@@ -1,0 +1,19 @@
+<div id="dlgConfirm" class="modalDialog">
+    <h1>Empty Bucket</h1>
+
+    <div class="dialogContent">
+        <div class="instructions">
+            Are you sure you want to empty the bucket {{bucketLabel}}?
+            <br><br>
+            Emptying this bucket will prevent future assignments and all existing users will be treated as new users
+            and may be assigned to a different bucket. Also, the allocation percentages of other buckets will be
+            renormalized to sum to 100%.
+        </div>
+        <div class="buttonBar">
+            <button id="btnConfirmOk" class="blue" ng-click="ok()">OK</button>
+            <button class="cancel" ng-click="cancel()">Cancel</button>
+            <!--
+            <span class="buttonOr">or</span> <a href="#" class="cancel">Cancel</a>-->
+        </div>
+    </div>
+</div>

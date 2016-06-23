@@ -1,0 +1,88 @@
+<div id="dlgGetAssignments" class="modalDialog">
+    <h1>Get Assignment Data</h1>
+    <div class="dialogContent">
+        <form id="getAssignmentsForm" novalidate name="getAssignmentsForm">
+                    <div>
+                        <label>From Date</label>
+
+                        <table style="position: relative; top: -20px;">
+                            <tr>
+                                <td>
+                                    <p class="input-group">
+                                        <input date-picker type="text" id="fromDate" name="fromDate" readonly="true" ng-model="data.fromDate"/>
+                                    </p>
+                                </td>
+                                <td>
+                                    <div ng-model="data.fromDate" ng-change="changed()"ng-controller="TimePickerCtrl">
+                                        <!--<div style="position: relative; top: -34px; left: 10px;" ng-model="experiment.endTime" ng-change="changed()"ng-controller="TimePickerCtrl">-->
+                                        <timepicker hour-step="hstep" minute-step="mstep"
+                                                    show-meridian="ismeridian"></timepicker>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <!-- Validation error -->
+                                    <div class="error"
+                                         ng-show="(getAssignmentsForm.endTime.$dirty && getAssignmentsForm.endTime.$invalid) || getAssignmentsFormSubmitted">
+                                        <small class="fieldError"
+                                               ng-show="getAssignmentsForm.endTime.$error.ensureStartGreaterEndTime">
+                                            End date must be greater than start date.
+                                        </small>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                        <label>To Date</label>
+
+                        <table style="position: relative; top: -20px;">
+                            <tr>
+                                <td>
+                                    <p class="input-group">
+                                        <input date-picker type="text" id="toDate" name="toDate" readonly="true" ng-model="data.toDate" ensure-start-greater-end-time/>
+                                    </p>
+                                </td>
+                                <td>
+                                    <div ng-model="data.toDate" ng-change="changed()"ng-controller="TimePickerCtrl">
+                                        <!--<div style="position: relative; top: -34px; left: 10px;" ng-model="experiment.toDate" ng-change="changed()"ng-controller="TimePickerCtrl">-->
+                                        <timepicker hour-step="hstep" minute-step="mstep"
+                                                    show-meridian="ismeridian"></timepicker>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <!-- Validation error -->
+                                    <div class="error"
+                                         ng-show="(getAssignmentsForm.toDate.$dirty && getAssignmentsForm.toDate.$invalid) || getAssignmentsFormSubmitted">
+                                        <small class="fieldError"
+                                               ng-show="getAssignmentsForm.toDate.$error.ensureStartGreaterEndTime">
+                                            End date must be greater than start date.
+                                        </small>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                        <label style="top: -10px;">Timezone</label>
+
+                        <table style="position: relative; top: -10px;">
+                            <tr>
+                                <td>
+                                    <p class="input-group">
+                                        <select ng-model="data.timeZone" ng-options="tz for tz in possibleTimeZones"
+                                                name="timeZone" required>
+                                        </select>
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+            <div class="buttonBar">
+                <button id="btnGetAssignemnts" class="blue" ng-click="ok(getAssignmentsForm.$invalid)">Get Assignments</button>
+                <button class="cancel" ng-click="cancel()">Cancel</button>
+                <!--
+                <span class="buttonOr">or</span> <a href="#" class="cancel">Cancel</a>-->
+            </div>
+        </form>
+    </div>
+</div>

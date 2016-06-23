@@ -1,0 +1,146 @@
+<!--
+    Copyright 2016 Intuit
+   
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+   
+        http://www.apache.org/licenses/LICENSE-2.0
+   
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+ -->
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.intuit.wasabi</groupId>
+		<artifactId>wasabi</artifactId>
+		<version>20151215171929-SNAPSHOT</version>
+		<relativePath>../../pom.xml</relativePath>
+	</parent>
+
+    <artifactId>wasabi-functional-test</artifactId>
+    <packaging>jar</packaging>
+    <name>${project.artifactId}</name>
+
+    <properties>
+        <sonar.skip>true</sonar.skip>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attached</goal>
+                        </goals>
+                        <configuration>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <classifier>test</classifier>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+
+        <resources>
+            <resource>
+                <directory>${basedir}/src/main/resources</directory>
+                <targetPath>${basedir}/target/classes</targetPath>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>${basedir}/src/main/scripts</directory>
+                <targetPath>${basedir}/target/scripts</targetPath>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>${basedir}</directory>
+                <targetPath>${basedir}/target/classes</targetPath>
+                <includes>
+                    <include>testng.xml</include>
+                    <include>testng_authTest.xml</include>
+                    <include>testng_feedbackTest.xml</include>
+                    <include>testng_forcedfailure.xml</include>
+                    <include>testng_initialTeardown.xml</include>
+                    <include>testng_integrationPostTests.xml</include>
+                    <include>testng_integrationPreTests.xml</include>
+                    <include>testng_integrationTests.xml</include>
+                    <include>testng_mutualExclusion.xml</include>
+                    <include>testng_prepPerfTest.xml</include>
+                    <include>testng_prioritiesTest.xml</include>
+                    <include>testng_repeatStateInconsistency.xml</include>
+                    <include>testng_retryTestExample.xml</include>
+                    <include>testng_segHttpHeader.xml</include>
+                    <include>testng_segRuleFix.xml</include>
+                    <include>testng_smokeTest.xml</include>
+                    <include>testng_teardown.xml</include>
+                </includes>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>6.9.6</version>
+        </dependency>
+        <dependency>
+            <groupId>com.jayway.restassured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>2.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.jayway.restassured</groupId>
+            <artifactId>json-schema-validator</artifactId>
+            <version>2.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.retrofit</groupId>
+            <artifactId>retrofit</artifactId>
+            <version>1.9.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>3.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.jakewharton.retrofit</groupId>
+            <artifactId>retrofit1-okhttp3-client</artifactId>
+            <version>1.0.2</version>
+        </dependency>
+    </dependencies>
+</project>

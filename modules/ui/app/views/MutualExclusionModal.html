@@ -1,0 +1,64 @@
+<div id="exclusionPickList" class="modalDialog">
+    <h1>Add Mutually Exclusive Experiment</h1>
+
+    <div class="dialogContent">
+        <div class="toolbar">
+            <form id="searchExperimentsForm">
+                <div class="search">
+                    <input search type="text" autocorrect="off" autocapitalize="off" placeholder="Search" ng-model="data.searchField"
+                           ng-change="search()"/>
+                    <a href="#" class="clear">Clear Search</a>
+                </div>
+            </form>
+        </div>
+        <!-- Validation error -->
+        <div class="error"
+             ng-show="mutualExclusionFormSubmitted">
+            <small class="fieldError"
+                   ng-show="postSubmitError === 'genericSubmitError'">
+                The selected experiments could not be made mutually exclusive with this experiment.
+            </small>
+        </div>
+        <div id="exclusionList" scrollable-list>
+            <div class="scrollListHeader">
+            <table>
+                <tr>
+                    <th style="width:4%" class="icon"><input type="checkbox" ng-change="selectAllNone();" ng-model="data.selectAll" /></th>
+                    <th style="width:25%">Experiment</th>
+                    <th style="width:44%">Description</th>
+                    <th style="width:8%" class="icon">Status</th>
+                </tr>
+            </table>
+            </div>
+            <div class="scrollListBody">
+            <table>
+                <tr>
+                    <th style="width:4%" class="icon">&nbsp;</th>
+                    <th style="width:25%">Experiment</th>
+                    <th style="width:44%">Description</th>
+                    <th style="width:8%" class="icon">Status</th>
+                </tr>
+                <tr ng-repeat="experiment in filteredItems">
+                    <td class="icon"><input type="checkbox" ng-model="experiment.selected"/></td>
+                    <td>
+                        <span title="{{experiment.label}}">{{experiment.label}}</span>
+                    </td>
+                    <td><span title="{{experiment.description}}">{{experiment.description}}</span></td>
+                    <td class="icon">
+                        <img ng-src="{{stateImgUrl(experiment.state)}}"
+                             alt="{{capitalizeFirstLetter(stateName(experiment.state))}}"
+                             custom-tooltip="{{capitalizeFirstLetter(stateName(experiment.state))}}" displayRight="true"
+                             sortindex="2">
+                    </td>
+                </tr>
+            </table>
+            </div>
+            <div class="dlgZeroSearch" ng-show="filteredItems.length <= 0">Please refine your search.</div>
+        </div>
+        <div class="buttonBar">
+            <!-- TODO: Need to save list of selected experiment IDs in selectedExperimentIDs on mutualExclusion object -->
+            <button id="btnAddExclusion" class="blue" ng-click="saveMutualExclusion();">Add</button>
+            <button class="cancel" ng-click="cancel();">Cancel</button>
+        </div>
+    </div>
+</div>

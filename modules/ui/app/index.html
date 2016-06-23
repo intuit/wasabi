@@ -1,0 +1,219 @@
+<!doctype html>
+<!-- Version: VERSIONLOC -->
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+  <head>
+    <meta charset="utf-8">
+    <title>Experiment Admin</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <meta http-equiv="cache-control" content="max-age=0" />
+    <meta http-equiv="cache-control" content="no-cache" />
+    <meta http-equiv="expires" content="0" />
+    <meta http-equiv="pragma" content="no-cache" />
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+    <!-- bower:css -->
+    <!-- endbower -->
+    <!-- endbuild -->
+    <!-- build:css({.tmp,app}) styles/wasabi.css -->
+    <link rel="stylesheet" href="styles/wasabi.css">
+    <!-- endbuild -->
+    <link rel="stylesheet" href="styles/branding.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.0/themes/ui-lightness/jquery-ui.css">
+  </head>
+  <body ng-app="wasabi">
+    <!--[if lt IE 7]>
+      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+
+    <header>
+        <div class="brandBanner">
+            <div class="brandContent">
+                <h1></h1>
+            </div>
+        </div>
+        <div class="navBanner">
+            <nav>
+                <ul class="main">
+                    <li class="sel"><a href="#/experiments">Experiments</a></li>
+                    <li><a href="#/priorities/">Priority</a></li>
+                    <li><a href="#/users">Users</a></li>
+                    <li><a href="#/applications">Applications</a></li>
+                    <li><a href="#/logs/">Logs</a></li>
+                    <li><a href="#/feedbackReader">Feedback</a></li>
+                </ul>
+                <ul class="user">
+                    <li id="welcomeMsg">Welcome</li>
+                    <li ng-controller="SignOutCtrl"><a href="#" onclick="return false;" ng-click="signOut()">Sign out</a></li>
+                    <li ng-controller="FeedbackCtrl"><a href="#" onclick="return false;" ng-click="openFeedbackModal()">Feedback</a></li>
+                </ul>
+            </nav>
+            <div class="ab"></div>
+            <div class="idea"></div>
+        </div>
+    </header>
+
+    <div id="mainContent">
+        <!-- MAIN CONTENT AND INJECTED VIEWS  -->
+        <div id="main">
+            <div ui-view></div>
+        </div>
+    </div>
+
+    <div style="display: block;" id="help">
+        <div>
+            <a id="closeHelp" href="javascript: void(0)">
+              <img src="images/right_arrow_sprite.png">
+            </a>
+            <div id="helpContent"></div>
+        </div>
+    </div>
+    <!--[if lt IE 9]>
+    <script src="bower_components/es5-shim/es5-shim.js"></script>
+    <![endif]-->
+
+    <!-- build:js scripts/vendor.js -->
+    <!-- bower:js -->
+    <script src="bower_components/jquery/dist/jquery.js"></script>
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/angular-mocks/angular-mocks.js"></script>
+    <script src="bower_components/angular-resource/angular-resource.js"></script>
+    <script src="bower_components/angular-cookies/angular-cookies.js"></script>
+    <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+    <script src="bower_components/angular-ui-router/release/angular-ui-router.js"></script>
+    <script src="bower_components/jquery-ui/jquery-ui.js"></script>
+    <script src="bower_components/bootstrap-sass-official/vendor/assets/javascripts/bootstrap/affix.js"></script>
+    <script src="bower_components/bootstrap-sass-official/vendor/assets/javascripts/bootstrap/alert.js"></script>
+    <script src="bower_components/bootstrap-sass-official/vendor/assets/javascripts/bootstrap/button.js"></script>
+    <script src="bower_components/bootstrap-sass-official/vendor/assets/javascripts/bootstrap/carousel.js"></script>
+    <script src="bower_components/bootstrap-sass-official/vendor/assets/javascripts/bootstrap/collapse.js"></script>
+    <script src="bower_components/bootstrap-sass-official/vendor/assets/javascripts/bootstrap/dropdown.js"></script>
+    <script src="bower_components/bootstrap-sass-official/vendor/assets/javascripts/bootstrap/tab.js"></script>
+    <script src="bower_components/bootstrap-sass-official/vendor/assets/javascripts/bootstrap/transition.js"></script>
+    <script src="bower_components/bootstrap-sass-official/vendor/assets/javascripts/bootstrap/scrollspy.js"></script>
+    <script src="bower_components/bootstrap-sass-official/vendor/assets/javascripts/bootstrap/modal.js"></script>
+    <script src="bower_components/bootstrap-sass-official/vendor/assets/javascripts/bootstrap/tooltip.js"></script>
+    <script src="bower_components/bootstrap-sass-official/vendor/assets/javascripts/bootstrap/popover.js"></script>
+    <script src="bower_components/moment/moment.js"></script>
+    <!-- endbower -->
+    <!-- endbuild -->
+
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+            // Load the Google Charts library.
+            google.charts.load('current', {packages: ['corechart']});
+    </script>
+
+    <!-- build:js({.tmp,app}) scripts/wasabi.js -->
+    <script src="scripts/config.js"></script>
+    <script src="scripts/app.js"></script>
+    <script src="scripts/plugins.js"></script>
+    <script src="scripts/dynamicEdit-0.1.js"></script>
+    <script src="scripts/colResizable-1.5.min.js"></script>
+    <script src="scripts/services/ConfigFactory.js"></script>
+    <script src="scripts/mocks.js"></script>
+    <script src="scripts/services/UtilitiesFactory.js"></script>
+    <script src="scripts/services/StateFactory.js"></script>
+    <script src="scripts/services/ExperimentsFactory.js"></script>
+    <script src="scripts/services/ExperimentStatisticsFactory.js"></script>
+    <script src="scripts/services/BucketsFactory.js"></script>
+    <script src="scripts/services/MutualExclusionsFactory.js"></script>
+    <script src="scripts/services/PrioritiesFactory.js"></script>
+    <script src="scripts/services/ApplicationsFactory.js"></script>
+    <script src="scripts/services/DialogsFactory.js"></script>
+    <script src="scripts/services/HttpInterceptor.js"></script>
+    <script src="scripts/services/ApplicationsFactory.js"></script>
+    <script src="scripts/services/AuthFactory.js"></script>
+    <script src="scripts/services/AuthzFactory.js"></script>
+    <script src="scripts/services/AuthUtilsFactory.js"></script>
+    <script src="scripts/services/ApplicationStatisticsFactory.js"></script>
+    <script src="scripts/services/TooltipFactory.js"></script>
+    <script src="scripts/services/RuleEditFactory.js"></script>
+    <script src="scripts/services/FeedbackFactory.js"></script>
+    <script src="scripts/services/LogsFactory.js"></script>
+    <script src="scripts/services/EmailFactory.js"></script>
+    <script src="scripts/services/WasabiFactory.js"></script>
+    <script src="scripts/services/Session.js"></script>
+    <script src="scripts/controllers/ExperimentsCtrl.js"></script>
+    <script src="scripts/controllers/ExperimentModalCtrl.js"></script>
+    <script src="scripts/controllers/BucketsCtrl.js"></script>
+    <script src="scripts/controllers/BucketModalCtrl.js"></script>
+    <script src="scripts/controllers/DatePickerCtrl.js"></script>
+    <script src="scripts/controllers/TimePickerCtrl.js"></script>
+    <script src="scripts/controllers/CloseBucketConfirmModalCtrl.js"></script>
+    <script src="scripts/controllers/EmptyBucketConfirmModalCtrl.js"></script>
+    <script src="scripts/controllers/ExperimentDetailsCtrl.js"></script>
+    <script src="scripts/controllers/ChangeSamplingModalCtrl.js"></script>
+    <script src="scripts/controllers/ChangeDateModalCtrl.js"></script>
+    <script src="scripts/controllers/MutualExclusionsCtrl.js"></script>
+    <script src="scripts/controllers/MutualExclusionModalCtrl.js"></script>
+    <script src="scripts/controllers/PrioritiesCtrl.js"></script>
+    <script src="scripts/controllers/UsersCtrl.js"></script>
+    <script src="scripts/controllers/UserModalCtrl.js"></script>
+    <script src="scripts/controllers/AddApplicationModalCtrl.js"></script>
+    <script src="scripts/controllers/EditApplicationModalCtrl.js"></script>
+    <script src="scripts/controllers/EditApplicationOnPageCtrl.js"></script>
+    <script src="scripts/controllers/AddUserModalCtrl.js"></script>
+    <script src="scripts/controllers/ApplicationsCtrl.js"></script>
+    <script src="scripts/controllers/AllApplicationsCtrl.js"></script>
+    <script src="scripts/controllers/DialogModalCtrl.js"></script>
+    <script src="scripts/controllers/PagesCtrl.js"></script>
+    <script src="scripts/controllers/ApplicationCtrl.js"></script>
+    <script src="scripts/controllers/SignInCtrl.js"></script>
+    <script src="scripts/controllers/SignOutCtrl.js"></script>
+    <script src="scripts/controllers/FeedbackCtrl.js"></script>
+    <script src="scripts/controllers/FeedbackModalCtrl.js"></script>
+    <script src="scripts/controllers/BucketAssignmentModalCtrl.js"></script>
+    <script src="scripts/controllers/SegmentationTestModal.js"></script>
+    <script src="scripts/controllers/FeedbackTableCtrl.js"></script>
+    <script src="scripts/controllers/GetAssignmentsModalCtrl.js"></script>
+    <script src="scripts/controllers/AdminListModalCtrl.js"></script>
+    <script src="scripts/controllers/APICallsCtrl.js"></script>
+    <script src="scripts/controllers/ChangeRapidExperimentCtrl.js"></script>
+    <script src="scripts/controllers/LogsCtrl.js"></script>
+    <script src="scripts/controllers/LogModalCtrl.js"></script>
+    <script src="scripts/controllers/AnalysisGraphModal.js"></script>
+    <script src="scripts/controllers/UserCtrl.js"></script>
+    <script src="scripts/directives/ConvertPercentDirective.js"></script>
+    <script src="scripts/directives/CustomTooltip.js"></script>
+    <script src="scripts/directives/EnsureNumber.js"></script>
+    <script src="scripts/directives/EnsureInterval.js"></script>
+    <script src="scripts/directives/EnsureStartGreaterEndTime.js"></script>
+    <script src="scripts/directives/EnsureFutureTime.js"></script>
+    <script src="scripts/directives/EnsurePersonalizationModel.js"></script>
+    <script src="scripts/directives/LabelLinkDirective.js"></script>
+    <script src="scripts/directives/LabelLinkContentDirective.js"></script>
+    <script src="scripts/directives/NgFocusDirective.js"></script>
+    <script src="scripts/directives/SearchDirective.js"></script>
+    <script src="scripts/directives/GoogleChartsDirective.js"></script>
+    <script src="scripts/directives/FadeInOutDirective.js"></script>
+    <script src="scripts/directives/ScrollTop.js"></script>
+    <script src="scripts/directives/ScrollableListDirective.js"></script>
+    <script src="scripts/directives/DragListDirective.js"></script>
+    <script src="scripts/directives/DatePickerDirective.js"></script>
+    <script src="scripts/directives/AutocompleteDirective.js"></script>
+    <script src="scripts/directives/AutoFocusDirective.js"></script>
+    <script src="scripts/directives/NoSpacesDirective.js"></script>
+    <script src="scripts/directives/DigitOnlyDirective.js"></script>
+    <script src="scripts/directives/RememberMeDirective.js"></script>
+    <script src="scripts/directives/DynamicEditDirective.js"></script>
+    <script src="scripts/directives/ExperimentProgressDirective.js"></script>
+    <script src="scripts/directives/FavoritesStarDirective.js"></script>
+    <script src="scripts/directives/ValidateRuleValue.js"></script>
+    <script src="scripts/directives/NPSWidgetDirective.js"></script>
+    <script src="scripts/directives/FeedbackGuysDirective.js"></script>
+    <script src="scripts/directives/HelpDirective.js"></script>
+    <script src="scripts/directives/RememberStateDirective.js"></script>
+    <script src="scripts/directives/RoleCheckboxes.js"></script>
+    <script src="scripts/directives/WhenScrollEndsDirective.js"></script>
+    <script src="scripts/directives/InitDatesDirective.js"></script>
+    <script src="scripts/directives/SwitchSearchDirective.js"></script>
+    <script src="scripts/directives/SortDirectionIconDirective.js"></script>
+    <script src="scripts/directives/HideRowsReshadeDirective.js"></script>
+    <script src="scripts/directives/SetFocusDirective.js"></script>
+    <script src="scripts/directives/ColResizeableDirective.js"></script>
+    <!-- endbuild -->
+</body>
+</html>

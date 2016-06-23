@@ -1,0 +1,92 @@
+<div ng-controller="PrioritiesCtrl">
+    <div class="toolbar">
+        <!--
+        <button id="btnSavePriority" class="yellow" disabled>Save</button>-->
+        <div>
+            <select id="applicationNameChoice" ng-model="data.applicationName" ng-options="applicationName for applicationName in appNames" ng-change="changePage()" ng-if="appNames.length > 1">
+                <option value="">Select an Application</option>
+            </select>
+            <span style="font-weight: bold; top: 2px; position: relative;" ng-if="appNames.length === 1">{{appNames[0]}}</span>
+            <span style="font-weight: bold; top: 2px; position: relative;"> Experiment Priority <span class="info" help help-content="{{help.priority}}"></span>
+            </span>
+        </div>
+        <div class="statusFilter">
+            <label>Hide:</label>&nbsp;&nbsp;<input type="checkbox" id="chkHidePaused" ng-model="data.hidePaused"><label for="chkHidePaused">Stopped</label>
+            <!-- input type="checkbox" id="chkHideNonExclusive"><label for="chkHideNonExclusive">Non-Exclusive</label -->
+        </div>
+    </div>
+    <div>
+        <div id="priorityList" class="tableContainer" ng-class="{dragable: !noDrag, notDragable: noDrag}" hide-rows-reshade drag-list no-drag="{{noDrag}}">
+            <table class="noCellTips" col-resizeable>
+                <tr>
+                    <th style="width:9%">Priority</th>
+                    <th style="width:22%">Experiment</th>
+                    <th style="width:10%">Sampling %</th>
+                    <th style="width:42%">Description</th>
+                    <th style="width:8%" class="icon">Status</th>
+                    <th style="width:9%" class="icon">Actions</th>
+                </tr>
+                <tr ng-repeat="experiment in experiments" data-id="{{experiment.id}}" data-application-name="{{experiment.applicationName}}">
+                    <td>
+                        <input class="priorityInput" type="text" value="{{experiment.priority}}" ng-if="hasUpdatePermission(applicationName)" />
+                        <span ng-if="!hasUpdatePermission(applicationName)">{{experiment.priority}}</span>
+                    </td>
+                    <td>
+                        <label-link state="{{experiment.state}}" exp-id="{{experiment.id}}"
+                                    exp-label="{{experiment.label}}" read-only="{{!hasUpdatePermission(applicationName)}}" has-update="{{hasUpdatePermission(applicationName)}}"></label-link>
+                    </td>
+                    <td class="sampling"><span ng-if="data.editingSampling"><input type="text" class="samplingInput" convert-percent ng-model="experiment.samplingPercent"/></span><span ng-if="!data.editingSampling">{{multiply100(experiment.samplingPercent)}}</span></td>
+                    <td><a class="desc" ng-click="openExperimentDescriptionModal(experiment)" title="{{experiment.description}}">{{experiment.description}}</a></td>
+                    <td class="icon">
+                        <img ng-src="{{stateImgUrl(experiment.state)}}"
+                             alt="{{capitalizeFirstLetter(stateName(experiment.state))}}"
+                             custom-tooltip="{{capitalizeFirstLetter(stateName(experiment.state))}}" displayRight="true"
+                             sortindex="2">
+                    </td>
+                    <td class="icon">
+                        <a class="command start" href="#" title="Start" onclick="return false;" ng-click="changeState(experiment, 'RUNNING')"
+                           ng-if="hasUpdatePermission(applicationName) && (experiment.state === 'DRAFT' ||
+                                  experiment.state === 'PAUSED')">
+                            Start
+                        </a>
+                        <a class="command stop" href="#" title="Stop" onclick="return false;" ng-click="changeState(experiment, 'PAUSED')"
+                                ng-if="hasUpdatePermission(applicationName) && experiment.state === 'RUNNING'">
+                            Pause
+                        </a>
+                        <a class="command terminate" href="#" title="Terminate" onclick="return false;" ng-click="changeState(experiment, 'TERMINATED')"
+                                ng-if="hasUpdatePermission(applicationName) && (experiment.state === 'RUNNING'||
+                                       experiment.state === 'PAUSED')">
+                            Stop
+                        </a>
+                        <a class="command start" href="#" style="visibility: hidden;" onclick="return false;" ng-if="experiment.state === 'TERMINATED'">&nbsp;</a>
+                        <a class="command delete" href="#" title="Delete" onclick="return false;" ng-click="deleteExperiment(experiment)"
+                           ng-if="hasDeletePermission(experiment) && (experiment.state === 'DRAFT' ||
+                                  experiment.state === 'TERMINATED')">
+                            Delete
+                        </a>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div style="padding-top: 5px;">
+            <div class="listTip" style="float:left; padding-top: 5px;">Order determines assignment priority for batch API calls.</div>
+            <div style="float:left; padding-left: 10px;" ng-show="experiments && experiments.length > 0 && !readOnly">
+                <button type="button" id="btnEditSampling" class="blue" ng-click="editSamplingPercentages()" ng-show="!data.editingSampling && !readOnly" title="Edit experiment sampling percentages">Edit Sampling %</button>
+                <button type="button" id="btnSaveSampling" class="blue" ng-click="saveSamplingChanges()" ng-show="data.editingSampling && !readOnly" title="Save experiment sampling percentage changes">Save</button>
+                <button type="button" class="cancel" ng-click="cancelSamplingChanges()" ng-show="data.editingSampling && !readOnly" title="Cancel experiment sampling percentage changes">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="experimentDesc" class="modalDialog">
+        <h1></h1>
+        <div class="dialogContent">
+            <div class="description"></div>
+            <div class="buttonBar">
+                <button class="cancel blue">Close</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+

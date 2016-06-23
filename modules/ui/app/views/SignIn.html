@@ -1,0 +1,23 @@
+<div class="signinBox">
+    <form name="signInForm" ng-submit="signIn(credentials)" novalidate>
+     <h1>Wasabi Service</h1>
+     <h2>Please sign in with your login.</h2>
+
+        <div class="signinLogo">
+            <input type="text" id="userId" ng-model="credentials.username" auto-focus placeholder="User ID"/>
+            <input type="password" id="password" ng-model="credentials.password" placeholder="Password">
+
+            <small class="text-danger" ng-if="loginFailed">
+                Invalid username and/or password.
+            </small>
+            <small class="text-danger" ng-if="serverDown">
+                The Wasabi A/B Testing Server is down, please try again later.
+            </small>
+
+            <div style="padding-bottom:10px">
+                <input remember-me type="checkbox" id="chkRememberMe" ng-model="credentials.rememberMe"><label for="chkRememberMe" class="checkboxLabel">Remember me</label>
+            </div>
+            <button id="btnSignin" class="blue">Sign In</button>
+        </div>
+    </form>
+</div>

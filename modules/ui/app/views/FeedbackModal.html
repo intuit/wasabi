@@ -1,0 +1,163 @@
+<div id="feedbackDialog" class="modalDialog" feedback-guys close-function="closeFunction" save-function="sendFeedback">
+    <form name="feedbackForm" novalidate>
+        <h1>Help Us Improve The Wasabi AB Testing Service</h1>
+        <div class="dialogContent">
+            <h2>We love feedback and can't wait to hear from you!</h2>
+
+            <label>How satisfied are you with the Wasabi AB Testing Service?</label>
+            <ul id="nps" nps-widget>
+                <li>0</li><li>1</li><li>2</li><li>3</li><li>4</li><li>5</li><li>6</li><li>7</li><li>8</li><li>9</li><li>10</li>
+            </ul>
+            <div id="npsLables">
+                <label>Not at all<br>satisfied</label><label>Somewhat<br>satisfied</label><label>Very<br>satisfied</label>
+            </div>
+            <textarea id="txtFeedbackComments" name="txtFeedbackComments" ng-model="feedback.comments" class="text" placeholder="Comments"></textarea>
+
+            <div>
+                <span id="chkFeedbackWrapper" style="display:inline-block"><input type="checkbox" id="chkFeedback" name="chkFeedback" ng-model="feedback.contactOkay" /><label for="chkFeedback" class="checkboxLabel">May we contact you to follow up on your feedback?</label></span>
+            </div>
+
+            <div class="buttonBar">
+                <button type="submit" id="btnFedbackSubmit" class="blue">Submit</button>
+                <button type="button" id="btnFeedbackCancel" class="cancel" ng-click="cancel()">Cancel</button>
+                <button style="display:none" class="cancel">Fake Cancel</button>
+            </div>
+
+            <div class="css3-guys">
+
+                <div class="css3-guy p1">
+                    <div class="css3-head">
+                        <div class="css3-eye left">
+                            <div class="inner" style="left: 3px; top: 6px;">
+                                <div class="sparkle"></div>
+                            </div>
+                        </div>
+                        <div class="css3-eye right">
+                            <div class="inner" style="left: 3px; top: 6px;">
+                                <div class="sparkle"></div>
+                            </div>
+                        </div>
+                        <div class="css3-mouth"></div>
+                    </div>
+                    <div class="css3-body"></div>
+                    <div class="css3-arm left">
+                        <div class="css3-finger finger1"></div>
+                        <div class="css3-finger finger2"></div>
+                        <div class="css3-finger finger3"></div>
+                        <div class="css3-finger finger4"></div>
+                        <div class="css3-finger finger5"></div>
+                        <div class="css3-hand"></div>
+                    </div>
+                    <div class="css3-arm right">
+                        <div class="css3-finger finger1"></div>
+                        <div class="css3-finger finger2"></div>
+                        <div class="css3-finger finger3"></div>
+                        <div class="css3-finger finger4"></div>
+                        <div class="css3-finger finger5"></div>
+                        <div class="css3-hand"></div>
+                    </div>
+                </div>
+
+                <div class="css3-guy p2">
+                    <div class="css3-head">
+                        <div class="css3-eye left">
+                            <div class="inner" style="left: 2px; top: 5px;">
+                                <div class="sparkle"></div>
+                            </div>
+                        </div>
+                        <div class="css3-eye right">
+                            <div class="inner" style="left: 2px; top: 5px;">
+                                <div class="sparkle"></div>
+                            </div>
+                        </div>
+                        <div class="css3-mouth"></div>
+                    </div>
+                    <div class="css3-body"></div>
+                    <div class="css3-arm left">
+                        <div class="css3-finger finger1"></div>
+                        <div class="css3-finger finger2"></div>
+                        <div class="css3-finger finger3"></div>
+                        <div class="css3-finger finger4"></div>
+                        <div class="css3-finger finger5"></div>
+                        <div class="css3-hand"></div>
+                    </div>
+                    <div class="css3-arm right">
+                        <div class="css3-finger finger1"></div>
+                        <div class="css3-finger finger2"></div>
+                        <div class="css3-finger finger3"></div>
+                        <div class="css3-finger finger4"></div>
+                        <div class="css3-finger finger5"></div>
+                        <div class="css3-hand"></div>
+                    </div>
+                </div>
+
+                <div class="css3-guy p3">
+                    <div class="css3-head">
+                        <div class="css3-eye left">
+                            <div class="inner" style="left: 2px; top: 4px;">
+                                <div class="sparkle"></div>
+                            </div>
+                        </div>
+                        <div class="css3-eye right">
+                            <div class="inner" style="left: 2px; top: 4px;">
+                                <div class="sparkle"></div>
+                            </div>
+                        </div>
+                        <div class="css3-mouth"></div>
+                    </div>
+                    <div class="css3-body"></div>
+                    <div class="css3-arm left">
+                        <div class="css3-finger finger1"></div>
+                        <div class="css3-finger finger2"></div>
+                        <div class="css3-finger finger3"></div>
+                        <div class="css3-finger finger4"></div>
+                        <div class="css3-finger finger5"></div>
+                        <div class="css3-hand"></div>
+                    </div>
+                    <div class="css3-arm right">
+                        <div class="css3-finger finger1"></div>
+                        <div class="css3-finger finger2"></div>
+                        <div class="css3-finger finger3"></div>
+                        <div class="css3-finger finger4"></div>
+                        <div class="css3-finger finger5"></div>
+                        <div class="css3-hand"></div>
+                    </div>
+                </div>
+
+                <div class="css3-guy p4">
+                    <div class="css3-head">
+                        <div class="css3-eye left">
+                            <div class="inner" style="left: 3px; top: 5px;">
+                                <div class="sparkle"></div>
+                            </div>
+                        </div>
+                        <div class="css3-eye right">
+                            <div class="inner" style="left: 3px; top: 5px;">
+                                <div class="sparkle"></div>
+                            </div>
+                        </div>
+                        <div class="css3-mouth"></div>
+                    </div>
+                    <div class="css3-body"></div>
+                    <div class="css3-arm left">
+                        <div class="css3-finger finger1"></div>
+                        <div class="css3-finger finger2"></div>
+                        <div class="css3-finger finger3"></div>
+                        <div class="css3-finger finger4"></div>
+                        <div class="css3-finger finger5"></div>
+                        <div class="css3-hand"></div>
+                    </div>
+                    <div class="css3-arm right">
+                        <div class="css3-finger finger1"></div>
+                        <div class="css3-finger finger2"></div>
+                        <div class="css3-finger finger3"></div>
+                        <div class="css3-finger finger4"></div>
+                        <div class="css3-finger finger5"></div>
+                        <div class="css3-hand"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </form>
+</div>

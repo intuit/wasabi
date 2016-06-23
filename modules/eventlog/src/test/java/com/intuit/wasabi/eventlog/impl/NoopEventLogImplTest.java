@@ -1,0 +1,68 @@
+/*******************************************************************************
+ * Copyright 2016 Intuit
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+package com.intuit.wasabi.eventlog.impl;
+
+import com.intuit.wasabi.eventlog.EventLogListener;
+import com.intuit.wasabi.eventlog.events.EventLogEvent;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+
+import java.util.Collections;
+
+/**
+ * Tests for {@link NoopEventLogImpl}.
+ */
+public class NoopEventLogImplTest {
+
+    private NoopEventLogImpl noopEventLog = new NoopEventLogImpl();
+
+    @Mock
+    private EventLogListener eventLogListener;
+
+    @Mock
+    private EventLogEvent eventLogEvent;
+
+    public NoopEventLogImplTest() {
+        MockitoAnnotations.initMocks(this);
+    }
+
+    @Test
+    public void testRegister() throws Exception {
+        // does nothing
+        noopEventLog.register(eventLogListener);
+        // does nothing
+        noopEventLog.register(eventLogListener, Collections.<Class<? extends EventLogEvent>> emptyList());
+        // does nothing
+        noopEventLog.register(eventLogListener, new String[]{});
+    }
+
+    @Test
+    public void testPostEvent() throws Exception {
+        // "register" eventLogListener (does nothing)
+        noopEventLog.register(eventLogListener, Collections.<Class<? extends EventLogEvent>>emptyList());
+        // if it did something and tries to post the event to the listener, throw an exception
+        Mockito.doThrow(new RuntimeException()).when(eventLogListener).postEvent(eventLogEvent);
+        // try the post
+        noopEventLog.postEvent(eventLogEvent);
+    }
+
+    @Test
+    public void testRun() throws Exception {
+        noopEventLog.run();
+    }
+}

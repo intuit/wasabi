@@ -1,0 +1,49 @@
+<div id="dlgChangeDate" class="modalDialog">
+    <h1>Change End Date</h1>
+    <div class="dialogContent">
+        <form id="experimentForm" novalidate name="experimentForm">
+                    <div style="height: 110px;">
+                        <label>End Date</label>
+
+                        <table style="position: relative; top: -20px;">
+                            <tr>
+                                <td>
+                                    <p class="input-group">
+                                        <input date-picker type="text" id="endTime" name="endTime" ng-model="experiment.endTime" ensure-start-greater-end-time/>
+                                    </p>
+                                </td>
+                                <td>
+                                    <div ng-model="experiment.endTime" ng-change="changed()"ng-controller="TimePickerCtrl">
+                                        <!--<div style="position: relative; top: -34px; left: 10px;" ng-model="experiment.endTime" ng-change="changed()"ng-controller="TimePickerCtrl">-->
+                                        <timepicker hour-step="hstep" minute-step="mstep"
+                                                    show-meridian="ismeridian"></timepicker>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <!-- Validation error -->
+                                    <div class="error"
+                                         ng-show="(experimentForm.endTime.$dirty && experimentForm.endTime.$invalid) || experimentFormSubmitted">
+                                        <small class="fieldError"
+                                               ng-show="experimentForm.endTime.$error.ensureStartGreaterEndTime">
+                                            End date must be greater than start date.
+                                        </small>
+                                        <small class="fieldError"
+                                               ng-show="experimentForm.endTime.$error.time">
+                                            Invalid starting date.
+                                        </small>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+            <div class="buttonBar">
+                <button id="btnSaveDate" class="blue" ng-click="ok(experimentForm.$invalid)">Save</button>
+                <button class="cancel" ng-click="cancel()">Cancel</button>
+                <!--
+                <span class="buttonOr">or</span> <a href="#" class="cancel">Cancel</a>-->
+            </div>
+        </form>
+    </div>
+</div>

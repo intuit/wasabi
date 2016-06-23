@@ -1,0 +1,98 @@
+<div id="bucketModal" class="modalDialog">
+    <h1 ng-show="isCreateBucket">Create Bucket</h1>
+    <h1 ng-show="!isCreateBucket">Edit Bucket</h1>
+
+    <div class="dialogContent">
+        <form name="bucketForm" novalidate ng-submit="saveBucket(bucketForm.$invalid)">
+            <ul class="formLayout oneCol">
+                <li>
+                    <div>
+                        <label>Bucket Name</label>
+                        <input id="txtBucketName" type="text" class="form-control text" name="label" auto-focus ng-model="bucket.label"
+                               ng-focus required no-spaces ng-pattern="/^[_\-\$A-Za-z][_\-\$A-Za-z0-9]*$/" ng-maxlength=64 ng-disabled="!isCreateBucket || readOnly"/>
+                        <div ng-if="isEditInDetails && bucketStatistics.actionCounts != undefined" class="bucketCounts">
+                            <label>Action Counts</label>
+                            <div>{{bucketStatistics.actionCounts}}</div>
+                        </div>
+                        <!-- Validation error -->
+                        <div class="error"
+                             ng-show="(bucketForm.label.$dirty && bucketForm.label.$invalid &&
+                                      !bucketForm.label.$focused) || bucketFormSubmitted">
+                            <small class="fieldError"
+                                   ng-show="bucketForm.label.$error.required">
+                                Bucket name required.
+                            </small>
+                            <small class="fieldError"
+                                   ng-show="bucketForm.label.$error.pattern">
+                                A bucket name must start with _, -, $ or a letter, and the rest may only consist of those characters or numbers.
+                            </small>
+                            <small class="fieldError"
+                                   ng-show="bucketForm.label.$error.maxlength">
+                                Cannot be longer than 64 characters.
+                            </small>
+                            <small class="fieldError"
+                                   ng-show="postSubmitError === 'genericCreateError'">
+                                Your bucket could not be created.
+                            </small>
+                            <small class="fieldError"
+                                   ng-show="postSubmitError === 'genericUpdateError'">
+                                Your bucket could not be updated.
+                            </small>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div>
+                        <label>Allocation</label>
+                        <input id="txtBucketAllocation" type="text" class="form-control text allocation" name="allocationPercent"
+                               digit-only ng-model="bucket.allocationPercent" convert-percent required ng-focus ensure-interval ng-disabled="isEditInDetails || readOnly"/>
+                        <span class="unit">%</span>
+                        <span style="display:inline-block; position:relative; left:40px; top:0px">
+                            <input id="chkControlBucket" type="checkbox" ng-model="bucket.isControl" ng-disabled="isEditInDetails || isNoControl || readOnly"/>&nbsp;&nbsp;<label
+                            for="chkControlBucket" class="checkboxLabel" name="isControl">Control group</label>
+                            <span class="info" help help-content="{{help.controlBucket}}"></span>
+                        </span>
+                        <div ng-if="isEditInDetails && bucketStatistics.impressionCounts != undefined" class="bucketCounts">
+                            <label>Impression Counts</label>
+                            <div>{{bucketStatistics.impressionCounts}}</div>
+                        </div>
+
+                        <!-- Validation error -->
+                        <div class="error"
+                             ng-show="(bucketForm.allocationPercent.$dirty && bucketForm.allocationPercent.$invalid &&
+                                      !bucketForm.allocationPercent.$focused) || bucketFormSubmitted">
+                            <small class="fieldError"
+                                   ng-show="bucketForm.allocationPercent.$error.required">
+                                Allocation required.
+                            </small>
+                            <small class="fieldError"
+                                   ng-show="bucketForm.allocationPercent.$error.ensureInterval">
+                                Sampling rate must be in interval (0.01,100).
+                            </small>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div>
+                        <label>Description</label>
+                        <textarea name="description" class="form-control" ng-model="bucket.description" ng-disabled="readOnly"></textarea>
+                    </div>
+                </li>
+                <li>
+                    <div>
+                        <label>
+                            Bucket Payload
+                            <span class="info" help help-content="{{help.bucketPayload}}"></span>
+                        </label>
+                        <textarea name="payload" class="form-control" ng-model="bucket.payload" ng-disabled="readOnly"></textarea>
+                    </div>
+                </li>
+            </ul>
+            <div class="buttonBar">
+                <button type="submit" id="btnSaveBucket" class="blue" ng-show="!isCreateBucket">Save</button>
+                <button type="submit" id="btnAddBucket" class="blue" ng-show="isCreateBucket">Add</button>
+                <button type="button" class="cancel" ng-click="cancel()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>

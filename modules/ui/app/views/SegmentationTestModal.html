@@ -1,0 +1,28 @@
+<div id="segmentationTestModal" class="modalDialog">
+    <h1>Test Segmentation Rule</h1>
+    <form name="segmentationTestForm" novalidate ng-submit="doSegmentationTest();">
+        <div class="dialogContent">
+            <div id="profileParametersList" class="tableContainer">
+                <table>
+                    <tr>
+                        <th style="width:47%">Parameter Name</th>
+                        <th style="width:17%;">Type</th>
+                        <th style="width:36%">Value</th>
+                    </tr>
+                    <tr ng-repeat="ruleElement in ruleElements">
+
+                        <td>{{ruleElement.name}}</td>
+                        <td>{{ruleElement.type}}</td>
+                        <td>
+                            <input type="text" class="text listField" style="width: 220px;" ng-model="ruleElement.value">
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="buttonBar">
+                <button id="btnTestRule" class="blue cancel">Test</button>
+                <button id="btnEditRuleelementsCancel" class="cancel" onclick="return false;" ng-click="cancel();">Cancel</button>
+            </div>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,72 @@
+<div id="logModal" class="modalDialog">
+    <h1>Log Details</h1>
+
+    <div class="dialogContent">
+        <form name="logForm" novalidate>
+            <ul class="formLayout oneCol">
+                <li>
+                    <div>
+                        <label>Time</label>
+                        <div class="logLeftCol">{{log.time | date:'MMM dd, yyyy HH:mm:ss a'}}</div>
+                        <div class="logRightCol">
+                            <label>User Name</label>
+                            <div>{{log.user.username}}</div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div>
+                        <label>User</label>
+                        <div class="logLeftCol">{{log.user.firstName}} {{log.user.lastName}}</div>
+                        <div class="logRightCol">
+                            <label>Email</label>
+                            <div>{{log.user.email}}</div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div>
+                        <label>Action</label>
+                        <div class="logLeftCol">{{log.action.message}}</div>
+                        <div class="logRightCol">
+                            <label>Experiment Name</label>
+                            <div>{{log.experiment.experimentLabel}}</div>
+                        </div>
+                    </div>
+                </li>
+                <li ng-if="log.change">
+                    <div>
+                        <label>Changed Attribute</label>
+                        <div>{{log.change.changedAttribute}}</div>
+                    </div>
+                </li>
+                <li ng-if="log.change && log.change.changedAttribute != 'state'">
+                    <div>
+                        <label>Before Value</label>
+                        <div class="logLeftCol" ng-if="!log.change.before">&nbsp;</div>
+                        <div class="logLeftCol" ng-if="log.change.before && (log.change.changedAttribute === 'sampling_percent' || log.change.changedAttribute === 'allocation')">{{multiply100(log.change.before)}}%</div>
+                        <div class="logLeftCol" ng-if="log.change.before && (log.change.changedAttribute !== 'sampling_percent' &&  log.change.changedAttribute !== 'allocation')">{{log.change.before}}</div>
+                        <div class="logRightCol">
+                            <label>After Value</label>
+                            <div ng-if="log.change.changedAttribute === 'sampling_percent' || log.change.changedAttribute === 'allocation'">{{multiply100(log.change.after)}}%</div>
+                            <div ng-if="log.change.changedAttribute !== 'sampling_percent' &&  log.change.changedAttribute !== 'allocation'">{{log.change.after}}</div>
+                        </div>
+                    </div>
+                </li>
+                <li ng-if="log.change && log.change.changedAttribute === 'state'">
+                    <div>
+                        <label>Before Value</label>
+                        <div class="logLeftCol">{{capitalizeFirstLetter(stateName(log.change.before))}}</div>
+                        <div class="logRightCol">
+                            <label>After Value</label>
+                            <div>{{capitalizeFirstLetter(stateName(log.change.after))}}</div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+            <div class="buttonBar">
+                <button type="button" class="blue" ng-click="cancel()">Close</button>
+            </div>
+        </form>
+    </div>
+</div>

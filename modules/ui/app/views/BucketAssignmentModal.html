@@ -1,0 +1,58 @@
+<div id="bucketAssignmentModal" class="modalDialog">
+    <h1>Edit Buckets</h1>
+    <form name="bucketAssignmentForm" novalidate ng-submit="saveBucketAssignment(experiment.id, experimentForm.$invalid)">
+        <div class="dialogContent">
+            <a href="#" id="editExpAddBucket" class="listAction add" onclick="return false;" ng-click="openBucketModal(experiment)"><span></span>Add Bucket</a>
+            <div id="editBucketList" class="tableContainer">
+                <table>
+                    <tr>
+                        <th style="width:47%">Bucket</th>
+                        <th style="width:17%; text-align: center;">Allocation</th>
+                        <th style="width:12%" class="icon">Control</th>
+                        <th style="width:12%" class="icon">
+                            Close
+                            <span class="info" help help-content="{{help.closeBucket}}"></span>
+                        </th>
+                        <th style="width:12%" class="icon">
+                            Empty
+                            <span class="info" help help-content="{{help.emptyBucket}}"></span>
+                        </th>
+                    </tr>
+                    <tr ng-repeat="bucket in buckets" ng-class="{closed: bucket.state === 'CLOSED', emptied: bucket.state === 'EMPTY'}">
+
+                        <td class="bucketName">
+                            <a onclick="return false;" ng-click="openBucketModal(experiment, bucket.label, bucket)" title="{{bucket.label}}">{{bucket.label}}</a>
+                        </td>
+                        <td>
+                            <input type="text" class="text listField" ng-class="{changedAllocation: allocationsUpdated}" ng-readonly="bucketReadOnly(bucket)" digit-only convert-percent ng-model="bucket.allocationPercent" ng-change="changedAllocation()"><span class="unit">%</span>
+                        </td>
+                        <td class="icon" ng-class="{checked: bucket.isControl}"><span></span></td>
+                        <td>
+                            <a ng-disabled="numActiveBuckets() === 1" ng-class="{disabled: numActiveBuckets() === 1}" class="command closeBucket" title="Close Bucket" onclick="return false;" ng-click="closeBucket(bucket.label)">Close</a>
+                            <span class="bucketClosed">CLOSED</span>
+                        </td>
+                        <td>
+                            <a ng-disabled="numActiveBuckets() === 1" ng-class="{disabled: numActiveBuckets() === 1}" class="command emptyBucket" title="Empty Bucket" onclick="return false;" ng-click="emptyBucket(bucket.label)">Empty</a>
+                            <span class="bucketEmptied">EMPTY</span>
+                        </td>
+                    </tr>
+                    <tr class="totals">
+                        <td>Total:</td>
+                        <td style="text-align: center;" ng-class="{notValid: !bucketTotalsValid, isValid: bucketTotalsValid}">{{multiply100(totalBucketAllocation())}}%</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="buttonBar" style="padding-top: 0;">
+                <div style="float: left;">
+                    <a ng-class="{disabled: readOnly}" ng-disabled="readOnly" href="#" onclick="return false;" ng-click="balanceBuckets();">Balance bucket allocations...</a>
+                </div>
+                <button ng-if="!changesMade" id="btnEditBucketsClose" class="blue cancel" onclick="return false;" ng-click="cancel();">Close</button>
+                <button ng-if="changesMade" id="btnEditBucketsSave" class="blue cancel">Save</button>
+                <button ng-if="changesMade" id="btnEditBucketsCancel" class="cancel" onclick="return false;" ng-click="cancel();">Cancel</button>
+            </div>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,45 @@
+<div id="addUserDialog" class="modalDialog">
+    <h1 ng-show="isEditingPermissions">User Details</h1>
+    <h1 ng-show="!isEditingPermissions">Add User</h1>
+    <div class="dialogContent">
+        <div class="toolbar">
+            <div ng-show="!isEditingPermissions" class="enterCorpId">
+                <form name="verifyForm" novalidate ng-submit="verifyUser()">
+                    <div class="verifyField">
+                            <input id="email" name="email" type="text" class="text" placeholder="Email Address" auto-focus ng-model="data.userEmail" ng-change="userValidated = false; validating = false; failedValidation = false; data.addWritePrivileges = false; data.addAdminPrivileges = false;"/>
+                            <div class="verify" ng-class="{pass: userValidated, verifying: validating, fail: failedValidation}"></div>
+                    </div>
+                    <button class="blue verifyUserId" type="button" ng-click="verifyUser()" ng-disabled="userValidated">Verify</button>
+                    <div class="hint">Email Address must be entered exactly.</div>
+                    <div class="error"
+                         ng-show="verifyFormNoValueError">
+                        <small class="fieldError"
+                               ng-show="verifyFormNoValueError">
+                            Email Address required.
+                        </small>
+                    </div>
+                </form>
+            </div>
+            <div class="appName" ng-if="isEditingPermissions && user.userID && user.firstName !== ''">{{user.firstName}} {{user.lastName}}</div>
+            <div class="appName" ng-if="isEditingPermissions && user.userID && (!user.firstName || user.firstName === '')">{{user.userID}}</div>
+        </div>
+        <div class="group">
+            <div class="readAccess">Read Access</div>
+            <div>User will have read access to all experiments in this application.</div>
+        </div>
+        <div class="group">
+            <input type="checkbox" id="chkAddAppWrite" ng-model="data.addWritePrivileges" ng-class="{disabled: !userValidated || data.addAdminPrivileges}" ng-disabled="!userValidated || data.addAdminPrivileges">
+            <label for="chkAddAppWrite">Write Access</label>
+            <div>Grants write access (create, edit, delete) to all experiments in this application.</div>
+        </div>
+        <div class="group">
+            <input type="checkbox" id="chkAddAppAdmin" role-checkboxes="chkAddAppWrite" ng-model="data.addAdminPrivileges" ng-class="{disabled: !userValidated}" ng-disabled="!userValidated">
+            <label for="chkAddAppAdmin">Admin Privileges</label>
+            <div>Grants administrative privileges over users and experiments in this application.</div>
+        </div>
+        <div class="buttonBar">
+            <button id="btnAddApplication" class="blue" ng-click="saveAddUser();" ng-disabled="!userValidated">Save</button>
+            <button class="cancel" ng-click="cancel();">Cancel</button>
+        </div>
+    </div>
+</div>

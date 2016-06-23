@@ -1,0 +1,23 @@
+<div ng-controller="ApplicationsCtrl">
+    <div class="toolbar">
+        &nbsp;
+    </div>
+
+    <ng-include ng-if="applications.length === 1" src="'views/EditApplicationOnPage.html'" ng-controller="EditApplicationOnPageCtrl"></ng-include>
+    <div id="applicationsList" ng-if="applications.length !== 1">
+        <div class="tableContainer">
+            <table sort-direction-icon>
+                <tr>
+                    <th style="width:10%" class="_label sortAscending" ng-click="sortBy('label')">
+                        <span class="colLabel">Application</span>
+                    </th>
+                </tr>
+                <tr ng-repeat="application in applications | orderBy:orderByField:reverseSort">
+                    <td class="app">
+                        <a href="#" title="Edit" onclick="return false;" ng-click="openApplicationModal(application)">{{application.label}}</a>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,18 @@
+<div id="dlgConfirm" class="modalDialog">
+    <h1>Close Bucket</h1>
+
+    <div class="dialogContent">
+        <div class="instructions">
+            Are you sure you want to close the bucket {{bucketLabel}}?
+            <br><br>
+            Closing this bucket will prevent future assignments and the allocation percentages of other buckets will be
+            renormalized to sum to 100%.
+        </div>
+        <div class="buttonBar">
+            <button id="btnConfirmOk" class="blue" ng-click="ok()">OK</button>
+            <button class="cancel" ng-click="cancel()">Cancel</button>
+            <!--
+            <span class="buttonOr">or</span> <a href="#" class="cancel">Cancel</a>-->
+        </div>
+    </div>
+</div>

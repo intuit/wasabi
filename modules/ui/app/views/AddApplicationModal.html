@@ -1,0 +1,58 @@
+<div id="addAppDialog" class="modalDialog">
+    <h1 ng-if="!isEditingPermissions">Add Application Privileges for {{user.userID}}</h1>
+    <h1 ng-if="isEditingPermissions">{{application.label}} Permissions</h1>
+    <div class="dialogContent">
+        <div class="toolbar">
+            <div id="addAppName" ng-show="!isEditingPermissions"></div>
+            <div class="appName" ng-show="isEditingPermissions">{{user.userID}}</div>
+            <div class="search" ng-show="!isEditingPermissions">
+                <input id="txtAddAppSearch" type="text" autocorrect="off" autocapitalize="off" placeholder="Search"
+                       ng-model="data.searchField" ng-change="search();"/>
+                <a href="#" class="clear">Clear Search</a>
+            </div>
+        </div>
+        <div id="addApplicationList" scrollable-list ng-show="!isEditingPermissions">
+            <div class="scrollListHeader">
+            <table>
+                <tr>
+                    <th style="width:5%" class="icon"></th>
+                    <th style="width:95%">Application</th>
+                </tr>
+            </table>
+            </div>
+            <div class="scrollListBody">
+            <table>
+                <tr>
+                    <th style="width:5%" class="icon"></th>
+                    <th style="width:95%">Application</th>
+                </tr>
+                <tr ng-repeat="application in filteredItems">
+                    <td class="icon"><input type="checkbox" ng-model="application.selected"/></td>
+                    <td>
+                        {{application.label}}
+                    </td>
+                </tr>
+            </table>
+            </div>
+            <div class="dlgZeroSearch" ng-hide="filteredItems.length > 0">Please refine your search.</div>
+        </div>
+        <div class="group" style="margin-top:20px">
+            <div class="readAccess">Read Access</div>
+            <div>User will have read access to all experiments in this application.</div>
+        </div>
+        <div class="group">
+            <input type="checkbox" id="chkAddAppWrite" ng-model="data.addWritePrivileges" ng-class="{disabled: data.addAdminPrivileges}" ng-disabled="data.addAdminPrivileges" >
+            <label for="chkAddAppWrite">Write Access</label>
+            <div>Grants write access (create, edit, delete) to all experiments in this application.</div>
+        </div>
+        <div class="group">
+            <input type="checkbox" id="chkAddAppAdmin" role-checkboxes="chkAddAppWrite" ng-model="data.addAdminPrivileges">
+            <label for="chkAddAppAdmin">Admin Privileges</label>
+            <div>Grants administrative privileges over users and experiments in this application.</div>
+        </div>
+        <div class="buttonBar">
+            <button id="btnAddApplication" class="blue" ng-click="saveAddApplication();">Save</button>
+            <button class="cancel" ng-click="cancel();">Cancel</button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,42 @@
+<div id="dlgChangeSampling" class="modalDialog">
+    <h1>Change Sampling Rate</h1>
+    <div class="dialogContent">
+        <form id="formChangeSampling" novalidate name="formChangeSampling">
+            <div class="warningMsg">
+                WARNING! Changing your sample rate may irreversibly impact or even invalidate the results of your experiment.
+                Please consider carefully and check with the experiment owner before changing the sample rate.
+            </div>
+            <ul class="formLayout oneCol">
+                <li>
+                    <div>
+                        <label>Sampling Rate</label>
+                        <input id="txtChangeSampling" type="number"  step="any" min="0" class="form-control sampling" placeholder="e.g. 10"
+                               name="samplingPercent" convert-percent ng-model="experiment.samplingPercent"  required ng-focus ensure-interval/>
+                        <span class="unit">%</span>
+
+                        <!-- Validation error -->
+                        <div class="error"
+                             ng-show="(formChangeSampling.samplingPercent.$dirty && formChangeSampling.samplingPercent.$invalid &&
+                                  !formChangeSampling.samplingPercent.$focused) || experimentFormSubmitted">
+                            <small class="fieldError"
+                                   ng-show="formChangeSampling.samplingPercent.$error.required">
+                                Sampling rate required.
+                            </small>
+                            <small class="fieldError"
+                                   ng-show="formChangeSampling.samplingPercent.$error.ensureInterval">
+                                Sampling rate must be in interval (0.01,100).
+                            </small>
+                        </div>
+
+                    </div>
+                </li>
+            </ul>
+            <div class="buttonBar">
+                <button id="btnSaveSamplingRate" class="blue" ng-click="ok(formChangeSampling.$invalid)">Save</button>
+                <button class="cancel" ng-click="cancel()">Cancel</button>
+                <!--
+                <span class="buttonOr">or</span> <a href="#" class="cancel">Cancel</a>-->
+            </div>
+        </form>
+    </div>
+</div>

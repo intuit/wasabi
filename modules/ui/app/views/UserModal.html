@@ -1,0 +1,70 @@
+<div id="addUser" class="panel" scroll-top>
+    <h2 ng-if="!user.userID">Add User</h2>
+    <h2 ng-if="user.userID && user.firstName && user.firstName !== ''">{{user.firstName}} {{user.lastName}}</h2>
+    <h2 ng-if="user.userID && (!user.firstName || user.firstName === '')">{{user.userID}}</h2>
+    <div id="addUserSuccess" fade-in-out fade-model-name="userValidated">
+        <span ng-if="!userHasRolesForAllApps">Click "Add Application" to manage user permissions.</span>
+        <span ng-if="userHasRolesForAllApps">This user already has permissions for all applications.</span>
+    </div>
+
+    <form name="userForm" novalidate ng-submit="verifyUser()">
+        <div ng-show="!user.userID" class="enterCorpId">
+            <div class="verifyField">
+                <input id="email" type="text" class="text" placeholder="Email Address" auto-focus ng-model="data.userEmail" />
+                <div class="verify" ng-class="{pass: userValidated, verifying: validating, fail: failedValidation}"></div>
+            </div>
+            <button class="blue verifyUserId" type="button" ng-click="verifyUser()">Verify</button>
+            <div class="hint">Email Address must be entered exactly.</div>
+            <div class="error"
+                 ng-show="verifyFormNoValueError">
+                <small class="fieldError"
+                       ng-show="verifyFormNoValueError">
+                    Email Address required.
+                </small>
+            </div>
+        </div>
+        <a href="#" ng-click="openAddApplicationModal(user)" onclick="return false;" class="addLink btnUserAddApp" ng-class="{disabled: !userValidated || userHasRolesForAllApps}"><span>+</span>Add Application</a>
+        <span class="hint">User will have read access to all experiments in the following applications.</span>
+        <div id="applicationList" scrollable-list>
+            <div class="scrollListHeader">
+            <table>
+                <tr>
+                    <th style="width:76%">Application</th>
+                    <th style="width:8%" class="icon">Write</th>
+                    <th style="width:8%" class="icon">Admin</th>
+                    <th style="width:8%" class="icon">Delete</th>
+                </tr>
+            </table>
+            </div>
+            <div class="scrollListBody">
+            <table>
+                <tr>
+                    <th style="width:76%">Application</th>
+                    <th style="width:8%" class="icon">Write</th>
+                    <th style="width:8%" class="icon">Admin</th>
+                    <th style="width:8%" class="icon">Delete</th>
+                </tr>
+                <tr ng-repeat="application in applications">
+                    <td><a href="#" title="Edit" onclick="return false;" ng-click="openEditUserPermissionsModal(application)">{{application.label}}</a></td>
+                    <td class="icon" ng-class="{'checked': userHasRoleForApplication(user, application.label, 'write')}">
+                        <span></span>
+                    </td>
+                    <td class="icon" ng-class="{'checked': userHasRoleForApplication(user, application.label, 'admin')}">
+                        <span></span>
+                    </td>
+                    <td class="icon">
+                        <a class="command delete" href="#" title="Delete" onclick="return false;" ng-click="removeRole(application)">
+                            Delete
+                        </a>
+                    </td>
+                </tr>
+            </table>
+            </div>
+        </div>
+
+
+    </form>
+    <div class="buttonBar">
+        <button class="blue cancel" ng-click="closeDialog()">Close</button>
+    </div>
+</div>

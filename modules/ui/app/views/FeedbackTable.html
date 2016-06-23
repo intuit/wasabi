@@ -1,0 +1,36 @@
+<div ng-controller="FeedbackTableCtrl">
+    <div id="usersList">
+        <div class="tableContainer">
+            <table col-resizeable>
+                <tr>
+                    <th style="width:13%" class="_username"><span class="colLabel">ID</span></th>
+                    <th style="width:13%" class="_submitted">
+                        <span class="colLabel">On Date</span>
+                    </th>
+                    <th style="width:6%" class="_score"><span class="colLabel">NPS</span></th>
+                    <th style="width:38%" class="_comments"><span class="colLabel">Comments</span></th>
+                    <th style="width:10%" class="_contactOkay"><span class="colLabel">Contact OK</span></th>
+                    <th style="width:20%" class="_email"><span class="colLabel">Email</span></th>
+                </tr>
+                <tr ng-repeat="feedback in feedbacks | orderBy:orderByField:reverseSort">
+                    <td class="app">
+                        {{feedback.username}}
+                    </td>
+                    <td class="date">{{feedback.submitted | date:'MMM dd, yyyy'}}</td>
+                    <td class="app">
+                        {{feedback.score}}
+                    </td>
+                    <td class="app"><a class="desc" ng-click="openFeedbackCommentsModal(feedback)">
+                        {{feedback.comments}}
+                    </a></td>
+                    <td class="app">
+                        {{feedback.contactOkay}}
+                    </td>
+                    <td class="app">
+                        {{feedback.email}}
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>

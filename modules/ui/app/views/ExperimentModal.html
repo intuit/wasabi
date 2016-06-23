@@ -1,0 +1,480 @@
+<div class="panel" scroll-top>
+    <span ng-if="experiment.id" class="starContainer">
+        <a href="#" favorites-star favorites-star-application-name="experiment.applicationName" favorites-star-experiment-name="experiment.label" favorites-star-parent-tag="span" after-favorite-func="setAsFavorite" ng-attr-is-favorite="{{experiment.isFavorite}}" class="star" title="Mark as Favorite"></a>
+    </span>
+    <h2 ng-if="!experiment.id" class="noStar">Create Experiment</h2>
+    <h2 ng-if="experiment.id">Edit Experiment</h2>
+
+    <form name="experimentForm" novalidate ng-submit="saveExperiment(experiment.id, experimentForm.$invalid, experimentForm)">
+        <ul class="formLayout">
+            <li class="layout8020">
+                <div>
+                    <label>
+                        Experiment Name
+                            <span class="info" help help-content="{{help.experimentName}}"></span>
+                    </label>
+                    <input ng-show="!readOnly" type="text" class="form-control text" name="label"
+                           ng-model="experiment.label" auto-focus ng-focus required
+                           ng-pattern="/^[_\-\$A-Za-z][_\-\$A-Za-z0-9]*$/" ng-maxlength=64/>
+                    <span ng-show="readOnly">{{experiment.label}}</span>
+                    <!-- Validation error -->
+                    <div class="error"
+                         ng-show="(experimentForm.label.$dirty && experimentForm.label.$invalid &&
+                                  !experimentForm.label.$focused) || experimentFormSubmitted">
+                        <small class="fieldError"
+                               ng-show="experimentForm.label.$error.required">
+                            Experiment name required.
+                        </small>
+                        <small class="fieldError"
+                               ng-show="experimentForm.label.$error.pattern">
+                            Invalid experiment name.
+                        </small>
+                        <small class="fieldError"
+                               ng-show="experimentForm.label.$error.maxlength">
+                            Cannot be longer than 64 characters.
+                        </small>
+                        <small class="fieldError"
+                               ng-show="experimentForm.label.$error.ensureUniqueLabel">
+                            Combination of name and label already exists.
+                        </small>
+                    </div>
+                </div>
+                <div>
+                    <label>
+                        Application Name
+                            <span class="info" help help-content="{{help.applicationName}}"></span>
+                    </label>
+                    <select ng-model="experiment.applicationName" ng-options="applicationName for applicationName in applications"
+                            name="applicationName" required ng-show="!experiment.id && applications.length > 1 && !readOnly"
+                            ng-change="changed()">
+                        <option value="">Select Application</option>
+                    </select>
+                    <select ng-model="experiment.applicationName" ng-options="applicationName for applicationName in applications"
+                            name="applicationName" required ng-show="experiment.id && applications.length > 1 && !readOnly"
+                            ng-change="changed()">
+                    </select>
+                    <select ng-model="experiment.applicationName" ng-options="applicationName for applicationName in applications"
+                            name="applicationName" required ng-show="applications.length === 1 || readOnly" disabled>
+                    </select>
+                    <div class="error"
+                         ng-show="experiment.applicationName != newApplicationNamePrompt &&
+                                  ((experimentForm.applicationName.$dirty && experimentForm.applicationName.$invalid &&
+                                  !experimentForm.applicationName.$focused) ||
+                                  experimentFormSubmitted)">
+                        <small class="fieldError"
+                               ng-show="experimentForm.applicationName.$error.required">
+                            Application name required.
+                        </small>
+                        <small class="fieldError"
+                               ng-show="experimentForm.applicationName.$error.pattern">
+                            Invalid application name.
+                        </small>
+                        <small class="fieldError"
+                               ng-show="experimentForm.applicationName.$error.maxlength">
+                            Cannot be longer than 64 characters.
+                        </small>
+                        <small class="fieldError"
+                               ng-show="postSubmitError === 'nonUnique'">
+                            Experiments must have a unique pair of Application Name and Experiment Name.
+                        </small>
+                        <small class="fieldError"
+                               ng-show="postSubmitError === 'genericSubmitError'">
+                            Your experiment could not be created.
+                        </small>
+                        <small class="fieldError"
+                               ng-show="postSubmitError === 'genericUpdateError'">
+                            Your experiment could not be updated.
+                        </small>
+                    </div>
+                    <input type="text" ng-show="showApplicationName2 || experiment.applicationName === newApplicationNamePrompt" style="width: 265px; margin-top: 10px;" class="form-control text" id="applicationName2"
+                           ng-model="experiment.applicationName2" name="applicationName2" required
+                           ng-pattern="/^[_\-\$A-Za-z][_\-\$A-Za-z0-9]*$/" ng-maxlength=64 abtest-autocomplete list="allApplications" select-function="selectApplication" enter-function="selectApplicationOnEnter"/>
+
+                    <!-- Validation error -->
+                    <div class="error"
+                         ng-show="experiment.applicationName === newApplicationNamePrompt &&
+                                  ((experimentForm.applicationName2.$dirty && experimentForm.applicationName2.$invalid &&
+                                  !experimentForm.applicationName2.$focused) ||
+                                  experimentFormSubmitted)">
+                        <small class="fieldError"
+                               ng-show="experimentForm.applicationName2.$error.required">
+                            Application name required.
+                        </small>
+                        <small class="fieldError"
+                               ng-show="experimentForm.applicationName2.$error.pattern">
+                            Invalid application name.
+                        </small>
+                        <small class="fieldError"
+                               ng-show="experimentForm.applicationName2.$error.maxlength">
+                            Cannot be longer than 64 characters.
+                        </small>
+                        <small class="fieldError"
+                               ng-show="postSubmitError === 'nonUnique'">
+                            Experiments must have a unique pair of Application Name and Experiment Name.
+                        </small>
+                        <small class="fieldError"
+                               ng-show="postSubmitError === 'genericSubmitError'">
+                            Your experiment could not be created.
+                        </small>
+                        <small class="fieldError"
+                               ng-show="postSubmitError === 'genericUpdateError'">
+                            Your experiment could not be updated.
+                        </small>
+                    </div>
+
+                </div>
+                <div>
+                    <label>
+                        Sampling Rate
+                        <span class="info" help help-content="{{help.samplingRate}}"></span>
+                    </label>
+                    <input ng-show="!readOnly" type="text" step="any" min="0" class="form-control sampling" placeholder=".01-100" name="samplingPercent"
+                           convert-percent ng-model="experiment.samplingPercent" required ng-focus ensure-number ensure-interval/>
+                    <span ng-show="!readOnly" class="unit">%</span>
+                    <span ng-show="readOnly">{{multiply100(experiment.samplingPercent)}}%</span>
+
+                    <!-- Validation error -->
+                    <div class="error"
+                         ng-show="(experimentForm.samplingPercent.$dirty && experimentForm.samplingPercent.$invalid &&
+                                  !experimentForm.samplingPercent.$focused) || experimentFormSubmitted">
+                        <small class="fieldError"
+                               ng-show="experimentForm.samplingPercent.$error.required">
+                            Sampling rate required.
+                        </small>
+                        <small class="fieldError"
+                               ng-show="experimentForm.samplingPercent.$error.ensureNumber">
+                            Sampling rate has to be a number.
+                        </small>
+                        <small class="fieldError"
+                               ng-show="experimentForm.samplingPercent.$error.ensureInterval">
+                            Sampling rate must be in interval (0,100).
+                        </small>
+                    </div>
+                </div>
+            </li>
+            <li class="layout8020">
+                <div>
+                    <label>Start Date</label>
+
+                    <div ng-show="!readOnly" class="col-md-7" style="margin-left:-17px">
+                        <p class="input-group">
+                            <input date-picker type="text" id="startTime" name="startTime" ng-model="experiment.startTime"/>
+                            <div class="error"
+                                 ng-show="(experimentForm.startTime.$dirty && experimentForm.startTime.$invalid &&
+                                          !experimentForm.startTime.$focused) || experimentFormSubmitted">
+                                <small class="fieldError"
+                                       ng-show="experimentForm.startTime.$error.required">
+                                    Experiment starting date required.
+                                </small>
+                                <small class="fieldError"
+                                       ng-show="experimentForm.startTime.$error.time">
+                                    Invalid starting date.
+                                </small>
+                            </div>
+                        </p>
+                    </div>
+                    <div ng-show="!readOnly" class="col-md-6" ng-model="experiment.startTime" ng-change="changed()"
+                         style="display:inline-block;margin-top:-34px;margin-left: 13px;"
+                         ng-controller="TimePickerCtrl">
+                        <timepicker hour-step="hstep" minute-step="mstep"
+                                    show-meridian="ismeridian"></timepicker>
+                    </div>
+                    <span ng-show="readOnly">{{experiment.startTime | date:'M/d/yyyy h:mm a'}}</span>
+                </div>
+                <div>
+                    <label>End Date</label>
+
+                    <div ng-show="!readOnly" class="col-md-7" style="margin-left:-17px">
+                        <p class="input-group">
+                            <input date-picker type="text" id="endTime" name="endTime" ng-model="experiment.endTime" ensure-start-greater-end-time/>
+
+                            <!-- Validation error -->
+                            <div class="error"
+                                 ng-show="(experimentForm.endTime.$dirty && experimentForm.endTime.$invalid) || experimentFormSubmitted">
+                                <small class="fieldError"
+                                       ng-show="experimentForm.endTime.$error.ensureStartGreaterEndTime">
+                                    End date must be greater than start date.
+                                </small>
+                            </div>
+                        </p>
+                    </div>
+                    <div ng-show="!readOnly" class="col-md-6" ng-model="experiment.endTime" ng-change="changed()"
+                         style="display:inline-block;margin-top:-34px;margin-left: 13px;"
+                         ng-controller="TimePickerCtrl">
+                        <timepicker hour-step="hstep" minute-step="mstep"
+                                    show-meridian="ismeridian"></timepicker>
+                    </div>
+                    <span ng-show="readOnly">{{experiment.endTime | date:'M/d/yyyy h:mm a'}}</span>
+                </div>
+                <div>
+                    <label>
+                        Rapid Experiment Max Users
+                        <span class="info" help help-content="{{help.rapidExperimentMaxUsers}}"></span>
+                    </label>
+                    <input ng-show="!readOnly" id="maxRapidUsers" name="maxRapidUsers" class="form-control rapidMax" type="number" min="1" max="2147483647" ng-model="data.userCapValue" class="form-control text" ng-maxlength="10" ensure-number placeholder="1-2147483647" ng-change="maxRapidUsersChanged()"/>&nbsp;&nbsp;
+                    <span ng-show="readOnly">{{rapidExperimentLabel()}}</span>
+                    <!-- Validation error -->
+                    <div class="error"
+                         ng-show="(experimentForm.maxRapidUsers.$dirty && experimentForm.maxRapidUsers.$invalid &&
+                                  !experimentForm.maxRapidUsers.$focused) ||
+                                  (experimentFormSubmitted &&
+                                   (experimentForm.maxRapidUsers.$error.maxlength))">
+                        <small class="fieldError"
+                               ng-show="experimentForm.maxRapidUsers.$error.ensureNumber">
+                            Maximum number of user assignments must be a number.
+                        </small>
+                        <small class="fieldError"
+                               ng-show="experimentForm.maxRapidUsers.$error.maxlength">
+                            Maximum number of user assignments cannot be longer than 11 characters.
+                        </small>
+                        <small class="fieldError"
+                               ng-show="experimentForm.maxRapidUsers.$error.min">
+                            Maximum number of user assignments must be greater than 0.
+                        </small>
+                        <small class="fieldError"
+                               ng-show="experimentForm.maxRapidUsers.$error.max">
+                            Maximum number of user assignments must be less than 2,147,483,648.
+                        </small>
+                        <small class="fieldError"
+                               ng-show="experimentForm.maxRapidUsers.$error.number">
+                            Maximum number of user assignments must be a positive number.
+                        </small>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <div style="width: 100%">
+                    <textarea ng-show="!readOnly" name="description" class="form-control" ng-model="experiment.description" style="width: 900px; height: 55px" ng-maxlength="256" placeholder="Experiment Description"></textarea>
+                    <textarea ng-show="readOnly" disabled="true" name="description" class="form-control readOnly" ng-model="experiment.description" style="width: 900px; height: 55px"></textarea>
+                    <!-- Validation error -->
+                    <div class="error"
+                         ng-show="(experimentForm.$error && experimentForm.$error.maxlength &&
+                                  experimentForm.$error.maxlength.length > 0 &&
+                                  experimentForm.$error.maxlength[0].$name === 'description') ||
+                                  (experimentFormSubmitted &&
+                                  experimentForm.$error && experimentForm.$error.maxlength &&
+                                  experimentForm.$error.maxlength.length > 0 &&
+                                  experimentForm.$error.maxlength[0].$name === 'description')">
+                        <small class="fieldError"
+                               ng-show="experimentForm.$error.maxlength[0].$name === 'description'">
+                            The description must be 256 characters or less.
+                        </small>
+                    </div>
+                </div>
+            </li>
+        </ul>
+
+        <div class="clear"></div>
+
+        <div id="saveMsg" fade-in-out fade-model-name="experiment.id">Experiment saved. You may now add buckets.</div>
+        <tabset id="newExprTabs" ng-show="experiment.id" class="tabs">
+            <tab id="buckets" active="tabs[0].active" heading="Buckets" ng-controller="BucketsCtrl">
+                <a ng-show="!readOnly" href="#" id="newExpAddBucket" class="listAction add" onclick="return false;" ng-click="openBucketModal(experiment.id)"><span></span>Add Bucket</a>
+                <span class="info newHelp" help help-content="{{help.buckets}}"></span>
+                <div id="newExpBucketList" class="tabContainer">
+                    <div class="tableContainer">
+                    <table col-resizeable>
+                        <tr>
+                            <th style="width:64%">Bucket</th>
+                            <th style="width:12%">Allocation</th>
+                            <th style="width:12%" class="icon">Control</th>
+                            <th ng-show="!readOnly" style="width:12%" class="icon">Delete</th>
+                        </tr>
+                        <tr ng-repeat="bucket in buckets | orderBy:'bucket.label'">
+                            <td ng-show="!readOnly"><a ng-click="openBucketModal(experiment.id, bucket.label)">{{bucket.label}}</a></td>
+                            <td ng-show="readOnly"><span title="{{bucket.label}}">{{bucket.label}}</span></td>
+                            <td style="text-align: center;">{{multiply100(bucket.allocationPercent)}}%</td>
+                            <td class="icon" ng-class="{ checked : bucket.isControl }"><span></span></td>
+                            <td ng-show="!readOnly" class="icon">
+                                <a class="command delete" href="#" title="Delete"
+                                   ng-click="deleteBucket(bucket)">Delete</a>
+                            </td>
+                        </tr>
+                        <tr class="totals">
+                            <td>Total:</td>
+                            <td style="text-align: center;" ng-class="{notValid: !bucketTotalsValid, isValid: bucketTotalsValid}">{{multiply100(totalBucketAllocation())}}%</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </table>
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <a ng-class="{disabled: readOnly}" ng-disabled="readOnly" href="#" onclick="return false;" ng-click="balanceBuckets();">Balance bucket allocations...</a>
+                    </div>
+                </div>
+            </tab>
+            <tab heading="Mutual Exclusion" active="tabs[1].active" ng-controller="MutualExclusionsCtrl">
+                <a ng-show="!readOnly" href="#" id="newExpAddExclusion" class="listAction add" onclick="return false;" ng-click="openMutualExclusionModal(experiment.id)"><span></span>Add Experiment</a>
+                <span class="info newHelp" help help-content="{{help.mutualExclusion}}"></span>
+                <div id="newExpExclusionList" class="tabContainer">
+                    <div class="tableContainer">
+                    <table col-resizeable>
+                        <tr>
+                            <th style="width:20%">Experiment</th>
+                            <th style="width:40%">Description</th>
+                            <th style="width:10%" class="icon">Status</th>
+                            <th ng-show="!readOnly" style="width:10%" class="icon">Remove</th>
+                        </tr>
+                        <tr ng-repeat="excludedExperiment in nonExpiredExcludedExperiments | orderBy:'excludedExperiment.label'">
+                            <td>
+                                <label-link state="{{excludedExperiment.state}}" exp-id="{{excludedExperiment.id}}"
+                                            exp-label="{{excludedExperiment.label}}" has-update="{{hasUpdatePermission(excludedExperiment)}}" read-only="{{!hasUpdatePermission(excludedExperiment)}}" open-string="openExperimentModal(excludedExperiment)" in-modal="true" opened-from-modal="{{openedFromModal}}"></label-link>
+                            </td>
+
+                            <td><span title="{{excludedExperiment.description}}">{{excludedExperiment.description}}</span></td>
+                            <td class="icon">
+                                <img ng-src="{{stateImgUrl(excludedExperiment.state)}}"
+                                     alt="{{capitalizeFirstLetter(stateName(excludedExperiment.state))}}"
+                                     custom-tooltip="{{capitalizeFirstLetter(stateName(excludedExperiment.state))}}" displayRight="true"
+                                     sortindex="2">
+                            </td>
+                            <td ng-show="!readOnly" class="icon">
+                                <a class="command delete" href="#" title="Remove"
+                                   ng-click="deleteMutualExclusion(excludedExperiment)">Delete</a>
+                            </td>
+                        </tr>
+                    </table>
+                    </div>
+                </div>
+            </tab>
+            <tab heading="Segmentation" active="tabs[2].active">
+                <div class="segmentationTab">
+                    <div>
+                        <div style="float: left;"><label>User Segmentation Rule</label></div>
+                    </div>
+                    <span class="info newHelp" help help-content="{{help.segmentationRule}}"></span>
+                    <div ng-show="simpleRuleEditing" style="float: left; margin-top: 5px;">
+                        <div class="ruleEditPanel">
+                            <div class="ruleRow" ng-form="subForm" ng-repeat="rule in rules">
+                                <select ng-class="{disabled: readOnly}" ng-disabled="readOnly" class="booleanOperator" ng-model="rule.booleanOperator" ng-show="rule.booleanOperator !== ''" ng-change="ruleChanged()"><option ng-repeat="boolOp in booleanOperators">{{boolOp.menuLabel}}</option></select>
+                                <span style="margin-left: 54px;" ng-show="rule.booleanOperator === ''"></span>
+                                <input ng-class="{disabled: readOnly}" ng-disabled="readOnly" type="text" class="text" name="ruleSubject" ng-model="rule.subject" placeholder="Parameter name" ng-change="ruleChanged()" />
+                                <select ng-class="{disabled: readOnly}" ng-disabled="readOnly" class="ruleType" ng-model="rule.type" ng-change="typeChanged(rule, subForm)"><option ng-repeat="type in types">{{type}}</option></select>
+                                <select ng-class="{disabled: readOnly}" ng-disabled="readOnly" class="operator" ng-model="rule.operator" ng-change="ruleChanged()"><option ng-repeat="operator in operators[rule.type]">{{operator.menuLabel}}</option></select>
+                                <input ng-class="{disabled: readOnly}" ng-disabled="readOnly" name="ruleValue" type="text" class="text" validate-rule-value displayRight="true" ruleType="{{rule.type}}" placeholder="{{typeSpecificPlaceholder(rule.type)}}" ng-model="rule.value" ng-change="ruleChanged()" />
+                                <a ng-class="{disabled: readOnly}" ng-disabled="readOnly" href="#" ng-click="removeRule($index)" class="command delete" title="Remove Rule" ng-show="rule.showDelete"></a>
+                                <div class="error segValidationError"
+                                     ng-show="subForm.ruleValue.$dirty && subForm.ruleValue.$invalid && !subForm.ruleValue.$focused">
+                                    <small class="fieldError"
+                                           ng-show="subForm.ruleValue.$error.validRuleValue">{{rule.errorMessage}}</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="float: left; width: 660px;">
+                            <a ng-class="{disabled: readOnly}" ng-disabled="readOnly" href="#" onclick="return false;" ng-click="addRule();">Add rule...</a>
+                        </div>
+                        <div style="float: left; width: 154px; text-align: right; margin-right: 20px;">
+                            <a ng-class="{disabled: readOnly || rulesChangedNotSaved}" ng-disabled="readOnly || rulesChangedNotSaved" href="#" onclick="return false;" ng-click="openSegmentationTestModal();">Test rule...</a>
+                        </div>
+                        <div style="float: left;">
+                            <a href="#" onclick="return false;" ng-click="toggleAdvanced();">{{labelStrings.switchToTextView}}</a>
+                        </div>
+                    </div>
+                    <div ng-show="!simpleRuleEditing">
+                        <textarea ng-show="!readOnly" id="rule" class="form-control" contenteditable spellcheck="false" ng-model="experiment.rule" ng-change="setSimpleDisabled()"></textarea>
+                        <textarea ng-show="readOnly" id="disabledRule" class="form-control readOnly" disabled="true" spellcheck="false" ng-model="experiment.rule"></textarea>
+                        <div class="hint"style="float: left; width: 544px;">e.g. (salary > 80000 &amp; state = "CA") | (salary > 60000 &amp; state != "CA") | flag = FALSE</div>
+                        <div style="float: left; width: 70px; text-align: right; margin-top: 3px;">
+                            <a ng-class="{disabled: readOnly || rulesChangedNotSaved}" ng-disabled="readOnly || rulesChangedNotSaved" href="#" onclick="return false;" ng-click="openSegmentationTestModal();">Test rule...</a>
+                        </div>
+                        <span style="margin-left: 20px;">
+                            <input remember-state state-name="showAdvancedSegmentationEditor" type="checkbox" id="chkRememberState" ng-class="{disabled: data.disableSimple}" ng-disabled="data.disableSimple">&nbsp;&nbsp;<label for="chkRememberState" class="checkboxLabel" style="font-weight: normal; font-size: 90%;" ng-class="{disabledLabel: data.disableSimple}" ng-disabled="data.disableSimple">{{labelStrings.rememberSegmentationViewChoice}}</label>
+                        </span>
+                        <span>
+                            <a href="#" onclick="return false;" ng-class="{disabled: data.disableSimple}" ng-disabled="data.disableSimple" ng-click="toggleAdvanced();">{{labelStrings.switchToFormView}}</a>
+                        </span>
+                    </div>
+                </div>
+            </tab>
+            <tab id="pages" heading="Pages" active="tabs[3].active" ng-controller="PagesCtrl">
+                <input ng-show="!readOnly" ng-model="pagesData.pageName" abtest-autocomplete list="pagesData.groupPages" select-function="selectPage" enter-function="selectPageOnEnter" id="txtAddPage" type="text" class="text" placeholder="Add Page" maxlength="256" />
+                <button ng-show="!readOnly" id="btnAddPage" type="button" class="blue" title="Add Page" ng-click="addPageClick()">Add</button>
+                <span class="info newHelp" help help-content="{{help.pages}}"></span>
+                <div id="newExpPageList" scrollable-list>
+                    <div class="scrollListHeader">
+                        <table>
+                            <tr>
+                                <th style="width:72%">Page</th>
+                                <th style="width:16%" class="icon">Allow Assignment</th>
+                                <th ng-show="!readOnly" style="width:12%" class="icon">Remove</th>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="scrollListBody">
+                        <table>
+                            <tr>
+                                <th style="width:72%">Page</th>
+                                <th style="width:16%" class="icon">Allow Assignment</th>
+                                <th ng-show="!readOnly" style="width:12%" class="icon">Remove</th>
+                            </tr>
+                            <tr ng-repeat="page in pages">
+                                <td><span title="{{page.name}}">{{page.name}}</span></td>
+                                <td ng-show="!readOnly" class="icon"><input type="checkbox" ng-model="page.allowNewAssignment" ng-checked="{{page.allowNewAssignment}}" ng-change="updatePage(page)"></td>
+                                <td ng-show="readOnly" class="icon" ng-class="{ checked : page.allowNewAssignment }"><span></span></td>
+                                <td ng-show="!readOnly" class="icon"><a href="#" ng-click="removePage(page.name)" class="command delete" title="Remove Page"></a></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="hint">List the page(s) on which this experiment takes place. Allow assignment on the page(s) where this experiment starts (typically just one).</div>
+            </tab>
+            <tab heading="Plugins">
+                <div ng-show="plugins && plugins.length > 0">
+                    <button ng-repeat="plugin in plugins | filter:{ pluginType: 'contributeDraftTab' }" style="margin-right: 15px;" onclick="return false;" ng-click="openPluginModal(plugin);">{{plugin.displayName}}</button>
+                </div>
+                <div ng-show="!plugins || plugins.length === 0">
+                    <label>No plugins are currently installed.</label>
+                </div>
+            </tab>
+            <tab heading="API Calls">
+                <div class="apiCallsTab" ng-controller="APICallsCtrl">
+                    <label>Example Wasabi API Calls</label>
+                    <div style="margin-top: 0">(Note: This experiment is in Draft and so these API calls will not succeed.)</div>
+                    <div>
+                        <div class="apiLabel">Assignment</div>
+                        <input id="singleAssignmentCall" class="form-control text" type="text"
+                               value="curl -H &quot;Content-Type: application/json&quot; {{hostUrl}}/assignments/applications/{{experiment.applicationName}}/experiments/{{experiment.label}}/users/userID1" readonly />
+                    </div>
+                    <div>
+                        <div class="apiLabel">Record an Impression</div>
+                        <input id="impressionEventCall" class="form-control text" type="text"
+                               value="curl -H &quot;Content-Type: application/json&quot; -d &quot;{\&quot;events\&quot;:[{\&quot;name\&quot;:\&quot;IMPRESSION\&quot;}]}&quot; {{hostUrl}}/events/applications/{{experiment.applicationName}}/experiments/{{experiment.label}}/users/userID1" readonly />
+                    </div>
+                    <div>
+                        <div class="apiLabel">Record an Action</div>
+                        <input id="actionEventCall" class="form-control text" type="text"
+                               value="curl -H &quot;Content-Type: application/json&quot; -d &quot;{\&quot;events\&quot;:[{\&quot;name\&quot;:\&quot;myEventName\&quot;,\&quot;payload\&quot;:\&quot;{\\\&quot;myPayloadKey1\\\&quot;:\\\&quot;payloadKey1Value\\\&quot;}\&quot;}]}&quot; {{hostUrl}}/events/applications/{{experiment.applicationName}}/experiments/{{experiment.label}}/users/userID1" readonly />
+                    </div>
+                    <div ng-show="experiment && experiment.pages && experiment.pages.length > 0">
+                        <div class="apiLabel">Batch Assignment</div>
+                        <input id="batchAssignmentCall" class="form-control text" type="text"
+                               value="curl -H &quot;Content-Type: application/json&quot; {{hostUrl}}/assignments/applications/{{experiment.applicationName}}/pages/{{firstPageEncoded()}}/users/userID1" readonly />
+                    </div>
+                    <div ng-show="experiment && experiment.rule && experiment.rule !== ''">
+                        <div class="apiLabel">Assignment Providing Profile For Use By Segmentation Rule</div>
+                        <input id="singleAssignmentCallWithSegmentationRule" class="form-control text" type="text"
+                               value="curl -H &quot;Content-Type: application/json&quot; -d &quot;{\&quot;profile\&quot;:{\&quot;key1\&quot;:\&quot;value1\&quot;,\&quot;key2\&quot;:\&quot;value2\&quot;}}&quot; {{hostUrl}}/assignments/applications/{{experiment.applicationName}}/experiments/{{experiment.label}}/users/userID1" readonly />
+                    </div>
+                    <div ng-show="experiment && experiment.rule && experiment.rule !== '' && experiment.pages && experiment.pages.length > 0">
+                        <div class="apiLabel">Batch Assignment Providing Profile For Use By Segmentation Rule</div>
+                        <input id="batchAssignmentCallWithSegmentationRule" class="form-control text" type="text"
+                               value="curl -H &quot;Content-Type: application/json&quot; -d &quot;{\&quot;profile\&quot;:{\&quot;key1\&quot;:\&quot;value1\&quot;,\&quot;key2\&quot;:\&quot;value2\&quot;}}&quot; {{hostUrl}}/assignments/applications/{{experiment.applicationName}}/pages/{{firstPageEncoded()}}/users/userID1" readonly />
+                    </div>
+                    <div ng-show="experiment && experiment.id">
+                        <div class="apiLabel">Experiment ID</div>
+                        <input id="experimentId" class="form-control text" type="text"
+                               value="{{experiment.id}}" readonly />
+                    </div>
+                </div>
+            </tab>
+        </tabset>
+
+        <div class="buttonBar">
+            <button type="button" id="btnStartExperiment" class="blue" ng-click="startExperiment(experimentForm.$invalid)" ng-show="experiment.id && !readOnly">Start Experiment</button>&nbsp; &nbsp;
+            <button type="submit" id="btnSaveExperiment" class="blue" ng-show="experiment.id && !readOnly">Save</button>
+            <button type="submit" id="btnCreateExperiment" class="blue" ng-show="!experiment.id">Create Experiment</button>
+            <button type="button" class="cancel" ng-click="cancel()" ng-show="!readOnly">Cancel</button>
+            <button type="button" class="cancel blue" ng-click="cancel()" ng-show="readOnly">Close</button>
+        </div>
+    </form>
+</div>

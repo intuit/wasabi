@@ -1,0 +1,21 @@
+{
+  "name": "wasabi-ui",
+  "version": "0.1.0",
+  "dependencies": {
+    "angular": "1.2.15",
+    "angular-mocks": "1.2.15",
+    "angular-resource": "1.2.15",
+    "angular-cookies": "1.2.15",
+    "angular-bootstrap": "~0.11.2",
+    "angular-ui-router": "~0.2.10",
+    "es5-shim": "~2.1.0",
+    "jquery": "~1.11.0",
+    "jquery-ui": "~1.11.0",
+    "bootstrap-sass-official": "~3.1.0",
+    "moment": "~2.10.3"
+  },
+  "devDependencies": {
+    "angular-mocks": "1.2.15",
+    "angular-scenario": "1.2.15"
+  }
+}

@@ -1,0 +1,70 @@
+<div ng-controller="UsersCtrl">
+    <div class="toolbar">
+        <button id="btnNewUser" class="blue" ng-click="openUserModal()">Add User</button>
+        <div id="basicSearch">
+            <form id="usersForm">
+                <div class="search">
+                    <input search type="text" autocorrect="off" autocapitalize="off" placeholder="Search"
+                           ng-model="data.query"
+                           ng-change="search()"/>
+                    <a href="#" class="clear">Clear Search</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="usersList">
+        <div class="tableContainer">
+            <table sort-direction-icon col-resizeable>
+                <tr>
+                    <th class="_userID sortAscending" ng-click="sortBy('userID')">
+                        <span class="colLabel">ID</span>
+                    </th>
+                    <th style="width:12%" class="_firstName" ng-click="sortBy('firstName')"><span class="colLabel">FirstName</span></th>
+                    <th style="width:13%" class="_lastName" ng-click="sortBy('lastName')">
+                        <span class="colLabel">Last Name</span>
+                    </th>
+                    <th style="width:21%" class="_userEmail" ng-click="sortBy('userEmail')"><span class="colLabel">Email</span></th>
+                    <th style="width:15%" class="_formattedApplications" ng-click="sortBy('formattedApplications')"><span class="colLabel">Applications</span></th>
+                    <th style="width:8%" class="_write icon write" ng-click="sortBy('write')"><span class="colLabel">Write</span></th>
+                    <th style="width:8%" class="_admin icon admin" ng-click="sortBy('admin')"><span class="colLabel">Admin</span></th>
+                    <th style="width:8%" class="icon">Remove</th>
+                </tr>
+                <tr ng-repeat="user in pagedItems[currentPage - 1] | orderBy:orderByField:reverseSort">
+                    <td class="app">
+                        <a href="#" title="Edit" onclick="return false;" ng-click="openUserModal(user)">{{user.userID}}</a>
+                    </td>
+                    <td class="app">
+                        {{user.firstName}}
+                    </td>
+                    <td class="app">
+                        {{user.lastName}}
+                    </td>
+                    <td class="app">
+                        {{user.userEmail}}
+                    </td>
+                    <td class="app" title="{{formattedApplications(user.applications)}}">
+                        {{user.formattedApplications}}
+                    </td>
+                    <td class="icon" ng-class="{'checked': userHasRole(user, 'write')}">
+                        <span></span>
+                    </td>
+                    <td class="icon" ng-class="{'checked': userHasRole(user, 'admin')}">
+                        <span></span>
+                    </td>
+                    <td class="icon">
+                        <a class="command delete" href="#" title="Remove" onclick="return false;" ng-click="removeUser(user)">
+                            Delete
+                        </a>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div style="text-align:right">
+            <span style="font-size:13px; color:#888; position: relative; top: -20px; left: -5px;">{{pageRangeStart()}} - {{pageRangeEnd()}} of {{totalItems}}</span>
+            <div style="display: inline;">
+                <pagination total-items="totalItems" ng-model="currentPage" ng-change="pageChanged()" max-size="5" rotate="false"></pagination>
+            </div>
+        </div>
+    </div>
+</div>

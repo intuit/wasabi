@@ -1,0 +1,234 @@
+<!--
+    Copyright 2016 Intuit
+   
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+   
+        http://www.apache.org/licenses/LICENSE-2.0
+   
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+ -->
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.intuit.wasabi</groupId>
+        <artifactId>wasabi</artifactId>
+        <version>20151215171929-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>wasabi-main</artifactId>
+    <packaging>jar</packaging>
+    <name>${project.artifactId}</name>
+
+    <properties>
+        <application.main>com.intuit.wasabi.Main</application.main>
+        <application.daemon.enable>true</application.daemon.enable>
+        <application.daemon.dependencies>runit</application.daemon.dependencies>
+        <application.user>${project.name}-${application.profile}</application.user>
+        <application.group>${project.name}-${application.profile}</application.group>
+        <application.email>${project.name}-${application.profile}@you.org</application.email>
+
+        <application.http.enabled>true</application.http.enabled>
+        <application.http.port>8080</application.http.port>
+        <application.http.context.path>/api</application.http.context.path>
+        <application.http.content.directory>${application.home}/content/ui/dist</application.http.content.directory>
+
+        <application.jersey.provider.paths>com.intuit.wasabi.api;com.codahale.metrics.jersey</application.jersey.provider.paths>
+        <application.jersey.pojo.enabled>true</application.jersey.pojo.enabled>
+        <application.jersey.request.filters>com.sun.jersey.api.client.filter.LoggingFilter</application.jersey.request.filters>
+        <application.jersey.response.filters>com.intuit.wasabi.api.SimpleCORSResponseFilter;com.sun.jersey.api.client.filter.LoggingFilter</application.jersey.response.filters>
+        <application.jersey.wadl.enabled>false</application.jersey.wadl.enabled>
+        <application.jmx.port>8090</application.jmx.port>
+        <application.debug.port>8180</application.debug.port>
+        <application.instrument/>
+        <application.monitor/>
+
+        <log.dir>/var/log/${application.name}</log.dir>
+        <log.level>INFO</log.level>
+        <log.email.to>${application.email}</log.email.to>
+
+        <metrics.jmx.enabled>false</metrics.jmx.enabled>
+        <metrics.csv.enabled>false</metrics.csv.enabled>
+        <metrics.csv.directory>${log.dir}/metrics</metrics.csv.directory>
+        <metrics.csv.interval.seconds>20</metrics.csv.interval.seconds>
+        <metrics.graphite.enabled>false</metrics.graphite.enabled>
+        <metrics.graphite.service>http://graphite.example.com:2003</metrics.graphite.service>
+        <metrics.graphite.service.prefix>${application.name}</metrics.graphite.service.prefix>
+        <metrics.graphite.interval.seconds>30</metrics.graphite.interval.seconds>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>development</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <application.daemon.enable>false</application.daemon.enable>
+                <log.dir>${application.home}/logs</log.dir>
+                <log.level>DEBUG</log.level>
+                <metrics.jmx.enabled>true</metrics.jmx.enabled>
+            </properties>
+        </profile>
+        <profile>
+            <id>test</id>
+            <properties>
+                <!-- NOTE: do not pretty-print format -->
+                <application.instrument>-javaagent:/usr/local/lib/org.jacoco.agent-${jacoco.version}-runtime.jar=destfile=${LOG_DIR}/jacoco-it.exec,append=false</application.instrument>
+                <metrics.jmx.enabled>true</metrics.jmx.enabled>
+            </properties>
+        </profile>
+    </profiles>
+
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>wasabi-api</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intuit.data.autumn</groupId>
+            <artifactId>autumn.service</artifactId>
+            <version>1.0.20160515205816</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intuit.data.autumn</groupId>
+            <artifactId>autumn.metrics</artifactId>
+            <version>1.0.20160515205816</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.3.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.jayway.restassured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>2.4.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>6.9.6</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>3.0.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.retrofit</groupId>
+            <artifactId>retrofit</artifactId>
+            <version>1.9.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.jakewharton.retrofit</groupId>
+            <artifactId>retrofit1-okhttp3-client</artifactId>
+            <version>1.0.2</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <!-- Copy integration tests to target, filtering along the way. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.7</version>
+                <configuration>
+                    <escapeString>\</escapeString>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>copy-resources</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${basedir}/target/extra-resources</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/env</directory>
+                                    <filtering>true</filtering>
+                                </resource>
+                                <resource>
+                                    <directory>src/test/integration</directory>
+                                    <filtering>true</filtering>
+                                </resource>
+                            </resources>
+                            <includeEmptyDirs>true</includeEmptyDirs>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.4.3</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <createSourcesJar>true</createSourcesJar>
+                            <shadedClassifierName>${application.profile}-all</shadedClassifierName>
+                            <createDependencyReducedPom>true</createDependencyReducedPom>
+                            <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
+                            <artifactSet>
+                                <excludes>
+                                    <exclude>junit:*</exclude>
+                                    <exclude>org.hamcrest:*</exclude>
+                                    <exclude>org.mockito:*</exclude>
+                                    <exclude>org.objenesis:*</exclude>
+                                </excludes>
+                            </artifactSet>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/LICENSE</exclude>
+                                        <exclude>META-INF/license</exclude>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                            <transformers>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>${application.main}</mainClass>
+                                </transformer>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

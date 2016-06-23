@@ -1,0 +1,54 @@
+<div id="dlgChangeRapidExperiment" class="modalDialog">
+    <h1>Configure As Rapid Experiment</h1>
+    <div class="dialogContent">
+        <form id="formChangeRapidExperiment" novalidate name="formChangeRapidExperiment">
+            <ul class="formLayout oneCol" ng-show="!readOnly">
+                <li>
+                    <div>
+                        <input id="chkRapidExperimentation" name="chkRapidExperimentation" type="checkbox" ng-model="experiment.isRapidExperiment" ng-checked="{{experiment.isRapidExperiment}}"/>&nbsp;&nbsp;<label
+                        for="chkRapidExperimentation" class="checkboxLabel" name="isRapidExperiment" ng-class="{disabled: data.disableRapidExperimentationFields}">Enable rapid experimentation</label>
+
+                    </div>
+                </li>
+                <li>
+                    <div>
+                        <label ng-class="{disabled: !experiment.isRapidExperiment}">Maximum Number of User Assignments</label>
+                        <input id="maxRapidUsers" name="maxRapidUsers" type="number" min="1" max="2147483647" ng-model="experiment.userCap" class="form-control text" ng-maxlength="10" ensure-number ng-disabled="!experiment.isRapidExperiment" ng-class="{disabled: !experiment.isRapidExperiment}" />&nbsp;&nbsp;
+                        <!-- Validation error -->
+                        <div class="error"
+                             ng-show="(formChangeRapidExperiment.maxRapidUsers.$dirty && formChangeRapidExperiment.maxRapidUsers.$invalid &&
+                                      !formChangeRapidExperiment.maxRapidUsers.$focused) ||
+                                      (formChangeRapidExperimentSubmitted)">
+                            <small class="fieldError"
+                                   ng-show="formChangeRapidExperiment.maxRapidUsers.$error.ensureNumber">
+                                Maximum number of user assignments must be a number.
+                            </small>
+                            <small class="fieldError"
+                                   ng-show="formChangeRapidExperiment.maxRapidUsers.$error.maxlength">
+                                Maximum number of user assignments cannot be longer than 11 characters.
+                            </small>
+                            <small class="fieldError"
+                                   ng-show="formChangeRapidExperiment.maxRapidUsers.$error.min">
+                                Maximum number of user assignments must be greater than 0.
+                            </small>
+                            <small class="fieldError"
+                                   ng-show="formChangeRapidExperiment.maxRapidUsers.$error.max">
+                                Maximum number of user assignments must be less than 2,147,483,648.
+                            </small>
+                            <small class="fieldError"
+                                   ng-show="formChangeRapidExperiment.maxRapidUsers.$error.number">
+                                Maximum number of user assignments must be a positive number.
+                            </small>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+            <div class="buttonBar">
+                <button id="btnSaveSamplingRate" class="blue" ng-click="ok(formChangeRapidExperiment.$invalid, formChangeRapidExperiment)">Save</button>
+                <button class="cancel" ng-click="cancel()">Cancel</button>
+                <!--
+                <span class="buttonOr">or</span> <a href="#" class="cancel">Cancel</a>-->
+            </div>
+        </form>
+    </div>
+</div>

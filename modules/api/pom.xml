@@ -1,0 +1,181 @@
+<!--
+    Copyright 2016 Intuit
+   
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+   
+        http://www.apache.org/licenses/LICENSE-2.0
+   
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+ -->
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.intuit.wasabi</groupId>
+        <artifactId>wasabi</artifactId>
+        <version>20151215171929-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>wasabi-api</artifactId>
+    <packaging>jar</packaging>
+    <name>${project.artifactId}</name>
+
+    <profiles>
+        <profile>
+            <id>development</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+    </profiles>
+
+    <dependencies>
+        <dependency>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>wasabi-analytics</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>wasabi-auditlog</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>wasabi-email</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>wasabi-event</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>wasabi-feedback</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>wasabi-feedback-objects</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>wasabi-authorization</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>wasabi-experiment</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intuit.data.autumn</groupId>
+            <artifactId>autumn.api</artifactId>
+            <version>1.0.20160515205816</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.7.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.7.2</version>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-annotation</artifactId>
+            <version>3.1.2</version>
+        </dependency>
+        <!-- FIXME: we might need to run against jersey 1.18.1 for this to work -->
+        <!--
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-jersey</artifactId>
+            <version>3.1.2</version>
+        </dependency>
+        -->
+        <dependency>
+            <groupId>Hyrule</groupId>
+            <artifactId>Hyrule</artifactId>
+            <version>0.0.1</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!--<plugin>
+                <groupId>com.github.kongchen</groupId>
+                <artifactId>swagger-maven-plugin</artifactId>
+                <version>2.0</version>
+                <configuration>
+                    <apiSources>
+                        <apiSource>
+                            <locations>com.intuit.wasabi.api</locations>
+                            <apiVersion>v1</apiVersion>
+                            <basePath>${swaggerUrl}</basePath>
+                            <outputTemplate>${basedir}/src/main/apidocs/strapdown.html.mustache</outputTemplate>
+                            <outputPath>${project.build.directory}/swagger/apis.html</outputPath>
+                            <mustacheFileRoot>${basedir}/src/main/apidocs/</mustacheFileRoot>
+                            <swaggerDirectory>${project.build.directory}/swagger/apidocs</swaggerDirectory>
+                        </apiSource>
+                    </apiSources>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>-->
+            <plugin>
+                <groupId>com.github.kongchen</groupId>
+                <artifactId>swagger-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <apiSources>
+                        <apiSource>
+                            <springmvc>false</springmvc>
+                            <locations>com.intuit.wasabi.api</locations>
+                            <schemes>http</schemes>
+                            <host>${swaggerHost}</host>
+                            <basePath>/api</basePath>
+                            <info>
+                                <title>AB Testing</title>
+                                <version>v1</version>
+                            </info>
+                            <!-- Support classpath or file absolute path here.
+                            1) classpath e.g: "classpath:/markdown.hbs", "classpath:/templates/hello.html"
+                            2) file e.g: "${basedir}/src/main/resources/markdown.hbs",
+                                "${basedir}/src/main/resources/template/hello.html" -->
+                            <templatePath>${basedir}/templates/strapdown.html.hbs</templatePath>
+                            <outputPath>${project.build.directory}/generated/document.html</outputPath>
+                            <swaggerDirectory>${project.build.directory}/generated/swagger-ui</swaggerDirectory>
+                        </apiSource>
+                    </apiSources>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -1,0 +1,30 @@
+<div ng-controller="AllApplicationsCtrl" style="width: 100%">
+    <div id="applicationsList">
+        <div class="tableContainer" scrollable-list style="height: 400px;">
+            <div class="scrollListHeader">
+            <table>
+                <tr>
+                    <th style="width:10%" class="_label">
+                        <span>Application</span>
+                    </th>
+                </tr>
+            </table>
+            </div>
+            <div class="scrollListBody">
+            <table>
+                <tr>
+                    <th style="width:10%" class="_label sortAscending">
+                        <span>Application</span>
+                    </th>
+                </tr>
+                <tr ng-repeat="application in applications | orderBy:orderByField:reverseSort">
+                    <td class="app">
+                        <a href="#" title="Send email to request access" onclick="return false;" ng-click="selectApplication(application)">{{application.applicationName}}</a>
+                    </td>
+                </tr>
+            </table>
+            </div>
+        </div>
+    </div>
+</div>
+

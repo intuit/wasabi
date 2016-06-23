@@ -1,0 +1,1015 @@
+<attributionReport>
+   <dependencies>
+       <dependency>
+          <name>Angular JS</name>
+          <groupId>google</groupId>
+          <artifactId>angular</artifactId>
+          <version>1.2.15</version>
+          <projectUrl>https://angularjs.org</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/angular/angular.js/blob/master/LICENSE</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>angular-mocks</name>
+          <groupId>google</groupId>
+          <artifactId>angular-mocks</artifactId>
+          <version>1.2.15</version>
+          <projectUrl>https://github.com/angular/bower-angular-mocks</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/angular/bower-angular-mocks/blob/master/LICENSE.md</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/angular/bower-angular-mocks</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>angular-resource</name>
+          <groupId>google</groupId>
+          <artifactId>angular-resource</artifactId>
+          <version>1.2.15</version>
+          <projectUrl>https://github.com/angular/bower-angular-resource</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/angular/bower-angular-resource/blob/master/LICENSE.md</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/angular/bower-angular-resource</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>angular-cookies</name>
+          <groupId>google</groupId>
+          <artifactId>angular-cookies</artifactId>
+          <version>1.2.15</version>
+          <projectUrl>https://github.com/angular/bower-angular-cookies</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/angular/bower-angular-cookies/blob/master/LICENSE.md</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/angular/bower-angular-cookies</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>angular-bootstrap</name>
+          <groupId>google</groupId>
+          <artifactId>angular-bootstrap</artifactId>
+          <version>1.2.15</version>
+          <projectUrl>https://github.com/angular-ui/bootstrap</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/angular-ui/bootstrap/blob/master/LICENSE</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/angular-ui/bootstrap</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>angular-ui-router</name>
+          <groupId>google</groupId>
+          <artifactId>angular-ui-router</artifactId>
+          <version>1.2.15</version>
+          <projectUrl>https://github.com/angular-ui/ui-router</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/angular-ui/ui-router/blob/master/LICENSE</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/angular-ui/ui-router</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>es5-shim</name>
+          <groupId>Kristopher Michael Kowal and contributors</groupId>
+          <artifactId>es5-shim</artifactId>
+          <version>2.1.0</version>
+          <projectUrl>https://github.com/es-shims/es5-shim</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/es-shims/es5-shim/blob/master/LICENSE</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/es-shims/es5-shim</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>jQuery</name>
+          <groupId>jQuery Foundation</groupId>
+          <artifactId>jquery</artifactId>
+          <version>1.11.3</version>
+          <projectUrl>https://github.com/jquery/jquery</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/jquery/jquery/blob/master/LICENSE.txt</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/jquery/jquery</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>jQuery UI</name>
+          <groupId>jQuery Foundation</groupId>
+          <artifactId>jquery-ui</artifactId>
+          <version>1.11.4</version>
+          <projectUrl>https://github.com/jquery/jquery-ui</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/jquery/jquery-ui/blob/master/LICENSE.txt</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/jquery/jquery-ui</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Bootstrap SASS</name>
+          <groupId>twitter</groupId>
+          <artifactId>bootstrap-sass-official</artifactId>
+          <version>3.1.1</version>
+          <projectUrl>https://github.com/twbs/bootstrap-sass</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/twbs/bootstrap-sass/blob/master/LICENSE</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/twbs/bootstrap-sass</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Moment</name>
+          <groupId>kmussel</groupId>
+          <artifactId>moment</artifactId>
+          <version>2.10.0</version>
+          <projectUrl>https://github.com/kmussel/Moment</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/kmussel/Moment/blob/master/LICENSE</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/kmussel/Moment</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>angular-scenario</name>
+          <groupId>google</groupId>
+          <artifactId>angular-scenario</artifactId>
+          <version>1.2.15</version>
+          <projectUrl>https://github.com/angular/bower-angular-scenario</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/angular/bower-angular-scenario/blob/master/LICENSE.md</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/angular/bower-angular-scenario</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Chai JS</name>
+          <groupId>Jake Luer</groupId>
+          <artifactId>chai</artifactId>
+          <version>2.3.0</version>
+          <projectUrl>https://github.com/chaijs/chai</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/chaijs/chai/blob/master/README.md</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/chaijs/chai</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Grunt</name>
+          <groupId>jQuery Foundation</groupId>
+          <artifactId>grunt</artifactId>
+          <version>0.4.5</version>
+          <projectUrl>https://github.com/gruntjs/grunt</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/gruntjs/grunt/blob/master/LICENSE</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/gruntjs/grunt</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Grunt Autoprefixer</name>
+          <groupId>nDmitry</groupId>
+          <artifactId>grunt-autoprefixer</artifactId>
+          <version>0.4.2</version>
+          <projectUrl>https://github.com/nDmitry/grunt-autoprefixer</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/nDmitry/grunt-autoprefixer/blob/master/LICENSE</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/nDmitry/grunt-autoprefixer</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Grunt Bower Install</name>
+          <groupId>stephenplusplus</groupId>
+          <artifactId>grunt-bower-install</artifactId>
+          <version>1.0.2</version>
+          <projectUrl>git://github.com/stephenplusplus/grunt-bower-install.git</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>git://github.com/stephenplusplus/grunt-bower-install/blob/master/LICENSE</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>git://github.com/stephenplusplus/grunt-bower-install.git</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Grunt Concurrent</name>
+          <groupId>sindresorhus</groupId>
+          <artifactId>grunt-concurrent</artifactId>
+          <version>0.5.0</version>
+          <projectUrl>https://github.com/sindresorhus/grunt-concurrent</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/sindresorhus/grunt-concurrent/blob/master/license</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/sindresorhus/grunt-concurrent</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Grunt Contrib Clean</name>
+          <groupId>gruntjs</groupId>
+          <artifactId>grunt-contrib-clean</artifactId>
+          <version>0.5.0</version>
+          <projectUrl>https://github.com/gruntjs/grunt-contrib-clean</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/gruntjs/grunt-contrib-clean/blob/master/LICENSE-MIT</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/gruntjs/grunt-contrib-clean</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Grunt Contrib Compass</name>
+          <groupId>gruntjs</groupId>
+          <artifactId>grunt-contrib-compass</artifactId>
+          <version>0.7.2</version>
+          <projectUrl>https://github.com/gruntjs/grunt-contrib-compass</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/gruntjs/grunt-contrib-compass/blob/master/LICENSE-MIT</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/gruntjs/grunt-contrib-compass</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Grunt Contrib Concat</name>
+          <groupId>gruntjs</groupId>
+          <artifactId>grunt-contrib-concat</artifactId>
+          <version>0.3.0</version>
+          <projectUrl>https://github.com/gruntjs/grunt-contrib-concat</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/gruntjs/grunt-contrib-concat/blob/master/LICENSE-MIT</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/gruntjs/grunt-contrib-concat</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Grunt Contrib Connect</name>
+          <groupId>gruntjs</groupId>
+          <artifactId>grunt-contrib-connect</artifactId>
+          <version>0.5.0</version>
+          <projectUrl>https://github.com/gruntjs/grunt-contrib-connect</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/gruntjs/grunt-contrib-connect/blob/master/LICENSE-MIT</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/gruntjs/grunt-contrib-connect</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Grunt Contrib Copy</name>
+          <groupId>gruntjs</groupId>
+          <artifactId>grunt-contrib-copy</artifactId>
+          <version>0.4.1</version>
+          <projectUrl>https://github.com/gruntjs/grunt-contrib-copy</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/gruntjs/grunt-contrib-copy/blob/master/LICENSE-MIT</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/gruntjs/grunt-contrib-copy</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Grunt Contrib Cssmin</name>
+          <groupId>gruntjs</groupId>
+          <artifactId>grunt-contrib-cssmin</artifactId>
+          <version>0.7.0</version>
+          <projectUrl>https://github.com/gruntjs/grunt-contrib-cssmin</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/gruntjs/grunt-contrib-cssmin/blob/master/LICENSE-MIT</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/gruntjs/grunt-contrib-cssmin</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Grunt Contrib Htmlmin</name>
+          <groupId>gruntjs</groupId>
+          <artifactId>grunt-contrib-htmlmin</artifactId>
+          <version>0.1.3</version>
+          <projectUrl>https://github.com/gruntjs/grunt-contrib-htmlmin</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/gruntjs/grunt-contrib-htmlmin/blob/master/LICENSE-MIT</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/gruntjs/grunt-contrib-htmlmin</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Grunt Contrib JSHint</name>
+          <groupId>gruntjs</groupId>
+          <artifactId>grunt-contrib-jshint</artifactId>
+          <version>0.7.2</version>
+          <projectUrl>https://github.com/gruntjs/grunt-contrib-jshint</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/gruntjs/grunt-contrib-jshint/blob/master/LICENSE-MIT</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/gruntjs/grunt-contrib-jshint</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Grunt Contrib Uglify</name>
+          <groupId>gruntjs</groupId>
+          <artifactId>grunt-contrib-uglify</artifactId>
+          <version>0.2.7</version>
+          <projectUrl>https://github.com/gruntjs/grunt-contrib-uglify</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/gruntjs/grunt-contrib-uglify/blob/master/LICENSE-MIT</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/gruntjs/grunt-contrib-uglify</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Grunt Contrib Watch</name>
+          <groupId>gruntjs</groupId>
+          <artifactId>grunt-contrib-watch</artifactId>
+          <version>0.5.3</version>
+          <projectUrl>https://github.com/gruntjs/grunt-contrib-watch</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/gruntjs/grunt-contrib-watch/blob/master/LICENSE-MIT</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/gruntjs/grunt-contrib-watch</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Grunt File Append</name>
+          <groupId>devlato</groupId>
+          <artifactId>grunt-contrib-watch</artifactId>
+          <version>0.0.6</version>
+          <projectUrl>https://github.com/devlato/grunt-file-append</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/devlato/grunt-file-append/blob/master/LICENSE</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/devlato/grunt-file-append</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Grunt Google CDN</name>
+          <groupId>btford</groupId>
+          <artifactId>grunt-google-cdn</artifactId>
+          <version>0.2.2</version>
+          <projectUrl>https://github.com/btford/grunt-google-cdn</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>BSD</name>
+                <url>https://github.com/btford/grunt-google-cdn/blob/master/README.md</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/btford/grunt-google-cdn</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Grunt Karma</name>
+          <groupId>karma-runner</groupId>
+          <artifactId>grunt-karma</artifactId>
+          <version>0.8.3</version>
+          <projectUrl>https://github.com/karma-runner/grunt-karma</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/karma-runner/grunt-karma/blob/master/LICENSE</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/karma-runner/grunt-karma</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Grunt Legacy Log</name>
+          <groupId>gruntjs</groupId>
+          <artifactId>grunt-legacy-log</artifactId>
+          <version>0.1.3</version>
+          <projectUrl>https://github.com/gruntjs/grunt-legacy-log</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/gruntjs/grunt-legacy-log/blob/master/LICENSE-MIT</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/gruntjs/grunt-legacy-log</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Grunt Legacy Log Utils</name>
+          <groupId>gruntjs</groupId>
+          <artifactId>grunt-legacy-log-utils</artifactId>
+          <version>0.1.1</version>
+          <projectUrl>https://github.com/gruntjs/grunt-legacy-log-utils</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/gruntjs/grunt-legacy-log-utils/blob/master/LICENSE-MIT</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/gruntjs/grunt-legacy-log-utils</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Grunt Legacy Util</name>
+          <groupId>gruntjs</groupId>
+          <artifactId>grunt-legacy-util</artifactId>
+          <version>0.2.0</version>
+          <projectUrl>https://github.com/gruntjs/grunt-legacy-util</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/gruntjs/grunt-legacy-util/blob/master/LICENSE-MIT</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/gruntjs/grunt-legacy-util</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Grunt Lib Contrib</name>
+          <groupId>gruntjs</groupId>
+          <artifactId>grunt-lib-contrib</artifactId>
+          <version>0.6.1</version>
+          <projectUrl>https://github.com/gruntjs/grunt-lib-contrib</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/gruntjs/grunt-lib-contrib/blob/master/LICENSE-MIT</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/gruntjs/grunt-lib-contrib</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Grunt Newer</name>
+          <groupId>tschaub</groupId>
+          <artifactId>grunt-newer</artifactId>
+          <version>0.6.1</version>
+          <projectUrl>https://github.com/tschaub/grunt-newer</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/tschaub/grunt-newer/blob/master/LICENSE-MIT</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/tschaub/grunt-newer</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Grunt NG Constant</name>
+          <groupId>werk85</groupId>
+          <artifactId>grunt-ng-constant</artifactId>
+          <version>2.0.1</version>
+          <projectUrl>https://github.com/werk85/grunt-ng-constant</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/werk85/grunt-ng-constant/blob/master/LICENSE-MIT</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/werk85/grunt-ng-constant</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Grunt NGMin</name>
+          <groupId>btford</groupId>
+          <artifactId>grunt-ngmin</artifactId>
+          <version>0.0.3</version>
+          <projectUrl>https://github.com/btford/grunt-ngmin</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>BSD</name>
+                <url>https://github.com/btford/grunt-ngmin/blob/master/README.md</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/btford/grunt-ngmin</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Grunt Rev</name>
+          <groupId>cbas</groupId>
+          <artifactId>grunt-rev</artifactId>
+          <version>0.1.0</version>
+          <projectUrl>https://github.com/cbas/grunt-rev</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/cbas/grunt-rev/blob/master/LICENSE-MIT</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/cbas/grunt-rev</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Grunt Svgmin</name>
+          <groupId>sindresorhus</groupId>
+          <artifactId>grunt-svgmin</artifactId>
+          <version>0.2.1</version>
+          <projectUrl>https://github.com/sindresorhus/grunt-svgmin</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/sindresorhus/grunt-svgmin/blob/master/license</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/sindresorhus/grunt-svgmin</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Grunt Usemin</name>
+          <groupId>yeoman</groupId>
+          <artifactId>grunt-usemin</artifactId>
+          <version>2.0.2</version>
+          <projectUrl>https://github.com/yeoman/grunt-usemin</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/yeoman/grunt-usemin/blob/master/LICENSE</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/yeoman/grunt-usemin</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Jasmin Core</name>
+          <groupId>jasmine</groupId>
+          <artifactId>jasmin-core</artifactId>
+          <version>2.4.1</version>
+          <projectUrl>https://github.com/jasmine/jasmine</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/jasmine/jasmine/blob/master/MIT.LICENSE</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/jasmine/jasmine</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>JSHint Stylish</name>
+          <groupId>sindresorhus</groupId>
+          <artifactId>jshint-stylish</artifactId>
+          <version>0.1.5</version>
+          <projectUrl>https://github.com/sindresorhus/jshint-stylish</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/sindresorhus/jshint-stylish/blob/master/license</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/sindresorhus/jshint-stylish</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Karma</name>
+          <groupId>karma-runner</groupId>
+          <artifactId>karma</artifactId>
+          <version>0.12.37</version>
+          <projectUrl>https://github.com/karma-runner/karma</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/karma-runner/karma/blob/master/LICENSE</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/karma-runner/karma</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Karma Chai</name>
+          <groupId>xdissent</groupId>
+          <artifactId>karma-chai</artifactId>
+          <version>0.1.0</version>
+          <projectUrl>https://github.com/xdissent/karma-chai</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/xdissent/karma-chai/blob/master/LICENSE</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/xdissent/karma-chai</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Karma Chrome Launcher</name>
+          <groupId>karma-runner</groupId>
+          <artifactId>karma-chrome-launcher</artifactId>
+          <version>0.1.12</version>
+          <projectUrl>https://github.com/karma-runner/karma-chrome-launcher</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/karma-runner/karma-chrome-launcher/blob/master/LICENSE</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/karma-runner/karma-chrome-launcher</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Karma Coverage</name>
+          <groupId>karma-runner</groupId>
+          <artifactId>karma-coverage</artifactId>
+          <version>0.2.7</version>
+          <projectUrl>https://github.com/karma-runner/karma-coverage</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/karma-runner/karma-coverage/blob/master/LICENSE</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/karma-runner/karma-coverage</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Karma Jasmine</name>
+          <groupId>karma-runner</groupId>
+          <artifactId>karma-jasmine</artifactId>
+          <version>0.3.8</version>
+          <projectUrl>https://github.com/karma-runner/karma-jasmine</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/karma-runner/karma-jasmine/blob/master/LICENSE</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/karma-runner/karma-jasmine</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Karma JUnit Reporter</name>
+          <groupId>karma-runner</groupId>
+          <artifactId>karma-junit-reporter</artifactId>
+          <version>0.2.2</version>
+          <projectUrl>https://github.com/karma-runner/karma-junit-reporter</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/karma-runner/karma-junit-reporter/blob/master/LICENSE</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/karma-runner/karma-junit-reporter</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Karma Mocha</name>
+          <groupId>karma-runner</groupId>
+          <artifactId>karma-mocha</artifactId>
+          <version>0.1.10</version>
+          <projectUrl>https://github.com/karma-runner/karma-mocha</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/karma-runner/karma-mocha/blob/master/LICENSE</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/karma-runner/karma-mocha</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Karma NG HTML2JS Preprocessor</name>
+          <groupId>karma-runner</groupId>
+          <artifactId>karma-ng-html2js-preprocessor</artifactId>
+          <version>0.1.2</version>
+          <projectUrl>https://github.com/karma-runner/karma-ng-html2js-preprocessor</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/karma-runner/karma-ng-html2js-preprocessor/blob/master/LICENSE</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/karma-runner/karma-ng-html2js-preprocessor</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Karma NG Scenario</name>
+          <groupId>karma-runner</groupId>
+          <artifactId>karma-ng-scenario</artifactId>
+          <version>0.1.0</version>
+          <projectUrl>https://github.com/karma-runner/karma-ng-scenario</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/karma-runner/karma-ng-scenario/blob/master/LICENSE</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/karma-runner/karma-ng-scenario</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Karma PhantomJS Launcher</name>
+          <groupId>karma-runner</groupId>
+          <artifactId>karma-phantomjs-launcher</artifactId>
+          <version>0.1.4</version>
+          <projectUrl>https://github.com/karma-runner/karma-phantomjs-launcher</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/karma-runner/karma-phantomjs-launcher/blob/master/LICENSE</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/karma-runner/karma-phantomjs-launcher</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Karma Sinon</name>
+          <groupId>yanoosh</groupId>
+          <artifactId>karma-sinon</artifactId>
+          <version>1.0.5</version>
+          <projectUrl>https://github.com/yanoosh/karma-sinon</projectUrl>
+          <type>js</type>
+          <licenses>
+              <license>
+                 <name>MIT License</name>
+                 <url>https://github.com/yanoosh/karma-sinon/blob/master/LICENSE</url>
+              </license>
+              <license>
+                 <name>BSD</name>
+                 <url>https://github.com/yanoosh/karma-sinon/blob/master/LICENSE</url>
+              </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/yanoosh/karma-sinon</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Load Grunt Tasks</name>
+          <groupId>sindresorhus</groupId>
+          <artifactId>load-grunt-tasks</artifactId>
+          <version>0.1.4</version>
+          <projectUrl>https://github.com/sindresorhus/load-grunt-tasks</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/sindresorhus/load-grunt-tasks/blob/master/license</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/sindresorhus/load-grunt-tasks</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Mocha</name>
+          <groupId>mochajs</groupId>
+          <artifactId>mocha</artifactId>
+          <version>2.5.3</version>
+          <projectUrl>https://github.com/mochajs/mocha</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/mochajs/mocha/blob/master/LICENSE</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/mochajs/mocha</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Sinon</name>
+          <groupId>cjohansen</groupId>
+          <artifactId>sinon</artifactId>
+          <version>1.17.4</version>
+          <projectUrl>https://github.com/sinonjs/sinon</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>BSD</name>
+                <url>https://github.com/sinonjs/sinon/blob/master/LICENSE</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/sinonjs/sinon</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Sinon Chai</name>
+          <groupId>domenic</groupId>
+          <artifactId>sinon-chai</artifactId>
+          <version>2.8.0</version>
+          <projectUrl>https://github.com/domenic/sinon-chai</projectUrl>
+          <type>js</type>
+          <licenses>
+              <license>
+                 <name>WTFPL</name>
+                 <url>https://github.com/domenic/sinon-chai/blob/master/LICENSE.txt</url>
+              </license>
+              <license>
+                 <name>BSD</name>
+                 <url>https://github.com/domenic/sinon-chai/blob/master/LICENSE.txt</url>
+              </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/domenic/sinon-chai</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Time Grunt</name>
+          <groupId>sindresorhus</groupId>
+          <artifactId>time-grunt</artifactId>
+          <version>0.2.10</version>
+          <projectUrl>https://github.com/sindresorhus/time-grunt</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>MIT License</name>
+                <url>https://github.com/sindresorhus/time-grunt/blob/master/license</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://github.com/sindresorhus/time-grunt</string>
+          </downloadUrls>
+       </dependency>
+       <dependency>
+          <name>Google Charts</name>
+          <groupId>google</groupId>
+          <artifactId>corechart</artifactId>
+          <version>current</version>
+          <projectUrl>https://developers.google.com/chart/</projectUrl>
+          <type>js</type>
+          <licenses>
+             <license>
+                <name>Google TOS</name>
+                <url>https://developers.google.com/chart/terms</url>
+             </license>
+          </licenses>
+          <downloadUrls>
+             <string>https://www.gstatic.com/charts/loader.js</string>
+          </downloadUrls>
+       </dependency>
+   </dependencies>
+</attributionReport>

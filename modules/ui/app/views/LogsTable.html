@@ -1,0 +1,49 @@
+<div ng-controller="LogsCtrl">
+    <div class="toolbar">
+        <!--
+        <button id="btnSaveLog" class="yellow" disabled>Save</button>-->
+        <div>
+            <select id="applicationNameChoice" ng-model="data.applicationName" ng-options="applicationName for applicationName in appNames" ng-change="changePage()" ng-if="appNames.length > 1">
+                <option value="">Select an Application</option>
+            </select>
+            <span style="font-weight: bold; top: 2px; position: relative;" ng-if="appNames.length === 1">{{appNames[0]}}</span>
+            <span style="font-weight: bold; top: 2px; position: relative;"> Logs
+            </span>
+        </div>
+        <div id="logsSearch">
+            <form id="usersForm">
+                <div class="search">
+                    <input search type="text" autocorrect="off" autocapitalize="off" placeholder="Search"
+                           ng-model="data.query"
+                           ng-change="search()"/>
+                    <a href="#" class="clear" ng-click="clearSearch()">Clear Search</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div>
+        <div id="logList" class="tableContainer">
+            <table sort-direction-icon class="noCellTips" col-resizeable>
+                <tr>
+                    <th style="width:20%" class="_time sortDescending" ng-click="sortBy('time')"><span class="colLabel">Date/Time</span></th>
+                    <th style="width:18%" class="_user_lastName" ng-click="sortBy('user.lastName')"><span class="colLabel">User</span></th>
+                    <th style="width:35%" class="_action" ng-click="sortBy('action')"><span class="colLabel">Action</span></th>
+                    <th style="width:27%" class="_experiment" ng-click="sortBy('experiment')"><span class="colLabel">Experiment</span></th>
+                </tr>
+                <tr ng-repeat="log in logs" data-id="{{log.id}}" data-application-name="{{log.applicationName}}">
+                    <td class="date">{{log.time | date:'MMM dd, yyyy HH:mm:ss a'}}</td>
+                    <td>{{log.user.firstName}} {{log.user.lastName}}</td>
+                    <td title="{{log.action.message}}"><a ng-click="openLogModal(log)" title="{{log.action.message}}">{{log.action.message}}</a></td>
+                    <td title="{{log.experiment.experimentLabel}}">{{log.experiment.experimentLabel}}</td>
+                </tr>
+            </table>
+        </div>
+        <div style="text-align:right">
+            <span style="font-size:13px; color:#888; position: relative; top: -20px; left: -5px;">{{pageRangeStart()}} - {{pageRangeEnd()}} of {{totalItems}}</span>
+            <div style="display: inline;">
+                <pagination total-items="totalItems" ng-model="currentPage" ng-change="pageChanged()" max-size="5" rotate="false"></pagination>
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,219 @@
+<div ng-controller="ExperimentsCtrl">
+    <div class="toolbar">
+        <a href="" onclick="return false;" id="searchMoreLess" title="More Search Options" ng-show="!noExperiments" ng-click="showMoreLessSearch();"><span></span></a>
+        <button id="btnNewExperiment" class="blue" ng-click="openExperimentModal()" ng-class="{disabled: !applicationsLoaded}" ng-disabled="!applicationsLoaded">Create Experiment</button>
+        <span ng-if="data.enableCardView" id="checkToggleListSpan" style="position: relative;"><input type="checkbox" id="chkToggleList" ng-model="data.showGrid"
+               ng-click="switchToGrid()" ng-class="{disabled: disableShowAsGrid}" ng-disabled="disableShowAsGrid"/><label id="chkToggleListLabel" for="chkToggleList" ng-class="{disabled: disableShowAsGrid}" ng-disabled="disableShowAsGrid" class="checkboxLabel">Card view</label>
+        </span>
+
+        <div id="basicSearch" switch-search is-advanced="false">
+            <form id="experimentsForm">
+                <input type="checkbox" name="chkHideTerminated" ng-model="data.hideTerminated"
+                       ng-change="applySearchSortFilters(false)"/><label for="chkHideTerminated" class="checkboxLabel">Hide
+                terminated</label>
+
+                <div class="search">
+                    <input search type="text" autocorrect="off" autocapitalize="off" placeholder="Search"
+                           ng-model="data.query"
+                           ng-change="search()"/>
+                    <a href="#" class="clear">Clear Search</a>
+                </div>
+            </form>
+        </div>
+        <div id="advancedSearch" switch-search is-advanced="true">
+            <form id="advancedSearchForm">
+                <select ng-model="data.advApplicationName" ng-options="applicationName for applicationName in applicationsWithReadOrBetterAccess"
+                        ng-if="applicationsWithReadOrBetterAccess.length > 1">
+                    <option value="">Select Application</option>
+                </select>
+                <span ng-model="data.advApplicationName" ng-if="applicationsWithReadOrBetterAccess.length === 1">{{applicationsWithReadOrBetterAccess[0]}}</span>
+                <select ng-model="data.advStatus">
+                    <option value="any">Any Status</option>
+                    <option selected="selected" value="notTerminated">Not Terminated</option>
+                    <option value="terminated">Terminated</option>
+                    <option value="running">Running</option>
+                    <option value="paused">Stopped</option>
+                    <option value="draft">Draft</option>
+                </select>
+                <input id="txtExperiment" type="text" autocorrect="off" autocapitalize="off" placeholder="Search" ng-model="data.advExperimentName"/>
+
+                <div style="padding-top:5px">
+                    <select ng-model="data.advStartOrEndDate">
+                        <option value="startDate">Start Date</option>
+                        <option value="endDate">End Date</option>
+                    </select>
+                    <select id="lstDateSearchType" ng-model="data.adv1stDateSearchType">
+                        <option value="isAny">Is Any</option>
+                        <option value="isBefore">Is Before</option>
+                        <option value="isOn">Is On</option>
+                        <option value="isAfter">Is After</option>
+                        <option value="isBetween">Is Between</option>
+                    </select>
+                    <input type="text" id="txtSearchDateOne" init-dates class="text" ng-class="{twoDateInput: data.adv1stDateSearchType === 'isBetween', disabled: data.adv1stDateSearchType === 'isAny'}" ng-disabled="data.adv1stDateSearchType === 'isAny'" ng-model="data.advTxtSearchDateOne">
+                    <span id="searchDateTwo" ng-show="data.adv1stDateSearchType === 'isBetween'">
+                        - <input type="text" id="txtSearchDateTwo" init-dates readonly="true" ng-model="data.advTxtSearchDateTwo">
+                    </span>
+                    <button class="blue" id="btnSearch" ng-click="advSearch()">Go</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div ng-if="data.enableCardView" when-scroll-ends="loadMoreExperimentData()" id="gridView" class="leftCol" ng-show="data.showGrid">
+        <div ng-if="filteredItems.length === 0" id="emptyHomeList">You have no running experiments.</div>
+        <ul ng-if="filteredItems.length > 0" id="exprSummary">
+            <li ng-repeat="experiment in gridItems" ng-class="{favorite: experiment.isFavorite}">
+                <div class="summaryHead">
+                    <a href="#" favorites-star favorites-star-application-name="experiment.applicationName" favorites-star-experiment-name="experiment.label" ng-attr-is-favorite="{{experiment.isFavorite}}" after-favorite-func="handleCardStarAnimation" class="star" title="Mark as Favorite"></a>
+                    <label-link-content state="{{experiment.state}}" href="{{customHref}}" ng-click="hasUpdatePermission(experiment) && experiment.state === 'DRAFT' && openExperimentModal(experiment)" class="exprWrapper" exp-id="{{experiment.id}}" custom-tooltip="{{experiment.homePageTooltip}}" has-update="{{hasUpdatePermission(experiment)}}" read-only="{{!hasUpdatePermission(experiment)}}">
+                        <h3>{{experiment.applicationName}}</h3>
+                        <h2>{{experiment.label}}</h2>
+                    </label-link-content>
+                    <div style="margin-top: 20px;">
+                        <img class="gridStateImage" ng-src="{{stateImgUrl(experiment.state)}}"
+                                 alt="{{capitalizeFirstLetter(stateName(experiment.state))}}"
+                                 sortindex="2"> <span style="position: relative; top: -19px; left: 8px;">{{capitalizeFirstLetter(stateName(experiment.state))}}</span>
+                        <div class="actionContainer">
+                            <a class="command start" href="#" title="Start" onclick="return false;" ng-click="changeState(experiment, 'RUNNING')"
+                               ng-if="hasUpdatePermission(experiment) && (experiment.state === 'DRAFT' ||
+                                      experiment.state === 'PAUSED')">
+                                Start
+                            </a>
+                            <a class="command stop" href="#" title="Stop" onclick="return false;" ng-click="changeState(experiment, 'PAUSED')"
+                                    ng-if="hasUpdatePermission(experiment) && experiment.state === 'RUNNING'">
+                                Pause
+                            </a>
+                            <a class="command terminate" href="#" title="Terminate" onclick="return false;" ng-click="changeState(experiment, 'TERMINATED')"
+                                    ng-if="hasUpdatePermission(experiment) && (experiment.state === 'RUNNING'||
+                                           experiment.state === 'PAUSED')">
+                                Stop
+                            </a>
+                            <a class="command start" href="#" style="visibility: hidden;" onclick="return false;" ng-if="experiment.state === 'TERMINATED'">&nbsp;</a>
+                            <a class="command delete" href="#" title="Delete" onclick="return false;" ng-click="deleteExperiment(experiment)"
+                               ng-if="hasDeletePermission(experiment) && (experiment.state === 'DRAFT' ||
+                                      experiment.state === 'TERMINATED')">
+                                Delete
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="summaryBody">
+                    <ul class="buckets" ng-if="experiment.statistics && experiment.statistics.sortedBucketsActiveOnly && experiment.statistics.sortedBucketsActiveOnly.length > 0">
+                        <li ng-repeat="bucket in experiment.statistics.sortedBucketsActiveOnly" custom-tooltip="{{bucket.homePageTooltip}}" ng-class="{closed: getBucket(bucket.label, experiment).state === 'CLOSED', indeterminate: improvementClass(bucket.label, experiment) === 'indeterminate', winner: improvementClass(bucket.label, experiment) === 'winner', indeterminate: improvementClass(bucket.label, experiment) === 'loser', noWinner: improvementClass(bucket.label, experiment) === 'no-winner'}">
+                            <label>{{bucket.label}} <span ng-if="getBucket(bucket.label, experiment).isControl">(control)</span><span ng-if="getBucket(bucket.label, experiment).isBaseLine">(baseline)</span></label>
+                            <div>{{actionRate(bucket.label, experiment.statistics.buckets) | number:1}} <span>&plusmn;{{actionDiff(bucket.label, experiment.statistics.buckets) | number:1}}%</span></div>
+                            <div title="Bucket assignments" class="bucketAssignments" ng-if="getBucket(bucket.label, experiment).count >= 0">{{getBucket(bucket.label, experiment).count}}</div>
+                        </li>
+                    </ul>
+                    <ul class="buckets" ng-if="(!experiment.statistics || !experiment.statistics.sortedBucketsActiveOnly) && (experiment.buckets && experiment.buckets.length > 0)">
+                        <li ng-repeat="bucket in experiment.buckets" custom-tooltip="{{bucket.homePageTooltip}}" class="noWinnerNotRunning">
+                            <label>{{bucket.label}} <span ng-if="getBucket(bucket.label, experiment).isControl">(control)</span><span ng-if="getBucket(bucket.label, experiment).isBaseLine">(baseline)</span></label>
+                            <div>{{multiply100(bucket.allocationPercent)}}%</div>
+                        </li>
+                    </ul>
+                    <ul class="buckets" ng-if="(!experiment.statistics || !experiment.statistics.sortedBucketsActiveOnly) && (!experiment.buckets || experiment.buckets.length === 0)">
+                        <li style="padding-bottom: 8px;">
+                            <label ng-if="!experiment.buckets">Loading...</label>
+                            <label ng-if="experiment.buckets && experiment.buckets.length === 0">No buckets defined</label>
+                        </li>
+                    </ul>
+                    <div class="total" ng-if="experiment.state != 'DRAFT'">Total users:&nbsp;&nbsp;<span title="Total users assigned to the experiment">{{experiment.numUsers | number:0}}</span></div>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <div id="experimentsList" ng-show="!noExperiments && !data.showGrid">
+        <div class="tableContainer">
+            <table sort-direction-icon col-resizeable>
+                <tr>
+                    <th style="width:7%"><span class="colLabel">Fave</span></th>
+                    <th style="width:9%" class="_applicationName" ng-click="sortBy('applicationName')">
+                        <span class="colLabel">App</span>
+                    </th>
+                    <th style="width:18%" class="_label" ng-click="sortBy('label')"><span class="colLabel">Experiment</span></th>
+                    <th style="width:12%" class="_creatorID" ng-click="sortBy('creatorID')"><span class="colLabel">Created By</span></th>
+                    <th style="width:10%" class="_samplingPercent" ng-click="sortBy('samplingPercent')">
+                        <span class="colLabel">Sampling %</span>
+                    </th>
+                    <th style="width:9%" class="_startTime" ng-click="sortBy('startTime')"><span class="colLabel">Start</span></th>
+                    <th style="width:9%" class="_endTime" ng-click="sortBy('endTime')"><span class="colLabel">End</span></th>
+                    <th style="width:9%" class="_modificationTime" ng-click="sortBy('modificationTime')"><span class="colLabel">Modified</span></th>
+                    <th style="width:9%" class="icon _state">
+                        <span class="headingLabel colLabel" ng-click="sortBy('state')">
+                            Status
+                        </span>
+                        <span class="info" style="z-index: 1000;" help help-content="{{help.status}}"></span>
+                    </th>
+                    <th style="width:8%" class="icon">Actions</th>
+                </tr>
+                <tr ng-repeat="experiment in pagedData.pagedItems[currentPage - 1]">
+                    <td ng-class="{favorite: experiment.isFavorite}">
+                        <a href="#" favorites-star favorites-star-application-name="experiment.applicationName" favorites-star-experiment-name="experiment.label" ng-attr-is-favorite="{{experiment.isFavorite}}" favorites-star-parent-tag="td" after-favorite-func="handleListStarAnimation" class="star"></a>
+                    </td>
+                    <td class="app">
+                        <span title="{{experiment.applicationName}}">{{experiment.applicationName}}</span>
+                    </td>
+                    <td>
+                        <label-link state="{{experiment.state}}" exp-id="{{experiment.id}}"
+                                    exp-label="{{experiment.label}}" has-update="{{hasUpdatePermission(experiment)}}" read-only="{{!hasUpdatePermission(experiment)}}"></label-link>
+                    </td>
+                    <td>
+                        <span title="{{experiment.creatorID}}">{{experiment.creatorID}}</span>
+                    </td>
+                    <td class="sampling">{{multiply100(experiment.samplingPercent)}}</td>
+                    <td class="date">{{experiment.startTime | date:'MMM dd, yyyy'}}</td>
+                    <td class="date">{{experiment.endTime | date:'MMM dd, yyyy'}}</td>
+                    <td class="date">{{experiment.modificationTime | date:'MMM dd, yyyy'}}</td>
+                    <td class="icon">
+                        <img ng-src="{{stateImgUrl(experiment.state)}}"
+                             alt="{{capitalizeFirstLetter(stateName(experiment.state))}}"
+                             custom-tooltip="{{capitalizeFirstLetter(stateName(experiment.state))}}" displayRight="true"
+                             sortindex="2">
+                    </td>
+                    <td class="icon">
+                        <a class="command start" href="#" title="Start" onclick="return false;" ng-click="changeState(experiment, 'RUNNING')"
+                           ng-if="hasUpdatePermission(experiment) && (experiment.state === 'DRAFT' ||
+                                  experiment.state === 'PAUSED')">
+                            Start
+                        </a>
+                        <a class="command stop" href="#" title="Stop" onclick="return false;" ng-click="changeState(experiment, 'PAUSED')"
+                                ng-if="hasUpdatePermission(experiment) && experiment.state === 'RUNNING'">
+                            Pause
+                        </a>
+                        <a class="command terminate" href="#" title="Terminate" onclick="return false;" ng-click="changeState(experiment, 'TERMINATED')"
+                                ng-if="hasUpdatePermission(experiment) && (experiment.state === 'RUNNING'||
+                                       experiment.state === 'PAUSED')">
+                            Stop
+                        </a>
+                        <a class="command start" href="#" style="visibility: hidden;" onclick="return false;" ng-if="experiment.state === 'TERMINATED'">&nbsp;</a>
+                        <a class="command delete" href="#" title="Delete" onclick="return false;" ng-click="deleteExperiment(experiment)"
+                           ng-if="hasDeletePermission(experiment) && (experiment.state === 'DRAFT' ||
+                                  experiment.state === 'TERMINATED')">
+                            Delete
+                        </a>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div style="text-align:right">
+            <span style="font-size:13px; color:#888; position: relative; top: -20px; left: -5px;">{{pageRangeStart()}} - {{pageRangeEnd()}} of {{totalItems}}</span>
+
+            <div style="display: inline;" ng-show="totalItems > 0">
+                <pagination total-items="totalItems" ng-model="currentPage" ng-change="pageChanged()" max-size="5" rotate="false"></pagination>
+            </div>
+        </div>
+    </div>
+    <div class="dlgZeroNoExperiments" ng-show="noExperiments">
+        You are not currently authorized for any applications in the Wasabi A/B Testing system.<br/><br/>
+        If you need to be authorized for
+        an <strong>existing application</strong>, please find it in the list below on the left, click on it, and then
+        an email will be sent to the admins to request access.<br/><br/>
+        If you need access to a <strong>new application</strong>, please click on Create Experiment to create a new experiment.  For Application Name,
+        select New Application, specify the new name of the new application, and create the experiment.  You will then be
+        the admin of that new application name.
+    </div>
+    <div ng-if="noExperiments">
+        <ng-include src="'views/AllApplicationsTable.html'"></ng-include>
+    </div>
+</div>

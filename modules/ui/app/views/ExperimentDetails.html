@@ -1,0 +1,335 @@
+<div id="experimentDetails" class="panel" ng-controller="ExperimentDetailsCtrl" style="top: 120px; z-index: 1050;">
+    <div class="exprHead">
+        <div class="exprName">
+            <span class="starContainer" ng-class="{favorite: experiment.isFavorite}">
+                <a href="#" favorites-star favorites-star-application-name="experiment.applicationName" favorites-star-experiment-name="experiment.label" favorites-star-parent-tag="span" after-favorite-func="setAsFavorite" ng-attr-is-favorite="{{experiment.isFavorite}}" class="star" title="Mark as Favorite"></a>
+            </span>
+            <h2><div style="margin-bottom: 10px;">{{experiment.applicationName}}</div><div>{{experiment.label}}</div></h2>
+        </div>
+        <!--<a href="#" id="refreshButton" onclick="return false;" ng-click="refreshDialog()" class="button">Refresh</a>-->
+
+        <div style="position: relative; top: -50px; left: 807px;">
+            <div style="float: left"><img ng-src="{{stateImgUrl(experiment.state)}}"
+                     alt="{{capitalizeFirstLetter(stateName(experiment.state))}}"
+                     sortindex="2"> <span style="position: relative; top: -9px;">{{capitalizeFirstLetter(stateName(experiment.state))}}</span>
+            </div>
+            <div class="detailsActionContainer">
+                <a class="command start" href="#" title="Start" onclick="return false;" ng-click="changeState(experiment, 'RUNNING')"
+                   ng-if="hasUpdatePermission(experiment) && (experiment.state === 'DRAFT' ||
+                          experiment.state === 'PAUSED')"></a>
+                <a class="command stop" href="#" title="Stop" onclick="return false;" ng-click="changeState(experiment, 'PAUSED')"
+                        ng-if="hasUpdatePermission(experiment) && experiment.state === 'RUNNING'"></a>
+                <a class="command terminate" href="#" title="Terminate" onclick="return false;" ng-click="changeState(experiment, 'TERMINATED')"
+                        ng-if="hasUpdatePermission(experiment) && (experiment.state === 'RUNNING'||
+                               experiment.state === 'PAUSED')"></a>
+                <a class="command start" href="#" style="visibility: hidden;" onclick="return false;" ng-if="experiment.state === 'TERMINATED'">&nbsp;</a>
+                <a class="command delete" href="#" title="Delete" onclick="return false;" ng-click="deleteExperiment(experiment)"
+                   ng-if="hasDeletePermission(experiment) && (experiment.state === 'DRAFT' ||
+                          experiment.state === 'TERMINATED')"></a>
+            </div>
+
+        </div>
+    </div>
+
+    <table class="summary">
+        <tr>
+            <td class="customLabel" style="width: 10px;">Start</td>
+            <td>{{experiment.startTime | date:'MMM dd, yyyy hh:mm a'}}</td>
+            <td class="customLabel">
+                Total Impressions
+                <span class="info" help help-content="{{help.totalImpressions}}"></span>
+            </td>
+            <td>{{experiment.statistics.impressionCounts.eventCount}}</td>
+            <td class="customLabel">
+                Total Actions
+                <span class="info" help help-content="{{help.totalActions}}"></span>
+            </td>
+            <td>{{experiment.statistics.jointActionCounts.eventCount}}</td>
+            <td class="customLabel">Assigned Users<span class="info" help help-content="{{help.assignedUsers}}"></span></td>
+            <td>{{experiment.numUsers}}</td>
+        </tr>
+        <tr>
+            <td class="customLabel">End</td>
+            <td>
+                <a ng-show="!readOnly" id="endDate" title="Change End Date" ng-click="openChangeEndTimeModal(experiment.endTime)">{{experiment.endTime | date:'MMM dd, yyyy hh:mm a'}}</a>
+                <span ng-show="readOnly">{{experiment.endTime | date:'MMM dd, yyyy hh:mm a'}}</span>
+            </td>
+            <td class="customLabel">
+                Unique Impressions<span class="info" help help-content="{{help.uniqueImpressions}}"></span>
+            </td>
+            <td>{{experiment.statistics.impressionCounts.uniqueUserCount}}</td>
+            <td class="customLabel">
+                Unique Actions<span class="info" help help-content="{{help.uniqueActions}}"></span>
+            </td>
+            <td>{{experiment.statistics.jointActionCounts.uniqueUserCount}}</td>
+            <td class="customLabel">Sampling<span class="info" help help-content="{{help.samplingPercentage}}"></span></td>
+            <td>
+                <a ng-show="!readOnly" id="samplingRate" title="Change Sampling Rate" ng-click="openChangeSamplingModal(experiment.samplingPercent)">{{multiply100(experiment.samplingPercent)}}%</a>
+                <span ng-show="readOnly">{{multiply100(experiment.samplingPercent)}}%</span>
+            </td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td class="customLabel">Rapid Experiment Max Users<span class="info" help help-content="{{help.rapidExperimentMaxUsers}}"></span></td>
+            <td>
+                <a ng-show="!readOnly" id="maxNumUsers" title="Make this a Rapid Experiment" ng-click="openChangeRapidExperiment()">{{rapidExperimentLabel()}}</a>
+                <span ng-show="readOnly">{{rapidExperimentLabel()}}</span>
+            </td>
+        </tr>
+    </table>
+
+    <div>
+        <div style="float: left; margin-right: 862px;"><label class="descriptionLabel">Description</label></div>
+        <pre id="experimentDescription" spellcheck="false" class="readOnly"></pre>
+        <div id="descriptionToolbar" ng-show="!readOnly" dynamic-edit input-tag="experimentDescription" select-function="saveDescription" edit-function="editDescription" cancel-function="cancelDescription" ng-model="experiment.description" class="dynamicToolbar"></div>
+        <div style="margin-top: 5px; margin-bottom: 10px; font-size: 12px;"><label ng-class="{tooMany: data.descriptionLength > 256}">{{(256 - data.descriptionLength) >= 0 ? 256 - data.descriptionLength : 'NO'}} characters left</label></div>
+    </div>
+
+    <tabset id="experimentDetailsTabs" ng-show="experiment.id" class="tabs">
+        <tab id="buckets" heading="Buckets">
+            <a ng-show="!readOnly" href="#" id="btnEditBuckets" class="listAction edit" onclick="return false;" ng-click="openEditRunningBucketsModal(experiment)"><span></span>Edit Buckets</a>
+            <span class="info newHelp" help help-content="{{help.buckets}}"></span>
+            <div id="experimentBuckets" class="tabContainer">
+                <div class="tableContainerBasic">
+                    <table col-resizeable>
+                        <tr>
+                            <th style="width:30%">Bucket Name</th>
+                            <th style="width:15%">Assignments</th>
+                            <th style="width:23%">
+                                Actions
+                                <span class="info" help help-content="{{help.bucketActions}}"></span>
+                                 Impressions
+                                <span class="info" help help-content="{{help.bucketImpressions}}"></span>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            </th>
+                            <th style="width:17%">
+                                Action Rate
+                                <span class="info" help help-content="{{help.bucketActionRate}}"></span>
+                            </th>
+                            <th style="width:15%">
+                                Improvement
+                                <span class="info" help help-content="{{help.bucketImprovement}}"></span>
+                            </th>
+                        </tr>
+                        <tr ng-repeat="bucket in experiment.statistics.sortedBuckets" ng-class="bucketState(getBucket(bucket.label, experiment))">
+                            <td class="bucketName resultColumn" ng-class="{winner: improvementClass(bucket.label, experiment) === 'winner', noWinner: improvementClass(bucket.label, experiment) === 'no-winner'}" custom-tooltip="{{bucket.toolTip}}">
+                                <a ng-show="getBucket(bucket.label, experiment).state !== 'CLOSED' && getBucket(bucket.label, experiment).state !== 'EMPTY'" onclick="return false;" ng-click="openBucketModal(experiment.id, bucket.label, bucket, readOnly)" title="{{bucket.label}}{{getBucket(bucket.label, experiment).isControl ? ' (control)' : ''}}">{{bucket.label}} <span class="bucketType" ng-if="getBucket(bucket.label, experiment).isControl">(control)</span>
+                                            <span class="bucketType" ng-if="getBucket(bucket.label, experiment).isBaseLine">(baseline)</span></a>
+                                <span ng-show="getBucket(bucket.label, experiment).state === 'CLOSED' || getBucket(bucket.label, experiment).state === 'EMPTY'" title="{{bucket.label}}{{getBucket(bucket.label, experiment).state === 'CLOSED' ? ' - CLOSED' : ''}}{{getBucket(bucket.label, experiment).state === 'EMPTY' ? ' - EMPTY' : ''}}{{getBucket(bucket.label, experiment).isControl ? ' (control)' : ''}}">{{bucket.label}} <span ng-show="getBucket(bucket.label, experiment).state === 'CLOSED'">- CLOSED</span><span ng-show="getBucket(bucket.label, experiment).state === 'EMPTY'">- EMPTY</span><span class="bucketType" ng-if="getBucket(bucket.label, experiment).isControl">(control)</span>
+                                            <span class="bucketType" ng-if="getBucket(bucket.label, experiment).isBaseLine">(baseline)</span></span>
+                            </td>
+                            <td>{{bucket.count}}</td>
+                            <td>{{bucket.jointActionCounts.uniqueUserCount | number:0}} / {{bucket.impressionCounts.uniqueUserCount | number:0}}</td>
+                            <td>{{actionRate(bucket.label, experiment.statistics.buckets) | number:1}} <span>&plusmn;{{actionDiff(bucket.label, experiment.statistics.buckets) | number:1}}%</span></td>
+                            <td ng-if="improvement(bucket.label) !== undefined">{{improvement(bucket.label) | number:1}} <span>&plusmn;{{improvementDiff(bucket.label) | number:1}}%</span></td>
+                            <td ng-if="improvement(bucket.label) === undefined"><span>N/A</span></td>
+                        </tr>
+                        <tr class="totals">
+                            <td>Totals:</td>
+                            <td>{{experiment.numUsers}}</td>
+                            <td>{{experiment.statistics.jointActionCounts.uniqueUserCount | number:0}} / {{experiment.statistics.impressionCounts.uniqueUserCount | number:0}}</td>
+                            <td>{{actionRateTotal() | number:1}} <span>&plusmn;{{actionDiffTotal() | number:1}}%</span></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </table>
+                </div>
+                <div style="padding-left: 400px; padding-top: 10px;">
+                    <button id="btnShowAnalysis" type="button" class="blue" title="Add Page" ng-click="showAnalysisGraph()">Show Analysis Graph</button>
+                </div>
+            </div>
+        </tab>
+        <tab id="actions" heading="Actions">
+            <div id="analysisBucketList" class="tabContainer">
+                <div style="float: right;">
+                    <span style="margin-right: 100px;"><a href="#" onclick="return false;" ng-click="showingActionRates = true;" ng-class="{selectedLink: showingActionRates === true}" title="View action rates for each bucket and each action">Rates</a>&nbsp;&nbsp;&nbsp;<a href="#" onclick="return false;" ng-click="showingActionRates = false;" ng-class="{selectedLink: showingActionRates === false}" title="View unique action counts for each bucket and each action">Counts</a></span>
+                    <span class="info newHelp" style="margin-bottom: 10px;" help help-content="{{help.actionAnalysis}}"></span>
+                </div>
+                <div class="tableContainerBasic" style="float: left; clear: both;">
+                    <table>
+                        <tr>
+                            <th ng-repeat="header in headers" title="{{header.title}}"><div style="width: {{header.width}}">{{header.name}}</div></th>
+                        </tr>
+                        <tr ng-if="orderedDataRows.length > 1" ng-repeat="row in orderedDataRows">
+                            <td ng-show="showingActionRates" ng-repeat="cell in row track by $index" ng-class="{overallCell: cell.overallValue, actionWinner: cell.actionClass === 'actionWinner', actionLoser: cell.actionClass === 'actionLoser', bucketCell: cell.bucketCell === true, actionNameColumn: cell.actionName === true}" custom-tooltip="{{cell.toolTip}}">{{cell.value}} <span ng-if="cell.marginOfError">&plusmn;{{cell.marginOfError | number:1}}%</span></td>
+                            <td ng-show="!showingActionRates" ng-repeat="cell in row track by $index" ng-class="{overallCell: cell.overallValue, actionWinner: cell.actionClass === 'actionWinner', actionLoser: cell.actionClass === 'actionLoser', bucketCell: cell.bucketCell === true, actionNameColumn: cell.actionName === true}" custom-tooltip="{{cell.toolTip}}">{{cell.actionCountValue}}</td>
+                        </tr>
+                        <tr ng-if="orderedDataRows.length <= 1"><td colspan="{{orderedDataRows[0].length}}">No action data at this time.</td></tr>                    </table>
+                </div>
+            </div>
+        </tab>
+        <tab heading="Mutual Exclusion" ng-controller="MutualExclusionsCtrl">
+            <a ng-show="!readOnly" href="#" id="newExpAddExclusion" class="listAction add" onclick="return false;" ng-click="openMutualExclusionModal(experiment.id)"><span></span>Add Experiment</a>
+            <span class="info newHelp" help help-content="{{help.mutualExclusion}}"></span>
+            <div id="newExpExclusionList" class="tabContainer">
+                <div class="tableContainer">
+                <table col-resizeable>
+                    <tr>
+                        <th style="width:20%">Experiment</th>
+                        <th style="width:40%">Description</th>
+                        <th style="width:10%" class="icon">Status</th>
+                        <th ng-show="!readOnly" style="width:10%" class="icon">Remove</th>
+                    </tr>
+                    <tr ng-repeat="excludedExperiment in excludedExperiments | orderBy:'excludedExperiment.label'">
+                        <td>
+                            <label-link state="{{excludedExperiment.state}}" exp-id="{{excludedExperiment.id}}"
+                                        exp-label="{{excludedExperiment.label}}" has-update="{{hasUpdatePermission(excludedExperiment)}}" read-only="{{!hasUpdatePermission(excludedExperiment)}}" open-string="openExperimentModal(excludedExperiment)" in-modal="true" opened-from-modal="{{openedFromModal}}"></label-link>
+                        </td>
+                        <td><span title="{{excludedExperiment.description}}">{{excludedExperiment.description}}</span></td>
+                        <td class="icon">
+                            <img ng-src="{{stateImgUrl(excludedExperiment.state)}}"
+                                 alt="{{capitalizeFirstLetter(stateName(excludedExperiment.state))}}"
+                                 custom-tooltip="{{capitalizeFirstLetter(stateName(excludedExperiment.state))}}" displayRight="true"
+                                 sortindex="2">
+                        </td>
+                        <td ng-show="!readOnly" class="icon">
+                            <a class="command delete" href="#" onclick="return false;" title="Remove"
+                               ng-click="deleteMutualExclusion(excludedExperiment)">Delete</a>
+                        </td>
+                    </tr>
+                </table>
+                </div>
+            </div>
+        </tab>
+        <tab heading="Segmentation">
+            <div class="segmentationTab">
+            <form name="segForm" novalidate>
+            <div>
+                <label class="segmentationLabel">User Segmentation Rule</label>
+                <span class="info newHelp" help help-content="{{help.segmentationRule}}"></span>
+                <div id="segmentationToolbar" ng-show="!readOnly" dynamic-edit input-tag="rule" select-function="saveSegmentation" edit-function="editSegmentation" cancel-function="cancelSegmentation" ng-model="experiment.rule" class="dynamicToolbar"></div>
+                <div ng-show="simpleRuleEditing">
+                    <div class="ruleEditPanel">
+                        <div class="ruleRow" ng-form="subForm" ng-repeat="rule in rules">
+                            <select ng-class="{disabled: readOnly || data.ruleWidgetsDisabled}" ng-disabled="readOnly || data.ruleWidgetsDisabled" class="booleanOperator" ng-model="rule.booleanOperator" ng-show="rule.booleanOperator !== ''" ng-change="ruleChanged()"><option ng-repeat="boolOp in booleanOperators">{{boolOp.menuLabel}}</option></select>
+                            <span style="margin-left: 54px;" ng-show="rule.booleanOperator === ''"></span>
+                            <input ng-class="{disabled: readOnly || data.ruleWidgetsDisabled}" ng-disabled="readOnly || data.ruleWidgetsDisabled" type="text" class="text" name="ruleSubject" ng-model="rule.subject" placeholder="Parameter name" ng-change="ruleChanged()" />
+                            <select ng-class="{disabled: readOnly || data.ruleWidgetsDisabled}" ng-disabled="readOnly || data.ruleWidgetsDisabled" class="ruleType" ng-model="rule.type" ng-change="typeChanged(rule, subForm)"><option ng-repeat="type in types">{{type}}</option></select>
+                            <select ng-class="{disabled: readOnly || data.ruleWidgetsDisabled}" ng-disabled="readOnly || data.ruleWidgetsDisabled" class="operator" ng-model="rule.operator" ng-change="ruleChanged()"><option ng-repeat="operator in operators[rule.type]">{{operator.menuLabel}}</option></select>
+                            <input ng-class="{disabled: readOnly || data.ruleWidgetsDisabled}" ng-disabled="readOnly || data.ruleWidgetsDisabled" name="ruleValue" type="text" class="text" validate-rule-value displayRight="true" ruleType="{{rule.type}}" placeholder="{{typeSpecificPlaceholder(rule.type)}}" ng-model="rule.value" ng-change="ruleChanged()" />
+                            <a ng-class="{disabled: readOnly || data.ruleWidgetsDisabled}" ng-disabled="readOnly || data.ruleWidgetsDisabled" href="#" onclick="return false;" ng-click="removeRule($index)" class="command delete deleteRuleLink" title="Remove Rule" ng-show="rule.showDelete"></a>
+                            <div class="error segValidationError"
+                                 ng-show="subForm.ruleValue.$dirty && subForm.ruleValue.$invalid && !subForm.ruleValue.$focused">
+                                <small class="fieldError"
+                                       ng-show="subForm.ruleValue.$error.validRuleValue">{{rule.errorMessage}}</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="float: left; width: 727px;">
+                        <a ng-class="{disabled: readOnly || data.ruleWidgetsDisabled}" ng-disabled="readOnly || data.ruleWidgetsDisabled" id="addRuleLink" href="#" onclick="return false;" ng-click="addRule();">Add rule...</a>
+                    </div>
+                    <div style="float: left;">
+                        <a ng-class="{disabled: readOnly || rulesChangedNotSaved}" ng-disabled="readOnly || rulesChangedNotSaved" style="margin-right: 20px;" href="#" onclick="return false;" ng-click="openSegmentationTestModal();">Test rule...</a>
+                        <a href="#" onclick="return false;" ng-class="{disabled: data.disableAdvanced}" ng-disabled="data.disableAdvanced" ng-click="toggleAdvanced();">{{labelStrings.switchToTextView}}</a>
+                    </div>
+                </div>
+                <div ng-show="!simpleRuleEditing">
+                    <pre id="rule" spellcheck="false" class="readOnly"></pre>
+                    <div class="hint"style="float: left; width: 520px;">e.g. (salary > 80000 &amp; state = "CA") | (salary > 60000 &amp; state != "CA") | flag = FALSE</div>
+                    <a ng-class="{disabled: readOnly || rulesChangedNotSaved}" ng-disabled="readOnly || rulesChangedNotSaved" style="margin-right: 20px;" href="#" onclick="return false;" ng-click="openSegmentationTestModal();">Test rule...</a>
+                    <span style="margin-left: 20px;">
+                        <input remember-state state-name="showAdvancedSegmentationEditor" type="checkbox" id="chkRememberState" ng-class="{disabled: data.disableSimple}" ng-disabled="data.disableSimple">&nbsp;&nbsp;<label for="chkRememberState" class="checkboxLabel" style="font-weight: normal; font-size: 90%;" ng-class="{disabledLabel: data.disableSimple}" ng-disabled="data.disableSimple">{{labelStrings.rememberSegmentationViewChoice}}</label>
+                    </span>
+                    <span>
+                        <a href="#" onclick="return false;" ng-class="{disabled: data.disableSimple}" ng-disabled="data.disableSimple" ng-click="toggleAdvanced();">{{labelStrings.switchToFormView}}</a>
+                    </span>
+
+                </div>
+            </div>
+            </form>
+            </div>
+        </tab>
+        <tab id="pages" heading="Pages" ng-controller="PagesCtrl">
+            <input ng-show="!readOnly"ng-model="pagesData.pageName" set-focus watch-element="pagesData.setPageNameFocus" abtest-autocomplete list="pagesData.groupPages" select-function="selectPage" enter-function="selectPageOnEnter" id="txtAddPage" type="text" class="text" placeholder="Add Page" maxlength="256" />
+            <button ng-show="!readOnly" id="btnAddPage" type="button" class="blue" title="Add Page" ng-click="addPageClick()">Add</button>
+            <span class="info newHelp" help help-content="{{help.pages}}"></span>
+            <div id="newExpPageList" scrollable-list>
+                <div class="scrollListHeader">
+                    <table>
+                        <tr>
+                            <th style="width:72%">Page</th>
+                            <th style="width:16%" class="icon">Allow Assignment</th>
+                            <th ng-show="!readOnly" style="width:12%" class="icon">Remove</th>
+                        </tr>
+                    </table>
+                </div>
+                <div class="scrollListBody">
+                    <table>
+                        <tr>
+                            <th style="width:72%">Page</th>
+                            <th style="width:16%" class="icon">Allow Assignment</th>
+                            <th ng-show="!readOnly" style="width:12%" class="icon">Remove</th>
+                        </tr>
+                        <tr ng-repeat="page in pages">
+                            <td><span title="{{page.name}}">{{page.name}}</span></td>
+                            <td ng-show="!readOnly" class="icon"><input type="checkbox" ng-model="page.allowNewAssignment" ng-checked="{{page.allowNewAssignment}}" ng-change="updatePage(page)"></td>
+                            <td ng-show="readOnly" class="icon" ng-class="{ checked : page.allowNewAssignment }"><span></span></td>
+                            <td ng-show="!readOnly" class="icon"><a href="#" onclick="return false;" ng-click="removePage(page.name)" class="command delete" title="Remove Page"></a></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="hint">List the page(s) on which this experiment takes place. Allow assignment on the page(s) where this experiment starts (typically just one).</div>
+        </tab>
+        <tab heading="Plugins">
+            <div ng-show="plugins && plugins.length > 0">
+                <button ng-repeat="plugin in plugins | filter:{ pluginType: 'contributeDetailsTab' }" style="margin-right: 15px;" onclick="return false;" ng-click="openPluginModal(plugin);">{{plugin.displayName}}</button>
+            </div>
+            <div ng-show="!plugins || plugins.length === 0">
+                <label>No plugins are currently installed.</label>
+            </div>
+        </tab>
+        <tab heading="API Calls">
+            <div class="apiCallsTab" ng-controller="APICallsCtrl">
+                <label>Example Wasabi API Calls</label>
+                <div>
+                    <div class="apiLabel">Assignment</div>
+                    <input id="singleAssignmentCall" class="form-control text" type="text"
+                           value="curl -H &quot;Content-Type: application/json&quot; {{hostUrl}}/assignments/applications/{{experiment.applicationName}}/experiments/{{experiment.label}}/users/userID1" readonly />
+                </div>
+                <div>
+                    <div class="apiLabel">Record an Impression</div>
+                    <input id="impressionEventCall" class="form-control text" type="text"
+                           value="curl -H &quot;Content-Type: application/json&quot; -d &quot;{\&quot;events\&quot;:[{\&quot;name\&quot;:\&quot;IMPRESSION\&quot;}]}&quot; {{hostUrl}}/events/applications/{{experiment.applicationName}}/experiments/{{experiment.label}}/users/userID1" readonly />
+                </div>
+                <div>
+                    <div class="apiLabel">Record an Action</div>
+                    <input id="actionEventCall" class="form-control text" type="text"
+                           value="curl -H &quot;Content-Type: application/json&quot; -d &quot;{\&quot;events\&quot;:[{\&quot;name\&quot;:\&quot;myEventName\&quot;,\&quot;payload\&quot;:\&quot;{\\\&quot;myPayloadKey1\\\&quot;:\\\&quot;payloadKey1Value\\\&quot;}\&quot;}]}&quot; {{hostUrl}}/events/applications/{{experiment.applicationName}}/experiments/{{experiment.label}}/users/userID1" readonly />
+                </div>
+                <div ng-show="experiment && experiment.pages && experiment.pages.length > 0">
+                    <div class="apiLabel">Batch Assignment</div>
+                    <input id="batchAssignmentCall" class="form-control text" type="text"
+                           value="curl -H &quot;Content-Type: application/json&quot; {{hostUrl}}/assignments/applications/{{experiment.applicationName}}/pages/{{firstPageEncoded()}}/users/userID1" readonly />
+                </div>
+                <div ng-show="experiment.rule && experiment.rule !== ''">
+                    <div class="apiLabel">Assignment Providing Profile For Use By Segmentation Rule</div>
+                    <input id="singleAssignmentCallWithSegmentationRule" class="form-control text" type="text"
+                           value="curl -H &quot;Content-Type: application/json&quot; -d &quot;{\&quot;profile\&quot;:{\&quot;key1\&quot;:\&quot;value1\&quot;,\&quot;key2\&quot;:\&quot;value2\&quot;}}&quot; {{hostUrl}}/assignments/applications/{{experiment.applicationName}}/experiments/{{experiment.label}}/users/userID1" readonly />
+                </div>
+                <div ng-show="experiment && experiment.rule && experiment.rule !== '' && experiment.pages && experiment.pages.length > 0">
+                    <div class="apiLabel">Batch Assignment Providing Profile For Use By Segmentation Rule</div>
+                    <input id="batchAssignmentCallWithSegmentationRule" class="form-control text" type="text"
+                           value="curl -H &quot;Content-Type: application/json&quot; -d &quot;{\&quot;profile\&quot;:{\&quot;key1\&quot;:\&quot;value1\&quot;,\&quot;key2\&quot;:\&quot;value2\&quot;}}&quot; {{hostUrl}}/assignments/applications/{{experiment.applicationName}}/pages/{{firstPageEncoded()}}/users/userID1" readonly />
+                </div>
+                <div ng-show="experiment && experiment.id">
+                    <div class="apiLabel">Experiment ID</div>
+                    <input id="experimentId" class="form-control text" type="text"
+                           value="{{experiment.id}}" readonly />
+                </div>
+            </div>
+        </tab>
+    </tabset>
+
+    <!-- <div id="exprDetailGraph"></div> -->
+    <div class="buttonBar">
+        <a id="downloadAssignments" title="Download Assignment Data" ng-click="openGetAssignmentsModal(experiment)">Download Assignment Data</a>
+        <a href="#" onclick="return false;" ng-click="exitDialog()" class="button cancel blue">Close</a>
+    </div>
+    <a href="#" onclick="return false;" ng-click="exitDialog()" class="closePanel cancel">Close<span></span></a>
+</div>

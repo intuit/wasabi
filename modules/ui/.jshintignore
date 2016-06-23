@@ -1,0 +1,13 @@
+node_modules/**
+dist/**
+build/**
+bin/**
+app/bower_components/**
+app/images/**
+app/styles/**
+.tmp/**
+.sass-cache/**
+app/scripts/dynamicEdit-0.1.js
+app/scripts/mocks.js
+karma*.conf.js
+coverage/**

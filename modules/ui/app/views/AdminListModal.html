@@ -1,0 +1,19 @@
+<div id="applicationAdminList" class="modalDialog">
+  <h1>{{listTitle}}</h1>
+
+  <div class="dialogContent">
+    <div class="adminListInstructions">
+      You don't have any access for application {{applicationName}}.
+    </div>
+    <div class="adminListInstructions">
+      Please copy the list of admins below and send them an email to ask for access to this application.
+    </div>
+    <div id="adminsList">
+      <textarea id="adminListArea" ng-model="admins" rows="15" cols="80"></textarea>
+      <div class="dlgZeroSearch">This application has no admins.</div>
+    </div>
+    <div class="buttonBar">
+      <button id="btnAddExclusion" class="blue" ng-click="cancel();">Close</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,119 @@
+#API Document
+
+
+## BasePath: {{basePath}}
+
+## Api Version: {{apiVersion}}
+
+## Resources
+{{#apiDocuments}}
+### {{index}}. {{resourcePath}}
+#### Overview
+{{{description}}}
+
+{{#apis}}
+#### {{index}}.{{apiIndex}} `{{path}}`
+{{#operations}}
+##### {{index}}.{{apiIndex}}.{{opIndex}} {{nickname}}
+**{{httpMethod}}** `{{path}}`
+
+{{summary}}
+{{{notes}}}
+
+###### URL
+    {{url}}
+###### Parameters
+{{#parameters}}
+- {{paramType}}
+
+    <table border="1">
+        <tr>
+            <th>Parameter</th>
+            <th>Required</th>
+            <th>Description</th>
+            <th>Data Type</th>
+        </tr>
+        {{#paras}}
+        <tr>
+            <th>{{name}}</th>
+            <td>{{required}}</td>
+            <td>{{description}}</td>
+            <td>{{#linkType}}<a href="#{{linkType}}">{{type}}</a>{{/linkType}}{{^linkType}}{{type}}{{/linkType}}</td>
+        </tr>
+        {{/paras}}
+    </table>
+{{/parameters}}
+
+{{#responseClass}}
+###### Response
+[{{className}}](#{{classLinkName}}){{^genericClasses}}{{/genericClasses}}{{#genericClasses}}< [{{className}}](#{{classLinkName}}) >{{/genericClasses}}
+{{/responseClass}}
+
+
+###### Errors
+<table border="1">
+    <tr>
+        <th>Status Code</th>
+        <th>Reason</th>
+    </tr>
+    {{#errorResponses}}
+        <tr>
+            <td>{{code}}</td>
+            <td>{{message}}</td>
+        </tr>
+    {{/errorResponses}}
+</table>
+
+{{#samples}}
+###### Samples
+{{/samples}}
+{{#samples}}
+{{sampleDescription}}
+
+- Sample Request
+
+```
+{{{sampleRequest}}}
+```
+
+- Sample Response
+
+```
+{{{sampleResponse}}}
+```
+
+{{/samples}}
+
+- - -
+{{/operations}}
+{{/apis}}
+{{/apiDocuments}}
+
+## Data Types
+{{#dataTypes}}
+
+
+## <a name="{{name}}">{{name}}</a>
+
+<table border="1">
+    <tr>
+        <th>name</th>
+        <th>type</th>
+        <th>required</th>
+        <th>access</th>
+        <th>description</th>
+        <th>notes</th>
+    </tr>
+    {{#items}}
+        <tr>
+            <td>{{name}}</td>
+            <td>{{#linkType}}<a href="#{{linkType}}">{{type}}</a>{{/linkType}}{{^linkType}}{{type}}{{/linkType}}</td>
+            <td>{{#required}}required{{/required}}{{^required}}optional{{/required}}</td>
+            <td>{{#access}}{{{access}}}{{/access}}{{^access}}-{{/access}}</td>
+            <td>{{#description}}{{{description}}}{{/description}}{{^description}}-{{/description}}</td>
+            <td>{{#notes}}{{{notes}}}{{/notes}}{{^notes}}-{{/notes}}</td>
+        </tr>
+    {{/items}}
+</table>
+
+{{/dataTypes}}
