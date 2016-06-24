@@ -98,6 +98,6 @@ public class EventEnvelopePayloadTest {
 
 		};
 		String jsonpayload = payload.toJson();
-		assertThat(jsonpayload, is("{\"experimentLabel\":\"l1\",\"eventPayload\":null,\"eventType\":\"null\",\"userID\":null,\"epochTimestamp\":0,\"messageType\":\"EVENT\",\"context\":null,\"eventName\":\"null\",\"experimentID\":null,\"time_uuid\":d9f92dd0-05be-11e6-86e9-0bf850ef5299,\"value\":null,\"applicationName\":\"a1\",\"bucketLabel\":null}"));
+		assertThat(jsonpayload, is("{\"experimentLabel\":\"l1\",\"eventPayload\":null,\"eventType\":\"null\",\"userID\":null,\"epochTimestamp\":0,\"messageType\":\"EVENT\",\"context\":null,\"eventName\":\"null\",\"experimentID\":null,\"time_uuid\":\"d9f92dd0-05be-11e6-86e9-0bf850ef5299\",\"value\":null,\"applicationName\":\"a1\",\"bucketLabel\":null}"));
 	}
 }
