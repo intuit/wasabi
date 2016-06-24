@@ -139,7 +139,7 @@ test() {
   # FIXME: derive usr/pwd from env
   mkdir test.log >/dev/null 2>&1
   (cd modules/functional-test/target;
-    java -Dwasabi.api.server.name=${endpoint} -Dwasabi.user.name=admin -Dwasabi.user.password=admin \
+    java -Dapi.server.name=${endpoint} -Duser.name=admin -Duser.password=admin \
       -classpath classes:`ls wasabi-functional-test-*-SNAPSHOT-jar-with-dependencies.jar` org.testng.TestNG \
       -d ../../../test.log classes/testng.xml)
 }
