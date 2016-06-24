@@ -284,6 +284,8 @@ sleep=${sleep:=${sleep_default}}
 
 [[ $# -eq 0 ]] && usage
 
+eval $(docker-machine env wasabi) 2>/dev/null
+
 for command in ${@:$OPTIND}; do
   case "${command}" in
     bootstrap) bootstrap;;
