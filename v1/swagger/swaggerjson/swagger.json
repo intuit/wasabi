@@ -1,0 +1,3494 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "version" : "v1",
+    "title" : "AB Testing"
+  },
+  "host" : "abtesting-demo-e2e.a.intuit.com",
+  "basePath" : "/api",
+  "tags" : [ {
+    "name" : "Email (Send Emails)"
+  }, {
+    "name" : "Feedback (Submit feedback about this AB Testing Tool)"
+  }, {
+    "name" : "Authorization (Administer User Access Roles)"
+  }, {
+    "name" : "Experiments (Create-Modify Experiments & Buckets)"
+  }, {
+    "name" : "Audit Logs (Activity Logs about changes in experiments-buckets)"
+  }, {
+    "name" : "Applications (Access-Manage Applications)"
+  }, {
+    "name" : "Events (Record-Manage Events)"
+  }, {
+    "name" : "Analytics (Counts-Statistics for an experiment)"
+  }, {
+    "name" : "Assignments (Submit-Generate user(customer) bucket assignments)"
+  }, {
+    "name" : "Ping (Check Server Status)"
+  }, {
+    "name" : "Authentication (Login-Logout)"
+  } ],
+  "schemes" : [ "http" ],
+  "paths" : {
+    "/v1/analytics/applications/{applicationName}/experiments/{experimentLabel}/assignments/counts" : {
+      "get" : {
+        "tags" : [ "Analytics (Counts-Statistics for an experiment)" ],
+        "summary" : "Return a summary of assignments delivered for an experiment",
+        "description" : "",
+        "operationId" : "getAssignmentCountsByApp",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "applicationName",
+          "in" : "path",
+          "description" : "Application Name",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "experimentLabel",
+          "in" : "path",
+          "description" : "Experiment Label",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "context",
+          "in" : "query",
+          "description" : "context for the experiment, eg \"QA\", \"PROD\"",
+          "required" : false,
+          "type" : "string",
+          "default" : "PROD"
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/AssignmentCounts"
+            }
+          }
+        }
+      }
+    },
+    "/v1/analytics/experiments/{experimentID}/assignments/counts" : {
+      "get" : {
+        "tags" : [ "Analytics (Counts-Statistics for an experiment)" ],
+        "summary" : "Return a summary of assignments delivered for an experiment",
+        "description" : "",
+        "operationId" : "getAssignmentCounts",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "experimentID",
+          "in" : "path",
+          "description" : "Experiment ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "context",
+          "in" : "query",
+          "description" : "context for the experiment, eg \"QA\", \"PROD\"",
+          "required" : false,
+          "type" : "string",
+          "default" : "PROD"
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/AssignmentCounts"
+            }
+          }
+        }
+      }
+    },
+    "/v1/analytics/experiments/{experimentID}/counts" : {
+      "get" : {
+        "tags" : [ "Analytics (Counts-Statistics for an experiment)" ],
+        "summary" : "A wrapper for POST /counts API with default parameters",
+        "description" : "",
+        "operationId" : "getExperimentCounts",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "experimentID",
+          "in" : "path",
+          "description" : "Experiment ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "context",
+          "in" : "query",
+          "description" : "context for the experiment, eg \"QA\", \"PROD\"",
+          "required" : false,
+          "type" : "string",
+          "default" : "PROD"
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/ExperimentCounts"
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Analytics (Counts-Statistics for an experiment)" ],
+        "summary" : "Return a summary of the data collected for the experiment",
+        "description" : "Return unique and non-unique counts at the experiment, bucket, and action levels for both actions and impressions.",
+        "operationId" : "getExperimentCountsParameters",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "experimentID",
+          "in" : "path",
+          "description" : "Experiment ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/Parameters"
+          }
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/ExperimentCounts"
+            }
+          }
+        }
+      }
+    },
+    "/v1/analytics/experiments/{experimentID}/counts/dailies" : {
+      "get" : {
+        "tags" : [ "Analytics (Counts-Statistics for an experiment)" ],
+        "summary" : "A wrapper for POST /counts/dailies API with default parameters",
+        "description" : "",
+        "operationId" : "getExperimentCountsDailies",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "experimentID",
+          "in" : "path",
+          "description" : "Experiment ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "context",
+          "in" : "query",
+          "description" : "context for the experiment, eg QA, PROD",
+          "required" : false,
+          "type" : "string",
+          "default" : "PROD"
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/ExperimentCumulativeCounts"
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Analytics (Counts-Statistics for an experiment)" ],
+        "summary" : "Return a daily summary of the data collected for the experiment",
+        "description" : "Return unique and non-unique counts at the experiment, bucket, and action levels for both actions and impressions. For each day, includes counts for that day and cumulative counts, calculated from the beginning of the experiment.",
+        "operationId" : "getExperimentCountsDailiesParameters",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "experimentID",
+          "in" : "path",
+          "description" : "Experiment ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/Parameters"
+          }
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/ExperimentCumulativeCounts"
+            }
+          }
+        }
+      }
+    },
+    "/v1/analytics/experiments/{experimentID}/statistics" : {
+      "get" : {
+        "tags" : [ "Analytics (Counts-Statistics for an experiment)" ],
+        "summary" : "A wrapper for POST /statistics API with default parameters",
+        "description" : "",
+        "operationId" : "getExperimentStatistics",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "experimentID",
+          "in" : "path",
+          "description" : "Experiment ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "context",
+          "in" : "query",
+          "description" : "context for the experiment, eg QA, PROD",
+          "required" : false,
+          "type" : "string",
+          "default" : "PROD"
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/ExperimentStatistics"
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Analytics (Counts-Statistics for an experiment)" ],
+        "summary" : "Return a summary of the data collected for the experiment with derived statistics",
+        "description" : "Return unique and non-unique counts at the experiment, bucket, and action levels for both actions and impressions. Also returns a number of statistics calculated from the unique counts.",
+        "operationId" : "getExperimentStatisticsParameters",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "experimentID",
+          "in" : "path",
+          "description" : "Experiment ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/Parameters"
+          }
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/ExperimentStatistics"
+            }
+          }
+        }
+      }
+    },
+    "/v1/analytics/experiments/{experimentID}/statistics/dailies" : {
+      "get" : {
+        "tags" : [ "Analytics (Counts-Statistics for an experiment)" ],
+        "summary" : "A wrapper for POST /statistics/dailies API with default parameters",
+        "description" : "",
+        "operationId" : "getExperimentStatisticsDailies",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "experimentID",
+          "in" : "path",
+          "description" : "Experiment ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "context",
+          "in" : "query",
+          "description" : "context for the experiment, eg QA, PROD",
+          "required" : false,
+          "type" : "string",
+          "default" : "PROD"
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/ExperimentCumulativeStatistics"
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Analytics (Counts-Statistics for an experiment)" ],
+        "summary" : "Return a daily summary of the data collected for the experiment with derived statistics",
+        "description" : "Return unique and non-unique counts at the experiment, bucket, and action levels for both actions and impressions. For each day, includes counts for that day and cumulative counts, calculated from the beginning of the experiment. Also returns a number of statistics calculated from the unique counts.",
+        "operationId" : "getExperimentStatisticsDailiesParameters",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "experimentID",
+          "in" : "path",
+          "description" : "Experiment ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/Parameters"
+          }
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/ExperimentCumulativeStatistics"
+            }
+          }
+        }
+      }
+    },
+    "/v1/applications" : {
+      "get" : {
+        "tags" : [ "Applications (Access-Manage Applications)" ],
+        "summary" : "Returns all applications",
+        "description" : "",
+        "operationId" : "getApplications",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/v1/applications/{applicationName}/experiments" : {
+      "get" : {
+        "tags" : [ "Applications (Access-Manage Applications)" ],
+        "summary" : "Returns metadata for all experiments within an application",
+        "description" : "",
+        "operationId" : "getExperiments",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "applicationName",
+          "in" : "path",
+          "description" : "Application Name",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/ExperimentList"
+            }
+          }
+        }
+      }
+    },
+    "/v1/applications/{applicationName}/experiments/{experimentLabel}" : {
+      "get" : {
+        "tags" : [ "Applications (Access-Manage Applications)" ],
+        "summary" : "Return metadata for a single experiment",
+        "description" : "",
+        "operationId" : "getExperiment",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "applicationName",
+          "in" : "path",
+          "description" : "Application Name",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "experimentLabel",
+          "in" : "path",
+          "description" : "Experiment Label",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/Experiment"
+            }
+          }
+        }
+      }
+    },
+    "/v1/applications/{applicationName}/pages" : {
+      "get" : {
+        "tags" : [ "Applications (Access-Manage Applications)" ],
+        "summary" : "Get the set of pages associated with an application.",
+        "description" : "",
+        "operationId" : "getPagesForApplication",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "applicationName",
+          "in" : "path",
+          "description" : "Application Name",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/v1/applications/{applicationName}/pages/{pageName}/experiments" : {
+      "get" : {
+        "tags" : [ "Applications (Access-Manage Applications)" ],
+        "summary" : "Get the experiments associated to a page",
+        "description" : "The experiments returned belong to a single application",
+        "operationId" : "getExperiments",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "applicationName",
+          "in" : "path",
+          "description" : "Application Name",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "pageName",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/v1/applications/{applicationName}/priorities" : {
+      "get" : {
+        "tags" : [ "Applications (Access-Manage Applications)" ],
+        "summary" : "Get the priority list for an application",
+        "description" : "The returned priority list is rank ordered.",
+        "operationId" : "getPriorities",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "applicationName",
+          "in" : "path",
+          "description" : "Application Name",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "Applications (Access-Manage Applications)" ],
+        "summary" : "Create global priority list for an application",
+        "description" : "Experiments can only be placed in a priority list in DRAFT, RUNNING, and PAUSED states.",
+        "operationId" : "createPriorities",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "applicationName",
+          "in" : "path",
+          "description" : "Application Name",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/ExperimentIDList"
+          }
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/v1/assignments/applications/{applicationName}/experiments/{experimentLabel}/ruletest" : {
+      "post" : {
+        "tags" : [ "Assignments (Submit-Generate user(customer) bucket assignments)" ],
+        "summary" : "Test the segmentation rule of an experiment",
+        "description" : "",
+        "operationId" : "postAssignmentRuleTest",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "applicationName",
+          "in" : "path",
+          "description" : "Application Name",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "experimentLabel",
+          "in" : "path",
+          "description" : "Experiment Label",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "context",
+          "in" : "query",
+          "description" : "context for the experiment, eg QA, PROD",
+          "required" : false,
+          "type" : "string",
+          "default" : "PROD"
+        }, {
+          "in" : "body",
+          "name" : "segmentationProfile",
+          "description" : "Segmentation Profile",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/SegmentationProfile"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/v1/assignments/applications/{applicationName}/experiments/{experimentLabel}/users/{userID}" : {
+      "get" : {
+        "tags" : [ "Assignments (Submit-Generate user(customer) bucket assignments)" ],
+        "summary" : "Return bucket assignment for a user",
+        "description" : "Generate the assignment first if the user has no assignment for this experiment.  Return null if the user is not in the experiment.",
+        "operationId" : "getAssignment",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "applicationName",
+          "in" : "path",
+          "description" : "Application Name",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "experimentLabel",
+          "in" : "path",
+          "description" : "Experiment Label",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "userID",
+          "in" : "path",
+          "description" : "User(customer) ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "context",
+          "in" : "query",
+          "description" : "context for the experiment, e.g. PROD, QA",
+          "required" : false,
+          "type" : "string",
+          "default" : "PROD"
+        }, {
+          "name" : "createAssignment",
+          "in" : "query",
+          "description" : "whether an assignment should be generated if one doesn't exist",
+          "required" : false,
+          "type" : "boolean",
+          "default" : "true"
+        }, {
+          "name" : "ignoreSamplingPercent",
+          "in" : "query",
+          "description" : "whether the sampling percent for the experiment should be ignored, forcing the user into the experiment (if eligible)",
+          "required" : false,
+          "type" : "boolean",
+          "default" : "false"
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Assignments (Submit-Generate user(customer) bucket assignments)" ],
+        "summary" : "Return bucket assignment for a user",
+        "description" : "Generate the assignment first if the user has no assignment for this experiment. Forces the user to be in the experiment (if eligible based on profile).",
+        "operationId" : "postAssignment",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "applicationName",
+          "in" : "path",
+          "description" : "Application Name",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "experimentLabel",
+          "in" : "path",
+          "description" : "Experiment Label",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "userID",
+          "in" : "path",
+          "description" : "User(customer) ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "createAssignment",
+          "in" : "query",
+          "description" : "whether an assignment should be generated if one doesn't exist",
+          "required" : false,
+          "type" : "boolean",
+          "default" : "true"
+        }, {
+          "name" : "ignoreSamplingPercent",
+          "in" : "query",
+          "description" : "whether the sampling percent for the experiment should be ignored, forcing the user into the experiment (if eligible)",
+          "required" : false,
+          "type" : "boolean",
+          "default" : "false"
+        }, {
+          "name" : "context",
+          "in" : "query",
+          "description" : "context for the experiment, e.g. PROD, QA",
+          "required" : false,
+          "type" : "string",
+          "default" : "PROD"
+        }, {
+          "in" : "body",
+          "name" : "segmentationProfile",
+          "description" : "Segmentation Profile",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/SegmentationProfile"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/v1/assignments/applications/{applicationName}/pages/{pageName}/users/{userID}" : {
+      "get" : {
+        "tags" : [ "Assignments (Submit-Generate user(customer) bucket assignments)" ],
+        "summary" : "Return bucket assignments for a user for all the experiments associated with a page",
+        "description" : "If you want to pass segmentation information, use the POST-Call for this method",
+        "operationId" : "getBatchAssignmentForPage",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "applicationName",
+          "in" : "path",
+          "description" : "Application Name",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "pageName",
+          "in" : "path",
+          "description" : "Page Name",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "userID",
+          "in" : "path",
+          "description" : "User(customer) ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "createAssignment",
+          "in" : "query",
+          "description" : "whether Jabba should generate an assignment if one doesn't exist",
+          "required" : false,
+          "type" : "boolean",
+          "default" : "true"
+        }, {
+          "name" : "ignoreSamplingPercent",
+          "in" : "query",
+          "description" : "whether the sampling percent for the experiment should be ignored, forcing the user into the experiment (if eligible)",
+          "required" : false,
+          "type" : "boolean",
+          "default" : "false"
+        }, {
+          "name" : "context",
+          "in" : "query",
+          "description" : "context for the experiment, eg QA, PROD",
+          "required" : false,
+          "type" : "string",
+          "default" : "PROD"
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Assignments (Submit-Generate user(customer) bucket assignments)" ],
+        "summary" : "Return bucket assignments for a user for all the experiments associated with a page",
+        "description" : "The mutual exclusion and segmentation rules apply",
+        "operationId" : "postBatchAssignmentForPage",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "applicationName",
+          "in" : "path",
+          "description" : "Application Name",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "pageName",
+          "in" : "path",
+          "description" : "Page Name",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "userID",
+          "in" : "path",
+          "description" : "User(customer) ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "createAssignment",
+          "in" : "query",
+          "description" : "whether Jabba should generate an assignment if one doesn't exist",
+          "required" : false,
+          "type" : "boolean",
+          "default" : "true"
+        }, {
+          "name" : "ignoreSamplingPercent",
+          "in" : "query",
+          "description" : "whether the sampling percent for the experiment should be ignored, forcing the user into the experiment (if eligible)",
+          "required" : false,
+          "type" : "boolean",
+          "default" : "false"
+        }, {
+          "name" : "context",
+          "in" : "query",
+          "description" : "context for the experiment, eg QA, PROD",
+          "required" : false,
+          "type" : "string",
+          "default" : "PROD"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "description" : "Segmentation Profile",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/SegmentationProfile"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/v1/assignments/applications/{applicationName}/users/{userID}" : {
+      "post" : {
+        "tags" : [ "Assignments (Submit-Generate user(customer) bucket assignments)" ],
+        "summary" : "Return bucket assignments for a user across multiple experiments",
+        "description" : "Generate the assignments first if the user has no assignment for the specified experiments if the CREATE flag is set to true and the user is eligible with respect to the segmentation profile. Return null if the user is not in the experiment.",
+        "operationId" : "getBatchAssignments",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "applicationName",
+          "in" : "path",
+          "description" : "Application Name",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "userID",
+          "in" : "path",
+          "description" : "User(customer) ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "context",
+          "in" : "query",
+          "description" : "context for the experiment, eg QA, PROD",
+          "required" : false,
+          "type" : "string",
+          "default" : "PROD"
+        }, {
+          "name" : "create",
+          "in" : "query",
+          "required" : false,
+          "type" : "boolean",
+          "default" : "true"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/ExperimentBatch"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/v1/authentication/login" : {
+      "post" : {
+        "tags" : [ "Authentication (Login-Logout)" ],
+        "summary" : "Log a user in",
+        "description" : "",
+        "operationId" : "logUserIn",
+        "consumes" : [ "application/x-www-form-urlencoded" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        }, {
+          "name" : "grant_type",
+          "in" : "formData",
+          "description" : "please enter client_credentials in this field",
+          "required" : false,
+          "type" : "string",
+          "default" : "client_credentials"
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/v1/authentication/logout" : {
+      "get" : {
+        "tags" : [ "Authentication (Login-Logout)" ],
+        "summary" : "Log a user out",
+        "description" : "",
+        "operationId" : "logUserOut",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/v1/authentication/users/{userEmail}" : {
+      "get" : {
+        "tags" : [ "Authentication (Login-Logout)" ],
+        "summary" : "Check if user exists using user's email",
+        "description" : "",
+        "operationId" : "getUserExists",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "userEmail",
+          "in" : "path",
+          "description" : "Email of the user",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/v1/authentication/verifyToken" : {
+      "get" : {
+        "tags" : [ "Authentication (Login-Logout)" ],
+        "summary" : "Verify user's authorization",
+        "description" : "",
+        "operationId" : "verifyToken",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/v1/authorization/applications" : {
+      "get" : {
+        "tags" : [ "Authorization (Administer User Access Roles)" ],
+        "summary" : "Get access roles for all users for all applications that the given user belongs to",
+        "description" : "",
+        "operationId" : "getUserList",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/v1/authorization/applications/{applicationName}" : {
+      "get" : {
+        "tags" : [ "Authorization (Administer User Access Roles)" ],
+        "summary" : "Get roles for all users within an application",
+        "description" : "",
+        "operationId" : "getApplicationUsersByRole",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "applicationName",
+          "in" : "path",
+          "description" : "Application Name",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/v1/authorization/applications/{applicationName}/users/{userID}/roles" : {
+      "delete" : {
+        "tags" : [ "Authorization (Administer User Access Roles)" ],
+        "summary" : "Delete a user's role within an application",
+        "description" : "",
+        "operationId" : "deleteUserRoles",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "applicationName",
+          "in" : "path",
+          "description" : "Application Name",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "userID",
+          "in" : "path",
+          "description" : "User ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/v1/authorization/roles" : {
+      "post" : {
+        "tags" : [ "Authorization (Administer User Access Roles)" ],
+        "summary" : "Assign roles for a list of users and applications",
+        "description" : "",
+        "operationId" : "assignUserRoles",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "userRoleList",
+          "description" : "Please see model example",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/UserRoleList"
+          }
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "Authorization (Administer User Access Roles)" ],
+        "summary" : "Update roles for a list of users and applications",
+        "description" : "",
+        "operationId" : "updateUserRoles",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "userRoleList",
+          "description" : "Please see model example",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/UserRoleList"
+          }
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/v1/authorization/roles/{role}/permissions" : {
+      "get" : {
+        "tags" : [ "Authorization (Administer User Access Roles)" ],
+        "summary" : "Get permissions associated with a specific user role",
+        "description" : "",
+        "operationId" : "getRolePermissions",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "role",
+          "in" : "path",
+          "description" : "Example: SUPERADMIN / ADMIN /READONLY / READWRITE",
+          "required" : true,
+          "type" : "string",
+          "default" : "admin"
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/v1/authorization/users/{userID}/applications/{applicationName}/permissions" : {
+      "get" : {
+        "tags" : [ "Authorization (Administer User Access Roles)" ],
+        "summary" : "Get permissions of one user within a single application",
+        "description" : "",
+        "operationId" : "getUserAppPermissions",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "userID",
+          "in" : "path",
+          "description" : "User ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "applicationName",
+          "in" : "path",
+          "description" : "Application Name",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/v1/authorization/users/{userID}/permissions" : {
+      "get" : {
+        "tags" : [ "Authorization (Administer User Access Roles)" ],
+        "summary" : "Get permissions for a user across applications",
+        "description" : "",
+        "operationId" : "getUserPermissions",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "userID",
+          "in" : "path",
+          "description" : "User ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/v1/authorization/users/{userID}/roles" : {
+      "get" : {
+        "tags" : [ "Authorization (Administer User Access Roles)" ],
+        "summary" : "Get access roles for a user across applications",
+        "description" : "",
+        "operationId" : "getUserRole",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "userID",
+          "in" : "path",
+          "description" : "User ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/v1/email/applications/{applicationName}/users/{user}" : {
+      "post" : {
+        "tags" : [ "Email (Send Emails)" ],
+        "summary" : "Sends email to administrators of the specified application requesting access for a user",
+        "description" : "",
+        "operationId" : "postEmail",
+        "schemes" : [ "https" ],
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "applicationName",
+          "in" : "path",
+          "description" : "Application Name",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "user",
+          "in" : "path",
+          "description" : "Requesting user ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "clickableAccessEmailLinks",
+          "description" : "Clickable Access Email Links",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/EmailLinksList"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/v1/events/applications/{applicationName}/experiments/{experimentLabel}/users/{userID}" : {
+      "post" : {
+        "tags" : [ "Events (Record-Manage Events)" ],
+        "summary" : "Submit a single event or a batch of events for the specified assigned user(customer)",
+        "description" : "*NOTE*: For a given user, please make sure that you have the user assignment done using the assignments API before using this API. An event is either an impression, indicating the user has been exposed to the treatment, or an action, indicating that the user has done something that you want to track. Please record impressions first and then action - use event name = \"IMPRESSION\" for impressions.",
+        "operationId" : "recordEvents",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "applicationName",
+          "in" : "path",
+          "description" : "Application Name",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "experimentLabel",
+          "in" : "path",
+          "description" : "Experiment Label",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "userID",
+          "in" : "path",
+          "description" : "Customer User ID that is already assigned using assignments API",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "eventList",
+          "description" : "For impresison",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/EventList"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/v1/experiments" : {
+      "get" : {
+        "tags" : [ "Experiments (Create-Modify Experiments & Buckets)" ],
+        "summary" : "Return details of all the experiments, with respect to the authorization [done]",
+        "description" : "",
+        "operationId" : "getExperiments",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/ExperimentList"
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Experiments (Create-Modify Experiments & Buckets)" ],
+        "summary" : "Create an experiment (and the application as well, if it doesn't exist) [review]",
+        "description" : "",
+        "operationId" : "postExperiment",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/NewExperiment"
+          }
+        }, {
+          "name" : "createNewApplication",
+          "in" : "query",
+          "required" : false,
+          "type" : "boolean",
+          "default" : "false"
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/Experiment"
+            }
+          }
+        }
+      }
+    },
+    "/v1/experiments/applications/{applicationName}/pages/{pageName}" : {
+      "get" : {
+        "tags" : [ "Experiments (Create-Modify Experiments & Buckets)" ],
+        "summary" : "Return all experiments for page for app [done]",
+        "description" : "",
+        "operationId" : "getPageExperiments",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "applicationName",
+          "in" : "path",
+          "description" : "Application Name",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "pageName",
+          "in" : "path",
+          "description" : "Page name where the experiment will appear",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/ExperimentList"
+            }
+          }
+        }
+      }
+    },
+    "/v1/experiments/exclusions/experiment1/{experimentID_1}/experiment2/{experimentID_2}" : {
+      "delete" : {
+        "tags" : [ "Experiments (Create-Modify Experiments & Buckets)" ],
+        "summary" : "Delete a mutual exclusion relation [done]",
+        "description" : "Can only delete mutual exclusion relations that currently exists.  This operation is symmetric",
+        "operationId" : "removeExclusions",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "experimentID_1",
+          "in" : "path",
+          "description" : "Experiment ID 1",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "experimentID_2",
+          "in" : "path",
+          "description" : "Experiment ID 2",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/v1/experiments/{experimentID}" : {
+      "get" : {
+        "tags" : [ "Experiments (Create-Modify Experiments & Buckets)" ],
+        "summary" : "Return details of a single experiment [done]",
+        "description" : "",
+        "operationId" : "getExperiment",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "experimentID",
+          "in" : "path",
+          "description" : "Experiment ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/Experiment"
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "Experiments (Create-Modify Experiments & Buckets)" ],
+        "summary" : "Update an experiment [done]",
+        "description" : "Can update an experiment that is in DRAFT state to change the experiment state, or to change sampling percentage or to enable personalization and more.",
+        "operationId" : "putExperiment",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "experimentID",
+          "in" : "path",
+          "description" : "Experiment ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "description" : "Please read the implementation notes above",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/Experiment"
+          }
+        }, {
+          "name" : "createNewApplication",
+          "in" : "query",
+          "required" : false,
+          "type" : "boolean",
+          "default" : "false"
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/Experiment"
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "Experiments (Create-Modify Experiments & Buckets)" ],
+        "summary" : "Delete an experiment [done]",
+        "description" : "Can only delete an experiment that is in DRAFT or TERMINATED state.  The default call is safe to use, but other than that please only delete experiments which you have created.",
+        "operationId" : "deleteExperiment",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "experimentID",
+          "in" : "path",
+          "description" : "Experiment ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/v1/experiments/{experimentID}/assignments" : {
+      "get" : {
+        "tags" : [ "Experiments (Create-Modify Experiments & Buckets)" ],
+        "summary" : "Download a list of user assignments for a given experiment ID [review]",
+        "description" : "Shows list of all user assignments for a given experiment ID. Returns both nullassignments as well as bucket assignments. [review]",
+        "operationId" : "exportAssignments",
+        "produces" : [ "text/plain" ],
+        "parameters" : [ {
+          "name" : "experimentID",
+          "in" : "path",
+          "description" : "Experiment ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "context",
+          "in" : "query",
+          "description" : "context for the experiment, eg QA, PROD",
+          "required" : false,
+          "type" : "string",
+          "default" : "PROD"
+        }, {
+          "name" : "ignoreNullBucket",
+          "in" : "query",
+          "description" : "Filtering on the null bucket",
+          "required" : false,
+          "type" : "string",
+          "default" : "false"
+        }, {
+          "name" : "fromDate",
+          "in" : "query",
+          "description" : "from date to download assignments",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "toDate",
+          "in" : "query",
+          "description" : "to date to download assignments",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "timeZone",
+          "in" : "query",
+          "description" : "value of the time zone",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/StreamingOutput"
+            }
+          }
+        }
+      }
+    },
+    "/v1/experiments/{experimentID}/buckets" : {
+      "get" : {
+        "tags" : [ "Experiments (Create-Modify Experiments & Buckets)" ],
+        "summary" : "Return all buckets for an experiment [done]",
+        "description" : "",
+        "operationId" : "getBuckets",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "experimentID",
+          "in" : "path",
+          "description" : "Experiment ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/BucketList"
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Experiments (Create-Modify Experiments & Buckets)" ],
+        "summary" : "Modify a bucket for an experiment [Can only weirdly add a new bucket] [Weird] ",
+        "description" : "Can only modify buckets for an experiment that is in DRAFT state.",
+        "operationId" : "postBucket",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "experimentID",
+          "in" : "path",
+          "description" : "Experiment ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/Bucket"
+          }
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/Bucket"
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "Experiments (Create-Modify Experiments & Buckets)" ],
+        "summary" : "Modify buckets for an experiment [review]",
+        "description" : "Can only modify buckets for an experiment that is in DRAFT state.",
+        "operationId" : "putBucket",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "experimentID",
+          "in" : "path",
+          "description" : "Experiment ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/BucketList"
+          }
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/Bucket"
+            }
+          }
+        }
+      }
+    },
+    "/v1/experiments/{experimentID}/buckets/{bucketLabel}" : {
+      "get" : {
+        "tags" : [ "Experiments (Create-Modify Experiments & Buckets)" ],
+        "summary" : "Return a single bucket for an experiment [done]",
+        "description" : "",
+        "operationId" : "getBucket",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "experimentID",
+          "in" : "path",
+          "description" : "Experiment ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "bucketLabel",
+          "in" : "path",
+          "description" : "Bucket Label",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/Bucket"
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "Experiments (Create-Modify Experiments & Buckets)" ],
+        "summary" : "Update a bucket in an experiment [done]",
+        "description" : "Can only update buckets for an experiment that is in DRAFT state.",
+        "operationId" : "putBucket",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "experimentID",
+          "in" : "path",
+          "description" : "Experiment ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "bucketLabel",
+          "in" : "path",
+          "description" : "Bucket Label",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/Bucket"
+          }
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/Bucket"
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "Experiments (Create-Modify Experiments & Buckets)" ],
+        "summary" : "Delete a bucket in an experiment [done]",
+        "description" : "Can only delete a bucket for experiment that is in DRAFT state.  The default call is safe to use, but other than that please only delete buckets which you have created.",
+        "operationId" : "deleteBucket",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "experimentID",
+          "in" : "path",
+          "description" : "Experiment ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "bucketLabel",
+          "in" : "path",
+          "description" : "Bucket Label",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/v1/experiments/{experimentID}/buckets/{bucketLabel}/state/{desiredState}" : {
+      "put" : {
+        "tags" : [ "Experiments (Create-Modify Experiments & Buckets)" ],
+        "summary" : "Update a bucket state [done]",
+        "description" : "Can only close a bucket which is not in DRAFT state",
+        "operationId" : "putBucketState",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "experimentID",
+          "in" : "path",
+          "description" : "Experiment ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "bucketLabel",
+          "in" : "path",
+          "description" : "Bucket Label",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "desiredState",
+          "in" : "path",
+          "description" : "Desired Bucket State",
+          "required" : true,
+          "type" : "string",
+          "enum" : [ "OPEN", "CLOSED", "EMPTY" ]
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/Bucket"
+            }
+          }
+        }
+      }
+    },
+    "/v1/experiments/{experimentID}/events" : {
+      "get" : {
+        "tags" : [ "Experiments (Create-Modify Experiments & Buckets)" ],
+        "summary" : "Export all event records for an experiment [done]",
+        "description" : "A wrapper for POST API with default parameters",
+        "operationId" : "exportActions_get",
+        "produces" : [ "text/plain" ],
+        "parameters" : [ {
+          "name" : "experimentID",
+          "in" : "path",
+          "description" : "Experiment ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/StreamingOutput"
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Experiments (Create-Modify Experiments & Buckets)" ],
+        "summary" : "Export all event records for an experiment [review parameters]",
+        "description" : "Download all event records for a given experiment in a tab-delimited text format.",
+        "operationId" : "exportActions",
+        "produces" : [ "text/plain" ],
+        "parameters" : [ {
+          "name" : "experimentID",
+          "in" : "path",
+          "description" : "Experiment ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/Parameters"
+          }
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/StreamingOutput"
+            }
+          }
+        }
+      }
+    },
+    "/v1/experiments/{experimentID}/exclusions" : {
+      "get" : {
+        "tags" : [ "Experiments (Create-Modify Experiments & Buckets)" ],
+        "summary" : "Get list of mutually exclusive experiments [done]",
+        "description" : "Shows list of all experiments, in all states, that are mutually exclusive with input experiment.",
+        "operationId" : "getExclusions",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "experimentID",
+          "in" : "path",
+          "description" : "Experiment ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "showAll",
+          "in" : "query",
+          "required" : false,
+          "type" : "boolean",
+          "default" : "true"
+        }, {
+          "name" : "exclusive",
+          "in" : "query",
+          "required" : false,
+          "type" : "boolean",
+          "default" : "true"
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Experiments (Create-Modify Experiments & Buckets)" ],
+        "summary" : "Create mutual exclusion rules for an experiment [List<String> not an acceptable swagger override] [review]",
+        "description" : "Can only create mutual exclusion rules for experiments in DRAFT, RUNNING, and PAUSED states within+the same application",
+        "operationId" : "createExclusions",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "experimentID",
+          "in" : "path",
+          "description" : "Experiment ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/ExperimentIDList"
+          }
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/v1/experiments/{experimentID}/pages" : {
+      "get" : {
+        "tags" : [ "Experiments (Create-Modify Experiments & Buckets)" ],
+        "summary" : "Get the associated pages information for a given experiment ID [done]",
+        "description" : "",
+        "operationId" : "getExperimentPages",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "experimentID",
+          "in" : "path",
+          "description" : "Experiment ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Experiments (Create-Modify Experiments & Buckets)" ],
+        "summary" : "Post a list of pages to an experiment [for 1 page, works - NOT recognizing a list of pages JSON] [review]",
+        "description" : "Pages can only be added to an experiment with DRAFT, RUNNING, or PAUSED states",
+        "operationId" : "postPages",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "experimentID",
+          "in" : "path",
+          "description" : "Experiment ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/ExperimentPageList"
+          }
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/v1/experiments/{experimentID}/pages/{pageName}" : {
+      "delete" : {
+        "tags" : [ "Experiments (Create-Modify Experiments & Buckets)" ],
+        "summary" : "Remove a page from an experiment [done]",
+        "description" : "Pages can only be added to an experiment with DRAFT, RUNNING, or PAUSED states",
+        "operationId" : "deletePage",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "experimentID",
+          "in" : "path",
+          "description" : "Experiment ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "pageName",
+          "in" : "path",
+          "description" : "Page name where the experiment will appear",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/v1/experiments/{experimentID}/priority/{priorityPosition}" : {
+      "post" : {
+        "tags" : [ "Experiments (Create-Modify Experiments & Buckets)" ],
+        "summary" : "Insert an experiment into an application's priority list [done]",
+        "description" : "Experiments can only be placed in a priority list DRAFT, RUNNING, and PAUSED states withinthe same application",
+        "operationId" : "setPriority",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "experimentID",
+          "in" : "path",
+          "description" : "Experiment ID",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "priorityPosition",
+          "in" : "path",
+          "required" : true,
+          "type" : "integer",
+          "format" : "int32"
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/v1/feedback" : {
+      "get" : {
+        "tags" : [ "Feedback (Submit feedback about this AB Testing Tool)" ],
+        "summary" : "Get all feedback",
+        "description" : "",
+        "operationId" : "getAllUserFeedback",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Feedback (Submit feedback about this AB Testing Tool)" ],
+        "summary" : "Submit feedback",
+        "description" : "",
+        "operationId" : "postFeedback",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "userFeedback",
+          "description" : "Please see model example",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/UserFeedback"
+          }
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/v1/feedback/users/{username}" : {
+      "get" : {
+        "tags" : [ "Feedback (Submit feedback about this AB Testing Tool)" ],
+        "summary" : "Get single user feedback",
+        "description" : "",
+        "operationId" : "getUserFeedback",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "username",
+          "in" : "path",
+          "description" : "User name",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/v1/logs" : {
+      "get" : {
+        "tags" : [ "Audit Logs (Activity Logs about changes in experiments-buckets)" ],
+        "summary" : "Returns all logs if the requesting user has SuperAdmin permissions.",
+        "description" : "Returns all logs if the requesting user has SuperAdmin permissions. The parameters allow for filtering, sorting, and pagination.",
+        "operationId" : "getCompleteLogs",
+        "schemes" : [ "https" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "type" : "integer",
+          "default" : "1",
+          "format" : "int32"
+        }, {
+          "name" : "per_page",
+          "in" : "query",
+          "required" : false,
+          "type" : "integer",
+          "default" : "10",
+          "format" : "int32"
+        }, {
+          "name" : "sort",
+          "in" : "query",
+          "description" : "Allows to specify the sort order.<br /><pre>SortOrder    := Property | PropertyList\nPropertyList := Property,SortOrder\nProperty     := ALProperty | -ALProperty\nALProperty   := firstname, lastname, username, mail, app, experiment, bucket, time, attr, before, after, desc, action</pre>The prefix - allows for descending sorting.",
+          "required" : false,
+          "type" : "string",
+          "default" : "-time"
+        }, {
+          "name" : "filter",
+          "in" : "query",
+          "description" : "Allows to specify filter rules.<br /><pre>FilterMask   := Value | Value,KeyValueList | KeyValueListKeyValueList := Property=Value | Property=Value,KeyValueListProperty     := firstname | lastname | username | mail | user | experiment | bucket | app | time | attr | before | afterValue        := any value, may not contain commas (,) followed by a Property. If it starts with an escaped                dash (\\-), the value is negated, thus shall not match.</pre>",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "timezone",
+          "in" : "query",
+          "description" : "Allows to specify the user's timezone offset to UTC. Should be in the format +0000 (or -0000). If not specified, it is handled as +0000.",
+          "required" : false,
+          "type" : "string",
+          "default" : "+0000"
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/v1/logs/applications/{applicationName}" : {
+      "get" : {
+        "tags" : [ "Audit Logs (Activity Logs about changes in experiments-buckets)" ],
+        "summary" : "Returns all logs for the specified application if the requesting user has Admin permissions.",
+        "description" : "Returns all logs for the specified application if the requesting user has Admin permissions. The parameters allow for filtering, sorting, and pagination.",
+        "operationId" : "getLogs",
+        "schemes" : [ "https" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "Authorization",
+          "in" : "header",
+          "description" : "Example: Basic amFiYmFAaW50dWl0LmNvbTpqYWJiYTAx",
+          "required" : true,
+          "type" : "string",
+          "default" : ""
+        }, {
+          "name" : "applicationName",
+          "in" : "path",
+          "description" : "Application Name",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "description" : "Defines the page to retrieve",
+          "required" : false,
+          "type" : "integer",
+          "default" : "1",
+          "format" : "int32"
+        }, {
+          "name" : "perPage",
+          "in" : "query",
+          "description" : "Defines the entries per page.",
+          "required" : false,
+          "type" : "integer",
+          "default" : "10",
+          "format" : "int32"
+        }, {
+          "name" : "sort",
+          "in" : "query",
+          "description" : "Allows to specify the sort order.<br /><pre>SortOrder    := Property | PropertyList\nPropertyList := Property,SortOrder\nProperty     := ALProperty | -ALProperty\nALProperty   := firstname, lastname, username, mail, app, experiment, bucket, time, attr, before, after, desc, action</pre>The prefix - allows for descending sorting.",
+          "required" : false,
+          "type" : "string",
+          "default" : "-time"
+        }, {
+          "name" : "filter",
+          "in" : "query",
+          "description" : "Allows to specify filter rules.<br /><pre>FilterMask   := Value | Value,KeyValueList | KeyValueListKeyValueList := Property=Value | Property=Value,KeyValueListProperty     := firstname | lastname | username | mail | user | experiment | bucket | app | time | attr | before | afterValue        := any value, may not contain commas (,) followed by a Property. If it starts with an escaped                dash (\\-), the value is negated, thus shall not match.</pre>",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "timezone",
+          "in" : "query",
+          "description" : "Allows to specify the user's timezone offset to UTC. Should be in the format +0000 (or -0000). Default is +0000.",
+          "required" : false,
+          "type" : "string",
+          "default" : "+0000"
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/v1/ping" : {
+      "get" : {
+        "tags" : [ "Ping (Check Server Status)" ],
+        "summary" : "Pings the server",
+        "description" : "Also returns the status of other components. Uses metrics-healthchecks and pings/check connections to MySql and Cassandra.",
+        "operationId" : "ping",
+        "produces" : [ "application/json" ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/ComponentHealthList"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions" : {
+    "ActionComparisonStatistics" : {
+      "type" : "object",
+      "properties" : {
+        "fractionDataCollected" : {
+          "type" : "number",
+          "format" : "double"
+        },
+        "clearComparisonWinner" : {
+          "$ref" : "#/definitions/Label"
+        },
+        "actionRateDifference" : {
+          "$ref" : "#/definitions/Estimate"
+        },
+        "smallestDistinguishableEffectSize" : {
+          "$ref" : "#/definitions/DistinguishableEffectSize"
+        },
+        "actionName" : {
+          "$ref" : "#/definitions/Name"
+        },
+        "hasSufficientData" : {
+          "type" : "boolean",
+          "default" : false
+        }
+      }
+    },
+    "ActionCounts" : {
+      "type" : "object",
+      "required" : [ "eventCount", "uniqueUserCount" ],
+      "properties" : {
+        "eventCount" : {
+          "type" : "integer",
+          "format" : "int64",
+          "description" : "total number of counts (can have multiple counts per user)"
+        },
+        "uniqueUserCount" : {
+          "type" : "integer",
+          "format" : "int64",
+          "description" : "number of unique users with one or more counts"
+        },
+        "actionName" : {
+          "$ref" : "#/definitions/Name"
+        }
+      }
+    },
+    "ActionProgress" : {
+      "type" : "object",
+      "required" : [ "fractionDataCollected", "hasSufficientData", "losersSoFar", "winnersSoFar" ],
+      "properties" : {
+        "winnersSoFar" : {
+          "type" : "array",
+          "description" : "list of winning buckets",
+          "items" : {
+            "$ref" : "#/definitions/Label"
+          }
+        },
+        "losersSoFar" : {
+          "type" : "array",
+          "description" : "list of losing buckets",
+          "items" : {
+            "$ref" : "#/definitions/Label"
+          }
+        },
+        "hasSufficientData" : {
+          "type" : "boolean",
+          "description" : "if sufficient data has been collected to observe the effect size of interest",
+          "default" : false
+        },
+        "fractionDataCollected" : {
+          "type" : "number",
+          "format" : "double",
+          "description" : "fraction of data that has been collected to observe the effect size of interest"
+        },
+        "actionName" : {
+          "$ref" : "#/definitions/Name"
+        }
+      }
+    },
+    "ActionRate" : {
+      "type" : "object",
+      "required" : [ "estimate", "lowerBound", "upperBound" ],
+      "properties" : {
+        "estimate" : {
+          "type" : "number",
+          "format" : "double",
+          "description" : "estimate of the random variable"
+        },
+        "lowerBound" : {
+          "type" : "number",
+          "format" : "double",
+          "description" : "lower bound of the estimate"
+        },
+        "upperBound" : {
+          "type" : "number",
+          "format" : "double",
+          "description" : "upper bound of the estimate"
+        },
+        "actionName" : {
+          "$ref" : "#/definitions/Name"
+        }
+      }
+    },
+    "AssignmentCounts" : {
+      "type" : "object",
+      "properties" : {
+        "experimentID" : {
+          "description" : "UUID for the experiment",
+          "$ref" : "#/definitions/ID"
+        },
+        "assignments" : {
+          "type" : "array",
+          "description" : "assignments count per bucket",
+          "items" : {
+            "$ref" : "#/definitions/BucketAssignmentCount"
+          }
+        },
+        "totalUsers" : {
+          "description" : "total assignments delivered",
+          "$ref" : "#/definitions/TotalUsers"
+        }
+      }
+    },
+    "Bucket" : {
+      "type" : "object",
+      "required" : [ "allocationPercent", "description", "experimentID", "isControl", "label", "payload" ],
+      "properties" : {
+        "label" : {
+          "type" : "string",
+          "description" : "unique bucket label in the experiment"
+        },
+        "experimentID" : {
+          "type" : "string",
+          "format" : "uuid",
+          "description" : "unique experiment ID"
+        },
+        "allocationPercent" : {
+          "type" : "number",
+          "format" : "double",
+          "description" : "probability of a user being assigned this bucket if they are in the experiment; in range (0, 1]"
+        },
+        "description" : {
+          "type" : "string",
+          "description" : "description of the bucket treatment"
+        },
+        "payload" : {
+          "type" : "string",
+          "description" : "optional snippet of HTML, JS, etc; returned with a user bucket assignment"
+        },
+        "state" : {
+          "type" : "string",
+          "description" : "state of the bucket",
+          "enum" : [ "OPEN", "CLOSED", "EMPTY" ]
+        },
+        "isControl" : {
+          "type" : "boolean",
+          "description" : "a single control bucket may be specified for each experiment",
+          "default" : false
+        }
+      }
+    },
+    "BucketAssignmentCount" : {
+      "type" : "object",
+      "properties" : {
+        "bucket" : {
+          "description" : "identifier for the bucket",
+          "$ref" : "#/definitions/Label"
+        },
+        "count" : {
+          "type" : "integer",
+          "format" : "int64",
+          "description" : "count of assignments for the bucket"
+        }
+      }
+    },
+    "BucketBasicStatistics" : {
+      "type" : "object",
+      "required" : [ "actionCounts", "actionRates", "impressionCounts", "jointActionCounts", "jointActionRate" ],
+      "properties" : {
+        "actionCounts" : {
+          "type" : "object",
+          "description" : "counts for each action individually",
+          "additionalProperties" : {
+            "$ref" : "#/definitions/ActionCounts"
+          }
+        },
+        "impressionCounts" : {
+          "description" : "counts for impressions",
+          "$ref" : "#/definitions/Counts"
+        },
+        "jointActionCounts" : {
+          "description" : "counts for all actions treated as one",
+          "$ref" : "#/definitions/Counts"
+        },
+        "jointActionRate" : {
+          "description" : "statistics for all actions treated as one",
+          "$ref" : "#/definitions/Estimate"
+        },
+        "actionRates" : {
+          "type" : "object",
+          "description" : "statistics for each action individually",
+          "additionalProperties" : {
+            "$ref" : "#/definitions/ActionRate"
+          }
+        },
+        "label" : {
+          "$ref" : "#/definitions/Label"
+        }
+      }
+    },
+    "BucketComparison" : {
+      "type" : "object",
+      "properties" : {
+        "otherLabel" : {
+          "$ref" : "#/definitions/Label"
+        },
+        "jointActionComparison" : {
+          "$ref" : "#/definitions/ComparisonStatistics"
+        },
+        "actionComparisons" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "$ref" : "#/definitions/ActionComparisonStatistics"
+          }
+        }
+      }
+    },
+    "BucketCounts" : {
+      "type" : "object",
+      "required" : [ "actionCounts", "impressionCounts", "jointActionCounts" ],
+      "properties" : {
+        "actionCounts" : {
+          "type" : "object",
+          "description" : "counts for each action individually",
+          "additionalProperties" : {
+            "$ref" : "#/definitions/ActionCounts"
+          }
+        },
+        "impressionCounts" : {
+          "description" : "counts for impressions",
+          "$ref" : "#/definitions/Counts"
+        },
+        "jointActionCounts" : {
+          "description" : "counts for all actions treated as one",
+          "$ref" : "#/definitions/Counts"
+        },
+        "label" : {
+          "$ref" : "#/definitions/Label"
+        }
+      }
+    },
+    "BucketList" : {
+      "type" : "object",
+      "required" : [ "buckets" ],
+      "properties" : {
+        "buckets" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Bucket"
+          }
+        }
+      }
+    },
+    "BucketStatistics" : {
+      "type" : "object",
+      "required" : [ "actionCounts", "actionRates", "impressionCounts", "jointActionCounts", "jointActionRate" ],
+      "properties" : {
+        "actionCounts" : {
+          "type" : "object",
+          "description" : "counts for each action individually",
+          "additionalProperties" : {
+            "$ref" : "#/definitions/ActionCounts"
+          }
+        },
+        "impressionCounts" : {
+          "description" : "counts for impressions",
+          "$ref" : "#/definitions/Counts"
+        },
+        "jointActionCounts" : {
+          "description" : "counts for all actions treated as one",
+          "$ref" : "#/definitions/Counts"
+        },
+        "jointActionRate" : {
+          "description" : "statistics for all actions treated as one",
+          "$ref" : "#/definitions/Estimate"
+        },
+        "actionRates" : {
+          "type" : "object",
+          "description" : "statistics for each action individually",
+          "additionalProperties" : {
+            "$ref" : "#/definitions/ActionRate"
+          }
+        },
+        "label" : {
+          "$ref" : "#/definitions/Label"
+        },
+        "bucketComparisons" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "$ref" : "#/definitions/BucketComparison"
+          }
+        }
+      }
+    },
+    "ComparisonStatistics" : {
+      "type" : "object",
+      "properties" : {
+        "fractionDataCollected" : {
+          "type" : "number",
+          "format" : "double"
+        },
+        "clearComparisonWinner" : {
+          "$ref" : "#/definitions/Label"
+        },
+        "actionRateDifference" : {
+          "$ref" : "#/definitions/Estimate"
+        },
+        "smallestDistinguishableEffectSize" : {
+          "$ref" : "#/definitions/DistinguishableEffectSize"
+        },
+        "hasSufficientData" : {
+          "type" : "boolean",
+          "default" : false
+        }
+      }
+    },
+    "ComponentHealth" : {
+      "type" : "object",
+      "required" : [ "componentName", "detailedMessage", "healthy" ],
+      "properties" : {
+        "componentName" : {
+          "type" : "string"
+        },
+        "healthy" : {
+          "type" : "boolean",
+          "default" : false
+        },
+        "detailedMessage" : {
+          "type" : "string"
+        }
+      }
+    },
+    "ComponentHealthList" : {
+      "type" : "object",
+      "required" : [ "componentHealths" ],
+      "properties" : {
+        "componentHealths" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/ComponentHealth"
+          }
+        },
+        "jabbaVersion" : {
+          "type" : "string"
+        }
+      }
+    },
+    "Counts" : {
+      "type" : "object",
+      "required" : [ "eventCount", "uniqueUserCount" ],
+      "properties" : {
+        "eventCount" : {
+          "type" : "integer",
+          "format" : "int64",
+          "description" : "total number of counts (can have multiple counts per user)"
+        },
+        "uniqueUserCount" : {
+          "type" : "integer",
+          "format" : "int64",
+          "description" : "number of unique users with one or more counts"
+        }
+      }
+    },
+    "DailyCounts" : {
+      "type" : "object",
+      "required" : [ "cumulative", "date", "perDay" ],
+      "properties" : {
+        "date" : {
+          "type" : "string"
+        },
+        "perDay" : {
+          "description" : "counts occurring on the date",
+          "$ref" : "#/definitions/ExperimentCounts"
+        },
+        "cumulative" : {
+          "description" : "counts occurring on and prior to the date",
+          "$ref" : "#/definitions/ExperimentCounts"
+        }
+      }
+    },
+    "DailyStatistics" : {
+      "type" : "object",
+      "required" : [ "cumulative", "date", "perDay" ],
+      "properties" : {
+        "date" : {
+          "type" : "string"
+        },
+        "perDay" : {
+          "$ref" : "#/definitions/ExperimentBasicStatistics"
+        },
+        "cumulative" : {
+          "$ref" : "#/definitions/ExperimentStatistics"
+        }
+      }
+    },
+    "DistinguishableEffectSize" : {
+      "type" : "object",
+      "properties" : {
+        "negativeEffectSize" : {
+          "type" : "number",
+          "format" : "double"
+        },
+        "positiveEffectSize" : {
+          "type" : "number",
+          "format" : "double"
+        }
+      }
+    },
+    "EmailLinksList" : {
+      "type" : "object",
+      "properties" : {
+        "emailLinks" : {
+          "type" : "array",
+          "description" : "List of clickable email links for application Admins",
+          "items" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "Estimate" : {
+      "type" : "object",
+      "required" : [ "estimate", "lowerBound", "upperBound" ],
+      "properties" : {
+        "estimate" : {
+          "type" : "number",
+          "format" : "double",
+          "description" : "estimate of the random variable"
+        },
+        "lowerBound" : {
+          "type" : "number",
+          "format" : "double",
+          "description" : "lower bound of the estimate"
+        },
+        "upperBound" : {
+          "type" : "number",
+          "format" : "double",
+          "description" : "upper bound of the estimate"
+        }
+      }
+    },
+    "Event" : {
+      "type" : "object",
+      "required" : [ "name" ],
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "example" : "IMPRESSION/myEventName",
+          "description" : "Event ID; Use \"IMPRESSION\" for impressions"
+        },
+        "payload" : {
+          "type" : "string",
+          "description" : "payload for the event; defaults to null"
+        }
+      }
+    },
+    "EventList" : {
+      "type" : "object",
+      "required" : [ "events" ],
+      "properties" : {
+        "events" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Event"
+          }
+        }
+      }
+    },
+    "Experiment" : {
+      "type" : "object",
+      "required" : [ "applicationName", "creationTime", "endTime", "id", "label", "modificationTime", "samplingPercent", "startTime", "state" ],
+      "properties" : {
+        "id" : {
+          "type" : "string",
+          "format" : "uuid",
+          "description" : "unique experiment ID"
+        },
+        "label" : {
+          "type" : "string",
+          "description" : "experiment label; unique within the application"
+        },
+        "applicationName" : {
+          "type" : "string",
+          "description" : "name of the application; e.g. \"QBO\""
+        },
+        "startTime" : {
+          "type" : "string",
+          "format" : "date-time",
+          "description" : "earliest time the experiment allows bucket assignments"
+        },
+        "endTime" : {
+          "type" : "string",
+          "format" : "date-time",
+          "description" : "latest time the experiment allows bucket assignments"
+        },
+        "samplingPercent" : {
+          "type" : "number",
+          "format" : "double",
+          "description" : "probability of an eligible user being assigned into the experiment; in range: (0, 1]"
+        },
+        "description" : {
+          "type" : "string",
+          "description" : "description of the experiment"
+        },
+        "rule" : {
+          "type" : "string",
+          "description" : "defines a user segment, i.e., if the rule validates to true, user is part of the segment"
+        },
+        "ruleJson" : {
+          "type" : "string",
+          "description" : "defines a user segment in json, i.e., if the rule validates to true, user is part of the segment"
+        },
+        "creationTime" : {
+          "type" : "string",
+          "format" : "date-time",
+          "description" : "time experiment was created"
+        },
+        "modificationTime" : {
+          "type" : "string",
+          "format" : "date-time",
+          "description" : "last time experiment was modified"
+        },
+        "state" : {
+          "type" : "string",
+          "description" : "state of the experiment",
+          "enum" : [ "DRAFT", "RUNNING", "PAUSED", "TERMINATED", "DELETED" ]
+        },
+        "isPersonalizationEnabled" : {
+          "type" : "boolean",
+          "description" : "is personalization enabled for this experiment",
+          "default" : false
+        },
+        "modelName" : {
+          "type" : "string",
+          "description" : "model name"
+        },
+        "modelVersion" : {
+          "type" : "string",
+          "description" : "model version no."
+        },
+        "isRapidExperiment" : {
+          "type" : "boolean",
+          "description" : "is this a rapid experiment",
+          "default" : false
+        },
+        "userCap" : {
+          "type" : "integer",
+          "format" : "int32",
+          "description" : "maximum number of users to allow before pausing the experiment"
+        },
+        "creatorID" : {
+          "type" : "string",
+          "description" : "creator of the experiment"
+        }
+      }
+    },
+    "ExperimentBasicStatistics" : {
+      "type" : "object",
+      "required" : [ "actionCounts", "actionRates", "buckets", "impressionCounts", "jointActionCounts", "jointActionRate" ],
+      "properties" : {
+        "actionCounts" : {
+          "type" : "object",
+          "description" : "counts for each action individually",
+          "additionalProperties" : {
+            "$ref" : "#/definitions/ActionCounts"
+          }
+        },
+        "impressionCounts" : {
+          "description" : "counts for impressions",
+          "$ref" : "#/definitions/Counts"
+        },
+        "jointActionCounts" : {
+          "description" : "counts for all actions treated as one",
+          "$ref" : "#/definitions/Counts"
+        },
+        "jointActionRate" : {
+          "description" : "statistics for all actions treated as one",
+          "$ref" : "#/definitions/Estimate"
+        },
+        "actionRates" : {
+          "type" : "object",
+          "description" : "statistics for each action individually",
+          "additionalProperties" : {
+            "$ref" : "#/definitions/ActionRate"
+          }
+        },
+        "buckets" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "$ref" : "#/definitions/BucketBasicStatistics"
+          }
+        }
+      }
+    },
+    "ExperimentBatch" : {
+      "type" : "object",
+      "required" : [ "labels" ],
+      "properties" : {
+        "labels" : {
+          "type" : "array",
+          "description" : "a list of experiment labels for batch assignment",
+          "uniqueItems" : true,
+          "items" : {
+            "$ref" : "#/definitions/Label"
+          }
+        },
+        "profile" : {
+          "type" : "object",
+          "description" : "a user profile for segmentation",
+          "additionalProperties" : {
+            "type" : "object"
+          }
+        }
+      }
+    },
+    "ExperimentCounts" : {
+      "type" : "object",
+      "required" : [ "actionCounts", "buckets", "impressionCounts", "jointActionCounts" ],
+      "properties" : {
+        "actionCounts" : {
+          "type" : "object",
+          "description" : "counts for each action individually",
+          "additionalProperties" : {
+            "$ref" : "#/definitions/ActionCounts"
+          }
+        },
+        "impressionCounts" : {
+          "description" : "counts for impressions",
+          "$ref" : "#/definitions/Counts"
+        },
+        "jointActionCounts" : {
+          "description" : "counts for all actions treated as one",
+          "$ref" : "#/definitions/Counts"
+        },
+        "buckets" : {
+          "type" : "object",
+          "description" : "counts by bucket",
+          "additionalProperties" : {
+            "$ref" : "#/definitions/BucketCounts"
+          }
+        }
+      }
+    },
+    "ExperimentCumulativeCounts" : {
+      "type" : "object",
+      "required" : [ "days" ],
+      "properties" : {
+        "days" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/DailyCounts"
+          }
+        }
+      }
+    },
+    "ExperimentCumulativeStatistics" : {
+      "type" : "object",
+      "required" : [ "days" ],
+      "properties" : {
+        "days" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/DailyStatistics"
+          }
+        }
+      }
+    },
+    "ExperimentIDList" : {
+      "type" : "object",
+      "properties" : {
+        "experimentIDs" : {
+          "type" : "array",
+          "description" : "a list of experiment uuids for batch assignment",
+          "items" : {
+            "type" : "object"
+          }
+        }
+      }
+    },
+    "ExperimentList" : {
+      "type" : "object",
+      "required" : [ "experiments" ],
+      "properties" : {
+        "experiments" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Experiment"
+          }
+        }
+      }
+    },
+    "ExperimentPage" : {
+      "type" : "object",
+      "required" : [ "allowNewAssignment", "name" ],
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "description" : "name of the page"
+        },
+        "allowNewAssignment" : {
+          "type" : "boolean",
+          "description" : "flag to allow new assignments",
+          "default" : false
+        }
+      }
+    },
+    "ExperimentPageList" : {
+      "type" : "object",
+      "required" : [ "pages" ],
+      "properties" : {
+        "pages" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/ExperimentPage"
+          }
+        }
+      }
+    },
+    "ExperimentStatistics" : {
+      "type" : "object",
+      "required" : [ "actionCounts", "actionProgress", "actionRates", "buckets", "experimentProgress", "impressionCounts", "jointActionCounts", "jointActionRate", "jointProgress" ],
+      "properties" : {
+        "actionCounts" : {
+          "type" : "object",
+          "description" : "counts for each action individually",
+          "additionalProperties" : {
+            "$ref" : "#/definitions/ActionCounts"
+          }
+        },
+        "impressionCounts" : {
+          "description" : "counts for impressions",
+          "$ref" : "#/definitions/Counts"
+        },
+        "jointActionCounts" : {
+          "description" : "counts for all actions treated as one",
+          "$ref" : "#/definitions/Counts"
+        },
+        "jointActionRate" : {
+          "description" : "statistics for all actions treated as one",
+          "$ref" : "#/definitions/Estimate"
+        },
+        "actionRates" : {
+          "type" : "object",
+          "description" : "statistics for each action individually",
+          "additionalProperties" : {
+            "$ref" : "#/definitions/ActionRate"
+          }
+        },
+        "buckets" : {
+          "type" : "object",
+          "description" : "statistics by bucket",
+          "additionalProperties" : {
+            "$ref" : "#/definitions/BucketStatistics"
+          }
+        },
+        "experimentProgress" : {
+          "description" : "progress metrics at the experiment level",
+          "$ref" : "#/definitions/Progress"
+        },
+        "jointProgress" : {
+          "description" : "progress metrics for all actions treated as one",
+          "$ref" : "#/definitions/Progress"
+        },
+        "actionProgress" : {
+          "type" : "object",
+          "description" : "progress metrics for each action individually",
+          "additionalProperties" : {
+            "$ref" : "#/definitions/ActionProgress"
+          }
+        }
+      }
+    },
+    "ID" : {
+      "type" : "object",
+      "properties" : {
+        "rawID" : {
+          "type" : "string",
+          "format" : "uuid"
+        }
+      }
+    },
+    "Label" : {
+      "type" : "object"
+    },
+    "Name" : {
+      "type" : "object"
+    },
+    "NewExperiment" : {
+      "type" : "object",
+      "required" : [ "applicationName", "endTime", "label", "samplingPercent", "startTime" ],
+      "properties" : {
+        "label" : {
+          "type" : "string",
+          "description" : "Experiment Label"
+        },
+        "applicationName" : {
+          "type" : "string",
+          "description" : "Application Name"
+        },
+        "startTime" : {
+          "type" : "string",
+          "format" : "date-time",
+          "example" : "2014-06-10T00:00:00-0000"
+        },
+        "endTime" : {
+          "type" : "string",
+          "format" : "date-time",
+          "example" : "2018-12-25T00:00:00-0000"
+        },
+        "samplingPercent" : {
+          "type" : "number",
+          "format" : "double"
+        },
+        "description" : {
+          "type" : "string"
+        },
+        "rule" : {
+          "type" : "string"
+        },
+        "isPersonalizationEnabled" : {
+          "type" : "boolean",
+          "default" : false
+        },
+        "modelName" : {
+          "type" : "string"
+        },
+        "modelVersion" : {
+          "type" : "string"
+        },
+        "isRapidExperiment" : {
+          "type" : "boolean",
+          "description" : "is this a rapid experiment",
+          "default" : false
+        },
+        "userCap" : {
+          "type" : "integer",
+          "format" : "int32",
+          "description" : "maximum number of users to allow before pausing the experiment"
+        },
+        "creatorID" : {
+          "type" : "string"
+        },
+        "state" : {
+          "type" : "string",
+          "enum" : [ "DRAFT", "RUNNING", "PAUSED", "TERMINATED", "DELETED" ]
+        }
+      },
+      "description" : "Subset of Experiment used to create a new experiment."
+    },
+    "Parameters" : {
+      "type" : "object",
+      "properties" : {
+        "fromTime" : {
+          "type" : "string",
+          "format" : "date-time",
+          "example" : "2014-06-10T00:00:00-0000",
+          "description" : "ignore events prior to this time"
+        },
+        "toTime" : {
+          "type" : "string",
+          "format" : "date-time",
+          "example" : "2014-06-10T00:00:00-0000",
+          "description" : "ignore events after this time"
+        },
+        "confidenceLevel" : {
+          "type" : "number",
+          "format" : "double",
+          "description" : "confidence level for statistics calculations; in range (0, 1)"
+        },
+        "effectSize" : {
+          "type" : "number",
+          "format" : "double",
+          "description" : "effect size of interest; in range [-1, 1]"
+        },
+        "actions" : {
+          "type" : "array",
+          "description" : "only evaluate these actions",
+          "items" : {
+            "type" : "string"
+          }
+        },
+        "metric" : {
+          "type" : "string",
+          "description" : "ask if you're interested, otherwise ignore",
+          "enum" : [ "NORMAL_APPROX", "NORMAL_APPROX_SYM" ]
+        },
+        "mode" : {
+          "type" : "string",
+          "description" : "DO NOT USE",
+          "enum" : [ "PRODUCTION", "TEST" ]
+        },
+        "context" : {
+          "type" : "string",
+          "description" : "context of the experiment, eg \"QA\", \"PROD\""
+        },
+        "timeZone" : {
+          "description" : "time zone",
+          "$ref" : "#/definitions/TimeZone"
+        },
+        "isSingleShot" : {
+          "type" : "boolean",
+          "description" : "ask if you're interested, otherwise ignore",
+          "default" : false
+        }
+      },
+      "description" : "Input parameters for the Analytics APIs."
+    },
+    "Progress" : {
+      "type" : "object",
+      "required" : [ "fractionDataCollected", "hasSufficientData", "losersSoFar", "winnersSoFar" ],
+      "properties" : {
+        "winnersSoFar" : {
+          "type" : "array",
+          "description" : "list of winning buckets",
+          "items" : {
+            "$ref" : "#/definitions/Label"
+          }
+        },
+        "losersSoFar" : {
+          "type" : "array",
+          "description" : "list of losing buckets",
+          "items" : {
+            "$ref" : "#/definitions/Label"
+          }
+        },
+        "hasSufficientData" : {
+          "type" : "boolean",
+          "description" : "if sufficient data has been collected to observe the effect size of interest",
+          "default" : false
+        },
+        "fractionDataCollected" : {
+          "type" : "number",
+          "format" : "double",
+          "description" : "fraction of data that has been collected to observe the effect size of interest"
+        }
+      }
+    },
+    "SegmentationProfile" : {
+      "type" : "object",
+      "properties" : {
+        "profile" : {
+          "type" : "object",
+          "description" : "a map of key/value user attributes",
+          "additionalProperties" : {
+            "type" : "object"
+          }
+        }
+      }
+    },
+    "StreamingOutput" : {
+      "type" : "object"
+    },
+    "TimeZone" : {
+      "type" : "object",
+      "properties" : {
+        "displayName" : {
+          "type" : "string"
+        },
+        "id" : {
+          "type" : "string"
+        },
+        "rawOffset" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "dstsavings" : {
+          "type" : "integer",
+          "format" : "int32"
+        }
+      }
+    },
+    "TotalUsers" : {
+      "type" : "object",
+      "properties" : {
+        "total" : {
+          "type" : "integer",
+          "format" : "int64",
+          "description" : "Reflects the total number of users who have tried for an assignment"
+        },
+        "bucketAssignments" : {
+          "type" : "integer",
+          "format" : "int64",
+          "description" : "Reflects the total number of users who been assigned to a bucket"
+        },
+        "nullAssignments" : {
+          "type" : "integer",
+          "format" : "int64",
+          "description" : "Reflects the total number of users who have been delivered null assignments"
+        }
+      }
+    },
+    "UserFeedback" : {
+      "type" : "object",
+      "properties" : {
+        "username" : {
+          "type" : "string",
+          "description" : "User Name"
+        },
+        "score" : {
+          "type" : "integer",
+          "format" : "int32",
+          "description" : "Score in the range from 1-10"
+        },
+        "comments" : {
+          "type" : "string",
+          "description" : "User feedback comments"
+        },
+        "contactOkay" : {
+          "type" : "boolean",
+          "description" : "boolean indicating that it's okay to contact the user",
+          "default" : false
+        },
+        "email" : {
+          "type" : "string",
+          "description" : "User's email address"
+        }
+      }
+    },
+    "UserRole" : {
+      "type" : "object",
+      "required" : [ "applicationName", "role" ],
+      "properties" : {
+        "applicationName" : {
+          "type" : "string",
+          "description" : "name of the application"
+        },
+        "role" : {
+          "type" : "string",
+          "description" : "Role associated with the user for a given application",
+          "enum" : [ "READONLY", "READWRITE", "ADMIN", "SUPERADMIN" ]
+        },
+        "userID" : {
+          "type" : "string",
+          "description" : "user name"
+        },
+        "userEmail" : {
+          "type" : "string",
+          "description" : "user email"
+        },
+        "firstName" : {
+          "type" : "string",
+          "description" : "first name"
+        },
+        "lastName" : {
+          "type" : "string",
+          "description" : "last name"
+        }
+      }
+    },
+    "UserRoleList" : {
+      "type" : "object",
+      "required" : [ "roleList" ],
+      "properties" : {
+        "roleList" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/UserRole"
+          }
+        }
+      }
+    }
+  }
+}

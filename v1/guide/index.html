@@ -1,0 +1,2280 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>API Reference</title>
+
+    <style>
+      .highlight table td { padding: 5px; }
+.highlight table pre { margin: 0; }
+.highlight, .highlight .w {
+  color: #f8f8f2;
+  background-color: #272822;
+}
+.highlight .err {
+  color: #151515;
+  background-color: #ac4142;
+}
+.highlight .c, .highlight .cd, .highlight .cm, .highlight .c1, .highlight .cs {
+  color: #505050;
+}
+.highlight .cp {
+  color: #f4bf75;
+}
+.highlight .nt {
+  color: #f4bf75;
+}
+.highlight .o, .highlight .ow {
+  color: #d0d0d0;
+}
+.highlight .p, .highlight .pi {
+  color: #d0d0d0;
+}
+.highlight .gi {
+  color: #90a959;
+}
+.highlight .gd {
+  color: #ac4142;
+}
+.highlight .gh {
+  color: #6a9fb5;
+  background-color: #151515;
+  font-weight: bold;
+}
+.highlight .k, .highlight .kn, .highlight .kp, .highlight .kr, .highlight .kv {
+  color: #aa759f;
+}
+.highlight .kc {
+  color: #d28445;
+}
+.highlight .kt {
+  color: #d28445;
+}
+.highlight .kd {
+  color: #d28445;
+}
+.highlight .s, .highlight .sb, .highlight .sc, .highlight .sd, .highlight .s2, .highlight .sh, .highlight .sx, .highlight .s1 {
+  color: #90a959;
+}
+.highlight .sr {
+  color: #75b5aa;
+}
+.highlight .si {
+  color: #8f5536;
+}
+.highlight .se {
+  color: #8f5536;
+}
+.highlight .nn {
+  color: #f4bf75;
+}
+.highlight .nc {
+  color: #f4bf75;
+}
+.highlight .no {
+  color: #f4bf75;
+}
+.highlight .na {
+  color: #6a9fb5;
+}
+.highlight .m, .highlight .mf, .highlight .mh, .highlight .mi, .highlight .il, .highlight .mo, .highlight .mb, .highlight .mx {
+  color: #90a959;
+}
+.highlight .ss {
+  color: #90a959;
+}
+    </style>
+    <link href="stylesheets/screen.css" rel="stylesheet" media="screen" />
+    <link href="stylesheets/print.css" rel="stylesheet" media="print" />
+      <script src="javascripts/all.js"></script>
+  </head>
+
+  <body class="index" data-languages="[]">
+    <a href="#" id="nav-button">
+      <span>
+        NAV
+        <img src="images/navbar.png" />
+      </span>
+    </a>
+    <div class="tocify-wrapper">
+      <img src="images/idea_inverted.png" />
+        <div class="lang-selector">
+        </div>
+        <div class="search">
+          <input type="text" class="search" id="input-search" placeholder="Search">
+        </div>
+        <ul class="search-results"></ul>
+      <div id="toc">
+      </div>
+        <ul class="toc-footer">
+            <li><a href='https://github.com/tripit/slate'>Documentation Powered by Slate</a></li>
+        </ul>
+    </div>
+    <div class="page-wrapper">
+      <div class="dark-box"></div>
+      <div class="content">
+        
+          <h1 id="overview">Overview</h1>
+
+<p>The Wasabi AB Testing service is from Intuit Data Engineering and Analytics (IDEA)  based on a set of RESTful APIs that allow
+you to instrument your product code for AB tests (also called split tests), and then create and manage experiments and
+track and analyze results. We also provide a user interface for experiment management and tracking results. If you are
+looking for a simple, flexible, and scalable way to run AB test experiments in your product, you&rsquo;re in the right place.</p>
+
+<p>Wasabi enables you to:</p>
+
+<ul>
+<li>Create and manage experiments via API or through our web UI.</li>
+<li>Instrument your product code to run an AB test experiment via simple REST API calls:</li>
+<li>Assign users to a bucket (A, B. C, &hellip;), then you show them the version of the experience you want them to see
+(treatment).</li>
+<li>Log impressions when users have been exposed to the treatment.</li>
+<li>Log one or more kinds of actions the users may take in response to the treatment (your success metrics).</li>
+<li>View your experiment results to find the winning bucket and see statistical significance (via API or web UI).</li>
+<li>Immediately roll out your winning experience to all users until you can implement it in your product code.</li>
+</ul>
+
+<h3 id="where-can-i-use-ab-testing-almost-anywhere">Where can I use AB testing? (almost anywhere)</h3>
+
+<ul>
+<li>Web clients</li>
+<li>Mobile clients</li>
+<li>Desktop clients (with an internet connection)</li>
+<li>Server-side clients</li>
+<li>Can be called from client-side or server-side code</li>
+<li>Can run experiments across multiple platforms if you have a common user identifier</li>
+</ul>
+
+<h3 id="what-kinds-of-experiments-can-i-run">What kinds of experiments can I run?</h3>
+
+<ul>
+<li>Visual elements and content (e.g. red button vs. blue button)</li>
+<li>Multi-page work flows</li>
+<li>Dynamic single-page client experiences</li>
+<li>Back-end algorithms (e.g. compare recommendation algorithms)
+and much, much more!</li>
+</ul>
+
+<p>This document explains the features of the Wasabi AB Testing service and gives guidance on how to use them. Note that
+everything that you can do within the User Interface (UI) is also available via the REST APIs.</p>
+
+<h2 id="overall-architecture">Overall Architecture</h2>
+
+<p><img alt="Experiment Admin" src="images/overview/wasabiArchFlow.png" /></p>
+
+<h2 id="core-concepts">Core Concepts</h2>
+
+<h3 id="bucket">Bucket</h3>
+
+<p>Users going through an experiment are randomly assigned to a bucket (bucket A, bucket B, etc.) which determines which
+user experience they will be offered. This is often called by other, equivalent names such as variation, treatment
+group, or recipe.</p>
+
+<h3 id="assignment">Assignment</h3>
+
+<p>The process by which a user who is a potential subject of the experiment is assigned to one of the buckets, or
+determined not to be part of the experiment. We use a two roll system for assignment: “roll the dice” once and compare
+to the Sampling % to determine if the user is in the experiment or not. If the user is in the experiment, then we roll
+the dice again to determine which bucket the user is in, based on the bucket allocation percentages.</p>
+
+<p>Assignments are durable – once a user (e.g. UserId) is assigned to a particular bucket for an experiment, the AB Testing
+service will always return the same bucket assignment for that UserId, so the user will get the same experience in the
+product.  Note that this is also true if the user is determined to not be in the experiment (sometimes called a &ldquo;null
+assignment&rdquo;), that is, if you call the AB Testing service for that user&rsquo;s assignment, you will always be given the &ldquo;null
+assignment&rdquo;.</p>
+
+<h3 id="impression">Impression</h3>
+
+<p>Once a user is assigned to a bucket and has been shown the first part of the corresponding user experience or treatment,
+you record an impression for that user. They become part of the denominator for calculating statistics. This is
+logically separate from assignment, because in some situations you may assign a user to a bucket before they get to the
+part of your product where they see the impression of the user experience.</p>
+
+<h3 id="action">Action</h3>
+
+<p>Of all the users who see an impression of a particular user experience, some subset of those may take one or more
+actions that you are interested in logging and measuring as metrics for the success of that particular treatment. Each
+different kind of action gives rise to an action rate (roughly actions divided by impressions, usually restricting to
+unique users). Measuring these action rates and determining when they differ in a statistically significant way is the
+object of AB testing.</p>
+
+<h2 id="experiment-admin-create-edit-start-stop-terminate">Experiment Admin (Create,Edit, Start, Stop, Terminate)</h2>
+
+<p>The main administrative user interface of the AB Testing service is available at the following URL:</p>
+
+<p>https://abtesting.intuit.com</p>
+
+<p>and shows a list of the current experiments, organized by App and Experiment Name.</p>
+
+<p><img alt="Experiment Admin" src="images/overview/toplevel.png" /></p>
+
+<h3 id="concepts-and-definitions">Concepts and Definitions</h3>
+
+<h4 id="app">App</h4>
+
+<p>Defines the application where the experiment runs. For example QBO, or TTO. This functions as a grouping for
+experiments, and no two experiments within the same App can have the same Experiment Name.  This also defines the scope
+of mutual exclusion between experiments.  Finally, access control to administration of the AB Testing service is
+controlled at an App level.  For example, while all users with a Corp login can login to the AB Testing admin UI, only
+users who have been granted access will be able to see or modify experiments in a given App, e.g., CTG.</p>
+
+<h4 id="experiment">Experiment</h4>
+
+<p>The name for the experiment, which must be unique within the same App, and should be descriptive. There is also an
+Experiment UUID, which is not visible in the UI, but is used extensively in the APIs.</p>
+
+<p>NOTE: an experiment name may be re-used after any experiments with that name have been archived.</p>
+
+<h4 id="sampling">Sampling %</h4>
+
+<p>This is the percentage of users for whom an assignment is requested who will be placed into one of the experiment
+buckets. In most experiments, the sampling % is relatively small, and only a fraction of the user traffic is put into
+one of the buckets or experiment variations. The rest of the users receive the default experience. Users who are not
+assigned to a bucket will be given the assignment value “NULL” from the AB Testing service assignment API (they are
+given the &ldquo;null assignment&rdquo;).  Note that the assignment of &ldquo;NULL&rdquo; is actually &ldquo;sticky&rdquo;, that is, if that user returns
+to the app and you request their assignment into the experiment again, you will always get the &ldquo;NULL&rdquo; value for them.</p>
+
+<h4 id="rapid-experiment-max-users">Rapid Experiment Max Users</h4>
+
+<p>Usually, for an A/B test, you want to have users randomly assigned to buckets and run the test for a period of time to
+try to get statistically significant results.</p>
+
+<p>However, sometimes you just want to try out a test on a few people. Rather than picking a certain sampling percentage
+and trying to monitor the experiment until you have a sufficiently large number of assignments, you can make the
+experiment a &ldquo;rapid experiment&rdquo;. Note that this is a very unusual situation, so normally, you will not use this feature.</p>
+
+<p>If you do need to use this feature, however, specify the number of users you want in the experiment and when that number
+of assignments have been made, the experiment will Stop (meaning users will stop being assigned to the experiment, but
+users who have been assigned will still receive those assignments).</p>
+
+<p>For a stopped experiment, you can increase the maximum number of users and restart the experiment. New users will then
+start being assigned to the experiment, again, until you&rsquo;ve reached the newly entered number of users.</p>
+
+<h4 id="status">Status</h4>
+
+<p>The current status of the experiment, as indicated by the icon.</p>
+
+<h4 id="draft">Draft</h4>
+
+<p>An experiment which has been created but is not yet running. An experiment collects no data in draft mode and cannot
+accept incoming assignment or event calls. An experiment in draft mode can still be edited (e.g. you can add more
+buckets, change bucket allocation percentages, etc.). Most experiment parameters cannot be edited outside of draft mode.
+The experiment remains in draft mode until it is manually started even if it is past the experiment start date.</p>
+
+<h4 id="running">Running</h4>
+
+<p>An experiment moves from draft to running when you press the start button (as long as the current date is past the start
+date). A running experiment returns assignments when called, and collects event data (impressions and actions).  Note
+that before you can start the experiment, the total allocation percentages for all the buckets must add up to exactly
+100%.</p>
+
+<h4 id="stopped">Stopped</h4>
+
+<p>A running experiment can be stopped, during which time it continues to return existing assignments for UserIds that have
+already been assigned, but it does not create any new assignments. It continues to collect event data (impressions and
+actions) for UserIds that have already been assigned to a bucket. A paused experiment may be set back to the running
+state.</p>
+
+<h4 id="stopped-automatic">Stopped (automatic)</h4>
+
+<p>A running experiment will be stopped automatically when the experiment End Date is reached. This is a TERMINAL STATE. A
+stopped experiment cannot be re-started. It may only be archived.</p>
+
+<h4 id="terminated">Terminated</h4>
+
+<p>A stopped experiment can be terminated.  This causes the experiment to stop accepting new or returning existing
+assignments.  This should only be done when you no longer have code that is using this experiment.  A terminated
+experiment can only be deleted.</p>
+
+<h4 id="deleted">Deleted</h4>
+
+<p>Stopped or terminated experiments may be deleted. Deleted experiments can have their experiment name re-used. Deleted
+experiments no longer appear in the experiment list UI.</p>
+
+<h4 id="start-date">Start Date</h4>
+
+<p>The date on which the experiment is allowed to start. Starting the experiment still requires pressing the Play button.
+If you press Play before the start date, then the experiment will automatically start on that date. If you don’t press
+Play until after the start date, then the experiment will start when you press Play.</p>
+
+<h4 id="end-date">End Date</h4>
+
+<p>The date on which the experiment is automatically stopped.  A running or paused experiment can be manually stopped by
+pressing the Stop button at any time.</p>
+
+<p>NOTE: In the future we plan to replace End Date with an optional parameter “Scheduled End Date” instead.</p>
+
+<h4 id="actions">Actions</h4>
+
+<p>You can edit a Draft experiment by clicking on the name of the experiment.  There are also a set of action buttons which
+allow you to change the state of the experiment. They consist of Start, Stop, Terminate and Delete.</p>
+
+<h3 id="creating-an-experiment">Creating an Experiment</h3>
+
+<p>Pressing the Create Experiment button brings up the Create Experiment dialog:</p>
+
+<p><img alt="Create Experiment" src="images/overview/createExperiment.png" /></p>
+
+<p>where you enter the Application Name, Experiment Name, Sampling Rate, Start Date, End Date, and a Description for your
+experiment. Once you fill this in and press Create Experiment, the dialog expands and allows you to create buckets for
+your new experiment.</p>
+
+<p><img alt="Edit Experiment" src="images/overview/editExperiment.png" /></p>
+
+<p>You can also go back and edit name, sampling rate, etc. This is the same dialog box as you see whenever you hit the Edit
+button for an experiment in Draft mode. If you click on the +Add Bucket link, it brings up the Edit Bucket dialog where
+you enter the bucket name, bucket allocation %, whether or not the bucket is the Control (e.g. the bucket to which other
+buckets are compared), an optional description, and an optional bucket payload.</p>
+
+<p><img alt="Create Bucket" src="images/overview/createBucket.png" /></p>
+
+<p>A bucket payload is a piece of text that is returned to the caller with every assignment made to this bucket. It could
+contain CSS, Javascript code, a URL so you can alter the look and feel for your experiment or redirect the user to a
+different URL depending on the assignment. This is just a pass through. Whatever information you put in this field will
+be returned to the caller each time an assignment is made to this bucket.</p>
+
+<p>Note that the bucket allocation % for all buckets in your experiment must sum to 100%, and there cannot be more than one
+Control bucket. You can edit or delete buckets by clicking on the appropriate buttons next to the buckets in the list.</p>
+
+<p><img alt="Buckets" src="images/overview/bucketsTab.png" /></p>
+
+<h3 id="edit-experiment">Edit Experiment</h3>
+
+<p>Experiments can only be edited when they are in draft mode. Just click on the experiment name in the experiment list to
+edit the experiment.</p>
+
+<p><img alt="Edit Experiment" src="images/overview/editExperiment.png" /></p>
+
+<h3 id="start-experiment">Start Experiment</h3>
+
+<p>Clicking on the Play button starts the experiment if it is currently past the Start Date. If it is currently before the
+Start Date, then it will set the experiment to automatically start on the Start Date. Once an experiment is started, you
+can no longer access the Edit Experiment mode. Any parameters which can be changed are available via API or in the Track
+&amp; Manage Experiment UI.</p>
+
+<p>NOTE: In the future we plan to replace Start Date with an optional parameter “Scheduled Start Date” instead.</p>
+
+<h3 id="stop-experiment">Stop Experiment</h3>
+
+<p>Pressing the Stop button stops the experiment, during which time it continues to return existing assignments for UserIds
+that have already been assigned, but it does not create any new assignments. It continues to collect event data
+(impressions and actions) for UserIds that have already been assigned to a bucket. A stopped experiment may be set back
+to the running state.</p>
+
+<h3 id="terminate-experiment">Terminate Experiment</h3>
+
+<p>Pressing the Terminate button terminates the experiment (this cannot be undone, and there is a dialog to warn you). A
+running or stopped experiment can be terminated either by explicitly pressing the Terminate button, or calling the API,
+or automatically stopped when the experiment End Date is reached. Terminated is a TERMINAL STATE. A terminated
+experiment cannot be re-started. It may only be deleted.</p>
+
+<h3 id="delete-experiment">Delete Experiment</h3>
+
+<p>Pressing the Delete button deletes the experiment, which removes it from the UI. It can still be accessed via API by its
+UUID. The experiment and its data are not actually deleted. Deleting an experiment is not reversible, and there is a
+warning dialog in case you hit the button by accident.</p>
+
+<p>NOTE: The current UI labels this as Delete Experiment. This may be renamed to Archive in an upcoming release.</p>
+
+<h2 id="experiment-tracking-amp-management">Experiment Tracking &amp; Management</h2>
+
+<p>Once your experiment is running, you can access the tracking and management panel by clicking on the experiment name in
+the list of experiments in the admin UI.</p>
+
+<p><img alt="Experiment Tracking" src="images/overview/detailsDialog.png" /></p>
+
+<h3 id="concepts-and-definitions">Concepts and Definitions</h3>
+
+<p>Please note that most of the terms in the tracking and management panel have Help descriptions available by clicking on
+the question mark icon, .</p>
+
+<h4 id="favorite-star">Favorite Star</h4>
+
+<p>The yellow star can be clicked on to either make this experiment one of your &ldquo;favorites&rdquo; or not.  Your favorite
+experiments are listed first on the Experiments list, making them easier to find.</p>
+
+<h4 id="application-and-experiment-name">Application and Experiment Name</h4>
+
+<p>The name of the application and experiment.</p>
+
+<h4 id="state">State</h4>
+
+<p>Whether this is a Running, Stopped or Terminated experiment.</p>
+
+<h4 id="controls">Controls</h4>
+
+<p>Depending on the state of the experiment, you can use the controls to stop, re-start, terminate or delete this
+experiment.</p>
+
+<h4 id="status">Status</h4>
+
+<p>Indicates whether or not there is a statistically significant winner among the buckets, which will be indicated by a
+green checkmark in the left column next to the bucket name.</p>
+
+<p>In the case that more than one bucket is in a statistical tie with one or more other buckets, but are statistically
+each different from some other “losing” bucket(s), then the bucket(s) will be marked with the green checkmark to show
+they are &ldquo;winners&rdquo;.</p>
+
+<h4 id="action-rate">Action Rate</h4>
+
+<p>The count of the unique users with an action divided by the count of unique users with an impression. E.g. this is
+usually a click-through rate. If you have defined multiple different action types, the default UI shows only the
+cumulative action rate (e.g. the numerator is the count of unique users with at least one action of any action type).
+The individual action rates for each action type are available via the APIs.</p>
+
+<h4 id="actions">Actions</h4>
+
+<p>If necessary, you can record more than one action.  The details of the action rates and counts for all the actions can
+be found on the Actions tab.</p>
+
+<h4 id="improvement">Improvement</h4>
+
+<p>Indicates the improvement (or not) with 95% confidence interval compared to the control bucket. If there is no control
+bucket specified, then comparisons are made vs. the first bucket in the list.</p>
+
+<h4 id="rapid-experiment-max-users">Rapid Experiment Max Users</h4>
+
+<p>As described in the Concepts and Definitions section above, this is a seldom-used feature that allows you to set a
+maximum number of users to assign to the experiment.  The experiment will use whatever other settings are configured
+for the experiment to determine users to assign to the experiment, but once this configured maximum number of users
+has been reached, the experiment will be transitioned to the Stopped state, that is, existing assignments will be
+returned, but no new users will be assigned to the experiment.</p>
+
+<p>Once that has happened, if you need to increase the number of users, edit this setting to increase the number and then
+start the experiment, again.</p>
+
+<h3 id="adjust-sample-rate">Adjust Sample Rate</h3>
+
+<p>Allows you to change your sample rate so you can roll out a winning experience without a code release.</p>
+
+<p><img alt="Adjust Sample Rate" src="images/overview/changeSampling.png" /></p>
+
+<h3 id="edit-buckets">Edit Buckets</h3>
+
+<p>You can click on the Edit Buckets link to bring up a dialog to modify the buckets.</p>
+
+<p>NOTE: Editing buckets while an experiment is running or stopped is not advisable. This will make the analytics
+unreliable and we cannot guarantee a good AB Test result at the end of the experiment. These changes cannot be undone
+and you should understand the risks before you proceed.</p>
+
+<p><img alt="Edit Buckets" src="images/overview/editBuckets.png" /></p>
+
+<p>Close Bucket</p>
+
+<p>If you need to stop adding new users to a bucket, but want the existing users to continue receiving their assignments to
+that bucket, you should close the bucket.  When you close a bucket, we set the bucket allocation percentage of the
+bucket to ZERO and redistribute the allocation percentage of that bucket proportionally among the other remaining
+buckets. By doing this, we will make sure no new users are put into this bucket. We still retain existing users that are
+part of this bucket and return assignments for existing users.</p>
+
+<p>Empty Bucket</p>
+
+<p>Empty a bucket (for when there are major experience issues with a bucket – returns all users to the null/“not in
+experiment” assignment).  When you empty a bucket, we set the bucket allocation percentage of the bucket to ZERO and
+redistribute the allocation percentage of that bucket proportionally among the other remaining buckets. By doing this,
+we will make sure no new users are put into this bucket. We also make sure all users that are already assigned to this
+bucket are cleared. They will be given new assignments the next time they come in.</p>
+
+<h3 id="changing-segmentation-personalization-or-description">Changing Segmentation, Personalization or Description</h3>
+
+<p>There is a set of UI widgets used to edit the Segmentation rule, Personalization settings and Description of a non-Draft
+experiment (e.g., Running, Stopped, etc.).  These widgets allow you to change aspects of the experiment individually and
+save the changes immediately.</p>
+
+<p>For example, if you edit a Running experiment, you will see the Description field displayed like this:</p>
+
+<p><img alt="Description" src="images/overview/editDescription.png" /></p>
+
+<p>To edit the description, simply click on the pencil icon in the upper right.  That will make the text area editable.</p>
+
+<p><img alt="Description" src="images/overview/editDescription2.png" /></p>
+
+<p>Once you have made your change, click on the green checkmark icon.  That will immediately save the new description.</p>
+
+<p>If, instead, you decide that you want to cancel your changes, click on the red X icon.  Your changes will be discarded
+and the previous value will be displayed.</p>
+
+<p>This technique of putting part of the UI into editing mode and allowing the change to be saved or cancelled immediately
+is also available for the Segmentation and Personalization tabs.</p>
+
+<h3 id="export-data-download-assignment-data">Export Data (Download Assignment Data)</h3>
+
+<p>Allows you to export your raw data as a CSV file where each row is an impression or action event for a user.</p>
+
+<p>NOTE: The file downloaded is currently actually a tab-delimited file, not a comma-separated values file.  You can import
+the tab-delimited file into Excel by specifying the delimiter.</p>
+
+<h3 id="event-payloads">Event Payloads</h3>
+
+<p>You can include Event payloads in your impression and action event calls. An Event payload is a small JSON payload with
+your impressions or actions to track other details like query strings, prices paid, etc.</p>
+
+<h3 id="assignment-override">Assignment Override</h3>
+
+<p>Allows you to specify the bucket assignment instead of having us provide it – useful for testing and if you have a
+different system doing the bucket allocation, e.g. an existing AB testing implementation which you want to shadow with
+our AB Testing service before migrating.</p>
+
+          <h1 id="getting-started-with-wasabi">Getting Started with Wasabi</h1>
+
+<p>Installing Wasabi is straightforward. The following steps will install the needed tools, build and run a complete stack.</p>
+
+<h2 id="bootstrapping-your-environment">Bootstrapping Your Environment</h2>
+<pre class="highlight shell"><code><span class="gp">% </span>/usr/bin/ruby <span class="se">\</span>
+  -e <span class="s2">"</span><span class="k">$(</span>curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install<span class="k">)</span><span class="s2">"</span>
+<span class="gp">% </span>brew install git
+<span class="gp">% </span>git clone https://github.com/idea/wasabi.git
+<span class="gp">% </span><span class="nb">cd </span>wasabi
+<span class="gp">% </span>./bin/wasabi.sh bootstrap
+</code></pre>
+
+<p>For OSX, you can get started as shown.</p>
+
+<p>Installed tools include: <a href="http://brew.sh">homebrew 0.9</a>, <a href="https://git-scm.com">git 2</a>,
+<a href="https://maven.apache.org">maven 3</a>, <a href="http://www.oracle.com/technetwork/java/javase/overview/index.html">java 1.8</a>,
+<a href="https://nodejs.org/en">node 6</a> and <a href="https://www.python.org">python 2.7</a>.</p>
+
+<p>Similar tooling will work for Linux and Windows alike. Contribute a patch :)</p>
+
+<h2 id="starting-wasabi">Starting Wasabi</h2>
+<pre class="highlight shell"><code><span class="gp">% </span>./bin/wasabi.sh -b <span class="nb">true </span>start
+...
+<span class="o">===</span> Wasabi successfully started. <span class="o">===</span>
+Wasabi UI: % open http://192.168.99.100:8080
+ping: % curl -i http://192.168.99.100:8080/api/v1/ping
+debug: attach debuger to 192.168.99.100:8180
+
+<span class="gp">% </span>curl -i http://<span class="k">$(</span>docker-machine ip wasabi<span class="k">)</span>:8080/api/v1/ping
+HTTP/1.1 200 OK
+Date: Wed, 25 May 2016 00:25:47 GMT
+...
+X-Application-Id: wasabi-api-20151215171929-SNAPSHOT-development
+Content-Type: application/json
+Transfer-Encoding: chunked
+Server: Jetty<span class="o">(</span>9.3.z-SNAPSHOT<span class="o">)</span>
+
+<span class="o">{</span>
+  <span class="s2">"componentHealths"</span>:[
+    <span class="o">{</span>
+      <span class="s2">"componentName"</span>:<span class="s2">"Experiments Cassandra"</span>,
+      <span class="s2">"healthy"</span>:true
+    <span class="o">}</span>,
+    <span class="o">{</span>
+      <span class="s2">"componentName"</span>:<span class="s2">"MySql"</span>,<span class="s2">"healthy"</span>:true
+    <span class="o">}</span>
+  <span class="o">]</span>,
+  <span class="s2">"wasabiVersion"</span>:<span class="s2">"wasabi-api-20151215171929-SNAPSHOT-development"</span>
+<span class="o">}</span>
+</code></pre>
+
+<p>Now that we have the necessary tools in place let&rsquo;s move on to build and start Wasabi followed by issuing a <em>ping</em>
+command to verify the build:
+<div></div></p>
+
+<p>Congratulations! You are the proud owner of a newly minted and personalized full stack Wasabi instance :)</p>
+
+<p>Ok, enough celebration &hellip; let&rsquo;s get back to business.</p>
+
+<h2 id="stopping-wasabi">Stopping Wasabi</h2>
+<pre class="highlight shell"><code><span class="gp">% </span>./bin/wasabi.sh stop
+</code></pre>
+
+<p>Alas, all good things must come to an end. Let&rsquo;s clean things up a bit stop the newly created Wasabi stack:</p>
+
+<p>At this point in time we now have all the requisite tools installed and as such subsequent invocations of Wasabi will
+start up much more quickly. Additionally there is no further need to include the <em>-b true</em> or <em>&ndash;build true</em> option.</p>
+
+<div></div>
+<pre class="highlight shell"><code><span class="gp">% </span>./bin/wasabi.sh -h
+
+  usage: wasabi.sh <span class="o">[</span>options] <span class="o">[</span>commands]
+
+  options:
+    -b | --build <span class="o">[</span> <span class="nb">true</span> | <span class="nb">false</span> <span class="o">]</span>          : build; default: <span class="nb">false</span>
+    -e | --endpoint <span class="o">[</span> host:port <span class="o">]</span>          : api endpoint; default: localhost:8080
+    -v | --verify <span class="o">[</span> <span class="nb">true</span> | <span class="nb">false</span> <span class="o">]</span>         : verify installation configuration; default: <span class="nb">false</span>
+    -s | --sleep <span class="o">[</span> sleep-time <span class="o">]</span>            : sleep/wait <span class="nb">time </span><span class="k">in </span>seconds; default: 30
+    -h | --help                            : <span class="nb">help </span>message
+
+  commands:
+    bootstrap                              : install dependencies
+    start[:cassandra,mysql,wasabi]         : start all, cassandra, mysql, wasabi
+    <span class="nb">test</span>                                   : <span class="nb">test </span>wasabi
+    stop[:wasabi,cassandra,mysql]          : stop all, wasabi, cassandra, mysql
+    resource[:ui,api,doc,cassandra,mysql]  : open resource api, javadoc, cassandra, mysql
+    status                                 : display resource status
+    remove[:wasabi,cassandra,mysql]        : remove all, wasabi, cassandra, mysql
+    package                                : build deployable packages
+    release[:start,finish]                 : promote release
+</code></pre>
+
+<p>Further, there are a number of additional wasabi.sh options available you should become familiar with:</p>
+
+<h2 id="developing-wasabi">Developing Wasabi</h2>
+
+<p>Let&rsquo;s turn it up to 11. To facilitate developing Wasabi contributions you can easily build and run from source and readily connect to the a fore mentioned infrastructure:</p>
+
+<h3 id="build-and-run-wasabi-server">Build and Run Wasabi Server</h3>
+<pre class="highlight shell"><code><span class="gp">% </span>mvn package
+<span class="gp">% </span>./bin/wasabi.sh start:cassandra,mysql
+<span class="gp">% </span><span class="nv">dmip</span><span class="o">=</span><span class="k">$(</span>docker-machine ip wasabi<span class="k">)</span>
+<span class="gp">% </span><span class="o">(</span><span class="nb">cd </span>modules/main/target; <span class="se">\</span>
+    <span class="nv">WASABI_CONFIGURATION</span><span class="o">=</span><span class="s2">"-DnodeHosts=</span><span class="k">${</span><span class="nv">dmip</span><span class="k">}</span><span class="s2"> -Ddatabase.url.host=</span><span class="k">${</span><span class="nv">dmip</span><span class="k">}</span><span class="s2">"</span> ./wasabi-main-<span class="k">*</span>-SNAPSHOT-development/bin/run<span class="o">)</span> &amp;
+<span class="gp">% </span>curl -i http://localhost:8080/api/v1/ping
+...
+</code></pre>
+
+<div></div>
+
+<blockquote>
+<p>Viewing runtime logs:</p>
+</blockquote>
+<pre class="highlight shell"><code><span class="gp">% </span>tail -f modules/main/target/wasabi-main-<span class="k">*</span>-SNAPSHOT-development/logs/wasabi-main-<span class="k">*</span>-SNAPSHOT-development.log
+</code></pre>
+
+<p>The runtime logs can be accessed executing the following command in a another shell:</p>
+
+<h3 id="build-and-run-wasabi-ui">Build and Run Wasabi UI</h3>
+<pre class="highlight shell"><code><span class="gp">% </span><span class="nb">cd </span>modules/ui
+<span class="gp">% </span>grunt build
+</code></pre>
+
+<blockquote>
+<p>Edit Gruntfile.js with the following change to the apiHostBaseUrlValue value, since you would be running the
+Wasabi server on localhost.</p>
+</blockquote>
+<pre class="highlight javascript"><code><span class="nx">development</span><span class="err">:</span> <span class="p">{</span>
+                <span class="nl">constants</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nl">supportEmail</span><span class="p">:</span> <span class="s1">'you@example.com'</span><span class="p">,</span>
+                    <span class="nx">apiHostBaseUrlValue</span><span class="err">:</span> <span class="s1">'http://localhost:8080/api/v1'</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+</code></pre>
+<pre class="highlight shell"><code><span class="gp">% </span>grunt serve
+</code></pre>
+
+<h3 id="resources">Resources</h3>
+
+<p>The following developer resources are available:</p>
+
+<ul>
+<li>API</li>
+</ul>
+<pre class="highlight shell"><code><span class="gp">% </span>./bin/wasabi.sh resource:api
+</code></pre>
+
+<ul>
+<li>Javadoc</li>
+</ul>
+<pre class="highlight shell"><code><span class="gp">% </span>./bin/wasabi.sh resource:doc
+</code></pre>
+
+<ul>
+<li>UI</li>
+</ul>
+<pre class="highlight shell"><code><span class="gp">% </span>./bin/wasabi.sh resource:ui
+</code></pre>
+
+<ul>
+<li>Cassandra</li>
+</ul>
+<pre class="highlight shell"><code><span class="gp">% </span>./bin/wasabi.sh resource:cassandra
+</code></pre>
+
+<ul>
+<li>MySql</li>
+</ul>
+<pre class="highlight shell"><code><span class="gp">% </span>./bin/wasabi.sh resource:mysql
+</code></pre>
+
+<ul>
+<li>Java Debugger Remote Attach Configuration</li>
+</ul>
+<pre class="highlight shell"><code>-agentlib:jdwp<span class="o">=</span><span class="nv">transport</span><span class="o">=</span>dt_socket,server<span class="o">=</span>y,suspend<span class="o">=</span>n,address<span class="o">=</span>8180
+</code></pre>
+
+<h3 id="stopping-wasabi">Stopping Wasabi</h3>
+<pre class="highlight shell"><code><span class="gp">% </span>./bin/wasabi.sh stop
+</code></pre>
+
+<div></div>
+
+<blockquote>
+<p>Wasabi runtime configuration:</p>
+</blockquote>
+<pre class="highlight shell"><code>-DnodeHosts<span class="o">=</span><span class="k">$(</span>docker-machine ip wasabi<span class="k">)</span> -Ddatabase.url.host<span class="o">=</span><span class="k">$(</span>docker-machine ip wasabi<span class="k">)</span>
+</code></pre>
+
+<p>Now while that was fun, in all likelihood you will be using an IDE to develop Wasabi features. In doing so you need only
+add the aforementioned configuration information to your Wasabi JVM runtime prior to startup:</p>
+
+<div></div>
+
+<p>Awesome! You are well on your way at this point in time.</p>
+
+<h3 id="running-functional-tests">Running Functional Tests</h3>
+<pre class="highlight shell"><code><span class="gp">% </span>./bin/wasabi.sh start <span class="nb">test </span>stop
+</code></pre>
+
+<p>Code changes can readily be verified by running the growing collection of included functional tests:</p>
+
+<h2 id="packaging-and-deploying-wasabi-at-scale">Packaging and Deploying Wasabi at Scale</h2>
+<pre class="highlight shell"><code><span class="gp">% </span>./bin/wasabi.sh package
+<span class="gp">% </span>find ./modules -type f <span class="se">\(</span> -name <span class="s2">"*.rpm"</span> -or -name <span class="s2">"*.deb"</span> <span class="se">\)</span>
+</code></pre>
+
+<p>Wasabi can readily be packaged as installable <em>rpm</em> or <em>deb</em> distributions and deployed at scale as follows:</p>
+
+<p>Note: <a href="http://www.oracle.com/technetwork/java/javase/overview/index.html">Java 8</a> is a runtime dependency</p>
+
+<h2 id="integrating-wasabi">Integrating Wasabi</h2>
+<pre class="highlight xml"><code><span class="nt">&lt;dependency&gt;</span>
+    <span class="nt">&lt;groupId&gt;</span>com.intuit.wasabi<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>wasabi<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>1.0.TBD<span class="nt">&lt;/version&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+</code></pre>
+
+<p>Wasabi is readily embeddable via the following <em>maven</em> dependency GAV family:</p>
+
+<h2 id="recap">Recap</h2>
+
+<p>Ok, that was a ground to cover. Here is a high level overview of the operational elements described above, either directly or indirectly:</p>
+
+<p><img alt="OverView" src="images/getting_started/landscape.png" /></p>
+
+<p>And lastly, as a teaser, here is a technology stack diagram of the elements of which Wasabi is comprised of:</p>
+
+<p><img alt="TechStack" src="images/getting_started/stack.png" /></p>
+
+          <h1 id="hello-world">Hello World</h1>
+
+<h2 id="prerequisites">Prerequisites</h2>
+
+<ul>
+<li>node</li>
+<li>npm</li>
+</ul>
+
+<h2 id="configuration">Configuration</h2>
+
+<p>If you are not running a copy of Wasabi locally on your system at localhost:8080, you will need
+to search for &ldquo;WASABI.setOptions&rdquo; in the source (currently two locations) and then change the server
+and possibly the protocol.  </p>
+
+<p>Also in that same set of code that calls WASABI.setOptions(), you will see a Wasabi application name and
+experiment name referenced.  As you can see, the default code expects an experiment named &ldquo;TestBuyButtonColor&rdquo; in
+an application named &ldquo;MyStore&rdquo; to be defined in the Wasabi server that you are hitting.  There is a script
+named setup.sh that can be run to create and start that experiment.  Before running that script, be source
+to edit it to make sure it points at the Wasabi server you are using (e.g., it might be localhost:8080,
+192.168.99.100:8080, abtesting.intuit.com, etc.) and make sure you put in your login name.</p>
+
+<p>Then just run it like this:</p>
+<pre class="highlight shell"><code><span class="gp">% </span>./setup.sh
+<span class="gp">% </span>npm install
+</code></pre>
+
+<div></div>
+
+<p>If you want, you can create the experiment in the Wasabi UI.  It is named &ldquo;TestBuyButtonColor&rdquo;, is in the (new)
+application &ldquo;MyStore, and should have
+3 buckets, &quot;Control&rdquo; (which should be marked as the control of the experiment), &ldquo;GreenButton&rdquo; and &ldquo;BlueButton&rdquo;.  The
+buckets should have Allocation Percentages that are balanced among the 3 buckets, e.g., 33.33%, 33.33% and 33.34%.  You
+can make those Allocation Percentages easily using the &ldquo;Balance bucket allocations&hellip;&rdquo; link on the Edit experiment
+dialog.
+The experiment should also have 100% Sampling Percentage, an End Date far enough into the future that it won&rsquo;t expire while
+you&rsquo;re using this app.  You should then Start the experiment.</p>
+
+<p>If that experiment and application don&rsquo;t exist, you will see an error on the JavaScript console, but the UI will happily
+continue and show you the default button color.</p>
+
+<h2 id="running-the-demo">Running the Demo</h2>
+<pre class="highlight shell"><code><span class="gp">% </span><span class="nb">cd </span>wasabi-hello-world
+<span class="gp">% </span>node server
+</code></pre>
+
+<p>That will start a node server that will both serve the UI files and act as a REST API server.<br>
+Point your browser to localhost:3000 to bring up the UI.</p>
+
+<h2 id="what-is-demoed">What is Demoed</h2>
+
+<p>You should initially see a screen that says &ldquo;Please Login&rdquo;.  You may enter any user name and password and
+click on Submit.  You will then be &ldquo;logged in&rdquo; to the demo store application.</p>
+
+<p>The interesting thing, however, is that when you were logged in, the app called Wasabi to test if you were in
+the &ldquo;TestBuyButtonColor&rdquo; experiment.  If you were not already assigned to the experiment, you will have been
+assigned to one of the three buckets, randomly.  If you were assigned to the &ldquo;BlueButton&rdquo; bucket, you should see
+blue &ldquo;Buy&rdquo; buttons in the UI.  If you were assigned to the &ldquo;GreenButton&rdquo; bucket, you should see
+green &ldquo;Buy&rdquo; buttons in the UI.  If you were assigned to the &ldquo;Control&rdquo; bucket (or if the experiment wasn&rsquo;t running
+and so you weren&rsquo;t actually assigned to the experiment), you would see the default white button.</p>
+
+<p>When you were shown the screen with the Buy buttons, the app also makes a call to Wasabi to record and &ldquo;impression&rdquo;.
+Then, if you click on one of the Buy buttons, the app will make a call to Wasabi to record an action.  This is
+considered to be the &ldquo;success activity&rdquo; and so the more users who click on the Buy button, the higher the Action Rate
+for that bucket.</p>
+
+<p>You can login to the app as several different users, e.g., &ldquo;user1&rdquo;, &ldquo;user2&rdquo;, etc.  Over the course of several logins,
+you should see blue, green and white Buy buttons.  If you then click on the Buy buttons, maybe only if they are one of the
+colors, you should see the Action Rates diverging.</p>
+
+<h2 id="what-else-can-you-do">What else can you do?</h2>
+
+<p>You can do things like using Segmentation Rules, Pages, Mutual Exclusion, or putting the experiment at different
+places in the app.  You can also experiment with what happens when you stop the experiment and when you terminate it,
+or when you empty or close a bucket.</p>
+
+          <h1 id="integrating-ab-testing-in-your-product">Integrating AB Testing in your product</h1>
+
+<p>With our service, integrating AB testing in your product is as simple as an API call. Really. It&rsquo;s that simple. Let&rsquo;s
+look at the detailed steps involved.</p>
+
+<h2 id="step-1">Step - 1</h2>
+
+<p>Create Experiment in the UI. Click on the &ldquo;Create Experiment&rdquo; button.</p>
+
+<p><img alt="Step 1" src="images/integration/step1.png" /></p>
+
+<h2 id="step-2">Step - 2</h2>
+
+<p>Enter the Experiment name (for example: tto_getdata_autoimport_test), select the Application name (for example: CTG,
+SBG, CG, etc..), enter the Sampling percentage (What % of users do you want to send to this experiment?  This ranges
+from 0.01% to 100%. 100% means all traffic will be sent to this experiment), Start date (when do you want this
+experiment to start collecting data and assign users to buckets) and end date (When do you want this experiment to stop
+collecting data and assigning users to buckets) and a brief description that describes what the experiment is about.
+Note that you will probably not want to enter a value for the Rapid Experiment Max Users as that is a feature only a few
+teams use. Read the help about the feature by clicking on the question mark icon if you are interested.</p>
+
+<p><img alt="Step 2" src="images/integration/step2.png" /></p>
+
+<h2 id="step-3">Step - 3</h2>
+
+<p>Click on the &ldquo;Create Experiment&rdquo; button.</p>
+
+<h2 id="step-4">Step - 4</h2>
+
+<p>Once you finish step 3, you will now start creating buckets (recipes) for your experiment. Ideally, for AB Testing there
+is a control bucket and other buckets that serve as alternatives to control. We&rsquo;ll go ahead and define those now in the
+UI. Click on &ldquo;Add Bucket&rdquo; link in the UI under the &ldquo;Buckets&rdquo; tab.</p>
+
+<p><img alt="Step 4" src="images/integration/step4.png" /></p>
+
+<h2 id="step-5a">Step - 5a</h2>
+
+<p>Enter the Bucket name, Allocation percentage (this is the percentage of people from the sampling percentage that you
+entered in step 2 of creating the experiment. For example: When I enter 50% here, it means that of all users entering
+the experiment 50% will see this version) and a brief description of what the bucket is. Also, make sure you check the
+&ldquo;Control&rdquo; check box if this is the control (Typically bucket A or recipe A. You can come up with whatever name you
+like).</p>
+
+<p><img alt="Step 5a" src="images/integration/step5a.png" /></p>
+
+<h2 id="step-5b">Step - 5b</h2>
+
+<p>Follow the steps in 5a to create another bucket. We now have 2 buckets.</p>
+
+<p><img alt="Step 5b" src="images/integration/step5b.png" /></p>
+
+<p>You are now ready to start running the experiment. However, there are some advanced features that we will go into. If
+you don&rsquo;t need to know these advanced features, feel free to jump right into the code section to see how you can
+integrate AB testing in your code.</p>
+
+<h2 id="step-6">Step - 6</h2>
+
+<p>Setup Mutual Exclusion rules by clicking on the Mutual Exclusion tab. Here you can select all other experiments running
+in your current app which are mutually exclusive. Wasabi will look at the selection and makes sure that the same user is
+not put into mutually exclusive buckets. Click the &ldquo;Add experiments&rdquo; link to start picking experiments.</p>
+
+<p><img alt="Step 6" src="images/integration/step6.png" /></p>
+
+<p>Be sure to read the discussion of Experiment Priorities below, as those only apply when you have chosen to make
+experiments mutually exclusive with each other.</p>
+
+<h2 id="step-7">Step - 7</h2>
+
+<p>You can give some targeting rules for these experiments. You can choose which segment of users will see this experiment.
+If you want to target your experiment to a set of users that qualify certain criteria, you can define the criteria here.
+For example, for my experiment I want to target users whose salary is greater than $80,000 and who live in California,
+my segmentation rule would be: salary &gt; 80000 &amp; state =&ldquo;CA&rdquo;.</p>
+
+<p><img alt="Step 7" src="images/integration/step7.png" /></p>
+
+<p>By default, you should see the &ldquo;form view&rdquo; for entering and editing a rule.  This allows you to enter and edit
+segmentation rules without having to know the expression syntax.  So, for example, to enter the rule mentioned above,
+you would first enter &ldquo;salary&rdquo; in the &ldquo;Parameter name&rdquo; field, then select &ldquo;number&rdquo; from the drop down.  When you do
+that, the selections in the next drop down will be valid choices for number type expressions (&ldquo;equals&rdquo;, &ldquo;does not
+equal&rdquo;, &ldquo;is greater than&rdquo;, &ldquo;is less than&rdquo;, &ldquo;is greater than or equal to&rdquo;, or &ldquo;is less than or equal to&rdquo;).  Select &ldquo;is
+greater than&rdquo;.  Finally, the value to test against, 80000, is entered in the final field.</p>
+
+<p>Since we need another rule, &ldquo;state = CA&rdquo;, we click on &ldquo;Add rule&hellip;&rdquo;.  This adds another row of widgets, including one
+that allows you to select &ldquo;and&rdquo; or &ldquo;or&rdquo; to the left of the second row.  We want to &ldquo;and&rdquo; the rule segments, so we leave
+the default choice of &ldquo;and&rdquo; for the first drop down menu.  We enter &ldquo;state&rdquo; for the &ldquo;Parameter name&rdquo;, select &ldquo;string&rdquo;
+for the type, select &ldquo;equals&rdquo; for the comparison operator, and then enter &ldquo;CA&rdquo; for the comparison value.  Note that you
+actually need to enter the quotes for the &ldquo;CA&rdquo; (the placeholder text gives you a hint for each type of value).</p>
+
+<p>Your segmentation rule tab should now look like this:</p>
+
+<p><img alt="Step 7" src="images/integration/segRuleEdit2.png" /></p>
+
+<p>After you save the dialog, you can edit the experiment again (by clicking on the name of the experiment in the
+Experiments list).  If you then go back to the Segmentation tab, you will see the &ldquo;Test rule&hellip;&rdquo; link is enabled.  By
+clicking on that, you will get a dialog that is created from the rule and allows you to enter values and then test
+whether the rule will be &ldquo;passed&rdquo; or &ldquo;failed&rdquo; given those values.  Here is an example of that dialog:</p>
+
+<p><img alt="Step 7" src="images/integration/segRuleTest.png" /></p>
+
+<p>You can also look at the rule syntax in text form by clicking on the &ldquo;Switch to text view&hellip;&rdquo; link.</p>
+
+<p>Note that the call to assign a user to an experiment that has a segmentation rule is different from the call to assign a
+user to an experiment that does not have one.  That is because in order for the rule to be run successfully, you need to
+pass values for the parameters to the rule in the assignment call.  The values you pass should be for the user you are
+assigning.  For examples of the syntax used when passing the rule values, see the API Calls tab for the experiment.</p>
+
+<h2 id="step-8">Step - 8</h2>
+
+<p>(Entirely Optional) You can add a &ldquo;Page&rdquo; to your experiment. This like a tag that you use to identify a group of
+experiments. A &ldquo;Page&rdquo; can be shared with more than one experiment. This is particularly helpful when you want to allow
+assignment calls for a group of experiments. Without pages you would call assignments on each experiment manually. But
+with pages, you would call the page assignment API and all experiments that this page refers to will get the assignment
+call. In the screenshot below, I gave a page name as &ldquo;checkout_page&rdquo;. The reason for that is this experiment is running
+on my checkout page. There are other experiments running on this page, too, so I will need to add this page name to
+them.</p>
+
+<p><img alt="Step 8" src="images/integration/step8.png" /></p>
+
+<p>See the API Calls tab for examples of the API used when you are assigning a user to multiple experiments using &ldquo;pages&rdquo;
+in one call.</p>
+
+<h2 id="step-9">Step - 9</h2>
+
+<p>Save the experiment by clicking on the &ldquo;Save&rdquo; button.</p>
+
+<h2 id="step-10">Step - 10</h2>
+
+<p>You will find the experiment listed on the homepage. As you will notice, this is still in a draft state. You have to
+manually click the &ldquo;Play&rdquo; button next to it to start the experiment. Go ahead and hit Play.</p>
+
+<p><img alt="Step 10" src="images/integration/step10.png" /></p>
+
+<h2 id="step-11">Step - 11</h2>
+
+<p>The status changes to the green Play icon indicating that the experiment is running. But the experiment won&rsquo;t perform
+assignments and collect data until the start date.</p>
+
+<p><img alt="Step 11" src="images/integration/step11.png" /></p>
+
+<h1 id="advanced-topics">Advanced topics</h1>
+
+<h2 id="experiment-priority">Experiment priority</h2>
+
+<p>In setting up an experiment, there are eligibility rules associated with each experiment.  Some experiments have rules
+which are fairly easy to satisfy (e.g. mobile users only), while others have much more stringent rules (e.g. mobile
+users between the age of 25-39 in states with no income tax and who have previously used TurboTax).  Those experiments
+with more stringent rules will oftentimes have an issue with getting enough users in the experiments for it to reach the
+desired level of statistical confidence.  We want to allow the user a way to manage their experiments such that these
+experiments with more stringent eligibility rules will still be able to acquire enough users to produce meaningful
+results.</p>
+
+<p>In order to support this use case, the AB Testing service allows you to specify a priority order that will be used with
+mutually exclusive experiments to determine which should be checked, first, when deciding to assign a user to the
+experiments.</p>
+
+<p>To set up your priority order, you use the Priority UI.  In the Priority UI, you can change the priority in two ways:</p>
+
+<p>Just type in the number you want in the priority box and the list will re-arrange according to the new priority.
+Manually drag the row you want to the desired priority location and the priority numbers will be updated automatically.
+Priority rankings are only relevant when used in conjunction with mutual exclusion and with the pages feature.  That is
+because you must be trying to assign a user to multiple mutually exclusive experiments before the priority of the
+experiments relative to each other is relevant.  By using these features, you can achieve efficient user assignment
+management.</p>
+
+<p>priority.png</p>
+
+<p>Notice the &ldquo;Edit Sampling %&rdquo; button.  If you want, you can click on that button and the sampling percentage for all the
+experiments in the list will become editable.  This is an easy to adjust the percentages of a group of related
+experiments.</p>
+
+<p>Also notice that if you click on one of the experiments, the other experiments in the list that are mutually exclusive
+with that experiment will be highlighted.</p>
+
+<p>Now that we have created the experiment in the UI, the next step is to integrate this in your code. Let&rsquo;s take a look at
+how this works. Below is a very simple example on how to integrate AB Testing in your code.</p>
+
+<h1 id="code-samples">Code Samples</h1>
+
+<p>JavaScript</p>
+<pre class="highlight javascript"><code>    <span class="c1">//Configuration</span>
+    <span class="kd">var</span> <span class="nx">server</span> <span class="o">=</span> <span class="s2">"abtesting-demo-e2e.a.intuit.com"</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">appName</span> <span class="o">=</span> <span class="s2">"Demo_App"</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">expLabel</span> <span class="o">=</span> <span class="s2">"BuyButton"</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">buckets</span> <span class="o">=</span> <span class="p">[</span> <span class="s2">"BucketA"</span><span class="p">,</span> <span class="s2">"BucketB"</span> <span class="p">];</span>
+    <span class="kd">var</span> <span class="nx">colors</span> <span class="o">=</span> <span class="p">[</span> <span class="s1">'DarkSeaGreen'</span><span class="p">,</span> <span class="s1">'Peru'</span> <span class="p">];</span>
+
+    <span class="c1">// Experiment related Information</span>
+    <span class="kd">var</span> <span class="nx">userID</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">experimentID</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">bucket</span><span class="p">;</span>
+    <span class="p">...</span>
+
+    <span class="nx">userID</span> <span class="o">=</span> <span class="nx">escape</span><span class="p">(</span><span class="nx">$</span><span class="p">(</span><span class="s1">'#userIDext'</span><span class="p">).</span><span class="nx">val</span><span class="p">());</span>
+
+    <span class="kd">var</span> <span class="nx">assignmentCall</span> <span class="o">=</span> <span class="nx">$</span><span class="p">.</span><span class="nx">ajax</span><span class="p">({</span>
+        <span class="na">url</span><span class="p">:</span> <span class="s2">"http://"</span><span class="o">+</span> <span class="nx">server</span>
+            <span class="o">+</span> <span class="s2">"/api/v1/assignments/applications/"</span>
+            <span class="o">+</span> <span class="nx">appName</span>
+            <span class="o">+</span> <span class="s2">"/experiments/"</span>
+            <span class="o">+</span> <span class="nx">expLabel</span>
+            <span class="o">+</span> <span class="s2">"/users/"</span>
+            <span class="o">+</span> <span class="nx">userID</span><span class="p">,</span>
+        <span class="na">dataType</span><span class="p">:</span> <span class="s1">'json'</span><span class="p">,</span>
+        <span class="na">timeout</span><span class="p">:</span> <span class="mi">300</span><span class="p">,</span>
+        <span class="na">success</span><span class="p">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">response</span> <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span>
+            <span class="nx">bucket</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">assignment</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">});</span>
+</code></pre>
+
+<p>Here is a very simple implementation of AB testing in your code. This app displays either a &ldquo;Green&rdquo; or &ldquo;Orange&rdquo; buy
+button depending on the user. I created two buckets in my experiment with a sampling rate of 50% each. Each time a user
+logs in, the app makes an API call to AB testing and provides the application name, experiment label and user ID of the
+current user in the app. A user ID could be anything that you internally use to uniquely identify a user in your system.
+Sometimes, it could be a visitor ID for marketing pages.</p>
+
+<p>In the above code snippet, as soon as the app gets the user ID, it makes a simple ajax call to the assignments API
+provided by the AB Testing service. AB Testing service will evaluate the request and return the bucket the user belongs
+to. It could be one of the buckets that you created during your experiment setup or &ldquo;null&rdquo; indicating that this
+particular user does not qualify for the experiment (if the Sampling Percentage of the experiment is less than 100%).</p>
+
+<p>Best Practice: As you noticed I set a timeout of 300 milliseconds on the ajax call. The reason for this is to make sure
+your users get an uninterrupted experience. We make sure we maintain at least 45 ms response time for all of our APIs,
+but that doesn&rsquo;t include network latency, etc. It is your responsibility to prepare for the unexpected and provide a
+seamless user experience, so you might want to experiment to find the right timeout for your situation. You obviously
+don&rsquo;t want your users to see a spinning mouse on their browsers for an hour, do you?</p>
+
+<p>Now that we have our bucket assignment from AB Testing service, the application then decides what experience to show to
+the user depending on what bucket the user falls into.</p>
+
+<p>Logging impressions and actions:</p>
+
+<p>In order for the AB Testing service to determine which bucket is the winner, it needs to know how many users actually
+saw the experience and if the users took any actions on that experience. Impressions are similar to page views and
+actions are button clicks, hovers, right clicks, checkouts, or whatever metric you want to measure.</p>
+
+<p>The following are the API calls that you would call from your code just like how you called the assignments API to tell
+the AB Testing service about impressions and actions. This information helps the service determine a winner.  These are
+just example calls using the &ldquo;curl&rdquo; command, but you can translate them to whatever language your application is using.</p>
+
+<h3 id="log-an-impression">Log an impression</h3>
+<pre class="highlight shell"><code>curl -v -H <span class="s1">'Content-type: application/json'</span> -d <span class="s1">'{"events":[{"name":"IMPRESSION"}]}'</span> http://abtesting-demo-e2e.a.intuit.com/api/v1/events/applications/<span class="nv">$appName</span>/experiments/<span class="nv">$experimentName</span>/users/<span class="nv">$userId</span>
+</code></pre>
+
+<h3 id="log-an-action">Log an action</h3>
+<pre class="highlight shell"><code>curl -H <span class="s1">'Content-type: application/json'</span> -d <span class="s1">'{"events":[{"name":$actionName}]}'</span> http://abtesting-demo-e2e.a.intuit.com/api/v1/events/applications/<span class="nv">$appName</span>/experiments/<span class="nv">$experimentName</span>/users/<span class="nv">$userId</span>
+</code></pre>
+
+          <h1 id="forming-a-segmentation-rule">Forming a Segmentation Rule</h1>
+
+<p>The Segmentation Rule feature of the AB Testing server allows the experiment owner to target an AB Test to a specific
+user group that fall into a certain category. For example, if you want to target an AB Test only to the people whose
+salary is greater than $80000 and who live in California, the rule would say salary &gt; 80000 &amp; state = &ldquo;CA&rdquo;.</p>
+
+<h2 id="how-do-i-form-the-rules">How do I form the rules?</h2>
+
+<p>Creating rules is simple. Here are some instructions that will help you understand.</p>
+
+<p>The easiest way to create a rule (unless it is a very large rule) is using the Rule Creation UI.  This is the default UI
+you see when you edit an experiment and go to the Segmentation tab:</p>
+
+<p><img alt="Edit Experiment" src="images/segmentation/segRuleEdit.png" /></p>
+
+<p>By default, you should see the &ldquo;form view&rdquo; for entering and editing a rule.  This allows you to enter and edit
+segmentation rules without having to know the expression syntax.  (If you don&rsquo;t see the fields and menus shown above in
+the Segmentation tab, click on the &ldquo;Switch to form view&hellip;&rdquo; link on the bottom right.)</p>
+
+<p>So, for example, to enter the rule mentioned above, you would first enter &ldquo;salary&rdquo; in the &ldquo;Parameter name&rdquo; field, then
+select &ldquo;number&rdquo; from the drop down.  When you do that, the selections in the next drop down will be valid choices for
+number type expressions (&ldquo;equals&rdquo;, &ldquo;does not equal&rdquo;, &ldquo;is greater than&rdquo;, &ldquo;is less than&rdquo;, &ldquo;is greater than or equal to&rdquo;,
+or &ldquo;is less than or equal to&rdquo;).  Select &ldquo;is greater than&rdquo;.  Finally, the value to test against, 80000, is entered in the
+final field.</p>
+
+<p>Since we need another rule, &ldquo;state = CA&rdquo;, we click on &ldquo;Add rule&hellip;&rdquo;.  This adds another row of widgets, including one
+that allows you to select &ldquo;and&rdquo; or &ldquo;or&rdquo; to the left of the second row.  We want to &ldquo;and&rdquo; the rule segments, so we leave
+the default choice of &ldquo;and&rdquo; for the first drop down menu.  We enter &ldquo;state&rdquo; for the &ldquo;Parameter name&rdquo;, select &ldquo;string&rdquo;
+for the type, select &ldquo;equals&rdquo; for the comparison operator, and then enter &ldquo;CA&rdquo; for the comparison value.  Note that you
+actually need to enter the quotes for the &ldquo;CA&rdquo; (the placeholder text gives you a hint for each type of value).</p>
+
+<p>Your segmentation rule tab should now look like this:</p>
+
+<p><img alt="Edit Experiment" src="images/segmentation/segRuleEdit3.png" /></p>
+
+<p>If you now save your experiment and then edit it again, you can use the &ldquo;Test rule&hellip;&rdquo; feature.  This is only enabled
+after you have saved the segmentation rule because the testing feature actually hits the AB Testing service and uses the
+same code that is used when your application calls to assign a user to the experiment.  When you click on that link,
+you&rsquo;ll get the following dialog:</p>
+
+<p><img alt="Test Segmentation Rule" src="images/segmentation/segRuleTest.png" /></p>
+
+<p>Notice that this dialog is created from the rule, e.g., there is a field for a value for &ldquo;salary&rdquo; and one for a value
+for &ldquo;state&rdquo;.  You put example values in those fields like what you will be passing for each user and then you can see
+if, given those values, the rule would pass or fail.</p>
+
+<h2 id="what-type-of-comparisons-can-i-have-in-my-rules">What type of comparisons can I have in my rules?</h2>
+
+<p>We support a variety of comparison &ldquo;operators&rdquo; that can be used to create the rule.  These are what you use to compare
+the values you pass in for each user with the value being tested against in the rule.</p>
+
+<h3 id="for-strings">For Strings</h3>
+
+<table><thead>
+<tr>
+<th>meaning</th>
+<th>operator</th>
+<th>note</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>equals</td>
+<td>=</td>
+<td>this operator ignores upper and lower case</td>
+</tr>
+<tr>
+<td>does not equal</td>
+<td>!=</td>
+<td>this operator ignores upper and lower case</td>
+</tr>
+<tr>
+<td>equals (same case)</td>
+<td>^=</td>
+<td>exact matching including upper and lower case</td>
+</tr>
+<tr>
+<td>matches (regexp)</td>
+<td>=~</td>
+<td>using Java regex syntax*</td>
+</tr>
+<tr>
+<td>does not match (regexp)</td>
+<td>!~</td>
+<td>using Java regex syntax*</td>
+</tr>
+</tbody></table>
+
+<ul>
+<li>more specifically, left =~ right is equivalent to the following Java statement: Pattern.matches(right, left) (see here
+for more documentation).</li>
+</ul>
+
+<p>Examples for String rules:</p>
+
+<p><code class="prettyprint">name = &quot;wasabi&quot;</code></p>
+
+<p><code class="prettyprint">name != &quot;wasabi&quot;</code></p>
+
+<p><code class="prettyprint">name =~ &quot;(.*)srikanth(.*)&quot; //This matches all Strings that contain the word Srikanth. The left hand side is the key and
+the right hand side is the RegEx pattern. The RegEx is standard Java RegEx.</code></p>
+
+<p><code class="prettyprint">name !~ &quot;(.*)srikanth(.*)&quot;</code></p>
+
+<h3 id="for-numerical-values">For numerical values:</h3>
+
+<table><thead>
+<tr>
+<th>meaning</th>
+<th>operator</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>equals</td>
+<td>=</td>
+</tr>
+<tr>
+<td>does not equal</td>
+<td>!=</td>
+</tr>
+<tr>
+<td>greater than</td>
+<td>&gt;</td>
+</tr>
+<tr>
+<td>greater than or equal to</td>
+<td>&gt;=</td>
+</tr>
+<tr>
+<td>less than</td>
+<td>&lt;</td>
+</tr>
+<tr>
+<td>less than equal to</td>
+<td>&lt;=</td>
+</tr>
+</tbody></table>
+
+<h3 id="for-boolean-values">For boolean values:</h3>
+
+<table><thead>
+<tr>
+<th>meaning</th>
+<th>operator</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>is</td>
+<td>=</td>
+</tr>
+<tr>
+<td>is not</td>
+<td>!=</td>
+</tr>
+</tbody></table>
+
+<h3 id="for-date-values">For date values:</h3>
+
+<table><thead>
+<tr>
+<th>meaning</th>
+<th>operator</th>
+<th>note</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>is on, equals</td>
+<td>=</td>
+<td>dates that exactly match (down to the millisecond)</td>
+</tr>
+<tr>
+<td>is before</td>
+<td>&lt;</td>
+<td>left date is before right date</td>
+</tr>
+<tr>
+<td>is after</td>
+<td>&gt;</td>
+<td>left date is after right date</td>
+</tr>
+<tr>
+<td>is not on, does not equal</td>
+<td>!=</td>
+<td>negation of on</td>
+</tr>
+</tbody></table>
+
+<p>The symbols in brackets are the representations of the operators in the logical expression language, referred to in the
+UI as the &ldquo;text view&rdquo; of the rule. Operators can compare any combination of attributes and constants, so both a
+comparison of attributes to constants as well as comparing two different attributes is possible (although that is not
+supported by the form view in the UI).</p>
+
+<p>Conditions can be combined using boolean operators: and (&amp;), or (|), not (!): NOTE: This is not available through the
+&ldquo;form view&rdquo; in the UI.</p>
+
+<h2 id="what-is-the-logical-expression-language">What is the Logical Expression Language</h2>
+
+<p>NOTE: If you can fit your rules into the form view of the UI, you should do so, as it is a much simpler and more
+reliable way to create and edit rules.  There are some features in the string form of the rules that you can create
+using the text view that are not supported in the form view.  If you choose to use some of these, by using them in the
+text view, you will not be able to switch to the form view.  Examples of features you can&rsquo;t use in the form view are
+parentheses and the Boolean &ldquo;not&rdquo; operator.</p>
+
+<p>If you choose to use the form view, you don&rsquo;t need to read the rest of this section.</p>
+
+<p>The Logical Expression Language is what you use to write rules. It is proprietary but very simple and straightforward.
+Here is some helpful information below.</p>
+
+<p>Valid elements in this language are:</p>
+
+<ul>
+<li>string literals (delimited by either a pair of &ldquo; or &rsquo;)</li>
+<li>boolean literals (true or false ignoring case)</li>
+<li>number literals (Java standard notation rules: sequence of digits 0-9, point optional for fractions)</li>
+<li><p>date literals as specified here within &rdquo; or &rsquo;. Valid date literals:</p>
+
+<p><code class="prettyprint">yyyy-MM-dd</code></p>
+
+<p><code class="prettyprint">yyyy-MM-dd&#39;T&#39;HH:mm:ss</code> (NB: this specifies the instant associated with this time in your local time zone)</p></li>
+<li><p>attribute identifiers (any valid variable identifier in Java)</p></li>
+<li><p>relational operators (as described above)</p></li>
+<li><p>logical operators (and, or, not or &amp;, |, !)</p></li>
+</ul>
+
+<p>Then a condition is defined as follows:</p>
+
+<p><code class="prettyprint">condition := (attribute | literal) operator (attribute | literal)</code></p>
+
+<p>Additional restrictions apply in that the types associated with the attribute/literal/operator in the condition have to
+match.</p>
+
+<p>Examples of valid conditions are:</p>
+
+<p><code class="prettyprint">income &gt; 10000</code></p>
+
+<p><code class="prettyprint">income &gt; adjusted_income</code></p>
+
+<p><code class="prettyprint">10000 &lt; income</code></p>
+
+<p><code class="prettyprint">!(age &gt; 65) // the brackets are not necessary but improve readability</code></p>
+
+<p><code class="prettyprint">state = &quot;california&quot;</code></p>
+
+<p>Conditions can be chained by logical operators to create a rule, with parentheses determining precedence. Formally,
+valid rules are defined as follows:</p>
+
+<p><code class="prettyprint">rule := condition | (rule) | !rule | (rule || rule) | (rule &amp;&amp; rule)</code></p>
+
+<p>These can be combined to an expression:</p>
+
+<p><code class="prettyprint">income &gt; 10000 &amp; !(age &gt; 65) | state = &quot;california&quot;</code></p>
+
+<p>Expressions are evaluated from left to right, i.e. there is an implicit left-to-right bracketing. That is, the above
+expression is equivalent to:</p>
+
+<p><code class="prettyprint">(income &gt; 10000 &amp; !(age &gt; 65)) | state = &quot;california&quot;</code></p>
+
+<p>Parentheses can be freely inserted around binary logical operators to change the order of evaluation, creating a
+different expression:</p>
+
+<p><code class="prettyprint">income &gt; 10000 &amp; (!(age &gt; 65) | state = &quot;california&quot;</code></p>
+
+          <h1 id="developing-wasabi">Developing Wasabi</h1>
+
+<h2 id="extending-server-side-modules">Extending Server-side Modules</h2>
+
+<p>Wasabi uses <a href="https://github.com/google/guice">Guice</a> heavily for dependency injection. In order to extend the
+functionality, you will have to implement the appropriate interfaces below, and optionally, extend the corresponding
+module class to bind objects to your implementation.</p>
+
+<h3 id="authentication">Authentication</h3>
+
+<ul>
+<li>Interface: <code class="prettyprint">com.intuit.idea.abntest.authentication.Authentication</code></li>
+</ul>
+
+<p>By implementing this interface, you can include your own authentication scheme. Be sure to update the
+<code class="prettyprint">&lt;authentication.class.name&gt;</code> property in the root pom.xml file with your appropriate class.</p>
+
+<p>The default implementation for the Authentication interface is
+<code class="prettyprint">com.intuit.idea.abntest.authentication.impl.DefaultAuthentication</code>. It reads user credentials from the
+<code class="prettyprint">userDirectory.properties</code> file.</p>
+
+<h3 id="authorization">Authorization</h3>
+
+<ul>
+<li>Interface: <code class="prettyprint">com.intuit.idea.abntest.authorization.Authorization</code></li>
+</ul>
+
+<p>Implement this interface to include your own authorization scheme. Be sure to update the <code class="prettyprint">&lt;authorization.class.name&gt;</code>
+property in the root pom.xml file with your appropriate class.</p>
+
+<p>If you extended the <code class="prettyprint">com.intuit.idea.abntest.authentication.AuthenticationModule</code> Guice module with your own
+implementation, then you must extend the <code class="prettyprint">com.intuit.idea.abntest.authorization.AuthorizationModule</code> Guice module as
+well in order to install your appropriate authenticaton module.</p>
+
+<p>By implementing this interface, you can include your own authorization scheme. Be sure to update the
+<code class="prettyprint">&lt;authorization.class.name&gt;</code> property in the root pom.xml file with your appropriate class.</p>
+
+<h3 id="real-time-data-exportation">Real-Time Data Exportation</h3>
+
+<p>Wasabi allows for the exportation of data in real-time as events occur. Two types of data types can are exported:
+assignment data, and impression/action data.</p>
+
+<h4 id="assignment-data">Assignment data</h4>
+
+<p>Whenever an assignment data object is created/modified, you can export that event in the following way:</p>
+
+<div></div>
+
+<ul>
+<li>Create a class that implements the AssignmentIngestionExecutor interface, and will execute when an
+AssignmentEnvelopePayload object is received:</li>
+</ul>
+<pre class="highlight java"><code><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">mypackage</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.intuit.idea.abntest.assignment.AssignmentIngestionExecutor</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.intuit.idea.abntest.assignmentobjects.AssignmentEnvelopePayload</span><span class="o">;</span>
+
+<span class="cm">/**
+ * MyIngestionExecutor
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyIngestionExecutor</span> <span class="kd">implements</span> <span class="n">AssignmentIngestionExecutor</span> <span class="o">{</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">NAME</span> <span class="o">=</span> <span class="s">"MYINGESTOR"</span><span class="o">;</span>
+
+    <span class="c1">// Override the methods below appropriately</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="n">execute</span><span class="o">(</span><span class="n">AssignmentEnvelopePayload</span> <span class="n">assignmentEnvelopePayload</span><span class="o">)</span> <span class="o">{</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">int</span> <span class="n">queueLength</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="mi">0</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">String</span> <span class="n">name</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre>
+
+<div></div>
+
+<ul>
+<li>Extend the AssignmentsModule class to create a thread pool and bind your IngestmentExecutor class:</li>
+</ul>
+<pre class="highlight java"><code><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">mypackage</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.google.common.util.concurrent.ThreadFactoryBuilder</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.concurrent.LinkedBlockingQueue</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.concurrent.ThreadPoolExecutor</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">com</span><span class="o">.</span><span class="na">google</span><span class="o">.</span><span class="na">inject</span><span class="o">.</span><span class="na">name</span><span class="o">.</span><span class="na">Names</span><span class="o">.</span><span class="na">named</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">java</span><span class="o">.</span><span class="na">util</span><span class="o">.</span><span class="na">concurrent</span><span class="o">.</span><span class="na">TimeUnit</span><span class="o">.</span><span class="na">MILLISECONDS</span><span class="o">;</span>
+
+<span class="cm">/**
+ * Created by tislam1 on 6/21/16.
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyAssignmentsModule</span> <span class="kd">extends</span> <span class="n">AssignmentsModule</span> <span class="o">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">protected</span> <span class="kt">void</span> <span class="n">configure</span><span class="o">()</span> <span class="o">{</span>
+        <span class="kd">super</span><span class="o">.</span><span class="na">configure</span><span class="o">();</span>
+
+        <span class="c1">// bind the threadpool executor to your ingestor's threadpool</span>
+        <span class="n">bindMyIngestionThreadPool</span><span class="o">();</span>
+
+        <span class="c1">// add your IngestionExecutor's class to the mapBinder</span>
+        <span class="n">mapBinder</span><span class="o">.</span><span class="na">addBinding</span><span class="o">(</span><span class="n">MyIngestionExecutor</span><span class="o">.</span><span class="na">NAME</span><span class="o">).</span><span class="na">to</span><span class="o">(</span><span class="n">MyIngestionExecutor</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="kd">private</span> <span class="kt">void</span> <span class="n">bindMyIngestionThreadPool</span><span class="o">()</span> <span class="o">{</span>
+        <span class="c1">// create an in-memory queue</span>
+        <span class="n">LinkedBlockingQueue</span><span class="o">&lt;</span><span class="n">Runnable</span><span class="o">&gt;</span> <span class="n">myQueue</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LinkedBlockingQueue</span><span class="o">&lt;&gt;();</span>
+        <span class="c1">// set your threadpool size</span>
+        <span class="kt">int</span> <span class="n">myThreadPoolSize</span> <span class="o">=</span> <span class="mi">5</span><span class="o">;</span>
+        <span class="n">ThreadPoolExecutor</span> <span class="n">myThreadPoolExecutor</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ThreadPoolExecutor</span><span class="o">(</span><span class="n">myThreadPoolSize</span><span class="o">,</span>
+                <span class="n">myThreadPoolSize</span><span class="o">,</span> <span class="mi">0L</span><span class="o">,</span> <span class="n">MILLISECONDS</span><span class="o">,</span> <span class="n">myQueue</span><span class="o">,</span> <span class="k">new</span> <span class="n">ThreadFactoryBuilder</span><span class="o">()</span>
+                <span class="o">.</span><span class="na">setNameFormat</span><span class="o">(</span><span class="s">"MyIngestion-%d"</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">setDaemon</span><span class="o">(</span><span class="kc">true</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">build</span><span class="o">());</span>
+        <span class="n">bind</span><span class="o">(</span><span class="n">ThreadPoolExecutor</span><span class="o">.</span><span class="na">class</span><span class="o">).</span><span class="na">annotatedWith</span><span class="o">(</span><span class="n">named</span><span class="o">(</span><span class="s">"my.assignmentThreadPoolExecutor"</span><span class="o">)).</span><span class="na">toInstance</span><span class="o">(</span><span class="n">myThreadPoolExecutor</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre>
+
+<div></div>
+
+<ul>
+<li>Modify the EventsModule class&rsquo;s configure() method to install the MyAssignmentsModule class.</li>
+</ul>
+
+<h3 id="impressions-actions-data">Impressions/Actions data</h3>
+
+<ul>
+<li>Interface:</li>
+</ul>
+
+<h2 id="extending-the-ui-plugin-mechanism">Extending the UI Plugin Mechanism</h2>
+
+<p>Overview
+Code/Template Plugin Mechanism
+Configuration Mechanism
+Branding Mechanism
+Appendix</p>
+
+<h3 id="overview">Overview</h3>
+
+<p>In order to create a version of the Wasabi UI that we could Open Source, we removed several features that we felt either didn’t make sense to be open sourced or couldn’t be.  However, when we create a version of Wasabi that is for Intuit use, we want to put those features back (or most of them).  In order to handle that in as general a manner as possible, we created several mechanisms that would have no effect on the UI unless activated by some configuration.  The generic open source version would then not have the features or branding, but by putting some configuration in place, the Intuit version would.  That also makes the plugin capability a feature that could be used by other adopters of our open source version.</p>
+
+<p>This document describes the plugin mechanisms and the changes that would need to be made to put the Intuit features back in.</p>
+
+<h3 id="code-template-plugin-mechanism">Code/Template Plugin Mechanism</h3>
+
+<h4 id="motivation">Motivation</h4>
+
+<p>One of the features we took out and wanted to put back in was a feature in the UI that allowed the user to configure the Personalization feature.  This is basically a reference to a service that Wasabi will turn around and call to make decisions about bucketing, that is, rather than using our usual rules of using the bucket allocation percentages to determine whether a user is in one bucket or another, the service can use whatever criteria it wants to make that decision.</p>
+
+<p>The UI allowed the user to turn Personalization on or off (“make this a personalization experiment”) and if on, to configure the name of the model (the service) and a version number of the model.  These features in the UI were presented in one of the tabs on the Draft experiment dialog and on the Running experiment dialog (different implementations).</p>
+
+<h4 id="implementation">Implementation</h4>
+
+<p>In order to support putting that feature back in, we added a tab called Plugins in the Draft and Running dialogs.  We then added the ability to specify, through configuration, a template for the UI of each of the features to be added as well as the controller code for the feature.  When a feature is configured for the Draft dialog, for example, a button is created in the Plugins tab.  If the user clicks on that button, a dialog appears and shows the template, using the configured controller.</p>
+
+<h4 id="use">Use</h4>
+<pre class="highlight javascript"><code><span class="kd">var</span> <span class="nx">wasabiUIPlugins</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s2">"pluginType"</span><span class="p">:</span> <span class="s2">"contributeDraftTab"</span><span class="p">,</span>
+        <span class="s2">"displayName"</span><span class="p">:</span> <span class="s2">"Personalization"</span><span class="p">,</span>
+        <span class="s2">"ctrlName"</span><span class="p">:</span> <span class="s2">"PersonalizationCtrl"</span><span class="p">,</span>
+        <span class="s2">"ctrl"</span><span class="p">:</span> <span class="s2">"plugins/personalization/ctrl.js"</span><span class="p">,</span>
+        <span class="s2">"templateUrl"</span><span class="p">:</span> <span class="s2">"plugins/personalization/template.html"</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">"pluginType"</span><span class="p">:</span> <span class="s2">"contributeDetailsTab"</span><span class="p">,</span>
+        <span class="s2">"displayName"</span><span class="p">:</span> <span class="s2">"Personalization"</span><span class="p">,</span>
+        <span class="s2">"ctrlName"</span><span class="p">:</span> <span class="s2">"PersonalizationDetailsCtrl"</span><span class="p">,</span>
+        <span class="s2">"ctrl"</span><span class="p">:</span> <span class="s2">"plugins/personalization/detailsCtrl.js"</span><span class="p">,</span>
+        <span class="s2">"templateUrl"</span><span class="p">:</span> <span class="s2">"plugins/personalization/detailsTemplate.html"</span>
+    <span class="p">}</span>
+<span class="p">];</span>
+</code></pre>
+
+<p>In order to contribute a plugin to one of the dialogs (Draft or Running), you need to add some configuration to the file modules/ui/app/scripts/plugins.js . The configuration looks like this:</p>
+
+<div></div>
+
+<p>This file exists in vanilla open source Wasabi, but it simply contains an empty array.</p>
+
+<p>The configuration above defines two plugins.  The first contributes a plugin to the dialog for editing a Draft experiment.  The second contributes a plugin to the dialog for editing Running experiments.  In both cases, the Plugins tab will have a button with the label “Personalization” (the “displayName”).  The last piece of configuration defines the name of the controller created by the code referenced by the “ctrl” parameter.  Of course, in order for this configuration to work, the files must exist beneath the modules/ui/app/scripts/plugins directory.</p>
+
+<p>Note that we have also used this mechanism to implement the plugging in of click tracking in the Wasabi UI itself.  We needed to remove that because we use our WebSDK to Trinity and that isn’t externally visible.  This consists of creating an object that has 3 methods, init(), reset() and trackEvent(eventName, parm1, parm2, parm3, parm4).  In conjunction with the WebSDK, we also added a plugin configuration that is mainly there just to load the WebSDK library.  Here is the configuration:</p>
+<pre class="highlight javascript"><code>    <span class="p">{</span>
+        <span class="s2">"pluginType"</span><span class="err">:</span> <span class="s2">"contributeClickTrackingLib"</span><span class="p">,</span>
+        <span class="s2">"ctrl"</span><span class="err">:</span> <span class="s2">"https://dwum8argi892z.cloudfront.net/js/cdc_lib_min_latest.js"</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">"pluginType"</span><span class="p">:</span> <span class="s2">"contributeClickTracking"</span><span class="p">,</span>
+        <span class="s2">"displayName"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+        <span class="s2">"ctrlName"</span><span class="p">:</span> <span class="s2">"TrackingFactory"</span><span class="p">,</span>
+        <span class="s2">"ctrl"</span><span class="p">:</span> <span class="s2">"plugins/tracking/factory.js"</span><span class="p">,</span>
+        <span class="s2">"templateUrl"</span><span class="p">:</span> <span class="s2">""</span>
+    <span class="p">}</span>
+</code></pre>
+
+<p>By simply configuring a plugin of a type that isn’t used anywhere, but registering the WebSDK library as the “ctrl”, the file will be loaded when the plugins are loaded.  Then the “contributeClickTracking” will be loaded, which will create an object that is called by the generic code in UtilitiesFactory and app.js.</p>
+
+<p>If you look at the code, notice that there needed to be some code to handle the fact that, while we start the loading of the WebSDK (the cdc_lib_min_latest.js file above) first, it may not have loaded by the time the TrackingFactory code is called, so we need to handle that with some setTimeouts.</p>
+
+<p>See the appendix for an example of the code and templates.</p>
+
+<h4 id="technical-details">Technical Details</h4>
+
+<p>In order to implement this, we needed to load the controller code dynamically from the configuration at the time the app is loaded into the browser.  This is done by the code that creates the Angular JS app for the UI in modules/ui/app/scripts/app.js .  The plugins.js file is referenced by index.html and so that JavaScript object (an array of objects) will be loaded.  But then we iterate over the array and save the configuration in a global array (in $rootScope) and then use the UtilitiesFactory.loadExternalFile() method to cause the browser to pull the controller code in and load the object.</p>
+
+<p>Now, when each of the dialogs is created, the $rootScope.plugins array is available to the controller and is used to create whatever buttons are necessary on the Plugins tab.  When the user clicks on the button, the openPluginModal() method is called.  That method displays a modal dialog using the configured template and controller code, hence presenting the plugin and allowing it to implement its own UI.</p>
+
+<h3 id="configuration-mechanism">Configuration Mechanism</h3>
+
+<h4 id="motivation">Motivation</h4>
+
+<p>Several of the things we needed configurable didn’t need to be as complex as a plugin.  One of them was an error message that displayed our support email as part of the message.  Obviously, we didn’t want our support email in the open source version, but we wanted to be able to put it back for the Intuit version.</p>
+
+<h4 id="implementation">Implementation</h4>
+
+<p>Since this involved a simple, configurable piece of text, we implemented it by pulling in a grunt plugin called grunt-ng-constant (or ngconstant).  This plugin allows you to configure values that will be placed in a generated Angular JS module.  That file is included by index.html, causing the module to be instantiated, and then the module just has to be injected into the other parts of your Angular JS app.</p>
+
+<p>We configured ngconstant to run in the grunt build and generate a file named modules/ui/app/scripts/config.js from an input file at modules/ui/constants.json .  The config.js file contains the configured values, including “supportEmail”, in a module definition.  That value is injected into the ExperimentDetailsCtrl and used in an error message, if it exists.</p>
+
+<p>At the same time, we changed the configuration of the URL of the backend server to be also defined using the ngconstant mechanism.</p>
+
+<h4 id="use">Use</h4>
+<pre class="highlight javascript"><code><span class="p">{</span>
+    <span class="s2">"supportEmail"</span><span class="err">:</span> <span class="s2">""</span><span class="p">,</span>
+    <span class="s2">"apiHostBaseUrlValue"</span><span class="err">:</span> <span class="s2">"http://localhost:8080/api/v1"</span>
+<span class="p">}</span>
+</code></pre>
+
+<p>In order to configure a support email for Wasabi, you simply edit the modules/ui/constants.json file which looks like this by default:</p>
+
+<div></div>
+<pre class="highlight javascript"><code><span class="p">{</span>
+  <span class="s2">"supportEmail"</span><span class="err">:</span> <span class="s2">"abtesting.support@intuit.com"</span><span class="p">,</span>
+  <span class="s2">"apiHostBaseUrlValue"</span><span class="err">:</span> <span class="s2">"http://localhost:8080/api/v1"</span>
+<span class="p">}</span>
+</code></pre>
+
+<p>This will cause no support email to be displayed in the error message.  If, instead, it looked like this:</p>
+
+<p>Then the support email will be displayed in that error message.</p>
+
+<h4 id="technical-details">Technical Details</h4>
+
+<p>One thing of note, in order to make it possible to be able to customize the backend server URL after the build (e.g.,
+  during deployment), we needed to make sure the config.js file was not minimized into the wasabi.js file during the
+  grunt build.  We also needed to make sure it was loaded by the index.html .</p>
+
+<p>In order to keep the config.js file from being included in the combined and minified file, we make sure we call the
+ngconstant grunt task after the task that creates that minified file and we also make sure the file is generated into t
+he dist directory.</p>
+
+<p>In order to put the include of config.js into the index.html, we pulled in another grunt plugin, file_append, and cause
+it to add a <code class="prettyprint">&lt;script&gt;</code> tag to pull in the config.js file at the very end of the build.</p>
+
+<h3 id="branding-mechanism">Branding Mechanism</h3>
+
+<h4 id="motivation">Motivation</h4>
+
+<p>Another area where we needed to pull something out of the open source version of the UI, but want to be able to put it back, is with the Intuit and IDEA branding on the login page and the header area of all the other pages.  This involves both some images and some CSS (to adjust the position of the login form, for example).</p>
+
+<h4 id="implementation">Implementation</h4>
+
+<p>Since we needed to override some CSS to make the positioning work, and to pull in the images, we added a file that will be loaded in the open source version by index.html, but which is empty.  By putting the necessary image files in the right place and then putting the necessary CSS to adjust the login form and the header and to invoke those images in the file modules/ui/app/styles/branding.scss , you can customize those parts of the UI.</p>
+
+<h4 id="use">Use</h4>
+<pre class="highlight css"><code><span class="nt">header</span> <span class="p">{</span>
+  <span class="err">.brandBanner</span> <span class="err">{</span>
+       <span class="err">.brandContent</span> <span class="err">{</span>
+        <span class="nl">background</span><span class="p">:</span> <span class="m">#373737</span> <span class="sx">url(images/idea_horizontal_reversed_46.png)</span> <span class="nb">no-repeat</span> <span class="nb">right</span> <span class="nb">center</span> <span class="cp">!important</span><span class="p">;</span>
+     <span class="p">}</span>
+  <span class="err">}</span>
+<span class="err">}</span>
+
+<span class="nc">.signinBox</span> <span class="p">{</span>
+    <span class="err">div.signinLogo</span> <span class="err">{</span>
+        <span class="nl">margin-left</span><span class="p">:</span> <span class="m">0</span> <span class="cp">!important</span><span class="p">;</span>
+        <span class="nl">position</span><span class="p">:</span> <span class="nb">relative</span> <span class="cp">!important</span><span class="p">;</span>
+        <span class="nl">padding-top</span><span class="p">:</span> <span class="m">5px</span> <span class="cp">!important</span><span class="p">;</span>
+        <span class="nl">padding-left</span><span class="p">:</span> <span class="m">175px</span> <span class="cp">!important</span><span class="p">;</span>
+        <span class="nl">background</span><span class="p">:</span> <span class="no">white</span> <span class="sx">url(images/intuit_signin.png)</span> <span class="nb">no-repeat</span> <span class="m">-10px</span> <span class="m">1px</span> <span class="cp">!important</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="err">}</span>
+</code></pre>
+
+<p>In the case of our Intuit/IDEA branding, you need to put CSS like this in the branding.scss file (note: it is actually SCSS, which is processed by compass into a CSS file at build time):</p>
+
+<div></div>
+
+<p>Notice the copious use of “!important”.  That is a CSS feature that causes those settings to override any equivalent setting that had already been specified in a previous CSS file.  That is necessary because the branding.scss file content is pulled in by index.html after the normal CSS file, so we need to override any existing settings to make sure our customizations are used.  Also notice the references to the two image files.  They must be put in modules/ui/app/images .</p>
+
+<h3 id="appendix">Appendix</h3>
+
+<p>Note: you may need to be careful about copying and pasting this code, as newlines may be added in odd places.</p>
+
+<blockquote>
+<p>plugins/personalization/ctrl.js</p>
+</blockquote>
+<pre class="highlight javascript"><code><span class="s1">'use strict'</span><span class="p">;</span>
+
+<span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s1">'wasabi.controllers'</span><span class="p">).</span>
+    <span class="nx">controllerProvider</span><span class="p">.</span><span class="nx">register</span><span class="p">(</span><span class="s1">'PersonalizationCtrl'</span><span class="p">,</span> <span class="p">[</span><span class="s1">'$scope'</span><span class="p">,</span> <span class="s1">'experiment'</span><span class="p">,</span> <span class="s1">'UtilitiesFactory'</span><span class="p">,</span> <span class="s1">'$modalInstance'</span><span class="p">,</span>
+        <span class="kd">function</span> <span class="p">(</span><span class="nx">$scope</span><span class="p">,</span> <span class="nx">experiment</span><span class="p">,</span> <span class="nx">UtilitiesFactory</span><span class="p">,</span> <span class="nx">$modalInstance</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">$scope</span><span class="p">.</span><span class="nx">experiment</span> <span class="o">=</span> <span class="nx">experiment</span><span class="p">;</span>
+            <span class="nx">$scope</span><span class="p">.</span><span class="nx">personalizationFormSubmitted</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+
+            <span class="nx">$scope</span><span class="p">.</span><span class="nx">experiment</span><span class="p">.</span><span class="nx">isPersonalizationEnabled</span> <span class="o">=</span> <span class="p">(</span><span class="nx">experiment</span> <span class="o">&amp;&amp;</span> <span class="nx">experiment</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">(</span><span class="s1">'isPersonalizationEnabled'</span><span class="p">)</span> <span class="p">?</span> <span class="nx">experiment</span><span class="p">.</span><span class="nx">isPersonalizationEnabled</span> <span class="p">:</span> <span class="kc">false</span><span class="p">);</span>
+
+            <span class="nx">$scope</span><span class="p">.</span><span class="nx">savePersonalization</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">isFormInvalid</span><span class="p">,</span> <span class="nx">theForm</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">isFormInvalid</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">$modalInstance</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+                <span class="p">}</span>
+                <span class="k">else</span> <span class="p">{</span>
+                    <span class="nx">$scope</span><span class="p">.</span><span class="nx">personalizationFormSubmitted</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">};</span>
+
+            <span class="nx">$scope</span><span class="p">.</span><span class="nx">cancel</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                <span class="nx">$modalInstance</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+            <span class="p">};</span>
+        <span class="p">}</span>
+<span class="p">]);</span>
+</code></pre>
+
+<blockquote>
+<p>plugins/personalization/template.html</p>
+</blockquote>
+<pre class="highlight html"><code><span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">"personalizationModal"</span> <span class="na">class=</span><span class="s">"modalDialog"</span> <span class="na">style=</span><span class="s">"width: 700px; left: 0;"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;h1&gt;</span>Personalization<span class="nt">&lt;/h1&gt;</span>
+    <span class="nt">&lt;form</span> <span class="na">name=</span><span class="s">"personalizationForm"</span> <span class="na">novalidate</span> <span class="na">ng-submit=</span><span class="s">"savePersonalization(personalizationForm.$invalid, personalizationForm);"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"dialogContent"</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;div&gt;</span>
+                <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"formLayout"</span> <span class="na">ng-show=</span><span class="s">"!readOnly"</span><span class="nt">&gt;</span>
+                    <span class="nt">&lt;li&gt;</span>
+                        <span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"width: 100%;"</span><span class="nt">&gt;</span>
+                            <span class="nt">&lt;input</span> <span class="na">id=</span><span class="s">"chkPersonalization"</span> <span class="na">name=</span><span class="s">"chkPersonalization"</span> <span class="na">type=</span><span class="s">"checkbox"</span> <span class="na">ng-model=</span><span class="s">"experiment.isPersonalizationEnabled"</span> <span class="na">ensure-personalization-model</span> <span class="na">ng-checked=</span><span class="s">"{{experiment.isPersonalizationEnabled}}"</span><span class="nt">/&gt;</span><span class="ni">&amp;nbsp;&amp;nbsp;</span><span class="nt">&lt;label</span>
+                            <span class="na">for=</span><span class="s">"chkPersonalization"</span> <span class="na">class=</span><span class="s">"checkboxLabel"</span> <span class="na">name=</span><span class="s">"isPersonalizationEnabled"</span><span class="nt">&gt;</span>This is a personalization experiment<span class="nt">&lt;/label&gt;</span>
+
+                        <span class="nt">&lt;/div&gt;</span>
+                    <span class="nt">&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"layout8020"</span> <span class="na">ng-show=</span><span class="s">"experiment.isPersonalizationEnabled"</span><span class="nt">&gt;</span>
+                        <span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"width: 320px;"</span><span class="nt">&gt;</span>
+                            <span class="nt">&lt;label&gt;</span>Model Name<span class="nt">&lt;/label&gt;</span>
+                            <span class="nt">&lt;input</span> <span class="na">id=</span><span class="s">"modelName"</span> <span class="na">name=</span><span class="s">"modelName"</span> <span class="na">ng-model=</span><span class="s">"experiment.modelName"</span> <span class="na">class=</span><span class="s">"form-control text"</span> <span class="na">ng-pattern=</span><span class="s">"/^[_\-\$A-Za-z][_\-\$A-Za-z0-9]*$/"</span> <span class="na">ng-maxlength=</span><span class="s">"64"</span><span class="nt">/&gt;</span><span class="ni">&amp;nbsp;&amp;nbsp;</span>
+                            <span class="c">&lt;!-- Validation error --&gt;</span>
+                            <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"error"</span>
+                                <span class="na">ng-show=</span><span class="s">"personalizationForm.chkPersonalization.$modelValue == true &amp;&amp;
+                                ((personalizationForm.modelName.$dirty &amp;&amp; personalizationForm.modelName.$invalid &amp;&amp;
+                                                !personalizationForm.modelName.$focused) ||
+                                        personalizationFormSubmitted)"</span><span class="nt">&gt;</span>
+                                <span class="nt">&lt;small</span> <span class="na">class=</span><span class="s">"fieldError"</span>
+                                    <span class="na">ng-show=</span><span class="s">"personalizationForm.chkPersonalization.$error.ensurePersonalizationModel &amp;&amp; !personalizationForm.modelName.$error.pattern"</span><span class="nt">&gt;</span>
+                                    Model name required.
+                                <span class="nt">&lt;/small&gt;</span>
+                            <span class="nt">&lt;/div&gt;</span>
+                            <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"error"</span>
+                                <span class="na">ng-show=</span><span class="s">"(personalizationForm.modelName.$dirty &amp;&amp; personalizationForm.modelName.$invalid &amp;&amp;
+                                        !personalizationForm.modelName.$focused) ||
+                                        (personalizationFormSubmitted &amp;&amp;
+                                        (personalizationForm.modelName.$error.required || personalizationForm.modelName.$error.pattern || personalizationForm.modelName.$error.maxlength))"</span><span class="nt">&gt;</span>
+                                <span class="nt">&lt;small</span> <span class="na">class=</span><span class="s">"fieldError"</span>
+                                    <span class="na">ng-show=</span><span class="s">"personalizationForm.modelName.$error.pattern"</span><span class="nt">&gt;</span>
+                                    Invalid model name.
+                                <span class="nt">&lt;/small&gt;</span>
+                                <span class="nt">&lt;small</span> <span class="na">class=</span><span class="s">"fieldError"</span>
+                                    <span class="na">ng-show=</span><span class="s">"personalizationForm.modelName.$error.maxlength"</span><span class="nt">&gt;</span>
+                                    Model name cannot be longer than 64 characters.
+                                <span class="nt">&lt;/small&gt;</span>
+                            <span class="nt">&lt;/div&gt;</span>
+                        <span class="nt">&lt;/div&gt;</span>
+                        <span class="nt">&lt;div&gt;</span>
+                            <span class="nt">&lt;label&gt;</span>Model Version<span class="nt">&lt;/label&gt;</span>
+                            <span class="nt">&lt;input</span> <span class="na">id=</span><span class="s">"modelVersion"</span> <span class="na">name=</span><span class="s">"modelVersion"</span> <span class="na">ng-model=</span><span class="s">"experiment.modelVersion"</span> <span class="na">class=</span><span class="s">"form-control text"</span> <span class="na">ng-pattern=</span><span class="s">"/^[_\-\$A-Za-z0-9][_\.\-\$A-Za-z0-9]*$/"</span> <span class="na">ng-maxlength=</span><span class="s">"64"</span> <span class="nt">/&gt;</span>
+                            <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"error"</span>
+                                <span class="na">ng-show=</span><span class="s">"(personalizationForm.modelVersion.$dirty &amp;&amp; personalizationForm.modelVersion.$invalid &amp;&amp;
+                                        !personalizationForm.modelVersion.$focused) || personalizationFormSubmitted"</span><span class="nt">&gt;</span>
+                                <span class="nt">&lt;small</span> <span class="na">class=</span><span class="s">"fieldError"</span>
+                                    <span class="na">ng-show=</span><span class="s">"personalizationForm.modelVersion.$error.pattern"</span><span class="nt">&gt;</span>
+                                    Invalid model version.
+                                <span class="nt">&lt;/small&gt;</span>
+                                <span class="nt">&lt;small</span> <span class="na">class=</span><span class="s">"fieldError"</span>
+                                    <span class="na">ng-show=</span><span class="s">"personalizationForm.modelVersion.$error.maxlength"</span><span class="nt">&gt;</span>
+                                    Model version cannot be longer than 64 characters.
+                                <span class="nt">&lt;/small&gt;</span>
+                            <span class="nt">&lt;/div&gt;</span>
+                        <span class="nt">&lt;/div&gt;</span>
+                    <span class="nt">&lt;/li&gt;</span>
+                <span class="nt">&lt;/ul&gt;</span>
+                <span class="nt">&lt;div</span> <span class="na">ng-show=</span><span class="s">"readOnly"</span><span class="nt">&gt;</span>
+                    <span class="nt">&lt;label</span> <span class="na">ng-show=</span><span class="s">"experiment.isPersonalizationEnabled"</span><span class="nt">&gt;</span>Personalization is enabled for this experiment<span class="nt">&lt;/label&gt;</span>
+                    <span class="nt">&lt;label</span> <span class="na">ng-show=</span><span class="s">"!experiment.isPersonalizationEnabled"</span><span class="nt">&gt;</span>Personalization is <span class="nt">&lt;b&gt;</span>not<span class="nt">&lt;/b&gt;</span> enabled for this experiment<span class="nt">&lt;/label&gt;</span>
+                <span class="nt">&lt;/div&gt;</span>
+            <span class="nt">&lt;/div&gt;</span>
+            <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"buttonBar"</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;button</span> <span class="na">id=</span><span class="s">"btnSavePersonalization"</span> <span class="na">class=</span><span class="s">"blue cancel"</span><span class="nt">&gt;</span>Save<span class="nt">&lt;/button&gt;</span>
+                <span class="nt">&lt;button</span> <span class="na">id=</span><span class="s">"btnSavePersonalizationCancel"</span> <span class="na">class=</span><span class="s">"cancel"</span> <span class="na">onclick=</span><span class="s">"return false;"</span> <span class="na">ng-click=</span><span class="s">"cancel();"</span><span class="nt">&gt;</span>Cancel<span class="nt">&lt;/button&gt;</span>
+            <span class="nt">&lt;/div&gt;</span>
+        <span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;/form&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</code></pre>
+
+<blockquote>
+<p>plugins/personalization/detailsCtrl.js</p>
+</blockquote>
+<pre class="highlight javascript"><code><span class="s1">'use strict'</span><span class="p">;</span>
+
+<span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s1">'wasabi.controllers'</span><span class="p">).</span>
+    <span class="nx">controllerProvider</span><span class="p">.</span><span class="nx">register</span><span class="p">(</span><span class="s1">'PersonalizationDetailsCtrl'</span><span class="p">,</span> <span class="p">[</span><span class="s1">'$scope'</span><span class="p">,</span> <span class="s1">'experiment'</span><span class="p">,</span> <span class="s1">'UtilitiesFactory'</span><span class="p">,</span> <span class="s1">'$modalInstance'</span><span class="p">,</span> <span class="s1">'ExperimentsFactory'</span><span class="p">,</span>
+        <span class="kd">function</span> <span class="p">(</span><span class="nx">$scope</span><span class="p">,</span> <span class="nx">experiment</span><span class="p">,</span> <span class="nx">UtilitiesFactory</span><span class="p">,</span> <span class="nx">$modalInstance</span><span class="p">,</span> <span class="nx">ExperimentsFactory</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">$scope</span><span class="p">.</span><span class="nx">experiment</span> <span class="o">=</span> <span class="nx">experiment</span><span class="p">;</span>
+            <span class="nx">$scope</span><span class="p">.</span><span class="nx">personalizationFormSubmitted</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+
+            <span class="nx">$scope</span><span class="p">.</span><span class="nx">data</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="na">disablePersonalizationFields</span><span class="p">:</span> <span class="kc">true</span>
+            <span class="p">};</span>
+
+            <span class="nx">$scope</span><span class="p">.</span><span class="nx">experiment</span><span class="p">.</span><span class="nx">isPersonalizationEnabled</span> <span class="o">=</span> <span class="p">(</span><span class="nx">experiment</span> <span class="o">&amp;&amp;</span> <span class="nx">experiment</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">(</span><span class="s1">'isPersonalizationEnabled'</span><span class="p">)</span> <span class="p">?</span> <span class="nx">experiment</span><span class="p">.</span><span class="nx">isPersonalizationEnabled</span> <span class="p">:</span> <span class="kc">false</span><span class="p">);</span>
+
+            <span class="nx">$scope</span><span class="p">.</span><span class="nx">savePersonalizationValues</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                <span class="nx">$scope</span><span class="p">.</span><span class="nx">stringifiedPersonalization</span> <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">({</span>
+                    <span class="na">isPersonalizationEnabled</span><span class="p">:</span> <span class="p">(</span><span class="nx">$scope</span><span class="p">.</span><span class="nx">experiment</span><span class="p">.</span><span class="nx">isPersonalizationEnabled</span> <span class="p">?</span> <span class="nx">$scope</span><span class="p">.</span><span class="nx">experiment</span><span class="p">.</span><span class="nx">isPersonalizationEnabled</span> <span class="p">:</span> <span class="kc">false</span><span class="p">),</span>
+                    <span class="na">modelName</span><span class="p">:</span> <span class="p">(</span><span class="nx">$scope</span><span class="p">.</span><span class="nx">experiment</span><span class="p">.</span><span class="nx">modelName</span> <span class="p">?</span> <span class="nx">$scope</span><span class="p">.</span><span class="nx">experiment</span><span class="p">.</span><span class="nx">modelName</span> <span class="p">:</span> <span class="s1">''</span><span class="p">),</span>
+                    <span class="na">modelVersion</span><span class="p">:</span> <span class="p">(</span><span class="nx">$scope</span><span class="p">.</span><span class="nx">experiment</span><span class="p">.</span><span class="nx">modelVersion</span> <span class="p">?</span> <span class="nx">$scope</span><span class="p">.</span><span class="nx">experiment</span><span class="p">.</span><span class="nx">modelVersion</span> <span class="p">:</span> <span class="s1">''</span><span class="p">)</span>
+                <span class="p">});</span>
+            <span class="p">};</span>
+
+            <span class="nx">$scope</span><span class="p">.</span><span class="nx">restorePersonalizationValues</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">values</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">values</span><span class="p">);</span>
+            <span class="p">};</span>
+
+            <span class="nx">$scope</span><span class="p">.</span><span class="nx">editPersonalization</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                <span class="nx">$scope</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">disablePersonalizationFields</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+                <span class="nx">$scope</span><span class="p">.</span><span class="nx">$apply</span><span class="p">();</span> <span class="c1">// Needed to poke Angular to update the fields based on that variable.</span>
+                <span class="nx">$scope</span><span class="p">.</span><span class="nx">savePersonalizationValues</span><span class="p">();</span>
+                <span class="k">return</span> <span class="nx">$scope</span><span class="p">.</span><span class="nx">stringifiedPersonalization</span><span class="p">;</span>
+            <span class="p">};</span>
+
+            <span class="nx">$scope</span><span class="p">.</span><span class="nx">cancelPersonalization</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">tempValue</span><span class="p">)</span> <span class="p">{</span>
+                <span class="kd">var</span> <span class="nx">tmp</span> <span class="o">=</span> <span class="nx">$scope</span><span class="p">.</span><span class="nx">restorePersonalizationValues</span><span class="p">(</span><span class="nx">tempValue</span><span class="p">);</span>
+                <span class="nx">$scope</span><span class="p">.</span><span class="nx">experiment</span><span class="p">.</span><span class="nx">isPersonalizationEnabled</span> <span class="o">=</span> <span class="nx">tmp</span><span class="p">.</span><span class="nx">isPersonalizationEnabled</span><span class="p">;</span>
+                <span class="nx">$scope</span><span class="p">.</span><span class="nx">experiment</span><span class="p">.</span><span class="nx">modelName</span> <span class="o">=</span> <span class="nx">tmp</span><span class="p">.</span><span class="nx">modelName</span><span class="p">;</span>
+                <span class="nx">$scope</span><span class="p">.</span><span class="nx">experiment</span><span class="p">.</span><span class="nx">modelVersion</span> <span class="o">=</span> <span class="nx">tmp</span><span class="p">.</span><span class="nx">modelVersion</span><span class="p">;</span>
+                <span class="nx">$scope</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">disablePersonalizationFields</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+                <span class="nx">$scope</span><span class="p">.</span><span class="nx">experimentFormSubmitted</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+                <span class="nx">$scope</span><span class="p">.</span><span class="nx">$apply</span><span class="p">();</span>
+            <span class="p">};</span>
+
+            <span class="c1">// This function handles saving the personalization metadata when the checkbox is checked or unchecked.</span>
+            <span class="c1">// If it is being checked, we need to validate that there is a model name provided.  In either case,</span>
+            <span class="c1">// we need to set the value of data.disableModelFields so that the fields will be enabled or disabled</span>
+            <span class="c1">// correctly, based on the state of the isPersonalizationEnabled flag.</span>
+            <span class="nx">$scope</span><span class="p">.</span><span class="nx">savePersonalization</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                <span class="kd">var</span> <span class="nx">experiment</span> <span class="o">=</span> <span class="nx">$scope</span><span class="p">.</span><span class="nx">experiment</span><span class="p">;</span>
+                <span class="nx">$scope</span><span class="p">.</span><span class="nx">personalizationFormSubmitted</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+                <span class="nx">$scope</span><span class="p">.</span><span class="nx">$apply</span><span class="p">();</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">experiment</span><span class="p">.</span><span class="nx">isPersonalizationEnabled</span> <span class="o">&amp;&amp;</span>
+                    <span class="p">(</span><span class="o">!</span><span class="nx">experiment</span><span class="p">.</span><span class="nx">modelName</span> <span class="o">||</span> <span class="nx">$</span><span class="p">.</span><span class="nx">trim</span><span class="p">(</span><span class="nx">experiment</span><span class="p">.</span><span class="nx">modelName</span><span class="p">).</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">0</span> <span class="o">||</span>
+                    <span class="p">(</span><span class="nx">$</span><span class="p">(</span><span class="s1">'#modelVersion'</span><span class="p">).</span><span class="nx">closest</span><span class="p">(</span><span class="s1">'div'</span><span class="p">).</span><span class="nx">find</span><span class="p">(</span><span class="s1">'.fieldError'</span><span class="p">).</span><span class="nx">length</span> <span class="o">!==</span>
+                    <span class="nx">$</span><span class="p">(</span><span class="s1">'#modelVersion'</span><span class="p">).</span><span class="nx">closest</span><span class="p">(</span><span class="s1">'div'</span><span class="p">).</span><span class="nx">find</span><span class="p">(</span><span class="s1">'.ng-hide'</span><span class="p">).</span><span class="nx">length</span><span class="p">)))</span> <span class="p">{</span>
+                    <span class="c1">// Need modelName, error already displayed,</span>
+                    <span class="c1">// or the second test is a kludge because we don't have access to the $error from the form or</span>
+                    <span class="c1">// fields here, so we just check if there are any unhidden error messages for the model version.</span>
+
+                    <span class="c1">// Handle the problem that the dynamic edit widgets (the pencil, etc., buttons) collapse</span>
+                    <span class="c1">// when you do a save...even if there is an error.  In the error case, we want them to show.</span>
+                    <span class="nx">$</span><span class="p">(</span><span class="s1">'#personalizationToolbar'</span><span class="p">).</span><span class="nx">data</span><span class="p">(</span><span class="s1">'dynamicEdit'</span><span class="p">).</span><span class="nx">displayWidgets</span><span class="p">(</span><span class="nx">$</span><span class="p">(</span><span class="s1">'#personalizationToolbar .dynamicEdit'</span><span class="p">),</span> <span class="kc">false</span><span class="p">);</span>
+                    <span class="k">return</span><span class="p">;</span>
+                <span class="p">}</span>
+                <span class="kd">var</span> <span class="nx">updates</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="na">id</span><span class="p">:</span> <span class="nx">experiment</span><span class="p">.</span><span class="nx">id</span><span class="p">,</span>
+                        <span class="na">isPersonalizationEnabled</span><span class="p">:</span> <span class="nx">experiment</span><span class="p">.</span><span class="nx">isPersonalizationEnabled</span><span class="p">,</span>
+                        <span class="na">modelName</span><span class="p">:</span> <span class="nx">experiment</span><span class="p">.</span><span class="nx">modelName</span>
+                    <span class="p">};</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">experiment</span><span class="p">.</span><span class="nx">modelVersion</span> <span class="o">&amp;&amp;</span> <span class="nx">$</span><span class="p">.</span><span class="nx">trim</span><span class="p">(</span><span class="nx">experiment</span><span class="p">.</span><span class="nx">modelVersion</span><span class="p">).</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">updates</span><span class="p">.</span><span class="nx">modelVersion</span> <span class="o">=</span> <span class="nx">$</span><span class="p">.</span><span class="nx">trim</span><span class="p">(</span><span class="nx">experiment</span><span class="p">.</span><span class="nx">modelVersion</span><span class="p">);</span>
+                <span class="p">}</span>
+                <span class="k">else</span> <span class="p">{</span>
+                    <span class="nx">updates</span><span class="p">.</span><span class="nx">modelVersion</span> <span class="o">=</span> <span class="s1">''</span><span class="p">;</span>
+                <span class="p">}</span>
+                <span class="nx">ExperimentsFactory</span><span class="p">.</span><span class="nx">update</span><span class="p">(</span><span class="nx">updates</span><span class="p">).</span><span class="nx">$promise</span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+                        <span class="nx">$scope</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">disablePersonalizationFields</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+                        <span class="nx">UtilitiesFactory</span><span class="p">.</span><span class="nx">trackEvent</span><span class="p">(</span><span class="s1">'saveItemSuccess'</span><span class="p">,</span>
+                            <span class="p">{</span><span class="na">key</span><span class="p">:</span> <span class="s1">'dialog_name'</span><span class="p">,</span> <span class="na">value</span><span class="p">:</span> <span class="s1">'savePersonalizationFromDetails'</span><span class="p">},</span>
+                            <span class="p">{</span><span class="na">key</span><span class="p">:</span> <span class="s1">'application_name'</span><span class="p">,</span> <span class="na">value</span><span class="p">:</span> <span class="nx">experiment</span><span class="p">.</span><span class="nx">applicationName</span><span class="p">},</span>
+                            <span class="p">{</span><span class="na">key</span><span class="p">:</span> <span class="s1">'item_id'</span><span class="p">,</span> <span class="na">value</span><span class="p">:</span> <span class="nx">experiment</span><span class="p">.</span><span class="nx">id</span><span class="p">},</span>
+                            <span class="p">{</span><span class="na">key</span><span class="p">:</span> <span class="s1">'item_label'</span><span class="p">,</span> <span class="na">value</span><span class="p">:</span> <span class="nx">experiment</span><span class="p">.</span><span class="nx">label</span><span class="p">});</span>
+                    <span class="p">},</span>
+                    <span class="kd">function</span><span class="p">(</span><span class="nx">response</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">$scope</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">disablePersonalizationFields</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+                        <span class="nx">UtilitiesFactory</span><span class="p">.</span><span class="nx">handleGlobalError</span><span class="p">(</span><span class="nx">response</span><span class="p">);</span>
+                    <span class="p">}</span>
+                <span class="p">);</span>
+            <span class="p">};</span>
+
+            <span class="nx">$scope</span><span class="p">.</span><span class="nx">cancel</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                <span class="nx">$modalInstance</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+            <span class="p">};</span>
+        <span class="p">}</span>
+<span class="p">]);</span>
+</code></pre>
+
+<blockquote>
+<p>plugins/personalization/detailsTemplate.html</p>
+</blockquote>
+<pre class="highlight html"><code><span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">"personalizationDetailsModal"</span> <span class="na">class=</span><span class="s">"modalDialog"</span> <span class="na">style=</span><span class="s">"width: 700px; left: 0;"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;h1&gt;</span>Personalization<span class="nt">&lt;/h1&gt;</span>
+    <span class="nt">&lt;form</span> <span class="na">name=</span><span class="s">"personalizationForm"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"dialogContent"</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;div&gt;</span>
+                <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">"personalizationToolbar"</span> <span class="na">ng-show=</span><span class="s">"!readOnly"</span> <span class="na">dynamic-edit</span> <span class="na">input-tag=</span><span class="s">"stringifiedPersonalization"</span> <span class="na">select-function=</span><span class="s">"savePersonalization"</span> <span class="na">edit-function=</span><span class="s">"editPersonalization"</span> <span class="na">cancel-function=</span><span class="s">"cancelPersonalization"</span> <span class="na">ng-model=</span><span class="s">"experiment.modelName"</span> <span class="na">class=</span><span class="s">"dynamicToolbar"</span> <span class="na">style=</span><span class="s">"top: 43px; left: 300px;"</span><span class="nt">&gt;&lt;/div&gt;</span>
+                <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"formLayout oneCol"</span> <span class="na">ng-show=</span><span class="s">"!readOnly"</span><span class="nt">&gt;</span>
+                    <span class="nt">&lt;li&gt;</span>
+                        <span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"width: 100%;"</span><span class="nt">&gt;</span>
+                            <span class="nt">&lt;input</span> <span class="na">id=</span><span class="s">"chkPersonalization"</span> <span class="na">name=</span><span class="s">"chkPersonalization"</span> <span class="na">type=</span><span class="s">"checkbox"</span> <span class="na">ng-model=</span><span class="s">"experiment.isPersonalizationEnabled"</span> <span class="na">ensure-personalization-model</span> <span class="na">ng-checked=</span><span class="s">"{{experiment.isPersonalizationEnabled}}"</span> <span class="na">ng-disabled=</span><span class="s">"data.disablePersonalizationFields"</span> <span class="na">ng-class=</span><span class="s">"{disabled: data.disablePersonalizationFields}"</span><span class="nt">/&gt;</span><span class="ni">&amp;nbsp;&amp;nbsp;</span><span class="nt">&lt;label</span>
+                            <span class="na">for=</span><span class="s">"chkPersonalization"</span> <span class="na">class=</span><span class="s">"checkboxLabel"</span> <span class="na">name=</span><span class="s">"isPersonalizationEnabled"</span> <span class="na">ng-class=</span><span class="s">"{disabled: data.disablePersonalizationFields}"</span><span class="nt">&gt;</span>This is a personalization experiment<span class="nt">&lt;/label&gt;</span>
+
+                        <span class="nt">&lt;/div&gt;</span>
+                    <span class="nt">&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"layout8020"</span> <span class="na">ng-show=</span><span class="s">"experiment.isPersonalizationEnabled"</span><span class="nt">&gt;</span>
+                        <span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"width: 320px;"</span><span class="nt">&gt;</span>
+                            <span class="nt">&lt;label</span> <span class="na">ng-class=</span><span class="s">"{disabled: data.disablePersonalizationFields}"</span><span class="nt">&gt;</span>Model Name<span class="nt">&lt;/label&gt;</span>
+                            <span class="nt">&lt;input</span> <span class="na">id=</span><span class="s">"modelName"</span> <span class="na">name=</span><span class="s">"modelName"</span> <span class="na">ng-model=</span><span class="s">"experiment.modelName"</span> <span class="na">class=</span><span class="s">"form-control text"</span> <span class="na">ng-pattern=</span><span class="s">"/^[_\-\$A-Za-z][_\-\$A-Za-z0-9]*$/"</span> <span class="na">ng-maxlength=</span><span class="s">"64"</span> <span class="na">ng-disabled=</span><span class="s">"data.disablePersonalizationFields"</span> <span class="na">ng-class=</span><span class="s">"{disabled: data.disablePersonalizationFields}"</span> <span class="nt">/&gt;</span><span class="ni">&amp;nbsp;&amp;nbsp;</span>
+                            <span class="c">&lt;!-- Validation error --&gt;</span>
+                            <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"error"</span>
+                                <span class="na">ng-show=</span><span class="s">"personalizationForm.chkPersonalization.$modelValue == true &amp;&amp;
+                                ((personalizationForm.modelName.$dirty &amp;&amp; personalizationForm.modelName.$invalid &amp;&amp;
+                                                !personalizationForm.modelName.$focused) ||
+                                        personalizationFormSubmitted)"</span><span class="nt">&gt;</span>
+                                <span class="nt">&lt;small</span> <span class="na">class=</span><span class="s">"fieldError"</span>
+                                    <span class="na">ng-show=</span><span class="s">"personalizationForm.chkPersonalization.$error.ensurePersonalizationModel &amp;&amp; !personalizationForm.modelName.$error.pattern"</span><span class="nt">&gt;</span>
+                                    Model name required.
+                                <span class="nt">&lt;/small&gt;</span>
+                            <span class="nt">&lt;/div&gt;</span>
+                            <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"error"</span>
+                                <span class="na">ng-show=</span><span class="s">"(personalizationForm.modelName.$dirty &amp;&amp; personalizationForm.modelName.$invalid &amp;&amp;
+                                        !personalizationForm.modelName.$focused) ||
+                                        (personalizationFormSubmitted &amp;&amp;
+                                        (personalizationForm.modelName.$error.required || personalizationForm.modelName.$error.pattern || personalizationForm.modelName.$error.maxlength))"</span><span class="nt">&gt;</span>
+                                <span class="nt">&lt;small</span> <span class="na">class=</span><span class="s">"fieldError"</span>
+                                    <span class="na">ng-show=</span><span class="s">"personalizationForm.modelName.$error.pattern"</span><span class="nt">&gt;</span>
+                                    Invalid model name.
+                                <span class="nt">&lt;/small&gt;</span>
+                                <span class="nt">&lt;small</span> <span class="na">class=</span><span class="s">"fieldError"</span>
+                                    <span class="na">ng-show=</span><span class="s">"personalizationForm.modelName.$error.maxlength"</span><span class="nt">&gt;</span>
+                                    Model name cannot be longer than 64 characters.
+                                <span class="nt">&lt;/small&gt;</span>
+                            <span class="nt">&lt;/div&gt;</span>
+                        <span class="nt">&lt;/div&gt;</span>
+                        <span class="nt">&lt;div&gt;</span>
+                            <span class="nt">&lt;label</span> <span class="na">ng-class=</span><span class="s">"{disabled: data.disablePersonalizationFields}"</span><span class="nt">&gt;</span>Model Version<span class="nt">&lt;/label&gt;</span>
+                            <span class="nt">&lt;input</span> <span class="na">id=</span><span class="s">"modelVersion"</span> <span class="na">name=</span><span class="s">"modelVersion"</span> <span class="na">ng-model=</span><span class="s">"experiment.modelVersion"</span> <span class="na">class=</span><span class="s">"form-control text"</span> <span class="na">ng-pattern=</span><span class="s">"/^[_\-\$A-Za-z0-9][_\.\-\$A-Za-z0-9]*$/"</span> <span class="na">ng-maxlength=</span><span class="s">"64"</span> <span class="na">ng-disabled=</span><span class="s">"data.disablePersonalizationFields"</span> <span class="na">ng-class=</span><span class="s">"{disabled: data.disablePersonalizationFields}"</span>  <span class="nt">/&gt;</span>
+                            <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"error"</span>
+                                <span class="na">ng-show=</span><span class="s">"(personalizationForm.modelVersion.$dirty &amp;&amp; personalizationForm.modelVersion.$invalid &amp;&amp;
+                                        !personalizationForm.modelVersion.$focused) || personalizationFormSubmitted"</span><span class="nt">&gt;</span>
+                                <span class="nt">&lt;small</span> <span class="na">class=</span><span class="s">"fieldError"</span>
+                                    <span class="na">ng-show=</span><span class="s">"personalizationForm.modelVersion.$error.pattern"</span><span class="nt">&gt;</span>
+                                    Invalid model version.
+                                <span class="nt">&lt;/small&gt;</span>
+                                <span class="nt">&lt;small</span> <span class="na">class=</span><span class="s">"fieldError"</span>
+                                    <span class="na">ng-show=</span><span class="s">"personalizationForm.modelVersion.$error.maxlength"</span><span class="nt">&gt;</span>
+                                    Model version cannot be longer than 64 characters.
+                                <span class="nt">&lt;/small&gt;</span>
+                            <span class="nt">&lt;/div&gt;</span>
+                        <span class="nt">&lt;/div&gt;</span>
+                    <span class="nt">&lt;/li&gt;</span>
+                <span class="nt">&lt;/ul&gt;</span>
+                <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"buttonBar"</span><span class="nt">&gt;</span>
+                    <span class="nt">&lt;button</span> <span class="na">id=</span><span class="s">"btnSavePersonalizationCancel"</span> <span class="na">class=</span><span class="s">"blue cancel"</span> <span class="na">onclick=</span><span class="s">"return false;"</span> <span class="na">ng-click=</span><span class="s">"cancel();"</span><span class="nt">&gt;</span>Close<span class="nt">&lt;/button&gt;</span>
+                <span class="nt">&lt;/div&gt;</span>
+            <span class="nt">&lt;/div&gt;</span>
+        <span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;/form&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">ng-show=</span><span class="s">"readOnly"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;label</span> <span class="na">ng-show=</span><span class="s">"experiment.isPersonalizationEnabled"</span><span class="nt">&gt;</span>Personalization is enabled for this experiment<span class="nt">&lt;/label&gt;</span>
+        <span class="nt">&lt;label</span> <span class="na">ng-show=</span><span class="s">"!experiment.isPersonalizationEnabled"</span><span class="nt">&gt;</span>Personalization is <span class="nt">&lt;b&gt;</span>not<span class="nt">&lt;/b&gt;</span> enabled for this experiment<span class="nt">&lt;/label&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+
+<span class="nt">&lt;/div&gt;</span>
+</code></pre>
+
+<blockquote>
+<p>plugins/tracking/factory.js</p>
+</blockquote>
+<pre class="highlight javascript"><code><span class="s1">'use strict'</span><span class="p">;</span>
+
+<span class="kd">var</span> <span class="nx">globalWebSDKTrackingParams</span> <span class="o">=</span> <span class="p">{},</span>
+    <span class="nx">tracking</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="na">init</span><span class="p">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">that</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span><span class="p">(</span><span class="nx">intuit</span><span class="p">)</span> <span class="o">!==</span> <span class="s1">'undefined'</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">tracking</span><span class="p">.</span><span class="nx">doInit</span><span class="p">();</span>
+            <span class="p">}</span>
+            <span class="k">else</span> <span class="p">{</span>
+                <span class="nx">setTimeout</span><span class="p">(</span><span class="nx">that</span><span class="p">.</span><span class="nx">init</span><span class="p">,</span> <span class="mi">1000</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">},</span>
+
+        <span class="na">doInit</span><span class="p">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="c1">// Initialize Web SDK tracking</span>
+            <span class="nb">window</span><span class="p">.</span><span class="nx">webAnalyticsSDKTracker</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">intuit</span><span class="p">.</span><span class="nx">web</span><span class="p">.</span><span class="nx">analytics</span><span class="p">();</span>
+            <span class="nb">window</span><span class="p">.</span><span class="nx">webAnalyticsSDKTracker</span><span class="p">.</span><span class="nx">init</span><span class="p">({</span>
+                <span class="s1">'cec_version'</span><span class="p">:</span> <span class="s1">'1'</span><span class="p">,</span>
+                <span class="s1">'app_name'</span><span class="p">:</span> <span class="s1">'Wasabi'</span><span class="p">,</span>
+                <span class="s1">'offering_id'</span><span class="p">:</span> <span class="s1">'Wasabi'</span><span class="p">,</span>
+
+                <span class="s1">'app_log_enable'</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+                <span class="s1">'app_force_crossdomain_tracking'</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+                <span class="s1">'app_force_crossdomain_tracking_timeout'</span><span class="p">:</span> <span class="mi">250</span><span class="p">,</span>
+
+                <span class="s1">'providers'</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s1">'iac'</span><span class="p">:{</span>
+                        <span class="s1">'enable'</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+                        <span class="s1">'clickstream_format_version'</span><span class="p">:</span> <span class="s1">'1'</span><span class="p">,</span>
+                        <span class="s1">'server_endpoint'</span><span class="p">:</span> <span class="s1">'http://trinity-prfqdc.intuit.com/trinity/v1/idea-wasabicui-clickstream'</span><span class="p">,</span>
+                        <span class="s1">'server_endpoint_secure'</span><span class="p">:</span> <span class="s1">'https://trinity-prfqdc.intuit.com/trinity/v1/idea-wasabicui-clickstream'</span>
+                    <span class="p">},</span>
+
+                    <span class="s1">'siteCatalyst'</span> <span class="p">:{</span>
+                        <span class="s1">'enable'</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+                        <span class="s1">'server_endpoint'</span><span class="p">:</span> <span class="s1">'http://ci.intuit.com/b/ss/'</span><span class="p">,</span>
+                        <span class="s1">'server_endpoint_secure'</span><span class="p">:</span> <span class="s1">'https://sci.intuit.com/b/ss/'</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="s1">'dom_events'</span> <span class="p">:</span> <span class="p">[</span>
+                    <span class="p">{</span>
+                        <span class="s1">'css_selector'</span><span class="p">:</span> <span class="s1">'input[type=button]'</span><span class="p">,</span>
+                        <span class="s1">'event'</span><span class="p">:</span> <span class="s1">'click'</span><span class="p">,</span>
+                        <span class="s1">'standard'</span><span class="p">:</span> <span class="kc">true</span>
+                    <span class="p">},</span>
+                    <span class="p">{</span>
+                        <span class="s1">'css_selector'</span><span class="p">:</span> <span class="s1">'button'</span><span class="p">,</span>
+                        <span class="s1">'event'</span><span class="p">:</span> <span class="s1">'click'</span><span class="p">,</span>
+                        <span class="s1">'standard'</span><span class="p">:</span> <span class="kc">true</span>
+                    <span class="p">},</span>
+                    <span class="p">{</span>
+                        <span class="s1">'css_selector'</span><span class="p">:</span> <span class="s1">'a'</span><span class="p">,</span>
+                        <span class="s1">'event'</span><span class="p">:</span> <span class="s1">'click'</span><span class="p">,</span>
+                        <span class="s1">'standard'</span><span class="p">:</span> <span class="kc">true</span>
+                    <span class="p">},</span>
+                    <span class="p">{</span>
+                        <span class="s1">'event'</span><span class="p">:</span> <span class="s1">'load'</span><span class="p">,</span>
+                        <span class="s1">'standard'</span><span class="p">:</span> <span class="kc">true</span>
+                    <span class="p">},</span>
+                    <span class="p">{</span>
+                        <span class="s1">'css_selector'</span><span class="p">:</span> <span class="s1">'button#btnSearch'</span><span class="p">,</span>  <span class="c1">//Group of DOM elements to be tracked (Required for any DOM event except load)</span>
+                        <span class="s1">'event'</span><span class="p">:</span> <span class="s1">'click'</span><span class="p">,</span>           <span class="c1">//DOM event (Required) supported types: click, change, focus, blur</span>
+                        <span class="s1">'capture'</span> <span class="p">:</span> <span class="p">{</span>
+                            <span class="s1">'iac'</span><span class="p">:</span> <span class="p">[</span>
+                                <span class="p">{</span>
+                                    <span class="s1">'sampling'</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+                                    <span class="s1">'inherit_from'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'page_parent_iac'</span><span class="p">],</span>
+                                    <span class="s1">'properties'</span> <span class="p">:</span> <span class="p">{</span>
+                                        <span class="s1">'event.event_name'</span><span class="p">:</span> <span class="s1">'click'</span><span class="p">,</span>
+                                        <span class="s1">'event.event_category'</span><span class="p">:</span> <span class="s1">'dom'</span><span class="p">,</span>
+                                        <span class="s1">'event.properties.pagination_item'</span><span class="p">:</span> <span class="s1">'page'</span>
+                                    <span class="p">}</span>
+                                <span class="p">}</span>
+                            <span class="p">]</span>
+                        <span class="p">}</span>
+                    <span class="p">}</span>
+                <span class="p">],</span>
+                <span class="s1">'custom_events'</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s1">'saveItemSuccess'</span><span class="p">:</span> <span class="p">[</span> <span class="c1">// Tracked when the save of an item, like an experiment, was successful.</span>
+                        <span class="p">{</span>
+                            <span class="s1">'capture'</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s1">'iac'</span><span class="p">:</span> <span class="p">[</span>
+                                    <span class="p">{</span>
+                                        <span class="s1">'properties'</span><span class="p">:</span> <span class="p">{</span>
+                                            <span class="s1">'event.event_name'</span><span class="p">:</span> <span class="s1">'saveItemSuccess'</span><span class="p">,</span>
+                                            <span class="s1">'event.dialog_name'</span><span class="p">:</span> <span class="s1">'#DIALOG_NAME#'</span><span class="p">,</span>
+                                            <span class="s1">'event.application_name'</span><span class="p">:</span> <span class="s1">'#APPLICATION_NAME#'</span><span class="p">,</span>
+                                            <span class="s1">'event.experiment_id'</span><span class="p">:</span> <span class="s1">'#EXPERIMENT_ID#'</span><span class="p">,</span>
+                                            <span class="s1">'event.item_id'</span><span class="p">:</span> <span class="s1">'#ITEM_ID#'</span><span class="p">,</span>
+                                            <span class="s1">'event.item_label'</span><span class="p">:</span> <span class="s1">'#ITEM_LABEL#'</span>
+                                        <span class="p">}</span>
+                                    <span class="p">}</span>
+                                <span class="p">]</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">],</span>
+                    <span class="s1">'updateItemSuccess'</span><span class="p">:</span> <span class="p">[</span> <span class="c1">// Tracked when an item is updated.</span>
+                        <span class="p">{</span>
+                            <span class="s1">'capture'</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s1">'iac'</span><span class="p">:</span> <span class="p">[</span>
+                                    <span class="p">{</span>
+                                        <span class="s1">'properties'</span><span class="p">:</span> <span class="p">{</span>
+                                            <span class="s1">'event.event_name'</span><span class="p">:</span> <span class="s1">'updateItemSuccess'</span><span class="p">,</span>
+                                            <span class="s1">'event.dialog_name'</span><span class="p">:</span> <span class="s1">'#DIALOG_NAME#'</span><span class="p">,</span>
+                                            <span class="s1">'event.experiment_id'</span><span class="p">:</span> <span class="s1">'#EXPERIMENT_ID#'</span><span class="p">,</span>
+                                            <span class="s1">'event.item_value'</span><span class="p">:</span> <span class="s1">'#ITEM_VALUE#'</span>
+                                        <span class="p">}</span>
+                                    <span class="p">}</span>
+                                <span class="p">]</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">],</span>
+                    <span class="s1">'deleteItemSuccess'</span><span class="p">:</span> <span class="p">[</span> <span class="c1">// Tracked when an item is deleted.</span>
+                        <span class="p">{</span>
+                            <span class="s1">'capture'</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s1">'iac'</span><span class="p">:</span> <span class="p">[</span>
+                                    <span class="p">{</span>
+                                        <span class="s1">'properties'</span><span class="p">:</span> <span class="p">{</span>
+                                            <span class="s1">'event.event_name'</span><span class="p">:</span> <span class="s1">'deleteItemSuccess'</span><span class="p">,</span>
+                                            <span class="s1">'event.dialog_name'</span><span class="p">:</span> <span class="s1">'#DIALOG_NAME#'</span><span class="p">,</span>
+                                            <span class="s1">'event.experiment_id'</span><span class="p">:</span> <span class="s1">'#EXPERIMENT_ID#'</span><span class="p">,</span>
+                                            <span class="s1">'event.item_id'</span><span class="p">:</span> <span class="s1">'#ITEM_ID#'</span>
+                                        <span class="p">}</span>
+                                    <span class="p">}</span>
+                                <span class="p">]</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">],</span>
+                    <span class="s1">'changeItemStateSuccess'</span><span class="p">:</span> <span class="p">[</span> <span class="c1">// Tracked when an item's state is changed.</span>
+                        <span class="p">{</span>
+                            <span class="s1">'capture'</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s1">'iac'</span><span class="p">:</span> <span class="p">[</span>
+                                    <span class="p">{</span>
+                                        <span class="s1">'properties'</span><span class="p">:</span> <span class="p">{</span>
+                                            <span class="s1">'event.event_name'</span><span class="p">:</span> <span class="s1">'changeStateSuccess'</span><span class="p">,</span>
+                                            <span class="s1">'event.dialog_name'</span><span class="p">:</span> <span class="s1">'#DIALOG_NAME#'</span><span class="p">,</span>
+                                            <span class="s1">'event.experiment_id'</span><span class="p">:</span> <span class="s1">'#EXPERIMENT_ID#'</span><span class="p">,</span>
+                                            <span class="s1">'event.item_id'</span><span class="p">:</span> <span class="s1">'#ITEM_ID#'</span>
+                                        <span class="p">}</span>
+                                    <span class="p">}</span>
+                                <span class="p">]</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">],</span>
+                    <span class="s1">'closeBucketSuccess'</span><span class="p">:</span> <span class="p">[</span> <span class="c1">// Tracked when a bucket is closed.</span>
+                        <span class="p">{</span>
+                            <span class="s1">'capture'</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s1">'iac'</span><span class="p">:</span> <span class="p">[</span>
+                                    <span class="p">{</span>
+                                        <span class="s1">'properties'</span><span class="p">:</span> <span class="p">{</span>
+                                            <span class="s1">'event.event_name'</span><span class="p">:</span> <span class="s1">'closeBucketSuccess'</span><span class="p">,</span>
+                                            <span class="s1">'event.dialog_name'</span><span class="p">:</span> <span class="s1">'#DIALOG_NAME#'</span><span class="p">,</span>
+                                            <span class="s1">'event.experiment_id'</span><span class="p">:</span> <span class="s1">'#EXPERIMENT_ID#'</span><span class="p">,</span>
+                                            <span class="s1">'event.item_label'</span><span class="p">:</span> <span class="s1">'#ITEM_LABEL#'</span>
+                                        <span class="p">}</span>
+                                    <span class="p">}</span>
+                                <span class="p">]</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">],</span>
+                    <span class="s1">'loadedDialog'</span><span class="p">:</span> <span class="p">[</span> <span class="c1">// Tracked when a dialog is loaded.</span>
+                        <span class="p">{</span>
+                            <span class="s1">'capture'</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s1">'iac'</span><span class="p">:</span> <span class="p">[</span>
+                                    <span class="p">{</span>
+                                        <span class="s1">'properties'</span><span class="p">:</span> <span class="p">{</span>
+                                            <span class="s1">'event.event_name'</span><span class="p">:</span> <span class="s1">'loadedDialog'</span><span class="p">,</span>
+                                            <span class="s1">'event.dialog_name'</span><span class="p">:</span> <span class="s1">'#DIALOG_NAME#'</span><span class="p">,</span>
+                                            <span class="s1">'event.application_name'</span><span class="p">:</span> <span class="s1">'#APPLICATION_NAME#'</span>
+                                        <span class="p">}</span>
+                                    <span class="p">}</span>
+                                <span class="p">]</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">],</span>
+                    <span class="s1">'canceledDialog'</span><span class="p">:</span> <span class="p">[</span> <span class="c1">// Tracked when a dialog is closed without save.</span>
+                        <span class="p">{</span>
+                            <span class="s1">'capture'</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s1">'iac'</span><span class="p">:</span> <span class="p">[</span>
+                                    <span class="p">{</span>
+                                        <span class="s1">'properties'</span><span class="p">:</span> <span class="p">{</span>
+                                            <span class="s1">'event.event_name'</span><span class="p">:</span> <span class="s1">'canceledDialog'</span><span class="p">,</span>
+                                            <span class="s1">'event.dialog_name'</span><span class="p">:</span> <span class="s1">'#DIALOG_NAME#'</span>
+                                        <span class="p">}</span>
+                                    <span class="p">}</span>
+                                <span class="p">]</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">],</span>
+                    <span class="s1">'advancedSearch'</span><span class="p">:</span> <span class="p">[</span> <span class="c1">// Tracked when an advanced search is done (Go button clicked).</span>
+                        <span class="p">{</span>
+                            <span class="s1">'capture'</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s1">'iac'</span><span class="p">:</span> <span class="p">[</span>
+                                    <span class="p">{</span>
+                                        <span class="s1">'properties'</span><span class="p">:</span> <span class="p">{</span>
+                                            <span class="s1">'event.event_name'</span><span class="p">:</span> <span class="s1">'advancedSearch'</span><span class="p">,</span>
+                                            <span class="s1">'event.search_parms'</span><span class="p">:</span> <span class="s1">'#SEARCH_PARMS#'</span>
+                                        <span class="p">}</span>
+                                    <span class="p">}</span>
+                                <span class="p">]</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">],</span>
+                    <span class="s1">'saveRolesSuccess'</span><span class="p">:</span> <span class="p">[</span> <span class="c1">// Tracked when the save of an item, like an experiment, was successful.</span>
+                        <span class="p">{</span>
+                            <span class="s1">'capture'</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s1">'iac'</span><span class="p">:</span> <span class="p">[</span>
+                                    <span class="p">{</span>
+                                        <span class="s1">'properties'</span><span class="p">:</span> <span class="p">{</span>
+                                            <span class="s1">'event.event_name'</span><span class="p">:</span> <span class="s1">'saveRolesSuccess'</span><span class="p">,</span>
+                                            <span class="s1">'event.dialog_name'</span><span class="p">:</span> <span class="s1">'#DIALOG_NAME#'</span><span class="p">,</span>
+                                            <span class="s1">'event.application_name'</span><span class="p">:</span> <span class="s1">'#APPLICATION_NAME#'</span><span class="p">,</span>
+                                            <span class="s1">'event.item_id'</span><span class="p">:</span> <span class="s1">'#ITEM_ID#'</span><span class="p">,</span>
+                                            <span class="s1">'event.item_role'</span><span class="p">:</span> <span class="s1">'#ITEM_ROLE#'</span>
+                                        <span class="p">}</span>
+                                    <span class="p">}</span>
+                                <span class="p">]</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">],</span>
+                    <span class="s1">'deleteRolesSuccess'</span><span class="p">:</span> <span class="p">[</span> <span class="c1">// Tracked when an item is deleted.</span>
+                        <span class="p">{</span>
+                            <span class="s1">'capture'</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s1">'iac'</span><span class="p">:</span> <span class="p">[</span>
+                                    <span class="p">{</span>
+                                        <span class="s1">'properties'</span><span class="p">:</span> <span class="p">{</span>
+                                            <span class="s1">'event.event_name'</span><span class="p">:</span> <span class="s1">'deleteRolesSuccess'</span><span class="p">,</span>
+                                            <span class="s1">'event.dialog_name'</span><span class="p">:</span> <span class="s1">'#DIALOG_NAME#'</span><span class="p">,</span>
+                                            <span class="s1">'event.application_name'</span><span class="p">:</span> <span class="s1">'#APPLICATION_NAME#'</span><span class="p">,</span>
+                                            <span class="s1">'event.item_id'</span><span class="p">:</span> <span class="s1">'#ITEM_ID#'</span><span class="p">,</span>
+                                            <span class="s1">'event.item_role'</span><span class="p">:</span> <span class="s1">'#ITEM_ROLE#'</span>
+                                        <span class="p">}</span>
+                                    <span class="p">}</span>
+                                <span class="p">]</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">]</span>
+                <span class="p">},</span>
+                <span class="s1">'inheritances'</span> <span class="err">:</span> <span class="p">{},</span>
+                <span class="s1">'parameters'</span> <span class="err">:</span> <span class="p">{</span> <span class="c1">// These tie the data saved when tracking to a global var, necessary because the tracking is asynch so you can only point the Web SDK at something that it can pull the value from.</span>
+                    <span class="s1">'SCREEN_ID'</span><span class="err">:</span> <span class="p">{</span>
+                        <span class="s1">'values'</span><span class="err">:</span> <span class="p">[</span>
+                            <span class="p">{</span><span class="s1">'js_var'</span><span class="p">:</span> <span class="s1">'screen_id'</span><span class="p">}</span>
+                        <span class="p">]</span>
+                    <span class="p">},</span>
+                    <span class="s1">'DIALOG_NAME'</span><span class="err">:</span> <span class="p">{</span>
+                        <span class="s1">'values'</span><span class="err">:</span> <span class="p">[</span>
+                            <span class="p">{</span><span class="s1">'js_var'</span><span class="p">:</span> <span class="s1">'globalWebSDKTrackingParams.dialog_name'</span><span class="p">}</span>
+                        <span class="p">]</span>
+                    <span class="p">},</span>
+                    <span class="s1">'APPLICATION_NAME'</span><span class="err">:</span> <span class="p">{</span>
+                        <span class="s1">'values'</span><span class="err">:</span> <span class="p">[</span>
+                            <span class="p">{</span><span class="s1">'js_var'</span><span class="p">:</span> <span class="s1">'globalWebSDKTrackingParams.application_name'</span><span class="p">}</span>
+                        <span class="p">]</span>
+                    <span class="p">},</span>
+                    <span class="s1">'EXPERIMENT_ID'</span><span class="err">:</span> <span class="p">{</span>
+                        <span class="s1">'values'</span><span class="err">:</span> <span class="p">[</span>
+                            <span class="p">{</span><span class="s1">'js_var'</span><span class="p">:</span> <span class="s1">'globalWebSDKTrackingParams.experiment_id'</span><span class="p">}</span>
+                        <span class="p">]</span>
+                    <span class="p">},</span>
+                    <span class="s1">'ITEM_ID'</span><span class="err">:</span> <span class="p">{</span>
+                        <span class="s1">'values'</span><span class="err">:</span> <span class="p">[</span>
+                            <span class="p">{</span><span class="s1">'js_var'</span><span class="p">:</span> <span class="s1">'globalWebSDKTrackingParams.item_id'</span><span class="p">}</span>
+                        <span class="p">]</span>
+                    <span class="p">},</span>
+                    <span class="s1">'ITEM_LABEL'</span><span class="err">:</span> <span class="p">{</span>
+                        <span class="s1">'values'</span><span class="err">:</span> <span class="p">[</span>
+                            <span class="p">{</span><span class="s1">'js_var'</span><span class="p">:</span> <span class="s1">'globalWebSDKTrackingParams.item_label'</span><span class="p">}</span>
+                        <span class="p">]</span>
+                    <span class="p">},</span>
+                    <span class="s1">'ITEM_VALUE'</span><span class="err">:</span> <span class="p">{</span>
+                        <span class="s1">'values'</span><span class="err">:</span> <span class="p">[</span>
+                            <span class="p">{</span><span class="s1">'js_var'</span><span class="p">:</span> <span class="s1">'globalWebSDKTrackingParams.item_value'</span><span class="p">}</span>
+                        <span class="p">]</span>
+                    <span class="p">},</span>
+                    <span class="s1">'ITEM_ROLE'</span><span class="err">:</span> <span class="p">{</span>
+                        <span class="s1">'values'</span><span class="err">:</span> <span class="p">[</span>
+                            <span class="p">{</span><span class="s1">'js_var'</span><span class="p">:</span> <span class="s1">'globalWebSDKTrackingParams.item_role'</span><span class="p">}</span>
+                        <span class="p">]</span>
+                    <span class="p">},</span>
+                    <span class="s1">'RESPONSE_STATUS'</span><span class="err">:</span> <span class="p">{</span>
+                        <span class="s1">'values'</span><span class="err">:</span> <span class="p">[</span>
+                            <span class="p">{</span><span class="s1">'js_var'</span><span class="p">:</span> <span class="s1">'globalWebSDKTrackingParams.response_status'</span><span class="p">}</span>
+                        <span class="p">]</span>
+                    <span class="p">},</span>
+                    <span class="s1">'RESPONSE_DATA'</span><span class="err">:</span> <span class="p">{</span>
+                        <span class="s1">'values'</span><span class="err">:</span> <span class="p">[</span>
+                            <span class="p">{</span><span class="s1">'js_var'</span><span class="p">:</span> <span class="s1">'globalWebSDKTrackingParams.response_data'</span><span class="p">}</span>
+                        <span class="p">]</span>
+                    <span class="p">},</span>
+                    <span class="s1">'SEARCH_PARMS'</span><span class="err">:</span> <span class="p">{</span>
+                        <span class="s1">'values'</span><span class="err">:</span> <span class="p">[</span>
+                            <span class="p">{</span><span class="s1">'js_var'</span><span class="p">:</span> <span class="s1">'globalWebSDKTrackingParams.search_parms'</span><span class="p">}</span>
+                        <span class="p">]</span>
+                    <span class="p">},</span>
+                    <span class="s1">'PAGINATION_ITEM'</span><span class="err">:</span> <span class="p">{</span>
+                        <span class="s1">'values'</span><span class="err">:</span> <span class="p">[</span>
+                            <span class="p">{</span>
+                                <span class="s1">'element'</span><span class="p">:</span> <span class="p">{</span>  <span class="c1">//Get value from a DOM element</span>
+                                    <span class="s1">'element_id'</span><span class="p">:</span> <span class="s1">'self'</span><span class="p">,</span> <span class="c1">//Any element ID or "self" (element that triggers the DOM event).  "self" can be used in DOM_events's properties only.</span>
+                                    <span class="s1">'element_property'</span><span class="p">:</span> <span class="s1">'innerHtml'</span> <span class="c1">//Get value from the DOM element's property</span>
+                                <span class="p">}</span>
+                            <span class="p">}</span>
+                        <span class="p">]</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">});</span>
+        <span class="p">},</span>
+
+        <span class="nx">reset</span><span class="err">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="kd">function</span> <span class="nx">doInitNow</span><span class="p">()</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">webAnalyticsSDKTracker</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nb">window</span><span class="p">.</span><span class="nx">webAnalyticsSDKTracker</span><span class="p">.</span><span class="nx">resetListeners</span><span class="p">();</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="nx">setTimeout</span><span class="p">(</span><span class="nx">doInitNow</span><span class="p">,</span> <span class="mi">100</span><span class="p">);</span>
+        <span class="p">},</span>
+
+        <span class="nx">trackEvent</span><span class="err">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">eventName</span><span class="p">,</span> <span class="nx">parm1</span><span class="p">,</span> <span class="nx">parm2</span><span class="p">,</span> <span class="nx">parm3</span><span class="p">,</span> <span class="nx">parm4</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">parm1</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">globalWebSDKTrackingParams</span><span class="p">[</span><span class="nx">parm1</span><span class="p">.</span><span class="nx">key</span><span class="p">]</span> <span class="o">=</span> <span class="nx">parm1</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">parm2</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">globalWebSDKTrackingParams</span><span class="p">[</span><span class="nx">parm2</span><span class="p">.</span><span class="nx">key</span><span class="p">]</span> <span class="o">=</span> <span class="nx">parm2</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">parm3</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">globalWebSDKTrackingParams</span><span class="p">[</span><span class="nx">parm3</span><span class="p">.</span><span class="nx">key</span><span class="p">]</span> <span class="o">=</span> <span class="nx">parm3</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">parm4</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">globalWebSDKTrackingParams</span><span class="p">[</span><span class="nx">parm4</span><span class="p">.</span><span class="nx">key</span><span class="p">]</span> <span class="o">=</span> <span class="nx">parm4</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="nx">webAnalyticsSDKTracker</span><span class="p">.</span><span class="nx">triggerEvent</span><span class="p">(</span><span class="nx">eventName</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">};</span>
+
+<span class="nx">tracking</span><span class="p">.</span><span class="nx">init</span><span class="p">();</span>
+</code></pre>
+
+          
+      </div>
+      <div class="dark-box">
+          <div class="lang-selector">
+          </div>
+      </div>
+    </div>
+  </body>
+</html>
