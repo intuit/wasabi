@@ -57,6 +57,7 @@ public class AccessToken extends ModelItem {
      */
     public AccessToken setAccessToken(String access_token) {
         this.access_token = access_token;
+
         return this;
     }
 

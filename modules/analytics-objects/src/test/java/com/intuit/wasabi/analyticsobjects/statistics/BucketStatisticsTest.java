@@ -42,12 +42,12 @@ public class BucketStatisticsTest {
     @Before
     public void setup() {
         label = Bucket.Label.valueOf("TestWinner");
-        actionCountsMap = new HashMap<Event.Name, ActionCounts>();
-        actionRateMap = new HashMap<Event.Name, ActionRate>();
+        actionCountsMap = new HashMap<>();
+        actionRateMap = new HashMap<>();
         jointActionCounts = new Counts();
         impressionCounts = new Counts();
         jointActionRate = new Estimate();
-        bucketComparisons = new HashMap<Bucket.Label, BucketComparison>();
+        bucketComparisons = new HashMap<>();
         bucketStatistics = new BucketStatistics.Builder().withLabel(label)
                 .withActionCounts(actionCountsMap).withActionRates(actionRateMap)
                 .withJointActionCounts(jointActionCounts).withImpressionCounts(impressionCounts)

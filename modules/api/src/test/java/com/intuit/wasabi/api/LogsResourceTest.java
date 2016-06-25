@@ -176,7 +176,7 @@ public class LogsResourceTest {
     @Test
     public void linkHeaderValue() throws Exception {
         LogsResource lr = new LogsResource(mock(AuditLog.class), mock(Authorization.class), new HttpHeader("jaba-???"));
-        String lh = lr.linkHeaderValue("/test", 100, 3, 5, 1, new HashMap<String, String>());
+        String lh = lr.linkHeaderValue("/test", 100, 3, 5, 1, new HashMap<>());
 
         assertEquals("</api/v1/logs/test?per_page=5&page=1>; rel=\"First\", </api/v1/logs/test?per_page=5&page=20>; rel=\"Last\", </api/v1/logs/test?per_page=5&page=2>; rel=\"Previous\", </api/v1/logs/test?per_page=5&page=2>; rel=\"Page 2\", </api/v1/logs/test?per_page=5&page=4>; rel=\"Next\", </api/v1/logs/test?per_page=5&page=4>; rel=\"Page 4\"", lh);
     }

@@ -61,7 +61,7 @@ public class EventLogImpl implements EventLog {
         listeners = new ConcurrentHashMap<>();
         eventDeque = new ConcurrentLinkedDeque<>();
 
-        eventPostThreadPoolExecutor = new ThreadPoolExecutor(threadPoolSizeCore, threadPoolSizeMax, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
+        eventPostThreadPoolExecutor = new ThreadPoolExecutor(threadPoolSizeCore, threadPoolSizeMax, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
     }
 
     /**
@@ -168,9 +168,7 @@ public class EventLogImpl implements EventLog {
         } finally {
             LOGGER.info("Shutting down event system, posting remaining events -- incoming events are no longer accepted.");
             if (!eventDeque.isEmpty()) {
-                for (EventLogEvent eventLogEvent : eventDeque) {
-                    prepareEnvelope(eventLogEvent);
-                }
+                eventDeque.forEach(this::prepareEnvelope);
             }
         }
     }
@@ -184,10 +182,8 @@ public class EventLogImpl implements EventLog {
         if (event == null) {
             return;
         }
-        for (EventLogListener eventLogListener : listeners.keySet()) {
-            if (isSubscribed(eventLogListener, event)) {
-                eventPostThreadPoolExecutor.submit(new EventLogEventEnvelope(event, eventLogListener));
-            }
-        }
+        listeners.keySet().stream().filter(eventLogListener ->
+                isSubscribed(eventLogListener, event)).forEach(eventLogListener ->
+                eventPostThreadPoolExecutor.submit(new EventLogEventEnvelope(event, eventLogListener)));
     }
 }

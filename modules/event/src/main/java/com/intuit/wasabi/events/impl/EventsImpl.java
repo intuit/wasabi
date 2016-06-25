@@ -139,10 +139,10 @@ public class EventsImpl implements Events, EventsMBean {
 
     @Override
     public Map<String, Integer> queuesLength() {
-        Map<String, Integer> queueLengthMap = new HashMap<String, Integer>();
-        queueLengthMap.put(MYSQL, new Integer(mysqlQueue.size()));
+        Map<String, Integer> queueLengthMap = new HashMap<>();
+        queueLengthMap.put(MYSQL, mysqlQueue.size());
         for (String name : eventIngestionExecutors.keySet()) {
-            queueLengthMap.put(name.toLowerCase(), new Integer(eventIngestionExecutors.get(name).queueLength()));
+            queueLengthMap.put(name.toLowerCase(), eventIngestionExecutors.get(name).queueLength());
         }
         return queueLengthMap;
     }

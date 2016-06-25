@@ -91,7 +91,7 @@ public class DatabaseAnalyticsTest {
         Date from = mock(Date.class), to = mock(Date.class);
         when(parameters.getFromTime()).thenReturn(from);
         when(parameters.getToTime()).thenReturn(to);
-        List<String> actions = new ArrayList<String>();
+        List<String> actions = new ArrayList<>();
         actions.add("TEST_ACTION");
         when(parameters.getActions()).thenReturn(actions);
         List<Map> expected = mock(List.class);
@@ -113,7 +113,7 @@ public class DatabaseAnalyticsTest {
         Date from = mock(Date.class), to = mock(Date.class);
         when(parameters.getFromTime()).thenReturn(from);
         when(parameters.getToTime()).thenReturn(to);
-        List<String> actions = new ArrayList<String>();
+        List<String> actions = new ArrayList<>();
         actions.add("TEST_ACTION");
         when(parameters.getActions()).thenReturn(actions);
         List<Map> expected = mock(List.class);
@@ -150,8 +150,8 @@ public class DatabaseAnalyticsTest {
     @Test(expected = RepositoryException.class)
     public void getEmptyBucketsTest() {
         Experiment.ID experimentId = Experiment.ID.newInstance();
-        List<Map> input = new ArrayList<Map>();
-        Map<String, String> map = new HashMap<String, String>();
+        List<Map> input = new ArrayList<>();
+        Map<String, String> map = new HashMap<>();
         map.put("label", "TEST_LABEL");
         input.add(map);
         when(transaction.select(anyString(), Matchers.anyVararg())).thenReturn(input);

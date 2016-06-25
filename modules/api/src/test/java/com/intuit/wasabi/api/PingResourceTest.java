@@ -65,7 +65,7 @@ public class PingResourceTest {
 
     @Test
     public void pingTest() throws Exception {
-        SortedMap<String, HealthCheck.Result> result = new TreeMap<String, HealthCheck.Result>();
+        SortedMap<String, HealthCheck.Result> result = new TreeMap<>();
         result.put("test", HealthCheck.Result.unhealthy("test unhealthy"));
         when(healthChecks.runHealthChecks()).thenReturn(result);
         Response answer = resouce.ping();

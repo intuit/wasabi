@@ -196,7 +196,7 @@ public class ExperimentsImplTest {
         doNothing().when(cassandraRepository).createIndicesForNewExperiment(testExp);
         expImpl.createExperiment(testExp, UserInfo.from(UserInfo.Username.valueOf("user")).build());
         verify(eventLog, times(1)).postEvent(any(ExperimentCreateEvent.class));
-        List<Application.Name> names = new ArrayList<Application.Name>();
+        List<Application.Name> names = new ArrayList<>();
         when(cassandraRepository.getApplicationsList()).thenReturn(names);
         assertThat(expImpl.getApplications(), is(names));
     }

@@ -85,6 +85,6 @@ public class EventsModule extends AbstractModule {
     @Provides
     @Inject
     public Map<String, EventIngestionExecutor> ingestionExecutors() {
-        return new HashMap<String, EventIngestionExecutor>();
+        return new HashMap<>();
     }
 }

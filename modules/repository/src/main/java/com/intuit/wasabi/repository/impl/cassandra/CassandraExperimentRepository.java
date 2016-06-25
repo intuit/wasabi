@@ -46,6 +46,8 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.IOException;
 import java.util.*;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Cassandra experiment repo
  *
@@ -90,14 +92,10 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
      * @return the experiment
      * @ repository failure
      */
-    private Experiment getExperiment(Experiment.ID experimentID,
-                                     ConsistencyLevel consistency) {
+    private Experiment getExperiment(Experiment.ID experimentID, ConsistencyLevel consistency) {
+        checkNotNull(experimentID, "Parameter \"experimentID\" cannot be null");
 
-        Preconditions.checkNotNull(experimentID, "Parameter \"experimentID\" cannot be null");
-
-        final String CQL = "select * from experiment " +
-                "where id = ?";
-
+        final String cql = "select * from experiment where id = ?";
         final ConsistencyLevel CONSISTENCY = consistency != null
                 ? consistency
                 : ConsistencyLevel.CL_QUORUM;
@@ -107,7 +105,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
                     getDriver().getKeyspace()
                             .prepareQuery(getKeyspace().experimentCF())
                             .setConsistencyLevel(CONSISTENCY)
-                            .withCql(CQL)
+                            .withCql(cql)
                             .asPreparedStatement()
                             .withByteBufferValue(experimentID, ExperimentIDSerializer.get())
                             .execute();
@@ -150,16 +148,12 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
      * @param consistency  cassandra consistency level
      * @return the experiment
      */
-    private Experiment getExperiment(Application.Name appName,
-                                     Experiment.Label experimentLabel, ConsistencyLevel consistency) {
+    private Experiment getExperiment(Application.Name appName, Experiment.Label experimentLabel,
+                                     ConsistencyLevel consistency) {
+        checkNotNull(appName, "Parameter \"appName\" cannot be null");
+        checkNotNull(experimentLabel, "Parameter \"experimentLabel\" cannot be null");
 
-        Preconditions.checkNotNull(appName, "Parameter \"appName\" cannot be null");
-        Preconditions.checkNotNull(experimentLabel, "Parameter \"experimentLabel\" cannot be null");
-
-        final String CQL = "select * from experiment_label_index " +
-                "where app_name = ? and label = ?";
-
-
+        final String cql = "select * from experiment_label_index where app_name = ? and label = ?";
         final ConsistencyLevel CONSISTENCY = (consistency != null)
                 ? consistency
                 : ConsistencyLevel.CL_QUORUM;
@@ -169,7 +163,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
                     getDriver().getKeyspace()
                             .prepareQuery(getKeyspace().experimentLabelIndexCF())
                             .setConsistencyLevel(CONSISTENCY)
-                            .withCql(CQL)
+                            .withCql(cql)
                             .asPreparedStatement()
                             .withByteBufferValue(appName, ApplicationNameSerializer.get())
                             .withByteBufferValue(experimentLabel, ExperimentLabelSerializer.get())
@@ -181,7 +175,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
 
             if (!rows.isEmpty()) {
                 Row<ExperimentsKeyspace.AppNameExperimentLabelComposite, String> row = rows.getRowByIndex(0);
-                Experiment.ID experimentID = Experiment.ID.valueOf(Preconditions.checkNotNull(
+                Experiment.ID experimentID = Experiment.ID.valueOf(checkNotNull(
                         row.getColumns().getUUIDValue("id", null)));
                 result = getExperiment(experimentID);
             }
@@ -217,7 +211,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
         // being created with the same app name/label could result in one being 
         // clobbered. In practice, this should never happen, but...
         // TODO: Implement a transactional recipe
-        final String CQL = "insert into experiment " +
+        final String cql = "insert into experiment " +
                 "(id, description, rule, sample_percent, start_time, end_time, " +
                 "   state, label, app_name, created, modified, is_personalized, model_name, model_version," +
                 " is_rapid_experiment, user_cap, creatorid) " +
@@ -234,7 +228,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
 
             getDriver().getKeyspace()
                     .prepareQuery(getKeyspace().experimentCF())
-                    .withCql(CQL)
+                    .withCql(cql)
                     .asPreparedStatement()
                     .withByteBufferValue(experimentID, ExperimentIDSerializer.get())
                     .withStringValue(newExperiment.getDescription() != null
@@ -419,13 +413,12 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
      */
     @Override
     public BucketList getBucketList(Experiment.ID experimentID) {
-
         BucketList bucketList = new BucketList();
+        final String cql = "select * from bucket where experiment_id = ?";
 
-        final String CQL = "select * from bucket where experiment_id = ?";
         try {
             Rows<Bucket.Label, String> rows = getDriver().getKeyspace().prepareQuery(getKeyspace().bucketCF())
-                    .withCql(CQL).asPreparedStatement().withByteBufferValue(experimentID, ExperimentIDSerializer.get())
+                    .withCql(cql).asPreparedStatement().withByteBufferValue(experimentID, ExperimentIDSerializer.get())
                     .execute().getResult().getRows();
             if (!rows.isEmpty()) {
                 for (Row<Bucket.Label, String> row : rows) {
@@ -440,10 +433,9 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
 
     @Override
     public Experiment updateExperiment(Experiment experiment) {
-
         validator.validateExperiment(experiment);
 
-        final String CQL = "update experiment " +
+        final String cql = "update experiment " +
                 "set description = ?, rule = ?, sample_percent = ?, " +
                 "start_time = ?, end_time = ?, " +
                 "state=?, label=?, app_name=?, modified=? , is_personalized=?, model_name=?, model_version=?," +
@@ -457,7 +449,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
 
             getDriver().getKeyspace()
                     .prepareQuery(getKeyspace().experimentCF())
-                    .withCql(CQL)
+                    .withCql(cql)
                     .asPreparedStatement()
                     .withStringValue(experiment.getDescription() != null
                             ? experiment.getDescription()
@@ -498,10 +490,9 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
      */
     @Override
     public Experiment updateExperimentState(Experiment experiment, State state) {
-
         validator.validateExperiment(experiment);
 
-        final String CQL = "update experiment" +
+        final String cql = "update experiment" +
                 " set state = ?, modified = ?" +
                 " where id = ?";
 
@@ -512,7 +503,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
 
             getDriver().getKeyspace()
                     .prepareQuery(getKeyspace().experimentCF())
-                    .withCql(CQL)
+                    .withCql(cql)
                     .asPreparedStatement()
                     .withByteBufferValue(state, ExperimentStateSerializer.get())
                     .withByteBufferValue(NOW, DateSerializer.get())
@@ -608,17 +599,16 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
      */
     @Override
     public Rows<Experiment.ID, String> getExperimentRows(Application.Name appName) {
+        checkNotNull(appName, "Parameter \"appName\" cannot be null");
 
-        Preconditions.checkNotNull(appName, "Parameter \"appName\" cannot be null");
-
-        final String CQL = "select * from experiment where app_name = ?";
+        final String cql = "select * from experiment where app_name = ?";
 
         try {
 
             OperationResult<CqlResult<Experiment.ID, String>> opResult =
                     getDriver().getKeyspace()
                             .prepareQuery(getKeyspace().experimentCF())
-                            .withCql(CQL)
+                            .withCql(cql)
                             .asPreparedStatement()
                             .withByteBufferValue(appName, ApplicationNameSerializer.get())
                             .execute();
@@ -680,14 +670,13 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
      */
     @Override
     public List<Application.Name> getApplicationsList() {
-
         List<Application.Name> result = new ArrayList<>();
+        final String cql = "select distinct app_name from applicationList";
 
-        final String CQL = "select distinct app_name from applicationList";
         try {
             Rows<Application.Name, String> rows = getDriver().getKeyspace()
                     .prepareQuery(getKeyspace().applicationList_CF())
-                    .withCql(CQL)
+                    .withCql(cql)
                     .asPreparedStatement()
                     .execute()
                     .getResult()
@@ -712,18 +701,17 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
      */
     @Override
     public Bucket getBucket(Experiment.ID experimentID, Bucket.Label bucketLabel) {
+        checkNotNull(experimentID, "Parameter \"experimentID\" cannot be null");
+        checkNotNull(bucketLabel, "Parameter \"bucketLabel\" cannot be null");
 
-        Preconditions.checkNotNull(experimentID, "Parameter \"experimentID\" cannot be null");
-        Preconditions.checkNotNull(bucketLabel, "Parameter \"bucketLabel\" cannot be null");
-
-        final String CQL = "select * from bucket " +
+        final String cql = "select * from bucket " +
                 "where experiment_id = ? and label = ?";
 
         try {
             Rows<Bucket.Label, String> rows =
                     getDriver().getKeyspace()
                             .prepareQuery(getKeyspace().bucketCF())
-                            .withCql(CQL)
+                            .withCql(cql)
                             .asPreparedStatement()
                             .withByteBufferValue(experimentID, ExperimentIDSerializer.get())
                             .withByteBufferValue(bucketLabel, BucketLabelSerializer.get())
@@ -752,12 +740,10 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
      */
     @Override
     public void createBucket(Bucket newBucket) {
-
-        Preconditions.checkNotNull(newBucket, "Parameter \"newBucket\" cannot be null");
+        checkNotNull(newBucket, "Parameter \"newBucket\" cannot be null");
 
         final Bucket.State STATE = Bucket.State.OPEN;
-
-        final String CQL = "insert into bucket " +
+        final String cql = "insert into bucket " +
                 "(experiment_id, label, description, allocation, " +
                 "   is_control, payload, state) " +
                 "values (?, ?, ?, ?, ?, ?, ?)";
@@ -765,7 +751,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
         try {
             getDriver().getKeyspace()
                     .prepareQuery(getKeyspace().bucketCF())
-                    .withCql(CQL)
+                    .withCql(cql)
                     .asPreparedStatement()
                     .withByteBufferValue(newBucket.getExperimentID(), ExperimentIDSerializer.get())
                     .withByteBufferValue(newBucket.getLabel(), BucketLabelSerializer.get())
@@ -841,15 +827,14 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
             }
         }
 
-
-        final String CQL = "update bucket " +
+        final String cql = "update bucket " +
                 "set description = ?, allocation = ?, is_control = ?, payload = ? " +
                 "where experiment_id = ? and label = ?";
 
         try {
             getDriver().getKeyspace()
                     .prepareQuery(getKeyspace().bucketCF())
-                    .withCql(CQL)
+                    .withCql(cql)
                     .asPreparedStatement()
                     .withStringValue(bucket.getDescription() != null
                             ? bucket.getDescription()
@@ -873,15 +858,12 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
 
     @Override
     public Bucket updateBucketAllocationPercentage(Bucket bucket, Double desiredAllocationPercentage) {
-
-        final String CQL = "update bucket " +
-                "set allocation = ? " +
-                "where experiment_id = ? and label = ?";
+        final String cql = "update bucket set allocation = ? where experiment_id = ? and label = ?";
 
         try {
             getDriver().getKeyspace()
                     .prepareQuery(getKeyspace().bucketCF())
-                    .withCql(CQL)
+                    .withCql(cql)
                     .asPreparedStatement()
                     .withDoubleValue(desiredAllocationPercentage)
                     .withByteBufferValue(bucket.getExperimentID(), ExperimentIDSerializer.get())
@@ -903,15 +885,12 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
      */
     @Override
     public Bucket updateBucketState(Bucket bucket, Bucket.State desiredState) {
-
-        final String CQL = "update bucket " +
-                "set state = ? " +
-                "where experiment_id = ? and label = ?";
+        final String cql = "update bucket set state = ? where experiment_id = ? and label = ?";
 
         try {
             getDriver().getKeyspace()
                     .prepareQuery(getKeyspace().bucketCF())
-                    .withCql(CQL)
+                    .withCql(cql)
                     .asPreparedStatement()
                     .withByteBufferValue(desiredState, BucketStateSerializer.get())
                     .withByteBufferValue(bucket.getExperimentID(), ExperimentIDSerializer.get())
@@ -938,56 +917,71 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
      */
     @Override
     public BucketList updateBucketBatch(Experiment.ID experimentID, BucketList bucketList) {
+        String cql = "BEGIN BATCH ";
 
-        String CQL = "BEGIN BATCH ";
         for (int i = 0; i < bucketList.getBuckets().size(); i++) {
             Bucket b = bucketList.getBuckets().get(i);
-            CQL += "UPDATE bucket SET ";
+
+            cql += "UPDATE bucket SET ";
+
             if (b.getState() != null) {
-                CQL += "state = ?,";
+                cql += "state = ?,";
             }
+
             if (b.getAllocationPercent() != null) {
-                CQL += "allocation = ?,";
+                cql += "allocation = ?,";
             }
+
             if (b.getDescription() != null) {
-                CQL += "description = ?,";
+                cql += "description = ?,";
             }
+
             if (b.isControl() != null) {
-                CQL += "is_control = ?,";
+                cql += "is_control = ?,";
             }
+
             if (b.getPayload() != null) {
-                CQL += "payload = ?,";
+                cql += "payload = ?,";
             }
-            if (",".equals(CQL.substring(CQL.length() - 1, CQL.length()))) {
-                CQL = CQL.substring(0, CQL.length() - 1);
+
+            if (",".equals(cql.substring(cql.length() - 1, cql.length()))) {
+                cql = cql.substring(0, cql.length() - 1);
             }
-            CQL += "where experiment_id = ? and label = ?;";
+
+            cql += "where experiment_id = ? and label = ?;";
         }
-        CQL += "APPLY BATCH;";
+
+        cql += "APPLY BATCH;";
 
         try {
             PreparedCqlQuery<Bucket.Label, String> temp = getDriver().getKeyspace()
                     .prepareQuery(getKeyspace().bucketCF())
-                    .withCql(CQL)
+                    .withCql(cql)
                     .asPreparedStatement();
 
             for (int i = 0; i < bucketList.getBuckets().size(); i++) {
                 Bucket b = bucketList.getBuckets().get(i);
+
                 if (b.getState() != null) {
                     temp = temp.withByteBufferValue(b.getState(), BucketStateSerializer.get());
                 }
+
                 if (b.getAllocationPercent() != null) {
                     temp = temp.withDoubleValue(b.getAllocationPercent());
                 }
+
                 if (b.getDescription() != null) {
                     temp = temp.withStringValue(b.getDescription());
                 }
+
                 if (b.isControl() != null) {
                     temp = temp.withBooleanValue(b.isControl());
                 }
+
                 if (b.getPayload() != null) {
                     temp = temp.withStringValue(b.getPayload());
                 }
+
                 temp = temp.withByteBufferValue(experimentID, ExperimentIDSerializer.get());
                 temp = temp.withByteBufferValue(b.getLabel(), BucketLabelSerializer.get());
             }
@@ -1011,16 +1005,16 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
     public void deleteBucket(Experiment.ID experimentID,
                              Bucket.Label bucketLabel) {
 
-        Preconditions.checkNotNull(experimentID, "Parameter \"experimentID\" cannot be null");
-        Preconditions.checkNotNull(bucketLabel, "Parameter \"bucketLabel\" cannot be null");
+        checkNotNull(experimentID, "Parameter \"experimentID\" cannot be null");
+        checkNotNull(bucketLabel, "Parameter \"bucketLabel\" cannot be null");
 
         try {
-            final String CQL = "delete from bucket " +
+            final String cql = "delete from bucket " +
                     "where experiment_id = ? and label = ?";
 
             getDriver().getKeyspace()
                     .prepareQuery(getKeyspace().bucketCF())
-                    .withCql(CQL)
+                    .withCql(cql)
                     .asPreparedStatement()
                     .withByteBufferValue(experimentID, ExperimentIDSerializer.get())
                     .withByteBufferValue(bucketLabel, BucketLabelSerializer.get())
@@ -1040,16 +1034,16 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
     @Override
     public void logBucketChanges(Experiment.ID experimentID, Bucket.Label bucketLabel,
                                  List<BucketAuditInfo> changeList) {
-
         final long NOW = System.currentTimeMillis();
-        final String CQL = "insert into bucket_audit_log " +
+        final String cql = "insert into bucket_audit_log " +
                 "(experiment_id, label, modified, attribute_name, old_value, new_value) " +
                 "values (?,?,?,?,?,?)";
+
         try {
             for (BucketAuditInfo changeData : changeList) {
                 getDriver().getKeyspace()
                         .prepareQuery(getKeyspace().bucket_audit_log_CF())
-                        .withCql(CQL)
+                        .withCql(cql)
                         .asPreparedStatement()
                         .withByteBufferValue(experimentID, ExperimentIDSerializer.get())
                         .withByteBufferValue(bucketLabel, BucketLabelSerializer.get())
@@ -1071,7 +1065,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
     @Override
     public void logExperimentChanges(Experiment.ID experimentID, List<ExperimentAuditInfo> changeList) {
         final long NOW = System.currentTimeMillis();
-        final String CQL = "insert into experiment_audit_log " +
+        final String cql = "insert into experiment_audit_log " +
                 "(experiment_id, modified,attribute_name, old_value, new_value) " +
                 "values(?,?,?,?,?)";
         try {
@@ -1079,7 +1073,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
             for (ExperimentAuditInfo changeData : changeList) {
                 getDriver().getKeyspace()
                         .prepareQuery(getKeyspace().experiment_audit_log_CF())
-                        .withCql(CQL)
+                        .withCql(cql)
                         .asPreparedStatement()
                         .withByteBufferValue(experimentID, ExperimentIDSerializer.get())
                         .withLongValue(NOW)
@@ -1103,23 +1097,23 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
      */
     @Override
     public BucketList getBuckets(Experiment.ID experimentID) {
-
-        Preconditions.checkNotNull(experimentID, "Parameter \"experimentID\" cannot be null");
+        checkNotNull(experimentID, "Parameter \"experimentID\" cannot be null");
 
         // Check if the experiment is live
         Experiment experiment = getExperiment(experimentID);
+
         if (experiment == null) {
             throw new ExperimentNotFoundException(experimentID);
         }
 
-        final String CQL = "select * from bucket " +
+        final String cql = "select * from bucket " +
                 "where experiment_id = ?";
 
         try {
             OperationResult<CqlResult<Bucket.Label, String>> opResult =
                     getDriver().getKeyspace()
                             .prepareQuery(getKeyspace().bucketCF())
-                            .withCql(CQL)
+                            .withCql(cql)
                             .asPreparedStatement()
                             .withByteBufferValue(experimentID, ExperimentIDSerializer.get())
                             .execute();
@@ -1139,13 +1133,12 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
     private void updateExperimentLabelIndex(Experiment.ID experimentID, Application.Name appName,
                                             Experiment.Label experimentLabel, Date startTime, Date endTime,
                                             Experiment.State state) {
-
         if (state == Experiment.State.TERMINATED || state == Experiment.State.DELETED) {
             removeExperimentLabelIndex(appName, experimentLabel);
             return;
         }
 
-        final String CQL = "update experiment_label_index " +
+        final String cql = "update experiment_label_index " +
                 "set id = ?, modified = ?, start_time = ?, end_time = ?, state = ? " +
                 "where app_name = ? and label = ?";
 
@@ -1156,7 +1149,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
 
             getDriver().getKeyspace()
                     .prepareQuery(getKeyspace().experimentLabelIndexCF())
-                    .withCql(CQL)
+                    .withCql(cql)
                     .asPreparedStatement()
                     .withByteBufferValue(experimentID, ExperimentIDSerializer.get())
                     // modified
@@ -1173,11 +1166,8 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
         }
     }
 
-    private void removeExperimentLabelIndex(Application.Name appName,
-                                            Experiment.Label experimentLabel) {
-
-        final String CQL = "delete from experiment_label_index " +
-                "where app_name = ? and label = ?";
+    private void removeExperimentLabelIndex(Application.Name appName, Experiment.Label experimentLabel) {
+        final String cql = "delete from experiment_label_index where app_name = ? and label = ?";
 
         try {
             // Note that this timestamp gets serialized as mulliseconds from
@@ -1185,7 +1175,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
 
             getDriver().getKeyspace()
                     .prepareQuery(getKeyspace().experimentLabelIndexCF())
-                    .withCql(CQL)
+                    .withCql(cql)
                     .asPreparedStatement()
                     .withByteBufferValue(appName, ApplicationNameSerializer.get())
                     .withByteBufferValue(experimentLabel, ExperimentLabelSerializer.get())
@@ -1255,13 +1245,12 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
      */
     @Override
     public void createApplication(Application.Name applicationName) {
-
-        final String CQL = "insert into applicationList(app_name) values(?)";
+        final String cql = "insert into applicationList(app_name) values(?)";
 
         try {
             getDriver().getKeyspace()
                     .prepareQuery(getKeyspace().applicationList_CF())
-                    .withCql(CQL).asPreparedStatement()
+                    .withCql(cql).asPreparedStatement()
                     .withByteBufferValue(applicationName, ApplicationNameSerializer.get())
                     .execute().getResult();
         } catch (Exception e) {

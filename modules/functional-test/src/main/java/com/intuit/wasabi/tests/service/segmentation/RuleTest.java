@@ -101,45 +101,42 @@ public class RuleTest extends TestBase {
 
     @Test(dependsOnMethods = {"t_changingStates"}, groups = {"changingStates"})
     public void t_changeRules() {
-        for (Experiment experiment : validExperimentsMaps.values()) {
-            if (experiment.applicationName.contains("valid")) {
-                String newRule = "{\"rule\":\"vet=false\"}";
-                response = apiServerConnector.doPut("/experiments/" + experiment.id, newRule);
-                assertReturnCode(response, HttpStatus.SC_OK);
-                String oldRule = "{\"rule\": \"(salary > 80000 && state = 'CA') || (salary > 60000 && vet = true)\"}";
-                response = apiServerConnector.doPut("/experiments/" + experiment.id, oldRule);
-                assertReturnCode(response, HttpStatus.SC_OK);
-            }
-        }
+        validExperimentsMaps.values().stream().filter(experiment -> experiment.applicationName.contains("valid")).forEach(experiment -> {
+            String newRule = "{\"rule\":\"vet=false\"}";
+            response = apiServerConnector.doPut("/experiments/" + experiment.id, newRule);
+            assertReturnCode(response, HttpStatus.SC_OK);
+            String oldRule = "{\"rule\": \"(salary > 80000 && state = 'CA') || (salary > 60000 && vet = true)\"}";
+            response = apiServerConnector.doPut("/experiments/" + experiment.id, oldRule);
+            assertReturnCode(response, HttpStatus.SC_OK);
+        });
     }
 
     @Test(dependsOnGroups = {"changingStates"}, groups = {"assignment"})
     public void t_noRuleAssignment() {
-        for (Experiment experiment : validExperimentsMaps.values()) {
-            if (experiment.applicationName.contains("no_rule")) {
-                String baseUrl = String.format("/assignments/applications/%s/experiments/%s/users/",
-                        experiment.applicationName, experiment.label);
-                LOGGER.debug("Assign johnDoe to New_ASSIGNMENT");
-                response = apiServerConnector.doGet(baseUrl + "johnDoe");
-                assertReturnCode(response, HttpStatus.SC_OK);
-                Assert.assertEquals(response.asString().contains("NEW_ASSIGNMENT"), true);
-                LOGGER.debug("Get existing assignment for johnDoe");
-                response = apiServerConnector.doGet(baseUrl + "johnDoe");
-                assertReturnCode(response, HttpStatus.SC_OK);
-                Assert.assertEquals(response.asString().contains("EXISTING_ASSIGNMENT"), true);
+        //Assign user with profile
+        validExperimentsMaps.values().stream().filter(experiment -> experiment.applicationName.contains("no_rule")).forEach(experiment -> {
+            String baseUrl = String.format("/assignments/applications/%s/experiments/%s/users/",
+                    experiment.applicationName, experiment.label);
+            LOGGER.debug("Assign johnDoe to New_ASSIGNMENT");
+            response = apiServerConnector.doGet(baseUrl + "johnDoe");
+            assertReturnCode(response, HttpStatus.SC_OK);
+            Assert.assertEquals(response.asString().contains("NEW_ASSIGNMENT"), true);
+            LOGGER.debug("Get existing assignment for johnDoe");
+            response = apiServerConnector.doGet(baseUrl + "johnDoe");
+            assertReturnCode(response, HttpStatus.SC_OK);
+            Assert.assertEquals(response.asString().contains("EXISTING_ASSIGNMENT"), true);
 
-                //Assign user with profile
-                String data = "{\"profile\": {\"salary\": 50000, \"state\": \"CA\"}}";
-                LOGGER.debug("Assign janeDoe to New_ASSIGNMENT");
-                response = apiServerConnector.doPost(baseUrl + "janeDoe", data);
-                assertReturnCode(response, HttpStatus.SC_OK);
-                Assert.assertEquals(response.asString().contains("NEW_ASSIGNMENT"), true);
-                LOGGER.debug("Get existing assignment for janeDoe");
-                response = apiServerConnector.doGet(baseUrl + "janeDoe");
-                assertReturnCode(response, HttpStatus.SC_OK);
-                Assert.assertEquals(response.asString().contains("EXISTING_ASSIGNMENT"), true);
-            }
-        }
+            //Assign user with profile
+            String data = "{\"profile\": {\"salary\": 50000, \"state\": \"CA\"}}";
+            LOGGER.debug("Assign janeDoe to New_ASSIGNMENT");
+            response = apiServerConnector.doPost(baseUrl + "janeDoe", data);
+            assertReturnCode(response, HttpStatus.SC_OK);
+            Assert.assertEquals(response.asString().contains("NEW_ASSIGNMENT"), true);
+            LOGGER.debug("Get existing assignment for janeDoe");
+            response = apiServerConnector.doGet(baseUrl + "janeDoe");
+            assertReturnCode(response, HttpStatus.SC_OK);
+            Assert.assertEquals(response.asString().contains("EXISTING_ASSIGNMENT"), true);
+        });
     }
 
     @Test(dependsOnGroups = {"changingStates"}, groups = {"assignment"})

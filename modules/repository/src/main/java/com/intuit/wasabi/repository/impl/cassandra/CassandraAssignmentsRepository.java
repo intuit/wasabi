@@ -16,6 +16,7 @@
 package com.intuit.wasabi.repository.impl.cassandra;
 
 import com.codahale.metrics.annotation.Timed;
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
@@ -48,11 +49,14 @@ import com.netflix.astyanax.query.PreparedCqlQuery;
 import com.netflix.astyanax.serializers.DateSerializer;
 import com.netflix.astyanax.serializers.StringSerializer;
 import com.netflix.astyanax.serializers.UUIDSerializer;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.StreamingOutput;
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.ByteBuffer;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -61,7 +65,10 @@ import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import static com.intuit.wasabi.repository.Constants.DEFAULT_CHAR_SET;
+import static java.lang.System.getProperty;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -86,6 +93,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     private ThreadPoolExecutor assignmentsCountExecutor;
     private boolean assignUserToOld;
     private boolean assignUserToNew;
+    private Joiner joiner = Joiner.on("\t");
 
     @Inject
     public CassandraAssignmentsRepository(@CassandraRepository ExperimentRepository experimentRepository,
@@ -121,15 +129,14 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     @Override
     @Timed
     public Set<Experiment.ID> getUserAssignments(User.ID userID, Application.Name appLabel, Context context) {
-
-        final String CQL = "select * from experiment_user_index " +
+        final String cql = "select * from experiment_user_index " +
                 "where user_id = ? and app_name = ? and context = ?";
 
         try {
             Rows<User.ID, String> rows =
                     driver.getKeyspace()
                             .prepareQuery(keyspace.experimentUserIndexCF())
-                            .withCql(CQL)
+                            .withCql(cql)
                             .asPreparedStatement()
                             .withByteBufferValue(userID, UserIDSerializer.get())
                             .withByteBufferValue(appLabel, ApplicationNameSerializer.get())
@@ -137,7 +144,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                             .execute()
                             .getResult()
                             .getRows();
-
             Set<Experiment.ID> result = new HashSet<>();
 
             //return all experiments to which the user is assigned for which the
@@ -208,26 +214,21 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
      */
     @Timed
     protected Assignment assignUserToLookUp(Assignment assignment, Date date) {
-        final String CQL;
-        Date paramDate = date;
-        if (paramDate == null) {
-            paramDate = new Date();
-        }
-        if (assignment.getBucketLabel() != null) {
-            CQL = "insert into user_assignment_look_up " +
-                    "(experiment_id, user_id, context, created, bucket_label) " +
-                    "values (?, ?, ?, ?, ?)";
-        } else {
-            CQL = "insert into user_assignment_look_up " +
-                    "(experiment_id, user_id, context, created) " +
-                    "values (?, ?, ?, ?)";
-        }
+        final String cql = assignment.getBucketLabel() != null ?
+                "insert into user_assignment_look_up " +
+                        "(experiment_id, user_id, context, created, bucket_label) " +
+                        "values (?, ?, ?, ?, ?)" :
+                "insert into user_assignment_look_up " +
+                        "(experiment_id, user_id, context, created) " +
+                        "values (?, ?, ?, ?)";
+        Date paramDate = date == null ? new Date() : date;
+
         try {
 
             PreparedCqlQuery<User.ID, String> query =
                     driver.getKeyspace()
                             .prepareQuery(keyspace.userAssignmentLookUp())
-                            .withCql(CQL)
+                            .withCql(cql)
                             .asPreparedStatement()
                             .withByteBufferValue(assignment.getExperimentID(), ExperimentIDSerializer.get())
                             .withByteBufferValue(assignment.getUserID(), UserIDSerializer.get())
@@ -255,23 +256,19 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     @Override
     @Timed
     public Assignment assignUserToOld(Assignment assignment, Date date) {
-        final String CQL;
-
-        if (assignment.getBucketLabel() != null) {
-            CQL = "insert into user_assignment " +
-                    "(experiment_id, user_id, context, created, bucket_label) " +
-                    "values (?, ?, ?, ?, ?)";
-        } else {
-            CQL = "insert into user_assignment " +
-                    "(experiment_id, user_id, context, created) " +
-                    "values (?, ?, ?, ?)";
-        }
+        final String cql = assignment.getBucketLabel() != null ?
+                "insert into user_assignment " +
+                        "(experiment_id, user_id, context, created, bucket_label) " +
+                        "values (?, ?, ?, ?, ?)" :
+                "insert into user_assignment " +
+                        "(experiment_id, user_id, context, created) " +
+                        "values (?, ?, ?, ?)";
 
         try {
             PreparedCqlQuery<ExperimentsKeyspace.UserAssignmentComposite, String> query =
                     driver.getKeyspace()
                             .prepareQuery(keyspace.userAssignmentCF())
-                            .withCql(CQL)
+                            .withCql(cql)
                             .asPreparedStatement()
                             .withByteBufferValue(assignment.getExperimentID(), ExperimentIDSerializer.get())
                             .withByteBufferValue(assignment.getUserID(), UserIDSerializer.get())
@@ -306,10 +303,11 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
      * @param context      context
      */
     protected void deleteUserFromLookUp(Experiment.ID experimentID, User.ID userID, Context context) {
-        final String CQL = "delete from user_assignment_look_up where user_id = ? and context = ? and experiment_id = ?";
+        final String cql = "delete from user_assignment_look_up where user_id = ? and context = ? and experiment_id = ?";
+
         try {
             PreparedCqlQuery<ExperimentsKeyspace.UserAssignmentComposite, String> query =
-                    driver.getKeyspace().prepareQuery(keyspace.userAssignmentCF()).withCql(CQL)
+                    driver.getKeyspace().prepareQuery(keyspace.userAssignmentCF()).withCql(cql)
                             .asPreparedStatement()
                             .withByteBufferValue(userID, UserIDSerializer.get())
                             .withStringValue(context.getContext())
@@ -330,10 +328,10 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     @Override
     @Timed
     public void assignUserToExports(Assignment assignment, Date date) {
-        final String CQL;
-        CQL = "insert into user_assignment_export " +
+        final String cql = "insert into user_assignment_export " +
                 "(experiment_id, user_id, context, created, day_hour, bucket_label, is_bucket_null) " +
                 "values (?, ?, ?, ?, ?, ?, ?)";
+
         try {
             DateHour dateHour = new DateHour();
             dateHour.setDateHour(date);
@@ -341,7 +339,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
             PreparedCqlQuery<ExperimentsKeyspace.ExperimentIDDayHourComposite, String> query =
                     driver.getKeyspace()
                             .prepareQuery(keyspace.userAssignmentExport())
-                            .withCql(CQL)
+                            .withCql(cql)
                             .asPreparedStatement()
                             .withByteBufferValue(assignment.getExperimentID().getRawID(), UUIDSerializer.get())
                             .withByteBufferValue(assignment.getUserID(), UserIDSerializer.get())
@@ -366,30 +364,29 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     //add to cassandra table a user-indexed table of experiments for mutual exclusion
     @Timed
     private void indexExperimentsToUser(Assignment assignment) {
-
-        String CQL = (assignment.getBucketLabel() != null)
-
-                ? "insert into experiment_user_index " +
-                "(user_id, context, app_name, experiment_id, bucket) " +
-                "values (?, ?, ?, ?, ?)"
-                : "insert into experiment_user_index " +
-                "(user_id, context, app_name, experiment_id) " +
-                "values (?, ?, ?, ?)";
+        String cql = (assignment.getBucketLabel() != null) ?
+                "insert into experiment_user_index " +
+                        "(user_id, context, app_name, experiment_id, bucket) " +
+                        "values (?, ?, ?, ?, ?)" :
+                "insert into experiment_user_index " +
+                        "(user_id, context, app_name, experiment_id) " +
+                        "values (?, ?, ?, ?)";
 
         try {
-
             PreparedCqlQuery<User.ID, String> query =
                     driver.getKeyspace()
                             .prepareQuery(keyspace.experimentUserIndexCF())
-                            .withCql(CQL)
+                            .withCql(cql)
                             .asPreparedStatement()
                             .withByteBufferValue(assignment.getUserID(), UserIDSerializer.get())
                             .withStringValue(assignment.getContext().getContext())
                             .withByteBufferValue(assignment.getApplicationName(), ApplicationNameSerializer.get())
                             .withByteBufferValue(assignment.getExperimentID(), ExperimentIDSerializer.get());
+
             if (assignment.getBucketLabel() != null) {
                 query.withByteBufferValue(assignment.getBucketLabel(), BucketLabelSerializer.get());
             }
+
             query.execute();
         } catch (ConnectionException e) {
             throw new RepositoryException("Could not index experiment to user \"" + assignment + "\"", e);
@@ -398,15 +395,15 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
 
     @Timed
     private void indexUserToExperiment(Assignment assignment) {
-
-        final String CQL = "insert into user_experiment_index " +
+        final String cql = "insert into user_experiment_index " +
                 "(app_name, user_id, context, experiment_id, bucket_label) " +
                 "values (?, ?, ?, ?, ?)";
+
         try {
             PreparedCqlQuery<Application.Name, String> query =
                     driver.getKeyspace()
                             .prepareQuery(keyspace.userExperimentIndexCF())
-                            .withCql(CQL)
+                            .withCql(cql)
                             .asPreparedStatement()
                             .withByteBufferValue(assignment.getApplicationName(), ApplicationNameSerializer.get())
                             .withByteBufferValue(assignment.getUserID(), UserIDSerializer.get())
@@ -429,8 +426,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
 
     @Timed
     private void indexUserToBucket(Assignment assignment) {
-
-        final String CQL = "insert into user_bucket_index " +
+        final String cql = "insert into user_bucket_index " +
                 "(experiment_id, user_id, context, assigned, bucket_label) " +
                 "values (?, ?, ?, ?, ?)";
 
@@ -440,7 +436,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
             PreparedCqlQuery<Application.Name, String> query =
                     driver.getKeyspace()
                             .prepareQuery(keyspace.userExperimentIndexCF())
-                            .withCql(CQL)
+                            .withCql(cql)
                             .asPreparedStatement()
                             .withByteBufferValue(assignment.getExperimentID(), ExperimentIDSerializer.get())
                             .withByteBufferValue(assignment.getUserID(), UserIDSerializer.get())
@@ -471,7 +467,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                                                                          Context context,
                                                                          Table<Experiment.ID, Experiment.Label,
                                                                                  Experiment> allExperiments) {
-
         final String CQL = "select * from experiment_user_index " +
                 "where user_id = ? and app_name = ? and context = ?";
 
@@ -505,14 +500,12 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
 
     @Timed
     protected Assignment getAssignmentFromLookUp(Experiment.ID experimentID, User.ID userID, Context context) {
-
-        final String CQL =
-                "select * from user_assignment_look_up " +
-                        "where experiment_id = ? and user_id = ? and context = ?";
+        final String cql = "select * from user_assignment_look_up " +
+                "where experiment_id = ? and user_id = ? and context = ?";
 
         try {
             Rows<User.ID, String> rows =
-                    driver.getKeyspace().prepareQuery(keyspace.userAssignmentLookUp()).withCql(CQL).asPreparedStatement()
+                    driver.getKeyspace().prepareQuery(keyspace.userAssignmentLookUp()).withCql(cql).asPreparedStatement()
                             .withByteBufferValue(experimentID, ExperimentIDSerializer.get())
                             .withByteBufferValue(userID, UserIDSerializer.get())
                             .withStringValue(context.getContext())
@@ -571,13 +564,12 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     //TODO: After migration getAssignmentOld should be deleted
     @Timed
     protected Assignment getAssignmentOld(Experiment.ID experimentID, User.ID userID, Context context) {
-        final String CQL =
-                "select * from user_assignment " +
-                        "where experiment_id = ? and user_id = ? and context = ?";
+        final String cql = "select * from user_assignment " +
+                "where experiment_id = ? and user_id = ? and context = ?";
 
         try {
             Rows<ExperimentsKeyspace.UserAssignmentComposite, String> rows =
-                    driver.getKeyspace().prepareQuery(keyspace.userAssignmentCF()).withCql(CQL).asPreparedStatement()
+                    driver.getKeyspace().prepareQuery(keyspace.userAssignmentCF()).withCql(cql).asPreparedStatement()
                             .withByteBufferValue(experimentID, ExperimentIDSerializer.get())
                             .withByteBufferValue(userID, UserIDSerializer.get())
                             .withStringValue(context.getContext())
@@ -685,11 +677,11 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     //TODO: After migration deleteAssignment should be deleted
     protected void deleteAssignmentOld(Experiment.ID experimentID, User.ID userID, Context context, Application.Name appName,
                                        Bucket.Label bucketLabel) {
-        final String CQL = "delete from user_assignment where experiment_id = ? and user_id = ? and context = ?";
+        final String cql = "delete from user_assignment where experiment_id = ? and user_id = ? and context = ?";
 
         try {
             PreparedCqlQuery<ExperimentsKeyspace.UserAssignmentComposite, String> query =
-                    driver.getKeyspace().prepareQuery(keyspace.userAssignmentCF()).withCql(CQL)
+                    driver.getKeyspace().prepareQuery(keyspace.userAssignmentCF()).withCql(cql)
                             .asPreparedStatement()
                             .withByteBufferValue(experimentID, ExperimentIDSerializer.get())
                             .withByteBufferValue(userID, UserIDSerializer.get())
@@ -713,12 +705,12 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
      */
     public void removeIndexUserToExperiment(User.ID userID, Experiment.ID experimentID, Context context,
                                             Application.Name appName) {
-        final String CQL = "delete from user_experiment_index " +
+        final String cql = "delete from user_experiment_index " +
                 "where user_id = ? and experiment_id = ? and context = ? and app_name = ?";
 
         try {
             PreparedCqlQuery<Application.Name, String> query =
-                    driver.getKeyspace().prepareQuery(keyspace.userExperimentIndexCF()).withCql(CQL).asPreparedStatement()
+                    driver.getKeyspace().prepareQuery(keyspace.userExperimentIndexCF()).withCql(cql).asPreparedStatement()
                             .withByteBufferValue(userID, UserIDSerializer.get()) // user_id
                             .withByteBufferValue(experimentID, ExperimentIDSerializer.get()) // experiment_id
                             .withStringValue(context.getContext()) //context
@@ -737,16 +729,17 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     @Timed
     public void removeIndexUserToBucket(User.ID userID, Experiment.ID experimentID, Context context,
                                         Bucket.Label bucketLabel) {
-        final String CQL = "delete from user_bucket_index " +
+        final String cql = "delete from user_bucket_index " +
                 "where experiment_id = ? and user_id = ? and context = ? and bucket_label = ?";
 
         try {
             PreparedCqlQuery<Application.Name, String> query =
-                    driver.getKeyspace().prepareQuery(keyspace.userExperimentIndexCF()).withCql(CQL).asPreparedStatement()
+                    driver.getKeyspace().prepareQuery(keyspace.userExperimentIndexCF()).withCql(cql).asPreparedStatement()
                             .withByteBufferValue(experimentID, ExperimentIDSerializer.get())
                             .withByteBufferValue(userID, UserIDSerializer.get())
                             .withStringValue(context.getContext())
                             .withByteBufferValue(bucketLabel, BucketLabelSerializer.get());
+
             query.execute();
         } catch (ConnectionException e) {
             throw new RepositoryException(
@@ -783,80 +776,67 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
 
         // Fetches the relevant partitions for a given time window where the user assignments data resides.
         final List<DateHour> dateHours = getUserAssignmentPartitions(from_ts_new, to_ts_new);
-        final String CQL;
+        final String cql = !ignoreNullBucket ?
+                "select * from user_assignment_export " +
+                        "where experiment_id = ? and day_hour = ? and context = ?" :
+                "select * from user_assignment_export " +
+                        "where experiment_id = ? and day_hour = ? and context = ? and is_bucket_null = false";
 
-        if (!ignoreNullBucket) {
-            CQL =
-                    "select * from user_assignment_export " +
-                            "where experiment_id = ? and day_hour = ? and context = ?";
-        } else {
-            CQL =
-                    "select * from user_assignment_export " +
-                            "where experiment_id = ? and day_hour = ? and context = ? and is_bucket_null = false";
-        }
+        return os -> {
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, DEFAULT_CHAR_SET));
+            String header = joiner.join("experiment_id", "user_id", "context", "bucket_label", "created",
+                    getProperty("line.separator"));
 
-        return new StreamingOutput() {
-            @Override
-            public void write(OutputStream os) throws IOException, WebApplicationException {
-                Writer writer = new BufferedWriter(new OutputStreamWriter(os, Constants.DEFAULT_CHAR_SET));
+            writer.write(header);
 
-                String header = "experiment_id" + "\t" +
-                        "user_id" + "\t" +
-                        "context" + "\t" +
-                        "bucket_label" + "\t" +
-                        "created" + "\t" +
-                        System.getProperty("line.separator");
-                writer.write(header);
-                String output;
-                DateFormat formatter = new SimpleDateFormat(defaultTimeFormat);
+            String output;
+            DateFormat formatter = new SimpleDateFormat(defaultTimeFormat);
 
-                formatter.setTimeZone(parameters.getTimeZone());
-                try {
-                    // Iterating through the different partitions across which the data resides
-                    for (int ipart = 0; ipart < dateHours.size(); ipart = ipart + 1) {
-                        Rows<ExperimentsKeyspace.ExperimentIDDayHourComposite, String> data =
-                                driver.getKeyspace()
-                                        .prepareQuery(keyspace.userAssignmentExport())
-                                        .withCql(CQL)
-                                        .asPreparedStatement()
-                                        // experiment_id
-                                        .withByteBufferValue(
-                                                experimentID,
-                                                ExperimentIDSerializer.get())
-                                        //day_hour
-                                        .withByteBufferValue(dateHours.get(ipart).getDayHour(), DateSerializer.get())
-                                        //context
-                                        .withStringValue(context.getContext())
-                                        .execute()
-                                        .getResult()
-                                        .getRows();
+            formatter.setTimeZone(parameters.getTimeZone());
 
-                        for (int index = 0; index < data.size(); index = index + 1) {
-                            ColumnList<String> columns = data.getRowByIndex(index).getColumns();
-                            String id = String.valueOf(columns.getUUIDValue("experiment_id", null));
-                            String user = columns.getStringValue("user_id", null);
-                            String context_string = columns.getStringValue("context", null);
-                            String bucket_label = columns.getStringValue("bucket_label", null);
-                            Date date = columns.getDateValue("created", null);
-                            final Date converted_date = new Timestamp(date.getTime());
-                            String created = formatter.format(converted_date);
-                            output = id + '\t' + user + '\t' + context_string + '\t' + bucket_label + '\t' + created
-                                    + System.getProperty("line.separator");
-                            writer.write(output);
-                        }
+            try {
+                // Iterating through the different partitions across which the data resides
+                for (DateHour dateHour : dateHours) {
+                    Rows<ExperimentsKeyspace.ExperimentIDDayHourComposite, String> data =
+                            driver.getKeyspace()
+                                    .prepareQuery(keyspace.userAssignmentExport())
+                                    .withCql(cql)
+                                    .asPreparedStatement()
+                                    // experiment_id
+                                    .withByteBufferValue(
+                                            experimentID,
+                                            ExperimentIDSerializer.get())
+                                    //day_hour
+                                    .withByteBufferValue(dateHour.getDayHour(), DateSerializer.get())
+                                    //context
+                                    .withStringValue(context.getContext())
+                                    .execute()
+                                    .getResult()
+                                    .getRows();
 
+                    for (int index = 0; index < data.size(); index = index + 1) {
+                        ColumnList<String> columns = data.getRowByIndex(index).getColumns();
+                        String id1 = String.valueOf(columns.getUUIDValue("experiment_id", null));
+                        String user = columns.getStringValue("user_id", null);
+                        String context_string = columns.getStringValue("context", null);
+                        String bucket_label = columns.getStringValue("bucket_label", null);
+                        Date date = columns.getDateValue("created", null);
+                        final Date converted_date = new Timestamp(date.getTime());
+                        String created = formatter.format(converted_date);
+                        output = id1 + '\t' + user + '\t' + context_string + '\t' + bucket_label + '\t' + created
+                                + getProperty("line.separator");
+                        writer.write(output);
                     }
-                } catch (ConnectionException e) {
-                    throw new RepositoryException("Could not retrieve assignment for " +
-                            "experimentID = \"" + experimentID, e);
-                } finally {
-                    writer.close();
-                }
 
+                }
+            } catch (ConnectionException e) {
+                throw new RepositoryException("Could not retrieve assignment for " +
+                        "experimentID = \"" + experimentID, e);
+            } finally {
+                closeQuietly(writer);
             }
         };
     }
-
 
     /**
      * Removes the referenced pair from the experiment_user_index.
@@ -868,13 +848,12 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
      */
     public void removeIndexExperimentsToUser(User.ID userID, Experiment.ID experimentID, Context context,
                                              Application.Name appName) {
-        String CQL = "delete from experiment_user_index " +
+        String cql = "delete from experiment_user_index " +
                 "where user_id = ? and experiment_id = ? and context = ? and app_name = ?";
 
         try {
-
             PreparedCqlQuery<User.ID, String> query =
-                    driver.getKeyspace().prepareQuery(keyspace.experimentUserIndexCF()).withCql(CQL).asPreparedStatement()
+                    driver.getKeyspace().prepareQuery(keyspace.experimentUserIndexCF()).withCql(cql).asPreparedStatement()
                             .withByteBufferValue(userID, UserIDSerializer.get()) // user_id
                             .withByteBufferValue(experimentID, ExperimentIDSerializer.get())  // experiment_id
                             .withStringValue(context.getContext())   //context
@@ -905,7 +884,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     public List<DateHour> getUserAssignmentPartitions(Date from_time, Date to_time) {
         int ONE_HOUR = 1;
         int ZERO_MINUTES = 0;
-        List<DateHour> dateHours = new ArrayList<DateHour>();
+        List<DateHour> dateHours = new ArrayList<>();
         // Sanity check
         if (from_time.after(to_time)) {
             return dateHours;
@@ -947,20 +926,19 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     @Timed
     public void updateBucketAssignmentCount(Experiment experiment, Assignment assignment, boolean countUp) {
         Bucket.Label bucketLabel = assignment.getBucketLabel();
-        Bucket.Label bucketLabel1 = null;
-        String CQL;
+        Bucket.Label bucketLabel1;
+        String cql = countUp ?
+                "UPDATE bucket_assignment_counts SET bucket_assignment_count = bucket_assignment_count + 1 " +
+                        "WHERE experiment_id =? and bucket_label = ?" :
+                "UPDATE bucket_assignment_counts SET bucket_assignment_count = bucket_assignment_count - 1 " +
+                        "WHERE experiment_id =? and bucket_label = ?";
+
         bucketLabel1 = (bucketLabel == null) ? Bucket.Label.valueOf("NULL") : bucketLabel;
-        if (countUp) {
-            CQL = "UPDATE bucket_assignment_counts SET bucket_assignment_count = bucket_assignment_count + 1 " +
-                    "WHERE experiment_id =? and bucket_label = ?";
-        } else {
-            CQL = "UPDATE bucket_assignment_counts SET bucket_assignment_count = bucket_assignment_count - 1 " +
-                    "WHERE experiment_id =? and bucket_label = ?";
-        }
+
         try {
             driver.getKeyspace()
                     .prepareQuery(keyspace.bucketAssignmentCountsCF())
-                    .withCql(CQL)
+                    .withCql(cql)
                     .asPreparedStatement()
                     .withByteBufferValue(experiment.getID(), ExperimentIDSerializer.get())
                     .withByteBufferValue(bucketLabel1, BucketLabelSerializer.get())
@@ -980,19 +958,17 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     @Override
     @Timed
     public AssignmentCounts getBucketAssignmentCount(Experiment experiment) {
-
         AssignmentCounts assignmentCounts;
-
-        List<BucketAssignmentCount> bucketAssignmentCountList = new ArrayList<BucketAssignmentCount>();
+        List<BucketAssignmentCount> bucketAssignmentCountList = new ArrayList<>();
         Integer totalAssignments = 0;
         Integer nullAssignments = 0;
-
-        String CQL = "SELECT * FROM bucket_assignment_counts  " +
+        String cql = "SELECT * FROM bucket_assignment_counts  " +
                 "WHERE experiment_id =?";
+
         try {
             Rows<Experiment.ID, String> rows = driver.getKeyspace()
                     .prepareQuery(keyspace.bucketAssignmentCountsCF())
-                    .withCql(CQL)
+                    .withCql(cql)
                     .asPreparedStatement()
                     .withByteBufferValue(experiment.getID(), ExperimentIDSerializer.get())
                     .execute()

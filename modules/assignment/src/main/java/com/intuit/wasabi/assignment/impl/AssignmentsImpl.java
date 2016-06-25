@@ -58,6 +58,7 @@ import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -106,7 +107,6 @@ public class AssignmentsImpl implements Assignments {
     private HttpCall<PersonalizationEngineResponse> httpCall = new HttpCallImplWithConnectionPooling<>();
     private Priorities priorities;
     private Pages pages;
-
     private EventLog eventLog;
 
     /**
@@ -166,7 +166,6 @@ public class AssignmentsImpl implements Assignments {
         this.assignmentDBEnvelopeProvider = assignmentDBEnvelopeProvider;
         this.assignmentWebEnvelopeProvider = assignmentWebEnvelopeProvider;
         this.assignmentDecorator = assignmentDecorator;
-        this.eventLog = eventLog;
         this.ruleCacheExecutor = ruleCacheExecutor;
         this.assignmentsRepository = assignmentsRepository;
         this.mutexRepository = mutexRepository;
@@ -604,13 +603,8 @@ public class AssignmentsImpl implements Assignments {
                 experiment.getState() == Experiment.State.PAUSED)) {
             //get experiments which are mutually exclusive
             ExperimentList exclusives = mutexRepository.getExclusions(experiment.getID());
-            List<Experiment.ID> exclusiveIDs = new ArrayList<>();
-            for (Experiment exp : exclusives.getExperiments()) {
-                if (exp.getState() == Experiment.State.RUNNING ||
-                        exp.getState() == Experiment.State.PAUSED) {
-                    exclusiveIDs.add(exp.getID());
-                }
-            }
+            List<Experiment.ID> exclusiveIDs = exclusives.getExperiments().stream().filter(exp -> exp.getState() == Experiment.State.RUNNING ||
+                    exp.getState() == Experiment.State.PAUSED).map(Experiment::getID).collect(Collectors.toList());
 
             //get all experiments to which this user is assigned
             Set<Experiment.ID> preAssign = assignmentsRepository.getUserAssignments(userID, experiment
@@ -656,13 +650,8 @@ public class AssignmentsImpl implements Assignments {
 
     private Set<Experiment.ID> getNonNullUserAssignments(List<Experiment.ID> experimentIDList,
                                                          Table<Experiment.ID, Experiment.Label, String> userAssignments) {
-        Set<Experiment.ID> result = new HashSet<>();
-        for (Experiment.ID experimentID : experimentIDList) {
-            if (!userAssignments.row(experimentID).values().isEmpty() &&
-                    !"null".equals(userAssignments.row(experimentID).values().iterator().next())) {
-                result.add(experimentID);
-            }
-        }
+        Set<Experiment.ID> result = experimentIDList.stream().filter(experimentID -> !userAssignments.row(experimentID).values().isEmpty() &&
+                !"null".equals(userAssignments.row(experimentID).values().iterator().next())).collect(Collectors.toSet());
         return result;
     }
 
@@ -928,13 +917,8 @@ public class AssignmentsImpl implements Assignments {
 
         // Sort the buckets consistently (by label)
         Collections.sort(buckets,
-                new Comparator<Bucket>() {
-                    @Override
-                    public int compare(Bucket b1, Bucket b2) {
-                        return b1.getAllocationPercent().compareTo(
-                                b2.getAllocationPercent());
-                    }
-                });
+                (b1, b2) -> b1.getAllocationPercent().compareTo(
+                        b2.getAllocationPercent()));
 
         Double totalProbability = 0.0d;
 
@@ -1044,10 +1028,10 @@ public class AssignmentsImpl implements Assignments {
 
     @Override
     public Map<String, Integer> queuesLength() {
-        Map<String, Integer> queueLengthMap = new HashMap<String, Integer>();
-        queueLengthMap.put(RULE_CACHE, new Integer(this.ruleCacheExecutor.getQueue().size()));
+        Map<String, Integer> queueLengthMap = new HashMap<>();
+        queueLengthMap.put(RULE_CACHE, this.ruleCacheExecutor.getQueue().size());
         for (String name : executors.keySet()) {
-            queueLengthMap.put(name.toLowerCase(), new Integer(executors.get(name).queueLength()));
+            queueLengthMap.put(name.toLowerCase(), executors.get(name).queueLength());
         }
         return queueLengthMap;
     }

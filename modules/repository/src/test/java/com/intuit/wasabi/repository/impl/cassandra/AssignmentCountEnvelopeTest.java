@@ -63,7 +63,7 @@ public class AssignmentCountEnvelopeTest {
 //        doReturn(42).when(exp).getUserCap();
         when(exp.getIsRapidExperiment()).thenReturn(true);
         when(exp.getUserCap()).thenReturn(42);
-        when(ar.getBucketAssignmentCount(exp).getTotalUsers().getBucketAssignments()).thenReturn(41l);
+        when(ar.getBucketAssignmentCount(exp).getTotalUsers().getBucketAssignments()).thenReturn(41L);
 
         AssignmentCountEnvelope env = new AssignmentCountEnvelope(ar, cass, mysql, exp, assignment, true, el, date, true, true);
         env.run();
@@ -80,7 +80,7 @@ public class AssignmentCountEnvelopeTest {
     public void testRapidExperimentationCassandraFail() {
         when(exp.getIsRapidExperiment()).thenReturn(true);
         when(exp.getUserCap()).thenReturn(7);
-        when(ar.getBucketAssignmentCount(exp).getTotalUsers().getBucketAssignments()).thenReturn(41l);
+        when(ar.getBucketAssignmentCount(exp).getTotalUsers().getBucketAssignments()).thenReturn(41L);
         when(cass.updateExperimentState(exp, Experiment.State.PAUSED)).thenThrow(new RuntimeException("Cassandra failed"));
 
         AssignmentCountEnvelope env = new AssignmentCountEnvelope(ar, cass, mysql, exp, assignment, true, el, date, true, true);
@@ -98,7 +98,7 @@ public class AssignmentCountEnvelopeTest {
     public void testRapidExperimentationCassandraSuccess() {
         when(exp.getIsRapidExperiment()).thenReturn(true);
         when(exp.getUserCap()).thenReturn(41); //41 users already assigned
-        when(ar.getBucketAssignmentCount(exp).getTotalUsers().getBucketAssignments()).thenReturn(41l);
+        when(ar.getBucketAssignmentCount(exp).getTotalUsers().getBucketAssignments()).thenReturn(41L);
         when(cass.updateExperimentState(exp, Experiment.State.PAUSED)).thenReturn(exp);
         when(mysql.updateExperimentState(exp, Experiment.State.PAUSED)).thenReturn(exp);
 

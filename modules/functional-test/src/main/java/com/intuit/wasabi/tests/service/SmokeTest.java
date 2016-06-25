@@ -302,12 +302,7 @@ public class SmokeTest extends TestBase {
 
         List<DailyStatistics> filteredStatistics =
                 new ModelUtil<DailyStatistics>().filterList(dailies.days,
-                        new ModelUtil.Filter<DailyStatistics>() {
-                            @Override
-                            public boolean filter(DailyStatistics daily) {
-                                return daily.perDay.impressionCounts.eventCount > 0;
-                            }
-                        });
+                        daily -> daily.perDay.impressionCounts.eventCount > 0);
 
         Assert.assertEquals(filteredStatistics.size(), 1, "Only one day should have more than 0 impressions.");
 
@@ -339,12 +334,10 @@ public class SmokeTest extends TestBase {
         for (Map.Entry<String, BucketStatistics> bucket : perDay.buckets.entrySet()) {
             expectedCounts.eventCount = 0;
             expectedCounts.uniqueUserCount = 0;
-            for (Map.Entry<User, Assignment> assignment : assignments.entrySet()) {
-                if (assignment.getValue().assignment.equals(bucket.getKey())) {
-                    expectedCounts.eventCount += userImpressions.get(assignment.getKey());
-                    expectedCounts.uniqueUserCount += 1;
-                }
-            }
+            assignments.entrySet().stream().filter(assignment -> assignment.getValue().assignment.equals(bucket.getKey())).forEach(assignment -> {
+                expectedCounts.eventCount += userImpressions.get(assignment.getKey());
+                expectedCounts.uniqueUserCount += 1;
+            });
             assertEqualModelItems(bucket.getValue().impressionCounts, expectedCounts);
         }
 
@@ -383,12 +376,7 @@ public class SmokeTest extends TestBase {
 
         List<DailyStatistics> filteredStatistics =
                 new ModelUtil<DailyStatistics>().filterList(dailies.days,
-                        new ModelUtil.Filter<DailyStatistics>() {
-                            @Override
-                            public boolean filter(DailyStatistics daily) {
-                                return daily.perDay.impressionCounts.eventCount > 0;
-                            }
-                        });
+                        daily -> daily.perDay.impressionCounts.eventCount > 0);
 
         Assert.assertEquals(filteredStatistics.size(), 1, "Only one day should have more than 0 impressions.");
 
@@ -423,12 +411,10 @@ public class SmokeTest extends TestBase {
         for (Map.Entry<String, BucketStatistics> bucket : perDay.buckets.entrySet()) {
             expectedCounts.eventCount = 0;
             expectedCounts.uniqueUserCount = 0;
-            for (Map.Entry<User, Assignment> assignment : assignments.entrySet()) {
-                if (assignment.getValue().assignment.equals(bucket.getKey())) {
-                    expectedCounts.eventCount += userImpressions.get(assignment.getKey());
-                    expectedCounts.uniqueUserCount += 1;
-                }
-            }
+            assignments.entrySet().stream().filter(assignment -> assignment.getValue().assignment.equals(bucket.getKey())).forEach(assignment -> {
+                expectedCounts.eventCount += userImpressions.get(assignment.getKey());
+                expectedCounts.uniqueUserCount += 1;
+            });
             assertEqualModelItems(bucket.getValue().impressionCounts, expectedCounts);
         }
 

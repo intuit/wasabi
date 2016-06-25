@@ -38,7 +38,7 @@ public class ConstraintViolationExceptionTest {
 
     @Before
     public void setUp() {
-        properties = new ConcurrentHashMap<String, Object>();
+        properties = new ConcurrentHashMap<>();
     }
 
     @Test

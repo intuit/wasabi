@@ -34,6 +34,7 @@ import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
 import com.netflix.astyanax.model.Rows;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.intuit.wasabi.experimentobjects.Experiment.State.DELETED;
 
@@ -174,10 +175,7 @@ class DatabaseExperimentRepository implements ExperimentRepository {
         try {
             List<Map<String, Object>> experiments = newTransaction().select(SQL, DELETED.toString());
 
-            List<Experiment.ID> result = new ArrayList<>();
-            for (Map<String, Object> experiment : experiments) {
-                result.add(Experiment.ID.valueOf((byte[]) experiment.get("id")));
-            }
+            List<Experiment.ID> result = experiments.stream().map(experiment -> Experiment.ID.valueOf((byte[]) experiment.get("id"))).collect(Collectors.toList());
 
             return result;
         } catch (WasabiException e) {

@@ -25,6 +25,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Top level DTO to save the cumulative counts for an Experiment
@@ -84,11 +85,7 @@ public class ExperimentCumulativeCounts implements Cloneable {
         }
 
         if (days != null) {
-            List<DailyCounts> clonedDays = new ArrayList<DailyCounts>();
-
-            for (DailyCounts day : days) {
-                clonedDays.add(day.clone());
-            }
+            List<DailyCounts> clonedDays = days.stream().map(DailyCounts::clone).collect(Collectors.toList());
 
             cloned.setDays(clonedDays);
         }

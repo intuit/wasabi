@@ -15,8 +15,10 @@
  *******************************************************************************/
 package com.intuit.wasabi.tests.library.util;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * Provides helper methods to handle model items.
@@ -27,17 +29,11 @@ public class ModelUtil<T> {
      * Filteres a list according to the supplied filter strategy.
      *
      * @param dataList the list to filter
-     * @param filter the filter to use
+     * @param filter   the filter to use
      * @return the filtered list
      */
     public List<T> filterList(List<T> dataList, Filter<T> filter) {
-        List<T> filteredList = new ArrayList<T>();
-        for (T dataItem : dataList) {
-            if (filter.filter(dataItem)) {
-                filteredList.add(dataItem);
-            }
-        }
-        return filteredList;
+        return dataList.stream().filter(filter::filter).collect(toList());
     }
 
     /**
@@ -55,5 +51,4 @@ public class ModelUtil<T> {
          */
         boolean filter(T collectionItem);
     }
-
 }

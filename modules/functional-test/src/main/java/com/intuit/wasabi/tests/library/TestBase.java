@@ -36,6 +36,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -548,9 +549,7 @@ public class TestBase extends ServiceTestBase {
     }
 
     public void deleteExperiments(List<Experiment> experiments) {
-        for (Experiment exp : experiments) {
-            deleteExperiment(exp);
-        }
+        experiments.forEach(this::deleteExperiment);
     }
 
     /**
@@ -660,9 +659,7 @@ public class TestBase extends ServiceTestBase {
      */
     public List<Bucket> postBuckets(List<Bucket> buckets, int expectedStatus, APIServerConnector apiServerConnector) {
         List<Bucket> newBuckets = new ArrayList<>(buckets.size());
-        for (Bucket bucket : buckets) {
-            newBuckets.add(postBucket(bucket, expectedStatus, apiServerConnector));
-        }
+        newBuckets.addAll(buckets.stream().map(bucket -> postBucket(bucket, expectedStatus, apiServerConnector)).collect(Collectors.toList()));
         return newBuckets;
     }
 
@@ -741,9 +738,7 @@ public class TestBase extends ServiceTestBase {
      */
     public List<Bucket> putBuckets(List<Bucket> buckets, int expectedStatus, APIServerConnector apiServerConnector) {
         List<Bucket> newBuckets = new ArrayList<>(buckets.size());
-        for (Bucket bucket : buckets) {
-            newBuckets.add(putBucket(bucket, expectedStatus, apiServerConnector));
-        }
+        newBuckets.addAll(buckets.stream().map(bucket -> putBucket(bucket, expectedStatus, apiServerConnector)).collect(Collectors.toList()));
         return newBuckets;
     }
 
@@ -839,9 +834,7 @@ public class TestBase extends ServiceTestBase {
      */
     public List<Bucket> putBucketsStates(List<Bucket> buckets, int expectedStatus, APIServerConnector apiServerConnector) {
         List<String> bucketStates = new ArrayList<>(buckets.size());
-        for (Bucket bucket : buckets) {
-            bucketStates.add(bucket.state);
-        }
+        bucketStates.addAll(buckets.stream().map(bucket -> bucket.state).collect(Collectors.toList()));
         return putBucketsStates(buckets, bucketStates, expectedStatus, apiServerConnector);
     }
 
@@ -1121,9 +1114,7 @@ public class TestBase extends ServiceTestBase {
      */
     public List<Bucket> getBuckets(List<Bucket> buckets, int expectedStatus, APIServerConnector apiServerConnector) {
         List<Bucket> bucketList = new ArrayList<>(buckets.size());
-        for (Bucket bucket : buckets) {
-            bucketList.add(getBucket(bucket, expectedStatus, apiServerConnector));
-        }
+        bucketList.addAll(buckets.stream().map(bucket -> getBucket(bucket, expectedStatus, apiServerConnector)).collect(Collectors.toList()));
         return bucketList;
     }
 
@@ -1180,9 +1171,7 @@ public class TestBase extends ServiceTestBase {
         String json = TestUtils.csvToJsonArray(response.body().asString(), Constants.TAB);
         List<Map<String, Object>> eventMapList = simpleGson.fromJson(json, List.class);
         List<Event> eventList = new ArrayList<>(eventMapList.size());
-        for (Map m : eventMapList) {
-            eventList.add(EventFactory.createFromJSONString(simpleGson.toJson(m)));
-        }
+        eventList.addAll(eventMapList.stream().map(m -> EventFactory.createFromJSONString(simpleGson.toJson(m))).collect(Collectors.toList()));
         return eventList;
 
     }
@@ -1326,9 +1315,7 @@ public class TestBase extends ServiceTestBase {
         String json = TestUtils.csvToJsonArray(response.body().asString(), Constants.TAB);
         List<Map<String, Object>> eventMapList = simpleGson.fromJson(json, List.class);
         List<Event> eventList = new ArrayList<>(eventMapList.size());
-        for (Map m : eventMapList) {
-            eventList.add(EventFactory.createFromJSONString(simpleGson.toJson(m)));
-        }
+        eventList.addAll(eventMapList.stream().map(m -> EventFactory.createFromJSONString(simpleGson.toJson(m))).collect(Collectors.toList()));
         return eventList;
     }
 
@@ -1439,9 +1426,7 @@ public class TestBase extends ServiceTestBase {
     public Response postExclusions(Experiment experiment, List<Experiment> excludedExperiments, int expectedStatus, APIServerConnector apiServerConnector) {
         String uri = "experiments/" + experiment.id + "/exclusions";
         List<String> excludeIds = new ArrayList<>(excludedExperiments.size());
-        for (Experiment exp : excludedExperiments) {
-            excludeIds.add(exp.id);
-        }
+        excludeIds.addAll(excludedExperiments.stream().map(exp -> exp.id).collect(Collectors.toList()));
         response = apiServerConnector.doPost(uri,
                 TestUtils.wrapJsonIntoObject(simpleGson.toJson(excludeIds), "experimentIDs"));
         assertReturnCode(response, expectedStatus);
@@ -1570,10 +1555,7 @@ public class TestBase extends ServiceTestBase {
         response = apiServerConnector.doGet(uri);
         assertReturnCode(response, expectedStatus);
         List<Map<String, Object>> jsonResult = response.jsonPath().getList("experiments");
-        List<Experiment> experiments = new ArrayList<>();
-        for (Map jsonMap : jsonResult) {
-            experiments.add(ExperimentFactory.createFromJSONString(simpleGson.toJson(jsonMap)));
-        }
+        List<Experiment> experiments = jsonResult.stream().map(jsonMap -> ExperimentFactory.createFromJSONString(simpleGson.toJson(jsonMap))).collect(Collectors.toList());
         return experiments;
     }
 
@@ -2471,21 +2453,16 @@ public class TestBase extends ServiceTestBase {
         }
 
         HashSet<String> experimentLabels = new HashSet<>(experiments.size());
-        for (Experiment experiment : experiments) {
-            experimentLabels.add(experiment.label);
-        }
+        experimentLabels.addAll(experiments.stream().map(experiment -> experiment.label).collect(Collectors.toList()));
         String json = TestUtils.wrapJsonIntoObject(simpleGson.toJson(experimentLabels), "labels");
         response = apiServerConnector.doPost(uri, json);
         assertReturnCode(response, expectedStatus);
 
         List<Map<String, Object>> assignmentMappings = response.jsonPath().getList("assignments");
         List<Assignment> assignments = new ArrayList<>(assignmentMappings.size());
-        for (Map assignmentMapping : assignmentMappings) {
-            assignments.add(AssignmentFactory.createFromJSONString(
-                    simpleGson.toJson(assignmentMapping)
-                    )
-            );
-        }
+        assignments.addAll(assignmentMappings.stream().map(assignmentMapping -> AssignmentFactory.createFromJSONString(
+                simpleGson.toJson(assignmentMapping)
+        )).collect(Collectors.toList()));
         return assignments;
     }
 
@@ -2603,12 +2580,9 @@ public class TestBase extends ServiceTestBase {
         assertReturnCode(response, expectedStatus);
         List<Map<String, Object>> assignmentMappings = response.jsonPath().getList("assignments");
         List<Assignment> assignments = new ArrayList<>(assignmentMappings.size());
-        for (Map assignmentMapping : assignmentMappings) {
-            assignments.add(AssignmentFactory.createFromJSONString(
-                    simpleGson.toJson(assignmentMapping)
-                    )
-            );
-        }
+        assignments.addAll(assignmentMappings.stream().map(assignmentMapping -> AssignmentFactory.createFromJSONString(
+                simpleGson.toJson(assignmentMapping)
+        )).collect(Collectors.toList()));
         return assignments;
     }
 
@@ -2752,12 +2726,9 @@ public class TestBase extends ServiceTestBase {
 
         List<Map<String, Object>> assignmentMappings = response.jsonPath().getList("assignments");
         List<Assignment> assignments = new ArrayList<>(assignmentMappings.size());
-        for (Map assignmentMapping : assignmentMappings) {
-            assignments.add(AssignmentFactory.createFromJSONString(
-                    simpleGson.toJson(assignmentMapping)
-                    )
-            );
-        }
+        assignments.addAll(assignmentMappings.stream().map(assignmentMapping -> AssignmentFactory.createFromJSONString(
+                simpleGson.toJson(assignmentMapping)
+        )).collect(Collectors.toList()));
         return assignments;
     }
 
@@ -2973,9 +2944,7 @@ public class TestBase extends ServiceTestBase {
     public Response putApplicationPriorities(Application application, List<Experiment> experiments, int expectedStatus, APIServerConnector apiServerConnector) {
         String uri = "applications/" + application.name + "/priorities";
         List<String> experimentIDs = new ArrayList<>(experiments.size());
-        for (Experiment experiment : experiments) {
-            experimentIDs.add(experiment.id);
-        }
+        experimentIDs.addAll(experiments.stream().map(experiment -> experiment.id).collect(Collectors.toList()));
         String jsonString = TestUtils.wrapJsonIntoObject(simpleGson.toJson(experimentIDs), "experimentIDs");
         response = apiServerConnector.doPut(uri, jsonString);
         assertReturnCode(response, expectedStatus);

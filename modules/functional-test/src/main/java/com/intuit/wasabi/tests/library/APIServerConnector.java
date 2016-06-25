@@ -89,7 +89,7 @@ public class APIServerConnector {
         this.basePath = basePath;
         this.userName = userName;
         this.password = password;
-        this.headerMap = new HashMap<String, String>();
+        this.headerMap = new HashMap<>();
         this.requestSpec = constructRequestSpec();
     }
 

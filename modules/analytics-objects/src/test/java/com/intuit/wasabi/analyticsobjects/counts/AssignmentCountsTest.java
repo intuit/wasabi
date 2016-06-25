@@ -29,7 +29,7 @@ public class AssignmentCountsTest {
     public void testBuilder() {
         Experiment.ID experimentID = Experiment.ID.newInstance();
         TotalUsers totalUsersCounter = new TotalUsers();
-        List<BucketAssignmentCount> assignmentCountList = new ArrayList<BucketAssignmentCount>();
+        List<BucketAssignmentCount> assignmentCountList = new ArrayList<>();
         AssignmentCounts counter = new AssignmentCounts.Builder().withExperimentID(experimentID)
                 .withBucketAssignmentCount(assignmentCountList).withTotalUsers(totalUsersCounter)
                 .build();

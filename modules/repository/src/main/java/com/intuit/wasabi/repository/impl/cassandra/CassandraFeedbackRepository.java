@@ -36,6 +36,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Cassandra implementation of
  * @see FeedbackRepository
@@ -67,15 +69,14 @@ public class CassandraFeedbackRepository implements FeedbackRepository {
      */
     @Override
     public void createUserFeedback(UserFeedback userFeedback) {
-
-        String CQL = "INSERT INTO user_feedback " +
+        String cql = "INSERT INTO user_feedback " +
                 "(user_id, submitted, score, comments, contact_okay, user_email) " +
                 "VALUES (?, ?, ?, ?, ?, ?);";
 
         try {
 
             driver.getKeyspace().prepareQuery(keyspace.feedbackCF())
-                    .withCql(CQL)
+                    .withCql(cql)
                     .asPreparedStatement()
                     .withByteBufferValue(userFeedback.getUsername(), UsernameSerializer.get())
                     .withByteBufferValue(userFeedback.getSubmitted(), DateSerializer.get())
@@ -96,17 +97,15 @@ public class CassandraFeedbackRepository implements FeedbackRepository {
      */
     @Override
     public List<UserFeedback> getUserFeedback(UserInfo.Username username) {
+        checkNotNull (username, "Parameter \"username\" cannot be null");
 
-        Preconditions.checkNotNull(username, "Parameter \"username\" cannot be null");
-
-        final String CQL = "select * from user_feedback " +
-                "where user_id = ?";
+        final String cql = "select * from user_feedback where user_id = ?";
 
         try {
             OperationResult<CqlResult<UserInfo.Username, String>> opResult =
                     driver.getKeyspace()
                             .prepareQuery(keyspace.feedbackCF())
-                            .withCql(CQL)
+                            .withCql(cql)
                             .asPreparedStatement()
                             .withByteBufferValue(username, UsernameSerializer.get())
                             .execute();
@@ -134,13 +133,13 @@ public class CassandraFeedbackRepository implements FeedbackRepository {
      */
     @Override
     public List<UserFeedback> getAllUserFeedback() {
-        final String CQL = "select * from user_feedback";
+        final String cql = "select * from user_feedback";
 
         try {
             OperationResult<CqlResult<UserInfo.Username, String>> opResult =
                     driver.getKeyspace()
                             .prepareQuery(keyspace.feedbackCF())
-                            .withCql(CQL)
+                            .withCql(cql)
                             .asPreparedStatement()
                             .execute();
 

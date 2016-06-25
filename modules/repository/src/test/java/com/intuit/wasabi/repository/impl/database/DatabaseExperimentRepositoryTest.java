@@ -40,6 +40,7 @@ import java.util.*;
 
 import static com.googlecode.catchexception.CatchException.caughtException;
 import static com.intuit.wasabi.experimentobjects.Experiment.State.DELETED;
+import static java.util.Collections.*;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.IsNull.nullValue;
@@ -209,7 +210,7 @@ public class DatabaseExperimentRepositoryTest {
     public void testGetExperimentsWithListOfExperimentIDs() {
         DatabaseExperimentRepository repository = spy(new DatabaseExperimentRepository(transactionFactory,
                 experimentValidator, flyway));
-        List<Experiment.ID> list = Arrays.asList(Experiment.ID.newInstance());
+        List<Experiment.ID> list = singletonList(Experiment.ID.newInstance());
         Experiment experiment = mock(Experiment.class);
         doReturn(experiment).when(repository).getExperiment(any(Experiment.ID.class));
         ExperimentList result = repository.getExperiments(list);
@@ -257,7 +258,7 @@ public class DatabaseExperimentRepositoryTest {
                 .hasMessage("Assignment counts not supported on sql")
                 .hasNoCause();
 
-        BDDCatchException.when(repository).getBucketList(Collections.emptyList());
+        BDDCatchException.when(repository).getBucketList(emptyList());
         BDDCatchException.then(caughtException())
                 .isInstanceOf(UnsupportedOperationException.class)
                 .hasMessage("Not supported ")
@@ -462,8 +463,8 @@ public class DatabaseExperimentRepositoryTest {
     @Test
     public void testEmptyMethods() {
         repository.logBucketChanges(Experiment.ID.newInstance(), Bucket.Label.valueOf("lable"),
-                new ArrayList<Bucket.BucketAuditInfo>());
-        repository.logExperimentChanges(Experiment.ID.newInstance(), new ArrayList<Experiment.ExperimentAuditInfo>());
+                new ArrayList<>());
+        repository.logExperimentChanges(Experiment.ID.newInstance(), new ArrayList<>());
     }
 
     @Test

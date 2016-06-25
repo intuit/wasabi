@@ -188,7 +188,7 @@ public class SegmentationDataProvider {
     public static Object[][] validSegmentationRules() {
         Gson gson = new GsonBuilder().create();
         Map<String, Object> baseData = new HashMap<>();
-        List<Object[]> output = new ArrayList<Object[]>();
+        List<Object[]> output = new ArrayList<>();
         baseData.put("startTime", startTime);
         baseData.put("endTime", endTime);
         baseData.put("samplingPercent", 1);

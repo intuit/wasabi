@@ -57,7 +57,7 @@ public class PageTest {
         String name = "aNameThatIsShort Enough";
         assertEquals(name, Page.Name.valueOf(name).toString());
 
-        StringBuffer outputBuffer = new StringBuffer();
+        StringBuilder outputBuffer = new StringBuilder();
         for (int i = 0; i < 257; i++) {
             outputBuffer.append("a");
         }

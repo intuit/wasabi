@@ -38,8 +38,8 @@ public class ExperimentCountsTest {
     public void setup() {
         impressionCounts = new Counts.Builder().withEventCount(100).withUniqueUserCount(100).build();
         jointActionCounts = new Counts.Builder().withEventCount(200).withUniqueUserCount(200).build();
-        actionCounts = new HashMap<Event.Name, ActionCounts>();
-        buckets = new HashMap<Bucket.Label, BucketCounts>();
+        actionCounts = new HashMap<>();
+        buckets = new HashMap<>();
 
         counter = new ExperimentCounts.Builder().withJointActionCounts(jointActionCounts)
                 .withImpressionCounts(impressionCounts).withActionCounts(actionCounts)

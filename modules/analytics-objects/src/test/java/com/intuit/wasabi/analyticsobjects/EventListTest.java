@@ -21,7 +21,7 @@ public class EventListTest {
         assertThat(eventList.getEvents(), is(not(nullValue())));
         assertThat(eventList.getEvents().size(), is(0));
 
-        List<Event> list = new ArrayList<Event>();
+        List<Event> list = new ArrayList<>();
         list.add(new Event());
         eventList.setEvents(list);
 

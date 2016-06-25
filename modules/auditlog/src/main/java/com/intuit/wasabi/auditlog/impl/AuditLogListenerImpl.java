@@ -40,7 +40,7 @@ public class AuditLogListenerImpl implements EventLogListener {
         this.repository = repository;
         eventLog.register(this);
 
-        threadPoolExecutor = new ThreadPoolExecutor(threadPoolSizeCore, threadPoolSizeMax, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
+        threadPoolExecutor = new ThreadPoolExecutor(threadPoolSizeCore, threadPoolSizeMax, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
     }
 
     /**

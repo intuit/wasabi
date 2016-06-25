@@ -25,6 +25,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Experiment id list serializer
@@ -60,10 +61,8 @@ public class ExperimentIDListSerializer extends AbstractSerializer<List<Experime
         if (experimentIDs == null) {
             return null;
         }
-        List<UUID> uuidList = new ArrayList<UUID>(experimentIDs.size());
-        for (Experiment.ID experimentID : experimentIDs) {
-            uuidList.add(experimentID.getRawID());
-        }
+        List<UUID> uuidList = new ArrayList<>(experimentIDs.size());
+        uuidList.addAll(experimentIDs.stream().map(Experiment.ID::getRawID).collect(Collectors.toList()));
         return delegate.toByteBuffer(uuidList);
     }
 
@@ -73,10 +72,8 @@ public class ExperimentIDListSerializer extends AbstractSerializer<List<Experime
             return null;
         }
         List<UUID> uuidList = delegate.fromByteBuffer(byteBuffer);
-        List<Experiment.ID> experimentIDs = new ArrayList<Experiment.ID>(uuidList.size());
-        for (UUID uuid : uuidList) {
-            experimentIDs.add(Experiment.ID.valueOf(uuid));
-        }
+        List<Experiment.ID> experimentIDs = new ArrayList<>(uuidList.size());
+        experimentIDs.addAll(uuidList.stream().map(Experiment.ID::valueOf).collect(Collectors.toList()));
         return experimentIDs;
     }
 

@@ -81,21 +81,15 @@ public class RetryListener extends TestListenerAdapter {
 
         for (ITestNGMethod method : retryMethods) {
             if (passedMap.getAllMethods().contains(method)) {
-                for (ITestResult result : testContext.getSkippedTests().getAllResults()) {
-                    if (result.getMethod().equals(method)) {
-                        testContext.getSkippedTests().removeResult(result);
-                    }
-                }
-                for (ITestResult result : testContext.getFailedTests().getAllResults()) {
-                    if (result.getMethod().equals(method)) {
-                        testContext.getFailedTests().removeResult(result);
-                    }
-                }
-                for (ITestResult result : testContext.getFailedButWithinSuccessPercentageTests().getAllResults()) {
-                    if (result.getMethod().equals(method)) {
-                        testContext.getFailedButWithinSuccessPercentageTests().removeResult(result);
-                    }
-                }
+                testContext.getSkippedTests().getAllResults().stream().filter(result ->
+                        result.getMethod().equals(method)).forEach(result ->
+                        testContext.getSkippedTests().removeResult(result));
+                testContext.getFailedTests().getAllResults().stream().filter(result ->
+                        result.getMethod().equals(method)).forEach(result ->
+                        testContext.getFailedTests().removeResult(result));
+                testContext.getFailedButWithinSuccessPercentageTests().getAllResults().stream().filter(result ->
+                        result.getMethod().equals(method)).forEach(result ->
+                        testContext.getFailedButWithinSuccessPercentageTests().removeResult(result));
                 continue;
             }
             if (failedButMap.getAllMethods().contains(method)) {
@@ -150,21 +144,15 @@ public class RetryListener extends TestListenerAdapter {
                         }
                     }
                 }
-                for (ITestResult result : testContext.getPassedTests().getAllResults()) {
-                    if (result.getMethod().equals(method)) {
-                        testContext.getPassedTests().removeResult(result);
-                    }
-                }
-                for (ITestResult result : testContext.getSkippedTests().getAllResults()) {
-                    if (result.getMethod().equals(method)) {
-                        testContext.getSkippedTests().removeResult(result);
-                    }
-                }
-                for (ITestResult result : testContext.getFailedButWithinSuccessPercentageTests().getAllResults()) {
-                    if (result.getMethod().equals(method)) {
-                        testContext.getFailedButWithinSuccessPercentageTests().removeResult(result);
-                    }
-                }
+                testContext.getPassedTests().getAllResults().stream().filter(result ->
+                        result.getMethod().equals(method)).forEach(result ->
+                        testContext.getPassedTests().removeResult(result));
+                testContext.getSkippedTests().getAllResults().stream().filter(result ->
+                        result.getMethod().equals(method)).forEach(result ->
+                        testContext.getSkippedTests().removeResult(result));
+                testContext.getFailedButWithinSuccessPercentageTests().getAllResults().stream().filter(result ->
+                        result.getMethod().equals(method)).forEach(result ->
+                        testContext.getFailedButWithinSuccessPercentageTests().removeResult(result));
             }
         }
 

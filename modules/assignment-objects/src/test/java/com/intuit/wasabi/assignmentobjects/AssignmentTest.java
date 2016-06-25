@@ -42,7 +42,7 @@ public class AssignmentTest {
     @Mock
     private Context context;
     private Status status = Status.NEW_ASSIGNMENT;
-    private Boolean cacheable = Boolean.valueOf(true);
+    private Boolean cacheable = true;
 
     private Assignment assignment;
 

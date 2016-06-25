@@ -97,15 +97,7 @@ public class DBITransaction implements Transaction {
      */
     @Override
     public List select(final String query, final Object... params) {
-        return (List) perform(new HandleBlock() {
-            /**
-             * {@inheritDoc}
-             */
-            @Override
-            public Object value(Handle arg) {
-                return handle.select(query, params);
-            }
-        });
+        return (List) perform(arg -> handle.select(query, params));
     }
 
     /**
@@ -126,21 +118,15 @@ public class DBITransaction implements Transaction {
 
     private Integer insert(final boolean shouldReturnId, final String query, final Object... params) {
         try {
-            return (Integer) perform(new HandleBlock() {
-                /**
-                 * {@inheritDoc}
-                 */
-                @Override
-                public Object value(Handle handle) {
-                    Update statement = handle.createStatement(query);
+            return (Integer) perform(handle1 -> {
+                Update statement = handle1.createStatement(query);
 
-                    for (int i = 0; i < params.length; i++) {
-                        statement.bind(i, params[i]);
-                    }
-
-                    return shouldReturnId ?
-                            statement.executeAndReturnGeneratedKeys(IntegerMapper.FIRST).first() : statement.execute();
+                for (int i = 0; i < params.length; i++) {
+                    statement.bind(i, params[i]);
                 }
+
+                return shouldReturnId ?
+                        statement.executeAndReturnGeneratedKeys(IntegerMapper.FIRST).first() : statement.execute();
             });
         } catch (ConstraintViolationException ex) {
             LOGGER.error("Failed to execute query: " + query, ex);
@@ -154,15 +140,7 @@ public class DBITransaction implements Transaction {
      */
     @Override
     public Integer update(final String query, final Object... params) {
-        return (Integer) perform(new HandleBlock() {
-            /**
-             * {@inheritDoc}
-             */
-            @Override
-            public Object value(Handle handle) {
-                return handle.update(query, params);
-            }
-        });
+        return (Integer) perform(handle1 -> handle1.update(query, params));
     }
 
     private Object perform(HandleBlock block) {

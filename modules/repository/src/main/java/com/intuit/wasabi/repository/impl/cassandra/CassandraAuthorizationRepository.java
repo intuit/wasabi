@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -83,8 +84,8 @@ public class CassandraAuthorizationRepository implements AuthorizationRepository
 
     private UserRole getUserRole(UserInfo.Username userID, Application.Name applicationName) {
 
-        Preconditions.checkNotNull(userID, userNonNullMsg);
-        Preconditions.checkNotNull(applicationName, applicationNonNullMsg);
+        checkNotNull(userID, userNonNullMsg);
+        checkNotNull(applicationName, applicationNonNullMsg);
 
         try {
             OperationResult<CqlResult<UserInfo.Username, String>> opResult =
@@ -130,24 +131,23 @@ public class CassandraAuthorizationRepository implements AuthorizationRepository
      */
     @Override
     public UserPermissionsList getUserPermissionsList(UserInfo.Username userID) {
-
-        Preconditions.checkNotNull(userID, userNonNullMsg);
+        checkNotNull(userID, userNonNullMsg);
 
         try {
             UserPermissionsList userPermissionsList = new UserPermissionsList();
-
             //check if superadmin privileges exist
-            final String CQL = "select * from user_roles where user_id = ? and app_name = '*'";
+            final String cql = "select * from user_roles where user_id = ? and app_name = '*'";
+
             OperationResult<CqlResult<UserInfo.Username, String>> opResult =
                     driver.getKeyspace()
                             .prepareQuery(keyspace.userRolesCF())
-                            .withCql(CQL)
+                            .withCql(cql)
                             .asPreparedStatement()
                             .withByteBufferValue(userID, UsernameSerializer.get())
                             .execute();
-
             Rows<UserInfo.Username, String> rows = opResult.getResult().getRows();
             UserPermissions userPermissions;
+
             if (!rows.isEmpty()) {
                 for (Row<UserInfo.Username, String> row : rows) {
                     if ("superadmin".equals(row.getColumns().getStringValue("role", ""))) {
@@ -164,15 +164,14 @@ public class CassandraAuthorizationRepository implements AuthorizationRepository
             }
 
             //check for individual app permissions if user is not Super admin
-            final String CQL1 = "select * from user_roles where user_id = ?";
+            final String cql1 = "select * from user_roles where user_id = ?";
             OperationResult<CqlResult<UserInfo.Username, String>> opResult1 =
                     driver.getKeyspace()
                             .prepareQuery(keyspace.userRolesCF())
-                            .withCql(CQL1)
+                            .withCql(cql1)
                             .asPreparedStatement()
                             .withByteBufferValue(userID, UsernameSerializer.get())
                             .execute();
-
             Rows<UserInfo.Username, String> rows1 = opResult1.getResult().getRows();
 
             for (Row<UserInfo.Username, String> row1 : rows1) {
@@ -200,31 +199,28 @@ public class CassandraAuthorizationRepository implements AuthorizationRepository
      */
     @Override
     public UserRoleList getApplicationUsers(Application.Name applicationName) {
+        checkNotNull(applicationName, applicationNonNullMsg);
 
-        Preconditions.checkNotNull(applicationName, applicationNonNullMsg);
-
-        final String CQL = "select * from app_roles where app_name = ?";
+        final String cql = "select * from app_roles where app_name = ?";
 
         try {
             OperationResult<CqlResult<Application.Name, String>> opResult =
                     driver.getKeyspace()
                             .prepareQuery(keyspace.appRoleCF())
-                            .withCql(CQL)
+                            .withCql(cql)
                             .asPreparedStatement()
                             .withByteBufferValue(applicationName, ApplicationNameSerializer.get())
                             .execute();
 
             Rows<Application.Name, String> rows = opResult.getResult().getRows();
-
             UserRoleList userRoleList = new UserRoleList();
 
             for (Row<Application.Name, String> row : rows) {
-
                 Application.Name appName = Application.Name.valueOf(row.getColumns().getStringValue("app_name", ""));
                 Role role = Role.toRole(row.getColumns().getStringValue("role", ""));
                 UserInfo.Username userID = UserInfo.Username.valueOf(row.getColumns().getStringValue("user_id", ""));
-
                 UserInfo userInfo = getUserInfo(userID);
+
                 if (userInfo == null) {
                     userInfo = lookupUser(userID);
                 }
@@ -266,24 +262,22 @@ public class CassandraAuthorizationRepository implements AuthorizationRepository
      */
     @Override
     public UserPermissions getUserPermissions(UserInfo.Username userID, Application.Name applicationName) {
-
-        Preconditions.checkNotNull(userID, userNonNullMsg);
-        Preconditions.checkNotNull(applicationName, applicationNonNullMsg);
+        checkNotNull(userID, userNonNullMsg);
+        checkNotNull(applicationName, applicationNonNullMsg);
 
         try {
-
             //check if superadmin privileges exist
-            final String CQL = "select * from user_roles where user_id = ? and app_name = '*'";
+            final String cql = "select * from user_roles where user_id = ? and app_name = '*'";
             OperationResult<CqlResult<UserInfo.Username, String>> opResult =
                     driver.getKeyspace()
                             .prepareQuery(keyspace.userRolesCF())
-                            .withCql(CQL)
+                            .withCql(cql)
                             .asPreparedStatement()
                             .withByteBufferValue(userID, UsernameSerializer.get())
                             .execute();
-
             Rows<UserInfo.Username, String> rows = opResult.getResult().getRows();
             UserPermissions userPermissions = null;
+
             if (!rows.isEmpty()) {
                 for (Row<UserInfo.Username, String> row : rows) {
                     if ("superadmin".equals(row.getColumns().getStringValue("role", ""))) {
@@ -368,7 +362,7 @@ public class CassandraAuthorizationRepository implements AuthorizationRepository
     @Override
     public void setUserRole(UserRole userRole) {
 
-        Preconditions.checkNotNull(userRole, "Parameter \"userRole\" cannot be null");
+        checkNotNull(userRole, "Parameter \"userRole\" cannot be null");
         String cql = "insert into user_roles (user_id, app_name, role) values (?, ?, ?)";
         try {
             driver.getKeyspace()
@@ -420,25 +414,24 @@ public class CassandraAuthorizationRepository implements AuthorizationRepository
     @Override
     public UserRoleList getUserRoleList(UserInfo.Username userID) {
 
-        Preconditions.checkNotNull(userID, userNonNullMsg);
+        checkNotNull(userID, userNonNullMsg);
 
         try {
             UserRoleList userRoleList = new UserRoleList();
-
             //check if superadmin privileges exist
-            final String CQL = "select * from user_roles where user_id = ? and app_name = '*'";
+            final String cql = "select * from user_roles where user_id = ? and app_name = '*'";
             OperationResult<CqlResult<UserInfo.Username, String>> opResult =
                     driver.getKeyspace()
                             .prepareQuery(keyspace.userRolesCF())
-                            .withCql(CQL)
+                            .withCql(cql)
                             .asPreparedStatement()
                             .withByteBufferValue(userID, UsernameSerializer.get())
                             .execute();
-
             Rows<UserInfo.Username, String> rows = opResult.getResult().getRows();
             UserRole userRole;
             //get user info from cassandra
             UserInfo userInfo = getUserInfo(userID);
+
             //if the user did not exist in cassandra
             if (userInfo == null) {
                 try {
@@ -478,15 +471,14 @@ public class CassandraAuthorizationRepository implements AuthorizationRepository
             }
 
             //check for individual app permissions if user is not Super admin
-            final String CQL1 = "select * from user_roles where user_id = ?";
+            final String cql1 = "select * from user_roles where user_id = ?";
             OperationResult<CqlResult<UserInfo.Username, String>> opResult1 =
                     driver.getKeyspace()
                             .prepareQuery(keyspace.userRolesCF())
-                            .withCql(CQL1)
+                            .withCql(cql1)
                             .asPreparedStatement()
                             .withByteBufferValue(userID, UsernameSerializer.get())
                             .execute();
-
             Rows<UserInfo.Username, String> rows1 = opResult1.getResult().getRows();
 
             for (Row<UserInfo.Username, String> row1 : rows1) {
@@ -573,16 +565,14 @@ public class CassandraAuthorizationRepository implements AuthorizationRepository
      */
     @Override
     public UserPermissions checkSuperAdminPermissions(UserInfo.Username userID, Application.Name applicationName) {
-
-
-        String CQL = "select * from user_roles where user_id = ? and app_name = '*'";
+        String cql = "select * from user_roles where user_id = ? and app_name = '*'";
         OperationResult<CqlResult<UserInfo.Username, String>> opResult;
 
         try {
             opResult =
                     driver.getKeyspace()
                             .prepareQuery(keyspace.userRolesCF())
-                            .withCql(CQL)
+                            .withCql(cql)
                             .asPreparedStatement()
                             .withByteBufferValue(userID, UsernameSerializer.get())
                             .execute();

@@ -57,7 +57,7 @@ public class EventsImplTest {
     @Before
     public void setUp() {
 
-        HashMap<String, EventIngestionExecutor> eventIngestioExecutors = new HashMap<String, EventIngestionExecutor>();
+        HashMap<String, EventIngestionExecutor> eventIngestioExecutors = new HashMap<>();
         eventIngestioExecutors.put("Mock", mockEventIngestionExecutor);
         eventsImpl = new EventsImpl(eventIngestioExecutors, 2, assignments, transactionFactory) {
 
@@ -68,8 +68,8 @@ public class EventsImplTest {
             }
 
         };
-        contextSet = new HashSet<Context>();
-        eventsList = new ArrayList<Event>();
+        contextSet = new HashSet<>();
+        eventsList = new ArrayList<>();
         c1 = Context.valueOf("c1");
         createdEventEnvelope = false;
     }
@@ -81,9 +81,9 @@ public class EventsImplTest {
 
     @Test
     public void testQueueLength() {
-        Map<String, Integer> queueLengthMap = new HashMap<String, Integer>();
-        queueLengthMap.put(EventsImpl.MYSQL, new Integer(0));
-        queueLengthMap.put("mock", new Integer(0));
+        Map<String, Integer> queueLengthMap = new HashMap<>();
+        queueLengthMap.put(EventsImpl.MYSQL, 0);
+        queueLengthMap.put("mock", 0);
         assertThat(eventsImpl.queuesLength(), is(queueLengthMap));
     }
 

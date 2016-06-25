@@ -38,7 +38,7 @@ public class BucketCountsTest {
         label = Bucket.Label.valueOf("TestLabel");
         impressionCounts = new Counts.Builder().withEventCount(100).withUniqueUserCount(100).build();
         jointActionCounts = new Counts.Builder().withEventCount(200).withUniqueUserCount(200).build();
-        actionCounts = new HashMap<Event.Name, ActionCounts>();
+        actionCounts = new HashMap<>();
         counter = new BucketCounts.Builder().withLabel(label)
                 .withJointActionCounts(jointActionCounts).withImpressionCounts(impressionCounts)
                 .withActionCounts(actionCounts).build();

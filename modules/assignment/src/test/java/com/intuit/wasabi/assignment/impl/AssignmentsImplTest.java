@@ -20,7 +20,6 @@ import com.google.common.collect.Table;
 import com.google.inject.Provider;
 import com.intuit.hyrule.Rule;
 import com.intuit.wasabi.assignment.AssignmentDecorator;
-import com.intuit.wasabi.assignment.AssignmentIngestionExecutor;
 import com.intuit.wasabi.assignment.Assignments;
 import com.intuit.wasabi.assignmentobjects.*;
 import com.intuit.wasabi.cassandra.CassandraDriver;
@@ -95,7 +94,7 @@ public class AssignmentsImplTest {
 
     @Before
     public void setup() throws IOException, ConnectionException {
-        this.assignmentsImpl = new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
+        this.assignmentsImpl = new AssignmentsImpl(new HashMap<>(),
                 experimentRepository, assignmentsRepository, mutexRepository,
                 ruleCache, pages, priorities, assignmentDBEnvelopeProvider, assignmentWebEnvelopeProvider,
                 assignmentDecorator, threadPoolExecutor, eventLog);
@@ -104,8 +103,8 @@ public class AssignmentsImplTest {
     @Test
     public void testQueueLength() {
         when(threadPoolExecutor.getQueue().size()).thenReturn(0);
-        Map<String, Integer> queueLengthMap = new HashMap<String, Integer>();
-        queueLengthMap.put(AssignmentsImpl.RULE_CACHE, new Integer(0));
+        Map<String, Integer> queueLengthMap = new HashMap<>();
+        queueLengthMap.put(AssignmentsImpl.RULE_CACHE, 0);
         assertThat(assignmentsImpl.queuesLength(), is(queueLengthMap));
     }
 
@@ -132,7 +131,7 @@ public class AssignmentsImplTest {
 
     @Test
     public void testGetSingleAssignmentNullAssignmentExperimentInDraftState() throws IOException, ConnectionException {
-        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
+        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<>(),
                 experimentRepository, assignmentsRepository,
                 mutexRepository, ruleCache, pages, priorities, assignmentDBEnvelopeProvider,
                 assignmentWebEnvelopeProvider, assignmentDecorator, threadPoolExecutor,
@@ -239,7 +238,7 @@ public class AssignmentsImplTest {
 
     @Test
     public void testGetSingleAssignmentNullAssignmentExperimentNoProfileMatch() throws IOException, ConnectionException {
-        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
+        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<>(),
                 experimentRepository, assignmentsRepository,
                 mutexRepository, ruleCache, pages, priorities, assignmentDBEnvelopeProvider,
                 assignmentWebEnvelopeProvider, assignmentDecorator, threadPoolExecutor, eventLog));
@@ -295,7 +294,7 @@ public class AssignmentsImplTest {
 
     @Test(expected = AssertionError.class)
     public void testGetSingleAssignmentProfileMatchAssertNewAssignment() throws IOException, ConnectionException {
-        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
+        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<>(),
                 experimentRepository, assignmentsRepository,
                 mutexRepository, ruleCache, pages, priorities, assignmentDBEnvelopeProvider,
                 assignmentWebEnvelopeProvider, assignmentDecorator, threadPoolExecutor, eventLog));
@@ -326,7 +325,7 @@ public class AssignmentsImplTest {
 
     @Test
     public void testGetSingleAssignmentSuccess() throws IOException, ConnectionException {
-        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
+        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<>(),
                 experimentRepository, assignmentsRepository,
                 mutexRepository, ruleCache, pages, priorities, assignmentDBEnvelopeProvider,
                 assignmentWebEnvelopeProvider, assignmentDecorator, threadPoolExecutor, eventLog));
@@ -386,7 +385,7 @@ public class AssignmentsImplTest {
         HttpHeaders headers = mock(HttpHeaders.class);
         when(experimentRepository.getExperimentList(eq(appName))).thenReturn(table);
         Assignment assignment = mock(Assignment.class);
-        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
+        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<>(),
                 experimentRepository, assignmentsRepository,
                 mutexRepository, ruleCache, pages, priorities, assignmentDBEnvelopeProvider,
                 assignmentWebEnvelopeProvider, assignmentDecorator, threadPoolExecutor, eventLog));

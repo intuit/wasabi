@@ -875,11 +875,7 @@ public class ExperimentsResource {
         if (!showAll) {
             ExperimentList allExperiments = new ExperimentList();
 
-            for (Experiment experiment : experimentList.getExperiments()) {
-                if (!experiment.getState().equals(TERMINATED) && !experiment.getState().equals(DELETED)) {
-                    allExperiments.addExperiment(experiment);
-                }
-            }
+            experimentList.getExperiments().stream().filter(experiment -> !experiment.getState().equals(TERMINATED) && !experiment.getState().equals(DELETED)).forEach(allExperiments::addExperiment);
 
             returnedExperiments = allExperiments;
         }

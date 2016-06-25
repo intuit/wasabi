@@ -57,9 +57,7 @@ public class PrioritiesTest extends TestBase {
     @Test(dependsOnGroups = {"ping"})
     public void t_prepareApp() {
         List<Experiment> experiments = getApplicationExperiments(priorityApp);
-        for (Experiment experiment : experiments) {
-            deleteExperiment(experiment);
-        }
+        experiments.forEach(this::deleteExperiment);
     }
 
     /**

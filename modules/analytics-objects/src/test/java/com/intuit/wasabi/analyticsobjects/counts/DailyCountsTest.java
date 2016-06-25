@@ -38,8 +38,8 @@ public class DailyCountsTest {
     public void setup() {
         Counts impressionCounts = new Counts.Builder().withEventCount(100).withUniqueUserCount(100).build();
         Counts jointActionCounts = new Counts.Builder().withEventCount(200).withUniqueUserCount(200).build();
-        HashMap<Event.Name, ActionCounts> actionCounts = new HashMap<Event.Name, ActionCounts>();
-        HashMap<Bucket.Label, BucketCounts> buckets = new HashMap<Bucket.Label, BucketCounts>();
+        HashMap<Event.Name, ActionCounts> actionCounts = new HashMap<>();
+        HashMap<Bucket.Label, BucketCounts> buckets = new HashMap<>();
 
         perDay = new ExperimentCounts.Builder().withJointActionCounts(jointActionCounts)
                 .withImpressionCounts(impressionCounts).withActionCounts(actionCounts)

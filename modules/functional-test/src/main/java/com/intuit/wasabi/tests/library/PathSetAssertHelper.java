@@ -22,22 +22,22 @@ import org.slf4j.Logger;
 import org.testng.Assert;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
+import static com.intuit.wasabi.tests.library.util.Constants.NEW_LINE;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class PathSetAssertHelper {
 
     private static final Logger LOGGER = getLogger(PathSetAssertHelper.class);
-    private List<String> actualStrAL = new ArrayList<String>();
-    private List<String> expectedStrAL = new ArrayList<String>();
+    private List<String> actualStrAL = new ArrayList<>();
+    private List<String> expectedStrAL = new ArrayList<>();
     private Response response;
 
     /**
      * Instantiates an {@code PathSetAssertHelper} object.
      *
-     * @param response    the response object
+     * @param response the response object
      */
     public PathSetAssertHelper(Response response) {
         this.response = response;
@@ -103,16 +103,16 @@ public class PathSetAssertHelper {
     }
 
     public void doAssert() {
-        StringBuffer actualSB = new StringBuffer();
-        Iterator<String> itrActual = actualStrAL.iterator();
-        while (itrActual.hasNext()) {
-            actualSB.append(itrActual.next() + Constants.NEW_LINE);
+        StringBuilder actualSB = new StringBuilder();
+
+        for (String anActualStrAL : actualStrAL) {
+            actualSB.append(anActualStrAL).append(NEW_LINE);
         }
 
-        StringBuffer expectedSB = new StringBuffer();
-        Iterator<String> itrExpected = expectedStrAL.iterator();
-        while (itrExpected.hasNext()) {
-            expectedSB.append(itrExpected.next() + Constants.NEW_LINE);
+        StringBuilder expectedSB = new StringBuilder();
+
+        for (String anExpectedStrAL : expectedStrAL) {
+            expectedSB.append(anExpectedStrAL).append(NEW_LINE);
         }
 
         Assert.assertEquals(actualSB.toString(), expectedSB.toString());

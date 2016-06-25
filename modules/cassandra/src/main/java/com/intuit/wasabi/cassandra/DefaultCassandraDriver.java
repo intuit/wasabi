@@ -198,8 +198,8 @@ public class DefaultCassandraDriver implements CassandraDriver {
 
                 LOGGER.info("Creating keyspace \"{}\"", keyspace.getKeyspaceName());
 
-                Map<String, Object> keyspaceConfig = new HashMap<String, Object>();
-                Map<String, Object> strategyOptions = new HashMap<String, Object>();
+                Map<String, Object> keyspaceConfig = new HashMap<>();
+                Map<String, Object> strategyOptions = new HashMap<>();
 
                 String keyspaceReplicationStrategy = config.getKeyspaceStrategyClass();
                 // Get the keyspaceReplicationStrategy and default it to SimpleStrategy

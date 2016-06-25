@@ -39,8 +39,8 @@ public class ActionProgressTest {
     @Before
     public void setup() {
         actionName = Event.Name.valueOf("TestAction");
-        winnersSoFar = new ArrayList<Bucket.Label>();
-        losersSoFar = new ArrayList<Bucket.Label>();
+        winnersSoFar = new ArrayList<>();
+        losersSoFar = new ArrayList<>();
         Bucket.Label winner = Bucket.Label.valueOf("TestWinner");
         Bucket.Label loser = Bucket.Label.valueOf("TestLoser");
         winnersSoFar.add(winner);

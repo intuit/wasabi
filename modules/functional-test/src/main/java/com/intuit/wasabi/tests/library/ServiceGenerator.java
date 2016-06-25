@@ -58,13 +58,10 @@ public class ServiceGenerator {
     }
 
     private static RequestInterceptor LoginReuqestInterceptor(final String basic) {
-        return new RequestInterceptor() {
-            @Override
-            public void intercept(RequestFacade request) {
-                request.addHeader("Authorization", basic);
-                request.addHeader("Accept", "application/json");
-                request.addHeader("User-Agent", "TestAgent");
-            }
+        return request -> {
+            request.addHeader("Authorization", basic);
+            request.addHeader("Accept", "application/json");
+            request.addHeader("User-Agent", "TestAgent");
         };
     }
 

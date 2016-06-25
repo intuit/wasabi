@@ -66,7 +66,7 @@ public class UserDirectoryModule extends AbstractModule {
     List<UserInfo> provideUsers() {
         Properties properties = create(PROPERTY_NAME, UserDirectoryModule.class);
         String userIds = getProperty("user.ids", properties);
-        List<UserInfo> users = new ArrayList<UserInfo>();
+        List<UserInfo> users = new ArrayList<>();
 
         for (String userId : userIds.split(":")) {
             userId = trimToNull(userId);

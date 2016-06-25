@@ -29,9 +29,9 @@ import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
 import com.netflix.astyanax.model.Rows;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Cassandra priorities repository impl
@@ -82,18 +82,15 @@ public class CassandraPrioritiesRepository implements PrioritiesRepository {
 
     /**
      * Deletes existing priority list for an application, and inserts with new priority list.
-     *
      */
     @Override
     public void createPriorities(Application.Name applicationName, List<Experiment.ID> experimentPriorityList) {
-
         if (experimentPriorityList.isEmpty()) {
-
-            final String CQL = "delete from application where app_name = ?";
+            final String cql = "delete from application where app_name = ?";
 
             try {
                 driver.getKeyspace().prepareQuery(keyspace.application_CF())
-                        .withCql(CQL).asPreparedStatement()
+                        .withCql(cql).asPreparedStatement()
                         // Application name
                         .withByteBufferValue(applicationName, ApplicationNameSerializer.get())
                         .execute().getResult();
@@ -102,11 +99,11 @@ public class CassandraPrioritiesRepository implements PrioritiesRepository {
                         + applicationName.toString() + "\"" + e);
             }
         } else {
-            final String CQL = "insert into application(app_name,priorities) values(?,?)";
+            final String cql = "insert into application(app_name,priorities) values(?,?)";
 
             try {
                 driver.getKeyspace().prepareQuery(keyspace.application_CF())
-                        .withCql(CQL).asPreparedStatement()
+                        .withCql(cql).asPreparedStatement()
                         // Application name
                         .withByteBufferValue(applicationName, ApplicationNameSerializer.get())
                         // Experiment priority list
@@ -124,15 +121,12 @@ public class CassandraPrioritiesRepository implements PrioritiesRepository {
      */
     @Override
     public List<Experiment.ID> getPriorityList(Application.Name applicationName) {
-
-        String CQL = "select * from application " +
-                "where app_name = ?";
+        String cql = "select * from application where app_name = ?";
 
         try {
-
             Rows<Application.Name, String> rows = driver.getKeyspace()
                     .prepareQuery(keyspace.application_CF())
-                    .withCql(CQL)
+                    .withCql(cql)
                     .asPreparedStatement()
                     .withByteBufferValue(applicationName, ApplicationNameSerializer.get())
                     .execute()
@@ -158,7 +152,8 @@ public class CassandraPrioritiesRepository implements PrioritiesRepository {
     /**
      * Get not exclusion list
      * TODO : More clarification
-     * @param base  base experiment id
+     *
+     * @param base base experiment id
      * @return experiment list
      */
     public ExperimentList getNotExclusions(Experiment.ID base) {
@@ -173,12 +168,7 @@ public class CassandraPrioritiesRepository implements PrioritiesRepository {
             Application.Name appName = experiment.getApplicationName();
             //get all experiments with this application name
             List<Experiment> ExpList = experimentRepository.getExperiments(appName);
-            List<Experiment> notMutex = new ArrayList<>();
-            for (Experiment exp : ExpList) {
-                if (!pairIDs.contains(exp.getID()) && !exp.getID().equals(base)) {
-                    notMutex.add(exp);
-                }
-            }
+            List<Experiment> notMutex = ExpList.stream().filter(exp -> !pairIDs.contains(exp.getID()) && !exp.getID().equals(base)).collect(Collectors.toList());
 
             ExperimentList result = new ExperimentList();
             result.setExperiments(notMutex);

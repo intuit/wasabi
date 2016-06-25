@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.intuit.wasabi.tests.library.util.ModelAssert.assertEqualModelItems;
 
@@ -314,16 +315,8 @@ public class SegmentationRuleCacheFixTest extends TestBase {
     @RetryTest(maxTries = 5, warmup = 2500)
     public void verifyResultsOfNoHeaderAssignments() {
         List<Assignment> assignments = getAssignments(experiment);
-        final List<String> userIDs = new ArrayList<>();
-        for (User user : userList2) {
-            userIDs.add(user.userID);
-        }
-        ModelUtil.Filter<Assignment> filter = new ModelUtil.Filter<Assignment>() {
-            @Override
-            public boolean filter(Assignment collectionItem) {
-                return userIDs.contains(collectionItem.user_id);
-            }
-        };
+        final List<String> userIDs = userList2.stream().map(user -> user.userID).collect(Collectors.toList());
+        ModelUtil.Filter<Assignment> filter = collectionItem -> userIDs.contains(collectionItem.user_id);
         assignments = new ModelUtil<Assignment>().filterList(assignments, filter);
         Assert.assertEquals(assignments.size(), newAssignments, "Number of assignments does not match.");
         existingAssignments = 0;
@@ -361,16 +354,8 @@ public class SegmentationRuleCacheFixTest extends TestBase {
     @RetryTest(maxTries = 5, warmup = 2500)
     public void verifyResultsOfRepeatedAssignments() {
         List<Assignment> assignments = getAssignments(experiment);
-        final List<String> userIDs = new ArrayList<>();
-        for (User user : userList2) {
-            userIDs.add(user.userID);
-        }
-        ModelUtil.Filter<Assignment> filter = new ModelUtil.Filter<Assignment>() {
-            @Override
-            public boolean filter(Assignment collectionItem) {
-                return userIDs.contains(collectionItem.user_id);
-            }
-        };
+        final List<String> userIDs = userList2.stream().map(user -> user.userID).collect(Collectors.toList());
+        ModelUtil.Filter<Assignment> filter = collectionItem -> userIDs.contains(collectionItem.user_id);
         assignments = new ModelUtil<Assignment>().filterList(assignments, filter);
         Assert.assertEquals(assignments.size(), newAssignments + existingAssignments, "Number of assignments does not match.");
         existingAssignments = 0;

@@ -49,7 +49,7 @@ public class UserPermissionsListTest {
     public void testUserPermissionsListSet() {
         userPermissionsList.setPermissionsList(permissionsList);
         assertEquals(permissionsList, userPermissionsList.getPermissionsList());
-        List<Permission> permissions = new ArrayList<Permission>();
+        List<Permission> permissions = new ArrayList<>();
         permissions.add(Permission.CREATE);
         permissions.add(Permission.DELETE);
         userPermissionsList.addPermissions(UserPermissions.newInstance(Application.Name.valueOf("testApp"), permissions).build());

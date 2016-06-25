@@ -315,7 +315,7 @@ public class CountIntegrationTest extends TestBase {
 
     @Test(dependsOnMethods = {"t_PostLoveIt"})
     public void t_CheckAllEventsYestedayOnwards() {
-        List<String> types = new ArrayList<String>();
+        List<String> types = new ArrayList<>();
         types.add(actionImpression);
         types.add(actionClick);
         types.add(actionLoveIt);
@@ -392,7 +392,7 @@ public class CountIntegrationTest extends TestBase {
 
     @Test(dependsOnMethods = {"t_PostLoveIt"})
     public void t_CheckClickEventsYestedayOnwards() {
-        List<String> types = new ArrayList<String>();
+        List<String> types = new ArrayList<>();
         types.add(actionClick);
         AnalyticsParameters params = new AnalyticsParameters();
         params.confidenceLevel = .9999999d;
@@ -468,7 +468,7 @@ public class CountIntegrationTest extends TestBase {
 
     @Test(dependsOnMethods = {"t_PostLoveIt"})
     public void t_CheckLoveItEventsYestedayOnwards() {
-        List<String> types = new ArrayList<String>();
+        List<String> types = new ArrayList<>();
         types.add(actionLoveIt);
         AnalyticsParameters params = new AnalyticsParameters();
         params.confidenceLevel = .9999999d;
@@ -545,7 +545,7 @@ public class CountIntegrationTest extends TestBase {
 
     @Test(dependsOnMethods = {"t_PostLoveIt"})
     public void t_CheckAllEventsYestedayOnwardsOnlyImpressions() {
-        List<String> types = new ArrayList<String>();
+        List<String> types = new ArrayList<>();
         types.add(actionImpression);
         AnalyticsParameters params = new AnalyticsParameters();
         params.confidenceLevel = .9999999d;
@@ -621,7 +621,7 @@ public class CountIntegrationTest extends TestBase {
 
     @Test(dependsOnMethods = {"t_PostLoveIt"})
     public void t_CheckAllEventsYestedayOnly() {
-        List<String> types = new ArrayList<String>();
+        List<String> types = new ArrayList<>();
         AnalyticsParameters params = new AnalyticsParameters();
         params.confidenceLevel = .9999999d;
         params.actions = types;
@@ -698,7 +698,7 @@ public class CountIntegrationTest extends TestBase {
 
     @Test(dependsOnMethods = {"t_PostLoveIt"})
     public void t_CheckAllEventsTodayOnly() {
-        List<String> types = new ArrayList<String>();
+        List<String> types = new ArrayList<>();
         types.add(actionImpression);
         types.add(actionClick);
         types.add(actionLoveIt);
@@ -775,7 +775,7 @@ public class CountIntegrationTest extends TestBase {
 
     @Test(dependsOnMethods = {"t_PostLoveIt"})
     public void t_CheckAllEventsTomorrowOnly() {
-        List<String> types = new ArrayList<String>();
+        List<String> types = new ArrayList<>();
         types.add(actionImpression);
         types.add(actionClick);
         types.add(actionLoveIt);
@@ -848,7 +848,7 @@ public class CountIntegrationTest extends TestBase {
 
     @Test(dependsOnMethods = {"t_PostLoveIt"})
     public void t_CheckAllEventsYesterdayOnly() {
-        List<String> types = new ArrayList<String>();
+        List<String> types = new ArrayList<>();
         types.add(actionImpression);
         types.add(actionClick);
         types.add(actionLoveIt);
@@ -921,7 +921,7 @@ public class CountIntegrationTest extends TestBase {
 
     @Test(dependsOnMethods = {"t_PostLoveIt"})
     public void t_CheckAllEventsTodayOnWards() {
-        List<String> types = new ArrayList<String>();
+        List<String> types = new ArrayList<>();
         types.add(actionImpression);
         types.add(actionClick);
         types.add(actionLoveIt);
@@ -995,7 +995,7 @@ public class CountIntegrationTest extends TestBase {
 
     @Test(dependsOnMethods = {"t_PostLoveIt"})
     public void t_CheckAllEventsTomorrowOnWards() {
-        List<String> types = new ArrayList<String>();
+        List<String> types = new ArrayList<>();
         types.add(actionImpression);
         types.add(actionClick);
         types.add(actionLoveIt);
@@ -1279,8 +1279,8 @@ public class CountIntegrationTest extends TestBase {
         Set<String> buckets = new HashSet<>();
         long count = 0;
         List assignments = (List) map.get("assignments");
-        for (int i = 0; i < assignments.size(); i++) {
-            Map assignment = (Map) assignments.get(i);
+        for (Object assignment1 : assignments) {
+            Map assignment = (Map) assignment1;
             buckets.add((String) assignment.get("bucket"));
             count += (Integer) assignment.get("count");
         }

@@ -72,45 +72,42 @@ public class EventsExportImpl implements EventsExport {
         final Date fromTsFinal = fromTsNew;
         final Date toTsFinal = toTsNew;
 
-        return new StreamingOutput() {
-            @Override
-            public void write(OutputStream os) throws IOException {
-                Writer writer = new BufferedWriter(new OutputStreamWriter(os));
-                Handle h = db.open();
+        return os -> {
+            Writer writer = new BufferedWriter(new OutputStreamWriter(os));
+            Handle h = db.open();
 
-                ResultIterator<Map<String, Object>> rs = h.createQuery(
-                        "SELECT user_id, bucket_label, timestamp, 'ACTION' AS event_type, action AS name, payload" +
-                                " FROM event_action" +
-                                " WHERE experiment_id = UNHEX(REPLACE('" + experimentID + "','-','')) " +
-                                "and timestamp >= '" + fromTsFinal + "'" + " and timestamp <= '" + toTsFinal + "'" +
-                                " UNION ALL" +
-                                " SELECT user_id, bucket_label, timestamp, 'IMPRESSION' AS event_type , 'IMPRESSION' AS name, payload" +
-                                " FROM event_impression" +
-                                " WHERE experiment_id = UNHEX(REPLACE('" + experimentID + "','-',''))" +
-                                "and timestamp >= '" + fromTsFinal + "'" + " and timestamp <= '" + toTsFinal + "'" +
-                                " ORDER BY user_id, timestamp")
-                        .iterator();
-                String header = "userId" + "\t" +
-                        "bucketLabel" + "\t" +
-                        "timestamp" + "\t" +
-                        "eventType" + "\t" +
-                        "name" + "\t" +
-                        "payload" + "\n";
-                writer.write(header);
-                while (rs.hasNext()) {
-                    Map<String, Object> row = rs.next();
-                    writer.write(row.get("user_id") + "\t" +
-                            row.get("bucket_label") + "\t" +
-                            row.get("timestamp") + "\t" +
-                            row.get("event_type") + "\t" +
-                            row.get("name") + "\t" +
-                            row.get("payload") + "\n"
-                    );
-                }
-                rs.close();
-                h.close();
-                writer.flush();
+            ResultIterator<Map<String, Object>> rs = h.createQuery(
+                    "SELECT user_id, bucket_label, timestamp, 'ACTION' AS event_type, action AS name, payload" +
+                            " FROM event_action" +
+                            " WHERE experiment_id = UNHEX(REPLACE('" + experimentID + "','-','')) " +
+                            "and timestamp >= '" + fromTsFinal + "'" + " and timestamp <= '" + toTsFinal + "'" +
+                            " UNION ALL" +
+                            " SELECT user_id, bucket_label, timestamp, 'IMPRESSION' AS event_type , 'IMPRESSION' AS name, payload" +
+                            " FROM event_impression" +
+                            " WHERE experiment_id = UNHEX(REPLACE('" + experimentID + "','-',''))" +
+                            "and timestamp >= '" + fromTsFinal + "'" + " and timestamp <= '" + toTsFinal + "'" +
+                            " ORDER BY user_id, timestamp")
+                    .iterator();
+            String header = "userId" + "\t" +
+                    "bucketLabel" + "\t" +
+                    "timestamp" + "\t" +
+                    "eventType" + "\t" +
+                    "name" + "\t" +
+                    "payload" + "\n";
+            writer.write(header);
+            while (rs.hasNext()) {
+                Map<String, Object> row = rs.next();
+                writer.write(row.get("user_id") + "\t" +
+                        row.get("bucket_label") + "\t" +
+                        row.get("timestamp") + "\t" +
+                        row.get("event_type") + "\t" +
+                        row.get("name") + "\t" +
+                        row.get("payload") + "\n"
+                );
             }
+            rs.close();
+            h.close();
+            writer.flush();
         };
     }
 }

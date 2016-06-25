@@ -33,7 +33,7 @@ public class EmailLinksListTest {
 
     @Test
     public void testToStringWithOneLinkList() {
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         list.add("one");
         EmailLinksList elist = EmailLinksList.withEmailLinksList(list).build();
         assertEquals("one" + EmailLinksList.LINE_SEPARATOR, elist.toString());
@@ -41,7 +41,7 @@ public class EmailLinksListTest {
 
     @Test
     public void testToStringWithTwoLinkList() {
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         list.add("one");
         list.add("two");
 
@@ -55,7 +55,7 @@ public class EmailLinksListTest {
     //if we don't intended to return null when build method is called twice, this method can be removed
     @Test
     public void testBuilderBuildMethodCalledTwice() {
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         list.add("one");
         list.add("two");
 

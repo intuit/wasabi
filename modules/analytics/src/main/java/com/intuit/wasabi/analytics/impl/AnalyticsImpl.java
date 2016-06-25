@@ -23,8 +23,6 @@ import com.intuit.wasabi.analyticsobjects.Parameters;
 import com.intuit.wasabi.analyticsobjects.counts.*;
 import com.intuit.wasabi.analyticsobjects.metrics.BinomialMetrics.BinomialMetric;
 import com.intuit.wasabi.analyticsobjects.statistics.*;
-import com.intuit.wasabi.database.Transaction;
-import com.intuit.wasabi.database.Transaction.Block;
 import com.intuit.wasabi.database.TransactionFactory;
 import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
 import com.intuit.wasabi.experiment.Experiments;
@@ -102,58 +100,55 @@ public class AnalyticsImpl implements Analytics {
     @Override
     public ExperimentCounts getExperimentRollup(final Experiment.ID experimentID, final Parameters parameters) {
 
-        return (ExperimentCounts) transactionFactory.transaction(new Block() {
-            @Override
-            public Object value(Transaction transaction) {
+        return (ExperimentCounts) transactionFactory.transaction(transaction -> {
 
-                //if from_ or to_ time or actions specified, calculate counts from actions and impressions tables directly
-                if (circumventRollup(experimentID, parameters)) {
-                    return getExperimentCounts(experimentID, parameters);
-                }
-
-                //check that experiment exists and fetch metadata
-                Experiment exp = getExperimentIfExists(experimentID);
-
-                Rollup rollup = new Rollup(exp, true, transaction);
-                if (!rollup.isFreshEnough()) {
-                    return getExperimentCounts(experimentID, parameters);
-                }
-
-                //get rolluprows from the database
-                List<Map> rollupRows = analyticsRepository.getRollupRows(experimentID,
-                        rollup.latestAvailableRollupDateAsString(),
-                        parameters);
-
-                //fetch list of buckets for experiment and use to create counts objects
-                Map<Bucket.Label, BucketCounts> buckets = analyticsRepository.getEmptyBuckets(experimentID);
-
-                //loop over rollup rows to fill BucketCounts objects with counts
-                for (Map rollupRow : rollupRows) {
-                    // fixme: ref rollup domain object
-                    BucketCounts bucket = buckets.get(Bucket.Label.valueOf((String) rollupRow.get("bid")));
-
-                    // fixme: ref rollup domain object
-                    if ("".equals(rollupRow.get(ACTION))) {
-                        bucket.setImpressionCounts(new Counts.Builder()
-                                .withEventCount(Long.valueOf((Integer) rollupRow.get("ic")))
-                                .withUniqueUserCount(Long.valueOf((Integer) rollupRow.get("iuc")))
-                                .build());
-                        bucket.setJointActionCounts(new Counts.Builder()
-                                .withEventCount(Long.valueOf((Integer) rollupRow.get("ac")))
-                                .withUniqueUserCount(Long.valueOf((Integer) rollupRow.get("auc")))
-                                .build());
-                    } else {
-                        Event.Name actionName = Event.Name.valueOf((String) rollupRow.get(ACTION));
-                        bucket.addActionCounts(actionName, new ActionCounts.Builder()
-                                .withActionName(actionName)
-                                .withEventCount(Long.valueOf((Integer) rollupRow.get("ac")))
-                                .withUniqueUserCount(Long.valueOf((Integer) rollupRow.get("auc")))
-                                .build());
-                    }
-                }
-
-                return analysisTools.calculateExperimentCounts(buckets.values());
+            //if from_ or to_ time or actions specified, calculate counts from actions and impressions tables directly
+            if (circumventRollup(experimentID, parameters)) {
+                return getExperimentCounts(experimentID, parameters);
             }
+
+            //check that experiment exists and fetch metadata
+            Experiment exp = getExperimentIfExists(experimentID);
+
+            Rollup rollup = new Rollup(exp, true, transaction);
+            if (!rollup.isFreshEnough()) {
+                return getExperimentCounts(experimentID, parameters);
+            }
+
+            //get rolluprows from the database
+            List<Map> rollupRows = analyticsRepository.getRollupRows(experimentID,
+                    rollup.latestAvailableRollupDateAsString(),
+                    parameters);
+
+            //fetch list of buckets for experiment and use to create counts objects
+            Map<Bucket.Label, BucketCounts> buckets = analyticsRepository.getEmptyBuckets(experimentID);
+
+            //loop over rollup rows to fill BucketCounts objects with counts
+            for (Map rollupRow : rollupRows) {
+                // fixme: ref rollup domain object
+                BucketCounts bucket = buckets.get(Bucket.Label.valueOf((String) rollupRow.get("bid")));
+
+                // fixme: ref rollup domain object
+                if ("".equals(rollupRow.get(ACTION))) {
+                    bucket.setImpressionCounts(new Counts.Builder()
+                            .withEventCount(Long.valueOf((Integer) rollupRow.get("ic")))
+                            .withUniqueUserCount(Long.valueOf((Integer) rollupRow.get("iuc")))
+                            .build());
+                    bucket.setJointActionCounts(new Counts.Builder()
+                            .withEventCount(Long.valueOf((Integer) rollupRow.get("ac")))
+                            .withUniqueUserCount(Long.valueOf((Integer) rollupRow.get("auc")))
+                            .build());
+                } else {
+                    Event.Name actionName = Event.Name.valueOf((String) rollupRow.get(ACTION));
+                    bucket.addActionCounts(actionName, new ActionCounts.Builder()
+                            .withActionName(actionName)
+                            .withEventCount(Long.valueOf((Integer) rollupRow.get("ac")))
+                            .withUniqueUserCount(Long.valueOf((Integer) rollupRow.get("auc")))
+                            .build());
+                }
+            }
+
+            return analysisTools.calculateExperimentCounts(buckets.values());
         });
     }
 
@@ -164,49 +159,46 @@ public class AnalyticsImpl implements Analytics {
     public ExperimentCounts getExperimentCounts(final Experiment.ID experimentID, final Parameters parameters) {
 
 
-        return (ExperimentCounts) transactionFactory.transaction(new Block() {
-            @Override
-            public Object value(Transaction transaction) {
+        return (ExperimentCounts) transactionFactory.transaction(transaction -> {
 
-                assertExperimentExists(experimentID);
+            assertExperimentExists(experimentID);
 
-                List<Map> impressionRows = analyticsRepository.getImpressionRows(experimentID, parameters);
-                List<Map> actionsRows = analyticsRepository.getActionsRows(experimentID, parameters);
-                List<Map> jointActionsRows = analyticsRepository.getJointActions(experimentID, parameters);
-                //fetch list of buckets for experiment and use to create counts objects
-                Map<Bucket.Label, BucketCounts> buckets = analyticsRepository.getEmptyBuckets(experimentID);
+            List<Map> impressionRows = analyticsRepository.getImpressionRows(experimentID, parameters);
+            List<Map> actionsRows = analyticsRepository.getActionsRows(experimentID, parameters);
+            List<Map> jointActionsRows = analyticsRepository.getJointActions(experimentID, parameters);
+            //fetch list of buckets for experiment and use to create counts objects
+            Map<Bucket.Label, BucketCounts> buckets = analyticsRepository.getEmptyBuckets(experimentID);
 
-                //loop over each of the SQL results to fill BucketCounts objects with counts
-                for (Map actionRow : actionsRows) {
-                    BucketCounts bucket = buckets.get(Bucket.Label.valueOf((String) actionRow.get("bid")));
-                    Event.Name actionName = Event.Name.valueOf((String) actionRow.get(ACTION));
-                    bucket.addActionCounts(actionName, new ActionCounts.Builder()
-                            .withActionName(actionName)
-                            .withEventCount((Long) actionRow.get("c"))
-                            .withUniqueUserCount((Long) actionRow.get("cu"))
-                            .build());
-                }
-
-                for (Map impressionRow : impressionRows) {
-                    BucketCounts bucket = buckets.get(Bucket.Label.valueOf((String) impressionRow.get("bid")));
-
-                    bucket.setImpressionCounts(new Counts.Builder()
-                            .withEventCount((Long) impressionRow.get("c"))
-                            .withUniqueUserCount((Long) impressionRow.get("cu"))
-                            .build());
-                }
-
-                for (Map jointActionsRow : jointActionsRows) {
-                    BucketCounts bucket = buckets.get(Bucket.Label.valueOf((String) jointActionsRow.get("bid")));
-
-                    bucket.setJointActionCounts(new Counts.Builder()
-                            .withEventCount((Long) jointActionsRow.get("c"))
-                            .withUniqueUserCount((Long) jointActionsRow.get("cu"))
-                            .build());
-                }
-
-                return analysisTools.calculateExperimentCounts(buckets.values());
+            //loop over each of the SQL results to fill BucketCounts objects with counts
+            for (Map actionRow : actionsRows) {
+                BucketCounts bucket = buckets.get(Bucket.Label.valueOf((String) actionRow.get("bid")));
+                Event.Name actionName = Event.Name.valueOf((String) actionRow.get(ACTION));
+                bucket.addActionCounts(actionName, new ActionCounts.Builder()
+                        .withActionName(actionName)
+                        .withEventCount((Long) actionRow.get("c"))
+                        .withUniqueUserCount((Long) actionRow.get("cu"))
+                        .build());
             }
+
+            for (Map impressionRow : impressionRows) {
+                BucketCounts bucket = buckets.get(Bucket.Label.valueOf((String) impressionRow.get("bid")));
+
+                bucket.setImpressionCounts(new Counts.Builder()
+                        .withEventCount((Long) impressionRow.get("c"))
+                        .withUniqueUserCount((Long) impressionRow.get("cu"))
+                        .build());
+            }
+
+            for (Map jointActionsRow : jointActionsRows) {
+                BucketCounts bucket = buckets.get(Bucket.Label.valueOf((String) jointActionsRow.get("bid")));
+
+                bucket.setJointActionCounts(new Counts.Builder()
+                        .withEventCount((Long) jointActionsRow.get("c"))
+                        .withUniqueUserCount((Long) jointActionsRow.get("cu"))
+                        .build());
+            }
+
+            return analysisTools.calculateExperimentCounts(buckets.values());
         });
     }
 
@@ -216,147 +208,144 @@ public class AnalyticsImpl implements Analytics {
     @Override
     public ExperimentCumulativeCounts getExperimentRollupDailies(final Experiment.ID experimentID,
                                                                  final Parameters parameters) {
-        return (ExperimentCumulativeCounts) transactionFactory.transaction(new Block() {
-            @Override
-            public Object value(Transaction transaction) {
+        return (ExperimentCumulativeCounts) transactionFactory.transaction(transaction -> {
 
-                //if from_ or to_ time or actions specified, calculate counts from actions and impressions tables directly
-                if (circumventRollup(experimentID, parameters)) {
-                    return getExperimentCountsDailies(experimentID, parameters);
-                }
-
-                Experiment exp = getExperimentIfExists(experimentID);
-
-                Rollup rollup = new Rollup(exp, transaction);
-                if (!rollup.isFreshEnough())
-                    return getExperimentCountsDailies(experimentID, parameters);
-
-                List<Map> rollupRows = analyticsRepository.getCountsFromRollups(experimentID, parameters);
-
-                // fetch list of buckets for experiment and use to pre-populate buckets for perDay and cumulative
-                Map<Bucket.Label, BucketCounts> buckets = analyticsRepository.getEmptyBuckets(experimentID);
-                ExperimentCounts experiment = analysisTools.calculateExperimentCounts(buckets.values());
-
-                //create calendars to hold the start and end day
-                Date start_ts = exp.getStartTime();
-                Calendar start_cal = createCalendarMidnight(start_ts);
-                Date end_ts = exp.getEndTime();
-                Calendar end_cal = createCalendarMidnight(end_ts);
-                DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-
-                df.setTimeZone(TimeZone.getTimeZone("UTC"));
-
-                //loop over days using calendars to create DailyCounts with zero counts for each day
-                List<DailyCounts> days = new ArrayList<>();
-
-                for (; start_cal.compareTo(end_cal) <= 0; start_cal.add(Calendar.DATE, 1)) {
-                    String thisDate = df.format(start_cal.getTime());
-
-                    days.add(new DailyCounts.Builder().setDate(thisDate).withPerDay(experiment.clone())
-                            .withCumulative(experiment.clone()).build());
-                }
-
-                int numberDays = days.size();
-                int currentDay = 0;
-                //loop over rollup rows to update DailyCounts for each day
-                Map<Bucket.Label, BucketCounts> perDayBuckets = new HashMap<>();
-                Map<Bucket.Label, BucketCounts> cumulativeBuckets = new HashMap<>();
-
-                for (Map.Entry<Bucket.Label, BucketCounts> bucketEntry : buckets.entrySet()) {
-                    perDayBuckets.put(bucketEntry.getKey(), bucketEntry.getValue().clone());
-                    cumulativeBuckets.put(bucketEntry.getKey(), bucketEntry.getValue().clone());
-                }
-
-                int numberRows = rollupRows.size();
-
-                for (int n = 0; n < numberRows; n++) {
-                    Map rollupRow = rollupRows.get(n);
-                    Bucket.Label bucketLabel = Bucket.Label.valueOf((String) rollupRow.get("bid"));
-
-                    if ("".equals(rollupRow.get(ACTION))) {
-                        Counts bucketImpressions = new Counts.Builder()
-                                .withEventCount(Long.valueOf((Integer) rollupRow.get("ic")))
-                                .withUniqueUserCount(Long.valueOf((Integer) rollupRow.get("iuc")))
-                                .build();
-                        Counts bucketJointActions = new Counts.Builder()
-                                .withEventCount(Long.valueOf((Integer) rollupRow.get("ac")))
-                                .withUniqueUserCount(Long.valueOf((Integer) rollupRow.get("auc")))
-                                .build();
-
-                        if ((Boolean) rollupRow.get("c")) {
-                            cumulativeBuckets.get(bucketLabel).setImpressionCounts(bucketImpressions);
-                            cumulativeBuckets.get(bucketLabel).setJointActionCounts(bucketJointActions);
-                        } else {
-                            perDayBuckets.get(bucketLabel).setImpressionCounts(bucketImpressions);
-                            perDayBuckets.get(bucketLabel).setJointActionCounts(bucketJointActions);
-                        }
-                    } else {
-                        Event.Name actionName = Event.Name.valueOf((String) rollupRow.get(ACTION));
-                        ActionCounts bucketAction = new ActionCounts.Builder()
-                                .withActionName(actionName)
-                                .withEventCount(Long.valueOf((Integer) rollupRow.get("ac")))
-                                .withUniqueUserCount(Long.valueOf((Integer) rollupRow.get("auc")))
-                                .build();
-
-                        if ((Boolean) rollupRow.get("c")) {
-                            cumulativeBuckets.get(bucketLabel).addActionCounts(actionName, bucketAction);
-                        } else {
-                            perDayBuckets.get(bucketLabel).addActionCounts(actionName, bucketAction);
-                        }
-                    }
-
-                    //update the DailyCounts if this is the last row for this date
-                    Date thisDay = (Date) rollupRow.get("day");
-
-                    if ((n == numberRows - 1) || (!rollupRows.get(n + 1).get("day").equals(thisDay))) {
-                        //calculate date string and create a new DailyCounts for this day
-                        String thisDate = df.format(thisDay);
-
-                        while (currentDay < numberDays) {
-                            if (days.get(currentDay).getDate().equals(thisDate)) {
-                                days.set(currentDay, new DailyCounts.Builder().setDate(thisDate)
-                                        .withPerDay(analysisTools.calculateExperimentCounts(perDayBuckets.values()))
-                                        .withCumulative(analysisTools.calculateExperimentCounts(cumulativeBuckets.values()))
-                                        .build());
-
-                                currentDay += 1;
-
-                                break;
-                            } else {
-                                //carry over cumulative counts from previous day if there are no new counts
-                                if (currentDay > 0) {
-                                    DailyCounts currentDailyCounts = days.get(currentDay);
-                                    DailyCounts missingDailyCounts = getPreviousDayDailyCountAsCurrentDailyCount(
-                                            currentDailyCounts, days, currentDay);
-                                    days.set(currentDay, missingDailyCounts);
-                                }
-
-                                currentDay += 1;
-                            }
-                        }
-
-                        //reset the perDay and cumulative maps for the next day
-                        perDayBuckets = new HashMap<>();
-                        cumulativeBuckets = new HashMap<>();
-
-                        for (Map.Entry<Bucket.Label, BucketCounts> bucketEntry : buckets.entrySet()) {
-                            perDayBuckets.put(bucketEntry.getKey(), bucketEntry.getValue().clone());
-                            cumulativeBuckets.put(bucketEntry.getKey(), bucketEntry.getValue().clone());
-                        }
-                    }
-                }
-
-                //finish filling the cumulative counts if not already done
-                for (; currentDay < numberDays; currentDay += 1) {
-                    DailyCounts thisDailyCounts = days.get(currentDay);
-                    DailyCounts currentDailyCount = getPreviousDayDailyCountAsCurrentDailyCount(
-                            thisDailyCounts, days, currentDay);
-
-                    days.set(currentDay, currentDailyCount);
-                }
-
-                return new ExperimentCumulativeCounts.Builder().withDays(days).build();
+            //if from_ or to_ time or actions specified, calculate counts from actions and impressions tables directly
+            if (circumventRollup(experimentID, parameters)) {
+                return getExperimentCountsDailies(experimentID, parameters);
             }
+
+            Experiment exp = getExperimentIfExists(experimentID);
+
+            Rollup rollup = new Rollup(exp, transaction);
+            if (!rollup.isFreshEnough())
+                return getExperimentCountsDailies(experimentID, parameters);
+
+            List<Map> rollupRows = analyticsRepository.getCountsFromRollups(experimentID, parameters);
+
+            // fetch list of buckets for experiment and use to pre-populate buckets for perDay and cumulative
+            Map<Bucket.Label, BucketCounts> buckets = analyticsRepository.getEmptyBuckets(experimentID);
+            ExperimentCounts experiment = analysisTools.calculateExperimentCounts(buckets.values());
+
+            //create calendars to hold the start and end day
+            Date start_ts = exp.getStartTime();
+            Calendar start_cal = createCalendarMidnight(start_ts);
+            Date end_ts = exp.getEndTime();
+            Calendar end_cal = createCalendarMidnight(end_ts);
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+
+            df.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+            //loop over days using calendars to create DailyCounts with zero counts for each day
+            List<DailyCounts> days = new ArrayList<>();
+
+            for (; start_cal.compareTo(end_cal) <= 0; start_cal.add(Calendar.DATE, 1)) {
+                String thisDate = df.format(start_cal.getTime());
+
+                days.add(new DailyCounts.Builder().setDate(thisDate).withPerDay(experiment.clone())
+                        .withCumulative(experiment.clone()).build());
+            }
+
+            int numberDays = days.size();
+            int currentDay = 0;
+            //loop over rollup rows to update DailyCounts for each day
+            Map<Bucket.Label, BucketCounts> perDayBuckets = new HashMap<>();
+            Map<Bucket.Label, BucketCounts> cumulativeBuckets = new HashMap<>();
+
+            for (Map.Entry<Bucket.Label, BucketCounts> bucketEntry : buckets.entrySet()) {
+                perDayBuckets.put(bucketEntry.getKey(), bucketEntry.getValue().clone());
+                cumulativeBuckets.put(bucketEntry.getKey(), bucketEntry.getValue().clone());
+            }
+
+            int numberRows = rollupRows.size();
+
+            for (int n = 0; n < numberRows; n++) {
+                Map rollupRow = rollupRows.get(n);
+                Bucket.Label bucketLabel = Bucket.Label.valueOf((String) rollupRow.get("bid"));
+
+                if ("".equals(rollupRow.get(ACTION))) {
+                    Counts bucketImpressions = new Counts.Builder()
+                            .withEventCount(Long.valueOf((Integer) rollupRow.get("ic")))
+                            .withUniqueUserCount(Long.valueOf((Integer) rollupRow.get("iuc")))
+                            .build();
+                    Counts bucketJointActions = new Counts.Builder()
+                            .withEventCount(Long.valueOf((Integer) rollupRow.get("ac")))
+                            .withUniqueUserCount(Long.valueOf((Integer) rollupRow.get("auc")))
+                            .build();
+
+                    if ((Boolean) rollupRow.get("c")) {
+                        cumulativeBuckets.get(bucketLabel).setImpressionCounts(bucketImpressions);
+                        cumulativeBuckets.get(bucketLabel).setJointActionCounts(bucketJointActions);
+                    } else {
+                        perDayBuckets.get(bucketLabel).setImpressionCounts(bucketImpressions);
+                        perDayBuckets.get(bucketLabel).setJointActionCounts(bucketJointActions);
+                    }
+                } else {
+                    Event.Name actionName = Event.Name.valueOf((String) rollupRow.get(ACTION));
+                    ActionCounts bucketAction = new ActionCounts.Builder()
+                            .withActionName(actionName)
+                            .withEventCount(Long.valueOf((Integer) rollupRow.get("ac")))
+                            .withUniqueUserCount(Long.valueOf((Integer) rollupRow.get("auc")))
+                            .build();
+
+                    if ((Boolean) rollupRow.get("c")) {
+                        cumulativeBuckets.get(bucketLabel).addActionCounts(actionName, bucketAction);
+                    } else {
+                        perDayBuckets.get(bucketLabel).addActionCounts(actionName, bucketAction);
+                    }
+                }
+
+                //update the DailyCounts if this is the last row for this date
+                Date thisDay = (Date) rollupRow.get("day");
+
+                if ((n == numberRows - 1) || (!rollupRows.get(n + 1).get("day").equals(thisDay))) {
+                    //calculate date string and create a new DailyCounts for this day
+                    String thisDate = df.format(thisDay);
+
+                    while (currentDay < numberDays) {
+                        if (days.get(currentDay).getDate().equals(thisDate)) {
+                            days.set(currentDay, new DailyCounts.Builder().setDate(thisDate)
+                                    .withPerDay(analysisTools.calculateExperimentCounts(perDayBuckets.values()))
+                                    .withCumulative(analysisTools.calculateExperimentCounts(cumulativeBuckets.values()))
+                                    .build());
+
+                            currentDay += 1;
+
+                            break;
+                        } else {
+                            //carry over cumulative counts from previous day if there are no new counts
+                            if (currentDay > 0) {
+                                DailyCounts currentDailyCounts = days.get(currentDay);
+                                DailyCounts missingDailyCounts = getPreviousDayDailyCountAsCurrentDailyCount(
+                                        currentDailyCounts, days, currentDay);
+                                days.set(currentDay, missingDailyCounts);
+                            }
+
+                            currentDay += 1;
+                        }
+                    }
+
+                    //reset the perDay and cumulative maps for the next day
+                    perDayBuckets = new HashMap<>();
+                    cumulativeBuckets = new HashMap<>();
+
+                    for (Map.Entry<Bucket.Label, BucketCounts> bucketEntry : buckets.entrySet()) {
+                        perDayBuckets.put(bucketEntry.getKey(), bucketEntry.getValue().clone());
+                        cumulativeBuckets.put(bucketEntry.getKey(), bucketEntry.getValue().clone());
+                    }
+                }
+            }
+
+            //finish filling the cumulative counts if not already done
+            for (; currentDay < numberDays; currentDay += 1) {
+                DailyCounts thisDailyCounts = days.get(currentDay);
+                DailyCounts currentDailyCount = getPreviousDayDailyCountAsCurrentDailyCount(
+                        thisDailyCounts, days, currentDay);
+
+                days.set(currentDay, currentDailyCount);
+            }
+
+            return new ExperimentCumulativeCounts.Builder().withDays(days).build();
         });
     }
 
@@ -433,14 +422,11 @@ public class AnalyticsImpl implements Analytics {
      */
     @Override
     public ExperimentStatistics getExperimentStatistics(final Experiment.ID experimentId, final Parameters parameters) {
-        return (ExperimentStatistics) transactionFactory.transaction(new Block() {
-            @Override
-            public Object value(Transaction transaction) {
-                ExperimentCounts counts = getExperimentRollup(experimentId, parameters);
+        return (ExperimentStatistics) transactionFactory.transaction(transaction -> {
+            ExperimentCounts counts = getExperimentRollup(experimentId, parameters);
 
-                return calculateExperimentStatistics(counts, parameters.getMetricImpl(), parameters.getEffectSize(),
-                        parameters.getMode());
-            }
+            return calculateExperimentStatistics(counts, parameters.getMetricImpl(), parameters.getEffectSize(),
+                    parameters.getMode());
         });
     }
 
@@ -552,7 +538,7 @@ public class AnalyticsImpl implements Analytics {
             Bucket.Label bucketLabel = bucket.getLabel();
             BucketStatistics bucketWithStats = new BucketStatistics.Builder()
                     .withBucketCounts(bucket)
-                    .withBucketComparisons(new HashMap<Bucket.Label, BucketComparison>())
+                    .withBucketComparisons(new HashMap<>())
                     .build();
 
             analysisTools.generateRate(bucketWithStats, metric);

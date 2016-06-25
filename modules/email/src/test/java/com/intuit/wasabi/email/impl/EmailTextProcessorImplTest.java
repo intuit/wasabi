@@ -33,13 +33,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static com.intuit.wasabi.eventlog.EventLogEventType.BUCKET_CHANGED;
 import static com.intuit.wasabi.eventlog.EventLogEventType.EXPERIMENT_CHANGED;
+import static java.util.Collections.*;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.IsNull.nullValue;
@@ -170,7 +168,7 @@ public class EmailTextProcessorImplTest {
         UserRole roleBad = mock(UserRole.class);
 
         when(roleBad.getUserEmail()).thenReturn("really invalid email");
-        when(roleListMock.getRoleList()).thenReturn(Arrays.asList(roleBad));
+        when(roleListMock.getRoleList()).thenReturn(singletonList(roleBad));
         when(repoMock.getApplicationUsers(appName)).thenReturn(roleListMock);
 
         textProcessor.getAddressees(appName); //this should throw IllArgumentExp

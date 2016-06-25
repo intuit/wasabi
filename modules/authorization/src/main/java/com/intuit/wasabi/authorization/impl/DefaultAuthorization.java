@@ -15,7 +15,6 @@
  *******************************************************************************/
 package com.intuit.wasabi.authorization.impl;
 
-import com.google.common.base.Optional;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authorization.Authorization;
 import com.intuit.wasabi.authorizationobjects.*;
@@ -32,10 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.intuit.wasabi.authorizationobjects.Permission.SUPERADMIN;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -110,7 +106,7 @@ public class DefaultAuthorization implements Authorization {
     //TODO: move this to authentication instead of authorization
     @Override
     public UserInfo.Username getUser(String authHeader) {
-        return parseUsername(Optional.fromNullable(authHeader));
+        return parseUsername(Optional.ofNullable(authHeader));
     }
 
     @Override
@@ -184,7 +180,7 @@ public class DefaultAuthorization implements Authorization {
             throw new AuthenticationException("Null Authentication Header is not supported");
         }
 
-        if (!authHeader.or(SPACE).contains(BASIC)) {
+        if (!authHeader.orElse(SPACE).contains(BASIC)) {
             throw new AuthenticationException("Only Basic Authentication is supported");
         }
 

@@ -41,11 +41,8 @@ class ImpressionsActionsResourceParser {
         String timestamp = df.format(now);
 
         for (List<List<String>> submissions : body.values()) {
-            for (List<String> submission : submissions) {
-                if (submission.get(0) == null) {
-                    submission.set(0, timestamp);
-                }
-            }
+            submissions.stream().filter(submission -> submission.get(0) == null).forEach(submission ->
+                    submission.set(0, timestamp));
         }
     }
 }

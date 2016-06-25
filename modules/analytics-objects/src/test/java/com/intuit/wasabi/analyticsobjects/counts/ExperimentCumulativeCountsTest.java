@@ -29,7 +29,7 @@ public class ExperimentCumulativeCountsTest {
 
     @Before
     public void setup() {
-        days = new ArrayList<DailyCounts>();
+        days = new ArrayList<>();
         counter = new ExperimentCumulativeCounts.Builder().withDays(days).build();
     }
 
@@ -44,7 +44,7 @@ public class ExperimentCumulativeCountsTest {
     @Test
     public void testAddSetDays() {
         DailyCounts day = new DailyCounts.Builder().build();
-        List<DailyCounts> otherDays = new ArrayList<DailyCounts>();
+        List<DailyCounts> otherDays = new ArrayList<>();
         otherDays.add(day);
         counter.addDays(day);
         assertEquals(counter.getDays(), otherDays);
@@ -75,7 +75,7 @@ public class ExperimentCumulativeCountsTest {
     @Test
     public void testNotEquals() {
         ExperimentCumulativeCounts counter1 = new ExperimentCumulativeCounts.Builder().withDays(days).build();
-        ArrayList<DailyCounts> days2 = new ArrayList<DailyCounts>();
+        ArrayList<DailyCounts> days2 = new ArrayList<>();
         days.add(new DailyCounts.Builder().setDate("2016-03-01 12:12:12z").build());
         ExperimentCumulativeCounts counter2 = new ExperimentCumulativeCounts.Builder().withDays(days2).build();
 

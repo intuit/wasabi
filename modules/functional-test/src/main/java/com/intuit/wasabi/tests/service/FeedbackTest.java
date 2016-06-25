@@ -82,17 +82,15 @@ public class FeedbackTest extends TestBase {
     private void sleep(long ms) {
         try {
             Thread.sleep(ms);
-        } catch (Exception e) {
+        } catch (InterruptedException ignored) {
         }
     }
 
     /**
      * Tries to post Userfeedback with valid authorizations and valid inputs. ContactOkay set to true so email address will be looked up by by Corpid.
      *
-     * @param userName
-     *            the user name
-     * @param password
-     *            the user pass
+     * @param userName the user name
+     * @param password the user pass
      */
     @Test(dataProvider = "ValidAuthProvider", dependsOnGroups = {"ping"})
     public void createUserFeedback(String userName, String password, String userEmail) {
@@ -112,10 +110,8 @@ public class FeedbackTest extends TestBase {
     /**
      * Tries to post Userfeedback with valid authorizations and valid inputs. ContactOkay set to false so email address provided will be persisted as is.
      *
-     * @param userName
-     *            the user name
-     * @param password
-     *            the user pass
+     * @param userName the user name
+     * @param password the user pass
      */
     @Test(dataProvider = "ValidAuthProvider", dependsOnGroups = {"ping"})
     public void createUserFeedbackIsContactOkFalse(String userName, String password, String userEmail) {
@@ -220,10 +216,8 @@ public class FeedbackTest extends TestBase {
      * Tries to post Userfeedback with valid authorization and invalid inputs.
      * Score=0
      *
-     * @param userName
-     *            the user name
-     * @param password
-     *            the user pass
+     * @param userName the user name
+     * @param password the user pass
      */
     @Test(dataProvider = "ValidAuthProvider", dependsOnGroups = {"ping"})
     public void createUserFeedbackHasScore0(String userName, String password, String userEmail) {
@@ -239,10 +233,8 @@ public class FeedbackTest extends TestBase {
      * Tries to post Userfeedback with valid authorization and invalid inputs.
      * Score=-1
      *
-     * @param userName
-     *            the user name
-     * @param password
-     *            the user pass
+     * @param userName the user name
+     * @param password the user pass
      */
     @Test(dataProvider = "ValidAuthProvider", dependsOnGroups = {"ping"})
     public void createUserFeedbackHasScoreMinus1(String userName,
@@ -259,10 +251,8 @@ public class FeedbackTest extends TestBase {
      * Tries to post Userfeedback with valid authorization and invalid inputs.
      * Score &gt; 10
      *
-     * @param userName
-     *            the user name
-     * @param password
-     *            the user pass
+     * @param userName the user name
+     * @param password the user pass
      */
     @Test(dataProvider = "ValidAuthProvider", dependsOnGroups = {"ping"})
     public void createUserFeedbackHasScore11(String userName, String password, String userEmail) {
@@ -278,10 +268,8 @@ public class FeedbackTest extends TestBase {
      * Tries to post Userfeedback with valid authorization and invalid inputs.
      * contact_ok = false
      *
-     * @param userName
-     *            the user name
-     * @param password
-     *            the user pass
+     * @param userName the user name
+     * @param password the user pass
      */
     @Test(dataProvider = "ValidAuthProvider", dependsOnGroups = {"ping"})
     public void createUserFeedbackIsContactOkayFalse(String userName,

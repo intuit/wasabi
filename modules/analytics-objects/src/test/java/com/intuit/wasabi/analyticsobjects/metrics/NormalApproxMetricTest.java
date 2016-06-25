@@ -167,16 +167,16 @@ public class NormalApproxMetricTest {
     @Test
     public void predictedDataNeeded() throws Exception {
         Long output = testStats95.predictedDataNeeded(0.5, 0.5, 0.5, 0.05);
-        assertThat("test 1", output, equalTo(new Long(1537)));
+        assertThat("test 1", output, equalTo(1537L));
 
         output = testStats95.predictedDataNeeded(0.5, 0.25, 0.25, 0.01);
-        assertThat("test 2", output, equalTo(new Long(76829)));
+        assertThat("test 2", output, equalTo(76829L));
 
         output = testStats95.predictedDataNeeded(0.1, 0.3, 0.2, 0.03);
-        assertThat("test 3", output, equalTo(new Long(3201)));
+        assertThat("test 3", output, equalTo(3201L));
 
         output = testStats99.predictedDataNeeded(0.01, 0.7, 0.3, 0.005);
-        assertThat("test 4", output, equalTo(new Long(12512)));
+        assertThat("test 4", output, equalTo(12512L));
 
         Long output2 = testStats99.predictedDataNeeded(0.01, 0.3, 0.7, 0.005);
         assertThat("symmetric in allocation percentage", output, equalTo(output2));

@@ -161,11 +161,9 @@ public class PrioritiesImpl implements Priorities {
         // are missing
         List<Experiment> experimentList = experiments.getExperiments(applicationName);
         if (experimentList.size() != experimentSet.size()) {
-            for (Experiment experiment : experimentList) {
-                if (!experimentSet.contains(experiment.getID())) {
-                    experimentSet.add(experiment.getID());
-                }
-            }
+            experimentList.stream().filter(experiment ->
+                    !experimentSet.contains(experiment.getID())).forEach(experiment ->
+                    experimentSet.add(experiment.getID()));
         }
 
         return new ArrayList<>(experimentSet);

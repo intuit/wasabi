@@ -32,6 +32,7 @@ import com.netflix.astyanax.query.PreparedCqlQuery;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Mutax repo cassandra implementation
@@ -87,7 +88,7 @@ public class CassandraMutexRepository implements MutexRepository {
      */
     @Override
     public void deleteExclusion(Experiment.ID base, Experiment.ID pair) throws RepositoryException {
-        final String CQL = "begin batch " +
+        final String cql = "begin batch " +
                 "delete from exclusion where base = ? and pair = ?; " +
                 "delete from exclusion where base = ? and pair = ?; " +
                 "apply batch;";
@@ -95,7 +96,7 @@ public class CassandraMutexRepository implements MutexRepository {
         try {
             driver.getKeyspace()
                     .prepareQuery(keyspace.exclusion_CF())
-                    .withCql(CQL)
+                    .withCql(cql)
                     .asPreparedStatement()
                     // baseID for exclusion-1
                     .withByteBufferValue(base, ExperimentIDSerializer.get())
@@ -173,12 +174,7 @@ public class CassandraMutexRepository implements MutexRepository {
             Application.Name appName = experiment.getApplicationName();
             //get all experiments with this application name
             List<Experiment> ExpList = experimentRepository.getExperiments(appName);
-            List<Experiment> notMutex = new ArrayList<>();
-            for (Experiment exp : ExpList) {
-                if (!pairIDs.contains(exp.getID()) && !exp.getID().equals(base)) {
-                    notMutex.add(exp);
-                }
-            }
+            List<Experiment> notMutex = ExpList.stream().filter(exp -> !pairIDs.contains(exp.getID()) && !exp.getID().equals(base)).collect(Collectors.toList());
 
             ExperimentList result = new ExperimentList();
             result.setExperiments(notMutex);

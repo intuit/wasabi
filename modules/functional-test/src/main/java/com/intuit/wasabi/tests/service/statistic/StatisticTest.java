@@ -25,7 +25,6 @@ import com.intuit.wasabi.tests.model.Assignment;
 import com.intuit.wasabi.tests.model.Experiment;
 import com.intuit.wasabi.tests.model.OutputBucketStatistics;
 import com.intuit.wasabi.tests.model.Statistics;
-import com.intuit.wasabi.tests.model.analytics.DailyStatistics;
 import com.intuit.wasabi.tests.model.analytics.ExperimentCumulativeStatistics;
 import com.intuit.wasabi.tests.model.factory.AssignmentFactory;
 import com.intuit.wasabi.tests.model.factory.ExperimentFactory;
@@ -38,6 +37,8 @@ import org.testng.annotations.Test;
 
 import java.time.LocalDateTime;
 import java.util.*;
+
+import static org.testng.Assert.assertTrue;
 
 public class StatisticTest extends TestBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(StatisticTest.class);
@@ -147,7 +148,7 @@ public class StatisticTest extends TestBase {
         LOGGER.debug(jsonObject.toString());
         Statistics statistics = statisticsMap.getOrDefault(validExperimentsLists.get(0).label, new Statistics());
         Statistics result = new Gson().fromJson(jsonObject, Statistics.class);
-        Assert.assertTrue(result.equals(statistics));
+        assertTrue(result.equals(statistics));
     }
 
 
@@ -160,7 +161,7 @@ public class StatisticTest extends TestBase {
         LOGGER.info(jsonObject.toString());
         Statistics statistics = statisticsMap.getOrDefault(validExperimentsLists.get(0).label, new Statistics());
         Statistics result = new Gson().fromJson(jsonObject, Statistics.class);
-        Assert.assertTrue(result.equals(statistics));
+        assertTrue(result.equals(statistics));
     }
 
 
@@ -175,7 +176,7 @@ public class StatisticTest extends TestBase {
         LOGGER.info(jsonObject.toString());
         Statistics statistics = statisticsMap.getOrDefault(validExperimentsLists.get(0).label, new Statistics());
         Statistics result = new Gson().fromJson(jsonObject, Statistics.class);
-        Assert.assertTrue(result.equals(statistics));
+        assertTrue(result.equals(statistics));
     }
 
 
@@ -188,8 +189,8 @@ public class StatisticTest extends TestBase {
         for (Map.Entry<String, String> entry : experimentUserBucketMap.get(validExperimentsLists.get(0).label).entrySet()) {
             Map<String, Integer> eventCounts = bucketLabelToEventCount.get(entry.getValue());
             OutputBucketStatistics bucketStatistics = statistics.getStatisticsByLable(entry.getValue());
-            statistics.increaseCounts(eventCounts, (p) -> actions.contains(p));
-            bucketStatistics.increaseCounts(eventCounts, (p) -> actions.contains(p));
+            statistics.increaseCounts(eventCounts, actions::contains);
+            bucketStatistics.increaseCounts(eventCounts, actions::contains);
         }
         response = apiServerConnector.doPost("/analytics/experiments/" + validExperimentsLists.get(0).id + "/statistics",
                 "{\"actions\": [\"click\"]}");
@@ -198,7 +199,7 @@ public class StatisticTest extends TestBase {
         StatisticsUtils.COMPUTE_COUNT(jsonObject);
         LOGGER.info(jsonObject.toString());
         Statistics result = new Gson().fromJson(jsonObject, Statistics.class);
-        Assert.assertTrue(result.equals(statistics));
+        assertTrue(result.equals(statistics));
     }
 
 
@@ -211,8 +212,8 @@ public class StatisticTest extends TestBase {
         for (Map.Entry<String, String> entry : experimentUserBucketMap.get(validExperimentsLists.get(0).label).entrySet()) {
             Map<String, Integer> eventCounts = bucketLabelToEventCount.get(entry.getValue());
             OutputBucketStatistics bucketStatistics = statistics.getStatisticsByLable(entry.getValue());
-            statistics.increaseCounts(eventCounts, (p) -> actions.contains(p));
-            bucketStatistics.increaseCounts(eventCounts, (p) -> actions.contains(p));
+            statistics.increaseCounts(eventCounts, actions::contains);
+            bucketStatistics.increaseCounts(eventCounts, actions::contains);
         }
         response = apiServerConnector.doPost("/analytics/experiments/" + validExperimentsLists.get(0).id + "/statistics",
                 "{\"actions\": [\"love it\"]}");
@@ -221,7 +222,7 @@ public class StatisticTest extends TestBase {
         StatisticsUtils.COMPUTE_COUNT(jsonObject);
         LOGGER.info(jsonObject.toString());
         Statistics result = new Gson().fromJson(jsonObject, Statistics.class);
-        Assert.assertTrue(result.equals(statistics));
+        assertTrue(result.equals(statistics));
     }
 
 
@@ -253,7 +254,7 @@ public class StatisticTest extends TestBase {
             Assert.assertEquals(result.getImpressionCounts(), statistics.getImpressionCounts());
             Assert.assertEquals(result.getJointActionCounts(), statistics.getJointActionCounts());
         } else {
-            Assert.assertTrue(result.equals(statistics));
+            assertTrue(result.equals(statistics));
         }
     }
 
@@ -288,8 +289,8 @@ public class StatisticTest extends TestBase {
 
             Statistics result = new Gson().fromJson(perDay, Statistics.class);
             //TODO: full implement equals, for now we are only checking the impression count and joint action count.
-            Assert.assertTrue(result.getJointActionCounts().equals(perDayStatistics.getJointActionCounts()));
-            Assert.assertTrue(result.getImpressionCounts().equals(perDayStatistics.getImpressionCounts()));
+            assertTrue(result.getJointActionCounts().equals(perDayStatistics.getJointActionCounts()));
+            assertTrue(result.getImpressionCounts().equals(perDayStatistics.getImpressionCounts()));
         }
     }
 
@@ -321,14 +322,13 @@ public class StatisticTest extends TestBase {
         ExperimentCumulativeStatistics stats = new Gson().fromJson(response.asString(), ExperimentCumulativeStatistics.class);
         LOGGER.info(stats.toString());
         Assert.assertEquals(stats.days.size(), numOfDays);
-        for (DailyStatistics day : stats.days) {
-            if (day.date.equals(SharedExperimentDataProvider.yesterday) ||
-                    day.date.equals(SharedExperimentDataProvider.today) ||
-                    day.date.equals(SharedExperimentDataProvider.tomorrow)) {
-                //TODO: figure out a good way to test statistics
-                Assert.assertTrue(day.cumulative.jointActionCounts.uniqueUserCount <= expectedResult);
-            }
-        }
+        //TODO: figure out a good way to test statistics
+        stats.days.stream().filter(day -> day.date.equals(SharedExperimentDataProvider.yesterday) ||
+                day.date.equals(SharedExperimentDataProvider.today) ||
+                day.date.equals(SharedExperimentDataProvider.tomorrow)).forEach(day -> {
+            //TODO: figure out a good way to test statistics
+            assertTrue(day.cumulative.jointActionCounts.uniqueUserCount <= expectedResult);
+        });
     }
 
     @AfterClass

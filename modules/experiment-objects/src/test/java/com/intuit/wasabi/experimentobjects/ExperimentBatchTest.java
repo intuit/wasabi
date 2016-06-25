@@ -83,7 +83,7 @@ public class ExperimentBatchTest {
         ExperimentBatch expBatchCopy = ExperimentBatch.from(expBatch).build();
 
         assertEquals(expBatch.hashCode(), expBatchCopy.hashCode());
-        expBatchCopy.setProfile(new HashMap<String, Object>());
+        expBatchCopy.setProfile(new HashMap<>());
         assertNotEquals(expBatch.hashCode(), expBatchCopy.hashCode());
 
     }

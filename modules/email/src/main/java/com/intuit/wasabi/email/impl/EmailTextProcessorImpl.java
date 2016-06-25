@@ -18,7 +18,6 @@ package com.intuit.wasabi.email.impl;
 import com.google.inject.Inject;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authorizationobjects.Role;
-import com.intuit.wasabi.authorizationobjects.UserRole;
 import com.intuit.wasabi.authorizationobjects.UserRoleList;
 import com.intuit.wasabi.email.EmailLinksList;
 import com.intuit.wasabi.email.EmailTextProcessor;
@@ -194,16 +193,14 @@ public class EmailTextProcessorImpl implements EmailTextProcessor {
         Set<String> adressors = new HashSet<>();
         UserRoleList usersRoles = authorizationRepository.getApplicationUsers(appName);
 
-        for (UserRole user : usersRoles.getRoleList()) {
-            if (user.getRole() == Role.ADMIN) {
-                String email = user.getUserEmail();
-                if (EmailValidator.getInstance().isValid(email)) {
-                    adressors.add(email);
-                } else {
-                    LOGGER.warn("\"" + email + "\" is not a valid email address for one of the administrators of " + appName);
-                }
+        usersRoles.getRoleList().stream().filter(user -> user.getRole() == Role.ADMIN).forEach(user -> {
+            String email = user.getUserEmail();
+            if (EmailValidator.getInstance().isValid(email)) {
+                adressors.add(email);
+            } else {
+                LOGGER.warn("\"" + email + "\" is not a valid email address for one of the administrators of " + appName);
             }
-        }
+        });
 
         //no admins, no email!
         if (adressors.isEmpty()) {

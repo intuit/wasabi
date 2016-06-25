@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.intuit.wasabi.experimentobjects.Experiment.State.TERMINATED;
 
@@ -66,10 +67,7 @@ public class PagesImpl implements Pages {
 
         Experiment experiment = experiments.getExperiment(experimentID);
         if (experiment != null) {
-            List<String> pageNames = new ArrayList<>();
-            for (ExperimentPage experimentPage : experimentPageList.getPages()) {
-                pageNames.add(experimentPage.getName().toString());
-            }
+            List<String> pageNames = experimentPageList.getPages().stream().map(experimentPage -> experimentPage.getName().toString()).collect(Collectors.toList());
             String pageString = StringUtils.join(pageNames, ", ");
             eventLog.postEvent(new ExperimentChangeEvent(user, experiment, "pages", null, pageString));
         }

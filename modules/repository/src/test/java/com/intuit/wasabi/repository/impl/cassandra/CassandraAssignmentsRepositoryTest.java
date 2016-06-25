@@ -53,7 +53,7 @@ public class CassandraAssignmentsRepositoryTest {
                 cassandraRepository, dbRepository, assignmentsRepository, cassandraDriver, keyspace, eventLog, 5, true, true, true, true, "yyyy-mm-dd");
         Date from_time = new Date();
         Date to_time = cassandraAssignmentsRepository.addHoursMinutes(from_time, 1, 0);
-        List<DateHour> expected = new ArrayList<DateHour>();
+        List<DateHour> expected = new ArrayList<>();
         DateHour dateHour1 = new DateHour();
         dateHour1.setDateHour(from_time);
         expected.add(dateHour1);
@@ -71,7 +71,7 @@ public class CassandraAssignmentsRepositoryTest {
                 cassandraRepository, dbRepository, assignmentsRepository, cassandraDriver, keyspace, eventLog, 5, true, true, true, true, "yyyy-mm-dd");
         Date from_time = new Date();
         Date to_time = new Date();
-        List<DateHour> expected = new ArrayList<DateHour>();
+        List<DateHour> expected = new ArrayList<>();
         DateHour dateHour1 = new DateHour();
         dateHour1.setDateHour(from_time);
         expected.add(dateHour1);
@@ -87,7 +87,7 @@ public class CassandraAssignmentsRepositoryTest {
                 cassandraRepository, dbRepository, assignmentsRepository, cassandraDriver, keyspace, eventLog, 5, true, true, true, true, "yyyy-mm-dd");
         Date from_time = new Date();
         Date to_time = cassandraAssignmentsRepository.addHoursMinutes(from_time, 0, -1);
-        List<DateHour> expected = new ArrayList<DateHour>();
+        List<DateHour> expected = new ArrayList<>();
         List<DateHour> result = cassandraAssignmentsRepository.getUserAssignmentPartitions(from_time, to_time);
         assert result.equals(expected);
     }

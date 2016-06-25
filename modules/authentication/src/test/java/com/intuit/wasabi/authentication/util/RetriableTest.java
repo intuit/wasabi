@@ -21,6 +21,8 @@ import org.mockito.Mockito;
 
 import java.security.NoSuchAlgorithmException;
 
+import static org.junit.Assert.fail;
+
 /**
  * Tests for {@link Retriable}.
  */
@@ -49,12 +51,10 @@ public class RetriableTest {
                 throw new NoSuchAlgorithmException();
             }
         };
-        try {
-            retriableThrows.retriableCall();
-            Assert.fail("retriableThrows does not throw!");
-        } catch (Exception e) {
-            throw e;
-        }
+
+        retriableThrows.retriableCall();
+
+        fail("retriableThrows does not throw!");
     }
 
     /**
@@ -82,7 +82,7 @@ public class RetriableTest {
         };
         try {
             retriableThrows.retryCallOnFail(1, 0);
-            Assert.fail("retriableThrows does not throw!");
+            fail("retriableThrows does not throw!");
         } catch (RetriableException e) {
             Assert.assertTrue("Expected exception cause is not NoSuchAlgorithmException",
                     e.getCause() instanceof NoSuchAlgorithmException);
@@ -106,7 +106,7 @@ public class RetriableTest {
 
         try {
             retriableFails.retryCallOnFail(invocations3, timeout0);
-            Assert.fail("retriableFails did not throw.");
+            fail("retriableFails did not throw.");
         } catch (RetriableException e) {
             Assert.assertTrue("Expected exception cause for retriableFails is not UnknownHostException but"
                             + e.getCause().getCause().toString(),
@@ -125,7 +125,7 @@ public class RetriableTest {
 
         try {
             retriableFailsTimeout.retryCallOnFail(invocations2, timeout5);
-            Assert.fail("retriableFailsTimeout did not throw.");
+            fail("retriableFailsTimeout did not throw.");
         } catch (RetriableException e) {
             Assert.assertTrue("Expected exception cause for retriableFailsTimeout is not UnknownHostException but"
                             + e.getCause().getCause().toString(),

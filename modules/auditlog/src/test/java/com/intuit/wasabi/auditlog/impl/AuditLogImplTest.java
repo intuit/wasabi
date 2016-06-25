@@ -9,7 +9,6 @@ import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.repository.AuditLogRepository;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -17,6 +16,9 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests for {@link AuditLogImpl}.
@@ -132,62 +134,62 @@ public class AuditLogImplTest {
 
     @Test
     public void testGetAuditLogs1() throws Exception {
-        Assert.assertArrayEquals(appList.toArray(), auditLog.getAuditLogs(Mockito.mock(Application.Name.class), null, null).toArray());
+        assertArrayEquals(appList.toArray(), auditLog.getAuditLogs(Mockito.mock(Application.Name.class), null, null).toArray());
     }
 
     @Test
     public void testGetAuditLogs2() throws Exception {
-        Assert.assertArrayEquals(appList.toArray(), auditLog.getAuditLogs(Mockito.mock(Application.Name.class), "", null).toArray());
+        assertArrayEquals(appList.toArray(), auditLog.getAuditLogs(Mockito.mock(Application.Name.class), "", null).toArray());
     }
 
     @Test
     public void testGetAuditLogs3() throws Exception {
-        Assert.assertArrayEquals(appList.toArray(), auditLog.getAuditLogs(Mockito.mock(Application.Name.class), null, "").toArray());
+        assertArrayEquals(appList.toArray(), auditLog.getAuditLogs(Mockito.mock(Application.Name.class), null, "").toArray());
     }
 
     @Test
     public void testGetAuditLogs4() throws Exception {
-        Assert.assertArrayEquals(appList.toArray(), auditLog.getAuditLogs(Mockito.mock(Application.Name.class), "", "").toArray());
+        assertArrayEquals(appList.toArray(), auditLog.getAuditLogs(Mockito.mock(Application.Name.class), "", "").toArray());
     }
 
     @Test
     public void testGetCompleteAuditLogs1() throws Exception {
-        Assert.assertArrayEquals(completeList.toArray(), auditLog.getAuditLogs(null, null).toArray());
+        assertArrayEquals(completeList.toArray(), auditLog.getAuditLogs(null, null).toArray());
     }
 
     @Test
     public void testGetCompleteAuditLogs2() throws Exception {
-        Assert.assertArrayEquals(completeList.toArray(), auditLog.getAuditLogs("", null).toArray());
+        assertArrayEquals(completeList.toArray(), auditLog.getAuditLogs("", null).toArray());
     }
 
     @Test
     public void testGetCompleteAuditLogs3() throws Exception {
-        Assert.assertArrayEquals(completeList.toArray(), auditLog.getAuditLogs(null, "").toArray());
+        assertArrayEquals(completeList.toArray(), auditLog.getAuditLogs(null, "").toArray());
     }
 
     @Test
     public void testGetCompleteAuditLogs4() throws Exception {
-        Assert.assertArrayEquals(completeList.toArray(), auditLog.getAuditLogs("", "").toArray());
+        assertArrayEquals(completeList.toArray(), auditLog.getAuditLogs("", "").toArray());
     }
 
     @Test
     public void testGetGlobalAuditLogs1() throws Exception {
-        Assert.assertArrayEquals(globalList.toArray(), auditLog.getGlobalAuditLogs(null, null).toArray());
+        assertArrayEquals(globalList.toArray(), auditLog.getGlobalAuditLogs(null, null).toArray());
     }
 
     @Test
     public void testGetGlobalAuditLogs2() throws Exception {
-        Assert.assertArrayEquals(globalList.toArray(), auditLog.getGlobalAuditLogs("", null).toArray());
+        assertArrayEquals(globalList.toArray(), auditLog.getGlobalAuditLogs("", null).toArray());
     }
 
     @Test
     public void testGetGlobalAuditLogs3() throws Exception {
-        Assert.assertArrayEquals(globalList.toArray(), auditLog.getGlobalAuditLogs(null, "").toArray());
+        assertArrayEquals(globalList.toArray(), auditLog.getGlobalAuditLogs(null, "").toArray());
     }
 
     @Test
     public void testGetGlobalAuditLogs4() throws Exception {
-        Assert.assertArrayEquals(globalList.toArray(), auditLog.getGlobalAuditLogs("", "").toArray());
+        assertArrayEquals(globalList.toArray(), auditLog.getGlobalAuditLogs("", "").toArray());
     }
 
     @Test
@@ -197,78 +199,74 @@ public class AuditLogImplTest {
         for (int i = 0; i < completeList.size(); i += 2) {
             expectedResults.add(completeList.get(i));
         }
-        Assert.assertArrayEquals(expectedResults.toArray(), auditLog.getAuditLogs("em use", "").toArray());
+        assertArrayEquals(expectedResults.toArray(), auditLog.getAuditLogs("em use", "").toArray());
     }
 
     @Test
     public void testFullTextSearch2() throws Exception {
-        Assert.assertEquals("expected no matches", 0, auditLog.getAuditLogs("nonmatchingfulltextsearch", "").size());
+        assertEquals("expected no matches", 0, auditLog.getAuditLogs("nonmatchingfulltextsearch", "").size());
     }
 
     @Test
     public void testFullTextSearch3() throws Exception {
-        Assert.assertEquals("expected all to match", 10, auditLog.getAuditLogs("\\-nonmatchingfulltextsearch", "").size());
+        assertEquals("expected all to match", 10, auditLog.getAuditLogs("\\-nonmatchingfulltextsearch", "").size());
     }
 
     @Test
     public void testFilterSortFailFast1() throws Exception {
         // filter & sort blank
-        Assert.assertArrayEquals(completeList.toArray(), auditLog.getAuditLogs("", "").toArray());
+        assertArrayEquals(completeList.toArray(), auditLog.getAuditLogs("", "").toArray());
     }
 
     @Test
     public void testFilterSortFailFast2() throws Exception {
         // filter just ,
-        Assert.assertArrayEquals(completeList.toArray(), auditLog.getAuditLogs(",", "").toArray());
+        assertArrayEquals(completeList.toArray(), auditLog.getAuditLogs(",", "").toArray());
     }
 
     @Test
     public void testFilterSortFailFast3() throws Exception {
         // sort default
-        Assert.assertArrayEquals(completeList.toArray(), auditLog.getAuditLogs("", "-time").toArray());
+        assertArrayEquals(completeList.toArray(), auditLog.getAuditLogs("", "-time").toArray());
     }
 
     @Test
     public void testFilterGrammar1() throws Exception {
         // filter for "ro" on field "attr", should match "prop" and return index 0 and 6.
         List<AuditLogEntry> expectedList = Arrays.asList(completeList.get(0), completeList.get(6));
-        Assert.assertArrayEquals(expectedList.toArray(), auditLog.getAuditLogs("attr=ro", "").toArray());
+        assertArrayEquals(expectedList.toArray(), auditLog.getAuditLogs("attr=ro", "").toArray());
     }
 
     @Test
     public void testFilterGrammar2() throws Exception {
-        Assert.assertArrayEquals(completeList.toArray(), auditLog.getAuditLogs("time={-0900}Mar 14, 2001", "").toArray());
+        assertArrayEquals(completeList.toArray(), auditLog.getAuditLogs("time={-0900}Mar 14, 2001", "").toArray());
     }
 
     @Test
     public void testFilterGrammar3() throws Exception {
         // filter for "ro" on field "attr" and filter for "4" on experiment - only one entry should be left
-        Assert.assertArrayEquals(new AuditLogEntry[]{completeList.get(0)}, auditLog.getAuditLogs("attr=ro,experiment=4", "").toArray());
+        assertArrayEquals(new AuditLogEntry[]{completeList.get(0)}, auditLog.getAuditLogs("attr=ro,experiment=4", "").toArray());
     }
 
     @Test
     public void testFilterGrammar4() throws Exception {
         // filter for "ro" on field "attr" and filter for "4" on experiment - only one entry should be left
-        Assert.assertArrayEquals(completeList.toArray(), auditLog.getAuditLogs("time=", "").toArray());
+        assertArrayEquals(completeList.toArray(), auditLog.getAuditLogs("time=", "").toArray());
     }
 
     @Test
     public void testFilterGrammar5() throws Exception {
         // filter for "ro" on field "attr" and filter for "4" on experiment - only one entry should be left
         List<AuditLogEntry> expectedList = new ArrayList<>(9);
-        for (AuditLogEntry auditLogEntry : completeList) {
-            if (completeList.indexOf(auditLogEntry) != 3) {
-                expectedList.add(auditLogEntry);
-            }
-        }
-        Assert.assertArrayEquals(expectedList.toArray(), auditLog.getAuditLogs("time=\\-Mar 15, 2001 02:03:10", "").toArray());
+        expectedList.addAll(completeList.stream().filter(auditLogEntry -> completeList.indexOf(auditLogEntry) != 3).collect(Collectors.toList()));
+        assertArrayEquals(expectedList.toArray(), auditLog.getAuditLogs("time=\\-Mar 15, 2001 02:03:10", "").toArray());
     }
 
 
     @Test
     public void testFilterGrammar6() throws Exception {
         // filter for "ro" on field "attr" and filter for "4" on experiment - only one entry should be left
-        Assert.assertArrayEquals(Collections.emptyList().toArray(), auditLog.getAuditLogs("time=a=b", "").toArray());
+        assertArrayEquals(Collections.emptyList().toArray(), auditLog.getAuditLogs("time=a=b", "").toArray());
     }
 
     @Test
@@ -280,7 +278,7 @@ public class AuditLogImplTest {
         for (int i : order) {
             expectedSortedList.add(completeList.get(i));
         }
-        Assert.assertArrayEquals("Sort order not correct (sort: experiment).", expectedSortedList.toArray(), auditLog.getAuditLogs("", "experiment").subList(0, 4).toArray());
+        assertArrayEquals("Sort order not correct (sort: experiment).", expectedSortedList.toArray(), auditLog.getAuditLogs("", "experiment").subList(0, 4).toArray());
     }
 
     @Test
@@ -292,7 +290,7 @@ public class AuditLogImplTest {
         for (int i : order) {
             expectedSortedList.add(completeList.get(i));
         }
-        Assert.assertArrayEquals("Sort order not correct (sort: -experiment).", expectedSortedList.toArray(), auditLog.getAuditLogs("", "-experiment").subList(0, 4).toArray());
+        assertArrayEquals("Sort order not correct (sort: -experiment).", expectedSortedList.toArray(), auditLog.getAuditLogs("", "-experiment").subList(0, 4).toArray());
     }
 
     @Test
@@ -313,22 +311,22 @@ public class AuditLogImplTest {
             expectedSortedList.add(completeList.get(i));
         }
         List<AuditLogEntry> result = auditLog.getAuditLogs("", "bucket,-experiment,firstname,action,lastname,mail,app,attr,before,after,-time");
-        Assert.assertArrayEquals("Sort order not correct (sort: bucket,-experiment,firstname,action,lastname,mail,app,attr,before,after,-time).", expectedSortedList.toArray(), result.toArray());
+        assertArrayEquals("Sort order not correct (sort: bucket,-experiment,firstname,action,lastname,mail,app,attr,before,after,-time).", expectedSortedList.toArray(), result.toArray());
         // sort the result by app name (changes nothing)
         result = auditLog.sort(result, "app");
-        Assert.assertArrayEquals("Sort order not correct (sort: app).", expectedSortedList.toArray(), result.toArray());
+        assertArrayEquals("Sort order not correct (sort: app).", expectedSortedList.toArray(), result.toArray());
 
         // sort the result a bit around with properties, changes the order: brings 0,6 to the front (before 3,9 and the rest as above)
         expectedSortedList.remove(2);
         expectedSortedList.add(1, completeList.get(2));
         result = auditLog.sort(result, "attr,before");
-        Assert.assertArrayEquals("Sort order not correct (sort: attr,before).", expectedSortedList.toArray(), result.toArray());
+        assertArrayEquals("Sort order not correct (sort: attr,before).", expectedSortedList.toArray(), result.toArray());
 
         // swaps the first two elements
         expectedSortedList.add(0, expectedSortedList.get(1));
         expectedSortedList.remove(2);
         result = auditLog.sort(result, "attr,after");
-        Assert.assertArrayEquals("Sort order not correct (sort: attr,after).", expectedSortedList.toArray(), result.toArray());
+        assertArrayEquals("Sort order not correct (sort: attr,after).", expectedSortedList.toArray(), result.toArray());
 
         // sorts the list by the userNames and IDs
         expectedSortedList.add(7, expectedSortedList.get(1));
@@ -338,13 +336,13 @@ public class AuditLogImplTest {
         expectedSortedList.add(1, expectedSortedList.get(4));
         expectedSortedList.remove(5);
         result = auditLog.sort(result, "user");
-        Assert.assertArrayEquals("Sort order not correct (sort: user).", expectedSortedList.toArray(), result.toArray());
+        assertArrayEquals("Sort order not correct (sort: user).", expectedSortedList.toArray(), result.toArray());
     }
 
     @Test
     public void testSortGrammar4() throws Exception {
         List<AuditLogEntry> result = auditLog.getAuditLogs("", "nonsortablekey");
-        Assert.assertArrayEquals("Order of items changed for invalid value.", completeList.toArray(), result.toArray());
+        assertArrayEquals("Order of items changed for invalid value.", completeList.toArray(), result.toArray());
     }
 
     /**
@@ -355,39 +353,33 @@ public class AuditLogImplTest {
     @Test
     public void testSortGrammar5() throws Exception {
         List<AuditLogEntry> result = auditLog.getAuditLogs("", "desc");
-        Assert.assertEquals(completeList.size(), result.size());
-        for (AuditLogEntry auditLogEntry : result) {
-            if (!completeList.contains(auditLogEntry)) {
-                Assert.fail("AuditLogEntry " + auditLogEntry + " not in sorted list.");
-            }
-        }
-        for (AuditLogEntry auditLogEntry : completeList) {
-            if (!result.contains(auditLogEntry)) {
-                Assert.fail("AuditLogEntry " + auditLogEntry + " not in expected list.");
-            }
-        }
+        assertEquals(completeList.size(), result.size());
+        result.stream().filter(auditLogEntry -> !completeList.contains(auditLogEntry)).forEach(auditLogEntry ->
+                fail("AuditLogEntry " + auditLogEntry + " not in sorted list."));
+        completeList.stream().filter(auditLogEntry -> !result.contains(auditLogEntry)).forEach(auditLogEntry ->
+                fail("AuditLogEntry " + auditLogEntry + " not in expected list."));
     }
 
     @Test
     public void testFilterImmediateReturns1() throws Exception {
-        Assert.assertEquals(completeList, auditLog.filter(completeList, ","));
+        assertEquals(completeList, auditLog.filter(completeList, ","));
     }
 
     @Test
     public void testFilterImmediateReturns2() throws Exception {
-        Assert.assertEquals(Collections.emptyList(), auditLog.filter(completeList, ",johndoe"));
+        assertEquals(Collections.emptyList(), auditLog.filter(completeList, ",johndoe"));
     }
 
     @Test
     public void testSingleFieldSearch() throws Exception {
-        Assert.assertFalse(((AuditLogImpl) auditLog).singleFieldSearch(Mockito.mock(AuditLogEntry.class), "invalidKey", "somePattern", "", true));
-        Assert.assertFalse(((AuditLogImpl) auditLog).singleFieldSearch(appList.get(0), "app", "App", "", false));
-        Assert.assertFalse(((AuditLogImpl) auditLog).singleFieldSearch(appList.get(0), "-app", "App", "", true));
-        Assert.assertFalse(((AuditLogImpl) auditLog).singleFieldSearch(appList.get(0), null, "App", "", true));
-        Assert.assertTrue(((AuditLogImpl) auditLog).singleFieldSearch(appList.get(0), null, "App", "", false));
-        Assert.assertTrue(((AuditLogImpl) auditLog).singleFieldSearch(appList.get(0), "time", "Mar 14, 2001 19:00", "-0700", true));
-        Assert.assertFalse(((AuditLogImpl) auditLog).singleFieldSearch(appList.get(0), "time", "Mar 15, 2001", "", false));
-        Assert.assertTrue(((AuditLogImpl) auditLog).singleFieldSearch(appList.get(0), null, "", "", false));
+        assertFalse(((AuditLogImpl) auditLog).singleFieldSearch(Mockito.mock(AuditLogEntry.class), "invalidKey", "somePattern", "", true));
+        assertFalse(((AuditLogImpl) auditLog).singleFieldSearch(appList.get(0), "app", "App", "", false));
+        assertFalse(((AuditLogImpl) auditLog).singleFieldSearch(appList.get(0), "-app", "App", "", true));
+        assertFalse(((AuditLogImpl) auditLog).singleFieldSearch(appList.get(0), null, "App", "", true));
+        assertTrue(((AuditLogImpl) auditLog).singleFieldSearch(appList.get(0), null, "App", "", false));
+        assertTrue(((AuditLogImpl) auditLog).singleFieldSearch(appList.get(0), "time", "Mar 14, 2001 19:00", "-0700", true));
+        assertFalse(((AuditLogImpl) auditLog).singleFieldSearch(appList.get(0), "time", "Mar 15, 2001", "", false));
+        assertTrue(((AuditLogImpl) auditLog).singleFieldSearch(appList.get(0), null, "", "", false));
     }
 
 }

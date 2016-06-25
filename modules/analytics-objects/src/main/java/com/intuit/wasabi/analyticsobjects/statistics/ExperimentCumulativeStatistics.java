@@ -22,8 +22,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This is a wrapper DTO to save the List of DailyStatistics
@@ -68,10 +68,7 @@ public class ExperimentCumulativeStatistics implements Cloneable {
         }
 
         if (days != null) {
-            List<DailyStatistics> clonedDays = new ArrayList<DailyStatistics>();
-            for (DailyStatistics day : days) {
-                clonedDays.add(day.clone());
-            }
+            List<DailyStatistics> clonedDays = days.stream().map(DailyStatistics::clone).collect(Collectors.toList());
             cloned.setDays(clonedDays);
         }
 

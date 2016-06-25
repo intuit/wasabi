@@ -118,20 +118,18 @@ public class StatisticsUtils {
         for (Map.Entry<String, List<EventDateTime>> entry : EVENT_DATETIME().entrySet()) {
             Map<String, Integer> eventCount = result.getOrDefault(entry.getKey(), new HashMap<>());
             result.put(entry.getKey(), eventCount);
-            for (EventDateTime eventDateTime : entry.getValue()) {
-                if (!eventDateTime.getEventDatetime().isAfter(end) &&
-                        !eventDateTime.getEventDatetime().isBefore(start)) {
-                    Integer val = eventCount.getOrDefault(eventDateTime.getEventLabel(), 0);
-                    eventCount.put(eventDateTime.getEventLabel(), val + 1);
-                }
-            }
+            entry.getValue().stream().filter(eventDateTime -> !eventDateTime.getEventDatetime().isAfter(end) &&
+                    !eventDateTime.getEventDatetime().isBefore(start)).forEach(eventDateTime -> {
+                Integer val = eventCount.getOrDefault(eventDateTime.getEventLabel(), 0);
+                eventCount.put(eventDateTime.getEventLabel(), val + 1);
+            });
         }
         return result;
     }
 
 
     static String TIME_RANGE_QUERY_BUILDER(String start, String end) {
-        StringBuffer sb = new StringBuffer("{");
+        StringBuilder sb = new StringBuilder("{");
         boolean haveStart = false;
         if (start != null) {
             sb.append("\"fromTime\": \"").append(start).append("\"");

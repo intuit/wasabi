@@ -243,7 +243,7 @@ public class CountDailyIntegrationTest extends TestBase {
 
     @Test(dependsOnMethods = {"t_PostLoveIt"})
     public void t_CheckDailyStatsYestedayOnly() {
-        List<String> types = new ArrayList<String>();
+        List<String> types = new ArrayList<>();
         types.add(actionImpression);
         types.add(actionClick);
         types.add(actionLoveIt);
@@ -304,7 +304,7 @@ public class CountDailyIntegrationTest extends TestBase {
 
     @Test(dependsOnMethods = {"t_PostLoveIt"})
     public void t_CheckDailyStatsTodayOnly() {
-        List<String> types = new ArrayList<String>();
+        List<String> types = new ArrayList<>();
         types.add(actionImpression);
         types.add(actionClick);
         types.add(actionLoveIt);
@@ -366,7 +366,7 @@ public class CountDailyIntegrationTest extends TestBase {
 
     @Test(dependsOnMethods = {"t_PostLoveIt"})
     public void t_CheckDailyStatsYesterdayToTodayOnly() {
-        List<String> types = new ArrayList<String>();
+        List<String> types = new ArrayList<>();
         types.add(actionImpression);
         types.add(actionClick);
         types.add(actionLoveIt);
@@ -472,7 +472,7 @@ public class CountDailyIntegrationTest extends TestBase {
 
     @Test(dependsOnMethods = {"t_PostLoveIt"})
     public void t_CheckDailyStatsYesterdayToTomorrow() {
-        List<String> types = new ArrayList<String>();
+        List<String> types = new ArrayList<>();
         types.add(actionImpression);
         types.add(actionClick);
         types.add(actionLoveIt);
@@ -622,7 +622,7 @@ public class CountDailyIntegrationTest extends TestBase {
 
     @Test(dependsOnMethods = {"t_PostLoveIt"})
     public void t_CheckDailyStatsTodayToTomorrowOnly() {
-        List<String> types = new ArrayList<String>();
+        List<String> types = new ArrayList<>();
         types.add(actionImpression);
         types.add(actionClick);
         types.add(actionLoveIt);
@@ -728,7 +728,7 @@ public class CountDailyIntegrationTest extends TestBase {
 
     @Test(dependsOnMethods = {"t_PostLoveIt"})
     public void t_CheckDailyStatsTomorrowOnly() {
-        List<String> types = new ArrayList<String>();
+        List<String> types = new ArrayList<>();
         types.add(actionImpression);
         types.add(actionClick);
         types.add(actionLoveIt);

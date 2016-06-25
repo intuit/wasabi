@@ -37,6 +37,7 @@ import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -47,7 +48,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 public class CassandraPagesRepository implements PagesRepository {
 
-    private static final List<Page> EMPTY = new ArrayList<Page>(1);
+    private static final List<Page> EMPTY = new ArrayList<>(1);
     private static final Logger LOGGER = getLogger(CassandraPagesRepository.class);
     private final CassandraDriver driver;
     private final ExperimentsKeyspace keyspace;
@@ -172,9 +173,7 @@ public class CassandraPagesRepository implements PagesRepository {
                     .getColumnNames();
             if (!pages.isEmpty()) {
                 List<Page> pageList = new ArrayList<>(pages.size());
-                for (String pageName : pages) {
-                    pageList.add(new Page.Builder().withName(Page.Name.valueOf(pageName)).build());
-                }
+                pageList.addAll(pages.stream().map(pageName -> new Page.Builder().withName(Page.Name.valueOf(pageName)).build()).collect(Collectors.toList()));
                 return pageList;
             } else {
                 return EMPTY;
@@ -237,9 +236,9 @@ public class CassandraPagesRepository implements PagesRepository {
     @Override
     public List<PageExperiment> getExperiments(Application.Name applicationName, Page.Name pageName) {
         List<PageExperiment> result = new LinkedList<>();
-        final String CQL = "select * from page_experiment_index where app_name = ? and page = ?";
+        final String cql = "select * from page_experiment_index where app_name = ? and page = ?";
         Rows<ExperimentsKeyspace.AppNamePageComposite, String> rows = executeGetExperimentQuery(applicationName,
-                pageName, CQL);
+                pageName, cql);
 
         if (!rows.isEmpty()) {
             for (Row<ExperimentsKeyspace.AppNamePageComposite, String> row : rows) {
@@ -259,11 +258,11 @@ public class CassandraPagesRepository implements PagesRepository {
     }
 
     Rows<ExperimentsKeyspace.AppNamePageComposite, String> executeGetExperimentQuery(Application.Name applicationName,
-                                                                                     Page.Name pageName, String CQL) {
+                                                                                     Page.Name pageName, String cql) {
         try {
             return driver.getKeyspace()
                     .prepareQuery(keyspace.page_experiment_index_CF())
-                    .withCql(CQL).asPreparedStatement()
+                    .withCql(cql).asPreparedStatement()
                     .withByteBufferValue(applicationName, ApplicationNameSerializer.get())
                     .withByteBufferValue(pageName, PageNameSerializer.get())
                     .execute()

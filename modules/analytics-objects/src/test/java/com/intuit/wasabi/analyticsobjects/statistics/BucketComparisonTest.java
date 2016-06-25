@@ -36,7 +36,7 @@ public class BucketComparisonTest {
     @Before
     public void setup() {
         Bucket.Label label = Bucket.Label.valueOf("TestLabel");
-        Map<Event.Name, ActionComparisonStatistics> map = new HashMap<Event.Name, ActionComparisonStatistics>();
+        Map<Event.Name, ActionComparisonStatistics> map = new HashMap<>();
         ComparisonStatistics comparisonStatistics = new ComparisonStatistics();
         bucketComparison = new BucketComparison.Builder().withOtherLabel(label)
                 .withJointActionComparison(comparisonStatistics).withActionComparisons(map).build();
@@ -45,7 +45,7 @@ public class BucketComparisonTest {
     @Test
     public void gettersAndSetters() {
         Bucket.Label label = Bucket.Label.valueOf("NewTestLabel");
-        Map<Event.Name, ActionComparisonStatistics> map = new HashMap<Event.Name, ActionComparisonStatistics>();
+        Map<Event.Name, ActionComparisonStatistics> map = new HashMap<>();
         ComparisonStatistics comparisonStatistics = new ComparisonStatistics();
         bucketComparison.setActionComparisons(map);
         bucketComparison.setJointActionComparison(comparisonStatistics);

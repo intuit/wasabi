@@ -150,12 +150,9 @@ public class BucketsImplTest {
         bucketList.addBucket(bucket);
         bucketList.addBucket(bucket2);
         for (Bucket b1 : bucketList.getBuckets()) {
-            for (Bucket b2 : bucketList.getBuckets()) {
-                if (b1.getLabel().equals(b2.getLabel())) {
-                    assertTrue(b1.equals(b2));
-                }
-            }
+            bucketList.getBuckets().stream().filter(b2 -> b1.getLabel().equals(b2.getLabel())).forEach(b2 -> assertTrue(b1.equals(b2)));
         }
+
         assertTrue(bucketList.getBuckets().size() == newBuckets.getBuckets().size());
 
     }

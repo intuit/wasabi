@@ -34,9 +34,9 @@ public class ImpressionsActionsResourceParserTest {
 
     @Test
     public void parse() {
-        Map<Application.Name, List<List<String>>> body = new HashMap<Application.Name, List<List<String>>>();
-        List<List<String>> sub1 = new ArrayList<List<String>>();
-        List<String> subSub1 = new ArrayList<String>();
+        Map<Application.Name, List<List<String>>> body = new HashMap<>();
+        List<List<String>> sub1 = new ArrayList<>();
+        List<String> subSub1 = new ArrayList<>();
 
         subSub1.add(null);
         sub1.add(subSub1);

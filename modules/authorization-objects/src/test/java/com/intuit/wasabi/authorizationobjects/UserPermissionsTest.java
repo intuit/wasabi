@@ -44,7 +44,7 @@ public class UserPermissionsTest {
      *
      */
     private UserPermissions getUserPermissions() {
-        permissions = new ArrayList<Permission>();
+        permissions = new ArrayList<>();
         permissions.add(Permission.CREATE);
         permissions.add(Permission.DELETE);
         return UserPermissions.newInstance(applicationName, permissions).build();

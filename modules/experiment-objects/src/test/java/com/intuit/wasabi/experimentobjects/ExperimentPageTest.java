@@ -58,7 +58,7 @@ public class ExperimentPageTest {
     public void testInitialize() {
         ExperimentPageList experimentList = new ExperimentPageList(11);
         assertThat(experimentList.getPages().size(), is(0));
-        List<ExperimentPage> experimentPageList = new ArrayList<ExperimentPage>();
+        List<ExperimentPage> experimentPageList = new ArrayList<>();
         ExperimentPage page = ExperimentPage.withAttributes(Page.Name.valueOf("page"), true).build();
         experimentPageList.add(page);
         experimentList.setPages(experimentPageList);
