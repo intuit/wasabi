@@ -75,6 +75,32 @@ Server: Jetty(9.3.z-SNAPSHOT)
 
 Note: The initial invocation of Wasbi can take up to 8m as the system is configured, built and provisioned. Second and subsequent invocations occur much faster, taking on average 1m20s.
 
+## Calling Wasabi
+
+These are the 3 common API's that you'd use to instrument your client application with Wasabi API's.
+
+Let's assume that you've created and started a sample experiment 'buyButtonTest' in 'myApp' application with 'orangeButton'
+and 'greenButton' buckets via the Admin UI or by calling the API's. 
+
+You can assign a user with a unique ID (e.g. 'userID1') to an experiment by calling this API Request:
+```bash
+Assign a user to experiment and bucket:
+% curl -H "Content-Type: application/json" http://192.168.99.100:8080/api/v1/assignments/applications/myApp/experiments/buyButtonTest/users/userID1
+{"cache":true,"payload":null,"assignment":"orangeButton","context":"PROD","status":"NEW_ASSIGNMENT"}
+```
+
+Now the 'userID1' user is assigned into the 'orangeButton' bucket. Let's record an impression of their experience with this API Request:
+```bash
+Record an impression:
+% curl -H "Content-Type: application/json" -d "{\"events\":[{\"name\":\"IMPRESSION\"}]}" http://192.168.99.100:8080/api/v1/events/applications/myApp/experiments/buyButtonTest/users/userID1
+```
+
+If the 'userID1' user does an action, such as clicking the buy button, you'd record it with this API Request: 
+```bash
+Record an action:
+% curl -H "Content-Type: application/json" -d "{\"events\":[{\"name\":\"BuyClicked\"}]}" http://192.168.99.100:8080/api/v1/events/applications/myApp/experiments/buyButtonTest/users/userID1
+```
+
 ## Development
 
 Additionally one can opt to build and deploy Wasabi locally, using an IDE for example, and connect to the required services as follows:
