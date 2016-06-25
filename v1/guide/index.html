@@ -577,6 +577,32 @@ command to verify the build:
 
 <p>Ok, enough celebration &hellip; let&rsquo;s get back to business.</p>
 
+<h2 id="calling-wasabi">Calling Wasabi</h2>
+
+<p>These are the 3 common API&rsquo;s that you&rsquo;d use to instrument your client application with Wasabi API&rsquo;s.</p>
+
+<p>Let&rsquo;s assume that you&rsquo;ve created and started a sample experiment &lsquo;buyButtonTest&rsquo; in &#39;myApp&rsquo; application with &#39;orangeButton&rsquo;
+and &#39;greenButton&rsquo; buckets via the Admin UI or by calling the API&rsquo;s. </p>
+<pre class="highlight shell"><code>Assign a user to experiment and bucket:
+<span class="gp">% </span>curl -H <span class="s2">"Content-Type: application/json"</span> http://192.168.99.100:8080/api/v1/assignments/applications/myApp/experiments/buyButtonTest/users/userID1
+<span class="o">{</span><span class="s2">"cache"</span>:true,<span class="s2">"payload"</span>:null,<span class="s2">"assignment"</span>:<span class="s2">"orangeButton"</span>,<span class="s2">"context"</span>:<span class="s2">"PROD"</span>,<span class="s2">"status"</span>:<span class="s2">"NEW_ASSIGNMENT"</span><span class="o">}</span>
+</code></pre>
+
+<p>You can assign a user with a unique ID (e.g. &#39;userID1&rsquo;) to an experiment by calling this API Request:
+<div></div></p>
+<pre class="highlight shell"><code>Record an impression:
+<span class="gp">% </span>curl -H <span class="s2">"Content-Type: application/json"</span> -d <span class="s2">"{</span><span class="se">\"</span><span class="s2">events</span><span class="se">\"</span><span class="s2">:[{</span><span class="se">\"</span><span class="s2">name</span><span class="se">\"</span><span class="s2">:</span><span class="se">\"</span><span class="s2">IMPRESSION</span><span class="se">\"</span><span class="s2">}]}"</span> http://192.168.99.100:8080/api/v1/events/applications/myApp/experiments/buyButtonTest/users/userID1
+</code></pre>
+
+<p>Now the &#39;userID1&rsquo; user is assigned into the &#39;orangeButton&rsquo; bucket. Let&rsquo;s record an impression of their experience with this API Request:
+<div></div></p>
+<pre class="highlight shell"><code>Record an action:
+<span class="gp">% </span>curl -H <span class="s2">"Content-Type: application/json"</span> -d <span class="s2">"{</span><span class="se">\"</span><span class="s2">events</span><span class="se">\"</span><span class="s2">:[{</span><span class="se">\"</span><span class="s2">name</span><span class="se">\"</span><span class="s2">:</span><span class="se">\"</span><span class="s2">BuyClicked</span><span class="se">\"</span><span class="s2">}]}"</span> http://192.168.99.100:8080/api/v1/events/applications/myApp/experiments/buyButtonTest/users/userID1
+</code></pre>
+
+<p>If the &#39;userID1&rsquo; user does an action, such as clicking the buy button, you&rsquo;d record it with this API Request: 
+<div></div></p>
+
 <h2 id="stopping-wasabi">Stopping Wasabi</h2>
 <pre class="highlight shell"><code><span class="gp">% </span>./bin/wasabi.sh stop
 </code></pre>
