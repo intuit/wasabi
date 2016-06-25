@@ -75,7 +75,7 @@ Server: Jetty(9.3.z-SNAPSHOT)
 
 Note: The initial invocation of Wasbi can take up to 8m as the system is configured, built and provisioned. Second and subsequent invocations occur much faster, taking on average 1m20s.
 
-## Calling Wasabi
+#### Call Wasabi
 
 These are the 3 common API's that you'd use to instrument your client application with Wasabi API's.
 
