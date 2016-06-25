@@ -3,8 +3,6 @@ package com.intuit.wasabi.analyticsobjects.statistics;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.ArrayList;
@@ -22,7 +20,7 @@ public class ExperimentCumulativeStatisticsTest {
     List<DailyStatistics> dailyStatisticsList = new ArrayList<>();
 
     @Before
-    public void setup(){
+    public void setup() {
         experimentCumulativeStatistics = new ExperimentCumulativeStatistics.Builder()
                 .withDays(dailyStatisticsList).build();
     }

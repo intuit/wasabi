@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,12 +25,12 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 public class UserRole {
-    
-    @ApiModelProperty(value = "name of the application", dataType = "String",  required = true)
+
+    @ApiModelProperty(value = "name of the application", dataType = "String", required = true)
     private Application.Name applicationName;
     @ApiModelProperty(value = "Role associated with the user for a given application", required = true)
     private Role role;
-    @ApiModelProperty(value = "user name", dataType = "String",  required = false)
+    @ApiModelProperty(value = "user name", dataType = "String", required = false)
     private UserInfo.Username userID;
     @ApiModelProperty(value = "user email", required = false)
     private String userEmail;
@@ -38,46 +38,9 @@ public class UserRole {
     private String firstName;
     @ApiModelProperty(value = "last name", required = false)
     private String lastName;
-    
-    public Application.Name getApplicationName() {
-        return applicationName;
-    }
-    public void setApplicationName(Application.Name applicationName) {
-        this.applicationName = applicationName;
-    }
-    public Role getRole() {
-        return role;
-    }
-    public void setRole(Role role) {
-        this.role = role;
-    }
-    public UserInfo.Username getUserID() {
-        return userID;
-    }
-    public void setUserID(UserInfo.Username userID) {
-        this.userID = userID;
-    }
-    public String getUserEmail() {
-        return userEmail;
-    }
-    public void setUserEmail(String userEmail) {
-        this.userEmail = userEmail;
-    }
-    public String getFirstName() {
-        return firstName;
-    }
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-    public String getLastName() {
-        return lastName;
-    }
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
 
-    protected UserRole() { 
-        super(); 
+    protected UserRole() {
+        super();
     }
 
     public static Builder newInstance(Application.Name applicationName, Role role) {
@@ -88,57 +51,108 @@ public class UserRole {
         return new Builder(userRole);
     }
 
+    public Application.Name getApplicationName() {
+        return applicationName;
+    }
+
+    public void setApplicationName(Application.Name applicationName) {
+        this.applicationName = applicationName;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public UserInfo.Username getUserID() {
+        return userID;
+    }
+
+    public void setUserID(UserInfo.Username userID) {
+        this.userID = userID;
+    }
+
+    public String getUserEmail() {
+        return userEmail;
+    }
+
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+    }
+
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return EqualsBuilder.reflectionEquals(this, obj);
+    }
+
     public static class Builder {
+
+        private UserRole instance;
 
         public Builder(Application.Name applicationName, Role role) {
             instance = new UserRole();
-            instance.applicationName= Preconditions.checkNotNull(applicationName);
+            instance.applicationName = Preconditions.checkNotNull(applicationName);
             instance.role = Preconditions.checkNotNull(role);
+        }
+
+        private Builder(UserRole other) {
+            this(other.applicationName, other.role);
         }
 
         public Builder withUserID(final UserInfo.Username userID) {
             this.instance.userID = userID;
             return this;
         }
+
         public Builder withUserEmail(final String userEmail) {
             this.instance.userEmail = userEmail;
             return this;
         }
+
         public Builder withFirstName(final String firstName) {
             this.instance.firstName = firstName;
             return this;
         }
+
         public Builder withLastName(final String lastName) {
             this.instance.lastName = lastName;
             return this;
         }
 
-        private Builder(UserRole other) {
-            this(other.applicationName,other.role);
-        }
-
         public UserRole build() {
-            UserRole result=instance;
-            instance=null;
+            UserRole result = instance;
+            instance = null;
             return result;
         }
-
-        private UserRole instance;
-    }
-
-    @Override
-    public String toString() {
-    	return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
-    }
-
-    @Override
-    public int hashCode() {
-    	return HashCodeBuilder.reflectionHashCode(this);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-    	   return EqualsBuilder.reflectionEquals(this, obj);
     }
 
 }

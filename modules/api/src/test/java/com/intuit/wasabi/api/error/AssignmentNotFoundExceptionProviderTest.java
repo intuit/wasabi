@@ -2,7 +2,6 @@ package com.intuit.wasabi.api.error;
 
 import com.intuit.wasabi.api.HttpHeader;
 import com.intuit.wasabi.exceptions.AssignmentNotFoundException;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,28 +32,27 @@ public class Context {
 
     private Context(String ctx) {
         super();
-        this.ctx=Preconditions.checkNotNull(ctx);
+        this.ctx = Preconditions.checkNotNull(ctx);
 
         if (ctx.trim().isEmpty()) {
-            throw new IllegalArgumentException("Context cannot be "+
+            throw new IllegalArgumentException("Context cannot be " +
                     "an empty string");
         }
 
-            if (!ctx.matches("^[_\\-$A-Za-z][_\\-$A-Za-z0-9]*")) {
-            throw new InvalidIdentifierException("Context \""+
-                    ctx+"\" must begin with a letter, -, dollar sign, or "+
+        if (!ctx.matches("^[_\\-$A-Za-z][_\\-$A-Za-z0-9]*")) {
+            throw new InvalidIdentifierException("Context \"" +
+                    ctx + "\" must begin with a letter, -, dollar sign, or " +
                     "underscore, and must not contain any spaces");
         }
-    }
-
-    public static Context valueOf(String value) {
-        return new Context(value);
     }
 
     protected Context() {
         super();
     }
 
+    public static Context valueOf(String value) {
+        return new Context(value);
+    }
 
     public static Builder newInstance(String ctx) {
         return new Builder(ctx);
@@ -63,7 +62,32 @@ public class Context {
         return new Builder(ctx);
     }
 
+    public String getContext() {
+        return ctx;
+    }
+
+    public void setContext(String value) {
+        this.ctx = value;
+    }
+
+    @Override
+    public String toString() {
+        return ctx;
+    }
+
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return EqualsBuilder.reflectionEquals(this, obj);
+    }
+
     public static class Builder {
+
+        private Context instance;
 
         private Builder(String ctx) {
             instance = new Context(ctx);
@@ -74,35 +98,9 @@ public class Context {
         }
 
         public Context build() {
-            Context result=instance;
-            instance=null;
+            Context result = instance;
+            instance = null;
             return result;
         }
-
-        private Context instance;
-    }
-
-
-    public String getContext() {
-        return ctx;
-    }
-    public void setContext(String value){
-        this.ctx = value;
-    }
-
-
-    @Override
-    public String toString() {
-        return ctx ;
-    }
-
-    @Override
-    public int hashCode() {
-    	return HashCodeBuilder.reflectionHashCode(this);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-    	   return EqualsBuilder.reflectionEquals(this, obj);
     }
 }

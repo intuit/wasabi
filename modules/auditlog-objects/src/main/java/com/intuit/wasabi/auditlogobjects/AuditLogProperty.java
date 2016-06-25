@@ -23,15 +23,6 @@ public enum AuditLogProperty {
     }
 
     /**
-     * Returns the key for the search string.
-     *
-     * @return the key
-     */
-    public String getKey() {
-        return key;
-    }
-
-    /**
      * Returns the key list.
      *
      * @return the key list.
@@ -59,5 +50,14 @@ public enum AuditLogProperty {
         }
 
         return null;
+    }
+
+    /**
+     * Returns the key for the search string.
+     *
+     * @return the key
+     */
+    public String getKey() {
+        return key;
     }
 }

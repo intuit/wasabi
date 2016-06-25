@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,9 +16,9 @@
 package com.intuit.wasabi.tests.model.analytics;
 
 import com.google.gson.GsonBuilder;
-import com.intuit.wasabi.tests.model.ModelItem;
 import com.intuit.wasabi.tests.library.util.serialstrategies.DefaultNameExclusionStrategy;
 import com.intuit.wasabi.tests.library.util.serialstrategies.SerializationStrategy;
+import com.intuit.wasabi.tests.model.ModelItem;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,35 +28,26 @@ import java.util.Map;
  */
 public class ExperimentStatistics extends ModelItem {
 
-    /** statistics by bucket, key = bucket label, value = bucket statistics */
-    public Map<String, BucketStatistics> buckets = new HashMap<>();
-
-    /** the experiment progress */
-    public Progress experimentProgress;
-
-    /** the overall progress */
-    public Progress jointProgress;
-
-    /** the progress per action, key = action name, value = progress */
-    public Map<String, Progress> actionProgress = new HashMap<>();
-
-    /** joint estimates for all actions */
-    public Estimate jointActionRate;
-
-    /** statistics per action */
-    public Map<String, Estimate> actionRates = new HashMap<>();
-
-    /** impressions */
-    public Counts impressionCounts;
-
-    /** counts for all actions */
-    public Counts jointActionCounts;
-
-    /** the counts per action */
-    public Map<String, Counts> actionCounts = new HashMap<>();
-
     /** The serialization strategy for comparisons and JSON serialization. */
     private static SerializationStrategy serializationStrategy = new DefaultNameExclusionStrategy();
+    /** statistics by bucket, key = bucket label, value = bucket statistics */
+    public Map<String, BucketStatistics> buckets = new HashMap<>();
+    /** the experiment progress */
+    public Progress experimentProgress;
+    /** the overall progress */
+    public Progress jointProgress;
+    /** the progress per action, key = action name, value = progress */
+    public Map<String, Progress> actionProgress = new HashMap<>();
+    /** joint estimates for all actions */
+    public Estimate jointActionRate;
+    /** statistics per action */
+    public Map<String, Estimate> actionRates = new HashMap<>();
+    /** impressions */
+    public Counts impressionCounts;
+    /** counts for all actions */
+    public Counts jointActionCounts;
+    /** the counts per action */
+    public Map<String, Counts> actionCounts = new HashMap<>();
 
     @Override
     public String toString() {
@@ -64,13 +55,13 @@ public class ExperimentStatistics extends ModelItem {
     }
 
     @Override
-    public void setSerializationStrategy(SerializationStrategy serializationStrategy) {
-        ExperimentStatistics.serializationStrategy = serializationStrategy;
+    public SerializationStrategy getSerializationStrategy() {
+        return ExperimentStatistics.serializationStrategy;
     }
 
     @Override
-    public SerializationStrategy getSerializationStrategy() {
-        return ExperimentStatistics.serializationStrategy;
+    public void setSerializationStrategy(SerializationStrategy serializationStrategy) {
+        ExperimentStatistics.serializationStrategy = serializationStrategy;
     }
 
 }

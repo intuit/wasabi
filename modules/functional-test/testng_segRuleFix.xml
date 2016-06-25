@@ -20,7 +20,7 @@
 <suite name="SegmentationRuleCacheFix" parallel="false">
     <test name="SegmentationRuleCacheFix">
         <classes>
-            <class name="com.intuit.wasabi.tests.service.SegmentationRuleCacheFixTest" />
+            <class name="com.intuit.wasabi.tests.service.SegmentationRuleCacheFixTest"/>
         </classes>
     </test>
 </suite>

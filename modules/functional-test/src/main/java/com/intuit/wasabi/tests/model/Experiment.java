@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,9 +16,9 @@
 package com.intuit.wasabi.tests.model;
 
 import com.intuit.wasabi.tests.library.util.Constants;
+import com.intuit.wasabi.tests.library.util.TestUtils;
 import com.intuit.wasabi.tests.library.util.serialstrategies.DefaultNameExclusionStrategy;
 import com.intuit.wasabi.tests.library.util.serialstrategies.SerializationStrategy;
-import com.intuit.wasabi.tests.library.util.TestUtils;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -30,68 +30,50 @@ import java.util.GregorianCalendar;
  */
 public class Experiment extends ModelItem {
 
+    /** The serialization strategy for comparisons and JSON serialization. */
+    private static SerializationStrategy serializationStrategy = new DefaultNameExclusionStrategy();
     /** The experiment ID. Soft requirement: Should be fetched from server. */
     public String id;
-
     /** The experiment's label. Required. */
     public String label;
-
     /** The name of the application this experiment belongs to. Required. */
     public String applicationName;
-
     /**
      * The start time. Should be formatted {@code yyyy-MM-dd'T'hh:mm:ssZ}.
      * Use the {@link TestUtils} to create it. Required.
      */
     public String startTime;
-
     /**
      * The end time. Should be formatted {@code yyyy-MM-dd'T'hh:mm:ssZ}. Use the {@link TestUtils} to create it.
      * Required.
      */
     public String endTime;
-
     /** The sampling percentage (0, 1]. Required. */
     public double samplingPercent;
-
     /** The description. Optional. */
     public String description;
-
     /** The selection rules for this experiment. Optional. */
     public String rule;
-
     /** The rules as a JSON String. Should be fetched from the server. */
     public String ruleJson;
-
     /** The creation time. Should be formatted {@code yyyy-MM-dd'T'hh:mm:ssZ}. Should be fetched from server. */
     public String creationTime;
-
     /** The modification time. Should be formatted {@code yyyy-MM-dd'T'hh:mm:ssZ}. Should be fetched from server. */
     public String modificationTime;
-
     /** The experiment state. See {@link Constants} for possible states. */
     public String state;
-
     /** Personalization status. */
     public Boolean isPersonalizationEnabled;
-
     /** The model name to fetch the assignment distribution from. */
     public String modelName;
-
     /** The model version. */
     public String modelVersion;
-
     /** Flags if this Experiment is used for rapid Experimentation. */
     public Boolean isRapidExperiment;
-
     /** userCap for Rapid Experimentation. */
     public Integer userCap;
-
     /** the user who created the experiment */
     public String creatorID;
-
-    /** The serialization strategy for comparisons and JSON serialization. */
-    private static SerializationStrategy serializationStrategy = new DefaultNameExclusionStrategy();
 
     /**
      * Creates an empty experiment.
@@ -127,7 +109,7 @@ public class Experiment extends ModelItem {
      */
     public Experiment(String label, Application application, String startTime, String endTime,
                       double samplingPercent) {
-        this(label, application, startTime, endTime, samplingPercent, null, null, false , "", "", false, 0, null);
+        this(label, application, startTime, endTime, samplingPercent, null, null, false, "", "", false, 0, null);
     }
 
     /**
@@ -391,7 +373,7 @@ public class Experiment extends ModelItem {
      * @param isPersonalizationEnabled enable the personalization
      * @return this
      */
-    public Experiment setIsPersonalizationEnabled (Boolean isPersonalizationEnabled) {
+    public Experiment setIsPersonalizationEnabled(Boolean isPersonalizationEnabled) {
         this.isPersonalizationEnabled = isPersonalizationEnabled;
         return this;
     }
@@ -402,7 +384,7 @@ public class Experiment extends ModelItem {
      * @param modelName the model name
      * @return this
      */
-    public Experiment setModelName (String modelName) {
+    public Experiment setModelName(String modelName) {
         this.modelName = modelName;
         return this;
     }
@@ -413,7 +395,7 @@ public class Experiment extends ModelItem {
      * @param modelVersion the model version
      * @return this
      */
-    public Experiment setModelVersion (String modelVersion) {
+    public Experiment setModelVersion(String modelVersion) {
         this.modelVersion = modelVersion;
         return this;
     }
@@ -452,13 +434,13 @@ public class Experiment extends ModelItem {
     }
 
     @Override
-    public void setSerializationStrategy(SerializationStrategy serializationStrategy) {
-        Experiment.serializationStrategy = serializationStrategy;
+    public SerializationStrategy getSerializationStrategy() {
+        return Experiment.serializationStrategy;
     }
 
     @Override
-    public SerializationStrategy getSerializationStrategy() {
-        return Experiment.serializationStrategy;
+    public void setSerializationStrategy(SerializationStrategy serializationStrategy) {
+        Experiment.serializationStrategy = serializationStrategy;
     }
 
 }

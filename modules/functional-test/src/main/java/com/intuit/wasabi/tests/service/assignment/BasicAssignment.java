@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,11 +39,11 @@ public class BasicAssignment extends TestBase {
     static final Logger LOGGER = LoggerFactory.getLogger(BasicAssignment.class);
     List<ExperimentMeta> experimentList = new ArrayList<>();
 
-    @Test(groups={"setup"}, dataProvider = "ExperimentTimes", dataProviderClass = AssignmentDataProvider.class)
-    public void setupExperiments(String startTime, String endTime, String type, String experimentCount){
-        String data = " {\"applicationName\": \"qbo\", \"label\": \"exp_"+AssignmentDataProvider.time+"_"
-                +experimentCount+"\"," +"\"samplingPercent\": 0.67, \"startTime\": \""+startTime+"\"," +
-                "\"endTime\": \""+endTime+"\"}";
+    @Test(groups = {"setup"}, dataProvider = "ExperimentTimes", dataProviderClass = AssignmentDataProvider.class)
+    public void setupExperiments(String startTime, String endTime, String type, String experimentCount) {
+        String data = " {\"applicationName\": \"qbo\", \"label\": \"exp_" + AssignmentDataProvider.time + "_"
+                + experimentCount + "\"," + "\"samplingPercent\": 0.67, \"startTime\": \"" + startTime + "\"," +
+                "\"endTime\": \"" + endTime + "\"}";
 
         response = apiServerConnector.doPost("/experiments", data);
         assertReturnCode(response, HttpStatus.SC_CREATED);
@@ -54,13 +54,13 @@ public class BasicAssignment extends TestBase {
         experimentList.add(meta);
     }
 
-    @Test(groups={"setup"}, dependsOnMethods = {"setupExperiments"}, dataProvider = "ExperimentBucket",
+    @Test(groups = {"setup"}, dependsOnMethods = {"setupExperiments"}, dataProvider = "ExperimentBucket",
             dataProviderClass = AssignmentDataProvider.class)
-    public void setupBuckets(String bucketLabel, Object percent, Object isControl){
-        String data = " {\"label\": \""+bucketLabel+"\", \"allocationPercent\": "+percent+", \"isControl\": "+isControl
-                +", \"description\": \""+bucketLabel+" bucket\",\"payload\": \"HTML-JS-"+bucketLabel+"\"}";
-        for(ExperimentMeta experiment : experimentList){
-            String url = "experiments/"+experiment.getExperiment().id+"/buckets";
+    public void setupBuckets(String bucketLabel, Object percent, Object isControl) {
+        String data = " {\"label\": \"" + bucketLabel + "\", \"allocationPercent\": " + percent + ", \"isControl\": " + isControl
+                + ", \"description\": \"" + bucketLabel + " bucket\",\"payload\": \"HTML-JS-" + bucketLabel + "\"}";
+        for (ExperimentMeta experiment : experimentList) {
+            String url = "experiments/" + experiment.getExperiment().id + "/buckets";
             response = apiServerConnector.doPost(url, data);
             assertReturnCode(response, HttpStatus.SC_CREATED);
         }
@@ -95,23 +95,23 @@ public class BasicAssignment extends TestBase {
             response = apiServerConnector.doGet(url);
             LOGGER.debug("State=RUNNING meta=" + experimentMeta.getMeta() + " status=" + response.getStatusCode()
                     + " response=" + response.asString());
-            if("future".equals(experimentMeta.getMeta())) {
+            if ("future".equals(experimentMeta.getMeta())) {
                 assertReturnCode(response, HttpStatus.SC_OK);
                 Assert.assertEquals(response.asString().contains("EXPERIMENT_NOT_STARTED"), true);
-            } else if ("past".equals(experimentMeta.getMeta())){
+            } else if ("past".equals(experimentMeta.getMeta())) {
                 assertReturnCode(response, HttpStatus.SC_OK);
                 Assert.assertEquals(response.asString().contains("EXPERIMENT_EXPIRED"), true);
             } else if ("present".equals(experimentMeta.getMeta())) {
-                if(user.contains("dontCreate")) {
+                if (user.contains("dontCreate")) {
                     assertReturnCode(response, HttpStatus.SC_NOT_FOUND);
                     Assert.assertEquals(response.asString().contains("404"), true);
-                }else{
+                } else {
                     assertReturnCode(response, HttpStatus.SC_OK);
                     Assert.assertEquals(response.asString().contains("NEW_ASSIGNMENT"), true);
                     Assignment assignment = AssignmentFactory.createFromJSONString(response.asString());
                     Assert.assertEquals(null == assignment.assignment ||
                             "blue".equals(assignment.assignment) ||
-                            "red".equals(assignment.assignment)        , true);
+                            "red".equals(assignment.assignment), true);
                 }
             } else {
                 //impossible case
@@ -121,7 +121,7 @@ public class BasicAssignment extends TestBase {
     }
 
 
-    @Test(dependsOnGroups = {"setup"}, dependsOnMethods = {"t_draftStateAssignment","t_runningStateAssignment"},
+    @Test(dependsOnGroups = {"setup"}, dependsOnMethods = {"t_draftStateAssignment", "t_runningStateAssignment"},
             groups = {"stateTest"},
             dataProvider = "ExperimentUsers", dataProviderClass = AssignmentDataProvider.class)
     public void t_pausedStateAssignment(String user) {
@@ -134,23 +134,23 @@ public class BasicAssignment extends TestBase {
             response = apiServerConnector.doGet(url);
             LOGGER.debug("State=PAUSED meta=" + experimentMeta.getMeta() + " status=" + response.getStatusCode()
                     + " response=" + response.asString());
-            if("future".equals(experimentMeta.getMeta())) {
+            if ("future".equals(experimentMeta.getMeta())) {
                 assertReturnCode(response, HttpStatus.SC_OK);
                 Assert.assertEquals(response.asString().contains("EXPERIMENT_NOT_STARTED"), true);
-            } else if ("past".equals(experimentMeta.getMeta())){
+            } else if ("past".equals(experimentMeta.getMeta())) {
                 assertReturnCode(response, HttpStatus.SC_OK);
                 Assert.assertEquals(response.asString().contains("EXPERIMENT_EXPIRED"), true);
             } else if ("present".equals(experimentMeta.getMeta())) {
-                if(user.contains("dontCreate")) {
+                if (user.contains("dontCreate")) {
                     assertReturnCode(response, HttpStatus.SC_NOT_FOUND);
                     Assert.assertEquals(response.asString().contains("404"), true);
-                }else{
+                } else {
                     assertReturnCode(response, HttpStatus.SC_OK);
                     Assert.assertEquals(response.asString().contains("EXISTING_ASSIGNMENT"), true);
                     Assignment assignment = AssignmentFactory.createFromJSONString(response.asString());
                     Assert.assertEquals(null == assignment.assignment ||
                             "blue".equals(assignment.assignment) ||
-                            "red".equals(assignment.assignment)        , true);
+                            "red".equals(assignment.assignment), true);
                 }
             } else {
                 //impossible case
@@ -160,7 +160,7 @@ public class BasicAssignment extends TestBase {
     }
 
     @Test(dependsOnGroups = {"setup"}, groups = {"stateTest"},
-            dependsOnMethods = {"t_draftStateAssignment","t_runningStateAssignment","t_pausedStateAssignment"},
+            dependsOnMethods = {"t_draftStateAssignment", "t_runningStateAssignment", "t_pausedStateAssignment"},
             dataProvider = "ExperimentUsers", dataProviderClass = AssignmentDataProvider.class)
     public void t_runningAfterPausedStateAssignment(String user) {
         for (ExperimentMeta experimentMeta : experimentList) {
@@ -172,23 +172,23 @@ public class BasicAssignment extends TestBase {
             response = apiServerConnector.doGet(url);
             LOGGER.info("State=RUNNING meta=" + experimentMeta.getMeta() + " status=" + response.getStatusCode()
                     + " response=" + response.asString());
-            if("future".equals(experimentMeta.getMeta())) {
+            if ("future".equals(experimentMeta.getMeta())) {
                 assertReturnCode(response, HttpStatus.SC_OK);
                 Assert.assertEquals(response.asString().contains("EXPERIMENT_NOT_STARTED"), true);
-            } else if ("past".equals(experimentMeta.getMeta())){
+            } else if ("past".equals(experimentMeta.getMeta())) {
                 assertReturnCode(response, HttpStatus.SC_OK);
                 Assert.assertEquals(response.asString().contains("EXPERIMENT_EXPIRED"), true);
             } else if ("present".equals(experimentMeta.getMeta())) {
-                if(user.contains("dontCreate")) {
+                if (user.contains("dontCreate")) {
                     assertReturnCode(response, HttpStatus.SC_NOT_FOUND);
                     Assert.assertEquals(response.asString().contains("404"), true);
-                }else{
+                } else {
                     assertReturnCode(response, HttpStatus.SC_OK);
                     Assert.assertEquals(response.asString().contains("EXISTING_ASSIGNMENT"), true);
                     Assignment assignment = AssignmentFactory.createFromJSONString(response.asString());
                     Assert.assertEquals(null == assignment.assignment ||
                             "blue".equals(assignment.assignment) ||
-                            "red".equals(assignment.assignment)        , true);
+                            "red".equals(assignment.assignment), true);
                 }
             } else {
                 //impossible case
@@ -198,8 +198,8 @@ public class BasicAssignment extends TestBase {
     }
 
     @Test(dependsOnGroups = {"setup", "stateTest"}, groups = {"firstCall"})
-    public void t_firstCallToPausedExperiment(){
-        ExperimentMeta experimentMeta = experimentList.get(experimentList.size()-1);
+    public void t_firstCallToPausedExperiment() {
+        ExperimentMeta experimentMeta = experimentList.get(experimentList.size() - 1);
         response = apiServerConnector.doPut("/experiments/" + experimentMeta.getExperiment().id,
                 "{\"state\": \"PAUSED\"}");
         assertReturnCode(response, HttpStatus.SC_OK);
@@ -210,7 +210,7 @@ public class BasicAssignment extends TestBase {
         Assert.assertEquals(response.asString().contains("EXPERIMENT_PAUSED"), true);
         LOGGER.info("State=PAUSED meta=" + experimentMeta.getMeta() + " status=" + response.getStatusCode()
                 + " response=" + response.asString());
-        response = apiServerConnector.doGet(url+"?ignoreSamplingPercent=true");
+        response = apiServerConnector.doGet(url + "?ignoreSamplingPercent=true");
         LOGGER.info("Ignore Sampling State=PAUSED meta=" + experimentMeta.getMeta() + " status=" + response.getStatusCode()
                 + " response=" + response.asString());
         assertReturnCode(response, HttpStatus.SC_OK);
@@ -227,15 +227,13 @@ public class BasicAssignment extends TestBase {
     }
 
 
-
-
     @AfterClass
-    public void t_cleanUp(){
-        for(ExperimentMeta experiment : experimentList){
-            response = apiServerConnector.doPut("experiments/"+experiment.getExperiment().id, "{\"state\": \"RUNNING\"}");
-            response = apiServerConnector.doPut("experiments/"+experiment.getExperiment().id, "{\"state\": \"TERMINATED\"}");
+    public void t_cleanUp() {
+        for (ExperimentMeta experiment : experimentList) {
+            response = apiServerConnector.doPut("experiments/" + experiment.getExperiment().id, "{\"state\": \"RUNNING\"}");
+            response = apiServerConnector.doPut("experiments/" + experiment.getExperiment().id, "{\"state\": \"TERMINATED\"}");
             assertReturnCode(response, HttpStatus.SC_OK);
-            response = apiServerConnector.doDelete("experiments/"+experiment.getExperiment().id);
+            response = apiServerConnector.doDelete("experiments/" + experiment.getExperiment().id);
             assertReturnCode(response, HttpStatus.SC_NO_CONTENT);
         }
     }

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,10 +19,7 @@ import com.intuit.wasabi.analyticsobjects.Event;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class ActionRateTest {
     Double estimate;
@@ -32,17 +29,17 @@ public class ActionRateTest {
     ActionRate actionRate;
 
     @Before
-    public void setup(){
+    public void setup() {
         actionName = Event.Name.valueOf("TestAction");
         estimate = 0.5;
         lowerBound = 0.45;
         upperBound = 0.55;
         actionRate = new ActionRate.Builder().withActionName(actionName).withEstimateValue(estimate)
-                    .withEstimateLower(lowerBound).withEstimateUpper(upperBound).build();
+                .withEstimateLower(lowerBound).withEstimateUpper(upperBound).build();
     }
 
     @Test
-    public void testBuilder(){
+    public void testBuilder() {
         assertEquals(actionRate.getActionName(), actionName);
 
         Estimate estimator = new Estimate.Builder().withEstimate(estimate).withLowerBound(lowerBound)
@@ -60,7 +57,7 @@ public class ActionRateTest {
     }
 
     @Test
-    public void testSettersandGetters(){
+    public void testSettersandGetters() {
         actionRate.setActionName(Event.Name.valueOf("TestOtherAction"));
         assertEquals(actionRate.getActionName(), Event.Name.valueOf("TestOtherAction"));
     }

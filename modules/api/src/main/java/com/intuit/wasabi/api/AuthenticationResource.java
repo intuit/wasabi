@@ -53,6 +53,7 @@ public class AuthenticationResource {
 
     /**
      * Log in user
+     *
      * @param authorizationHeader
      * @param grantType
      * @return Response object
@@ -82,6 +83,7 @@ public class AuthenticationResource {
 
     /**
      * Verify token
+     *
      * @param tokenHeader
      * @return Response object
      */
@@ -98,6 +100,7 @@ public class AuthenticationResource {
 
     /**
      * Log out user
+     *
      * @param tokenHeader
      * @return Response object
      */
@@ -115,9 +118,10 @@ public class AuthenticationResource {
 
     /**
      * Check if user exists
+     *
      * @param userEmail Email of the user
-      * @return Response object
-    */
+     * @return Response object
+     */
     @GET
     @Path("/users/{userEmail}")
     @Produces(APPLICATION_JSON)

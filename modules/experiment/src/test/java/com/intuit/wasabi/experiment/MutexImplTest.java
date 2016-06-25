@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,19 +37,15 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MutexImplTest {
+    private final static Application.Name testApp = Application.Name.valueOf("testApp");
     private CassandraMutexRepository mutexRepository = mock(CassandraMutexRepository.class);
     private ExperimentsImpl experiments = mock(ExperimentsImpl.class);
     private EventLog eventLog = mock(EventLog.class);
-
     MutexImpl resource = new MutexImpl(mutexRepository, experiments, eventLog);
-    private final static Application.Name testApp = Application.Name.valueOf("testApp");
 
     @Test
     public void testGetExclusions() {

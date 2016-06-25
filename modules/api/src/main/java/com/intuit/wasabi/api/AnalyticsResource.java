@@ -63,7 +63,7 @@ public class AnalyticsResource {
 
     /**
      * Returns a number of summary counts for the specified experiment.
-     *
+     * <p>
      * Returns unique and non-unique counts at the experiment, bucket, and action levels for both actions and impressions.
      *
      * @param experimentID        the unique experiment ID
@@ -143,7 +143,7 @@ public class AnalyticsResource {
 
     /**
      * Returns a number of summary counts for the specified experiment, by day.
-     *
+     * <p>
      * Returns unique and non-unique counts at the experiment, bucket, and action levels for both actions and impressions.
      * For each day, includes counts for that day and cumulative counts, calculated from the beginning of the experiment.
      *
@@ -217,7 +217,7 @@ public class AnalyticsResource {
 
     /**
      * Returns a number of summary counts and statistics for the specified experiment.
-     *
+     * <p>
      * Returns unique and non-unique counts at the experiment, bucket, and action levels for both actions and impressions.
      * Also returns a number of statistics calculated from the unique counts.
      *
@@ -291,7 +291,7 @@ public class AnalyticsResource {
 
     /**
      * Returns a number of summary counts and statistics for the specified experiment, by day
-     *
+     * <p>
      * Returns unique and non-unique counts at the experiment, bucket, and action levels for both actions and impressions.
      * For each day, includes counts for that day and cumulative counts, calculated from the beginning of the experiment.
      * Also returns a number of statistics calculated from the unique counts.
@@ -368,6 +368,7 @@ public class AnalyticsResource {
 
     /**
      * Get assignments count
+     *
      * @param experimentID
      * @param context
      * @param authorizationHeader

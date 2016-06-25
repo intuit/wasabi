@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,7 +25,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * Daily statistics wrapper class
- * 
+ *
  * {@see ExperimentBasicStatistics}
  * {@see ExperimentStatistics}
  */
@@ -42,33 +42,6 @@ public class DailyStatistics extends DailyBase implements Cloneable {
         this.cumulative = builder.cumulative_;
     }
 
-
-    public static class Builder extends DailyBase.Builder<Builder> {
-        private ExperimentBasicStatistics perDay_;
-        private ExperimentStatistics cumulative_;
-
-        public Builder(){}
-
-        public Builder withPerDay(ExperimentBasicStatistics value){
-            perDay_ = value;
-            return getThis();
-        }
-        public Builder withCumulative(ExperimentStatistics value){
-            cumulative_ = value;
-            return getThis();
-        }
-
-        public DailyStatistics build(){
-            return new DailyStatistics(this);
-        }
-
-        @Override
-        protected Builder getThis() {
-            return this;
-        }
-
-    }
-
     public ExperimentBasicStatistics getPerDay() {
         return perDay;
     }
@@ -77,20 +50,19 @@ public class DailyStatistics extends DailyBase implements Cloneable {
         return cumulative;
     }
 
-
     @Override
     public String toString() {
-    	return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 
     @Override
     public int hashCode() {
-    	return HashCodeBuilder.reflectionHashCode(this);
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override
     public boolean equals(Object obj) {
-    	   return EqualsBuilder.reflectionEquals(this, obj);
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 
     @Override
@@ -113,5 +85,33 @@ public class DailyStatistics extends DailyBase implements Cloneable {
         }
 
         return cloned;
+    }
+
+    public static class Builder extends DailyBase.Builder<Builder> {
+        private ExperimentBasicStatistics perDay_;
+        private ExperimentStatistics cumulative_;
+
+        public Builder() {
+        }
+
+        public Builder withPerDay(ExperimentBasicStatistics value) {
+            perDay_ = value;
+            return getThis();
+        }
+
+        public Builder withCumulative(ExperimentStatistics value) {
+            cumulative_ = value;
+            return getThis();
+        }
+
+        public DailyStatistics build() {
+            return new DailyStatistics(this);
+        }
+
+        @Override
+        protected Builder getThis() {
+            return this;
+        }
+
     }
 }

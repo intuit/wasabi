@@ -20,7 +20,7 @@
 <suite name="RetryTest" parallel="false">
     <test name="RetryTest">
         <classes>
-            <class name="com.intuit.wasabi.tests.library.RetryTestClass" />
+            <class name="com.intuit.wasabi.tests.library.RetryTestClass"/>
         </classes>
     </test>
 </suite>

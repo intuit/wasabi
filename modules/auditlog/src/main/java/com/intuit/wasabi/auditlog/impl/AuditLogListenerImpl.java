@@ -18,17 +18,19 @@ import java.util.concurrent.TimeUnit;
  */
 public class AuditLogListenerImpl implements EventLogListener {
 
-    /** Executes the {@link AuditLogEntryEnvelope}s. */
+    /**
+     * Executes the {@link AuditLogEntryEnvelope}s.
+     */
     private final ThreadPoolExecutor threadPoolExecutor;
     private final AuditLogRepository repository;
 
     /**
      * Initializes the audit log.
      *
-     * @param eventLog the event log to subscribe to
+     * @param eventLog           the event log to subscribe to
      * @param threadPoolSizeCore the core threadpool size (java property {@code auditlog.threadpoolsize.core})
-     * @param threadPoolSizeMax the max threadpool size (java property {@code auditlog.threadpoolsize.max})
-     * @param repository the audit log repository
+     * @param threadPoolSizeMax  the max threadpool size (java property {@code auditlog.threadpoolsize.max})
+     * @param repository         the audit log repository
      */
     @Inject
     public AuditLogListenerImpl(final EventLog eventLog,
@@ -53,6 +55,7 @@ public class AuditLogListenerImpl implements EventLogListener {
 
     /**
      * Creates an {@link AuditLogEntryEnvelope} for the specified event.
+     *
      * @param event the event
      * @return an {@link AuditLogEntry} wrapped into an envelope
      */

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -69,12 +69,12 @@ public class AuthorizationResourceTest {
 
         AuthorizationResource authorizationResource = new AuthorizationResource(authorization, new HttpHeader("jaba-???"));
 
-        HashMap<String,Object> result = new HashMap<>();
+        HashMap<String, Object> result = new HashMap<>();
 
         when(authorization.getPermissionsFromRole(Role.READONLY)).thenReturn(Role.READONLY.getRolePermissions());
         result.put("permissions", Role.READONLY.getRolePermissions());
         Response response = authorizationResource.getRolePermissions(Role.READONLY.toString());
-        assertThat(response.getEntity(), CoreMatchers.<Object>equalTo(result));
+        assertThat(response.getEntity(), CoreMatchers.equalTo(result));
     }
 
     @Test
@@ -90,7 +90,7 @@ public class AuthorizationResourceTest {
 
         when(authorization.getUserPermissionsList(USER)).thenReturn(userPermissionsList);
         Response response = authorizationResource.getUserPermissions(USER, AUTHHEADER);
-        assertThat(response.getEntity(), CoreMatchers.<Object>equalTo(userPermissionsList));
+        assertThat(response.getEntity(), CoreMatchers.equalTo(userPermissionsList));
 
         UserPermissions userPermissions1 = UserPermissions.newInstance(TESTAPP2,
                 Role.READWRITE.getRolePermissions()).build();
@@ -115,10 +115,10 @@ public class AuthorizationResourceTest {
         when(authorization.getUserPermissions(TESTUSER, TESTAPP2)).thenReturn(userPermissions1);
 
         Response response = authorizationResource.getUserAppPermissions(USER, TESTAPP, AUTHHEADER);
-        assertThat(response.getEntity(), CoreMatchers.<Object>equalTo(userPermissions));
+        assertThat(response.getEntity(), CoreMatchers.equalTo(userPermissions));
 
         response = authorizationResource.getUserAppPermissions(TESTUSER, TESTAPP2, AUTHHEADER);
-        assertThat(response.getEntity(), CoreMatchers.<Object>equalTo(userPermissions1));
+        assertThat(response.getEntity(), CoreMatchers.equalTo(userPermissions1));
     }
 
     @Test
@@ -126,7 +126,7 @@ public class AuthorizationResourceTest {
 
         AuthorizationResource authorizationResource = new AuthorizationResource(authorization, new HttpHeader("jaba-???"));
 
-        UserRole userRole = UserRole.newInstance(TESTAPP,Role.ADMIN).withUserID(USER).build();
+        UserRole userRole = UserRole.newInstance(TESTAPP, Role.ADMIN).withUserID(USER).build();
         UserRole userRole1 = UserRole.newInstance(TESTAPP2, Role.READWRITE).withUserID(TESTUSER).build();
         UserRoleList userRoleList = new UserRoleList();
         userRoleList.addRole(userRole);
@@ -159,7 +159,7 @@ public class AuthorizationResourceTest {
         when(authorization.setUserRole(userRole, EventLog.SYSTEM_USER)).thenReturn(status);
 
         Response response = authorizationResource.assignUserRoles(userRoleList, AUTHHEADER);
-        assertThat(response.getEntity(), CoreMatchers.<Object>equalTo(statmap));
+        assertThat(response.getEntity(), CoreMatchers.equalTo(statmap));
     }
 
     @Test
@@ -167,7 +167,7 @@ public class AuthorizationResourceTest {
 
         AuthorizationResource authorizationResource = new AuthorizationResource(authorization, new HttpHeader("jaba-???"));
 
-        UserRole userRole = UserRole.newInstance(TESTAPP,Role.ADMIN).withUserID(USER).build();
+        UserRole userRole = UserRole.newInstance(TESTAPP, Role.ADMIN).withUserID(USER).build();
         UserRole userRole1 = UserRole.newInstance(TESTAPP2, Role.READWRITE).withUserID(TESTUSER).build();
         UserRoleList userRoleList = new UserRoleList();
         userRoleList.addRole(userRole);
@@ -200,7 +200,7 @@ public class AuthorizationResourceTest {
         when(authorization.setUserRole(userRole, EventLog.SYSTEM_USER)).thenReturn(status);
 
         Response response = authorizationResource.updateUserRoles(userRoleList, AUTHHEADER);
-        assertThat(response.getEntity(), CoreMatchers.<Object>equalTo(statmap));
+        assertThat(response.getEntity(), CoreMatchers.equalTo(statmap));
     }
 
     @Test
@@ -208,7 +208,7 @@ public class AuthorizationResourceTest {
 
         AuthorizationResource authorizationResource = new AuthorizationResource(authorization, new HttpHeader("jaba-???"));
 
-        UserRole userRole = UserRole.newInstance(TESTAPP,Role.ADMIN).withUserID(USER).build();
+        UserRole userRole = UserRole.newInstance(TESTAPP, Role.ADMIN).withUserID(USER).build();
         UserRole userRole1 = UserRole.newInstance(TESTAPP2, Role.READWRITE).withUserID(USER).build();
         UserRoleList userRoleList = new UserRoleList();
         userRoleList.addRole(userRole);
@@ -217,9 +217,9 @@ public class AuthorizationResourceTest {
         when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
         when(authorization.getUserRoleList(USER)).thenReturn(userRoleList);
         Response response = authorizationResource.getUserRole(USER, AUTHHEADER);
-        assert(userRoleList.equals(response.getEntity()));
+        assert (userRoleList.equals(response.getEntity()));
 
-        userRole = UserRole.newInstance(TESTAPP,Role.ADMIN).withUserID(TESTUSER).build();
+        userRole = UserRole.newInstance(TESTAPP, Role.ADMIN).withUserID(TESTUSER).build();
         userRole1 = UserRole.newInstance(TESTAPP2, Role.READWRITE).withUserID(TESTUSER).build();
         userRoleList = new UserRoleList();
         userRoleList.addRole(userRole);
@@ -232,7 +232,7 @@ public class AuthorizationResourceTest {
         UserRoleList userRoleList1 = new UserRoleList();
         userRoleList1.addRole(userRoleList.getRoleList().get(0));
         UserRoleList x = (UserRoleList) response.getEntity();
-        assert(x.equals(userRoleList1));
+        assert (x.equals(userRoleList1));
     }
 
     @Test
@@ -251,7 +251,7 @@ public class AuthorizationResourceTest {
 
         AuthorizationResource authorizationResource = new AuthorizationResource(authorization, new HttpHeader("jaba-???"));
 
-        UserRole userRole = UserRole.newInstance(TESTAPP,Role.ADMIN).withUserID(USER).build();
+        UserRole userRole = UserRole.newInstance(TESTAPP, Role.ADMIN).withUserID(USER).build();
         UserRole userRole1 = UserRole.newInstance(TESTAPP2, Role.READWRITE).withUserID(USER).build();
         UserRoleList userRoleList = new UserRoleList();
         userRoleList.addRole(userRole);
@@ -260,8 +260,8 @@ public class AuthorizationResourceTest {
         when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
         when(authorization.getApplicationUsers(TESTAPP)).thenReturn(userRoleList);
 
-        Response response = authorizationResource.getApplicationUsersByRole(TESTAPP,AUTHHEADER);
-        assertThat(response.getEntity(), CoreMatchers.<Object>equalTo(userRoleList));
+        Response response = authorizationResource.getApplicationUsersByRole(TESTAPP, AUTHHEADER);
+        assertThat(response.getEntity(), CoreMatchers.equalTo(userRoleList));
     }
 
     @Test
@@ -280,6 +280,6 @@ public class AuthorizationResourceTest {
         when(authorization.getUserPermissionsList(USER)).thenReturn(permissionsList);
 
         Response response = authorizationResource.getUserList(AUTHHEADER);
-        assertThat(response.getEntity(), CoreMatchers.<Object>equalTo(Collections.singletonList(userRoleList)));
+        assertThat(response.getEntity(), CoreMatchers.equalTo(Collections.singletonList(userRoleList)));
     }
 }

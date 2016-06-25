@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,14 +17,12 @@ package com.intuit.wasabi.experimentobjects;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
-import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-
-import java.util.Date;
-
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+
+import java.util.Date;
 
 /**
  * Specification of a new experiment
@@ -72,60 +70,16 @@ public final class NewExperiment implements ExperimentBase {
         this.id = Experiment.ID.newInstance();
     }
 
-    public Experiment.ID getId() {
-		return id;
-	}
-
-	public void setId(Experiment.ID id) {
-		this.id = id;
-	}
-
-	public void setLabel(Experiment.Label label) {
-		this.label = label;
-	}
-
-	public void setStartTime(Date startTime) {
-		this.startTime = startTime;
-	}
-
-	public void setEndTime(Date endTime) {
-		this.endTime = endTime;
-	}
-
-	public void setSamplingPercent(Double samplingPercent) {
-		this.samplingPercent = samplingPercent;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public void setRule(String rule) {
-		this.rule = rule;
-	}
-
-	public void setIsPersonalizationEnabled(Boolean isPersonalizationEnabled) {
-		this.isPersonalizationEnabled = isPersonalizationEnabled;
-	}
-
-	public void setModelName(String modelName) {
-		this.modelName = modelName;
-	}
-
-	public void setModelVersion(String modelVersion) {
-		this.modelVersion = modelVersion;
-	}
-
-	public void setIsRapidExperiment(Boolean isRapidExperiment) {
-		this.isRapidExperiment = isRapidExperiment;
-	}
-
-	public void setUserCap(Integer userCap) {
-		this.userCap = userCap;
-	}
-
-	public static NewExperiment.Builder withID(Experiment.ID id) {
+    public static NewExperiment.Builder withID(Experiment.ID id) {
         return new NewExperiment.Builder(id);
+    }
+
+    public Experiment.ID getId() {
+        return id;
+    }
+
+    public void setId(Experiment.ID id) {
+        this.id = id;
     }
 
     /**
@@ -133,7 +87,8 @@ public final class NewExperiment implements ExperimentBase {
      *
      * @return the experiment ID
      */
-    @Override @JsonIgnore
+    @Override
+    @JsonIgnore
     public Experiment.ID getID() {
         return id;
     }
@@ -142,8 +97,16 @@ public final class NewExperiment implements ExperimentBase {
         return isRapidExperiment;
     }
 
+    public void setIsRapidExperiment(Boolean isRapidExperiment) {
+        this.isRapidExperiment = isRapidExperiment;
+    }
+
     public Integer getUserCap() {
         return userCap;
+    }
+
+    public void setUserCap(Integer userCap) {
+        this.userCap = userCap;
     }
 
     @Override
@@ -151,12 +114,24 @@ public final class NewExperiment implements ExperimentBase {
         return isPersonalizationEnabled;
     }
 
+    public void setIsPersonalizationEnabled(Boolean isPersonalizationEnabled) {
+        this.isPersonalizationEnabled = isPersonalizationEnabled;
+    }
+
     public String getModelName() {
         return modelName;
     }
 
+    public void setModelName(String modelName) {
+        this.modelName = modelName;
+    }
+
     public String getModelVersion() {
         return modelVersion;
+    }
+
+    public void setModelVersion(String modelVersion) {
+        this.modelVersion = modelVersion;
     }
 
     @Override
@@ -164,10 +139,18 @@ public final class NewExperiment implements ExperimentBase {
         return description;
     }
 
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     @Override
     public String getRule() {
 
         return rule;
+    }
+
+    public void setRule(String rule) {
+        this.rule = rule;
     }
 
     @Override
@@ -179,9 +162,17 @@ public final class NewExperiment implements ExperimentBase {
         return samplingPercent;
     }
 
+    public void setSamplingPercent(Double samplingPercent) {
+        this.samplingPercent = samplingPercent;
+    }
+
     @Override
     public Date getStartTime() {
         return startTime;
+    }
+
+    public void setStartTime(Date startTime) {
+        this.startTime = startTime;
     }
 
     @Override
@@ -189,9 +180,17 @@ public final class NewExperiment implements ExperimentBase {
         return endTime;
     }
 
+    public void setEndTime(Date endTime) {
+        this.endTime = endTime;
+    }
+
     @Override
     public Experiment.Label getLabel() {
         return label;
+    }
+
+    public void setLabel(Experiment.Label label) {
+        this.label = label;
     }
 
     @Override
@@ -213,7 +212,7 @@ public final class NewExperiment implements ExperimentBase {
 
     @Override
     public String toString() {
-    	return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 
     /**

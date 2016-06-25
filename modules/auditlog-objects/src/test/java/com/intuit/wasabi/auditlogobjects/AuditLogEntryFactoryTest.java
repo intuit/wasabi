@@ -18,7 +18,7 @@ public class AuditLogEntryFactoryTest {
     public void testCreateFromEvent() throws Exception {
         new AuditLogEntryFactory();
 
-        EventLogEvent[] events = new EventLogEvent[] {
+        EventLogEvent[] events = new EventLogEvent[]{
                 new SimpleEvent("SimpleEvent"),
                 new ExperimentChangeEvent(Mockito.mock(Experiment.class), "Property", "before", "after"),
                 new ExperimentCreateEvent(Mockito.mock(Experiment.class)),

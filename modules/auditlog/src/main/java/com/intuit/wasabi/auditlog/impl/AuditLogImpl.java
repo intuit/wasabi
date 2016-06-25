@@ -12,14 +12,7 @@ import com.intuit.wasabi.repository.AuditLogRepository;
 import org.apache.commons.lang3.StringUtils;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 
 /**
  * Implements the AuditLog with a default implementation.
@@ -137,8 +130,8 @@ public class AuditLogImpl implements AuditLog {
      * Note: This method is case-insensitive.
      *
      * @param auditLogEntry the auditlog entry
-     * @param pattern the pattern to search
-     * @param filter the return value on success
+     * @param pattern       the pattern to search
+     * @param filter        the return value on success
      * @return {@code filter} on match, {@code !filter} otherwise
      */
     private boolean fullTextSearch(AuditLogEntry auditLogEntry, String pattern, Map<String, String> options, boolean filter) {
@@ -168,71 +161,83 @@ public class AuditLogImpl implements AuditLog {
         String s2 = contained.toString().toLowerCase();
         return s1.contains(s2);
     }
-    
+
     /**
      * Calls the getter identified by {@code key.toLowerCase()} of the auditLogEntry returns {@code filter} on success.
      * If no match is found, {@code !filter} is returned.
-     *
+     * <p>
      * The allowed keys and their fields are:
      * <ul>
-     *     <li>firstname {@link AuditLogEntry#getUser()}{@link UserInfo#getFirstName()}</li>
-     *     <li>lastname {@link AuditLogEntry#getUser()}{@link UserInfo#getLastName()}</li>
-     *     <li>username {@link AuditLogEntry#getUser()}{@link UserInfo#getUsername()} and {@link UserInfo#getUserId()}</li>
-     *     <li>mail {@link AuditLogEntry#getUser()}{@link UserInfo#getEmail()}</li>
-     *     <li>action {@link AuditLogEntry#getAction()} and {@link AuditLogAction#getDescription(AuditLogEntry)}</li>
-     *     <li>desc {@link AuditLogEntry#getAction()} and {@link AuditLogAction#getDescription(AuditLogEntry)}</li>
-     *     <li>experiment {@link AuditLogEntry#getExperimentLabel()}</li>
-     *     <li>bucket {@link AuditLogEntry#getBucketLabel()}</li>
-     *     <li>app {@link AuditLogEntry#getApplicationName()}</li>
-     *     <li>time {@link AuditLogEntry#getTimeString()}</li>
-     *     <li>attr {@link AuditLogEntry#getChangedProperty()}</li>
-     *     <li>before {@link AuditLogEntry#getBefore()}</li>
-     *     <li>after {@link AuditLogEntry#getAfter()}</li>
-     *     <li>fullname {@link AuditLogEntry#getUser()}{@link UserInfo#getFirstName()} combined with {@link UserInfo#getLastName()}</li>
+     * <li>firstname {@link AuditLogEntry#getUser()}{@link UserInfo#getFirstName()}</li>
+     * <li>lastname {@link AuditLogEntry#getUser()}{@link UserInfo#getLastName()}</li>
+     * <li>username {@link AuditLogEntry#getUser()}{@link UserInfo#getUsername()} and {@link UserInfo#getUserId()}</li>
+     * <li>mail {@link AuditLogEntry#getUser()}{@link UserInfo#getEmail()}</li>
+     * <li>action {@link AuditLogEntry#getAction()} and {@link AuditLogAction#getDescription(AuditLogEntry)}</li>
+     * <li>desc {@link AuditLogEntry#getAction()} and {@link AuditLogAction#getDescription(AuditLogEntry)}</li>
+     * <li>experiment {@link AuditLogEntry#getExperimentLabel()}</li>
+     * <li>bucket {@link AuditLogEntry#getBucketLabel()}</li>
+     * <li>app {@link AuditLogEntry#getApplicationName()}</li>
+     * <li>time {@link AuditLogEntry#getTimeString()}</li>
+     * <li>attr {@link AuditLogEntry#getChangedProperty()}</li>
+     * <li>before {@link AuditLogEntry#getBefore()}</li>
+     * <li>after {@link AuditLogEntry#getAfter()}</li>
+     * <li>fullname {@link AuditLogEntry#getUser()}{@link UserInfo#getFirstName()} combined with {@link UserInfo#getLastName()}</li>
      * </ul>
      * Note: This method is case-insensitive!
      *
      * @param auditLogEntry the auditLogEntry
-     * @param key the key determining the checked field
-     * @param pattern the pattern to search
-     * @param filter the return value on success
+     * @param key           the key determining the checked field
+     * @param pattern       the pattern to search
+     * @param filter        the return value on success
      * @return {@code filter} on match, {@code !filter} otherwise
      */
     /*test*/ boolean singleFieldSearch(AuditLogEntry auditLogEntry, String key, String pattern, String options, boolean filter) {
         AuditLogProperty property = AuditLogProperty.forKey(key);
         boolean filtered = !filter;
-        
+
         if (property == null) {
             return filtered;
         }
         switch (property) {
-            case FIRSTNAME: filtered = contains(auditLogEntry.getUser().getFirstName(), pattern) ? filter : !filter;
+            case FIRSTNAME:
+                filtered = contains(auditLogEntry.getUser().getFirstName(), pattern) == filter;
                 break;
-            case LASTNAME: filtered = contains(auditLogEntry.getUser().getLastName(), pattern) ? filter : !filter;
+            case LASTNAME:
+                filtered = contains(auditLogEntry.getUser().getLastName(), pattern) == filter;
                 break;
-            case USERNAME: filtered = (contains(auditLogEntry.getUser().getUsername(), pattern) || (contains(auditLogEntry.getUser().getUserId(), pattern)) ? filter : !filter);
+            case USERNAME:
+                filtered = ((contains(auditLogEntry.getUser().getUsername(), pattern) || (contains(auditLogEntry.getUser().getUserId(), pattern))) == filter);
                 break;
-            case MAIL: filtered = contains(auditLogEntry.getUser().getEmail(), pattern) ? filter : !filter;
+            case MAIL:
+                filtered = contains(auditLogEntry.getUser().getEmail(), pattern) == filter;
                 break;
             case ACTION: // fall through
-            case DESCRIPTION: filtered = (contains(auditLogEntry.getAction(), pattern) ? filter : !filter) || (contains(AuditLogAction.getDescription(auditLogEntry), pattern) ? filter : !filter);
+            case DESCRIPTION:
+                filtered = (contains(auditLogEntry.getAction(), pattern) == filter) || (contains(AuditLogAction.getDescription(auditLogEntry), pattern) == filter);
                 break;
-            case EXPERIMENT: filtered = contains(auditLogEntry.getExperimentLabel(), pattern) ? filter : !filter;
+            case EXPERIMENT:
+                filtered = contains(auditLogEntry.getExperimentLabel(), pattern) == filter;
                 break;
-            case BUCKET: filtered = contains(auditLogEntry.getBucketLabel(), pattern) ? filter : !filter;
+            case BUCKET:
+                filtered = contains(auditLogEntry.getBucketLabel(), pattern) == filter;
                 break;
-            case APP: filtered = contains(auditLogEntry.getApplicationName(), pattern) ? filter : !filter;
+            case APP:
+                filtered = contains(auditLogEntry.getApplicationName(), pattern) == filter;
                 break;
             case TIME:
-                filtered = contains(formatDateLikeUI(auditLogEntry.getTime(), StringUtils.isBlank(options) ? "+0000" : options), pattern) ? filter : !filter;
+                filtered = contains(formatDateLikeUI(auditLogEntry.getTime(), StringUtils.isBlank(options) ? "+0000" : options), pattern) == filter;
                 break;
-            case ATTR: filtered = contains(auditLogEntry.getChangedProperty(), pattern) ? filter : !filter;
+            case ATTR:
+                filtered = contains(auditLogEntry.getChangedProperty(), pattern) == filter;
                 break;
-            case BEFORE: filtered = contains(auditLogEntry.getBefore(), pattern) ? filter : !filter;
+            case BEFORE:
+                filtered = contains(auditLogEntry.getBefore(), pattern) == filter;
                 break;
-            case AFTER: filtered = contains(auditLogEntry.getAfter(), pattern) ? filter : !filter;
+            case AFTER:
+                filtered = contains(auditLogEntry.getAfter(), pattern) == filter;
                 break;
-            case USER: filtered = contains(auditLogEntry.getUser().getFirstName() + " " + auditLogEntry.getUser().getLastName(), pattern) ? filter : !filter;
+            case USER:
+                filtered = contains(auditLogEntry.getUser().getFirstName() + " " + auditLogEntry.getUser().getLastName(), pattern) == filter;
                 break;
             default:
                 break;
@@ -308,12 +313,13 @@ public class AuditLogImpl implements AuditLog {
                                 result = o1.getUser().getLastName().compareToIgnoreCase(o2.getUser().getLastName());
                             }
                             break;
-                        case USER: case USERNAME:
+                        case USER:
+                        case USERNAME:
                             if ((result = compareNull(o1.getUser().getUsername(), o2.getUser().getUsername(), descending)) == NOT_NULL) {
                                 result = o1.getUser().getUsername().toString().compareToIgnoreCase(o2.getUser().getUsername().toString());
                             }
                             if (result == 0 && (result = compareNull(o1.getUser().getUserId(), o2.getUser().getUserId(), descending)) == NOT_NULL) {
-                                    result = o1.getUser().getUserId().compareToIgnoreCase(o2.getUser().getUserId());
+                                result = o1.getUser().getUserId().compareToIgnoreCase(o2.getUser().getUserId());
                             }
                             break;
                         case MAIL:
@@ -387,8 +393,8 @@ public class AuditLogImpl implements AuditLog {
      * Filters first and sorts then by subsequent calls to {@link #filter(List, String)} and {@link #sort(List, String)}.
      * Note: This method is case-insensitive!
      *
-     * @param filterMask      the filter mask
-     * @param sortOrder       the sort order
+     * @param filterMask the filter mask
+     * @param sortOrder  the sort order
      * @return a list of filtered and sorted audit logs
      */
     private List<AuditLogEntry> filterAndSort(List<AuditLogEntry> auditLogEntries, String filterMask, String sortOrder) {

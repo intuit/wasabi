@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,9 +16,9 @@
 package com.intuit.wasabi.tests.model.analytics;
 
 import com.google.gson.GsonBuilder;
-import com.intuit.wasabi.tests.model.ModelItem;
 import com.intuit.wasabi.tests.library.util.serialstrategies.DefaultNameExclusionStrategy;
 import com.intuit.wasabi.tests.library.util.serialstrategies.SerializationStrategy;
+import com.intuit.wasabi.tests.model.ModelItem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,11 +28,10 @@ import java.util.List;
  */
 public class ExperimentCumulativeCounts extends ModelItem {
 
-    /** cumulative counts per day */
-    public List<DailyCounts> days = new ArrayList<>();
-
     /** The serialization strategy for comparisons and JSON serialization. */
     private static SerializationStrategy serializationStrategy = new DefaultNameExclusionStrategy();
+    /** cumulative counts per day */
+    public List<DailyCounts> days = new ArrayList<>();
 
     @Override
     public String toString() {
@@ -40,12 +39,12 @@ public class ExperimentCumulativeCounts extends ModelItem {
     }
 
     @Override
-    public void setSerializationStrategy(SerializationStrategy serializationStrategy) {
-        ExperimentCumulativeCounts.serializationStrategy = serializationStrategy;
+    public SerializationStrategy getSerializationStrategy() {
+        return ExperimentCumulativeCounts.serializationStrategy;
     }
 
     @Override
-    public SerializationStrategy getSerializationStrategy() {
-        return ExperimentCumulativeCounts.serializationStrategy;
+    public void setSerializationStrategy(SerializationStrategy serializationStrategy) {
+        ExperimentCumulativeCounts.serializationStrategy = serializationStrategy;
     }
 }

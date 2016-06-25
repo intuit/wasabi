@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -176,13 +176,13 @@ public class RetryListener extends TestListenerAdapter {
         String resultString = ("\n\n\nINTEGRATION TESTS DETAILED RESULTS:"
                 + "\n TOTAL TESTS: " + total
                 + String.format("\n  %4d %-10s\n\t", passedMap.getAllMethods().size(), "passed:")
-                    + (passedMap.getAllMethods().size() == 0 ? "" : passedMap.getAllMethods())
+                + (passedMap.getAllMethods().size() == 0 ? "" : passedMap.getAllMethods())
                 + String.format("\n  %4d %-10s\n\t", failedMap.getAllMethods().size(), "failed:")
-                    + (failedMap.getAllMethods().size() == 0 ? "" : failedMap.getAllMethods())
+                + (failedMap.getAllMethods().size() == 0 ? "" : failedMap.getAllMethods())
                 + String.format("\n  %4d %-10s\n\t", skippedMap.getAllMethods().size(), "skipped:")
-                    + (skippedMap.getAllMethods().size() == 0 ? "" : skippedMap.getAllMethods())
+                + (skippedMap.getAllMethods().size() == 0 ? "" : skippedMap.getAllMethods())
                 + String.format("\n  %4d %-10s\n\t", failedButMap.getAllMethods().size(), "failedBut:")
-                    + (failedButMap.getAllMethods().size() == 0 ? "" : failedButMap.getAllMethods())
+                + (failedButMap.getAllMethods().size() == 0 ? "" : failedButMap.getAllMethods())
                 + "\n\n\n").replace(search, replace).replace("\t[", "\t").replace("]]", "]");
         LOGGER.info(resultString);
     }

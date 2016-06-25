@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,9 +31,9 @@ import static org.junit.Assert.*;
 public class ExperimentPageTest {
 
     @Test
-    public void testEquals(){
-        ExperimentPage ep = ExperimentPage.withAttributes(Page.Name.valueOf("fluffy"),true).build();
-        ExperimentPage ep2 = ExperimentPage.withAttributes(Page.Name.valueOf("fluffy"),true).build();
+    public void testEquals() {
+        ExperimentPage ep = ExperimentPage.withAttributes(Page.Name.valueOf("fluffy"), true).build();
+        ExperimentPage ep2 = ExperimentPage.withAttributes(Page.Name.valueOf("fluffy"), true).build();
 
         assertTrue(ep.equals(ep));
         assertFalse(ep.equals(null));
@@ -42,20 +42,20 @@ public class ExperimentPageTest {
     }
 
     @Test
-    public void testHashCode(){
-        ExperimentPage ep = ExperimentPage.withAttributes(Page.Name.valueOf("fluffy"),true).build();
-        ExperimentPage ep2 = ExperimentPage.withAttributes(Page.Name.valueOf("fluffy"),true).build();
+    public void testHashCode() {
+        ExperimentPage ep = ExperimentPage.withAttributes(Page.Name.valueOf("fluffy"), true).build();
+        ExperimentPage ep2 = ExperimentPage.withAttributes(Page.Name.valueOf("fluffy"), true).build();
 
-        assertEquals(ep.hashCode(),ep2.hashCode());
+        assertEquals(ep.hashCode(), ep2.hashCode());
 
         ep2.setAllowNewAssignment(false);
 
-        assertNotEquals(ep.hashCode(),ep2.hashCode());
+        assertNotEquals(ep.hashCode(), ep2.hashCode());
 
     }
 
     @Test
-    public void testInitialize(){
+    public void testInitialize() {
         ExperimentPageList experimentList = new ExperimentPageList(11);
         assertThat(experimentList.getPages().size(), is(0));
         List<ExperimentPage> experimentPageList = new ArrayList<ExperimentPage>();

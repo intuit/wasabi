@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,8 +17,8 @@ package com.intuit.wasabi.tests.model.factory;
 
 import com.google.gson.GsonBuilder;
 import com.intuit.wasabi.tests.library.util.Constants;
-import com.intuit.wasabi.tests.model.Experiment;
 import com.intuit.wasabi.tests.library.util.TestUtils;
+import com.intuit.wasabi.tests.model.Experiment;
 
 /**
  * A factory for Experiments.
@@ -26,12 +26,12 @@ import com.intuit.wasabi.tests.library.util.TestUtils;
 public class ExperimentFactory {
 
     public static String USER_ID = "admin";
-    
+
     /**
      * Only used to create unique Experiment labels.
      */
     private static int internalId = 0;
-    
+
     static {
         if (System.getProperty("user-name") != null)
             USER_ID = System.getProperty("user-name");
@@ -63,7 +63,7 @@ public class ExperimentFactory {
         experiment.description = "A sample Experiment description.";
         return experiment;
     }
-    
+
     /**
      * Creates a basic Experiment with the required default values and the optional value
      * rule. (No ID!)

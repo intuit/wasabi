@@ -19,9 +19,9 @@
 
 <suite name="RepeatStateInconsistencyTest" parallel="false">
     <test name="RepeatStateInconsistencyTest">
-        <parameter name="repetitionCount" value="20" />
+        <parameter name="repetitionCount" value="20"/>
         <classes>
-            <class name="com.intuit.wasabi.tests.service.factory.RepeatStateInconsistencyTestFactory" />
+            <class name="com.intuit.wasabi.tests.service.factory.RepeatStateInconsistencyTestFactory"/>
         </classes>
     </test>
 </suite>

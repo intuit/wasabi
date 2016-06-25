@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,10 +33,10 @@ import static org.slf4j.LoggerFactory.getLogger;
  * Add a noop implementation that can be used in the test setting where we do not want to sent out emails.
  */
 @Singleton
-public class NoopEmailImpl implements EmailService{
+public class NoopEmailImpl implements EmailService {
 
-    private EmailTextProcessor emailTextProcessor;
     private final static Logger LOGGER = getLogger(NoopEmailImpl.class);
+    private EmailTextProcessor emailTextProcessor;
 
     /**
      * Sets the {@link EmailTextProcessor} for the service.
@@ -45,7 +45,7 @@ public class NoopEmailImpl implements EmailService{
      */
     @Inject
     // FIXME: ?why inject a processor for a no-op impl?
-    public void setEmailTextProcessor(EmailTextProcessor emailTextProcessor){
+    public void setEmailTextProcessor(EmailTextProcessor emailTextProcessor) {
         this.emailTextProcessor = emailTextProcessor;
     }
 
@@ -55,7 +55,7 @@ public class NoopEmailImpl implements EmailService{
     }
 
     @Override
-    public void sendEmailForUserPermission(Application.Name appName, UserInfo.Username user,EmailLinksList links) {
+    public void sendEmailForUserPermission(Application.Name appName, UserInfo.Username user, EmailLinksList links) {
         LOGGER.info("EMAIL IS GETTING SEND FOR USER: \"" + user + "\" FOR THE APPLICATION \" " + appName.toString() + "\"");
 
         try {
@@ -64,7 +64,7 @@ public class NoopEmailImpl implements EmailService{
             Set<String> addressees = emailTextProcessor.getAddressees(appName);
 
             doSend(subject, msg, addressees.toArray(new String[addressees.size()]));
-        } catch (NullPointerException npe){
+        } catch (NullPointerException npe) {
             LOGGER.info("No EmailTextProcessor set in NoopImplementation", npe);
         }
     }

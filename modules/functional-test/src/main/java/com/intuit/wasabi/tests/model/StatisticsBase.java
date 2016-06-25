@@ -41,25 +41,27 @@ public class StatisticsBase {
 
     /**
      * this method is used to update the reference count of the actions
+     *
      * @param eventCount is a map that contains the the event label and the count of the lable
      */
-    public void increaseCounts(Map<String, Integer> eventCount, Predicate<String> predicate){
+    public void increaseCounts(Map<String, Integer> eventCount, Predicate<String> predicate) {
         increaseEventCount(eventCount, predicate);
         increaseActionCount(eventCount, predicate);
     }
 
     /**
      * this method is used to update the reference count of the actions
+     *
      * @param eventCounts is a map that contains the the event label and the count of the lable
      */
-    private void increaseEventCount(Map<String, Integer> eventCounts, Predicate<String> predicate){
+    private void increaseEventCount(Map<String, Integer> eventCounts, Predicate<String> predicate) {
         int impressionCount = eventCounts.getOrDefault("impression", 0);
         int impressionUniqueCount = Math.min(impressionCount, 1);
         int jointCounts = 0;
-        if (!predicate.test("click")){
+        if (!predicate.test("click")) {
             jointCounts += eventCounts.getOrDefault("click", 0);
         }
-        if (!predicate.test("love it")){
+        if (!predicate.test("love it")) {
             jointCounts += eventCounts.getOrDefault("love it", 0);
         }
         int jointUniqueCount = Math.min(jointCounts, 1);
@@ -71,19 +73,20 @@ public class StatisticsBase {
 
     /**
      * this method is used to update the reference count of the actions
+     *
      * @param eventCounts is a map that contains the the event label and the count of the label
      */
-    private void increaseActionCount(Map<String, Integer> eventCounts, Predicate<String> predicate){
-        eventCounts.forEach((k,v)->{
-            if(!"impression".equals(k) && ! predicate.test(k) ){
+    private void increaseActionCount(Map<String, Integer> eventCounts, Predicate<String> predicate) {
+        eventCounts.forEach((k, v) -> {
+            if (!"impression".equals(k) && !predicate.test(k)) {
                 OutputBucketStatistics.ActionCount data = actionCounts.get(k);
-                if (data == null){
+                if (data == null) {
                     data = new OutputBucketStatistics.ActionCount();
                     data.setActionName(k);
                     actionCounts.put(k, data);
                 }
-                data.setEventCount( data.getEventCount() + v );
-                data.setUniqueUserCount( data.getUniqueUserCount() + 1 );
+                data.setEventCount(data.getEventCount() + v);
+                data.setUniqueUserCount(data.getUniqueUserCount() + 1);
             }
         });
     }

@@ -43,7 +43,7 @@ import static org.apache.commons.lang3.StringUtils.join;
 
 /**
  * The API endpoint /logs provides audit logs for application admins.
- *
+ * <p>
  * The logs can be filtered, sorted, paginated. By default the page {@link APISwaggerResource#DEFAULT_PAGE} is returned,
  * containing the last {@link APISwaggerResource#DEFAULT_PER_PAGE} actions. The logs are by default sorted by their
  * occurence date, descending.
@@ -74,7 +74,7 @@ public class LogsResource {
     /**
      * Returns a list of audit log entries for the specified application if the requesting user has access to it.
      * To have access the user needs {@link Permission#ADMIN} permissions for the application.
-     *
+     * <p>
      * Before returning the paginated list of log entries it gets
      * <ul>
      * <li>filtered,</li>
@@ -164,7 +164,7 @@ public class LogsResource {
     /**
      * Returns a list of audit log entries for all applications, if the requesting user has access to it.
      * To have access the user needs {@link Permission#SUPERADMIN} permissions.
-     *
+     * <p>
      * Before returning the paginated list of log entries it gets
      * <ul>
      * <li>filtered,</li>
@@ -372,13 +372,13 @@ public class LogsResource {
      * Creates navigation links for a {@code Link} headers field.<br />
      * This will contain a comma separated list of entries with (relative) links in {@code < >} and a {@code rel}
      * attribute which describes the link.<br />
-     *
+     * <p>
      * Examples:
      * <ul>
      * <li>{@code &lt;/api/v1/logs/applications/MyApplication?per_page=20&page=2&gt;; rel="Page 2"}</li>
      * <li>{@code &lt;/api/v1/logs/applications/MyApplication?per_page=20&page=2&gt;; rel="Page 2", &lt;/api/v1/logs/applications/MyApplication?per_page=20&page=1&gt;; rel="Previous"}</li>
      * </ul>
-     *
+     * <p>
      * The method automatically generates links to the "First" and "Last" pages and, if applicable, for the "Next" and
      * "Previous" pages. Additionally it will generate links from pages {@code page-boundary} to {@code page+boundary},
      * excluding the current page and unreachable pages. Those pages will have their rel-attributes set to "Page X",

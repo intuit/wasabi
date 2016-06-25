@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,11 +23,10 @@ import com.intuit.wasabi.tests.library.util.serialstrategies.SerializationStrate
  */
 public class Application extends ModelItem {
 
-    /** the application name */
-    public String name;
-
     /** The serialization strategy for comparisons and JSON serialization. */
     private static SerializationStrategy serializationStrategy = new DefaultNameExclusionStrategy();
+    /** the application name */
+    public String name;
 
     /**
      * Creates an application with a default name.
@@ -67,6 +66,16 @@ public class Application extends ModelItem {
     }
 
     /**
+     * Returns the current SerializationStrategy.
+     *
+     * @return the current SerializationStategy.
+     */
+    @Override
+    public SerializationStrategy getSerializationStrategy() {
+        return Application.serializationStrategy;
+    }
+
+    /**
      * Sets the SerializationStrategy which is used for JSON serialization and
      * {@link Experiment#equals(Object)}.
      *
@@ -75,16 +84,6 @@ public class Application extends ModelItem {
     @Override
     public void setSerializationStrategy(SerializationStrategy serializationStrategy) {
         Application.serializationStrategy = serializationStrategy;
-    }
-
-    /**
-     * Returns the current SerializationStrategy.
-     *
-     * @return the current SerializationStategy.
-     */
-    @Override
-    public SerializationStrategy getSerializationStrategy() {
-        return Application.serializationStrategy;
     }
 
 }

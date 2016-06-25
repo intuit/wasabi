@@ -20,7 +20,7 @@
 <suite name="SegmentOnHttpHeaderTest" parallel="false">
     <test name="SegmentOnHttpHeaderTest">
         <classes>
-            <class name="com.intuit.wasabi.tests.service.SegmentOnHttpHeaderTest" />
+            <class name="com.intuit.wasabi.tests.service.SegmentOnHttpHeaderTest"/>
         </classes>
     </test>
 </suite>

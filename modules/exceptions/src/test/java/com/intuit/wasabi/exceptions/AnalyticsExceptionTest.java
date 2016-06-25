@@ -26,6 +26,6 @@ public class AnalyticsExceptionTest {
 
         assertThat(e.getErrorCode(), is(ANALYTICS_FAILED));
         assertThat(e.getMessage(), is("e1"));
-        assertThat(e.getCause(), Is.<Throwable>is(r));
+        assertThat(e.getCause(), Is.is(r));
     }
 }

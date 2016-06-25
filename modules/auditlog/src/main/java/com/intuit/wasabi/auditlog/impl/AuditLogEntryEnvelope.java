@@ -17,7 +17,7 @@ import com.intuit.wasabi.repository.AuditLogRepository;
     /**
      * Wraps {@code entry} into this envelope.
      *
-     * @param entry the entry to wrap
+     * @param entry      the entry to wrap
      * @param repository the repository to store events
      */
     public AuditLogEntryEnvelope(final AuditLogEntry entry, final AuditLogRepository repository) {

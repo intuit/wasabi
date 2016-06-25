@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -41,11 +41,11 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class DBITransaction implements Transaction {
 
     private static final Logger LOGGER = getLogger(DBITransaction.class);
+    private final Pattern notNullPattern = compile("^.*Column \'(\\S+)\' cannot be null");
+    private final Pattern duplicateEntryPattern = compile("^.*Duplicate entry \'(\\S+)\' for key \'(\\S+)\'");
     private Handle handle;
     private DBI dbi;
     private boolean inTransaction = false;
-    private final Pattern notNullPattern = compile("^.*Column \'(\\S+)\' cannot be null");
-    private final Pattern duplicateEntryPattern = compile("^.*Duplicate entry \'(\\S+)\' for key \'(\\S+)\'");
 
     public DBITransaction(DBI dbi) {
         this.dbi = dbi;
@@ -55,7 +55,7 @@ public class DBITransaction implements Transaction {
      * {@inheritDoc}
      */
     @Override
-    public Object transaction(Block block)  {
+    public Object transaction(Block block) {
         try {
             begin();
             Object value = block.value(this);
@@ -96,13 +96,13 @@ public class DBITransaction implements Transaction {
      * {@inheritDoc}
      */
     @Override
-    public List select(final String query, final Object... params)  {
+    public List select(final String query, final Object... params) {
         return (List) perform(new HandleBlock() {
             /**
              * {@inheritDoc}
              */
             @Override
-            public Object value(Handle arg)  {
+            public Object value(Handle arg) {
                 return handle.select(query, params);
             }
         });
@@ -120,19 +120,18 @@ public class DBITransaction implements Transaction {
      * {@inheritDoc}
      */
     @Override
-    public Integer insertAndReturnKey(final String query, final Object... params)  {
+    public Integer insertAndReturnKey(final String query, final Object... params) {
         return insert(true, query, params);
     }
 
-    private Integer insert(final boolean shouldReturnId, final String query, final Object... params)
-             {
+    private Integer insert(final boolean shouldReturnId, final String query, final Object... params) {
         try {
             return (Integer) perform(new HandleBlock() {
                 /**
                  * {@inheritDoc}
                  */
                 @Override
-                public Object value(Handle handle)  {
+                public Object value(Handle handle) {
                     Update statement = handle.createStatement(query);
 
                     for (int i = 0; i < params.length; i++) {
@@ -154,19 +153,19 @@ public class DBITransaction implements Transaction {
      * {@inheritDoc}
      */
     @Override
-    public Integer update(final String query, final Object... params)  {
+    public Integer update(final String query, final Object... params) {
         return (Integer) perform(new HandleBlock() {
             /**
              * {@inheritDoc}
              */
             @Override
-            public Object value(Handle handle)  {
+            public Object value(Handle handle) {
                 return handle.update(query, params);
             }
         });
     }
 
-    private Object perform(HandleBlock block)  {
+    private Object perform(HandleBlock block) {
         handle = getHandle();
         try {
             return block.value(handle);
@@ -251,7 +250,7 @@ public class DBITransaction implements Transaction {
         return false;
     }
 
-    private WasabiException remapMySQLException(SQLException ex)  {
+    private WasabiException remapMySQLException(SQLException ex) {
         String msg = ex.getMessage();
         final Matcher notNull = notNullPattern.matcher(msg);
 

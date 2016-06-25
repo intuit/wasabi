@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,11 +28,13 @@ import com.intuit.hyrule.exceptions.MissingInputException;
 import com.intuit.hyrule.exceptions.TreeStructureException;
 import com.intuit.wasabi.analyticsobjects.Parameters;
 import com.intuit.wasabi.assignment.AssignmentDecorator;
-import com.intuit.wasabi.assignment.Assignments;
 import com.intuit.wasabi.assignment.AssignmentIngestionExecutor;
+import com.intuit.wasabi.assignment.Assignments;
 import com.intuit.wasabi.assignmentobjects.*;
 import com.intuit.wasabi.eventlog.EventLog;
-import com.intuit.wasabi.exceptions.*;
+import com.intuit.wasabi.exceptions.AssignmentExistsException;
+import com.intuit.wasabi.exceptions.BucketNotFoundException;
+import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
 import com.intuit.wasabi.experiment.Pages;
 import com.intuit.wasabi.experiment.Priorities;
 import com.intuit.wasabi.experimentobjects.*;
@@ -53,7 +55,6 @@ import javax.annotation.Nullable;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
-import java.net.URI;
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -67,16 +68,11 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 public class AssignmentsImpl implements Assignments {
 
+    protected static final String RULE_CACHE = "ruleCache";
     /**
      * Logger for the class
      */
     private static final Logger LOGGER = getLogger(AssignmentsImpl.class);
-
-    /**
-     * Executors to ingest data to real time ingestion system.
-     */
-	protected Map<String, AssignmentIngestionExecutor> executors;
-
     /**
      * Experiment repo
      */
@@ -91,28 +87,23 @@ public class AssignmentsImpl implements Assignments {
      * Assignments reo
      */
     protected final AssignmentsRepository assignmentsRepository;
-
-    protected AssignmentDecorator assignmentDecorator = null;
-
     private final SecureRandom random;
-
-
+    /**
+     * Executors to ingest data to real time ingestion system.
+     */
+    protected Map<String, AssignmentIngestionExecutor> executors;
+    protected AssignmentDecorator assignmentDecorator = null;
+    protected ThreadPoolExecutor ruleCacheExecutor;
+    //TODO: instead of provider type, these needs to be factories
+    protected Provider<Envelope<AssignmentEnvelopePayload, DatabaseExport>> assignmentDBEnvelopeProvider;
+    //TODO: instead of provider type, these needs to be factories
+    protected Provider<Envelope<AssignmentEnvelopePayload, WebExport>> assignmentWebEnvelopeProvider;
+    // Rule-Cache queue set up
+    protected RuleCache ruleCache;
     /**
      * Proxy related info
      */
     private HttpCall<PersonalizationEngineResponse> httpCall = new HttpCallImplWithConnectionPooling<>();
-
-    protected static final String RULE_CACHE = "ruleCache";
-    protected ThreadPoolExecutor ruleCacheExecutor;
-
-    //TODO: instead of provider type, these needs to be factories
-    protected Provider<Envelope<AssignmentEnvelopePayload, DatabaseExport>> assignmentDBEnvelopeProvider;
-
-    //TODO: instead of provider type, these needs to be factories
-    protected Provider<Envelope<AssignmentEnvelopePayload, WebExport>> assignmentWebEnvelopeProvider;
-
-    // Rule-Cache queue set up
-    protected RuleCache ruleCache;
     private Priorities priorities;
     private Pages pages;
 
@@ -277,15 +268,15 @@ public class AssignmentsImpl implements Assignments {
                 experimentID));
 
         // Ingest data to real time data ingestion systems if executors exist
-		for (String name : executors.keySet()) {
-			executors.get(name).execute(new AssignmentEnvelopePayload(userID, context, createAssignment, false, ignoreSamplingPercent,
+        for (String name : executors.keySet()) {
+            executors.get(name).execute(new AssignmentEnvelopePayload(userID, context, createAssignment, false, ignoreSamplingPercent,
                     segmentationProfile, assignment != null ? assignment.getStatus() : null,
                     assignment != null ? assignment.getBucketLabel() : null, pageName, applicationName,
                     experimentLabel, experimentID,
                     currentDate, headers));
-		}
+        }
 
-		return assignment;
+        return assignment;
     }
 
     @Override
@@ -420,13 +411,13 @@ public class AssignmentsImpl implements Assignments {
         }
 
         // Ingest data to real time data ingestion systems if executors exist
-		for (String name : executors.keySet()) {
-			executors.get(name).execute(new AssignmentEnvelopePayload(userID, context, createAssignment, false,
+        for (String name : executors.keySet()) {
+            executors.get(name).execute(new AssignmentEnvelopePayload(userID, context, createAssignment, false,
                     ignoreSamplingPercent, segmentationProfile, assignment != null ? assignment.getStatus() : null,
                     assignment != null ? assignment.getBucketLabel() : null, pageName, applicationName, experimentLabel,
                     experimentID, currentDate, headers));
-		}        
-        
+        }
+
         // Updating rule cache.  This will cause future assignment calls, on this server, to
         // use the new version of the rule, if it has recently been changed.
         ruleCacheExecutor.execute(new ExperimentRuleCacheUpdateEnvelope(experiment.getRule(),
@@ -437,9 +428,9 @@ public class AssignmentsImpl implements Assignments {
 
     @Override
     public List<Map> doBatchAssignments(User.ID userID, Application.Name applicationName, Context context,
-                                            boolean createAssignment, boolean forceInExperiment, HttpHeaders headers,
-                                            ExperimentBatch experimentBatch, Page.Name pageName,
-                                            Map<Experiment.ID, Boolean> allowAssignments) {
+                                        boolean createAssignment, boolean forceInExperiment, HttpHeaders headers,
+                                        ExperimentBatch experimentBatch, Page.Name pageName,
+                                        Map<Experiment.ID, Boolean> allowAssignments) {
 
         // Get the metadata of all the experiments for this application
         Table<Experiment.ID, Experiment.Label, Experiment> allExperiments = repository.getExperimentList(applicationName);
@@ -547,7 +538,7 @@ public class AssignmentsImpl implements Assignments {
         //throw exception if assignment already exists for user unless overwrite == true
         Assignment currentAssignment = assignmentsRepository.getAssignment(experimentID, userID, context);
         if (!overwrite && currentAssignment != null && !currentAssignment.isBucketEmpty()) {
-                throw new AssignmentExistsException(userID, applicationName, experimentLabel);
+            throw new AssignmentExistsException(userID, applicationName, experimentLabel);
         }
 
         //check that the desired bucket is valid
@@ -592,13 +583,13 @@ public class AssignmentsImpl implements Assignments {
         Date date = new Date();
 
         // Ingest data to real time data ingestion systems if executors exist
-		for (String name : executors.keySet()) {
-			executors.get(name).execute(new AssignmentEnvelopePayload(userID, context, false, true, false, null,
+        for (String name : executors.keySet()) {
+            executors.get(name).execute(new AssignmentEnvelopePayload(userID, context, false, true, false, null,
                     Assignment.Status.NEW_ASSIGNMENT, assignment.getBucketLabel(), null, applicationName,
                     experimentLabel, experimentID,
                     date, null));
-		}        
-        
+        }
+
         //write assignment after checking assignment in first step
         return assignmentsRepository.assignUser(assignment, experiment, date);
     }
@@ -637,9 +628,9 @@ public class AssignmentsImpl implements Assignments {
         return true;
     }
 
-	protected boolean checkMutex(Experiment experiment,
-                               Table<Experiment.ID, Experiment.Label, String> userAssignments,
-                               Map<Experiment.ID, List<Experiment.ID>> exclusivesList) {
+    protected boolean checkMutex(Experiment experiment,
+                                 Table<Experiment.ID, Experiment.Label, String> userAssignments,
+                                 Map<Experiment.ID, List<Experiment.ID>> exclusivesList) {
 
         //if the experiment exists in the database and is in a valid MUTEX state
         if (experiment != null && (experiment.getState() == Experiment.State.RUNNING ||
@@ -664,7 +655,7 @@ public class AssignmentsImpl implements Assignments {
     }
 
     private Set<Experiment.ID> getNonNullUserAssignments(List<Experiment.ID> experimentIDList,
-                              Table<Experiment.ID, Experiment.Label, String> userAssignments) {
+                                                         Table<Experiment.ID, Experiment.Label, String> userAssignments) {
         Set<Experiment.ID> result = new HashSet<>();
         for (Experiment.ID experimentID : experimentIDList) {
             if (!userAssignments.row(experimentID).values().isEmpty() &&
@@ -687,8 +678,8 @@ public class AssignmentsImpl implements Assignments {
 
     @Override
     public List<Map> doPageAssignments(Application.Name applicationName, Page.Name pageName, User.ID userID,
-                                           Context context, boolean createAssignment, boolean ignoreSamplingPercent,
-                                           HttpHeaders headers, SegmentationProfile segmentationProfile) {
+                                       Context context, boolean createAssignment, boolean ignoreSamplingPercent,
+                                       HttpHeaders headers, SegmentationProfile segmentationProfile) {
 
         List<PageExperiment> pageExperimentList = pages.getExperiments(applicationName, pageName);
         Set<Experiment.Label> experimentLabels = new HashSet<>(pageExperimentList.size());
@@ -710,7 +701,7 @@ public class AssignmentsImpl implements Assignments {
     }
 
     protected Assignment nullAssignment(User.ID userID, Application.Name appName, Experiment.ID experimentID,
-                                      Assignment.Status status) {
+                                        Assignment.Status status) {
 
         return Assignment.newInstance(experimentID)
                 .withApplicationName(appName)
@@ -735,7 +726,7 @@ public class AssignmentsImpl implements Assignments {
      * @return boolean true if the current user is selected by the experiment segmentation rule
      */
     boolean doesProfileMatch(Experiment experiment, SegmentationProfile segmentationProfile,
-                                     HttpHeaders headers, Context context) {
+                             HttpHeaders headers, Context context) {
         return doesProfileMatch(experiment, segmentationProfile, headers, context, false);
     }
 
@@ -800,9 +791,9 @@ public class AssignmentsImpl implements Assignments {
     }
 
     protected Assignment getAssignment(final Experiment.ID experimentID,
-                                     final User.ID userID, final Context context,
-                                     final Table<Experiment.ID, Experiment.Label, String> userAssignments,
-                                     final BucketList bucketList) {
+                                       final User.ID userID, final Context context,
+                                       final Table<Experiment.ID, Experiment.Label, String> userAssignments,
+                                       final BucketList bucketList) {
 
         if (userAssignments != null && userAssignments.row(experimentID).isEmpty()) {
             return null;
@@ -830,7 +821,7 @@ public class AssignmentsImpl implements Assignments {
     }
 
     Assignment generateAssignment(Experiment experiment, User.ID userID, Context context,
-                                          boolean selectBucket, Date date) {
+                                  boolean selectBucket, Date date) {
 
         Assignment.Builder builder = Assignment.newInstance(experiment.getID())
                 .withApplicationName(experiment.getApplicationName())
@@ -1057,7 +1048,7 @@ public class AssignmentsImpl implements Assignments {
         queueLengthMap.put(RULE_CACHE, new Integer(this.ruleCacheExecutor.getQueue().size()));
         for (String name : executors.keySet()) {
             queueLengthMap.put(name.toLowerCase(), new Integer(executors.get(name).queueLength()));
-        }        
+        }
         return queueLengthMap;
     }
 

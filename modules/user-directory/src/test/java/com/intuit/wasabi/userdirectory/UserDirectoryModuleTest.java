@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,31 +32,31 @@ public class UserDirectoryModuleTest {
 
     @Test
     public void testConfigureDefaultClassFound() throws Exception {
-    	System.getProperties().put("user.lookup.class.name",
+        System.getProperties().put("user.lookup.class.name",
                 "com.intuit.wasabi.userdirectory.impl.DefaultUserDirectory");
-    	Injector injector = Guice.createInjector(new UserDirectoryModule());
+        Injector injector = Guice.createInjector(new UserDirectoryModule());
         UserDirectory userDirectory = injector.getInstance(UserDirectory.class);
         assertNotNull(userDirectory);
-   }
+    }
 
     @Test
     public void testProvidesUsers() throws Exception {
-    	UserDirectoryModule module = new UserDirectoryModule();
-    	List<UserInfo> users = module.provideUsers();
-    	assertEquals(4, users.size());
-   }
+        UserDirectoryModule module = new UserDirectoryModule();
+        List<UserInfo> users = module.provideUsers();
+        assertEquals(4, users.size());
+    }
 
-	@Test
+    @Test
     public void testConfigureDummyClassNotFound() throws Exception {
-    	System.getProperties().put("user.lookup.class.name",
+        System.getProperties().put("user.lookup.class.name",
                 "dummy.class.name");
-    	try {
-    		Injector injector = Guice.createInjector(new UserDirectoryModule());
-    		// should not happen
-    		fail();
-    		assertNull(injector);
-    	} catch(Exception e) {
-    		assertEquals(e.getCause().getClass(), UserToolsException.class);
-    	}
-   }
+        try {
+            Injector injector = Guice.createInjector(new UserDirectoryModule());
+            // should not happen
+            fail();
+            assertNull(injector);
+        } catch (Exception e) {
+            assertEquals(e.getCause().getClass(), UserToolsException.class);
+        }
+    }
 }

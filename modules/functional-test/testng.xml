@@ -20,25 +20,25 @@
 <suite name="IntegrationTestsMeta" parallel="false">
     <suite-files>
         <!-- test preparation -->
-        <suite-file path="testng_initialTeardown.xml" />
-        <suite-file path="testng_smokeTest.xml" />
+        <suite-file path="testng_initialTeardown.xml"/>
+        <suite-file path="testng_smokeTest.xml"/>
 
         <!-- extensive integration tests -->
-        <suite-file path="testng_integrationPreTests.xml" />
-        <suite-file path="testng_integrationTests.xml" />
-        <suite-file path="testng_integrationPostTests.xml" />
+        <suite-file path="testng_integrationPreTests.xml"/>
+        <suite-file path="testng_integrationTests.xml"/>
+        <suite-file path="testng_integrationPostTests.xml"/>
 
         <!-- basic functionality -->
-        <suite-file path="testng_authTest.xml" />
-        <suite-file path="testng_prioritiesTest.xml" />
-        <suite-file path="testng_feedbackTest.xml" />
+        <suite-file path="testng_authTest.xml"/>
+        <suite-file path="testng_prioritiesTest.xml"/>
+        <suite-file path="testng_feedbackTest.xml"/>
 
         <!-- bug fix tests -->
-        <suite-file path="testng_segHttpHeader.xml" />
-        <suite-file path="testng_segRuleFix.xml" />
-        <suite-file path="testng_repeatStateInconsistency.xml" />
+        <suite-file path="testng_segHttpHeader.xml"/>
+        <suite-file path="testng_segRuleFix.xml"/>
+        <suite-file path="testng_repeatStateInconsistency.xml"/>
 
         <!-- final clean up -->
-        <suite-file path="testng_teardown.xml" />
+        <suite-file path="testng_teardown.xml"/>
     </suite-files>
 </suite>

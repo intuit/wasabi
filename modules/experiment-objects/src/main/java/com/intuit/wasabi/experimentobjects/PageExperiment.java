@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,26 +31,8 @@ public class PageExperiment implements Cloneable {
     @ApiModelProperty(value = "flag to allow new assignments", required = true)
     private boolean allowNewAssignment;
 
-    public static Builder withAttributes(Experiment.ID experimentID, Experiment.Label label, boolean allowNewAssignment){
-        return new Builder(experimentID,label,allowNewAssignment);
-    }
-
-    public static class Builder{
-        private PageExperiment instance;
-
-        public Builder(Experiment.ID experimentID, Experiment.Label label, boolean allowNewAssignment){
-            super();
-            instance = new PageExperiment();
-            instance.id = experimentID;
-            instance.label = label;
-            instance.allowNewAssignment = allowNewAssignment;
-        }
-
-        public PageExperiment build(){
-            PageExperiment result = instance;
-            instance = null;
-            return result;
-        }
+    public static Builder withAttributes(Experiment.ID experimentID, Experiment.Label label, boolean allowNewAssignment) {
+        return new Builder(experimentID, label, allowNewAssignment);
     }
 
     public Experiment.ID getId() {
@@ -79,12 +61,12 @@ public class PageExperiment implements Cloneable {
 
     @Override
     public int hashCode() {
-    	return HashCodeBuilder.reflectionHashCode(this);
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override
     public boolean equals(Object obj) {
-    	   return EqualsBuilder.reflectionEquals(this, obj);
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 
     @Override
@@ -92,7 +74,7 @@ public class PageExperiment implements Cloneable {
         return "PageExperiment{" +
                 "id=" + id +
                 ", label=" + label +
-                ", allowNewAssignment="+ allowNewAssignment +"}";
+                ", allowNewAssignment=" + allowNewAssignment + "}";
     }
 
     @Override
@@ -102,6 +84,24 @@ public class PageExperiment implements Cloneable {
         } catch (CloneNotSupportedException e) {
             // Should never happen
             throw new RuntimeException(e);
+        }
+    }
+
+    public static class Builder {
+        private PageExperiment instance;
+
+        public Builder(Experiment.ID experimentID, Experiment.Label label, boolean allowNewAssignment) {
+            super();
+            instance = new PageExperiment();
+            instance.id = experimentID;
+            instance.label = label;
+            instance.allowNewAssignment = allowNewAssignment;
+        }
+
+        public PageExperiment build() {
+            PageExperiment result = instance;
+            instance = null;
+            return result;
         }
     }
 

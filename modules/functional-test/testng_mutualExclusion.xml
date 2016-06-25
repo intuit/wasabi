@@ -20,7 +20,7 @@
 <suite name="MutualExclusionTest">
     <test name="MutualExclusionTest">
         <classes>
-            <class name="com.intuit.wasabi.tests.service.IntegrationMutualExclusion" />
+            <class name="com.intuit.wasabi.tests.service.IntegrationMutualExclusion"/>
         </classes>
     </test>
 </suite>

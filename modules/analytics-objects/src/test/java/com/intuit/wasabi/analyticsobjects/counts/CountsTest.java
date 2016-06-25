@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,9 +18,7 @@ package com.intuit.wasabi.analyticsobjects.counts;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class CountsTest {
     Counts counter;
@@ -28,14 +26,14 @@ public class CountsTest {
     long uniqueUserCount;
 
     @Before
-    public void setup(){
+    public void setup() {
         eventCount = 500000;
-        uniqueUserCount  = 500000;
+        uniqueUserCount = 500000;
         counter = new Counts.Builder().withEventCount(eventCount).withUniqueUserCount(uniqueUserCount).build();
     }
 
     @Test
-    public void testBuilder(){
+    public void testBuilder() {
         assertEquals(counter.getEventCount(), eventCount);
         assertEquals(counter.getUniqueUserCount(), uniqueUserCount);
         assertNotNull(counter.clone());
@@ -44,21 +42,21 @@ public class CountsTest {
     }
 
     @Test
-    public void testAddEventCount(){
+    public void testAddEventCount() {
         long addEventValue = 100000;
         counter.addEventCount(addEventValue);
         assertEquals(counter.getEventCount(), eventCount + addEventValue);
     }
 
     @Test
-    public void testAddUniqueUserCount(){
+    public void testAddUniqueUserCount() {
         long addUserValue = 100000;
         counter.addUniqueUserCount(addUserValue);
         assertEquals(counter.getUniqueUserCount(), uniqueUserCount + addUserValue);
     }
 
     @Test
-    public void testAddCount(){
+    public void testAddCount() {
         // Reset to setup value due to previous tests
         counter.setEventCount(eventCount);
         counter.setUniqueUserCount(uniqueUserCount);

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,14 +32,14 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * An <tt>APIServerConnector</tt> object stores the current server url, and provides methods for doing REST GET, POST, etc. to the server. 
- * 
+ *
  * @since September 5, 2014
- * 
+ *
  * If a non-null user name is passed to the constructor, then basic, preemptive authentication will be used.
- *  
+ *
  * The {@code clone} method is meant for making a clone of a connector that then can be modified using the setters, 
  * thus avoiding to have to specify all arguments that otherwise go into a constructor call. 
- *  
+ *
  */
 
 public class APIServerConnector {
@@ -55,7 +55,7 @@ public class APIServerConnector {
     private String basePath;
     private String userName;
     private String password;
-    private Map<String,String> headerMap;
+    private Map<String, String> headerMap;
     private ContentType contentType = ContentType.JSON;
 
     /**
@@ -131,7 +131,7 @@ public class APIServerConnector {
     }
 
     // Public utility methods
-    public APIServerConnector clone () {
+    public APIServerConnector clone() {
         // NIT Consider replacing this by the Object.clone method it overrides
         APIServerConnector theClone = new APIServerConnector(
                 this.baseUri,
@@ -144,11 +144,11 @@ public class APIServerConnector {
     }
 
     // Private helper Methods
-    public String getJsonString (Object jsonBody) {
+    public String getJsonString(Object jsonBody) {
         String jsonString = null;
         if (jsonBody != null) {
             if (jsonBody.getClass() == String.class) {
-                jsonString = (String)jsonBody;
+                jsonString = (String) jsonBody;
             } else {
                 Gson gson = new Gson();
                 jsonString = gson.toJson(jsonBody);
@@ -170,37 +170,37 @@ public class APIServerConnector {
      *
      * TODO Should handle other header keys, and multiple content types.
      */
-    private String curlCallString (String method, String url, String formJSON) {
+    private String curlCallString(String method, String url, String formJSON) {
 
         String dataString = "";
-        if (formJSON != null && ! formJSON.isEmpty()) {
+        if (formJSON != null && !formJSON.isEmpty()) {
             dataString = "-d '" + formJSON + "' ";
         }
 
         String authString = "";
-        if (userName != null && ! userName.isEmpty()) {
+        if (userName != null && !userName.isEmpty()) {
             authString = "-u $api_user:$api_user_password "; // Don't print actual values!
         }
 
         String agentString = "";
         String contentTypeString = "-H \"Content-Type:application/json\" "; // Default is JSON
         if (this.headerMap != null) {
-            for (Map.Entry<String,String> entry : this.headerMap.entrySet()) {
+            for (Map.Entry<String, String> entry : this.headerMap.entrySet()) {
                 String key = entry.getKey();
                 String value = entry.getValue();
 
                 switch (key) {
-                case "User-Agent":
-                    agentString = "-A " + value + " ";
-                    break;
-                case "Content-Type":
-                    contentTypeString = "-H \"Content-Type:" + value + "\" ";
-                    break;
-                case "Authorization":
-                    authString = "-H \"Authorization: " + value + "\"";
-                    break;
-                default:
-                    throw new IllegalArgumentException("Support for key \"" + key + "\" not implemented yet.");
+                    case "User-Agent":
+                        agentString = "-A " + value + " ";
+                        break;
+                    case "Content-Type":
+                        contentTypeString = "-H \"Content-Type:" + value + "\" ";
+                        break;
+                    case "Authorization":
+                        authString = "-H \"Authorization: " + value + "\"";
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Support for key \"" + key + "\" not implemented yet.");
                 }
             }
         }
@@ -217,7 +217,7 @@ public class APIServerConnector {
         return curlCall;
     }
 
-    private RequestSpecification constructRequestSpec () {
+    private RequestSpecification constructRequestSpec() {
         RequestSpecBuilder reqBuilder = new RequestSpecBuilder();
         reqBuilder.setContentType(this.contentType);
         reqBuilder.setBaseUri(this.baseUri);
@@ -243,7 +243,7 @@ public class APIServerConnector {
 
     /**
      * Does a HTTP POST with the given {@code formJSON} in the body
-     * 
+     *
      * @param url    The API call part of the URL (i.e. everything after ".../api/v1/"). 
      * @param jsonBody    The JSON body to pass to the REST API call. Can be either a String, or an Object which can convert to a JSON string using Gson's toJson method.
      * @return The response object returned 
@@ -253,12 +253,12 @@ public class APIServerConnector {
         LOGGER.info(curlCallString("POST", url, formJSON));
         long startTime = System.currentTimeMillis();
 
-        Response response;        
+        Response response;
         if (formJSON != null) {
             response = given().
                     spec(this.requestSpec).
                     body(formJSON).
-                    post(url);            
+                    post(url);
         } else {
             response = given().
                     spec(this.requestSpec).
@@ -270,21 +270,21 @@ public class APIServerConnector {
         LOGGER.info("Duration for POST " + url + ": " + duration);
 
         return response;
-    }  
+    }
 
     /**
      * Does a HTTP POST with an empty body 
-     * 
+     *
      * @param url    The API call part of the URL (i.e. everything after ".../api/v1/"). 
      * @return The response object returned 
      */
     public Response doPost(String url) {
-        return doPost(url, null); 
-    }  
+        return doPost(url, null);
+    }
 
     /**
      * Does a HTTP PUT with the given {@code formJSON} in the body
-     * 
+     *
      * @param url    The API call part of the URL (i.e. everything after ".../api/v1/"). 
      * @param jsonBody    The JSON body to pass to the REST API call. Can be either a String, or an Object which can convert to a JSON string using Gson's toJson method.
      * @return The response object returned 
@@ -294,7 +294,7 @@ public class APIServerConnector {
         LOGGER.info(curlCallString("PUT", url, formJSON));
         long startTime = System.currentTimeMillis();
 
-        Response response;        
+        Response response;
         if (formJSON != null) {
             response = given().
                     spec(this.requestSpec).
@@ -311,22 +311,22 @@ public class APIServerConnector {
         LOGGER.info("Duration for PUT " + url + ": " + duration);
 
         return response;
-    }  
+    }
 
     /**
      * Does a HTTP PUT with an empty body
-     * 
+     *
      * @param url    The API call part of the URL (i.e. everything after ".../api/v1/"). 
      * @return The response object returned 
      */
     public Response doPut(String url) {
-        return doPut(url, null); 
-    }  
+        return doPut(url, null);
+    }
 
 
     /**
      * Does a HTTP GET
-     * 
+     *
      * @param url    The API call part of the URL (i.e. everything after ".../api/v1/")
      * @param jsonBody    The JSON body to pass to the REST API call. Can be either a String, or an Object which can convert to a JSON string using Gson's toJson method.
      * @return The response object returned 
@@ -337,12 +337,12 @@ public class APIServerConnector {
 
         long startTime = System.currentTimeMillis();
 
-        Response response;        
+        Response response;
         if (formJSON != null) {
             response = given().
                     spec(this.requestSpec).
                     body(formJSON).
-                    get(url);            
+                    get(url);
         } else {
             response = given().
                     spec(this.requestSpec).
@@ -354,22 +354,22 @@ public class APIServerConnector {
         LOGGER.info("Duration for GET " + url + ": " + duration);
 
         return response;
-    }  
+    }
 
     /**
      * Does a HTTP GET with an empty body
-     * 
+     *
      * @param url    The API call part of the URL (i.e. everything after ".../api/v1/"). 
      * @return The response object returned 
      */
     public Response doGet(String url) {
-        return doGet(url, null); 
-    }  
+        return doGet(url, null);
+    }
 
 
     /**
      * Does a HTTP DELETE
-     * 
+     *
      * @param url    The API call part of the URL (i.e. everything after ".../api/v1/")
      * @param jsonBody    The JSON body to pass to the REST API call. Can be either a String, or an Object which can convert to a JSON string using Gson's toJson method.
      * @return The response object returned 
@@ -380,12 +380,12 @@ public class APIServerConnector {
 
         long startTime = System.currentTimeMillis();
 
-        Response response;        
+        Response response;
         if (formJSON != null) {
             response = given().
                     spec(this.requestSpec).
                     body(formJSON).
-                    delete(url);            
+                    delete(url);
         } else {
             response = given().
                     spec(this.requestSpec).
@@ -397,21 +397,21 @@ public class APIServerConnector {
         LOGGER.info("Duration for DELETE " + url + ": " + duration);
 
         return response;
-    }  
+    }
 
     /**
      * Does a HTTP DELETE with an empty body
-     * 
+     *
      * @param url    The API call part of the URL (i.e. everything after ".../api/v1/"). 
      * @return The response object returned 
      */
     public Response doDelete(String url) {
-        return doDelete(url, null); 
-    }  
+        return doDelete(url, null);
+    }
 
     /**
      * Does a HTTP PATCH with the given {@code formJSON} in the body
-     * 
+     *
      * @param url    The API call part of the URL (i.e. everything after ".../api/v1/"). 
      * @param jsonBody    The JSON body to pass to the REST API call. Can be either a String, or an Object which can convert to a JSON string using Gson's toJson method.
      * @return The response object returned 
@@ -421,13 +421,13 @@ public class APIServerConnector {
         LOGGER.info(curlCallString("PATCH", url, formJSON));
         long startTime = System.currentTimeMillis();
 
-        Response response;        
+        Response response;
         if (formJSON != null) {
             response = given().
                     spec(this.requestSpec).
                     body(formJSON).
                     contentType("application/json-patch+json").
-                    patch(url);            
+                    patch(url);
         } else {
             response = given().
                     spec(this.requestSpec).
@@ -440,15 +440,15 @@ public class APIServerConnector {
 
         return response;
     }
-    
+
     /**
      * Does a HTTP PATCH with an empty body 
-     * 
+     *
      * @param url    The API call part of the URL (i.e. everything after ".../api/v1/"). 
      * @return The response object returned 
      */
     public Response doPatch(String url) {
-        return doPatch(url, null); 
-    }  
+        return doPatch(url, null);
+    }
 
 }

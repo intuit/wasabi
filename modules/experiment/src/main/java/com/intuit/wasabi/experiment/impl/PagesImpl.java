@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,13 +23,7 @@ import com.intuit.wasabi.exceptions.ApplicationNotFoundException;
 import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
 import com.intuit.wasabi.experiment.Experiments;
 import com.intuit.wasabi.experiment.Pages;
-import com.intuit.wasabi.experimentobjects.Application;
-import com.intuit.wasabi.experimentobjects.Experiment;
-import com.intuit.wasabi.experimentobjects.ExperimentList;
-import com.intuit.wasabi.experimentobjects.ExperimentPage;
-import com.intuit.wasabi.experimentobjects.ExperimentPageList;
-import com.intuit.wasabi.experimentobjects.Page;
-import com.intuit.wasabi.experimentobjects.PageExperiment;
+import com.intuit.wasabi.experimentobjects.*;
 import com.intuit.wasabi.experimentobjects.exceptions.InvalidExperimentStateException;
 import com.intuit.wasabi.repository.CassandraRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
@@ -89,7 +83,8 @@ public class PagesImpl implements Pages {
         Application.Name applicationName = getApplicationNameForModifyingPages(experimentID);
         pagesRepository.deletePage(applicationName, experimentID, pageName);
 
-        Experiment experiment = experiments.getExperiment(experimentID);if (experiment != null) {
+        Experiment experiment = experiments.getExperiment(experimentID);
+        if (experiment != null) {
             eventLog.postEvent(new ExperimentChangeEvent(user, experiment, "pages", pageName.toString(), null));
         }
     }
@@ -176,7 +171,7 @@ public class PagesImpl implements Pages {
     @Override
     public List<Page> getPageList(Application.Name applicationName) {
         // Throw an exception if application name is invalid
-        if (applicationName == null || StringUtils.isBlank(applicationName.toString())){
+        if (applicationName == null || StringUtils.isBlank(applicationName.toString())) {
             throw new ApplicationNotFoundException("The Application name can not be null or empty");
         }
         return pagesRepository.getPageList(applicationName);
@@ -188,7 +183,7 @@ public class PagesImpl implements Pages {
     @Override
     public List<PageExperiment> getExperiments(Application.Name applicationName, Page.Name pageName) {
         // Throw an exception if application name is invalid
-        if (applicationName == null || StringUtils.isBlank(applicationName.toString())){
+        if (applicationName == null || StringUtils.isBlank(applicationName.toString())) {
             throw new ApplicationNotFoundException("The Application name can not be null or empty");
         }
 
@@ -201,7 +196,7 @@ public class PagesImpl implements Pages {
     @Override
     public Map<Page.Name, List<PageExperiment>> getPageAndExperimentList(Application.Name applicationName) {
         // Throw an exception if application name is invalid
-        if (applicationName == null || StringUtils.isBlank(applicationName.toString())){
+        if (applicationName == null || StringUtils.isBlank(applicationName.toString())) {
             throw new ApplicationNotFoundException("The Application name can not be null or empty");
         }
         return pagesRepository.getPageExperimentList(applicationName);

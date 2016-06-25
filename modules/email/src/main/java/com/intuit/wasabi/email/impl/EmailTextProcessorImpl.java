@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,7 +16,6 @@
 package com.intuit.wasabi.email.impl;
 
 import com.google.inject.Inject;
-
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authorizationobjects.Role;
 import com.intuit.wasabi.authorizationobjects.UserRole;
@@ -38,8 +37,8 @@ import org.stringtemplate.v4.ST;
 
 import java.util.*;
 
-import static com.intuit.wasabi.email.WasabiEmailFields.*;
 import static com.intuit.wasabi.email.TextTemplates.*;
+import static com.intuit.wasabi.email.WasabiEmailFields.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -47,9 +46,9 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 public class EmailTextProcessorImpl implements EmailTextProcessor {
 
+    private final static Logger LOGGER = getLogger(EmailTextProcessorImpl.class);
     /* need this for getting the admins to an experiment */
     private AuthorizationRepository authorizationRepository;
-    private final static Logger LOGGER = getLogger(EmailTextProcessorImpl.class);
 
     @Inject
     public EmailTextProcessorImpl(final AuthorizationRepository authorizationRepository) {

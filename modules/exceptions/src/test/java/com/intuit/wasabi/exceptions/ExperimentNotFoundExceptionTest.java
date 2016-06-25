@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,25 +15,21 @@
  *******************************************************************************/
 package com.intuit.wasabi.exceptions;
 
-import org.junit.Assert;
-
+import com.intuit.wasabi.experimentobjects.Experiment;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.intuit.wasabi.experimentobjects.Experiment;
-
 @RunWith(MockitoJUnitRunner.class)
 public class ExperimentNotFoundExceptionTest {
 
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
     private Experiment.ID experimentID = Experiment.ID.newInstance();
     private Experiment.Label label = Experiment.Label.valueOf("testExp");
     private String message = "ExperimentNotFoundException error: ";
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     @Test
     public void testExperimentNotFoundException1() {

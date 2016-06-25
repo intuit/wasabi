@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,7 +20,6 @@ import com.intuit.wasabi.analyticsobjects.counts.ActionCounts;
 import com.intuit.wasabi.analyticsobjects.counts.Counts;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Bucket.Label;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -28,9 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static junit.framework.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class BucketStatisticsTest {
     Bucket.Label label;
@@ -43,7 +40,7 @@ public class BucketStatisticsTest {
     BucketStatistics bucketStatistics;
 
     @Before
-    public void setup(){
+    public void setup() {
         label = Bucket.Label.valueOf("TestWinner");
         actionCountsMap = new HashMap<Event.Name, ActionCounts>();
         actionRateMap = new HashMap<Event.Name, ActionRate>();
@@ -58,7 +55,7 @@ public class BucketStatisticsTest {
     }
 
     @Test
-    public void testTwoObjectsEqual(){
+    public void testTwoObjectsEqual() {
         BucketStatistics bucketStatistics2 = new BucketStatistics.Builder().withLabel(label)
                 .withActionCounts(actionCountsMap).withActionRates(actionRateMap)
                 .withJointActionCounts(jointActionCounts).withImpressionCounts(impressionCounts)
@@ -67,7 +64,7 @@ public class BucketStatisticsTest {
     }
 
     @Test
-    public void testTwoObjectsNotEqual(){
+    public void testTwoObjectsNotEqual() {
         Label label2 = Bucket.Label.valueOf("TestWinner2");
 
         BucketStatistics bucketStatistics2 = new BucketStatistics.Builder().withLabel(label2)
@@ -78,7 +75,7 @@ public class BucketStatisticsTest {
     }
 
     @Test
-    public void testCloneObjectsEqual(){
+    public void testCloneObjectsEqual() {
         BucketStatistics bucketStatistics2 = new BucketStatistics.Builder().withLabel(label)
                 .withActionCounts(actionCountsMap).withActionRates(actionRateMap)
                 .withJointActionCounts(jointActionCounts).withImpressionCounts(impressionCounts)
@@ -88,7 +85,7 @@ public class BucketStatisticsTest {
     }
 
     @Test
-    public void testBuilder(){
+    public void testBuilder() {
         assertEquals(bucketStatistics.getLabel(), label);
         assertEquals(bucketStatistics.getActionCounts(), actionCountsMap);
         assertEquals(bucketStatistics.getActionRates(), actionRateMap);
@@ -105,7 +102,7 @@ public class BucketStatisticsTest {
     }
 
     @Test
-    public void testSettersAndGetters(){
+    public void testSettersAndGetters() {
         bucketStatistics.setLabel(null);
         assertEquals(bucketStatistics.getLabel(), null);
 

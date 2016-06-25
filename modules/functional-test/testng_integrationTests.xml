@@ -20,54 +20,54 @@
 <suite name="IntegrationTests" parallel="false">
     <test name="IntegrationAuthTests">
         <classes>
-            <class name="com.intuit.wasabi.tests.service.IntegrationAuthentication" />
-            <class name="com.intuit.wasabi.tests.service.IntegrationAuthorization" />
+            <class name="com.intuit.wasabi.tests.service.IntegrationAuthentication"/>
+            <class name="com.intuit.wasabi.tests.service.IntegrationAuthorization"/>
         </classes>
     </test>
     <test name="IntegrationAssignmentTests">
         <classes>
-            <class name="com.intuit.wasabi.tests.service.assignment.BasicAssignment" />
-            <class name="com.intuit.wasabi.tests.service.assignment.BatchAssignment" />
-            <class name="com.intuit.wasabi.tests.service.assignment.PutAssignment" />
-            <class name="com.intuit.wasabi.tests.service.assignment.ExportAssignment" />
+            <class name="com.intuit.wasabi.tests.service.assignment.BasicAssignment"/>
+            <class name="com.intuit.wasabi.tests.service.assignment.BatchAssignment"/>
+            <class name="com.intuit.wasabi.tests.service.assignment.PutAssignment"/>
+            <class name="com.intuit.wasabi.tests.service.assignment.ExportAssignment"/>
         </classes>
     </test>
     <test name="IntegrationBucketTests">
         <classes>
-            <class name="com.intuit.wasabi.tests.service.IntegrationBucket" />
-            <class name="com.intuit.wasabi.tests.service.EmptyBucketUserAssignmentTest" />
-            <class name="com.intuit.wasabi.tests.service.EmptyBucketUserAssignmentToEmptyBucket" />
-            <class name="com.intuit.wasabi.tests.service.BucketIntegrationTest" />
-            <class name="com.intuit.wasabi.tests.service.ContextIntegrationTest" />
-            <class name="com.intuit.wasabi.tests.service.ContextMutexIntegrationTest" />
+            <class name="com.intuit.wasabi.tests.service.IntegrationBucket"/>
+            <class name="com.intuit.wasabi.tests.service.EmptyBucketUserAssignmentTest"/>
+            <class name="com.intuit.wasabi.tests.service.EmptyBucketUserAssignmentToEmptyBucket"/>
+            <class name="com.intuit.wasabi.tests.service.BucketIntegrationTest"/>
+            <class name="com.intuit.wasabi.tests.service.ContextIntegrationTest"/>
+            <class name="com.intuit.wasabi.tests.service.ContextMutexIntegrationTest"/>
         </classes>
     </test>
     <test name="IntegrationExperimentTests">
         <classes>
-            <class name="com.intuit.wasabi.tests.service.IntegrationExperiment" />
-            <class name="com.intuit.wasabi.tests.service.IntegrationMutualExclusion" />
+            <class name="com.intuit.wasabi.tests.service.IntegrationExperiment"/>
+            <class name="com.intuit.wasabi.tests.service.IntegrationMutualExclusion"/>
         </classes>
     </test>
     <test name="IntegrationEventsTests">
         <classes>
-            <class name="com.intuit.wasabi.tests.service.EventsIntegrationTest" />
+            <class name="com.intuit.wasabi.tests.service.EventsIntegrationTest"/>
         </classes>
     </test>
     <test name="IntegrationCountTests">
         <classes>
-            <class name="com.intuit.wasabi.tests.service.CountIntegrationTest" />
-            <class name="com.intuit.wasabi.tests.service.CountDailyIntegrationTest" />
+            <class name="com.intuit.wasabi.tests.service.CountIntegrationTest"/>
+            <class name="com.intuit.wasabi.tests.service.CountDailyIntegrationTest"/>
         </classes>
     </test>
     <test name="IntegrationTestsMisc">
         <classes>
-            <class name="com.intuit.wasabi.tests.service.IntegrationMetadata" />
+            <class name="com.intuit.wasabi.tests.service.IntegrationMetadata"/>
         </classes>
     </test>
     <test name="IntegrationPriorityTests">
         <classes>
-            <class name="com.intuit.wasabi.tests.service.priority.BasicPriorityTest" />
-            <class name="com.intuit.wasabi.tests.service.priority.BatchPriorityAssignmentTest" />
+            <class name="com.intuit.wasabi.tests.service.priority.BasicPriorityTest"/>
+            <class name="com.intuit.wasabi.tests.service.priority.BatchPriorityAssignmentTest"/>
         </classes>
     </test>
     <test name="IntegrationSegmentationTests">

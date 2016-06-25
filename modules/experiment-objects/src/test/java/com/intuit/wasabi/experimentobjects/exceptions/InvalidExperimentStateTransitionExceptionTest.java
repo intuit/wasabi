@@ -26,6 +26,6 @@ public class InvalidExperimentStateTransitionExceptionTest {
 
         assertThat(e.getErrorCode(), is(INVALID_EXPERIMENT_STATE));
         assertThat(e.getDetailMessage(), is("e1"));
-        assertThat(e.getCause(), Is.<Throwable>is(r));
+        assertThat(e.getCause(), Is.is(r));
     }
 }

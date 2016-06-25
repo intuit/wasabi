@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,33 +27,17 @@ import com.intuit.wasabi.cassandra.CassandraDriver;
 import com.intuit.wasabi.cassandra.ExperimentDriver;
 import com.intuit.wasabi.exceptions.ConstraintViolationException;
 import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
-import com.intuit.wasabi.experimentobjects.Application;
-import com.intuit.wasabi.experimentobjects.Bucket;
+import com.intuit.wasabi.experimentobjects.*;
 import com.intuit.wasabi.experimentobjects.Bucket.BucketAuditInfo;
-import com.intuit.wasabi.experimentobjects.BucketList;
-import com.intuit.wasabi.experimentobjects.Context;
-import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.Experiment.ExperimentAuditInfo;
 import com.intuit.wasabi.experimentobjects.Experiment.State;
-import com.intuit.wasabi.experimentobjects.ExperimentList;
-import com.intuit.wasabi.experimentobjects.ExperimentValidator;
-import com.intuit.wasabi.experimentobjects.NewExperiment;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.RepositoryException;
-import com.intuit.wasabi.repository.impl.cassandra.serializer.ApplicationNameSerializer;
-import com.intuit.wasabi.repository.impl.cassandra.serializer.BucketLabelSerializer;
-import com.intuit.wasabi.repository.impl.cassandra.serializer.BucketStateSerializer;
-import com.intuit.wasabi.repository.impl.cassandra.serializer.ExperimentIDSerializer;
-import com.intuit.wasabi.repository.impl.cassandra.serializer.ExperimentLabelSerializer;
-import com.intuit.wasabi.repository.impl.cassandra.serializer.ExperimentStateSerializer;
+import com.intuit.wasabi.repository.impl.cassandra.serializer.*;
 import com.netflix.astyanax.MutationBatch;
 import com.netflix.astyanax.connectionpool.OperationResult;
 import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
-import com.netflix.astyanax.model.ColumnList;
-import com.netflix.astyanax.model.ConsistencyLevel;
-import com.netflix.astyanax.model.CqlResult;
-import com.netflix.astyanax.model.Row;
-import com.netflix.astyanax.model.Rows;
+import com.netflix.astyanax.model.*;
 import com.netflix.astyanax.query.PreparedCqlQuery;
 import com.netflix.astyanax.serializers.DateSerializer;
 import com.toddfast.mutagen.cassandra.CassandraMutagen;
@@ -64,7 +48,7 @@ import java.util.*;
 
 /**
  * Cassandra experiment repo
- * 
+ *
  * @see ExperimentRepository
  */
 class CassandraExperimentRepository extends AbstractCassandraRepository<ExperimentsKeyspace> implements
@@ -107,8 +91,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
      * @ repository failure
      */
     private Experiment getExperiment(Experiment.ID experimentID,
-                                     ConsistencyLevel consistency)
-             {
+                                     ConsistencyLevel consistency) {
 
         Preconditions.checkNotNull(experimentID, "Parameter \"experimentID\" cannot be null");
 
@@ -214,8 +197,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
      * {@inheritDoc}
      */
     @Override
-    public Experiment.ID createExperiment(NewExperiment newExperiment)
-             {
+    public Experiment.ID createExperiment(NewExperiment newExperiment) {
 
         validator.validateNewExperiment(newExperiment);
 
@@ -267,11 +249,11 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
                     .withByteBufferValue(STATE, ExperimentStateSerializer.get())
                     .withByteBufferValue(newExperiment.getLabel(), ExperimentLabelSerializer.get())
                     .withByteBufferValue(newExperiment.getApplicationName(), ApplicationNameSerializer.get())
-                            // created
+                    // created
                     .withByteBufferValue(NOW, DateSerializer.get())
-                            // modified
+                    // modified
                     .withByteBufferValue(NOW, DateSerializer.get())
-                            //isPersonalizationEnabled
+                    //isPersonalizationEnabled
                     .withBooleanValue(newExperiment.getIsPersonalizationEnabled())
                     .withStringValue(newExperiment.getModelName())
                     .withStringValue(newExperiment.getModelVersion())
@@ -292,7 +274,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
      * Create indices for new experiment
      *
      * @param newExperiment the new experiment object
-     * 
+     *
      * TODO: Need more clarification
      */
     @Override
@@ -457,8 +439,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
     }
 
     @Override
-    public Experiment updateExperiment(Experiment experiment)
-             {
+    public Experiment updateExperiment(Experiment experiment) {
 
         validator.validateExperiment(experiment);
 
@@ -515,9 +496,8 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
     /**
      * {@inheritDoc}
      */
-   @Override
-    public Experiment updateExperimentState(Experiment experiment, State state)
-             {
+    @Override
+    public Experiment updateExperimentState(Experiment experiment, State state) {
 
         validator.validateExperiment(experiment);
 
@@ -554,9 +534,9 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
         return experiment;
     }
 
-   /**
-    * {@inheritDoc}
-    */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<Experiment.ID> getExperiments() {
 
@@ -601,7 +581,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
      * {@inheritDoc}
      */
     @Override
-    public void deleteExperiment(NewExperiment newExperiment)  {
+    public void deleteExperiment(NewExperiment newExperiment) {
 
         Experiment.ID experimentID = newExperiment.getID();
 
@@ -698,7 +678,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
     /**
      * {@inheritDoc}
      */
-   @Override
+    @Override
     public List<Application.Name> getApplicationsList() {
 
         List<Application.Name> result = new ArrayList<>();
@@ -727,9 +707,9 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
         return result;
     }
 
-   /**
-    * {@inheritDoc}
-    */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Bucket getBucket(Experiment.ID experimentID, Bucket.Label bucketLabel) {
 
@@ -922,7 +902,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
      * {@inheritDoc}
      */
     @Override
-    public Bucket updateBucketState(Bucket bucket, Bucket.State desiredState)  {
+    public Bucket updateBucketState(Bucket bucket, Bucket.State desiredState) {
 
         final String CQL = "update bucket " +
                 "set state = ? " +
@@ -950,10 +930,10 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
 
     /**
      * Update bucket batch
-     * 
+     *
      * @param experimentID the experiment id
      * @param bucketList  the bucket list
-     * 
+     *
      * @return BucketList
      */
     @Override
@@ -1059,7 +1039,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
      */
     @Override
     public void logBucketChanges(Experiment.ID experimentID, Bucket.Label bucketLabel,
-                                 List<BucketAuditInfo> changeList)  {
+                                 List<BucketAuditInfo> changeList) {
 
         final long NOW = System.currentTimeMillis();
         final String CQL = "insert into bucket_audit_log " +
@@ -1179,7 +1159,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
                     .withCql(CQL)
                     .asPreparedStatement()
                     .withByteBufferValue(experimentID, ExperimentIDSerializer.get())
-                            // modified
+                    // modified
                     .withByteBufferValue(NOW, DateSerializer.get())
                     .withByteBufferValue(startTime, DateSerializer.get())
                     .withByteBufferValue(endTime, DateSerializer.get())

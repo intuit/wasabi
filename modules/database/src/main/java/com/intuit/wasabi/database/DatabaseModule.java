@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -99,8 +99,8 @@ public class DatabaseModule extends AbstractModule {
         String port = getProperty("database.url.port", properties);
         String dbName = getProperty("database.url.dbname", properties);
         String dbArgs = getProperty("database.url.args", properties);
-        
-        config.setJdbcUrl("jdbc:mysql://"+host+":"+port+"/"+dbName+"?"+dbArgs);
+
+        config.setJdbcUrl("jdbc:mysql://" + host + ":" + port + "/" + dbName + "?" + dbArgs);
         config.setUsername(getProperty("database.user", properties));
         config.setPassword(getProperty("database.password", properties));
         config.setPartitionCount(parseInt(getProperty("database.pool.partitions", properties)));

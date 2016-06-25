@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,16 +18,13 @@ package com.intuit.wasabi.analyticsobjects.counts;
 import com.intuit.wasabi.analyticsobjects.Event;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.test.util.TestUtils;
-
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class ExperimentCountsTest {
     Counts impressionCounts;
@@ -38,7 +35,7 @@ public class ExperimentCountsTest {
     ExperimentCounts counter;
 
     @Before
-    public void setup(){
+    public void setup() {
         impressionCounts = new Counts.Builder().withEventCount(100).withUniqueUserCount(100).build();
         jointActionCounts = new Counts.Builder().withEventCount(200).withUniqueUserCount(200).build();
         actionCounts = new HashMap<Event.Name, ActionCounts>();
@@ -50,7 +47,7 @@ public class ExperimentCountsTest {
     }
 
     @Test
-    public void testBuilder(){
+    public void testBuilder() {
         assertEquals(counter.getActionCounts(), actionCounts);
         assertEquals(counter.getJointActionCounts(), jointActionCounts);
         assertEquals(counter.getImpressionCounts(), impressionCounts);
@@ -61,7 +58,7 @@ public class ExperimentCountsTest {
     }
 
     @Test
-    public void testAddBucketCounts(){
+    public void testAddBucketCounts() {
         Bucket.Label label = Bucket.Label.valueOf("TestLabel");
         BucketCounts bucketCounter = new BucketCounts.Builder().withLabel(label)
                 .withJointActionCounts(jointActionCounts).withImpressionCounts(impressionCounts)
@@ -80,7 +77,7 @@ public class ExperimentCountsTest {
     }
 
     @Test
-    public void testCloneWithEmptyBucket(){
+    public void testCloneWithEmptyBucket() {
         assertEquals(0, counter.getBuckets().size());
 
         ExperimentCounts clonedExperimentCount = counter.clone();
@@ -89,7 +86,7 @@ public class ExperimentCountsTest {
     }
 
     @Test
-    public void testCloneWithOneBucket(){
+    public void testCloneWithOneBucket() {
         Bucket.Label label = Bucket.Label.valueOf("TestLabel");
         BucketCounts bucketCounts = new BucketCounts.Builder().withLabel(label)
                 .withJointActionCounts(jointActionCounts).withImpressionCounts(impressionCounts)
@@ -100,13 +97,13 @@ public class ExperimentCountsTest {
 
         ExperimentCounts clonedExperimentCount = counter.clone();
         assertEquals(1, clonedExperimentCount.getBuckets().size());
-        
+
         TestUtils.assertMapsEqual(counter.getBuckets(), clonedExperimentCount.getBuckets());
 
     }
 
     @Test
-    public void testCloneWithTwoBucket(){
+    public void testCloneWithTwoBucket() {
         Bucket.Label label = Bucket.Label.valueOf("TestLabel");
         BucketCounts bucketCounts = new BucketCounts.Builder().withLabel(label)
                 .withJointActionCounts(jointActionCounts).withImpressionCounts(impressionCounts)
@@ -127,7 +124,7 @@ public class ExperimentCountsTest {
     }
 
     @Test
-    public void testEqualsWithSelfAndClone(){
+    public void testEqualsWithSelfAndClone() {
         Bucket.Label label = Bucket.Label.valueOf("TestLabel");
         BucketCounts bucketCounts = new BucketCounts.Builder().withLabel(label)
                 .withJointActionCounts(jointActionCounts).withImpressionCounts(impressionCounts)
@@ -140,7 +137,7 @@ public class ExperimentCountsTest {
     }
 
     @Test
-    public void testEqualsTwoCopies(){
+    public void testEqualsTwoCopies() {
 
         ExperimentCounts otherCounter = new ExperimentCounts.Builder().withJointActionCounts(jointActionCounts)
                 .withImpressionCounts(impressionCounts).withActionCounts(actionCounts)
@@ -151,7 +148,7 @@ public class ExperimentCountsTest {
     }
 
     @Test
-    public void testNotEquals(){
+    public void testNotEquals() {
 
         ExperimentCounts otherCounter = new ExperimentCounts.Builder().withJointActionCounts(jointActionCounts)
                 .withImpressionCounts(impressionCounts)

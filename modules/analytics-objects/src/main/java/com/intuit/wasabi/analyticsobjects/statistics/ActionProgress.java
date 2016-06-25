@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -80,22 +80,27 @@ public class ActionProgress extends Progress {
             this.item.actionName = value;
             return this;
         }
+
         public Builder withWinnersSoFarList(List<Bucket.Label> value) {
             this.item.winnersSoFar = value;
             return this;
         }
+
         public Builder withLosersSoFarList(List<Bucket.Label> value) {
             this.item.losersSoFar = value;
             return this;
         }
+
         public Builder withSufficientData(Boolean value) {
             this.item.hasSufficientData = value;
             return this;
         }
+
         public Builder withFractionDataCollected(double value) {
             this.item.fractionDataCollected = value;
             return this;
         }
+
         public Builder withProgress(Progress value) {
             this.item.fractionDataCollected = value.fractionDataCollected;
             this.item.losersSoFar = value.losersSoFar;

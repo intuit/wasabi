@@ -20,7 +20,7 @@
 <suite name="AuthTest" parallel="false">
     <test name="AuthTest">
         <classes>
-            <class name="com.intuit.wasabi.tests.service.AuthTest" />
+            <class name="com.intuit.wasabi.tests.service.AuthTest"/>
         </classes>
     </test>
 </suite>

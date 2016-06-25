@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,20 +35,16 @@ import static org.mockito.BDDMockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MutexImplTest2 {
-    
-	@Mock
-	CassandraMutexRepository mutexRepository;
-	
-	@Mock	
-    private ExperimentsImpl experiments;
-	
-	@Mock
-    private EventLog eventLog;
-	
-	@InjectMocks
-    MutexImpl resource;
-	
+
     private final static Application.Name testApp = Application.Name.valueOf("testApp");
+    @Mock
+    CassandraMutexRepository mutexRepository;
+    @InjectMocks
+    MutexImpl resource;
+    @Mock
+    private ExperimentsImpl experiments;
+    @Mock
+    private EventLog eventLog;
 
     @Test
     public void testDeleteExclusionSuccessful() {
@@ -67,24 +63,24 @@ public class MutexImplTest2 {
         willDoNothing().given(mutexRepository).deleteExclusion(experimentID1, experimentID2);
         willDoNothing().given(eventLog).postEvent(any(ExperimentChangeEvent.class));
         resource.deleteExclusion(experimentID1, experimentID2, null);
-        
+
         verify(mutexRepository).deleteExclusion(experimentID1, experimentID2);
         verify(eventLog).postEvent(any(ExperimentChangeEvent.class));
     }
 
     @Test
     public void testGetExclusions() {
-    	ExperimentList exclusions = new ExperimentList();
+        ExperimentList exclusions = new ExperimentList();
         Experiment.ID experimentID = Experiment.ID.newInstance();
         Experiment experiment = Experiment.withID(experimentID)
                 .withApplicationName(testApp)
                 .build();
         given(experiments.getExperiment(experimentID)).willReturn(experiment);
         given(mutexRepository.getExclusions(experimentID)).willReturn(exclusions);
-        
+
         ExperimentList result = resource.getExclusions(experimentID);
-        
-    	then(result).isEqualTo(exclusions);
+
+        then(result).isEqualTo(exclusions);
 
         verify(experiments).getExperiment(experimentID);
         verify(mutexRepository).getExclusions(experimentID);
@@ -92,13 +88,13 @@ public class MutexImplTest2 {
 
     @Test
     public void testGetNotExclusions() {
-    	ExperimentList notExclusions = new ExperimentList();
+        ExperimentList notExclusions = new ExperimentList();
         Experiment.ID experimentID = Experiment.ID.newInstance();
         given(mutexRepository.getNotExclusions(experimentID)).willReturn(notExclusions);
-        
+
         ExperimentList result = resource.getNotExclusions(experimentID);
-        
-    	then(result).isEqualTo(notExclusions);
+
+        then(result).isEqualTo(notExclusions);
 
         verify(mutexRepository).getNotExclusions(experimentID);
     }

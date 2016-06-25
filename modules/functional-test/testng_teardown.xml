@@ -24,10 +24,10 @@
         to something like:
             myFirstPrefix|mySecondPrefix
     -->
-    <parameter name="applicationPrefixes" value="" />
+    <parameter name="applicationPrefixes" value=""/>
     <test name="TearDown">
         <classes>
-            <class name="com.intuit.wasabi.tests.library.TearDownTestExperiments" />
+            <class name="com.intuit.wasabi.tests.library.TearDownTestExperiments"/>
         </classes>
     </test>
 </suite>

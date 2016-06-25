@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,13 +25,7 @@ import org.junit.Test;
 
 import java.util.Date;
 
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * This class tests the {@link AssignmentCountEnvelope}
@@ -41,7 +35,7 @@ import static org.mockito.Mockito.when;
 public class AssignmentCountEnvelopeTest {
 
     private Experiment exp = mock(Experiment.class);
-    private AssignmentsRepository ar = mock(AssignmentsRepository.class,RETURNS_DEEP_STUBS);
+    private AssignmentsRepository ar = mock(AssignmentsRepository.class, RETURNS_DEEP_STUBS);
     private ExperimentRepository cass = mock(ExperimentRepository.class);
     private ExperimentRepository mysql = mock(ExperimentRepository.class);
     private Assignment assignment = mock(Assignment.class);
@@ -49,7 +43,7 @@ public class AssignmentCountEnvelopeTest {
     private Date date = mock(Date.class);
 
     @Test
-    public void testErrorInUpdateBucket(){
+    public void testErrorInUpdateBucket() {
 
         doThrow(new RuntimeException("exception")).when(ar).updateBucketAssignmentCount(exp, assignment, true);
 
@@ -64,7 +58,7 @@ public class AssignmentCountEnvelopeTest {
      * This tests what happens when the userCap is not reached yet.
      */
     @Test
-    public void testRapidExperimentationLimitNotReached(){
+    public void testRapidExperimentationLimitNotReached() {
 //        doReturn(true).when(exp).getIsRapidExperiment();
 //        doReturn(42).when(exp).getUserCap();
         when(exp.getIsRapidExperiment()).thenReturn(true);
@@ -83,7 +77,7 @@ public class AssignmentCountEnvelopeTest {
      * This tests what happens if the update in Cassandra fails.
      */
     @Test
-    public void testRapidExperimentationCassandraFail(){
+    public void testRapidExperimentationCassandraFail() {
         when(exp.getIsRapidExperiment()).thenReturn(true);
         when(exp.getUserCap()).thenReturn(7);
         when(ar.getBucketAssignmentCount(exp).getTotalUsers().getBucketAssignments()).thenReturn(41l);
@@ -101,7 +95,7 @@ public class AssignmentCountEnvelopeTest {
      * This tests what happens if the update in Cassandra succeeds.
      */
     @Test
-    public void testRapidExperimentationCassandraSuccess(){
+    public void testRapidExperimentationCassandraSuccess() {
         when(exp.getIsRapidExperiment()).thenReturn(true);
         when(exp.getUserCap()).thenReturn(41); //41 users already assigned
         when(ar.getBucketAssignmentCount(exp).getTotalUsers().getBucketAssignments()).thenReturn(41l);

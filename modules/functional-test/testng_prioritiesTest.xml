@@ -20,7 +20,7 @@
 <suite name="PrioritiesTest" parallel="false">
     <test name="PrioritiesTest">
         <classes>
-            <class name="com.intuit.wasabi.tests.service.PrioritiesTest" />
+            <class name="com.intuit.wasabi.tests.service.PrioritiesTest"/>
         </classes>
     </test>
 </suite>

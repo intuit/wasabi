@@ -16,12 +16,14 @@
  *  ******************************************************************************
  */
 package com.intuit.wasabi.tests.model;
+
 import java.time.LocalDateTime;
+
 /**
  * Created on 6/16/16.
  */
 
-public class EventDateTime{
+public class EventDateTime {
     String eventLabel;
     LocalDateTime eventDatetime;
 

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -47,12 +47,12 @@ public class ExperimentValidator {
         validateSamplingPercent(experiment.getSamplingPercent());
         validateExperimentRule(experiment.getRule());
         validateModelNameNotNullForPersonalizedExperiments(experiment.getIsPersonalizationEnabled()
-                ,experiment.getModelName());
+                , experiment.getModelName());
     }
 
     public void validateNewExperiment(NewExperiment newExperiment) {
 
-        validateExperimentStartEnd(newExperiment.getStartTime(),newExperiment.getEndTime());
+        validateExperimentStartEnd(newExperiment.getStartTime(), newExperiment.getEndTime());
         validateSamplingPercent(newExperiment.getSamplingPercent());
         validateExperimentRule(newExperiment.getRule());
         validateModelNameNotNullForPersonalizedExperiments(newExperiment.getIsPersonalizationEnabled(),
@@ -75,7 +75,7 @@ public class ExperimentValidator {
 
     protected void validateExperimentRule(String rule) {
         // validate if rule is not empty string
-        if(rule != null && !rule.trim().isEmpty()) {
+        if (rule != null && !rule.trim().isEmpty()) {
             try {
                 new RuleBuilder().parseExpression(rule);
             } catch (InvalidSyntaxException | IllegalArgumentException | InvalidSchemaException e) {
@@ -105,7 +105,7 @@ public class ExperimentValidator {
 
         if (!oldState.isStateTransitionAllowed(newState)) {
             throw new InvalidExperimentStateTransitionException("Invalid switch from state \"" + oldState +
-                    "\" to invalid state \"" + newState+"\"");
+                    "\" to invalid state \"" + newState + "\"");
         }
     }
 
@@ -124,7 +124,7 @@ public class ExperimentValidator {
 
             totalAllocation += val;
 
-            if (bucket.getState() == Bucket.State.OPEN || bucket.getState() == null){
+            if (bucket.getState() == Bucket.State.OPEN || bucket.getState() == null) {
                 nOpen++;
             }
             if (bucket.isControl()) {
@@ -151,7 +151,7 @@ public class ExperimentValidator {
         Experiment.State state = experiment.getState();
 
         if (!state.equals(Experiment.State.DRAFT)) {
-            throw new InvalidExperimentStateException(experiment.getID(), Experiment.State.DRAFT,experiment.getState());
+            throw new InvalidExperimentStateException(experiment.getID(), Experiment.State.DRAFT, experiment.getState());
         }
     }
 
@@ -162,7 +162,7 @@ public class ExperimentValidator {
 
         if (!bucket.isStateTransitionValid(desiredState)) {
             throw new InvalidBucketStateTransitionException("Invalid switch from state \"" + oldState +
-                    "\" to invalid state \"" + desiredState+"\"");
+                    "\" to invalid state \"" + desiredState + "\"");
         }
     }
 }

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -337,14 +337,14 @@ public class Bucket extends ModelItem {
         }
 
         for (Field field : this.getClass().getFields()) {
-            if(!this.getSerializationStrategy().shouldSkipField(new FieldAttributes(field))) {
+            if (!this.getSerializationStrategy().shouldSkipField(new FieldAttributes(field))) {
                 try {
                     boolean thisFieldEquals = Objects.equals(field.get(this), field.get(other));
                     if (!thisFieldEquals && field.getName().equals("allocationPercent")) {
                         LOGGER.debug("Retrying comparison of allocation percentages: " + this.allocationPercent
-                                + " and " + ((Bucket)other).allocationPercent);
+                                + " and " + ((Bucket) other).allocationPercent);
                         String allocThis = String.valueOf(this.allocationPercent);
-                        String allocOther = String.valueOf(((Bucket)other).allocationPercent);
+                        String allocOther = String.valueOf(((Bucket) other).allocationPercent);
                         allocThis = allocThis.substring(0, Math.min(allocThis.indexOf(".") + 6, allocThis.length()));
                         allocOther = allocOther.substring(0, Math.min(allocOther.indexOf(".") + 6, allocOther.length()));
                         LOGGER.debug("\tComparing only " + allocThis + " and " + allocOther);

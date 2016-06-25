@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,6 +33,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.TimeZone;
+
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -45,7 +46,7 @@ public class IntegrationPages extends TestBase {
     private static final Logger LOGGER = getLogger(IntegrationPages.class);
     private static final double SAMPLING_PERCENT = 1.0;
     private static final double ALLOCATION_PERCENT = 1.0;
-    private static final String TIMESTAMP_STR=""+System.currentTimeMillis();
+    private static final String TIMESTAMP_STR = "" + System.currentTimeMillis();
 
     private static Experiment exp_b;
 
@@ -65,7 +66,7 @@ public class IntegrationPages extends TestBase {
 
     /**
      * This method queries list of experiments by application and page. Returns true if found.
-     * 
+     *
      * @param exp
      * @param page
      * @return
@@ -75,8 +76,7 @@ public class IntegrationPages extends TestBase {
         //Getting the list of pages for the application
         List<Experiment> experiments = getExperimentsByApplicationPage(new Application(exp.applicationName), page);
         for (Experiment e : experiments) {
-            if (e.label.equals(exp.label))
-            {
+            if (e.label.equals(exp.label)) {
                 found = true;
             }
         }
@@ -86,10 +86,10 @@ public class IntegrationPages extends TestBase {
     private Page testPostPage(Experiment exp, String pageName, boolean allowAssignment) {
         return testPostPage(exp, pageName, allowAssignment, true);
     }
-    
+
     /**
      * This method tests posting page after setting experiment to the desired experimentState.
-     * 
+     *
      * @param exp
      * @param pageName
      * @param allowAssignment
@@ -102,37 +102,36 @@ public class IntegrationPages extends TestBase {
 
         Response response = postPages(exp, page, HttpStatus.SC_CREATED);
         Assert.assertEquals(response.getStatusCode(), 201);
-        
+
         boolean found = findExperimentByPage(exp, page);
-        Assert.assertTrue(found);        
-        
+        Assert.assertTrue(found);
+
         assertPageTrue(page, exp);
-        
-        if (isDeletePage)
-        {
+
+        if (isDeletePage) {
             response = deletePages(exp, page);
             Assert.assertEquals(response.getStatusCode(), HttpStatus.SC_NO_CONTENT);
 
             found = findExperimentByPage(exp, page);
-            Assert.assertFalse(found); 
-            
-            assertPageFalse(page, exp);            
+            Assert.assertFalse(found);
+
+            assertPageFalse(page, exp);
         }
-        
+
         return page;
     }
 
     private Experiment testExperimentChangeState(Experiment exp, String experimentState) {
-        LOGGER.info("Changing the experiment exp "+exp.id+" state to " + experimentState);
+        LOGGER.info("Changing the experiment exp " + exp.id + " state to " + experimentState);
         exp.setState(experimentState);
         Assert.assertEquals(exp.state, experimentState, "Experiment state is not changed to " + experimentState);
 
         Experiment retExp = putExperiment(exp.setState(experimentState));
         Assert.assertEquals(retExp.state, exp.state);
-        
+
         return exp;
     }
-    
+
     private Experiment testCreateNewExperimentWithBucket(String bucketLabel, String bucketDescription, String bucketPayload, String expName, int startTimeDay, int endTimeDay) {
         String pastStartTime = getDatePlusDays(startTimeDay);
         String futureEndTime = getDatePlusDays(endTimeDay);
@@ -151,15 +150,15 @@ public class IntegrationPages extends TestBase {
         LOGGER.info("Testing non-default bucket description and payload...");
         Assert.assertEquals(bucket.description, bucketDescription, "Bucket description does not match the supplied description");
         Assert.assertEquals(bucket.payload, bucketPayload, "Bucket payload does not match the supplied payload string");
-        
+
         return exp;
     }
-    
+
     private Experiment testCreateNewExperimentWithBucket(String bucketLabel, String bucketDescription, String bucketPayload, String expName) {
 
         return testCreateNewExperimentWithBucket(bucketLabel, bucketDescription, bucketPayload, expName, -1, 10);
     }
-    
+
     /**
      * Creates the experiment with provided startTime , endTime and experiment Label
      *
@@ -171,7 +170,7 @@ public class IntegrationPages extends TestBase {
                 .setEndTime(endTime)
                 .setLabel(PREFIX_EXPERIMENT + TIMESTAMP_STR + expSuffix)
                 .setSamplingPercent(SAMPLING_PERCENT)
-                .setApplication(ApplicationFactory.createApplication().setName(PREFIX_APPLICATION+TIMESTAMP_STR));
+                .setApplication(ApplicationFactory.createApplication().setName(PREFIX_APPLICATION + TIMESTAMP_STR));
     }
 
     /**
@@ -179,7 +178,7 @@ public class IntegrationPages extends TestBase {
      */
     @Test(dependsOnGroups = {"ping"})
     public void t_expiredExperimentPages() {
-        
+
         String pastStartTime = getDatePlusDays(-10);
         String pastEndTime = getDatePlusDays(-5);
 
@@ -197,10 +196,10 @@ public class IntegrationPages extends TestBase {
 
         Response response = postPages(exp, page, HttpStatus.SC_BAD_REQUEST);
         Assert.assertEquals(response.getStatusCode(), HttpStatus.SC_BAD_REQUEST);
-        
+
         deleteExperiment(exp);
-    }    
-    
+    }
+
     /**
      * Tests posting bucket and page for draft experiment with past start and future end times
      */
@@ -239,8 +238,8 @@ public class IntegrationPages extends TestBase {
 
         // cleanup
         deleteExperiment(exp);
-    } 
-    
+    }
+
     /**
      * Tests posting bucket and page for paused experiment with past start and future end times
      */
@@ -293,7 +292,7 @@ public class IntegrationPages extends TestBase {
         // cleanup
         deleteExperiment(exp);
     }
-    
+
     /**
      * Tests posting new pages for terminated experiment
      */
@@ -352,7 +351,7 @@ public class IntegrationPages extends TestBase {
         Response response = postPages(exp, page, HttpStatus.SC_NOT_FOUND);
         Assert.assertEquals(response.getStatusCode(), HttpStatus.SC_NOT_FOUND);
     }
-    
+
     /**
      * create new experiment b
      */
@@ -366,7 +365,7 @@ public class IntegrationPages extends TestBase {
      */
     @Test(dependsOnMethods = {"t_createNewExperiment_b"})
     public void t_postPagesByExperimentState_exp_b() {
-        
+
         testPostPage(exp_b, "home", true);
         exp_b = testExperimentChangeState(exp_b, Constants.EXPERIMENT_STATE_RUNNING);
         testPostPage(exp_b, "landingPage", false);
@@ -387,51 +386,51 @@ public class IntegrationPages extends TestBase {
 
         Response response = postPages(exp_c, page, HttpStatus.SC_CREATED);
         Assert.assertEquals(response.getStatusCode(), 201);
-        LOGGER.info("Verifying if page '"+ newPage +"' is found by querying the application " + exp_c.applicationName);
+        LOGGER.info("Verifying if page '" + newPage + "' is found by querying the application " + exp_c.applicationName);
         boolean found = findExperimentByPage(exp_c, page);
-        Assert.assertTrue(found);        
+        Assert.assertTrue(found);
 
-        LOGGER.info("Verifying if page '"+ newPage +"' is found by querying the experiment " + exp_c.id);
+        LOGGER.info("Verifying if page '" + newPage + "' is found by querying the experiment " + exp_c.id);
         assertPageTrue(page, exp_c);
-            
+
         // try to post page for exp b
         response = postPages(exp_b, page, HttpStatus.SC_CREATED);
         Assert.assertEquals(response.getStatusCode(), 201);
-        
-        LOGGER.info("Verifying if page '"+ newPage +"' is found in both exp_b '"+ exp_b.id +"' and exp_c '" + exp_c.id +"' by querying the application " + exp_c.applicationName);
-        found = findExperimentByPage(exp_b, page);
-        Assert.assertTrue(found);    
-        found = findExperimentByPage(exp_c, page);
-        Assert.assertTrue(found);            
 
-        LOGGER.info("Deleting page "+page.name +" from exp_c " +exp_c.id);
+        LOGGER.info("Verifying if page '" + newPage + "' is found in both exp_b '" + exp_b.id + "' and exp_c '" + exp_c.id + "' by querying the application " + exp_c.applicationName);
+        found = findExperimentByPage(exp_b, page);
+        Assert.assertTrue(found);
+        found = findExperimentByPage(exp_c, page);
+        Assert.assertTrue(found);
+
+        LOGGER.info("Deleting page " + page.name + " from exp_c " + exp_c.id);
         response = deletePages(exp_c, page);
         Assert.assertEquals(response.getStatusCode(), HttpStatus.SC_NO_CONTENT);
-        LOGGER.info("Verifying page "+page.name +" is not in exp_c " +exp_c.id);
+        LOGGER.info("Verifying page " + page.name + " is not in exp_c " + exp_c.id);
         found = findExperimentByPage(exp_c, page);
-        Assert.assertFalse(found); 
+        Assert.assertFalse(found);
 
-        LOGGER.info("Deleting page "+page.name +" from exp_b " +exp_b.id);
+        LOGGER.info("Deleting page " + page.name + " from exp_b " + exp_b.id);
         response = deletePages(exp_b, page);
         Assert.assertEquals(response.getStatusCode(), HttpStatus.SC_NO_CONTENT);
-        LOGGER.info("Verifying page "+page.name +" is not in exp_b " +exp_b.id);
+        LOGGER.info("Verifying page " + page.name + " is not in exp_b " + exp_b.id);
         found = findExperimentByPage(exp_b, page);
-        Assert.assertFalse(found); 
+        Assert.assertFalse(found);
 
-        LOGGER.info("Verifying non of the experiments have "+page.name + ".");
+        LOGGER.info("Verifying non of the experiments have " + page.name + ".");
         found = findExperimentByPage(exp_b, page);
-        Assert.assertFalse(found);  
+        Assert.assertFalse(found);
 
         deleteExperiment(exp_c);
     }
-    
+
     /**
      * Test posting page to experiment in different state.
      */
     @Test(dependsOnMethods = {"t_retrievePagesAcrossExperiments"})
     public void t_postPagesToExperment_TerminateState_exp_b() {
         exp_b = testExperimentChangeState(exp_b, Constants.EXPERIMENT_STATE_TERMINATED);
-        
+
         // try to post page for exp b in terminated state
         Page page = PageFactory.createPage().setName("home").setAllowNewAssignment(true);
         Response response = postPages(exp_b, page, HttpStatus.SC_BAD_REQUEST);
@@ -442,13 +441,13 @@ public class IntegrationPages extends TestBase {
         page = PageFactory.createPage().setName("home").setAllowNewAssignment(true);
         response = postPages(exp_b, page, HttpStatus.SC_NOT_FOUND);
         Assert.assertEquals(response.getStatusCode(), HttpStatus.SC_NOT_FOUND);
-        
+
     }
-    
+
     /**
      * Tests batch assignments
      */
-    @Test(dependsOnMethods = { "t_postPagesToExperment_TerminateState_exp_b" })
+    @Test(dependsOnMethods = {"t_postPagesToExperment_TerminateState_exp_b"})
     public void t_batchExperimentPages() {
 
         Experiment exp_X = testCreateNewExperimentWithBucket("red", "red bucket", "HTML-JS-red", "X");
@@ -465,7 +464,7 @@ public class IntegrationPages extends TestBase {
         Page page_allowAssignTrue = testPostPage(exp_X, pageName, true /* allowAssignment=true */, false);
         testPostPage(exp_Y, pageName, true, false);
         Page page_allowAssignFalse = testPostPage(exp_Z, pageName, false /* allowAssignment=false */, false);
-        
+
         User testUser = new User("ironman");
         LOGGER.info(String.format("Generating assignments for a single user %s for the experiments associated to page %s", testUser.userID, page_allowAssignTrue.name));
         boolean foundX = false;
@@ -474,7 +473,7 @@ public class IntegrationPages extends TestBase {
         LOGGER.info(String.format("Exp X %s ", exp_X.id));
         LOGGER.info(String.format("Exp Y %s ", exp_Y.id));
         LOGGER.info(String.format("Exp Z %s ", exp_Z.id));
-        
+
         List<Assignment> assignments = postAssignments(new Application(exp_X.applicationName), page_allowAssignTrue, testUser, null, null, true, true);
         for (Assignment a : assignments) {
             LOGGER.info(String.format("The assignment is %s while exp X %s exp Y %s exp Z %s", a.experimentLabel, exp_X.label, exp_Y.label, exp_Z.label));
@@ -491,7 +490,7 @@ public class IntegrationPages extends TestBase {
         Assignment assignment = getAssignment(exp_Z, testUser);
         Assert.assertEquals(assignment.status, "NEW_ASSIGNMENT", "Assignment status wrong.");
         Assert.assertTrue(assignment.cache, "Assignment.cache not true.");
-        
+
         LOGGER.info(String.format("Generating assignments AGAIN for a single user %s for the experiments associated to page %s. This time assignment should be found in exp Z", testUser.userID, page_allowAssignTrue.name));
         assignments = postAssignments(new Application(exp_X.applicationName), page_allowAssignTrue, testUser, null, null, true, true);
         for (Assignment a : assignments) {
@@ -499,28 +498,28 @@ public class IntegrationPages extends TestBase {
             if (!foundX && a.experimentLabel.equals(exp_X.label)) foundX = true;
             if (!foundY && a.experimentLabel.equals(exp_Y.label)) foundY = true;
             if (!foundZ && a.experimentLabel.equals(exp_Z.label)) foundZ = true;
-        }        
+        }
         Assert.assertEquals(foundX, true, "Assignment to experiment X missing");
         Assert.assertEquals(foundY, true, "Assignment to experiment Y missing");
         Assert.assertEquals(foundZ, true, "Assignment to experiment Z missing");
-        
+
         deletePages(exp_X, page_allowAssignTrue);
         deletePages(exp_Y, page_allowAssignTrue);
         deletePages(exp_Z, page_allowAssignFalse);
-        
+
         testExperimentChangeState(exp_X, Constants.EXPERIMENT_STATE_TERMINATED);
         deleteExperiment(exp_X);
         testExperimentChangeState(exp_Y, Constants.EXPERIMENT_STATE_TERMINATED);
         deleteExperiment(exp_Y);
         testExperimentChangeState(exp_Z, Constants.EXPERIMENT_STATE_TERMINATED);
         deleteExperiment(exp_Z);
-    }    
-    
+    }
+
     /**
      * JBA-227: Search Pages API: Create 3 valid Experiment.Two experiments have page testPage1.Third has some other page.
      * The experiment list for page testPage1 will retrieve two correct experiments.
      */
-    @Test(dependsOnMethods = { "t_batchExperimentPages" })
+    @Test(dependsOnMethods = {"t_batchExperimentPages"})
     public void t_batchExperimentPages_Issue_JBA_227() {
 
         LOGGER.info("Creating the second valid new experiment AA");
@@ -537,27 +536,28 @@ public class IntegrationPages extends TestBase {
         testPostPage(exp_bb, testPage1Name, false/* allowAssignment=false */, false);
         String otherPageName = "otherPage";
         Page otherPage = testPostPage(exp_cc, otherPageName, false /* allowAssignment=false */, false);
-        
-        LOGGER.info("Verifying if page '"+ testPage1Name +"' is found in both exp_aa '"+ exp_aa.id +"' and exp_bb '" + exp_bb.id +"' by querying the application " + exp_aa.applicationName);
+
+        LOGGER.info("Verifying if page '" + testPage1Name + "' is found in both exp_aa '" + exp_aa.id + "' and exp_bb '" + exp_bb.id + "' by querying the application " + exp_aa.applicationName);
         boolean found = findExperimentByPage(exp_aa, testPage1);
-        Assert.assertTrue(found);    
-        LOGGER.info("Found page " + testPage1Name + " in exp_aa "+exp_aa.id);
+        Assert.assertTrue(found);
+        LOGGER.info("Found page " + testPage1Name + " in exp_aa " + exp_aa.id);
         found = findExperimentByPage(exp_bb, testPage1);
-        Assert.assertTrue(found);            
-        LOGGER.info("Found page " + testPage1Name + " in exp_bb "+exp_bb.id);
+        Assert.assertTrue(found);
+        LOGGER.info("Found page " + testPage1Name + " in exp_bb " + exp_bb.id);
 
         found = findExperimentByPage(exp_cc, testPage1);
-        LOGGER.info("Should not find page " + testPage1Name + " in exp_cc "+exp_cc.id);
-        Assert.assertFalse(found);  
-        
+        LOGGER.info("Should not find page " + testPage1Name + " in exp_cc " + exp_cc.id);
+        Assert.assertFalse(found);
+
         deletePages(exp_aa, testPage1);
         deletePages(exp_bb, testPage1);
         deletePages(exp_cc, otherPage);
-        
+
         deleteExperiment(exp_aa);
         deleteExperiment(exp_bb);
         deleteExperiment(exp_cc);
-    }        
+    }
+
     /**
      * Returns date n days later in UTC timezone as string
      *

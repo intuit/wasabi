@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -40,31 +40,52 @@ public class PersonalizationEngineResponse {
         super();
     }
 
+    public static Builder withTid(String tid) {
+        return new Builder(tid);
+    }
+
+    public static Builder from(PersonalizationEngineResponse personalizationEngineResponse) {
+        return new Builder(personalizationEngineResponse);
+    }
+
     public String getTid() {
         return tid;
     }
+
     public void setTid(String tid) {
         this.tid = tid;
     }
+
     public Map<String, Double> getData() {
         return data;
     }
+
     public void setData(Map<String, Double> data) {
         this.data = data;
     }
+
     public String getModel() {
 
         return model;
     }
+
     public void setModel(String model) {
         this.model = model;
     }
 
-    public static Builder withTid(String tid) {
-        return new Builder(tid);
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
     }
-    public static Builder from(PersonalizationEngineResponse personalizationEngineResponse) {
-        return new Builder(personalizationEngineResponse);
+
+    @Override
+    public boolean equals(Object obj) {
+        return EqualsBuilder.reflectionEquals(this, obj);
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 
     public static class Builder {
@@ -99,20 +120,5 @@ public class PersonalizationEngineResponse {
             instance = null;
             return result;
         }
-    }
-
-    @Override
-    public int hashCode() {
-    	return HashCodeBuilder.reflectionHashCode(this);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-    	   return EqualsBuilder.reflectionEquals(this, obj);
-    }
-
-    @Override
-    public String toString() {
-    	return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 }

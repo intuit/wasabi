@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,41 +22,30 @@ import com.intuit.wasabi.tests.library.util.serialstrategies.SerializationStrate
  * A very simple Assignment wrapper.
  */
 public class Assignment extends ModelItem {
-    /** the assigned bucket */
-    public String assignment;
-
-    /** this assignment's payload */
-    public String payload;
-
-    /** the assignment status */
-    public String status;
-
-    /** the assignment context */
-    public String context;
-
-    /** the assignment cache value */
-    public boolean cache;
-
-    /** the assignment's overwrite value */
-    public boolean overwrite = true;
-
-    /** the experiment label for this assignment */
-    public String experimentLabel;
-
-    /** creation date */
-    public String created;
-
-    /** experiment ID */
-    public String experiment_id;
-
-    /** user id */
-    public String user_id;
-
-    /** Bucket label */
-    public String bucket_label;
-
     /** The serialization strategy for comparisons and JSON serialization. */
     private static SerializationStrategy serializationStrategy = new DefaultNameExclusionStrategy();
+    /** the assigned bucket */
+    public String assignment;
+    /** this assignment's payload */
+    public String payload;
+    /** the assignment status */
+    public String status;
+    /** the assignment context */
+    public String context;
+    /** the assignment cache value */
+    public boolean cache;
+    /** the assignment's overwrite value */
+    public boolean overwrite = true;
+    /** the experiment label for this assignment */
+    public String experimentLabel;
+    /** creation date */
+    public String created;
+    /** experiment ID */
+    public String experiment_id;
+    /** user id */
+    public String user_id;
+    /** Bucket label */
+    public String bucket_label;
 
     /**
      * Creates an empty experiment.
@@ -150,15 +139,14 @@ public class Assignment extends ModelItem {
         return this;
     }
 
+    @Override
+    public SerializationStrategy getSerializationStrategy() {
+        return Assignment.serializationStrategy;
+    }
 
     @Override
     public void setSerializationStrategy(SerializationStrategy serializationStrategy) {
         Assignment.serializationStrategy = serializationStrategy;
-    }
-
-    @Override
-    public SerializationStrategy getSerializationStrategy() {
-        return Assignment.serializationStrategy;
     }
 
 }

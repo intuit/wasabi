@@ -29,8 +29,10 @@
     <name>${project.artifactId}</name>
 
     <properties>
-        <auditlog.implementation.class.name>com.intuit.wasabi.auditlog.impl.AuditLogImpl</auditlog.implementation.class.name>
-        <auditlog.listener.class.name>com.intuit.wasabi.auditlog.impl.AuditLogListenerImpl</auditlog.listener.class.name>
+        <auditlog.implementation.class.name>com.intuit.wasabi.auditlog.impl.AuditLogImpl
+        </auditlog.implementation.class.name>
+        <auditlog.listener.class.name>com.intuit.wasabi.auditlog.impl.AuditLogListenerImpl
+        </auditlog.listener.class.name>
         <auditlog.threadpoolsize.core>2</auditlog.threadpoolsize.core>
         <auditlog.threadpoolsize.max>4</auditlog.threadpoolsize.max>
         <auditlog.fetchlimit>10000</auditlog.fetchlimit>

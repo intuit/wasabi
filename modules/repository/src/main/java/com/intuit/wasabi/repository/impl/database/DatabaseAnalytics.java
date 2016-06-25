@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -108,19 +108,19 @@ public class DatabaseAnalytics implements AnalyticsRepository {
 
             if (from_ts != null) {
                 params.add(from_ts);
-                sqlParams.append( " and timestamp >= ?" );
+                sqlParams.append(" and timestamp >= ?");
             }
 
             if (to_ts != null) {
                 params.add(to_ts);
-                sqlParams.append( " and timestamp <= ?");
+                sqlParams.append(" and timestamp <= ?");
             }
 
             addActionsToSql(parameters, sqlParams, params);
 
             Object[] bucketSqlData = new Object[params.size()];
             params.toArray(bucketSqlData);
-            
+
             String sqlActions = "select action, " + sqlBase + " from event_action" +
                     sqlParams.toString() + " group by bucket_label, action";
             List<Map> actionsRows = transaction.select(sqlActions, bucketSqlData);
@@ -187,15 +187,15 @@ public class DatabaseAnalytics implements AnalyticsRepository {
         List<String> actions = parameters.getActions();
         if (actions != null) {
             int num_actions = actions.size();
-            if( num_actions >= 1){
-                sqlParams.append( " and action in (?");
+            if (num_actions >= 1) {
+                sqlParams.append(" and action in (?");
                 params.add(actions.get(0));
             }
             for (int num = 1; num < num_actions; num++) {
-                sqlParams.append( ",?" );
+                sqlParams.append(",?");
                 params.add(actions.get(num));
             }
-            if( num_actions >= 1) {
+            if (num_actions >= 1) {
                 sqlParams.append(") ");
             }
         }

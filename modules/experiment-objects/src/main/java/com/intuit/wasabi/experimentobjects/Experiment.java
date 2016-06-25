@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -47,11 +47,11 @@ import static java.util.UUID.randomUUID;
  */
 public class Experiment implements Cloneable, ExperimentBase {
 
-    @ApiModelProperty(value = "unique experiment ID", dataType = "UUID",  required = true)
+    @ApiModelProperty(value = "unique experiment ID", dataType = "UUID", required = true)
     private Experiment.ID id;
-    @ApiModelProperty(value = "experiment label; unique within the application", dataType = "String",  required = true)
+    @ApiModelProperty(value = "experiment label; unique within the application", dataType = "String", required = true)
     private Experiment.Label label;
-    @ApiModelProperty(value = "name of the application; e.g. \"QBO\"", dataType = "String",  required = true)
+    @ApiModelProperty(value = "name of the application; e.g. \"QBO\"", dataType = "String", required = true)
     private Application.Name applicationName;
     @ApiModelProperty(value = "earliest time the experiment allows bucket assignments", required = true)
     private Date startTime;
@@ -307,7 +307,7 @@ public class Experiment implements Cloneable, ExperimentBase {
 
     @Override
     public String toString() {
-    	return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 
     @Override
@@ -415,6 +415,7 @@ public class Experiment implements Cloneable, ExperimentBase {
 
             private static final Map<State, ArrayList<State>> m =
                     new EnumMap<>(State.class);
+
             static {
                 for (ExperimentStateTransition trans :
                         ExperimentStateTransition.values()) {
@@ -424,6 +425,7 @@ public class Experiment implements Cloneable, ExperimentBase {
                     }
                 }
             }
+
             private final transient List<State> allowedStateTransitions;
 
             ExperimentStateTransition(State... allowedTransitions) {
@@ -610,7 +612,7 @@ public class Experiment implements Cloneable, ExperimentBase {
         public static ID valueOf(byte[] value) {
             if (value.length != 16) {
                 throw new InvalidIdentifierException("Argument \"value\" must " +
-                    "be a 16-byte array representing a UUID");
+                        "be a 16-byte array representing a UUID");
             }
 
             try {
@@ -642,7 +644,7 @@ public class Experiment implements Cloneable, ExperimentBase {
 
         @Override
         public boolean equals(Object obj) {
-        	   return EqualsBuilder.reflectionEquals(this, obj);
+            return EqualsBuilder.reflectionEquals(this, obj);
         }
 
         @Override
@@ -716,7 +718,7 @@ public class Experiment implements Cloneable, ExperimentBase {
 
         @Override
         public boolean equals(Object obj) {
-        	   return EqualsBuilder.reflectionEquals(this, obj);
+            return EqualsBuilder.reflectionEquals(this, obj);
         }
 
         public static class Serializer extends JsonSerializer<Label> {

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -52,11 +52,7 @@ import org.slf4j.Logger;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.StreamingOutput;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -75,6 +71,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 public class CassandraAssignmentsRepository implements AssignmentsRepository {
 
+    private static final Logger LOGGER = getLogger(CassandraAssignmentsRepository.class);
     private final CassandraDriver driver;
     private final ExperimentsKeyspace keyspace;
     private final ExperimentRepository experimentRepository;
@@ -89,7 +86,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     private ThreadPoolExecutor assignmentsCountExecutor;
     private boolean assignUserToOld;
     private boolean assignUserToNew;
-    private static final Logger LOGGER = getLogger(CassandraAssignmentsRepository.class);
 
     @Inject
     public CassandraAssignmentsRepository(@CassandraRepository ExperimentRepository experimentRepository,
@@ -118,7 +114,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         this.assignBucketCount = assignBucketCount;
         this.defaultTimeFormat = defaultTimeFormat;
 
-        assignmentsCountExecutor = (ThreadPoolExecutor) new ThreadPoolExecutor(assignmentsCountThreadPoolSize,
+        assignmentsCountExecutor = new ThreadPoolExecutor(assignmentsCountThreadPoolSize,
                 assignmentsCountThreadPoolSize, 0L, MILLISECONDS, assignmentsCountQueue);
     }
 
@@ -549,7 +545,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                 * */
                 boolean bucketEmpty = experimentRepository.getBucket(experimentID, bucketLabel).getState().equals(Bucket.State.EMPTY);
                 if (bucketLabel != null &&
-                        bucketEmpty ) {
+                        bucketEmpty) {
                     bucketLabel = null;
                 }
                 result = Assignment.newInstance(experimentIDdb)
@@ -612,7 +608,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                 * However, the below hack will return a null assignment  even though the existing assignment
                 * for a user who had been assigned to an EMPTY bucket is not null
                 * */
-                boolean isBucketEmpty = false; 
+                boolean isBucketEmpty = false;
                 if (bucketLabel != null &&
                         experimentRepository.getBucket(experimentID, bucketLabel).getState().equals(Bucket.State.EMPTY)) {
                     bucketLabel = null;
@@ -716,7 +712,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
      * @param appName      application name
      */
     public void removeIndexUserToExperiment(User.ID userID, Experiment.ID experimentID, Context context,
-                                             Application.Name appName) {
+                                            Application.Name appName) {
         final String CQL = "delete from user_experiment_index " +
                 "where user_id = ? and experiment_id = ? and context = ? and app_name = ?";
 
@@ -789,7 +785,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         final List<DateHour> dateHours = getUserAssignmentPartitions(from_ts_new, to_ts_new);
         final String CQL;
 
-        if (ignoreNullBucket == false) {
+        if (!ignoreNullBucket) {
             CQL =
                     "select * from user_assignment_export " +
                             "where experiment_id = ? and day_hour = ? and context = ?";
@@ -802,7 +798,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         return new StreamingOutput() {
             @Override
             public void write(OutputStream os) throws IOException, WebApplicationException {
-                Writer writer = new BufferedWriter(new OutputStreamWriter(os, Constants.DEFAULT_CHAR_SET ));
+                Writer writer = new BufferedWriter(new OutputStreamWriter(os, Constants.DEFAULT_CHAR_SET));
 
                 String header = "experiment_id" + "\t" +
                         "user_id" + "\t" +
@@ -871,7 +867,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
      * @param appName      application name
      */
     public void removeIndexExperimentsToUser(User.ID userID, Experiment.ID experimentID, Context context,
-                                              Application.Name appName) {
+                                             Application.Name appName) {
         String CQL = "delete from experiment_user_index " +
                 "where user_id = ? and experiment_id = ? and context = ? and app_name = ?";
 
@@ -1045,7 +1041,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                 .withBucketAssignmentCount(bucketAssignmentCountList)
                 .withExperimentID(experiment.getID())
                 .withTotalUsers(new TotalUsers.Builder()
-                        .withBucketAssignments((long)totalAssignments - nullAssignments)
+                        .withBucketAssignments((long) totalAssignments - nullAssignments)
                         .withNullAssignments(nullAssignments)
                         .withTotal(totalAssignments)
                         .build()).build();

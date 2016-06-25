@@ -58,6 +58,7 @@ public class FeedbackResource {
 
     /**
      * Get all user feedback
+     *
      * @param authorizationHeader
      * @return Response object
      */
@@ -80,6 +81,7 @@ public class FeedbackResource {
 
     /**
      * Post feedback from user
+     *
      * @param userFeedback
      * @param authorizationHeader
      * @return Response object
@@ -89,7 +91,7 @@ public class FeedbackResource {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Submit feedback")
     @Timed
-    public Response postFeedback(@ApiParam(name = "userFeedback", value = "Please see model example",  required = true)
+    public Response postFeedback(@ApiParam(name = "userFeedback", value = "Please see model example", required = true)
                                  final UserFeedback userFeedback,
 
                                  @HeaderParam(AUTHORIZATION)
@@ -103,6 +105,7 @@ public class FeedbackResource {
 
     /**
      * Get user feedback
+     *
      * @param username
      * @param authorizationHeader
      * @return Response object

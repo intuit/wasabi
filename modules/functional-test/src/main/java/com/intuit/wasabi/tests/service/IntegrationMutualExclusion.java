@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -305,7 +305,7 @@ public class IntegrationMutualExclusion extends TestBase {
      */
     @Test(dependsOnMethods = {"t_prepBatchAssignmentMutEx"})
     public void t_startBatchExperiments() {
-        for(Experiment exp : batchMutExExperiments) {
+        for (Experiment exp : batchMutExExperiments) {
             postBuckets(BucketFactory.createBuckets(exp, 1));
             Experiment update = putExperiment(exp.setState(Constants.EXPERIMENT_STATE_RUNNING));
             assertEqualModelItems(update, exp, new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson"));
@@ -321,7 +321,7 @@ public class IntegrationMutualExclusion extends TestBase {
         Assert.assertEquals(assignments.size(), 5, "Exactly 5 assignments should be returned for mutual exclusive experiments.");
         int nonNullAssignments = 0;
         for (Assignment assignment : assignments) {
-            nonNullAssignments += assignment.assignment != null? 1 : 0;
+            nonNullAssignments += assignment.assignment != null ? 1 : 0;
         }
         Assert.assertEquals(nonNullAssignments, 1, "Exactly one assignment should not be null.");
     }
@@ -343,7 +343,7 @@ public class IntegrationMutualExclusion extends TestBase {
         Assert.assertEquals(assignments.size(), 5, "Five assignments should be returned for mutual exclusive experiments.");
         int nonNullAssignments = 0;
         for (Assignment assignment : assignments) {
-            nonNullAssignments += assignment.assignment != null? 1 : 0;
+            nonNullAssignments += assignment.assignment != null ? 1 : 0;
         }
         Assert.assertEquals(nonNullAssignments, 2, "Exactly two assignment should not be null.");
     }
@@ -399,8 +399,8 @@ public class IntegrationMutualExclusion extends TestBase {
         // passed End time
         Experiment endTimePassedExperiment = postExperiment(
                 ExperimentFactory.createExperiment()
-                    .setEndTime(TestUtils.relativeTimeString(-3))
-                    .setStartTime(TestUtils.relativeTimeString(-4)));
+                        .setEndTime(TestUtils.relativeTimeString(-3))
+                        .setStartTime(TestUtils.relativeTimeString(-4)));
         toCleanUp.add(endTimePassedExperiment);
         postBuckets(BucketFactory.createBuckets(endTimePassedExperiment, 2));
         putExperiment(endTimePassedExperiment.setState(Constants.EXPERIMENT_STATE_RUNNING));

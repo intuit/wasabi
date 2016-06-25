@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -325,9 +325,9 @@ public class AnalyticsImpl implements Analytics {
                             } else {
                                 //carry over cumulative counts from previous day if there are no new counts
                                 if (currentDay > 0) {
-                                    DailyCounts currentDailyCounts =  days.get(currentDay);
-                                    DailyCounts missingDailyCounts =  getPreviousDayDailyCountAsCurrentDailyCount(
-                                            currentDailyCounts, days, currentDay) ;
+                                    DailyCounts currentDailyCounts = days.get(currentDay);
+                                    DailyCounts missingDailyCounts = getPreviousDayDailyCountAsCurrentDailyCount(
+                                            currentDailyCounts, days, currentDay);
                                     days.set(currentDay, missingDailyCounts);
                                 }
 
@@ -350,7 +350,7 @@ public class AnalyticsImpl implements Analytics {
                 for (; currentDay < numberDays; currentDay += 1) {
                     DailyCounts thisDailyCounts = days.get(currentDay);
                     DailyCounts currentDailyCount = getPreviousDayDailyCountAsCurrentDailyCount(
-                            thisDailyCounts, days, currentDay) ;
+                            thisDailyCounts, days, currentDay);
 
                     days.set(currentDay, currentDailyCount);
                 }
@@ -364,7 +364,7 @@ public class AnalyticsImpl implements Analytics {
         DailyCounts.Builder dailyCountsBuilder = new DailyCounts.Builder()
                 .setDate(currentDailyCount.getDate())
                 .withPerDay(currentDailyCount.getPerDay())
-                .withCumulative( days.get(currentDay - 1).getCumulative() );
+                .withCumulative(days.get(currentDay - 1).getCumulative());
         return dailyCountsBuilder.build();
     }
 

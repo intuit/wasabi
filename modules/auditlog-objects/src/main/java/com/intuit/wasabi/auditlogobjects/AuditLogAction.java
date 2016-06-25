@@ -1,12 +1,6 @@
 package com.intuit.wasabi.auditlogobjects;
 
-import com.intuit.wasabi.eventlog.events.AuthorizationChangeEvent;
-import com.intuit.wasabi.eventlog.events.BucketChangeEvent;
-import com.intuit.wasabi.eventlog.events.BucketCreateEvent;
-import com.intuit.wasabi.eventlog.events.BucketDeleteEvent;
-import com.intuit.wasabi.eventlog.events.EventLogEvent;
-import com.intuit.wasabi.eventlog.events.ExperimentChangeEvent;
-import com.intuit.wasabi.eventlog.events.ExperimentCreateEvent;
+import com.intuit.wasabi.eventlog.events.*;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import org.apache.commons.lang3.StringUtils;
@@ -23,8 +17,7 @@ public enum AuditLogAction {
     BUCKET_CREATED(BucketCreateEvent.class),
     BUCKET_CHANGED(BucketChangeEvent.class),
     BUCKET_DELETED(BucketDeleteEvent.class),
-    AUTHORIZATION_CHANGE(AuthorizationChangeEvent.class),
-    ;
+    AUTHORIZATION_CHANGE(AuthorizationChangeEvent.class),;
 
     private final Class<? extends EventLogEvent> eventType;
 
@@ -80,7 +73,8 @@ public enum AuditLogAction {
      * @param entry the audit log entry
      * @return a simple description of the change
      */
-    /*test*/ static String getDescriptionAuthorizationChange(AuditLogEntry entry) {
+    /*test*/
+    static String getDescriptionAuthorizationChange(AuditLogEntry entry) {
         if (StringUtils.isBlank(entry.getAfter())) {
             return "removed access from " + entry.getChangedProperty();
         } else {
@@ -93,7 +87,7 @@ public enum AuditLogAction {
                     access = "WRITE";
                     break;
                 default:
-                	break;
+                    break;
             }
 
             if (StringUtils.isBlank(entry.getBefore())) {
@@ -109,7 +103,7 @@ public enum AuditLogAction {
                     accessFrom = "WRITE";
                     break;
                 default:
-                	break;
+                    break;
             }
 
             return "changed access from " + accessFrom + " to " + access + " for " + entry.getChangedProperty();
@@ -122,7 +116,8 @@ public enum AuditLogAction {
      * @param entry the audit log entry
      * @return a simple description of the change
      */
-    /*test*/ static String getDescriptionExperimentChanged(AuditLogEntry entry) {
+    /*test*/
+    static String getDescriptionExperimentChanged(AuditLogEntry entry) {
         switch (entry.getChangedProperty()) {
             // direct experiment properties
             case "state":
@@ -199,7 +194,8 @@ public enum AuditLogAction {
      * @param entry the audit log entry
      * @return a simple description of the change
      */
-    /*test*/ static String getDescriptionBucketChanged(AuditLogEntry entry) {
+    /*test*/
+    static String getDescriptionBucketChanged(AuditLogEntry entry) {
         switch (entry.getChangedProperty()) {
             case "is_control":
                 if (!StringUtils.isBlank(entry.getAfter()) && Boolean.parseBoolean(entry.getAfter())) {
@@ -233,7 +229,8 @@ public enum AuditLogAction {
      * @param doubleString an input string representing a double
      * @return an output string representing a percentage (including %)
      */
-    /*test*/ static String getPercentString(String doubleString) {
+    /*test*/
+    static String getPercentString(String doubleString) {
         try {
             return new DecimalFormat("###.##%").format(Double.parseDouble(doubleString));
         } catch (NumberFormatException ignored) {

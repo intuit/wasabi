@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,13 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.impl.cassandra;
 
-import com.intuit.wasabi.repository.impl.cassandra.serializer.ApplicationNameSerializer;
-import com.intuit.wasabi.repository.impl.cassandra.serializer.BucketLabelSerializer;
-import com.intuit.wasabi.repository.impl.cassandra.serializer.ExperimentIDSerializer;
-import com.intuit.wasabi.repository.impl.cassandra.serializer.ExperimentStateIndexKeySerializer;
-import com.intuit.wasabi.repository.impl.cassandra.serializer.PageNameSerializer;
-import com.intuit.wasabi.repository.impl.cassandra.serializer.UserIDSerializer;
-import com.intuit.wasabi.repository.impl.cassandra.serializer.UsernameSerializer;
+import com.intuit.wasabi.repository.impl.cassandra.serializer.*;
 import com.netflix.astyanax.serializers.StringSerializer;
 import com.netflix.astyanax.serializers.TimeUUIDSerializer;
 import org.junit.Assert;

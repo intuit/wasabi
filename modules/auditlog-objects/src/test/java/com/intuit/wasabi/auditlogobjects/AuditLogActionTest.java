@@ -1,14 +1,7 @@
 package com.intuit.wasabi.auditlogobjects;
 
 import com.intuit.wasabi.authenticationobjects.UserInfo;
-import com.intuit.wasabi.eventlog.events.AuthorizationChangeEvent;
-import com.intuit.wasabi.eventlog.events.BucketChangeEvent;
-import com.intuit.wasabi.eventlog.events.BucketCreateEvent;
-import com.intuit.wasabi.eventlog.events.BucketDeleteEvent;
-import com.intuit.wasabi.eventlog.events.EventLogEvent;
-import com.intuit.wasabi.eventlog.events.ExperimentChangeEvent;
-import com.intuit.wasabi.eventlog.events.ExperimentCreateEvent;
-import com.intuit.wasabi.eventlog.events.SimpleEvent;
+import com.intuit.wasabi.eventlog.events.*;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Experiment;
@@ -42,6 +35,7 @@ public class AuditLogActionTest {
         Mockito.when(entry.getBucketLabel()).thenReturn(Mockito.mock(Bucket.Label.class));
 
     }
+
     @Test
     public void testGetActionForEvent() throws Exception {
         Assert.assertEquals(AuditLogAction.UNSPECIFIED_ACTION, AuditLogAction.getActionForEvent(new SimpleEvent("SimpleEvent")));
@@ -64,7 +58,7 @@ public class AuditLogActionTest {
 
         eventKeywords.put(new SimpleEvent("Simple Event"), new String[]{""});
 
-        Experiment exp = Experiment.withID(Experiment.ID.valueOf(new UUID(1,1)))
+        Experiment exp = Experiment.withID(Experiment.ID.valueOf(new UUID(1, 1)))
                 .withApplicationName(Application.Name.valueOf("ABCDEF"))
                 .withLabel(Experiment.Label.valueOf("FEDCBA")).build();
         eventKeywords.put(new ExperimentCreateEvent(exp), new String[]{"created", "experiment"});

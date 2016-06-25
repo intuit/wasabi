@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -48,7 +48,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  * Known Issues:
  * - The python test checked for the number of experiments, but since this could be run on production environments
  *   it does not feel right to check those numbers, as they might change by other accessors.
- * 
+ *
  * These transitions are tested:
  *
  * <small>(row transitions to column)</small>
@@ -94,7 +94,7 @@ public class IntegrationExperiment extends TestBase {
         completeExperiment = ExperimentFactory.createCompleteExperiment();
         personalizationExperiment = ExperimentFactory.createCompleteExperiment();
     }
-    
+
     /**
      * Creates a test experiment to test with.
      */
@@ -260,10 +260,10 @@ public class IntegrationExperiment extends TestBase {
                 new Object[]{ExperimentFactory.createExperiment().setState(Constants.EXPERIMENT_STATE_DRAFT), "Unrecognized property \"state\"", HttpStatus.SC_BAD_REQUEST},
                 // FIXME: jwtodd
 //                new Object[] { ExperimentFactory.createCompleteExperiment().setStartTime((String) null), "Repository error", HttpStatus.SC_INTERNAL_SERVER_ERROR },
-                new Object[]{ExperimentFactory.createCompleteExperiment().setStartTime((String) null), "Could not create experiment \"NewExperiment[id=20533222-2a3f-459d-b6b6-5e05ad1104e3,label=SW50ZWdyVGVzdA_Experiment_146123290282853,applicationName=SW50ZWdyVGVzdA_1461232889078App_PRIMARY,startTime=<null>,endTime=Thu Jun 02 10:01:42 UTC 2016,samplingPercent=1.0,description=A sample Experiment description.,rule=(salary < 10000) && (state = 'VA'),isPersonalizationEnabled=false,modelName=,modelVersion=,isRapidExperiment=false,userCap=0,creatorID="+userName+"]\"", HttpStatus.SC_INTERNAL_SERVER_ERROR},
+                new Object[]{ExperimentFactory.createCompleteExperiment().setStartTime((String) null), "Could not create experiment \"NewExperiment[id=20533222-2a3f-459d-b6b6-5e05ad1104e3,label=SW50ZWdyVGVzdA_Experiment_146123290282853,applicationName=SW50ZWdyVGVzdA_1461232889078App_PRIMARY,startTime=<null>,endTime=Thu Jun 02 10:01:42 UTC 2016,samplingPercent=1.0,description=A sample Experiment description.,rule=(salary < 10000) && (state = 'VA'),isPersonalizationEnabled=false,modelName=,modelVersion=,isRapidExperiment=false,userCap=0,creatorID=" + userName + "]\"", HttpStatus.SC_INTERNAL_SERVER_ERROR},
                 // FIXME: jwtodd
 //                new Object[] { ExperimentFactory.createCompleteExperiment().setEndTime((String) null), "Repository error", HttpStatus.SC_INTERNAL_SERVER_ERROR },
-                new Object[]{ExperimentFactory.createCompleteExperiment().setEndTime((String) null), "Could not create experiment \"NewExperiment[id=97daea3b-1523-43e7-8d7c-d7eba2c18ff5,label=SW50ZWdyVGVzdA_Experiment_146123290282954,applicationName=SW50ZWdyVGVzdA_1461232889078App_PRIMARY,startTime=Thu Apr 21 10:01:42 UTC 2016,endTime=<null>,samplingPercent=1.0,description=A sample Experiment description.,rule=(salary < 10000) && (state = 'VA'),isPersonalizationEnabled=false,modelName=,modelVersion=,isRapidExperiment=false,userCap=0,creatorID="+userName+"]\"", HttpStatus.SC_INTERNAL_SERVER_ERROR},
+                new Object[]{ExperimentFactory.createCompleteExperiment().setEndTime((String) null), "Could not create experiment \"NewExperiment[id=97daea3b-1523-43e7-8d7c-d7eba2c18ff5,label=SW50ZWdyVGVzdA_Experiment_146123290282954,applicationName=SW50ZWdyVGVzdA_1461232889078App_PRIMARY,startTime=Thu Apr 21 10:01:42 UTC 2016,endTime=<null>,samplingPercent=1.0,description=A sample Experiment description.,rule=(salary < 10000) && (state = 'VA'),isPersonalizationEnabled=false,modelName=,modelVersion=,isRapidExperiment=false,userCap=0,creatorID=" + userName + "]\"", HttpStatus.SC_INTERNAL_SERVER_ERROR},
                 // FIXME: jwtodd
 //                new Object[] { null, "The server was unable to process the request", HttpStatus.SC_INTERNAL_SERVER_ERROR },
                 new Object[]{null, "null", HttpStatus.SC_INTERNAL_SERVER_ERROR},
@@ -309,7 +309,7 @@ public class IntegrationExperiment extends TestBase {
                 // FIXME: jwtodd
 //                new Object[] { new Experiment(experiment.setId("foobar")), "Invalid identifier", HttpStatus.SC_INTERNAL_SERVER_ERROR },
                 new Object[]{new Experiment(experiment.setId("foobar")), "com.intuit.wasabi.experimentobjects.exceptions.InvalidIdentifierException: Invalid experiment identifier \"foobar\"", HttpStatus.SC_INTERNAL_SERVER_ERROR},
-                new Object[] { new Experiment(experiment.setId("")), "The server was unable to process the request", HttpStatus.SC_INTERNAL_SERVER_ERROR },
+                new Object[]{new Experiment(experiment.setId("")), "The server was unable to process the request", HttpStatus.SC_INTERNAL_SERVER_ERROR},
         };
     }
 
@@ -340,7 +340,7 @@ public class IntegrationExperiment extends TestBase {
     public Object[][] badExperimentsPUT() {
         Experiment experiment = ExperimentFactory.createExperiment().setId(initialExperiment.id);
         String samplingPercAsString = experiment.toJSONString();
-        samplingPercAsString = samplingPercAsString.replace(""+experiment.samplingPercent, "\"foo\"");
+        samplingPercAsString = samplingPercAsString.replace("" + experiment.samplingPercent, "\"foo\"");
         return new Object[][]{
                 // FIXME: jwtodd
 //                new Object[] { new Experiment(experiment).setStartTime("foo").toJSONString(), "Invalid input", HttpStatus.SC_BAD_REQUEST },
@@ -402,46 +402,46 @@ public class IntegrationExperiment extends TestBase {
     @DataProvider
     public Object[][] state() {
         return new Object[][]{
-                new Object[] { "OBVIOUSLY_INVALID_EXPERIMENT_STATE", HttpStatus.SC_BAD_REQUEST}, // DR -> I
-                new Object[] { Constants.EXPERIMENT_STATE_DRAFT, HttpStatus.SC_OK}, // DR -> DR
-                new Object[] { Constants.EXPERIMENT_STATE_PAUSED, HttpStatus.SC_OK}, // DR -> P
-                new Object[] { "OBVIOUSLY_INVALID_EXPERIMENT_STATE", HttpStatus.SC_BAD_REQUEST}, // P -> I
-                new Object[] { Constants.EXPERIMENT_STATE_PAUSED, HttpStatus.SC_OK}, // P -> P
+                new Object[]{"OBVIOUSLY_INVALID_EXPERIMENT_STATE", HttpStatus.SC_BAD_REQUEST}, // DR -> I
+                new Object[]{Constants.EXPERIMENT_STATE_DRAFT, HttpStatus.SC_OK}, // DR -> DR
+                new Object[]{Constants.EXPERIMENT_STATE_PAUSED, HttpStatus.SC_OK}, // DR -> P
+                new Object[]{"OBVIOUSLY_INVALID_EXPERIMENT_STATE", HttpStatus.SC_BAD_REQUEST}, // P -> I
+                new Object[]{Constants.EXPERIMENT_STATE_PAUSED, HttpStatus.SC_OK}, // P -> P
                 // FIXME: jwtodd
 //                new Object[] { Constants.EXPERIMENT_STATE_DRAFT, HttpStatus.SC_UNPROCESSABLE_ENTITY}, // P -> DR
                 new Object[]{Constants.EXPERIMENT_STATE_DRAFT, HttpStatus.SC_BAD_REQUEST}, // P -> DR
-                new Object[] { Constants.EXPERIMENT_STATE_RUNNING, HttpStatus.SC_OK}, // P -> R
-                new Object[] { "OBVIOUSLY_INVALID_EXPERIMENT_STATE", HttpStatus.SC_BAD_REQUEST}, // R -> I
-                new Object[] { Constants.EXPERIMENT_STATE_RUNNING, HttpStatus.SC_OK}, // R -> R
+                new Object[]{Constants.EXPERIMENT_STATE_RUNNING, HttpStatus.SC_OK}, // P -> R
+                new Object[]{"OBVIOUSLY_INVALID_EXPERIMENT_STATE", HttpStatus.SC_BAD_REQUEST}, // R -> I
+                new Object[]{Constants.EXPERIMENT_STATE_RUNNING, HttpStatus.SC_OK}, // R -> R
                 // FIXME: jwtodd
 //                new Object[] { Constants.EXPERIMENT_STATE_DELETED, HttpStatus.SC_UNPROCESSABLE_ENTITY}, // R -> DEL
                 new Object[]{Constants.EXPERIMENT_STATE_DELETED, HttpStatus.SC_BAD_REQUEST}, // R -> DEL
                 // FIXME: jwtodd
 //                new Object[] { Constants.EXPERIMENT_STATE_DRAFT, HttpStatus.SC_UNPROCESSABLE_ENTITY}, // R -> DR
                 new Object[]{Constants.EXPERIMENT_STATE_DRAFT, HttpStatus.SC_BAD_REQUEST}, // R -> DR
-                new Object[] { Constants.EXPERIMENT_STATE_PAUSED, HttpStatus.SC_OK}, // R -> P
+                new Object[]{Constants.EXPERIMENT_STATE_PAUSED, HttpStatus.SC_OK}, // R -> P
                 // FIXME: jwtodd
 //                new Object[] { Constants.EXPERIMENT_STATE_DELETED, HttpStatus.SC_UNPROCESSABLE_ENTITY}, // P -> DEL
                 new Object[]{Constants.EXPERIMENT_STATE_DELETED, HttpStatus.SC_BAD_REQUEST}, // P -> DEL
-                new Object[] { Constants.EXPERIMENT_STATE_TERMINATED, HttpStatus.SC_OK}, // P -> T
-                new Object[] { "OBVIOUSLY_INVALID_EXPERIMENT_STATE", HttpStatus.SC_BAD_REQUEST}, // T -> I
+                new Object[]{Constants.EXPERIMENT_STATE_TERMINATED, HttpStatus.SC_OK}, // P -> T
+                new Object[]{"OBVIOUSLY_INVALID_EXPERIMENT_STATE", HttpStatus.SC_BAD_REQUEST}, // T -> I
                 // FIXME: jwtodd
 //                new Object[] { Constants.EXPERIMENT_STATE_RUNNING, HttpStatus.SC_UNPROCESSABLE_ENTITY}, // T -> R
                 new Object[]{Constants.EXPERIMENT_STATE_RUNNING, HttpStatus.SC_BAD_REQUEST}, // T -> R
-                new Object[] { Constants.EXPERIMENT_STATE_TERMINATED, HttpStatus.SC_OK}, // T -> T
+                new Object[]{Constants.EXPERIMENT_STATE_TERMINATED, HttpStatus.SC_OK}, // T -> T
                 // FIXME: jwtodd
 //                new Object[] { Constants.EXPERIMENT_STATE_PAUSED, HttpStatus.SC_UNPROCESSABLE_ENTITY}, // T -> P
                 new Object[]{Constants.EXPERIMENT_STATE_PAUSED, HttpStatus.SC_BAD_REQUEST}, // T -> P
                 // FIXME: jwtodd
 //                new Object[] { Constants.EXPERIMENT_STATE_DRAFT, HttpStatus.SC_UNPROCESSABLE_ENTITY}, // T -> DR
                 new Object[]{Constants.EXPERIMENT_STATE_DRAFT, HttpStatus.SC_BAD_REQUEST}, // T -> DR
-                new Object[] { Constants.EXPERIMENT_STATE_DELETED, HttpStatus.SC_NO_CONTENT}, // T -> DEL
-                new Object[] { "OBVIOUSLY_INVALID_EXPERIMENT_STATE", HttpStatus.SC_BAD_REQUEST}, // DEL -> I
-                new Object[] { Constants.EXPERIMENT_STATE_DELETED, HttpStatus.SC_NOT_FOUND}, // DEL -> DEL
-                new Object[] { Constants.EXPERIMENT_STATE_RUNNING, HttpStatus.SC_NOT_FOUND}, // DEL -> R
-                new Object[] { Constants.EXPERIMENT_STATE_PAUSED, HttpStatus.SC_NOT_FOUND}, // DEL -> P
-                new Object[] { Constants.EXPERIMENT_STATE_DRAFT, HttpStatus.SC_NOT_FOUND}, // DEL -> DR
-                new Object[] { Constants.EXPERIMENT_STATE_TERMINATED, HttpStatus.SC_NOT_FOUND}, // DEL -> T
+                new Object[]{Constants.EXPERIMENT_STATE_DELETED, HttpStatus.SC_NO_CONTENT}, // T -> DEL
+                new Object[]{"OBVIOUSLY_INVALID_EXPERIMENT_STATE", HttpStatus.SC_BAD_REQUEST}, // DEL -> I
+                new Object[]{Constants.EXPERIMENT_STATE_DELETED, HttpStatus.SC_NOT_FOUND}, // DEL -> DEL
+                new Object[]{Constants.EXPERIMENT_STATE_RUNNING, HttpStatus.SC_NOT_FOUND}, // DEL -> R
+                new Object[]{Constants.EXPERIMENT_STATE_PAUSED, HttpStatus.SC_NOT_FOUND}, // DEL -> P
+                new Object[]{Constants.EXPERIMENT_STATE_DRAFT, HttpStatus.SC_NOT_FOUND}, // DEL -> DR
+                new Object[]{Constants.EXPERIMENT_STATE_TERMINATED, HttpStatus.SC_NOT_FOUND}, // DEL -> T
         };
     }
 
@@ -562,12 +562,12 @@ public class IntegrationExperiment extends TestBase {
     @DataProvider
     public Object[][] dates() {
         String identicalTime = TestUtils.relativeTimeString(5);
-        return new Object[][] {
-                new Object[] { "present", TestUtils.relativeTimeString(-1), TestUtils.relativeTimeString(1) },
-                new Object[] { "future", TestUtils.relativeTimeString(2), TestUtils.relativeTimeString(4) },
-                new Object[] { "same", identicalTime, identicalTime },
-                new Object[] { "past", TestUtils.relativeTimeString(-4), TestUtils.relativeTimeString(-2) },
-                new Object[] { "endBeforeStart", TestUtils.relativeTimeString(3), TestUtils.relativeTimeString(1) },
+        return new Object[][]{
+                new Object[]{"present", TestUtils.relativeTimeString(-1), TestUtils.relativeTimeString(1)},
+                new Object[]{"future", TestUtils.relativeTimeString(2), TestUtils.relativeTimeString(4)},
+                new Object[]{"same", identicalTime, identicalTime},
+                new Object[]{"past", TestUtils.relativeTimeString(-4), TestUtils.relativeTimeString(-2)},
+                new Object[]{"endBeforeStart", TestUtils.relativeTimeString(3), TestUtils.relativeTimeString(1)},
         };
     }
 

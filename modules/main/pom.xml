@@ -41,10 +41,14 @@
         <application.http.context.path>/api</application.http.context.path>
         <application.http.content.directory>${application.home}/content/ui/dist</application.http.content.directory>
 
-        <application.jersey.provider.paths>com.intuit.wasabi.api;com.codahale.metrics.jersey</application.jersey.provider.paths>
+        <application.jersey.provider.paths>com.intuit.wasabi.api;com.codahale.metrics.jersey
+        </application.jersey.provider.paths>
         <application.jersey.pojo.enabled>true</application.jersey.pojo.enabled>
-        <application.jersey.request.filters>com.sun.jersey.api.client.filter.LoggingFilter</application.jersey.request.filters>
-        <application.jersey.response.filters>com.intuit.wasabi.api.SimpleCORSResponseFilter;com.sun.jersey.api.client.filter.LoggingFilter</application.jersey.response.filters>
+        <application.jersey.request.filters>com.sun.jersey.api.client.filter.LoggingFilter
+        </application.jersey.request.filters>
+        <application.jersey.response.filters>
+            com.intuit.wasabi.api.SimpleCORSResponseFilter;com.sun.jersey.api.client.filter.LoggingFilter
+        </application.jersey.response.filters>
         <application.jersey.wadl.enabled>false</application.jersey.wadl.enabled>
         <application.jmx.port>8090</application.jmx.port>
         <application.debug.port>8180</application.debug.port>
@@ -82,7 +86,9 @@
             <id>test</id>
             <properties>
                 <!-- NOTE: do not pretty-print format -->
-                <application.instrument>-javaagent:/usr/local/lib/org.jacoco.agent-${jacoco.version}-runtime.jar=destfile=${LOG_DIR}/jacoco-it.exec,append=false</application.instrument>
+                <application.instrument>
+                    -javaagent:/usr/local/lib/org.jacoco.agent-${jacoco.version}-runtime.jar=destfile=${LOG_DIR}/jacoco-it.exec,append=false
+                </application.instrument>
                 <metrics.jmx.enabled>true</metrics.jmx.enabled>
             </properties>
         </profile>

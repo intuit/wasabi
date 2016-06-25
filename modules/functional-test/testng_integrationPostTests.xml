@@ -20,7 +20,7 @@
 <suite name="IntegrationPostTests" parallel="false">
     <test name="IntegrationPostTests">
         <classes>
-            <class name="com.intuit.wasabi.tests.library.TearDownTestExperiments" />
+            <class name="com.intuit.wasabi.tests.library.TearDownTestExperiments"/>
         </classes>
     </test>
 </suite>

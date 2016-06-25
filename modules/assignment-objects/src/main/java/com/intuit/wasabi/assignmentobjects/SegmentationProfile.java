@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -51,7 +51,51 @@ public class SegmentationProfile {
         return new Builder(profile);
     }
 
+    public Map<String, Object> getProfile() {
+        return profile;
+    }
+
+    public void setProfile(Map<String, Object> profile) {
+        this.profile = profile;
+    }
+
+    public JSONObject toJSONProfile() {
+        JSONObject profileJson = new JSONObject(profile);
+        return profileJson;
+    }
+
+    public void addAttribute(String key, Object value) {
+        if (profile != null && key != null && value != null) {
+            profile.put(key, value);
+        }
+    }
+
+    public Object getAttribute(String key) {
+        return profile.get(key);
+    }
+
+    public boolean hasAttribute(String key) {
+        return profile != null && profile.containsKey(key);
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+    }
+
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return EqualsBuilder.reflectionEquals(this, obj);
+    }
+
     public static class Builder {
+        private SegmentationProfile instance;
+
         private Builder() {
             instance = new SegmentationProfile();
         }
@@ -71,49 +115,5 @@ public class SegmentationProfile {
             instance = null;
             return result;
         }
-
-        private SegmentationProfile instance;
-    }
-
-    public Map<String, Object> getProfile() {
-        return profile;
-    }
-
-    public JSONObject toJSONProfile(){
-        JSONObject profileJson = new JSONObject(profile);
-        return profileJson;
-    }
-
-    public void setProfile(Map<String, Object> profile) {
-        this.profile = profile;
-    }
-
-    public void addAttribute(String key, Object value) {
-        if (profile != null && key != null && value != null) {
-            profile.put(key, value);
-        }
-    }
-
-    public Object getAttribute(String key) {
-        return profile.get(key);
-    }
-
-    public boolean hasAttribute(String key) {
-        return profile != null && profile.containsKey(key);
-    }
-
-    @Override
-    public String toString() {
-    	return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
-    }
-
-    @Override
-    public int hashCode() {
-    	return HashCodeBuilder.reflectionHashCode(this);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-    	   return EqualsBuilder.reflectionEquals(this, obj);
     }
 }

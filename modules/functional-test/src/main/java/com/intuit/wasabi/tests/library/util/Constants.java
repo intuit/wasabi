@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,7 +31,7 @@ public class Constants {
     public static final String TAB = "\t";
 
     /** The integration tests prefix, should be {@code SW50ZWdyVGVzdA_} */
-    public static final String INTEGRATION_TESTS_PREFIX = new String(Base64.encodeBase64("IntegrTest".getBytes())).replace("==","_");
+    public static final String INTEGRATION_TESTS_PREFIX = new String(Base64.encodeBase64("IntegrTest".getBytes())).replace("==", "_");
 
     /** {@link #INTEGRATION_TESTS_PREFIX}{@code + "Application_";} */
     public static final String DEFAULT_PREFIX_APPLICATION = INTEGRATION_TESTS_PREFIX + System.currentTimeMillis() + "App_";
@@ -52,13 +52,13 @@ public class Constants {
 
     /** {@link #INTEGRATION_TESTS_PREFIX}{@code + "UserFeedback_";} */
     public static final String DEFAULT_PREFIX_USER_FEEDBACK = INTEGRATION_TESTS_PREFIX + "UserFeedback_";
-    
+
     public static final String EXPERIMENT_STATE_DRAFT = "DRAFT";
     public static final String EXPERIMENT_STATE_RUNNING = "RUNNING";
     public static final String EXPERIMENT_STATE_PAUSED = "PAUSED";
     public static final String EXPERIMENT_STATE_TERMINATED = "TERMINATED";
     public static final String EXPERIMENT_STATE_DELETED = "DELETED";
-    
+
     public static final String BUCKET_STATE_OPEN = "OPEN";
     public static final String BUCKET_STATE_CLOSED = "CLOSED";
     public static final String BUCKET_STATE_EMPTY = "EMPTY";
@@ -66,11 +66,11 @@ public class Constants {
     public static final String ASSIGNMENT_NO_PROFILE_MATCH = "NO_PROFILE_MATCH";
     public static final String ASSIGNMENT_NEW_ASSIGNMENT = "NEW_ASSIGNMENT";
     public static final String ASSIGNMENT_EXISTING_ASSIGNMENT = "EXISTING_ASSIGNMENT";
-	public static final String ASSIGNMENT_EXPERIMENT_IN_DRAFT_STATE = "EXPERIMENT_IN_DRAFT_STATE";
+    public static final String ASSIGNMENT_EXPERIMENT_IN_DRAFT_STATE = "EXPERIMENT_IN_DRAFT_STATE";
 
     public static final String NEW_ASSIGNMENT = "NEW_ASSIGNMENT";
-	public static final String NO_OPEN_BUCKETS = "NO_OPEN_BUCKETS";
+    public static final String NO_OPEN_BUCKETS = "NO_OPEN_BUCKETS";
 
-	public static final int EXP_SPAWN_COUNT = 5;
+    public static final int EXP_SPAWN_COUNT = 5;
 
 }

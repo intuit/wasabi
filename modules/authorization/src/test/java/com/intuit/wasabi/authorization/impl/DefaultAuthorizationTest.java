@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -137,7 +137,7 @@ public class DefaultAuthorizationTest {
     }
 
     @Test
-    public void testGetUserHeaderNull(){
+    public void testGetUserHeaderNull() {
         thrown.expect(AuthenticationException.class);
         thrown.expectMessage("Null Authentication Header is not supported");
         UserInfo.Username user = defaultAuthorization.getUser(null);
@@ -153,7 +153,7 @@ public class DefaultAuthorizationTest {
     }
 
     @Test
-    public void testGetCorrectUser(){
+    public void testGetCorrectUser() {
         UserInfo.Username user = defaultAuthorization.getUser("Basic d2FzYWJpX3JlYWRlcjp3YXNhYmkwMQ==");
         assertThat(user.getUsername(), is("wasabi_reader"));
     }
@@ -179,7 +179,7 @@ public class DefaultAuthorizationTest {
         UserRoleList userRoleList = Mockito.mock(UserRoleList.class);
         when(authorizationRepository.getUserRoleList(userRole.getUserID())).thenReturn(userRoleList);
         when(authorizationRepository.getUserInfo(userRole.getUserID())).thenReturn(EventLog.SYSTEM_USER);
-        when(userRoleList.getRoleList()).thenReturn(Collections.<UserRole>emptyList());
+        when(userRoleList.getRoleList()).thenReturn(Collections.emptyList());
         map = defaultAuthorization.setUserRole(userRole, EventLog.SYSTEM_USER);
         assertEquals(status, map);
 
@@ -194,7 +194,7 @@ public class DefaultAuthorizationTest {
         assertEquals(status, map);
     }
 
-    private Map<String, String> createTestStatus(UserRole userRole){
+    private Map<String, String> createTestStatus(UserRole userRole) {
         Map<String, String> status = new HashMap<>();
         status.put("userID", userRole.getUserID().toString());
         status.put("role", userRole.getRole().toString());
@@ -222,7 +222,7 @@ public class DefaultAuthorizationTest {
         when(authorizationRepository.checkSuperAdminPermissions(USER, null)).thenReturn(Mockito.mock(UserPermissions.class));
         try {
             defaultAuthorization.checkSuperAdmin(USER);
-        } catch(AuthenticationException e) {
+        } catch (AuthenticationException e) {
             Assert.fail("Expected successful call to checkSuperAdmin, but got an exception: " + e.getMessage());
         }
     }

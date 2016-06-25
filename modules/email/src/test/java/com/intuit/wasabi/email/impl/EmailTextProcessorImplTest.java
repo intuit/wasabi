@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -44,7 +44,8 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * This class tests the {@link com.intuit.wasabi.email.impl.EmailTextProcessorImpl}
@@ -61,7 +62,7 @@ public class EmailTextProcessorImplTest {
     private List<String> links = new ArrayList<>();
 
     @Test
-    public void testMessageResolution(){
+    public void testMessageResolution() {
 
         Experiment.Label label = Experiment.Label.valueOf("expLabel");
         Experiment.ID id = Experiment.ID.newInstance();
@@ -81,7 +82,7 @@ public class EmailTextProcessorImplTest {
     }
 
     @Test
-    public void testMessageAddressors(){
+    public void testMessageAddressors() {
 
         ExperimentBase exp = mock(Experiment.class);
         UserRoleList roleListMock = mock(UserRoleList.class);
@@ -95,14 +96,14 @@ public class EmailTextProcessorImplTest {
         when(roleOk.getUserEmail()).thenReturn("valid.email@you.org");
         when(roleOk2.getUserEmail()).thenReturn("valid.email@gmail.com");
         when(roleBad.getUserEmail()).thenReturn("alskdjuifa");
-        when(roleListMock.getRoleList()).thenReturn(Arrays.asList(roleOk,roleOk2,roleBad));
+        when(roleListMock.getRoleList()).thenReturn(Arrays.asList(roleOk, roleOk2, roleBad));
         when(exp.getApplicationName()).thenReturn(appName);
         when(repoMock.getApplicationUsers(appName)).thenReturn(roleListMock);
         EventLogEvent event = new ExperimentCreateEvent(exp);
 
         Set<String> emailMessage = textProcessor.getAddressees(event);
 
-        assertEquals(emailMessage.size(),1);
+        assertEquals(emailMessage.size(), 1);
         assertTrue(emailMessage.contains("valid.email@you.org"));
         //assertTrue(emailMessage.contains("valid.email@gmail.com"));
         assertFalse(emailMessage.contains("alskdjuifa"));
@@ -110,7 +111,7 @@ public class EmailTextProcessorImplTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testSubjectExtraction(){
+    public void testSubjectExtraction() {
 
         EventLogEvent mockedEventLog = mock(EventLogEvent.class);
         assertThat(textProcessor.getSubject(appName), is("A User requests access to your Application"));
@@ -136,7 +137,7 @@ public class EmailTextProcessorImplTest {
      *
      */
     @Test(expected = IllegalArgumentException.class)
-    public void testMessageExtraction(){
+    public void testMessageExtraction() {
         BucketCreateEvent mockedEventLog = mock(BucketCreateEvent.class);
         ExperimentBase mockedExperimentBase = mock(ExperimentBase.class);
         Bucket mockedBucket = mock(Bucket.class);
@@ -163,7 +164,7 @@ public class EmailTextProcessorImplTest {
     }
 
     @Test(expected = WasabiEmailException.class)
-    public void testNoAdminsForApp(){
+    public void testNoAdminsForApp() {
 
         UserRoleList roleListMock = mock(UserRoleList.class);
         UserRole roleBad = mock(UserRole.class);
@@ -176,14 +177,14 @@ public class EmailTextProcessorImplTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testGetAddresseesDefault(){
+    public void testGetAddresseesDefault() {
         EventLogEvent eventLogEvent = mock(EventLogEvent.class);
         when(eventLogEvent.getType()).thenReturn(EventLogEventType.UNKNOWN);
         textProcessor.getAddressees(eventLogEvent);
     }
 
     @Test
-    public void testAccessTemplateForApp(){
+    public void testAccessTemplateForApp() {
         links.add("https://wasabi.you.org/");
         String msg = textProcessor.getMessage(appName, UserInfo.Username.valueOf("Jabb0r"), EmailLinksList.withEmailLinksList(links).build());
         assertTrue(StringUtils.containsIgnoreCase(msg, appName.toString()));
@@ -191,7 +192,7 @@ public class EmailTextProcessorImplTest {
     }
 
     @Test
-    public void testMessageResolutionForExpChange(){
+    public void testMessageResolutionForExpChange() {
 
         Experiment.Label label = Experiment.Label.valueOf("expChanged");
         Experiment.ID id = Experiment.ID.newInstance();
@@ -202,9 +203,9 @@ public class EmailTextProcessorImplTest {
         when(exp.getLabel()).thenReturn(label);
         when(exp.getID()).thenReturn(id);
 
-        EventLogEvent event = new ExperimentChangeEvent(exp,"label","newUiFeature","NewUI");
+        EventLogEvent event = new ExperimentChangeEvent(exp, "label", "newUiFeature", "NewUI");
         String emailMessage = textProcessor.getMessage(event);
-        
+
         assertTrue(emailMessage.contains(appName.toString()));
         assertTrue(emailMessage.contains(label.toString()));
         assertTrue(emailMessage.contains(id.toString()));
@@ -214,7 +215,7 @@ public class EmailTextProcessorImplTest {
     }
 
     @Test
-    public void testMessageResolutionForBucketChange(){
+    public void testMessageResolutionForBucketChange() {
 
         Experiment.Label label = Experiment.Label.valueOf("expChanged");
         Experiment.ID id = Experiment.ID.newInstance();
@@ -227,7 +228,7 @@ public class EmailTextProcessorImplTest {
         when(exp.getID()).thenReturn(id);
         when(buck.getLabel()).thenReturn(Bucket.Label.valueOf("CaseA"));
 
-        EventLogEvent event = new BucketChangeEvent(exp,buck,"label","casea","CaseA");
+        EventLogEvent event = new BucketChangeEvent(exp, buck, "label", "casea", "CaseA");
         String emailMessage = textProcessor.getMessage(event);
 
         assertTrue(emailMessage.contains(appName.toString()));

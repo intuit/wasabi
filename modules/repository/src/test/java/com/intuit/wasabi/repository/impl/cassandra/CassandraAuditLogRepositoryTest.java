@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,11 +24,7 @@ import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.repository.AuditLogRepository;
 import com.intuit.wasabi.repository.RepositoryException;
-import com.intuit.wasabi.repository.impl.cassandra.serializer.ApplicationNameSerializer;
-import com.intuit.wasabi.repository.impl.cassandra.serializer.BucketLabelSerializer;
-import com.intuit.wasabi.repository.impl.cassandra.serializer.ExperimentIDSerializer;
-import com.intuit.wasabi.repository.impl.cassandra.serializer.ExperimentLabelSerializer;
-import com.intuit.wasabi.repository.impl.cassandra.serializer.UsernameSerializer;
+import com.intuit.wasabi.repository.impl.cassandra.serializer.*;
 import com.netflix.astyanax.Keyspace;
 import com.netflix.astyanax.connectionpool.OperationResult;
 import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
@@ -55,15 +51,6 @@ import java.util.List;
  */
 @SuppressWarnings("unchecked")
 public class CassandraAuditLogRepositoryTest {
-    // the tested item
-    private CassandraAuditLogRepository calr;
-
-    // important mocks
-    private CassandraDriver driver;
-    // NOTE: prepQuery.execute() needs to be stubbed whenever needed!
-    // Additionally prepQuery.with[...]Buffer needs to be stubbed if it is not the applicationName
-    private PreparedCqlQuery<Application.Name, String> prepQuery;
-
     // helpers
     private final ExperimentsKeyspace keyspace = new ExperimentsKeyspaceImpl();
     private final Experiment.Label expLabel = Mockito.mock(Experiment.Label.class);
@@ -71,7 +58,13 @@ public class CassandraAuditLogRepositoryTest {
     private final Bucket.Label bucketLabel = Mockito.mock(Bucket.Label.class);
     private final Calendar time = Calendar.getInstance();
     private final String dummyStringValue = "DummyString";
-
+    // the tested item
+    private CassandraAuditLogRepository calr;
+    // important mocks
+    private CassandraDriver driver;
+    // NOTE: prepQuery.execute() needs to be stubbed whenever needed!
+    // Additionally prepQuery.with[...]Buffer needs to be stubbed if it is not the applicationName
+    private PreparedCqlQuery<Application.Name, String> prepQuery;
     private Application.Name appName;
     private Rows<Application.Name, String> rows;
 

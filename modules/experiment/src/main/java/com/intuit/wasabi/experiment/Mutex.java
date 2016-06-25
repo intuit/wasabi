@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -49,7 +49,7 @@ public interface Mutex {
 
     /**
      * Creates a new mutual exclusion rule and adds it to the database
-     * 
+     *
      * @param experimentID experimentID object containing experiment uuid
      * @param experimentIDList experimentList object containing list of experiment uuid's
      * @param user the {@link UserInfo} who triggered the creation of an exclusion
@@ -59,7 +59,7 @@ public interface Mutex {
 
     /**
      * Deletes a mutual exclusion relation between 2 experiments by removing it from the database.
-     * 
+     *
      * @param expID1 ID of experiment 1
      * @param expID2 ID of experiment 2
      * @param user the {@link UserInfo} who deleted the exclusion

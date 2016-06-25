@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,7 +18,6 @@ package com.intuit.wasabi.repository.impl.cassandra;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
-import com.intuit.wasabi.userdirectory.UserDirectory;
 import com.intuit.wasabi.authorizationobjects.*;
 import com.intuit.wasabi.cassandra.CassandraDriver;
 import com.intuit.wasabi.cassandra.ExperimentDriver;
@@ -30,6 +29,7 @@ import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.RepositoryException;
 import com.intuit.wasabi.repository.impl.cassandra.serializer.ApplicationNameSerializer;
 import com.intuit.wasabi.repository.impl.cassandra.serializer.UsernameSerializer;
+import com.intuit.wasabi.userdirectory.UserDirectory;
 import com.netflix.astyanax.connectionpool.OperationResult;
 import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
 import com.netflix.astyanax.model.CqlResult;
@@ -44,7 +44,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Cassandra AuthorizationRepository implementation
- * 
+ *
  *  @see AuthorizationRepository
  */
 public class CassandraAuthorizationRepository implements AuthorizationRepository {
@@ -55,7 +55,7 @@ public class CassandraAuthorizationRepository implements AuthorizationRepository
     private final ExperimentRepository experimentRepository;
     private final UserDirectory userDirectory;
     private final String userNonNullMsg = "Parameter \"userID\" cannot be null";
-    private final String applicationNonNullMsg =  "Parameter \"applicationName\" cannot be null";
+    private final String applicationNonNullMsg = "Parameter \"applicationName\" cannot be null";
     private final String CQL_ROLES = "select * from user_roles where user_id = ? and app_name = ?";
 
     /**

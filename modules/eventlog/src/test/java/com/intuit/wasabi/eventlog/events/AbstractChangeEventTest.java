@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,9 +23,27 @@ import org.junit.Test;
  */
 public class AbstractChangeEventTest {
 
+    /**
+     * Tests an event for its for its inherited features (that means if the properties are passed on correctly).
+     * Assumes creationTime to be in [now-3s, now+3s], and that the event is caused by the System user. Does not check
+     * the description.
+     *
+     * @param event The event to check.
+     * @param expectedPropertyName the expected property name
+     * @param expectedBefore the expected before-value
+     * @param expectedAfter the expected after-value
+     */
+    public static void testValidSystemEvent(AbstractChangeEvent event, String expectedPropertyName, String expectedBefore, String expectedAfter) {
+        Assert.assertEquals(expectedPropertyName, event.getPropertyName());
+        Assert.assertEquals(expectedBefore, event.getBefore());
+        Assert.assertEquals(expectedAfter, event.getAfter());
+
+        AbstractEventTest.testValidSystemEvent(event);
+    }
+
     @Test
     public void testAbstractChangeEvent() throws Exception {
-        String[] invalidPropertyNames = { null, "", " ", "\t", "\n" };
+        String[] invalidPropertyNames = {null, "", " ", "\t", "\n"};
         for (String invalidPropertyName : invalidPropertyNames) {
             try {
                 new AbstractChangeEvent(null, invalidPropertyName, null, null) {
@@ -60,23 +78,5 @@ public class AbstractChangeEventTest {
 
         testValidSystemEvent(aceComplete, "label", "gren", "green");
 
-    }
-
-    /**
-     * Tests an event for its for its inherited features (that means if the properties are passed on correctly).
-     * Assumes creationTime to be in [now-3s, now+3s], and that the event is caused by the System user. Does not check
-     * the description.
-     *
-     * @param event The event to check.
-     * @param expectedPropertyName the expected property name
-     * @param expectedBefore the expected before-value
-     * @param expectedAfter the expected after-value
-     */
-    public static void testValidSystemEvent(AbstractChangeEvent event, String expectedPropertyName, String expectedBefore, String expectedAfter) {
-        Assert.assertEquals(expectedPropertyName, event.getPropertyName());
-        Assert.assertEquals(expectedBefore, event.getBefore());
-        Assert.assertEquals(expectedAfter, event.getAfter());
-
-        AbstractEventTest.testValidSystemEvent(event);
     }
 }

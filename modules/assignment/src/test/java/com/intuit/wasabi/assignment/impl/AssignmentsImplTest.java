@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -88,7 +88,7 @@ public class AssignmentsImplTest {
     private ThreadPoolExecutor threadPoolExecutor = mock(ThreadPoolExecutor.class, RETURNS_DEEP_STUBS);
     private Provider<Envelope<AssignmentEnvelopePayload, DatabaseExport>> assignmentDBEnvelopeProvider =
             mock(Provider.class, RETURNS_DEEP_STUBS);
-    private Provider<Envelope<AssignmentEnvelopePayload, WebExport>> assignmentWebEnvelopeProvider=
+    private Provider<Envelope<AssignmentEnvelopePayload, WebExport>> assignmentWebEnvelopeProvider =
             mock(Provider.class, RETURNS_DEEP_STUBS);
     private AssignmentsRepository assignmentsRepository = mock(AssignmentsRepository.class, RETURNS_DEEP_STUBS);
     private AssignmentsImpl assignmentsImpl;
@@ -102,7 +102,7 @@ public class AssignmentsImplTest {
     }
 
     @Test
-    public void testQueueLength(){
+    public void testQueueLength() {
         when(threadPoolExecutor.getQueue().size()).thenReturn(0);
         Map<String, Integer> queueLengthMap = new HashMap<String, Integer>();
         queueLengthMap.put(AssignmentsImpl.RULE_CACHE, new Integer(0));
@@ -110,7 +110,7 @@ public class AssignmentsImplTest {
     }
 
     @Test
-    public void testGetSingleAssignmentNullAssignmentExperimentNotFound(){
+    public void testGetSingleAssignmentNullAssignmentExperimentNotFound() {
         Application.Name appName = Application.Name.valueOf("Test");
         Experiment.Label label = Experiment.Label.valueOf("label");
         User.ID user = User.ID.valueOf("testUser");
@@ -161,7 +161,7 @@ public class AssignmentsImplTest {
     }
 
     @Test
-    public void testGetSingleAssignmentNullAssignmentExperimentNotStarted(){
+    public void testGetSingleAssignmentNullAssignmentExperimentNotStarted() {
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         when(experiment.getID()).thenReturn(id);
@@ -186,7 +186,7 @@ public class AssignmentsImplTest {
     }
 
     @Test
-    public void testGetSingleAssignmentNullAssignmentExperimentExpired(){
+    public void testGetSingleAssignmentNullAssignmentExperimentExpired() {
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         when(experiment.getID()).thenReturn(id);
@@ -211,7 +211,7 @@ public class AssignmentsImplTest {
     }
 
     @Test
-    public void testGetSingleAssignmentNullAssignmentExperimentPaused(){
+    public void testGetSingleAssignmentNullAssignmentExperimentPaused() {
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         when(experiment.getID()).thenReturn(id);
@@ -272,7 +272,7 @@ public class AssignmentsImplTest {
     }
 
     @Test(expected = AssertionError.class)
-    public void testGetSingleAssignmentAssertExistingAssignment(){
+    public void testGetSingleAssignmentAssertExistingAssignment() {
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         when(experiment.getID()).thenReturn(id);
@@ -329,7 +329,7 @@ public class AssignmentsImplTest {
         AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
                 experimentRepository, assignmentsRepository,
                 mutexRepository, ruleCache, pages, priorities, assignmentDBEnvelopeProvider,
-                assignmentWebEnvelopeProvider, assignmentDecorator,  threadPoolExecutor, eventLog));
+                assignmentWebEnvelopeProvider, assignmentDecorator, threadPoolExecutor, eventLog));
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         Assignment assignment = mock(Assignment.class);
@@ -345,7 +345,7 @@ public class AssignmentsImplTest {
         when(assignmentsRepository.getAssignment(eq(id), eq(user), any(Context.class))).thenReturn(assignment);
         when(assignment.getStatus()).thenReturn(Assignment.Status.EXISTING_ASSIGNMENT);
         Assignment result = assignmentsImpl.getSingleAssignment(user, appName, label, context, true, true,
-                    null, null, pageName);
+                null, null, pageName);
         verify(threadPoolExecutor, times(1)).execute(any(ExperimentRuleCacheUpdateEnvelope.class));
         assertThat(result, is(assignment));
     }
@@ -386,10 +386,10 @@ public class AssignmentsImplTest {
         HttpHeaders headers = mock(HttpHeaders.class);
         when(experimentRepository.getExperimentList(eq(appName))).thenReturn(table);
         Assignment assignment = mock(Assignment.class);
-        AssignmentsImpl assignmentsImpl = spy( new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
+        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
                 experimentRepository, assignmentsRepository,
                 mutexRepository, ruleCache, pages, priorities, assignmentDBEnvelopeProvider,
-                assignmentWebEnvelopeProvider, assignmentDecorator,  threadPoolExecutor, eventLog));
+                assignmentWebEnvelopeProvider, assignmentDecorator, threadPoolExecutor, eventLog));
 
         doReturn(assignment).when(assignmentsImpl).getAssignment(eq(userID), eq(appName), eq(label),
                 eq(context), any(boolean.class), any(boolean.class), eq(segmentationProfile),
@@ -704,9 +704,9 @@ public class AssignmentsImplTest {
 
     @Test
     public void checkMutexWithExperimentNullTrue() throws Exception {
-    	AssignmentsImpl impl = new AssignmentsImpl(assignmentsRepository, mutexRepository);
-    	boolean value = impl.checkMutex(null, null, Context.valueOf("dummystring"));
-    	then(value).isEqualTo(true);
+        AssignmentsImpl impl = new AssignmentsImpl(assignmentsRepository, mutexRepository);
+        boolean value = impl.checkMutex(null, null, Context.valueOf("dummystring"));
+        then(value).isEqualTo(true);
     }
 
     /* FIXME

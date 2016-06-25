@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,27 +29,6 @@ import java.util.Calendar;
  */
 public class AbstractEventTest {
 
-    @Test
-    public void testAbstractEvent() throws Exception {
-        UserInfo user = Mockito.mock(UserInfo.class);
-        AbstractEvent systemEvent = new AbstractEvent(null) {
-            @Override
-            public String getDefaultDescription() {
-                return "Desc";
-            }
-        };
-        testValidSystemEvent(systemEvent);
-
-        systemEvent = new AbstractEvent(user) {
-            @Override
-            public String getDefaultDescription() {
-                return "Desc";
-            }
-        };
-        Assert.assertEquals(user, systemEvent.getUser());
-        Assert.assertEquals(EventLogEventType.UNKNOWN, systemEvent.getType());
-    }
-
     /**
      * Tests an event for its for its inherited features (that means if the properties are passed on correctly).
      * Assumes creationTime to be in [now-3s, now+3s], and that the event is caused by the {@link EventLog#SYSTEM_USER}.
@@ -69,6 +48,27 @@ public class AbstractEventTest {
         Assert.assertTrue("Event time off (too early)", event.getTime().after(past));
 
         Assert.assertNotNull("Event description is null!", event.getDefaultDescription());
+    }
+
+    @Test
+    public void testAbstractEvent() throws Exception {
+        UserInfo user = Mockito.mock(UserInfo.class);
+        AbstractEvent systemEvent = new AbstractEvent(null) {
+            @Override
+            public String getDefaultDescription() {
+                return "Desc";
+            }
+        };
+        testValidSystemEvent(systemEvent);
+
+        systemEvent = new AbstractEvent(user) {
+            @Override
+            public String getDefaultDescription() {
+                return "Desc";
+            }
+        };
+        Assert.assertEquals(user, systemEvent.getUser());
+        Assert.assertEquals(EventLogEventType.UNKNOWN, systemEvent.getType());
     }
 
 }

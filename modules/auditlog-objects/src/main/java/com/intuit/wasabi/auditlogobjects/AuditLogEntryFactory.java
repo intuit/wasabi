@@ -1,12 +1,7 @@
 package com.intuit.wasabi.auditlogobjects;
 
 import com.intuit.wasabi.authenticationobjects.UserInfo;
-import com.intuit.wasabi.eventlog.events.ApplicationEvent;
-import com.intuit.wasabi.eventlog.events.BucketCreateEvent;
-import com.intuit.wasabi.eventlog.events.BucketEvent;
-import com.intuit.wasabi.eventlog.events.ChangeEvent;
-import com.intuit.wasabi.eventlog.events.EventLogEvent;
-import com.intuit.wasabi.eventlog.events.ExperimentEvent;
+import com.intuit.wasabi.eventlog.events.*;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Experiment;

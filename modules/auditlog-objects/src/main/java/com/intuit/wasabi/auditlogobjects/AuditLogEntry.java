@@ -9,14 +9,13 @@ import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.ExperimentBase;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
-
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * Represents an AuditLogEntry.
@@ -40,8 +39,8 @@ public class AuditLogEntry {
     /**
      * Creates an AuditLogEntry.
      *
-     * @param time the event time (required)
-     * @param user the event user (required)
+     * @param time   the event time (required)
+     * @param user   the event user (required)
      * @param action the event action (required)
      */
     public AuditLogEntry(Calendar time, UserInfo user, AuditLogAction action) {
@@ -51,14 +50,14 @@ public class AuditLogEntry {
     /**
      * Creates an AuditLogEntry.
      *
-     * @param time the event time (required)
-     * @param user the event user (required)
-     * @param action the event action (required)
-     * @param experiment the experiment (if applicable)
-     * @param bucketLabel the bucket label (if applicable)
+     * @param time            the event time (required)
+     * @param user            the event user (required)
+     * @param action          the event action (required)
+     * @param experiment      the experiment (if applicable)
+     * @param bucketLabel     the bucket label (if applicable)
      * @param changedProperty the changed property (if applicable)
-     * @param before the property before (if applicable)
-     * @param after the property after (if applicable)
+     * @param before          the property before (if applicable)
+     * @param after           the property after (if applicable)
      */
     public AuditLogEntry(Calendar time, UserInfo user, AuditLogAction action,
                          ExperimentBase experiment,
@@ -74,20 +73,18 @@ public class AuditLogEntry {
     /**
      * Creates an AuditLogEntry. Usually you want to use the other constructors as they have a better parameter order.
      *
-     * @see #AuditLogEntry(Calendar, UserInfo, AuditLogAction)
-     * @see #AuditLogEntry(Calendar, UserInfo, AuditLogAction, ExperimentBase, Bucket.Label, String, String, String)
-     *
-     *
-     * @param time the event time (required)
-     * @param user the event invoking user (required)
-     * @param action the event action (required)
+     * @param time            the event time (required)
+     * @param user            the event invoking user (required)
+     * @param action          the event action (required)
      * @param applicationName application name (if applicable)
      * @param experimentLabel the experiment label (if applicable)
-     * @param experimentId the experiment ID(if applicable)
-     * @param bucketLabel the bucket label (if applicable)
+     * @param experimentId    the experiment ID(if applicable)
+     * @param bucketLabel     the bucket label (if applicable)
      * @param changedProperty the changed property (if applicable)
-     * @param before the property before (if applicable)
-     * @param after the property after (if applicable)
+     * @param before          the property before (if applicable)
+     * @param after           the property after (if applicable)
+     * @see #AuditLogEntry(Calendar, UserInfo, AuditLogAction)
+     * @see #AuditLogEntry(Calendar, UserInfo, AuditLogAction, ExperimentBase, Bucket.Label, String, String, String)
      */
     public AuditLogEntry(Calendar time, UserInfo user,
                          AuditLogAction action, Application.Name applicationName,
@@ -225,7 +222,7 @@ public class AuditLogEntry {
      */
     @Override
     public String toString() {
-    	return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 
     /**

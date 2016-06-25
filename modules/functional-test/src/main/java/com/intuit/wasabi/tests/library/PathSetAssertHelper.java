@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -53,9 +53,8 @@ public class PathSetAssertHelper {
         String actualValue;
         try {
             actualValue = response.jsonPath().get(path);
-        }
-        catch (Exception e) {
-            actualValue  = "Error: Could not get value from path!";
+        } catch (Exception e) {
+            actualValue = "Error: Could not get value from path!";
             LOGGER.info("ERROR: " + e.toString());
         }
         actualStrAL.add(path + ": " + actualValue);
@@ -68,9 +67,8 @@ public class PathSetAssertHelper {
         try {
             actualValueInt = response.jsonPath().get(path);
             actualValue = actualValueInt.toString();
-        }
-        catch (Exception e) {
-            actualValue  = "Error: Could not get value from path!";
+        } catch (Exception e) {
+            actualValue = "Error: Could not get value from path!";
             LOGGER.info("ERROR: " + e.toString());
         }
         actualStrAL.add(path + ": " + actualValue);
@@ -83,9 +81,8 @@ public class PathSetAssertHelper {
         try {
             actualValueInt = response.jsonPath().get(path);
             actualValue = Integer.toString(actualValueInt);
-        }
-        catch (Exception e) {
-            actualValue  = "Error: Could not get value from path!";
+        } catch (Exception e) {
+            actualValue = "Error: Could not get value from path!";
             LOGGER.info("ERROR: " + e.toString());
         }
         actualStrAL.add(path + ": " + actualValue);
@@ -98,24 +95,23 @@ public class PathSetAssertHelper {
         try {
             actualValueFloat = response.jsonPath().get(path);
             actualValue = Float.toString(actualValueFloat);
-        }
-        catch (Exception e) {
-            actualValue  = "Error: Could not get value from path!";
+        } catch (Exception e) {
+            actualValue = "Error: Could not get value from path!";
             LOGGER.info("ERROR: " + e.toString());
         }
         actualStrAL.add(path + ": " + actualValue);
     }
 
-    public void doAssert () {
+    public void doAssert() {
         StringBuffer actualSB = new StringBuffer();
         Iterator<String> itrActual = actualStrAL.iterator();
-        while(itrActual.hasNext()) {
+        while (itrActual.hasNext()) {
             actualSB.append(itrActual.next() + Constants.NEW_LINE);
         }
 
         StringBuffer expectedSB = new StringBuffer();
         Iterator<String> itrExpected = expectedStrAL.iterator();
-        while(itrExpected.hasNext()) {
+        while (itrExpected.hasNext()) {
             expectedSB.append(itrExpected.next() + Constants.NEW_LINE);
         }
 

@@ -184,12 +184,11 @@ public class AuthorizedExperimentGetterTest {
         when(authorization.getUser("foo")).thenReturn(username);
         when(experiments.getExperiment(experimentId)).thenReturn(null);
         try {
-        	authorizedExperimentGetter.getAuthorizedExperimentByName("foo", applicationName, experimentLabel);
-        }
-        finally {
-        	verify(authorization).getUser("foo");
-        	verify(authorization).checkUserPermissions(username, applicationName, READ);
-        	verify(experiments, times(1)).getExperiment(applicationName, experimentLabel);
+            authorizedExperimentGetter.getAuthorizedExperimentByName("foo", applicationName, experimentLabel);
+        } finally {
+            verify(authorization).getUser("foo");
+            verify(authorization).checkUserPermissions(username, applicationName, READ);
+            verify(experiments, times(1)).getExperiment(applicationName, experimentLabel);
         }
     }
 }

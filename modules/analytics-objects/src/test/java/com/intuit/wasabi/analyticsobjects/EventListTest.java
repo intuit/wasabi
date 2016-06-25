@@ -5,9 +5,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -17,7 +15,7 @@ public class EventListTest {
 
 
     @Test
-    public void testBasicOperations(){
+    public void testBasicOperations() {
         EventList eventList = new EventList();
 
         assertThat(eventList.getEvents(), is(not(nullValue())));
@@ -25,7 +23,7 @@ public class EventListTest {
 
         List<Event> list = new ArrayList<Event>();
         list.add(new Event());
-        eventList.setEvents( list );
+        eventList.setEvents(list);
 
         assertThat(eventList.getEvents().size(), is(1));
 

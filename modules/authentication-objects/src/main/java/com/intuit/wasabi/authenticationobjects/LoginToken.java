@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,25 +22,10 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 public class LoginToken {
 
-    public String getAccess_token() {
-        return access_token;
-    }
-    public void setAccess_token(String access_token) {
-        this.access_token = access_token;
-    }
-
-    public String getToken_type() {
-        return token_type;
-    }
-    public void setToken_type(String token_type) {
-        this.token_type = token_type;
-    }
-
     @ApiModelProperty(value = "access_token", required = true)
     private String access_token;
     @ApiModelProperty(value = "token_type")
     private String token_type;
-
 
     protected LoginToken() {
         super();
@@ -52,6 +37,39 @@ public class LoginToken {
 
     public static Builder from(LoginToken iusTicket) {
         return new Builder(iusTicket);
+    }
+
+    public String getAccess_token() {
+        return access_token;
+    }
+
+    public void setAccess_token(String access_token) {
+        this.access_token = access_token;
+    }
+
+    public String getToken_type() {
+        return token_type;
+    }
+
+    public void setToken_type(String token_type) {
+        this.token_type = token_type;
+    }
+
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return EqualsBuilder.reflectionEquals(this, obj);
+    }
+
+    @Override
+    public String toString() {
+        return "LoginToken{" +
+                "access_token=hidden" +
+                "token_type=" + token_type + '}';
     }
 
     public static class Builder {
@@ -79,22 +97,5 @@ public class LoginToken {
             instance = null;
             return result;
         }
-    }
-
-    @Override
-    public int hashCode() {
-    	return HashCodeBuilder.reflectionHashCode(this);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-    	   return EqualsBuilder.reflectionEquals(this, obj);
-    }
-
-    @Override
-    public String toString() {
-        return "LoginToken{" +
-                "access_token=hidden" +
-                "token_type=" + token_type + '}';
     }
 }

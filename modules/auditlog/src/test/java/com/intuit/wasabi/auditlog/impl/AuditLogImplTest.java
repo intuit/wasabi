@@ -16,13 +16,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.List;
-import java.util.TimeZone;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Tests for {@link AuditLogImpl}.
@@ -50,8 +44,8 @@ public class AuditLogImplTest {
         completeList = new ArrayList<>();
         fillLists();
 
-        Mockito.when(repository.getAuditLogEntryList(Mockito.<Application.Name> any())).thenReturn(appList);
-        Mockito.when(repository.getAuditLogEntryList(Mockito.<Application.Name>any(), Mockito.eq(limit))).thenReturn(appList);
+        Mockito.when(repository.getAuditLogEntryList(Mockito.any())).thenReturn(appList);
+        Mockito.when(repository.getAuditLogEntryList(Mockito.any(), Mockito.eq(limit))).thenReturn(appList);
         Mockito.when(repository.getCompleteAuditLogEntryList()).thenReturn(completeList);
         Mockito.when(repository.getCompleteAuditLogEntryList(Mockito.eq(limit))).thenReturn(completeList);
         Mockito.when(repository.getGlobalAuditLogEntryList()).thenReturn(globalList);
@@ -60,22 +54,22 @@ public class AuditLogImplTest {
 
     /**
      * Fills the member array lists like this:
-     *
+     * <p>
      * The complete list is filled:
      * <ul>
-     *     <li>10 Entries</li>
-     *     <li>Time: Minute-steps from {@code 2001-03-15T02:00:10Z} to {@code 2001-03-15T02:09:10Z}.</li>
-     *     <li>Odd entries are by the the {@code System Users}, even entries by admin users.</li>
-     *     <li>All actions are {@code UNSPECIFIED_ACTIONS}.</li>
-     *     <li>Every third entry has an experiment, starting with the first (thus indices {@code 0, 3, 6, 9}).</li>
-     *     <li>Those experiments are labeled {@code exp4} through {@code exp1}.</li>
-     *     <li>All experiments belong to the Application {@code App}.</li>
-     *     <li>Their UUIDs are created with most = least sig bits, both initializing to {@code 1 << i}</li>
-     *     <li>Each experiment has one bucket with the label {@code label}.</li>
-     *     <li>Even-number-indexed experiments (thus index 0 and 6) have a changed property {@code prop} which changed for the first from {@code 0} to {@code 6} and vice-verse for the second.</li>
-     *     <li>The users at index 1 and 3 (admin) are the only ones with userIDs.</li>
+     * <li>10 Entries</li>
+     * <li>Time: Minute-steps from {@code 2001-03-15T02:00:10Z} to {@code 2001-03-15T02:09:10Z}.</li>
+     * <li>Odd entries are by the the {@code System Users}, even entries by admin users.</li>
+     * <li>All actions are {@code UNSPECIFIED_ACTIONS}.</li>
+     * <li>Every third entry has an experiment, starting with the first (thus indices {@code 0, 3, 6, 9}).</li>
+     * <li>Those experiments are labeled {@code exp4} through {@code exp1}.</li>
+     * <li>All experiments belong to the Application {@code App}.</li>
+     * <li>Their UUIDs are created with most = least sig bits, both initializing to {@code 1 << i}</li>
+     * <li>Each experiment has one bucket with the label {@code label}.</li>
+     * <li>Even-number-indexed experiments (thus index 0 and 6) have a changed property {@code prop} which changed for the first from {@code 0} to {@code 6} and vice-verse for the second.</li>
+     * <li>The users at index 1 and 3 (admin) are the only ones with userIDs.</li>
      * </ul>
-     *
+     * <p>
      * The appList contains all of those events which have their app != null.
      * The globalList contains all events which are not in the appList.
      */
@@ -225,13 +219,13 @@ public class AuditLogImplTest {
     @Test
     public void testFilterSortFailFast2() throws Exception {
         // filter just ,
-        Assert.assertArrayEquals(completeList.toArray(), auditLog.getAuditLogs(",","").toArray());
+        Assert.assertArrayEquals(completeList.toArray(), auditLog.getAuditLogs(",", "").toArray());
     }
 
     @Test
     public void testFilterSortFailFast3() throws Exception {
         // sort default
-        Assert.assertArrayEquals(completeList.toArray(), auditLog.getAuditLogs("","-time").toArray());
+        Assert.assertArrayEquals(completeList.toArray(), auditLog.getAuditLogs("", "-time").toArray());
     }
 
     @Test
@@ -249,7 +243,7 @@ public class AuditLogImplTest {
     @Test
     public void testFilterGrammar3() throws Exception {
         // filter for "ro" on field "attr" and filter for "4" on experiment - only one entry should be left
-        Assert.assertArrayEquals(new AuditLogEntry[] { completeList.get(0) }, auditLog.getAuditLogs("attr=ro,experiment=4", "").toArray());
+        Assert.assertArrayEquals(new AuditLogEntry[]{completeList.get(0)}, auditLog.getAuditLogs("attr=ro,experiment=4", "").toArray());
     }
 
     @Test
@@ -282,7 +276,7 @@ public class AuditLogImplTest {
         // manually sorting lists by experiment name ascending - null values should always go last
         List<AuditLogEntry> expectedSortedList = new ArrayList<>(completeList.size());
 
-        int[] order = new int[] {9, 6, 3, 0};
+        int[] order = new int[]{9, 6, 3, 0};
         for (int i : order) {
             expectedSortedList.add(completeList.get(i));
         }
@@ -294,7 +288,7 @@ public class AuditLogImplTest {
         // manually sorting lists by experiment name descending - null values should always go last
         List<AuditLogEntry> expectedSortedList = new ArrayList<>(completeList.size());
 
-        int[] order = new int[] {0, 3, 6, 9};
+        int[] order = new int[]{0, 3, 6, 9};
         for (int i : order) {
             expectedSortedList.add(completeList.get(i));
         }
@@ -307,13 +301,13 @@ public class AuditLogImplTest {
 
         // sort by bucket, action, -experiment, firstname, lastname, mail, app, attr, before, after, -time
         // where only bucket, -experiment, firstname and -time should have impacts
-        int[] order = new int[] {
+        int[] order = new int[]{
                 // bucket determines these 4, -experiment determines the order
                 0, 3, 6, 9,
-                    // name breaks ties for the following six, leaving the order 1, 5, 7 (user), 2, 4, 8 (system)
-                    // -time reverse the order to 7, 5, 1 / 8, 4, 2
-                    7, 5, 1,
-                    8, 4, 2
+                // name breaks ties for the following six, leaving the order 1, 5, 7 (user), 2, 4, 8 (system)
+                // -time reverse the order to 7, 5, 1 / 8, 4, 2
+                7, 5, 1,
+                8, 4, 2
         };
         for (int i : order) {
             expectedSortedList.add(completeList.get(i));

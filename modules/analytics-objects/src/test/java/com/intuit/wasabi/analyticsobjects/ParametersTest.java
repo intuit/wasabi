@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,9 +28,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class ParametersTest {
@@ -58,7 +56,7 @@ public class ParametersTest {
         assertThat("single_shot remains false", parameters.isSingleShot(), is(false));
         assertThat("metric contains confidence level", metric.getConfidenceLevel(), equalTo(0.6));
         assertThat("metric contains max decisions", metric.getMaxDecisions(),
-                   equalTo(DecisionAdjuster.DEFAULT_MAX_DECISIONS));
+                equalTo(DecisionAdjuster.DEFAULT_MAX_DECISIONS));
 
         parameters = new Parameters();
         parameters.setMetric(BinomialMetrics.NORMAL_APPROX);
@@ -79,12 +77,12 @@ public class ParametersTest {
             parameters.setMetric(metric_enum);
             parameters.parse();
             assertThat(metric_enum.toString() + " was constructed", parameters.getMetricImpl(),
-                       instanceOf(BinomialMetric.class));
+                    instanceOf(BinomialMetric.class));
         }
     }
 
     @Test
-    public void testClone(){
+    public void testClone() {
         Date date = new Date();
         Parameters parameters = new Parameters();
         parameters.setMetric(BinomialMetrics.NORMAL_APPROX_SYM);
@@ -107,7 +105,7 @@ public class ParametersTest {
         assertThat(clonedParameters.getContext(), is(Context.valueOf("TEST")));
         List<String> acts = new ArrayList<>();
         clonedParameters.setActions(acts);
-        assertThat(clonedParameters.getActions() , is(acts));
+        assertThat(clonedParameters.getActions(), is(acts));
 
     }
 

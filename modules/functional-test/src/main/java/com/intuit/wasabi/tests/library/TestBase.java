@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -44,7 +44,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 /**
  * A TestBase for new test sets.
  */
-@Listeners({ RetryListener.class })
+@Listeners({RetryListener.class})
 public class TestBase extends ServiceTestBase {
 
     private static final Logger LOGGER = getLogger(TestBase.class);
@@ -97,11 +97,11 @@ public class TestBase extends ServiceTestBase {
     private void loadProperties(String configFile) throws IOException {
         try {
             Properties properties = new Properties();
-            properties.load( new BufferedReader(
-                    new InputStreamReader(
-                            this.getClass().getClassLoader().getResourceAsStream(configFile)
+            properties.load(new BufferedReader(
+                            new InputStreamReader(
+                                    this.getClass().getClassLoader().getResourceAsStream(configFile)
+                            )
                     )
-                )
             );
             appProperties = properties;
             LOGGER.debug("Properties loaded: " + appProperties.toString());
@@ -118,10 +118,10 @@ public class TestBase extends ServiceTestBase {
         // TODO It appears that the build system has user.name and pwd set to something different from what it should be for the environment. Commented next two lines out for now.
         //	setPropertyFromSystemProperty ("user.name","user-name");
         //	setPropertyFromSystemProperty ("user.password","password");
-        
-        setPropertyFromSystemProperty ("user-name","user-name");
-        setPropertyFromSystemProperty ("password","password");
-        setPropertyFromSystemProperty ("user-lastname","user-lastname");
+
+        setPropertyFromSystemProperty("user-name", "user-name");
+        setPropertyFromSystemProperty("password", "password");
+        setPropertyFromSystemProperty("user-lastname", "user-lastname");
         setPropertyFromSystemProperty("validTokenPattern", "validTokenPattern");
         setPropertyFromSystemProperty("user-email", "user-email");
 
@@ -174,7 +174,6 @@ public class TestBase extends ServiceTestBase {
             appProperties.setProperty(internalPropKey, systemValueStr);
         }
     }
-
 
 
     ///////////////////
@@ -265,7 +264,6 @@ public class TestBase extends ServiceTestBase {
     }
 
 
-
     //////////////////////////
     // experiments Endpoint //
     //////////////////////////
@@ -350,7 +348,7 @@ public class TestBase extends ServiceTestBase {
      * @return the new experiment
      */
     public Experiment postExperiment(Experiment experiment, boolean createNewApplication, int expectedStatus, APIServerConnector apiServerConnector) {
-        response = apiServerConnector.doPost("experiments?createNewApplication=" + createNewApplication, experiment==null?null:experiment.toJSONString());
+        response = apiServerConnector.doPost("experiments?createNewApplication=" + createNewApplication, experiment == null ? null : experiment.toJSONString());
         // FIXME: jwtodd
         assertReturnCode(response, response.getStatusCode() == 500 ? 500 : expectedStatus);
         return ExperimentFactory.createFromJSONString(response.jsonPath().prettify());
@@ -428,12 +426,20 @@ public class TestBase extends ServiceTestBase {
         response = apiServerConnector.doPut("experiments/" + experiment.id, experiment.toJSONString());
 
         switch (caseModification) {
-            case "WHITELIST_REMOVED": experiment.getSerializationStrategy().add("modificationTime"); break;
-            case "BLACKLIST_ADDED": experiment.getSerializationStrategy().remove("modificationTime"); break;
+            case "WHITELIST_REMOVED":
+                experiment.getSerializationStrategy().add("modificationTime");
+                break;
+            case "BLACKLIST_ADDED":
+                experiment.getSerializationStrategy().remove("modificationTime");
+                break;
         }
         switch (caseCreation) {
-            case "WHITELIST_REMOVED": experiment.getSerializationStrategy().add("creationTime"); break;
-            case "BLACKLIST_ADDED": experiment.getSerializationStrategy().remove("creationTIme"); break;
+            case "WHITELIST_REMOVED":
+                experiment.getSerializationStrategy().add("creationTime");
+                break;
+            case "BLACKLIST_ADDED":
+                experiment.getSerializationStrategy().remove("creationTIme");
+                break;
         }
         assertReturnCode(response, expectedStatus);
         if (expectedStatus == HttpStatus.SC_NO_CONTENT) {
@@ -542,9 +548,9 @@ public class TestBase extends ServiceTestBase {
     }
 
     public void deleteExperiments(List<Experiment> experiments) {
-    	for (Experiment exp : experiments) {
-    		deleteExperiment(exp);
-    	}
+        for (Experiment exp : experiments) {
+            deleteExperiment(exp);
+        }
     }
 
     /**
@@ -574,7 +580,6 @@ public class TestBase extends ServiceTestBase {
         assertReturnCode(response, expectedStatus);
         return response;
     }
-
 
 
     ///////////////////////////////////////
@@ -656,7 +661,7 @@ public class TestBase extends ServiceTestBase {
     public List<Bucket> postBuckets(List<Bucket> buckets, int expectedStatus, APIServerConnector apiServerConnector) {
         List<Bucket> newBuckets = new ArrayList<>(buckets.size());
         for (Bucket bucket : buckets) {
-           newBuckets.add(postBucket(bucket, expectedStatus, apiServerConnector));
+            newBuckets.add(postBucket(bucket, expectedStatus, apiServerConnector));
         }
         return newBuckets;
     }
@@ -1123,7 +1128,6 @@ public class TestBase extends ServiceTestBase {
     }
 
 
-
     //////////////////////////////////////
     // experiments/<id>/events Endpoint //
     //////////////////////////////////////
@@ -1275,7 +1279,7 @@ public class TestBase extends ServiceTestBase {
             keyMapping.put("singleShot", "BOOLEAN");
 
             for (String key : parameters.keySet()) {
-                switch (keyMapping.get(key) == null? "INVALID" : keyMapping.get(key)) {
+                switch (keyMapping.get(key) == null ? "INVALID" : keyMapping.get(key)) {
                     case "DOUBLE":
                         if (!(parameters.get(key) instanceof Double) || (parameters.get(key)).equals(Double.NaN)) {
                             parameters.remove(key);
@@ -1386,7 +1390,6 @@ public class TestBase extends ServiceTestBase {
         parameters.put("context", context);
         return postEvents(experiment, parameters, expectedStatus, apiServerConnector);
     }
-
 
 
     //////////////////////////////////////////
@@ -1617,7 +1620,6 @@ public class TestBase extends ServiceTestBase {
     }
 
 
-
     ////////////////////////////////////////
     // experiments/<id>/priority Endpoint //
     ////////////////////////////////////////
@@ -1664,8 +1666,7 @@ public class TestBase extends ServiceTestBase {
         return response;
     }
 
-    
-    
+
     ///////////////////////////////////////////
     // experiments/<id>/assignments Endpoint //
     ///////////////////////////////////////////
@@ -1736,14 +1737,13 @@ public class TestBase extends ServiceTestBase {
         response = apiServerConnector.doGet(uri, context);
         assertReturnCode(response, expectedStatus);
         String jsonArray = TestUtils.csvToJsonArray(response.body().asString(), Constants.TAB);
-        String[] elements = jsonArray.substring(2, jsonArray.length()-2).split("\\},\\{");
+        String[] elements = jsonArray.substring(2, jsonArray.length() - 2).split("\\},\\{");
         List<Assignment> assignments = new ArrayList<>();
         for (String json : elements) {
             assignments.add(simpleGson.fromJson("{" + json + "}", Assignment.class));
         }
         return assignments;
     }
-
 
 
     /////////////////////////////////////
@@ -1918,7 +1918,6 @@ public class TestBase extends ServiceTestBase {
     }
 
 
-
     //////////////////////////////////////////////////////////////////
     // experiments/applications/<appName>/pages/<pagename> endpoint //
     //////////////////////////////////////////////////////////////////
@@ -1970,7 +1969,6 @@ public class TestBase extends ServiceTestBase {
         }
         return pageList;
     }
-
 
 
     //////////////////////////
@@ -2205,7 +2203,6 @@ public class TestBase extends ServiceTestBase {
     }
 
 
-
     /**
      * Sends a PUT request to update an assignment of the user for the experiment.
      * The response must contain {@link HttpStatus#SC_OK}.
@@ -2299,6 +2296,7 @@ public class TestBase extends ServiceTestBase {
     public Assignment putAssignment(Experiment experiment, Assignment assignment, User user) {
         return putAssignment(experiment, assignment, user, null);
     }
+
     /**
      * Sends a PUT request to update an assignment of the user for the experiment.
      * The response must contain {@link HttpStatus#SC_OK}.
@@ -2484,7 +2482,7 @@ public class TestBase extends ServiceTestBase {
         List<Assignment> assignments = new ArrayList<>(assignmentMappings.size());
         for (Map assignmentMapping : assignmentMappings) {
             assignments.add(AssignmentFactory.createFromJSONString(
-                        simpleGson.toJson(assignmentMapping)
+                    simpleGson.toJson(assignmentMapping)
                     )
             );
         }
@@ -2607,12 +2605,13 @@ public class TestBase extends ServiceTestBase {
         List<Assignment> assignments = new ArrayList<>(assignmentMappings.size());
         for (Map assignmentMapping : assignmentMappings) {
             assignments.add(AssignmentFactory.createFromJSONString(
-                            simpleGson.toJson(assignmentMapping)
+                    simpleGson.toJson(assignmentMapping)
                     )
             );
         }
         return assignments;
     }
+
     /**
      * Sends a POST request to assign a user to experiments of the specified page.
      * The response must contain {@link HttpStatus#SC_CREATED}.
@@ -2755,13 +2754,12 @@ public class TestBase extends ServiceTestBase {
         List<Assignment> assignments = new ArrayList<>(assignmentMappings.size());
         for (Map assignmentMapping : assignmentMappings) {
             assignments.add(AssignmentFactory.createFromJSONString(
-                            simpleGson.toJson(assignmentMapping)
+                    simpleGson.toJson(assignmentMapping)
                     )
             );
         }
         return assignments;
     }
-
 
 
     /////////////////////
@@ -2816,7 +2814,7 @@ public class TestBase extends ServiceTestBase {
      * @param experiment the experiment
      * @param user the user
      * @param expectedStatus the expected HTTP status code
-     * @return  the response
+     * @return the response
      */
     public Response postEvents(List<Event> events, Experiment experiment, User user, int expectedStatus) {
         return postEvents(events, experiment, user, expectedStatus, apiServerConnector);
@@ -2843,7 +2841,6 @@ public class TestBase extends ServiceTestBase {
 
         return response;
     }
-
 
 
     //////////////////////////////////////
@@ -3123,7 +3120,6 @@ public class TestBase extends ServiceTestBase {
         }
         return expList;
     }
-
 
 
     ////////////////////////
@@ -3606,7 +3602,6 @@ public class TestBase extends ServiceTestBase {
     }
 
 
-
     /////////////////////
     // CUSTOM requests //
     /////////////////////
@@ -3714,7 +3709,7 @@ public class TestBase extends ServiceTestBase {
     ///////////////////////////////
     // feedback endpoint BEGINS //
     //////////////////////////////
-    
+
     /**
      * Sends a POST request to create an user feedback.
      * The response must contain HTTP {@code expectedStatus}.
@@ -3725,11 +3720,11 @@ public class TestBase extends ServiceTestBase {
      * @return response The response of a request made by REST Assured
      */
     public Response postFeedback(UserFeedback userFeedback, int expectedStatus, APIServerConnector apiServerConnector) {
-        response = apiServerConnector.doPost("feedback", userFeedback==null?null:userFeedback.toJSONString());
+        response = apiServerConnector.doPost("feedback", userFeedback == null ? null : userFeedback.toJSONString());
         assertReturnCode(response, expectedStatus);
         return response;
-    }    
-    
+    }
+
     /**
      * Sends a GET request to get all feedbacks.
      * The response must contain HTTP {@code expectedStatus}.
@@ -3740,7 +3735,7 @@ public class TestBase extends ServiceTestBase {
      */
     public List<UserFeedback> getFeedbacks(int expectedStatus, APIServerConnector apiServerConnector) {
         response = apiServerConnector.doGet("feedback");
-        
+
         assertReturnCode(response, expectedStatus);
         List<Map<String, Object>> jsonStrings = response.jsonPath().getList("feedback");
         List<UserFeedback> userfeedbackList = new ArrayList<>(jsonStrings.size());
@@ -3749,11 +3744,11 @@ public class TestBase extends ServiceTestBase {
             userfeedbackList.add(UserFeedbackFactory.createFromJSONString(jsonString));
         }
         return userfeedbackList;
-    } 
-    
+    }
+
     /**
      * Sends a GET request to get feedbacks by username.
-     * 
+     *
      * The response must contain HTTP {@code expectedStatus}.
      *
      * @param expectedStatus the expected HTTP status code
@@ -3762,8 +3757,8 @@ public class TestBase extends ServiceTestBase {
      * @return a list of user feedbacks
      */
     public List<UserFeedback> getFeedbacksByUsername(int expectedStatus, APIServerConnector apiServerConnector, String username) {
-        response = apiServerConnector.doGet("feedback/users/"+username);
-        
+        response = apiServerConnector.doGet("feedback/users/" + username);
+
         assertReturnCode(response, expectedStatus);
         List<Map<String, Object>> jsonStrings = response.jsonPath().getList("feedbackList");
         List<UserFeedback> userfeedbackList = new ArrayList<>(jsonStrings.size());
@@ -3772,8 +3767,8 @@ public class TestBase extends ServiceTestBase {
             userfeedbackList.add(UserFeedbackFactory.createFromJSONString(jsonString));
         }
         return userfeedbackList;
-    }       
-    
+    }
+
     ///////////////////////////////
     // feedback endpoint ENDS //
     //////////////////////////////   
@@ -4037,7 +4032,6 @@ public class TestBase extends ServiceTestBase {
         assertReturnCode(response, expectedStatus);
         return response;
     }
-
 
 
     ///////////
