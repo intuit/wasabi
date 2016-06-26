@@ -51,9 +51,9 @@
             <version>0.8.0.RELEASE</version>
         </dependency>
         <dependency>
-            <groupId>com.intuit.data.autumn</groupId>
-            <artifactId>autumn.utils</artifactId>
-            <version>1.0.20160515205816</version>
+            <groupId>com.intuit.autumn</groupId>
+            <artifactId>autumn-utils</artifactId>
+            <version>1.0.20160626031951</version>
         </dependency>
         <dependency>
             <groupId>io.dropwizard.metrics</groupId>
