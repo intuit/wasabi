@@ -63,6 +63,18 @@ Congratulations! You are the proud owner of a newly minted and personalized full
 
 Ok, enough celebration ... let's get back to business.
 
+## Troulbeshoot Wasabi
+
+> Cannot connect to the Docker daemon. Is the docker daemon running on this host?
+
+```bash
+% eval $(docker-machine env wasabi)
+```
+
+* While starting Wasabi, if you run into errors such as this, run this command in
+your terminal and re-run ./bin/wasabi.sh start
+<div></div>
+
 ## Call Wasabi
 
 These are the 3 common API's that you'd use to instrument your client application with Wasabi.

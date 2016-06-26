@@ -578,6 +578,20 @@ command to verify the build:
 
 <p>Ok, enough celebration &hellip; let&rsquo;s get back to business.</p>
 
+<h2 id="troulbeshoot-wasabi">Troulbeshoot Wasabi</h2>
+
+<blockquote>
+<p>Cannot connect to the Docker daemon. Is the docker daemon running on this host?</p>
+</blockquote>
+<pre class="highlight shell"><code><span class="gp">% </span><span class="nb">eval</span> <span class="k">$(</span>docker-machine env wasabi<span class="k">)</span>
+</code></pre>
+
+<ul>
+<li>While starting Wasabi, if you run into errors such as this, run this command in
+your terminal and re-run ./bin/wasabi.sh start
+<div></div></li>
+</ul>
+
 <h2 id="call-wasabi">Call Wasabi</h2>
 
 <p>These are the 3 common API&rsquo;s that you&rsquo;d use to instrument your client application with Wasabi.</p>
