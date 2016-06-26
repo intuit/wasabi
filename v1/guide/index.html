@@ -775,81 +775,55 @@ add the aforementioned configuration information to your Wasabi JVM runtime prio
 
 <p><img alt="TechStack" src="images/getting_started/stack.png" /></p>
 
-          <h1 id="hello-world">Hello World</h1>
+          <h1 id="hello-world-client-demo-app">Hello World: Client Demo App</h1>
 
-<h2 id="prerequisites">Prerequisites</h2>
+<h2 id="navigate-to-the-client-demo-project">Navigate to the client-demo project</h2>
+
+<p>The &lsquo;client-demo&rsquo; project is located under the &#39;contrib&rsquo; directory.</p>
+<pre class="highlight shell"><code><span class="gp">% </span><span class="nb">cd </span>contrib/client-demo
+</code></pre>
+
+<h2 id="setup-an-experiment">Setup an experiment</h2>
+
+<p>Note: make sure your Wasabi service is running (default: 192.168.99.100:8080)</p>
+<pre class="highlight shell"><code><span class="gp">% </span>./bin/setup.sh create
+</code></pre>
+
+<p>Create and start a &#39;BuyButton&rsquo; experiment under &#39;Demo_App&rsquo; application with 2 buckets:</p>
 
 <ul>
-<li>node</li>
-<li>npm</li>
+<li>&#39;BucketA&rsquo;: green button, control bucket</li>
+<li>&#39;BucketB&rsquo;: orange button bucket
+<div></div></li>
 </ul>
 
-<h2 id="configuration">Configuration</h2>
+<p>Note the experimentUUID if you want to remove it later.</p>
 
-<p>If you are not running a copy of Wasabi locally on your system at localhost:8080, you will need
-to search for &ldquo;WASABI.setOptions&rdquo; in the source (currently two locations) and then change the server
-and possibly the protocol.  </p>
+<h2 id="launch-your-client-app">Launch your client app</h2>
+<pre class="highlight shell"><code><span class="gp">% </span>open index.html
+</code></pre>
 
-<p>Also in that same set of code that calls WASABI.setOptions(), you will see a Wasabi application name and
-experiment name referenced.  As you can see, the default code expects an experiment named &ldquo;TestBuyButtonColor&rdquo; in
-an application named &ldquo;MyStore&rdquo; to be defined in the Wasabi server that you are hitting.  There is a script
-named setup.sh that can be run to create and start that experiment.  Before running that script, be source
-to edit it to make sure it points at the Wasabi server you are using (e.g., it might be localhost:8080,
-192.168.99.100:8080, abtesting.intuit.com, etc.) and make sure you put in your login name.</p>
+<p>Launch the client demo app and simulate a user getting into an experiment (assignment),
+seeing an experience (impression), and clicking a button (action).
+<div></div></p>
 
-<p>Then just run it like this:</p>
-<pre class="highlight shell"><code><span class="gp">% </span>./setup.sh
-<span class="gp">% </span>npm install
+<h2 id="track-experiment-results">Track experiment results</h2>
+<pre class="highlight shell"><code><span class="gp">% </span>open http://192.168.99.100:8080      note: sign <span class="k">in </span>as admin/admin
+</code></pre>
+
+<p>Launch the Admin UI, navigate to the &#39;BuyButton&rsquo; experiment.
+<div></div></p>
+
+<p>Watch assignment, impression, and action counts increment with
+users going through the client demo app.</p>
+
+<p>You&rsquo;ll see which buckets are trending as users go through the buckets.</p>
+
+<h2 id="remove-the-sample-experiment">Remove the sample experiment</h2>
+<pre class="highlight shell"><code><span class="gp">% </span>./bin/setup.sh remove:&lt;experimentUUID&gt;
 </code></pre>
 
 <div></div>
-
-<p>If you want, you can create the experiment in the Wasabi UI.  It is named &ldquo;TestBuyButtonColor&rdquo;, is in the (new)
-application &ldquo;MyStore, and should have
-3 buckets, &quot;Control&rdquo; (which should be marked as the control of the experiment), &ldquo;GreenButton&rdquo; and &ldquo;BlueButton&rdquo;.  The
-buckets should have Allocation Percentages that are balanced among the 3 buckets, e.g., 33.33%, 33.33% and 33.34%.  You
-can make those Allocation Percentages easily using the &ldquo;Balance bucket allocations&hellip;&rdquo; link on the Edit experiment
-dialog.
-The experiment should also have 100% Sampling Percentage, an End Date far enough into the future that it won&rsquo;t expire while
-you&rsquo;re using this app.  You should then Start the experiment.</p>
-
-<p>If that experiment and application don&rsquo;t exist, you will see an error on the JavaScript console, but the UI will happily
-continue and show you the default button color.</p>
-
-<h2 id="running-the-demo">Running the Demo</h2>
-<pre class="highlight shell"><code><span class="gp">% </span><span class="nb">cd </span>wasabi-hello-world
-<span class="gp">% </span>node server
-</code></pre>
-
-<p>That will start a node server that will both serve the UI files and act as a REST API server.<br>
-Point your browser to localhost:3000 to bring up the UI.</p>
-
-<h2 id="what-is-demoed">What is Demoed</h2>
-
-<p>You should initially see a screen that says &ldquo;Please Login&rdquo;.  You may enter any user name and password and
-click on Submit.  You will then be &ldquo;logged in&rdquo; to the demo store application.</p>
-
-<p>The interesting thing, however, is that when you were logged in, the app called Wasabi to test if you were in
-the &ldquo;TestBuyButtonColor&rdquo; experiment.  If you were not already assigned to the experiment, you will have been
-assigned to one of the three buckets, randomly.  If you were assigned to the &ldquo;BlueButton&rdquo; bucket, you should see
-blue &ldquo;Buy&rdquo; buttons in the UI.  If you were assigned to the &ldquo;GreenButton&rdquo; bucket, you should see
-green &ldquo;Buy&rdquo; buttons in the UI.  If you were assigned to the &ldquo;Control&rdquo; bucket (or if the experiment wasn&rsquo;t running
-and so you weren&rsquo;t actually assigned to the experiment), you would see the default white button.</p>
-
-<p>When you were shown the screen with the Buy buttons, the app also makes a call to Wasabi to record and &ldquo;impression&rdquo;.
-Then, if you click on one of the Buy buttons, the app will make a call to Wasabi to record an action.  This is
-considered to be the &ldquo;success activity&rdquo; and so the more users who click on the Buy button, the higher the Action Rate
-for that bucket.</p>
-
-<p>You can login to the app as several different users, e.g., &ldquo;user1&rdquo;, &ldquo;user2&rdquo;, etc.  Over the course of several logins,
-you should see blue, green and white Buy buttons.  If you then click on the Buy buttons, maybe only if they are one of the
-colors, you should see the Action Rates diverging.</p>
-
-<h2 id="what-else-can-you-do">What else can you do?</h2>
-
-<p>You can do things like using Segmentation Rules, Pages, Mutual Exclusion, or putting the experiment at different
-places in the app.  You can also experiment with what happens when you stop the experiment and when you terminate it,
-or when you empty or close a bucket.</p>
 
           <h1 id="integrating-ab-testing-in-your-product">Integrating AB Testing in your product</h1>
 

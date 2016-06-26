@@ -8,7 +8,7 @@ toc_footers:
 includes:
   - overview
   - getting_started
-  - hello_world
+  - client_demo
   - integration
   - segmentation
   - development
