@@ -29,38 +29,54 @@ Learn more about how Wasabi can empower your team to move from hunches to action
 * **Analytics** - Core analytics functionality and metrics visualization out of the box. 
 * **Administrative UI** - Manage and setup your experiments using our user friendly interface.
 
-## Getting Started
+### User Interface
 
-#### Requirements
+* **Create an experiment and its buckets:**
+![](https://intuit.github.io/wasabi/v1/guide/images/readme/CreateBucket.png)
+* **Filter which customers are considered for your experiment:**
+![](https://intuit.github.io/wasabi/v1/guide/images/readme/SegmentationRules.png)
+* **Follow your currently running experiments:**
+![](https://intuit.github.io/wasabi/v1/guide/images/readme/ExperimentList.png)
+* **Track your experiment results in real-time:**
+![](https://intuit.github.io/wasabi/v1/guide/images/readme/ExperimentDetails.png)
 
-The Wasabi server requires some tools to be available in order to run. The following steps will initialize an operational development environment.
+## Getting Started with Wasabi
 
-For OSX, you can get started as follows:
+Installing Wasabi is straightforward. The following steps will install the needed tools, build and run a complete stack.
+
+#### Bootstrap Your Environment
+
+For OSX, you can get started as shown.
 
 ```bash
-% /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+% /usr/bin/ruby \
+  -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 % brew install git
-% git clone https://github.com/intuit/wasabi
+% git clone https://github.com/idea/wasabi.git
 % cd wasabi
 % ./bin/wasabi.sh bootstrap
 ```
 
-Installed tools include: [homebrew 0.9](http://brew.sh), [git 2](https://git-scm.com), [maven 3](https://maven.apache.org), [java 1.8](http://www.oracle.com/technetwork/java/javase/overview/index.html), [node 6](https://nodejs.org/en) and [python 2.7](https://www.python.org).
+Installed tools include: [homebrew 0.9](http://brew.sh), [git 2](https://git-scm.com),
+[maven 3](https://maven.apache.org), [java 1.8](http://www.oracle.com/technetwork/java/javase/overview/index.html),
+[node 6](https://nodejs.org/en) and [python 2.7](https://www.python.org).
 
-#### Start, Test and Stop
+Similar tooling will work for Linux and Windows alike. Contribute a patch :)
 
-Note: Make sure your default JDK is set to 1.8
+#### Start Wasabi
+
+Now that we have the necessary tools in place let's move on to build and start Wasabi followed by issuing a _ping_
+command to verify the build:
 
 ```bash
-% ./bin/wasabi.sh -b true start
+% ./bin/wasabi.sh --build true start
 ...
-=== Wasabi successfully started. ===
-Wasabi UI: % open http://192.168.99.100:8080
-Default user: admin/admin
+wasabi is operational:
 
-ping: % curl -i http://192.168.99.100:8080/api/v1/ping
+  ui: % open http://192.168.99.100:8080     note: sign in as admin/admin
+  api: % curl -i http://192.168.99.100:8080/api/v1/ping
+  debug: attach debuger to 192.168.99.100:8180
 
-debug: attach debuger to 192.168.99.100:8180
 % curl -i http://$(docker-machine ip wasabi):8080/api/v1/ping
 HTTP/1.1 200 OK
 Date: Wed, 25 May 2016 00:25:47 GMT
@@ -70,123 +86,275 @@ Content-Type: application/json
 Transfer-Encoding: chunked
 Server: Jetty(9.3.z-SNAPSHOT)
 
-{"componentHealths":[{"componentName":"Experiments Cassandra","healthy":true},{"componentName":"MySql","healthy":true}],"wasabiVersion":"wasabi-api-20151215171929-SNAPSHOT-development"}
-% ./bin/wasabi.sh stop
+{
+  "componentHealths":[
+    {
+      "componentName":"Experiments Cassandra",
+      "healthy":true
+    },
+    {
+      "componentName":"MySql","healthy":true
+    }
+  ],
+  "wasabiVersion":"wasabi-api-20151215171929-SNAPSHOT-development"
+}
 ```
 
-Note: The initial invocation of Wasbi can take up to 8m as the system is configured, built and provisioned. Second and subsequent invocations occur much faster, taking on average 1m20s.
+Congratulations! You are the proud owner of a newly minted and personalized full stack Wasabi instance :)
+
+Ok, enough celebration ... let's get back to business.
+
+#### Troulbeshoot Wasabi
+
+* While starting Wasabi, if you run into errors such as this, run this command in
+your terminal and re-run ./bin/wasabi.sh start:
+
+> Cannot connect to the Docker daemon. Is the docker daemon running on this host?
+
+```bash
+% eval $(docker-machine env wasabi)
+```
 
 #### Call Wasabi
 
-These are the 3 common API's that you'd use to instrument your client application with Wasabi API's.
+These are the 3 common API's that you'd use to instrument your client application with Wasabi.
 
-Let's assume that you've created and started a sample experiment 'buyButtonTest' in 'myApp' application with 'orangeButton'
-and 'greenButton' buckets via the Admin UI or by calling the API's. 
+Let's assume that you've created and started an experiment 'BuyButton' in 'Demo_App' application with:
 
-You can assign a user with a unique ID (e.g. 'userID1') to an experiment by calling this API Request:
+* 'BucketA': green button, control bucket
+* 'BucketB': orange button bucket
+
+You can assign a user with a unique ID (e.g. 'userID1') to the experiment by calling this API Request:
+
+> Assign a user to experiment and bucket:
+
 ```bash
-Assign a user to experiment and bucket:
-% curl -H "Content-Type: application/json" http://192.168.99.100:8080/api/v1/assignments/applications/myApp/experiments/buyButtonTest/users/userID1
-{"cache":true,"payload":null,"assignment":"orangeButton","context":"PROD","status":"NEW_ASSIGNMENT"}
+% curl -H "Content-Type: application/json" \
+    http://192.168.99.100:8080/api/v1/assignments/applications/Demo_App/experiments/BuyButton/users/userID1
+
+{  
+   "cache":true,
+   "payload":"green",
+   "assignment":"BucketA",
+   "context":"PROD",
+   "status":"NEW_ASSIGNMENT"
+}
 ```
 
-Now the 'userID1' user is assigned into the 'orangeButton' bucket. Let's record an impression of their experience with this API Request:
+Now the 'userID1' user is assigned into the 'BucketA' bucket. Let's record an impression of their experience 
+with this API Request:
+
+> Record an impression:
+
 ```bash
-Record an impression:
-% curl -H "Content-Type: application/json" -d "{\"events\":[{\"name\":\"IMPRESSION\"}]}" http://192.168.99.100:8080/api/v1/events/applications/myApp/experiments/buyButtonTest/users/userID1
+% curl -H "Content-Type: application/json" \
+    -d "{\"events\":[{\"name\":\"IMPRESSION\"}]}" \
+    http://192.168.99.100:8080/api/v1/events/applications/Demo_App/experiments/BuyButton/users/userID1
 ```
 
 If the 'userID1' user does an action, such as clicking the buy button, you'd record it with this API Request: 
-```bash
-Record an action:
-% curl -H "Content-Type: application/json" -d "{\"events\":[{\"name\":\"BuyClicked\"}]}" http://192.168.99.100:8080/api/v1/events/applications/myApp/experiments/buyButtonTest/users/userID1
-```
 
-## Development
-
-Additionally one can opt to build and deploy Wasabi locally, using an IDE for example, and connect to the required services as follows:
-
-#### Build and Run
+> Record an action:
 
 ```bash
-% ./bin/wasabi.sh start:cassandra,mysql
-% wasabi_ip=$(docker-machine ip wasabi)
-% wasabi_configuration="-DnodeHosts=${wasabi_ip} -Ddatabase.url.host=${wasabi_ip}"
-% (cd modules/main/target; \
-    WASABI_CONFIGURATION=${wasabi_configuration} ./wasabi-main-*-SNAPSHOT-development/bin/run) &
-% curl -i http://localhost:8080/api/v1/ping
-# server log
-% tail -f modules/main/target/wasabi-main-*-SNAPSHOT-development/logs/wasabi-main-*-SNAPSHOT-development.log &
-% ./bin/wasabi.sh stop:cassandra,mysql
+% curl -H "Content-Type: application/json" \
+    -d "{\"events\":[{\"name\":\"BuyClicked\"}]}" \
+    http://192.168.99.100:8080/api/v1/events/applications/Demo_App/experiments/BuyButton/users/userID1
 ```
 
-See *wasabi help* for more options:
+#### Explore Various Resources
+
+The following developer resources are available:
+
+> API: Swagger API playground
+
+```bash
+% ./bin/wasabi.sh resource:api
+```
+  
+> Javadoc
+
+```bash
+% ./bin/wasabi.sh resource:doc
+```
+  
+> Wasabi UI
+
+```bash
+% ./bin/wasabi.sh resource:ui
+```
+
+> Cassandra: cqlsh shell
+
+```bash
+% ./bin/wasabi.sh resource:cassandra
+```
+
+> MySQL: mysql shell
+
+```bash
+% ./bin/wasabi.sh resource:mysql
+```
+
+> Java Debugger: Remote attach configuration
+
+```bash
+-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8180
+```
+
+
+#### Stop Wasabi
+
+Alas, all good things must come to an end. Let's clean things up a bit stop the newly created Wasabi stack:
+
+At this point in time we now have all the requisite tools installed and as such subsequent invocations of Wasabi will
+start up much more quickly. Additionally there is no further need to include the _-b true_ or _--build true_ option.
+
+```bash
+% ./bin/wasabi.sh stop
+```
+
+#### Get Familiar with wasabi.sh
+
+Further, there are a number of additional wasabi.sh options available you should become familiar with:
 
 ```bash
 % ./bin/wasabi.sh -h
+  
+  usage: wasabi.sh [options] [commands]
+  
+  options:
+    -b | --build [ true | false ]          : build; default: false
+    -e | --endpoint [ host:port ]          : api endpoint; default: localhost:8080
+    -v | --verify [ true | false ]         : verify installation configuration; default: false
+    -s | --sleep [ sleep-time ]            : sleep/wait time in seconds; default: 30
+    -h | --help                            : help message
+  
+  commands:
+    bootstrap                              : install dependencies
+    start[:cassandra,mysql,wasabi]         : start all, cassandra, mysql, wasabi
+    test                                   : test wasabi
+    stop[:wasabi,cassandra,mysql]          : stop all, wasabi, cassandra, mysql
+    resource[:ui,api,doc,cassandra,mysql]  : open resource api, javadoc, cassandra, mysql
+    status                                 : display resource status
+    remove[:wasabi,cassandra,mysql]        : remove all, wasabi, cassandra, mysql
+    package                                : build deployable packages
+    release[:start,finish]                 : promote release
+```
 
-usage: wasabi.sh [options] [commands]
+## Develop Wasabi
 
+Let's turn it up to 11. To facilitate developing Wasabi contributions you can easily build and run from source and readily connect to the a fore mentioned infrastructure:
+
+#### Build and Run Wasabi Server
+
+```bash
+% mvn package
+% ./bin/wasabi.sh start:cassandra,mysql
+% dmip=$(docker-machine ip wasabi)
+% (cd modules/main/target; \
+    WASABI_CONFIGURATION="-DnodeHosts=${dmip} -Ddatabase.url.host=${dmip}" ./wasabi-main-*-SNAPSHOT-development/bin/run) &
+% curl -i http://localhost:8080/api/v1/ping
 ...
 ```
 
-#### Running Functional Tests
+The runtime logs can be accessed executing the following command in a another shell:
 
-In addition to locally compiling the code, running unit tests and the like it is trivial to run the entire collection of included functional tests as follows:
+> Viewing runtime logs:
+
+```bash
+% tail -f modules/main/target/wasabi-main-*-SNAPSHOT-development/logs/wasabi-main-*-SNAPSHOT-development.log
+```
+
+#### Build and Run Wasabi UI
+
+```bash
+% cd modules/ui
+% grunt build
+```
+
+> Edit Gruntfile.js with the following change to the apiHostBaseUrlValue value, since you would be running the
+Wasabi server on localhost.
+
+```javascript
+development: {
+                constants: {
+                    supportEmail: 'you@example.com',
+                    apiHostBaseUrlValue: 'http://localhost:8080/api/v1'
+                }
+            }
+```
+
+```bash
+% grunt serve
+```
+
+#### Stop Wasabi
+
+```bash
+% ./bin/wasabi.sh stop
+```
+
+Now while that was fun, in all likelihood you will be using an IDE to develop Wasabi features. In doing so you need only
+add the aforementioned configuration information to your Wasabi JVM runtime prior to startup:
+
+> Wasabi runtime configuration:
+
+```bash
+-DnodeHosts=$(docker-machine ip wasabi) -Ddatabase.url.host=$(docker-machine ip wasabi)
+```
+
+Awesome! You are well on your way at this point in time.
+
+#### Run Integration Tests
+
+Code changes can readily be verified by running the growing collection of included integration tests:
 
 ```bash
 % ./bin/wasabi.sh start test stop
 ```
 
-## Package
+## Package and Deploy Wasabi at Scale
 
-Further, we can build and deploy *rpm* or *deb* distribution packages as follows:
-
-Note: [Java 8](http://www.oracle.com/technetwork/java/javase/overview/index.html) is a runtime dependency
+Wasabi can readily be packaged as installable *rpm* or *deb* distributions and deployed at scale as follows:
 
 ```bash
 % ./bin/wasabi.sh package
 % find ./modules -type f \( -name "*.rpm" -or -name "*.deb" \)
 ```
 
-As noted above, configure these Wasabi instances to connect to the required services via the following JVM configurations:
+Note: [Java 8](http://www.oracle.com/technetwork/java/javase/overview/index.html) is a runtime dependency
 
-```bash
-% ... -DnodeHosts=${cassandra_ip(s)} -Ddatabase.url.host=${mysql_ip} -Ddatabase.url.port=${mysql_port} -Ddatabase.url.dbname=${mysql_dbname} -Ddatabase.url.args={mysql_args}"
-```
+## Integrate Wasabi
 
-## Integration / Maven
-
-Lastly Wasabi is embeddable via the following *maven* dependency family:
+Wasabi is readily embeddable via the following *maven* dependency GAV family:
 
 ```xml
 <dependency>
-    <groupId>com.intuit.data.autumn</groupId>
-    <artifactId>autumn</artifactId>
-    <version>1.0.20160515205816</version>
+    <groupId>com.intuit.wasabi</groupId>
+    <artifactId>wasabi</artifactId>
+    <version>1.0.<build_timestamp></version>
 </dependency>
 ```
 
-## Resources
-
-* [docs](link)
-* [issues](link)
-
-## Contributing
+## Contribute to Wasabi
 
 All contributions are highly encouraged! You can add new features, report and fix existing bugs and write docs and
 tutorials. Feel free to open issue or send pull request!
 
 The `master` branch of this repository contains the latest stable release of Wasabi while and snapshots are published to
-the `develop` branch. In general pull requests should be submitted against `develop` in the form of `feature` branch
-pull requests. See the [Contributing to a Project](https://guides.github.com/activities/contributing-to-open-source/)
+the `develop` branch. In general pull requests should be submitted against `develop` in the form of forking this repo into your account, developing and testing your changes, and creating pull requests to request merges. See the [Contributing to a Project](https://guides.github.com/activities/contributing-to-open-source/)
 article for more details about how to contribute.
 
-## Roadmap
+Steps to contribute:
 
-* implement modules/main/src/test/integration/rollup_exp_stats.py
-* tbd
+1. Fork this repository into your account on Github
+2. Clone *your forked repository* (not our original one) to your hard drive with `git clone https://github.com/YOURUSERNAME/wasabi.git`
+3. Design and develop your changes
+4. Add/update unit tests
+5. Add/update integration tests
+6. Create a pull request for review to request merge
+7. Obtain 2 approval _squirrels_ before your changes can be merged
 
-## License
+Thank you for you contribution!
 
-The code is published under the terms of the [Apache License v2.0](http://www.apache.org/licenses/LICENSE-2.0).
