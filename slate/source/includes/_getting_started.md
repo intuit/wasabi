@@ -2,7 +2,7 @@
 
 Installing Wasabi is straightforward. The following steps will install the needed tools, build and run a complete stack.
 
-## Bootstrapping Your Environment
+## Bootstrap Your Environment
 
 ```bash
 % /usr/bin/ruby \
@@ -21,15 +21,16 @@ Installed tools include: [homebrew 0.9](http://brew.sh), [git 2](https://git-scm
 
 Similar tooling will work for Linux and Windows alike. Contribute a patch :)
 
-## Starting Wasabi
+## Start Wasabi
 
 ```bash
-% ./bin/wasabi.sh -b true start
+% ./bin/wasabi.sh --build true start
 ...
-=== Wasabi successfully started. ===
-Wasabi UI: % open http://192.168.99.100:8080
-ping: % curl -i http://192.168.99.100:8080/api/v1/ping
-debug: attach debuger to 192.168.99.100:8180
+wasabi is operational:
+
+  ui: % open http://192.168.99.100:8080     note: sign in as admin/admin
+  api: % curl -i http://192.168.99.100:8080/api/v1/ping
+  debug: attach debuger to 192.168.99.100:8180
 
 % curl -i http://$(docker-machine ip wasabi):8080/api/v1/ping
 HTTP/1.1 200 OK
@@ -62,39 +63,98 @@ Congratulations! You are the proud owner of a newly minted and personalized full
 
 Ok, enough celebration ... let's get back to business.
 
-## Calling Wasabi
+## Call Wasabi
 
-These are the 3 common API's that you'd use to instrument your client application with Wasabi API's.
+These are the 3 common API's that you'd use to instrument your client application with Wasabi.
 
-Let's assume that you've created and started a sample experiment 'buyButtonTest' in 'myApp' application with 'orangeButton'
-and 'greenButton' buckets via the Admin UI or by calling the API's. 
+Let's assume that you've created and started an experiment 'BuyButton' in 'Demo_App' application with:
+
+* 'BucketA': green button, control bucket
+* 'BucketB': orange button bucket
+
+> Assign a user to experiment and bucket:
 
 ```bash
-Assign a user to experiment and bucket:
-% curl -H "Content-Type: application/json" http://192.168.99.100:8080/api/v1/assignments/applications/myApp/experiments/buyButtonTest/users/userID1
-{"cache":true,"payload":null,"assignment":"orangeButton","context":"PROD","status":"NEW_ASSIGNMENT"}
+% curl -H "Content-Type: application/json" \
+    http://192.168.99.100:8080/api/v1/assignments/applications/Demo_App/experiments/BuyButton/users/userID1
+
+{  
+   "cache":true,
+   "payload":"green",
+   "assignment":"BucketA",
+   "context":"PROD",
+   "status":"NEW_ASSIGNMENT"
+}
 ```
 
-You can assign a user with a unique ID (e.g. 'userID1') to an experiment by calling this API Request:
+You can assign a user with a unique ID (e.g. 'userID1') to the experiment by calling this API Request:
 <div></div>
 
+> Record an impression:
+
 ```bash
-Record an impression:
-% curl -H "Content-Type: application/json" -d "{\"events\":[{\"name\":\"IMPRESSION\"}]}" http://192.168.99.100:8080/api/v1/events/applications/myApp/experiments/buyButtonTest/users/userID1
+% curl -H "Content-Type: application/json" \
+    -d "{\"events\":[{\"name\":\"IMPRESSION\"}]}" \
+    http://192.168.99.100:8080/api/v1/events/applications/Demo_App/experiments/BuyButton/users/userID1
 ```
 
-Now the 'userID1' user is assigned into the 'orangeButton' bucket. Let's record an impression of their experience with this API Request:
+Now the 'userID1' user is assigned into the 'BucketA' bucket. Let's record an impression of their experience 
+with this API Request:
 <div></div>
 
+> Record an action:
+
 ```bash
-Record an action:
-% curl -H "Content-Type: application/json" -d "{\"events\":[{\"name\":\"BuyClicked\"}]}" http://192.168.99.100:8080/api/v1/events/applications/myApp/experiments/buyButtonTest/users/userID1
+% curl -H "Content-Type: application/json" \
+    -d "{\"events\":[{\"name\":\"BuyClicked\"}]}" \
+    http://192.168.99.100:8080/api/v1/events/applications/Demo_App/experiments/BuyButton/users/userID1
 ```
 
 If the 'userID1' user does an action, such as clicking the buy button, you'd record it with this API Request: 
 <div></div>
 
-## Stopping Wasabi
+## Explore Various Resources
+
+The following developer resources are available:
+
+> API: Swagger API playground
+
+```bash
+% ./bin/wasabi.sh resource:api
+```
+  
+> Javadoc
+
+```bash
+% ./bin/wasabi.sh resource:doc
+```
+  
+> Wasabi UI
+
+```bash
+% ./bin/wasabi.sh resource:ui
+```
+
+> Cassandra: cqlsh shell
+
+```bash
+% ./bin/wasabi.sh resource:cassandra
+```
+
+> MySQL: mysql shell
+
+```bash
+% ./bin/wasabi.sh resource:mysql
+```
+
+> Java Debugger: Remote attach configuration
+
+```bash
+-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8180
+```
+
+
+## Stop Wasabi
 
 ```bash
 % ./bin/wasabi.sh stop
@@ -106,6 +166,8 @@ At this point in time we now have all the requisite tools installed and as such 
 start up much more quickly. Additionally there is no further need to include the _-b true_ or _--build true_ option.
 
 <div></div>
+
+## Get Familiar with wasabi.sh
 ```bash
 % ./bin/wasabi.sh -h
   
@@ -131,10 +193,10 @@ start up much more quickly. Additionally there is no further need to include the
 ```
 
 Further, there are a number of additional wasabi.sh options available you should become familiar with:
+<div></div>
 
 
-
-## Developing Wasabi
+## Develop Wasabi
 
 Let's turn it up to 11. To facilitate developing Wasabi contributions you can easily build and run from source and readily connect to the a fore mentioned infrastructure:
 
@@ -159,6 +221,7 @@ Let's turn it up to 11. To facilitate developing Wasabi contributions you can ea
 ```
 
 The runtime logs can be accessed executing the following command in a another shell:
+<div></div>
 
 ### Build and Run Wasabi UI
 
@@ -183,46 +246,6 @@ development: {
 % grunt serve
 ```
 
-### Resources
-
-The following developer resources are available:
-
-  * API
-
-```bash
-% ./bin/wasabi.sh resource:api
-```
-
-  * Javadoc
-  
-```bash
-% ./bin/wasabi.sh resource:doc
-```
-
-  * UI
-  
-```bash
-% ./bin/wasabi.sh resource:ui
-```
-
-  * Cassandra
-
-```bash
-% ./bin/wasabi.sh resource:cassandra
-```
-
-  * MySql
-
-```bash
-% ./bin/wasabi.sh resource:mysql
-```
-
-  * Java Debugger Remote Attach Configuration
-
-```bash
--agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8180
-```
-
 ### Stopping Wasabi
 
 ```bash
@@ -242,26 +265,26 @@ add the aforementioned configuration information to your Wasabi JVM runtime prio
 <div></div>
 Awesome! You are well on your way at this point in time.
 
-### Running Functional Tests
+### Run Functional Tests
 ```bash
 % ./bin/wasabi.sh start test stop
 ```
 
 Code changes can readily be verified by running the growing collection of included functional tests:
+<div></div>
 
-
-
-## Packaging and Deploying Wasabi at Scale
+## Package and Deploy Wasabi at Scale
 
 ```bash
 % ./bin/wasabi.sh package
 % find ./modules -type f \( -name "*.rpm" -or -name "*.deb" \)
 ```
 Wasabi can readily be packaged as installable *rpm* or *deb* distributions and deployed at scale as follows:
+<div></div>
 
 Note: [Java 8](http://www.oracle.com/technetwork/java/javase/overview/index.html) is a runtime dependency
 
-## Integrating Wasabi
+## Integrate Wasabi
 
 ```xml
 <dependency>
@@ -271,7 +294,7 @@ Note: [Java 8](http://www.oracle.com/technetwork/java/javase/overview/index.html
 </dependency>
 ```
 Wasabi is readily embeddable via the following *maven* dependency GAV family:
-
+<div></div>
 
 ## Recap
 
