@@ -296,7 +296,7 @@ for command in ${@:$OPTIND}; do
     stop) stop;;
     stop:*) commands=$(echo ${command} | cut -d ':' -f 2)
       (IFS=','; for cmd in ${commands}; do stop ${cmd}; done);;
-    resource) command="resource:ui,api,doc,casssandra,mysql";&
+    resource) command="resource:ui,api,doc,casssandra,mysql";;
     resource:*) commands=$(echo ${command} | cut -d ':' -f 2)
       (IFS=','; for cmd in ${commands}; do resource ${cmd}; done);;
     status) status;;
