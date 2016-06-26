@@ -63,7 +63,7 @@ Congratulations! You are the proud owner of a newly minted and personalized full
 
 Ok, enough celebration ... let's get back to business.
 
-## Troulbeshoot Wasabi
+## Troubleshoot Wasabi
 
 > Cannot connect to the Docker daemon. Is the docker daemon running on this host?
 
