@@ -258,7 +258,7 @@ development: {
 % grunt serve
 ```
 
-### Stopping Wasabi
+### Stop Wasabi
 
 ```bash
 % ./bin/wasabi.sh stop
@@ -277,12 +277,12 @@ add the aforementioned configuration information to your Wasabi JVM runtime prio
 <div></div>
 Awesome! You are well on your way at this point in time.
 
-### Run Functional Tests
+### Run Integration Tests
 ```bash
 % ./bin/wasabi.sh start test stop
 ```
 
-Code changes can readily be verified by running the growing collection of included functional tests:
+Code changes can readily be verified by running the growing collection of included integration tests:
 <div></div>
 
 ## Package and Deploy Wasabi at Scale
