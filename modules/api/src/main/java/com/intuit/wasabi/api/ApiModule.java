@@ -36,8 +36,8 @@ import java.util.Properties;
 
 import static com.google.inject.Scopes.SINGLETON;
 import static com.google.inject.name.Names.named;
-import static com.intuit.data.autumn.utils.PropertyFactory.create;
-import static com.intuit.data.autumn.utils.PropertyFactory.getProperty;
+import static com.intuit.autumn.utils.PropertyFactory.create;
+import static com.intuit.autumn.utils.PropertyFactory.getProperty;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class ApiModule extends AbstractModule {
@@ -49,7 +49,7 @@ public class ApiModule extends AbstractModule {
     protected void configure() {
         LOGGER.debug("installing module: {}", ApiModule.class.getSimpleName());
 
-        install(new com.intuit.data.autumn.api.ApiModule());
+        install(new com.intuit.autumn.api.ApiModule());
         install(new AnalyticsModule());
         install(new AuditLogModule());
         install(new AuthorizationModule());

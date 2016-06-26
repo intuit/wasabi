@@ -23,7 +23,7 @@ import org.joda.time.DateTimeZone;
 import java.util.List;
 import java.util.Map;
 
-import static com.intuit.data.autumn.utils.PropertyFactory.create;
+import static com.intuit.autumn.utils.PropertyFactory.create;
 import static com.intuit.wasabi.analytics.impl.AnalyticsImpl.PROPERTY_NAME;
 import static java.lang.Integer.parseInt;
 
