@@ -19,8 +19,8 @@ import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
-import com.intuit.data.autumn.client.HttpCall;
-import com.intuit.data.autumn.client.impl.HttpCallImplWithConnectionPooling;
+import com.intuit.autumn.client.HttpCall;
+import com.intuit.autumn.client.impl.HttpCallImplWithConnectionPooling;
 import com.intuit.hyrule.Rule;
 import com.intuit.hyrule.RuleBuilder;
 import com.intuit.hyrule.exceptions.InvalidInputException;
@@ -28,11 +28,13 @@ import com.intuit.hyrule.exceptions.MissingInputException;
 import com.intuit.hyrule.exceptions.TreeStructureException;
 import com.intuit.wasabi.analyticsobjects.Parameters;
 import com.intuit.wasabi.assignment.AssignmentDecorator;
-import com.intuit.wasabi.assignment.Assignments;
 import com.intuit.wasabi.assignment.AssignmentIngestionExecutor;
+import com.intuit.wasabi.assignment.Assignments;
 import com.intuit.wasabi.assignmentobjects.*;
 import com.intuit.wasabi.eventlog.EventLog;
-import com.intuit.wasabi.exceptions.*;
+import com.intuit.wasabi.exceptions.AssignmentExistsException;
+import com.intuit.wasabi.exceptions.BucketNotFoundException;
+import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
 import com.intuit.wasabi.experiment.Pages;
 import com.intuit.wasabi.experiment.Priorities;
 import com.intuit.wasabi.experimentobjects.*;
@@ -53,7 +55,6 @@ import javax.annotation.Nullable;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
-import java.net.URI;
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -67,16 +68,11 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 public class AssignmentsImpl implements Assignments {
 
+    protected static final String RULE_CACHE = "ruleCache";
     /**
      * Logger for the class
      */
     private static final Logger LOGGER = getLogger(AssignmentsImpl.class);
-
-    /**
-     * Executors to ingest data to real time ingestion system.
-     */
-	protected Map<String, AssignmentIngestionExecutor> executors;
-
     /**
      * Experiment repo
      */
@@ -91,28 +87,23 @@ public class AssignmentsImpl implements Assignments {
      * Assignments reo
      */
     protected final AssignmentsRepository assignmentsRepository;
-
-    protected AssignmentDecorator assignmentDecorator = null;
-
     private final SecureRandom random;
-
-
+    /**
+     * Executors to ingest data to real time ingestion system.
+     */
+    protected Map<String, AssignmentIngestionExecutor> executors;
+    protected AssignmentDecorator assignmentDecorator = null;
+    protected ThreadPoolExecutor ruleCacheExecutor;
+    //TODO: instead of provider type, these needs to be factories
+    protected Provider<Envelope<AssignmentEnvelopePayload, DatabaseExport>> assignmentDBEnvelopeProvider;
+    //TODO: instead of provider type, these needs to be factories
+    protected Provider<Envelope<AssignmentEnvelopePayload, WebExport>> assignmentWebEnvelopeProvider;
+    // Rule-Cache queue set up
+    protected RuleCache ruleCache;
     /**
      * Proxy related info
      */
     private HttpCall<PersonalizationEngineResponse> httpCall = new HttpCallImplWithConnectionPooling<>();
-
-    protected static final String RULE_CACHE = "ruleCache";
-    protected ThreadPoolExecutor ruleCacheExecutor;
-
-    //TODO: instead of provider type, these needs to be factories
-    protected Provider<Envelope<AssignmentEnvelopePayload, DatabaseExport>> assignmentDBEnvelopeProvider;
-
-    //TODO: instead of provider type, these needs to be factories
-    protected Provider<Envelope<AssignmentEnvelopePayload, WebExport>> assignmentWebEnvelopeProvider;
-
-    // Rule-Cache queue set up
-    protected RuleCache ruleCache;
     private Priorities priorities;
     private Pages pages;
 

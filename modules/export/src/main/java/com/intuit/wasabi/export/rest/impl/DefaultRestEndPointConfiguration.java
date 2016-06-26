@@ -19,8 +19,6 @@ import com.intuit.wasabi.export.rest.RestEndPoint;
 
 import java.util.Properties;
 
-import static com.intuit.data.autumn.utils.PropertyFactory.create;
-
 public class DefaultRestEndPointConfiguration implements RestEndPoint.Configuration {
 
     private Properties properties;
