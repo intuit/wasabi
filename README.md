@@ -40,7 +40,7 @@ Learn more about how Wasabi can empower your team to move from hunches to action
 * **Track your experiment results in real-time:**
 ![](https://intuit.github.io/wasabi/v1/guide/images/readme/ExperimentDetails.png)
 
-## Getting Started with Wasabi
+## Get Started
 
 Installing Wasabi is straightforward. The following steps will install the needed tools, build and run a complete stack.
 
@@ -242,7 +242,7 @@ Further, there are a number of additional wasabi.sh options available you should
     release[:start,finish]                 : promote release
 ```
 
-## Develop Wasabi
+## Develop
 
 Let's turn it up to 11. To facilitate developing Wasabi contributions you can easily build and run from source and readily connect to the a fore mentioned infrastructure:
 
@@ -314,7 +314,7 @@ Code changes can readily be verified by running the growing collection of includ
 % ./bin/wasabi.sh start test stop
 ```
 
-## Package and Deploy Wasabi at Scale
+## Package and Deploy at Scale
 
 Wasabi can readily be packaged as installable *rpm* or *deb* distributions and deployed at scale as follows:
 
@@ -325,7 +325,7 @@ Wasabi can readily be packaged as installable *rpm* or *deb* distributions and d
 
 Note: [Java 8](http://www.oracle.com/technetwork/java/javase/overview/index.html) is a runtime dependency
 
-## Integrate Wasabi
+## Integrate
 
 Wasabi is readily embeddable via the following *maven* dependency GAV family:
 
@@ -337,7 +337,7 @@ Wasabi is readily embeddable via the following *maven* dependency GAV family:
 </dependency>
 ```
 
-## Contribute to Wasabi
+## Contribute
 
 All contributions are highly encouraged! You can add new features, report and fix existing bugs and write docs and
 tutorials. Feel free to open issue or send pull request!
