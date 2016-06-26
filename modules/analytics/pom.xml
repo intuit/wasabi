@@ -55,9 +55,9 @@
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.intuit.data.autumn</groupId>
-            <artifactId>autumn.utils</artifactId>
-            <version>1.0.20160515205816</version>
+            <groupId>com.intuit.autumn</groupId>
+            <artifactId>autumn-utils</artifactId>
+            <version>1.0.20160626031951</version>
         </dependency>
     </dependencies>
 </project>

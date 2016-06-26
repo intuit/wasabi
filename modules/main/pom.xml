@@ -95,14 +95,14 @@
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.intuit.data.autumn</groupId>
-            <artifactId>autumn.service</artifactId>
-            <version>1.0.20160515205816</version>
+            <groupId>com.intuit.autumn</groupId>
+            <artifactId>autumn-service</artifactId>
+            <version>1.0.20160626031951</version>
         </dependency>
         <dependency>
-            <groupId>com.intuit.data.autumn</groupId>
-            <artifactId>autumn.metrics</artifactId>
-            <version>1.0.20160515205816</version>
+            <groupId>com.intuit.autumn</groupId>
+            <artifactId>autumn-metrics</artifactId>
+            <version>1.0.20160626031951</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
