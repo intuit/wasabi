@@ -15,7 +15,7 @@
 # limitations under the License.
 ###############################################################################
 
-profile_default=development
+profile_default=developmentf
 build_default=false
 test_default=false
 
