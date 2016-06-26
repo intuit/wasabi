@@ -88,6 +88,7 @@ stop_docker() {
 }
 
 start_container() {
+  eval $(docker-machine env wasabi)
   docker network create --driver bridge ${docker_network} >/dev/null 2>&1
 
   cid=$(docker ps -aqf name=${1})
