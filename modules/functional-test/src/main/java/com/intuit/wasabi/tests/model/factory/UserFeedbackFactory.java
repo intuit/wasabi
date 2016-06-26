@@ -35,8 +35,7 @@ public class UserFeedbackFactory {
      * @return a default Page.
      */
     public static UserFeedback createUserFeedback() {
-        UserFeedback userFeedback = new UserFeedback(Constants.DEFAULT_PREFIX_USER_FEEDBACK + internalId++);
-        return userFeedback;
+        return new UserFeedback(Constants.DEFAULT_PREFIX_USER_FEEDBACK + internalId++);
     }
 
     /**

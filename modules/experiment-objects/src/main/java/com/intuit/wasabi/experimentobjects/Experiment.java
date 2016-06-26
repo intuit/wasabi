@@ -700,8 +700,7 @@ public class Experiment implements Cloneable, ExperimentBase {
         }
 
         public static Label valueOf(String value) {
-            Label result = new Label(value);
-            return result;
+            return new Label(value);
         }
 
         @Override

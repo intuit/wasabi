@@ -16,7 +16,6 @@
 package com.intuit.wasabi.repository.impl.cassandra;
 
 import com.google.common.base.Joiner;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
@@ -47,6 +46,7 @@ import java.io.IOException;
 import java.util.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.intuit.wasabi.experimentobjects.Bucket.State.OPEN;
 
 /**
  * Cassandra experiment repo
@@ -60,11 +60,12 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
 
     /**
      * Constructor
-     * @param mutagen cassandra mutagen
-     * @param driver  cassandra driver
-     * @param keyspace cassandra keyspace
+     *
+     * @param mutagen   cassandra mutagen
+     * @param driver    cassandra driver
+     * @param keyspace  cassandra keyspace
      * @param validator experiment validator
-     * @throws IOException io exception
+     * @throws IOException         io exception
      * @throws ConnectionException when connection failed
      */
     @Inject
@@ -87,8 +88,9 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
 
     /**
      * Get experiment
+     *
      * @param experimentID experiment id
-     * @param consistency cassandra consistency level
+     * @param consistency  cassandra consistency level
      * @return the experiment
      * @ repository failure
      */
@@ -143,9 +145,10 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
 
     /**
      * Get experiment by params
-     * @param appName application name
+     *
+     * @param appName         application name
      * @param experimentLabel experiment label
-     * @param consistency  cassandra consistency level
+     * @param consistency     cassandra consistency level
      * @return the experiment
      */
     private Experiment getExperiment(Application.Name appName, Experiment.Label experimentLabel,
@@ -268,8 +271,8 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
      * Create indices for new experiment
      *
      * @param newExperiment the new experiment object
-     *
-     * TODO: Need more clarification
+     *                      <p>
+     *                      TODO: Need more clarification
      */
     @Override
     public void createIndicesForNewExperiment(NewExperiment newExperiment) {
@@ -594,7 +597,6 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
      * Get experiment rows
      *
      * @param appName {@link Application.Name}
-     *
      * @return Experiment rows
      */
     @Override
@@ -742,11 +744,8 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
     public void createBucket(Bucket newBucket) {
         checkNotNull(newBucket, "Parameter \"newBucket\" cannot be null");
 
-        final Bucket.State STATE = Bucket.State.OPEN;
-        final String cql = "insert into bucket " +
-                "(experiment_id, label, description, allocation, " +
-                "   is_control, payload, state) " +
-                "values (?, ?, ?, ?, ?, ?, ?)";
+        final Bucket.State STATE = OPEN;
+        final String cql = "insert into bucket (experiment_id, label, description, allocation, is_control, payload, state) values (?, ?, ?, ?, ?, ?, ?)";
 
         try {
             getDriver().getKeyspace()
@@ -911,8 +910,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
      * Update bucket batch
      *
      * @param experimentID the experiment id
-     * @param bucketList  the bucket list
-     *
+     * @param bucketList   the bucket list
      * @return BucketList
      */
     @Override
@@ -1189,9 +1187,8 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
     /**
      * Update state index
      *
-     * @param batch {@link MutationBatch}
+     * @param batch      {@link MutationBatch}
      * @param experiment the experiment object
-     *
      */
     @Override
     public void updateStateIndex(MutationBatch batch, Experiment experiment)
@@ -1241,6 +1238,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
 
     /**
      * Creates an application at top level
+     *
      * @param applicationName Application Name
      */
     @Override

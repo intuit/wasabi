@@ -15,7 +15,6 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.impl.database;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import com.googlecode.flyway.core.Flyway;
@@ -36,6 +35,8 @@ import com.netflix.astyanax.model.Rows;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.intuit.wasabi.experimentobjects.Experiment.State.DELETED;
 
 /**
@@ -71,16 +72,10 @@ class DatabaseExperimentRepository implements ExperimentRepository {
 
     @Override
     public Experiment getExperiment(Experiment.ID experimentID) throws RepositoryException {
-
-        final String SQL =
-                "select * from experiment " +
-                        "where id = ? and state != ?";
+        final String sql = "select * from experiment where id = ? and state != ?";
 
         try {
-            List results = newTransaction().select(
-                    SQL,
-                    experimentID,
-                    Experiment.State.DELETED.toString());
+            List results = newTransaction().select(sql, experimentID, DELETED.toString());
 
             if (results.isEmpty()) {
                 return null;
@@ -117,18 +112,12 @@ class DatabaseExperimentRepository implements ExperimentRepository {
     }
 
     @Override
-    public Experiment getExperiment(Application.Name appName,
-                                    Experiment.Label experimentLabel) {
-
-        final String SQL =
-                "select * from experiment " +
-                        "where app_name = ? and label = ? and state != ?";
+    public Experiment getExperiment(Application.Name appName, Experiment.Label experimentLabel) {
+        final String sql = "select * from experiment where app_name = ? and label = ? and state != ?";
 
         try {
-            List results = newTransaction().select(SQL,
-                    appName.toString(),
-                    experimentLabel.toString(),
-                    State.DELETED.toString());
+            List results = newTransaction().select(sql, appName.toString(), experimentLabel.toString(),
+                    DELETED.toString());
 
             if (results.isEmpty()) {
                 return null;
@@ -141,9 +130,7 @@ class DatabaseExperimentRepository implements ExperimentRepository {
             }
 
             Map experimentMap = (Map) results.get(0);
-
-            Experiment.ID experimentID =
-                    Experiment.ID.valueOf((byte[]) experimentMap.get("id"));
+            Experiment.ID experimentID = Experiment.ID.valueOf((byte[]) experimentMap.get("id"));
 
             return Experiment.withID(experimentID)
                     .withLabel(Experiment.Label.valueOf((String) experimentMap.get("label")))
@@ -165,19 +152,13 @@ class DatabaseExperimentRepository implements ExperimentRepository {
     }
 
     @Override
-    public List<Experiment.ID> getExperiments()
-            throws RepositoryException {
-
-        final String SQL =
-                "select id from experiment " +
-                        "where state != ? order by id";
+    public List<Experiment.ID> getExperiments() throws RepositoryException {
+        final String sql = "select id from experiment where state != ? order by id";
 
         try {
-            List<Map<String, Object>> experiments = newTransaction().select(SQL, DELETED.toString());
+            List<Map<String, Object>> experiments = newTransaction().select(sql, DELETED.toString());
 
-            List<Experiment.ID> result = experiments.stream().map(experiment -> Experiment.ID.valueOf((byte[]) experiment.get("id"))).collect(Collectors.toList());
-
-            return result;
+            return experiments.stream().map(experiment -> Experiment.ID.valueOf((byte[]) experiment.get("id"))).collect(Collectors.toList());
         } catch (WasabiException e) {
             throw e;
         } catch (Exception e) {
@@ -212,10 +193,8 @@ class DatabaseExperimentRepository implements ExperimentRepository {
     }
 
     @Override
-    public Experiment.ID createExperiment(NewExperiment newExperiment)
-            throws RepositoryException {
-
-        final String SQL =
+    public Experiment.ID createExperiment(NewExperiment newExperiment) throws RepositoryException {
+        final String sql =
                 "insert into experiment " +
                         "(id, description, sampling_percent, label, " +
                         "start_time, end_time, app_name, state) " +
@@ -225,7 +204,7 @@ class DatabaseExperimentRepository implements ExperimentRepository {
             // Note that this timestamp gets serialized as milliseconds from
             // the epoch, so timezone is irrelevant
             newTransaction().insert(
-                    SQL,
+                    sql,
                     newExperiment.getID(),
                     newExperiment.getDescription() != null
                             ? newExperiment.getDescription()
@@ -247,19 +226,16 @@ class DatabaseExperimentRepository implements ExperimentRepository {
     }
 
     @Override
-    public Experiment updateExperiment(Experiment experiment)
-            throws RepositoryException {
-
+    public Experiment updateExperiment(Experiment experiment) throws RepositoryException {
         validator.validateExperiment(experiment);
 
-        final String SQL =
+        final String sql =
                 "update experiment " +
                         "set description=?, sampling_percent=?, state=?, " +
                         "label=?, start_time=?, end_time=?, app_name=? " +
                         "where id=?";
-
         int rowCount = newTransaction().update(
-                SQL,
+                sql,
                 experiment.getDescription() != null
                         ? experiment.getDescription()
                         : "",
@@ -283,25 +259,14 @@ class DatabaseExperimentRepository implements ExperimentRepository {
     }
 
     @Override
-    public Experiment updateExperimentState(Experiment experiment, State state)
-            throws RepositoryException {
-
+    public Experiment updateExperimentState(Experiment experiment, State state) throws RepositoryException {
         validator.validateExperiment(experiment);
 
-        final String SQL =
-                "update experiment " +
-                        "set state=? where id=?";
-        int rowCount = newTransaction().update(
-                SQL,
-                state.toString(),
-                experiment.getID());
+        final String sql = "update experiment set state=? where id=?";
+        int rowCount = newTransaction().update(sql, state.toString(), experiment.getID());
 
-        if (rowCount > 1) {
-            throw new RepositoryException("Concurrent updates; please retry");
-        }
-
-        if (rowCount < 1) {
-            throw new RepositoryException("No rows were updated");
+        if (rowCount != 1) {
+            throw new RepositoryException(rowCount > 1 ? "Concurrent updates; please retry" : "No rows were updated");
         }
 
         return experiment;
@@ -315,18 +280,13 @@ class DatabaseExperimentRepository implements ExperimentRepository {
     }
 
     @Override
-    public void createBucket(Bucket newBucket)
-            throws RepositoryException {
-
-
-        final String SQL =
-                "insert into bucket (" +
-                        "experiment_id, description, label, allocation_percent, is_control, payload, state) " +
-                        "values (?,?,?,?,?,?,?)";
+    public void createBucket(Bucket newBucket) throws RepositoryException {
+        final String sql =
+                "insert into bucket (experiment_id, description, label, allocation_percent, is_control, payload, state) values (?,?,?,?,?,?,?)";
 
         try {
             newTransaction().insert(
-                    SQL,
+                    sql,
                     newBucket.getExperimentID(),
                     newBucket.getDescription() != null
                             ? newBucket.getDescription()
@@ -349,36 +309,25 @@ class DatabaseExperimentRepository implements ExperimentRepository {
     }
 
     @Override
-    public Bucket updateBucket(Bucket bucket)
-            throws RepositoryException {
-
-        Preconditions.checkNotNull(bucket,
-                "Parameter \"bucket\" cannot be null");
-        Preconditions.checkNotNull(bucket.getExperimentID(),
-                "Bucket experiment ID cannot be null");
-        Preconditions.checkArgument(
-                bucket.getLabel() != null
-                        && !bucket.getLabel().toString().trim().isEmpty(),
+    public Bucket updateBucket(Bucket bucket) throws RepositoryException {
+        checkNotNull(bucket, "Parameter \"bucket\" cannot be null");
+        checkNotNull(bucket.getExperimentID(), "Bucket experiment ID cannot be null");
+        checkArgument(bucket.getLabel() != null && !bucket.getLabel().toString().trim().isEmpty(),
                 "Bucket external label cannot be null or an empty string");
-        Preconditions.checkArgument(bucket.getAllocationPercent() >= 0d,
-                "Bucket allocation percentage must be greater than or " +
-                        "equal to 0.0");
-        Preconditions.checkArgument(bucket.getAllocationPercent() <= 1d,
+        checkArgument(bucket.getAllocationPercent() >= 0d,
+                "Bucket allocation percentage must be greater than or equal to 0.0");
+        checkArgument(bucket.getAllocationPercent() <= 1d,
                 "Bucket allocation percentage must be less than or equal to 1.0");
-
 
         //TODO: Check if you can combine the two queries into a single transaction (NOT a single query)
 
-
         if (bucket.isControl()) {
-            final String SQL = "update bucket set is_control = false where experiment_id=?";
-            newTransaction().update(
-                    SQL,
-                    bucket.getExperimentID());
+            final String sql = "update bucket set is_control = false where experiment_id=?";
+
+            newTransaction().update(sql, bucket.getExperimentID());
         }
 
-
-        final String SQL =
+        final String sql =
                 "update bucket " +
                         "set description = ?, " +
                         "    allocation_percent = ?, " +
@@ -387,7 +336,7 @@ class DatabaseExperimentRepository implements ExperimentRepository {
                         "where experiment_id=? and label=?";
 
         newTransaction().update(
-                SQL,
+                sql,
                 bucket.getDescription() != null
                         ? bucket.getDescription()
                         : "",
@@ -411,14 +360,10 @@ class DatabaseExperimentRepository implements ExperimentRepository {
     @Override
     public Bucket updateBucketAllocationPercentage(Bucket bucket, Double desiredAllocationPercentage) throws
             RepositoryException {
-
-        final String SQL =
-                "update bucket " +
-                        "set allocation_percent=? " +
-                        "where experiment_id=? and label=?";
+        final String sql = "update bucket set allocation_percent=? where experiment_id=? and label=?";
 
         newTransaction().update(
-                SQL,
+                sql,
                 desiredAllocationPercentage.toString(),
                 bucket.getExperimentID(),
                 bucket.getLabel().toString());
@@ -428,14 +373,9 @@ class DatabaseExperimentRepository implements ExperimentRepository {
 
     @Override
     public Bucket updateBucketState(Bucket bucket, Bucket.State desiredState) throws RepositoryException {
+        final String sql = "update bucket set state = ? where experiment_id=? and label=?";
 
-        final String SQL =
-                "update bucket " +
-                        "set state = ? " +
-                        "where experiment_id=? and label=?";
-
-        newTransaction().update(
-                SQL,
+        newTransaction().update(sql,
                 desiredState.toString(),
                 bucket.getExperimentID(),
                 bucket.getLabel().toString());
@@ -447,12 +387,11 @@ class DatabaseExperimentRepository implements ExperimentRepository {
     @Override
     public BucketList updateBucketBatch(Experiment.ID experimentID, BucketList bucketList)
             throws RepositoryException {
-
         int bucketListSize = bucketList.getBuckets().size();
-        StringBuilder SQL = new StringBuilder("UPDATE bucket SET ");
+        StringBuilder sql = new StringBuilder("UPDATE bucket SET ");
         List<String> args = new ArrayList<>(bucketListSize);
-
         boolean hasval = false;
+
         for (int i = 0; i < bucketListSize; i++) {
             if (bucketList.getBuckets().get(i).getState() != null) {
                 hasval = true;
@@ -460,14 +399,14 @@ class DatabaseExperimentRepository implements ExperimentRepository {
             }
         }
         if (hasval) {
-            SQL.append("state = CASE label ");
+            sql.append("state = CASE label ");
             for (int i = 0; i < bucketListSize; i++) {
                 Bucket b = bucketList.getBuckets().get(i);
                 if (b.getState() != null) {
-                    SQL.append("WHEN ? then ? ");
+                    sql.append("WHEN ? then ? ");
                 }
             }
-            SQL.append("END,");
+            sql.append("END,");
         }
 
         hasval = false;
@@ -478,14 +417,14 @@ class DatabaseExperimentRepository implements ExperimentRepository {
             }
         }
         if (hasval) {
-            SQL.append("allocation_percent = CASE label ");
+            sql.append("allocation_percent = CASE label ");
             for (int i = 0; i < bucketListSize; i++) {
                 Bucket b = bucketList.getBuckets().get(i);
                 if (b.getAllocationPercent() != null) {
-                    SQL.append("WHEN ? then ? ");
+                    sql.append("WHEN ? then ? ");
                 }
             }
-            SQL.append("END,");
+            sql.append("END,");
         }
 
         hasval = false;
@@ -496,14 +435,14 @@ class DatabaseExperimentRepository implements ExperimentRepository {
             }
         }
         if (hasval) {
-            SQL.append("is_control = CASE label ");
+            sql.append("is_control = CASE label ");
             for (int i = 0; i < bucketListSize; i++) {
                 Bucket b = bucketList.getBuckets().get(i);
                 if (b.isControl() != null) {
-                    SQL.append("WHEN ? then ? ");
+                    sql.append("WHEN ? then ? ");
                 }
             }
-            SQL.append("END,");
+            sql.append("END,");
         }
 
         hasval = false;
@@ -514,14 +453,14 @@ class DatabaseExperimentRepository implements ExperimentRepository {
             }
         }
         if (hasval) {
-            SQL.append("payload = CASE label ");
+            sql.append("payload = CASE label ");
             for (int i = 0; i < bucketListSize; i++) {
                 Bucket b = bucketList.getBuckets().get(i);
                 if (b.getPayload() != null) {
-                    SQL.append("WHEN ? then ? ");
+                    sql.append("WHEN ? then ? ");
                 }
             }
-            SQL.append("END,");
+            sql.append("END,");
         }
 
         hasval = false;
@@ -532,26 +471,26 @@ class DatabaseExperimentRepository implements ExperimentRepository {
             }
         }
         if (hasval) {
-            SQL.append("description = CASE label ");
+            sql.append("description = CASE label ");
             for (int i = 0; i < bucketListSize; i++) {
                 Bucket b = bucketList.getBuckets().get(i);
                 if (b.getDescription() != null) {
-                    SQL.append("WHEN ? then ? ");
+                    sql.append("WHEN ? then ? ");
                 }
             }
-            SQL.append("END,");
+            sql.append("END,");
         }
 
-        if (",".equals(SQL.substring(SQL.length() - 1, SQL.length()))) {
-            SQL.setLength(SQL.length() - 1);
+        if (",".equals(sql.substring(sql.length() - 1, sql.length()))) {
+            sql.setLength(sql.length() - 1);
         }
 
-        SQL.append(" WHERE experiment_id = ? and label in (");
+        sql.append(" WHERE experiment_id = ? and label in (");
         for (int i = 0; i < bucketListSize; i++) {
-            SQL.append("?,");
+            sql.append("?,");
         }
-        SQL.setLength(SQL.length() - 1);
-        SQL.append(")");
+        sql.setLength(sql.length() - 1);
+        sql.append(")");
 
 
         for (int i = 0; i < bucketListSize; i++) {
@@ -594,7 +533,7 @@ class DatabaseExperimentRepository implements ExperimentRepository {
             args.add(bucketList.getBuckets().get(i).getLabel().toString());
         }
 
-        newTransaction().update(SQL.toString(), args.toArray(new String[args.size()]));
+        newTransaction().update(sql.toString(), args.toArray(new String[args.size()]));
 
         return bucketList;
 
@@ -685,38 +624,24 @@ class DatabaseExperimentRepository implements ExperimentRepository {
     }
 
     @Override
-    public BucketList getBuckets(Experiment.ID experimentID)
-            throws RepositoryException {
-
-        final String SQL_SELECT_ID =
-                "select id from experiment " +
-                        "where id=? and state != ?";
-
-        List experiments = newTransaction().select(
-                SQL_SELECT_ID,
-                experimentID,
-                DELETED.toString());
+    public BucketList getBuckets(Experiment.ID experimentID) throws RepositoryException {
+        final String sqlSelectId = "select id from experiment where id=? and state != ?";
+        List experiments = newTransaction().select(sqlSelectId, experimentID, DELETED.toString());
 
         if (experiments.size() == 0) {
             throw new ExperimentNotFoundException(experimentID);
         }
 
-        final String SQL_SELECT_EXPERIMENT =
+        final String sqlSelectExperiment =
                 "select label, allocation_percent, is_control, " +
                         "   payload, description " +
                         "from bucket " +
                         "where experiment_id=? order by id";
-
-
-        List buckets = newTransaction().select(
-                SQL_SELECT_EXPERIMENT,
-                experimentID);
-
+        List buckets = newTransaction().select(sqlSelectExperiment, experimentID);
         BucketList returnBuckets = new BucketList();
 
         for (Object bucket : buckets) {
             Map bucketMap = (Map) bucket;
-
             Bucket.Label label = Bucket.Label.valueOf(
                     (String) bucketMap.get("label"));
             Bucket returnBuck = Bucket.newInstance(experimentID, label)
@@ -734,6 +659,7 @@ class DatabaseExperimentRepository implements ExperimentRepository {
 
     /**
      * Creates an application at top level
+     *
      * @param applicationName Application Name
      */
     @Override

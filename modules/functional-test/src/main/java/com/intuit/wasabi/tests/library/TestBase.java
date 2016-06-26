@@ -1555,8 +1555,7 @@ public class TestBase extends ServiceTestBase {
         response = apiServerConnector.doGet(uri);
         assertReturnCode(response, expectedStatus);
         List<Map<String, Object>> jsonResult = response.jsonPath().getList("experiments");
-        List<Experiment> experiments = jsonResult.stream().map(jsonMap -> ExperimentFactory.createFromJSONString(simpleGson.toJson(jsonMap))).collect(Collectors.toList());
-        return experiments;
+        return jsonResult.stream().map(jsonMap -> ExperimentFactory.createFromJSONString(simpleGson.toJson(jsonMap))).collect(Collectors.toList());
     }
 
     /**

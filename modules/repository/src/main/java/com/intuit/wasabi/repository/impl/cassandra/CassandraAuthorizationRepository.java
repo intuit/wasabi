@@ -15,7 +15,6 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.impl.cassandra;
 
-import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authorizationobjects.*;
@@ -46,26 +45,27 @@ import static org.slf4j.LoggerFactory.getLogger;
 /**
  * Cassandra AuthorizationRepository implementation
  *
- *  @see AuthorizationRepository
+ * @see AuthorizationRepository
  */
 public class CassandraAuthorizationRepository implements AuthorizationRepository {
 
     private static final Logger LOGGER = getLogger(CassandraAuthorizationRepository.class);
+    private static final String USER_NON_NULL_MSG = "Parameter \"userID\" cannot be null";
+    private static final String APPLICATION_NON_NULL_MSG = "Parameter \"applicationName\" cannot be null";
+    private static final String CQL_ROLES = "select * from user_roles where user_id = ? and app_name = ?";
     private final CassandraDriver driver;
     private final ExperimentsKeyspace keyspace;
     private final ExperimentRepository experimentRepository;
     private final UserDirectory userDirectory;
-    private final String userNonNullMsg = "Parameter \"userID\" cannot be null";
-    private final String applicationNonNullMsg = "Parameter \"applicationName\" cannot be null";
-    private final String CQL_ROLES = "select * from user_roles where user_id = ? and app_name = ?";
 
     /**
      * Constructor
-     * @param driver     cassandra driver
-     * @param keyspace   cassandra keyspace
-     * @param experimentRepository  experiment repository
-     * @param userDirectory       user tools
-     * @throws IOException    io exception
+     *
+     * @param driver               cassandra driver
+     * @param keyspace             cassandra keyspace
+     * @param experimentRepository experiment repository
+     * @param userDirectory        user tools
+     * @throws IOException         io exception
      * @throws ConnectionException connection exception
      */
     @Inject
@@ -84,8 +84,8 @@ public class CassandraAuthorizationRepository implements AuthorizationRepository
 
     private UserRole getUserRole(UserInfo.Username userID, Application.Name applicationName) {
 
-        checkNotNull(userID, userNonNullMsg);
-        checkNotNull(applicationName, applicationNonNullMsg);
+        checkNotNull(userID, USER_NON_NULL_MSG);
+        checkNotNull(applicationName, APPLICATION_NON_NULL_MSG);
 
         try {
             OperationResult<CqlResult<UserInfo.Username, String>> opResult =
@@ -131,7 +131,7 @@ public class CassandraAuthorizationRepository implements AuthorizationRepository
      */
     @Override
     public UserPermissionsList getUserPermissionsList(UserInfo.Username userID) {
-        checkNotNull(userID, userNonNullMsg);
+        checkNotNull(userID, USER_NON_NULL_MSG);
 
         try {
             UserPermissionsList userPermissionsList = new UserPermissionsList();
@@ -199,7 +199,7 @@ public class CassandraAuthorizationRepository implements AuthorizationRepository
      */
     @Override
     public UserRoleList getApplicationUsers(Application.Name applicationName) {
-        checkNotNull(applicationName, applicationNonNullMsg);
+        checkNotNull(applicationName, APPLICATION_NON_NULL_MSG);
 
         final String cql = "select * from app_roles where app_name = ?";
 
@@ -262,8 +262,8 @@ public class CassandraAuthorizationRepository implements AuthorizationRepository
      */
     @Override
     public UserPermissions getUserPermissions(UserInfo.Username userID, Application.Name applicationName) {
-        checkNotNull(userID, userNonNullMsg);
-        checkNotNull(applicationName, applicationNonNullMsg);
+        checkNotNull(userID, USER_NON_NULL_MSG);
+        checkNotNull(applicationName, APPLICATION_NON_NULL_MSG);
 
         try {
             //check if superadmin privileges exist
@@ -414,7 +414,7 @@ public class CassandraAuthorizationRepository implements AuthorizationRepository
     @Override
     public UserRoleList getUserRoleList(UserInfo.Username userID) {
 
-        checkNotNull(userID, userNonNullMsg);
+        checkNotNull(userID, USER_NON_NULL_MSG);
 
         try {
             UserRoleList userRoleList = new UserRoleList();

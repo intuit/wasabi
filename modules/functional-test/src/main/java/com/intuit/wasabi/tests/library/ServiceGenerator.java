@@ -53,8 +53,7 @@ public class ServiceGenerator {
     public static String createBasicAuthorization(String Realm, String username, String password) {
         String credentials = username + ":" + password;
         // create Base64 encoded string
-        final String basic = Realm + " " + Base64.encodeBase64(credentials.getBytes());
-        return basic;
+        return Realm + " " + Base64.encodeBase64(credentials.getBytes());
     }
 
     private static RequestInterceptor LoginReuqestInterceptor(final String basic) {

@@ -650,9 +650,8 @@ public class AssignmentsImpl implements Assignments {
 
     private Set<Experiment.ID> getNonNullUserAssignments(List<Experiment.ID> experimentIDList,
                                                          Table<Experiment.ID, Experiment.Label, String> userAssignments) {
-        Set<Experiment.ID> result = experimentIDList.stream().filter(experimentID -> !userAssignments.row(experimentID).values().isEmpty() &&
+        return experimentIDList.stream().filter(experimentID -> !userAssignments.row(experimentID).values().isEmpty() &&
                 !"null".equals(userAssignments.row(experimentID).values().iterator().next())).collect(Collectors.toSet());
-        return result;
     }
 
     @Override

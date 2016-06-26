@@ -26,14 +26,14 @@ import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.repository.AuthorizationRepository;
 import com.intuit.wasabi.repository.RepositoryException;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import java.util.*;
 
 import static com.intuit.wasabi.authorizationobjects.Permission.SUPERADMIN;
+import static org.apache.commons.codec.binary.Base64.decodeBase64;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -167,7 +167,7 @@ public class DefaultAuthorization implements Authorization {
     @Override
     public UserInfo getUserInfo(UserInfo.Username userID) {
         UserInfo result;
-        if (userID != null && !StringUtils.isBlank(userID.toString())) {
+        if (userID != null && !isBlank(userID.toString())) {
             result = authorizationRepository.getUserInfo(userID);
         } else {
             throw new AuthenticationException("The user name was null or empty for retrieving the UserInfo.");
@@ -178,17 +178,17 @@ public class DefaultAuthorization implements Authorization {
     private UserInfo.Username parseUsername(Optional<String> authHeader) {
         if (!authHeader.isPresent()) {
             throw new AuthenticationException("Null Authentication Header is not supported");
-        }
-
-        if (!authHeader.orElse(SPACE).contains(BASIC)) {
+        } else if (!authHeader.orElse(SPACE).contains(BASIC)) {
             throw new AuthenticationException("Only Basic Authentication is supported");
         }
 
-        final String encodedUserPassword = authHeader.get().substring(authHeader.get().lastIndexOf(SPACE));
-        LOGGER.trace("Base64 decoded username and password is: {}", encodedUserPassword);
         String usernameAndPassword;
+        final String encodedUserPassword = authHeader.get().substring(authHeader.get().lastIndexOf(SPACE));
+
+        LOGGER.trace("Base64 decoded username and password is: {}", encodedUserPassword);
+
         try {
-            usernameAndPassword = new String(Base64.decodeBase64(encodedUserPassword.getBytes()));
+            usernameAndPassword = new String(decodeBase64(encodedUserPassword.getBytes()));
         } catch (Exception e) {
             throw new AuthenticationException("error parsing username and password", e);
         }
@@ -196,13 +196,11 @@ public class DefaultAuthorization implements Authorization {
         //Split username and password tokens
         String[] fields = usernameAndPassword.split(COLON);
 
-        if (fields.length > 2) {
-            throw new AuthenticationException("More than one username and password provided, or one contains ':'");
-        } else if (fields.length < 2) {
-            throw new AuthenticationException("Username or password are empty.");
-        }
-
-        if (StringUtils.isBlank(fields[0]) || StringUtils.isBlank(fields[1])) {
+        if (fields.length != 2) {
+            throw new AuthenticationException(fields.length > 2 ?
+                    "More than one username and password provided, or one contains ':'" :
+                    "Username or password are empty.");
+        } else if (isBlank(fields[0]) || isBlank(fields[1])) {
             throw new AuthenticationException("Username or password are empty.");
         }
 

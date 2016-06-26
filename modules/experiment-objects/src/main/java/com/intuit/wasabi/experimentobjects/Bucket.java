@@ -191,8 +191,7 @@ public class Bucket {
             CLOSED(State.CLOSED, State.EMPTY),
             EMPTY(State.EMPTY);
 
-            private static final Map<State, ArrayList<State>> m =
-                    new EnumMap<>(State.class);
+            private static final Map<State, ArrayList<State>> m = new EnumMap<>(State.class);
 
             static {
                 for (BucketStateTransition trans :

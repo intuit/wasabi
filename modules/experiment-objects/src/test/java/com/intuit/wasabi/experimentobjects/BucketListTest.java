@@ -12,5 +12,4 @@ public class BucketListTest {
         assertFalse(bl.equals(null));
         assertFalse(bl.equals("c2"));
     }
-
 }

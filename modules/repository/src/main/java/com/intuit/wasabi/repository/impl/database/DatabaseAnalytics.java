@@ -123,10 +123,9 @@ public class DatabaseAnalytics implements AnalyticsRepository {
 
             String sqlActions = "select action, " + sqlBase + " from event_action" +
                     sqlParams.toString() + " group by bucket_label, action";
-            List<Map> actionsRows = transaction.select(sqlActions, bucketSqlData);
 
 
-            return actionsRows;
+            return transaction.select(sqlActions, bucketSqlData);
 
         } catch (Exception e) {
             throw new RepositoryException("error reading actions rows from MySQL", e);
@@ -175,8 +174,7 @@ public class DatabaseAnalytics implements AnalyticsRepository {
 
             String sqlJointActions = "select " + sqlBase + " from event_action" +
                     sqlParams + " group by bucket_label";
-            List<Map> jointActionsRows = transaction.select(sqlJointActions, bucketSqlData);
-            return jointActionsRows;
+            return transaction.select(sqlJointActions, bucketSqlData);
 
         } catch (Exception e) {
             throw new RepositoryException("error reading actions rows from MySQL", e);
@@ -235,9 +233,8 @@ public class DatabaseAnalytics implements AnalyticsRepository {
 
             String sqlImpressions = "select " + sqlBase + " from event_impression" +
                     sqlParams + " group by bucket_label";
-            List<Map> impressionRows = transaction.select(sqlImpressions, bucketSqlData);
 
-            return impressionRows;
+            return transaction.select(sqlImpressions, bucketSqlData);
         } catch (Exception e) {
             throw new RepositoryException("error reading actions rows from MySQL", e);
         }
@@ -310,17 +307,11 @@ public class DatabaseAnalytics implements AnalyticsRepository {
     @Override
     public boolean checkMostRecentRollup(Experiment experiment, Parameters parameters, Date to)
             throws RepositoryException {
-
         try {
             Timestamp toTime = new Timestamp(to.getTime());
-
-
-            final String SQL_SELECT_ID = "SELECT day FROM experiment_rollup " +
-                    "WHERE experiment_id=? AND context=? ORDER BY day";
-
-            List result = transaction.select(SQL_SELECT_ID,
-                    experiment.getID(),
-                    parameters.getContext().getContext());
+            final String sqlSelectId =
+                    "SELECT day FROM experiment_rollup WHERE experiment_id=? AND context=? ORDER BY day";
+            List result = transaction.select(sqlSelectId, experiment.getID(), parameters.getContext().getContext());
 
             if (result.isEmpty()) {
                 return true;
@@ -330,9 +321,9 @@ public class DatabaseAnalytics implements AnalyticsRepository {
                 Timestamp maxStamp = new Timestamp(maxDay.getTime());
                 return maxStamp.after(toTime);
             }
+
         } catch (Exception e) {
             throw new RepositoryException("error reading counts from MySQL rollups", e);
         }
     }
-
 }

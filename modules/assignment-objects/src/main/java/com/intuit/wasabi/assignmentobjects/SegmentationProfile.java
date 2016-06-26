@@ -60,8 +60,7 @@ public class SegmentationProfile {
     }
 
     public JSONObject toJSONProfile() {
-        JSONObject profileJson = new JSONObject(profile);
-        return profileJson;
+        return new JSONObject(profile);
     }
 
     public void addAttribute(String key, Object value) {
