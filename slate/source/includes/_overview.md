@@ -84,13 +84,8 @@ object of AB testing.
 
 ## Experiment Admin (Create,Edit, Start, Stop, Terminate)
 
-The main administrative user interface of the AB Testing service is available at the following URL:
-
-https://abtesting.intuit.com
-
-and shows a list of the current experiments, organized by App and Experiment Name.
-
-
+The main administrative user interface of the AB Testing service shows a list of the current experiments, organized by
+App and Experiment Name.
 
 ![Experiment Admin](overview/toplevel.png)
 
@@ -235,7 +230,7 @@ Control bucket. You can edit or delete buckets by clicking on the appropriate bu
 Experiments can only be edited when they are in draft mode. Just click on the experiment name in the experiment list to
 edit the experiment.
 
-![Edit Experiment](overview/editExperiment.png)
+![Edit Experiment](overview/editExperiment2.png)
 
 
 
