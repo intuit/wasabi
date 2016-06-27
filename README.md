@@ -1,11 +1,13 @@
 # Wasabi - AB Testing Platform
 
-**Documentation:** [User Guide](https://intuit.github.io/wasabi/v1/guide/index.html), [![Javadocs](http://www.javadoc.io/badge/com.intuit.wasabi/wasabi.svg)](https://github.com/intuit/wasabi/tree/gh-pages/v1/javadocs/latest)
+**Documentation:** [User Guide](https://intuit.github.io/wasabi/v1/guide/index.html), [![Javadocs](http://www.javadoc.io/badge/com.intuit.wasabi/wasabi.svg)](https://intuit.github.io/wasabi/v1/javadocs/latest/)
 <br/>
 **Continuous Integration:** [![Build Status](https://api.travis-ci.org/intuit/wasabi.svg?branch=develop)](https://travis-ci.org/intuit/wasabi)
 [![Coverage Status](https://coveralls.io/repos/github/intuit/wasabi/badge.svg?branch=develop)](https://coveralls.io/github/intuit/wasabi?branch=develop)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.intuit.wasabi/wasabi/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.intuit.wasabi/wasabi) <br/>
-**License:** [![Apache 2](http://img.shields.io/badge/license-Apache%202-brightgreen.svg)](http://www.apache.org/licenses/LICENSE-2.0)
+**License:** [![Apache 2](http://img.shields.io/badge/license-Apache%202-brightgreen.svg)](http://www.apache.org/licenses/LICENSE-2.0) <br/>
+
+<sub>Note: Code coverage shows up low due to integration test code itself being considered (needs exclusion) and integration test coverage not currently included. In progress... </sub> 
 
 
 ## Project
@@ -332,7 +334,7 @@ Wasabi is readily embeddable via the following *maven* dependency GAV family:
 <dependency>
     <groupId>com.intuit.wasabi</groupId>
     <artifactId>wasabi</artifactId>
-    <version>1.0.TBD<build_timestamp></version>
+    <version>1.0.20160627213750<build_timestamp></version>
 </dependency>
 ```
 
@@ -343,6 +345,8 @@ tutorials. Feel free to open issue or send pull request!
 
 The `master` branch of this repository contains the latest stable release of Wasabi, while snapshots are published to the `develop` branch. In general pull requests should be submitted against `develop` in the form of forking this repo into your account, developing and testing your changes, and creating pull requests to request merges. See the [Contributing to a Project](https://guides.github.com/activities/contributing-to-open-source/)
 article for more details about how to contribute.
+
+Extension projects such as browser plugins, client integration libraries, and apps can be contributed under the `contrib` directory.
 
 Steps to contribute:
 

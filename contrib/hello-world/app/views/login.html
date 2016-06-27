@@ -1,0 +1,12 @@
+<section>
+    <section class="loginBox" ng-controller='LoginController as login'>
+        <div class="loginTitle">Welcome to our Store </div>
+        <div class="loginPrompt">Please Login</div>
+        <form>
+            <div style="margin-bottom: 5px;"><label>User Name: </label> <input type="text" ng-model='login.name'> </div>
+            <div><label>Password: </label>        <input type="password" ng-model='login.password'> </div>
+        </form>
+        <button class="loginBtn" ng-click='login.submit()'>Submit</button>
+        <p ng-show='login.errorMessage != ""'>Error: {{login.errorMessage}} </p>
+    </section>
+</section>
