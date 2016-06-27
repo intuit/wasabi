@@ -202,11 +202,8 @@ object of AB testing.</p>
 
 <h2 id="experiment-admin-create-edit-start-stop-terminate">Experiment Admin (Create,Edit, Start, Stop, Terminate)</h2>
 
-<p>The main administrative user interface of the AB Testing service is available at the following URL:</p>
-
-<p>https://abtesting.intuit.com</p>
-
-<p>and shows a list of the current experiments, organized by App and Experiment Name.</p>
+<p>The main administrative user interface of the AB Testing service shows a list of the current experiments, organized by
+App and Experiment Name.</p>
 
 <p><img alt="Experiment Admin" src="images/overview/toplevel.png" /></p>
 
@@ -345,7 +342,7 @@ Control bucket. You can edit or delete buckets by clicking on the appropriate bu
 <p>Experiments can only be edited when they are in draft mode. Just click on the experiment name in the experiment list to
 edit the experiment.</p>
 
-<p><img alt="Edit Experiment" src="images/overview/editExperiment.png" /></p>
+<p><img alt="Edit Experiment" src="images/overview/editExperiment2.png" /></p>
 
 <h3 id="start-experiment">Start Experiment</h3>
 
@@ -519,7 +516,8 @@ our AB Testing service before migrating.</p>
 
           <h1 id="getting-started-with-wasabi">Getting Started with Wasabi</h1>
 
-<p>Installing Wasabi is straightforward. The following steps will install the needed tools, build and run a complete stack.</p>
+<p>Installing Wasabi is straightforward. The following steps will install the needed tools, build and run a complete
+stack noting that at this time only OSX is supported.</p>
 
 <h2 id="bootstrap-your-environment">Bootstrap Your Environment</h2>
 <pre class="highlight shell"><code><span class="gp">% </span>/usr/bin/ruby <span class="se">\</span>
@@ -529,8 +527,6 @@ our AB Testing service before migrating.</p>
 <span class="gp">% </span><span class="nb">cd </span>wasabi
 <span class="gp">% </span>./bin/wasabi.sh bootstrap
 </code></pre>
-
-<p>For OSX, you can get started as shown.</p>
 
 <p>Installed tools include: <a href="http://brew.sh">homebrew 0.9</a>, <a href="https://git-scm.com">git 2</a>,
 <a href="https://maven.apache.org">maven 3</a>, <a href="http://www.oracle.com/technetwork/java/javase/overview/index.html">java 1.8</a>,
@@ -545,7 +541,7 @@ wasabi is operational:
 
   ui: % open http://192.168.99.100:8080     note: sign <span class="k">in </span>as admin/admin
   api: % curl -i http://192.168.99.100:8080/api/v1/ping
-  debug: attach debuger to 192.168.99.100:8180
+  debug: attach a remote debugger to 192.168.99.100:8180
 
 <span class="gp">% </span>curl -i http://<span class="k">$(</span>docker-machine ip wasabi<span class="k">)</span>:8080/api/v1/ping
 HTTP/1.1 200 OK
@@ -644,9 +640,7 @@ with this API Request:
 <p>If the &#39;userID1&rsquo; user does an action, such as clicking the buy button, you&rsquo;d record it with this API Request: 
 <div></div></p>
 
-<h2 id="explore-various-resources">Explore Various Resources</h2>
-
-<p>The following developer resources are available:</p>
+<h2 id="developer-resources">Developer Resources</h2>
 
 <blockquote>
 <p>API: Swagger API playground</p>
@@ -696,7 +690,7 @@ start up much more quickly. Additionally there is no further need to include the
 <div></div>
 
 <h2 id="get-familiar-with-wasabi-sh">Get Familiar with wasabi.sh</h2>
-<pre class="highlight shell"><code><span class="gp">% </span>./bin/wasabi.sh -h
+<pre class="highlight shell"><code><span class="gp">% </span>./bin/wasabi.sh --help
 
   usage: wasabi.sh <span class="o">[</span>options] <span class="o">[</span>commands]
 
@@ -757,11 +751,11 @@ start up much more quickly. Additionally there is no further need to include the
 Wasabi server on localhost.</p>
 </blockquote>
 <pre class="highlight javascript"><code><span class="nx">development</span><span class="err">:</span> <span class="p">{</span>
-                <span class="nl">constants</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="nl">supportEmail</span><span class="p">:</span> <span class="s1">'you@example.com'</span><span class="p">,</span>
-                    <span class="nx">apiHostBaseUrlValue</span><span class="err">:</span> <span class="s1">'http://localhost:8080/api/v1'</span>
-                <span class="p">}</span>
-            <span class="p">}</span>
+  <span class="nl">constants</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nl">supportEmail</span><span class="p">:</span> <span class="s1">'you@example.com'</span><span class="p">,</span>
+    <span class="nx">apiHostBaseUrlValue</span><span class="err">:</span> <span class="s1">'http://localhost:8080/api/v1'</span>
+  <span class="p">}</span>
+<span class="p">}</span>
 </code></pre>
 <pre class="highlight shell"><code><span class="gp">% </span>grunt serve
 </code></pre>
@@ -819,7 +813,7 @@ add the aforementioned configuration information to your Wasabi JVM runtime prio
 
 <p><img alt="OverView" src="images/getting_started/landscape.png" /></p>
 
-<p>And lastly, as a teaser, here is a technology stack diagram of the elements of which Wasabi is comprised of:</p>
+<p>And lastly, here is a technology stack diagram of the elements of which a Wasabi instance is comprised of:</p>
 
 <p><img alt="TechStack" src="images/getting_started/stack.png" /></p>
 
