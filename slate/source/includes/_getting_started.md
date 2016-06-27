@@ -1,6 +1,7 @@
 # Getting Started with Wasabi
 
-Installing Wasabi is straightforward. The following steps will install the needed tools, build and run a complete stack.
+Installing Wasabi is straightforward. The following steps will install the needed tools, build and run a complete
+stack noting that at this time only OSX is supported.
 
 ## Bootstrap Your Environment
 
@@ -12,8 +13,6 @@ Installing Wasabi is straightforward. The following steps will install the neede
 % cd wasabi
 % ./bin/wasabi.sh bootstrap
 ```
-
-For OSX, you can get started as shown.
 
 Installed tools include: [homebrew 0.9](http://brew.sh), [git 2](https://git-scm.com),
 [maven 3](https://maven.apache.org), [java 1.8](http://www.oracle.com/technetwork/java/javase/overview/index.html),
@@ -30,7 +29,7 @@ wasabi is operational:
 
   ui: % open http://192.168.99.100:8080     note: sign in as admin/admin
   api: % curl -i http://192.168.99.100:8080/api/v1/ping
-  debug: attach debuger to 192.168.99.100:8180
+  debug: attach a remote debugger to 192.168.99.100:8180
 
 % curl -i http://$(docker-machine ip wasabi):8080/api/v1/ping
 HTTP/1.1 200 OK
@@ -125,9 +124,7 @@ with this API Request:
 If the 'userID1' user does an action, such as clicking the buy button, you'd record it with this API Request: 
 <div></div>
 
-## Explore Various Resources
-
-The following developer resources are available:
+## Developer Resources
 
 > API: Swagger API playground
 
@@ -181,7 +178,7 @@ start up much more quickly. Additionally there is no further need to include the
 
 ## Get Familiar with wasabi.sh
 ```bash
-% ./bin/wasabi.sh -h
+% ./bin/wasabi.sh --help
   
   usage: wasabi.sh [options] [commands]
   
@@ -247,11 +244,11 @@ Wasabi server on localhost.
 
 ```javascript
 development: {
-                constants: {
-                    supportEmail: 'you@example.com',
-                    apiHostBaseUrlValue: 'http://localhost:8080/api/v1'
-                }
-            }
+  constants: {
+    supportEmail: 'you@example.com',
+    apiHostBaseUrlValue: 'http://localhost:8080/api/v1'
+  }
+}
 ```
 
 ```bash
@@ -314,6 +311,6 @@ Ok, that was a ground to cover. Here is a high level overview of the operational
 
 ![OverView](getting_started/landscape.png)
 
-And lastly, as a teaser, here is a technology stack diagram of the elements of which Wasabi is comprised of:
+And lastly, here is a technology stack diagram of the elements of which a Wasabi instance is comprised of:
 
 ![TechStack](getting_started/stack.png)
