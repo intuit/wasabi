@@ -43,11 +43,10 @@ Learn more about how Wasabi can empower your team to move from hunches to action
 
 ## Get Started
 
-Installing Wasabi is straightforward. The following steps will install the needed tools, build and run a complete stack.
+Installing Wasabi is straightforward. The following steps will install the needed tools, build and run a
+complete stack noting that at this time only OSX is supported.
 
 #### Bootstrap Your Environment
-
-For OSX, you can get started as shown.
 
 ```bash
 % /usr/bin/ruby \
@@ -220,7 +219,7 @@ start up much more quickly. Additionally there is no further need to include the
 Further, there are a number of additional wasabi.sh options available you should become familiar with:
 
 ```bash
-% ./bin/wasabi.sh -h
+% ./bin/wasabi.sh --help
   
   usage: wasabi.sh [options] [commands]
   
@@ -279,11 +278,11 @@ Wasabi server on localhost.
 
 ```javascript
 development: {
-                constants: {
-                    supportEmail: 'you@example.com',
-                    apiHostBaseUrlValue: 'http://localhost:8080/api/v1'
-                }
-            }
+  constants: {
+    supportEmail: 'you@example.com',
+    apiHostBaseUrlValue: 'http://localhost:8080/api/v1'
+  }
+}
 ```
 
 ```bash
@@ -334,9 +333,19 @@ Wasabi is readily embeddable via the following *maven* dependency GAV family:
 <dependency>
     <groupId>com.intuit.wasabi</groupId>
     <artifactId>wasabi</artifactId>
-    <version>1.0.<build_timestamp></version>
+    <version>1.0.TBD<build_timestamp></version>
 </dependency>
 ```
+
+## Recap
+
+Operational Landscape:
+
+![](https://intuit.github.io/wasabi/v1/guide/images/getting_started/landscape.png)
+
+Wasabi Technology Stack:
+
+![](https://intuit.github.io/wasabi/v1/guide/images/getting_started/stack.png)
 
 ## Contribute
 
