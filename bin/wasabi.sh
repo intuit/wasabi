@@ -15,7 +15,7 @@
 # limitations under the License.
 ###############################################################################
 
-formulas=("bash" "cask" "git" "maven" "python" "ruby" "node" "docker" "docker-machine")
+formulas=("bash" "cask" "git" "maven" "python" "ruby" "node" "docker")
 casks=("java" "vagrant" "virtualbox")
 build_default=false
 endpoint_default=localhost:8080
@@ -116,17 +116,10 @@ start() {
 }
 
 test() {
-  if [ ${endpoint} == ${endpoint_default} ]; then
-#    endpoint=$(docker-machine ip wasabi):8080
-    endpoint=localhost
-    [[ $? -ne 0 ]] && endpoint=${endpoint_default}
-  fi
-
   sleepTime=${1:-sleep}
   cntr=0
 
   while (( cntr < ${sleepTime} )); do
-    echo "${endpoint}/api/v1/ping"
     curl ${endpoint}/api/v1/ping >/dev/null 2>&1
     [[ $? -eq 0 ]] && break
     [[ ${cntr} < ${sleepTime} ]] && usage "unable to ping application: ${endpoint}/api/v1/ping" 1
@@ -150,12 +143,10 @@ resource() {
     case "${1}" in
       ui) [ ! -f ./modules/ui/dist/index.html ] && ./bin/build.sh
         ./bin/wasabi.sh status >/dev/null 2>&1 || ./bin/wasabi.sh start
-#        open http://$(docker-machine ip wasabi):8080/index.html;;
         open http://localhost:8080/index.html;;
       api) [[ ! -f ./modules/swagger-ui/target/swaggerui/index.html || \
         ! -f ./modules/api/target/generated/swagger-ui/swagger.json ]] && ./bin/build.sh
         ./bin/wasabi.sh status >/dev/null 2>&1 || ./bin/wasabi.sh start:docker
-#        jip=$(docker-machine ip wasabi)
         jip=localhost
         ./bin/wasabi.sh remove:wasabi >/dev/null 2>&1
         profile=development
@@ -169,7 +160,6 @@ resource() {
         sed -i '' "s/this.model.validatorUrl.*$/this.model.validatorUrl = null;/g" ${content}/swagger/swagger-ui.js
         ./bin/wasabi.sh start
         beerMe 6
-#        open http://$(docker-machine ip wasabi):8080/swagger/index.html;;
         open http://localhost:8080/swagger/index.html;;
       doc) [ ! -f ./target/site/apidocs/index.html ] && ./bin/build.sh
         open ./target/site/apidocs/index.html;;
@@ -288,25 +278,23 @@ sleep=${sleep:=${sleep_default}}
 
 [[ $# -eq 0 ]] && usage
 
-#eval $(docker-machine env wasabi) 2>/dev/null
-
 for command in ${@:$OPTIND}; do
   case "${command}" in
     bootstrap) bootstrap;;
-    start) start;;
+    start) command="";&
     start:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for cmd in ${commands}; do start ${cmd}; done);;
+      start ${commands};;
     test) test;;
-    stop) stop;;
+    stop) command="";&
     stop:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for cmd in ${commands}; do stop ${cmd}; done);;
-    resource) command="resource:ui,api,doc,casssandra,mysql";;
+      stop ${commands};;
+    resource) command="resource:ui,api,doc,casssandra,mysql";&
     resource:*) commands=$(echo ${command} | cut -d ':' -f 2)
       (IFS=','; for cmd in ${commands}; do resource ${cmd}; done);;
     status) status;;
-    remove) remove;;
+    remove) command="";&
     remove:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for cmd in ${commands}; do remove ${cmd}; done);;
+      remove ${commands};;
     package) package;;
     release) release;;
     release:*) commands=$(echo ${command} | cut -d ':' -f 2)
