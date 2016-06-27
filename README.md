@@ -337,7 +337,6 @@ Wasabi is readily embeddable via the following *maven* dependency GAV family:
 </dependency>
 ```
 
-
 ## Contribute
 
 All contributions are highly encouraged! You can add new features, report and fix existing bugs and write docs and
