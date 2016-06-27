@@ -1,6 +1,6 @@
 # Wasabi - AB Testing Platform
 
-**Documentation:** [User Guide](https://intuit.github.io/wasabi/v1/guide/index.html), [![Javadocs](http://www.javadoc.io/badge/com.intuit.wasabi/wasabi.svg)](http://www.javadoc.io/doc/com.intuit.wasabi/wasabi)
+**Documentation:** [User Guide](https://intuit.github.io/wasabi/v1/guide/index.html), [![Javadocs](http://www.javadoc.io/badge/com.intuit.wasabi/wasabi.svg)](https://github.com/intuit/wasabi/tree/gh-pages/v1/javadocs/latest)
 <br/>
 **Continuous Integration:** [![Build Status](https://api.travis-ci.org/intuit/wasabi.svg?branch=develop)](https://travis-ci.org/intuit/wasabi)
 [![Coverage Status](https://coveralls.io/repos/github/intuit/wasabi/badge.svg?branch=develop)](https://coveralls.io/github/intuit/wasabi?branch=develop)
