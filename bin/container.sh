@@ -98,7 +98,7 @@ start_container() {
     eval "docker run --net=${docker_network} --name ${1} ${3} -d ${2} ${4}" || \
       usage "unable to run command: % docker run --name ${1} ${3} -d ${2} ${4}" 1
     # todo: ?better way? ... see about moving polling to the app-start
-    beerMe 30
+#    beerMe 30
   elif [ "${cid}" != "running" ]; then
     cids=$(docker inspect --format '{{.State.Status}}' ${cid})
 
@@ -112,14 +112,14 @@ start_container() {
       docker ${op} ${cid} || usage "unable to run command: % docker ${op} ${cid}" 1
 
       while [ "${cids}" != "running" ]; do
-        beerMe 1
+#        beerMe 1
         cids=$(docker inspect --format '{{.State.Status}}' ${cid})
       done
 
-      if [ "${op}" == "restart" ]; then
+#      if [ "${op}" == "restart" ]; then
         # todo: ?better way?
-        beerMe 15
-      fi
+#        beerMe 15
+#      fi
     fi
   fi
 }
@@ -152,11 +152,12 @@ start_wasabi() {
 #  mip=$(docker-machine ip ${project})
   mip=localhost
 
-  remove_container ${project}-main
-
-  if [ "${verify}" = true ] || ! [ docker inspect ${project}-main >/dev/null 2>&1 ]; then
-    echo "${green}${project}: building${reset}"
-
+  if [[ "$(docker ps -aqf name=${project}-main)" = "" ]]; then
+#  remove_container ${project}-main
+#
+#  if [ "${verify}" = true ] || ! [ docker inspect ${project}-main >/dev/null 2>&1 ]; then
+#    echo "${green}${project}: building${reset}"
+#
     sed -i -e "s|\(http://\)localhost\(:8080\)|\1${mip}\2|g" modules/main/target/${id}/content/ui/dist/scripts/config.js 2>/dev/null;
     docker build -t ${project}-main:${USER}-$(date +%s) -t ${project}-main:latest modules/main/target/${id}
   fi
@@ -165,18 +166,20 @@ start_wasabi() {
 
   wenv="WASABI_CONFIGURATION=-DnodeHosts=${wcip} -Ddatabase.url.host=${wmip}"
 
+  beerMe 3
+  start_container ${project}-main ${project}-main "-p 8080:8080 -p 8090:8090 -p 8180:8180 -e \"${wenv}\""
 #   fixme: try to reuse the start_container() method instead of 'docker run...' directly; currently a problem with quotes in ${wenv} being passed into container.
-  docker run --net=${docker_network} --name ${project}-main -p 8080:8080 -p 8090:8090 -p 8180:8180 -e "${wenv}" -d ${project}-main
+#  docker run --net=${docker_network} --name ${project}-main -p 8080:8080 -p 8090:8090 -p 8180:8180 -e "${wenv}" -d ${project}-main
 
   if [[ "${waittime}" == "ping" ]]; then
-    echo -ne "${green}chill'ax ${reset}"
+#    echo -ne "${green}chill'ax ${reset}"
     for trial in $(seq 1 20); do
       curl ${mip}:8080/api/v1/ping >/dev/null 2>&1
       status=$?
       [[ ${status} -eq 0 ]] && break
 #      beerMe
-      echo -ne "${green}\xF0\x9F\x8D\xBA ${reset}"
-      sleep 3
+#      echo -ne "${green}\xF0\x9F\x8D\xBA ${reset}"
+      sleep 1
     done
     [[ ${status} -ne 0 ]] && usage "\nGiving up on the ping. Wasabi might not be running!" 1
   else
