@@ -104,7 +104,7 @@ Congratulations! You are the proud owner of a newly minted and personalized full
 
 Ok, enough celebration ... let's get back to business.
 
-#### Troubleshoot Wasabi
+#### Troubleshooting
 
 * While starting Wasabi, if you run into errors such as this, run this command in
 your terminal and re-run ./bin/wasabi.sh start:
