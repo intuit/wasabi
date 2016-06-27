@@ -346,6 +346,8 @@ tutorials. Feel free to open issue or send pull request!
 The `master` branch of this repository contains the latest stable release of Wasabi, while snapshots are published to the `develop` branch. In general pull requests should be submitted against `develop` in the form of forking this repo into your account, developing and testing your changes, and creating pull requests to request merges. See the [Contributing to a Project](https://guides.github.com/activities/contributing-to-open-source/)
 article for more details about how to contribute.
 
+Extension projects such as browser plugins, client integration libraries, and apps can be contributed under the `contrib` directory.
+
 Steps to contribute:
 
 1. Fork this repository into your account on Github
