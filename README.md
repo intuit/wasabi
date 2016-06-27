@@ -334,7 +334,7 @@ Wasabi is readily embeddable via the following *maven* dependency GAV family:
 <dependency>
     <groupId>com.intuit.wasabi</groupId>
     <artifactId>wasabi</artifactId>
-    <version>1.0.TBD<build_timestamp></version>
+    <version>1.0.20160627213750<build_timestamp></version>
 </dependency>
 ```
 
