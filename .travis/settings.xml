@@ -1,4 +1,4 @@
-c<settings>
+<settings>
   <servers>
     <server>
       <id>ossrh</id>
