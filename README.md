@@ -337,16 +337,6 @@ Wasabi is readily embeddable via the following *maven* dependency GAV family:
 </dependency>
 ```
 
-## Recap
-
-Operational Landscape:
-
-![](https://intuit.github.io/wasabi/v1/guide/images/getting_started/landscape.png)
-
-Wasabi Technology Stack:
-
-![](https://intuit.github.io/wasabi/v1/guide/images/getting_started/stack.png)
-
 ## Contribute
 
 All contributions are highly encouraged! You can add new features, report and fix existing bugs and write docs and
