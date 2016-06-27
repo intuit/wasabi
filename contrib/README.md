@@ -6,4 +6,6 @@
 
 wasabi/contrib/[your-project-name]/[your-project-structure]
 
+wasabi/contrib/hello-world
+
 ```
