@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Start using AB-Testing</title>
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+	<script type="text/javascript" src="js/jquery-1.11.1.js"></script>
+	<script type="text/javascript" src="js/wasabiTest.js"></script>
+	<script
+		src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
+
+	<div class='banner'>
+		<div class='container'>
+			<h1>Wasabi AB Testing Demo</h1>
+		</div>
+	</div>
+
+	<div class="container main-frame">
+
+		<div id="WelcomeCont">
+			<h2>Login to your application:</h2>
+			<div style="margin-top: 10px" id="login" class="interaction">
+				User ID: <input id="userIDtext" type="text">
+				<button id="loginAssignment">Login</button>
+			</div>
+			<p><b>Assign a user to experiment &amp; bucket:</b></p>
+			<p><em>API Request:</em></p>
+			<div class="coderesponse">
+				<code class="prettyprint">
+					$.getJSON({ <br>&nbsp;&nbsp; url : "http://" + server
+					+"/api/v1/assignments/applications/" + appName + "/experiments/" +
+					expLabel + "/users/" + userID, <br>&nbsp;&nbsp; function(data)
+					{ <br>&nbsp;&nbsp;&nbsp;&nbsp;response = $.param(data); <br>&nbsp;&nbsp;&nbsp;&nbsp;bucket
+					= data.assignment; <br>&nbsp;&nbsp;} <br>});
+				</code>
+			</div>
+
+			<br><br>
+			<p><em>API Response:</em></p>
+
+			<div style="margin-top: 20px"
+				class="code-example row-fluid form-inline coderesponse prettyprint" id="responseFromService">
+			</div>
+		</div>
+
+		<div id="BucketCont" hidden=true>
+			<h2>
+				Inside the Experiment
+			</h2>
+
+			<p><b>Record an impression:</b>
+			</p>
+			<p><em>API Request:</em></p>
+			<div class="coderesponse">
+				<code class="prettyprint">
+					$.ajax({ <br>&nbsp;&nbsp; url : "http://" + server
+					+"/api/v1/events/applications/" + appName + "/experiments/" +
+					expLabel + "/users/" + userID, <br>&nbsp;&nbsp; type : 'post',
+					<br>&nbsp;&nbsp; data :'{"events":[{"name":"IMPRESSION"}]}', <br>&nbsp;&nbsp;
+					contentType :"application/json" <br>});
+				</code>
+			</div>
+
+			<p></p>
+
+
+
+
+			<br>
+			<p><b>Record an action:</b>
+			</p>
+			<div class="interaction">
+				<button style="width: 60px; height: 30px;" id="buy">Buy</button>
+			</div>
+			<p><em>API Request:</em></p>
+			<div class="coderesponse">
+				<code class="prettyprint">
+					$.ajax({ <br>&nbsp;&nbsp; url : "http://" + server
+					+"/api/v1/events/applications/" + appName + "/experiments/" +
+					expLabel + "/users/" + userID, <br>&nbsp;&nbsp; type : 'post',
+					<br>&nbsp;&nbsp; data :'{"events":[{"name":"BuyClicked"}]}', <br>&nbsp;&nbsp;
+					contentType :"application/json" <br>});
+				</code>
+			</div>
+
+			<br><br>
+			<p><em>API Response:</em></p>
+
+			<div style="margin-top: 20px"
+				class="code-example row-fluid form-inline coderesponse prettyprint" id="responseFromService2"></div>
+
+			<br>
+			<div>
+				<button id="newUser">Try another User</button>
+			</div>
+
+		</div>
+
+		<br>
+
+		<div>
+			<button id="next" hidden=true>Next</button>
+		</div>
+
+	</div>
+
+</body>
+</html>

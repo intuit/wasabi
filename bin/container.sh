@@ -77,8 +77,6 @@ start_docker() {
   if [ "${dms}" != "Running" ]; then
     docker-machine restart ${project} || usage "unable to run command: % docker-machine restart ${project}" 1
   fi
-
-  eval $(docker-machine env ${project})
 }
 
 stop_docker() {
@@ -90,6 +88,7 @@ stop_docker() {
 }
 
 start_container() {
+  eval $(docker-machine env wasabi)
   docker network create --driver bridge ${docker_network} >/dev/null 2>&1
 
   cid=$(docker ps -aqf name=${1})
@@ -167,22 +166,27 @@ start_wasabi() {
 #   fixme: try to reuse the start_container() method instead of 'docker run...' directly; currently a problem with quotes in ${wenv} being passed into container.
   docker run --net=${docker_network} --name ${project}-main -p 8080:8080 -p 8090:8090 -p 8180:8180 -e "${wenv}" -d ${project}-main
 
-  if [[ "$waittime" == "ping" ]]; then
+  if [[ "${waittime}" == "ping" ]]; then
+    echo -ne "${green}chill'ax ${reset}"
     for trial in $(seq 1 20); do
       curl ${mip}:8080/api/v1/ping >/dev/null 2>&1
-      [[ $? -eq 0 ]] && break
-      beerMe 7
+      status=$?
+      [[ ${status} -eq 0 ]] && break
+#      beerMe
+      echo -ne "${green}\xF0\x9F\x8D\xBA ${reset}"
+      sleep 3
     done
-    # fixme: need to trap failed test
-    [[ $? -ne 0 ]] && usage "\nGiving up on the ping. Wasabi might not be running!" 1
+    [[ ${status} -ne 0 ]] && usage "\nGiving up on the ping. Wasabi might not be running!" 1
   else
     beerMe "${waittime}"
   fi
 
   cat << EOF
+
 ${green}
-  ui: % open http://${mip}:8080
-    default user: admin/admin
+wasabi is operational:
+
+  ui: % open http://${mip}:8080     note: sign in as admin/admin
   api: % curl -i http://${mip}:8080/api/v1/ping
   debug: attach debuger to ${mip}:8180
 ${reset}
@@ -264,6 +268,8 @@ verify=${verify:=${verify_default}}
 sleep=${sleep:=${sleep_default}}
 
 [[ $# -eq 0 ]] && usage
+
+eval $(docker-machine env ${project}) 2>/dev/null
 
 for command in ${@:$OPTIND}; do
   case "${command}" in
