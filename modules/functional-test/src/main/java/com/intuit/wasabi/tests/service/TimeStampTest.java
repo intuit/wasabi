@@ -52,7 +52,6 @@ public class TimeStampTest extends TestBase {
     private static final Logger LOGGER = getLogger(BatchRuleTest.class);
     public static final String COUNT_ERROR_MESSAGE = "Impression count does not match count of timestamps";
     private final List<Experiment> validExperimentsLists = new ArrayList<>();
-    private String actionImpression = "IMPRESSION";
     private Map<User, Assignment> assignments = new HashMap<>();
 
     @DataProvider
@@ -136,15 +135,16 @@ public class TimeStampTest extends TestBase {
                     data, true,
                     HttpStatus.SC_OK, apiServerConnector);
             assertEquals(events.size(), timeStamps.size());
+            String actionImpression1 = "IMPRESSION";
             for (Event event : events) {
-                assertEquals(event.name, actionImpression);
+                assertEquals(event.name, actionImpression1);
             }
             System.out.println("\tWaiting (5s) for database to update...");
             Thread.sleep(5000);
 
             // Query with different forms of timestamp to test time parsing in Analytics API as well
-            List<String> types = new ArrayList<String>();
-            types.add(actionImpression);
+            List<String> types = new ArrayList<>();
+            types.add(actionImpression1);
             AnalyticsParameters params = new AnalyticsParameters();
             params.confidenceLevel = 0.999d;
             params.actions = types;
