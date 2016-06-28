@@ -9,7 +9,7 @@ stack noting that at this time only OSX is supported.
 % /usr/bin/ruby \
   -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 % brew install git
-% git clone https://github.com/idea/wasabi.git
+% git clone https://github.com/intuit/wasabi.git
 % cd wasabi
 % ./bin/wasabi.sh bootstrap
 ```
