@@ -120,9 +120,9 @@ public class TimeStampTest extends TestBase {
                 Assert.assertTrue(assignment1.cache, "Assignment.cache not true.");
             }
 
+            String actionImpression = "IMPRESSION";
             // Post the impressions
             for (String ts : timeStamps) {
-                String actionImpression = "IMPRESSION";
                 Event event = EventFactory.createEvent();
                 event.name = actionImpression;
                 event.timestamp = ts;
@@ -135,16 +135,15 @@ public class TimeStampTest extends TestBase {
                     data, true,
                     HttpStatus.SC_OK, apiServerConnector);
             assertEquals(events.size(), timeStamps.size());
-            String actionImpression1 = "IMPRESSION";
             for (Event event : events) {
-                assertEquals(event.name, actionImpression1);
+                assertEquals(event.name, actionImpression);
             }
             System.out.println("\tWaiting (5s) for database to update...");
             Thread.sleep(5000);
 
             // Query with different forms of timestamp to test time parsing in Analytics API as well
             List<String> types = new ArrayList<>();
-            types.add(actionImpression1);
+            types.add(actionImpression);
             AnalyticsParameters params = new AnalyticsParameters();
             params.confidenceLevel = 0.999d;
             params.actions = types;
