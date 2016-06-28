@@ -24,10 +24,7 @@ package com.intuit.wasabi.tests.service;
 
 import com.intuit.wasabi.tests.library.TestBase;
 import com.intuit.wasabi.tests.library.util.TestUtils;
-import com.intuit.wasabi.tests.model.Application;
-import com.intuit.wasabi.tests.model.Event;
-import com.intuit.wasabi.tests.model.Experiment;
-import com.intuit.wasabi.tests.model.User;
+import com.intuit.wasabi.tests.model.*;
 import com.intuit.wasabi.tests.model.analytics.AnalyticsParameters;
 import com.intuit.wasabi.tests.model.factory.EventFactory;
 import com.intuit.wasabi.tests.model.factory.ExperimentFactory;
@@ -35,6 +32,7 @@ import com.intuit.wasabi.tests.service.segmentation.BatchRuleTest;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -45,6 +43,7 @@ import java.util.Map;
 
 import static com.intuit.wasabi.tests.model.factory.UserFactory.createUser;
 import static org.slf4j.LoggerFactory.getLogger;
+import static org.testng.Assert.assertEquals;
 
 /**
  * The TimeStamp test.
@@ -53,18 +52,17 @@ public class TimeStampTest extends TestBase {
     private static final Logger LOGGER = getLogger(BatchRuleTest.class);
     public static final String COUNT_ERROR_MESSAGE = "Impression count does not match count of timestamps";
     private final List<Experiment> validExperimentsLists = new ArrayList<>();
-
+    private String actionImpression = "IMPRESSION";
+    private Map<User, Assignment> assignments = new HashMap<>();
 
     @DataProvider
     public Object[][] sampleExperiment() {
         String label = "timestampTest_" + System.currentTimeMillis();
         Application application = new Application("LUA_timestamp");
         String startTime = "2013-01-01T00:00:00+0000";
-//      String endTime = "2016-06-02T00:00:00+0000";
         String endTime = TestUtils.relativeTimeString(1);
         Double samplingPercent = 1.0;
         Experiment experiment = new Experiment(label, application, startTime, endTime, samplingPercent);
-
         return new Object[][]{
                 new Object[]{experiment}
         };
@@ -80,7 +78,6 @@ public class TimeStampTest extends TestBase {
         validExperimentsLists.add(experiment);
         assertReturnCode(response, HttpStatus.SC_CREATED);
     }
-
 
     @Test(dependsOnMethods = {"setupExperiment"})
     public void setupBucketsAndStartExperiment() {
@@ -100,7 +97,6 @@ public class TimeStampTest extends TestBase {
         String username = "timestamp_user";
         User outUser = createUser(username);
 
-
         // Create identical timestamps in different formats
         String prefix = "2013-09-21T09:00:00";
         List<String> offSets = new ArrayList<>();
@@ -116,41 +112,56 @@ public class TimeStampTest extends TestBase {
         timeStamps.add("2013-09-21T02:00:00-0700");
 
         for (Experiment experiment : validExperimentsLists) {
+
+            // Assign user to experiment
+            Assignment assignment = getAssignment(experiment, outUser);
+            assignments.put(outUser, assignment);
+            for (Assignment assignment1 : assignments.values()) {
+                Assert.assertEquals(assignment1.status, "NEW_ASSIGNMENT", "Assignment status wrong.");
+                Assert.assertTrue(assignment1.cache, "Assignment.cache not true.");
+            }
+
             // Post the impressions
             for (String ts : timeStamps) {
-                System.out.println("\n\n\n######### ts = " + ts);
                 String actionImpression = "IMPRESSION";
                 Event event = EventFactory.createEvent();
                 event.name = actionImpression;
+                event.timestamp = ts;
                 response = postEvent(event, experiment, outUser, HttpStatus.SC_CREATED);
                 assertReturnCode(response, HttpStatus.SC_CREATED);
             }
-            Map<String, String> data = new HashMap<>();
-            data.put("fromTime", null);
-            System.out.println("\tWaiting (5s) for database to update...");
-            Thread.sleep(500); //FIXME: change to 5 seconds
-
-            // impression count at time = timestamp
-            // Query with different forms of timestamp to test time parsing in Analytics API as well
-            AnalyticsParameters params;
-            int impressionsCount;
-            params = new AnalyticsParameters();
-            params.confidenceLevel = .009999999d;
-
-//          Impression count at time = timestamp
-            for (String ts : timeStamps) {
-                System.out.println("\n\n\n********* ts = " + ts);
-                params.fromTime = ts;
-                impressionsCount = postExperimentCounts(experiment, params).impressionCounts.eventCount;
-                LOGGER.info("\t\timpressionCounts = " + impressionsCount + ", len(timestamps) = " + timeStamps.size());
-                Assert.assertEquals(impressionsCount, timeStamps.size(), COUNT_ERROR_MESSAGE);
+            Map<String, Object> data = new HashMap<>();
+            data.put("fromTime", "");
+            List<Event> events = postEvents(experiment,
+                    data, true,
+                    HttpStatus.SC_OK, apiServerConnector);
+            assertEquals(events.size(), timeStamps.size());
+            for (Event event : events) {
+                assertEquals(event.name, actionImpression);
             }
+            System.out.println("\tWaiting (5s) for database to update...");
+            Thread.sleep(5000);
+
+            // Query with different forms of timestamp to test time parsing in Analytics API as well
+            List<String> types = new ArrayList<String>();
+            types.add(actionImpression);
+            AnalyticsParameters params = new AnalyticsParameters();
+            params.confidenceLevel = 0.999d;
+            params.actions = types;
+            params.fromTime = experiment.startTime;
+            params.toTime = experiment.endTime;
+            int impressionsCount;
+
+            // Impression count at time = timestamp
+            impressionsCount = postExperimentCounts(experiment, params).impressionCounts.eventCount;
+            LOGGER.info("\t\timpressions = " + impressionsCount + ", len(timestamps) = " + timeStamps.size());
+            Assert.assertEquals(impressionsCount, timeStamps.size(), COUNT_ERROR_MESSAGE);
 
             // Impression count before time = timestamp
             String queryTime;
             queryTime = "2013-09-21T08:00:00Z";
             params.fromTime = queryTime;
-            impressionsCount = postExperimentCounts(experiment, params).impressionCounts.uniqueUserCount;
+            impressionsCount = postExperimentCounts(experiment, params).impressionCounts.eventCount;
             LOGGER.info("\t\tqueryTime = " + queryTime + ", impressions = " + impressionsCount + ", len(timestamps) = " + timeStamps.size());
             Assert.assertEquals(impressionsCount, timeStamps.size(), COUNT_ERROR_MESSAGE);
 
@@ -164,7 +175,6 @@ public class TimeStampTest extends TestBase {
         }
     }
 
-    /*
     @AfterClass
     public void cleanUp() {
         LOGGER.info("Setting experiment state to terminated and deleting valid experiments");
@@ -175,5 +185,4 @@ public class TimeStampTest extends TestBase {
             assertReturnCode(response, HttpStatus.SC_NO_CONTENT);
         }
     }
-    */
 }
