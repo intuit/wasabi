@@ -90,8 +90,9 @@ public class TimeStampTest extends TestBase {
         }
     }
 
+    // Ensures that the correct amount of impressions are being registered with respect to the timestamp and experiment
     @Test(dependsOnMethods = {"setupBucketsAndStartExperiment"})
-    public void timeStampTest() throws InterruptedException {
+    public void gatherImpressions() throws InterruptedException {
         // Create fake user
         String username = "timestamp_user";
         User outUser = createUser(username);
@@ -120,8 +121,8 @@ public class TimeStampTest extends TestBase {
                 Assert.assertTrue(assignment1.cache, "Assignment.cache not true.");
             }
 
-            String actionImpression = "IMPRESSION";
             // Post the impressions
+            String actionImpression = "IMPRESSION";
             for (String ts : timeStamps) {
                 Event event = EventFactory.createEvent();
                 event.name = actionImpression;
