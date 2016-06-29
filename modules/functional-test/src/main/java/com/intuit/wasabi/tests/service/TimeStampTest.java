@@ -46,7 +46,8 @@ import static org.slf4j.LoggerFactory.getLogger;
 import static org.testng.Assert.assertEquals;
 
 /**
- * The TimeStamp test.
+ * The TimeStamp test creates an experiment and bucket, assigns a user, and checks to see if the correct
+ * amount of impressions are being created when using different formats of timestamps at various times.
  */
 public class TimeStampTest extends TestBase {
     private static final Logger LOGGER = getLogger(BatchRuleTest.class);
