@@ -9,7 +9,6 @@
 
 <sub>* **Note: Code coverage shows up low due to unit and integration test code itself being considered (needs exclusion) and integration test coverage not currently included. In progress, see [issue:filter test source tests from coveralls](https://github.com/intuit/wasabi/issues/6)** </sub> 
 
-
 ## Project
 
 Wasabi A/B Testing Service is a real-time, enterprise-grade, 100% API driven project. Users are empowered to own their own data, and run experiments across web, mobile, and desktop. It’s fast, easy to use, it’s chock full of features, and instrumentation is minimal.
