@@ -189,10 +189,19 @@ package() {
 
   ./bin/build.sh -b true -p ${profile}
 
-  (export VAGRANT_CWD=./bin; vagrant up)
-  (export VAGRANT_CWD=./bin; vagrant ssh -c "cd wasabi; mvn dependency:resolve")
+  if [ -z "$OS" ]; then
+    (export VAGRANT_CWD=./bin; vagrant up)
+    (export VAGRANT_CWD=./bin; vagrant ssh -c "cd wasabi; mvn dependency:resolve")
+  else
+    mvn install
+    mvn dependency:resolve
+  fi
   beerMe 10
-  (export VAGRANT_CWD=./bin; vagrant ssh -c "cd wasabi; ./bin/fpm.sh -p ${profile}")
+  if [ -z "$OS" ]; then
+    (export VAGRANT_CWD=./bin; vagrant ssh -c "cd wasabi; ./bin/fpm.sh -p ${profile}")
+  else
+    ./bin/fpm.sh -p ${profile}
+  fi
 
   # FIXME: move to modules/ui/build.sh
   version=$(fromPom . build project.version)
@@ -213,12 +222,14 @@ package() {
     done; \
     sed -i '' -e "s|http://localhost:8080|${server}|g" target/constants.json 2>/dev/null; \
     sed -i '' -e "s|VERSIONLOC|${version}|g" target/app/index.html 2>/dev/null; \
+    if [ -z "$OS" ]; then \
     (cd target; \
       npm install; \
       bower install; \
       grunt clean; \
       grunt build --target=develop --no-color); \
 #      grunt test); \
+    fi
     cp -r build target; \
     for pkg in deb rpm; do \
       sed -i '' -e "s|\${application.home}|${home}|g" target/build/${pkg}/before-install.sh 2>/dev/null; \
@@ -232,8 +243,10 @@ package() {
       sed -i '' -e "s|\${application.http.content.directory}|${content}|g" target/build/${pkg}/before-remove.sh 2>/dev/null; \
     done)
 
-  (export VAGRANT_CWD=./bin; vagrant ssh -c "cd wasabi/modules/ui; ./bin/fpm.sh -n ${name} -v ${version} -p ${profile}")
-  (export VAGRANT_CWD=./bin; vagrant halt)
+  if [ -z "$OS" ]; then
+    (export VAGRANT_CWD=./bin; vagrant ssh -c "cd wasabi/modules/ui; ./bin/fpm.sh -n ${name} -v ${version} -p ${profile}")
+    (export VAGRANT_CWD=./bin; vagrant halt)
+  fi
 
   echo "deployable build packages:"
 
@@ -284,7 +297,9 @@ sleep=${sleep:=${sleep_default}}
 
 [[ $# -eq 0 ]] && usage
 
-eval $(docker-machine env wasabi) 2>/dev/null
+if [ -z "$OS" ]; then
+  eval $(docker-machine env wasabi) 2>/dev/null
+fi
 
 for command in ${@:$OPTIND}; do
   case "${command}" in
