@@ -25,6 +25,10 @@ red=`tput setaf 9`
 green=`tput setaf 10`
 reset=`tput sgr0`
 
+if [ -z "$OS" ]; then
+  export OS="OSX"
+fi
+
 usage() {
   [ "${1}" ] && echo "${red}error: ${1}${reset}"
 
@@ -189,7 +193,7 @@ package() {
 
   ./bin/build.sh -b true -p ${profile}
 
-  if [ -z "$OS" ]; then
+  if [ "$OS" == "OSX" ]; then
     (export VAGRANT_CWD=./bin; vagrant up)
     (export VAGRANT_CWD=./bin; vagrant ssh -c "cd wasabi; mvn dependency:resolve")
   else
@@ -197,7 +201,7 @@ package() {
     mvn dependency:resolve
   fi
   beerMe 10
-  if [ -z "$OS" ]; then
+  if [ "$OS" == "OSX" ]; then
     (export VAGRANT_CWD=./bin; vagrant ssh -c "cd wasabi; ./bin/fpm.sh -p ${profile}")
   else
     ./bin/fpm.sh -p ${profile}
@@ -217,12 +221,14 @@ package() {
 
   (cd modules/ui; \
     mkdir -p target; \
-    for f in app bower.json feedbackserver Gruntfile.js constants.json karma.conf.js karma-e2e.conf.js package.json test .bowerrc; do \
+    # for f in app bower.json feedbackserver Gruntfile.js constants.json karma.conf.js karma-e2e.conf.js package.json test .bowerrc; do \
+    # TODO Should we remove feedbackserver? it does not exist in the current structure.
+    for f in app bower.json Gruntfile.js constants.json karma.conf.js karma-e2e.conf.js package.json test .bowerrc; do \
       cp -r ${f} target; \
     done; \
     sed -i '' -e "s|http://localhost:8080|${server}|g" target/constants.json 2>/dev/null; \
     sed -i '' -e "s|VERSIONLOC|${version}|g" target/app/index.html 2>/dev/null; \
-    if [ -z "$OS" ]; then \
+    if [ "$OS" == "OSX" ]; then \
     (cd target; \
       npm install; \
       bower install; \
@@ -243,7 +249,7 @@ package() {
       sed -i '' -e "s|\${application.http.content.directory}|${content}|g" target/build/${pkg}/before-remove.sh 2>/dev/null; \
     done)
 
-  if [ -z "$OS" ]; then
+  if [ "$OS" == "OSX" ]; then
     (export VAGRANT_CWD=./bin; vagrant ssh -c "cd wasabi/modules/ui; ./bin/fpm.sh -n ${name} -v ${version} -p ${profile}")
     (export VAGRANT_CWD=./bin; vagrant halt)
   fi
@@ -297,7 +303,7 @@ sleep=${sleep:=${sleep_default}}
 
 [[ $# -eq 0 ]] && usage
 
-if [ -z "$OS" ]; then
+if [ "$OS" == "OSX" ]; then
   eval $(docker-machine env wasabi) 2>/dev/null
 fi
 

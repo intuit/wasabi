@@ -122,7 +122,7 @@ chmod 755 ${home}/${id}/bin/run
 chmod 755 ${home}/${id}/entrypoint.sh
 sed -i '' -e "s/chpst -u [^:]*:[^ ]* //" ${home}/${id}/bin/run 2>/dev/null
 
-if [ "${build}" = true ] && [ -z "$OS" ]; then
+if [ "${build}" = true ] && [ "$OS" == "OSX" ]; then
   brew list node
   if [[ $? -eq 1 ]]; then
   	echo "Node.js is not installed. Installing Node.js packages..."
