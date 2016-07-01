@@ -23,8 +23,8 @@ import com.netflix.astyanax.model.ConsistencyLevel;
 import java.util.Properties;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.intuit.data.autumn.utils.PropertyFactory.create;
-import static com.intuit.data.autumn.utils.PropertyFactory.getProperty;
+import static com.intuit.autumn.utils.PropertyFactory.create;
+import static com.intuit.autumn.utils.PropertyFactory.getProperty;
 import static com.netflix.astyanax.connectionpool.NodeDiscoveryType.*;
 import static com.netflix.astyanax.connectionpool.impl.ConnectionPoolType.*;
 import static com.netflix.astyanax.connectionpool.impl.ConnectionPoolType.TOKEN_AWARE;

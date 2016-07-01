@@ -1,14 +1,11 @@
 # Wasabi - AB Testing Platform
 
-**Documentation:** [User Guide](https://intuit.github.io/wasabi/v1/guide/index.html), [![Javadocs](http://www.javadoc.io/badge/com.intuit.wasabi/wasabi.svg)](https://intuit.github.io/wasabi/v1/javadocs/latest/)
+**Documentation:** [User Guide](https://intuit.github.io/wasabi/v1/guide/index.html), [JavaDocs](https://intuit.github.io/wasabi/v1/javadocs/latest/)
 <br/>
 **Continuous Integration:** [![Build Status](https://api.travis-ci.org/intuit/wasabi.svg?branch=develop)](https://travis-ci.org/intuit/wasabi)
 [![Coverage Status](https://coveralls.io/repos/github/intuit/wasabi/badge.svg?branch=develop)](https://coveralls.io/github/intuit/wasabi?branch=develop)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.intuit.wasabi/wasabi/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.intuit.wasabi/wasabi) <br/>
 **License:** [![Apache 2](http://img.shields.io/badge/license-Apache%202-brightgreen.svg)](http://www.apache.org/licenses/LICENSE-2.0) <br/>
-
-<sub>Note: Code coverage shows up low due to integration test code itself being considered (needs exclusion) and integration test coverage not currently included. In progress... </sub> 
-
 
 ## Project
 
@@ -53,7 +50,7 @@ complete stack noting that at this time only OSX is supported.
 % /usr/bin/ruby \
   -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 % brew install git
-% git clone https://github.com/idea/wasabi.git
+% git clone https://github.com/intuit/wasabi.git
 % cd wasabi
 % ./bin/wasabi.sh bootstrap
 ```
