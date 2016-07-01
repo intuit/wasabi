@@ -22,7 +22,7 @@ http://www.w3.org/2001/XMLSchema-instance">
 
     <groupId>com.intuit.wasabi</groupId>
     <artifactId>wasabi</artifactId>
-    <version>1.0.20160701065419</version>
+    <version>1.0.20160701080732</version>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
 
@@ -115,6 +115,9 @@ http://www.w3.org/2001/XMLSchema-instance">
         </profile>
         <profile>
             <id>sign</id>
+            <properties>
+                <application.profile>sign</application.profile>
+            </properties>
             <build>
                 <plugins>
                     <plugin>
