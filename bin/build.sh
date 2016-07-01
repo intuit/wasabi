@@ -83,8 +83,8 @@ if [[ "${build}" != false || "${test}" != false ]]; then
   [ "${build}" = true ] && package=package
   [[ "${build}" = false ]] && package=test
 
-  mvn -P${profile} ${tests} clean ${package} javadoc:aggregate || \
-    usage "invalid: mvn ${tests} -P${profile} clean ${package}" 1
+  mvn -P${profile} ${mvn_settings} ${tests} clean ${package} javadoc:aggregate || \
+    usage "invalid: mvn ${tests} -P${profile} ${mvn_settings} clean ${package}" 1
 fi
 
 artifact=$(fromPom ./modules/${module} ${profile} project.artifactId)

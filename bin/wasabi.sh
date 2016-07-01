@@ -189,7 +189,9 @@ status() {
 }
 
 package() {
-  profile=build
+
+  profile_default_package=build
+  profile=${profile:=${profile_default_package}}
 
   ./bin/build.sh -b true -p ${profile}
 
