@@ -64,7 +64,7 @@ public class ExperimentsResourceTest {
     private static final Application.Name TESTAPP2 = Application.Name.valueOf("test_app2");
     private static final Page.Name TESTPAGE = Page.Name.valueOf("test_page");
     private static final UUID EXPERIMENT_ID = randomUUID();
-    private static final String PATH = "http://somewhere:7979/abntest/experiment/" + EXPERIMENT_ID + "/bucket";
+    private static final String PATH = "http://somewhere:7979/foo/experiment/" + EXPERIMENT_ID + "/bucket";
     private final Date date = new Date();
     @Rule
     public ExpectedException thrown = ExpectedException.none();
