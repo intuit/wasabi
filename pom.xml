@@ -115,6 +115,9 @@ http://www.w3.org/2001/XMLSchema-instance">
         </profile>
         <profile>
             <id>sign</id>
+            <properties>
+                <application.profile>sign</application.profile>
+            </properties>
             <build>
                 <plugins>
                     <plugin>
