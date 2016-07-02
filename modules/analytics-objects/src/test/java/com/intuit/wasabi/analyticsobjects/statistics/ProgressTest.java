@@ -57,9 +57,6 @@ public class ProgressTest {
         assertEquals(progress.getWinnersSoFar(), winnersSoFar);
         assertEquals(progress.isHasSufficientData(), hasSufficientData);
 
-        assertNotNull(progress.hashCode());
-        assertNotNull(progress.toString());
-        assertNotNull(progress.clone());
         assertTrue(progress.equals(progress.clone()));
         assertTrue(progress.equals(progress));
         assertFalse(progress.equals(null));
@@ -70,7 +67,6 @@ public class ProgressTest {
     public void testAddWinners(){
         progress.setWinnersSoFar(null);
         progress.addToWinnersSoFarList(Bucket.Label.valueOf("TestWinner"));
-        assertNotNull(progress.getWinnersSoFar());
         try{
             progress.addToWinnersSoFarList(null);
             fail();
@@ -85,7 +81,6 @@ public class ProgressTest {
     public void testAddLosers() {
         progress.setLosersSoFar(null);
         progress.addToLosersSoFarList(Bucket.Label.valueOf("TestLoser"));
-        assertNotNull(progress.getLosersSoFar());
         try {
             progress.addToLosersSoFarList(null);
             fail();

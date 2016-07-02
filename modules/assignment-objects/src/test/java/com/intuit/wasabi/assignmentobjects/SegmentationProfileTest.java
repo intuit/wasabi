@@ -51,14 +51,7 @@ public class SegmentationProfileTest{
         segProfile1.setProfile(profile);
         SegmentationProfile segProfileOther = SegmentationProfile.from(segProfile1).build();
 
-        assertNotNull(segProfileOther.getProfile());
-        assertNotNull(segProfileOther.toString());
-        assertEquals(segProfileOther.hashCode(), segProfileOther.hashCode());
-
         assertEquals(segProfile1, segProfileOther);
-        assertEquals(segProfile1, segProfile1);
-
-        assertNotNull(segProfile.toJSONProfile());
     }
 
 }

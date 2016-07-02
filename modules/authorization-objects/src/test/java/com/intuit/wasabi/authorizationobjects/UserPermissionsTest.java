@@ -52,13 +52,6 @@ public class UserPermissionsTest {
     }
 
     @Test
-    public void testUserPermissions() {
-        assertNotNull(userPerm.getApplicationName());
-        assertNotNull(userPerm.getPermissions());
-        assertNotNull(userPerm.toString());
-    }
-
-    @Test
     public void testUserPermissionsSet() {
         userPerm.setApplicationName(applicationName);
         userPerm.setPermissions(permissions);
@@ -71,8 +64,6 @@ public class UserPermissionsTest {
         UserPermissions newUserPerm = UserPermissions.from(userPerm).build();
 
         assertEquals(userPerm, newUserPerm);
-        assertEquals(userPerm, userPerm);
-        assertEquals(userPerm.hashCode(), userPerm.hashCode());
     }
 
 }

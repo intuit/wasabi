@@ -69,22 +69,9 @@ public class AssignmentEnvelopePayloadTest {
 
     @Test
     public void testAssignmentEnvelopePayload() {
-        assertNotNull(payload.getUserID());
-        assertNotNull(payload.getContext());
         assertTrue(payload.isCreateAssignment());
         assertTrue(payload.isPutAssignment());
         assertTrue(payload.isIgnoreSamplingPercent());
-        assertNotNull(payload.getSegmentationProfile());
-        assertNotNull(payload.getAssignmentStatus());
-        assertNotNull(payload.getBucketLabel());
-        assertNotNull(payload.getPageName());
-        assertNotNull(payload.getApplicationName());
-        assertNotNull(payload.getExperimentLabel());
-        assertNotNull(payload.getExperimentID());
-        assertNotNull(payload.getDate());
-        //assertNotNull(payload.getHttpHeaders());
-        assertNotNull(payload.toJson());
-        //assertNotNull(payload.toXml());
     }
 
     @Test
@@ -103,21 +90,8 @@ public class AssignmentEnvelopePayloadTest {
         payload.setExperimentID(experimentID);
         payload.setDate(date);
         payload.setHttpHeaders(httpHeaders);
-        assertNotNull(payload.getUserID());
-        assertNotNull(payload.getContext());
         assertTrue(payload.isCreateAssignment());
         assertTrue(payload.isPutAssignment());
         assertTrue(payload.isIgnoreSamplingPercent());
-        assertNotNull(payload.getSegmentationProfile());
-        assertNotNull(payload.getAssignmentStatus());
-        assertNotNull(payload.getBucketLabel());
-        assertNotNull(payload.getPageName());
-        assertNotNull(payload.getApplicationName());
-        assertNotNull(payload.getExperimentLabel());
-        assertNotNull(payload.getExperimentID());
-        assertNotNull(payload.getDate());
-        assertNotNull(payload.getHttpHeaders());
-        assertNotNull(payload.toJson());
-        //assertNotNull(payload.toXml());
     }
 }

@@ -96,9 +96,6 @@ public class BucketStatisticsTest {
         assertEquals(bucketStatistics.getImpressionCounts(), impressionCounts);
         assertEquals(bucketStatistics.getJointActionRate(), jointActionRate);
 
-        assertNotNull(bucketStatistics.hashCode());
-        assertNotNull(bucketStatistics.toString());
-        assertNotNull(bucketStatistics.clone());
         assertTrue(bucketStatistics.equals(bucketStatistics));
         assertFalse(bucketStatistics.equals(null));
         assertFalse(bucketStatistics.equals(bucketComparisons));

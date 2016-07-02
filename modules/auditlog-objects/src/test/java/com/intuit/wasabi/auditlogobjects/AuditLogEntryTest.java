@@ -78,18 +78,6 @@ public class AuditLogEntryTest {
         AuditLogEntry ale = new AuditLogEntry(Calendar.getInstance(), user, AuditLogAction.UNSPECIFIED_ACTION,
                 experiment, Mockito.mock(Bucket.Label.class), "Property", "before", "after");
 
-        // fields
-        for (Field f : AuditLogEntry.class.getDeclaredFields()) {
-            f.setAccessible(true);
-            Assert.assertNotNull(f.getName(), f.get(ale));
-        }
-
-        // getters
-        for (Method m : AuditLogEntry.class.getDeclaredMethods()) {
-            if (m.getParameterTypes().length == 0 && m.getName().startsWith("get")) {
-                Assert.assertNotNull(m.invoke(ale));
-            }
-        }
     }
 
     @Test

@@ -40,12 +40,6 @@ public class UserRoleListTest {
     }
 
     @Test
-    public void testUserRoleList() {
-        assertNotNull(userRoleList.getRoleList());
-        assertNotNull(userRoleList.toString());
-    }
-
-    @Test
     public void testUserRoleListSet() {
         userRoleList.setRoleList(roleList);
         assertEquals(roleList, userRoleList.getRoleList());
@@ -58,8 +52,6 @@ public class UserRoleListTest {
         UserRoleList newUserRoleList = new UserRoleList(5);
 
         assertEquals(userRoleList, newUserRoleList);
-        assertEquals(userRoleList, userRoleList);
-        assertEquals(userRoleList.hashCode(), userRoleList.hashCode());
     }
 
 

@@ -52,9 +52,6 @@ public class ComparisonStatisticsTest {
         assertEquals(statistics.getActionRateDifference(), actionRateDifference);
         assertEquals(statistics.getSmallestDistinguishableEffectSize(), smallestDistinguishableEffectSize);
 
-        assertNotNull(statistics.hashCode());
-        assertNotNull(statistics.toString());
-        assertNotNull(statistics.clone());
         assertTrue(statistics.equals(statistics.clone()));
         assertTrue(statistics.equals(statistics));
         assertFalse(statistics.equals(null));

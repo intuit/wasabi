@@ -60,12 +60,8 @@ public class ActionComparisonStatisticsTest {
         ActionComparisonStatistics otherActionComparisonStatistics = new ActionComparisonStatistics.Builder().withActionName(actionName)
                                                                     .withComparisonStatistic(statistics).build();
 
-        assertNotNull(actionComparisonStatistics.hashCode());
-        assertNotNull(actionComparisonStatistics.toString());
-        assertNotNull(actionComparisonStatistics.clone());
         assertTrue(actionComparisonStatistics.equals(otherActionComparisonStatistics));
         assertTrue(actionComparisonStatistics.equals(actionComparisonStatistics));
-        assertFalse(actionComparisonStatistics.equals(null));
         Assert.assertFalse(actionComparisonStatistics.equals(statistics));
     }
 

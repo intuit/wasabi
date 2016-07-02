@@ -45,13 +45,6 @@ public class PersonalizationEngineResponseTest {
     }
 
     @Test
-    public void testPersonalizationEngineResponse() {
-        assertNotNull(response.getTid());
-        assertNotNull(response.getData());
-        assertNotNull(response.getModel());
-    }
-
-    @Test
     public void testPersonalizationEngineResponseSet() {
         response.setTid(tid);
         response.setData(data);
@@ -66,10 +59,7 @@ public class PersonalizationEngineResponseTest {
     public void testPersonalizationEngineResponseFromOther() {
         PersonalizationEngineResponse other = PersonalizationEngineResponse.from(response).build();
 
-        assertEquals(response, response);
         assertEquals(response, other);
-        assertEquals(response.toString(), response.toString());
-        assertEquals(response.hashCode(), response.hashCode());
     }
 
 }

@@ -45,8 +45,6 @@ public class ActionCountsTest {
         assertEquals(actionCounter.getEventCount(), eventCount);
         assertEquals(actionCounter.getUniqueUserCount(), uniqueUserCount);
         System.out.println(actionCounter.toString());
-        assertNotNull(actionCounter.toString());
-        assertNotNull(actionCounter.hashCode());
     }
 
     @Test
@@ -66,7 +64,6 @@ public class ActionCountsTest {
         assertEquals(newActionCounter.getEventCount(), eventCount);
         assertEquals(newActionCounter.getUniqueUserCount(), uniqueUserCount);
         assertTrue(actionCounter.equals(newActionCounter));
-        assertNotNull(actionCounter.clone());
     }
 
 }

@@ -15,6 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.assignmentobjects;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -22,6 +23,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.*;
 
+@Ignore
 @RunWith(MockitoJUnitRunner.class)
 public class UserTest {
 
@@ -29,21 +31,6 @@ public class UserTest {
 
     public UserTest() {
         userID = User.ID.valueOf("1234567890");
-    }
-
-    @Test
-    public void testUserID() {
-        assertThat(userID.hashCode(), is(userID.hashCode()));
-        assertNotNull(userID.toString());
-    }
-
-    @Test
-    public void testUserIDFromOther() {
-        User.ID userID1 = User.ID.valueOf("abcdefg");
-        assertEquals(userID1, userID1);
-        assertTrue(!userID1.equals(new Object()));
-        assertTrue(userID != null);
-        assertTrue(!userID1.equals(userID));
     }
 
 }

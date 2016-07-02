@@ -38,9 +38,6 @@ public class CountsTest {
     public void testBuilder(){
         assertEquals(counter.getEventCount(), eventCount);
         assertEquals(counter.getUniqueUserCount(), uniqueUserCount);
-        assertNotNull(counter.clone());
-        assertNotNull(counter.hashCode());
-        assertNotNull(counter.toString());
     }
 
     @Test

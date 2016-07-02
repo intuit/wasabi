@@ -43,10 +43,6 @@ public class DistinguishableEffectSizeTest {
 
         DistinguishableEffectSize otherEffectSize = new DistinguishableEffectSize(negativeEffectSize, positiveEffectSize);
 
-        assertNotNull(effectSize.hashCode());
-        assertNotNull(effectSize.toString());
-        assertNotNull(effectSize.clone());
-
         assertTrue(effectSize.equals(otherEffectSize));
         assertTrue(effectSize.equals(effectSize));
         assertFalse(effectSize.equals(null));

@@ -84,14 +84,6 @@ public class AssignmentTest {
 
     @Test
     public void testAssignment() {
-        assertNotNull(assignment.toString());
-        assertNotNull(assignment.getApplicationName());
-        assertNotNull(assignment.getBucketLabel());
-        assertNotNull(assignment.getContext());
-        assertNotNull(assignment.getCreated());
-        assertNotNull(assignment.getExperimentID());
-        assertNotNull(assignment.getStatus());
-        assertNotNull(assignment.getUserID());
         assertTrue(assignment.isCacheable());
         assertTrue(assignment.getStatus().isCacheable());
         assertFalse(assignment.isBucketEmpty());
@@ -100,14 +92,6 @@ public class AssignmentTest {
     @Test
     public void testAssignmentWithEmptyBucket() {
     	Assignment assignment = createAssignmentWithEmptyBucket();
-        assertNotNull(assignment.toString());
-        assertNotNull(assignment.getApplicationName());
-        assertNotNull(assignment.getBucketLabel());
-        assertNotNull(assignment.getContext());
-        assertNotNull(assignment.getCreated());
-        assertNotNull(assignment.getExperimentID());
-        assertNotNull(assignment.getStatus());
-        assertNotNull(assignment.getUserID());
         assertTrue(assignment.isCacheable());
         assertTrue(assignment.getStatus().isCacheable());
         assertTrue(assignment.isBucketEmpty());
@@ -183,19 +167,7 @@ public class AssignmentTest {
     @Test
     public void testAssignmentFromOther() {
         Assignment newAssignment = Assignment.from(assignment).build();
-
-        assertNotNull(newAssignment.toString());
-        assertNotNull(newAssignment.getApplicationName());
-        assertNotNull(newAssignment.getBucketLabel());
-        assertNotNull(newAssignment.getContext());
-        assertNotNull(newAssignment.getCreated());
-        assertNotNull(newAssignment.getExperimentID());
-        assertNotNull(newAssignment.getStatus());
-        assertNotNull(newAssignment.getUserID());
-
         assertEquals(assignment, newAssignment);
-        assertEquals(assignment, assignment);
-        assertEquals(assignment.hashCode(), assignment.hashCode());
     }
 
 

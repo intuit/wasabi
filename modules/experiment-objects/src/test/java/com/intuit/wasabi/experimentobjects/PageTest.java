@@ -47,9 +47,6 @@ public class PageTest{
         assertTrue(pageName.equals(pageName));
         assertFalse(pageName.equals(null));
         assertFalse(pageName.equals(42));
-
-        assertEquals(page.hashCode(), page.hashCode());
-        assertEquals(pageName.hashCode(),pageName.hashCode());
     }
 
     @Test

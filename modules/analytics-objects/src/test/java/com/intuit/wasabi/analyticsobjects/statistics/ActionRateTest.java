@@ -49,10 +49,6 @@ public class ActionRateTest {
                 .withUpperBound(upperBound).build();
         ActionRate otherActionRate = new ActionRate.Builder().withActionName(actionName).withEstimate(estimator).build();
 
-        assertNotNull(actionRate.hashCode());
-        assertNotNull(actionRate.toString());
-        assertNotNull(actionRate.clone());
-
         assertTrue(actionRate.equals(otherActionRate));
         assertTrue(actionRate.equals(actionRate));
         assertFalse(actionRate.equals(null));

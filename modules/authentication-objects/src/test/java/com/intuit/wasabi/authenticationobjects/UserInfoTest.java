@@ -55,17 +55,6 @@ public class UserInfoTest {
     }
 
     @Test
-    public void testUserInfo() {
-        assertNotNull(userInfo.getEmail());
-        assertNotNull(userInfo.getFirstName());
-        assertNotNull(userInfo.getLastName());
-        assertNotNull(userInfo.getUserId());
-        assertNotNull(userInfo.getUsername());
-        assertNotNull(userInfo.toString());
-        assertNotNull(userInfo.getPassword());
-    }
-
-    @Test
     public void testUserInfoSet() {
         userInfo.setEmail(email);
         userInfo.setFirstName(firstName);
@@ -90,7 +79,6 @@ public class UserInfoTest {
 
         assertEquals(userInfo, otherUserInfo);
         assertEquals(userInfo, otherUserInfo);
-        assertEquals(userInfo.hashCode(), userInfo.hashCode());
     }
 
     @Test
