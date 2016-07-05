@@ -21,29 +21,30 @@
 */
 
 package com.intuit.wasabi.tests.service;
-
 import com.intuit.wasabi.tests.library.TestBase;
 import com.intuit.wasabi.tests.library.util.TestUtils;
 import com.intuit.wasabi.tests.model.*;
 import com.intuit.wasabi.tests.model.analytics.AnalyticsParameters;
 import com.intuit.wasabi.tests.model.factory.EventFactory;
-import com.intuit.wasabi.tests.model.factory.ExperimentFactory;
 import com.intuit.wasabi.tests.service.segmentation.BatchRuleTest;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
-import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import static com.intuit.wasabi.tests.model.factory.ExperimentFactory.createFromJSONString;
 import static com.intuit.wasabi.tests.model.factory.UserFactory.createUser;
+import static java.text.MessageFormat.format;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
 import static org.slf4j.LoggerFactory.getLogger;
-import static org.testng.Assert.assertEquals;
+import static javax.ws.rs.core.Response.Status.CREATED;
+import static javax.ws.rs.core.Response.Status.OK;
+import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 
 /**
  * The TimeStamp test creates an experiment and bucket, assigns a user, and checks to see if the correct
@@ -52,6 +53,7 @@ import static org.testng.Assert.assertEquals;
 public class TimeStampTest extends TestBase {
     private static final Logger LOGGER = getLogger(BatchRuleTest.class);
     public static final String COUNT_ERROR_MESSAGE = "Impression count does not match count of timestamps";
+    public static final String TIMING_ERROR_MESSAGE = "Found impressions after expected time";
     private final List<Experiment> validExperimentsLists = new ArrayList<>();
     private Map<User, Assignment> assignments = new HashMap<>();
 
@@ -70,13 +72,11 @@ public class TimeStampTest extends TestBase {
 
     @Test(dataProvider = "sampleExperiment")
     public void setupExperiment(Experiment experimentData) {
-        LOGGER.debug(experimentData.toString());
+        LOGGER.debug(format("posting experiment: %s", experimentData.toString()));
         response = apiServerConnector.doPost("/experiments", experimentData);
-        LOGGER.debug(response.jsonPath().prettify());
-        Experiment experiment = ExperimentFactory.createFromJSONString(response.jsonPath().prettify());
-        System.out.println("This response is equal to " + response.jsonPath().prettify());
+        Experiment experiment = createFromJSONString(response.jsonPath().prettify());
         validExperimentsLists.add(experiment);
-        assertReturnCode(response, HttpStatus.SC_CREATED);
+        assertThat(response.getStatusCode(), is(CREATED.getStatusCode()));
     }
 
     @Test(dependsOnMethods = {"setupExperiment"})
@@ -85,9 +85,9 @@ public class TimeStampTest extends TestBase {
         String greenBucket = "{\"label\": \"green\", \"allocationPercent\": 1.0, \"isControl\": true, \"description\": \"Green buy button\"}";
         for (Experiment experiment : validExperimentsLists) {
             response = apiServerConnector.doPost("/experiments/" + experiment.id + "/buckets", greenBucket);
-            assertReturnCode(response, HttpStatus.SC_CREATED);
+            assertThat(response.getStatusCode(), is(CREATED.getStatusCode()));
             response = apiServerConnector.doPut("/experiments/" + experiment.id, "{\"state\": \"RUNNING\"}");
-            assertReturnCode(response, HttpStatus.SC_OK);
+            assertThat(response.getStatusCode(), is(OK.getStatusCode()));
         }
     }
 
@@ -108,7 +108,6 @@ public class TimeStampTest extends TestBase {
         for (String offSet : offSets) {
             timeStamps.add(prefix + offSet);
         }
-
         // Create another, equal timestamp in PDT
         timeStamps.add("2013-09-21T02:00:00-0700");
 
@@ -118,8 +117,8 @@ public class TimeStampTest extends TestBase {
             Assignment assignment = getAssignment(experiment, outUser);
             assignments.put(outUser, assignment);
             for (Assignment assignment1 : assignments.values()) {
-                Assert.assertEquals(assignment1.status, "NEW_ASSIGNMENT", "Assignment status wrong.");
-                Assert.assertTrue(assignment1.cache, "Assignment.cache not true.");
+                assertThat("Assignment status wrong", assignment1.status, is("NEW_ASSIGNMENT"));
+                assertThat("Assignment.cache not true.", assignment1.cache, is(true));
             }
 
             // Post the impressions
@@ -128,19 +127,19 @@ public class TimeStampTest extends TestBase {
                 Event event = EventFactory.createEvent();
                 event.name = actionImpression;
                 event.timestamp = ts;
-                response = postEvent(event, experiment, outUser, HttpStatus.SC_CREATED);
-                assertReturnCode(response, HttpStatus.SC_CREATED);
+                response = postEvent(event, experiment, outUser, CREATED.getStatusCode());
+                assertThat(response.getStatusCode(), is(CREATED.getStatusCode()));
             }
             Map<String, Object> data = new HashMap<>();
             data.put("fromTime", "");
             List<Event> events = postEvents(experiment,
                     data, true,
                     HttpStatus.SC_OK, apiServerConnector);
-            assertEquals(events.size(), timeStamps.size());
+            assertThat(events.size(), is(timeStamps.size()));
             for (Event event : events) {
-                assertEquals(event.name, actionImpression);
+                assertThat(event.name, is(actionImpression));
             }
-            System.out.println("\tWaiting (5s) for database to update...");
+            LOGGER.debug("\tWaiting (5s) for database to update...");
             Thread.sleep(5000);
 
             // Query with different forms of timestamp to test time parsing in Analytics API as well
@@ -156,7 +155,7 @@ public class TimeStampTest extends TestBase {
             // Impression count at time = timestamp
             impressionsCount = postExperimentCounts(experiment, params).impressionCounts.eventCount;
             LOGGER.info("\t\timpressions = " + impressionsCount + ", len(timestamps) = " + timeStamps.size());
-            Assert.assertEquals(impressionsCount, timeStamps.size(), COUNT_ERROR_MESSAGE);
+            assertThat(COUNT_ERROR_MESSAGE, impressionsCount, is(timeStamps.size()));
 
             // Impression count before time = timestamp
             String queryTime;
@@ -164,15 +163,14 @@ public class TimeStampTest extends TestBase {
             params.fromTime = queryTime;
             impressionsCount = postExperimentCounts(experiment, params).impressionCounts.eventCount;
             LOGGER.info("\t\tqueryTime = " + queryTime + ", impressions = " + impressionsCount + ", len(timestamps) = " + timeStamps.size());
-            Assert.assertEquals(impressionsCount, timeStamps.size(), COUNT_ERROR_MESSAGE);
+            assertThat(COUNT_ERROR_MESSAGE, impressionsCount, is(timeStamps.size()));
 
             // Impression count after time = timestamp
             queryTime = "2013-09-21T10:00:00Z";
             params.fromTime = queryTime;
             impressionsCount = postExperimentCounts(experiment, params).impressionCounts.uniqueUserCount;
-            System.out.println("ImpressionCountsTest = " + impressionsCount);
             LOGGER.info("\t\tqueryTime = " + queryTime + ", impressions = " + impressionsCount + ", len(timestamps) = " + timeStamps.size());
-            Assert.assertEquals(impressionsCount, 0, "Found impressions after time surpassed timestamp");
+            assertThat(TIMING_ERROR_MESSAGE, impressionsCount, is(0));
         }
     }
 
@@ -181,9 +179,9 @@ public class TimeStampTest extends TestBase {
         LOGGER.info("Setting experiment state to terminated and deleting valid experiments");
         for (Experiment experiment : validExperimentsLists) {
             response = apiServerConnector.doPut("experiments/" + experiment.id, "{\"state\": \"TERMINATED\"}");
-            assertReturnCode(response, HttpStatus.SC_OK);
+            assertThat(response.getStatusCode(), is(OK.getStatusCode()));
             response = apiServerConnector.doDelete("experiments/" + experiment.id);
-            assertReturnCode(response, HttpStatus.SC_NO_CONTENT);
+            assertThat(response.getStatusCode(), is(NO_CONTENT.getStatusCode()));
         }
     }
 }
