@@ -200,7 +200,7 @@ package() {
     (export VAGRANT_CWD=./bin; vagrant ssh -c "cd wasabi; mvn dependency:resolve")
   else
     mvn -P${profile} ${mvn_settings} install
-    mvn dependency:resolve
+    mvn -P${profile} ${mvn_settings} dependency:resolve
   fi
   beerMe 10
   if [ "$OS" == "OSX" ]; then
