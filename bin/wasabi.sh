@@ -199,7 +199,7 @@ package() {
     (export VAGRANT_CWD=./bin; vagrant up)
     (export VAGRANT_CWD=./bin; vagrant ssh -c "cd wasabi; mvn dependency:resolve")
   else
-    mvn install
+    mvn -P${profile} ${mvn_settings} install
     mvn dependency:resolve
   fi
   beerMe 10
