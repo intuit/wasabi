@@ -134,9 +134,10 @@ if [ "${build}" = true ] && [ "$OS" == "OSX" ]; then
 fi
 
 content=${home}/${id}/content/ui/dist
-
-mkdir -p ${content}
-cp -R ./modules/ui/dist/ ${content}
-mkdir -p ${content}/swagger/swaggerjson
-cp -R ./modules/swagger-ui/target/swaggerui/ ${content}/swagger
-cp -R ./modules/api/target/generated/swagger-ui/swagger.json ${content}/swagger/swaggerjson
+if [ "$OS" == "OSX" ]; then
+  mkdir -p ${content}
+  cp -R ./modules/ui/dist/ ${content}
+  mkdir -p ${content}/swagger/swaggerjson
+  cp -R ./modules/swagger-ui/target/swaggerui/ ${content}/swagger
+  cp -R ./modules/api/target/generated/swagger-ui/swagger.json ${content}/swagger/swaggerjson
+fi
