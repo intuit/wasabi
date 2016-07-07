@@ -117,7 +117,7 @@ cp ./modules/repository/target/classes/cassandra_experiments.properties ${home}/
 cp ./modules/repository/target/classes/repository.properties ${home}/${id}/conf
 cp ./modules/user-directory/target/classes/userDirectory.properties ${home}/${id}/conf
 cp ${home}/${id}-all.jar ${home}/${id}/lib
-
+echo "Jamr: build-id $id  & profile=$profile "
 chmod 755 ${home}/${id}/bin/run
 chmod 755 ${home}/${id}/entrypoint.sh
 sed -i '' -e "s/chpst -u [^:]*:[^ ]* //" ${home}/${id}/bin/run 2>/dev/null

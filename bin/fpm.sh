@@ -114,6 +114,7 @@ for module in "$modules"; do
     ../../user-directory/target/classes/userDirectory.properties=${home}/conf/userDirectory.properties\
     ${id}-all.jar=${home}/lib/${id}-all.jar"
 
+  echo "Jamr: fpm-id $id & profile=$profile"
   if [ "$daemon" = "true" ]; then
     resources="$resources    extra-resources/service/run=/etc/service/${id}/run"
   fi
