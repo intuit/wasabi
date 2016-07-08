@@ -84,10 +84,17 @@
     </table>
 
     <div>
-        <div style="float: left; margin-right: 862px;"><label class="descriptionLabel">Description</label></div>
+        <div style="float: left; margin-right: 862px;"><label class="descriptionLabel">Hypothesis/Description</label></div>
         <pre id="experimentDescription" spellcheck="false" class="readOnly"></pre>
         <div id="descriptionToolbar" ng-show="!readOnly" dynamic-edit input-tag="experimentDescription" select-function="saveDescription" edit-function="editDescription" cancel-function="cancelDescription" ng-model="experiment.description" class="dynamicToolbar"></div>
         <div style="margin-top: 5px; margin-bottom: 10px; font-size: 12px;"><label ng-class="{tooMany: data.descriptionLength > 256}">{{(256 - data.descriptionLength) >= 0 ? 256 - data.descriptionLength : 'NO'}} characters left</label></div>
+    </div>
+
+    <div>
+        <div style="width: 100%">
+            <button type="button" id="btnEnterResults" class="blue" ng-click="openResultsModal()" ng-show="experiment.id && experiment.state !== 'DRAFT'">Enter Results...</button>&nbsp; &nbsp;
+            <span class="truncateDiv">{{experiment.hypothesisCorrect ? 'Hypothesis Correct? ' + experiment.hypothesisCorrect + ', ' : ''}}{{experiment.results ? 'Results: ' + experiment.results : ''}}</span>
+        </div>
     </div>
 
     <tabset id="experimentDetailsTabs" ng-show="experiment.id" class="tabs">
