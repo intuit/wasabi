@@ -214,6 +214,7 @@ package() {
   # FIXME: server ip
   server="http://localhost:8080"
   home=$(fromPom . build application.home)
+  echo "Jamr: Home is set to: $home"
   name=wasabi-ui #$(fromPom main build application.name)
   api_name=$(fromPom . build application.name)
   user=$(fromPom ./modules/main build application.user)
@@ -238,6 +239,8 @@ package() {
       grunt build --target=develop --no-color); \
 #      grunt test); \
     fi
+    echo "Jamr: Just before sed: ${home}"
+
     cp -r build target; \
     for pkg in deb rpm; do \
       sed -i '' -e "s|\${application.home}|${home}|g" target/build/${pkg}/before-install.sh 2>/dev/null; \
@@ -251,6 +254,7 @@ package() {
       sed -i '' -e "s|\${application.http.content.directory}|${content}|g" target/build/${pkg}/before-remove.sh 2>/dev/null; \
     done)
 
+    echo "Jamr: Just after sed: `cat target/build/${pkg}/before-install.sh`"
   if [ "$OS" == "OSX" ]; then
     (export VAGRANT_CWD=./bin; vagrant ssh -c "cd wasabi/modules/ui; ./bin/fpm.sh -n ${name} -v ${version} -p ${profile}")
     (export VAGRANT_CWD=./bin; vagrant halt)
