@@ -49,12 +49,11 @@ import static com.intuit.wasabi.authorizationobjects.UserRole.newInstance;
 import static com.intuit.wasabi.experimentobjects.Experiment.State.DELETED;
 import static com.intuit.wasabi.experimentobjects.Experiment.State.TERMINATED;
 import static com.intuit.wasabi.experimentobjects.Experiment.from;
+import static com.intuit.wasabi.api.util.PaginationHelper.*;
 import static java.lang.Boolean.FALSE;
 import static java.util.TimeZone.getTimeZone;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
-import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
+import static javax.ws.rs.core.MediaType.*;
 import static javax.ws.rs.core.Response.Status.CREATED;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -83,6 +82,9 @@ public class ExperimentsResource {
     private Pages pages;
     private Priorities priorities;
 
+    // parameters for pagination
+    private final String responseName = "experiments";
+
     @Inject
     ExperimentsResource(final Experiments experiments, final EventsExport export, final Assignments assignments,
                         final Authorization authorization, final Buckets buckets, final Mutex mutex,
@@ -107,7 +109,7 @@ public class ExperimentsResource {
      * Returns a list of all experiments, with metadata. Does not return
      * metadata for deleted experiments.
      *
-     * @param authorizationHeader the ahtorization headers
+     * @param authorizationHeader the authorization headers
      * @return Response object
      */
     @GET
@@ -151,6 +153,95 @@ public class ExperimentsResource {
         }
 
         return httpHeader.headers().entity(authorizedExperiments).build();
+    }
+
+    /**
+     * Returns a List of experiments that can be filtered for by several fields {@link com.intuit.wasabi.experimentobjects.filter.ExperimentProperty}
+     *
+     * @param authHeader the ahtorization header
+     * @param page the page which should be returned, defaults to 1 (most recent experiments)
+     * @param perPage the number of experiments per page, defaults to 10
+     * @param sort the sorting rules
+     * @param filter the filter rules
+     * @param timezoneOffset  the timezone offset from GMT
+     * @return a response containing a list with {@code 0 - perPage} experiments, if that many are on the page.
+     */
+    @GET
+    @Path("filtered")
+    @ApiOperation(value = "Return experiments as specified by the filter criterion.",
+            response = ExperimentList.class,
+            position = 1)
+    @Timed
+    public Response getFilteredExperiments(@HeaderParam(AUTHORIZATION) String authHeader,
+                                           @QueryParam("page") @DefaultValue(APISwaggerResource.DEFAULT_PAGE) @ApiParam(name = "page", value = "Defines the page to retrieve.", defaultValue = APISwaggerResource.DEFAULT_PAGE)
+                                           final int page,
+                                           @QueryParam("per_page") @DefaultValue(APISwaggerResource.DEFAULT_PER_PAGE) @ApiParam(name = "perPage", value = "Defines the entries per page.", defaultValue = APISwaggerResource.DEFAULT_PER_PAGE)
+                                           final int perPage,
+                                           @QueryParam("sort") @DefaultValue("-time") @ApiParam(name = "sort", defaultValue = "-time",
+                                                   value = "Allows to specify the sort order.<br />"
+                                                           + "<pre>"
+                                                           + "SortOrder    := Property | PropertyList\n"
+                                                           + "PropertyList := Property,SortOrder\n"
+                                                           + "Property     := ALProperty | -ALProperty\n"
+                                                           + "ALProperty   := app_name, experiment_name, created_by, sampling_perc, start_date, end_date, mod_date, status, desc, action"
+                                                           + "</pre>"
+                                                           + "The prefix - allows for descending sorting.")
+                                           final String sort,
+                                           @QueryParam("filter") @DefaultValue("") @ApiParam(name = "filter", defaultValue = "",
+                                                   value = "Allows to specify filter rules.<br />"
+                                                           + "<pre>"
+                                                           + "FilterMask   := Value | Value,KeyValueList | KeyValueList"
+                                                           + "KeyValueList := Property=Value | Property=Value,KeyValueList"
+                                                           + "Property     := app_name | experiment_name | created_by | sampling_perc | start_date | end_date | mod_date | status "
+                                                           + "Value        := any value, may not contain commas (,) followed by a Property. If it starts with an escaped"
+                                                           + "                dash (\\-), the value is negated, thus shall not match."
+                                                           + "</pre>")
+                                           final String filter,
+                                           @QueryParam("timezone") @DefaultValue("+0000") @ApiParam(name = "timezone", defaultValue = "+0000", value = "Allows to specify the user's timezone offset to UTC. Should be in the format +0000 (or -0000). Default is +0000.")
+                                           final String timezoneOffset) {
+
+        //get all experiments
+        //ExperimentList experimentList = experiments.getExperiments();
+        // apply filtering
+        List<Experiment> experimentList = experiments.getFilteredExperiments(prepareDateFilter(filter, timezoneOffset), sort);
+
+        // just get the authorized experiments and apply filters on them
+
+        List<Experiment> authorizedExperiments;
+        if (authHeader == null) {
+            authorizedExperiments = experimentList;
+        } else {
+            UserInfo.Username subject = authorization.getUser(authHeader);
+            //objected for the filtering
+            Set<Application.Name> allowed = new HashSet<>();
+            //authorizedExperiments = new ExperimentList();
+            authorizedExperiments = new ArrayList<>();
+            //iterate through the list and check user permissions for each app
+            for (Experiment experiment : experimentList) {
+                if (experiment == null) {
+                    continue;
+                }
+                Application.Name applicationName = experiment.getApplicationName();
+                //check if we have already gotten permissions for this app
+                if (allowed.contains(applicationName)) {
+                    authorizedExperiments.add(experiment);
+                } else {
+                    //see if the current user is authorized to get experiments of this app name
+                    try {
+                        authorization.checkUserPermissions(subject, applicationName, READ);
+                        authorizedExperiments.add(experiment);
+                        allowed.add(applicationName);
+                    } catch (AuthenticationException ignored) {
+                        //user is not allowed to read
+                    }
+                }
+            }
+        }
+
+        // paginate the results
+        // FIXME: read out the path from the annotation!
+        return preparePageFilterResponse(responseName, "/v1/experiments", authorizedExperiments,
+                page, perPage, filter, sort);
     }
 
     /**

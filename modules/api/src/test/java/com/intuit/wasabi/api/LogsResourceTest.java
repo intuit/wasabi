@@ -22,6 +22,7 @@ import com.intuit.wasabi.auditlogobjects.AuditLogEntryFactory;
 import com.intuit.wasabi.authorization.Authorization;
 import com.intuit.wasabi.eventlog.events.SimpleEvent;
 import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.api.util.PaginationHelper;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -40,67 +41,6 @@ import static org.mockito.Mockito.mock;
  */
 public class LogsResourceTest {
 
-    @Test
-    public void fromIndex() throws Exception {
-        LogsResource lr = new LogsResource(mock(AuditLog.class), mock(Authorization.class), new HttpHeader("jaba-???"));
-
-        // invalid: just return 0
-        // parameters
-        assertEquals(0, lr.fromIndex(0, 1, 2));
-        assertEquals(0, lr.fromIndex(1, 0, 2));
-        assertEquals(0, lr.fromIndex(-1, 1, 2));
-        assertEquals(0, lr.fromIndex(1, -1, 2));
-        assertEquals(0, lr.fromIndex(1, 1, -1));
-        // impossible pages
-        assertEquals(0, lr.fromIndex(20, 10, 5));
-        assertEquals(0, lr.fromIndex(2, 10, 10));
-        assertEquals(0, lr.fromIndex(2, 100, 100));
-
-        // valid
-        assertEquals(0, lr.fromIndex(1, 10, 2));
-        assertEquals(10, lr.fromIndex(2, 10, 11));
-        assertEquals(264, lr.fromIndex(23, 12, 1230));
-    }
-
-    @Test
-    public void toIndex() throws Exception {
-        LogsResource lr = new LogsResource(mock(AuditLog.class), mock(Authorization.class), new HttpHeader("jaba-???"));
-
-        // invalid: just return 0
-        // parameters
-        assertEquals(0, lr.toIndex(0, 1, 2));
-        assertEquals(0, lr.toIndex(1, 0, 2));
-        assertEquals(0, lr.toIndex(-1, 1, 2));
-        assertEquals(0, lr.toIndex(1, -1, 2));
-        assertEquals(0, lr.toIndex(1, 1, -1));
-        // impossible pages
-        assertEquals(0, lr.toIndex(20, 10, 5));
-        assertEquals(0, lr.toIndex(2, 10, 10));
-        assertEquals(0, lr.toIndex(2, 100, 100));
-
-        // valid
-        assertEquals(2, lr.toIndex(1, 10, 2));
-        assertEquals(11, lr.toIndex(2, 10, 11));
-        assertEquals(276, lr.toIndex(23, 12, 1230));
-    }
-
-    @Test
-    public void numberOfPages() throws Exception {
-        LogsResource lr = new LogsResource(mock(AuditLog.class), mock(Authorization.class), new HttpHeader("jaba-???"));
-
-        // invalid: just return 1
-        assertEquals(1, lr.numberOfPages(5, 10));
-        assertEquals(1, lr.numberOfPages(-3, 32));
-        assertEquals(1, lr.numberOfPages(0, 0));
-        assertEquals(1, lr.numberOfPages(23, -1));
-
-        // valid
-        assertEquals(1, lr.numberOfPages(10, 10));
-        assertEquals(12, lr.numberOfPages(119, 10));
-        assertEquals(12, lr.numberOfPages(120, 10));
-        assertEquals(13, lr.numberOfPages(121, 10));
-        assertEquals(189, lr.numberOfPages(4325, 23));
-    }
 
     @Test
     public void getCompleteLogs() throws Exception {
@@ -168,38 +108,9 @@ public class LogsResourceTest {
         for (int i = 0; i < 3; i++) {
             list.add(AuditLogEntryFactory.createFromEvent(new SimpleEvent("Event")));
         }
-        Response respMap = lr.prepareLogListResponse(list, 2, 2, "", "");
+        Response respMap = PaginationHelper.preparePageFilterResponse("logEntries", "/logs", list, 2, 2, "", "");
         assertEquals(1, ((List) ((Map<String, Object>) respMap.getEntity()).get("logEntries")).size());
         assertEquals(3, ((Map<String, Object>) respMap.getEntity()).get("totalEntries"));
     }
 
-    @Test
-    public void linkHeaderValue() throws Exception {
-        LogsResource lr = new LogsResource(mock(AuditLog.class), mock(Authorization.class), new HttpHeader("jaba-???"));
-        String lh = lr.linkHeaderValue("/test", 100, 3, 5, 1, new HashMap<String, String>());
-
-        assertEquals("</api/v1/logs/test?per_page=5&page=1>; rel=\"First\", </api/v1/logs/test?per_page=5&page=20>; rel=\"Last\", </api/v1/logs/test?per_page=5&page=2>; rel=\"Previous\", </api/v1/logs/test?per_page=5&page=2>; rel=\"Page 2\", </api/v1/logs/test?per_page=5&page=4>; rel=\"Next\", </api/v1/logs/test?per_page=5&page=4>; rel=\"Page 4\"", lh);
-    }
-
-    @Test
-    public void prepareDateFilter() throws Exception {
-        LogsResource lr = new LogsResource(mock(AuditLog.class), mock(Authorization.class), new HttpHeader("jaba-???"));
-
-        assertEquals("", lr.prepareDateFilter("", ""));
-        assertEquals("filterMask", lr.prepareDateFilter("filterMask", ""));
-        assertEquals("filterMask,time", lr.prepareDateFilter("filterMask,time", ""));
-        assertEquals("filterMask,time={+0100}", lr.prepareDateFilter("filterMask,time", "+0100"));
-        assertEquals("filterMask,time={+0100}", lr.prepareDateFilter("filterMask", "+0100"));
-        assertEquals("filterMask,time={+0100}", lr.prepareDateFilter("filterMask,time=", "+0100"));
-        assertEquals("filterMask,time={+0100}Sep 22", lr.prepareDateFilter("filterMask,time=Sep 22", "+0100"));
-        assertEquals("filterMask,time={+0200}", lr.prepareDateFilter("filterMask,time={+0200}", "+0100"));
-        assertEquals("filterMask,time={+0200}Sep 22", lr.prepareDateFilter("filterMask,time={+0200}Sep 22", "+0100"));
-        assertEquals("filterMask,time,action=ed exp", lr.prepareDateFilter("filterMask,time,action=ed exp", ""));
-        assertEquals("filterMask,time={+0100},action=ed exp", lr.prepareDateFilter("filterMask,time,action=ed exp", "+0100"));
-        assertEquals("filterMask,action=ed exp,time={+0100}", lr.prepareDateFilter("filterMask,action=ed exp", "+0100"));
-        assertEquals("filterMask,time={+0100},action=ed exp", lr.prepareDateFilter("filterMask,time=,action=ed exp", "+0100"));
-        assertEquals("filterMask,time={+0100}Sep 22,action=ed exp", lr.prepareDateFilter("filterMask,time=Sep 22,action=ed exp", "+0100"));
-        assertEquals("filterMask,time={+0200},action=ed exp", lr.prepareDateFilter("filterMask,time={+0200},action=ed exp", "+0100"));
-        assertEquals("filterMask,time={+0200}Sep 22,action=ed exp", lr.prepareDateFilter("filterMask,time={+0200}Sep 22,action=ed exp", "+0100"));
-    }
 }
