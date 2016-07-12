@@ -159,8 +159,8 @@ public class LogsResource {
         List<AuditLogEntry> auditLogs = auditLog.getAuditLogs(applicationName,
                 prepareDateFilter(filter, timezoneOffset), sort);
 
-        // FIXME: read out the path from the annotation
-        return preparePageFilterResponse(responseName, "/v1/logs", auditLogs, page, perPage, filter, sort);
+        String path = this.getClass().getAnnotation(Path.class).value();
+        return preparePageFilterResponse(responseName, path, auditLogs, page, perPage, filter, sort);
 
     }
 
@@ -239,8 +239,8 @@ public class LogsResource {
 
         List<AuditLogEntry> auditLogEntries = auditLog.getAuditLogs(prepareDateFilter(filter, timezoneOffset), sort);
 
-        // FIXME: read out the path from the annotation!
-        return preparePageFilterResponse(responseName, "/v1/logs", auditLogEntries, page, perPage, filter, sort);
+        String path = this.getClass().getAnnotation(Path.class).value();
+        return preparePageFilterResponse(responseName, path, auditLogEntries, page, perPage, filter, sort);
     }
 
     /**

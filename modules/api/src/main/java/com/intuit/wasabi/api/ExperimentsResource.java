@@ -239,8 +239,8 @@ public class ExperimentsResource {
         }
 
         // paginate the results
-        // FIXME: read out the path from the annotation!
-        return preparePageFilterResponse(responseName, "/v1/experiments", authorizedExperiments,
+        String path = this.getClass().getAnnotation(Path.class).value();
+        return preparePageFilterResponse(responseName, path, authorizedExperiments,
                 page, perPage, filter, sort);
     }
 

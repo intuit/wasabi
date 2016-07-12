@@ -16,7 +16,9 @@
 package com.intuit.wasabi.experimentobjects.filter;
 
 import com.intuit.wasabi.experimentobjects.Experiment;
-import java.util.List;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.*;
 
 /**
  * This class contains the logic to sort and filter experiments.
@@ -60,11 +62,161 @@ public class ExperimentFilter {
      * </ul>
      *
      * @param experiments the list to be filtered
-     * @param filterMasks     the filter mask
+     * @param filterMask     the filter mask
      * @return a filtered list
      */
-    public static List<Experiment> filter(List<Experiment> experiments, String filterMasks){
-        return null;
+    public static List<Experiment> filter(List<Experiment> experiments, String filterMask){
+        if (StringUtils.isBlank(filterMask)) {
+            return experiments;
+        }
+
+        String[] mask = prepareMask(filterMask);
+        boolean filterFullText = !mask[0].contains("=");
+        String fullTextPattern = null;
+        if (filterFullText) {
+            fullTextPattern = mask[0].startsWith("\\-") ? mask[0].substring(2, mask[0].length()) : mask[0];
+        }
+
+        Map<String, String> optionsMap = new HashMap<>();
+
+        for (Iterator<Experiment> iter = experiments.iterator(); iter.hasNext(); ) {
+            Experiment exp = iter.next();
+            boolean remove = false;
+
+            // filter for each key value pair until none is left or the entry should be removed
+            for (int i = filterFullText ? 1 : 0; i < mask.length && !remove; ++i) {
+                // determine key and value, fail if not well formatted
+                String[] keyValue = mask[i].split("=");
+                String options = "";
+                if (keyValue.length > 2) { // return empty list if invalid
+                    return Collections.emptyList();
+                } else if (keyValue.length == 1) { // skip empty filters
+                    continue;
+                } else {
+                    // options
+                    if (keyValue[1].startsWith("{") && keyValue[1].contains("}")) {
+                        options = keyValue[1].substring(1, keyValue[1].indexOf("}"));
+                        keyValue[1] = keyValue[1].substring(keyValue[1].indexOf("}") + 1);
+                        optionsMap.put(keyValue[0], options);
+                    }
+                }
+                String pattern = keyValue[1].startsWith("\\-") ? keyValue[1].substring(2, keyValue[1].length()) : keyValue[1];
+                remove = !singleFieldSearch(exp, keyValue[0], pattern, options, !keyValue[1].startsWith("\\-"));
+            }
+
+            if (filterFullText && !remove) {
+                remove = !fullTextSearch(exp, fullTextPattern, optionsMap, !mask[0].startsWith("\\-"));
+            }
+
+            if (remove) {
+                iter.remove();
+            }
+        }
+
+        return experiments;
+    }
+
+    /**
+     * Calls all distinguishing getters of the Experiment until a match is found and returns {@code filter}.
+     * If no match is found, {@code !filter} is returned.
+     * Note: This method is case-insensitive.
+     *
+     * @param exp the experiment
+     * @param pattern the pattern to search
+     * @param filter the return value on success
+     * @return {@code filter} on match, {@code !filter} otherwise
+     */
+    private static boolean fullTextSearch(Experiment exp, String pattern, Map<String, String> options, boolean filter) {
+        for (String key : ExperimentProperty.keys()) {
+            if (singleFieldSearch(exp, key, pattern, options.get(key), filter) == filter) {
+                return filter;
+            }
+        }
+        if (contains(exp.getID(), pattern)) return filter;
+        return !filter;
+    }
+
+    /**
+     * Prepares the filter mask as it is defined by the rules described in {@link #filter(List, String)}.
+     *
+     * @param filterMask the filter mask
+     * @return the individual filters
+     */
+    private static String[] prepareMask(String filterMask) {
+        String filterMaskEsc = filterMask.replaceAll(",(" + StringUtils.join(ExperimentProperty.keys(), "|") + ")+", "\\\\,$1");
+        return filterMaskEsc.toLowerCase().split("\\\\,");
+    }
+
+    /**
+     * Calls the getter identified by {@code key.toLowerCase()} of the experiment returns {@code filter} on success.
+     * If no match is found, {@code !filter} is returned.
+     *
+     * The allowed keys and their fields are:
+     * <ul>
+     *     <li>app_name {@link Experiment#getApplicationName()}</li>
+     *     <li>experiment_name {@link Experiment#getLabel()}</li>
+     *     <li>created_by {@link Experiment#getCreatorID()}</li>
+     *     <li>sampling_perc {@link Experiment#getSamplingPercent()}</li>
+     *     <li>start_date {@link Experiment#getStartTime()}</li>
+     *     <li>end_date {@link Experiment#getEndTime()}</li>
+     *     <li>mod_date {@link Experiment#getModificationTime()}</li>
+     *     <li>status {@link Experiment#getState()}</li>
+     * </ul>
+     * Note: This method is case-insensitive!
+     *
+     * @param exp the Experiment
+     * @param key the key determining the checked field
+     * @param pattern the pattern to search
+     * @param filter the return value on success
+     * @return {@code filter} on match, {@code !filter} otherwise
+     */
+    /*test*/ static boolean singleFieldSearch(Experiment exp, String key, String pattern, String options, boolean filter) {
+        ExperimentProperty property = ExperimentProperty.forKey(key);
+        boolean filtered = !filter;
+
+
+        if (property == null) {
+            return filtered;
+        }
+        switch (property) {
+            case APP_NAME: filtered = contains(exp.getApplicationName().toString(), pattern) ? filter : !filter;
+                break;
+            case EXP_NAME: filtered = contains(exp.getLabel().toString(), pattern) ? filter : !filter;
+                break;
+            case CREATE_BY: filtered = contains(exp.getCreatorID(), pattern) ? filter : !filter;
+                break;
+            case SAMPLING_PERC: filtered = contains(exp.getSamplingPercent(), pattern) ? filter : !filter;
+                break;
+            case START_DATE: filtered = contains(exp.getStartTime(), pattern) ? filter : !filter;
+                break;
+            case END_DATE: filtered = contains(exp.getEndTime(), pattern) ? filter : !filter;
+                break;
+            case MOD_DATE: filtered = contains(exp.getModificationTime(), pattern) ? filter : !filter;
+                break;
+            case STATUS: filtered = contains(exp.getState().toString(), pattern) ? filter : !filter;
+                break;
+            default:
+                break;
+        }
+        return filtered;
+    }
+
+    /**
+     * Returns true iff both, container and contained, are not blank and if
+     * {@code container.toString().toLowerCase().contains(contained.toString().toLowerCase())}.
+     * Note: This method is case-insensitive!
+     *
+     * @param container the string to search in
+     * @param contained the string to search for
+     * @return true if container contains contained
+     */
+    private static boolean contains(Object container, Object contained) {
+        if (container == null || contained == null) {
+            return false;
+        }
+        String s1 = container.toString().toLowerCase();
+        String s2 = contained.toString().toLowerCase();
+        return s1.contains(s2);
     }
 
     /**
@@ -86,7 +238,7 @@ public class ExperimentFilter {
      *     <li>{@code -appname,expname} will sort by the application name (descending) and for each experiment label (ascending) to break ties</li>
      *     <li>{@code status, moddate} will sort by experiment status and then for each experiment by modification date</li>
      * </ul>
-     * 
+     *
      *
      * @param experiments the list to be sorted
      * @param sortOrder       the sort order
