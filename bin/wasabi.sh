@@ -152,7 +152,7 @@ test() {
 }
 
 resource() {
-  [ "$OS" == "OSX" ] && wip=$(docker-machine ip wasabi) || wip=localhost:8080
+  [ "$OS" == "OSX" ] && wip=$(docker-machine ip wasabi):8080 || wip=localhost:8080
 
   for resource in $1; do
     case "${1}" in
@@ -170,7 +170,7 @@ resource() {
         version=$(fromPom . ${profile} project.version)
         id=${artifact}-${version}-${profile}
         content=${home}/${id}/content/ui/dist
-        sed -i '' "s/localhost/${wip}/g" ${content}/swagger/swaggerjson/swagger.json
+        sed -i '' "s/localhost:8080/${wip}/g" ${content}/swagger/swaggerjson/swagger.json
         sed -i '' "s/this.model.validatorUrl.*$/this.model.validatorUrl = null;/g" ${content}/swagger/swagger-ui.js
         ./bin/wasabi.sh start
         beerMe 6
