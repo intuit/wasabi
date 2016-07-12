@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import static jdk.nashorn.internal.objects.Global.print;
 import static org.junit.Assert.*;
 
 /**
@@ -83,8 +84,12 @@ public class ExperimentFilterTest {
     }
 
     @Test
-    public void testFilteringMoreExperiments(){
-        assertEquals("expected one experiment", 1, ExperimentFilter.filter(experiments, "experiment_name=label").size());
+    public void testFilteringMoreExperimentsByName(){
+        // 'ab' is part of wasabi and label
+        ExperimentFilter.filter(experiments, "experiment_name=ab");
+        assertEquals("expected one experiment", 2, experiments.size());
+        assertTrue(experiments.contains(exp1));
+        assertTrue(experiments.contains(exp3));
     }
 
 
