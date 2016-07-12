@@ -246,6 +246,10 @@ public class ExperimentFilter {
      * @see ExperimentProperty#keys()
      */
     public static List<Experiment> sort(List<Experiment> experiments, String sortOrder){
-        return null;
+        if (StringUtils.isBlank(sortOrder) || "-time".equalsIgnoreCase(sortOrder)) {
+            return experiments;
+        }
+        Collections.sort(experiments, new ExperimentComparator(sortOrder));
+        return experiments;
     }
 }
