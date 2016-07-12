@@ -68,7 +68,7 @@ public class ExperimentFilter {
     }
 
     /**
-     * Sorts a list of AuditLogEntries according to the given sortOrder.
+     * Sorts a list of Experiments according to the given sortOrder.
      * If the sortOrder is null, empty or ill-formatted, the original list will be returned.
      * <p>
      * A sortOrder must be of the following format:
@@ -83,11 +83,10 @@ public class ExperimentFilter {
      * <p>
      * Examples:
      * <ul>
-     *     <li>{@code -username,experiment} will sort by users (username and userid) (descending) and for each user by experiment labels (ascending) to break ties</li>
-     *     <li>{@code experiment,bucket} will sort by experiments and then for each experiment by bucket</li>
+     *     <li>{@code -appname,expname} will sort by the application name (descending) and for each experiment label (ascending) to break ties</li>
+     *     <li>{@code status, moddate} will sort by experiment status and then for each experiment by modification date</li>
      * </ul>
-     * Note that both, {@code username} and {@code user} will try to sort by username first, and if that doesn't work will
-     * resort to userIDs.
+     * 
      *
      * @param experiments the list to be sorted
      * @param sortOrder       the sort order

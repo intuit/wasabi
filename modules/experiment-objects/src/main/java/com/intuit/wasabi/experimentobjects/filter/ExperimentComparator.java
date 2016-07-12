@@ -51,21 +51,70 @@ public class ExperimentComparator implements Comparator<Experiment>{
      */
     private int compareNull(Object o1, Object o2, boolean descending) {
         if (o1 != null && o2 != null) {
-            return 2;
+            return NOT_NULL;
         }
         if (o1 != null) {
-            return descending ? 1 : -1;
+            return descending ? LEFT_NULL : RIGHT_NULL;
         }
         if (o2 != null) {
-            return descending ? -1 : 1;
+            return descending ? RIGHT_NULL : LEFT_NULL;
         }
-        return 0;
+        return BOTH_NULL;
     }
 
 
     @Override
     public int compare(Experiment exp1, Experiment exp2) {
-        return 0;
+        int result = 0;
+        for (String sort : sortOrder.toLowerCase().split(",")) {
+            boolean descending = sort.contains("-");
+
+            ExperimentProperty property = ExperimentProperty.forKey(descending ? sort.substring(1) : sort);
+            if (property == null) {
+                continue;
+            }
+
+
+            switch (property){
+                case APP_NAME:
+                    result = exp1.getApplicationName().toString().compareToIgnoreCase(exp2.getApplicationName().toString());
+                    break;
+                case EXP_NAME:
+                    result = exp1.getLabel().toString().compareToIgnoreCase(exp2.getLabel().toString());
+                    break;
+                case CREATE_BY:
+                    result = exp1.getCreatorID().compareToIgnoreCase(exp2.getCreatorID());
+                    break;
+                case SAMPLING_PERC:
+                    if ((result = compareNull(exp1.getSamplingPercent(), exp2.getSamplingPercent(), descending)) == NOT_NULL)
+                        result = exp1.getSamplingPercent().compareTo(exp2.getSamplingPercent());
+                    break;
+                case START_DATE:
+                    if ((result = compareNull(exp1.getStartTime(), exp2.getStartTime(), descending)) == NOT_NULL)
+                        result = exp1.getStartTime().compareTo(exp2.getStartTime());
+                    break;
+                case END_DATE:
+                    if ((result = compareNull(exp1.getEndTime(), exp2.getEndTime(), descending)) == NOT_NULL)
+                        result = exp1.getEndTime().compareTo(exp2.getEndTime());
+                    break;
+                case MOD_DATE:
+                    if ((result = compareNull(exp1.getModificationTime(), exp2.getModificationTime(), descending)) == NOT_NULL)
+                        result = exp1.getModificationTime().compareTo(exp2.getModificationTime());
+                    break;
+                case STATUS:
+                    result = exp1.getState().compareTo(exp2.getState());
+                    break;
+            }
+
+            // reverse order in the case of descending
+            if (result != 0) {
+                if (descending) {
+                    result = -result;
+                }
+                break;
+            }
+        }
+        return result;
     }
 }
 
