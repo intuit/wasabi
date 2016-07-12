@@ -15,8 +15,8 @@
  *******************************************************************************/
 package com.intuit.wasabi;
 
-import com.intuit.data.autumn.metrics.MetricsModule;
-import com.intuit.data.autumn.service.ServiceManager;
+import com.intuit.autumn.metrics.MetricsModule;
+import com.intuit.autumn.service.ServiceManager;
 import com.intuit.wasabi.api.ApiModule;
 import com.intuit.wasabi.eventlog.EventLogService;
 import org.joda.time.DateTimeZone;
@@ -24,8 +24,8 @@ import org.slf4j.Logger;
 
 import java.util.TimeZone;
 
-import static com.intuit.data.autumn.metrics.MetricsServices.getEnabledMetricsServices;
-import static com.intuit.data.autumn.web.WebServices.getEnabledWebServices;
+import static com.intuit.autumn.metrics.MetricsServices.getEnabledMetricsServices;
+import static com.intuit.autumn.web.WebServices.getEnabledWebServices;
 import static java.util.TimeZone.getTimeZone;
 import static org.joda.time.DateTimeZone.UTC;
 import static org.slf4j.LoggerFactory.getLogger;

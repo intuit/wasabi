@@ -23,7 +23,7 @@
     <parent>
         <artifactId>wasabi</artifactId>
         <groupId>com.intuit.wasabi</groupId>
-        <version>20151215171929-SNAPSHOT</version>
+        <version>1.0.20160701080732-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -38,9 +38,9 @@
             <version>4.5.1</version>
         </dependency>
         <dependency>
-            <groupId>com.intuit.data.autumn</groupId>
-            <artifactId>autumn.utils</artifactId>
-            <version>1.0.20160515205816</version>
+            <groupId>com.intuit.autumn</groupId>
+            <artifactId>autumn-utils</artifactId>
+            <version>1.0.20160626031951</version>
         </dependency>
     </dependencies>
 </project>

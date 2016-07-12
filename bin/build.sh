@@ -83,8 +83,8 @@ if [[ "${build}" != false || "${test}" != false ]]; then
   [ "${build}" = true ] && package=package
   [[ "${build}" = false ]] && package=test
 
-  mvn -P${profile} ${tests} clean ${package} javadoc:aggregate || \
-    usage "invalid: mvn ${tests} -P${profile} clean ${package}" 1
+  mvn -P${profile} ${mvn_settings} ${tests} clean ${package} javadoc:aggregate || \
+    usage "invalid: mvn ${tests} -P${profile} ${mvn_settings} clean ${package}" 1
 fi
 
 artifact=$(fromPom ./modules/${module} ${profile} project.artifactId)
@@ -122,7 +122,7 @@ chmod 755 ${home}/${id}/bin/run
 chmod 755 ${home}/${id}/entrypoint.sh
 sed -i '' -e "s/chpst -u [^:]*:[^ ]* //" ${home}/${id}/bin/run 2>/dev/null
 
-if [ "${build}" = true ]; then
+if [ "${build}" = true ] && [ "$OS" == "OSX" ]; then
   brew list node
   if [[ $? -eq 1 ]]; then
   	echo "Node.js is not installed. Installing Node.js packages..."

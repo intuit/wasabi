@@ -69,7 +69,31 @@ beerMe() {
   echo ""
 }
 
+start_docker() {
+  if [ "$OS" == "OSX" ]; then
+    docker-machine status ${project} >/dev/null 2>&1 || docker-machine create -d virtualbox ${project}
+
+    dms=$(docker-machine status ${project})
+
+    if [ "${dms}" != "Running" ]; then
+      docker-machine restart ${project} || usage "unable to run command: % docker-machine restart ${project}" 1
+    fi
+  fi
+}
+
+stop_docker() {
+  if [ "$OS" == "OSX" ]; then
+    dms=$(docker-machine status ${project})
+
+    if [ "${dms}" == "Running" ]; then
+      docker-machine stop ${project} || usage "unable to run command: % docker-machine stop ${project}" 1
+    fi
+  fi
+}
+
 start_container() {
+  start_docker
+  [ "$OS" == "OSX" ] && eval $(docker-machine env wasabi)
   docker network create --driver bridge ${docker_network} >/dev/null 2>&1
 
   cid=$(docker ps -aqf name=${1})
@@ -77,7 +101,7 @@ start_container() {
   if [ "${cid}" == "" ]; then
     eval "docker run --net=${docker_network} --name ${1} ${3} -d ${2} ${4}" || \
       usage "unable to run command: % docker run --name ${1} ${3} -d ${2} ${4}" 1
-    beerMe 5
+    beerMe 9
   else
     cids=$(docker inspect --format '{{.State.Status}}' ${cid})
 
@@ -101,19 +125,23 @@ stop_container() {
   [ "${cid}" != "" ] && docker stop ${cid}
 }
 
-
 remove_container() {
   [ ${1} ] && container=${1}
 
   if [ ${container} ]; then
     stop_container ${container} >/dev/null 2>&1
     docker rm -fv ${container} >/dev/null 2>&1
+  elif [ "$OS" == "OSX" ]; then
+    docker-machine rm -f ${project} >/dev/null 2>&1
+    vboxmanage hostonlyif remove vboxnet0 >/dev/null 2>&1
   fi
 }
 
 start_wasabi() {
+  start_docker
+
   id=$(fromPom modules/main development application.name)
-  mip=localhost
+  [ "$OS" == "OSX" ] && mip=$(docker-machine ip ${project}) || mip=localhost
 
   if [ "$(docker ps -aqf name=${project}-main)" = "" ]; then
 #  if [ "${verify}" = true ] || ! [ docker inspect ${project}-main >/dev/null 2>&1 ]; then
@@ -136,7 +164,8 @@ start_wasabi() {
     beerMe 1
     status=0
     for trial in {1..20}; do
-      curl ${mip}:8080/api/v1/ping >/dev/null 2>&1
+      echo "curl http://${mip}:8080/api/v1/ping"
+      curl http://${mip}:8080/api/v1/ping >/dev/null 2>&1
       status=$?
       [[ ${status} -eq 0 ]] && break
       beerMe 1
@@ -200,6 +229,10 @@ console_mysql() {
 }
 
 status() {
+  if [ "$OS" == "OSX" ]; then
+    docker-machine active 2>/dev/null | grep ${project} || usage "start ${project}" 1
+  fi
+
   docker ps 2>/dev/null
 }
 
@@ -228,6 +261,7 @@ verify=${verify:=${verify_default}}
 sleep=${sleep:=${sleep_default}}
 
 [[ $# -eq 0 ]] && usage
+[ "$OS" == "OSX" ] && eval $(docker-machine env ${project}) 2>/dev/null
 
 for command in ${@:$OPTIND}; do
   case "${command}" in
