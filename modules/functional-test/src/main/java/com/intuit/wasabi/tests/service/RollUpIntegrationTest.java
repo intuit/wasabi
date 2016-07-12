@@ -18,6 +18,7 @@ package com.intuit.wasabi.tests.service;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -51,7 +52,7 @@ import com.jayway.restassured.response.Response;
 
 import static com.intuit.wasabi.tests.library.util.Constants.*;
 /**
- * Bucket integration tests
+ * RollUp integration tests
  */
 public class RollUpIntegrationTest extends TestBase {
 
@@ -131,12 +132,8 @@ public class RollUpIntegrationTest extends TestBase {
     public void prepareDBConnection() throws Exception {
     	Class.forName("com.mysql.jdbc.Driver").newInstance();
     	connection =
-		  DriverManager.getConnection(
-				  appProperties.getProperty("database.url"),
-				  appProperties.getProperty("database.username"),
-				  appProperties.getProperty("database.password")
-				  );
-     }
+		  DriverManager.getConnection(appProperties.getProperty("database.url"), "readwrite","readwrite");
+    }
     
     @AfterClass
     public void closeDBConnection() throws Exception {
@@ -184,23 +181,24 @@ public class RollUpIntegrationTest extends TestBase {
         assertEquals(events.size(), 0);
         System.out.println("Events size" + events);
 
-    	Statement statement = connection.createStatement();
     	String queryGroupByBucket = "select bucket_label, "
 				+ "count(user_id) as user_count, count(distinct user_id) as distinct_user_count  "
 				+ "from event_action where hex(experiment_id) = '" + 
 				experiment.id.replace("-", "") + "' group by bucket_label";
-    	ResultSet result = 
-    			statement.executeQuery(queryGroupByBucket);
-    	if ( result.next()) {
-    		String bucket = result.getString("bucket_label");
-    		int userCount = result.getInt("user_count");
-    		int distinctUserCount = result.getInt("distinct_user_count");
-    		fail("There should not be any rows but found with first bucket: " + bucket + " userCount: " + userCount + 
+    	try (Statement statement = connection.createStatement();
+    			ResultSet result = 
+    			statement.executeQuery(queryGroupByBucket)) {
+    		if ( result.next()) {
+    			String bucket = result.getString("bucket_label");
+    			int userCount = result.getInt("user_count");
+    			int distinctUserCount = result.getInt("distinct_user_count");
+    			fail("There should not be any rows but found with first bucket: " + bucket + " userCount: " + userCount + 
     				" distinct_user_count : " + distinctUserCount);
-    	}    	
+    		}    
+    	}
     }
 
-    @Test(dependsOnMethods = {"t_CheckBasicCounts"})
+	@Test(dependsOnMethods = {"t_CheckBasicCounts"})
     public void t_PostAssignments() {
     	
         for (User user : users) {
@@ -319,13 +317,14 @@ public class RollUpIntegrationTest extends TestBase {
     @Test(dependsOnMethods = {"t_PostImpressionTomorrowQA"})
     public void t_CheckEventsForYesterdayByBucketFromMySQLAllContext() throws Exception {
     	
-    	Statement statement = connection.createStatement();
     	String queryGroupByBucket = "select bucket_label, "
 				+ "count(user_id) as user_count, count(distinct user_id) as distinct_user_count  "
 				+ "from event_action where hex(experiment_id) = '" + 
 				experiment.id.replace("-", "").toUpperCase() + "' and timestamp = '" + this.yesterday + "' group by bucket_label";
+
+    	try (Statement statement = connection.createStatement();
     	ResultSet result = 
-    			statement.executeQuery(queryGroupByBucket);
+    			statement.executeQuery(queryGroupByBucket)){
     	if ( result.next()) {
     		String bucket = result.getString("bucket_label");
     		int userCount = result.getInt("user_count");
@@ -333,18 +332,20 @@ public class RollUpIntegrationTest extends TestBase {
     		fail("There should not be any rows but found with first bucket: " + bucket + " userCount: " + userCount + 
     				" distinct_user_count : " + distinctUserCount + " query: " + queryGroupByBucket);
     	}    	
+    	}
     }
 
     @Test(dependsOnMethods = {"t_PostImpressionTomorrowQA"})
     public void t_CheckEventsForYesterdayByBucketAndActionFromMySQLAllContext() throws Exception {
     	
-    	Statement statement = connection.createStatement();
     	String queryGroupByBucketAndAction = "select bucket_label, action, "
 				+ "count(user_id) as user_count, count(distinct user_id) as distinct_user_count  "
 				+ "from event_action where hex(experiment_id) = '" + 
 				experiment.id.replace("-", "").toUpperCase() + "' and timestamp = '" + this.yesterday + "' group by bucket_label, action";
+
+    	try (Statement statement = connection.createStatement();
     	ResultSet result = 
-    			statement.executeQuery(queryGroupByBucketAndAction);
+    			statement.executeQuery(queryGroupByBucketAndAction)){
     	if ( result.next()) {
     		String bucket = result.getString("bucket_label");
     		int userCount = result.getInt("user_count");
@@ -352,18 +353,19 @@ public class RollUpIntegrationTest extends TestBase {
     		fail("There should not be any rows but found with first bucket: " + bucket + " userCount: " + userCount + 
     				" distinct_user_count : " + distinctUserCount + " query: " + queryGroupByBucketAndAction);
     	}    	
+    	}
     }
 
     @Test(dependsOnMethods = {"t_PostImpressionTomorrowQA"})
     public void t_CheckImpressionForYesterdayByBucketFromMySQLAllContext() throws Exception {
     	
-    	Statement statement = connection.createStatement();
     	String queryGroupByBucket = "select bucket_label, "
 				+ "count(user_id) as user_count, count(distinct user_id) as distinct_user_count  "
 				+ "from event_impression where hex(experiment_id) = '" + 
 				experiment.id.replace("-", "").toUpperCase() + "' and timestamp = '" + this.yesterday + "' group by bucket_label";
+    	try (Statement statement = connection.createStatement();
     	ResultSet result = 
-    			statement.executeQuery(queryGroupByBucket);
+    			statement.executeQuery(queryGroupByBucket)){
 		int userCount = 0;
 		int distinctUserCount = 0;
 		boolean atLeastOneRow = false;
@@ -379,18 +381,20 @@ public class RollUpIntegrationTest extends TestBase {
         
         assertEquals(userCount,3);
         assertEquals(distinctUserCount,3);
+    	}
     }
 
     @Test(dependsOnMethods = {"t_PostImpressionTomorrowQA"})
     public void t_CheckImpressionForYesterdayByBucketFromMySQLProdContext() throws Exception {
     	
-    	Statement statement = connection.createStatement();
     	String queryGroupByBucket = "select bucket_label, "
 				+ "count(user_id) as user_count, count(distinct user_id) as distinct_user_count  "
 				+ "from event_impression where hex(experiment_id) = '" + 
 				experiment.id.replace("-", "").toUpperCase() + "' and context = 'PROD' and timestamp = '" + this.yesterday + "' group by bucket_label";
+
+    	try(Statement statement = connection.createStatement();
     	ResultSet result = 
-    			statement.executeQuery(queryGroupByBucket);
+    			statement.executeQuery(queryGroupByBucket)){
 		int userCount = 0;
 		int distinctUserCount = 0;
 		boolean atLeastOneRow = false;
@@ -406,21 +410,24 @@ public class RollUpIntegrationTest extends TestBase {
         
         assertEquals(userCount,3);
         assertEquals(distinctUserCount,3);
+    	}
     }
 
     @Test(dependsOnMethods = {"t_PostImpressionTomorrowQA"})
     public void t_CheckImpressionForYesterdayByBucketFromMySQLQAContext() throws Exception {
     	
-    	Statement statement = connection.createStatement();
     	String queryGroupByBucket = "select bucket_label, "
 				+ "count(user_id) as user_count, count(distinct user_id) as distinct_user_count  "
 				+ "from event_impression where hex(experiment_id) = '" + 
 				experiment.id.replace("-", "").toUpperCase() + "' and context = 'QA' and timestamp = '" + this.yesterday + "' group by bucket_label";
+
+    	try(Statement statement = connection.createStatement();
     	ResultSet result = 
-    			statement.executeQuery(queryGroupByBucket);
+    			statement.executeQuery(queryGroupByBucket)){
         if ( result.next()) {
         	fail("Should have no rows for query: " +queryGroupByBucket );
         }
+    	}
         
     }
 
@@ -636,5 +643,402 @@ public class RollUpIntegrationTest extends TestBase {
         assertEquals(userCount,2);
         assertEquals(distinctUserCount,2);
     }
+
+    /**
+     * Note - This test validates that the rollup counts are correct.  The steps involved
+     * in this test are :
+     * <ol>
+     * <li>Check counts before rollup table update
+     * <li>Insert non cumulative counts for events and impression into roll up table
+     * <li>Insert cumulative counts for events/impressions into roll up table
+     * <li>Insert non-cumulative counts for events by action into rollup table
+     * <li>Insert cumulative counts for events by action into rollup table
+     * <li>Get counts for experiment
+     * <li>Compare the counts with before counts
+     * </ol>
+     * @throws Exception
+     */
+    @Test(dependsOnMethods = {"t_PostImpressionTomorrowQA"})
+    public void t_PostRollUpsForTomorrow() throws Exception {
+    	
+        AnalyticsParameters params = new AnalyticsParameters();
+        params.confidenceLevel = .9999999d;
+        params.actions = null;
+        params.context = "QA";
+
+        long startTime = System.currentTimeMillis();
+		ExperimentCounts countsBefore = postExperimentCounts(experiment,params);
+        long endTime = System.currentTimeMillis();
+        
+        System.out.println("Before analytics time was: " + (endTime-startTime));
+    	
+    	String experimentId = experiment.id.replace("-", "").toUpperCase();
+    	
+    	// Counts for tomorrow only
+    	String queryImpressionGroupByRedAndQAForTomorrow = "Select " +
+				"count(user_id) as user_count, count(distinct user_id) as distinct_user_count  "
+				+ "from event_impression where hex(experiment_id) = '" + 
+				experimentId +
+				"' and timestamp = '" + this.tomorrow + 
+				"' and bucket_label = '" + RED + "' and context = '" + QA + "'";
+
+    	 int [] countImpressionRedQATomorrow = getUserAndDistinctUserCount(connection,
+				queryImpressionGroupByRedAndQAForTomorrow);
+		
+    	String queryActionGroupByRedAndQAForTomorrow = "Select " +
+				"count(user_id) as user_count, count(distinct user_id) as distinct_user_count  "
+				+ "from event_action where hex(experiment_id) = '" + 
+				experimentId +
+				"' and timestamp = '" + this.tomorrow + 
+				"' and bucket_label = '" + RED + "' and context = '" + QA + "'";
+
+    	int [] countActionRedQATomorrow = getUserAndDistinctUserCount(connection,
+				queryActionGroupByRedAndQAForTomorrow);
+		
+    	String queryImpressionGroupByBlueAndQAForTomorrow = "Select " +
+				"count(user_id) as user_count, count(distinct user_id) as distinct_user_count  "
+				+ "from event_impression where hex(experiment_id) = '" + 
+				experimentId +
+				"' and timestamp = '" + this.tomorrow + 
+				"' and bucket_label = '" + BLUE + "' and context = '" + QA + "'";
+    	
+    	int [] countImpressionBlueQATomorrow = getUserAndDistinctUserCount(connection,
+				queryImpressionGroupByBlueAndQAForTomorrow);
+		
+    	String queryActionGroupByBlueAndQAForTomorrow = "Select " +
+				"count(user_id) as user_count, count(distinct user_id) as distinct_user_count  "
+				+ "from event_action where hex(experiment_id) = '" + 
+				experimentId +
+				"' and timestamp = '" + this.tomorrow + 
+				"' and bucket_label = '" + BLUE + "' and context = '" + QA + "'";
+
+    	int [] countActionBlueQATomorrow = getUserAndDistinctUserCount(connection,
+				queryActionGroupByBlueAndQAForTomorrow);
+		
+    	String queryImpressionGroupByRedAndProdForTomorrow = "Select " +
+				"count(user_id) as user_count, count(distinct user_id) as distinct_user_count  "
+				+ "from event_impression where hex(experiment_id) = '" + 
+				experimentId +
+				"' and timestamp = '" + this.tomorrow + 
+				"' and bucket_label = '" + RED + "' and context = '" + PROD + "'";
+
+    	 int [] countImpressionRedProdTomorrow = getUserAndDistinctUserCount(connection,
+				queryImpressionGroupByRedAndProdForTomorrow);
+		
+    	String queryActionGroupByRedAndProdForTomorrow = "Select " +
+				"count(user_id) as user_count, count(distinct user_id) as distinct_user_count  "
+				+ "from event_action where hex(experiment_id) = '" + 
+				experimentId +
+				"' and timestamp = '" + this.tomorrow + 
+				"' and bucket_label = '" + RED + "' and context = '" + PROD + "'";
+
+    	int [] countActionRedProdTomorrow = getUserAndDistinctUserCount(connection,
+				queryActionGroupByRedAndProdForTomorrow);
+		
+    	String queryImpressionGroupByBlueAndProdForTomorrow = "Select " +
+				"count(user_id) as user_count, count(distinct user_id) as distinct_user_count  "
+				+ "from event_impression where hex(experiment_id) = '" + 
+				experimentId +
+				"' and timestamp = '" + this.tomorrow + 
+				"' and bucket_label = '" + BLUE + "' and context = '" + PROD + "'";
+    	
+    	int [] countImpressionBlueProdTomorrow = getUserAndDistinctUserCount(connection,
+				queryImpressionGroupByBlueAndProdForTomorrow);
+		
+    	String queryActionGroupByBlueAndProdForTomorrow = "Select " +
+				"count(user_id) as user_count, count(distinct user_id) as distinct_user_count  "
+				+ "from event_action where hex(experiment_id) = '" + 
+				experimentId +
+				"' and timestamp = '" + this.tomorrow + 
+				"' and bucket_label = '" + BLUE + "' and context = '" + PROD + "'";
+
+    	int [] countActionBlueProdTomorrow = getUserAndDistinctUserCount(connection,
+				queryActionGroupByBlueAndProdForTomorrow);
+
+    	String day = tomorrow.substring(0, 10);
+
+    	String rollUpQuery = "REPLACE INTO experiment_rollup " +
+        "(experiment_id, day, cumulative, bucket_label, action, " +
+         "impression_count, impression_user_count, " +
+         "action_count, action_user_count,context) " +
+         "values(unhex('" + experimentId + "'),'" + day + "',0,'" + RED + "',''," + 
+         (countImpressionRedQATomorrow[0]) + "," + 
+         (countImpressionRedQATomorrow[1]) + "," + 
+         (countActionRedQATomorrow[0]) + "," + 
+         (countActionRedQATomorrow[1]) + ",'" + 
+         QA +"')";
+    	
+		insertIntoRollUp(rollUpQuery);
+    	
+    	rollUpQuery = "REPLACE INTO experiment_rollup " +
+        "(experiment_id, day, cumulative, bucket_label, action, " +
+         "impression_count, impression_user_count, " +
+         "action_count, action_user_count,context) " +
+         "values(unhex('" + experimentId + "'),'" + day + "',0,'" + BLUE + "',''," + 
+         (countImpressionBlueQATomorrow[0]) + "," + 
+         (countImpressionBlueQATomorrow[1]) + "," + 
+         (countActionBlueQATomorrow[0]) + "," + 
+         (countActionBlueQATomorrow[1]) + ",'" + 
+         QA +"')";
+    	
+    	insertIntoRollUp(rollUpQuery);
+
+    	rollUpQuery = "REPLACE INTO experiment_rollup " +
+    	        "(experiment_id, day, cumulative, bucket_label, action, " +
+    	         "impression_count, impression_user_count, " +
+    	         "action_count, action_user_count,context) " +
+    	         "values(unhex('" + experimentId + "'),'" + day + "',0,'" + BLUE + "',''," + 
+    	         (countImpressionBlueProdTomorrow[0]) + "," + 
+    	         (countImpressionBlueProdTomorrow[1]) + "," + 
+    	         (countActionBlueProdTomorrow[0]) + "," + 
+    	         (countActionBlueProdTomorrow[1]) + ",'" + 
+    	         PROD +"')";
+    	    	
+    	insertIntoRollUp(rollUpQuery);
+
+    	rollUpQuery = "REPLACE INTO experiment_rollup " +
+    	        "(experiment_id, day, cumulative, bucket_label, action, " +
+    	         "impression_count, impression_user_count, " +
+    	         "action_count, action_user_count,context) " +
+    	         "values(unhex('" + experimentId + "'),'" + day + "',0,'" + RED + "',''," + 
+    	         (countImpressionRedProdTomorrow[0]) + "," + 
+    	         (countImpressionRedProdTomorrow[1]) + "," + 
+    	         (countActionRedProdTomorrow[0]) + "," + 
+    	         (countActionRedProdTomorrow[1]) + ",'" + 
+    	         PROD +"')";
+    	    	
+    	insertIntoRollUp(rollUpQuery);
+
+    	String queryActionByBucketActionContext = 
+    			"SELECT bucket_label, action, context, COUNT(user_id) as user_count, "
+    			+ " COUNT(DISTINCT user_id) as distinct_user_count " +
+    			" FROM event_action where hex(experiment_id) = '" + 
+				experimentId +
+				"' and timestamp = '" + this.tomorrow + "' GROUP BY bucket_label, action ";
+    	
+    	Statement statementActionByBucketActionContext = connection.createStatement();
+    	ResultSet resultActionByBucketActionContext = statementActionByBucketActionContext.executeQuery(queryActionByBucketActionContext);
+    	while(resultActionByBucketActionContext.next()) {
+    		String bucket = resultActionByBucketActionContext.getString("bucket_label");
+    		String action = resultActionByBucketActionContext.getString("action");
+    		String context = resultActionByBucketActionContext.getString("context");
+    		int userCount = resultActionByBucketActionContext.getInt("user_count");
+    		int distinctUserCount = resultActionByBucketActionContext.getInt("distinct_user_count");
+    		
+    		rollUpQuery = "REPLACE INTO experiment_rollup " +
+        	        "(experiment_id, day, cumulative, bucket_label, action, " +
+        	         "action_count, action_user_count,context) " +
+        	         "values(unhex('" + experimentId + "'),'" + day + "',0,'" + bucket + "','" + action + "'," + 
+        	         userCount + "," + 
+        	         distinctUserCount + ",'" + 
+        	         context +"')";
+    		insertIntoRollUp(rollUpQuery);
+    	}
+    	
+    	resultActionByBucketActionContext.close();
+    	statementActionByBucketActionContext.close();
+    	
+    	// Counts for tomorrow cumulative
+    	String queryImpressionGroupByRedAndQAForTomorrowCumulative = "Select " +
+				"count(user_id) as user_count, count(distinct user_id) as distinct_user_count  "
+				+ "from event_impression where hex(experiment_id) = '" + 
+				experimentId +
+				"' and timestamp <= '" + this.tomorrow + 
+				"' and bucket_label = '" + RED + "' and context = '" + QA + "'";
+
+    	 int [] countImpressionRedQATomorrowCumulative = getUserAndDistinctUserCount(connection,
+				queryImpressionGroupByRedAndQAForTomorrowCumulative);
+		
+    	String queryActionGroupByRedAndQAForTomorrowCumulative = "Select " +
+				"count(user_id) as user_count, count(distinct user_id) as distinct_user_count  "
+				+ "from event_action where hex(experiment_id) = '" + 
+				experimentId +
+				"' and timestamp <= '" + this.tomorrow + 
+				"' and bucket_label = '" + RED + "' and context = '" + QA + "'";
+
+    	int [] countActionRedQATomorrowCumulative = getUserAndDistinctUserCount(connection,
+				queryActionGroupByRedAndQAForTomorrowCumulative);
+		
+    	String queryImpressionGroupByBlueAndQAForTomorrowCumulative = "Select " +
+				"count(user_id) as user_count, count(distinct user_id) as distinct_user_count  "
+				+ "from event_impression where hex(experiment_id) = '" + 
+				experimentId +
+				"' and timestamp <= '" + this.tomorrow + 
+				"' and bucket_label = '" + BLUE + "' and context = '" + QA + "'";
+    	
+    	int [] countImpressionBlueQATomorrowCumulative = getUserAndDistinctUserCount(connection,
+				queryImpressionGroupByBlueAndQAForTomorrowCumulative);
+		
+    	String queryActionGroupByBlueAndQAForTomorrowCumulative = "Select " +
+				"count(user_id) as user_count, count(distinct user_id) as distinct_user_count  "
+				+ "from event_action where hex(experiment_id) = '" + 
+				experimentId +
+				"' and timestamp <= '" + this.tomorrow + 
+				"' and bucket_label = '" + BLUE + "' and context = '" + QA + "'";
+
+    	int [] countActionBlueQATomorrowCumulative = getUserAndDistinctUserCount(connection,
+				queryActionGroupByBlueAndQAForTomorrowCumulative);
+		
+    	String queryImpressionGroupByRedAndProdForTomorrowCumulative = "Select " +
+				"count(user_id) as user_count, count(distinct user_id) as distinct_user_count  "
+				+ "from event_impression where hex(experiment_id) = '" + 
+				experimentId +
+				"' and timestamp <= '" + this.tomorrow + 
+				"' and bucket_label = '" + RED + "' and context = '" + PROD + "'";
+
+    	 int [] countImpressionRedProdTomorrowCumulative = getUserAndDistinctUserCount(connection,
+				queryImpressionGroupByRedAndProdForTomorrowCumulative);
+		
+    	String queryActionGroupByRedAndProdForTomorrowCumulative = "Select " +
+				"count(user_id) as user_count, count(distinct user_id) as distinct_user_count  "
+				+ "from event_action where hex(experiment_id) = '" + 
+				experimentId +
+				"' and timestamp <= '" + this.tomorrow + 
+				"' and bucket_label = '" + RED + "' and context = '" + PROD + "'";
+
+    	int [] countActionRedProdTomorrowCumulative = getUserAndDistinctUserCount(connection,
+				queryActionGroupByRedAndProdForTomorrowCumulative);
+		
+    	String queryImpressionGroupByBlueAndProdForTomorrowCumulative = "Select " +
+				"count(user_id) as user_count, count(distinct user_id) as distinct_user_count  "
+				+ "from event_impression where hex(experiment_id) = '" + 
+				experimentId +
+				"' and timestamp <= '" + this.tomorrow + 
+				"' and bucket_label = '" + BLUE + "' and context = '" + PROD + "'";
+    	
+    	int [] countImpressionBlueProdTomorrowCumulative = getUserAndDistinctUserCount(connection,
+				queryImpressionGroupByBlueAndProdForTomorrowCumulative);
+		
+    	String queryActionGroupByBlueAndProdForTomorrowCumulative = "Select " +
+				"count(user_id) as user_count, count(distinct user_id) as distinct_user_count  "
+				+ "from event_action where hex(experiment_id) = '" + 
+				experimentId +
+				"' and timestamp <= '" + this.tomorrow + 
+				"' and bucket_label = '" + BLUE + "' and context = '" + PROD + "'";
+
+    	int [] countActionBlueProdTomorrowCumulative = getUserAndDistinctUserCount(connection,
+				queryActionGroupByBlueAndProdForTomorrowCumulative);
+
+    	rollUpQuery = "REPLACE INTO experiment_rollup " +
+        "(experiment_id, day, cumulative, bucket_label, action, " +
+         "impression_count, impression_user_count, " +
+         "action_count, action_user_count,context) " +
+         "values(unhex('" + experimentId + "'),'" + day + "',1,'" + RED + "',''," + 
+         (countImpressionRedQATomorrowCumulative[0]) + "," + 
+         (countImpressionRedQATomorrowCumulative[1]) + "," + 
+         (countActionRedQATomorrowCumulative[0]) + "," + 
+         (countActionRedQATomorrowCumulative[1]) + ",'" + 
+         QA +"')";
+    	
+		insertIntoRollUp(rollUpQuery);
+    	
+    	rollUpQuery = "REPLACE INTO experiment_rollup " +
+        "(experiment_id, day, cumulative, bucket_label, action, " +
+         "impression_count, impression_user_count, " +
+         "action_count, action_user_count,context) " +
+         "values(unhex('" + experimentId + "'),'" + day + "',1,'" + BLUE + "',''," + 
+         (countImpressionBlueQATomorrowCumulative[0]) + "," + 
+         (countImpressionBlueQATomorrowCumulative[1]) + "," + 
+         (countActionBlueQATomorrowCumulative[0]) + "," + 
+         (countActionBlueQATomorrowCumulative[1]) + ",'" + 
+         QA +"')";
+    	
+    	insertIntoRollUp(rollUpQuery);
+
+    	rollUpQuery = "REPLACE INTO experiment_rollup " +
+    	        "(experiment_id, day, cumulative, bucket_label, action, " +
+    	         "impression_count, impression_user_count, " +
+    	         "action_count, action_user_count,context) " +
+    	         "values(unhex('" + experimentId + "'),'" + day + "',1,'" + BLUE + "',''," + 
+    	         (countImpressionBlueProdTomorrowCumulative[0]) + "," + 
+    	         (countImpressionBlueProdTomorrowCumulative[1]) + "," + 
+    	         (countActionBlueProdTomorrowCumulative[0]) + "," + 
+    	         (countActionBlueProdTomorrowCumulative[1]) + ",'" + 
+    	         PROD +"')";
+    	    	
+    	insertIntoRollUp(rollUpQuery);
+
+    	rollUpQuery = "REPLACE INTO experiment_rollup " +
+    	        "(experiment_id, day, cumulative, bucket_label, action, " +
+    	         "impression_count, impression_user_count, " +
+    	         "action_count, action_user_count,context) " +
+    	         "values(unhex('" + experimentId + "'),'" + day + "',1,'" + RED + "',''," + 
+    	         (countImpressionRedProdTomorrowCumulative[0]) + "," + 
+    	         (countImpressionRedProdTomorrowCumulative[1]) + "," + 
+    	         (countActionRedProdTomorrowCumulative[0]) + "," + 
+    	         (countActionRedProdTomorrowCumulative[1]) + ",'" + 
+    	         PROD +"')";
+    	    	
+    	insertIntoRollUp(rollUpQuery);
+
+    	String queryActionByBucketActionContextCumulative = 
+    			"SELECT bucket_label, action, context, COUNT(user_id) as user_count, "
+    			+ " COUNT(DISTINCT user_id) as distinct_user_count " +
+    			" FROM event_action where hex(experiment_id) = '" + 
+				experimentId +
+				"' and timestamp <= '" + this.tomorrow + "' GROUP BY bucket_label, action ";
+    	
+    	Statement statementActionByBucketActionContextCumulative = connection.createStatement();
+    	ResultSet resultActionByBucketActionContextCumulative = statementActionByBucketActionContextCumulative
+    			.executeQuery(queryActionByBucketActionContextCumulative);
+    	
+    	while(resultActionByBucketActionContextCumulative.next()) {
+    		String bucket = resultActionByBucketActionContextCumulative.getString("bucket_label");
+    		String action = resultActionByBucketActionContextCumulative.getString("action");
+    		String context = resultActionByBucketActionContextCumulative.getString("context");
+    		int userCount = resultActionByBucketActionContextCumulative.getInt("user_count");
+    		int distinctUserCount = resultActionByBucketActionContextCumulative.getInt("distinct_user_count");
+    		
+    		rollUpQuery = "REPLACE INTO experiment_rollup " +
+        	        "(experiment_id, day, cumulative, bucket_label, action, " +
+        	         "action_count, action_user_count,context) " +
+        	         "values(unhex('" + experimentId + "'),'" + day + "',1,'" + bucket + "','" + action + "'," + 
+        	         userCount + "," + 
+        	         distinctUserCount + ",'" + 
+        	         context +"')";
+    		insertIntoRollUp(rollUpQuery);
+    	}
+    	statementActionByBucketActionContextCumulative.close();
+    	resultActionByBucketActionContextCumulative.close();
+
+    	startTime = System.currentTimeMillis();
+
+		ExperimentCounts countsAfter = postExperimentCounts(experiment,params);
+        endTime = System.currentTimeMillis();
+        
+        System.out.println("Before analytics time was: " + (endTime-startTime));
+		
+		if (!countsBefore.equals(countsAfter))
+			fail("CountBefore: " + countsBefore + " \nCountAfter: " + countsAfter +"\nShould be equal");
+
+    }
+
+	private void insertIntoRollUp(String rollUpQuery) throws SQLException {
+		Statement statement = connection.createStatement();
+    	
+    	ResultSet resultSet = statement.executeQuery(rollUpQuery);
+
+    	resultSet.close();
+    	statement.close();
+	}
+
+	private int [] getUserAndDistinctUserCount(Connection connection,
+			String query)
+			throws SQLException {
+    	Statement statement = connection.createStatement();
+		ResultSet result = 
+    			statement.executeQuery(query);
+    	
+    	if ( !result.next())
+    		fail("Should have at least one row for query " + query);
+    	
+		int userCount = result.getInt("user_count");
+		int distinctUserCount = result.getInt("distinct_user_count");
+    	
+		result.close();
+		statement.close();
+		
+		return new int [] { userCount, distinctUserCount };
+	}
 
 }

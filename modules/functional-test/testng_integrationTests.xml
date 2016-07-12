@@ -42,6 +42,12 @@
             <class name="com.intuit.wasabi.tests.service.ContextMutexIntegrationTest" />
         </classes>
     </test>
+    <test name="IntegrationRollupTests">
+        <classes>
+            <class name="com.intuit.wasabi.tests.service.RollUpIntegrationTest" />
+            <class name="com.intuit.wasabi.tests.service.RollUpBadCallsIntegrationTest" />
+        </classes>
+    </test>
     <test name="IntegrationExperimentTests">
         <classes>
             <class name="com.intuit.wasabi.tests.service.IntegrationExperiment" />
