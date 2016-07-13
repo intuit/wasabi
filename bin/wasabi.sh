@@ -15,10 +15,10 @@
 # limitations under the License.
 ###############################################################################
 
-[ -z "$OS" ] && export OS="OSX"
+[ -z "${WASABI_OS}" ] && export OS="OSX"
 
 formulas=('bash' 'cask' 'git' 'maven' 'python' 'ruby' 'node' 'docker')
-[ "$OS" == "OSX" ] && formulas+=('docker-machine')
+[ "${WASABI_OS}" == "OSX" ] && formulas+=('docker-machine')
 casks=('java' 'vagrant' 'virtualbox')
 # todo: docker(fpm), optionally include (vagrant, virtualbox)
 build_default=false
@@ -79,7 +79,7 @@ beerMe() {
 }
 
 bootstrap() {
-  if [ "$OS" == "OSX" ]; then
+  if [ "${WASABI_OS}" == "OSX" ]; then
     if ! hash brew 2>/dev/null; then
       echo "${green}installing homebrew ...${reset}"
 
@@ -122,7 +122,7 @@ start() {
 }
 
 test() {
-  if [ "$OS" == "OSX" ]; then
+  if [ "${WASABI_OS}" == "OSX" ]; then
     if [ ${endpoint} == ${endpoint_default} ]; then
       endpoint=$(docker-machine ip wasabi):8080
       [[ $? -ne 0 ]] && endpoint=${endpoint_default}
@@ -152,7 +152,7 @@ test() {
 }
 
 resource() {
-  [ "$OS" == "OSX" ] && wip=$(docker-machine ip wasabi):8080 || wip=localhost:8080
+  [ "${WASABI_OS}" == "OSX" ] && wip=$(docker-machine ip wasabi):8080 || wip=localhost:8080
 
   for resource in $1; do
     case "${1}" in
@@ -198,7 +198,7 @@ package() {
 
   ./bin/build.sh -b true -p ${profile}
 
-  if [ "$OS" == "OSX" ]; then
+  if [ "${WASABI_OS}" == "OSX" ]; then
     (export VAGRANT_CWD=./bin; vagrant up)
     (export VAGRANT_CWD=./bin; vagrant ssh -c "cd wasabi; mvn dependency:resolve")
   else
@@ -208,7 +208,7 @@ package() {
 
   beerMe 10
 
-  if [ "$OS" == "OSX" ]; then
+  if [ "${WASABI_OS}" == "OSX" ]; then
     (export VAGRANT_CWD=./bin; vagrant ssh -c "cd wasabi; ./bin/fpm.sh -p ${profile}")
   else
     ./bin/fpm.sh -p ${profile}
@@ -235,7 +235,7 @@ package() {
     done; \
     sed -i '' -e "s|http://localhost:8080|${server}|g" target/constants.json 2>/dev/null; \
     sed -i '' -e "s|VERSIONLOC|${version}|g" target/app/index.html 2>/dev/null; \
-    if [ "$OS" == "OSX" ]; then \
+    if [ "${WASABI_OS}" == "OSX" ]; then \
       (cd target; \
         npm install; \
         bower install; \
@@ -256,7 +256,7 @@ package() {
       sed -i '' -e "s|\${application.http.content.directory}|${content}|g" target/build/${pkg}/before-remove.sh 2>/dev/null; \
     done)
 
-  if [ "$OS" == "OSX" ]; then
+  if [ "${WASABI_OS}" == "OSX" ]; then
     (export VAGRANT_CWD=./bin; vagrant ssh -c "cd wasabi/modules/ui; ./bin/fpm.sh -n ${name} -v ${version} -p ${profile}")
     (export VAGRANT_CWD=./bin; vagrant halt)
   fi
@@ -309,7 +309,7 @@ verify=${verify:=${verify_default}}
 sleep=${sleep:=${sleep_default}}
 
 [[ $# -eq 0 ]] && usage
-[ "$OS" == "OSX" ] && eval $(docker-machine env wasabi) 2>/dev/null
+[ "${WASABI_OS}" == "OSX" ] && eval $(docker-machine env wasabi) 2>/dev/null
 
 for command in ${@:$OPTIND}; do
   case "${command}" in

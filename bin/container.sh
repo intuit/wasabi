@@ -70,7 +70,7 @@ beerMe() {
 }
 
 start_docker() {
-  if [ "$OS" == "OSX" ]; then
+  if [ "${WASABI_OS}" == "OSX" ]; then
     docker-machine status ${project} >/dev/null 2>&1 || docker-machine create -d virtualbox ${project}
 
     dms=$(docker-machine status ${project})
@@ -82,7 +82,7 @@ start_docker() {
 }
 
 stop_docker() {
-  if [ "$OS" == "OSX" ]; then
+  if [ "${WASABI_OS}" == "OSX" ]; then
     dms=$(docker-machine status ${project})
 
     if [ "${dms}" == "Running" ]; then
@@ -93,7 +93,7 @@ stop_docker() {
 
 start_container() {
   start_docker
-  [ "$OS" == "OSX" ] && eval $(docker-machine env wasabi)
+  [ "${WASABI_OS}" == "OSX" ] && eval $(docker-machine env wasabi)
   docker network create --driver bridge ${docker_network} >/dev/null 2>&1
 
   cid=$(docker ps -aqf name=${1})
@@ -131,7 +131,7 @@ remove_container() {
   if [ ${container} ]; then
     stop_container ${container} >/dev/null 2>&1
     docker rm -fv ${container} >/dev/null 2>&1
-  elif [ "$OS" == "OSX" ]; then
+  elif [ "${WASABI_OS}" == "OSX" ]; then
     docker-machine rm -f ${project} >/dev/null 2>&1
     vboxmanage hostonlyif remove vboxnet0 >/dev/null 2>&1
   fi
@@ -141,7 +141,7 @@ start_wasabi() {
   start_docker
 
   id=$(fromPom modules/main development application.name)
-  [ "$OS" == "OSX" ] && mip=$(docker-machine ip ${project}) || mip=localhost
+  [ "${WASABI_OS}" == "OSX" ] && mip=$(docker-machine ip ${project}) || mip=localhost
 
   if [ "$(docker ps -aqf name=${project}-main)" = "" ]; then
 #  if [ "${verify}" = true ] || ! [ docker inspect ${project}-main >/dev/null 2>&1 ]; then
@@ -229,7 +229,7 @@ console_mysql() {
 }
 
 status() {
-  if [ "$OS" == "OSX" ]; then
+  if [ "${WASABI_OS}" == "OSX" ]; then
     docker-machine active 2>/dev/null | grep ${project} || usage "start ${project}" 1
   fi
 
@@ -261,7 +261,7 @@ verify=${verify:=${verify_default}}
 sleep=${sleep:=${sleep_default}}
 
 [[ $# -eq 0 ]] && usage
-[ "$OS" == "OSX" ] && eval $(docker-machine env ${project}) 2>/dev/null
+[ "${WASABI_OS}" == "OSX" ] && eval $(docker-machine env ${project}) 2>/dev/null
 
 for command in ${@:$OPTIND}; do
   case "${command}" in
