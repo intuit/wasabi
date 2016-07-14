@@ -535,7 +535,7 @@
          <type>jar</type>
          <licenses/>
          <downloadUrls>
-            <string>TBD</string>
+            <string>file:/Users/jwu/git/wasabi-core/modules/experiment-objects/../../repository/Hyrule/Hyrule/0.0.1/Hyrule-0.0.1.jar</string>
          </downloadUrls>
       </dependency>
       <dependency>
