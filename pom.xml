@@ -25,6 +25,8 @@ http://www.w3.org/2001/XMLSchema-instance">
     <version>1.0.20160714090217-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
+    <url>https://github.com/intuit/wasabi</url>
+    <description>Opinionated micro-service kernel.</description>
 
     <properties>
         <default.time.zone>UTC</default.time.zone>
