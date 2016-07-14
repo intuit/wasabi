@@ -12,6 +12,7 @@ angular.module('wasabi.controllers').
                 disableSimple: false,
                 disableAdvanced: false,
                 ruleWidgetsDisabled: false,
+                resultsWidgetsDisabled: true,
                 descriptionLength: 0
             };
 
@@ -23,6 +24,7 @@ angular.module('wasabi.controllers').
             $scope.simpleRuleEditing = $cookies['showAdvancedSegmentationEditor'] == undefined || $cookies['showAdvancedSegmentationEditor'] !== 'true';
             $scope.downloadUrl = ConfigFactory.baseUrl() + '/experiments/' + $scope.experiment.id + '/assignments';
             $scope.rulesChangedNotSaved = true;
+            $scope.resultsChangedNotSaved = true;
             $scope.showingActionRates = true;
             $scope.plugins = $rootScope.plugins;
             $scope.supportEmail = supportEmail;
@@ -101,8 +103,20 @@ angular.module('wasabi.controllers').
                 return UtilitiesFactory.hasPermission(experiment.applicationName, PERMISSIONS.updatePerm);
             };
 
+            $scope.afterPause = function() {
+                // Prompt the user for results then load the experiment after they have provided them.
+                UtilitiesFactory.openResultsModal($scope.experiment, $scope.readOnly, $scope.loadExperiment);
+            };
+
             $scope.changeState = function (experiment, state) {
-                UtilitiesFactory.changeState(experiment, state, $scope.loadExperiment);
+                var afterChangeActions = {
+                    // Transitioning to PAUSED, that is, stopping the experiment.  Prompt the user to enter their results.
+                    'PAUSED': $scope.afterPause,
+                    // In other cases, just load the experiment.
+                    'RUNNING': $scope.loadExperiment,
+                    'TERMINATED': $scope.loadExperiment
+                };
+                UtilitiesFactory.changeState(experiment, state, afterChangeActions);
             };
 
             $scope.deleteExperiment = function (experiment) {
@@ -207,6 +221,10 @@ angular.module('wasabi.controllers').
             $scope.loadExperiment = function () {
                 ExperimentsFactory.show({id: $stateParams.experimentId}).$promise.then(function (experiment) {
                     $scope.experiment = experiment;
+
+                    // TODO: Remove this when have fields in data model
+                    $scope.experiment.results = 'My results.';
+                    $scope.experiment.hypothesisCorrect = 'yes';
 
                     $scope.rulesChangedNotSaved = $scope.checkForRule();
 
@@ -790,6 +808,47 @@ angular.module('wasabi.controllers').
                 );
             };
 
+            $scope.editResults = function() {
+                $scope.resultsChangedNotSaved = true;
+                $scope.data.resultsWidgetsDisabled = false;
+                $scope.$digest();
+                return {
+                    results: $scope.experiment.results,
+                    hypothesisCorrect: $scope.experiment.hypothesisCorrect
+                };
+            };
+
+            $scope.cancelResults = function(tempValue) {
+                $scope.resultsChangedNotSaved = false;
+                $scope.data.resultsWidgetsDisabled = true;
+                $scope.experiment.results = tempValue.results;
+                $scope.experiment.hypothesisCorrect = tempValue.hypothesisCorrect;
+                $scope.$digest();
+            };
+
+            $scope.saveResults = function(newValue) {
+                var experiment = $scope.experiment;
+                $scope.data.resultsWidgetsDisabled = true;
+                $scope.$digest();
+/* TODO: enable this
+                ExperimentsFactory.update({
+                    id: experiment.id,
+                    results: experiment.results,
+                    hypothesisCorrect: experiment.hypothesisCorrect
+                }).$promise.then(function () {
+                        UtilitiesFactory.trackEvent('saveItemSuccess',
+                            {key: 'dialog_name', value: 'saveResultsFromDetails'},
+                            {key: 'application_name', value: experiment.applicationName},
+                            {key: 'item_id', value: experiment.id},
+                            {key: 'item_label', value: experiment.label});
+                    },
+                    function(response) {
+                        UtilitiesFactory.handleGlobalError(response);
+                    }
+                );
+*/
+            };
+
             $scope.onDescriptionChange = function() {
                 $scope.data.descriptionLength = $('#experimentDescription').text().length;
                 $scope.$digest();
@@ -810,8 +869,19 @@ angular.module('wasabi.controllers').
 
             $scope.saveDescription = function(newValue) {
                 var newDesc = $.trim(newValue);
-                if (newDesc.length > 256) {
-                    DialogsFactory.alertDialog('The description must be 256 characters or less.', 'Description Too Long', function() {});
+                if (newDesc.length > 256 || newDesc.length <= 0) {
+                    if (newDesc.length <= 0) {
+                        DialogsFactory.alertDialog('You must provide a hypothesis/description.', 'Missing Hypothesis/Description', function() {});
+                    }
+                    else {
+                        DialogsFactory.alertDialog('The hypothesis/description must be 256 characters or less.', 'Hypothesis/Description Too Long', function() {});
+                    }
+                    // This will cause the dynamicEdit widget to go back into Edit mode.
+                    $('#descriptionToolbar .dynamicEdit').click();
+                    return false;
+                }
+                if (newDesc.length <= 0) {
+                    DialogsFactory.alertDialog('You must provide a hypothesis/description.', 'Missing Hypothesis/Description', function() {});
                     // This will cause the dynamicEdit widget to go back into Edit mode.
                     $('#descriptionToolbar .dynamicEdit').click();
                     return false;
@@ -1041,6 +1111,10 @@ angular.module('wasabi.controllers').
                 });
             };
 
+
+            $scope.openResultsModal = function () {
+                UtilitiesFactory.openResultsModal($scope.experiment, $scope.readOnly, $scope.loadExperiment);
+            };
 
             $scope.openPluginModal = function(plugin) {
                 UtilitiesFactory.openPluginModal(plugin, $scope.experiment);
