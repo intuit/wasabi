@@ -185,9 +185,9 @@ the `RetryListener`, which is necessary for `RetryTest`-annotations to work.
 A typical test class should look like this:
 
 ```java
-package com.intuit.idea.abntest.tests.service;
+package com.intuit.wasabi.tests.service;
 
-import com.intuit.idea.abntest.tests.library.TestBase;
+import com.intuit.wasabi.tests.library.TestBase;
 
 /**
  * A simple integration test.
@@ -290,7 +290,7 @@ in the same suite file.
 <suite name="SmokeTest">
     <test name="SmokeTest">
         <classes>
-            <class name="com.intuit.idea.abntest.tests.service.SmokeTest" />
+            <class name="com.intuit.wasabi.tests.service.SmokeTest" />
         </classes>
     </test>
 </suite>
@@ -363,7 +363,7 @@ Alternatively it is possible to add listeners via the TestNG xml at suite-level:
 ```xml
 <suite name="RetryTest">
     <listeners>
-        <listener class-name="com.intuit.idea.abntest.tests.library.util.RetryListener" />
+        <listener class-name="com.intuit.wasabi.tests.library.util.RetryListener" />
     </listeners>
     <!-- ... -->
 </suite>
@@ -470,7 +470,7 @@ For a complete test you should try to stick to the following pattern:
 <suite name="myTestSuite">
     <!-- If you want to allow for test retries, supply the following listener: -->
     <listeners>
-        <listener class-name="com.intuit.idea.abntest.tests.library.util.RetryListener" />
+        <listener class-name="com.intuit.wasabi.tests.library.util.RetryListener" />
     </listeners>
     
     <!-- If you have parameters for the test, supply them like this: -->
@@ -479,7 +479,7 @@ For a complete test you should try to stick to the following pattern:
     <!-- This is the real test -->
     <test name="myTest">
         <classes>
-            <class name="com.intuit.idea.abntest.tests.service.MyTest" />
+            <class name="com.intuit.wasabi.tests.service.MyTest" />
         </classes>
     </test>
 </suite>
@@ -488,13 +488,13 @@ For a complete test you should try to stick to the following pattern:
 ###`MyTest.java`
 
 ```java
-package com.intuit.idea.abntest.tests.service;
+package com.intuit.wasabi.tests.service;
 
 import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import com.intuit.idea.abntest.tests.library.TestBase;
-import com.intuit.idea.abntest.tests.library.util.RetryAnalyzer;
+import com.intuit.wasabi.tests.library.TestBase;
+import com.intuit.wasabi.tests.library.util.RetryAnalyzer;
 
 /**
  * MyTest is a small demo test.
@@ -577,10 +577,10 @@ custom objects this is not the case, those default to null - and thus are ignore
 A basic template is provided here:
 
 ```java
-package com.intuit.idea.abntest.tests.model;
+package com.intuit.wasabi.tests.model;
 
-import com.intuit.idea.abntest.tests.library.util.serialstrategies.DefaultNameExclusionStrategy;
-import com.intuit.idea.abntest.tests.library.util.serialstrategies.SerializationStrategy;
+import com.intuit.wasabi.tests.library.util.serialstrategies.DefaultNameExclusionStrategy;
+import com.intuit.wasabi.tests.library.util.serialstrategies.SerializationStrategy;
 
 public class NewItem extends ModelItem {
     /** The serialization strategy for comparisons and JSON serialization. */

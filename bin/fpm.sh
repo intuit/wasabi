@@ -137,7 +137,9 @@ for module in "$modules"; do
     --before-remove extra-resources/service/[PKG]/before-remove.sh\
     --after-remove extra-resources/service/[PKG]/after-remove.sh"
 
-  for pkg in "deb" "rpm"; do
+  # TODO: u/g fpm 1.4.0 to support deb
+  # for pkg in "deb" "rpm"; do
+  for pkg in "rpm"; do
     fpm="${!pkg} $common `echo $scripts | sed -e "s/\[PKG\]/${pkg}/g"` $depends $resources"
     (cd modules/$module/target; eval fpm $fpm) || exitOnError "failed to build rpm: $module"
   done
