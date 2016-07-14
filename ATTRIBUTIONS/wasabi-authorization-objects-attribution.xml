@@ -1118,7 +1118,7 @@
          <name>wasabi-authentication-objects</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-authentication-objects</artifactId>
-         <version>1.0.20160627222942-SNAPSHOT</version>
+         <version>1.0.20160714090217-SNAPSHOT</version>
          <type>jar</type>
          <licenses>
             <license>
@@ -1132,7 +1132,7 @@
          <name>wasabi-experiment-objects</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-experiment-objects</artifactId>
-         <version>1.0.20160627222942-SNAPSHOT</version>
+         <version>1.0.20160714090217-SNAPSHOT</version>
          <type>jar</type>
          <licenses>
             <license>

@@ -605,7 +605,7 @@
          <name>autumn-api</name>
          <groupId>com.intuit.autumn</groupId>
          <artifactId>autumn-api</artifactId>
-         <version>1.0.20160626031951</version>
+         <version>1.0.20160714060618</version>
          <projectUrl>https://github.com/intuit/Autumn/autumn-api</projectUrl>
          <type>jar</type>
          <licenses>
@@ -615,14 +615,14 @@
             </license>
          </licenses>
          <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/com/intuit/autumn/autumn-api/1.0.20160626031951/autumn-api-1.0.20160626031951.jar</string>
+            <string>https://repo.maven.apache.org/maven2/com/intuit/autumn/autumn-api/1.0.20160714060618/autumn-api-1.0.20160714060618.jar</string>
          </downloadUrls>
       </dependency>
       <dependency>
          <name>autumn-client</name>
          <groupId>com.intuit.autumn</groupId>
          <artifactId>autumn-client</artifactId>
-         <version>1.0.20160626031951</version>
+         <version>1.0.20160714060618</version>
          <projectUrl>https://github.com/intuit/Autumn/autumn-client</projectUrl>
          <type>jar</type>
          <licenses>
@@ -632,14 +632,14 @@
             </license>
          </licenses>
          <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/com/intuit/autumn/autumn-client/1.0.20160626031951/autumn-client-1.0.20160626031951.jar</string>
+            <string>https://repo.maven.apache.org/maven2/com/intuit/autumn/autumn-client/1.0.20160714060618/autumn-client-1.0.20160714060618.jar</string>
          </downloadUrls>
       </dependency>
       <dependency>
          <name>autumn-manage</name>
          <groupId>com.intuit.autumn</groupId>
          <artifactId>autumn-manage</artifactId>
-         <version>1.0.20160626031951</version>
+         <version>1.0.20160714060618</version>
          <projectUrl>https://github.com/intuit/Autumn/autumn-manage</projectUrl>
          <type>jar</type>
          <licenses>
@@ -649,14 +649,14 @@
             </license>
          </licenses>
          <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/com/intuit/autumn/autumn-manage/1.0.20160626031951/autumn-manage-1.0.20160626031951.jar</string>
+            <string>https://repo.maven.apache.org/maven2/com/intuit/autumn/autumn-manage/1.0.20160714060618/autumn-manage-1.0.20160714060618.jar</string>
          </downloadUrls>
       </dependency>
       <dependency>
          <name>autumn-metrics</name>
          <groupId>com.intuit.autumn</groupId>
          <artifactId>autumn-metrics</artifactId>
-         <version>1.0.20160626031951</version>
+         <version>1.0.20160714060618</version>
          <projectUrl>https://github.com/intuit/Autumn/autumn-metrics</projectUrl>
          <type>jar</type>
          <licenses>
@@ -666,14 +666,14 @@
             </license>
          </licenses>
          <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/com/intuit/autumn/autumn-metrics/1.0.20160626031951/autumn-metrics-1.0.20160626031951.jar</string>
+            <string>https://repo.maven.apache.org/maven2/com/intuit/autumn/autumn-metrics/1.0.20160714060618/autumn-metrics-1.0.20160714060618.jar</string>
          </downloadUrls>
       </dependency>
       <dependency>
          <name>autumn-service</name>
          <groupId>com.intuit.autumn</groupId>
          <artifactId>autumn-service</artifactId>
-         <version>1.0.20160626031951</version>
+         <version>1.0.20160714060618</version>
          <projectUrl>https://github.com/intuit/Autumn/autumn-service</projectUrl>
          <type>jar</type>
          <licenses>
@@ -683,14 +683,14 @@
             </license>
          </licenses>
          <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/com/intuit/autumn/autumn-service/1.0.20160626031951/autumn-service-1.0.20160626031951.jar</string>
+            <string>https://repo.maven.apache.org/maven2/com/intuit/autumn/autumn-service/1.0.20160714060618/autumn-service-1.0.20160714060618.jar</string>
          </downloadUrls>
       </dependency>
       <dependency>
          <name>autumn-utils</name>
          <groupId>com.intuit.autumn</groupId>
          <artifactId>autumn-utils</artifactId>
-         <version>1.0.20160626031951</version>
+         <version>1.0.20160714060618</version>
          <projectUrl>https://github.com/intuit/Autumn/autumn-utils</projectUrl>
          <type>jar</type>
          <licenses>
@@ -700,14 +700,14 @@
             </license>
          </licenses>
          <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/com/intuit/autumn/autumn-utils/1.0.20160626031951/autumn-utils-1.0.20160626031951.jar</string>
+            <string>https://repo.maven.apache.org/maven2/com/intuit/autumn/autumn-utils/1.0.20160714060618/autumn-utils-1.0.20160714060618.jar</string>
          </downloadUrls>
       </dependency>
       <dependency>
          <name>autumn-web</name>
          <groupId>com.intuit.autumn</groupId>
          <artifactId>autumn-web</artifactId>
-         <version>1.0.20160626031951</version>
+         <version>1.0.20160714060618</version>
          <projectUrl>https://github.com/intuit/Autumn/autumn-web</projectUrl>
          <type>jar</type>
          <licenses>
@@ -717,7 +717,7 @@
             </license>
          </licenses>
          <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/com/intuit/autumn/autumn-web/1.0.20160626031951/autumn-web-1.0.20160626031951.jar</string>
+            <string>https://repo.maven.apache.org/maven2/com/intuit/autumn/autumn-web/1.0.20160714060618/autumn-web-1.0.20160714060618.jar</string>
          </downloadUrls>
       </dependency>
       <dependency>
@@ -3050,7 +3050,7 @@
          <name>wasabi-analytics</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-analytics</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160714090217-SNAPSHOT</version>
          <type>jar</type>
          <licenses>
             <license>
@@ -3064,7 +3064,7 @@
          <name>wasabi-analytics-objects</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-analytics-objects</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160714090217-SNAPSHOT</version>
          <type>jar</type>
          <licenses>
             <license>
@@ -3078,7 +3078,7 @@
          <name>wasabi-api</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-api</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160714090217-SNAPSHOT</version>
          <type>jar</type>
          <licenses>
             <license>
@@ -3092,7 +3092,7 @@
          <name>wasabi-assignment</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-assignment</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160714090217-SNAPSHOT</version>
          <type>jar</type>
          <licenses>
             <license>
@@ -3106,7 +3106,7 @@
          <name>wasabi-assignment-objects</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-assignment-objects</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160714090217-SNAPSHOT</version>
          <type>jar</type>
          <licenses>
             <license>
@@ -3120,7 +3120,7 @@
          <name>wasabi-auditlog</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-auditlog</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160714090217-SNAPSHOT</version>
          <type>jar</type>
          <licenses>
             <license>
@@ -3134,7 +3134,7 @@
          <name>wasabi-auditlog-objects</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-auditlog-objects</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160714090217-SNAPSHOT</version>
          <type>jar</type>
          <licenses>
             <license>
@@ -3148,7 +3148,7 @@
          <name>wasabi-authentication</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-authentication</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160714090217-SNAPSHOT</version>
          <type>jar</type>
          <licenses>
             <license>
@@ -3162,7 +3162,7 @@
          <name>wasabi-authentication-objects</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-authentication-objects</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160714090217-SNAPSHOT</version>
          <type>jar</type>
          <licenses>
             <license>
@@ -3176,7 +3176,7 @@
          <name>wasabi-authorization</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-authorization</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160714090217-SNAPSHOT</version>
          <type>jar</type>
          <licenses>
             <license>
@@ -3190,7 +3190,7 @@
          <name>wasabi-authorization-objects</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-authorization-objects</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160714090217-SNAPSHOT</version>
          <type>jar</type>
          <licenses>
             <license>
@@ -3204,7 +3204,7 @@
          <name>wasabi-cassandra</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-cassandra</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160714090217-SNAPSHOT</version>
          <type>jar</type>
          <licenses>
             <license>
@@ -3218,7 +3218,7 @@
          <name>wasabi-database</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-database</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160714090217-SNAPSHOT</version>
          <type>jar</type>
          <licenses>
             <license>
@@ -3232,7 +3232,7 @@
          <name>wasabi-email</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-email</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160714090217-SNAPSHOT</version>
          <type>jar</type>
          <licenses>
             <license>
@@ -3246,7 +3246,7 @@
          <name>wasabi-event</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-event</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160714090217-SNAPSHOT</version>
          <type>jar</type>
          <licenses>
             <license>
@@ -3260,7 +3260,7 @@
          <name>wasabi-event-objects</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-event-objects</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160714090217-SNAPSHOT</version>
          <type>jar</type>
          <licenses>
             <license>
@@ -3274,7 +3274,7 @@
          <name>wasabi-eventlog</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-eventlog</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160714090217-SNAPSHOT</version>
          <type>jar</type>
          <licenses>
             <license>
@@ -3288,7 +3288,7 @@
          <name>wasabi-exceptions</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-exceptions</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160714090217-SNAPSHOT</version>
          <type>jar</type>
          <licenses>
             <license>
@@ -3302,7 +3302,7 @@
          <name>wasabi-experiment</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-experiment</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160714090217-SNAPSHOT</version>
          <type>jar</type>
          <licenses>
             <license>
@@ -3316,7 +3316,7 @@
          <name>wasabi-experiment-objects</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-experiment-objects</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160714090217-SNAPSHOT</version>
          <type>jar</type>
          <licenses>
             <license>
@@ -3330,7 +3330,7 @@
          <name>wasabi-export</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-export</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160714090217-SNAPSHOT</version>
          <type>jar</type>
          <licenses>
             <license>
@@ -3344,7 +3344,7 @@
          <name>wasabi-feedback</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-feedback</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160714090217-SNAPSHOT</version>
          <type>jar</type>
          <licenses>
             <license>
@@ -3358,7 +3358,7 @@
          <name>wasabi-feedback-objects</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-feedback-objects</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160714090217-SNAPSHOT</version>
          <type>jar</type>
          <licenses>
             <license>
@@ -3372,7 +3372,7 @@
          <name>wasabi-repository</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-repository</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160714090217-SNAPSHOT</version>
          <type>jar</type>
          <licenses>
             <license>
@@ -3386,7 +3386,7 @@
          <name>wasabi-user-directory</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-user-directory</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160714090217-SNAPSHOT</version>
          <type>jar</type>
          <licenses>
             <license>
@@ -3400,7 +3400,7 @@
          <name>wasabi-util</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-util</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160714090217-SNAPSHOT</version>
          <type>jar</type>
          <licenses>
             <license>
