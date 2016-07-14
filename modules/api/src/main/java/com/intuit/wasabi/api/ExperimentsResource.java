@@ -58,6 +58,8 @@ import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.Response.Status.CREATED;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -280,6 +282,8 @@ public class ExperimentsResource {
         if (experiment == null) {
             throw new ExperimentNotFoundException(experimentID);
         }
+
+        assert isNotEmpty(experiment.getDescription()) : "No description/hypothesis found";
 
         if (!createNewApplication) {
             authorization.checkUserPermissions(userName, experiment.getApplicationName(), UPDATE);
@@ -843,7 +847,7 @@ public class ExperimentsResource {
     @ApiOperation(value = "Get list of mutually exclusive experiments",
             notes = "Shows list of all experiments, in all states, that are " +
                     "mutually exclusive with input experiment.")
-            //            response = ??, //todo: update with proper object in @ApiOperation
+    //            response = ??, //todo: update with proper object in @ApiOperation
     @Timed
     public Response getExclusions(@PathParam("experimentID")
                                   @ApiParam(value = "Experiment ID")
