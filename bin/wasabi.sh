@@ -15,8 +15,12 @@
 # limitations under the License.
 ###############################################################################
 
-formulas=("bash" "cask" "git" "maven" "python" "ruby" "node" "docker" "docker-machine")
-casks=("java" "vagrant" "virtualbox")
+[ -z "${WASABI_OS}" ] && export OS="OSX"
+
+formulas=('bash' 'cask' 'git' 'maven' 'python' 'ruby' 'node' 'docker')
+[ "${WASABI_OS}" == "OSX" ] && formulas+=('docker-machine')
+casks=('java' 'vagrant' 'virtualbox')
+# todo: docker(fpm), optionally include (vagrant, virtualbox)
 build_default=false
 endpoint_default=localhost:8080
 verify_default=false
@@ -24,10 +28,6 @@ sleep_default=30
 red=`tput setaf 9`
 green=`tput setaf 10`
 reset=`tput sgr0`
-
-if [ -z "$OS" ]; then
-  export OS="OSX"
-fi
 
 usage() {
   [ "${1}" ] && echo "${red}error: ${1}${reset}"
@@ -79,38 +79,40 @@ beerMe() {
 }
 
 bootstrap() {
-  if ! hash brew 2>/dev/null; then
-    echo "${green}installing homebrew ...${reset}"
+  if [ "${WASABI_OS}" == "OSX" ]; then
+    if ! hash brew 2>/dev/null; then
+      echo "${green}installing homebrew ...${reset}"
 
-    ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+      ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
-    echo "${green}installed homebrew${reset}"
+      echo "${green}installed homebrew${reset}"
+    fi
+
+    brew update
+    brew doctor
+    brew cleanup
+
+    echo "${green}installing dependencies: ${formulas[@]} ${casks[@]} ...${reset}"
+
+    for formula in "${formulas[@]}"; do
+      [[ ! $(brew list ${formula} 2>/dev/null) ]] && brew install ${formula} || brew upgrade ${formula} 2>/dev/null
+    done
+
+    for cask in "${casks[@]}"; do
+      [[ $(brew cask list ${cask} 2>/dev/null) ]] && brew cask uninstall --force ${cask} 2>/dev/null
+      brew cask install --force ${cask}
+    done
+
+    npm config set prefix $(brew --prefix)
+
+    for n in yo grunt-cli bower; do
+      [[ ! $(npm -g list 2>/dev/null | grep ${n}) ]] && npm -g install ${n}
+    done
+
+    [[ ! $(gem list | grep compass) ]] && gem install compass
+
+    echo "${green}installed dependencies: ${formulas[@]} ${casks[@]}${reset}"
   fi
-
-  brew update
-  brew doctor
-  brew cleanup
-
-  echo "${green}installing dependencies: ${formulas[@]} ${casks[@]} ...${reset}"
-
-  for formula in "${formulas[@]}"; do
-    [[ ! $(brew list ${formula} 2>/dev/null) ]] && brew install ${formula} || brew upgrade ${formula} 2>/dev/null
-  done
-
-  for cask in "${casks[@]}"; do
-    [[ $(brew cask list ${cask} 2>/dev/null) ]] && brew cask uninstall --force ${cask} 2>/dev/null
-    brew cask install --force ${cask}
-  done
-
-  npm config set prefix $(brew --prefix)
-
-  for n in yo grunt-cli bower; do
-    [[ ! $(npm -g list 2>/dev/null | grep ${n}) ]] && npm -g install ${n}
-  done
-
-  [[ ! $(gem list | grep compass) ]] && gem install compass
-
-  echo "${green}installed dependencies: ${formulas[@]} ${casks[@]}${reset}"
 }
 
 start() {
@@ -120,16 +122,17 @@ start() {
 }
 
 test() {
-  if [ ${endpoint} == ${endpoint_default} ]; then
-    endpoint=$(docker-machine ip wasabi):8080
-    [[ $? -ne 0 ]] && endpoint=${endpoint_default}
+  if [ "${WASABI_OS}" == "OSX" ]; then
+    if [ ${endpoint} == ${endpoint_default} ]; then
+      endpoint=$(docker-machine ip wasabi):8080
+      [[ $? -ne 0 ]] && endpoint=${endpoint_default}
+    fi
   fi
 
   sleepTime=${1:-sleep}
   cntr=0
 
   while (( cntr < ${sleepTime} )); do
-    echo "${endpoint}/api/v1/ping"
     curl ${endpoint}/api/v1/ping >/dev/null 2>&1
     [[ $? -eq 0 ]] && break
     [[ ${cntr} < ${sleepTime} ]] && usage "unable to ping application: ${endpoint}/api/v1/ping" 1
@@ -149,15 +152,16 @@ test() {
 }
 
 resource() {
+  [ "${WASABI_OS}" == "OSX" ] && wip=$(docker-machine ip wasabi):8080 || wip=localhost:8080
+
   for resource in $1; do
     case "${1}" in
       ui) [ ! -f ./modules/ui/dist/index.html ] && ./bin/build.sh
         ./bin/wasabi.sh status >/dev/null 2>&1 || ./bin/wasabi.sh start
-        open http://$(docker-machine ip wasabi):8080/index.html;;
+        open http://${wip}/index.html;;
       api) [[ ! -f ./modules/swagger-ui/target/swaggerui/index.html || \
         ! -f ./modules/api/target/generated/swagger-ui/swagger.json ]] && ./bin/build.sh
         ./bin/wasabi.sh status >/dev/null 2>&1 || ./bin/wasabi.sh start:docker
-        jip=$(docker-machine ip wasabi)
         ./bin/wasabi.sh remove:wasabi >/dev/null 2>&1
         profile=development
         module=main
@@ -166,11 +170,11 @@ resource() {
         version=$(fromPom . ${profile} project.version)
         id=${artifact}-${version}-${profile}
         content=${home}/${id}/content/ui/dist
-        sed -i '' "s/localhost/${jip}/g" ${content}/swagger/swaggerjson/swagger.json
+        sed -i '' "s/localhost:8080/${wip}/g" ${content}/swagger/swaggerjson/swagger.json
         sed -i '' "s/this.model.validatorUrl.*$/this.model.validatorUrl = null;/g" ${content}/swagger/swagger-ui.js
         ./bin/wasabi.sh start
         beerMe 6
-        open http://$(docker-machine ip wasabi):8080/swagger/index.html;;
+        open http://${wip}/swagger/index.html;;
       doc) [ ! -f ./target/site/apidocs/index.html ] && ./bin/build.sh
         open ./target/site/apidocs/index.html;;
       mysql|cassandra) ./bin/wasabi.sh status 2>/dev/null | grep wasabi-${1} 1>/dev/null || ./bin/wasabi.sh start
@@ -189,21 +193,22 @@ status() {
 }
 
 package() {
-
   profile_default_package=build
   profile=${profile:=${profile_default_package}}
 
   ./bin/build.sh -b true -p ${profile}
 
-  if [ "$OS" == "OSX" ]; then
+  if [ "${WASABI_OS}" == "OSX" ]; then
     (export VAGRANT_CWD=./bin; vagrant up)
     (export VAGRANT_CWD=./bin; vagrant ssh -c "cd wasabi; mvn dependency:resolve")
   else
     mvn install
     mvn dependency:resolve
   fi
+
   beerMe 10
-  if [ "$OS" == "OSX" ]; then
+
+  if [ "${WASABI_OS}" == "OSX" ]; then
     (export VAGRANT_CWD=./bin; vagrant ssh -c "cd wasabi; ./bin/fpm.sh -p ${profile}")
   else
     ./bin/fpm.sh -p ${profile}
@@ -230,14 +235,14 @@ package() {
     done; \
     sed -i '' -e "s|http://localhost:8080|${server}|g" target/constants.json 2>/dev/null; \
     sed -i '' -e "s|VERSIONLOC|${version}|g" target/app/index.html 2>/dev/null; \
-    if [ "$OS" == "OSX" ]; then \
-    (cd target; \
-      npm install; \
-      bower install; \
-      grunt clean; \
-      grunt build --target=develop --no-color); \
-#      grunt test); \
-    fi
+    if [ "${WASABI_OS}" == "OSX" ]; then \
+      (cd target; \
+        npm install; \
+        bower install; \
+        grunt clean; \
+        grunt build --target=develop --no-color); \
+#        grunt test); \
+    fi; \
     cp -r build target; \
     for pkg in deb rpm; do \
       sed -i '' -e "s|\${application.home}|${home}|g" target/build/${pkg}/before-install.sh 2>/dev/null; \
@@ -251,7 +256,7 @@ package() {
       sed -i '' -e "s|\${application.http.content.directory}|${content}|g" target/build/${pkg}/before-remove.sh 2>/dev/null; \
     done)
 
-  if [ "$OS" == "OSX" ]; then
+  if [ "${WASABI_OS}" == "OSX" ]; then
     (export VAGRANT_CWD=./bin; vagrant ssh -c "cd wasabi/modules/ui; ./bin/fpm.sh -n ${name} -v ${version} -p ${profile}")
     (export VAGRANT_CWD=./bin; vagrant halt)
   fi
@@ -304,28 +309,25 @@ verify=${verify:=${verify_default}}
 sleep=${sleep:=${sleep_default}}
 
 [[ $# -eq 0 ]] && usage
-
-if [ "$OS" == "OSX" ]; then
-  eval $(docker-machine env wasabi) 2>/dev/null
-fi
+[ "${WASABI_OS}" == "OSX" ] && eval $(docker-machine env wasabi) 2>/dev/null
 
 for command in ${@:$OPTIND}; do
   case "${command}" in
     bootstrap) bootstrap;;
-    start) start;;
+    start) command="start:cassandra,mysql,wasabi";&
     start:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for cmd in ${commands}; do start ${cmd}; done);;
+      start ${commands};;
     test) test;;
-    stop) stop;;
+    stop) command="";&
     stop:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for cmd in ${commands}; do stop ${cmd}; done);;
-    resource) command="resource:ui,api,doc,casssandra,mysql";;
+      stop ${commands};;
+    resource) command="resource:ui,api,doc,casssandra,mysql";&
     resource:*) commands=$(echo ${command} | cut -d ':' -f 2)
       (IFS=','; for cmd in ${commands}; do resource ${cmd}; done);;
     status) status;;
-    remove) remove;;
+    remove) command="";&
     remove:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for cmd in ${commands}; do remove ${cmd}; done);;
+      remove ${commands};;
     package) package;;
     release) release;;
     release:*) commands=$(echo ${command} | cut -d ':' -f 2)
