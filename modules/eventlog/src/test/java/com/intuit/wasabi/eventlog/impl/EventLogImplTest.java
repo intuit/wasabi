@@ -19,6 +19,7 @@ import com.intuit.wasabi.eventlog.EventLogListener;
 import com.intuit.wasabi.eventlog.events.EventLogEvent;
 import com.intuit.wasabi.eventlog.events.SimpleEvent;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -261,6 +262,7 @@ public class EventLogImplTest {
         eventLogThread.interrupt();
     }
 
+    @Ignore("https://github.com/intuit/wasabi/issues/45")
     @Test
     public void testRunFinally() throws Exception {
         EventLogListener eventLogListener = Mockito.mock(EventLogListener.class);
