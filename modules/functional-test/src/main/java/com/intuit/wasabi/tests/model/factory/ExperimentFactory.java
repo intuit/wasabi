@@ -26,12 +26,12 @@ import com.intuit.wasabi.tests.library.util.TestUtils;
 public class ExperimentFactory {
 
     public static String USER_ID = "admin";
-    
+
     /**
      * Only used to create unique Experiment labels.
      */
     private static int internalId = 0;
-    
+
     static {
         if (System.getProperty("user-name") != null)
             USER_ID = System.getProperty("user-name");
@@ -63,7 +63,7 @@ public class ExperimentFactory {
         experiment.description = "A sample Experiment description.";
         return experiment;
     }
-    
+
     /**
      * Creates a basic Experiment with the required default values and the optional value
      * rule. (No ID!)
@@ -89,6 +89,7 @@ public class ExperimentFactory {
     public static Experiment createCompleteExperiment() {
         Experiment experiment = ExperimentFactory.createExperimentWithRule();
         experiment.description = "A sample Experiment description.";
+        experiment.results = "Sample experiment results";
         return experiment;
     }
 
@@ -102,3 +103,4 @@ public class ExperimentFactory {
         return new GsonBuilder().create().fromJson(json, Experiment.class);
     }
 }
+
