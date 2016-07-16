@@ -697,22 +697,6 @@ public class RollUpIntegrationTest extends TestBase {
 		}
 	}
 
-	/**
-	 * Note - This test validates that the rollup counts are correct. The steps
-	 * involved in this test are :
-	 * <ol>
-	 * <li>Check counts before rollup table update
-	 * <li>Insert non cumulative counts for events and impression into roll up
-	 * table
-	 * <li>Insert cumulative counts for events/impressions into roll up table
-	 * <li>Insert non-cumulative counts for events by action into rollup table
-	 * <li>Insert cumulative counts for events by action into rollup table
-	 * <li>Get counts for experiment
-	 * <li>Compare the counts with before counts
-	 * </ol>
-	 * 
-	 * @throws Exception
-	 */
 	@Test(dependsOnMethods = { "t_PostImpressionTomorrowQA" })
 	public void t_PostRollUpsForTomorrow() throws Exception {
 
@@ -768,6 +752,19 @@ public class RollUpIntegrationTest extends TestBase {
 					+ countsAfterProd + "\nShould be equal");
 	}
 
+	/**
+	 * Note - This method prepares the mysql rollup table for action and events. The steps
+	 * involved in preparing the roll up table are :
+	 * <ol>
+	 * <li>Insert non cumulative counts for events and impression into roll up
+	 * table
+	 * <li>Insert cumulative counts for events and impressions into roll up table
+	 * <li>Insert non-cumulative counts for events by action into rollup table
+	 * <li>Insert cumulative counts for events by action into rollup table
+	 * </ol>
+	 * 
+	 * @throws Exception
+	 */
 	protected void prepareRollUpTable() throws SQLException {
 		String experimentId = experiment.id.replace("-", "").toUpperCase();
 
