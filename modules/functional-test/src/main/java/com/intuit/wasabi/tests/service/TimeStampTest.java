@@ -42,12 +42,10 @@ import java.util.Map;
 import static com.intuit.wasabi.tests.model.factory.ExperimentFactory.createFromJSONString;
 import static com.intuit.wasabi.tests.model.factory.UserFactory.createUser;
 import static java.text.MessageFormat.format;
+import static javax.ws.rs.core.Response.Status.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.slf4j.LoggerFactory.getLogger;
-import static javax.ws.rs.core.Response.Status.CREATED;
-import static javax.ws.rs.core.Response.Status.OK;
-import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 
 /**
  * The TimeStamp test creates an experiment and bucket, assigns a user, and checks to see if the correct
@@ -55,25 +53,31 @@ import static javax.ws.rs.core.Response.Status.NO_CONTENT;
  */
 public class TimeStampTest extends TestBase {
     private static final Logger LOGGER = getLogger(BatchRuleTest.class);
+
     private static final String COUNT_ERROR_MESSAGE = "Impression count does not match count of timestamps";
     private static final String TIMING_ERROR_MESSAGE = "Found impressions after expected time";
+    private static final String IMPRESSION = "IMPRESSION";
+
+    private static final String EXPERIMENT_START = "2013-01-01T00:00:00+0000";
     private static final String TIME_AFTER_IMPRESSIONS = "2013-09-21T10:00:00Z";
     private static final String TIME_BEFORE_IMPRESSIONS = "2013-09-21T08:00:00Z";
-    private static final String IMPRESSION = "IMPRESSION";
+    private static final String TOMORROW = TestUtils.relativeTimeString(1);
+
     private static final String TIMESTAMP_USER = "timestamp_user";
     private static final List<Experiment> validExperimentsLists = new ArrayList<>();
-    private Map<User, Assignment> assignments = new HashMap<>();
-    private static final Map<String, AnalyticsParameters> paramsMap = new HashMap<>();
-    private List<String> timeStamps;
     private static final List<String> impressionAction = new ArrayList<>();
+    private static final Map<User, Assignment> assignments = new HashMap<>();
+
     private static User outUser = null;
+    private static List<String> timeStamps;
+    private AnalyticsParameters params;
 
     @DataProvider
     public Object[][] sampleExperiment() {
         String label = "timestampTest_" + System.currentTimeMillis();
         Application application = new Application("LUA_timestamp");
-        String startTime = "2013-01-01T00:00:00+0000";
-        String endTime = TestUtils.relativeTimeString(1);
+        String startTime = EXPERIMENT_START;
+        String endTime = TOMORROW;
         Double samplingPercent = 1.0;
         Experiment experiment = new Experiment(label, application, startTime, endTime, samplingPercent);
         return new Object[][]{
@@ -93,7 +97,8 @@ public class TimeStampTest extends TestBase {
     @Test(dependsOnMethods = {"setupExperiment"})
     public void setupBucketsAndStartExperiment() {
         // Create bucket with 100% allocation and change experiment state to running
-        String greenBucket = "{\"label\": \"green\", \"allocationPercent\": 1.0, \"isControl\": true, \"description\": \"Green buy button\"}";
+        String greenBucket = "{\"label\": \"green\", \"allocationPercent\": 1.0, " +
+                "\"isControl\": true, \"description\": \"Green buy button\"}";
         for (Experiment experiment : validExperimentsLists) {
             response = apiServerConnector.doPost("/experiments/" + experiment.id + "/buckets", greenBucket);
             assertThat(response.getStatusCode(), is(CREATED.getStatusCode()));
@@ -110,14 +115,11 @@ public class TimeStampTest extends TestBase {
     @Test(dependsOnMethods = {"setupImpressionAction"})
     public void setupParams() {
         // Setup params for queries with different forms of timestamp to test time parsing in Analytics API as well
-        AnalyticsParameters params = new AnalyticsParameters();
+        params = new AnalyticsParameters();
         params.actions = impressionAction;
         params.confidenceLevel = 0.999d;
-        for (Experiment experiment : validExperimentsLists) {
-            params.fromTime = experiment.startTime;
-            params.toTime = experiment.endTime;
-            paramsMap.put(experiment.id, params);
-        }
+        params.fromTime = EXPERIMENT_START;
+        params.toTime = TOMORROW;
     }
 
     @Test
@@ -143,8 +145,13 @@ public class TimeStampTest extends TestBase {
         outUser = createUser(username);
     }
 
+    @Test
+    public void assignUser() {
+    }
+
     // Ensures that the correct amount of impressions are being registered with respect to the timestamp and experiment
-    @Test(dependsOnMethods = {"setupBucketsAndStartExperiment", "setupParams", "setupTimestamps", "setupUser"})
+    @Test(dependsOnMethods = {"setupBucketsAndStartExperiment", "setupParams", "setupTimestamps", "setupUser",
+            "assignUser"})
     public void gatherImpressions() throws InterruptedException {
         for (Experiment experiment : validExperimentsLists) {
             // Assign user to experiment
@@ -164,15 +171,10 @@ public class TimeStampTest extends TestBase {
             }
             Map<String, Object> data = new HashMap<>();
             data.put("fromTime", "");
-            List<Event> events = postEvents(experiment,
-                    data, true,
-                    HttpStatus.SC_OK, apiServerConnector);
+            List<Event> events = postEvents(experiment, data, true, HttpStatus.SC_OK, apiServerConnector);
             assertThat(events.size(), is(timeStamps.size()));
-            for (Event event : events) {
-                assertThat(event.name, is(IMPRESSION));
-            }
+            for (Event event : events) assertThat(event.name, is(IMPRESSION));
             int impressionsCount;
-            AnalyticsParameters params = paramsMap.get(experiment.id);
 
             // Impression count at time = timestamp
             impressionsCount = postExperimentCounts(experiment, params).impressionCounts.eventCount;
