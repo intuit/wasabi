@@ -57,25 +57,25 @@ public class TimeStampTest extends TestBase {
     private static final String COUNT_ERROR_MESSAGE = "Impression count does not match count of timestamps";
     private static final String TIMING_ERROR_MESSAGE = "Found impressions after expected time";
     private static final String IMPRESSION = "IMPRESSION";
+    private static final String TIMESTAMP_USER = "timestamp_user";
 
     private static final String EXPERIMENT_START = "2013-01-01T00:00:00+0000";
     private static final String TIME_AFTER_IMPRESSIONS = "2013-09-21T10:00:00Z";
     private static final String TIME_BEFORE_IMPRESSIONS = "2013-09-21T08:00:00Z";
     private static final String TOMORROW = TestUtils.relativeTimeString(1);
 
-    private static final String TIMESTAMP_USER = "timestamp_user";
     private static final List<Experiment> validExperimentsLists = new ArrayList<>();
     private static final List<String> impressionAction = new ArrayList<>();
     private static final Map<User, Assignment> assignments = new HashMap<>();
 
     private static User outUser = null;
     private static List<String> timeStamps;
-    private AnalyticsParameters params;
+    private static AnalyticsParameters params;
 
     @DataProvider
     public Object[][] sampleExperiment() {
         String label = "timestampTest_" + System.currentTimeMillis();
-        Application application = new Application("LUA_timestamp");
+        Application application = new Application("Wasabi_timestamp_test");
         String startTime = EXPERIMENT_START;
         String endTime = TOMORROW;
         Double samplingPercent = 1.0;
@@ -118,7 +118,6 @@ public class TimeStampTest extends TestBase {
         params = new AnalyticsParameters();
         params.actions = impressionAction;
         params.confidenceLevel = 0.999d;
-        params.fromTime = EXPERIMENT_START;
         params.toTime = TOMORROW;
     }
 
@@ -145,15 +144,12 @@ public class TimeStampTest extends TestBase {
         outUser = createUser(username);
     }
 
-    @Test
-    public void assignUser() {
-    }
-
     // Ensures that the correct amount of impressions are being registered with respect to the timestamp and experiment
-    @Test(dependsOnMethods = {"setupBucketsAndStartExperiment", "setupParams", "setupTimestamps", "setupUser",
-            "assignUser"})
+    @Test(dependsOnMethods = {"setupBucketsAndStartExperiment", "setupParams", "setupTimestamps", "setupUser"})
     public void gatherImpressions() throws InterruptedException {
+        int impressionsCount;
         for (Experiment experiment : validExperimentsLists) {
+
             // Assign user to experiment
             Assignment assignment = getAssignment(experiment, outUser);
             assignments.put(outUser, assignment);
@@ -161,36 +157,41 @@ public class TimeStampTest extends TestBase {
                 assertThat("Assignment status wrong", assignment1.status, is("NEW_ASSIGNMENT"));
                 assertThat("Assignment.cache not true.", assignment1.cache, is(true));
             }
+
             // Post the impressions
-            for (String ts : timeStamps) {
+            for (String timestamp : timeStamps) {
                 Event event = EventFactory.createEvent();
                 event.name = IMPRESSION;
-                event.timestamp = ts;
+                event.timestamp = timestamp;
                 response = postEvent(event, experiment, outUser, CREATED.getStatusCode());
                 assertThat(response.getStatusCode(), is(CREATED.getStatusCode()));
             }
+
+            // Check that impressions were posted to experiment
             Map<String, Object> data = new HashMap<>();
             data.put("fromTime", "");
             List<Event> events = postEvents(experiment, data, true, HttpStatus.SC_OK, apiServerConnector);
             assertThat(events.size(), is(timeStamps.size()));
             for (Event event : events) assertThat(event.name, is(IMPRESSION));
-            int impressionsCount;
 
-            // Impression count at time = timestamp
+            // Check impression count starting at experiment start time
+            params.fromTime = EXPERIMENT_START;
             impressionsCount = postExperimentCounts(experiment, params).impressionCounts.eventCount;
             LOGGER.info("\t\timpressions = " + impressionsCount + ", len(timestamps) = " + timeStamps.size());
             assertThat(COUNT_ERROR_MESSAGE, impressionsCount, is(timeStamps.size()));
 
-            // Impression count before time = timestamp
+            // Check impression count after experiment start time but before impression time
             params.fromTime = TIME_BEFORE_IMPRESSIONS;
             impressionsCount = postExperimentCounts(experiment, params).impressionCounts.eventCount;
-            LOGGER.info("\t\tqueryTime = " + TIME_BEFORE_IMPRESSIONS + ", impressions = " + impressionsCount + ", len(timestamps) = " + timeStamps.size());
+            LOGGER.info("\t\tqueryTime = " + TIME_BEFORE_IMPRESSIONS + ", impressions = " + impressionsCount +
+                    ", len(timestamps) = " + timeStamps.size());
             assertThat(COUNT_ERROR_MESSAGE, impressionsCount, is(timeStamps.size()));
 
-            // Impression count after time = timestamp
+            // Check impression count after impression time
             params.fromTime = TIME_AFTER_IMPRESSIONS;
             impressionsCount = postExperimentCounts(experiment, params).impressionCounts.eventCount;
-            LOGGER.info("\t\tqueryTime = " + TIME_AFTER_IMPRESSIONS + ", impressions = " + impressionsCount + ", len(timestamps) = " + timeStamps.size());
+            LOGGER.info("\t\tqueryTime = " + TIME_AFTER_IMPRESSIONS + ", impressions = " + impressionsCount +
+                    ", len(timestamps) = " + timeStamps.size());
             assertThat(TIMING_ERROR_MESSAGE, impressionsCount, is(0));
         }
     }
