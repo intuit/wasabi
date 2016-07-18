@@ -21,6 +21,7 @@
 */
 
 package com.intuit.wasabi.tests.service;
+
 import com.intuit.wasabi.tests.library.TestBase;
 import com.intuit.wasabi.tests.library.util.TestUtils;
 import com.intuit.wasabi.tests.model.*;
@@ -32,10 +33,12 @@ import org.slf4j.Logger;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import static com.intuit.wasabi.tests.model.factory.ExperimentFactory.createFromJSONString;
 import static com.intuit.wasabi.tests.model.factory.UserFactory.createUser;
 import static java.text.MessageFormat.format;
@@ -52,10 +55,18 @@ import static javax.ws.rs.core.Response.Status.NO_CONTENT;
  */
 public class TimeStampTest extends TestBase {
     private static final Logger LOGGER = getLogger(BatchRuleTest.class);
-    public static final String COUNT_ERROR_MESSAGE = "Impression count does not match count of timestamps";
-    public static final String TIMING_ERROR_MESSAGE = "Found impressions after expected time";
-    private final List<Experiment> validExperimentsLists = new ArrayList<>();
+    private static final String COUNT_ERROR_MESSAGE = "Impression count does not match count of timestamps";
+    private static final String TIMING_ERROR_MESSAGE = "Found impressions after expected time";
+    private static final String TIME_AFTER_IMPRESSIONS = "2013-09-21T10:00:00Z";
+    private static final String TIME_BEFORE_IMPRESSIONS = "2013-09-21T08:00:00Z";
+    private static final String IMPRESSION = "IMPRESSION";
+    private static final String TIMESTAMP_USER = "timestamp_user";
+    private static final List<Experiment> validExperimentsLists = new ArrayList<>();
     private Map<User, Assignment> assignments = new HashMap<>();
+    private static final Map<String, AnalyticsParameters> paramsMap = new HashMap<>();
+    private List<String> timeStamps;
+    private static final List<String> impressionAction = new ArrayList<>();
+    private static User outUser = null;
 
     @DataProvider
     public Object[][] sampleExperiment() {
@@ -91,28 +102,51 @@ public class TimeStampTest extends TestBase {
         }
     }
 
-    // Ensures that the correct amount of impressions are being registered with respect to the timestamp and experiment
-    @Test(dependsOnMethods = {"setupBucketsAndStartExperiment"})
-    public void gatherImpressions() throws InterruptedException {
-        // Create fake user
-        String username = "timestamp_user";
-        User outUser = createUser(username);
+    @Test
+    public void setupImpressionAction() {
+        impressionAction.add(IMPRESSION);
+    }
 
+    @Test(dependsOnMethods = {"setupImpressionAction"})
+    public void setupParams() {
+        // Setup params for queries with different forms of timestamp to test time parsing in Analytics API as well
+        AnalyticsParameters params = new AnalyticsParameters();
+        params.actions = impressionAction;
+        params.confidenceLevel = 0.999d;
+        for (Experiment experiment : validExperimentsLists) {
+            params.fromTime = experiment.startTime;
+            params.toTime = experiment.endTime;
+            paramsMap.put(experiment.id, params);
+        }
+    }
+
+    @Test
+    public void setupTimestamps() {
         // Create identical timestamps in different formats
         String prefix = "2013-09-21T09:00:00";
         List<String> offSets = new ArrayList<>();
         offSets.add("Z");
         offSets.add("+0000");
         offSets.add("-0000");
-        List<String> timeStamps = new ArrayList<>();
+        timeStamps = new ArrayList<>();
         for (String offSet : offSets) {
             timeStamps.add(prefix + offSet);
         }
         // Create another, equal timestamp in PDT
         timeStamps.add("2013-09-21T02:00:00-0700");
+    }
 
+    @Test
+    public void setupUser() {
+        // Create fake user
+        String username = TIMESTAMP_USER;
+        outUser = createUser(username);
+    }
+
+    // Ensures that the correct amount of impressions are being registered with respect to the timestamp and experiment
+    @Test(dependsOnMethods = {"setupBucketsAndStartExperiment", "setupParams", "setupTimestamps", "setupUser"})
+    public void gatherImpressions() throws InterruptedException {
         for (Experiment experiment : validExperimentsLists) {
-
             // Assign user to experiment
             Assignment assignment = getAssignment(experiment, outUser);
             assignments.put(outUser, assignment);
@@ -120,12 +154,10 @@ public class TimeStampTest extends TestBase {
                 assertThat("Assignment status wrong", assignment1.status, is("NEW_ASSIGNMENT"));
                 assertThat("Assignment.cache not true.", assignment1.cache, is(true));
             }
-
             // Post the impressions
-            String actionImpression = "IMPRESSION";
             for (String ts : timeStamps) {
                 Event event = EventFactory.createEvent();
-                event.name = actionImpression;
+                event.name = IMPRESSION;
                 event.timestamp = ts;
                 response = postEvent(event, experiment, outUser, CREATED.getStatusCode());
                 assertThat(response.getStatusCode(), is(CREATED.getStatusCode()));
@@ -137,20 +169,10 @@ public class TimeStampTest extends TestBase {
                     HttpStatus.SC_OK, apiServerConnector);
             assertThat(events.size(), is(timeStamps.size()));
             for (Event event : events) {
-                assertThat(event.name, is(actionImpression));
+                assertThat(event.name, is(IMPRESSION));
             }
-            LOGGER.debug("\tWaiting (5s) for database to update...");
-            Thread.sleep(5000);
-
-            // Query with different forms of timestamp to test time parsing in Analytics API as well
-            List<String> types = new ArrayList<>();
-            types.add(actionImpression);
-            AnalyticsParameters params = new AnalyticsParameters();
-            params.confidenceLevel = 0.999d;
-            params.actions = types;
-            params.fromTime = experiment.startTime;
-            params.toTime = experiment.endTime;
             int impressionsCount;
+            AnalyticsParameters params = paramsMap.get(experiment.id);
 
             // Impression count at time = timestamp
             impressionsCount = postExperimentCounts(experiment, params).impressionCounts.eventCount;
@@ -158,18 +180,15 @@ public class TimeStampTest extends TestBase {
             assertThat(COUNT_ERROR_MESSAGE, impressionsCount, is(timeStamps.size()));
 
             // Impression count before time = timestamp
-            String queryTime;
-            queryTime = "2013-09-21T08:00:00Z";
-            params.fromTime = queryTime;
+            params.fromTime = TIME_BEFORE_IMPRESSIONS;
             impressionsCount = postExperimentCounts(experiment, params).impressionCounts.eventCount;
-            LOGGER.info("\t\tqueryTime = " + queryTime + ", impressions = " + impressionsCount + ", len(timestamps) = " + timeStamps.size());
+            LOGGER.info("\t\tqueryTime = " + TIME_BEFORE_IMPRESSIONS + ", impressions = " + impressionsCount + ", len(timestamps) = " + timeStamps.size());
             assertThat(COUNT_ERROR_MESSAGE, impressionsCount, is(timeStamps.size()));
 
             // Impression count after time = timestamp
-            queryTime = "2013-09-21T10:00:00Z";
-            params.fromTime = queryTime;
-            impressionsCount = postExperimentCounts(experiment, params).impressionCounts.uniqueUserCount;
-            LOGGER.info("\t\tqueryTime = " + queryTime + ", impressions = " + impressionsCount + ", len(timestamps) = " + timeStamps.size());
+            params.fromTime = TIME_AFTER_IMPRESSIONS;
+            impressionsCount = postExperimentCounts(experiment, params).impressionCounts.eventCount;
+            LOGGER.info("\t\tqueryTime = " + TIME_AFTER_IMPRESSIONS + ", impressions = " + impressionsCount + ", len(timestamps) = " + timeStamps.size());
             assertThat(TIMING_ERROR_MESSAGE, impressionsCount, is(0));
         }
     }
