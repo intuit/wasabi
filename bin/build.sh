@@ -91,7 +91,6 @@ artifact=$(fromPom ./modules/${module} ${profile} project.artifactId)
 version=$(fromPom . ${profile} project.version)
 home=./modules/${module}/target
 id=${artifact}-${version}-${profile}
-echo "Jamr: My id is==> $id"
 /bin/rm -rf ${home}/${id}
 mkdir -p ${home}/${id}/bin ${home}/${id}/conf ${home}/${id}/lib ${home}/${id}/logs
 

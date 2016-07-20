@@ -192,7 +192,6 @@ package() {
 
   profile_default_package=build
   profile=${profile:=${profile_default_package}}
-  echo "Jamr: Profile is ==> ${profile}" 
   ./bin/build.sh -b true -p ${profile}
 
   if [ "$OS" == "OSX" ]; then
