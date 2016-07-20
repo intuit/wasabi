@@ -132,14 +132,16 @@ if [ "${build}" = true ] && [ "${WASABI_OS}" == "OSX" ]; then
   	npm install -g yo grunt-cli bower grunt-contrib-compass
   	sudo gem install compass
   fi
+  (cd ./modules/ui && npm install && bower install && grunt build)
 fi
 
-(cd ./modules/ui && npm install && bower install && grunt build)
 
-content=${home}/${id}/content/ui/dist
+if [ "${WASABI_OS}" == "OSX" ]; then
+  content=${home}/${id}/content/ui/dist
 
-mkdir -p ${content}
-cp -R ./modules/ui/dist/ ${content}
-mkdir -p ${content}/swagger/swaggerjson
-cp -R ./modules/swagger-ui/target/swaggerui/ ${content}/swagger
-cp -R ./modules/api/target/generated/swagger-ui/swagger.json ${content}/swagger/swaggerjson
+  mkdir -p ${content}
+  cp -R ./modules/ui/dist/ ${content}
+  mkdir -p ${content}/swagger/swaggerjson
+  cp -R ./modules/swagger-ui/target/swaggerui/ ${content}/swagger
+  cp -R ./modules/api/target/generated/swagger-ui/swagger.json ${content}/swagger/swaggerjson
+fi
