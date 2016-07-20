@@ -22,9 +22,11 @@ http://www.w3.org/2001/XMLSchema-instance">
 
     <groupId>com.intuit.wasabi</groupId>
     <artifactId>wasabi</artifactId>
-    <version>1.0.20160627222942-SNAPSHOT</version>
+    <version>1.0.20160715100540-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
+    <url>https://github.com/intuit/wasabi</url>
+    <description>Opinionated micro-service kernel.</description>
 
     <properties>
         <default.time.zone>UTC</default.time.zone>
@@ -84,7 +86,8 @@ http://www.w3.org/2001/XMLSchema-instance">
         <assignment.decorator.enabled>false</assignment.decorator.enabled>
         <!-- FIXME: remove -->
         <assignment.decorator.service>http://decorator.example.com</assignment.decorator.service>
-        <assignment.decorator.class.name>com.intuit.wasabi.assignment.impl.DefaultAssignmentDecorator</assignment.decorator.class.name>
+        <assignment.decorator.class.name>com.intuit.wasabi.assignment.impl.DefaultAssignmentDecorator
+        </assignment.decorator.class.name>
         <assignments.class.name>com.intuit.wasabi.assignment.impl.AssignmentsImpl</assignments.class.name>
 
         <swaggerHost>localhost:8080</swaggerHost>
@@ -114,6 +117,9 @@ http://www.w3.org/2001/XMLSchema-instance">
         </profile>
         <profile>
             <id>sign</id>
+            <properties>
+                <application.profile>sign</application.profile>
+            </properties>
             <build>
                 <plugins>
                     <plugin>
@@ -354,6 +360,11 @@ http://www.w3.org/2001/XMLSchema-instance">
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>${jacoco.version}</version>
+                    <configuration>
+                        <excludes>
+                            <exclude>com/intuit/wasabi/tests/**/*.class</exclude>
+                        </excludes>
+                    </configuration>
                     <executions>
                         <execution>
                             <id>prepare-agent</id>
@@ -363,11 +374,6 @@ http://www.w3.org/2001/XMLSchema-instance">
                         </execution>
                     </executions>
                 </plugin>
-                <!--<plugin>-->
-                    <!--<groupId>org.jacoco</groupId>-->
-                    <!--<artifactId>jacoco-maven-plugin</artifactId>-->
-                    <!--<version>${jacoco.version}</version>-->
-                <!--</plugin>-->
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>cobertura-maven-plugin</artifactId>
@@ -376,6 +382,11 @@ http://www.w3.org/2001/XMLSchema-instance">
                         <format>xml</format>
                         <maxmem>256m</maxmem>
                         <aggregate>true</aggregate>
+                        <instrumentation>
+                            <excludes>
+                                <exclude>com/intuit/wasabi/tests/**/*.class</exclude>
+                            </excludes>
+                        </instrumentation>
                     </configuration>
                 </plugin>
                 <plugin>

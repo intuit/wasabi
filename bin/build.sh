@@ -91,6 +91,7 @@ artifact=$(fromPom ./modules/${module} ${profile} project.artifactId)
 version=$(fromPom . ${profile} project.version)
 home=./modules/${module}/target
 id=${artifact}-${version}-${profile}
+
 /bin/rm -rf ${home}/${id}
 mkdir -p ${home}/${id}/bin ${home}/${id}/conf ${home}/${id}/lib ${home}/${id}/logs
 
@@ -116,11 +117,14 @@ cp ./modules/repository/target/classes/cassandra_experiments.properties ${home}/
 cp ./modules/repository/target/classes/repository.properties ${home}/${id}/conf
 cp ./modules/user-directory/target/classes/userDirectory.properties ${home}/${id}/conf
 cp ${home}/${id}-all.jar ${home}/${id}/lib
+
 chmod 755 ${home}/${id}/bin/run
 chmod 755 ${home}/${id}/entrypoint.sh
 sed -i '' -e "s/chpst -u [^:]*:[^ ]* //" ${home}/${id}/bin/run 2>/dev/null
 
-if [ "${build}" = true ] && [ "$OS" == "OSX" ]; then
+if [ "${build}" = true ] && [ "${WASABI_OS}" == "OSX" ]; then
+  wip=$(docker-machine ip wasabi):8080
+  sed -i '' -e "s|http://localhost:8080|http://${wip}|g" constants.json 2>/dev/null
   brew list node
   if [[ $? -eq 1 ]]; then
   	echo "Node.js is not installed. Installing Node.js packages..."
@@ -128,14 +132,14 @@ if [ "${build}" = true ] && [ "$OS" == "OSX" ]; then
   	npm install -g yo grunt-cli bower grunt-contrib-compass
   	sudo gem install compass
   fi
-  (cd ./modules/ui && npm install && bower install && grunt build)
 fi
 
+(cd ./modules/ui && npm install && bower install && grunt build)
+
 content=${home}/${id}/content/ui/dist
-if [ "$OS" == "OSX" ]; then
-  mkdir -p ${content}
-  cp -R ./modules/ui/dist/ ${content}
-  mkdir -p ${content}/swagger/swaggerjson
-  cp -R ./modules/swagger-ui/target/swaggerui/ ${content}/swagger
-  cp -R ./modules/api/target/generated/swagger-ui/swagger.json ${content}/swagger/swaggerjson
-fi
+
+mkdir -p ${content}
+cp -R ./modules/ui/dist/ ${content}
+mkdir -p ${content}/swagger/swaggerjson
+cp -R ./modules/swagger-ui/target/swaggerui/ ${content}/swagger
+cp -R ./modules/api/target/generated/swagger-ui/swagger.json ${content}/swagger/swaggerjson

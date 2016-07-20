@@ -19,7 +19,7 @@ For examples on how to do it please refer to the email module or the auditlog mo
 You can adjust these parameters in the main pom.xml:
 
 ```xml
-<eventlog.class.name>com.intuit.idea.abntest.eventlog.impl.EventLogImpl</eventlog.class.name>
+<eventlog.class.name>com.intuit.wasabi.eventlog.impl</eventlog.class.name>
 <eventlog.poolsize.core>2</eventlog.poolsize.core>
 <eventlog.poolsize.max>4</eventlog.poolsize.max>
 ```

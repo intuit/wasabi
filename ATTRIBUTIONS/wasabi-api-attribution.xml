@@ -624,11 +624,11 @@
          </downloadUrls>
       </dependency>
       <dependency>
-         <name>autumn.api</name>
-         <groupId>com.intuit.data.autumn</groupId>
-         <artifactId>autumn.api</artifactId>
-         <version>1.0.20160515205816</version>
-         <projectUrl>https://github.com/intuit/Autumn/autumn.api</projectUrl>
+         <name>autumn-api</name>
+         <groupId>com.intuit.autumn</groupId>
+         <artifactId>autumn-api</artifactId>
+         <version>1.0.20160626031951</version>
+         <projectUrl>https://github.com/intuit/Autumn/autumn-api</projectUrl>
          <type>jar</type>
          <licenses>
             <license>
@@ -637,15 +637,15 @@
             </license>
          </licenses>
          <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/com/intuit/data/autumn/autumn.api/1.0.20160515205816/autumn.api-1.0.20160515205816.jar</string>
+            <string>https://repo.maven.apache.org/maven2/com/intuit/autumn/autumn-api/1.0.20160626031951/autumn-api-1.0.20160626031951.jar</string>
          </downloadUrls>
       </dependency>
       <dependency>
-         <name>autumn.client</name>
-         <groupId>com.intuit.data.autumn</groupId>
-         <artifactId>autumn.client</artifactId>
-         <version>1.0.20160515205816</version>
-         <projectUrl>https://github.com/intuit/Autumn/autumn.client</projectUrl>
+         <name>autumn-client</name>
+         <groupId>com.intuit.autumn</groupId>
+         <artifactId>autumn-client</artifactId>
+         <version>1.0.20160626031951</version>
+         <projectUrl>https://github.com/intuit/Autumn/autumn-client</projectUrl>
          <type>jar</type>
          <licenses>
             <license>
@@ -654,15 +654,15 @@
             </license>
          </licenses>
          <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/com/intuit/data/autumn/autumn.client/1.0.20160515205816/autumn.client-1.0.20160515205816.jar</string>
+            <string>https://repo.maven.apache.org/maven2/com/intuit/autumn/autumn-client/1.0.20160626031951/autumn-client-1.0.20160626031951.jar</string>
          </downloadUrls>
       </dependency>
       <dependency>
-         <name>autumn.manage</name>
-         <groupId>com.intuit.data.autumn</groupId>
-         <artifactId>autumn.manage</artifactId>
-         <version>1.0.20160515205816</version>
-         <projectUrl>https://github.com/intuit/Autumn/autumn.manage</projectUrl>
+         <name>autumn-manage</name>
+         <groupId>com.intuit.autumn</groupId>
+         <artifactId>autumn-manage</artifactId>
+         <version>1.0.20160626031951</version>
+         <projectUrl>https://github.com/intuit/Autumn/autumn-manage</projectUrl>
          <type>jar</type>
          <licenses>
             <license>
@@ -671,15 +671,15 @@
             </license>
          </licenses>
          <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/com/intuit/data/autumn/autumn.manage/1.0.20160515205816/autumn.manage-1.0.20160515205816.jar</string>
+            <string>https://repo.maven.apache.org/maven2/com/intuit/autumn/autumn-manage/1.0.20160626031951/autumn-manage-1.0.20160626031951.jar</string>
          </downloadUrls>
       </dependency>
       <dependency>
-         <name>autumn.utils</name>
-         <groupId>com.intuit.data.autumn</groupId>
-         <artifactId>autumn.utils</artifactId>
-         <version>1.0.20160515205816</version>
-         <projectUrl>https://github.com/intuit/Autumn/autumn.utils</projectUrl>
+         <name>autumn-utils</name>
+         <groupId>com.intuit.autumn</groupId>
+         <artifactId>autumn-utils</artifactId>
+         <version>1.0.20160626031951</version>
+         <projectUrl>https://github.com/intuit/Autumn/autumn-utils</projectUrl>
          <type>jar</type>
          <licenses>
             <license>
@@ -688,15 +688,15 @@
             </license>
          </licenses>
          <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/com/intuit/data/autumn/autumn.utils/1.0.20160515205816/autumn.utils-1.0.20160515205816.jar</string>
+            <string>https://repo.maven.apache.org/maven2/com/intuit/autumn/autumn-utils/1.0.20160626031951/autumn-utils-1.0.20160626031951.jar</string>
          </downloadUrls>
       </dependency>
       <dependency>
-         <name>autumn.web</name>
-         <groupId>com.intuit.data.autumn</groupId>
-         <artifactId>autumn.web</artifactId>
-         <version>1.0.20160515205816</version>
-         <projectUrl>https://github.com/intuit/Autumn/autumn.web</projectUrl>
+         <name>autumn-web</name>
+         <groupId>com.intuit.autumn</groupId>
+         <artifactId>autumn-web</artifactId>
+         <version>1.0.20160626031951</version>
+         <projectUrl>https://github.com/intuit/Autumn/autumn-web</projectUrl>
          <type>jar</type>
          <licenses>
             <license>
@@ -705,7 +705,7 @@
             </license>
          </licenses>
          <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/com/intuit/data/autumn/autumn.web/1.0.20160515205816/autumn.web-1.0.20160515205816.jar</string>
+            <string>https://repo.maven.apache.org/maven2/com/intuit/autumn/autumn-web/1.0.20160626031951/autumn-web-1.0.20160626031951.jar</string>
          </downloadUrls>
       </dependency>
       <dependency>
