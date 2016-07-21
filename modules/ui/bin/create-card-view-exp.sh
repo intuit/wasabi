@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export WASABI_SERVER=http://192.168.99.100:8080/api/v1
+export WASABI_SERVER=http://localhost:8080/api/v1
 # CHANGE THIS TO BE YOUR LOGIN
 export WASABI_LOGIN=admin
 export APP_NAME=WasabiUI

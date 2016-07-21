@@ -393,7 +393,7 @@ module.exports = function (grunt) {
             development: {
                 constants: {
                     supportEmail: 'you@example.com',
-                    apiHostBaseUrlValue: 'http://192.168.99.100:8080/api/v1'
+                    apiHostBaseUrlValue: 'http://localhost:8080/api/v1'
                 }
             }
         },
