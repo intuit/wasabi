@@ -221,10 +221,9 @@ angular.module('wasabi.controllers').
             $scope.loadExperiment = function () {
                 ExperimentsFactory.show({id: $stateParams.experimentId}).$promise.then(function (experiment) {
                     $scope.experiment = experiment;
-
-                    // TODO: Remove this when have fields in data model
-                    $scope.experiment.results = 'My results.';
-                    $scope.experiment.hypothesisCorrect = 'yes';
+                    if ($scope.experiment.hypothesisIsCorrect === null) {
+                        $scope.experiment.hypothesisIsCorrect = '';
+                    }
 
                     $scope.rulesChangedNotSaved = $scope.checkForRule();
 
@@ -814,7 +813,7 @@ angular.module('wasabi.controllers').
                 $scope.$digest();
                 return {
                     results: $scope.experiment.results,
-                    hypothesisCorrect: $scope.experiment.hypothesisCorrect
+                    hypothesisIsCorrect: $scope.experiment.hypothesisIsCorrect
                 };
             };
 
@@ -822,7 +821,7 @@ angular.module('wasabi.controllers').
                 $scope.resultsChangedNotSaved = false;
                 $scope.data.resultsWidgetsDisabled = true;
                 $scope.experiment.results = tempValue.results;
-                $scope.experiment.hypothesisCorrect = tempValue.hypothesisCorrect;
+                $scope.experiment.hypothesisIsCorrect = tempValue.hypothesisIsCorrect;
                 $scope.$digest();
             };
 
@@ -830,11 +829,11 @@ angular.module('wasabi.controllers').
                 var experiment = $scope.experiment;
                 $scope.data.resultsWidgetsDisabled = true;
                 $scope.$digest();
-/* TODO: enable this
+
                 ExperimentsFactory.update({
                     id: experiment.id,
                     results: experiment.results,
-                    hypothesisCorrect: experiment.hypothesisCorrect
+                    hypothesisIsCorrect: experiment.hypothesisIsCorrect
                 }).$promise.then(function () {
                         UtilitiesFactory.trackEvent('saveItemSuccess',
                             {key: 'dialog_name', value: 'saveResultsFromDetails'},
@@ -846,7 +845,6 @@ angular.module('wasabi.controllers').
                         UtilitiesFactory.handleGlobalError(response);
                     }
                 );
-*/
             };
 
             $scope.onDescriptionChange = function() {

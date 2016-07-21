@@ -6,11 +6,11 @@ angular.module('wasabi.controllers')
             function ($scope, $filter, $modalInstance, ExperimentsFactory, experiment, readOnly, UtilitiesFactory, $modal, ConfigFactory, DialogsFactory) {
 
                 $scope.experiment = experiment;
-                $scope.tmpResults = '';
-                $scope.tmpHypothesisCorrect = '';
 
                 $scope.originalResults = $scope.experiment.results;
-                $scope.originalHypothesisCorrect = $scope.experiment.hypothesisCorrect;
+                $scope.originalHypothesisCorrect = ($scope.experiment.hypothesisIsCorrect === null ? '' : $scope.experiment.hypothesisIsCorrect);
+                $scope.tmpResults = $scope.originalResults;
+                $scope.tmpHypothesisCorrect = $scope.originalHypothesisCorrect;
 
                 $scope.help = ConfigFactory.help;
                 $scope.readOnly = readOnly;
@@ -20,17 +20,15 @@ angular.module('wasabi.controllers')
                         $scope.originalHypothesisCorrect !== $scope.tmpHypothesisCorrect) {
                         // Save the new results values.
                         $scope.experiment.results = $scope.tmpResults;
-                        $scope.experiment.hypothesisCorrect = $scope.tmpHypothesisCorrect;
-/*
-                        ExperimentsFactory.update({id: $scope.experiment.id, results: $scope.experiment.results, hypothesisCorrect: $scope.experiment.hypothesisCorrect }).$promise.then(function () {
+                        $scope.experiment.hypothesisIsCorrect = $scope.tmpHypothesisCorrect;
+                        ExperimentsFactory.update({id: $scope.experiment.id, results: $scope.experiment.results, hypothesisIsCorrect: $scope.experiment.hypothesisIsCorrect }).$promise.then(function () {
                             UtilitiesFactory.trackEvent('updateItemSuccess',
                                 {key: 'dialog_name', value: 'updateExperimentResults'},
                                 {key: 'experiment_id', value: $scope.experiment.id},
-                                {key: 'item_value', value: $scope.experiment.results + '|' + $scope.experiment.hypothesisCorrect});
+                                {key: 'item_value', value: $scope.experiment.results + '|' + $scope.experiment.hypothesisIsCorrect});
                         }, function(response) {
                             UtilitiesFactory.handleGlobalError(response, 'Your experiment results could not be changed.');
                         });
-*/
                     }
                     $modalInstance.close();
                 };
