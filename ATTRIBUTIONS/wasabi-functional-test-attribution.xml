@@ -698,6 +698,23 @@
          </downloadUrls>
       </dependency>
       <dependency>
+         <name>jsr311-api</name>
+         <groupId>javax.ws.rs</groupId>
+         <artifactId>jsr311-api</artifactId>
+         <version>1.1.1</version>
+         <projectUrl>https://jsr311.dev.java.net</projectUrl>
+         <type>jar</type>
+         <licenses>
+            <license>
+               <name>CDDL License</name>
+               <url>http://www.opensource.org/licenses/cddl1.php</url>
+            </license>
+         </licenses>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/javax/ws/rs/jsr311-api/1.1.1/jsr311-api-1.1.1.jar</string>
+         </downloadUrls>
+      </dependency>
+      <dependency>
          <name>JUnit</name>
          <groupId>junit</groupId>
          <artifactId>junit</artifactId>
