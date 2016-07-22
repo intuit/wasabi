@@ -22,7 +22,8 @@ Learn more about how Wasabi can empower your team to move from hunches to action
 * **100% API Driven** - Compatible with any language and environment.
 * **Platform Agnostic** - A uniform, consistent experience across web, mobile, desktop, and also front-end, back-end.
 * **Get up and running in minutes** - Spin up your Wasabi docker in 5 minutes and be in production with the platform, instrumentation, and experiments within a day.
-* **It’s Free** - Don’t pay an arm and a leg for an enterprise-grade platform – the platform is free! 
+* **It’s Free** - Don’t pay an arm and a leg for an enterprise-grade platform – the platform is free!
+* **Extensible** - Easily integrates with your existing infrastructure, including analytics and corporate access systems.
 * **Real-time assignments** - Assign users into experiments in real-time, to preserve traffic for other parallel A/B tests.
 * **Cloud and on-premise** - Designed to live in the cloud or in your own data center.
 * **Analytics** - Core analytics functionality and metrics visualization out of the box. 
@@ -55,9 +56,15 @@ complete stack noting that at this time only OSX is supported.
 % ./bin/wasabi.sh bootstrap
 ```
 
+**Note**: if you have installed docker-native set the environment variable _'WASABI_OS'_
+
+```bash
+% export WASABI_OS=native
+``
+
 Installed tools include: [homebrew 0.9](http://brew.sh), [git 2](https://git-scm.com),
 [maven 3](https://maven.apache.org), [java 1.8](http://www.oracle.com/technetwork/java/javase/overview/index.html),
-[node 6](https://nodejs.org/en) and [python 2.7](https://www.python.org).
+[docker 1.12](https://docker.com), [node 6](https://nodejs.org/en) and [python 2.7](https://www.python.org).
 
 Similar tooling will work for Linux and Windows alike. Contribute a patch :)
 

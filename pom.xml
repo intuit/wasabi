@@ -22,9 +22,11 @@ http://www.w3.org/2001/XMLSchema-instance">
 
     <groupId>com.intuit.wasabi</groupId>
     <artifactId>wasabi</artifactId>
-    <version>1.0.20160701080732-SNAPSHOT</version>
+    <version>1.0.20160715100540-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
+    <url>https://github.com/intuit/wasabi</url>
+    <description>Opinionated micro-service kernel.</description>
 
     <properties>
         <default.time.zone>UTC</default.time.zone>
@@ -45,13 +47,13 @@ http://www.w3.org/2001/XMLSchema-instance">
         <http.proxy.host>http://insert.your.proxy.host.here</http.proxy.host>
         <http.proxy.port>80</http.proxy.port>
 
-        <mysql.host>localhost</mysql.host>
+        <mysql.host>192.168.99.100</mysql.host>
         <mysql.port>3306</mysql.port>
         <mysql.dbName>wasabi</mysql.dbName>
         <mysql.Args>verifyServerCertificate=false&amp;useSSL=false&amp;requireSSL=false&amp;autoReconnect=true&amp;autoReconnectForPools=true</mysql.Args>
 
         <cassandra.experiments.keyspaceName>wasabi_experiments</cassandra.experiments.keyspaceName>
-        <cassandra.experiments.nodeHosts>localhost</cassandra.experiments.nodeHosts>
+        <cassandra.experiments.nodeHosts>192.168.99.100</cassandra.experiments.nodeHosts>
         <cassandra.experiments.port>9160</cassandra.experiments.port>
         <cassandra.experiments.useSSL>false</cassandra.experiments.useSSL>
         <cassandra.experiments.defaultReadConsistency>CL_ONE</cassandra.experiments.defaultReadConsistency>
@@ -60,7 +62,7 @@ http://www.w3.org/2001/XMLSchema-instance">
         <cassandra.experiments.defaultWriteConsistency>CL_QUORUM</cassandra.experiments.defaultWriteConsistency>
         <cassandra.experiments.nodeDiscoveryType>NONE</cassandra.experiments.nodeDiscoveryType>
         <cassandra.experiments.connectionPoolType>ROUND_ROBIN</cassandra.experiments.connectionPoolType>
-        <cassandra.events.nodeHosts>localhost</cassandra.events.nodeHosts>
+        <cassandra.events.nodeHosts>192.168.99.100</cassandra.events.nodeHosts>
         <cassandra.events.port>9160</cassandra.events.port>
 
         <export.rest.assignment.web.class.name>com.intuit.wasabi.assignment.impl.NoopWebAssignmentEnvelope

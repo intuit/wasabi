@@ -1135,7 +1135,7 @@
          <type>jar</type>
          <licenses/>
          <downloadUrls>
-            <string>TBD</string>
+            <string>file:/Users/kagarwal/Workspace/wasabi/modules/authentication/../../repository/Hyrule/Hyrule/0.0.1/Hyrule-0.0.1.jar</string>
          </downloadUrls>
       </dependency>
       <dependency>
@@ -2132,7 +2132,8 @@
          <name>wasabi-analytics-objects</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-analytics-objects</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160715100540-SNAPSHOT</version>
+         <projectUrl>https://github.com/intuit/wasabi/modules/wasabi-analytics-objects</projectUrl>
          <type>jar</type>
          <licenses>
             <license>
@@ -2146,7 +2147,8 @@
          <name>wasabi-assignment-objects</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-assignment-objects</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160715100540-SNAPSHOT</version>
+         <projectUrl>https://github.com/intuit/wasabi/modules/wasabi-assignment-objects</projectUrl>
          <type>jar</type>
          <licenses>
             <license>
@@ -2160,7 +2162,8 @@
          <name>wasabi-auditlog-objects</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-auditlog-objects</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160715100540-SNAPSHOT</version>
+         <projectUrl>https://github.com/intuit/wasabi/modules/wasabi-auditlog-objects</projectUrl>
          <type>jar</type>
          <licenses>
             <license>
@@ -2174,7 +2177,8 @@
          <name>wasabi-authentication-objects</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-authentication-objects</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160715100540-SNAPSHOT</version>
+         <projectUrl>https://github.com/intuit/wasabi/modules/wasabi-authentication-objects</projectUrl>
          <type>jar</type>
          <licenses>
             <license>
@@ -2188,7 +2192,8 @@
          <name>wasabi-authorization-objects</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-authorization-objects</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160715100540-SNAPSHOT</version>
+         <projectUrl>https://github.com/intuit/wasabi/modules/wasabi-authorization-objects</projectUrl>
          <type>jar</type>
          <licenses>
             <license>
@@ -2202,7 +2207,8 @@
          <name>wasabi-cassandra</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-cassandra</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160715100540-SNAPSHOT</version>
+         <projectUrl>https://github.com/intuit/wasabi/modules/wasabi-cassandra</projectUrl>
          <type>jar</type>
          <licenses>
             <license>
@@ -2216,7 +2222,8 @@
          <name>wasabi-database</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-database</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160715100540-SNAPSHOT</version>
+         <projectUrl>https://github.com/intuit/wasabi/modules/wasabi-database</projectUrl>
          <type>jar</type>
          <licenses>
             <license>
@@ -2230,7 +2237,8 @@
          <name>wasabi-eventlog</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-eventlog</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160715100540-SNAPSHOT</version>
+         <projectUrl>https://github.com/intuit/wasabi/modules/wasabi-eventlog</projectUrl>
          <type>jar</type>
          <licenses>
             <license>
@@ -2244,7 +2252,8 @@
          <name>wasabi-exceptions</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-exceptions</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160715100540-SNAPSHOT</version>
+         <projectUrl>https://github.com/intuit/wasabi/modules/wasabi-exceptions</projectUrl>
          <type>jar</type>
          <licenses>
             <license>
@@ -2258,7 +2267,8 @@
          <name>wasabi-experiment-objects</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-experiment-objects</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160715100540-SNAPSHOT</version>
+         <projectUrl>https://github.com/intuit/wasabi/modules/wasabi-experiment-objects</projectUrl>
          <type>jar</type>
          <licenses>
             <license>
@@ -2272,7 +2282,8 @@
          <name>wasabi-export</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-export</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160715100540-SNAPSHOT</version>
+         <projectUrl>https://github.com/intuit/wasabi/modules/wasabi-export</projectUrl>
          <type>jar</type>
          <licenses>
             <license>
@@ -2286,7 +2297,8 @@
          <name>wasabi-feedback-objects</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-feedback-objects</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160715100540-SNAPSHOT</version>
+         <projectUrl>https://github.com/intuit/wasabi/modules/wasabi-feedback-objects</projectUrl>
          <type>jar</type>
          <licenses>
             <license>
@@ -2300,7 +2312,8 @@
          <name>wasabi-repository</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-repository</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160715100540-SNAPSHOT</version>
+         <projectUrl>https://github.com/intuit/wasabi/modules/wasabi-repository</projectUrl>
          <type>jar</type>
          <licenses>
             <license>
@@ -2314,7 +2327,8 @@
          <name>wasabi-user-directory</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-user-directory</artifactId>
-         <version>20151215171929-SNAPSHOT</version>
+         <version>1.0.20160715100540-SNAPSHOT</version>
+         <projectUrl>https://github.com/intuit/wasabi/modules/wasabi-user-directory</projectUrl>
          <type>jar</type>
          <licenses>
             <license>
