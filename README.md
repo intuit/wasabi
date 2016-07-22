@@ -9,17 +9,18 @@
 
 ## Project
 
-Wasabi is a mature, feature-rich, open-source A/B testing platform, complete with an experiment management UI. Wasabi powers all of Intuit's in-product experimentation and has been running in production at scale for several years.
+Wasabi A/B Testing Service is a real-time, enterprise-grade, 100% API driven project. Users are empowered to own their own data, and run experiments across web, mobile, and desktop. It’s fast, easy to use, it’s chock full of features, and instrumentation is minimal.
 
-Wasabi differs from other A/B testing services and frameworks in two ways. First, Wasabi runs on your servers, giving you full control over your data. Second, as something we call _A/B-Testing-as-a-Service_, Wasabi focuses on API-level integration with your apps and products. This means that Wasabi can be used to run experiments across Web, mobile, and desktop user experiences, as well as experiements on back-end, non-user-facing components, like business process workflows, search and routing algorithms, and predictive models.
+Learn more about how Wasabi can empower your team to move from hunches to actionable, data-driven user insights with our simple, flexible, and scalable experimentation platform.
+
 
 ### Features
 
 * **Own your own data** - Wasabi runs on your servers, in the cloud or on-premise, where you have complete control over your data.
 * **Proven** - Wasabi is battle-tested in production at Intuit, Inc., a financial technology company. Wasabi is the experimentation platform for TurboTax, QuickBooks, Mint.com, and other Intuit offerings.
-* **High Performance** - Consistent (P99) server-side response times for user assignments within 30ms.
+* **High Performance** - Consistent server-side response times for user assignments within 30ms.
 * **100% API-Driven** - The Wasabi REST API is compatible with any language and environment.
-* **Platform Agnostic** - Uniform, consistent testing across Web, mobile, desktop, and also front-end, back-end.
+* **Platform Agnostic** - Uniform, consistent testing across Web, mobile, desktop. Also supports front-end, back-end integrations.
 * **Real-time user assignments** - Assign users into experiments in real time, to preserve traffic for other parallel A/B tests.
 * **Cloud and on-premise** - Designed to live in the cloud or in your own data center.
 * **Analytics** - Core experiment analytics and metrics visualization out of the box, as well as the ability to send data to your existing analytics infrastructure.
