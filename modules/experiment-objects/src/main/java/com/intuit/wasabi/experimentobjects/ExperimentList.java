@@ -27,8 +27,6 @@ public class ExperimentList {
     @ApiModelProperty(required = true)
     private List<Experiment> experiments = new ArrayList<>();
 
-
-
     public ExperimentList() {
         super();
     }
@@ -40,10 +38,6 @@ public class ExperimentList {
     public List<Experiment> getExperiments() {
         return experiments;
     }
-    public int getTotalEntries() {
-        return experiments.size();
-    }
-
     public void setExperiments(List<Experiment> value) {
         experiments = value;
     }
@@ -55,7 +49,7 @@ public class ExperimentList {
     public int hashCode() {
     	return HashCodeBuilder.reflectionHashCode(this);
     }
-
+    
     @Override
     public boolean equals(Object obj) {
     	   return EqualsBuilder.reflectionEquals(this, obj);

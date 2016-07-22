@@ -18,8 +18,11 @@ package com.intuit.wasabi.api.pagination;
 import com.google.inject.Inject;
 import com.intuit.wasabi.api.pagination.comparators.PaginationComparator;
 import com.intuit.wasabi.api.pagination.filters.PaginationFilter;
+import com.intuit.wasabi.experimentobjects.Experiment;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class PaginationHelper<T> {
@@ -93,18 +96,23 @@ public class PaginationHelper<T> {
         return (page - 1) * perPage;
     }
 
-    public List<T> paginate(List<T> list, String filter, String timezoneOffset, String sort, int page, int perPage) {
-        if (list.size() == 0) {
-            return list;
-        }
+    public Map<String, Object> paginate(String jsonKey, List<T> list, String filter, String timezoneOffset, String sort, int page, int perPage) {
 
-        list = list.parallelStream()
-                   .filter(paginationFilter.setFilter(filter, timezoneOffset))
-                   .sorted(paginationComparator.setSortorder(sort))
-                   .collect(Collectors.toList());
+        Map<String, Object> response = new HashMap<>();
 
-        return perPage == -1 ? list : list.subList(fromIndex(page, perPage, list.size()),
-                                                   toIndex(page, perPage, list.size()));
+        list = list.size() == 0 ? list :
+                list.parallelStream()
+                    .filter(paginationFilter.setFilter(filter, timezoneOffset))
+                    .sorted(paginationComparator.setSortorder(sort))
+                    .collect(Collectors.toList());
+        response.put("totalEntries", list.size());
+
+        response.put(jsonKey, perPage == -1 ? list :
+                list.subList(fromIndex(page, perPage, list.size()),
+                             toIndex(page, perPage, list.size())));
+
+        return response;
+
     }
 
 }

@@ -54,7 +54,6 @@ public class ExperimentListTest {
         el.addExperiment(exp2);
 
         assertTrue("Experiments are not in the list.", el.getExperiments().contains(exp1) && el.getExperiments().contains(exp2));
-        assertEquals("Number of experiments incorrectly reported.", el.getTotalEntries(), 2);
     }
 
 }

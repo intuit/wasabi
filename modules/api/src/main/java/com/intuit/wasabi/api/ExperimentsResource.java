@@ -28,9 +28,26 @@ import com.intuit.wasabi.authenticationobjects.UserInfo.Username;
 import com.intuit.wasabi.authorization.Authorization;
 import com.intuit.wasabi.authorizationobjects.UserRole;
 import com.intuit.wasabi.events.EventsExport;
-import com.intuit.wasabi.exceptions.*;
-import com.intuit.wasabi.experiment.*;
-import com.intuit.wasabi.experimentobjects.*;
+import com.intuit.wasabi.exceptions.AuthenticationException;
+import com.intuit.wasabi.exceptions.BucketNotFoundException;
+import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
+import com.intuit.wasabi.exceptions.TimeFormatException;
+import com.intuit.wasabi.exceptions.TimeZoneFormatException;
+import com.intuit.wasabi.experiment.Buckets;
+import com.intuit.wasabi.experiment.Experiments;
+import com.intuit.wasabi.experiment.Mutex;
+import com.intuit.wasabi.experiment.Pages;
+import com.intuit.wasabi.experiment.Priorities;
+import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.experimentobjects.Bucket;
+import com.intuit.wasabi.experimentobjects.BucketList;
+import com.intuit.wasabi.experimentobjects.Context;
+import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.experimentobjects.ExperimentIDList;
+import com.intuit.wasabi.experimentobjects.ExperimentList;
+import com.intuit.wasabi.experimentobjects.ExperimentPageList;
+import com.intuit.wasabi.experimentobjects.NewExperiment;
+import com.intuit.wasabi.experimentobjects.Page;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -176,11 +193,10 @@ public class ExperimentsResource {
             }
         }
 
-        authorizedExperiments.setExperiments(
-                paginationHelper.paginate(authorizedExperiments.getExperiments(), filter, timezoneOffset, sort, page, perPage)
-        );
+        Map<String, Object> experimentResponse = paginationHelper.paginate("experiments", authorizedExperiments.getExperiments(),
+                filter, timezoneOffset, sort, page, perPage);
 
-        return httpHeader.headers().entity(authorizedExperiments).build();
+        return httpHeader.headers().entity(experimentResponse).build();
     }
 
     @POST

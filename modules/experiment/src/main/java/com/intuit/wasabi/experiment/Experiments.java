@@ -156,5 +156,4 @@ public interface Experiments {
      * @return a list of Application.Name types
      */
     List<Application.Name> getApplications();
-
 }

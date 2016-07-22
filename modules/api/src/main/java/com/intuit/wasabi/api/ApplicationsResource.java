@@ -177,9 +177,9 @@ public class ApplicationsResource {
         List<Experiment> experimentList = authorizedExperimentGetter.getAuthorizedExperimentsByName(authorizationHeader,
                 applicationName);
 
-        experimentList = experimentPaginationHelper.paginate(experimentList, filter, timezoneOffset, sort, page, perPage);
+        Map<String, Object> response = experimentPaginationHelper.paginate("experiments", experimentList, filter, timezoneOffset, sort, page, perPage);
 
-        return httpHeader.headers().entity(experimentList).build();
+        return httpHeader.headers().entity(response).build();
     }
 
     /**

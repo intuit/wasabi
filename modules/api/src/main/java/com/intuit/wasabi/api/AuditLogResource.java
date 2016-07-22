@@ -148,11 +148,7 @@ public class AuditLogResource {
             auditLogs = auditLog.getAuditLogs();
         }
 
-        Map<String, Object> auditLogResponse = new HashMap<>();
-        auditLogResponse.put("totalEntries", auditLogs.size());
-        auditLogResponse.put("logEntries", paginationHelper.paginate(auditLogs, filter, timezoneOffset, sort, page, perPage));
-
-        return httpHeader.headers().entity(auditLogResponse).build();
+        return httpHeader.headers().entity(paginationHelper.paginate("logEntries", auditLogs, filter, timezoneOffset, sort, page, perPage)).build();
     }
 
     /**
