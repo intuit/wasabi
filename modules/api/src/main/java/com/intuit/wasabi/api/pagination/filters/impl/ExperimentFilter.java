@@ -40,7 +40,7 @@ public class ExperimentFilter extends PaginationFilter<Experiment> {
 
     private enum Property implements PaginationFilterProperty<Experiment> {
         application_name(experiment -> experiment.getApplicationName().toString(), StringUtils::containsIgnoreCase),
-        application_name_exact(experiment -> experiment.getApplicationName().toString(), String::equals),
+        application_name_exact(experiment -> experiment.getApplicationName().toString(), StringUtils::equalsIgnoreCase),
         experiment_name(experiment -> experiment.getLabel().toString(), StringUtils::containsIgnoreCase),
         created_by(Experiment::getCreatorID, StringUtils::containsIgnoreCase),
         creation_time(Experiment::getCreationTime, FilterUtil::extractTimeZoneAndTestDate),
@@ -48,7 +48,7 @@ public class ExperimentFilter extends PaginationFilter<Experiment> {
 //        sampling_percent(Experiment::getSamplingPercent, ),
         end_time(Experiment::getEndTime, FilterUtil::extractTimeZoneAndTestDate),
         modification_time(Experiment::getModificationTime, FilterUtil::extractTimeZoneAndTestDate),
-        state(Experiment::getState, (state, filter) -> state.toString().contains(filter)),
+        state(Experiment::getState, (state, filter) -> StringUtils.containsIgnoreCase(state.toString(), filter)),
         state_exact(Experiment::getState, ExperimentFilter::statusTest),
         date_constraint_start(Experiment::getStartTime, ExperimentFilter::constraintTest),
         date_constraint_end(Experiment::getEndTime, ExperimentFilter::constraintTest)

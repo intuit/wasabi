@@ -69,7 +69,7 @@ public abstract class PaginationFilter<T> implements Predicate<T> {
     private <V extends Enum<V> & PaginationFilterProperty> boolean testFields(T object, Class<V> enumType) {
         String delimiter = ",";
         String separator = "=";
-        String pattern = "[a-z]+" + separator + ".*";
+        String pattern = "[a-z_]+" + separator + ".*";
 
         try (Scanner filterScanner = new Scanner(this.filter)) {
             filterScanner.useDelimiter(delimiter);
@@ -91,7 +91,7 @@ public abstract class PaginationFilter<T> implements Predicate<T> {
                 }
             }
         }
-        return true;
+        return false;
     }
 
     public <V extends Enum<V> & PaginationFilterProperty> boolean test(T object, Class<V> enumType) {
