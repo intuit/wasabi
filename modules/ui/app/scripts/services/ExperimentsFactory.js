@@ -6,22 +6,22 @@ angular.module('wasabi.services').factory('ExperimentsFactory', ['$resource', 'C
     function ($resource, ConfigFactory) {
         return $resource(ConfigFactory.baseUrl() + '/experiments/:id', {}, {
             'query': { method: 'GET',
+                params: {per_page: '@per_page', page: '@page', filter: '@filter', sort: '@sort', timezone: new Date().toString().match(/([-\+][0-9]+)\s/)[1]},
+                url: ConfigFactory.baseUrl() + '/experiments?page=:page&per_page=:per_page&filter=:filter&sort=:sort&timezone=:timezone',
                 transformResponse: function (data) {
                     var parsedData = $.parseJSON(data);
                     if (parsedData && parsedData.errors) {
                         return parsedData;
                     }
-                    parsedData = parsedData.experiments;
 
-                    for (var i = 0; i < parsedData.length; i++) {
-                        if (!parsedData[i]) {
-                            delete parsedData[i];
+                    for (var i = 0; i < parsedData.experiments.length; i++) {
+                        if (!parsedData.experiments[i]) {
+                            delete parsedData.experiments[i];
                         }
                     }
 
                     return parsedData;
-                },
-                isArray: true
+                }
             },
             'getPages': { method: 'GET', params: {id: '@id'},
                 url: ConfigFactory.baseUrl() + '/experiments/:id/pages',

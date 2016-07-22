@@ -49,8 +49,17 @@ angular.module('wasabi.controllers').
             $scope.noExperiments = false;
             $scope.applicationsLoaded = false;
 
-            $scope.experiment = [];
+            $scope.experiments = [];
             $scope.applications = [];
+
+            $scope.cardViewExperiments = [];
+            $scope.cardViewTotalItems = 0;
+            $scope.cardViewItemsPerPage = 8;
+
+            $scope.cardViewData = {
+                cardViewCurrentPage: StateFactory.currentCardViewPage
+            };
+
             $scope.applicationsWithReadOrBetterAccess = [];
             $scope.allApplications = [];
             $scope.needDataForThese = [];
@@ -290,9 +299,48 @@ angular.module('wasabi.controllers').
 
             // *** END Home page code
 
+            $scope.convertOrderByField = function() {
+                switch ($scope.orderByField) {
+                    case 'applicationName':
+                        return 'app';
+                    case 'label':
+                        return 'experiment_name';
+                    case 'creatorID':
+                        return 'created_by';
+                    case 'samplingPercent':
+                        return 'sampling_perc';
+                    case 'startTime':
+                        return 'start_date';
+                    case 'endTime':
+                        return 'end_date';
+                    case 'modificationTime':
+                        return 'mod_date';
+                    case 'state':
+                        return 'status';
+                    default:
+                        return 'app';
+                }
+            };
+
+            $scope.doLoadExperiments = function(pageSize, currentPage, afterLoadFunction) {
+                var queryParams = {
+                    per_page: pageSize,
+                    page: currentPage,
+                    sort: ($scope.reverseSort ? '-' : '') + $scope.convertOrderByField(),
+                    filter: $scope.data.query
+                };
+
+                ExperimentsFactory.query(queryParams).$promise
+                .then(afterLoadFunction,
+                    function(response) {
+                        UtilitiesFactory.handleGlobalError(response, 'The list of experiments could not be retrieved.');
+                });
+            };
+
             // load experiments from server
-            $scope.loadExperiments = function (orderByField) {
-                ExperimentsFactory.query().$promise.then(function (experiments) {
+            $scope.loadExperiments = function () {
+                $scope.doLoadExperiments($scope.itemsPerPage, $scope.currentPage, function (data) {
+                    var experiments = data.experiments;
                     if (experiments) {
                         // Initialize all the experiments selected values to false so the checkboxes (when list used in selection dialog) will be unchecked.
                         for (var i = 0; i < experiments.length; i++) {
@@ -302,10 +350,9 @@ angular.module('wasabi.controllers').
                                 delete experiments[i];
                             }
                         }
+                        $scope.totalItems = data.totalEntries;
                     }
                     $scope.experiments = experiments;
-
-                    $scope.applySearchSortFilters((orderByField !== undefined));
 
                     $scope.experiments.forEach(function(item) {
                         if ($rootScope.applicationNames.indexOf(item.applicationName) < 0) {
@@ -346,12 +393,12 @@ angular.module('wasabi.controllers').
 
                     $scope.loadAllApplications();
 
+/*
                     if ($scope.experiments.length > 0) {
-                        $scope.loadGridViewData($scope.filteredItems);
+                        $scope.loadGridViewData($scope.experiments);
                     }
+*/
 
-                }, function(response) {
-                    UtilitiesFactory.handleGlobalError(response, 'The list of experiments could not be retrieved.');
                 });
             };
 
@@ -379,6 +426,26 @@ angular.module('wasabi.controllers').
                 return false;
             };
 
+            $scope.loadCardViewExperiments = function() {
+                $scope.doLoadExperiments($scope.cardViewItemsPerPage, $scope.cardViewData.cardViewCurrentPage, function(data) {
+                    var experiments = data.experiments;
+                    if (experiments) {
+                        // Initialize all the experiments selected values to false so the checkboxes (when list used in selection dialog) will be unchecked.
+                        for (var i = 0; i < experiments.length; i++) {
+                            if (experiments[i]) {
+                                experiments[i].selected = false;
+                            } else {
+                                delete experiments[i];
+                            }
+                        }
+                        $scope.cardViewTotalItems = data.totalEntries;
+                    }
+                    $scope.cardViewExperiments = experiments;
+
+                    $scope.loadGridDataIfNecessary()
+                });
+            };
+
             // init controller
             if (Session && Session.switches) {
                 $scope.data.enableCardView = Session.switches.ShowCardView;
@@ -393,6 +460,10 @@ angular.module('wasabi.controllers').
                 $scope.showMoreLessSearch(true);
             }
 
+            if ($scope.data.enableCardView && $scope.data.showGrid) {
+                $scope.loadCardViewExperiments();
+            }
+
             UtilitiesFactory.hideHeading(false);
             UtilitiesFactory.selectTopLevelTab('Experiments');
 
@@ -405,7 +476,9 @@ angular.module('wasabi.controllers').
                     // we need to actually toggle this one because it doesn't get updated until after this has
                     // executed.
                     $scope.data.showGrid = false;
-                    $scope.applySearchSortFilters(false);
+                    localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
+                    // TODO: DO we need this?
+                    //$scope.applySearchSortFilters(false);
                 }
                 else {
                     // Record that we are showing the Card View in the localStorage
@@ -413,7 +486,7 @@ angular.module('wasabi.controllers').
                     localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
                     // Switched to card view.  Since we're not pre-loading the data for the cards, we need to
                     // load (or check if we need to load) the data now.
-                    $scope.loadGridDataIfNecessary();
+                    $scope.loadCardViewExperiments();
                 }
             };
 
@@ -492,22 +565,18 @@ angular.module('wasabi.controllers').
                 return UtilitiesFactory.hasPermission(applicationName, permission);
             };
 
-            // change sorting order if 2nd argument undefined
-            $scope.sortBy = function (orderByField, reverseSort) {
+            $scope.sortBy = function (orderByField) {
                 if ($scope.orderByField === orderByField) {
                     $scope.reverseSort = !$scope.reverseSort;
                 }
-                if (reverseSort !== undefined) {
-                    $scope.reverseSort = reverseSort;
+                else {
+                    $scope.reverseSort = true;
                 }
 
                 $scope.orderByField = orderByField;
 
-                if ($scope.data.showAdvancedSearch) {
-                    $scope.advSearch($scope.currentPage);
-                }
-                else {
-                    $scope.search($scope.currentPage);
+                if ($scope.orderByField !== '') {
+                    $scope.loadExperiments($scope.orderByField);
                 }
             };
 
@@ -543,11 +612,11 @@ angular.module('wasabi.controllers').
             $scope.loadGridDataIfNecessary = function() {
                 if ($scope.data.showGrid) {
                     // Handle the list used for lazy loading of the grid.
-                    $scope.gridsShown = ($scope.filteredItems.length < $scope.initialGridsShown ? $scope.filteredItems.length : $scope.initialGridsShown);
-                    $scope.gridItems = $scope.filteredItems.slice(0,$scope.gridsShown);
+                    $scope.gridsShown = ($scope.cardViewExperiments.length < $scope.initialGridsShown ? $scope.cardViewExperiments.length : $scope.initialGridsShown);
+                    $scope.gridItems = $scope.cardViewExperiments.slice(0,$scope.gridsShown);
                     $scope.needDataForThese = []; // Reset list of experiments to get data for.
                     $scope.gridDataLoaded = 0;
-                    $scope.filteredItems.forEach(function(experiment) {
+                    $scope.cardViewExperiments.forEach(function(experiment) {
                         // We may have already retrieved the extra data for this experiment because this might
                         // be a filtering.
                         $scope.needDataForThese.push({
@@ -560,45 +629,43 @@ angular.module('wasabi.controllers').
                 }
             };
 
-            // init the filtered items
-            $scope.search = function (currentPage) {
-                $scope.data.lastSearchWasSimple = true;
-                localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
-                $scope.filteredItems = $filter('filter')($scope.experiments, function (item) {
-                    // Filter out based on toggle switches, such as Hide Terminated.
-                    if ($scope.data.query !== undefined && $.trim($scope.data.query).length === 0) {
-                        return $scope.filterList(item);
-                    }
-                    for (var attr in item) {
-                        if (item[attr] &&
-                            item.hasOwnProperty(attr) &&
-                            typeof item[attr] !== 'function' &&
-                            attr !== '$$hashKey' &&
-                            attr !== 'id' &&
-                            attr.toLowerCase().indexOf('time') < 0) {
-                            //console.log('Searching attr ' + attr + ' with value [' + item[attr] + '] for [' + $scope.data.query + ']');
-                            var itemToSearch = item[attr].toString();
-                            if (attr.toLowerCase().indexOf('percent') >= 0) {
-                                // Convert this to the actual displayed value.
-                                itemToSearch = $scope.multiply100(itemToSearch).toString();
-                            }
-                            if (searchMatch(itemToSearch, $scope.data.query)) {
-                                // This item should be in the list based on search.  Should it be hidden due to filter controls?
-                                //console.log('Attr ' + attr + ' with value [' + item[attr] + '] contains [' + $scope.data.query + ']');
-                                return $scope.filterList(item);
-                            }
-                        }
-                    }
-                    return false;
-                });
-                // take care of the sorting order
-                if ($scope.orderByField !== '') {
-                    $scope.filteredItems = $filter('orderBy')($scope.filteredItems, $scope.orderByField, $scope.reverseSort);
-                }
-                bubbleFavoritesToTop();
+            $scope.clearSearch = function() {
+                $scope.data.query = '';
+                $scope.doSearch();
+            };
+
+            $scope.doSearch = function() {
+                $scope.loadExperiments($scope.orderByField);
 
                 // Handle the list used for lazy loading of the grid.
                 $scope.loadGridDataIfNecessary();
+                $scope.noExperiments = ((!$scope.experiments || $scope.experiments.length === 0) && $scope.totalItems === 0);
+
+                UtilitiesFactory.doTrackingInit();
+            };
+
+            $scope.search = function () {
+                $scope.data.lastSearchWasSimple = true;
+                localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
+                if ($.trim($scope.data.query).length > 0) {
+                    if ($scope.searchTimer) {
+                        $timeout.cancel($scope.searchTimer);
+                    }
+                    $scope.searchTimer = $timeout($scope.doSearch, 400);
+                }
+            };
+
+            // init the filtered items
+/*
+            $scope.search = function (currentPage) {
+                $scope.data.lastSearchWasSimple = true;
+                localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
+                if ($.trim($scope.data.query).length > 0) {
+                    if ($scope.searchTimer) {
+                        $timeout.cancel($scope.searchTimer);
+                    }
+                    $scope.searchTimer = $timeout($scope.doSearch, 400);
+                }
 
                 if (currentPage) {
                     $scope.currentPage = StateFactory.currentExperimentsPage = currentPage;
@@ -612,6 +679,7 @@ angular.module('wasabi.controllers').
 
                 UtilitiesFactory.doTrackingInit();
             };
+*/
 
             $scope.advSearch = function(currentPage) {
                 if (!$scope.experiments || $scope.experiments.length === 0) {
@@ -712,32 +780,58 @@ angular.module('wasabi.controllers').
 
             $scope.pageChanged = function() {
                 StateFactory.currentExperimentsPage = $scope.currentPage;
+
+                // The widget has updated the currentPage member.  By simply triggering the code to get the
+                // logs list, we should update the page.
+                $scope.loadExperiments($scope.orderByField);
             };
 
-            $scope.pageRangeStart = function () {
+            $scope.cardViewPageChanged = function() {
+                StateFactory.currentCardViewPage = $scope.cardViewData.cardViewCurrentPage;
+
+                // The widget has updated the currentPage member.  By simply triggering the code to get the
+                // logs list, we should update the page.
+                $scope.loadCardViewExperiments();
+            };
+
+            $scope.doPageRangeStart = function (currentPage, totalItems, itemsPerPage) {
                 try {
-                    if ($scope.currentPage === 1) {
-                        if ($scope.pagedData.pagedItems[$scope.currentPage - 1].length === 0) {
+                    if (currentPage === 1) {
+                        if (totalItems === 0) {
                             return 0;
                         } else {
                             return 1;
                         }
                     } else {
-                        return ($scope.currentPage - 1) * $scope.itemsPerPage + 1;
+                        return (currentPage - 1) * itemsPerPage + 1;
                     }
                 } catch (err) {
                     return 0;
                 }
             };
 
-            $scope.pageRangeEnd = function () {
+            $scope.doPageRangeEnd = function (pageRangeStartFunc, totalItems, itemsPerPage) {
                 try {
-                    return $scope.pageRangeStart() + $scope.pagedData.pagedItems[$scope.currentPage - 1].length - 1;
+                    var start = 0 + pageRangeStartFunc();
+                    var ret =  (totalItems >= (start + itemsPerPage) ? start + itemsPerPage - 1 : totalItems);
+                    return ret;
                 } catch (err) {
                     return 0;
                 }
             };
 
+            $scope.pageRangeStart = function() {
+                return $scope.doPageRangeStart($scope.currentPage, $scope.totalItems, $scope.itemsPerPage);
+            };
+            $scope.pageRangeEnd = function() {
+                return $scope.doPageRangeEnd($scope.pageRangeStart, $scope.totalItems, $scope.itemsPerPage);
+            };
+            $scope.cardViewPageRangeStart = function() {
+                return $scope.doPageRangeStart($scope.cardViewData.cardViewCurrentPage, $scope.cardViewTotalItems, $scope.cardViewItemsPerPage);
+            };
+            $scope.cardViewPageRangeEnd = function() {
+                return $scope.doPageRangeEnd($scope.cardViewPageRangeStart, $scope.cardViewTotalItems, $scope.cardViewItemsPerPage);
+            };
 
             $scope.filterList = function(item) {
                 if ($scope.data.hideTerminated) {
