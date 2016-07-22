@@ -54,9 +54,15 @@ The following steps will help you install the needed tools, then build and run a
 % ./bin/wasabi.sh bootstrap
 ```
 
+**Note**: if you have installed docker-native set the environment variable _'WASABI_OS'_
+
+```bash
+% export WASABI_OS=native
+``
+
 Installed tools include: [homebrew 0.9](http://brew.sh), [git 2](https://git-scm.com),
 [maven 3](https://maven.apache.org), [java 1.8](http://www.oracle.com/technetwork/java/javase/overview/index.html),
-[node 6](https://nodejs.org/en) and [python 2.7](https://www.python.org).
+[docker 1.12](https://docker.com), [node 6](https://nodejs.org/en) and [python 2.7](https://www.python.org).
 
 Similar tooling will work for Linux and Windows alike. Contribute a patch :)
 
