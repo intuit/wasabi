@@ -322,14 +322,71 @@ angular.module('wasabi.controllers').
                 }
             };
 
+            /*
+            $scope.data = {
+                lastSearchWasSimple: true,
+                query: '',
+                advStatus: 'notTerminated',
+                advApplicationName: '',
+                advExperimentName: '',
+                advStartOrEndDate: 'startDate',
+                adv1stDateSearchType: 'isAny',
+                advTxtSearchDateOne: today,
+                advTxtSearchDateTwo: today,
+                showGrid: false,
+                showAdvancedSearch: false,
+                hideTerminated: true,
+                enableCardView: false
+            };
+
+            state_exact=notTerminated
+            application_name_exact=CTG
+            experiment_name=partial
+            date_constraint_start/end=isBefore:07/22/2016
+            =isBetween:07/22/2016:07/23/2016
+
+
+             */
             $scope.doLoadExperiments = function(pageSize, currentPage, afterLoadFunction) {
+                function addAdvParam(existingFilter, newFilterValue) {
+                    if (existingFilter.length > 0) {
+                        existingFilter += ',';
+                    }
+                    existingFilter += newFilterValue;
+                }
+
                 var queryParams = {
                     per_page: pageSize,
                     page: currentPage,
-                    sort: ($scope.reverseSort ? '-' : '') + $scope.convertOrderByField(),
-                    filter: $scope.data.query
+                    sort: ($scope.reverseSort ? '-' : '') + $scope.convertOrderByField()
                 };
-
+                if ($scope.data.lastSearchWasSimple) {
+                    // Add simple filter info, if available
+                    queryParams.filter = $scope.data.query;
+                }
+                else {
+                    // Add advanced filter info, if available
+                    queryParams.filter = '';
+                    if ($scope.data.advApplicationName && $scope.data.advApplicationName.length > 0) {
+                        queryParams.filter += 'application_name_exact=' + $scope.data.advApplicationName;
+                    }
+                    if ($scope.data.advStatus !== 'any') {
+                        addAdvParam(queryParams.filter, 'state_exact=' + $scope.data.advApplicationName);
+                    }
+                    if ($scope.data.advExperimentName && $.trim($scope.data.advExperimentName).length > 0) {
+                        addAdvParam(queryParams.filter, 'experiment_name=' + $.trim($scope.data.advExperimentName));
+                    }
+                    if ($scope.data.adv1stDateSearchType !== 'isAny') {
+                        var testDate = moment($scope.data.advTxtSearchDateOne, 'M/D/YYYY');
+                        var testDate2 = moment($scope.data.advTxtSearchDateTwo, 'M/D/YYYY');
+                        addAdvParam(queryParams.filter, 'date_constraint_' +
+                                ($scope.data.advStartOrEndDate === 'startDate' ? 'start' : 'end') +
+                                '=' +
+                                $scope.data.adv1stDateSearchType + ':' +
+                                testDate +
+                                ($scope.data.adv1stDateSearchType === 'isBetween' ? ':' + testDate2 : ''));
+                    }
+                }
                 ExperimentsFactory.query(queryParams).$promise
                 .then(afterLoadFunction,
                     function(response) {
@@ -353,6 +410,8 @@ angular.module('wasabi.controllers').
                         $scope.totalItems = data.totalEntries;
                     }
                     $scope.experiments = experiments;
+
+                    $scope.noExperiments = ((!$scope.experiments || $scope.experiments.length === 0) && $scope.totalItems === 0);
 
                     $scope.experiments.forEach(function(item) {
                         if ($rootScope.applicationNames.indexOf(item.applicationName) < 0) {
@@ -450,7 +509,7 @@ angular.module('wasabi.controllers').
             if (Session && Session.switches) {
                 $scope.data.enableCardView = Session.switches.ShowCardView;
             }
-            $scope.loadExperiments($scope.orderByField);
+            $scope.loadExperiments();
 
             var tmpSearchSettings = localStorage.getItem('wasabiLastSearch');
             if (tmpSearchSettings) {
@@ -635,11 +694,10 @@ angular.module('wasabi.controllers').
             };
 
             $scope.doSearch = function() {
-                $scope.loadExperiments($scope.orderByField);
+                $scope.loadExperiments();
 
                 // Handle the list used for lazy loading of the grid.
                 $scope.loadGridDataIfNecessary();
-                $scope.noExperiments = ((!$scope.experiments || $scope.experiments.length === 0) && $scope.totalItems === 0);
 
                 UtilitiesFactory.doTrackingInit();
             };
@@ -692,6 +750,9 @@ angular.module('wasabi.controllers').
                 if ($scope.data.advApplicationName === null) {
                     $scope.data.advApplicationName = '';
                 }
+
+                $scope.loadExperiments();
+/*
                 // Filter out by the status
                 $scope.filteredItems = $filter('filter')($scope.experiments, function(item) {
                     return $scope.advancedFilterList(item, $scope.data.advStatus) &&
@@ -728,9 +789,11 @@ angular.module('wasabi.controllers').
                     $scope.filteredItems = $filter('orderBy')($scope.filteredItems, $scope.orderByField, $scope.reverseSort);
                 }
                 bubbleFavoritesToTop();
+*/
 
                 $scope.loadGridDataIfNecessary();
 
+/*
                 if (currentPage) {
                     $scope.currentPage = StateFactory.currentExperimentsPage = currentPage;
                 } else {
@@ -739,6 +802,7 @@ angular.module('wasabi.controllers').
                 // now group by pages
                 $scope.groupToPages();
                 $scope.totalItems = $scope.filteredItems.length;
+*/
 
                 var searchParms = 'advStatus=' + $scope.data.advStatus +
                         '&advExperimentName=' + $scope.data.advExperimentName +
