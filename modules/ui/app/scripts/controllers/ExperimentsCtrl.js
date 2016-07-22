@@ -323,36 +323,17 @@ angular.module('wasabi.controllers').
             };
 
             /*
-            $scope.data = {
-                lastSearchWasSimple: true,
-                query: '',
-                advStatus: 'notTerminated',
-                advApplicationName: '',
-                advExperimentName: '',
-                advStartOrEndDate: 'startDate',
-                adv1stDateSearchType: 'isAny',
-                advTxtSearchDateOne: today,
-                advTxtSearchDateTwo: today,
-                showGrid: false,
-                showAdvancedSearch: false,
-                hideTerminated: true,
-                enableCardView: false
-            };
-
-            state_exact=notTerminated
-            application_name_exact=CTG
-            experiment_name=partial
-            date_constraint_start/end=isBefore:07/22/2016
-            =isBetween:07/22/2016:07/23/2016
-
-
+            This function sets up the call to get the list of experiments.  It sets up the query
+            parameters to do the sorting, filtering and pagination.  It uses the lastSearchWasSimple
+            flag to decide if we are doing simple or advanced filtering and so which parameters need to
+            be used.
              */
             $scope.doLoadExperiments = function(pageSize, currentPage, afterLoadFunction) {
                 function addAdvParam(existingFilter, newFilterValue) {
                     if (existingFilter.length > 0) {
                         existingFilter += ',';
                     }
-                    existingFilter += newFilterValue;
+                    return existingFilter += newFilterValue;
                 }
 
                 var queryParams = {
@@ -371,20 +352,18 @@ angular.module('wasabi.controllers').
                         queryParams.filter += 'application_name_exact=' + $scope.data.advApplicationName;
                     }
                     if ($scope.data.advStatus !== 'any') {
-                        addAdvParam(queryParams.filter, 'state_exact=' + $scope.data.advApplicationName);
+                        queryParams.filter = addAdvParam(queryParams.filter, 'state_exact=' + $scope.data.advStatus);
                     }
                     if ($scope.data.advExperimentName && $.trim($scope.data.advExperimentName).length > 0) {
-                        addAdvParam(queryParams.filter, 'experiment_name=' + $.trim($scope.data.advExperimentName));
+                        queryParams.filter = addAdvParam(queryParams.filter, 'experiment_name=' + $.trim($scope.data.advExperimentName));
                     }
                     if ($scope.data.adv1stDateSearchType !== 'isAny') {
-                        var testDate = moment($scope.data.advTxtSearchDateOne, 'M/D/YYYY');
-                        var testDate2 = moment($scope.data.advTxtSearchDateTwo, 'M/D/YYYY');
-                        addAdvParam(queryParams.filter, 'date_constraint_' +
+                        queryParams.filter = addAdvParam(queryParams.filter, 'date_constraint_' +
                                 ($scope.data.advStartOrEndDate === 'startDate' ? 'start' : 'end') +
                                 '=' +
                                 $scope.data.adv1stDateSearchType + ':' +
-                                testDate +
-                                ($scope.data.adv1stDateSearchType === 'isBetween' ? ':' + testDate2 : ''));
+                                $scope.data.advTxtSearchDateOne +
+                                ($scope.data.adv1stDateSearchType === 'isBetween' ? ':' + $scope.data.advTxtSearchDateTwo : ''));
                     }
                 }
                 ExperimentsFactory.query(queryParams).$promise
@@ -411,8 +390,6 @@ angular.module('wasabi.controllers').
                     }
                     $scope.experiments = experiments;
 
-                    $scope.noExperiments = ((!$scope.experiments || $scope.experiments.length === 0) && $scope.totalItems === 0);
-
                     $scope.experiments.forEach(function(item) {
                         if ($rootScope.applicationNames.indexOf(item.applicationName) < 0) {
                             // Only add if it's not already there.
@@ -427,6 +404,7 @@ angular.module('wasabi.controllers').
                     // We also need the list of all applications they have any (specifically, read) access to, so
                     // we can use that in the advanced search menu of the experiments list.
                     $scope.applications = [];
+                    $scope.applicationsWithReadOrBetterAccess = [];
                     Session.permissions.forEach(function(nextPermissions) {
                         if (UtilitiesFactory.hasPermission(nextPermissions.applicationName, PERMISSIONS.createPerm)) {
                             $scope.applications.push(nextPermissions.applicationName);
@@ -447,17 +425,12 @@ angular.module('wasabi.controllers').
                             return a.toLowerCase().localeCompare(b.toLowerCase());
                         });
                     }
+                    $scope.noExperiments = ($scope.totalItems === 0 &&
+                            $scope.applicationsWithReadOrBetterAccess.length === 0);
 
                     $scope.applicationsLoaded = true;
 
                     $scope.loadAllApplications();
-
-/*
-                    if ($scope.experiments.length > 0) {
-                        $scope.loadGridViewData($scope.experiments);
-                    }
-*/
-
                 });
             };
 
@@ -703,46 +676,18 @@ angular.module('wasabi.controllers').
             };
 
             $scope.search = function () {
+                var switchingFromAdvanced = !$scope.data.lastSearchWasSimple;
                 $scope.data.lastSearchWasSimple = true;
                 localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
-                if ($.trim($scope.data.query).length > 0) {
+                if (switchingFromAdvanced || $.trim($scope.data.query).length > 0) {
                     if ($scope.searchTimer) {
                         $timeout.cancel($scope.searchTimer);
                     }
                     $scope.searchTimer = $timeout($scope.doSearch, 400);
                 }
             };
-
-            // init the filtered items
-/*
-            $scope.search = function (currentPage) {
-                $scope.data.lastSearchWasSimple = true;
-                localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
-                if ($.trim($scope.data.query).length > 0) {
-                    if ($scope.searchTimer) {
-                        $timeout.cancel($scope.searchTimer);
-                    }
-                    $scope.searchTimer = $timeout($scope.doSearch, 400);
-                }
-
-                if (currentPage) {
-                    $scope.currentPage = StateFactory.currentExperimentsPage = currentPage;
-                } else {
-                    $scope.currentPage = StateFactory.currentExperimentsPage = 1;
-                }
-                // now group by pages
-                $scope.groupToPages();
-                $scope.totalItems = $scope.filteredItems.length;
-                $scope.noExperiments = ((!$scope.experiments || $scope.experiments.length === 0) && $scope.totalItems === 0);
-
-                UtilitiesFactory.doTrackingInit();
-            };
-*/
 
             $scope.advSearch = function(currentPage) {
-                if (!$scope.experiments || $scope.experiments.length === 0) {
-                    return false;
-                }
                 // Save the advanced search settings
                 $scope.data.lastSearchWasSimple = false;
                 localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
@@ -752,57 +697,8 @@ angular.module('wasabi.controllers').
                 }
 
                 $scope.loadExperiments();
-/*
-                // Filter out by the status
-                $scope.filteredItems = $filter('filter')($scope.experiments, function(item) {
-                    return $scope.advancedFilterList(item, $scope.data.advStatus) &&
-                           searchMatch(item.applicationName.toString(), $scope.data.advApplicationName);
-                });
-
-                // Filter out by the experiment partial input field
-                $scope.filteredItems = $filter('filter')($scope.filteredItems, function (item) {
-                    return searchMatch(item.label.toString(), $scope.data.advExperimentName);
-                });
-
-                // Filter out by the dates
-                $scope.filteredItems = $filter('filter')($scope.filteredItems, function (item) {
-                    var filterDate = ($scope.data.advStartOrEndDate === 'startDate' ? moment(item.startTime, ['YYYY-MM-DDTHH:mm:ssZ', 'ddd MMM DD YYYY HH:mm:ss ZZ']) : moment(item.endTime, ['YYYY-MM-DDTHH:mm:ssZ', 'ddd MMM DD YYYY HH:mm:ss ZZ']));
-                    var testDate = moment($scope.data.advTxtSearchDateOne, 'M/D/YYYY');
-                    var testDate2 = moment($scope.data.advTxtSearchDateTwo, 'M/D/YYYY');
-                    switch ($scope.data.adv1stDateSearchType) {
-                        case 'isBefore':
-                            return filterDate.isBefore(testDate, 'day');
-                        case 'isOn':
-                            return filterDate.isSame(testDate, 'day');
-                        case 'isAfter':
-                            return filterDate.isAfter(testDate, 'day');
-                        case 'isBetween':
-                            // The add and subtract make this an inclusive test, e.g., if range is between 7/2 and 7/5, both 7/2 and 7/5 will be true.
-                            return filterDate.isAfter(testDate.subtract(1, 'days'), 'day') && filterDate.isBefore(testDate2.add(1, 'days'), 'day');
-                    }
-                    // Handles isAny
-                    return true;
-                });
-
-                // take care of the sorting order
-                if ($scope.orderByField !== '') {
-                    $scope.filteredItems = $filter('orderBy')($scope.filteredItems, $scope.orderByField, $scope.reverseSort);
-                }
-                bubbleFavoritesToTop();
-*/
 
                 $scope.loadGridDataIfNecessary();
-
-/*
-                if (currentPage) {
-                    $scope.currentPage = StateFactory.currentExperimentsPage = currentPage;
-                } else {
-                    $scope.currentPage = StateFactory.currentExperimentsPage = 1;
-                }
-                // now group by pages
-                $scope.groupToPages();
-                $scope.totalItems = $scope.filteredItems.length;
-*/
 
                 var searchParms = 'advStatus=' + $scope.data.advStatus +
                         '&advExperimentName=' + $scope.data.advExperimentName +
