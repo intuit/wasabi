@@ -126,7 +126,6 @@ test() {
   fi
   sleepTime=${1:-sleep}
   cntr=0
-endpoint=localhost:8080
   while (( cntr < ${sleepTime} )); do
     echo "${endpoint}/api/v1/ping"
     curl ${endpoint}/api/v1/ping >/dev/null 2>&1
