@@ -91,7 +91,7 @@ public abstract class PaginationFilter<T> implements Predicate<T> {
                 }
             }
         }
-        return false;
+        return true;
     }
 
     public <V extends Enum<V> & PaginationFilterProperty> boolean test(T object, Class<V> enumType) {
