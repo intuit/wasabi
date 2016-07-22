@@ -94,6 +94,10 @@ public class PaginationHelper<T> {
     }
 
     public List<T> paginate(List<T> list, String filter, String timezoneOffset, String sort, int page, int perPage) {
+        if (list.size() == 0) {
+            return list;
+        }
+
         list = list.parallelStream()
                    .filter(paginationFilter.setFilter(filter, timezoneOffset))
                    .sorted(paginationComparator.setSortorder(sort))
