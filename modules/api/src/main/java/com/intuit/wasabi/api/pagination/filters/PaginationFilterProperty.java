@@ -13,25 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package com.intuit.wasabi.auditlog.impl;
+package com.intuit.wasabi.api.pagination.filters;
 
-import com.intuit.wasabi.eventlog.EventLogListener;
-import com.intuit.wasabi.eventlog.events.EventLogEvent;
+import java.util.function.BiPredicate;
+import java.util.function.Function;
 
-/**
- * The default NOOP audit log implementation.
- */
-public class NoopAuditLogListenerImpl implements EventLogListener {
-
-    /**
-     * Will be called by the EventLogImpl with events which the listener registered for.
-     * Since this will not be registered for any events, this will never be called.
-     *
-     * @param event the event which occurred.
-     */
-    @Override
-    public void postEvent(EventLogEvent event) {
-        // does nothing
-    }
-
+public interface PaginationFilterProperty<T> {
+    Function<T, ?> getPropertyExtractor();
+    BiPredicate<?, String> getFilterPredicate();
 }

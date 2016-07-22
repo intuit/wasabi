@@ -19,6 +19,7 @@ import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.intuit.wasabi.api.pagination.PaginationHelper;
 import com.intuit.wasabi.authorization.Authorization;
 import com.intuit.wasabi.exceptions.AuthenticationException;
 import com.intuit.wasabi.experiment.Experiments;
@@ -56,17 +57,19 @@ public class ApplicationsResource {
     private Authorization authorization;
     private Pages pages;
     private Priorities priorities;
+    private PaginationHelper<Experiment> experimentPaginationHelper;
 
     @Inject
     ApplicationsResource(final AuthorizedExperimentGetter authorizedExperimentGetter, final Experiments experiments,
                          final Authorization authorization, final Priorities priorities, final Pages pages,
-                         final HttpHeader httpHeader) {
+                         final HttpHeader httpHeader, final PaginationHelper<Experiment> experimentPaginationHelper) {
         this.authorizedExperimentGetter = authorizedExperimentGetter;
         this.pages = pages;
         this.experiments = experiments;
         this.authorization = authorization;
         this.priorities = priorities;
         this.httpHeader = httpHeader;
+        this.experimentPaginationHelper = experimentPaginationHelper;
     }
 
     /**
@@ -98,7 +101,7 @@ public class ApplicationsResource {
      *
      * @param applicationName the application name
      * @param experimentLabel the experiment label
-     * @param authorizationHeader      the authorization headers
+     * @param authorizationHeader the authorization headers
      * @return Response object
      */
     @GET
@@ -128,7 +131,7 @@ public class ApplicationsResource {
      * Returns metadata for all experiments within an application.
      *
      * Does not return metadata for a deleted or terminated experiment.
-     *
+     * TODO @shoeffner
      * @param applicationName the application name
      * @param authorizationHeader      the authorization headers
      * @return Response object
@@ -145,9 +148,36 @@ public class ApplicationsResource {
 
                                    @HeaderParam(AUTHORIZATION)
                                    @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                   final String authorizationHeader) {
+                                   final String authorizationHeader,
+
+                                   @QueryParam("page")
+                                   @DefaultValue(DEFAULT_PAGE)
+                                   @ApiParam(name = "page", defaultValue = DEFAULT_PAGE, value = EXAMPLE_PAGE)
+                                   final int page,
+
+                                   @QueryParam("per_page")
+                                   @DefaultValue(DEFAULT_PER_PAGE)
+                                   @ApiParam(name = "per_page", defaultValue = DEFAULT_PER_PAGE, value = EXAMPLE_PER_PAGE)
+                                   final int perPage,
+
+                                   @QueryParam("sort")
+                                   @DefaultValue("")
+                                   @ApiParam(name = "sort", defaultValue = "", value = EXAMPLE_SORT)
+                                   final String sort,
+
+                                   @QueryParam("filter")
+                                   @DefaultValue("")
+                                   @ApiParam(name = "filter", defaultValue = "", value = EXAMPLE_SORT)
+                                   final String filter,
+
+                                   @QueryParam("timezone")
+                                   @DefaultValue("+0000")
+                                   @ApiParam(name = "timezone", defaultValue = "+0000", value = EXAMPLE_TIMEZONE)
+                                   final String timezoneOffset) {
         List<Experiment> experimentList = authorizedExperimentGetter.getAuthorizedExperimentsByName(authorizationHeader,
                 applicationName);
+
+        experimentList = experimentPaginationHelper.paginate(experimentList, filter, timezoneOffset, sort, page, perPage);
 
         return httpHeader.headers().entity(experimentList).build();
     }

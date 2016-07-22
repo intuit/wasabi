@@ -15,6 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.api;
 
+import com.intuit.wasabi.api.pagination.PaginationHelper;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authorization.Authorization;
 import com.intuit.wasabi.exceptions.AuthenticationException;
@@ -92,11 +93,13 @@ public class ApplicationsResourceTest {
     @Captor
     private ArgumentCaptor<Map<String, List<PageExperiment>>> pageExperimentsCaptor;
     private ApplicationsResource applicationsResource;
+    @Mock
+    private PaginationHelper<Experiment> experimentPaginationHelper;
 
     @Before
     public void setup() {
         applicationsResource = new ApplicationsResource(authorizedExperimentGetter, experiments, authorization, priorities,
-                pages, httpHeader);
+                pages, httpHeader, experimentPaginationHelper);
     }
 
     @Test
@@ -165,7 +168,7 @@ public class ApplicationsResourceTest {
                 .thenReturn(experimentsByName);
         whenHttpHeader(experimentsByName);
 
-        applicationsResource.getExperiments(applicationName, "foo");
+        applicationsResource.getExperiments(applicationName, "foo", 0, -1, "", "", "");
 
         verify(authorizedExperimentGetter).getAuthorizedExperimentsByName("foo", applicationName);
         verifyHttpHeader(experimentsByName);

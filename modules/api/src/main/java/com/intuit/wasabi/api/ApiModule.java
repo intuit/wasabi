@@ -17,15 +17,24 @@ package com.intuit.wasabi.api;
 
 import com.codahale.metrics.health.HealthCheckRegistry;
 import com.google.inject.AbstractModule;
+import com.google.inject.TypeLiteral;
 import com.intuit.wasabi.analytics.AnalyticsModule;
 import com.intuit.wasabi.api.error.ExceptionJsonifier;
 import com.intuit.wasabi.api.jackson.JacksonModule;
+import com.intuit.wasabi.api.pagination.comparators.PaginationComparator;
+import com.intuit.wasabi.api.pagination.comparators.impl.AuditLogComparator;
+import com.intuit.wasabi.api.pagination.comparators.impl.ExperimentComparator;
+import com.intuit.wasabi.api.pagination.filters.PaginationFilter;
+import com.intuit.wasabi.api.pagination.filters.impl.AuditLogFilter;
+import com.intuit.wasabi.api.pagination.filters.impl.ExperimentFilter;
 import com.intuit.wasabi.auditlog.AuditLogModule;
+import com.intuit.wasabi.auditlogobjects.AuditLogEntry;
 import com.intuit.wasabi.authorization.AuthorizationModule;
 import com.intuit.wasabi.database.DatabaseModule;
 import com.intuit.wasabi.email.EmailModule;
 import com.intuit.wasabi.events.EventsModule;
 import com.intuit.wasabi.experiment.ExperimentsModule;
+import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.feedback.FeedbackModule;
 import com.intuit.wasabi.repository.impl.cassandra.CassandraExperimentRepositoryModule;
 import com.intuit.wasabi.repository.impl.database.DatabaseExperimentRepositoryModule;
@@ -76,6 +85,12 @@ public class ApiModule extends AbstractModule {
         bind(HealthCheckRegistry.class).in(SINGLETON);
         bind(HttpHeader.class).in(SINGLETON);
         bind(ExceptionJsonifier.class).in(SINGLETON);
+
+        // Bind comparators and filters for pagination
+        bind(new TypeLiteral<PaginationComparator<AuditLogEntry>>(){}).to(new TypeLiteral<AuditLogComparator>(){});
+        bind(new TypeLiteral<PaginationFilter<AuditLogEntry>>(){}).to(new TypeLiteral<AuditLogFilter>(){});
+        bind(new TypeLiteral<PaginationComparator<Experiment>>(){}).to(new TypeLiteral<ExperimentComparator>(){});
+        bind(new TypeLiteral<PaginationFilter<Experiment>>(){}).to(new TypeLiteral<ExperimentFilter>(){});
 
         // FIXME: might need to run against jersey 1.18.1 to get this to work
 //        try {

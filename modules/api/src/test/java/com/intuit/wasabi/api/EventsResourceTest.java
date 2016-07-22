@@ -41,75 +41,75 @@ public class EventsResourceTest {
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
-	@Mock
-	private Events events;
-	private EventsResource resource;
+    @Mock
+    private Events events;
+    private EventsResource resource;
     private EventList eventList = new EventList();
     private Application.Name applicationName = Application.Name.valueOf("testApp");
     private Experiment.Label experimentLabel = Experiment.Label.valueOf("testExp");
     private User.ID userID = User.ID.valueOf("12345");
 
-	@Before
-	public void setUp() throws Exception {
-		resource = new EventsResource(events, new HttpHeader("jaba-???"));
-	}
-
-	@Test
-	public void recordEventsNameNull() throws Exception {
-		List<Event> listOfEvents = new ArrayList<>();
-		listOfEvents.add(new Event());
-		eventList.setEvents(listOfEvents);
-
-		thrown.expect(IllegalArgumentException.class);
-		thrown.expectMessage("Event name cannot be null or an empty string");
-		resource.recordEvents(applicationName, experimentLabel, userID, eventList);
-	}
-
-	@Test
-	public void recordEventsNameEmpty() throws Exception {
-		List<Event> listOfEvents = new ArrayList<>();
-		Event e = new Event();
-		e.setName(Name.valueOf(""));
-		listOfEvents.add(e);
-		eventList.setEvents(listOfEvents);
-
-		thrown.expect(IllegalArgumentException.class);
-		thrown.expectMessage("Event name cannot be null or an empty string");
-		resource.recordEvents(applicationName, experimentLabel, userID, eventList);
-	}
-
-	@Test
-	public void recordEvents() throws Exception {
-		List<Event> listOfEvents = new ArrayList<>();
-		Event e = new Event();
-		e.setName(Name.valueOf("someEventName"));
-		listOfEvents.add(e);
-		eventList.setEvents(listOfEvents);
-
-		resource.recordEvents(applicationName, experimentLabel, userID, eventList);
-		verify(events).recordEvents(any(Application.Name.class), any(Experiment.Label.class), any(User.ID.class), any(EventList.class), any(Set.class));
-	}
-
-	@Test
-	public void recordUsersEvents() throws UnsupportedOperationException {
-		Map<User.ID, List<Event>> eventList = new HashMap<>();
-
-		thrown.expect(UnsupportedOperationException.class);
-		thrown.expectMessage("Not implemented");
-		resource.recordUsersEvents(applicationName, experimentLabel, eventList);
-	}
-
-	@Test
-	public void recordExperimentsEvents() throws Exception {
-		Map<Experiment.Label, Map<User.ID, List<Event>>> eventList = new HashMap<>();
-
-		thrown.expect(UnsupportedOperationException.class);
-		thrown.expectMessage("Not implemented");
-		resource.recordExperimentsEvents(applicationName, userID, eventList);
-	}
+    @Before
+    public void setUp() throws Exception {
+        resource = new EventsResource(events, new HttpHeader("jaba-???"));
+    }
 
     @Test
-	public void getEventsQueueLength() throws Exception {
-		assertNotNull(resource.getEventsQueueLength());
-	}
+    public void recordEventsNameNull() throws Exception {
+        List<Event> listOfEvents = new ArrayList<>();
+        listOfEvents.add(new Event());
+        eventList.setEvents(listOfEvents);
+
+        thrown.expect(IllegalArgumentException.class);
+        thrown.expectMessage("Event name cannot be null or an empty string");
+        resource.recordEvents(applicationName, experimentLabel, userID, eventList);
+    }
+
+    @Test
+    public void recordEventsNameEmpty() throws Exception {
+        List<Event> listOfEvents = new ArrayList<>();
+        Event e = new Event();
+        e.setName(Name.valueOf(""));
+        listOfEvents.add(e);
+        eventList.setEvents(listOfEvents);
+
+        thrown.expect(IllegalArgumentException.class);
+        thrown.expectMessage("Event name cannot be null or an empty string");
+        resource.recordEvents(applicationName, experimentLabel, userID, eventList);
+    }
+
+    @Test
+    public void recordEvents() throws Exception {
+        List<Event> listOfEvents = new ArrayList<>();
+        Event e = new Event();
+        e.setName(Name.valueOf("someEventName"));
+        listOfEvents.add(e);
+        eventList.setEvents(listOfEvents);
+
+        resource.recordEvents(applicationName, experimentLabel, userID, eventList);
+        verify(events).recordEvents(any(Application.Name.class), any(Experiment.Label.class), any(User.ID.class), any(EventList.class), any(Set.class));
+    }
+
+    @Test
+    public void recordUsersEvents() throws UnsupportedOperationException {
+        Map<User.ID, List<Event>> eventList = new HashMap<>();
+
+        thrown.expect(UnsupportedOperationException.class);
+        thrown.expectMessage("Not implemented");
+        resource.recordUsersEvents(applicationName, experimentLabel, eventList);
+    }
+
+    @Test
+    public void recordExperimentsEvents() throws Exception {
+        Map<Experiment.Label, Map<User.ID, List<Event>>> eventList = new HashMap<>();
+
+        thrown.expect(UnsupportedOperationException.class);
+        thrown.expectMessage("Not implemented");
+        resource.recordExperimentsEvents(applicationName, userID, eventList);
+    }
+
+    @Test
+    public void getEventsQueueLength() throws Exception {
+        assertNotNull(resource.getEventsQueueLength());
+    }
 }

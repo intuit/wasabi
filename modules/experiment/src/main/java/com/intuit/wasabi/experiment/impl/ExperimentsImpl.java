@@ -29,7 +29,6 @@ import com.intuit.wasabi.experiment.Pages;
 import com.intuit.wasabi.experiment.Priorities;
 import com.intuit.wasabi.experimentobjects.*;
 import com.intuit.wasabi.experimentobjects.Experiment.ExperimentAuditInfo;
-import com.intuit.wasabi.experimentobjects.filter.ExperimentFilter;
 import com.intuit.wasabi.repository.CassandraRepository;
 import com.intuit.wasabi.repository.DatabaseRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
@@ -560,12 +559,4 @@ public class ExperimentsImpl implements Experiments {
         return experiment;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<Experiment> getFilteredExperiments(String filterMask, String sortOrder) {
-        List<Experiment> allExps = getExperiments().getExperiments();
-        return ExperimentFilter.sort(ExperimentFilter.filter(allExps, filterMask), sortOrder);
-    }
 }

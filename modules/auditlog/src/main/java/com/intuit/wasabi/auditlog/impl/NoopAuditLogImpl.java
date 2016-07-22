@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright 2016 Intuit
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package com.intuit.wasabi.auditlog.impl;
 
 import com.intuit.wasabi.auditlog.AuditLog;
@@ -16,61 +31,21 @@ public class NoopAuditLogImpl implements AuditLog {
      * Returns an empty list.
      *
      * @param applicationName the application
-     * @param filterMask      the filter mask
-     * @param sortOrder       the sort order
      * @return a list of filtered and sorted audit logs
      */
     @Override
-    public List<AuditLogEntry> getAuditLogs(Application.Name applicationName, String filterMask, String sortOrder) {
+    public List<AuditLogEntry> getAuditLogs(Application.Name applicationName) {
         return Collections.emptyList();
     }
 
     /**
      * Returns an empty list.
      *
-     * @param filterMask the filter mask
-     * @param sortOrder  the sort order
      * @return the list of AuditLogEntries
      */
     @Override
-    public List<AuditLogEntry> getAuditLogs(String filterMask, String sortOrder) {
+    public List<AuditLogEntry> getAuditLogs() {
         return Collections.emptyList();
-    }
-
-    /**
-     * Returns an empty list.
-     *
-     * @param filterMask the filter mask
-     * @param sortOrder  the sort order
-     * @return the list of AuditLogEntries
-     */
-    @Override
-    public List<AuditLogEntry> getGlobalAuditLogs(String filterMask, String sortOrder) {
-        return Collections.emptyList();
-    }
-
-    /**
-     * Returns the input list.
-     *
-     * @param auditLogEntries the list to be filtered
-     * @param filterMasks     the filter mask
-     * @return a filtered list
-     */
-    @Override
-    public List<AuditLogEntry> filter(List<AuditLogEntry> auditLogEntries, String filterMasks) {
-        return auditLogEntries;
-    }
-
-    /**
-     * Returns the input list.
-     *
-     * @param auditLogEntries the list to be sorted
-     * @param sortOrder       the sort order
-     * @return a sorted list
-     */
-    @Override
-    public List<AuditLogEntry> sort(List<AuditLogEntry> auditLogEntries, String sortOrder) {
-        return auditLogEntries;
     }
 
 }

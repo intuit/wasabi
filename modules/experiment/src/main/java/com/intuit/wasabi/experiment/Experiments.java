@@ -157,12 +157,4 @@ public interface Experiments {
      */
     List<Application.Name> getApplications();
 
-    /**
-     * Filters the list of all experiments according to the filter mask and the sort criteria.
-     *
-     * @param filterMask the filter mask
-     * @param sortOrder the sort order
-     * @return a list of experiments according to the filtermask and sort order
-     */
-    List<Experiment> getFilteredExperiments(String filterMask, String sortOrder);
 }
