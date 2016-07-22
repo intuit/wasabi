@@ -88,10 +88,20 @@ public class ExperimentFilter extends PaginationFilter<Experiment> {
     }
 
     private static boolean statusTest(Experiment.State state, String filter) {
-        if (filter.equalsIgnoreCase("notTerminated")) {
-            return state == Experiment.State.DRAFT || state == Experiment.State.RUNNING || state == Experiment.State.PAUSED;
+        switch (filter.toLowerCase()) {
+            case "notterminated":
+                return state == Experiment.State.DRAFT || state == Experiment.State.RUNNING || state == Experiment.State.PAUSED;
+            case "terminated":
+                return state == Experiment.State.TERMINATED;
+            case "running":
+                return state == Experiment.State.RUNNING;
+            case "draft":
+                return state == Experiment.State.DRAFT;
+            case "paused":
+                return state == Experiment.State.PAUSED;
+            default:
+                return true;
         }
-        return state.toString().equals(filter);
     }
 
     private static boolean constraintTest(Date experimentDate, String filter) {
