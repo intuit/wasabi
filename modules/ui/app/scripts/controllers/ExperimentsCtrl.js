@@ -302,23 +302,23 @@ angular.module('wasabi.controllers').
             $scope.convertOrderByField = function() {
                 switch ($scope.orderByField) {
                     case 'applicationName':
-                        return 'app';
+                        return 'application_name';
                     case 'label':
                         return 'experiment_name';
                     case 'creatorID':
                         return 'created_by';
                     case 'samplingPercent':
-                        return 'sampling_perc';
+                        return 'sampling_percent';
                     case 'startTime':
-                        return 'start_date';
+                        return 'start_time';
                     case 'endTime':
-                        return 'end_date';
+                        return 'end_time';
                     case 'modificationTime':
-                        return 'mod_date';
+                        return 'modification_time';
                     case 'state':
-                        return 'status';
+                        return 'state';
                     default:
-                        return 'app';
+                        return 'application_name';
                 }
             };
 

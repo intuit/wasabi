@@ -32,25 +32,26 @@ public class ExperimentFilter extends PaginationFilter<Experiment> {
 
     public ExperimentFilter() {
         super.registerFilterModifierForProperties(FilterUtil.FilterModifier.APPEND_TIMEZONEOFFSET,
-                Property.created, Property.started, Property.ended, Property.modified,
-                Property.dateconstraintstart, Property.dateconstraintend);
-        super.excludeFromFulltext(Property.appexact, Property.status, Property.dateconstraintstart,
-                Property.dateconstraintend);
+                Property.creation_time, Property.start_time, Property.end_time, Property.modification_time,
+                Property.date_constraint_start, Property.date_constraint_end);
+        super.excludeFromFulltext(Property.application_name_exact, Property.state_exact, Property.date_constraint_start,
+                Property.date_constraint_end);
     }
 
     private enum Property implements PaginationFilterProperty<Experiment> {
-        app(experiment -> experiment.getApplicationName().toString(), StringUtils::containsIgnoreCase),
-        appexact(experiment -> experiment.getApplicationName().toString(), String::equals),
-        name(experiment -> experiment.getLabel().toString(), StringUtils::containsIgnoreCase),
-        creator(Experiment::getCreatorID, StringUtils::containsIgnoreCase),
-        created(Experiment::getCreationTime, FilterUtil::extractTimeZoneAndTestDate),
-        started(Experiment::getStartTime, FilterUtil::extractTimeZoneAndTestDate),
-        ended(Experiment::getEndTime, FilterUtil::extractTimeZoneAndTestDate),
-        modified(Experiment::getModificationTime, FilterUtil::extractTimeZoneAndTestDate),
+        application_name(experiment -> experiment.getApplicationName().toString(), StringUtils::containsIgnoreCase),
+        application_name_exact(experiment -> experiment.getApplicationName().toString(), String::equals),
+        experiment_name(experiment -> experiment.getLabel().toString(), StringUtils::containsIgnoreCase),
+        created_by(Experiment::getCreatorID, StringUtils::containsIgnoreCase),
+        creation_time(Experiment::getCreationTime, FilterUtil::extractTimeZoneAndTestDate),
+        start_time(Experiment::getStartTime, FilterUtil::extractTimeZoneAndTestDate),
+//        sampling_percent(Experiment::getSamplingPercent, ),
+        end_time(Experiment::getEndTime, FilterUtil::extractTimeZoneAndTestDate),
+        modification_time(Experiment::getModificationTime, FilterUtil::extractTimeZoneAndTestDate),
         state(Experiment::getState, (state, filter) -> state.toString().contains(filter)),
-        status(Experiment::getState, ExperimentFilter::statusTest),
-        dateconstraintstart(Experiment::getStartTime, ExperimentFilter::constraintTest),
-        dateconstraintend(Experiment::getEndTime, ExperimentFilter::constraintTest)
+        state_exact(Experiment::getState, ExperimentFilter::statusTest),
+        date_constraint_start(Experiment::getStartTime, ExperimentFilter::constraintTest),
+        date_constraint_end(Experiment::getEndTime, ExperimentFilter::constraintTest)
         ;
 
         private final Function<Experiment, ?> propertyExtractor;

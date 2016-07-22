@@ -334,7 +334,7 @@ public class ExperimentsResource {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Delete an experiment",
             notes = "Can only delete an experiment that is in DRAFT or TERMINATED state.  The default call is " +
-                    "safe to use, but other than that please only delete experiments which you have created.")
+                    "safe to use, but other than that please only delete experiments which you have creation_time.")
     @Timed
     public Response deleteExperiment(@PathParam("experimentID")
                                      @ApiParam(value = "Experiment ID")
@@ -647,7 +647,7 @@ public class ExperimentsResource {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Delete a bucket in an experiment",
             notes = "Can only delete a bucket for experiment that is in DRAFT state.  The default call is " +
-                    "safe to use, but other than that please only delete buckets which you have created.")
+                    "safe to use, but other than that please only delete buckets which you have creation_time.")
     @Timed
     public Response deleteBucket(@PathParam("experimentID")
                                  @ApiParam(value = "Experiment ID")
