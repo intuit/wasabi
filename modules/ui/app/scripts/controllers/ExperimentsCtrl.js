@@ -344,6 +344,9 @@ angular.module('wasabi.controllers').
                 if ($scope.data.lastSearchWasSimple) {
                     // Add simple filter info, if available
                     queryParams.filter = $scope.data.query;
+                    if ($scope.data.hideTerminated) {
+                        queryParams.filter += ',state_exact=notTerminated';
+                    }
                 }
                 else {
                     // Add advanced filter info, if available
@@ -523,20 +526,11 @@ angular.module('wasabi.controllers').
             };
 
             $scope.applySearchSortFilters = function(doSorting) {
-                var faves = UtilitiesFactory.retrieveFavorites();
-                $scope.experiments.forEach(function(item) {
-                    item.isFavorite = (faves.indexOf(item.applicationName + '|' + item.label) >= 0);
-                });
-
-                if (doSorting) {
-                    $scope.sortBy($scope.orderByField, $scope.reverseSort);
-                } else {
-                    if ($scope.data.showAdvancedSearch) {
-                        $scope.advSearch($scope.currentPage);
-                    }
-                    else {
-                        $scope.search($scope.currentPage);
-                    }
+                if ($scope.data.showAdvancedSearch) {
+                    $scope.advSearch(true);
+                }
+                else {
+                    $scope.search(true);
                 }
             };
 
@@ -612,13 +606,8 @@ angular.module('wasabi.controllers').
                 }
             };
 
-            var searchMatch = function (haystack, needle) {
-                if (!needle) {
-                    return true;
-                }
-                return haystack.toLowerCase().indexOf(needle.toLowerCase()) !== -1;
-            };
-
+            // TODO: not currently being used, but not removing until we have solved the Favorites problem,
+            // that is, that favorites don't work with the new paginated API.
             var bubbleFavoritesToTop = function() {
                 // We want to pull the favorites to the top and have a secondary sort by the column we are
                 // sorting by.
@@ -667,19 +656,25 @@ angular.module('wasabi.controllers').
             };
 
             $scope.doSearch = function() {
-                $scope.loadExperiments();
+                if ($scope.data.showGrid) {
+                    $scope.loadCardViewExperiments();
 
-                // Handle the list used for lazy loading of the grid.
-                $scope.loadGridDataIfNecessary();
+                    // Handle the list used for lazy loading of the grid.
+                    $scope.loadGridDataIfNecessary();
+                }
+                else {
+                    $scope.loadExperiments();
+                }
 
                 UtilitiesFactory.doTrackingInit();
             };
 
-            $scope.search = function () {
-                var switchingFromAdvanced = !$scope.data.lastSearchWasSimple;
+            $scope.search = function (changingHideTerminated) {
+                var switchingFromAdvanced = !$scope.data.lastSearchWasSimple,
+                    hideTerminatedChanged = (changingHideTerminated !== undefined ? changingHideTerminated : false);
                 $scope.data.lastSearchWasSimple = true;
                 localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
-                if (switchingFromAdvanced || $.trim($scope.data.query).length > 0) {
+                if (switchingFromAdvanced || hideTerminatedChanged || $.trim($scope.data.query).length > 0) {
                     if ($scope.searchTimer) {
                         $timeout.cancel($scope.searchTimer);
                     }
@@ -687,7 +682,7 @@ angular.module('wasabi.controllers').
                 }
             };
 
-            $scope.advSearch = function(currentPage) {
+            $scope.advSearch = function() {
                 // Save the advanced search settings
                 $scope.data.lastSearchWasSimple = false;
                 localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
@@ -696,9 +691,13 @@ angular.module('wasabi.controllers').
                     $scope.data.advApplicationName = '';
                 }
 
-                $scope.loadExperiments();
-
-                $scope.loadGridDataIfNecessary();
+                if ($scope.data.showGrid) {
+                    $scope.loadCardViewExperiments();
+                    $scope.loadGridDataIfNecessary();
+                }
+                else {
+                    $scope.loadExperiments();
+                }
 
                 var searchParms = 'advStatus=' + $scope.data.advStatus +
                         '&advExperimentName=' + $scope.data.advExperimentName +
@@ -711,31 +710,6 @@ angular.module('wasabi.controllers').
 
 
                 UtilitiesFactory.doTrackingInit();
-            };
-
-            // calculate page in place
-            $scope.groupToPages = function () {
-                var tmpArray = [];
-
-                $scope.pagedData = {
-                    pagedItems: []
-                };
-                if ($scope.filteredItems.length === 0) {
-                    $scope.pagedData.pagedItems[0] = [];
-                    return;
-                }
-
-                for (var i = 0; i < $scope.filteredItems.length; i++) {
-                    if (i % $scope.itemsPerPage === 0) {
-                        tmpArray[Math.floor(i / $scope.itemsPerPage)] = [ $scope.filteredItems[i] ];
-                    } else {
-                        tmpArray[Math.floor(i / $scope.itemsPerPage)].push($scope.filteredItems[i]);
-                    }
-                }
-                $timeout(function() {
-                    $scope.pagedData.pagedItems = tmpArray;
-                    tmpArray = null;
-                });
             };
 
             $scope.pageChanged = function() {
