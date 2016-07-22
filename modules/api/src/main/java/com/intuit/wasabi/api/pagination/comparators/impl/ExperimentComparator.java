@@ -26,17 +26,17 @@ import java.util.function.Function;
 public class ExperimentComparator extends PaginationComparator<Experiment> {
 
     public ExperimentComparator() {
-        super("-modified");
+        super("-modification_time");
     }
 
     private enum Property implements PaginationComparatorProperty<Experiment> {
-        app(experiment -> experiment.getApplicationName().toString(), String::compareToIgnoreCase),
-        name(experiment -> experiment.getLabel().toString(), String::compareToIgnoreCase),
-        creator(Experiment::getCreatorID, String::compareToIgnoreCase),
-        created(Experiment::getCreationTime, Date::compareTo),
-        started(Experiment::getStartTime, Date::compareTo),
-        ended(Experiment::getEndTime, Date::compareTo),
-        modified(Experiment::getModificationTime, Date::compareTo),
+        application_name(experiment -> experiment.getApplicationName().toString(), String::compareToIgnoreCase),
+        experiment_name(experiment -> experiment.getLabel().toString(), String::compareToIgnoreCase),
+        created_by(Experiment::getCreatorID, String::compareToIgnoreCase),
+        creation_time(Experiment::getCreationTime, Date::compareTo),
+        start_time(Experiment::getStartTime, Date::compareTo),
+        end_time(Experiment::getEndTime, Date::compareTo),
+        modification_time(Experiment::getModificationTime, Date::compareTo),
         state(Experiment::getState, Experiment.State::compareTo)
         ;
 
