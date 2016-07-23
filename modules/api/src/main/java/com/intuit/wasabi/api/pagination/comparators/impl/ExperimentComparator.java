@@ -23,12 +23,26 @@ import java.util.Date;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+/**
+ * Implements the {@link PaginationComparator} for {@link Experiment} objects.
+ */
 public class ExperimentComparator extends PaginationComparator<Experiment> {
 
+    /**
+     * Initializes the ExperimentComparator.
+     *
+     * Sets the default sort order to the descending modification time ({@code -modification_time}),
+     * that means the latest changes come first.
+     */
     public ExperimentComparator() {
         super("-modification_time");
     }
 
+    /**
+     * Implementation of {@link PaginationComparatorProperty} for {@link Experiment}s.
+     *
+     * @see PaginationComparatorProperty
+     */
     private enum Property implements PaginationComparatorProperty<Experiment> {
         application_name(experiment -> experiment.getApplicationName().toString(), String::compareToIgnoreCase),
         experiment_name(experiment -> experiment.getLabel().toString(), String::compareToIgnoreCase),
@@ -43,8 +57,14 @@ public class ExperimentComparator extends PaginationComparator<Experiment> {
         private final Function<Experiment, ?> propertyExtractor;
         private final BiFunction<?, ?, Integer> comparisonFunction;
 
+        /**
+         * Creates a Property.
+         *
+         * @param propertyExtractor the property extractor
+         * @param comparisonFunction the comparison function
+         * @param <T> the property type
+         */
         <T> Property(Function<Experiment, T> propertyExtractor, BiFunction<T, T, Integer> comparisonFunction) {
-
             this.propertyExtractor = propertyExtractor;
             this.comparisonFunction = comparisonFunction;
         }
@@ -70,7 +90,7 @@ public class ExperimentComparator extends PaginationComparator<Experiment> {
      * {@inheritDoc}
      */
     @Override
-    public int compare(Experiment o1, Experiment o2) {
-        return super.compare(o1, o2, Property.class);
+    public int compare(Experiment left, Experiment right) {
+        return super.compare(left, right, Property.class);
     }
 }

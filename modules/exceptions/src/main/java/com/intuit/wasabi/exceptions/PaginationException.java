@@ -25,7 +25,7 @@ public class PaginationException extends WasabiClientException {
 
 
     /**
-     * Throws an PaginationException.
+     * Throws a PaginationException.
      *
      * @param errorCode the error code from {@link ErrorCode}
      * @param detailMessage a detailed error message
@@ -35,7 +35,7 @@ public class PaginationException extends WasabiClientException {
     }
 
     /**
-     * Throws an PaginationException.
+     * Throws a PaginationException.
      *
      * @param errorCode the error code from {@link ErrorCode}
      * @param detailMessage a detailed error message

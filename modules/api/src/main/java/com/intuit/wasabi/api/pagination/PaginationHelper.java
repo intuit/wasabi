@@ -112,7 +112,6 @@ public class PaginationHelper<T> {
                              toIndex(page, perPage, list.size())));
 
         return response;
-
     }
 
 }

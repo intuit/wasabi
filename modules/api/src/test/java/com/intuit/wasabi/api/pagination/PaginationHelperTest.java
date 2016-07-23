@@ -20,7 +20,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 /**
- * Test for {@link PaginationHelper}
+ * Tests for {@link PaginationHelper}.
  */
 public class PaginationHelperTest {
 
@@ -65,5 +65,6 @@ public class PaginationHelperTest {
         assertEquals(11, paginationHelper.toIndex(2, 10, 11));
         assertEquals(276, paginationHelper.toIndex(23, 12, 1230));
     }
+
 
 }

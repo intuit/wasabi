@@ -24,12 +24,27 @@ import java.util.Calendar;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+
+/**
+ * Implements the {@link PaginationComparator} for {@link AuditLogEntry} objects.
+ */
 public class AuditLogComparator extends PaginationComparator<AuditLogEntry> {
 
+    /**
+     * Initializes an AuditLogComparator.
+     *
+     * Sets the default sort order to descending time, that means
+     * the most recent events are first.
+     */
     public AuditLogComparator() {
         super("-time");
     }
 
+    /**
+     * Implementation of {@link PaginationComparatorProperty} for {@link AuditLogEntry}s.
+     *
+     * @see PaginationComparatorProperty
+     */
     private enum Property implements PaginationComparatorProperty<AuditLogEntry> {
         firstname(auditLogEntry -> auditLogEntry.getUser().getFirstName(), String::compareToIgnoreCase),
         lastname(auditLogEntry -> auditLogEntry.getUser().getLastName(), String::compareToIgnoreCase),
@@ -48,9 +63,16 @@ public class AuditLogComparator extends PaginationComparator<AuditLogEntry> {
         description(AuditLogAction::getDescription, String::compareToIgnoreCase),
         ;
 
-        final Function<AuditLogEntry, ?> propertyExtractor;
-        final BiFunction<?, ?, Integer> comparisonFunction;
+        private final Function<AuditLogEntry, ?> propertyExtractor;
+        private final BiFunction<?, ?, Integer> comparisonFunction;
 
+        /**
+         * Creates a Property.
+         *
+         * @param propertyExtractor the property extractor
+         * @param comparisonFunction the comparison function
+         * @param <T> the property type
+         */
         <T> Property(Function<AuditLogEntry, T> propertyExtractor, BiFunction<T, T, Integer> comparisonFunction) {
             this.propertyExtractor = propertyExtractor;
             this.comparisonFunction = comparisonFunction;
@@ -77,7 +99,7 @@ public class AuditLogComparator extends PaginationComparator<AuditLogEntry> {
      * {@inheritDoc}
      */
     @Override
-    public int compare(AuditLogEntry o1, AuditLogEntry o2) {
-        return super.compare(o1, o2, Property.class);
+    public int compare(AuditLogEntry left, AuditLogEntry right) {
+        return super.compare(left, right, Property.class);
     }
 }
