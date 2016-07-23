@@ -148,7 +148,10 @@ public class AuditLogResource {
             auditLogs = auditLog.getAuditLogs();
         }
 
-        return httpHeader.headers().entity(paginationHelper.paginate("logEntries", auditLogs, filter, timezoneOffset, sort, page, perPage)).build();
+        Map<String, Object> response = paginationHelper.paginate("logEntries",
+                auditLogs, filter, timezoneOffset, sort, page, perPage);
+
+        return httpHeader.headers().entity(response).build();
     }
 
     /**

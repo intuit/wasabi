@@ -28,6 +28,13 @@ public abstract class PaginationFilter<T> implements Predicate<T> {
     private String filter = "";
     private String timeZoneOffset = "+0000";
 
+    /** Separates a filter key from its value: key=value */
+    private final String SEPARATOR = "=";
+    /** Verifies a valid filter pattern: some_key=someting */
+    private final String PATTERN = "[a-z_]+" + SEPARATOR + ".*";
+    /** Delimites filter commands, appears between two filters: a=b,c=d */
+    private final String DELIMITER = ",";
+
     private final HashMap<PaginationFilterProperty, FilterUtil.FilterModifier> filterModifiers = new HashMap<>();
     private final List<PaginationFilterProperty> excludeFromFulltext = new ArrayList<>();
 
@@ -53,11 +60,10 @@ public abstract class PaginationFilter<T> implements Predicate<T> {
     }
 
     private <V extends Enum<V> & PaginationFilterProperty> boolean testFulltext(T object, Class<V> enumType) {
-
         return Arrays.asList(enumType.getEnumConstants()).parallelStream()
                 .filter(field -> !excludeFromFulltext.contains(field))
                 .anyMatch(field -> filterByProperty(object,
-                        modifyFilterForKey(field, this.filter),
+                        modifyFilterForKey(field, StringUtils.substringBefore(filter, ",")),
                         field.getPropertyExtractor(),
                         field.getFilterPredicate()));
     }
@@ -67,21 +73,23 @@ public abstract class PaginationFilter<T> implements Predicate<T> {
     }
 
     private <V extends Enum<V> & PaginationFilterProperty> boolean testFields(T object, Class<V> enumType) {
-        String delimiter = ",";
-        String separator = "=";
-        String pattern = "[a-z_]+" + separator + ".*";
+        try (Scanner filterScanner = new Scanner(filter)) {
+            filterScanner.useDelimiter(DELIMITER);
 
-        try (Scanner filterScanner = new Scanner(this.filter)) {
-            filterScanner.useDelimiter(delimiter);
+            // skip potential fulltext search pattern
+            if (StringUtils.contains(StringUtils.substringBefore(filter, SEPARATOR), DELIMITER)) {
+                filterScanner.findInLine(DELIMITER);
+            }
 
-            while (filterScanner.hasNext(pattern)) {
-                String[] keyValuePattern = filterScanner.next(pattern).split(separator);
+            // iterate over all single field patterns
+            while (filterScanner.hasNext(PATTERN)) {
+                String[] keyValuePattern = filterScanner.next(PATTERN).split(SEPARATOR);
 
                 V key;
                 try {
                     key = Enum.valueOf(enumType, keyValuePattern[0]);
                 } catch (IllegalArgumentException illegalArgumentException) {
-                    throw new PaginationException(ErrorCode.FILTER_KEY_UNPROCESSABLE, "The request can not be filtered by " + keyValuePattern[0], illegalArgumentException);
+                    throw new PaginationException(ErrorCode.FILTER_KEY_UNPROCESSABLE, "The request can not be filtered by key '" + keyValuePattern[0] + "'.", illegalArgumentException);
                 }
 
                 String filterValue = modifyFilterForKey(key, keyValuePattern[1]);
@@ -95,10 +103,13 @@ public abstract class PaginationFilter<T> implements Predicate<T> {
     }
 
     public <V extends Enum<V> & PaginationFilterProperty> boolean test(T object, Class<V> enumType) {
-        if (StringUtils.isBlank(this.filter)) {
+        if (StringUtils.isBlank(filter)) {
             return true;
-        } else if (this.filter.contains("=")) {
-            return testFields(object, enumType);
+        } else if (filter.contains(SEPARATOR)) {
+            if (StringUtils.containsNone(StringUtils.substringBefore(filter, DELIMITER), SEPARATOR)) {
+                return testFields(object, enumType);
+            }
+            return testFields(object, enumType) && testFulltext(object, enumType);
         }
         return testFulltext(object, enumType);
     }

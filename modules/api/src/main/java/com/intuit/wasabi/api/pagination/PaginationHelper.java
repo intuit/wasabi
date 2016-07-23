@@ -107,7 +107,7 @@ public class PaginationHelper<T> {
                     .collect(Collectors.toList());
         response.put("totalEntries", list.size());
 
-        response.put(jsonKey, perPage == -1 ? list :
+        response.put(jsonKey, (perPage == -1 || list.size() == 0) ? list :
                 list.subList(fromIndex(page, perPage, list.size()),
                              toIndex(page, perPage, list.size())));
 
