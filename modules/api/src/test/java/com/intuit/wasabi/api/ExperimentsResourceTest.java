@@ -16,6 +16,8 @@
 package com.intuit.wasabi.api;
 
 import com.intuit.wasabi.api.pagination.PaginationHelper;
+import com.intuit.wasabi.api.pagination.comparators.impl.ExperimentComparator;
+import com.intuit.wasabi.api.pagination.filters.impl.ExperimentFilter;
 import com.intuit.wasabi.assignment.Assignments;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authorization.Authorization;
@@ -96,8 +98,8 @@ public class ExperimentsResourceTest {
     private String toStringDate = "2040-05-10 18:03:39";
     private String timeZoneString = "UTC";
 
-    @Mock
-    private PaginationHelper<Experiment> paginationHelper;
+    private PaginationHelper<Experiment> paginationHelper = new PaginationHelper<>(
+            new ExperimentFilter(), new ExperimentComparator());
 
     @Before
     public void setup() {
@@ -143,21 +145,35 @@ public class ExperimentsResourceTest {
 
         when(experiments.getExperiments()).thenReturn(experimentList);
 
-        Response response = experimentsResource.getExperiments(null, 0, 10, "", "", "");
-        assert(experimentList.equals(response.getEntity()));
+        Response response = experimentsResource.getExperiments(AUTHHEADER, 1, 10, "", "", "");
 
+        List responseList = Collections.EMPTY_LIST;
+        if (response.getEntity() instanceof HashMap) {
+            if (((HashMap) response.getEntity()).get("experiments") instanceof List) {
+                responseList = (List) ((HashMap) response.getEntity()).get("experiments");
+            }
+        }
+        assert experimentList.getExperiments().containsAll(responseList);
+        assert experimentList.getExperiments().size() == responseList.size();
+
+        // fewer allowed experiments
         when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
-        ExperimentList authorizedExperiments = new ExperimentList();
-        authorizedExperiments.addExperiment(experiment);
-        authorizedExperiments.addExperiment(experiment1);
 
         //this throw is so that only the allowed (TESTAPP) experiments get returned
         doThrow(AuthenticationException.class).when(authorization)
                 .checkUserPermissions(USER, TESTAPP2, Permission.READ);
 
-        response = experimentsResource.getExperiments(AUTHHEADER, 0, 10, "", "", "");
-        // TODO: broken because of subList!!
-        //assert(authorizedExperiments.equals(response.getEntity()));
+        response = experimentsResource.getExperiments(AUTHHEADER, 1, 10, "", "", "");
+
+        responseList = Collections.EMPTY_LIST;
+        if (response.getEntity() instanceof HashMap) {
+            if (((HashMap) response.getEntity()).get("experiments") instanceof List) {
+                responseList = (List) ((HashMap) response.getEntity()).get("experiments");
+            }
+        }
+        assert experimentList.getExperiments().containsAll(responseList);
+        assert 2 == responseList.size();
+        assert !responseList.contains(experiment2);
     }
 
     @Test
