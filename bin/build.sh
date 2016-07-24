@@ -122,9 +122,7 @@ chmod 755 ${home}/${id}/bin/run
 chmod 755 ${home}/${id}/entrypoint.sh
 sed -i '' -e "s/chpst -u [^:]*:[^ ]* //" ${home}/${id}/bin/run 2>/dev/null
 
-if [ "${build}" = true ] && [ "${WASABI_OS}" == "OSX" ]; then
-  wip=$(docker-machine ip wasabi):8080
-  sed -i '' -e "s|http://localhost:8080|http://${wip}|g" constants.json 2>/dev/null
+if [ "${build}" = true ] && [ "$OS" == "OSX" ]; then
   brew list node
   if [[ $? -eq 1 ]]; then
   	echo "Node.js is not installed. Installing Node.js packages..."
@@ -132,9 +130,8 @@ if [ "${build}" = true ] && [ "${WASABI_OS}" == "OSX" ]; then
   	npm install -g yo grunt-cli bower grunt-contrib-compass
   	sudo gem install compass
   fi
+  (cd ./modules/ui && npm install && bower install && grunt build)
 fi
-
-(cd ./modules/ui && npm install && bower install && grunt build)
 
 content=${home}/${id}/content/ui/dist
 
