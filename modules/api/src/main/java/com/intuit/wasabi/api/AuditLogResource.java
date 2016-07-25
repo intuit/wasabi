@@ -78,22 +78,18 @@ public class AuditLogResource {
      * Returns a list of audit log entries for the specified application if the requesting user has access to it.
      * To have access the user needs {@link Permission#ADMIN} permissions for the application.
      *
-     * Before returning the paginated list of log entries it gets
-     * <ul>
-     * <li>filtered,</li>
-     * <li>sorted,</li>
-     * <li>counted,</li>
-     * <li>paginated.</li>
-     * </ul>
+     * This endpoint is paginated.
      *
      * @param authorizationHeader the authentication headers
-     * @param applicationName the name of the application for which the log should be fetched
-     * @param page the page which should be returned, defaults to 1 (latest changes)
-     * @param perPage the number of log entries per page, defaults to 10
+     * @param applicationName the application name. If {@code null}, all logs for the authorized user's applications
+     *                        are returned.
+     * @param page the page which should be returned, defaults to 1
+     * @param perPage the number of log entries per page, defaults to 10. -1 to get all values.
      * @param sort the sorting rules
      * @param filter the filter rules
-     * @param timezoneOffset the timezone offset from UTC
-     * @return a response containing a list with {@code 0 - perPage} experiments, if that many are on the page.
+     * @param timezoneOffset the time zone offset from UTC
+     * @return a response containing a map with a list with {@code 0} to {@code perPage} log entries,
+     * if that many are on the page, and a count of how many log entries match the filter criteria.
      */
     @GET
     @Path("/applications/{applicationName}")
@@ -116,27 +112,27 @@ public class AuditLogResource {
 
                             @QueryParam("page")
                             @DefaultValue(DEFAULT_PAGE)
-                            @ApiParam(name = "page", value = "Defines the page to retrieve", defaultValue = DEFAULT_PAGE)
+                            @ApiParam(name = "page", defaultValue = DEFAULT_PAGE, value = DOC_PAGE)
                             final int page,
 
                             @QueryParam("per_page")
                             @DefaultValue(DEFAULT_PER_PAGE)
-                            @ApiParam(name = "per_page", value = "Defines the entries per page.", defaultValue = DEFAULT_PER_PAGE)
+                            @ApiParam(name = "per_page", defaultValue = DEFAULT_PER_PAGE, value = DOC_PER_PAGE)
                             final int perPage,
-
-                            @QueryParam("sort")
-                            @DefaultValue("")
-                            @ApiParam(name = "sort", defaultValue = "", value = "")
-                            final String sort,
 
                             @QueryParam("filter")
                             @DefaultValue("")
-                            @ApiParam(name = "filter", defaultValue = "", value = "")
+                            @ApiParam(name = "filter", defaultValue = DEFAULT_FILTER, value = DOC_FILTER)
                             final String filter,
 
+                            @QueryParam("sort")
+                            @DefaultValue("")
+                            @ApiParam(name = "sort", defaultValue = DEFAULT_SORT, value = DOC_SORT)
+                            final String sort,
+
                             @QueryParam("timezone")
-                            @DefaultValue("+0000")
-                            @ApiParam(name = "timezone", defaultValue = "+0000", value = EXAMPLE_TIMEZONE)
+                            @DefaultValue(DEFAULT_TIMEZONE)
+                            @ApiParam(name = "timezone", defaultValue = DEFAULT_TIMEZONE, value = DOC_TIMEZONE)
                             final String timezoneOffset) {
         List<AuditLogEntry> auditLogs;
 
@@ -158,20 +154,16 @@ public class AuditLogResource {
      * Returns a list of audit log entries for all applications, if the requesting user has access to it.
      * To have access the user needs {@link Permission#SUPERADMIN} permissions.
      *
-     * Before returning the paginated list of log entries it gets
-     * <ul>
-     * <li>filtered,</li>
-     * <li>sorted,</li>
-     * <li>paginated.</li>
-     * </ul>
+     * This endpoint is paginated.
      *
      * @param authorizationHeader the authentication headers
-     * @param page the page which should be returned, defaults to 1 (latest changes)
-     * @param perPage the number of log entries per page, defaults to 10
+     * @param page the page which should be returned, defaults to 1
+     * @param perPage the number of log entries per page, defaults to 10. -1 to get all values.
      * @param sort the sorting rules
      * @param filter the filter rules
      * @param timezoneOffset the time zone offset from UTC
-     * @return a response containing a list with {@code 0} to {@code perPage} experiments, if that many are on the page.
+     * @return a response containing a map with a list with {@code 0} to {@code perPage} log entries,
+     * if that many are on the page, and a count of how many log entries match the filter criteria.
      */
     @GET
     @Produces(APPLICATION_JSON)
@@ -189,27 +181,27 @@ public class AuditLogResource {
 
                                     @QueryParam("page")
                                     @DefaultValue(DEFAULT_PAGE)
-                                    @ApiParam(name = "page", defaultValue = DEFAULT_PAGE, value = EXAMPLE_PAGE)
+                                    @ApiParam(name = "page", defaultValue = DEFAULT_PAGE, value = DOC_PAGE)
                                     final int page,
 
                                     @QueryParam("per_page")
                                     @DefaultValue(DEFAULT_PER_PAGE)
-                                    @ApiParam(name = "per_page", defaultValue = DEFAULT_PER_PAGE, value = EXAMPLE_PER_PAGE)
+                                    @ApiParam(name = "per_page", defaultValue = DEFAULT_PER_PAGE, value = DOC_PER_PAGE)
                                     final int perPage,
-
-                                    @QueryParam("sort")
-                                    @DefaultValue("")
-                                    @ApiParam(name = "sort", defaultValue = "", value = EXAMPLE_SORT)
-                                    final String sort,
 
                                     @QueryParam("filter")
                                     @DefaultValue("")
-                                    @ApiParam(name = "filter", defaultValue = "", value = EXAMPLE_FILTER)
+                                    @ApiParam(name = "filter", defaultValue = DEFAULT_FILTER, value = DOC_FILTER)
                                     final String filter,
 
+                                    @QueryParam("sort")
+                                    @DefaultValue("")
+                                    @ApiParam(name = "sort", defaultValue = DEFAULT_SORT, value = DOC_SORT)
+                                    final String sort,
+
                                     @QueryParam("timezone")
-                                    @DefaultValue("+0000")
-                                    @ApiParam(name = "timezone", defaultValue = "+0000", value = EXAMPLE_TIMEZONE)
+                                    @DefaultValue(DEFAULT_TIMEZONE)
+                                    @ApiParam(name = "timezone", defaultValue = DEFAULT_TIMEZONE, value = DOC_TIMEZONE)
                                     final String timezoneOffset) {
         return getLogs(authorizationHeader, null, page, perPage, sort, filter, timezoneOffset);
     }

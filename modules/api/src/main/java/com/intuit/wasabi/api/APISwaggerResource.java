@@ -40,15 +40,26 @@ interface APISwaggerResource {
     String DEFAULT_ASSIGNMENT = "{\"assignment\": \"" + DEFAULT_BUCKET + "\"}";
     String DEFAULT_EMPTY = "{}";
     String DEFAULT_ROLE = "admin";
-    String DEFAULT_PAGE = "1";
-    String DEFAULT_PER_PAGE = "10";
 
     String EXAMPLE_AUTHORIZATION_HEADER = "Basic d2FzYWJpLW5vcmVwbHlAaW50dWl0LmNvbTp3ZWFrcGFzcw";
     String EXAMPLE_ALL_ROLES = "Example: SUPERADMIN / ADMIN / READONLY / READWRITE";
 
-    String EXAMPLE_TIMEZONE = "+0000";
-    String EXAMPLE_PAGE = "1";
-    String EXAMPLE_PER_PAGE = "5";
-    String EXAMPLE_FILTER = "swagger";
-    String EXAMPLE_SORT = "-app";
+    String DEFAULT_PAGE = "1";
+    String DEFAULT_PER_PAGE = "10";
+    String DEFAULT_FILTER = "";
+    String DEFAULT_SORT = "";
+    String DEFAULT_TIMEZONE = "+0000";
+
+    String DOC_PAGE = "A positive integer determining the page to return. If the page does not exist, it is " +
+            "returned empty.";
+    String DOC_PER_PAGE = "A positive integer determining the number of entries per page to return. If -1, all " +
+            "entries are returned and the page option is ignored.";
+    String DOC_FILTER = "A filter string to filter the elements. The exact semantics depend on the resource, but in " +
+            "general the filter follows the pattern: fulltext,key=value,key2=value2,... . It is possible to either " +
+            "only supply the fulltext or only key=value pairs. Note that the fulltext must not contain '=' and the " +
+            "filter keys and values must not contain '=' or ','. An example would be: matchThis,experiment=myExp";
+    String DOC_SORT = "A sort string to sort the elements. The exact semantics depend on the resource, but in " +
+            "general the sort order follows the pattern: [-]primary[,[-]secondary[...]] . The keys determine the " +
+            "fields and a prefixed hyphen changes the sort order to descending.";
+    String DOC_TIMEZONE = "The user's timezone offset. Valid values are for example: +0100, -07:30 or the like.";
 }

@@ -21,15 +21,32 @@ import com.intuit.wasabi.api.pagination.filters.PaginationFilterProperty;
 import com.intuit.wasabi.exceptions.PaginationException;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.exceptions.ErrorCode;
-import com.intuit.wasabi.util.DateUtil;
 import org.apache.commons.lang3.StringUtils;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 
+/**
+ * Implements the {@link PaginationFilter} for {@link Experiment}s.
+ */
 public class ExperimentFilter extends PaginationFilter<Experiment> {
 
+    /**
+     * Initializes the ExperimentFilter.
+     *
+     * Registers modifiers to handle timezones correctly and excludes duplicate and specialized search query fields
+     * from fulltext search to avoid difficulties in overly specific queries and to avoid duplications.
+     *
+     * The fields modified are:<br />
+     * {@link Property#creation_time}, {@link Property#start_time}, {@link Property#end_time},
+     * {@link Property#modification_time}, {@link Property#date_constraint_start}, {@link Property#date_constraint_end}
+     *
+     * The fields excluded from fulltext search are:<br />
+     * {@link Property#application_name_exact}, {@link Property#state_exact}, {@link Property#date_constraint_start},
+     * {@link Property#date_constraint_end}
+     */
     public ExperimentFilter() {
         super.registerFilterModifierForProperties(FilterUtil.FilterModifier.APPEND_TIMEZONEOFFSET,
                 Property.creation_time, Property.start_time, Property.end_time, Property.modification_time,
@@ -38,6 +55,11 @@ public class ExperimentFilter extends PaginationFilter<Experiment> {
                 Property.date_constraint_end);
     }
 
+    /**
+     * Implementation of {@link PaginationFilterProperty} for {@link Experiment}s.
+     *
+     * @see PaginationFilterProperty
+     */
     private enum Property implements PaginationFilterProperty<Experiment> {
         application_name(experiment -> experiment.getApplicationName().toString(), StringUtils::containsIgnoreCase),
         application_name_exact(experiment -> experiment.getApplicationName().toString(), StringUtils::equalsIgnoreCase),
@@ -45,11 +67,10 @@ public class ExperimentFilter extends PaginationFilter<Experiment> {
         created_by(Experiment::getCreatorID, StringUtils::containsIgnoreCase),
         creation_time(Experiment::getCreationTime, FilterUtil::extractTimeZoneAndTestDate),
         start_time(Experiment::getStartTime, FilterUtil::extractTimeZoneAndTestDate),
-//        sampling_percent(Experiment::getSamplingPercent, ),
         end_time(Experiment::getEndTime, FilterUtil::extractTimeZoneAndTestDate),
         modification_time(Experiment::getModificationTime, FilterUtil::extractTimeZoneAndTestDate),
         state(Experiment::getState, (state, filter) -> StringUtils.containsIgnoreCase(state.toString(), filter)),
-        state_exact(Experiment::getState, ExperimentFilter::statusTest),
+        state_exact(Experiment::getState, ExperimentFilter::stateTest),
         date_constraint_start(Experiment::getStartTime, ExperimentFilter::constraintTest),
         date_constraint_end(Experiment::getEndTime, ExperimentFilter::constraintTest)
         ;
@@ -57,6 +78,13 @@ public class ExperimentFilter extends PaginationFilter<Experiment> {
         private final Function<Experiment, ?> propertyExtractor;
         private final BiPredicate<?, String> filterPredicate;
 
+        /**
+         * Creates a Property.
+         *
+         * @param propertyExtractor the property extractor
+         * @param filterPredicate the filter predicate
+         * @param <T> the property type
+         */
         <T> Property(Function<Experiment, T> propertyExtractor, BiPredicate<T, String> filterPredicate) {
             this.propertyExtractor = propertyExtractor;
             this.filterPredicate = filterPredicate;
@@ -87,7 +115,26 @@ public class ExperimentFilter extends PaginationFilter<Experiment> {
         return super.test(experiment, Property.class);
     }
 
-    private static boolean statusTest(Experiment.State state, String filter) {
+    /**
+     * A filter function used to test experiments for specific states with the filter key {@code state_exact}.
+     * Allowed filter values (case insensitive) and their results are:
+     *
+     * <ul>
+     *     <li><b>{@code notTerminated}</b>: {@code true} if the experiment state is either {@code DRAFT},
+     *     {@code RUNNING}, or {@code PAUSED}.</li>
+     *     <li><b>{@code terminated}</b>: {@code true} if the experiment state is {@code TERMINATED}.</li>
+     *     <li><b>{@code running}</b>: {@code true} if the experiment state is {@code RUNNING}.</li>
+     *     <li><b>{@code draft}</b>: {@code true} if the experiment state is {@code DRAFT}.</li>
+     *     <li><b>{@code paused}</b>: {@code true} if the experiment state is {@code PAUSED}.</li>
+     *     <li><b>{@code any}</b>: {@code true}.</li>
+     *     <li>default/invalid filter values: {@code false}.</li>
+     * </ul>
+     *
+     * @param state the experiment's state.
+     * @param filter the filter value to check, see above for details.
+     * @return true/false depending on the state check, see above for details.
+     */
+    private static boolean stateTest(Experiment.State state, String filter) {
         switch (filter.toLowerCase()) {
             case "notterminated":
                 return state == Experiment.State.DRAFT || state == Experiment.State.RUNNING || state == Experiment.State.PAUSED;
@@ -99,11 +146,33 @@ public class ExperimentFilter extends PaginationFilter<Experiment> {
                 return state == Experiment.State.DRAFT;
             case "paused":
                 return state == Experiment.State.PAUSED;
-            default:
+            case "any":
                 return true;
+            default:
+                return false;
         }
     }
 
+    /**
+     * Tests dates for more sophisticated constraints than just partial string matches.
+     *
+     *
+     * The a filter to check these constraints has to be of the following form:<br />
+     * {@code is[any|on|before|after|between]:MM/dd/yyyy[:MM/dd/yyyy]}
+     *
+     * For example to check whether the start date was before March 15, 2014 you would use a filter like:<br />
+     * {@code date_constraint_start=isbefore:03/15/2014}
+     *
+     * To check if an end date lies between (inclusive!) May 4, 2013 and July 4, 2014 you would use a
+     * filter like:<br />
+     * {@code date_constraint_end=isbetween:05/04/2013:07/04/2014}
+     *
+     * Note that {@code isbetween} is the only value taking two dates and {@code isany} always returns true.
+     *
+     * @param experimentDate the experiment date value to test
+     * @param filter the filter
+     * @return true if the constraint is fulfilled
+     */
     private static boolean constraintTest(Date experimentDate, String filter) {
         String[] extracted = FilterUtil.extractTimeZone(filter);
         String originalFilter = extracted[0];
@@ -121,13 +190,15 @@ public class ExperimentFilter extends PaginationFilter<Experiment> {
                     "use: is[any|on|before|after|between]:MM/dd/yyyy[:MM/dd/yyyy]");
         }
 
-        experimentDate = DateUtil.createCalendarMidnight(experimentDate).getTime();
+        LocalDate experimentLocalDate = FilterUtil.convertDateToOffsetDateTime(experimentDate).toLocalDate();
 
         if (structuredFilter[0].equalsIgnoreCase("isBetween")) {
             try {
-                Date beforeEperimentDate = FilterUtil.parseUIDate(structuredFilter[1], timeZoneOffset);
-                Date afterEperimentDate = FilterUtil.parseUIDate(structuredFilter[2], timeZoneOffset);
-                return experimentDate.after(beforeEperimentDate) && experimentDate.before(afterEperimentDate);
+                LocalDate beforeExperimentDate = FilterUtil.parseUIDate(structuredFilter[1], timeZoneOffset)
+                        .minusDays(1).toLocalDate();
+                LocalDate afterExperimentDate = FilterUtil.parseUIDate(structuredFilter[2], timeZoneOffset)
+                        .plusDays(1).toLocalDate();
+                return experimentLocalDate.isAfter(beforeExperimentDate) && experimentLocalDate.isBefore(afterExperimentDate);
             } catch (ArrayIndexOutOfBoundsException aioobe) {
                 throw new PaginationException(ErrorCode.FILTER_KEY_UNPROCESSABLE,
                         "Wrong format for inBetween (" + filter + "), use: isbetween:MM/dd/yyyy:MM/dd/yyyy .",
@@ -135,14 +206,14 @@ public class ExperimentFilter extends PaginationFilter<Experiment> {
             }
         }
 
-        Date filterDate = FilterUtil.parseUIDate(structuredFilter[1], timeZoneOffset);
+        LocalDate filterDate = FilterUtil.parseUIDate(structuredFilter[1], timeZoneOffset).toLocalDate();
         switch (structuredFilter[0].toLowerCase()) {
             case "isbefore":
-                return experimentDate.before(filterDate);
+                return experimentLocalDate.isBefore(filterDate);
             case "isafter":
-                return experimentDate.after(filterDate);
+                return experimentLocalDate.isAfter(filterDate);
             case "ison":
-                return experimentDate.compareTo(filterDate) == 0;
+                return experimentLocalDate.isEqual(filterDate);
         }
 
         return false;

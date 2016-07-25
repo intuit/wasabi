@@ -49,10 +49,10 @@ import java.util.function.Function;
  * ascending order and the latter in descending order. If multiple enum fields
  * exist, a sort after multiple fields is possible. Consider also sorting by {@link Object#hashCode},
  * with the enum key being {@code hash}, then one could first sort by {@code string} ascending
- * and {@code hashcCde} descending with the sort order {@code string,-hash}.
+ * and {@code hashCode} descending with the sort order {@code string,-hash} as tie breakers.
  *
- * An example emplementations for {@code Object} would be (adjust accordingly or see linked
- * Comparators below for more examples):
+ * An example implementation for {@code Object} would be (adjust accordingly or see linked
+ * comparators below for more examples):
  *
  * <pre>{@code
  * public class ObjectComparator extends PaginationComparator<Object> {
@@ -98,14 +98,7 @@ public abstract class PaginationComparator<T> implements Comparator<T> {
     private String sortOrder = "";
 
     /**
-     * Initialies a PagnitionComparator with an empty sort order.
-     */
-    public PaginationComparator() {
-        this("");
-    }
-
-    /**
-     * Initialies a PaginationComparator with a default sort order.
+     * Initializes a PaginationComparator with a default sort order.
      * See class documentation for more information about the sort order.
      *
      * @param defaultSortOrder the default sort order.
@@ -122,7 +115,7 @@ public abstract class PaginationComparator<T> implements Comparator<T> {
      * @param sortOrder a new sort order
      * @return this
      */
-    public PaginationComparator<T> setSortorder(String sortOrder) {
+    public PaginationComparator<T> replaceSortorder(String sortOrder) {
         this.sortOrder = sortOrder;
         return this;
     }
@@ -195,14 +188,25 @@ public abstract class PaginationComparator<T> implements Comparator<T> {
 
     /**
      * Compares two objects by one of their properties.
+     * If a {@link NullPointerException} occurs while trying to access a property of one of the two objects,
+     * the property is handles as {@code null}. For example if {@code myHouse.getSecondFloor().getWindow()} would
+     * throw a {@link NullPointerException} because it only has a ground level, then this will be caught and the
+     * window to be compared will be treated as {@code null}.
+     *
+     * Both extracted properties are first compared according to their {@code null} value (see
+     * {@link #compareNull(Object, Object, boolean)}). If both are non-null values, then they comparison function
+     * is applied. This way the comparison function does not need to care about {@code null} values.
+     *
+     * If {@code descending} is set, the results are multiplied by {@code -1} at the end (however, {@code null}
+     * values are always considered to be bigger, so that they appear after relevant values).
      *
      * @param left left object
      * @param right right object
-     * @param propertyExtractor
-     * @param comparisonFunc
-     * @param descending
-     * @param <V>
-     * @return
+     * @param propertyExtractor will be applied to both objects to extract the properties to be compared
+     * @param comparisonFunc compares the two extracted properties if both are not null
+     * @param descending if true, the order of the values is changed
+     * @param <V> type of the extracted property.
+     * @return -1, 0, 1
      */
     private <V> int compareByProperty(T left, T right, Function<T, V> propertyExtractor, BiFunction<V, V, Integer> comparisonFunc, boolean descending) {
         V property1 = null;
@@ -224,6 +228,40 @@ public abstract class PaginationComparator<T> implements Comparator<T> {
         return result * (descending ? -1 : 1);
     }
 
+    /**
+     * Returns
+     * <ul>
+     *     <li>if <b>{@code descending == false}</b>
+     *         <dl>
+     *             <dt>0</dt>
+     *                 <dd>if both objects are {@code null}.</dd>
+     *             <dt>2</dt>
+     *                 <dd>if both objects are not {@code null}.</dd>
+     *             <dt>-1</dt>
+     *                 <dd>if left is not {@code null}, but right is.</dd>
+     *             <dt>1</dt>
+     *                 <dd>if left is {@code null}, but right is not.</dd>
+     *         </dl>
+     *     </li>
+     *     <li>if <b>{@code descending == true}</b>
+     *         <dl>
+     *             <dt>0</dt>
+     *                 <dd>if both objects are {@code null}.</dd>
+     *             <dt>2</dt>
+     *                 <dd>if both objects are not {@code null}.</dd>
+     *             <dt>1</dt>
+     *                 <dd>if left is not {@code null}, but right is.</dd>
+     *             <dt>-1</dt>
+     *                 <dd>if left is {@code null}, but right is not.</dd>
+     *         </dl>
+     *     </li>
+     * </ul>
+     *
+     * @param left left object
+     * @param right right object
+     * @param descending if true, objects are sorted the other way around.
+     * @return -1, 0, 1, 2 - see description for details.
+     */
     private int compareNull(Object left, Object right, boolean descending) {
         if (left != null && right != null) {
             return 2;

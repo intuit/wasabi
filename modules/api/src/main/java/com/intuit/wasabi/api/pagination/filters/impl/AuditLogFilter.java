@@ -25,13 +25,27 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 
+/**
+ * Implements the {@link PaginationFilter} for {@link AuditLogEntry}s.
+ */
 public class AuditLogFilter extends PaginationFilter<AuditLogEntry> {
 
+    /**
+     * Initializes the AuditLogFilter.
+     *
+     * Registers the {@link com.intuit.wasabi.api.pagination.filters.FilterUtil.FilterModifier#APPEND_TIMEZONEOFFSET}
+     * for {@link Property#time} to handle timezones.
+     */
     public AuditLogFilter() {
         super.registerFilterModifierForProperties(FilterUtil.FilterModifier.APPEND_TIMEZONEOFFSET,
                 Property.time);
     }
 
+    /**
+     * Implementation of {@link PaginationFilterProperty} for {@link AuditLogEntry}s.
+     *
+     * @see PaginationFilterProperty
+     */
     private enum Property implements PaginationFilterProperty<AuditLogEntry> {
         firstname(auditLogEntry -> auditLogEntry.getUser().getFirstName(), StringUtils::containsIgnoreCase),
         lastname(auditLogEntry -> auditLogEntry.getUser().getLastName(), StringUtils::containsIgnoreCase),
@@ -54,22 +68,38 @@ public class AuditLogFilter extends PaginationFilter<AuditLogEntry> {
         private final Function<AuditLogEntry, ?> propertyExtractor;
         private final BiPredicate<?, String> filterPredicate;
 
+        /**
+         * Creates a Property.
+         *
+         * @param propertyExtractor the property extractor
+         * @param filterPredicate the filter predicate
+         * @param <T> the property type
+         */
         <T> Property(Function<AuditLogEntry, T> propertyExtractor, BiPredicate<T, String> filterPredicate) {
             this.propertyExtractor = propertyExtractor;
             this.filterPredicate = filterPredicate;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public Function<AuditLogEntry, ?> getPropertyExtractor() {
             return propertyExtractor;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public BiPredicate<?, String> getFilterPredicate() {
             return filterPredicate;
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean test(AuditLogEntry auditLogEntry) {
         return super.test(auditLogEntry, Property.class);
