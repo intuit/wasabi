@@ -172,7 +172,7 @@ public class ExperimentsResource {
         ExperimentList authorizedExperiments;
 
         if (authorizationHeader == null) {
-            authorizedExperiments = experimentList;
+            throw new AuthenticationException("No authorization given.");
         } else {
             Username userName = authorization.getUser(authorizationHeader);
             Set<Application.Name> allowed = new HashSet<>();

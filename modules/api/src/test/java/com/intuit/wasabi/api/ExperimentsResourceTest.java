@@ -26,9 +26,24 @@ import com.intuit.wasabi.events.EventsExport;
 import com.intuit.wasabi.exceptions.AuthenticationException;
 import com.intuit.wasabi.exceptions.BucketNotFoundException;
 import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
-import com.intuit.wasabi.experiment.*;
-import com.intuit.wasabi.experimentobjects.*;
+import com.intuit.wasabi.exceptions.TimeFormatException;
+import com.intuit.wasabi.exceptions.TimeZoneFormatException;
+import com.intuit.wasabi.experiment.Buckets;
+import com.intuit.wasabi.experiment.Experiments;
+import com.intuit.wasabi.experiment.Mutex;
+import com.intuit.wasabi.experiment.Pages;
+import com.intuit.wasabi.experiment.Priorities;
+import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.experimentobjects.Bucket;
+import com.intuit.wasabi.experimentobjects.BucketList;
+import com.intuit.wasabi.experimentobjects.Context;
+import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.Experiment.ID;
+import com.intuit.wasabi.experimentobjects.ExperimentIDList;
+import com.intuit.wasabi.experimentobjects.ExperimentList;
+import com.intuit.wasabi.experimentobjects.ExperimentPageList;
+import com.intuit.wasabi.experimentobjects.NewExperiment;
+import com.intuit.wasabi.experimentobjects.Page;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -40,16 +55,24 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import static java.nio.charset.Charset.forName;
 import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.Response.Status.CREATED;
+import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static javax.ws.rs.core.UriBuilder.fromPath;
 import static org.apache.commons.codec.binary.Base64.encodeBase64;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.argThat;
@@ -122,7 +145,8 @@ public class ExperimentsResourceTest {
     public void getExperiments() throws Exception {
 
         ExperimentsResource experimentsResource = new ExperimentsResource(experiments, eventsExport, assignments,
-                authorization, buckets, mutex, pages, priorities, "US/New York", "YYYY-mm-DD", new HttpHeader("MyApp-???"), paginationHelper);
+                authorization, buckets, mutex, pages, priorities, "US/New York", "YYYY-mm-DD",
+                new HttpHeader("MyApp-???"), paginationHelper);
 
         Experiment experiment1 = Experiment.withID(Experiment.ID.newInstance())
                 .withApplicationName(TESTAPP)
@@ -174,6 +198,39 @@ public class ExperimentsResourceTest {
         assert experimentList.getExperiments().containsAll(responseList);
         assert 2 == responseList.size();
         assert !responseList.contains(experiment2);
+    }
+
+    @Test
+    public void testGetExperiments_NullAuth() throws Exception {
+        ExperimentsResource experimentsResource = new ExperimentsResource(experiments, eventsExport, assignments,
+                authorization, buckets, mutex, pages, priorities, "US/New York", "YYYY-mm-DD",
+                new HttpHeader("MyApp-???"), paginationHelper);
+
+        thrown.expect(AuthenticationException.class);
+        experimentsResource.getExperiments(null, 1, 10, "", "", "");
+    }
+
+    @Test
+    public void testGetExperiments_NullExperiment() throws Exception {
+        ExperimentsResource experimentsResource = new ExperimentsResource(experiments, eventsExport, assignments,
+                authorization, buckets, mutex, pages, priorities, "US/New York", "YYYY-mm-DD",
+                new HttpHeader("MyApp-???"), paginationHelper);
+
+        ExperimentList experimentList = new ExperimentList();
+        experimentList.addExperiment(null);
+        experimentList.addExperiment(experiment);
+        when(experiments.getExperiments()).thenReturn(experimentList);
+
+        Response response = experimentsResource.getExperiments(AUTHHEADER, 1, 10, "", "", "");
+        if (response.getEntity() instanceof HashMap) {
+            if (((HashMap) response.getEntity()).get("experiments") instanceof List) {
+                assertThat("Experiment was not included in list.",
+                        ((List) ((HashMap) response.getEntity()).get("experiments")).contains(experiment));
+                assertEquals("Null experiment was not skipped.", 1,
+                        ((List) ((HashMap) response.getEntity()).get("experiments")).size());
+            }
+        }
+
     }
 
     @Test
@@ -644,6 +701,38 @@ public class ExperimentsResourceTest {
     }
 
     @Test
+    public void exportAssignments_InvalidTimeZone() throws Exception {
+        ExperimentsResource experimentsResource = new ExperimentsResource(experiments, eventsExport, assignments,
+                authorization, buckets, mutex, pages, priorities, "US/New York", "YYYY-mm-DD",
+                new HttpHeader("MyApp-???"), paginationHelper);
+
+        thrown.expect(TimeZoneFormatException.class);
+        experimentsResource.exportAssignments(experiment.getID(), null, null, null, null, "noTimezoneString", null);
+    }
+
+    @Test
+    public void exportAssignment_InvalidStartDate() throws Exception {
+        ExperimentsResource experimentsResource = new ExperimentsResource(experiments, eventsExport, assignments,
+                authorization, buckets, mutex, pages, priorities, "US/New York", "YYYY-mm-DD",
+                new HttpHeader("MyApp-???"), paginationHelper);
+
+        thrown.expect(TimeFormatException.class);
+        experimentsResource.exportAssignments(experiment.getID(), null, null, "invalidStart", null, null, null);
+
+    }
+
+    @Test
+    public void exportAssignment_InvalidEndDate() throws Exception {
+        ExperimentsResource experimentsResource = new ExperimentsResource(experiments, eventsExport, assignments,
+                authorization, buckets, mutex, pages, priorities, "US/New York", "YYYY-mm-DD",
+                new HttpHeader("MyApp-???"), paginationHelper);
+
+        thrown.expect(TimeFormatException.class);
+        experimentsResource.exportAssignments(experiment.getID(), null, null, null, "invalidEnd", null, null);
+
+    }
+
+    @Test
     public void getPageExperiments() throws Exception {
         ExperimentsResource experimentsResource = new ExperimentsResource(experiments, eventsExport, assignments,
                 authorization, buckets, mutex, pages, priorities, "US/New York", "YYYY-mm-DD", new HttpHeader("MyApp-???"), paginationHelper);
@@ -651,8 +740,15 @@ public class ExperimentsResourceTest {
     }
 
     @Test
-    public void exportActions() throws Exception {
-        //TODO: implement
+    public void exportActions_post() throws Exception {
+        ExperimentsResource experimentsResource = new ExperimentsResource(experiments, eventsExport, assignments,
+                authorization, buckets, mutex, pages, priorities, "US/New York", "YYYY-mm-DD", new HttpHeader("MyApp-???"), paginationHelper);
+
+        doReturn(USER).when(authorization).getUser(AUTHHEADER);
+        doReturn(null).when(experiments).getExperiment(experiment.getID());
+
+        thrown.expect(ExperimentNotFoundException.class);
+        experimentsResource.exportActions(experiment.getID(), null, AUTHHEADER);
     }
 
     @Test
@@ -741,6 +837,15 @@ public class ExperimentsResourceTest {
             fail();
         } catch (AuthenticationException ignored) {
         }
+
+        // simply pass through the method when we get valid input and check if the response is correct
+        doReturn(USER).when(authorization).getUser(AUTHHEADER);
+        doReturn(experiment).when(experiments).getExperiment(experiment.getID());
+        doNothing().when(authorization).checkUserPermissions(USER, experiment.getApplicationName(), Permission.DELETE);
+        doNothing().when(mutex).deleteExclusion(experiment.getID(), experiment2.getID(), USERINFO);
+
+        Response response = experimentsResource.removeExclusions(experiment.getID(), experiment2.getID(), AUTHHEADER);
+        assertEquals("Response code indicates no deletion occurred.", response.getStatus(), NO_CONTENT.getStatusCode());
     }
 
     @Test
@@ -860,6 +965,15 @@ public class ExperimentsResourceTest {
             fail();
         } catch (AuthenticationException ignored) {
         }
+
+        // simply pass through the method when we get valid input and check if the response is correct
+        doReturn(USER).when(authorization).getUser(AUTHHEADER);
+        doReturn(experiment).when(experiments).getExperiment(experiment.getID());
+        doNothing().when(authorization).checkUserPermissions(USER, experiment.getApplicationName(), Permission.CREATE);
+        doNothing().when(priorities).setPriority(experiment.getID(), 1);
+
+        Response response = experimentsResource.setPriority(experiment.getID(), 1, AUTHHEADER);
+        assertEquals("Response code indicates priority was not set.", response.getStatus(), CREATED.getStatusCode());
     }
 
     @Test
@@ -893,6 +1007,15 @@ public class ExperimentsResourceTest {
             fail();
         } catch (AuthenticationException ignored) {
         }
+
+        // simply pass through the method when we get valid input and check if the response is correct
+        doReturn(USER).when(authorization).getUser(AUTHHEADER);
+        doReturn(experiment).when(experiments).getExperiment(experiment.getID());
+        doNothing().when(authorization).checkUserPermissions(USER, experiment.getApplicationName(), Permission.CREATE);
+        doNothing().when(pages).postPages(experiment.getID(), experimentPageList, USERINFO);
+
+        Response response = experimentsResource.postPages(experiment.getID(), experimentPageList, AUTHHEADER);
+        assertEquals("Response code indicates pages were not set.", response.getStatus(), CREATED.getStatusCode());
     }
 
     @Test
