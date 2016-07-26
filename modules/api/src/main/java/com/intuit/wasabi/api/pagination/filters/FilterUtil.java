@@ -19,11 +19,13 @@ import com.intuit.wasabi.exceptions.PaginationException;
 import com.intuit.wasabi.experimentobjects.exceptions.ErrorCode;
 import org.apache.commons.lang3.StringUtils;
 
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.TemporalAccessor;
 import java.util.Date;
 import java.util.function.BiFunction;
 
@@ -32,7 +34,8 @@ import java.util.function.BiFunction;
  */
 public class FilterUtil {
 
-    private static final String TIMEZONE_SEPARATOR = "\t";
+    /** Used to append (and split) the timezone to (and from) the filter. */
+    /*test*/ static final String TIMEZONE_SEPARATOR = "\t";
 
     /**
      * Modifiers to register with
@@ -94,7 +97,7 @@ public class FilterUtil {
      * @param timeZoneOffset the timezone offset to UTC
      * @return a timezone offset adjusted string of the UI pattern {@code MMM d, YYYY HH:mm:ss a}.
      */
-    private static String formatDateTimeAsUI(OffsetDateTime date, String timeZoneOffset) {
+    /*test*/ static String formatDateTimeAsUI(OffsetDateTime date, String timeZoneOffset) {
         return date.format(DateTimeFormatter.ofPattern("MMM d, YYYY HH:mm:ss a")
                                             .withZone(ZoneId.ofOffset("UTC", ZoneOffset.of(timeZoneOffset))));
     }
@@ -109,7 +112,8 @@ public class FilterUtil {
      */
     public static OffsetDateTime parseUIDate(String dateString, String timeZoneOffset) {
         try {
-            return OffsetDateTime.parse(dateString + timeZoneOffset, DateTimeFormatter.ofPattern("M/d/yZ"));
+            TemporalAccessor tempAccessor = DateTimeFormatter.ofPattern("M/d/yyyyZ").parse(dateString + timeZoneOffset);
+            return OffsetDateTime.of(java.time.LocalDate.from(tempAccessor), LocalTime.MIDNIGHT, ZoneOffset.UTC);
         } catch (DateTimeParseException parseException) {
             throw new PaginationException(ErrorCode.FILTER_KEY_UNPROCESSABLE,
                     "Can not parse date (" + dateString + ") , must be of " +
