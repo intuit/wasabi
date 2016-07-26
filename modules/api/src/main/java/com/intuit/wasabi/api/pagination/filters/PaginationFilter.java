@@ -20,7 +20,11 @@ import com.intuit.wasabi.experimentobjects.exceptions.ErrorCode;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.ZoneOffset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Scanner;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -140,14 +144,16 @@ public abstract class PaginationFilter<T> implements Predicate<T> {
     private final String DELIMITER = ",";
 
     /** Stores the modifiers for properties. */
-    private final HashMap<PaginationFilterProperty, FilterUtil.FilterModifier> filterModifiers = new HashMap<>();
+    /*test*/ final HashMap<PaginationFilterProperty, FilterUtil.FilterModifier> filterModifiers = new HashMap<>();
     /** Stores the list of properties to exclude from fulltext search. */
-    private final List<PaginationFilterProperty> excludeFromFulltext = new ArrayList<>();
+    /*test*/ final List<PaginationFilterProperty> excludeFromFulltext = new ArrayList<>();
 
     /**
      * Sets the filter and timezone offsets for filtering and returns such that it can be done in place
      * and be passed as a filter to streams:
      * {@code stream().filter(paginationFilter.setFilter(filter, timeZoneOffset))}.
+     *
+     * If the empty string is passed as a timezone, it is set to "+0000".
      *
      * @param filter the filter string
      * @param timeZoneOffset the timezone offset to UTC (should be compatible with
@@ -156,7 +162,7 @@ public abstract class PaginationFilter<T> implements Predicate<T> {
      */
     public PaginationFilter<T> replaceFilter(final String filter, final String timeZoneOffset) {
         this.filter = filter;
-        this.timeZoneOffset = timeZoneOffset;
+        this.timeZoneOffset = timeZoneOffset.isEmpty() ? "+0000" : timeZoneOffset;
         return this;
     }
 
@@ -192,12 +198,12 @@ public abstract class PaginationFilter<T> implements Predicate<T> {
      * @param <V> the property enum type
      * @return the test result
      */
-    private <V extends Enum<V> & PaginationFilterProperty> boolean testFields(T object, Class<V> enumType) {
+    /*test*/ final <V extends Enum<V> & PaginationFilterProperty> boolean testFields(T object, Class<V> enumType) {
         try (Scanner filterScanner = new Scanner(getKeyValuePartOfFilter(filter))) {
             filterScanner.useDelimiter(DELIMITER);
 
             // iterate over all single field patterns
-            String pattern = "[a-z_]+" + SEPARATOR + ".*";
+            String pattern = "[a-zA-Z_]+" + SEPARATOR + ".*";
             while (filterScanner.hasNext(pattern)) {
                 String[] keyValuePattern = filterScanner.next(pattern).split(SEPARATOR);
 
@@ -227,7 +233,7 @@ public abstract class PaginationFilter<T> implements Predicate<T> {
      * @param <V> the property value enum type
      * @return the test result
      */
-    private <V extends Enum<V> & PaginationFilterProperty> boolean testFulltext(T object, Class<V> enumType) {
+    /*test*/ final <V extends Enum<V> & PaginationFilterProperty> boolean testFulltext(T object, Class<V> enumType) {
         return Arrays.asList(enumType.getEnumConstants()).parallelStream()
                 .filter(field -> !excludeFromFulltext.contains(field))
                 .anyMatch(field -> filterByProperty(object,
@@ -250,7 +256,7 @@ public abstract class PaginationFilter<T> implements Predicate<T> {
      * @param <V> the type of the object's property
      * @return false for failures and null-properties, otherwise the return value of the {@code filterFunction}
      */
-    private <V> boolean filterByProperty(T object, String filterValue, Function<T, V> propertyExtractor, BiPredicate<V, String> filterFunction) {
+    /*test*/ final <V> boolean filterByProperty(T object, String filterValue, Function<T, V> propertyExtractor, BiPredicate<V, String> filterFunction) {
         V property;
         try {
             property = propertyExtractor.apply(object);
@@ -269,7 +275,7 @@ public abstract class PaginationFilter<T> implements Predicate<T> {
      * @param <V> the property enum type
      * @return the modified or untouched value
      */
-    private <V extends Enum<V> & PaginationFilterProperty> String modifyFilterForKey(V key, String value) {
+    /*test*/ final <V extends Enum<V> & PaginationFilterProperty> String modifyFilterForKey(V key, String value) {
         return filterModifiers.containsKey(key) ? filterModifiers.get(key).apply(value, this) : value;
     }
 
@@ -282,18 +288,25 @@ public abstract class PaginationFilter<T> implements Predicate<T> {
      *     <li>Jul 15, 2014} <i>returns</i> the empty String</i></li>
      *     <li>appname=myApp,experiment=myExp} <i>returns</i> {@code appname=myApp,experiment=myExp}</li>
      *     <li>,,,=wrongFormatButStill} <i>returns</i> {@code =wrongFormatButStill}</li>
-     *
      * </ul>
      *
      * @param filter the filter
      * @return the key-value part of the filter
      */
-    private String getKeyValuePartOfFilter(String filter) {
+    /*test*/ final String getKeyValuePartOfFilter(String filter) {
+        if (filter == null) {
+            return "";
+        }
+
         if (!filter.contains(SEPARATOR)) {
             return "";
         }
 
-        return filter.substring(StringUtils.lastIndexOf(filter.substring(0, filter.indexOf(SEPARATOR)), DELIMITER));
+        if (!filter.contains(DELIMITER)) {
+            return filter;
+        }
+
+        return filter.substring(StringUtils.lastIndexOf(filter.substring(0, filter.indexOf(SEPARATOR)), DELIMITER) + 1);
     }
 
     /**
@@ -311,9 +324,17 @@ public abstract class PaginationFilter<T> implements Predicate<T> {
      * @param filter the filter
      * @return the fulltext part of the filter
      */
-    private String getFulltextPartOfFilter(String filter) {
+    /*test*/ final String getFulltextPartOfFilter(String filter) {
+        if (filter == null) {
+            return "";
+        }
+
         if (!filter.contains(SEPARATOR)) {
             return filter;
+        }
+
+        if (!filter.contains(DELIMITER) || filter.indexOf(SEPARATOR) < filter.indexOf(DELIMITER)) {
+            return "";
         }
 
         return filter.substring(0, StringUtils.lastIndexOf(filter.substring(0, filter.indexOf(SEPARATOR)), DELIMITER));
@@ -348,7 +369,16 @@ public abstract class PaginationFilter<T> implements Predicate<T> {
      *
      * @return the timeZoneOffset.
      */
-    String getTimeZoneOffset() {
+    final String getTimeZoneOffset() {
         return timeZoneOffset;
+    }
+
+    /**
+     * Returns the current filter.
+     *
+     * @return the filter.
+     */
+    final String getFilter() {
+        return filter;
     }
 }

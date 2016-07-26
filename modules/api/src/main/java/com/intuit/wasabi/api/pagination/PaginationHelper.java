@@ -150,7 +150,6 @@ public class PaginationHelper<T> {
      * @return a response map to be passed to {@link javax.ws.rs.core.Response.ResponseBuilder#entity(Object)}.
      */
     public Map<String, Object> paginate(String jsonKey, List<T> list, String filter, String timezoneOffset, String sort, int page, int perPage) {
-
         Map<String, Object> response = new HashMap<>();
 
         paginationFilter.replaceFilter(filter, timezoneOffset);

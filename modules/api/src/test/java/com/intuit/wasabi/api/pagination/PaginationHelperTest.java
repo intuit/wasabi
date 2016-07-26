@@ -66,5 +66,11 @@ public class PaginationHelperTest {
         assertEquals(276, paginationHelper.toIndex(23, 12, 1230));
     }
 
+    @Test
+    public void testPaginate() throws Exception {
+        // indirectly tested by resources already, will need to add more sophisticated tests
+
+    }
+
 
 }
