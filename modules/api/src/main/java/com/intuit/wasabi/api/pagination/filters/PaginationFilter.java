@@ -153,7 +153,8 @@ public abstract class PaginationFilter<T> implements Predicate<T> {
      * and be passed as a filter to streams:
      * {@code stream().filter(paginationFilter.setFilter(filter, timeZoneOffset))}.
      *
-     * If the empty string is passed as a timezone, it is set to "+0000".
+     * If the empty string is passed as a timezone, it is set unchanged.
+     * If null is passed as timezone, it is set to the default +0000.
      *
      * @param filter the filter string
      * @param timeZoneOffset the timezone offset to UTC (should be compatible with
@@ -161,8 +162,12 @@ public abstract class PaginationFilter<T> implements Predicate<T> {
      * @return {@code this}
      */
     public PaginationFilter<T> replaceFilter(final String filter, final String timeZoneOffset) {
-        this.filter = filter;
-        this.timeZoneOffset = timeZoneOffset.isEmpty() ? "+0000" : timeZoneOffset;
+        this.filter = filter == null ? "" : filter;
+        if (timeZoneOffset == null) {
+            this.timeZoneOffset = "+0000";
+        } else {
+            this.timeZoneOffset = timeZoneOffset.isEmpty() ? this.timeZoneOffset : timeZoneOffset;
+        }
         return this;
     }
 

@@ -92,7 +92,11 @@ public class PaginationFilterTest {
 
         objectFilter.replaceFilter("mySecondFilter", "");
         Assert.assertEquals("filter was not updated.", "mySecondFilter", objectFilter.getFilter());
-        Assert.assertEquals("timezoneOffset was not updated.", "+0000", objectFilter.getTimeZoneOffset());
+        Assert.assertEquals("timezoneOffset changed.", "+0400", objectFilter.getTimeZoneOffset());
+
+        objectFilter.replaceFilter(null, null);
+        Assert.assertEquals("filter was not reset.", "", objectFilter.getFilter());
+        Assert.assertEquals("timezoneOffset was not reset.", "+0000", objectFilter.getTimeZoneOffset());
     }
 
     @Test
