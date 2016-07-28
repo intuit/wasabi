@@ -146,7 +146,7 @@ public abstract class PaginationFilter<T> implements Predicate<T> {
     /** Stores the modifiers for properties. */
     /*test*/ final HashMap<PaginationFilterProperty, FilterUtil.FilterModifier> filterModifiers = new HashMap<>();
     /** Stores the list of properties to exclude from fulltext search. */
-    /*test*/ final List<PaginationFilterProperty> excludeFromFulltext = new ArrayList<>();
+    private final List<PaginationFilterProperty> excludeFromFulltext = new ArrayList<>();
 
     /**
      * Sets the filter and timezone offsets for filtering and returns such that it can be done in place
