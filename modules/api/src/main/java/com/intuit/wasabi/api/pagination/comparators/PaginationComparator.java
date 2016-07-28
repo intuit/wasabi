@@ -98,6 +98,14 @@ public abstract class PaginationComparator<T> implements Comparator<T> {
     private String sortOrder = "";
 
     /**
+     * Initializes a PaginationComparator with the default sort order {@code ""}.
+     * See class documentation for more information about the sort order.
+     */
+    PaginationComparator() {
+        this("");
+    }
+
+    /**
      * Initializes a PaginationComparator with a default sort order.
      * See class documentation for more information about the sort order.
      *
@@ -112,11 +120,13 @@ public abstract class PaginationComparator<T> implements Comparator<T> {
      * in {@link java.util.stream.Stream#sorted(Comparator)} calls:
      * <pre>{@code stream().sorted(this.setSortorder(newsort))}</pre>
      *
+     * If {@code sortOrder} is {@code null}, it is reset to the empty string.
+     *
      * @param sortOrder a new sort order
      * @return this
      */
     public PaginationComparator<T> replaceSortorder(String sortOrder) {
-        this.sortOrder = sortOrder;
+        this.sortOrder = sortOrder == null ? "" : sortOrder;
         return this;
     }
 
@@ -208,7 +218,7 @@ public abstract class PaginationComparator<T> implements Comparator<T> {
      * @param <V> type of the extracted property.
      * @return -1, 0, 1
      */
-    private <V> int compareByProperty(T left, T right, Function<T, V> propertyExtractor, BiFunction<V, V, Integer> comparisonFunc, boolean descending) {
+    /*test*/ <V> int compareByProperty(T left, T right, Function<T, V> propertyExtractor, BiFunction<V, V, Integer> comparisonFunc, boolean descending) {
         V property1 = null;
         V property2 = null;
 
@@ -262,7 +272,7 @@ public abstract class PaginationComparator<T> implements Comparator<T> {
      * @param descending if true, objects are sorted the other way around.
      * @return -1, 0, 1, 2 - see description for details.
      */
-    private int compareNull(Object left, Object right, boolean descending) {
+    /*test*/ int compareNull(Object left, Object right, boolean descending) {
         if (left != null && right != null) {
             return 2;
         }
@@ -273,5 +283,14 @@ public abstract class PaginationComparator<T> implements Comparator<T> {
             return descending ? -1 : 1;
         }
         return 0;
+    }
+
+    /**
+     * Returns the current sort order.
+     *
+     * @return the current sort order
+     */
+    /*test*/ String getSortOrder() {
+        return sortOrder;
     }
 }
