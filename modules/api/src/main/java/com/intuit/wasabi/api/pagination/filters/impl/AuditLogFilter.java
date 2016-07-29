@@ -60,8 +60,8 @@ public class AuditLogFilter extends PaginationFilter<AuditLogEntry> {
         app(auditLogEntry -> auditLogEntry.getApplicationName().toString(), StringUtils::containsIgnoreCase),
         time(auditLogEntry -> auditLogEntry.getTime().getTime(), FilterUtil::extractTimeZoneAndTestDate),
         attribute(AuditLogEntry::getChangedProperty, StringUtils::containsIgnoreCase),
-        from(AuditLogEntry::getBefore, StringUtils::containsIgnoreCase),
-        to(AuditLogEntry::getAfter, StringUtils::containsIgnoreCase),
+        before(AuditLogEntry::getBefore, StringUtils::containsIgnoreCase),
+        after(AuditLogEntry::getAfter, StringUtils::containsIgnoreCase),
         user(auditLogEntry -> auditLogEntry.getUser().getFirstName() + " " + auditLogEntry.getUser().getLastName(), StringUtils::containsIgnoreCase),
         ;
 

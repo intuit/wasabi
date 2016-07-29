@@ -100,7 +100,7 @@ public class AuditLogComparatorTest {
         testCases.put("bucket", -1);
         testCases.put("app", 0);
         testCases.put("time", -1);
-        testCases.put("attr", -1);
+        testCases.put("attribute", -1);
         testCases.put("before", -1);
         testCases.put("after", -1);
         testCases.put("description", -1);

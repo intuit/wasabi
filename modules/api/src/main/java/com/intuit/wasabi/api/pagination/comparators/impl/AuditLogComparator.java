@@ -57,7 +57,7 @@ public class AuditLogComparator extends PaginationComparator<AuditLogEntry> {
         bucket(auditLogEntry -> auditLogEntry.getBucketLabel().toString(), String::compareToIgnoreCase),
         app(auditLogEntry -> auditLogEntry.getApplicationName().toString(), String::compareToIgnoreCase),
         time(AuditLogEntry::getTime, Calendar::compareTo),
-        attr(AuditLogEntry::getChangedProperty, String::compareToIgnoreCase),
+        attribute(AuditLogEntry::getChangedProperty, String::compareToIgnoreCase),
         before(AuditLogEntry::getBefore, String::compareToIgnoreCase),
         after(AuditLogEntry::getAfter, String::compareToIgnoreCase),
         description(AuditLogAction::getDescription, String::compareToIgnoreCase),
