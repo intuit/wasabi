@@ -15,6 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.api.pagination.comparators;
 
+import com.intuit.wasabi.api.pagination.comparators.impl.AuditLogEntryComparator;
 import com.intuit.wasabi.exceptions.PaginationException;
 import com.intuit.wasabi.experimentobjects.exceptions.ErrorCode;
 import org.apache.commons.lang3.StringUtils;
@@ -88,7 +89,7 @@ import java.util.function.Function;
  *
  * As can be seen, all sorting logic is already in the enum entry declarations.
  *
- * @see com.intuit.wasabi.api.pagination.comparators.impl.AuditLogComparator
+ * @see AuditLogEntryComparator
  * @see com.intuit.wasabi.api.pagination.comparators.impl.ExperimentComparator
  *
  * @param <T> The object type, in the examples {@link Object}.

@@ -28,15 +28,15 @@ import java.util.function.Function;
 /**
  * Implements the {@link PaginationComparator} for {@link AuditLogEntry} objects.
  */
-public class AuditLogComparator extends PaginationComparator<AuditLogEntry> {
+public class AuditLogEntryComparator extends PaginationComparator<AuditLogEntry> {
 
     /**
-     * Initializes an AuditLogComparator.
+     * Initializes an AuditLogEntryComparator.
      *
      * Sets the default sort order to descending time, that means
      * the most recent events are first.
      */
-    public AuditLogComparator() {
+    public AuditLogEntryComparator() {
         super("-time");
     }
 

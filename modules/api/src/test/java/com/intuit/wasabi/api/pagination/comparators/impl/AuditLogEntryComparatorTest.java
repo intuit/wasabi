@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package com.intuit.wasabi.api.pagination.filters.impl;
+package com.intuit.wasabi.api.pagination.comparators.impl;
 
 import com.intuit.wasabi.auditlogobjects.AuditLogAction;
 import com.intuit.wasabi.auditlogobjects.AuditLogEntry;
@@ -34,11 +34,12 @@ import java.util.Map;
 import java.util.TimeZone;
 
 /**
- * Tests for {@link AuditLogFilter}.
+ * Tests for {@link AuditLogEntryComparator}.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class AuditLogFilterTest {
-    private AuditLogEntry auditLogEntry;
+public class AuditLogEntryComparatorTest {
+    private AuditLogEntry auditLogEntry1;
+    private AuditLogEntry auditLogEntry2;
 
     @Mock
     private Experiment experiment;
@@ -50,7 +51,7 @@ public class AuditLogFilterTest {
         Experiment.Label experimentLabel = Experiment.Label.valueOf("RedButtonExperience");
         Mockito.doReturn(experimentLabel).when(experiment).getLabel();
 
-        auditLogEntry = new AuditLogEntry(
+        auditLogEntry1 = new AuditLogEntry(
                 Calendar.getInstance(TimeZone.getTimeZone("GMT")),
                 UserInfo.from(UserInfo.Username.valueOf("john"))
                         .withUserId("jodoe")
@@ -64,37 +65,56 @@ public class AuditLogFilterTest {
                 "allocation",
                 "100",
                 "50");
+
+        Calendar secondDate = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+        secondDate.add(Calendar.YEAR, 1);
+        auditLogEntry2 = new AuditLogEntry(
+                secondDate,
+                UserInfo.from(UserInfo.Username.valueOf("jane"))
+                        .withUserId("jadoe")
+                        .withEmail("jadoe@example.com")
+                        .withFirstName("Jane")
+                        .withLastName("Doe")
+                        .build(),
+                AuditLogAction.EXPERIMENT_CREATED,
+                experiment,
+                null,
+                "created",
+                null,
+                "Experiment new!");
     }
 
     @Test
-    public void testTest() throws Exception {
-        AuditLogFilter auditLogFilter = new AuditLogFilter();
+    public void testCompare() throws Exception {
+        AuditLogEntryComparator auditLogEntryComparator = new AuditLogEntryComparator();
 
-        HashMap<String, Boolean> testCases = new HashMap<>();
-        testCases.put("firstname=john", true);
-        testCases.put("lastname=duck", false);
-        testCases.put("user=oh", true);
-        testCases.put("username=oh", true);
-        testCases.put("userid=doe", true);
-        testCases.put("mail=wasabi@example.com", false);
-        testCases.put("action=experiment", false);
-        testCases.put("experiment=RedButton", true);
-        testCases.put("bucket=A", true);
-        testCases.put("app=testApp", false);
-        testCases.put("time=Summer", false);
-        testCases.put("attribute=alloc", true);
-        testCases.put("before=100", true);
-        testCases.put("after=new value", false);
-        testCases.put("description=some description", false);
-        testCases.put("john", true);
-        testCases.put("john,experiment=Experience", true);
+        HashMap<String, Integer> testCases = new HashMap<>();
+        testCases.put("firstname", 1);
+        testCases.put("lastname", 0);
+        testCases.put("user", 1);
+        testCases.put("username", 1);
+        testCases.put("userid", 1);
+        testCases.put("mail", 1);
+        testCases.put("action", -1);
+        testCases.put("experiment", 0);
+        testCases.put("bucket", -1);
+        testCases.put("app", 0);
+        testCases.put("time", -1);
+        testCases.put("attribute", -1);
+        testCases.put("before", -1);
+        testCases.put("after", -1);
+        testCases.put("description", -1);
 
-        for (Map.Entry<String, Boolean> testCase : testCases.entrySet()) {
-            auditLogFilter.replaceFilter(testCase.getKey(), "+0000");
+        for (Map.Entry<String, Integer> testCase : testCases.entrySet()) {
+            auditLogEntryComparator.replaceSortorder(testCase.getKey());
 
+            int magnitudeResult = auditLogEntryComparator.compare(auditLogEntry1, auditLogEntry2);
+            if (magnitudeResult != 0) {
+                magnitudeResult /= Math.abs(magnitudeResult);
+            }
             Assert.assertEquals("test case " + testCase.getKey() + " failed.",
-                    testCase.getValue(),
-                    auditLogFilter.test(auditLogEntry));
+                    testCase.getValue().intValue(),
+                    magnitudeResult);
         }
     }
 }

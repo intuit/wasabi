@@ -15,6 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.api.pagination.filters;
 
+import com.intuit.wasabi.api.pagination.filters.impl.AuditLogEntryFilter;
 import com.intuit.wasabi.exceptions.PaginationException;
 import com.intuit.wasabi.experimentobjects.exceptions.ErrorCode;
 import org.apache.commons.lang3.StringUtils;
@@ -120,13 +121,13 @@ import java.util.function.Predicate;
  * As an example, {@link com.intuit.wasabi.api.pagination.filters.FilterUtil.FilterModifier#APPEND_TIMEZONEOFFSET} will
  * append the timezone offset to the filter such that the predicates have it available. However they then have
  * to split it from the real filter again by using {@link FilterUtil#extractTimeZone(String)}! See
- * {@link com.intuit.wasabi.api.pagination.filters.impl.AuditLogFilter.Property#time} for an example implementation.
+ * {@link AuditLogEntryFilter.Property#time} for an example implementation.
  * <br />
  * To use such a modification use
  * {@link #registerFilterModifierForProperties(FilterUtil.FilterModifier, PaginationFilterProperty[])} to register it
  * in your filter implementation.
  *
- * @see com.intuit.wasabi.api.pagination.filters.impl.AuditLogFilter
+ * @see AuditLogEntryFilter
  * @see com.intuit.wasabi.api.pagination.filters.impl.ExperimentFilter
  *
  * @param <T> The object type, in the examples {@link Object}.

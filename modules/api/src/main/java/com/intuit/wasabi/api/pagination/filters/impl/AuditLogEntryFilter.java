@@ -28,15 +28,15 @@ import java.util.function.Function;
 /**
  * Implements the {@link PaginationFilter} for {@link AuditLogEntry}s.
  */
-public class AuditLogFilter extends PaginationFilter<AuditLogEntry> {
+public class AuditLogEntryFilter extends PaginationFilter<AuditLogEntry> {
 
     /**
-     * Initializes the AuditLogFilter.
+     * Initializes the AuditLogEntryFilter.
      *
      * Registers the {@link com.intuit.wasabi.api.pagination.filters.FilterUtil.FilterModifier#APPEND_TIMEZONEOFFSET}
      * for {@link Property#time} to handle timezones.
      */
-    public AuditLogFilter() {
+    public AuditLogEntryFilter() {
         super.registerFilterModifierForProperties(FilterUtil.FilterModifier.APPEND_TIMEZONEOFFSET,
                 Property.time);
     }
