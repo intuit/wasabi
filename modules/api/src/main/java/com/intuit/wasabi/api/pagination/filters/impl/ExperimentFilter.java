@@ -170,27 +170,37 @@ public class ExperimentFilter extends PaginationFilter<Experiment> {
      * filter like:<br />
      * {@code date_constraint_end=isbetween:05/04/2013:07/04/2014}
      *
-     * Note that {@code isbetween} is the only value taking two dates and {@code isany} always returns true.
+     * Note that {@code isbetween} is the only value taking two dates and {@code isany} as well as empty strings
+     * and {@code null} always return true.
      *
      * @param experimentDate the experiment date value to test
      * @param filter the filter
      * @return true if the constraint is fulfilled
      */
-    private static boolean constraintTest(Date experimentDate, String filter) {
+    /*test*/ static boolean constraintTest(Date experimentDate, String filter) {
         String[] extracted = FilterUtil.extractTimeZone(filter);
         String originalFilter = extracted[0];
-        String timeZoneOffset = extracted[1];
+        String timeZoneOffset = "+0000";
+        try {
+            timeZoneOffset = extracted[1];
+        } catch (ArrayIndexOutOfBoundsException ignored) {
+        }
 
         String[] structuredFilter = originalFilter.split(":");
 
-        if (structuredFilter[0].equalsIgnoreCase("isAny")) {
-            return true;
+        if (structuredFilter.length < 2) {
+            if (StringUtils.isBlank(structuredFilter[0]) || structuredFilter[0].equalsIgnoreCase("isAny")) {
+                return true;
+            }
+            throw new PaginationException(ErrorCode.FILTER_KEY_UNPROCESSABLE,
+                    "Wrong format for constraint date ( " + filter + " ), " +
+                            "use: is[any|on|before|after|between]:MM/dd/yyyy[:MM/dd/yyyy]");
         }
 
-        if (structuredFilter.length < 2) {
+        if (StringUtils.isBlank(structuredFilter[0])) {
             throw new PaginationException(ErrorCode.FILTER_KEY_UNPROCESSABLE,
-                    "Wrong format for constraint date (" + filter + "), " +
-                    "use: is[any|on|before|after|between]:MM/dd/yyyy[:MM/dd/yyyy]");
+                    "Wrong format for constraint date ( " + filter + " ), " +
+                            "needs one of is[any|on|before|after|between] before the colon.");
         }
 
         LocalDate experimentLocalDate = FilterUtil.convertDateToOffsetDateTime(experimentDate).toLocalDate();
@@ -201,11 +211,12 @@ public class ExperimentFilter extends PaginationFilter<Experiment> {
                         .minusDays(1).toLocalDate();
                 LocalDate afterExperimentDate = FilterUtil.parseUIDate(structuredFilter[2], timeZoneOffset)
                         .plusDays(1).toLocalDate();
-                return experimentLocalDate.isAfter(beforeExperimentDate) && experimentLocalDate.isBefore(afterExperimentDate);
+                return experimentLocalDate.isAfter(beforeExperimentDate)
+                        && experimentLocalDate.isBefore(afterExperimentDate);
             } catch (ArrayIndexOutOfBoundsException aioobe) {
                 throw new PaginationException(ErrorCode.FILTER_KEY_UNPROCESSABLE,
-                        "Wrong format for inBetween (" + filter + "), use: isbetween:MM/dd/yyyy:MM/dd/yyyy .",
-                        aioobe);
+                        "Wrong format for isBetween ( " + filter + " ), " +
+                                "use: isbetween:MM/dd/yyyy:MM/dd/yyyy .", aioobe);
             }
         }
 
@@ -218,7 +229,7 @@ public class ExperimentFilter extends PaginationFilter<Experiment> {
             case "ison":
                 return experimentLocalDate.isEqual(filterDate);
         }
-
-        return false;
+        throw new PaginationException(ErrorCode.FILTER_KEY_UNPROCESSABLE,
+                        "Unprocessable filter format ( " + filter + " ).");
     }
 }

@@ -15,6 +15,8 @@
  *******************************************************************************/
 package com.intuit.wasabi.api.pagination.filters.impl;
 
+import com.intuit.wasabi.api.pagination.filters.FilterUtil;
+import com.intuit.wasabi.exceptions.PaginationException;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import org.junit.Assert;
@@ -143,6 +145,57 @@ public class ExperimentFilterTest {
 
     @Test
     public void testConstraintTest() throws Exception {
+        Date date = Date.from(Instant.from(DateTimeFormatter.ISO_DATE_TIME.parse("2014-02-13T13:42:45+00:00")));
 
+        HashMap<String, Boolean> testCases = new HashMap<>();
+        testCases.put("", true);
+        testCases.put("isAny", true);
+        testCases.put("isBefore:2/13/2014", false);
+        testCases.put("isBefore:2/14/2014", true);
+        testCases.put("isAfter:2/13/2014", false);
+        testCases.put("isAfter:2/12/2014", true);
+        testCases.put("isOn:2/13/2014", true);
+        testCases.put("isOn:2/12/2014", false);
+        testCases.put("isOn:2/13/2014", true);
+        testCases.put("isOn:2/12/2014", false);
+        testCases.put("isOn:2/2/2014", false);
+        testCases.put("isOn:02/02/2014", false);
+        testCases.put("isOn:02/02/2014\t+0000", false);
+        testCases.put("isBetween:2/5/2013:12/23/2014", true);
+        testCases.put("isBetween:2/5/2013:12/23/2013", false);
+        testCases.put("isBetween:02/13/2014:02/15/2014", true);
+        testCases.put("isBetween:2/01/2013:02/13/2014", true);
+        testCases.put("isBetween:2/5/2013:12/12/2013", false);
+
+
+
+        for (Map.Entry<String, Boolean> testCase : testCases.entrySet()) {
+            Assert.assertEquals("Test case " + testCase.getKey() + " failed.",
+                    testCase.getValue(),
+                    ExperimentFilter.constraintTest(date, testCase.getKey()));
+        }
+
+        List<String> throwCases = new ArrayList<>();
+        throwCases.add("isBefore:");
+        throwCases.add("isAfter:");
+        throwCases.add(":12/5/2013");
+        throwCases.add("isBefore:13/5/2013");
+        throwCases.add("isBefore:11/3/13");
+        throwCases.add("isBetween:11/3/2013:12/3/14");
+        throwCases.add("isBetween:11/3/2013:");
+        throwCases.add("isBetween:11/3/2013");
+        throwCases.add("isOn:13/12/2013");
+        throwCases.add("isSomeday:5/21/2011");
+
+        for (String throwCase : throwCases) {
+            try {
+                ExperimentFilter.constraintTest(date, throwCase);
+                Assert.fail(throwCase + " passed, but should have thrown.");
+            } catch (PaginationException ignored) {
+                // expected
+            } catch (Exception exception) {
+                Assert.fail(throwCase + " threw the wrong exception: " + exception);
+            }
+        }
     }
 }
