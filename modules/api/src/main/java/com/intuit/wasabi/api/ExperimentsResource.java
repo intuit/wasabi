@@ -142,32 +142,32 @@ public class ExperimentsResource {
     @Timed
     public Response getExperiments(@HeaderParam(AUTHORIZATION)
                                    @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                       final String authorizationHeader,
+                                   final String authorizationHeader,
 
                                    @QueryParam("page")
                                    @DefaultValue(DEFAULT_PAGE)
                                    @ApiParam(name = "page", defaultValue = DEFAULT_PAGE, value = DOC_PAGE)
-                                       final int page,
+                                   final int page,
 
                                    @QueryParam("per_page")
                                    @DefaultValue(DEFAULT_PER_PAGE)
                                    @ApiParam(name = "per_page", defaultValue = DEFAULT_PER_PAGE, value = DOC_PER_PAGE)
-                                       final int perPage,
+                                   final int perPage,
 
                                    @QueryParam("filter")
                                    @DefaultValue("")
                                    @ApiParam(name = "filter", defaultValue = DEFAULT_FILTER, value = DOC_FILTER)
-                                       final String filter,
+                                   final String filter,
 
                                    @QueryParam("sort")
                                    @DefaultValue("")
                                    @ApiParam(name = "sort", defaultValue = DEFAULT_SORT, value = DOC_SORT)
-                                       final String sort,
+                                   final String sort,
 
                                    @QueryParam("timezone")
                                    @DefaultValue(DEFAULT_TIMEZONE)
                                    @ApiParam(name = "timezone", defaultValue = DEFAULT_TIMEZONE, value = DOC_TIMEZONE)
-                                       final String timezoneOffset) {
+                                   final String timezoneOffset) {
         ExperimentList experimentList = experiments.getExperiments();
         ExperimentList authorizedExperiments;
 
@@ -357,7 +357,7 @@ public class ExperimentsResource {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Delete an experiment",
             notes = "Can only delete an experiment that is in DRAFT or TERMINATED state.  The default call is " +
-                    "safe to use, but other than that please only delete experiments which you have creation_time.")
+                    "safe to use, but other than that please only delete experiments which you have created.")
     @Timed
     public Response deleteExperiment(@PathParam("experimentID")
                                      @ApiParam(value = "Experiment ID")
@@ -670,7 +670,7 @@ public class ExperimentsResource {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Delete a bucket in an experiment",
             notes = "Can only delete a bucket for experiment that is in DRAFT state.  The default call is " +
-                    "safe to use, but other than that please only delete buckets which you have creation_time.")
+                    "safe to use, but other than that please only delete buckets which you have created.")
     @Timed
     public Response deleteBucket(@PathParam("experimentID")
                                  @ApiParam(value = "Experiment ID")

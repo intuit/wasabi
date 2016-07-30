@@ -718,7 +718,6 @@ public class ExperimentsResourceTest {
 
         thrown.expect(TimeFormatException.class);
         experimentsResource.exportAssignments(experiment.getID(), null, null, "invalidStart", null, null, null);
-
     }
 
     @Test
@@ -729,7 +728,6 @@ public class ExperimentsResourceTest {
 
         thrown.expect(TimeFormatException.class);
         experimentsResource.exportAssignments(experiment.getID(), null, null, null, "invalidEnd", null, null);
-
     }
 
     @Test

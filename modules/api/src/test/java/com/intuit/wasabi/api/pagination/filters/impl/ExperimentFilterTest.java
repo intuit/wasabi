@@ -15,7 +15,6 @@
  *******************************************************************************/
 package com.intuit.wasabi.api.pagination.filters.impl;
 
-import com.intuit.wasabi.api.pagination.filters.FilterUtil;
 import com.intuit.wasabi.exceptions.PaginationException;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Experiment;
@@ -25,7 +24,11 @@ import org.junit.Test;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Tests for {@link ExperimentFilter}.
@@ -166,8 +169,6 @@ public class ExperimentFilterTest {
         testCases.put("isBetween:02/13/2014:02/15/2014", true);
         testCases.put("isBetween:2/01/2013:02/13/2014", true);
         testCases.put("isBetween:2/5/2013:12/12/2013", false);
-
-
 
         for (Map.Entry<String, Boolean> testCase : testCases.entrySet()) {
             Assert.assertEquals("Test case " + testCase.getKey() + " failed.",
