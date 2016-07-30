@@ -15,7 +15,6 @@
  *******************************************************************************/
 package com.intuit.wasabi.api.pagination.comparators;
 
-import com.intuit.wasabi.api.pagination.filters.PaginationFilterTest;
 import com.intuit.wasabi.exceptions.PaginationException;
 import org.junit.Assert;
 import org.junit.Test;
@@ -52,7 +51,7 @@ public class PaginationComparatorTest {
         }
     };
 
-    private static class ObjectComparator extends PaginationComparator<Object> {
+    public static class TestObjectComparator extends PaginationComparator<Object> {
         @Override
         public int compare(Object left, Object right) {
             return super.compare(left, right, Property.class);
@@ -75,9 +74,9 @@ public class PaginationComparatorTest {
         private enum Property implements PaginationComparatorProperty<Object> {
             string(Object::toString, String::compareToIgnoreCase),
             hash(Object::hashCode, Integer::compareTo),
-            alwaysnpeforhash1234(PaginationComparatorTest.ObjectComparator::nullPointerLambda1234,
+            alwaysnpeforhash1234(TestObjectComparator::nullPointerLambda1234,
                     (ignored, ignored2) -> 0),
-            alwaysnpeforhash2345(PaginationComparatorTest.ObjectComparator::nullPointerLambda2345,
+            alwaysnpeforhash2345(TestObjectComparator::nullPointerLambda2345,
                     (ignored, ignored2) -> 0);
 
             private final Function<Object, ?> propertyExtractor;
@@ -102,7 +101,7 @@ public class PaginationComparatorTest {
 
     @Test
     public void testReplaceSortOrder() throws Exception {
-        PaginationComparator<Object> objectComparator = new ObjectComparator();
+        PaginationComparator<Object> objectComparator = new TestObjectComparator();
 
         PaginationComparator<Object> objectComparatorHandle = objectComparator.replaceSortorder("-newSort,otherSort");
         Assert.assertEquals("SortOrder was not updated.", "-newSort,otherSort", objectComparator.getSortOrder());
@@ -114,7 +113,7 @@ public class PaginationComparatorTest {
 
    @Test
    public void testCompare() throws Exception {
-       ObjectComparator objectComparator = new ObjectComparator();
+       TestObjectComparator objectComparator = new TestObjectComparator();
 
        Assert.assertEquals("1 & 2 test, empty sort order", 0,
                objectComparator.compare(testObject1, testObject2));
@@ -174,7 +173,7 @@ public class PaginationComparatorTest {
 
    @Test
    public void testCompareByProperty() throws Exception {
-       ObjectComparator objectComparator = new ObjectComparator();
+       TestObjectComparator objectComparator = new TestObjectComparator();
 
        Assert.assertEquals("Identity test, toString, asc", 0,
                objectComparator.compareByProperty(testObject1, testObject1,
@@ -205,25 +204,25 @@ public class PaginationComparatorTest {
 
        Assert.assertEquals("1 & 2 test, npe left, asc", 1,
                objectComparator.compareByProperty(testObject1, testObject2,
-                       ObjectComparator::nullPointerLambda1234, String::compareToIgnoreCase, false)
+                       TestObjectComparator::nullPointerLambda1234, String::compareToIgnoreCase, false)
        );
        Assert.assertEquals("1 & 2 test, npe left, desc", 1,
                objectComparator.compareByProperty(testObject1, testObject2,
-                       ObjectComparator::nullPointerLambda1234, String::compareToIgnoreCase, true)
+                       TestObjectComparator::nullPointerLambda1234, String::compareToIgnoreCase, true)
        );
        Assert.assertEquals("1 & 2 test, npe right, asc", -1,
                objectComparator.compareByProperty(testObject1, testObject2,
-                       ObjectComparator::nullPointerLambda2345, String::compareToIgnoreCase, false)
+                       TestObjectComparator::nullPointerLambda2345, String::compareToIgnoreCase, false)
        );
        Assert.assertEquals("1 & 2 test, npe right, desc", -1,
                objectComparator.compareByProperty(testObject1, testObject2,
-                       ObjectComparator::nullPointerLambda2345, String::compareToIgnoreCase, true)
+                       TestObjectComparator::nullPointerLambda2345, String::compareToIgnoreCase, true)
        );
    }
 
    @Test
    public void testCompareNull() throws Exception {
-       ObjectComparator objectComparator = new ObjectComparator();
+       TestObjectComparator objectComparator = new TestObjectComparator();
 
        Assert.assertEquals("objectComparator.compareNull(null, null, false)",
                0, objectComparator.compareNull(null, null, false));

@@ -43,9 +43,9 @@ public class PaginationFilterTest {
     };
 
     /**
-     * The example ObjectFilter implementation to test the PaginationFilter more conveniently.
+     * The example TestObjectFilter implementation to test the PaginationFilter more conveniently.
      */
-    private static class ObjectFilter extends PaginationFilter<Object> {
+    public static class TestObjectFilter extends PaginationFilter<Object> {
         @Override
         public boolean test(Object object) {
             return super.test(object, Property.class);
@@ -59,7 +59,7 @@ public class PaginationFilterTest {
             string(Object::toString, StringUtils::containsIgnoreCase),
             hash(Object::hashCode, (hash, filter) ->
                     StringUtils.containsIgnoreCase(Integer.toString(hash), filter)),
-            alwaysnull(ObjectFilter::nullPointerLambda, (ignored, ignored2) -> true);
+            alwaysnull(TestObjectFilter::nullPointerLambda, (ignored, ignored2) -> true);
 
             private final Function<Object, ?> propertyExtractor;
             private final BiPredicate<?, String> filterPredicate;
@@ -83,7 +83,7 @@ public class PaginationFilterTest {
 
     @Test
     public void testReplaceFilter() throws Exception {
-        PaginationFilter<Object> objectFilter = new ObjectFilter();
+        PaginationFilter<Object> objectFilter = new TestObjectFilter();
 
         PaginationFilter<Object> objectFilterHandle = objectFilter.replaceFilter("myFilter", "+0400");
         Assert.assertEquals("filter was not updated.", "myFilter", objectFilter.getFilter());
@@ -101,7 +101,7 @@ public class PaginationFilterTest {
 
     @Test
     public void testTest() throws Exception {
-        ObjectFilter objectFilter = new ObjectFilter();
+        TestObjectFilter objectFilter = new TestObjectFilter();
 
         HashMap<String, Boolean> testCases = new HashMap<>();
         testCases.put("", true);
@@ -124,7 +124,7 @@ public class PaginationFilterTest {
             try {
                 Assert.assertEquals("Case handled incorrectly: " + testCase.getKey(),
                         testCase.getValue(),
-                        objectFilter.test(testObject, ObjectFilter.Property.class));
+                        objectFilter.test(testObject, TestObjectFilter.Property.class));
             } catch (Exception exception) {
                 Assert.fail("Failed due to exception: " + exception.getMessage() + " - Test was: " + testCase.getKey() + " -> " + testCase.getValue());
             }
@@ -133,7 +133,7 @@ public class PaginationFilterTest {
 
     @Test
     public void testTestFields() throws Exception {
-        ObjectFilter objectFilter = new ObjectFilter();
+        TestObjectFilter objectFilter = new TestObjectFilter();
 
         HashMap<String, Boolean> testCases = new HashMap<>();
         testCases.put("", true);
@@ -151,7 +151,7 @@ public class PaginationFilterTest {
             try {
                 Assert.assertEquals("Case handled incorrectly: " + testCase.getKey(),
                         testCase.getValue(),
-                        objectFilter.testFields(testObject, ObjectFilter.Property.class));
+                        objectFilter.testFields(testObject, TestObjectFilter.Property.class));
             } catch (Exception exception) {
                 Assert.fail("Failed due to exception: " + exception.getMessage()
                         + " - Test was: " + testCase.getKey() + " -> " + testCase.getValue());
@@ -166,7 +166,7 @@ public class PaginationFilterTest {
         for (Map.Entry<String, Boolean> testCase : testCases.entrySet()) {
             objectFilter.replaceFilter(testCase.getKey(), "");
             try {
-                objectFilter.testFields(testObject, ObjectFilter.Property.class);
+                objectFilter.testFields(testObject, TestObjectFilter.Property.class);
                 Assert.fail("Failed, no exception was thrown - Test was: "
                         + testCase.getKey() + " -> " + testCase.getValue());
             } catch (PaginationException ignored) {
@@ -180,24 +180,24 @@ public class PaginationFilterTest {
 
     @Test
     public void testTestFulltext() throws Exception {
-        ObjectFilter objectFilter = new ObjectFilter();
+        TestObjectFilter objectFilter = new TestObjectFilter();
 
         objectFilter.replaceFilter("ch th", "");
         Assert.assertTrue("Did not find 'ch th'.",
-                objectFilter.testFulltext(testObject, ObjectFilter.Property.class));
+                objectFilter.testFulltext(testObject, TestObjectFilter.Property.class));
 
         objectFilter.replaceFilter("123", "");
         Assert.assertTrue("Did not find '123'.",
-                objectFilter.testFulltext(testObject, ObjectFilter.Property.class));
+                objectFilter.testFulltext(testObject, TestObjectFilter.Property.class));
 
         objectFilter.replaceFilter("no match", "");
         Assert.assertFalse("Did match 'no match'",
-                objectFilter.testFulltext(testObject, ObjectFilter.Property.class));
+                objectFilter.testFulltext(testObject, TestObjectFilter.Property.class));
     }
 
     @Test
     public void testFilterByProperty() throws Exception {
-        ObjectFilter objectFilter = new ObjectFilter();
+        TestObjectFilter objectFilter = new TestObjectFilter();
 
         Assert.assertFalse("Matched 'no match'!",
                 objectFilter.filterByProperty(testObject, "no match",
@@ -213,26 +213,26 @@ public class PaginationFilterTest {
 
         Assert.assertFalse("Match an intermediate null pointer!",
                 objectFilter.filterByProperty(testObject, "no match",
-                        ObjectFilter::nullPointerLambda, String::contains));
+                        TestObjectFilter::nullPointerLambda, String::contains));
     }
 
     @Test
     public void testModifyFilterForKey() throws Exception {
-        ObjectFilter objectFilter = new ObjectFilter();
+        TestObjectFilter objectFilter = new TestObjectFilter();
         objectFilter.registerFilterModifierForProperties(FilterUtil.FilterModifier.APPEND_TIMEZONEOFFSET,
-                ObjectFilter.Property.string);
+                TestObjectFilter.Property.string);
 
         Assert.assertEquals("Did not modify string!",
                 FilterUtil.FilterModifier.APPEND_TIMEZONEOFFSET.apply("timezone", objectFilter),
-                objectFilter.modifyFilterForKey(ObjectFilter.Property.string, "timezone"));
+                objectFilter.modifyFilterForKey(TestObjectFilter.Property.string, "timezone"));
         Assert.assertEquals("Did modify hash!",
                 "",
-                objectFilter.modifyFilterForKey(ObjectFilter.Property.hash, ""));
+                objectFilter.modifyFilterForKey(TestObjectFilter.Property.hash, ""));
     }
 
     @Test
     public void testGetKeyValuePartOfFilter() throws Exception {
-        ObjectFilter objectFilter = new ObjectFilter();
+        TestObjectFilter objectFilter = new TestObjectFilter();
 
         HashMap<String, String> testCases = new HashMap<>();
         testCases.put("", "");
@@ -264,7 +264,7 @@ public class PaginationFilterTest {
 
     @Test
     public void testGetFulltextPartOfFilter() throws Exception {
-        ObjectFilter objectFilter = new ObjectFilter();
+        TestObjectFilter objectFilter = new TestObjectFilter();
 
         HashMap<String, String> testCases = new HashMap<>();
         testCases.put("", "");
@@ -296,27 +296,27 @@ public class PaginationFilterTest {
 
     @Test
     public void testRegisterFilterModifierForProperties() throws Exception {
-        ObjectFilter objectFilter1 = new ObjectFilter();
+        TestObjectFilter objectFilter1 = new TestObjectFilter();
         objectFilter1.registerFilterModifierForProperties(FilterUtil.FilterModifier.APPEND_TIMEZONEOFFSET,
-                ObjectFilter.Property.hash);
+                TestObjectFilter.Property.hash);
         Assert.assertTrue("Modifier not correctly added (objectFilter1).",
-                objectFilter1.filterModifiers.containsKey(ObjectFilter.Property.hash));
+                objectFilter1.filterModifiers.containsKey(TestObjectFilter.Property.hash));
         Assert.assertEquals("Modifier not correct (objectFilter1).",
                 FilterUtil.FilterModifier.APPEND_TIMEZONEOFFSET,
-                objectFilter1.filterModifiers.get(ObjectFilter.Property.hash));
+                objectFilter1.filterModifiers.get(TestObjectFilter.Property.hash));
         Assert.assertEquals("Incorrect number of modifiers (objectFilter1).",
                 1,
                 objectFilter1.filterModifiers.size());
 
-        ObjectFilter objectFilter2 = new ObjectFilter();
+        TestObjectFilter objectFilter2 = new TestObjectFilter();
         objectFilter2.registerFilterModifierForProperties(FilterUtil.FilterModifier.APPEND_TIMEZONEOFFSET,
-                ObjectFilter.Property.hash, ObjectFilter.Property.string);
+                TestObjectFilter.Property.hash, TestObjectFilter.Property.string);
         Assert.assertEquals("Modifier not correct (objectFilter2, hash).",
                 FilterUtil.FilterModifier.APPEND_TIMEZONEOFFSET,
-                objectFilter2.filterModifiers.get(ObjectFilter.Property.hash));
+                objectFilter2.filterModifiers.get(TestObjectFilter.Property.hash));
         Assert.assertEquals("Modifier not correct (objectFilter2, string).",
                 FilterUtil.FilterModifier.APPEND_TIMEZONEOFFSET,
-                objectFilter2.filterModifiers.get(ObjectFilter.Property.string));
+                objectFilter2.filterModifiers.get(TestObjectFilter.Property.string));
         Assert.assertEquals("Incorrect number of modifiers (objectFilter2).",
                 2,
                 objectFilter2.filterModifiers.size());
@@ -325,21 +325,21 @@ public class PaginationFilterTest {
 
     @Test
     public void testExcludeFromFulltext() throws Exception {
-        ObjectFilter objectFilter = new ObjectFilter();
-        objectFilter.excludeFromFulltext(ObjectFilter.Property.string);
+        TestObjectFilter objectFilter = new TestObjectFilter();
+        objectFilter.excludeFromFulltext(TestObjectFilter.Property.string);
 
         objectFilter.replaceFilter("match", "");
         Assert.assertFalse("Did match 'match' although the field was excluded.",
-                objectFilter.testFulltext(testObject, ObjectFilter.Property.class));
+                objectFilter.testFulltext(testObject, TestObjectFilter.Property.class));
 
         objectFilter.replaceFilter("123", "");
         Assert.assertTrue("Did not find '123' with excluded string.",
-                objectFilter.testFulltext(testObject, ObjectFilter.Property.class));
+                objectFilter.testFulltext(testObject, TestObjectFilter.Property.class));
     }
 
     @Test
     public void testGetTimeZoneOffset() throws Exception {
-        PaginationFilter<Object> objectFilter = new ObjectFilter();
+        PaginationFilter<Object> objectFilter = new TestObjectFilter();
 
         Assert.assertEquals("Default timezoneOffset is not correct.", objectFilter.getTimeZoneOffset(), "+0000");
 
@@ -349,7 +349,7 @@ public class PaginationFilterTest {
 
     @Test
     public void testGetFilter() throws Exception {
-        PaginationFilter<Object> objectFilter = new ObjectFilter();
+        PaginationFilter<Object> objectFilter = new TestObjectFilter();
 
         Assert.assertEquals("Default filter is not correct.", objectFilter.getFilter(), "");
 

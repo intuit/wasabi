@@ -51,7 +51,7 @@ public class ExperimentComparator extends PaginationComparator<Experiment> {
         start_time(Experiment::getStartTime, Date::compareTo),
         end_time(Experiment::getEndTime, Date::compareTo),
         modification_time(Experiment::getModificationTime, Date::compareTo),
-        state(Experiment::getState, Experiment.State::compareTo)
+        state(experiment -> experiment.getState().name(), String::compareToIgnoreCase)
         ;
 
         private final Function<Experiment, ?> propertyExtractor;
