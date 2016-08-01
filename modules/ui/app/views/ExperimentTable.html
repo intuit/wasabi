@@ -108,7 +108,8 @@
                     <ul class="buckets" ng-if="(!experiment.statistics || !experiment.statistics.sortedBucketsActiveOnly) && (experiment.buckets && experiment.buckets.length > 0)">
                         <li ng-repeat="bucket in experiment.buckets" custom-tooltip="{{bucket.homePageTooltip}}" class="noWinnerNotRunning">
                             <label>{{bucket.label}} <span ng-if="getBucket(bucket.label, experiment).isControl">(control)</span><span ng-if="getBucket(bucket.label, experiment).isBaseLine">(baseline)</span></label>
-                            <div>{{multiply100(bucket.allocationPercent)}}%</div>
+                            <div>-- <span>&plusmn;--%</span></div>
+                            <div title="Bucket assignments" class="bucketAssignments">--</div>
                         </li>
                     </ul>
                     <ul class="buckets" ng-if="(!experiment.statistics || !experiment.statistics.sortedBucketsActiveOnly) && (!experiment.buckets || experiment.buckets.length === 0)">
@@ -117,6 +118,7 @@
                             <label ng-if="experiment.buckets && experiment.buckets.length === 0">No buckets defined</label>
                         </li>
                     </ul>
+                    <div class="total" ng-if="experiment.state == 'DRAFT' && (experiment.buckets && experiment.buckets.length > 0)">Total users:&nbsp;&nbsp;<span title="Total users assigned to the experiment">--</span></div>
                     <div class="total" ng-if="experiment.state != 'DRAFT'">Total users:&nbsp;&nbsp;<span title="Total users assigned to the experiment">{{experiment.numUsers | number:0}}</span></div>
                 </div>
             </li>
