@@ -15,8 +15,8 @@
 # limitations under the License.
 ###############################################################################
 
-formulas=("bash" "cask" "git" "maven" "python" "ruby" "node" "docker" "docker-machine")
-casks=("java" "vagrant" "virtualbox")
+formulas=("bash" "cask" "git" "maven" "python" "ruby" "node") # "docker")
+casks=("java" "docker" "vagrant" "virtualbox")
 build_default=false
 endpoint_default=localhost:8080
 verify_default=false
@@ -121,7 +121,8 @@ start() {
 
 test() {
   if [ ${endpoint} == ${endpoint_default} ]; then
-    endpoint=$(docker-machine ip wasabi):8080
+#    endpoint=$(docker-machine ip wasabi):8080
+    endpoint=localhost:8080
     [[ $? -ne 0 ]] && endpoint=${endpoint_default}
   fi
 
@@ -153,11 +154,13 @@ resource() {
     case "${1}" in
       ui) [ ! -f ./modules/ui/dist/index.html ] && ./bin/build.sh
         ./bin/wasabi.sh status >/dev/null 2>&1 || ./bin/wasabi.sh start
-        open http://$(docker-machine ip wasabi):8080/index.html;;
+#        open http://$(docker-machine ip wasabi):8080/index.html;;
+        open http://localhost:8080/index.html;;
       api) [[ ! -f ./modules/swagger-ui/target/swaggerui/index.html || \
         ! -f ./modules/api/target/generated/swagger-ui/swagger.json ]] && ./bin/build.sh
         ./bin/wasabi.sh status >/dev/null 2>&1 || ./bin/wasabi.sh start:docker
-        jip=$(docker-machine ip wasabi)
+#        jip=$(docker-machine ip wasabi)
+        jip=localhost
         ./bin/wasabi.sh remove:wasabi >/dev/null 2>&1
         profile=development
         module=main
@@ -170,7 +173,8 @@ resource() {
         sed -i '' "s/this.model.validatorUrl.*$/this.model.validatorUrl = null;/g" ${content}/swagger/swagger-ui.js
         ./bin/wasabi.sh start
         beerMe 6
-        open http://$(docker-machine ip wasabi):8080/swagger/index.html;;
+#        open http://$(docker-machine ip wasabi):8080/swagger/index.html;;
+        open http://localhost:8080/swagger/index.html;;
       doc) [ ! -f ./target/site/apidocs/index.html ] && ./bin/build.sh
         open ./target/site/apidocs/index.html;;
       mysql|cassandra) ./bin/wasabi.sh status 2>/dev/null | grep wasabi-${1} 1>/dev/null || ./bin/wasabi.sh start
@@ -305,9 +309,9 @@ sleep=${sleep:=${sleep_default}}
 
 [[ $# -eq 0 ]] && usage
 
-if [ "$OS" == "OSX" ]; then
-  eval $(docker-machine env wasabi) 2>/dev/null
-fi
+#if [ "$OS" == "OSX" ]; then
+#  eval $(docker-machine env wasabi) 2>/dev/null
+#fi
 
 for command in ${@:$OPTIND}; do
   case "${command}" in

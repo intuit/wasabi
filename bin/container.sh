@@ -70,25 +70,27 @@ beerMe() {
 }
 
 start_docker() {
-  docker-machine status ${project} >/dev/null 2>&1 || docker-machine create -d virtualbox ${project}
-
-  dms=$(docker-machine status ${project})
-
-  if [ "${dms}" != "Running" ]; then
-    docker-machine restart ${project} || usage "unable to run command: % docker-machine restart ${project}" 1
-  fi
+#  docker-machine status ${project} >/dev/null 2>&1 || docker-machine create -d virtualbox ${project}
+#
+#  dms=$(docker-machine status ${project})
+#
+#  if [ "${dms}" != "Running" ]; then
+#    docker-machine restart ${project} || usage "unable to run command: % docker-machine restart ${project}" 1
+#  fi
+  echo ""
 }
 
 stop_docker() {
-  dms=$(docker-machine status ${project})
-
-  if [ "${dms}" == "Running" ]; then
-    docker-machine stop ${project} || usage "unable to run command: % docker-machine stop ${project}" 1
-  fi
+#  dms=$(docker-machine status ${project})
+#
+#  if [ "${dms}" == "Running" ]; then
+#    docker-machine stop ${project} || usage "unable to run command: % docker-machine stop ${project}" 1
+#  fi
+  echo ""
 }
 
 start_container() {
-  eval $(docker-machine env wasabi)
+#  eval $(docker-machine env wasabi)
   docker network create --driver bridge ${docker_network} >/dev/null 2>&1
 
   cid=$(docker ps -aqf name=${1})
@@ -136,9 +138,9 @@ remove_container() {
   if [ ${container} ]; then
     stop_container ${container} >/dev/null 2>&1
     docker rm -fv ${container} >/dev/null 2>&1
-  else
-    docker-machine rm -f ${project} >/dev/null 2>&1
-    vboxmanage hostonlyif remove vboxnet0 >/dev/null 2>&1
+#  else
+#    docker-machine rm -f ${project} >/dev/null 2>&1
+#    vboxmanage hostonlyif remove vboxnet0 >/dev/null 2>&1
   fi
 }
 
@@ -148,7 +150,8 @@ start_wasabi() {
   id=$(fromPom modules/main development application.name)
   wcip=$(docker inspect --format "{{ .NetworkSettings.Networks.${docker_network}.IPAddress }}" ${project}-cassandra)
   wmip=$(docker inspect --format "{{ .NetworkSettings.Networks.${docker_network}.IPAddress }}" ${project}-mysql)
-  mip=$(docker-machine ip ${project})
+#  mip=$(docker-machine ip ${project})
+  mip=localhost
 
   remove_container ${project}-main
 
@@ -237,9 +240,9 @@ console_mysql() {
 }
 
 status() {
-  eval $(docker-machine env ${project}) 2>/dev/null
-  docker-machine active 2>/dev/null | grep ${project} || usage "start ${project}" 1
-  eval $(docker-machine env ${project})
+#  eval $(docker-machine env ${project}) 2>/dev/null
+#  docker-machine active 2>/dev/null | grep ${project} || usage "start ${project}" 1
+#  eval $(docker-machine env ${project})
   docker ps 2>/dev/null
 }
 
@@ -269,7 +272,7 @@ sleep=${sleep:=${sleep_default}}
 
 [[ $# -eq 0 ]] && usage
 
-eval $(docker-machine env ${project}) 2>/dev/null
+#eval $(docker-machine env ${project}) 2>/dev/null
 
 for command in ${@:$OPTIND}; do
   case "${command}" in
