@@ -118,7 +118,7 @@ public class TestBase extends ServiceTestBase {
         // TODO It appears that the build system has user.name and pwd set to something different from what it should be for the environment. Commented next two lines out for now.
         //	setPropertyFromSystemProperty ("user.name","user-name");
         //	setPropertyFromSystemProperty ("user.password","password");
-        
+
         setPropertyFromSystemProperty ("user-name","user-name");
         setPropertyFromSystemProperty ("password","password");
         setPropertyFromSystemProperty ("user-lastname","user-lastname");
@@ -1664,8 +1664,8 @@ public class TestBase extends ServiceTestBase {
         return response;
     }
 
-    
-    
+
+
     ///////////////////////////////////////////
     // experiments/<id>/assignments Endpoint //
     ///////////////////////////////////////////
@@ -2928,8 +2928,8 @@ public class TestBase extends ServiceTestBase {
         String uri = "applications/" + application.name + "/experiments";
         response = apiServerConnector.doGet(uri);
         assertReturnCode(response, expectedStatus);
-        // according to swagger this should be "experiments" instead of "" but it's not
-        List<Map<String, Object>> jsonStrings = response.jsonPath().getList("");
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> jsonStrings = (List<Map<String, Object>>) response.jsonPath().getMap("").get("experiments");
         List<Experiment> expList = new ArrayList<>(jsonStrings.size());
         for (Map jsonMap : jsonStrings) {
             String jsonString = simpleGson.toJson(jsonMap);
@@ -3714,7 +3714,7 @@ public class TestBase extends ServiceTestBase {
     ///////////////////////////////
     // feedback endpoint BEGINS //
     //////////////////////////////
-    
+
     /**
      * Sends a POST request to create an user feedback.
      * The response must contain HTTP {@code expectedStatus}.
@@ -3728,8 +3728,8 @@ public class TestBase extends ServiceTestBase {
         response = apiServerConnector.doPost("feedback", userFeedback==null?null:userFeedback.toJSONString());
         assertReturnCode(response, expectedStatus);
         return response;
-    }    
-    
+    }
+
     /**
      * Sends a GET request to get all feedbacks.
      * The response must contain HTTP {@code expectedStatus}.
@@ -3740,7 +3740,7 @@ public class TestBase extends ServiceTestBase {
      */
     public List<UserFeedback> getFeedbacks(int expectedStatus, APIServerConnector apiServerConnector) {
         response = apiServerConnector.doGet("feedback");
-        
+
         assertReturnCode(response, expectedStatus);
         List<Map<String, Object>> jsonStrings = response.jsonPath().getList("feedback");
         List<UserFeedback> userfeedbackList = new ArrayList<>(jsonStrings.size());
@@ -3749,11 +3749,11 @@ public class TestBase extends ServiceTestBase {
             userfeedbackList.add(UserFeedbackFactory.createFromJSONString(jsonString));
         }
         return userfeedbackList;
-    } 
-    
+    }
+
     /**
      * Sends a GET request to get feedbacks by username.
-     * 
+     *
      * The response must contain HTTP {@code expectedStatus}.
      *
      * @param expectedStatus the expected HTTP status code
@@ -3763,7 +3763,7 @@ public class TestBase extends ServiceTestBase {
      */
     public List<UserFeedback> getFeedbacksByUsername(int expectedStatus, APIServerConnector apiServerConnector, String username) {
         response = apiServerConnector.doGet("feedback/users/"+username);
-        
+
         assertReturnCode(response, expectedStatus);
         List<Map<String, Object>> jsonStrings = response.jsonPath().getList("feedbackList");
         List<UserFeedback> userfeedbackList = new ArrayList<>(jsonStrings.size());
@@ -3772,11 +3772,11 @@ public class TestBase extends ServiceTestBase {
             userfeedbackList.add(UserFeedbackFactory.createFromJSONString(jsonString));
         }
         return userfeedbackList;
-    }       
-    
+    }
+
     ///////////////////////////////
     // feedback endpoint ENDS //
-    //////////////////////////////   
+    //////////////////////////////
 
     /////////////////////////////
     // authentication endpoint //
