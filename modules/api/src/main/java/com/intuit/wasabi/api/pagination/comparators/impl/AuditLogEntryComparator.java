@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- * <p>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,12 +24,26 @@ import java.util.Calendar;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public class AuditLogComparator extends PaginationComparator<AuditLogEntry> {
+/**
+ * Implements the {@link PaginationComparator} for {@link AuditLogEntry} objects.
+ */
+public class AuditLogEntryComparator extends PaginationComparator<AuditLogEntry> {
 
-    public AuditLogComparator() {
+    /**
+     * Initializes an AuditLogEntryComparator.
+     *
+     * Sets the default sort order to descending time, that means
+     * the most recent events are first.
+     */
+    public AuditLogEntryComparator() {
         super("-time");
     }
 
+    /**
+     * Implementation of {@link PaginationComparatorProperty} for {@link AuditLogEntry}s.
+     *
+     * @see PaginationComparatorProperty
+     */
     private enum Property implements PaginationComparatorProperty<AuditLogEntry> {
         firstname(auditLogEntry -> auditLogEntry.getUser().getFirstName(), String::compareToIgnoreCase),
         lastname(auditLogEntry -> auditLogEntry.getUser().getLastName(), String::compareToIgnoreCase),
@@ -42,15 +56,22 @@ public class AuditLogComparator extends PaginationComparator<AuditLogEntry> {
         bucket(auditLogEntry -> auditLogEntry.getBucketLabel().toString(), String::compareToIgnoreCase),
         app(auditLogEntry -> auditLogEntry.getApplicationName().toString(), String::compareToIgnoreCase),
         time(AuditLogEntry::getTime, Calendar::compareTo),
-        attr(AuditLogEntry::getChangedProperty, String::compareToIgnoreCase),
+        attribute(AuditLogEntry::getChangedProperty, String::compareToIgnoreCase),
         before(AuditLogEntry::getBefore, String::compareToIgnoreCase),
         after(AuditLogEntry::getAfter, String::compareToIgnoreCase),
         description(AuditLogAction::getDescription, String::compareToIgnoreCase),
         ;
 
-        final Function<AuditLogEntry, ?> propertyExtractor;
-        final BiFunction<?, ?, Integer> comparisonFunction;
+        private final Function<AuditLogEntry, ?> propertyExtractor;
+        private final BiFunction<?, ?, Integer> comparisonFunction;
 
+        /**
+         * Creates a Property.
+         *
+         * @param propertyExtractor the property extractor
+         * @param comparisonFunction the comparison function
+         * @param <T> the property type
+         */
         <T> Property(Function<AuditLogEntry, T> propertyExtractor, BiFunction<T, T, Integer> comparisonFunction) {
             this.propertyExtractor = propertyExtractor;
             this.comparisonFunction = comparisonFunction;
@@ -77,7 +98,7 @@ public class AuditLogComparator extends PaginationComparator<AuditLogEntry> {
      * {@inheritDoc}
      */
     @Override
-    public int compare(AuditLogEntry o1, AuditLogEntry o2) {
-        return super.compare(o1, o2, Property.class);
+    public int compare(AuditLogEntry left, AuditLogEntry right) {
+        return super.compare(left, right, Property.class);
     }
 }

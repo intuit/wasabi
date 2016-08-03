@@ -25,6 +25,7 @@ import com.intuit.wasabi.experiment.Experiments;
 import com.intuit.wasabi.experiment.Pages;
 import com.intuit.wasabi.experiment.Priorities;
 import com.intuit.wasabi.experimentobjects.*;
+import io.codearte.catchexception.shade.mockito.Mockito;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,6 +37,7 @@ import org.mockito.verification.VerificationMode;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -168,14 +170,15 @@ public class ApplicationsResourceTest {
 
     @Test
     public void getExperiments() throws Exception {
-        when(authorizedExperimentGetter.getAuthorizedExperimentsByName("foo", applicationName))
-                .thenReturn(experimentsByName);
-        whenHttpHeader(experimentsByName);
+        doReturn(responseBuilder).when(httpHeader).headers();
+        doReturn(responseBuilder).when(responseBuilder).entity(anyCollection());
+        doReturn(response).when(responseBuilder).build();
 
         applicationsResource.getExperiments(applicationName, "foo", 0, -1, "", "", "");
 
         verify(authorizedExperimentGetter).getAuthorizedExperimentsByName("foo", applicationName);
-        verifyHttpHeader(experimentsByName);
+        verify(httpHeader).headers();
+        verify(responseBuilder).build();
     }
 
     @Test

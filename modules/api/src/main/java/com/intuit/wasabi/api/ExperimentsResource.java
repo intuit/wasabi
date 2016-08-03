@@ -123,9 +123,17 @@ public class ExperimentsResource {
     /**
      * Returns a list of all experiments, with metadata. Does not return
      * metadata for deleted experiments.
-     * TODO @shoeffner
-     * @param authorizationHeader the authorization headers
-     * @return Response object
+     *
+     * This endpoint is paginated.
+     *
+     * @param authorizationHeader the authentication headers
+     * @param page the page which should be returned, defaults to 1
+     * @param perPage the number of log entries per page, defaults to 10. -1 to get all values.
+     * @param sort the sorting rules
+     * @param filter the filter rules
+     * @param timezoneOffset the time zone offset from UTC
+     * @return a response containing a map with a list with {@code 0} to {@code perPage} experiments,
+     * if that many are on the page, and a count of how many experiments match the filter criteria.
      */
     @GET
     @Produces(APPLICATION_JSON)
@@ -134,38 +142,37 @@ public class ExperimentsResource {
     @Timed
     public Response getExperiments(@HeaderParam(AUTHORIZATION)
                                    @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                       final String authorizationHeader,
+                                   final String authorizationHeader,
 
                                    @QueryParam("page")
                                    @DefaultValue(DEFAULT_PAGE)
-                                   @ApiParam(name = "page", defaultValue = DEFAULT_PAGE, value = EXAMPLE_PAGE)
-                                       final int page,
+                                   @ApiParam(name = "page", defaultValue = DEFAULT_PAGE, value = DOC_PAGE)
+                                   final int page,
 
                                    @QueryParam("per_page")
                                    @DefaultValue(DEFAULT_PER_PAGE)
-                                   @ApiParam(name = "per_page", defaultValue = DEFAULT_PER_PAGE, value = EXAMPLE_PER_PAGE)
-                                       final int perPage,
-
-                                   @QueryParam("sort")
-                                   @DefaultValue("")
-                                   @ApiParam(name = "sort", defaultValue = "", value = EXAMPLE_SORT)
-                                       final String sort,
+                                   @ApiParam(name = "per_page", defaultValue = DEFAULT_PER_PAGE, value = DOC_PER_PAGE)
+                                   final int perPage,
 
                                    @QueryParam("filter")
                                    @DefaultValue("")
-                                   @ApiParam(name = "filter", defaultValue = "", value = EXAMPLE_FILTER)
-                                       final String filter,
+                                   @ApiParam(name = "filter", defaultValue = DEFAULT_FILTER, value = DOC_FILTER)
+                                   final String filter,
+
+                                   @QueryParam("sort")
+                                   @DefaultValue("")
+                                   @ApiParam(name = "sort", defaultValue = DEFAULT_SORT, value = DOC_SORT)
+                                   final String sort,
 
                                    @QueryParam("timezone")
-                                   @DefaultValue("+0000")
-                                   @ApiParam(name = "timezone", defaultValue = "+0000", value = EXAMPLE_TIMEZONE)
-                                       final String timezoneOffset
-                                   ) {
+                                   @DefaultValue(DEFAULT_TIMEZONE)
+                                   @ApiParam(name = "timezone", defaultValue = DEFAULT_TIMEZONE, value = DOC_TIMEZONE)
+                                   final String timezoneOffset) {
         ExperimentList experimentList = experiments.getExperiments();
         ExperimentList authorizedExperiments;
 
         if (authorizationHeader == null) {
-            authorizedExperiments = experimentList;
+            throw new AuthenticationException("No authorization given.");
         } else {
             Username userName = authorization.getUser(authorizationHeader);
             Set<Application.Name> allowed = new HashSet<>();
@@ -350,7 +357,7 @@ public class ExperimentsResource {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Delete an experiment",
             notes = "Can only delete an experiment that is in DRAFT or TERMINATED state.  The default call is " +
-                    "safe to use, but other than that please only delete experiments which you have creation_time.")
+                    "safe to use, but other than that please only delete experiments which you have created.")
     @Timed
     public Response deleteExperiment(@PathParam("experimentID")
                                      @ApiParam(value = "Experiment ID")
@@ -663,7 +670,7 @@ public class ExperimentsResource {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Delete a bucket in an experiment",
             notes = "Can only delete a bucket for experiment that is in DRAFT state.  The default call is " +
-                    "safe to use, but other than that please only delete buckets which you have creation_time.")
+                    "safe to use, but other than that please only delete buckets which you have created.")
     @Timed
     public Response deleteBucket(@PathParam("experimentID")
                                  @ApiParam(value = "Experiment ID")

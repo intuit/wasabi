@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- * <p>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,13 +25,27 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 
-public class AuditLogFilter extends PaginationFilter<AuditLogEntry> {
+/**
+ * Implements the {@link PaginationFilter} for {@link AuditLogEntry}s.
+ */
+public class AuditLogEntryFilter extends PaginationFilter<AuditLogEntry> {
 
-    public AuditLogFilter() {
+    /**
+     * Initializes the AuditLogEntryFilter.
+     *
+     * Registers the {@link com.intuit.wasabi.api.pagination.filters.FilterUtil.FilterModifier#APPEND_TIMEZONEOFFSET}
+     * for {@link Property#time} to handle timezones.
+     */
+    public AuditLogEntryFilter() {
         super.registerFilterModifierForProperties(FilterUtil.FilterModifier.APPEND_TIMEZONEOFFSET,
                 Property.time);
     }
 
+    /**
+     * Implementation of {@link PaginationFilterProperty} for {@link AuditLogEntry}s.
+     *
+     * @see PaginationFilterProperty
+     */
     private enum Property implements PaginationFilterProperty<AuditLogEntry> {
         firstname(auditLogEntry -> auditLogEntry.getUser().getFirstName(), StringUtils::containsIgnoreCase),
         lastname(auditLogEntry -> auditLogEntry.getUser().getLastName(), StringUtils::containsIgnoreCase),
@@ -46,30 +60,46 @@ public class AuditLogFilter extends PaginationFilter<AuditLogEntry> {
         app(auditLogEntry -> auditLogEntry.getApplicationName().toString(), StringUtils::containsIgnoreCase),
         time(auditLogEntry -> auditLogEntry.getTime().getTime(), FilterUtil::extractTimeZoneAndTestDate),
         attribute(AuditLogEntry::getChangedProperty, StringUtils::containsIgnoreCase),
-        from(AuditLogEntry::getBefore, StringUtils::containsIgnoreCase),
-        to(AuditLogEntry::getAfter, StringUtils::containsIgnoreCase),
+        before(AuditLogEntry::getBefore, StringUtils::containsIgnoreCase),
+        after(AuditLogEntry::getAfter, StringUtils::containsIgnoreCase),
         user(auditLogEntry -> auditLogEntry.getUser().getFirstName() + " " + auditLogEntry.getUser().getLastName(), StringUtils::containsIgnoreCase),
         ;
 
         private final Function<AuditLogEntry, ?> propertyExtractor;
         private final BiPredicate<?, String> filterPredicate;
 
+        /**
+         * Creates a Property.
+         *
+         * @param propertyExtractor the property extractor
+         * @param filterPredicate the filter predicate
+         * @param <T> the property type
+         */
         <T> Property(Function<AuditLogEntry, T> propertyExtractor, BiPredicate<T, String> filterPredicate) {
             this.propertyExtractor = propertyExtractor;
             this.filterPredicate = filterPredicate;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public Function<AuditLogEntry, ?> getPropertyExtractor() {
             return propertyExtractor;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public BiPredicate<?, String> getFilterPredicate() {
             return filterPredicate;
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean test(AuditLogEntry auditLogEntry) {
         return super.test(auditLogEntry, Property.class);

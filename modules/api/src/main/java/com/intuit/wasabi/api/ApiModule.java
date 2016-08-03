@@ -22,10 +22,10 @@ import com.intuit.wasabi.analytics.AnalyticsModule;
 import com.intuit.wasabi.api.error.ExceptionJsonifier;
 import com.intuit.wasabi.api.jackson.JacksonModule;
 import com.intuit.wasabi.api.pagination.comparators.PaginationComparator;
-import com.intuit.wasabi.api.pagination.comparators.impl.AuditLogComparator;
+import com.intuit.wasabi.api.pagination.comparators.impl.AuditLogEntryComparator;
 import com.intuit.wasabi.api.pagination.comparators.impl.ExperimentComparator;
 import com.intuit.wasabi.api.pagination.filters.PaginationFilter;
-import com.intuit.wasabi.api.pagination.filters.impl.AuditLogFilter;
+import com.intuit.wasabi.api.pagination.filters.impl.AuditLogEntryFilter;
 import com.intuit.wasabi.api.pagination.filters.impl.ExperimentFilter;
 import com.intuit.wasabi.auditlog.AuditLogModule;
 import com.intuit.wasabi.auditlogobjects.AuditLogEntry;
@@ -87,8 +87,8 @@ public class ApiModule extends AbstractModule {
         bind(ExceptionJsonifier.class).in(SINGLETON);
 
         // Bind comparators and filters for pagination
-        bind(new TypeLiteral<PaginationComparator<AuditLogEntry>>(){}).to(new TypeLiteral<AuditLogComparator>(){});
-        bind(new TypeLiteral<PaginationFilter<AuditLogEntry>>(){}).to(new TypeLiteral<AuditLogFilter>(){});
+        bind(new TypeLiteral<PaginationComparator<AuditLogEntry>>(){}).to(new TypeLiteral<AuditLogEntryComparator>(){});
+        bind(new TypeLiteral<PaginationFilter<AuditLogEntry>>(){}).to(new TypeLiteral<AuditLogEntryFilter>(){});
         bind(new TypeLiteral<PaginationComparator<Experiment>>(){}).to(new TypeLiteral<ExperimentComparator>(){});
         bind(new TypeLiteral<PaginationFilter<Experiment>>(){}).to(new TypeLiteral<ExperimentFilter>(){});
 
