@@ -116,7 +116,7 @@ public class FilterUtil {
             return OffsetDateTime.of(java.time.LocalDate.from(tempAccessor), LocalTime.MIDNIGHT, ZoneOffset.UTC);
         } catch (DateTimeParseException parseException) {
             throw new PaginationException(ErrorCode.FILTER_KEY_UNPROCESSABLE,
-                    "Can not parse date (" + dateString + ") , must be of " +
+                    "Wrong format: Can not parse date (" + dateString + ") , must be of " +
                             "format MM/dd/yyyy , e.g. 05/23/2014 or 4/7/2013",
                     parseException);
         }

@@ -472,7 +472,7 @@ public class TestBase extends ServiceTestBase {
      * @return a list of experiments
      */
     public List<Experiment> getExperiments(int expectedStatus, APIServerConnector apiServerConnector) {
-        response = apiServerConnector.doGet("experiments");
+        response = apiServerConnector.doGet("experiments?per_page=-1");
         assertReturnCode(response, expectedStatus);
         List<Map<String, Object>> jsonStrings = response.jsonPath().getList("experiments");
         List<Experiment> expList = new ArrayList<>(jsonStrings.size());

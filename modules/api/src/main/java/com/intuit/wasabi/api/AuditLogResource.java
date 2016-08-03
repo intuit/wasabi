@@ -203,7 +203,7 @@ public class AuditLogResource {
                                     @DefaultValue(DEFAULT_TIMEZONE)
                                     @ApiParam(name = "timezone", defaultValue = DEFAULT_TIMEZONE, value = DOC_TIMEZONE)
                                     final String timezoneOffset) {
-        return getLogs(authorizationHeader, null, page, perPage, sort, filter, timezoneOffset);
+        return getLogs(authorizationHeader, null, page, perPage, filter, sort, timezoneOffset);
     }
 
 }

@@ -230,6 +230,6 @@ public class ExperimentFilter extends PaginationFilter<Experiment> {
                 return experimentLocalDate.isEqual(filterDate);
         }
         throw new PaginationException(ErrorCode.FILTER_KEY_UNPROCESSABLE,
-                        "Unprocessable filter format ( " + filter + " ).");
+                        "Wrong format: not processable filter format ( " + filter + " ).");
     }
 }
