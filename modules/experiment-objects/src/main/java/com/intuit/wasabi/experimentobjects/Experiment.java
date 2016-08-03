@@ -553,6 +553,12 @@ public class Experiment implements Cloneable, ExperimentBase {
             return this;
         }
 
+        public Builder withHypothesisIsCorrect(final String hypothesisIsCorrect) {
+            instance.hypothesisIsCorrect = hypothesisIsCorrect;
+
+            return this;
+        }
+
         public Builder withResults(final String results) {
             instance.results = results;
 
