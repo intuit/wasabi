@@ -61,7 +61,6 @@ angular.module('wasabi.controllers').
             };
 
             $scope.applicationsWithReadOrBetterAccess = [];
-            $scope.allApplications = [];
             $scope.needDataForThese = [];
             $scope.disableShowAsGrid = false;
             $scope.initialGridsShown = 12;
@@ -69,30 +68,6 @@ angular.module('wasabi.controllers').
             $scope.gridDataLoaded = 0; // Tracks for how many of the experiments shown in the grid view we have finished getting data (or got an error doing so)
 
             $scope.help = ConfigFactory.help;
-
-            $scope.loadAllApplications = function () {
-                ApplicationsFactory.query().$promise.then(function (applications) {
-                    if (applications) {
-                        $scope.allApplications = [];
-                        // Make a list of only the applications for which this user doesn't have access.
-                        for (var i = 0; i < applications.length; i++) {
-                            var hasAccessForApp = false;
-                            for (var j = 0; j < $scope.applications.length; j++) {
-                                // Check if this application is one of the ones they already have access for.
-                                if (applications[i].applicationName === $scope.applications[j]) {
-                                    hasAccessForApp = true;
-                                    break;
-                                }
-                            }
-                            if (!hasAccessForApp) {
-                                $scope.allApplications.push(applications[i].applicationName);
-                            }
-                        }
-                    }
-                }, function(response) {
-                        UtilitiesFactory.handleGlobalError(response, 'The list of applications could not be retrieved.');
-                });
-            };
 
             // *** Home page code
 
@@ -432,8 +407,6 @@ angular.module('wasabi.controllers').
                             $scope.applicationsWithReadOrBetterAccess.length === 0);
 
                     $scope.applicationsLoaded = true;
-
-                    $scope.loadAllApplications();
                 });
             };
 
@@ -831,9 +804,6 @@ angular.module('wasabi.controllers').
                             // Add ability for user to create a new application while creating an experiment.
                             clone.push(ConfigFactory.newApplicationNamePrompt);
                             return clone;
-                        },
-                        allApplications: function() {
-                            return $scope.allApplications;
                         }
                     }
                 });
