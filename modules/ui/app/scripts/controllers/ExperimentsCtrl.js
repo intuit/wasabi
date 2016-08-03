@@ -103,77 +103,19 @@ angular.module('wasabi.controllers').
                 return experiment.statistics.buckets[bucketLabel].improvementClass;
             };
 
-            $scope.doneLoading = false; // Used so we don't keep calling this function once we've loaded everything.
-            // This function is called by the WhenScrollEndsDirective when it detects we are near the bottom of scrolling
-            // the grid view.  It adds more experiments from the filteredItems list to the gridItems list and they are
-            // then displayed by Angular JS.  We will also call a method to start the process of loading the data for
-            // the newly added experiments.
-            $scope.loadMoreExperimentData = function() {
-                if (!$scope.doneLoading) {
-                    $scope.gridsShown = ($scope.filteredItems.length < $scope.gridsShown + 4 ? $scope.filteredItems.length : $scope.gridsShown + 4);
-                    $scope.doneLoading = ($scope.gridsShown === $scope.filteredItems.length);
-                    $scope.gridItems = $scope.filteredItems.slice(0,$scope.gridsShown);
-                    $scope.startDataLoadForNextExperiment();
-                }
-            };
-
-            // This method loads the extra data needed for each of the experiments in order to render
-            // the Grid View (formerly, Home Page).  RUNNING, DRAFT, PAUSED, TERMINATED
-            $scope.loadGridViewData = function (experiments) {
-                if (experiments) {
-                    $scope.needDataForThese = []; // This contains experiments we need to get supplementary data for.
-                    experiments.forEach(function(experiment) {
-                        experiment.dataRetrieved = false;
-                        $scope.needDataForThese.push({
-                            experiment: experiment,
-                            // This flag lets us know we only need the data for a DRAFT experiment, which is a little less than for RUNNING, etc.
-                            onlyBucketData: (experiment.state.toLowerCase() === 'draft')
-                        });
-
-                        UtilitiesFactory.getFormattedStartAndEndDates(experiment);
-                        if (!experiment.isRapidExperiment) {
-                            experiment.progressRollover = experiment.progressDaysLeft + ' days left in experiment';
-                        }
-
-                        var start = experiment.formattedStart;
-                        var end = experiment.formattedEnd;
-
-                        // Create experiment description tooltip
-                        experiment.homePageTooltip = '';
-
-                        var s = '<div style="font-weight:normal; font-size:15px;">' + experiment.label + '</div>';
-                        s += '<div style="position:relative; padding-bottom:9px; font-size: 90%; color:rgb(92,92,92)">';
-                        s += start.format('MMM DD YYYY') + ' - ' + end.format('MMM DD YYYY') + '</div>';
-                        if (experiment.description && experiment.description.length > 0) {
-                            s += '<div style="width:360px">' + experiment.description + '</div>';
-                        }
-                        experiment.homePageTooltip = s;
-
-                        experiment.numUsers = 0;
-                    });
-
-                    if ($scope.data.showGrid) {
-                        // Probably just refreshed when grid was showing, need to load data.
-                        $scope.startDataLoadForNextExperiment();
-                    }
-                }
-
-            };
-
             $scope.startDataLoadForNextExperiment = function() {
                 // If there are any more experiments to get data for, get the next one.
-                if ($scope.gridDataLoaded < $scope.gridsShown && $scope.needDataForThese.length > 0) {
+                if ($scope.needDataForThese.length > 0) {
                     // Start the process of getting extra data for the next experiment, unless it has the flag set
                     // that we have already gotten the data.
                     var foundExperimentInNeedOfLoading = false;
                     do {
                         var nextExperiment = $scope.needDataForThese.splice(0,1)[0];
-                        $scope.gridDataLoaded += 1;
                         if (!nextExperiment.experiment.dataRetrieved) {
                             foundExperimentInNeedOfLoading = true;
                             $scope.loadBuckets(nextExperiment.experiment, !nextExperiment.onlyBucketData);
                         }
-                    } while (!foundExperimentInNeedOfLoading && $scope.gridDataLoaded < $scope.gridsShown && $scope.needDataForThese.length > 0);
+                    } while (!foundExperimentInNeedOfLoading && $scope.needDataForThese.length > 0);
                 }
                 else {
                     // We are done loading the extra data for the grid view, so enable the Show grid checkbox.
@@ -442,6 +384,21 @@ angular.module('wasabi.controllers').
                         for (var i = 0; i < experiments.length; i++) {
                             if (experiments[i]) {
                                 experiments[i].selected = false;
+
+                                UtilitiesFactory.getFormattedStartAndEndDates(experiments[i]);
+                                var start = experiments[i].formattedStart;
+                                var end = experiments[i].formattedEnd;
+
+                                // Create experiment description tooltip
+                                experiments[i].homePageTooltip = '';
+
+                                var s = '<div style="font-weight:normal; font-size:15px;">' + experiments[i].label + '</div>';
+                                s += '<div style="position:relative; padding-bottom:9px; font-size: 90%; color:rgb(92,92,92)">';
+                                s += start.format('MMM DD YYYY') + ' - ' + end.format('MMM DD YYYY') + '</div>';
+                                if (experiments[i].description && experiments[i].description.length > 0) {
+                                    s += '<div style="width:360px">' + experiments[i].description + '</div>';
+                                }
+                                experiments[i].homePageTooltip = s;
                             } else {
                                 delete experiments[i];
                             }
@@ -606,10 +563,7 @@ angular.module('wasabi.controllers').
             $scope.loadGridDataIfNecessary = function() {
                 if ($scope.data.showGrid) {
                     // Handle the list used for lazy loading of the grid.
-                    $scope.gridsShown = ($scope.cardViewExperiments.length < $scope.initialGridsShown ? $scope.cardViewExperiments.length : $scope.initialGridsShown);
-                    $scope.gridItems = $scope.cardViewExperiments.slice(0,$scope.gridsShown);
                     $scope.needDataForThese = []; // Reset list of experiments to get data for.
-                    $scope.gridDataLoaded = 0;
                     $scope.cardViewExperiments.forEach(function(experiment) {
                         // We may have already retrieved the extra data for this experiment because this might
                         // be a filtering.
@@ -618,7 +572,6 @@ angular.module('wasabi.controllers').
                             onlyBucketData: (experiment.state.toLowerCase() === 'draft')
                         });
                     });
-                    $scope.doneLoading = false;
                     $scope.startDataLoadForNextExperiment();
                 }
             };
@@ -631,9 +584,6 @@ angular.module('wasabi.controllers').
             $scope.doSearch = function() {
                 if ($scope.data.showGrid) {
                     $scope.loadCardViewExperiments();
-
-                    // Handle the list used for lazy loading of the grid.
-                    $scope.loadGridDataIfNecessary();
                 }
                 else {
                     $scope.loadExperiments();
@@ -666,7 +616,6 @@ angular.module('wasabi.controllers').
 
                 if ($scope.data.showGrid) {
                     $scope.loadCardViewExperiments();
-                    $scope.loadGridDataIfNecessary();
                 }
                 else {
                     $scope.loadExperiments();
