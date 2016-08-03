@@ -28,7 +28,7 @@ import java.util.function.Function;
  * A comparator to sort objects for pagination. To implement a specific comparator,
  * inherit from this class and implement the function {@link java.util.Comparator#compare(Object, Object)} like this:
  * <pre>{@code
- * @literal @Override
+ * {@literal @}Override
  *  public int compare(T left, T right) {
  *      return super.compare(left, right, Property.class);
  *  }
@@ -57,7 +57,7 @@ import java.util.function.Function;
  *
  * <pre>{@code
  * public class ObjectComparator extends PaginationComparator<Object> {
- *     @literal @Override
+ *     {@literal @}Override
  *      public int compare(Object left, Object right) {
  *          return super.compare(left, right, Property.class);
  *      }
@@ -74,12 +74,12 @@ import java.util.function.Function;
  *              this.comparisonFunction = comparisonFunction;
  *          }
  *
- *         @literal @Override
+ *         {@literal @}Override
  *          public Function<Object, ?> getPropertyExtractor() {
  *              return propertyExtractor;
  *          }
  *
- *         @literal @Override
+ *         {@literal @}Override
  *          public BiFunction<?, ?, Integer> getComparisonFunction() {
  *              return comparisonFunction;
  *          }

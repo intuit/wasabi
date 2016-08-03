@@ -60,7 +60,7 @@ public class ExperimentFilter extends PaginationFilter<Experiment> {
      *
      * @see PaginationFilterProperty
      */
-    private enum Property implements PaginationFilterProperty<Experiment> {
+    public enum Property implements PaginationFilterProperty<Experiment> {
         application_name(experiment -> experiment.getApplicationName().toString(), StringUtils::containsIgnoreCase),
         application_name_exact(experiment -> experiment.getApplicationName().toString(), StringUtils::equalsIgnoreCase),
         experiment_name(experiment -> experiment.getLabel().toString(), StringUtils::containsIgnoreCase),

@@ -34,7 +34,7 @@ import java.util.function.Predicate;
  * A filter to filter objects for pagination. To implement a specific filter,
  * inherit from this class and implement the function {@link Predicate#test(Object)} like this:
  * <pre>{@code
- * @literal @Override
+ * {@literal @}Override
  *  public boolean test(T object) {
  *      return super.test(object, Property.class);
  *  }
@@ -82,7 +82,7 @@ import java.util.function.Predicate;
  *
  * <pre>{@code
  * public class ObjectFilter extends PaginationFilter<Object> {
- *     @literal @Override
+ *     {@literal @}Override
  *      public boolean test(Object object) {
  *          return super.test(object, Property.class);
  *      }
@@ -100,12 +100,12 @@ import java.util.function.Predicate;
  *              this.filterPredicate = filterPredicate;
  *          }
  *
- *         @literal @Override
+ *         {@literal @}Override
  *          public Function<Object, ?> getPropertyExtractor() {
  *              return propertyExtractor;
  *          }
  *
- *         @literal @Override
+ *         {@literal @}Override
  *          public BiPredicate<?, String> getFilterPredicate() {
  *              return filterPredicate;
  *          }

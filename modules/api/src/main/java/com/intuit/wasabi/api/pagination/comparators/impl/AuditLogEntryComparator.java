@@ -24,7 +24,6 @@ import java.util.Calendar;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-
 /**
  * Implements the {@link PaginationComparator} for {@link AuditLogEntry} objects.
  */

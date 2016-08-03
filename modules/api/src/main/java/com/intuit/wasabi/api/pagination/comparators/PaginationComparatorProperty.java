@@ -49,12 +49,12 @@ import java.util.function.Function;
  *          this.comparisonFunction = comparisonFunction;
  *      }
  *
- *     @literal @Override
+ *     {@literal @}Override
  *      public Function<Object, ?> getPropertyExtractor() {
  *          return propertyExtractor;
  *      }
  *
- *     @literal @Override
+ *     {@literal @}Override
  *      public BiFunction<?, ?, Integer> getComparisonFunction() {
  *          return comparisonFunction;
  *      }

@@ -54,12 +54,12 @@ import java.util.function.Function;
  *          this.filterPredicate = filterPredicate;
  *      }
  *
- *     @literal @Override
+ *     {@literal @}Override
  *      public Function<Object, ?> getPropertyExtractor() {
  *          return propertyExtractor;
  *      }
  *
- *     @literal @Override
+ *     {@literal @}Override
  *      public BiPredicate<?, String> getFilterPredicate() {
  *          return filterPredicate;
  *      }
