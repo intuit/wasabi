@@ -70,23 +70,11 @@ beerMe() {
 }
 
 start_docker() {
-#  docker-machine status ${project} >/dev/null 2>&1 || docker-machine create -d virtualbox ${project}
-#
-#  dms=$(docker-machine status ${project})
-#
-#  if [ "${dms}" != "Running" ]; then
-#    docker-machine restart ${project} || usage "unable to run command: % docker-machine restart ${project}" 1
-#  fi
-  echo ""
+  docker ps ${project} >/dev/null 2>&1 || (open /Applications/Docker.app; beerMe 10)
 }
 
 stop_docker() {
-#  dms=$(docker-machine status ${project})
-#
-#  if [ "${dms}" == "Running" ]; then
-#    docker-machine stop ${project} || usage "unable to run command: % docker-machine stop ${project}" 1
-#  fi
-  echo ""
+  osascript -e 'quit app "Docker"'
 }
 
 start_container() {
@@ -97,7 +85,7 @@ start_container() {
 
   if [ "${cid}" == "" ]; then
     eval "docker run --net=${docker_network} --name ${1} ${3} -d ${2} ${4}" || \
-      usage "unable to run command: % docker run --name ${1} ${3} -d ${2} ${4}" 1
+      usage "docker run --net=${docker_network} --name ${1} ${3} -d ${2} ${4}" 1
     # todo: ?better way? ... see about moving polling to the app-start
     beerMe 30
   elif [ "${cid}" != "running" ]; then
@@ -167,7 +155,9 @@ start_wasabi() {
   wenv="WASABI_CONFIGURATION=-DnodeHosts=${wcip} -Ddatabase.url.host=${wmip}"
 
 #   fixme: try to reuse the start_container() method instead of 'docker run...' directly; currently a problem with quotes in ${wenv} being passed into container.
-  docker run --net=${docker_network} --name ${project}-main -p 8080:8080 -p 8090:8090 -p 8180:8180 -e "${wenv}" -d ${project}-main
+  docker run --net=${docker_network} --name ${project}-main -p 8080:8080 -p 8090:8090 -p 8180:8180 \
+    -e "${wenv}" -d ${project}-main || \
+    usage "docker run --net=${docker_network} --name ${project}-main -p 8080:8080 -p 8090:8090 -p 8180:8180 -e \"${wenv}\" -d ${project}-main" 1
 
   if [[ "${waittime}" == "ping" ]]; then
     echo -ne "${green}chill'ax ${reset}"
@@ -207,7 +197,7 @@ console_cassandra() {
   wcip=$(docker inspect --format "{{ .NetworkSettings.Networks.${docker_network}.IPAddress }}" ${project}-cassandra)
 
   docker run --net=${docker_network} -it --rm ${cassandra} cqlsh ${wcip} || \
-    usage "unable to run command: % docker run -it --rm ${cassandra} cqlsh ${wcip}" 1
+    usage "unable to run command: docker run --net=${docker_network} -it --rm ${cassandra} cqlsh ${wcip}" 1
 }
 
 start_mysql() {

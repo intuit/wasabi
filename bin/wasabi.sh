@@ -15,7 +15,7 @@
 # limitations under the License.
 ###############################################################################
 
-formulas=("bash" "cask" "git" "maven" "python" "ruby" "node") # "docker")
+formulas=("bash" "cask" "git" "maven" "python" "ruby" "node")
 casks=("java" "docker" "vagrant" "virtualbox")
 build_default=false
 endpoint_default=localhost:8080
