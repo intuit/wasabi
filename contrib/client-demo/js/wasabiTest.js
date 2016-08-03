@@ -43,8 +43,8 @@ $(document)
 																+ expLabel
 																+ "/users/"
 																+ userID,
-														function(data) {
-															response = $.param(data);
+														function(data, textStatus, jqXHR) {
+															response = jqXHR.status + " " + jqXHR.statusText + "<br/>" + $.param(data);
 															bucket = data.assignment;
                                                             $('#responseFromService').html(response);
 														});
@@ -66,10 +66,12 @@ $(document).ready(
 									type : 'post',
 									data : '{"events":[{"name":"BuyClicked"}]}',
 									contentType : "application/json",
-									success: function(xml, textStatus, xhr) {
-                                            console.log(xhr.status);
-                                            $('#responseFromService2').html("HTTP RESPONSE CODE: " + xhr.status);
-                                    }
+									complete: function(xhr, textStatus) {
+										  var msg = xhr.status + " " + xhr.statusText;
+                      console.log(msg);
+                      $('#responseFromService2').html(msg);
+                  },
+
 								});
 
 							});
@@ -107,7 +109,7 @@ var SwitchPages = function(){
 
 		break;
 	}
-	
+
 }
 
 // NEXT-Button. Switch between the views
