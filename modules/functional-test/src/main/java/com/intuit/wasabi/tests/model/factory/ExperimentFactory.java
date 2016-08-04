@@ -89,6 +89,7 @@ public class ExperimentFactory {
     public static Experiment createCompleteExperiment() {
         Experiment experiment = ExperimentFactory.createExperimentWithRule();
         experiment.description = "A sample Experiment description.";
+        experiment.hypothesisIsCorrect = "Sample hypothesis check";
         experiment.results = "Sample experiment results";
         return experiment;
     }
