@@ -22,7 +22,6 @@ usage () {
 
 export JAVA_HOME=${JAVA_HOME:-/usr/local/java}
 export PATH=$JAVA_HOME/bin:$PATH
-profile_default=development
 
 fromPom() {
   case $# in
@@ -40,7 +39,7 @@ exitOnError() {
 
 name=`fromPom . project.name`
 version=`fromPom . project.version`
-profile=${profile:=${profile_default}}
+profile=development
 timestamp=`date -u "+%Y%m%d%H%M%S"`
 modules=main
 daemon=false
