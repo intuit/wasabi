@@ -30,6 +30,11 @@ public class FavoritesImpl implements Favorites {
 
     private final FavoritesRepository favoritesRepository;
 
+    /**
+     * Initializes the default FavoritesImpl.
+     *
+     * @param favoritesRepository the favorites repository
+     */
     @Inject
     public FavoritesImpl(final FavoritesRepository favoritesRepository) {
         this.favoritesRepository = favoritesRepository;

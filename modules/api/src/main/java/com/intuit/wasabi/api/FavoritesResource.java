@@ -36,7 +36,9 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.intuit.wasabi.api.APISwaggerResource.EXAMPLE_AUTHORIZATION_HEADER;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
@@ -44,7 +46,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 
 /**
- * TODO: documentation
+ * Manages favorited experiments.
  */
 @Path("/v1/favorites")
 @Singleton
@@ -57,10 +59,11 @@ public class FavoritesResource {
     private final Authorization authorization;
 
     /**
+     * Instantiates the favorites resource.
      *
-     * @param httpHeader
-     * @param favorites
-     * @param authorization
+     * @param httpHeader the HTTP header
+     * @param favorites the favorites implementation
+     * @param authorization the authorization implementation
      */
     @Inject
     public FavoritesResource(final HttpHeader httpHeader, final Favorites favorites, final Authorization authorization) {
@@ -70,10 +73,11 @@ public class FavoritesResource {
     }
 
     /**
+     * Favorite an experiment.
      *
-     * @param authHeader
-     * @param experimentID
-     * @return
+     * @param authHeader the authorization
+     * @param experiment the experiment JSON
+     * @return the current list of experiments as an HTTP response
      */
     @POST
     @Consumes(APPLICATION_JSON)
@@ -88,29 +92,30 @@ public class FavoritesResource {
             @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
             final String authHeader,
 
-            @ApiParam(value = "experimentID")
-            final Experiment.ID experimentID
+            @ApiParam(value = "id")
+            final Experiment experiment
     ) {
         UserInfo.Username userName = authorization.getUser(authHeader);
 
-        favorites.addFavorite(userName, experimentID);
+        favorites.addFavorite(userName, experiment.getID());
 
         List<Experiment.ID> favoriteList = favorites.getFavorites(userName);
 
-        return httpHeader.headers(Response.Status.OK).entity(favoriteList).build();
+        return httpHeader.headers(Response.Status.OK).entity(prepareResponseEntity(favoriteList)).build();
     }
 
     /**
+     * Returns the current list of favorites for the authenticated user.
      *
-     * @param authHeader
-     * @return
+     * @param authHeader the authorization
+     * @return the current list of experiments as an HTTP response
      */
     @GET
     @ApiOperation(value = "Gets a list of favorites.",
             response = Response.class,
             httpMethod = "DELETE",
             protocols = "https")
-    @Timed(name = "deleteFavorite")
+    @Timed(name = "getFavorites")
     public Response getFavorites(
             @HeaderParam(AUTHORIZATION)
             @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
@@ -120,14 +125,15 @@ public class FavoritesResource {
 
         List<Experiment.ID> favoriteList = favorites.getFavorites(userName);
 
-        return httpHeader.headers(Response.Status.OK).entity(favoriteList).build();
+        return httpHeader.headers(Response.Status.OK).entity(prepareResponseEntity(favoriteList)).build();
     }
 
     /**
+     * Deletes a favorite
      *
-     * @param authHeader
-     * @param experimentID
-     * @return
+     * @param authHeader the authorization
+     * @param experimentID the experiment ID
+     * @return the current list of experiments as an HTTP response
      */
     @DELETE
     @Path("/{experimentID}")
@@ -135,7 +141,7 @@ public class FavoritesResource {
             response = Response.class,
             httpMethod = "DELETE",
             protocols = "https")
-    @Timed(name = "deleteFavorites")
+    @Timed(name = "deleteFavorite")
     public Response deleteFavorites(
             @HeaderParam(AUTHORIZATION)
             @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
@@ -151,6 +157,18 @@ public class FavoritesResource {
 
         List<Experiment.ID> favoriteList = favorites.getFavorites(userName);
 
-        return httpHeader.headers(Response.Status.OK).entity(favoriteList).build();
+        return httpHeader.headers(Response.Status.OK).entity(prepareResponseEntity(favoriteList)).build();
+    }
+
+    /**
+     * Wraps the response list into a map to add it to the JSON key "experimentIDs".
+     *
+     * @param experimentIDs the list of experiment IDs
+     * @return the experimentIDs wrapped in a map.
+     */
+    private Map<String, List<Experiment.ID>> prepareResponseEntity(List<Experiment.ID> experimentIDs) {
+        Map<String, List<Experiment.ID>> responseEntity = new HashMap<>();
+        responseEntity.put("experimentIDs", experimentIDs);
+        return responseEntity;
     }
 }

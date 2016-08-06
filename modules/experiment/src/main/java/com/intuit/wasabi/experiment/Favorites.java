@@ -21,28 +21,31 @@ import com.intuit.wasabi.experimentobjects.Experiment;
 import java.util.List;
 
 /**
- * TODO: documentation
+ * Favorites are realized as lists of Experiment IDs.
  */
 public interface Favorites {
 
     /**
+     * Returns a list of experiment IDs which are favorites for the specified user.
      *
-     * @param username
-     * @return
+     * @param username the user to get the favorites for
+     * @return the favorite IDs
      */
     List<Experiment.ID> getFavorites(UserInfo.Username username);
 
     /**
+     * Adds a new favorite for a user.
      *
-     * @param username
-     * @param experimentID
+     * @param username the user
+     * @param experimentID the new favorite experiment ID
      */
     void addFavorite(UserInfo.Username username, Experiment.ID experimentID);
 
     /**
+     * Deletes a favorite for a user.
      *
-     * @param username
-     * @param experimentID
+     * @param username the user
+     * @param experimentID the favorite to delete
      */
     void deleteFavorite(UserInfo.Username username, Experiment.ID experimentID);
 

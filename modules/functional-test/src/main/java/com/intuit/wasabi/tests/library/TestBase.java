@@ -4053,7 +4053,7 @@ public class TestBase extends ServiceTestBase {
     public List<String> getFavorites() {
         response = apiServerConnector.doGet("favorites");
         assertReturnCode(response, HttpStatus.SC_OK);
-        return response.jsonPath().get();
+        return response.jsonPath().get("experimentIDs");
     }
 
     /**
@@ -4064,9 +4064,11 @@ public class TestBase extends ServiceTestBase {
      * @return a list of all favorite IDs
      */
     public List<String> addFavorite(String experimentID) {
-        response = apiServerConnector.doPost("favorites", experimentID);
+        Map<String, String> favMap = new HashMap<>();
+        favMap.put("id", experimentID);
+        response = apiServerConnector.doPost("favorites", favMap);
         assertReturnCode(response, HttpStatus.SC_OK);
-        return response.jsonPath().get();
+        return response.jsonPath().get("experimentIDs");
     }
 
     /**
@@ -4079,7 +4081,7 @@ public class TestBase extends ServiceTestBase {
     public List<String> deleteFavorite(String experimentID) {
         response = apiServerConnector.doDelete("favorites/" + experimentID);
         assertReturnCode(response, HttpStatus.SC_OK);
-        return response.jsonPath().get();
+        return response.jsonPath().get("experimentIDs");
     }
 
 
