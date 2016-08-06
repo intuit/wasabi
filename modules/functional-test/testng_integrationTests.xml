@@ -91,6 +91,7 @@
     <test name="IntegrationPaginationTests">
         <classes>
             <class name="com.intuit.wasabi.tests.service.PaginationTest" />
+            <class name="com.intuit.wasabi.tests.service.FavoritesTest" />
         </classes>
     </test>
 </suite>

@@ -4039,6 +4039,49 @@ public class TestBase extends ServiceTestBase {
     }
 
 
+    ////////////////////////
+    // favorites endpoint //
+    ////////////////////////
+
+
+    /**
+     * Sends a GET request to favorites.
+     * The response must contain {@link HttpStatus#SC_OK}.
+     *
+     * @return a list of all favorite IDs
+     */
+    public List<String> getFavorites() {
+        response = apiServerConnector.doGet("favorites");
+        assertReturnCode(response, HttpStatus.SC_OK);
+        return response.jsonPath().get();
+    }
+
+    /**
+     * Sends a POST request to favorites.
+     * The response must contain {@link HttpStatus#SC_OK}.
+     *
+     * @param experimentID the experiment's ID to add.
+     * @return a list of all favorite IDs
+     */
+    public List<String> addFavorite(String experimentID) {
+        response = apiServerConnector.doPost("favorites", experimentID);
+        assertReturnCode(response, HttpStatus.SC_OK);
+        return response.jsonPath().get();
+    }
+
+    /**
+     * Sends a DELETE request to favorites.
+     * The response must contain {@link HttpStatus#SC_OK}.
+     *
+     * @param experimentID the experiment's ID to delete.
+     * @return a list of remaining favorite IDs
+     */
+    public List<String> deleteFavorite(String experimentID) {
+        response = apiServerConnector.doDelete("favorites/" + experimentID);
+        assertReturnCode(response, HttpStatus.SC_OK);
+        return response.jsonPath().get();
+    }
+
 
     ///////////
     // OTHER //
