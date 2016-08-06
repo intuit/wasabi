@@ -23,15 +23,19 @@ import com.intuit.wasabi.repository.cassandra.pojo.UserFeedback;
 import java.util.Date;
 
 /**
- * Repository for feedback data 
- * 
+ * Accessor for feedback data 
  */
 @Accessor
 public interface UserFeedbackAccessor {
 
 	/**
-	 * Create user feedback
-	 * @param userFeedback new user feedback
+	 * Create user feedback object
+	 * @param user_id
+	 * @param submitted
+	 * @param score
+	 * @param comments
+	 * @param contact_ok
+	 * @param user_email
 	 */
 	@Query("INSERT INTO user_feedback " +
     "(user_id, submitted, score, comments, contact_okay, user_email) " +
@@ -41,7 +45,7 @@ public interface UserFeedbackAccessor {
 
     /**
      * Get user feedback for user
-     * @param username current user name
+     * @param user_id user id
      * @return user feedback list
      */
     @Query("select * from user_feedback where user_id = ?")
