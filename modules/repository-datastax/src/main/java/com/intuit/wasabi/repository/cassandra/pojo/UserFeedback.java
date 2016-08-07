@@ -39,7 +39,11 @@ public class UserFeedback {
     private Date submitted;
     private int score = 0;
     private String comments= "";
+    
+    @Column(name="contact_okay")
     private boolean contactOkay = false;
+    
+    @Column(name="user_email")
     private String email = "";
 
     public Date getSubmitted() {

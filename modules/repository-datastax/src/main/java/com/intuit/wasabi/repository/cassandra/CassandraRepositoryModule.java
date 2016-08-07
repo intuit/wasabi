@@ -10,6 +10,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public class CassandraRepositoryModule extends AbstractModule {
     public static final String PROPERTY_NAME = "/cassandra_client_config.properties";
+    private static final Logger LOGGER = getLogger(CassandraRepositoryModule.class);
 
     @Override
     protected void configure() {
