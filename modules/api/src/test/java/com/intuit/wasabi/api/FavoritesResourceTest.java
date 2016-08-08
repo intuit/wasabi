@@ -15,7 +15,6 @@
  *******************************************************************************/
 package com.intuit.wasabi.api;
 
-import com.intuit.wasabi.assignmentobjects.User;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authorization.Authorization;
 import com.intuit.wasabi.experiment.Favorites;
