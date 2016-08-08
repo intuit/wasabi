@@ -78,7 +78,7 @@ public class CassandraFeedbackRepository implements FeedbackRepository {
         	Result<com.intuit.wasabi.repository.cassandra.pojo.UserFeedback> result = 
         			userFeedbackAccessor.getUserFeedback(username.getUsername());
         	
-        	feedbacks = makeFeedbacks(result);
+        	feedbacks = makeFeedbacksFromResult(result);
         }
         catch (Exception e) {
         	LOGGER.error("Error while getting feedback for user " + username.getUsername(), e);
@@ -87,7 +87,26 @@ public class CassandraFeedbackRepository implements FeedbackRepository {
         return feedbacks;
      }
 
-	protected List<UserFeedback> makeFeedbacks(
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<UserFeedback> getAllUserFeedback() {
+
+        List<UserFeedback> feedbacks = new ArrayList<>();
+        try {
+        	Result<com.intuit.wasabi.repository.cassandra.pojo.UserFeedback> result = 
+        			userFeedbackAccessor.getAllUserFeedback(); 
+        	feedbacks = makeFeedbacksFromResult(result);
+        }
+        catch (Exception e) {
+        	LOGGER.error("Error while getting all user feedback", e);
+            throw new RepositoryException("Could not retrieve feedback from all users",e);
+        }
+        return feedbacks;
+    }
+
+	protected List<UserFeedback> makeFeedbacksFromResult(
 			Result<com.intuit.wasabi.repository.cassandra.pojo.UserFeedback> result) {
 		
 		List<UserFeedback> feedbacks = new ArrayList<>();
@@ -111,21 +130,4 @@ public class CassandraFeedbackRepository implements FeedbackRepository {
 		return feedback;
 	}
  
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<UserFeedback> getAllUserFeedback() {
-
-        List<UserFeedback> feedbacks = new ArrayList<>();
-        try {
-        	Result<com.intuit.wasabi.repository.cassandra.pojo.UserFeedback> result = userFeedbackAccessor.getAllUserFeedback(); 
-        	feedbacks = makeFeedbacks(result);
-        }
-        catch (Exception e) {
-        	LOGGER.error("Error while getting all user feedback", e);
-            throw new RepositoryException("Could not retrieve feedback from all users",e);
-        }
-        return feedbacks;
-    }
 }
