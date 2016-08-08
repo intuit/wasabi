@@ -52,15 +52,15 @@ public class FavoritesImpl implements Favorites {
      * {@inheritDoc}
      */
     @Override
-    public void addFavorite(UserInfo.Username username, Experiment.ID experimentID) {
-        favoritesRepository.addFavorite(username, experimentID);
+    public List<Experiment.ID> addFavorite(UserInfo.Username username, Experiment.ID experimentID) {
+        return favoritesRepository.addFavorite(username, experimentID);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void deleteFavorite(UserInfo.Username username, Experiment.ID experimentID) {
-        favoritesRepository.deleteFavorite(username, experimentID);
+    public List<Experiment.ID> deleteFavorite(UserInfo.Username username, Experiment.ID experimentID) {
+        return favoritesRepository.deleteFavorite(username, experimentID);
     }
 }
