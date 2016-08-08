@@ -104,35 +104,12 @@ public class DefaultCassandraDriver implements CassandraDriver {
                 //Configure the connection pool's options
                 PoolingOptions poolingOptions = new PoolingOptions()
                         .setPoolTimeoutMillis(20_000)
-                        .setMaxRequestsPerConnection(HostDistance.LOCAL, 10_000) //range  (0, 32768)
+                        .setMaxRequestsPerConnection(HostDistance.LOCAL, 1_000) //range  (0, 32768)
                         .setMaxConnectionsPerHost(HostDistance.LOCAL, getConfiguration().getMaxConnectionsPerHost())
-                        .setMaxRequestsPerConnection(HostDistance.REMOTE, 10_000) //range  (0, 32768)
+                        .setMaxRequestsPerConnection(HostDistance.REMOTE, 1_000) //range  (0, 32768)
                         .setMaxConnectionsPerHost(HostDistance.REMOTE, getConfiguration().getMaxConnectionsPerHost());
                 builder.withPoolingOptions(poolingOptions);
 
-
-     /*           ConnectionPoolConfigurationImpl conf =
-                        new ConnectionPoolConfigurationImpl(getConfiguration().getKeyspaceName() + "Pool")
-                                .setPort(getConfiguration().getPort())
-                                .setMaxConnsPerHost(
-                                        getConfiguration().getMaxConnectionsPerHost())
-                                .setSeeds(getConfiguration().getNodeHosts())
-                                .setMaxOperationsPerConnection(10_000_000)
-                                .setConnectionLimiterMaxPendingCount(20)
-                                .setTimeoutWindow(120_000)
-                                .setConnectionLimiterWindowSize(20_000)
-                                .setMaxTimeoutCount(3)
-                                .setConnectTimeout(20_000)
-                                .setMaxFailoverCount(-1)
-                                .setSocketTimeout(30_000)
-                                .setMaxTimeoutWhenExhausted(10_000)
-                                .setMaxPendingConnectionsPerHost(20)
-                                .setLatencyAwareBadnessThreshold(20)
-                                .setLatencyAwareUpdateInterval(10_000) // 10000
-                                .setLatencyAwareResetInterval(0)
-                                .setLatencyAwareWindowSize(100) // 100
-                                .setLatencyAwareSentinelCompare(100f)
-                                .setInitConnsPerHost(10)*/;
                 // SSL connection
                 if (getConfiguration().useSSL()) {
                     try {
@@ -154,9 +131,9 @@ public class DefaultCassandraDriver implements CassandraDriver {
                         .setCompression(ProtocolOptions.Compression.LZ4);
 
                 Metadata metadata = cluster.getMetadata();
-                LOGGER.info("Connected to cluster: %s\n", metadata.getClusterName());
+                LOGGER.info("Connected to cluster: {}\n", metadata.getClusterName());
                 for (Host host : metadata.getAllHosts()) {
-                    LOGGER.info("Datatacenter: %s; Host: %s; Rack: %s\n",
+                    LOGGER.info("Datatacenter: {}; Host: {}; Rack: {}\n",
                             host.getDatacenter(),
                             host.getAddress(),
                             host.getRack());

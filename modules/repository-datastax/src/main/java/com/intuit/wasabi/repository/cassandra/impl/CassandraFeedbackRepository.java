@@ -121,9 +121,9 @@ public class CassandraFeedbackRepository implements FeedbackRepository {
 	protected UserFeedback makeUserFeedback(
 			com.intuit.wasabi.repository.cassandra.pojo.UserFeedback userFeedback) {
 		UserFeedback feedback = new UserFeedback();
-		feedback.setComments(userFeedback.getComments());
+		feedback.setComments(userFeedback.getComment());
 		feedback.setContactOkay(userFeedback.isContactOkay());
-		feedback.setEmail(userFeedback.getEmail());
+		feedback.setEmail(userFeedback.getUserEmail());
 		feedback.setScore(userFeedback.getScore());
 		feedback.setSubmitted(userFeedback.getSubmitted());
 		feedback.setUsername(Username.valueOf(userFeedback.getUserId()));

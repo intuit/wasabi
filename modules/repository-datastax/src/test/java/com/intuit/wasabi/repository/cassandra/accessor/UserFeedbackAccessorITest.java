@@ -15,8 +15,6 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.cassandra.accessor;
 
-import static org.junit.Assert.*;
-
 import com.datastax.driver.core.Session;
 import com.datastax.driver.mapping.Mapper;
 import com.datastax.driver.mapping.MappingManager;
@@ -28,12 +26,13 @@ import com.google.inject.name.Names;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.repository.cassandra.CassandraRepositoryModule;
 import com.intuit.wasabi.repository.cassandra.pojo.UserFeedback;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.Date;
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
 
 public class UserFeedbackAccessorITest {
     static Session session;
@@ -75,7 +74,7 @@ public class UserFeedbackAccessorITest {
     	assertEquals("submitted should be same", submitted, feedback.getSubmitted());
     	assertEquals("score should be same", score, feedback.getScore());
     	assertEquals("contactOk should be same", contactOk, feedback.isContactOkay());
-    	assertEquals("email should be same", email, feedback.getEmail());
+    	assertEquals("email should be same", email, feedback.getUserEmail());
     }
 
     @Test

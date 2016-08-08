@@ -1,26 +1,23 @@
 package com.intuit.wasabi.repository.cassandra.impl;
 
-import static org.junit.Assert.*;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
-
-import org.mockito.runners.MockitoJUnitRunner;
-
 import com.datastax.driver.mapping.Result;
 import com.intuit.wasabi.authenticationobjects.UserInfo.Username;
 import com.intuit.wasabi.feedbackobjects.UserFeedback;
 import com.intuit.wasabi.repository.RepositoryException;
 import com.intuit.wasabi.repository.cassandra.accessor.UserFeedbackAccessor;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CassandraFeedbackRepositoryTest {
@@ -81,9 +78,9 @@ public class CassandraFeedbackRepositoryTest {
 		userFeedback.setUserId("userid1");
 		userFeedback.setSubmitted(new Date());
 		userFeedback.setScore(2);
-		userFeedback.setComments("comments1");
+		userFeedback.setComment("comments1");
 		userFeedback.setContactOkay(true);
-		userFeedback.setEmail("userId1@example.com");
+		userFeedback.setUserEmail("userId1@example.com");
 
 		when(userFeedbackAccessor.getUserFeedback("userid1")).thenReturn(result);
 		List<com.intuit.wasabi.repository.cassandra.pojo.UserFeedback> userFeedbacks = new ArrayList<>();
@@ -99,7 +96,7 @@ public class CassandraFeedbackRepositoryTest {
     	assertEquals("submitted should be same", userFeedback.getSubmitted(), feedback.getSubmitted());
     	assertEquals("score should be same", userFeedback.getScore(), feedback.getScore());
     	assertEquals("contactOk should be same", userFeedback.isContactOkay(), feedback.isContactOkay());
-    	assertEquals("email should be same", userFeedback.getEmail(), feedback.getEmail());
+    	assertEquals("email should be same", userFeedback.getUserEmail(), feedback.getEmail());
 	}
 
 	@Test
@@ -130,9 +127,9 @@ public class CassandraFeedbackRepositoryTest {
 		userFeedback.setUserId("userid1");
 		userFeedback.setSubmitted(new Date());
 		userFeedback.setScore(2);
-		userFeedback.setComments("comments1");
+		userFeedback.setComment("comments1");
 		userFeedback.setContactOkay(true);
-		userFeedback.setEmail("userId1@example.com");
+		userFeedback.setUserEmail("userId1@example.com");
 
 		when(userFeedbackAccessor.getAllUserFeedback()).thenReturn(result);
 		List<com.intuit.wasabi.repository.cassandra.pojo.UserFeedback> userFeedbacks = new ArrayList<>();
@@ -148,7 +145,7 @@ public class CassandraFeedbackRepositoryTest {
     	assertEquals("submitted should be same", userFeedback.getSubmitted(), feedback.getSubmitted());
     	assertEquals("score should be same", userFeedback.getScore(), feedback.getScore());
     	assertEquals("contactOk should be same", userFeedback.isContactOkay(), feedback.isContactOkay());
-    	assertEquals("email should be same", userFeedback.getEmail(), feedback.getEmail());
+    	assertEquals("email should be same", userFeedback.getUserEmail(), feedback.getEmail());
 	}
 
 	@Test(expected=RepositoryException.class)
