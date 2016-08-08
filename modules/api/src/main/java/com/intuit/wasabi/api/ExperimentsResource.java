@@ -33,11 +33,7 @@ import com.intuit.wasabi.exceptions.BucketNotFoundException;
 import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
 import com.intuit.wasabi.exceptions.TimeFormatException;
 import com.intuit.wasabi.exceptions.TimeZoneFormatException;
-import com.intuit.wasabi.experiment.Buckets;
-import com.intuit.wasabi.experiment.Experiments;
-import com.intuit.wasabi.experiment.Mutex;
-import com.intuit.wasabi.experiment.Pages;
-import com.intuit.wasabi.experiment.Priorities;
+import com.intuit.wasabi.experiment.*;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.BucketList;
@@ -98,11 +94,12 @@ public class ExperimentsResource {
     private Mutex mutex;
     private Pages pages;
     private Priorities priorities;
+    private Favorites favorites;
 
     @Inject
     ExperimentsResource(final Experiments experiments, final EventsExport export, final Assignments assignments,
                         final Authorization authorization, final Buckets buckets, final Mutex mutex,
-                        final Pages pages, final Priorities priorities,
+                        final Pages pages, final Priorities priorities, final Favorites favorites,
                         final @Named("default.time.zone") String defaultTimezone,
                         final @Named("default.time.format") String defaultTimeFormat,
                         final HttpHeader httpHeader, final PaginationHelper<Experiment> paginationHelper) {
@@ -118,13 +115,15 @@ public class ExperimentsResource {
         this.defaultTimeFormat = defaultTimeFormat;
         this.httpHeader = httpHeader;
         this.paginationHelper = paginationHelper;
+        this.favorites = favorites;
     }
 
     /**
      * Returns a list of all experiments, with metadata. Does not return
      * metadata for deleted experiments.
      *
-     * This endpoint is paginated.
+     * This endpoint is paginated. Favorites are sorted to the front.
+     * If {@code per_page == -1}, favorites are ignored and all experiments are returned.
      *
      * @param authorizationHeader the authentication headers
      * @param page the page which should be returned, defaults to 1
@@ -198,10 +197,17 @@ public class ExperimentsResource {
                     }
                 }
             }
+
+            List<Experiment.ID> favoriteList = favorites.getFavorites(userName);
+            authorizedExperiments.getExperiments()
+                    .parallelStream()
+                    .filter(experiment -> favoriteList.contains(experiment.getID()))
+                    .forEach(experiment -> experiment.setFavorite(true));
         }
 
-        Map<String, Object> experimentResponse = paginationHelper.paginate("experiments", authorizedExperiments.getExperiments(),
-                filter, timezoneOffset, sort, page, perPage);
+        Map<String, Object> experimentResponse = paginationHelper.paginate("experiments",
+                authorizedExperiments.getExperiments(), filter, timezoneOffset,
+                (perPage != -1 ? "-favorite," : "") + sort, page, perPage);
 
         return httpHeader.headers().entity(experimentResponse).build();
     }

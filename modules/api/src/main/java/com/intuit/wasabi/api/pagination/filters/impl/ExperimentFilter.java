@@ -72,7 +72,8 @@ public class ExperimentFilter extends PaginationFilter<Experiment> {
         state(Experiment::getState, (state, filter) -> StringUtils.containsIgnoreCase(state.toString(), filter)),
         state_exact(Experiment::getState, ExperimentFilter::stateTest),
         date_constraint_start(Experiment::getStartTime, ExperimentFilter::constraintTest),
-        date_constraint_end(Experiment::getEndTime, ExperimentFilter::constraintTest)
+        date_constraint_end(Experiment::getEndTime, ExperimentFilter::constraintTest),
+        favorite(Experiment::isFavorite, (isFavorite, filter) -> Boolean.parseBoolean(filter) == isFavorite)
         ;
 
         private final Function<Experiment, ?> propertyExtractor;
