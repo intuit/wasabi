@@ -77,11 +77,8 @@ public class CassandraFeedbackRepository implements FeedbackRepository {
         try {
         	Result<com.intuit.wasabi.repository.cassandra.pojo.UserFeedback> result = 
         			userFeedbackAccessor.getUserFeedback(username.getUsername());
-        	for( com.intuit.wasabi.repository.cassandra.pojo.UserFeedback userFeedback : result.all()) {
-        		UserFeedback feedback = makeUserFeedback(userFeedback);
-        		
-        		feedbacks.add(feedback);
-        	}
+        	
+        	feedbacks = makeFeedbacks(result);
         }
         catch (Exception e) {
         	LOGGER.error("Error while getting feedback for user " + username.getUsername(), e);
@@ -89,6 +86,18 @@ public class CassandraFeedbackRepository implements FeedbackRepository {
         }
         return feedbacks;
      }
+
+	protected List<UserFeedback> makeFeedbacks(
+			Result<com.intuit.wasabi.repository.cassandra.pojo.UserFeedback> result) {
+		
+		List<UserFeedback> feedbacks = new ArrayList<>();
+		for( com.intuit.wasabi.repository.cassandra.pojo.UserFeedback userFeedback : result.all()) {
+			UserFeedback feedback = makeUserFeedback(userFeedback);
+			
+			feedbacks.add(feedback);
+		}
+		return feedbacks;
+	}
 
 	protected UserFeedback makeUserFeedback(
 			com.intuit.wasabi.repository.cassandra.pojo.UserFeedback userFeedback) {
@@ -111,11 +120,7 @@ public class CassandraFeedbackRepository implements FeedbackRepository {
         List<UserFeedback> feedbacks = new ArrayList<>();
         try {
         	Result<com.intuit.wasabi.repository.cassandra.pojo.UserFeedback> result = userFeedbackAccessor.getAllUserFeedback(); 
-        	for( com.intuit.wasabi.repository.cassandra.pojo.UserFeedback userFeedback : result.all()) {
-        		UserFeedback feedback = makeUserFeedback(userFeedback);
-        		
-        		feedbacks.add(feedback);
-        	}
+        	feedbacks = makeFeedbacks(result);
         }
         catch (Exception e) {
         	LOGGER.error("Error while getting all user feedback", e);

@@ -35,7 +35,7 @@ import org.junit.Test;
 import java.util.Date;
 import java.util.List;
 
-public class UserFeedbackAccessorTest {
+public class UserFeedbackAccessorITest {
     static Session session;
     static MappingManager manager;
     static UserFeedbackAccessor accessor;
@@ -62,11 +62,13 @@ public class UserFeedbackAccessorTest {
     	String comments = "comments1";
     	boolean contactOk = true;
     	String email = "userId1@example.com";
+    	
     	accessor.createUserFeedback(userId, submitted, score, comments, contactOk, email);
     	
     	Result<UserFeedback> result = accessor.getUserFeedback(userId);
     	List<UserFeedback> feedbacks = result.all();
     	assertEquals("Size should be same", 1, feedbacks.size());
+    	
     	UserFeedback feedback = feedbacks.get(0);
     	
     	assertEquals("user should be same", userId, feedback.getUserId());
@@ -76,4 +78,24 @@ public class UserFeedbackAccessorTest {
     	assertEquals("email should be same", email, feedback.getEmail());
     }
 
+    @Test
+    public void testGetAllFeedback(){
+    	    	
+    	Result<UserFeedback> resultBefore = accessor.getAllUserFeedback();
+    	List<UserFeedback> feedbacksBefore = resultBefore.all();
+    	int feedbackBeforeCount = feedbacksBefore.size();
+    	
+    	Date submitted = new Date();
+    	int score = 2;
+    	String comments = "comments2";
+    	boolean contactOk = true;
+    	String email = "userId1@example.com";
+    	
+    	accessor.createUserFeedback("userIdnew", submitted, score, comments, contactOk, email);
+    	
+    	Result<UserFeedback> resultAfter = accessor.getAllUserFeedback();
+    	List<UserFeedback> feedbacksAfter = resultAfter.all();
+    	assertEquals("Size should be same", feedbackBeforeCount + 1, feedbacksAfter.size());
+    	
+    }
 }

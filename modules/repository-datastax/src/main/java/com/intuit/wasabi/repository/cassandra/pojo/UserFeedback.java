@@ -46,7 +46,16 @@ public class UserFeedback {
     @Column(name="user_email")
     private String email = "";
 
-    public Date getSubmitted() {
+    public UserFeedback(String userId, Date submitted, int score,
+			String comments, boolean contactOkay, String email) {
+		this.userId = userId;
+		this.submitted = submitted;
+		this.score = score;
+		this.comments = comments;
+		this.contactOkay = contactOkay;
+		this.email = email;
+	}
+	public Date getSubmitted() {
         return submitted;
     }
     public void setSubmitted(Date submitted) {
