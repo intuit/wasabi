@@ -21,7 +21,6 @@ mysql=mysql:5.6
 docker_network=${project}_nw
 verify_default=false
 sleep_default=3
-waittime=ping
 red=`tput setaf 9`
 green=`tput setaf 10`
 reset=`tput sgr0`
@@ -78,7 +77,6 @@ stop_docker() {
 }
 
 start_container() {
-#  eval $(docker-machine env wasabi)
   docker network create --driver bridge ${docker_network} >/dev/null 2>&1
 
   cid=$(docker ps -aqf name=${1})
@@ -126,9 +124,6 @@ remove_container() {
   if [ ${container} ]; then
     stop_container ${container} >/dev/null 2>&1
     docker rm -fv ${container} >/dev/null 2>&1
-#  else
-#    docker-machine rm -f ${project} >/dev/null 2>&1
-#    vboxmanage hostonlyif remove vboxnet0 >/dev/null 2>&1
   fi
 }
 
@@ -138,15 +133,14 @@ start_wasabi() {
   id=$(fromPom modules/main development application.name)
   wcip=$(docker inspect --format "{{ .NetworkSettings.Networks.${docker_network}.IPAddress }}" ${project}-cassandra)
   wmip=$(docker inspect --format "{{ .NetworkSettings.Networks.${docker_network}.IPAddress }}" ${project}-mysql)
-#  mip=$(docker-machine ip ${project})
-  mip=localhost
+#  mip=localhost
 
   remove_container ${project}-main
 
   if [ "${verify}" = true ] || ! [ docker inspect ${project}-main >/dev/null 2>&1 ]; then
     echo "${green}${project}: building${reset}"
 
-    sed -i -e "s|\(http://\)localhost\(:8080\)|\1${mip}\2|g" modules/main/target/${id}/content/ui/dist/scripts/config.js 2>/dev/null;
+#    sed -i -e "s|\(http://\)localhost\(:8080\)|\1${mip}\2|g" modules/main/target/${id}/content/ui/dist/scripts/config.js 2>/dev/null;
     docker build -t ${project}-main:${USER}-$(date +%s) -t ${project}-main:latest modules/main/target/${id}
   fi
 
@@ -159,29 +153,27 @@ start_wasabi() {
     -e "${wenv}" -d ${project}-main || \
     usage "docker run --net=${docker_network} --name ${project}-main -p 8080:8080 -p 8090:8090 -p 8180:8180 -e \"${wenv}\" -d ${project}-main" 1
 
-  if [[ "${waittime}" == "ping" ]]; then
-    echo -ne "${green}chill'ax ${reset}"
-    for trial in $(seq 1 20); do
-      curl ${mip}:8080/api/v1/ping >/dev/null 2>&1
-      status=$?
-      [[ ${status} -eq 0 ]] && break
-#      beerMe
-      echo -ne "${green}\xF0\x9F\x8D\xBA ${reset}"
-      sleep 3
-    done
-    [[ ${status} -ne 0 ]] && usage "\nGiving up on the ping. Wasabi might not be running!" 1
-  else
-    beerMe "${waittime}"
-  fi
+  echo -ne "${green}chill'ax ${reset}"
+
+  status=0
+
+  for trial in $(seq 1 20); do
+    wget -q http://localhost:8080/api/v1/ping
+    status=$?
+    [ ${status} -eq 0 ] && break
+    beerMe 3
+  done
+
+  [ ${status} -ne 0 ] && usage "unable to start" 1
 
   cat << EOF
 
 ${green}
 wasabi is operational:
 
-  ui: % open http://${mip}:8080     note: sign in as admin/admin
-  api: % curl -i http://${mip}:8080/api/v1/ping
-  debug: attach debuger to ${mip}:8180
+  ui: % open http://localhost:8080     note: sign in as admin/admin
+  api: % curl -i http://localhost:8080/api/v1/ping
+  debug: attach debuger to localhost:8180
 ${reset}
 EOF
 }
@@ -230,9 +222,6 @@ console_mysql() {
 }
 
 status() {
-#  eval $(docker-machine env ${project}) 2>/dev/null
-#  docker-machine active 2>/dev/null | grep ${project} || usage "start ${project}" 1
-#  eval $(docker-machine env ${project})
   docker ps 2>/dev/null
 }
 
@@ -262,24 +251,21 @@ sleep=${sleep:=${sleep_default}}
 
 [[ $# -eq 0 ]] && usage
 
-#eval $(docker-machine env ${project}) 2>/dev/null
-
 for command in ${@:$OPTIND}; do
   case "${command}" in
-    start) start_cassandra; start_mysql; start_wasabi;;
+    start) command="start:cassandra,mysql,wasabi";&
     start:*) commands=$(echo ${command} | cut -d':' -f 2)
-      (IFS=','; for cmd in ${commands}; do start_${cmd}; done);;
-    stop) stop_container ${project}-main; stop_container ${project}-cassandra; stop_container ${project}-mysql;
-      stop_docker;;
+      (IFS=','; for command in ${commands}; do start_${command}; done);;
+    stop) command="stop:main,cassandra,mysql";&
     stop:*) commands=$(echo ${command} | cut -d':' -f 2)
-      (IFS=','; for cmd in ${commands}; do stop_container ${project}-${cmd/${project}/main}; done);;
-    console) console_cassandra; console_mysql;;
+      (IFS=','; for command in ${commands}; do stop_container ${project}-${command/${project}/main}; done);;
+    console) command="console:cassandra,mysql";&
     console:*) commands=$(echo ${command} | cut -d':' -f 2)
-      (IFS=','; for cmd in ${commands}; do console_${cmd}; done);;
+      (IFS=','; for command in ${commands}; do console_${command}; done);;
     status) status;;
-    remove) remove_container;;
+    remove) command="remove:wasabi,cassandra,mysql";&
     remove:*) commands=$(echo ${command} | cut -d':' -f 2)
-      (IFS=','; for cmd in ${commands}; do remove_container ${project}-${cmd/${project}/main}; done);;
+      (IFS=','; for command in ${commands}; do remove_container ${project}-${command/${project}/main}; done);;
     "") usage "unknown command: ${command}" 1;;
     *) usage "unknown command: ${command}" 1;;
   esac
