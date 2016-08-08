@@ -442,8 +442,6 @@ angular.module('wasabi.controllers').
                     // executed.
                     $scope.data.showGrid = false;
                     localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
-                    // TODO: DO we need this?
-                    //$scope.applySearchSortFilters(false);
                 }
                 else {
                     // Record that we are showing the Card View in the localStorage

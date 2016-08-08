@@ -123,10 +123,10 @@
             </li>
         </ul>
             </div>
-        <div style="text-align:right; clear: both; margin-right: 70px;">
+        <div style="text-align:right; clear: both; margin-right: 70px;" ng-show="cardViewTotalItems > 0">
             <span style="font-size:13px; color:#888; position: relative; top: -20px; left: -5px;">{{cardViewPageRangeStart()}} - {{cardViewPageRangeEnd()}} of {{cardViewTotalItems}}</span>
 
-            <div style="display: inline;" ng-show="cardViewTotalItems > 0">
+            <div style="display: inline;">
                 <pagination total-items="cardViewTotalItems" ng-model="cardViewData.cardViewCurrentPage" ng-change="cardViewPageChanged()" max-size="5" rotate="false"></pagination>
             </div>
         </div>
