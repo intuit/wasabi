@@ -97,9 +97,7 @@ public class FavoritesResource {
     ) {
         UserInfo.Username userName = authorization.getUser(authHeader);
 
-        favorites.addFavorite(userName, experiment.getID());
-
-        List<Experiment.ID> favoriteList = favorites.getFavorites(userName);
+        List<Experiment.ID> favoriteList = favorites.addFavorite(userName, experiment.getID());
 
         return httpHeader.headers(Response.Status.OK).entity(prepareResponseEntity(favoriteList)).build();
     }
@@ -142,7 +140,7 @@ public class FavoritesResource {
             httpMethod = "DELETE",
             protocols = "https")
     @Timed(name = "deleteFavorite")
-    public Response deleteFavorites(
+    public Response deleteFavorite(
             @HeaderParam(AUTHORIZATION)
             @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
             final String authHeader,
@@ -153,9 +151,7 @@ public class FavoritesResource {
     ) {
         UserInfo.Username userName = authorization.getUser(authHeader);
 
-        favorites.deleteFavorite(userName, experimentID);
-
-        List<Experiment.ID> favoriteList = favorites.getFavorites(userName);
+        List<Experiment.ID> favoriteList = favorites.deleteFavorite(userName, experimentID);
 
         return httpHeader.headers(Response.Status.OK).entity(prepareResponseEntity(favoriteList)).build();
     }

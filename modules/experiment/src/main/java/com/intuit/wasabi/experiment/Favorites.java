@@ -29,7 +29,7 @@ public interface Favorites {
      * Returns a list of experiment IDs which are favorites for the specified user.
      *
      * @param username the user to get the favorites for
-     * @return the favorite IDs
+     * @return the list offavorite IDs
      */
     List<Experiment.ID> getFavorites(UserInfo.Username username);
 
@@ -38,15 +38,17 @@ public interface Favorites {
      *
      * @param username the user
      * @param experimentID the new favorite experiment ID
+     * @return the new list of favorite IDs
      */
-    void addFavorite(UserInfo.Username username, Experiment.ID experimentID);
+    List<Experiment.ID> addFavorite(UserInfo.Username username, Experiment.ID experimentID);
 
     /**
      * Deletes a favorite for a user.
      *
      * @param username the user
      * @param experimentID the favorite to delete
+     * @return the new list of favorite IDs
      */
-    void deleteFavorite(UserInfo.Username username, Experiment.ID experimentID);
+    List<Experiment.ID> deleteFavorite(UserInfo.Username username, Experiment.ID experimentID);
 
 }
