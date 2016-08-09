@@ -63,6 +63,13 @@ public class DatabaseFavoritesRepository implements FavoritesRepository {
      */
     @Override
     public List<Experiment.ID> getFavorites(UserInfo.Username username) {
+        // Remove favorites of now deleted experiments
+        String updateSQL = "UPDATE user_experiment_properties INNER JOIN experiment "
+                         + "ON user_experiment_properties.experiment_id = experiment.id "
+                         + "SET user_experiment_properties.is_favorite = 0 "
+                         + "WHERE experiment.state = 'DELETED' AND user_experiment_properties.is_favorite = 1;";
+        transactionFactory.newTransaction().update(updateSQL);
+
         String sql = "SELECT experiment_id FROM user_experiment_properties WHERE user_id = ? AND is_favorite = 1;";
         List list = transactionFactory.newTransaction().select(sql, username.toString());
 
