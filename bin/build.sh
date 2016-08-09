@@ -18,6 +18,7 @@
 profile_default=development
 build_default=false
 test_default=false
+wasabi_os_default=OSX
 
 usage() {
   [ "$1" ] && echo "error: ${1}"
@@ -122,7 +123,7 @@ chmod 755 ${home}/${id}/bin/run
 chmod 755 ${home}/${id}/entrypoint.sh
 sed -i '' -e "s/chpst -u [^:]*:[^ ]* //" ${home}/${id}/bin/run 2>/dev/null
 
-if [ "${build}" = true ] && [ "$OS" == "OSX" ]; then
+if [ "${build}" = true ] && [ "${WASABI_OS}" == "${wasabi_os_default}" ]; then
   brew list node
   if [[ $? -eq 1 ]]; then
   	echo "Node.js is not installed. Installing Node.js packages..."

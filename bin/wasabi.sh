@@ -15,7 +15,7 @@
 # limitations under the License.
 ###############################################################################
 
-formulas=("bash" "cask" "git" "maven" "python" "ruby" "node")
+formulas=("bash" "cask" "git" "maven" "wget" "python" "ruby" "node")
 casks=("java" "docker" "vagrant" "virtualbox")
 endpoint_default=localhost:8080
 verify_default=false
@@ -23,10 +23,8 @@ sleep_default=30
 red=`tput setaf 9`
 green=`tput setaf 10`
 reset=`tput sgr0`
-
-if [ -z "$OS" ]; then
-  export OS="OSX"
-fi
+wasabi_os_default=OSX
+export WASABI_OS=${WASABI_OS:-${wasabi_os_default}}
 
 usage() {
   [ "${1}" ] && echo "${red}error: ${1}${reset}"
@@ -120,23 +118,9 @@ start() {
   ./bin/container.sh -v ${verify} start${1:+:$1}
 }
 
-test() {
-  if [ ${endpoint} == ${endpoint_default} ]; then
-    endpoint=localhost:8080
-    [[ $? -ne 0 ]] && endpoint=${endpoint_default}
-  fi
-
-  sleepTime=${1:-sleep}
-  cntr=0
-
-  while (( cntr < ${sleepTime} )); do
-    echo "${endpoint}/api/v1/ping"
-    curl ${endpoint}/api/v1/ping >/dev/null 2>&1
-    [[ $? -eq 0 ]] && break
-    [[ ${cntr} < ${sleepTime} ]] && usage "unable to ping application: ${endpoint}/api/v1/ping" 1
-    cntr=$(($cntr + 3))
-    beerMe 3
-  done
+test_api() {
+  wget -q --spider --tries=20 --waitretry=3 http://${endpoint}/api/v1/ping
+  [ $? -ne 0 ] && usage "unable to start" 1
 
   [ ! -e ./modules/functional-test/target/wasabi-functional-test-*-SNAPSHOT-jar-with-dependencies.jar ] && \
     build true ${verify}
@@ -194,7 +178,7 @@ package() {
 
   build true false ${profile}
 
-  if [ "$OS" == "OSX" ]; then
+  if [ "${WASABI_OS}" == "${wasabi_os_default}" ]; then
     (export VAGRANT_CWD=./bin; vagrant up)
     (export VAGRANT_CWD=./bin; vagrant ssh -c "cd wasabi; mvn dependency:resolve")
   else
@@ -204,7 +188,7 @@ package() {
 
   beerMe 10
 
-  if [ "$OS" == "OSX" ]; then
+  if [ "${WASABI_OS}" == "${wasabi_os_default}" ]; then
     (export VAGRANT_CWD=./bin; vagrant ssh -c "cd wasabi; ./bin/fpm.sh -p ${profile}")
   else
     ./bin/fpm.sh -p ${profile}
@@ -231,7 +215,7 @@ package() {
     done; \
     sed -i '' -e "s|http://localhost:8080|${server}|g" target/constants.json 2>/dev/null; \
     sed -i '' -e "s|VERSIONLOC|${version}|g" target/app/index.html 2>/dev/null; \
-    if [ "$OS" == "OSX" ]; then \
+    if [ "${WASABI_OS}" == "${wasabi_os_default}" ]; then \
     (cd target; \
       npm install; \
       bower install; \
@@ -252,7 +236,7 @@ package() {
       sed -i '' -e "s|\${application.http.content.directory}|${content}|g" target/build/${pkg}/before-remove.sh 2>/dev/null; \
     done)
 
-  if [ "$OS" == "OSX" ]; then
+  if [ "${WASABI_OS}" == "${wasabi_os_default}" ]; then
     (export VAGRANT_CWD=./bin; vagrant ssh -c "cd wasabi/modules/ui; ./bin/fpm.sh -n ${name} -v ${version} -p ${profile}")
     (export VAGRANT_CWD=./bin; vagrant halt)
   fi
@@ -309,7 +293,7 @@ for command in ${@:$OPTIND}; do
     start) command="start:cassandra,mysql,wasabi";&
     start:*) commands=$(echo ${command} | cut -d ':' -f 2)
       (IFS=','; for command in ${commands}; do start ${command}; done);;
-    test) test;;
+    test) test_api;;
     stop) command="stop:wasabi,mysql,cassandra";&
     stop:*) commands=$(echo ${command} | cut -d ':' -f 2)
       (IFS=','; for command in ${commands}; do stop ${command}; done);;

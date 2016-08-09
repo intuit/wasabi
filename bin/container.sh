@@ -133,7 +133,6 @@ start_wasabi() {
   id=$(fromPom modules/main development application.name)
   wcip=$(docker inspect --format "{{ .NetworkSettings.Networks.${docker_network}.IPAddress }}" ${project}-cassandra)
   wmip=$(docker inspect --format "{{ .NetworkSettings.Networks.${docker_network}.IPAddress }}" ${project}-mysql)
-#  mip=localhost
 
   remove_container ${project}-main
 
@@ -155,16 +154,8 @@ start_wasabi() {
 
   echo -ne "${green}chill'ax ${reset}"
 
-  status=0
-
-  for trial in $(seq 1 20); do
-    wget -q http://localhost:8080/api/v1/ping
-    status=$?
-    [ ${status} -eq 0 ] && break
-    beerMe 3
-  done
-
-  [ ${status} -ne 0 ] && usage "unable to start" 1
+  wget -q --spider --tries=20 --waitretry=3 http://localhost:8080/api/v1/ping
+  [ $? -ne 0 ] && usage "unable to start" 1
 
   cat << EOF
 
