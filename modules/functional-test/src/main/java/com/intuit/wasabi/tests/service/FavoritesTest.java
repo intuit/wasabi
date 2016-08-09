@@ -39,17 +39,17 @@ public class FavoritesTest extends TestBase {
     /**
      * Sets up 12 experiments to test favorites properly.
      */
-    @BeforeClass
+    @BeforeClass(dependsOnGroups = {"ping", "basicExperimentTests"})
     public void setup() {
         cleanup();
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 3; i++) {
             experimentList.add(postExperiment(
                     ExperimentFactory.createCompleteExperiment()
                             .setLabel(String.format(experimentPrefix + "Exp%02d", i))));
         }
     }
 
-    @Test(dependsOnGroups = {"ping"})
+    @Test
     public void t_getEmptyFavorites() {
         List<String> favorites = getFavorites();
         Assert.assertTrue(favorites.isEmpty(), "Favorites are not empty!");
@@ -80,7 +80,23 @@ public class FavoritesTest extends TestBase {
                 "The favorites don't contain the second ID (index 1) anymore.");
     }
 
-    @Test(dependsOnMethods = {"t_getFavorites"})
+    @Test(dependsOnMethods = {"t_addFavorites", "t_getFavorites"})
+    public void t_getFavoritesDeletedExperiment() {
+        addFavorite(experimentList.get(2).id);
+        deleteExperiment(experimentList.get(2));
+
+        List<String> favorites = getFavorites();
+
+        Assert.assertEquals(favorites.size(), 2, "There should only be two favorites!");
+        Assert.assertTrue(favorites.contains(experimentList.get(0).id),
+                "The favorites don't contain the first ID (index 0) anymore.");
+        Assert.assertTrue(favorites.contains(experimentList.get(1).id),
+                "The favorites don't contain the second ID (index 1) anymore.");
+        Assert.assertFalse(favorites.contains(experimentList.get(2).id),
+                "The favorites do contain the third ID (index 2), which is wrong.");
+    }
+
+    @Test(dependsOnMethods = {"t_getFavorites", "t_getFavoritesDeletedExperiment"})
     public void t_deleteOneFavorite() {
         List<String> favorites = deleteFavorite(experimentList.get(0).id);
         Assert.assertEquals(favorites.size(), 1, "There is not only one remaining favorite!");
@@ -88,7 +104,6 @@ public class FavoritesTest extends TestBase {
                 "The favorites still contain the first ID (index 0).");
         Assert.assertTrue(favorites.contains(experimentList.get(1).id),
                 "The favorites don't contain the second ID (index 1) anymore.");
-
     }
 
     @Test(dependsOnMethods = {"t_deleteOneFavorite"})
