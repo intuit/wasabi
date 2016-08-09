@@ -44,6 +44,7 @@ angular.module('wasabi.controllers').
             $scope.groupedItems = [];
             $scope.filteredItems = [];
             $scope.currentPage = StateFactory.currentExperimentsPage;
+            $scope.initialPage = StateFactory.currentExperimentsPage;
             $scope.totalItems = 0;
             $scope.hasAnyCreatePermissions = false;
             $scope.noExperiments = false;
@@ -59,6 +60,7 @@ angular.module('wasabi.controllers').
             $scope.cardViewTotalItems = 0;
             $scope.cardViewItemsPerPage = 8;
 
+            $scope.initialCardViewPage = StateFactory.currentCardViewPage;
             $scope.cardViewData = {
                 cardViewCurrentPage: StateFactory.currentCardViewPage
             };
@@ -121,9 +123,6 @@ angular.module('wasabi.controllers').
                 }).$promise.then(function (appInfo) {
                         if (appInfo && appInfo.totalUsers && appInfo.totalUsers.bucketAssignments) {
                             experiment.numUsers = appInfo.totalUsers.bucketAssignments;
-                        }
-                        if (experiment.isRapidExperiment) {
-                            experiment.progressRollover = (experiment.userCap - experiment.progressDaysLeft) + ' user assignments still needed';
                         }
                         if (appInfo && appInfo.assignments && appInfo.assignments.length > 0) {
                             // Get bucket-level assignment counts.
@@ -666,7 +665,14 @@ angular.module('wasabi.controllers').
             };
 
             $scope.pageChanged = function() {
-                StateFactory.currentExperimentsPage = $scope.currentPage;
+                if ($scope.initialPage > 1) {
+                    $scope.currentPage = $scope.initialPage;
+                    $scope.initialPage = 0;
+                    return false;
+                }
+                else {
+                    StateFactory.currentExperimentsPage = $scope.currentPage;
+                }
 
                 // The widget has updated the currentPage member.  By simply triggering the code to get the
                 // list, we should update the page.
@@ -674,7 +680,14 @@ angular.module('wasabi.controllers').
             };
 
             $scope.cardViewPageChanged = function() {
-                StateFactory.currentCardViewPage = $scope.cardViewData.cardViewCurrentPage;
+                if ($scope.initialCardViewPage > 1) {
+                    $scope.cardViewData.cardViewCurrentPage = $scope.initialCardViewPage;
+                    $scope.initialCardViewPage = 0;
+                    return false;
+                }
+                else {
+                    StateFactory.currentCardViewPage = $scope.cardViewData.cardViewCurrentPage;
+                }
 
                 // The widget has updated the currentPage member.  By simply triggering the code to get the
                 // logs list, we should update the page.

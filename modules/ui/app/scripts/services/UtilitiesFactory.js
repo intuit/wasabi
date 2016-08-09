@@ -7,8 +7,8 @@
 // page success message before the first one has faded out.
 var globalPageSuccessMessageFadeOutTimer = null;
 
-angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$state', 'AuthFactory', '$rootScope', 'AUTH_EVENTS', 'PERMISSIONS', 'USER_ROLES', '$filter', 'AuthzFactory', 'BucketsFactory', 'DialogsFactory', 'ExperimentsFactory', 'WasabiFactory', '$modal', '$injector', 'FavoritesFactory',
-    function (Session, $state, AuthFactory, $rootScope, AUTH_EVENTS, PERMISSIONS, USER_ROLES, $filter, AuthzFactory, BucketsFactory, DialogsFactory, ExperimentsFactory, WasabiFactory, $modal, $injector, FavoritesFactory) {
+angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$state', 'AuthFactory', '$rootScope', 'AUTH_EVENTS', 'PERMISSIONS', 'USER_ROLES', '$filter', 'AuthzFactory', 'BucketsFactory', 'DialogsFactory', 'ExperimentsFactory', 'WasabiFactory', '$modal', '$injector', 'FavoritesFactory', 'StateFactory',
+    function (Session, $state, AuthFactory, $rootScope, AUTH_EVENTS, PERMISSIONS, USER_ROLES, $filter, AuthzFactory, BucketsFactory, DialogsFactory, ExperimentsFactory, WasabiFactory, $modal, $injector, FavoritesFactory, StateFactory) {
         return {
             // generate state image url
             stateImgUrl: function (state) {
@@ -61,6 +61,9 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                 }
                 if (label.toLowerCase() !== 'experiments') {
                     localStorage.removeItem('wasabiLastSearch'); // Clear the remembered search value
+                    // Clear the remembered page value
+                    StateFactory.currentExperimentsPage = 1;
+                    StateFactory.currentCardViewPage = 1;
                 }
                 $('.main li').removeClass('sel');
                 $('.main li a:contains(' + label + ')').parent().addClass('sel');
