@@ -138,7 +138,7 @@ resource() {
     case "${1}" in
       ui) [ ! -f ./modules/ui/dist/index.html ] && build
         ./bin/wasabi.sh status >/dev/null 2>&1 || ./bin/wasabi.sh start
-        open http://localhost:8080/index.html;;
+        open http://localhost:8080;;
       api) [[ ! -f ./modules/swagger-ui/target/swaggerui/index.html || \
         ! -f ./modules/api/target/generated/swagger-ui/swagger.json ]] && build
         ./bin/wasabi.sh status >/dev/null 2>&1 || ./bin/wasabi.sh start:docker

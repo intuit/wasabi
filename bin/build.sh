@@ -75,6 +75,8 @@ module=main
 [[ "${build}" != "true" && "${build}" != "false" ]] && usage "invalid build parameter" 1
 [[ "${test}" != "true" && "${test}" != "false" ]] && usage "invalid test parameter" 1
 
+[ ! -e ./modules/main/target/wasabi-main-*-SNAPSHOT-development-all.jar ] && build=true
+
 if [[ "${build}" != false || "${test}" != false ]]; then
   package=
   tests=
