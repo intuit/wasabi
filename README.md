@@ -72,7 +72,7 @@ Now that we have the necessary tools in place, let's move on to build and start 
 command to verify the build:
 
 ```bash
-% ./bin/wasabi.sh --build true start
+% ./bin/wasabi.sh build start
 ...
 wasabi is operational:
 
@@ -208,7 +208,7 @@ The following developer resources are available:
 Alas, all good things must come to an end. Let's clean things up a bit stop the newly created Wasabi stack:
 
 At this point in time, we now have all the requisite tools installed, and subsequent invocations of Wasabi will
-start up much more quickly. Additionally, there is no further need to include the _-b true_ or _--build true_ option.
+start up much more quickly.
 
 ```bash
 % ./bin/wasabi.sh stop
@@ -224,7 +224,6 @@ Further, there are a number of additional wasabi.sh options available you should
   usage: wasabi.sh [options] [commands]
   
   options:
-    -b | --build [ true | false ]          : build; default: false
     -e | --endpoint [ host:port ]          : api endpoint; default: localhost:8080
     -v | --verify [ true | false ]         : verify installation configuration; default: false
     -s | --sleep [ sleep-time ]            : sleep/wait time in seconds; default: 30
@@ -232,6 +231,7 @@ Further, there are a number of additional wasabi.sh options available you should
   
   commands:
     bootstrap                              : install dependencies
+    build                                  : build project
     start[:cassandra,mysql,wasabi]         : start all, cassandra, mysql, wasabi
     test                                   : test wasabi
     stop[:wasabi,cassandra,mysql]          : stop all, wasabi, cassandra, mysql
