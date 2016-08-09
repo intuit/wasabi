@@ -4,8 +4,8 @@
 
 angular.module('wasabi.controllers')
     .controller('ExperimentModalCtrl',
-        ['$scope', '$modalInstance', '$modal', 'ExperimentsFactory', 'experiments', 'experiment', 'UtilitiesFactory', '$rootScope', 'readOnly', 'applications', 'DialogsFactory', 'RuleEditFactory', 'ConfigFactory', 'Session', 'AuthzFactory', 'ApplicationsFactory', 'PERMISSIONS', '$cookies', 'openedFromModal', 'EmailFactory',
-            function ($scope, $modalInstance, $modal, ExperimentsFactory, experiments, experiment, UtilitiesFactory, $rootScope, readOnly, applications, DialogsFactory, RuleEditFactory, ConfigFactory, Session, AuthzFactory, ApplicationsFactory, PERMISSIONS, $cookies, openedFromModal, EmailFactory) {
+        ['$scope', '$modalInstance', '$modal', 'ExperimentsFactory', 'experiments', 'experiment', 'UtilitiesFactory', '$rootScope', 'readOnly', 'applications', 'DialogsFactory', 'RuleEditFactory', 'ConfigFactory', 'Session', 'AuthzFactory', 'ApplicationsFactory', 'PERMISSIONS', '$cookies', 'openedFromModal', 'EmailFactory', 'favoritesObj',
+            function ($scope, $modalInstance, $modal, ExperimentsFactory, experiments, experiment, UtilitiesFactory, $rootScope, readOnly, applications, DialogsFactory, RuleEditFactory, ConfigFactory, Session, AuthzFactory, ApplicationsFactory, PERMISSIONS, $cookies, openedFromModal, EmailFactory, favoritesObj) {
 
                 UtilitiesFactory.trackEvent('loadedDialog',
                     {key: 'dialog_name', value: 'createOrEditExperiment'});
@@ -33,6 +33,7 @@ angular.module('wasabi.controllers')
                 $scope.bucketTotalsValid = false;
                 $scope.rulesChangedNotSaved = !($scope.experiment && $scope.experiment.rule && $scope.experiment.rule.length > 0);
                 $scope.plugins = $rootScope.plugins;
+                $scope.favoritesObj = favoritesObj;
 
                 $scope.tabs = [
                     {active: true},

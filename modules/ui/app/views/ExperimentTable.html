@@ -65,7 +65,7 @@
         <ul ng-if="experiments.length > 0" id="exprSummary">
             <li ng-repeat="experiment in cardViewExperiments" ng-class="{favorite: experiment.isFavorite}">
                 <div class="summaryHead">
-                    <a href="#" favorites-star favorites-star-application-name="experiment.applicationName" favorites-star-experiment-name="experiment.label" ng-attr-is-favorite="{{experiment.isFavorite}}" after-favorite-func="handleCardStarAnimation" class="star" title="Mark as Favorite"></a>
+                    <a href="#" favorites-star favorites-star-experiment-id="experiment.id" favorites-star-favorites-object="favoritesObj" ng-attr-is-favorite="{{experiment.isFavorite}}" after-favorite-func="handleCardStarAnimation" class="star" title="Mark as Favorite"></a>
                     <label-link-content state="{{experiment.state}}" href="{{customHref}}" ng-click="hasUpdatePermission(experiment) && experiment.state === 'DRAFT' && openExperimentModal(experiment)" class="exprWrapper" exp-id="{{experiment.id}}" custom-tooltip="{{experiment.homePageTooltip}}" has-update="{{hasUpdatePermission(experiment)}}" read-only="{{!hasUpdatePermission(experiment)}}">
                         <h3>{{experiment.applicationName}}</h3>
                         <h2>{{experiment.label}}</h2>
@@ -127,7 +127,7 @@
             <span style="font-size:13px; color:#888; position: relative; top: -20px; left: -5px;">{{cardViewPageRangeStart()}} - {{cardViewPageRangeEnd()}} of {{cardViewTotalItems}}</span>
 
             <div style="display: inline;">
-                <pagination total-items="cardViewTotalItems" ng-model="cardViewData.cardViewCurrentPage" ng-change="cardViewPageChanged()" max-size="5" rotate="false"></pagination>
+                <pagination total-items="cardViewTotalItems" items-per-page="8" ng-model="cardViewData.cardViewCurrentPage" ng-change="cardViewPageChanged()" max-size="5" rotate="false"></pagination>
             </div>
         </div>
     </div>
@@ -158,7 +158,7 @@
                 </tr>
                 <tr ng-repeat="experiment in experiments">
                     <td ng-class="{favorite: experiment.isFavorite}">
-                        <a href="#" favorites-star favorites-star-application-name="experiment.applicationName" favorites-star-experiment-name="experiment.label" ng-attr-is-favorite="{{experiment.isFavorite}}" favorites-star-parent-tag="td" after-favorite-func="handleListStarAnimation" class="star"></a>
+                        <a href="#" favorites-star favorites-star-experiment-id="experiment.id" favorites-star-favorites-object="favoritesObj" ng-attr-is-favorite="{{experiment.isFavorite}}" favorites-star-parent-tag="td" after-favorite-func="handleListStarAnimation" class="star"></a>
                     </td>
                     <td class="app">
                         <span title="{{experiment.applicationName}}">{{experiment.applicationName}}</span>
@@ -209,7 +209,7 @@
             <span style="font-size:13px; color:#888; position: relative; top: -20px; left: -5px;">{{pageRangeStart()}} - {{pageRangeEnd()}} of {{totalItems}}</span>
 
             <div style="display: inline;" ng-show="totalItems > 0">
-                <pagination total-items="totalItems" ng-model="currentPage" ng-change="pageChanged()" max-size="5" rotate="false"></pagination>
+                <pagination total-items="totalItems" items-per-page="10" ng-model="currentPage" ng-change="pageChanged()" max-size="5" rotate="false"></pagination>
             </div>
         </div>
     </div>

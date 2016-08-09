@@ -26,6 +26,9 @@ angular.module('wasabi.controllers').
             $scope.showingActionRates = true;
             $scope.plugins = $rootScope.plugins;
             $scope.supportEmail = supportEmail;
+            $scope.favoritesObj = {
+                favorites: null
+            };
 
             $scope.headers = [];
 
@@ -212,9 +215,15 @@ angular.module('wasabi.controllers').
 
                     $scope.readOnly = ($scope.readOnly || experiment.state.toLowerCase() === 'terminated');
 
-                    // Retrieve whether or not this is a favorite from local storage.
-                    var faves = UtilitiesFactory.retrieveFavorites();
-                    $scope.experiment.isFavorite = (faves.indexOf($scope.experiment.applicationName + '|' + $scope.experiment.label) >= 0);
+                    // Retrieve whether or not this is a favorite.
+                    UtilitiesFactory.retrieveFavorites().$promise
+                    .then(function(faves) {
+                        $scope.favoritesObj.favorites = (faves && faves.experimentIDs ? faves.experimentIDs : []);
+                        $scope.experiment.isFavorite = ($scope.favoritesObj.favorites.indexOf($scope.experiment.id) >= 0);
+                    },
+                        function(response) {
+                            UtilitiesFactory.handleGlobalError(response, 'The list of favorites could not be retrieved.');
+                    });
 
                     $scope.data.descriptionLength = (experiment.description ? experiment.description.length : 0);
 

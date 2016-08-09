@@ -5,8 +5,8 @@
 'use strict';
 
 angular.module('wasabi.controllers').
-    controller('ExperimentsCtrl', ['$scope', '$filter', '$http', '$timeout', 'ExperimentsFactory', '$modal', 'UtilitiesFactory', '$rootScope', 'StateFactory', 'DialogsFactory', 'AUTH_EVENTS', 'Session', 'PERMISSIONS', 'ConfigFactory', 'AuthzFactory', 'USER_ROLES', 'ApplicationsFactory', 'BucketsFactory', 'ExperimentStatisticsFactory', 'ApplicationStatisticsFactory',
-        function ($scope, $filter, $http, $timeout, ExperimentsFactory, $modal, UtilitiesFactory, $rootScope, StateFactory, DialogsFactory, AUTH_EVENTS, Session, PERMISSIONS, ConfigFactory, AuthzFactory, USER_ROLES, ApplicationsFactory, BucketsFactory, ExperimentStatisticsFactory, ApplicationStatisticsFactory) {
+    controller('ExperimentsCtrl', ['$scope', '$filter', '$http', '$timeout', 'ExperimentsFactory', '$modal', 'UtilitiesFactory', '$rootScope', 'StateFactory', 'DialogsFactory', 'AUTH_EVENTS', 'Session', 'PERMISSIONS', 'ConfigFactory', 'AuthzFactory', 'USER_ROLES', 'ApplicationsFactory', 'BucketsFactory', 'ExperimentStatisticsFactory', 'ApplicationStatisticsFactory', 'FavoritesFactory',
+        function ($scope, $filter, $http, $timeout, ExperimentsFactory, $modal, UtilitiesFactory, $rootScope, StateFactory, DialogsFactory, AUTH_EVENTS, Session, PERMISSIONS, ConfigFactory, AuthzFactory, USER_ROLES, ApplicationsFactory, BucketsFactory, ExperimentStatisticsFactory, ApplicationStatisticsFactory, FavoritesFactory) {
 
              var today = moment().format('MM/DD/YYYY');
 
@@ -44,10 +44,13 @@ angular.module('wasabi.controllers').
             $scope.groupedItems = [];
             $scope.filteredItems = [];
             $scope.currentPage = StateFactory.currentExperimentsPage;
-            $scope.totalItems = $scope.filteredItems.length;
+            $scope.totalItems = 0;
             $scope.hasAnyCreatePermissions = false;
             $scope.noExperiments = false;
             $scope.applicationsLoaded = false;
+            $scope.favoritesObj = {
+                favorites: null
+            };
 
             $scope.experiments = [];
             $scope.applications = [];
@@ -70,17 +73,6 @@ angular.module('wasabi.controllers').
             $scope.help = ConfigFactory.help;
 
             // *** Home page code
-
-            $scope.moveExperiment = function(nextFave, tmpExperiments, experiments) {
-                // Find this one in tmpExperiments
-                var pos = tmpExperiments.map(function(e) { return e.applicationName + '|' + e.label; }).indexOf(nextFave);
-                if (pos >= 0) {
-                    // The item in the favorites cookie exists in the experiments list,
-                    // remove the matching item from tmpExperiments and add it to $scope.experiments
-                    experiments.push(tmpExperiments.splice(pos, 1)[0]);
-                }
-                return experiments;
-            };
 
             $scope.actionRate = function(bucketLabel, buckets) {
                 return UtilitiesFactory.actionRate(bucketLabel, buckets);
@@ -239,6 +231,30 @@ angular.module('wasabi.controllers').
                 }
             };
 
+            $scope.doFavorites = function(experimentsList, forceGet) {
+                function applyFavorites(experimentsList) {
+                    if ($scope.favoritesObj.favorites && $scope.favoritesObj.favorites.length && experimentsList) {
+                        for (var i = 0; i < experimentsList.length; i++) {
+                            experimentsList[i].isFavorite = ($scope.favoritesObj.favorites.indexOf(experimentsList[i].id) >= 0);
+                        }
+                    }
+                }
+
+                if (forceGet) {
+                    FavoritesFactory.query().$promise
+                    .then(function(faves) {
+                        $scope.favoritesObj.favorites = (faves && faves.experimentIDs ? faves.experimentIDs : []);
+                        applyFavorites(experimentsList);
+                    },
+                        function(response) {
+                            UtilitiesFactory.handleGlobalError(response, 'The list of favorites could not be retrieved.');
+                    });
+                }
+                else {
+                    applyFavorites(experimentsList);
+                }
+            };
+
             /*
             This function sets up the call to get the list of experiments.  It sets up the query
             parameters to do the sorting, filtering and pagination.  It uses the lastSearchWasSimple
@@ -319,6 +335,14 @@ angular.module('wasabi.controllers').
                             }
                         }
                     });
+
+                    if (!$scope.favoritesObj.favorites || $scope.favoritesObj.favorites.length === 0) {
+                        $scope.favoritesObj.favorites = [];
+                        $scope.doFavorites($scope.experiments, true);
+                    }
+                    else {
+                        $scope.doFavorites($scope.experiments, false);
+                    }
 
                     // Get the list of applications for passing down to the create/edit experiment dialog.
                     // We also need the list of all applications they have any (specifically, read) access to, so
@@ -407,6 +431,14 @@ angular.module('wasabi.controllers').
                     }
                     $scope.cardViewExperiments = experiments;
 
+                    if (!$scope.favoritesObj.favorites || $scope.favoritesObj.favorites.length === 0) {
+                        $scope.favoritesObj.favorites = [];
+                        $scope.doFavorites($scope.cardViewExperiments, true);
+                    }
+                    else {
+                        $scope.doFavorites($scope.cardViewExperiments, false);
+                    }
+
                     $scope.loadGridDataIfNecessary()
                 });
             };
@@ -436,12 +468,13 @@ angular.module('wasabi.controllers').
 
             $scope.switchToGrid = function() {
                 if ($scope.data.showGrid) {
-                    // Switching back to list, do a filter in case a favorite has changed.
+                    // Switching back to list.
                     // So that it gets changed correctly in the localStorage that saves the search state,
                     // we need to actually toggle this one because it doesn't get updated until after this has
                     // executed.
                     $scope.data.showGrid = false;
                     localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
+                    $scope.loadExperiments();
                 }
                 else {
                     // Record that we are showing the Card View in the localStorage
@@ -530,7 +563,7 @@ angular.module('wasabi.controllers').
                 $scope.orderByField = orderByField;
 
                 if ($scope.orderByField !== '') {
-                    $scope.loadExperiments($scope.orderByField);
+                    $scope.loadExperiments();
                 }
             };
 
@@ -636,8 +669,8 @@ angular.module('wasabi.controllers').
                 StateFactory.currentExperimentsPage = $scope.currentPage;
 
                 // The widget has updated the currentPage member.  By simply triggering the code to get the
-                // logs list, we should update the page.
-                $scope.loadExperiments($scope.orderByField);
+                // list, we should update the page.
+                $scope.loadExperiments();
             };
 
             $scope.cardViewPageChanged = function() {
@@ -664,9 +697,19 @@ angular.module('wasabi.controllers').
                 }
             };
 
-            $scope.doPageRangeEnd = function (pageRangeStartFunc, totalItems, itemsPerPage) {
+            $scope.doPageRangeEnd = function (currentPage, totalItems, itemsPerPage) {
                 try {
-                    var start = 0 + pageRangeStartFunc();
+                    var start = 1;
+                    if (currentPage === 1) {
+                        if (totalItems === 0) {
+                            start = 0;
+                        } else {
+                            start = 1;
+                        }
+                    } else {
+                        start = (currentPage - 1) * itemsPerPage + 1;
+                    }
+
                     var ret =  (totalItems >= (start + itemsPerPage) ? start + itemsPerPage - 1 : totalItems);
                     return ret;
                 } catch (err) {
@@ -678,13 +721,13 @@ angular.module('wasabi.controllers').
                 return $scope.doPageRangeStart($scope.currentPage, $scope.totalItems, $scope.itemsPerPage);
             };
             $scope.pageRangeEnd = function() {
-                return $scope.doPageRangeEnd($scope.pageRangeStart, $scope.totalItems, $scope.itemsPerPage);
+                return $scope.doPageRangeEnd($scope.currentPage, $scope.totalItems, $scope.itemsPerPage);
             };
             $scope.cardViewPageRangeStart = function() {
                 return $scope.doPageRangeStart($scope.cardViewData.cardViewCurrentPage, $scope.cardViewTotalItems, $scope.cardViewItemsPerPage);
             };
             $scope.cardViewPageRangeEnd = function() {
-                return $scope.doPageRangeEnd($scope.cardViewPageRangeStart, $scope.cardViewTotalItems, $scope.cardViewItemsPerPage);
+                return $scope.doPageRangeEnd($scope.cardViewData.cardViewCurrentPage, $scope.cardViewTotalItems, $scope.cardViewItemsPerPage);
             };
 
             $scope.filterList = function(item) {
@@ -740,6 +783,9 @@ angular.module('wasabi.controllers').
                         experiments: function () {
                             return $scope.experiments;
                         },
+                        favoritesObj: function () {
+                            return $scope.favoritesObj;
+                        },
                         readOnly: function() {
                             return false;
                         },
@@ -767,7 +813,12 @@ angular.module('wasabi.controllers').
                     // Update the list of permissions with any newly created ones.
                     UtilitiesFactory.updatePermissionsAndAppList(function(applicationsList) {
                         $scope.applications = applicationsList;
-                        $scope.loadExperiments();
+                        if ($scope.data.showGrid) {
+                            $scope.loadCardViewExperiments();
+                        }
+                        else {
+                            $scope.loadExperiments();
+                        }
                     });
 
 
