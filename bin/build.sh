@@ -18,6 +18,7 @@
 profile_default=development
 build_default=false
 test_default=false
+wasabi_os_default=OSX
 
 usage() {
   [ "$1" ] && echo "error: ${1}"
@@ -74,6 +75,8 @@ module=main
 [[ "${build}" != "true" && "${build}" != "false" ]] && usage "invalid build parameter" 1
 [[ "${test}" != "true" && "${test}" != "false" ]] && usage "invalid test parameter" 1
 
+[ ! -e ./modules/main/target/wasabi-main-*-SNAPSHOT-development-all.jar ] && build=true
+
 if [[ "${build}" != false || "${test}" != false ]]; then
   package=
   tests=
@@ -122,7 +125,7 @@ chmod 755 ${home}/${id}/bin/run
 chmod 755 ${home}/${id}/entrypoint.sh
 sed -i '' -e "s/chpst -u [^:]*:[^ ]* //" ${home}/${id}/bin/run 2>/dev/null
 
-if [ "${build}" = true ] && [ "$OS" == "OSX" ]; then
+if [ "${build}" = true ] && [ "${WASABI_OS}" == "${wasabi_os_default}" ]; then
   brew list node
   if [[ $? -eq 1 ]]; then
   	echo "Node.js is not installed. Installing Node.js packages..."
@@ -130,7 +133,7 @@ if [ "${build}" = true ] && [ "$OS" == "OSX" ]; then
   	npm install -g yo grunt-cli bower grunt-contrib-compass
   	sudo gem install compass
   fi
-  (cd ./modules/ui && npm install && bower install && grunt build)
+  (cd ./modules/ui && npm install && bower install && grunt --force build)
 fi
 
 content=${home}/${id}/content/ui/dist

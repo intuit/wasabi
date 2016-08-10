@@ -130,6 +130,13 @@ public class FilterUtilTest {
                     testCase.getValue(),
                     FilterUtil.formatDateTimeAsUI(date, testCase.getKey()));
         }
+
+        try {
+            FilterUtil.formatDateTimeAsUI(date, " 0200");
+            Assert.fail("Was able to format incorrect timezone.");
+        } catch (PaginationException expected) {
+            // pass
+        }
     }
 
     @Test

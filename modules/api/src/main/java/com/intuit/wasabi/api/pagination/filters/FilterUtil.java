@@ -19,6 +19,7 @@ import com.intuit.wasabi.exceptions.PaginationException;
 import com.intuit.wasabi.experimentobjects.exceptions.ErrorCode;
 import org.apache.commons.lang3.StringUtils;
 
+import java.time.DateTimeException;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -98,8 +99,14 @@ public class FilterUtil {
      * @return a timezone offset adjusted string of the UI pattern {@code MMM d, YYYY HH:mm:ss a}.
      */
     /*test*/ static String formatDateTimeAsUI(OffsetDateTime date, String timeZoneOffset) {
-        return date.format(DateTimeFormatter.ofPattern("MMM d, YYYY HH:mm:ss a")
-                                            .withZone(ZoneId.ofOffset("UTC", ZoneOffset.of(timeZoneOffset))));
+        try {
+            return date.format(DateTimeFormatter.ofPattern("MMM d, YYYY HH:mm:ss a")
+                    .withZone(ZoneId.ofOffset("UTC", ZoneOffset.of(timeZoneOffset))));
+        } catch (DateTimeException dateTimeException) {
+            throw new PaginationException(ErrorCode.FILTER_KEY_UNPROCESSABLE,
+                    "Wrong format: Can not parse timezone '" + timeZoneOffset + "' or date " + date.toString()
+                            + " properly.", dateTimeException);
+        }
     }
 
     /**
