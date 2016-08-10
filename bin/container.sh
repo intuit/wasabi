@@ -163,8 +163,8 @@ ${green}
 wasabi is operational:
 
   ui: % open http://localhost:8080     note: sign in as admin/admin
-  api: % curl -i http://localhost:8080/api/v1/ping
-  debug: attach debuger to localhost:8180
+  ping: % curl -i http://localhost:8080/api/v1/ping
+  debug: attach to localhost:8180
 ${reset}
 EOF
 }

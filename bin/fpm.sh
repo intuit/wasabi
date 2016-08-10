@@ -15,6 +15,8 @@
 # limitations under the License.
 ###############################################################################
 
+wasabi_os_default=OSX
+
 usage () {
   echo "usage: `basename $0` [-n name] [-v version] [-p profile] [-h home] [-l log] [-t timestamp] [-m modules] [-d]"
   exit
@@ -80,42 +82,41 @@ for module in "$modules"; do
   echo "packaging service: $id"
 
   common="-s dir --force --debug --architecture noarch --name ${name}-${profile} --version ${version}\
-    --iteration ${timestamp} --license \"Apache License v2.0 : http://www.apache.org/licenses/LICENSE-2.0\"\
-    --vendor \"[tbd]\" --category application --provides ${name}-${profile}\
-    --description \"${name}, ${version} [${profile}] ...\" --url https://github.com/intuit/wasabi\
-    --maintainer ${email} --directories ${home} --directories ${log}"
+    --iteration ${timestamp} --license APLv2.0 --vendor tbd --category application --provides ${name}-${profile}\
+    --description ${name}-${version}-${profile} --url https://github.com/intuit/wasabi\
+    --maintainer ${email}" # --directories ${home} --directories ${log}"
 
   if [ "$daemon" = "true" ]; then
     common="$common    --directories /etc/service/${id}"
   fi
 
-  resources="extra-resources/service/run=${home}/service/run\
-    extra-resources/service/log/run=${home}/service/log/run\
-    extra-resources/service/run=${home}/bin/run\
-    ./classes/logback-access.xml=${home}/conf/logback-access.xml\
-    ./classes/logback.xml=${home}/conf/logback.xml\
-    ./classes/metrics.properties=${home}/conf/metrics.properties\
-    ./classes/web.properties=${home}/conf/web.properties\
-    ../../analytics/target/classes/analytics.properties=${home}/conf/analytics.properties\
-    ../../api/target/classes/api.properties=${home}/conf/api.properties\
-    ../../api/target/generated/swagger-ui/=${home}/content/ui/dist/swagger/swaggerjson\
-    ../../assignment/target/classes/assignment.properties=${home}/conf/assignment.properties\
-    ../../auditlog/target/classes/auditlog.properties=${home}/conf/auditlog.properties\
-    ../../authentication/target/classes/authentication.properties=${home}/conf/authentication.properties\
-    ../../authorization/target/classes/authorization.properties=${home}/conf/authorization.properties\
-    ../../database/target/classes/database.properties=${home}/conf/database.properties\
-    ../../email/target/classes/email.properties=${home}/conf/email.properties\
-    ../../event/target/classes/event.properties=${home}/conf/event.properties\
-    ../../eventlog/target/classes/eventlog.properties=${home}/conf/eventlog.properties\
-    ../../export/target/classes/export.properties=${home}/conf/export.properties\
-    ../../repository/target/classes/cassandra_experiments.properties=${home}/conf/cassandra_experiments.properties\
-    ../../repository/target/classes/repository.properties=${home}/conf/repository.properties\
-    ../../swagger-ui/target/swaggerui/=${home}/content/ui/dist/swagger\
-    ../../user-directory/target/classes/userDirectory.properties=${home}/conf/userDirectory.properties\
-    ${id}-all.jar=${home}/lib/${id}-all.jar"
+  resources="modules/${module}/target/extra-resources/service/run=${home}/service/run\
+    modules/${module}/target/extra-resources/service/log/run=${home}/service/log/run\
+    modules/${module}/target/extra-resources/service/run=${home}/bin/run\
+    modules/${module}/target/classes/logback-access.xml=${home}/conf/logback-access.xml\
+    modules/${module}/target/classes/logback.xml=${home}/conf/logback.xml\
+    modules/${module}/target/classes/metrics.properties=${home}/conf/metrics.properties\
+    modules/${module}/target/classes/web.properties=${home}/conf/web.properties\
+    modules/analytics/target/classes/analytics.properties=${home}/conf/analytics.properties\
+    modules/api/target/classes/api.properties=${home}/conf/api.properties\
+    modules/api/target/generated/swagger-ui/=${home}/content/ui/dist/swagger/swaggerjson\
+    modules/assignment/target/classes/assignment.properties=${home}/conf/assignment.properties\
+    modules/auditlog/target/classes/auditlog.properties=${home}/conf/auditlog.properties\
+    modules/authentication/target/classes/authentication.properties=${home}/conf/authentication.properties\
+    modules/authorization/target/classes/authorization.properties=${home}/conf/authorization.properties\
+    modules/database/target/classes/database.properties=${home}/conf/database.properties\
+    modules/email/target/classes/email.properties=${home}/conf/email.properties\
+    modules/event/target/classes/event.properties=${home}/conf/event.properties\
+    modules/eventlog/target/classes/eventlog.properties=${home}/conf/eventlog.properties\
+    modules/export/target/classes/export.properties=${home}/conf/export.properties\
+    modules/repository/target/classes/cassandra_experiments.properties=${home}/conf/cassandra_experiments.properties\
+    modules/repository/target/classes/repository.properties=${home}/conf/repository.properties\
+    modules/swagger-ui/target/swaggerui/=${home}/content/ui/dist/swagger\
+    modules/user-directory/target/classes/userDirectory.properties=${home}/conf/userDirectory.properties\
+    modules/${module}/target/${id}-all.jar=${home}/lib/${id}-all.jar"
 
   if [ "$daemon" = "true" ]; then
-    resources="$resources    extra-resources/service/run=/etc/service/${id}/run"
+    resources="$resources    modules/${module}/target/extra-resources/service/run=/etc/service/${id}/run"
   fi
 
   if [ ! -z "$deps" ]; then
@@ -132,15 +133,19 @@ for module in "$modules"; do
 
   deb="-t deb --deb-no-default-config-files"
   rpm="-t rpm --rpm-os linux"
-  scripts="--before-install extra-resources/service/[PKG]/before-install.sh\
-    --after-install extra-resources/service/[PKG]/after-install.sh\
-    --before-remove extra-resources/service/[PKG]/before-remove.sh\
-    --after-remove extra-resources/service/[PKG]/after-remove.sh"
+  scripts="--before-install modules/${module}/target/extra-resources/service/[PKG]/before-install.sh\
+    --after-install modules/${module}/target/extra-resources/service/[PKG]/after-install.sh\
+    --before-remove modules/${module}/target/extra-resources/service/[PKG]/before-remove.sh\
+    --after-remove modules/${module}/target/extra-resources/service/[PKG]/after-remove.sh"
 
   # TODO: u/g fpm 1.4.0 to support deb
   # for pkg in "deb" "rpm"; do
   for pkg in "rpm"; do
     fpm="${!pkg} $common `echo $scripts | sed -e "s/\[PKG\]/${pkg}/g"` $depends $resources"
-    (cd modules/$module/target; eval fpm $fpm) || exitOnError "failed to build rpm: $module"
+    if [ "${WASABI_OS}" == "${wasabi_os_default}" ]; then
+      docker run -it -v `pwd`:/build --rm liuedy/centos-fpm fpm ${fpm} || exitOnError "failed to build rpm: $module"
+    else
+      eval fpm $fpm || exitOnError "failed to build rpm: $module"
+    fi
   done
 done

@@ -16,7 +16,7 @@
 ###############################################################################
 
 formulas=("bash" "cask" "git" "maven" "wget" "python" "ruby" "node")
-casks=("java" "docker" "vagrant" "virtualbox")
+casks=("java" "docker")
 endpoint_default=localhost:8080
 verify_default=false
 sleep_default=30
@@ -178,22 +178,6 @@ package() {
 
   build true false ${profile}
 
-  if [ "${WASABI_OS}" == "${wasabi_os_default}" ]; then
-    (export VAGRANT_CWD=./bin; vagrant up)
-    (export VAGRANT_CWD=./bin; vagrant ssh -c "cd wasabi; mvn dependency:resolve")
-  else
-    mvn install
-    mvn dependency:resolve
-  fi
-
-  beerMe 10
-
-  if [ "${WASABI_OS}" == "${wasabi_os_default}" ]; then
-    (export VAGRANT_CWD=./bin; vagrant ssh -c "cd wasabi; ./bin/fpm.sh -p ${profile}")
-  else
-    ./bin/fpm.sh -p ${profile}
-  fi
-
   # FIXME: move to modules/ui/build.sh
   version=$(fromPom . build project.version)
   # FIXME: server ip
@@ -236,14 +220,11 @@ package() {
       sed -i '' -e "s|\${application.http.content.directory}|${content}|g" target/build/${pkg}/before-remove.sh 2>/dev/null; \
     done)
 
-  if [ "${WASABI_OS}" == "${wasabi_os_default}" ]; then
-    (export VAGRANT_CWD=./bin; vagrant ssh -c "cd wasabi/modules/ui; ./bin/fpm.sh -n ${name} -v ${version} -p ${profile}")
-    (export VAGRANT_CWD=./bin; vagrant halt)
-  fi
+  ./bin/fpm.sh -n ${name} -v ${version} -p ${profile}
 
   echo "deployable build packages:"
 
-  find ./modules -type f \( -name "*.rpm" -or -name "*.deb" \)
+  find . -type f -name \*.rpm
 }
 
 release() {
