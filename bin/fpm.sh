@@ -138,9 +138,7 @@ for module in "$modules"; do
     --before-remove modules/${module}/target/extra-resources/service/[PKG]/before-remove.sh\
     --after-remove modules/${module}/target/extra-resources/service/[PKG]/after-remove.sh"
 
-  # TODO: u/g fpm 1.4.0 to support deb
-  # for pkg in "deb" "rpm"; do
-  for pkg in "rpm"; do
+   for pkg in "deb" "rpm"; do
     fpm="${!pkg} $common `echo $scripts | sed -e "s/\[PKG\]/${pkg}/g"` $depends $resources"
     if [ "${WASABI_OS}" == "${wasabi_os_default}" ]; then
       docker run -it -v `pwd`:/build --rm liuedy/centos-fpm fpm ${fpm} || exitOnError "failed to build rpm: $module"

@@ -133,7 +133,7 @@ if [ "${build}" = true ] && [ "${WASABI_OS}" == "${wasabi_os_default}" ]; then
   	npm install -g yo grunt-cli bower grunt-contrib-compass
   	sudo gem install compass
   fi
-  (cd ./modules/ui && npm install && bower install && grunt build)
+  (cd ./modules/ui && npm install && bower install && grunt --force build)
 fi
 
 content=${home}/${id}/content/ui/dist
