@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Wasabi-Eye Options</title>
+        <style type="text/css">
+            label, button {
+                clear: left;
+            }
+
+            label, button, input {
+                float: left;
+                margin: 5pt;
+            }
+
+            button {
+                margin-bottom: 10pt;
+            }
+
+            div#status {
+                font-weight: bold;
+                color: #5f0000;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="status"></div>
+
+        <h1>Configure Wasabi-Eye options</h1>
+
+        <label for="wasabi-auth-user">Username</label>
+        <input type="text" id="wasabi-auth-user" placeholder="Your username" />
+
+        <label for="wasabi-auth-pass">Password</label>
+        <input type="password" id="wasabi-auth-pass" placeholder="Your password" />
+
+        <button id="save-auth-button">Create and store Authorization header</button>
+
+        <label for="wasabi-base-url">Wasabi Service base URL (with trailing /)</label>
+        <input type="text" id="wasabi-base-url" placeholder="https://localhost:8080/" />
+
+        <button id="save-settings-button">Store base URL</button>
+
+        <script src="options.js"></script>
+    </body>
+</html>
