@@ -1,4 +1,6 @@
-This chrome extension was a contributed effort of the following people:
+# Credits
+
+This chrome extension was a combined effort of the following people:
 
 1. [Piyush Waradpande] (https://github.com/pi5)
 2. [Ajith Rajeshwari] (https://github.com/ajithkrajeswari)
