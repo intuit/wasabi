@@ -8,6 +8,6 @@ This chrome extension was a combined effort of the following people:
 4. Mary Farrow
 
 
-Special thanks to [Sebastian Höffner](https://github.intuit.com/shoeffner) for refactoring the code and making it generic and grooming it to make it open source.
+Special thanks to [Sebastian Höffner](https://github.intuit.com/shoeffner) for refactoring the code, making it generic and grooming it to make it open source.
 
 
