@@ -1,0 +1,32 @@
+.wasabi-eye-border {
+    border: 1px dashed red;
+    box-shadow: 0 0 2px red;
+    animation: blink .1s step-end 15 alternate, flicker .05s step-end 10 alternate;
+    position:relative;
+}
+
+@keyframes blink {
+    50% { border: 2px dashed #2D882D; }
+}
+
+@keyframes flicker {
+    50% {
+        visibility: hidden;
+    }
+}
+
+.myProgress {
+    position: relative;
+    width: 100%;
+    height: 20px;
+    background-color: #ddd;
+    text-align: right;
+    font-family: "Lucida Console", Monaco, monospace;
+}
+
+.myBar {
+    position: absolute;
+    width: 11%;
+    height: 100%;
+    background-color: #4CAF50;
+}

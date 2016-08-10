@@ -1,0 +1,32 @@
+{
+  "manifest_version": 2,
+  "name": "Wasabi-Eye",
+  "version": "1.0",
+  "description": "Quickly see how your Wasabi tests look like and how they perform",
+  "browser_action": {
+    "default_icon": "img/wasabi-eye.png",
+    "default_title": "Wasabi-Eye"
+  },
+  "icons": {
+    "128": "img/wasabi-eye128.png"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "chrome_style": true
+  },
+  "background" : {
+      "scripts": ["background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["contentscript.js",
+        "lib/jquery.min.js",
+        "lib/jquery.contextMenu.min.js",
+        "lib/jquery.ui.position.min.js",
+        "lib/lodash.core.min.js"],
+      "css": ["lib/jquery.contextMenu.min.css", "basic.css"]
+    }
+  ],
+  "permissions":["activeTab", "storage"]
+}
