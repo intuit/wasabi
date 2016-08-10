@@ -3,7 +3,7 @@
 This chrome extension was a combined effort of the following people:
 
 1. [Piyush Waradpande] (https://github.com/pi5)
-2. [Ajith Rajeshwari] (https://github.com/ajithkrajeswari)
+2. [Ajith Rajeswari] (https://github.com/ajithkrajeswari)
 3. [Diwakar Kumawat] (https://github.com/diwakarkumawat)
 4. [Mary Farrow] (https://github.com/mffarrow)
 
