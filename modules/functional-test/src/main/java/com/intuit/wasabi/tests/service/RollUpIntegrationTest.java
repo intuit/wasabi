@@ -57,6 +57,11 @@ import static com.intuit.wasabi.tests.library.util.Constants.*;
  */
 public class RollUpIntegrationTest extends TestBase {
 
+	private static final String CONTEXT = "context";
+	private static final String ACTION = "action";
+	private static final String DISTINCT_USER_COUNT = "distinct_user_count";
+	private static final String USER_COUNT = "user_count";
+	private static final String BUCKET_LABEL = "bucket_label";
 	private static final String FROM_TIME = "fromTime";
 	private static final String QBO = "qbo";
 	protected static final String RED = "red";
@@ -133,8 +138,9 @@ public class RollUpIntegrationTest extends TestBase {
 	public void prepareDBConnection() throws Exception {
 		Class.forName("com.mysql.jdbc.Driver").newInstance();
 		connection = DriverManager.getConnection(
-				appProperties.getProperty("database.url"), "readwrite",
-				"readwrite");
+				appProperties.getProperty("database.url"), 
+				appProperties.getProperty("database.username"),
+				appProperties.getProperty("database.password"));
 	}
 
 	@AfterClass
@@ -193,9 +199,9 @@ public class RollUpIntegrationTest extends TestBase {
 		try (Statement statement = connection.createStatement();
 				ResultSet result = statement.executeQuery(queryGroupByBucket)) {
 			if (result.next()) {
-				String bucket = result.getString("bucket_label");
-				int userCount = result.getInt("user_count");
-				int distinctUserCount = result.getInt("distinct_user_count");
+				String bucket = result.getString(BUCKET_LABEL);
+				int userCount = result.getInt(USER_COUNT);
+				int distinctUserCount = result.getInt(DISTINCT_USER_COUNT);
 				fail("There should not be any rows but found with first bucket: "
 						+ bucket
 						+ " userCount: "
@@ -242,7 +248,7 @@ public class RollUpIntegrationTest extends TestBase {
 		}
 		Map<String, Object> parameters = new HashMap<>();
 		parameters.put(FROM_TIME, "");
-		parameters.put("context", PROD);
+		parameters.put(CONTEXT, PROD);
 		List<Event> events = postEvents(experiment, parameters, true,
 				HttpStatus.SC_OK, apiServerConnector);
 		assertEquals(events.size(), 3);
@@ -266,7 +272,7 @@ public class RollUpIntegrationTest extends TestBase {
 		}
 		Map<String, Object> parameters = new HashMap<>();
 		parameters.put(FROM_TIME, today);
-		parameters.put("context", PROD);
+		parameters.put(CONTEXT, PROD);
 		List<Event> events = postEvents(experiment, parameters, true,
 				HttpStatus.SC_OK, apiServerConnector);
 
@@ -291,7 +297,7 @@ public class RollUpIntegrationTest extends TestBase {
 		}
 		Map<String, Object> parameters = new HashMap<>();
 		parameters.put(FROM_TIME, tomorrow);
-		parameters.put("context", PROD);
+		parameters.put(CONTEXT, PROD);
 
 		List<Event> events = postEvents(experiment, parameters, true,
 				HttpStatus.SC_OK, apiServerConnector);
@@ -336,9 +342,9 @@ public class RollUpIntegrationTest extends TestBase {
 		try (Statement statement = connection.createStatement();
 				ResultSet result = statement.executeQuery(queryGroupByBucket)) {
 			if (result.next()) {
-				String bucket = result.getString("bucket_label");
-				int userCount = result.getInt("user_count");
-				int distinctUserCount = result.getInt("distinct_user_count");
+				String bucket = result.getString(BUCKET_LABEL);
+				int userCount = result.getInt(USER_COUNT);
+				int distinctUserCount = result.getInt(DISTINCT_USER_COUNT);
 				fail("There should not be any rows but found with first bucket: "
 						+ bucket
 						+ " userCount: "
@@ -365,9 +371,9 @@ public class RollUpIntegrationTest extends TestBase {
 				ResultSet result = statement
 						.executeQuery(queryGroupByBucketAndAction)) {
 			if (result.next()) {
-				String bucket = result.getString("bucket_label");
-				int userCount = result.getInt("user_count");
-				int distinctUserCount = result.getInt("distinct_user_count");
+				String bucket = result.getString(BUCKET_LABEL);
+				int userCount = result.getInt(USER_COUNT);
+				int distinctUserCount = result.getInt(DISTINCT_USER_COUNT);
 				fail("There should not be any rows but found with first bucket: "
 						+ bucket
 						+ " userCount: "
@@ -395,9 +401,8 @@ public class RollUpIntegrationTest extends TestBase {
 			int distinctUserCount = 0;
 			boolean atLeastOneRow = false;
 			while (result.next()) {
-				String bucket = result.getString("bucket_label");
-				userCount += result.getInt("user_count");
-				distinctUserCount += result.getInt("distinct_user_count");
+				userCount += result.getInt(USER_COUNT);
+				distinctUserCount += result.getInt(DISTINCT_USER_COUNT);
 				atLeastOneRow = true;
 			}
 			if (!atLeastOneRow) {
@@ -427,9 +432,8 @@ public class RollUpIntegrationTest extends TestBase {
 			int distinctUserCount = 0;
 			boolean atLeastOneRow = false;
 			while (result.next()) {
-				String bucket = result.getString("bucket_label");
-				userCount += result.getInt("user_count");
-				distinctUserCount += result.getInt("distinct_user_count");
+				userCount += result.getInt(USER_COUNT);
+				distinctUserCount += result.getInt(DISTINCT_USER_COUNT);
 				atLeastOneRow = true;
 			}
 			if (!atLeastOneRow) {
@@ -465,17 +469,18 @@ public class RollUpIntegrationTest extends TestBase {
 	@Test(dependsOnMethods = { "t_PostImpressionTomorrowQA" })
 	public void t_CheckImpressionForTomorrowByBucketFromMySQLProdContext()
 			throws Exception {
-
-		Statement statement = connection.createStatement();
 		String queryGroupByBucket = "select bucket_label, "
 				+ "count(user_id) as user_count, count(distinct user_id) as distinct_user_count  "
 				+ "from event_impression where hex(experiment_id) = '"
 				+ experiment.id.replace("-", "").toUpperCase()
 				+ "' and context = 'PROD' and timestamp = '" + this.tomorrow
 				+ "' group by bucket_label";
-		ResultSet result = statement.executeQuery(queryGroupByBucket);
-		if (result.next()) {
-			fail("Should have no rows for query: " + queryGroupByBucket);
+
+		try (Statement statement = connection.createStatement();
+		ResultSet result = statement.executeQuery(queryGroupByBucket)) {
+			if (result.next()) {
+				fail("Should have no rows for query: " + queryGroupByBucket);
+			}
 		}
 
 	}
@@ -497,9 +502,9 @@ public class RollUpIntegrationTest extends TestBase {
 			int distinctUserCount = 0;
 			boolean atLeastOneRow = false;
 			while (result.next()) {
-				String bucket = result.getString("bucket_label");
-				userCount += result.getInt("user_count");
-				distinctUserCount += result.getInt("distinct_user_count");
+				String bucket = result.getString(BUCKET_LABEL);
+				userCount += result.getInt(USER_COUNT);
+				distinctUserCount += result.getInt(DISTINCT_USER_COUNT);
 				atLeastOneRow = true;
 			}
 			if (!atLeastOneRow) {
@@ -529,9 +534,9 @@ public class RollUpIntegrationTest extends TestBase {
 			int distinctUserCount = 0;
 			boolean atLeastOneRow = false;
 			while (result.next()) {
-				String action = result.getString("action");
-				userCount += result.getInt("user_count");
-				distinctUserCount += result.getInt("distinct_user_count");
+				String action = result.getString(ACTION);
+				userCount += result.getInt(USER_COUNT);
+				distinctUserCount += result.getInt(DISTINCT_USER_COUNT);
 				assertEquals(actionClick, action);
 				atLeastOneRow = true;
 			}
@@ -599,9 +604,9 @@ public class RollUpIntegrationTest extends TestBase {
 			int distinctUserCount = 0;
 			boolean atLeastOneRow = false;
 			while (result.next()) {
-				String bucket = result.getString("bucket_label");
-				userCount += result.getInt("user_count");
-				distinctUserCount += result.getInt("distinct_user_count");
+				String bucket = result.getString(BUCKET_LABEL);
+				userCount += result.getInt(USER_COUNT);
+				distinctUserCount += result.getInt(DISTINCT_USER_COUNT);
 				atLeastOneRow = true;
 			}
 			if (!atLeastOneRow) {
@@ -630,9 +635,9 @@ public class RollUpIntegrationTest extends TestBase {
 			int distinctUserCount = 0;
 			boolean atLeastOneRow = false;
 			while (result.next()) {
-				String bucket = result.getString("bucket_label");
-				userCount += result.getInt("user_count");
-				distinctUserCount += result.getInt("distinct_user_count");
+				String bucket = result.getString(BUCKET_LABEL);
+				userCount += result.getInt(USER_COUNT);
+				distinctUserCount += result.getInt(DISTINCT_USER_COUNT);
 				atLeastOneRow = true;
 				if (RED.equals(bucket) || BLUE.equals(bucket)) {
 					// ok
@@ -683,9 +688,9 @@ public class RollUpIntegrationTest extends TestBase {
 			int distinctUserCount = 0;
 			boolean atLeastOneRow = false;
 			while (result.next()) {
-				String bucket = result.getString("bucket_label");
-				userCount += result.getInt("user_count");
-				distinctUserCount += result.getInt("distinct_user_count");
+				String bucket = result.getString(BUCKET_LABEL);
+				userCount += result.getInt(USER_COUNT);
+				distinctUserCount += result.getInt(DISTINCT_USER_COUNT);
 				atLeastOneRow = true;
 			}
 			if (!atLeastOneRow) {
@@ -705,32 +710,31 @@ public class RollUpIntegrationTest extends TestBase {
 		paramsQA.actions = null;
 		paramsQA.context = QA;
 
-		long startTime = System.currentTimeMillis();
+		long startTime = System.nanoTime();
 		ExperimentCounts countsBeforeQA = postExperimentCounts(experiment, paramsQA);
-		long endTime = System.currentTimeMillis();
+		long endTime = System.nanoTime();
 
 		System.out.println("Before analytics time QA was: "
 				+ (endTime - startTime));
 
-		startTime = System.currentTimeMillis();
-		
 		AnalyticsParameters paramsProd = new AnalyticsParameters();
 		paramsProd.confidenceLevel = .9999999d;
 		paramsProd.actions = null;
 		paramsProd.context = PROD;
 
+		startTime = System.nanoTime();		
 		ExperimentCounts countsBeforeProd = postExperimentCounts(experiment, paramsProd);
-		endTime = System.currentTimeMillis();
+		endTime = System.nanoTime();
 
 		System.out.println("Before analytics time Prod was: "
 				+ (endTime - startTime));
 
 		prepareRollUpTable();
 
-		startTime = System.currentTimeMillis();
+		startTime = System.nanoTime();
 
 		ExperimentCounts countsAfterQA = postExperimentCounts(experiment, paramsQA);
-		endTime = System.currentTimeMillis();
+		endTime = System.nanoTime();
 
 		System.out.println("After analytics time QA was: "
 				+ (endTime - startTime));
@@ -739,10 +743,10 @@ public class RollUpIntegrationTest extends TestBase {
 			fail("CountBeforeQA: " + countsBeforeQA + " \nCountAfterQA: "
 					+ countsAfterQA + "\nShould be equal");
 
-		startTime = System.currentTimeMillis();
+		startTime = System.nanoTime();
 
 		ExperimentCounts countsAfterProd = postExperimentCounts(experiment, paramsProd);
-		endTime = System.currentTimeMillis();
+		endTime = System.nanoTime();
 
 		System.out.println("After analytics time Prod was: "
 				+ (endTime - startTime));
@@ -913,15 +917,15 @@ public class RollUpIntegrationTest extends TestBase {
 						.executeQuery(queryActionByBucketActionContext)) {
 			while (resultActionByBucketActionContext.next()) {
 				String bucket = resultActionByBucketActionContext
-						.getString("bucket_label");
+						.getString(BUCKET_LABEL);
 				String action = resultActionByBucketActionContext
-						.getString("action");
+						.getString(ACTION);
 				String context = resultActionByBucketActionContext
-						.getString("context");
+						.getString(CONTEXT);
 				int userCount = resultActionByBucketActionContext
-						.getInt("user_count");
+						.getInt(USER_COUNT);
 				int distinctUserCount = resultActionByBucketActionContext
-						.getInt("distinct_user_count");
+						.getInt(DISTINCT_USER_COUNT);
 
 				rollUpQuery = "REPLACE INTO experiment_rollup "
 						+ "(experiment_id, day, cumulative, bucket_label, action, "
@@ -1094,15 +1098,15 @@ public class RollUpIntegrationTest extends TestBase {
 
 			while (resultActionByBucketActionContextCumulative.next()) {
 				String bucket = resultActionByBucketActionContextCumulative
-						.getString("bucket_label");
+						.getString(BUCKET_LABEL);
 				String action = resultActionByBucketActionContextCumulative
-						.getString("action");
+						.getString(ACTION);
 				String context = resultActionByBucketActionContextCumulative
-						.getString("context");
+						.getString(CONTEXT);
 				int userCount = resultActionByBucketActionContextCumulative
-						.getInt("user_count");
+						.getInt(USER_COUNT);
 				int distinctUserCount = resultActionByBucketActionContextCumulative
-						.getInt("distinct_user_count");
+						.getInt(DISTINCT_USER_COUNT);
 
 				rollUpQuery = "REPLACE INTO experiment_rollup "
 						+ "(experiment_id, day, cumulative, bucket_label, action, "
@@ -1116,29 +1120,25 @@ public class RollUpIntegrationTest extends TestBase {
 	}
 
 	private void insertIntoRollUp(String rollUpQuery) throws SQLException {
-		Statement statement = connection.createStatement();
-
-		ResultSet resultSet = statement.executeQuery(rollUpQuery);
-
-		resultSet.close();
-		statement.close();
+		try (Statement statement = connection.createStatement();
+				ResultSet resultSet = statement.executeQuery(rollUpQuery)) {			
+		}
 	}
 
 	private int[] getUserAndDistinctUserCount(Connection connection,
 			String query) throws SQLException {
-		Statement statement = connection.createStatement();
-		ResultSet result = statement.executeQuery(query);
+		
+		try (Statement statement = connection.createStatement();
+				ResultSet result = statement.executeQuery(query)) {
 
-		if (!result.next())
-			fail("Should have at least one row for query " + query);
+			if (!result.next())
+				fail("Should have at least one row for query " + query);
 
-		int userCount = result.getInt("user_count");
-		int distinctUserCount = result.getInt("distinct_user_count");
+			int userCount = result.getInt(USER_COUNT);
+			int distinctUserCount = result.getInt(DISTINCT_USER_COUNT);
 
-		result.close();
-		statement.close();
-
-		return new int[] { userCount, distinctUserCount };
+			return new int[] { userCount, distinctUserCount };
+		}
 	}
 
 }
