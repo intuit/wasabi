@@ -1,3 +1,7 @@
+# Wasabi-Eye
+This is a chrome extension which allows to view experiment elements on websites if they have an `abtest="<EXPERIMENT_ID>"` attribute.
+To use it, just install it as an unpacked extension to your browser. Make sure that the developer mode is enabled.
+
 # Credits
 
 This chrome extension was a combined effort of the following people:
@@ -9,5 +13,4 @@ This chrome extension was a combined effort of the following people:
 
 
 Special thanks to [Sebastian Höffner](https://github.com/Faedrivin) for refactoring the code, making it generic and grooming it to make it open source.
-
 
