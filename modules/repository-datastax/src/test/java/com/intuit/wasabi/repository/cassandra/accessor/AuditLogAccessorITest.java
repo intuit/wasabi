@@ -50,6 +50,7 @@ public class AuditLogAccessorITest {
 
     @BeforeClass
     public static void setup(){
+    	
         Injector injector = Guice.createInjector(new CassandraRepositoryModule());
         injector.getInstance(Key.get(String.class, Names.named("CassandraInstanceName")));
 
@@ -57,10 +58,9 @@ public class AuditLogAccessorITest {
         manager = new MappingManager(session);
         mapper = manager.mapper(UserFeedback.class);
         accessor = manager.createAccessor(AuditLogAccessor.class);
-        applicationName = "ApplicationName:" + System.currentTimeMillis();
+        applicationName = "ApplicationName" + System.currentTimeMillis();
         session.execute("delete from wasabi_experiments.auditlog where application_name = '" 
         		+ applicationName + "'");
-      
 
         Date time = new Date();
     	String action = AuditLogAction.BUCKET_CHANGED.toString();
@@ -76,13 +76,13 @@ public class AuditLogAccessorITest {
     	String propertyAfter = "stateAfter";
 
     	for (int i = 0; i < 5; i++ )
-    		accessor.storeEntry(applicationName + "-" + i, 
+    		accessor.storeEntry(applicationName + "_" + i, 
     			time, action, firstName, lastName, email, userName, userId, 
     			experimentId, experimentLabel, bucketLabel, changedProperty, propertyBefore, 
     			propertyAfter);
     	
     	for (int i = 0; i < 10; i++ )
-    		accessor.storeEntry(AuditLogRepository.GLOBAL_ENTRY_APPLICATION.toString()+ "-" + i, 
+    		accessor.storeEntry(AuditLogRepository.GLOBAL_ENTRY_APPLICATION.toString() + "_" + i, 
     			time, action, firstName, lastName, email, userName, userId, 
     			experimentId, experimentLabel, bucketLabel, changedProperty, propertyBefore, 
     			propertyAfter);
