@@ -10,7 +10,7 @@ angular.module('wasabi.services').factory('ExperimentsFactory', ['$resource', 'C
                 url: ConfigFactory.baseUrl() + '/experiments?page=:page&per_page=:per_page&filter=:filter&sort=:sort&timezone=' + (new Date().toString().match(/([-\+][0-9]+)\s/)[1]).replace('+', '%2B'),
                 transformResponse: function (data) {
                     var parsedData = $.parseJSON(data);
-                    if (parsedData && parsedData.errors) {
+                    if (parsedData && parsedData.error) {
                         return parsedData;
                     }
 
