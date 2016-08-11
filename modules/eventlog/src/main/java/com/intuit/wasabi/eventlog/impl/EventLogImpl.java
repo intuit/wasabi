@@ -43,11 +43,11 @@ public class EventLogImpl implements EventLog {
     /**
      * The listener subscriptions.
      */
-    private final Map<EventLogListener, List<Class<? extends EventLogEvent>>> listeners;
+    /*test*/ final Map<EventLogListener, List<Class<? extends EventLogEvent>>> listeners;
     /**
      * the event Deque
      */
-    private final Deque<EventLogEvent> eventDeque;
+    /*test*/ final Deque<EventLogEvent> eventDeque;
 
     /**
      * Creates the event pool executor. Should be called by Guice.
@@ -69,7 +69,7 @@ public class EventLogImpl implements EventLog {
      */
     @Override
     public void register(EventLogListener listener) {
-        this.register(listener, Collections.<Class<? extends EventLogEvent>>emptyList());
+        this.register(listener, Collections.emptyList());
     }
 
     /**
@@ -78,7 +78,7 @@ public class EventLogImpl implements EventLog {
     @Override
     public void register(EventLogListener listener, List<Class<? extends EventLogEvent>> events) {
         if (events.isEmpty()) {
-            events = Collections.<Class<? extends EventLogEvent>>singletonList(EventLogEvent.class);
+            events = Collections.singletonList(EventLogEvent.class);
         }
         listeners.put(listener, events);
     }
@@ -166,11 +166,10 @@ public class EventLogImpl implements EventLog {
                 }
             }
         } finally {
-            LOGGER.info("Shutting down event system, posting remaining events -- incoming events are no longer accepted.");
+            LOGGER.info("Shutting down event system, posting remaining events -- new events will not be processed.");
             if (!eventDeque.isEmpty()) {
-                for (EventLogEvent eventLogEvent : eventDeque) {
-                    prepareEnvelope(eventLogEvent);
-                }
+                eventDeque.forEach(this::prepareEnvelope);
+                eventDeque.clear();
             }
         }
     }
