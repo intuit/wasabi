@@ -86,12 +86,9 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
 
 		for (AuditLog auditLog : entries) {
 
-			// Set time if it is set in table
-			Calendar calendar = null;
-			if (auditLog.getTime() != null) {
-				calendar = Calendar.getInstance();
-				calendar.setTime(auditLog.getTime());
-			}
+			// Note time cannot be null since it is required during save
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(auditLog.getTime());
 
 			String userName = makeEmptyForNull(auditLog.getUsername());
 
@@ -309,7 +306,7 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
 		String applicationName = AuditLogRepository.GLOBAL_ENTRY_APPLICATION
 				.toString();
 		if (entry.getApplicationName() != null
-				&& StringUtils.isBlank(entry.getApplicationName().toString()))
+				&& ! StringUtils.isBlank(entry.getApplicationName().toString()))
 			applicationName = entry.getApplicationName().toString();
 
 		Date time = entry.getTime().getTime();
@@ -318,7 +315,7 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
 		String firstName = makeEmptyForNull(entry.getUser().getFirstName());
 		String lastName = makeEmptyForNull(entry.getUser().getLastName());
 		String email = makeEmptyForNull(entry.getUser().getEmail());
-		String userId = makeEmptyForNull(entry.getUser().getEmail());
+		String userId = makeEmptyForNull(entry.getUser().getUserId());
 		String userName = makeEmptyForNull(entry.getUser().getUsername()
 				.getUsername());
 
