@@ -77,10 +77,11 @@ stop_docker() {
 }
 
 start_container() {
+  # fix: do not re-create
   docker network create --driver bridge ${docker_network} >/dev/null 2>&1
 
-#  cid=$(docker ps -aqf name=${1})
-  cid=
+  cid=$(docker ps -aqf name=${1})
+
   if [ "${cid}" == "" ]; then
     eval "docker run --net=${docker_network} --name ${1} ${3} -d ${2} ${4}" || \
       usage "docker run --net=${docker_network} --name ${1} ${3} -d ${2} ${4}" 1

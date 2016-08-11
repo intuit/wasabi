@@ -111,7 +111,7 @@ bootstrap() {
 }
 
 build() {
-  ./bin/build.sh -b ${1:-true} -t ${2:-false} -p ${3:-development}
+  ./bin/build.sh -b ${1:-false} -t ${2:-false} -p ${3:-development}
 }
 
 start() {
@@ -136,11 +136,11 @@ test_api() {
 resource() {
   for resource in $1; do
     case "${1}" in
-      ui) [ ! -f ./modules/ui/dist/index.html ] && build false
+      ui) [ ! -f ./modules/ui/dist/index.html ] && build
         ./bin/wasabi.sh status >/dev/null 2>&1 || ./bin/wasabi.sh start
         open http://localhost:8080;;
       api) [[ ! -f ./modules/swagger-ui/target/swaggerui/index.html || \
-        ! -f ./modules/api/target/generated/swagger-ui/swagger.json ]] && build false
+        ! -f ./modules/api/target/generated/swagger-ui/swagger.json ]] && build
         ./bin/wasabi.sh status >/dev/null 2>&1 || ./bin/wasabi.sh start:docker
         jip=localhost
         ./bin/wasabi.sh remove:wasabi >/dev/null 2>&1
@@ -156,7 +156,7 @@ resource() {
         ./bin/wasabi.sh start
         beerMe 6
         open http://localhost:8080/swagger/index.html;;
-      doc) [ ! -f ./target/site/apidocs/index.html ] && build false
+      doc) [ ! -f ./target/site/apidocs/index.html ] && build
         open ./target/site/apidocs/index.html;;
       mysql|cassandra) ./bin/wasabi.sh status 2>/dev/null | grep wasabi-${1} 1>/dev/null || ./bin/wasabi.sh start
         ./bin/container.sh console:${1};;
