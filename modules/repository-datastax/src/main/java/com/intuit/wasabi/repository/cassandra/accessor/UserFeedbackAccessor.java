@@ -49,7 +49,7 @@ public interface UserFeedbackAccessor {
      * @return user feedback list
      */
     @Query("select * from user_feedback where user_id = ?")
-    Result<UserFeedback> getUserFeedback(String userId);
+    Result<UserFeedback> getUserFeedback(String user_id);
 
     /**
      * Get all feedbacks

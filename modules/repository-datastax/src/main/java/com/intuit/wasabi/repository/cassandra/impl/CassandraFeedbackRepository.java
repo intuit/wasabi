@@ -33,16 +33,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Cassandra implementation of
+ * Cassandra implementation of FeedbackRepository
  * @see FeedbackRepository
  *
  */
 public class CassandraFeedbackRepository implements FeedbackRepository {
 
+	/**
+	 * Accessor
+	 */
     private UserFeedbackAccessor userFeedbackAccessor;
 
+    /**
+     * Logger for the class
+     */
     protected static final Logger LOGGER = LoggerFactory.getLogger(CassandraFeedbackRepository.class);
     
+    /**
+     * Constructor
+     * @param userFeedbackAccessor
+     */
     @Inject
     public CassandraFeedbackRepository(UserFeedbackAccessor userFeedbackAccessor) {
     	this.userFeedbackAccessor = userFeedbackAccessor;
@@ -106,6 +116,11 @@ public class CassandraFeedbackRepository implements FeedbackRepository {
         return feedbacks;
     }
 
+    /**
+     * Helper method to translate pojo UserFeedback into UserFeedback
+     * @param result with pojo UserFeedback objects
+     * @return List of UserFeedback objects
+     */
 	protected List<UserFeedback> makeFeedbacksFromResult(
 			Result<com.intuit.wasabi.repository.cassandra.pojo.UserFeedback> result) {
 		
@@ -118,6 +133,11 @@ public class CassandraFeedbackRepository implements FeedbackRepository {
 		return feedbacks;
 	}
 
+	/**
+	 * Translate one pojo user feedback object into UserFeedback
+	 * @param userFeedback pojo 
+	 * @return UserFeedback 
+	 */
 	protected UserFeedback makeUserFeedback(
 			com.intuit.wasabi.repository.cassandra.pojo.UserFeedback userFeedback) {
 		UserFeedback feedback = new UserFeedback();

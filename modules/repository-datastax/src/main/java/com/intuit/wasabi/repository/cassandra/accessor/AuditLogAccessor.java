@@ -32,7 +32,7 @@ public interface AuditLogAccessor {
     /**
      * Retrieves the complete list of AuditLogEntries for all application and global events.
      *
-     * @return a list of those entries
+     * @return a list of auditlog entries
      */
 	@Query("SELECT * FROM auditlog")
 	Result<AuditLog> getCompleteAuditLogEntryList();
@@ -41,7 +41,7 @@ public interface AuditLogAccessor {
      * Retrieves a limited list of AuditLogEntries for all application and global events.
      *
      * @param limit the limit
-     * @return a list of those AuditLogEntries
+     * @return a list of auditlog AuditLogEntries
      */
 	@Query("SELECT * FROM auditlog limit ?")
 	Result<AuditLog> getCompleteAuditLogEntryList(int limit);
@@ -50,7 +50,7 @@ public interface AuditLogAccessor {
      * Retrieves the complete list of AuditLogEntries for a specified application.
      *
      * @param applicationName the application to select
-     * @return a list of those entries
+     * @return a list of auditlog entries
      */
     @Query("SELECT * FROM auditlog WHERE application_name = ?")
     Result<AuditLog> getAuditLogEntryList(String applicationName);
@@ -69,7 +69,20 @@ public interface AuditLogAccessor {
      * Stores an AuditLogEntry into the database.
      * Makes sure that when no ApplicationName is supplied, the {@link #GLOBAL_ENTRY_APPLICATION} is used instead.
      *
-     * @param entry the entry to store
+     * @param applicationName
+     * @param time
+     * @param action
+     * @param firstName
+     * @param lastName
+     * @param email
+     * @param userName
+     * @param userId
+     * @param experimentId
+     * @param experimentLabel
+     * @param bucketLabel
+     * @param changedProperty
+     * @param propertyBefore
+     * @param propertyAfter
      */
     @Query("INSERT INTO auditlog ( event_id, application_name, time, action, "
                 + "user_firstname, user_lastname, user_email, user_username, user_userid, "
