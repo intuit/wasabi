@@ -807,7 +807,7 @@
          <type>jar</type>
          <licenses/>
          <downloadUrls>
-            <string>file:/Users/kagarwal/Workspace/wasabi/modules/assignment-objects/../../repository/Hyrule/Hyrule/0.0.1/Hyrule-0.0.1.jar</string>
+            <string>TBD</string>
          </downloadUrls>
       </dependency>
       <dependency>
@@ -1473,7 +1473,7 @@
          <name>wasabi-experiment-objects</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-experiment-objects</artifactId>
-         <version>1.0.20160715100540-SNAPSHOT</version>
+         <version>1.0.20160801220857-SNAPSHOT</version>
          <projectUrl>https://github.com/intuit/wasabi/modules/wasabi-experiment-objects</projectUrl>
          <type>jar</type>
          <licenses>
@@ -1488,7 +1488,7 @@
          <name>wasabi-export</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-export</artifactId>
-         <version>1.0.20160715100540-SNAPSHOT</version>
+         <version>1.0.20160801220857-SNAPSHOT</version>
          <projectUrl>https://github.com/intuit/wasabi/modules/wasabi-export</projectUrl>
          <type>jar</type>
          <licenses>

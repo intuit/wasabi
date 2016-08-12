@@ -410,6 +410,17 @@ module.exports = function (grunt) {
           }
         },
 
+        compress: {
+            main: {
+                options: {
+                  archive: 'dist.zip'
+                },
+                files: [
+                  {src: ['dist/**'], dest: ''}
+                ]
+            }
+        },
+
         // By default, your `index.html`'s <!-- Usemin block --> will take care of
         // minification. These next options are pre-configured if you do not wish
         // to use the Usemin blocks.
@@ -512,7 +523,8 @@ module.exports = function (grunt) {
         'ngconstant:dist',
         'copy:distwasabijs',
         'copy:stylesbranding',
-        'file_append'
+        'file_append',
+        'compress'
     ]);
 
     grunt.registerTask('default', [

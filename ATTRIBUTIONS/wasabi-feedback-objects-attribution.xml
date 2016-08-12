@@ -665,7 +665,7 @@
          <name>wasabi-authentication-objects</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-authentication-objects</artifactId>
-         <version>1.0.20160715100540-SNAPSHOT</version>
+         <version>1.0.20160801220857-SNAPSHOT</version>
          <projectUrl>https://github.com/intuit/wasabi/modules/wasabi-authentication-objects</projectUrl>
          <type>jar</type>
          <licenses>
