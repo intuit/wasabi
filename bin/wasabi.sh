@@ -15,7 +15,7 @@
 # limitations under the License.
 ###############################################################################
 
-formulas=("bash" "cask" "git" "maven" "wget" "python" "ruby" "node")
+formulas=("bash" "cask" "git" "maven" "wget" "ruby" "node")
 casks=("java" "docker")
 endpoint_default=localhost:8080
 verify_default=false
