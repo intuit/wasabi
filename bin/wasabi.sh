@@ -15,19 +15,16 @@
 # limitations under the License.
 ###############################################################################
 
-formulas=("bash" "cask" "git" "maven" "python" "ruby" "node" "docker" "docker-machine")
-casks=("java" "vagrant" "virtualbox")
-build_default=false
+formulas=("bash" "cask" "git" "maven" "wget" "python" "ruby" "node")
+casks=("java" "docker")
 endpoint_default=localhost:8080
 verify_default=false
 sleep_default=30
 red=`tput setaf 9`
 green=`tput setaf 10`
 reset=`tput sgr0`
-
-if [ -z "$OS" ]; then
-  export OS="OSX"
-fi
+wasabi_os_default=OSX
+export WASABI_OS=${WASABI_OS:-${wasabi_os_default}}
 
 usage() {
   [ "${1}" ] && echo "${red}error: ${1}${reset}"
@@ -37,7 +34,6 @@ ${green}
 usage: `basename ${0}` [options] [commands]
 
 options:
-  -b | --build [ true | false ]          : build; default: ${build_default}
   -e | --endpoint [ host:port ]          : api endpoint; default: ${endpoint_default}
   -v | --verify [ true | false ]         : verify installation configuration; default: ${verify_default}
   -s | --sleep [ sleep-time ]            : sleep/wait time in seconds; default: ${sleep_default}
@@ -45,6 +41,7 @@ options:
 
 commands:
   bootstrap                              : install dependencies
+  build                                  : build project
   start[:cassandra,mysql,wasabi]         : start all, cassandra, mysql, wasabi
   test                                   : test wasabi
   stop[:wasabi,cassandra,mysql]          : stop all, wasabi, cassandra, mysql
@@ -113,32 +110,20 @@ bootstrap() {
   echo "${green}installed dependencies: ${formulas[@]} ${casks[@]}${reset}"
 }
 
-start() {
-  [ ${build} = "true" ] && ./bin/build.sh -b ${build} -t ${verify}
+build() {
+  ./bin/build.sh -b ${1:-false} -t ${2:-false} -p ${3:-development}
+}
 
+start() {
   ./bin/container.sh -v ${verify} start${1:+:$1}
 }
 
-test() {
-  if [ ${endpoint} == ${endpoint_default} ]; then
-    endpoint=$(docker-machine ip wasabi):8080
-    [[ $? -ne 0 ]] && endpoint=${endpoint_default}
-  fi
-
-  sleepTime=${1:-sleep}
-  cntr=0
-
-  while (( cntr < ${sleepTime} )); do
-    echo "${endpoint}/api/v1/ping"
-    curl ${endpoint}/api/v1/ping >/dev/null 2>&1
-    [[ $? -eq 0 ]] && break
-    [[ ${cntr} < ${sleepTime} ]] && usage "unable to ping application: ${endpoint}/api/v1/ping" 1
-    cntr=$(($cntr + 3))
-    beerMe 3
-  done
+test_api() {
+  wget -q --spider --tries=20 --waitretry=3 http://${endpoint}/api/v1/ping
+  [ $? -ne 0 ] && usage "unable to start" 1
 
   [ ! -e ./modules/functional-test/target/wasabi-functional-test-*-SNAPSHOT-jar-with-dependencies.jar ] && \
-    ./bin/build.sh -b true -t ${verify}
+    build false ${verify}
 
   # FIXME: derive usr/pwd from env
   mkdir test.log >/dev/null 2>&1
@@ -151,13 +136,13 @@ test() {
 resource() {
   for resource in $1; do
     case "${1}" in
-      ui) [ ! -f ./modules/ui/dist/index.html ] && ./bin/build.sh
+      ui) [ ! -f ./modules/ui/dist/index.html ] && build
         ./bin/wasabi.sh status >/dev/null 2>&1 || ./bin/wasabi.sh start
-        open http://$(docker-machine ip wasabi):8080/index.html;;
+        open http://localhost:8080;;
       api) [[ ! -f ./modules/swagger-ui/target/swaggerui/index.html || \
-        ! -f ./modules/api/target/generated/swagger-ui/swagger.json ]] && ./bin/build.sh
+        ! -f ./modules/api/target/generated/swagger-ui/swagger.json ]] && build
         ./bin/wasabi.sh status >/dev/null 2>&1 || ./bin/wasabi.sh start:docker
-        jip=$(docker-machine ip wasabi)
+#        jip=localhost
         ./bin/wasabi.sh remove:wasabi >/dev/null 2>&1
         profile=development
         module=main
@@ -166,12 +151,13 @@ resource() {
         version=$(fromPom . ${profile} project.version)
         id=${artifact}-${version}-${profile}
         content=${home}/${id}/content/ui/dist
-        sed -i '' "s/localhost/${jip}/g" ${content}/swagger/swaggerjson/swagger.json
+#        sed -i '' "s/localhost/${jip}/g" ${content}/swagger/swaggerjson/swagger.json
+        # FIXME: this can fail after 'package' given the profile = build
         sed -i '' "s/this.model.validatorUrl.*$/this.model.validatorUrl = null;/g" ${content}/swagger/swagger-ui.js
         ./bin/wasabi.sh start
         beerMe 6
-        open http://$(docker-machine ip wasabi):8080/swagger/index.html;;
-      doc) [ ! -f ./target/site/apidocs/index.html ] && ./bin/build.sh
+        open http://localhost:8080/swagger/index.html;;
+      doc) [ ! -f ./target/site/apidocs/index.html ] && build
         open ./target/site/apidocs/index.html;;
       mysql|cassandra) ./bin/wasabi.sh status 2>/dev/null | grep wasabi-${1} 1>/dev/null || ./bin/wasabi.sh start
         ./bin/container.sh console:${1};;
@@ -189,25 +175,9 @@ status() {
 }
 
 package() {
+  profile=build
 
-  profile_default_package=build
-  profile=${profile:=${profile_default_package}}
-
-  ./bin/build.sh -b true -p ${profile}
-
-  if [ "$OS" == "OSX" ]; then
-    (export VAGRANT_CWD=./bin; vagrant up)
-    (export VAGRANT_CWD=./bin; vagrant ssh -c "cd wasabi; mvn dependency:resolve")
-  else
-    mvn install
-    mvn dependency:resolve
-  fi
-  beerMe 10
-  if [ "$OS" == "OSX" ]; then
-    (export VAGRANT_CWD=./bin; vagrant ssh -c "cd wasabi; ./bin/fpm.sh -p ${profile}")
-  else
-    ./bin/fpm.sh -p ${profile}
-  fi
+  build true false ${profile}
 
   # FIXME: move to modules/ui/build.sh
   version=$(fromPom . build project.version)
@@ -230,7 +200,7 @@ package() {
     done; \
     sed -i '' -e "s|http://localhost:8080|${server}|g" target/constants.json 2>/dev/null; \
     sed -i '' -e "s|VERSIONLOC|${version}|g" target/app/index.html 2>/dev/null; \
-    if [ "$OS" == "OSX" ]; then \
+    if [ "${WASABI_OS}" == "${wasabi_os_default}" ]; then \
     (cd target; \
       npm install; \
       bower install; \
@@ -251,18 +221,16 @@ package() {
       sed -i '' -e "s|\${application.http.content.directory}|${content}|g" target/build/${pkg}/before-remove.sh 2>/dev/null; \
     done)
 
-  if [ "$OS" == "OSX" ]; then
-    (export VAGRANT_CWD=./bin; vagrant ssh -c "cd wasabi/modules/ui; ./bin/fpm.sh -n ${name} -v ${version} -p ${profile}")
-    (export VAGRANT_CWD=./bin; vagrant halt)
-  fi
+  ./bin/fpm.sh -n ${name} -v ${version} -p ${profile}
+  find . -type f \( -name "*.rpm" -or -name "*.deb" \) -exec mv {} ./target \;
 
   echo "deployable build packages:"
 
-  find ./modules -type f \( -name "*.rpm" -or -name "*.deb" \)
+  find . -type f \( -name "*.rpm" -or -name "*.deb" \)
 }
 
 release() {
-  ./bin/release.sh ${1:+$1}
+  echo "./bin/release.sh ${1:+$1}"
 }
 
 remove() {
@@ -275,8 +243,6 @@ while getopts "${optspec}" opt; do
   case "${opt}" in
     -)
       case "${OPTARG}" in
-        build) build="${!OPTIND}"; OPTIND=$(( ${OPTIND} + 1 ));;
-        build=*) build="${OPTARG#*=}";;
         endpoint) endpoint="${!OPTIND}"; OPTIND=$(( ${OPTIND} + 1 ));;
         endpoint=*) endpoint="${OPTARG#*=}";;
         verify) verify="${!OPTIND}"; OPTIND=$(( ${OPTIND} + 1 ));;
@@ -286,7 +252,6 @@ while getopts "${optspec}" opt; do
         help) usage;;
         *) [ "${OPTERR}" = 1 ] && [ "${optspec:0:1}" != ":" ] && echo "unknown option --${OPTARG}";;
       esac;;
-    b) build=${OPTARG};;
     e) endpoint=${OPTARG};;
     v) verify=${OPTARG};;
     s) sleep=${OPTARG};;
@@ -298,38 +263,34 @@ done
 
 [ $# -eq 0 ] && usage "unspecified command" 1
 
-build=${build:=${build_default}}
 endpoint=${endpoint:=${endpoint_default}}
 verify=${verify:=${verify_default}}
 sleep=${sleep:=${sleep_default}}
 
 [[ $# -eq 0 ]] && usage
 
-if [ "$OS" == "OSX" ]; then
-  eval $(docker-machine env wasabi) 2>/dev/null
-fi
-
 for command in ${@:$OPTIND}; do
   case "${command}" in
     bootstrap) bootstrap;;
-    start) start;;
+    build) build true;;
+    start) command="start:cassandra,mysql,wasabi";&
     start:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for cmd in ${commands}; do start ${cmd}; done);;
-    test) test;;
-    stop) stop;;
+      (IFS=','; for command in ${commands}; do start ${command}; done);;
+    test) test_api;;
+    stop) command="stop:wasabi,mysql,cassandra";&
     stop:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for cmd in ${commands}; do stop ${cmd}; done);;
-    resource) command="resource:ui,api,doc,casssandra,mysql";;
+      (IFS=','; for command in ${commands}; do stop ${command}; done);;
+    resource) command="resource:ui,api,doc,casssandra,mysql";&
     resource:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for cmd in ${commands}; do resource ${cmd}; done);;
+      (IFS=','; for command in ${commands}; do resource ${command}; done);;
     status) status;;
-    remove) remove;;
+    remove) command="remove:wasabi,cassandra,mysql";&
     remove:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for cmd in ${commands}; do remove ${cmd}; done);;
+      (IFS=','; for command in ${commands}; do remove ${command}; done);;
     package) package;;
     release) release;;
     release:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for cmd in ${commands}; do release ${cmd}; done);;
+      (IFS=','; for command in ${commands}; do release ${command}; done);;
     "") usage "unknown command: ${command}" 1;;
     *) usage "unknown command: ${command}" 1;;
   esac
