@@ -1,6 +1,6 @@
-@echo off
+@echo off 
 
-rem ###############################################################################
+rem ############################################################################
 rem # Copyright 2016 Intuit
 rem #
 rem # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,59 +14,103 @@ rem # distributed under the License is distributed on an "AS IS" BASIS,
 rem # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 rem # See the License for the specific language governing permissions and
 rem # limitations under the License.
-rem ###############################################################################
+rem ############################################################################
 
-rem list of dependencies to install
-set choco_packages=docker 
-rem docker-machine boot2docker
-rem jdk8 nodejs.install maven python2
+setlocal
 
-rem test if administrator (see http://stackoverflow.com/a/11995662)
+rem List of dependencies to install
+set choco_packages=docker,docker-machine,boot2docker,jdk8,nodejs.install,maven --version 3.3.9 --allowEmptyChecksums,ruby
+rem TODO: wait for maven repo to be fixed and remove the additional arguments
+set npm_packages=yo,grunt-cli,bower
+set gem_packages=compass
+
+rem Test if administrator (see http://stackoverflow.com/a/11995662)
 net session >nul 2>&1
 if not %errorLevel% == 0 (
-  echo Are you an administrator? 1>&2
-  echo For the bootstrap you need an elevated prompt. 1>&2
-  goto end_of_file
-)
-
-rem enable hyper v
-dism.exe /Online /Enable-Feature:Microsoft-Hyper-V /All /NoRestart 1>nul
-if not %errorLevel% == 0 (
-  echo Can not enable Hyper-V. Try it from "Turn Windows features on or off." 1>&2
-  goto end_of_file
-) else (
-  echo Enabled Hyper-V. You might need to restart.
-  echo Also make sure Hyper-V is enabled in your BIOS.
+    call :error You need administrator rights to bootstrap Wasabi.
+    exit /b 1
 )
 
 rem install chocolatey
-echo Trying to find Chocolatey
+call :info Trying to find Chocolatey
 if not exist C:\ProgramData\chocolatey\choco.exe (
-  echo Installing Chocolatey
+  call :info Installing Chocolatey
   powershell -NoProfile -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin
   if errorlevel 1 (
-    echo Can not install chocolatey 1>&2
-    goto end_of_file
+      call :error Can not install Chocolatey
+      exit /b 1
   )
   rem make sure choco writes its config
   C:\ProgramData\chocolatey\choco.exe
 ) else (
-  echo Found Chocolatey.
+    call :info Found Chocolatey
 )
 
-rem install dependencies
-for %%p in (%choco_packages%) do (
-  C:\ProgramData\chocolatey\choco.exe upgrade %%p -y
-)
 
-rem create vm
-rem powershell -NoProfile -ExecutionPolicy Bypass -Command "New-VM -Name 'wasabi-windows' -MemoryStartupBytes 512MB -NoVHD"
-powershell -NoProfile -ExecutionPolicy Bypass -Command "New-VMSwitch -SwitchName 'VirtualSwitchWasabi' -SwitchType Internal"
-docker-machine --debug create wasabi --driver hyperv --hyperv-virtual-switch "VirtualSwitchWasabi" --hyperv-memory "800" 
-
-rem --hyperv-boot2docker-url "file:\\C:\Program Files\Boot2Docker for Windows\boot2docker.iso" 
-
-
-:end_of_file
+call :info Installing/Upgrading Chocolatey dependencies
+set remaining_packages=%choco_packages%
+:install_chocolatey_dependencies
+    for /f "tokens=1* delims=," %%P in ("%remaining_packages%") do (
+        set current_package=%%P
+        set remaining_packages=%%Q
+      
+        call :debug Installing/Upgrading via choco !current_package!
+        cmd /c C:\ProgramData\chocolatey\choco.exe upgrade !current_package! -y
+    )
+    if defined remaining_packages goto :install_chocolatey_dependencies
 
 
+call :info Installing/Upgrading Node.JS dependencies
+set remaining_packages=%npm_packages%
+:install_npm_dependencies
+    for /f "tokens=1* delims=," %%P in ("%remaining_packages%") do (
+        set current_package=%%P
+        set remaining_packages=%%Q
+      
+        call :debug Installing/Upgrading via npm !current_package!
+        cmd /c "C:\Program Files\nodejs\npm.cmd" -g install !current_package!
+    )
+    if defined remaining_packages goto :install_npm_dependencies
+
+
+call :info Installing/Upgrading Ruby dependencies
+set remaining_packages=%gem_packages%
+:install_gem_dependencies
+    for /f "tokens=1* delims=," %%P in ("%remaining_packages%") do (
+        set current_package=%%P
+        set remaining_packages=%%Q
+      
+        call :debug Installing/Upgrading via gem !current_package!
+        cmd /c C:\Tools\ruby23\bin\gem.cmd install !current_package!
+    )
+    if defined remaining_packages goto :install_gem_dependencies
+
+cmd /c C:\ProgramData\chocolatey\bin\RefreshEnv.cmd
+call :info Bootstrapping done. You might need to restart your terminal.
+goto :eof
+
+
+rem FUNCTION: Logs the parameters as DEBUG.
+:debug
+    call :log [DEBUG] %*
+    call :log [DEBUG] %* >> wasabi_windows.log
+    goto :eof
+
+rem FUNCTION: Logs the parameters as INFO.
+:info
+    call :log [INFO] %*
+    call :log [INFO] %* >> wasabi_windows.log
+    goto :eof
+
+rem FUNCTION: Logs the parameters as ERROR.
+:error
+    call :log [ERROR] %* 1>&2
+    call :log [ERROR] %* >> wasabi_windows.log
+    goto :eof
+
+rem FUNCTION: Logs the parameters.
+:log
+    for /f "tokens=*" %%D in ('date /t') do (
+        for /f "tokens=*" %%T in ('time /t') do echo %%D%%T  %*
+    )
+    goto :eof

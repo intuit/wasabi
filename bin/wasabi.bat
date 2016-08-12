@@ -1,6 +1,6 @@
-@echo off
+@echo off 
 
-rem ###############################################################################
+rem ############################################################################
 rem # Copyright 2016 Intuit
 rem #
 rem # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,34 +14,105 @@ rem # distributed under the License is distributed on an "AS IS" BASIS,
 rem # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 rem # See the License for the specific language governing permissions and
 rem # limitations under the License.
-rem ###############################################################################
+rem ############################################################################
 
-rem define valid commands
-set valid_commands=(bootstrap test usage)
+setlocal
+call :init_logging
 
-rem loop over passed commands and call subsequent files
-rem until no commands left to parse or an invalid command is
-rem issued.
-:read_params
-    if [%1]==[] goto end_of_file
-    
-    rem check if valid command was issued, otherwise stop
-    rem and show usage
-    for %%i in %valid_commands% do (
-        if /I %%i == %1 (
-           goto valid_command_issued
+rem Define valid commands
+set valid_commands=bootstrap build package remove resource start stop test usage
+
+if "%1"=="" (
+    call :invalid_command_issued
+    exit /b 1
+)
+
+rem Enable delayed expansion for the parser
+setlocal enabledelayedexpansion
+
+call :info Processing Wasabi commands
+set remaining_commands=%*
+:read_commands
+    rem Pop currently first command (split at space)
+    for /f "tokens=1*" %%C in ("%remaining_commands%") do (
+        set current_command=%%C
+        call :info Current command: !current_command!
+        set remaining_commands=%%D
+        call :debug Remaining commands: !remaining_commands!
+        
+        rem Process current command. Split command and parameters at :
+        for /f "tokens=1* delims=:" %%F in ("!current_command!") do (
+            set command_name=%%F
+            call :debug Command name: !command_name!
+            set parameters=%%G
+            call :debug Command parameters: !parameters!
+            
+            rem Check command validity
+            for %%V in (%valid_commands%) do (
+                if /I "!command_name!"=="%%V" goto :valid_command
+            )
+            call :invalid_command_issued !command_name!
+            exit /b 1
+            :valid_command
+            set space_parameters=
+            
+            rem Read command paramaters from parameter string
+            :read_parameters
+                rem Pop first parameter (split at , )
+                for /f "delims=, tokens=1*" %%P in ("!parameters!") do (
+                    set param=%%P
+                    call :debug Current parameter: !param!
+                     set parameters=%%Q
+                    call :debug Remaining parameters: !parameters!
+                    
+                    rem Append parameter to parameter list - now space separated
+                    set space_parameters=!space_parameters! !param!
+                    call :debug Collected parameters: !space_parameters!
+                )
+                if defined parameters goto :read_parameters
+            
+            set assembled_command=bin/win/!command_name!.bat!space_parameters!
+            call :info Assembled: !assembled_command!
+            call !assembled_command!
         )
     )
-    echo Invalid command: %1 1>&2
-    call "bin/win/usage.bat"
-    goto end_of_file
-    :valid_command_issued
+    if defined remaining_commands goto read_commands
+call :info Wasabi done
+goto :eof
 
-    rem call valid command file
-    call "bin/win/%1.bat"
 
-    rem next parameter
-    shift
-    goto read_params
+rem LABEL: Print error and show usage, then exit with exit code 1.
+:invalid_command_issued
+     call :error Invalid command: %1
+     call "bin/win/usage.bat"
+     goto :eof
 
-:end_of_file
+rem FUNCTION: Initializes the debug log.
+:init_logging
+    call :log === Wasabi Windows Log === > wasabi_windows.log
+    goto :eof
+
+rem FUNCTION: Logs the parameters as DEBUG.
+:debug
+    rem call :log [DEBUG] %*
+    call :log [DEBUG] %* >> wasabi_windows.log
+    goto :eof
+
+rem FUNCTION: Logs the parameters as INFO.
+:info
+    call :log [INFO] %*
+    call :log [INFO] %* >> wasabi_windows.log
+    goto :eof
+
+rem FUNCTION: Logs the parameters as ERROR.
+:error
+    call :log [ERROR] %* 1>&2
+    call :log [ERROR] %* >> wasabi_windows.log
+    goto :eof
+
+rem FUNCTION: Logs the parameters.
+:log
+    for /f "tokens=*" %%D in ('date /t') do (
+        for /f "tokens=*" %%T in ('time /t') do echo %%D%%T  %*
+    )
+    goto :eof
