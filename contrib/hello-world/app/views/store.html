@@ -12,7 +12,10 @@
             <table style="width: 500px;">
                 <tr><th style="width: 260px;">Name</th><th style="width: 100px;">Price</th><th>Quantity</th><th>&nbsp;</th></tr>
                 <tr ng-repeat='nextProduct in store.products | filter:query' ng-class-odd="'oddRow'" ng-class-even="'evenRow'">
-                    <td class="storeProductName">{{nextProduct.name}}</td><td class="storePriceCell">${{nextProduct.cost}}</td><td style="text-align: center;"><input type="number" style="width: 20px;" ng-model="nextProduct.quantity"/></td><td class="buttonCell"><button style="background-color: {{store.buttonColor}}; color: {{store.textColor}}" ng-click="store.addToCart(nextProduct)">Buy</button></td></tr>
+                    <td class="storeProductName">{{nextProduct.name}}</td>
+                    <td class="storePriceCell">${{nextProduct.cost}}</td>
+                    <td style="text-align: center;"><input type="number" style="width: 20px;" ng-model="nextProduct.quantity"/></td>
+                    <td class="buttonCell"><button style="background-color: {{store.buttonColor}}; color: {{store.textColor}}" ng-click="store.addToCart(nextProduct)">Buy</button></td></tr>
                 </tr>
             </table>
         </section>

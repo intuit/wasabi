@@ -8,7 +8,7 @@ npm
 
 ##Configuration
 
-If you are not running a copy of Wasabi locally on your system at 192.168.99.100:8080, you will need
+If you are not running a copy of Wasabi locally on your system at localhost:8080, you will need
 to search for "WASABI.setOptions" in the source (currently two locations) and then change the server
 and possibly the protocol. You will also need to change the include of wasabi.js in the index.html. 
 
@@ -17,7 +17,7 @@ experiment name referenced.  As you can see, the default code expects an experim
 an application named "MyStore" to be defined in the Wasabi server that you are hitting.  There is a script
 named setup.sh that can be run to create and start that experiment.  Before running that script, be source
 to edit it to make sure it points at the Wasabi server you are using (e.g., it might be localhost:8080,
-192.168.99.100:8080, etc.) and make sure you put in your login name.
+localhost:8080, etc.) and make sure you put in your login name.
 
 Then just run it like this:
 
