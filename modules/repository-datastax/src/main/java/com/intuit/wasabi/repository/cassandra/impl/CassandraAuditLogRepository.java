@@ -48,12 +48,22 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 public class CassandraAuditLogRepository implements AuditLogRepository {
 
+	/**
+	 * Logger for teh class
+	 */
 	private static final Logger LOGGER = getLogger(CassandraAuditLogRepository.class);
+	
+	/**
+	 * Accessor interface for audit log table
+	 */
 	private AuditLogAccessor accessor;
 
+	/**
+	 * Constructor
+	 * @param accessor
+	 */
 	@Inject
-	public CassandraAuditLogRepository(AuditLogAccessor accessor)
-			throws IOException, ConnectionException {
+	public CassandraAuditLogRepository(AuditLogAccessor accessor) {
 		this.accessor = accessor;
 	}
 
@@ -77,10 +87,20 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
 		}
 	}
 
+	/**
+	 * Helper method to get empty string for null
+	 * @param input
+	 * @return input or empty string
+	 */
 	private String makeEmptyStringForNull(String input) {
 		return input == null ? "" : input;
 	}
 
+	/**
+	 * Helper method to translate audit log list 
+	 * @param entries audit log table pojo list
+	 * @return audit log domain object list
+	 */
 	private List<AuditLogEntry> makeAuditLogEntries(List<AuditLog> entries) {
 		List<AuditLogEntry> auditLogEntries = new ArrayList<>(entries.size());
 
@@ -295,11 +315,6 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
 	 * @param entry
 	 *            the entry to store
 	 * @return true on success
-	 * @throws RepositoryException
-	 *             if the required entry values
-	 *             {@link AuditLogEntry#getAction()},
-	 *             {@link AuditLogEntry#getUser()},
-	 *             {@link AuditLogEntry#getTime()} or the entry itself are null.
 	 */
 	@Override
 	public boolean storeEntry(AuditLogEntry entry) {
