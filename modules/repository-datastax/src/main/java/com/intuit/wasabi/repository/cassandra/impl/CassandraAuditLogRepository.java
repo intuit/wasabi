@@ -103,38 +103,44 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
 					.withUserId(userId).build();
 
 			// The intent of the multiple try blocks is to get as much info to
-			// the client as possible.
+			// the client as possible. The exceptions are logged as warn
 			AuditLogAction ala = null;
 			try {
 				ala = AuditLogAction.valueOf(auditLog.getAction());
 			} catch (Exception e) {
-				LOGGER.error("Error while creating audit log action: "
+				LOGGER.warn("Exception while creating audit log action: "
 						+ auditLog.getAction(), e);
 				ala = AuditLogAction.UNSPECIFIED_ACTION;
 			}
 
 			Bucket.Label bucketLabel = null;
 			try {
-				bucketLabel = Bucket.Label.valueOf(auditLog.getBucketLabel());
+				String label = auditLog.getBucketLabel();
+				if ( ! StringUtils.isBlank(label) )
+					bucketLabel = Bucket.Label.valueOf(label);
 			} catch (Exception e) {
-				LOGGER.error("Error while creating audit log exp label: "
+				LOGGER.warn("Exception while creating audit log exp label: "
 						+ auditLog.getBucketLabel(), e);
 			}
 
 			Experiment.Label experimentLabel = null;
 			try {
-				experimentLabel = Label.valueOf(auditLog.getExperimentLabel());
+				String label = auditLog.getExperimentLabel();
+				if ( ! StringUtils.isBlank(label) )
+					experimentLabel = Label.valueOf(label);
 			} catch (Exception e) {
-				LOGGER.error("Error while creating audit log bucket label: "
+				LOGGER.warn("Exception while creating audit log bucket label: "
 						+ auditLog.getExperimentLabel(), e);
 			}
 
 			Experiment.ID experimentId = null;
 			try {
-				experimentId = Experiment.ID
-						.valueOf(auditLog.getExperimentId());
+				UUID expId = auditLog.getExperimentId();
+				if ( expId != null )
+					experimentId = Experiment.ID
+						.valueOf(expId);
 			} catch (Exception e) {
-				LOGGER.error("Error while creating audit log bucket label: "
+				LOGGER.warn("Exception while creating audit log bucket label: "
 						+ auditLog.getExperimentId(), e);
 			}
 
