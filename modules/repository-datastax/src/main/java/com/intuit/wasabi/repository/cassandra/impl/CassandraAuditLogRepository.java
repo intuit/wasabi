@@ -29,12 +29,10 @@ import com.intuit.wasabi.repository.AuditLogRepository;
 import com.intuit.wasabi.repository.RepositoryException;
 import com.intuit.wasabi.repository.cassandra.accessor.AuditLogAccessor;
 import com.intuit.wasabi.repository.cassandra.pojo.audit.AuditLog;
-import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -75,6 +73,8 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
 	 */
 	@Override
 	public List<AuditLogEntry> getCompleteAuditLogEntryList() {
+    	LOGGER.debug("Getting complete audit log entries");
+
 		try {
 
 			Result<AuditLog> result = accessor.getCompleteAuditLogEntryList();
@@ -191,6 +191,7 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
 	 */
 	@Override
 	public List<AuditLogEntry> getCompleteAuditLogEntryList(int limit) {
+    	LOGGER.debug("Getting complete audit log entries with limit {}", limit);
 		try {
 
 			Result<AuditLog> result = accessor
@@ -217,6 +218,7 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
 	@Override
 	public List<AuditLogEntry> getAuditLogEntryList(
 			Application.Name applicationName) {
+    	LOGGER.debug("Getting audit log entries for {}", applicationName);
 
 		try {
 
@@ -245,6 +247,8 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
 	@Override
 	public List<AuditLogEntry> getAuditLogEntryList(
 			Application.Name applicationName, int limit) {
+    	LOGGER.debug("Getting audit log entries for application name {} and limit {}",
+    			applicationName, limit);
 		try {
 
 			Result<AuditLog> result = accessor.getAuditLogEntryList(
@@ -268,6 +272,7 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
 	 */
 	@Override
 	public List<AuditLogEntry> getGlobalAuditLogEntryList() {
+    	LOGGER.debug("Getting global audit log entries");
 		try {
 
 			Result<AuditLog> result = accessor
@@ -291,6 +296,8 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
 	 */
 	@Override
 	public List<AuditLogEntry> getGlobalAuditLogEntryList(int limit) {
+    	LOGGER.debug("Getting global audit log entries with limit {}", limit);
+
 		try {
 
 			Result<AuditLog> result = accessor.getAuditLogEntryList(
@@ -318,6 +325,8 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
 	 */
 	@Override
 	public boolean storeEntry(AuditLogEntry entry) {
+    	LOGGER.debug("Storing entry {}", entry);
+    	
 		// Note checks for action, time and action are redundant since 
 		// they are already checked in AuditLogEntry
 		if (entry == null || entry.getAction() == null

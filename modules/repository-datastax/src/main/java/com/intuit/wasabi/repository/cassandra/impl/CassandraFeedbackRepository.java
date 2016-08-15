@@ -63,7 +63,9 @@ public class CassandraFeedbackRepository implements FeedbackRepository {
      */
     @Override
     public void createUserFeedback(UserFeedback userFeedback) {
-        try {
+    	LOGGER.debug("creating user feedback {}", userFeedback);
+
+    	try {
 
         	userFeedbackAccessor.createUserFeedback(userFeedback.getUsername().getUsername(),
     			userFeedback.getSubmitted(), userFeedback.getScore(), userFeedback.getComments(),
@@ -80,6 +82,7 @@ public class CassandraFeedbackRepository implements FeedbackRepository {
      */
     @Override
     public List<UserFeedback> getUserFeedback(UserInfo.Username username) throws RepositoryException {
+    	LOGGER.debug("Getting user feedback for {}", username);
 
         Preconditions.checkNotNull(username, "Parameter \"username\" cannot be null");
 
@@ -102,6 +105,7 @@ public class CassandraFeedbackRepository implements FeedbackRepository {
      */
     @Override
     public List<UserFeedback> getAllUserFeedback() {
+    	LOGGER.debug("Getting all user feedbacks ");
 
         List<UserFeedback> feedbacks = new ArrayList<>();
         try {
