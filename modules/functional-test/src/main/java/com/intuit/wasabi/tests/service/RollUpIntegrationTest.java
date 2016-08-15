@@ -138,7 +138,7 @@ public class RollUpIntegrationTest extends TestBase {
 	public void prepareDBConnection() throws Exception {
 		Class.forName("com.mysql.jdbc.Driver").newInstance();
 		connection = DriverManager.getConnection(
-				appProperties.getProperty("database.url"), 
+				appProperties.getProperty("database.url"),
 				appProperties.getProperty("database.username"),
 				appProperties.getProperty("database.password"));
 	}
@@ -477,7 +477,7 @@ public class RollUpIntegrationTest extends TestBase {
 				+ "' group by bucket_label";
 
 		try (Statement statement = connection.createStatement();
-		ResultSet result = statement.executeQuery(queryGroupByBucket)) {
+				ResultSet result = statement.executeQuery(queryGroupByBucket)) {
 			if (result.next()) {
 				fail("Should have no rows for query: " + queryGroupByBucket);
 			}
@@ -711,7 +711,8 @@ public class RollUpIntegrationTest extends TestBase {
 		paramsQA.context = QA;
 
 		long startTime = System.nanoTime();
-		ExperimentCounts countsBeforeQA = postExperimentCounts(experiment, paramsQA);
+		ExperimentCounts countsBeforeQA = postExperimentCounts(experiment,
+				paramsQA);
 		long endTime = System.nanoTime();
 
 		System.out.println("Before analytics time QA was: "
@@ -722,8 +723,9 @@ public class RollUpIntegrationTest extends TestBase {
 		paramsProd.actions = null;
 		paramsProd.context = PROD;
 
-		startTime = System.nanoTime();		
-		ExperimentCounts countsBeforeProd = postExperimentCounts(experiment, paramsProd);
+		startTime = System.nanoTime();
+		ExperimentCounts countsBeforeProd = postExperimentCounts(experiment,
+				paramsProd);
 		endTime = System.nanoTime();
 
 		System.out.println("Before analytics time Prod was: "
@@ -733,7 +735,8 @@ public class RollUpIntegrationTest extends TestBase {
 
 		startTime = System.nanoTime();
 
-		ExperimentCounts countsAfterQA = postExperimentCounts(experiment, paramsQA);
+		ExperimentCounts countsAfterQA = postExperimentCounts(experiment,
+				paramsQA);
 		endTime = System.nanoTime();
 
 		System.out.println("After analytics time QA was: "
@@ -745,7 +748,8 @@ public class RollUpIntegrationTest extends TestBase {
 
 		startTime = System.nanoTime();
 
-		ExperimentCounts countsAfterProd = postExperimentCounts(experiment, paramsProd);
+		ExperimentCounts countsAfterProd = postExperimentCounts(experiment,
+				paramsProd);
 		endTime = System.nanoTime();
 
 		System.out.println("After analytics time Prod was: "
@@ -757,12 +761,13 @@ public class RollUpIntegrationTest extends TestBase {
 	}
 
 	/**
-	 * Note - This method prepares the mysql rollup table for action and events. The steps
-	 * involved in preparing the roll up table are :
+	 * Note - This method prepares the mysql rollup table for action and events.
+	 * The steps involved in preparing the roll up table are :
 	 * <ol>
 	 * <li>Insert non cumulative counts for events and impression into roll up
 	 * table
-	 * <li>Insert cumulative counts for events and impressions into roll up table
+	 * <li>Insert cumulative counts for events and impressions into roll up
+	 * table
 	 * <li>Insert non-cumulative counts for events by action into rollup table
 	 * <li>Insert cumulative counts for events by action into rollup table
 	 * </ol>
@@ -1121,13 +1126,13 @@ public class RollUpIntegrationTest extends TestBase {
 
 	private void insertIntoRollUp(String rollUpQuery) throws SQLException {
 		try (Statement statement = connection.createStatement();
-				ResultSet resultSet = statement.executeQuery(rollUpQuery)) {			
+				ResultSet resultSet = statement.executeQuery(rollUpQuery)) {
 		}
 	}
 
 	private int[] getUserAndDistinctUserCount(Connection connection,
 			String query) throws SQLException {
-		
+
 		try (Statement statement = connection.createStatement();
 				ResultSet result = statement.executeQuery(query)) {
 
