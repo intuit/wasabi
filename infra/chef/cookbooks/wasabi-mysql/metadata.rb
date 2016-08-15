@@ -1,0 +1,8 @@
+name 'wasabi-mysql'
+maintainer 'IDEA Ops'
+maintainer_email 'sriramu_singaram@intuit.com'
+license 'all_rights'
+description 'Installs/Configures wasabi-mysql'
+long_description 'Installs/Configures wasabi-mysql'
+version '0.1.0'
+depends 'mysql', '~> 8.0'

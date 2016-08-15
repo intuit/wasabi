@@ -1,0 +1,4 @@
+.vagrant
+Berksfile.lock
+chef/nodes
+chef/cookbooks/clients

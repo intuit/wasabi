@@ -1,0 +1,3 @@
+source 'https://supermarket.chef.io'
+
+cookbook 'wasabi-mysql', '= 0.1.0', path: './chef/cookbooks/wasabi-mysql'
