@@ -8,7 +8,7 @@ import lombok.*;
 import java.util.List;
 import java.util.UUID;
 
-@Table(name="Application")
+@Table(name="application")
 @Data
 @Builder(toBuilder = true)
 @NoArgsConstructor
