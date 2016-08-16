@@ -1,27 +1,15 @@
 package com.intuit.wasabi.repository.cassandra.impl;
 
-import com.datastax.driver.core.Session;
-import com.datastax.driver.mapping.Mapper;
-import com.datastax.driver.mapping.MappingManager;
 import com.datastax.driver.mapping.Result;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.name.Names;
 import com.intuit.wasabi.auditlogobjects.AuditLogAction;
 import com.intuit.wasabi.auditlogobjects.AuditLogEntry;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authenticationobjects.UserInfo.Username;
-import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Experiment;
-import com.intuit.wasabi.feedbackobjects.UserFeedback;
-import com.intuit.wasabi.repository.AuditLogRepository;
 import com.intuit.wasabi.repository.RepositoryException;
-import com.intuit.wasabi.repository.cassandra.CassandraRepositoryModule;
 import com.intuit.wasabi.repository.cassandra.accessor.AuditLogAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.UserFeedbackAccessor;
 import com.intuit.wasabi.repository.cassandra.pojo.audit.AuditLog;
 
 import org.junit.Before;
@@ -33,17 +21,12 @@ import static org.mockito.Mockito.*;
 
 import org.mockito.runners.MockitoJUnitRunner;
 
-import io.codearte.catchexception.shade.mockito.Mockito;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doThrow;
 
 @RunWith(MockitoJUnitRunner.class)    
 public class CassandraAuditLogRepositoryTest {
