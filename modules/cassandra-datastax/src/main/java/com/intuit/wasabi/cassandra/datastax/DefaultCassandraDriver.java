@@ -161,6 +161,7 @@ public class DefaultCassandraDriver implements CassandraDriver {
                         keyspaceInitialized = false;
                     }
                 }
+                LOGGER.info("Connected to the {} keyspace", getConfiguration().getKeyspaceName());
             }
         }
     }
