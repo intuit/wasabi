@@ -5,7 +5,10 @@ import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.cassandra.datastax.DefaultCassandraDriver;
+import com.intuit.wasabi.repository.AuthorizationRepository;
 import com.intuit.wasabi.repository.cassandra.accessor.*;
+import com.intuit.wasabi.repository.cassandra.impl.CassandraAuthorizationRepository;
+import com.intuit.wasabi.repository.cassandra.impl.CassandraFeedbackRepository;
 import com.intuit.wasabi.repository.cassandra.provider.*;
 import org.slf4j.Logger;
 
@@ -34,5 +37,9 @@ public class CassandraRepositoryModule extends AbstractModule {
         bind(UserInfoAccessor.class).toProvider(UserInfoAccessorProvider.class).in(Singleton.class);
         bind(UserRoleAccessor.class).toProvider(UserRoleAccessorProvider.class).in(Singleton.class);
         bind(ApplicationListAccessor.class).toProvider(ApplicationListAccessorProvider.class).in(Singleton.class);
+
+        //Bind those repositories
+        bind(AuthorizationRepository.class).to(CassandraAuthorizationRepository.class).in(Singleton.class);
+        bind(FeedbackRepository.class).to(CassandraFeedbackRepository.class).in(Singleton.class);
     }
 }
