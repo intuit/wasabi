@@ -30,26 +30,26 @@ public interface UserFeedbackAccessor {
 
 	/**
 	 * Create user feedback object
-	 * @param user_id
+	 * @param userId
 	 * @param submitted
 	 * @param score
 	 * @param comments
-	 * @param contact_ok
-	 * @param user_email
+	 * @param contactOk
+	 * @param userEmail
 	 */
 	@Query("INSERT INTO user_feedback " +
     "(user_id, submitted, score, comments, contact_okay, user_email) " +
     "VALUES (?, ?, ?, ?, ?, ?)")
-    void createUserFeedback(String user_id, Date submitted, int score, String comments, boolean contact_ok, 
-    		String user_email);
+    void createUserFeedback(String userId, Date submitted, int score, String comments, boolean contactOk,
+    		String userEmail);
 
     /**
      * Get user feedback for user
-     * @param user_id user id
+     * @param userId user id
      * @return user feedback list
      */
     @Query("select * from user_feedback where user_id = ?")
-    Result<UserFeedback> getUserFeedback(String user_id);
+    Result<UserFeedback> getUserFeedback(String userId);
 
     /**
      * Get all feedbacks

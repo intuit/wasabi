@@ -14,4 +14,7 @@ public interface UserInfoAccessor {
 
     @Query("select * from user_info where user_id = ?")
     Result<UserInfo> getUserInfoBy(String userId);
+
+    @Query("delete from user_info where user_id = ?")
+    ResultSet deleteBy(String userId);
 }

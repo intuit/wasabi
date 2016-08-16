@@ -10,6 +10,7 @@ import com.intuit.wasabi.repository.cassandra.accessor.*;
 import com.intuit.wasabi.repository.cassandra.impl.CassandraAuthorizationRepository;
 import com.intuit.wasabi.repository.cassandra.impl.CassandraFeedbackRepository;
 import com.intuit.wasabi.repository.cassandra.provider.*;
+import com.intuit.wasabi.userdirectory.UserDirectoryModule;
 import org.slf4j.Logger;
 
 import javax.inject.Singleton;
@@ -26,6 +27,7 @@ public class CassandraRepositoryModule extends AbstractModule {
         bind(CassandraDriver.Configuration.class).toInstance(config);
         bind(String.class).annotatedWith(Names.named("CassandraInstanceName")).toInstance("CassandraWasabiCluster");
         bind(CassandraDriver.class).to(DefaultCassandraDriver.class).asEagerSingleton();
+        install(new UserDirectoryModule());
 
         //Binding the accessors to their providers
         //NOTE: have to use provider here because the session object that is required can only be obtained by guice internally
