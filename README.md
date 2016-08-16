@@ -106,7 +106,7 @@ Congratulations! You are the proud owner of a newly minted Wasabi instance. :)
 ** Look at the current docker containers that have been successfully started.
 
 ```bash
-% docker ps
+% ./bin/wasabi.sh status
 
 CONTAINER ID        IMAGE                    COMMAND                  CREATED             STATUS              PORTS                                                                     NAMES
 8c12458057ef        wasabi-main              "entrypoint.sh wasabi"   25 minutes ago      Up 25 minutes       0.0.0.0:8080->8080/tcp, 0.0.0.0:8090->8090/tcp, 0.0.0.0:8180->8180/tcp    wasabi-main
