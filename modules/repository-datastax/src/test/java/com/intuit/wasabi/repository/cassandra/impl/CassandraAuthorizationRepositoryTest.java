@@ -15,6 +15,7 @@ import com.intuit.wasabi.repository.cassandra.accessor.ApplicationListAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.UserInfoAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.UserRoleAccessor;
 import com.intuit.wasabi.repository.cassandra.pojo.AppRole;
+import com.intuit.wasabi.repository.cassandra.pojo.ApplicationList;
 import com.intuit.wasabi.repository.cassandra.pojo.UserInfo;
 import com.intuit.wasabi.repository.cassandra.pojo.UserRole;
 import com.intuit.wasabi.userdirectory.UserDirectory;
@@ -50,7 +51,7 @@ public class CassandraAuthorizationRepositoryTest {
     @Mock Result<AppRole> appRoleResult;
     @Mock Result<UserInfo> userInfoResult;
     @Mock Result<UserRole> userRoleResult;
-    @Mock Result<String> appNamesResult;
+    @Mock Result<ApplicationList> appNamesResult;
 
     @Mock UserDirectory userDirectory;
     @Mock (answer = Answers.RETURNS_DEEP_STUBS) MappingManager mappingMapager;
@@ -398,9 +399,9 @@ public class CassandraAuthorizationRepositoryTest {
                 .withLastName("test_ln")
                 .build();
 
-        List<String> allAppsNames = new ArrayList<>();
-        allAppsNames.add("testApp1");
-        allAppsNames.add("testApp2");
+        List<ApplicationList> allAppsNames = new ArrayList<>();
+        allAppsNames.add(ApplicationList.builder().appName("testApp1").build());
+        allAppsNames.add(ApplicationList.builder().appName("testApp2").build());
 
         doReturn(userRoleList).when(spyRepository).getUserRolesWithWildcardAppName(
                 eq(username),

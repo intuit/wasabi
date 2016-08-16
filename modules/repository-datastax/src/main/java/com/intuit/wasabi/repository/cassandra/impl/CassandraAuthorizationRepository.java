@@ -216,9 +216,10 @@ public class CassandraAuthorizationRepository  implements AuthorizationRepositor
         UserRoleList userRoleList = new UserRoleList();
         //If the userID is in the superadmin list
         if(superAdmins.size() > 0){
-            Result<String> allAppNames = applicationListAccessor.getUniqueAppName();
+            Result<ApplicationList> allAppNames = applicationListAccessor.getUniqueAppName();
             List<String> allAppNamesList = StreamSupport.stream(
                     Spliterators.spliteratorUnknownSize(allAppNames.iterator(), Spliterator.ORDERED), false)
+                    .map(t -> t.getAppName())
                     .collect(Collectors.toList());
             superAdmins.stream()
                     .map( t ->
