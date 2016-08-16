@@ -8,6 +8,6 @@ import com.intuit.wasabi.repository.cassandra.pojo.ApplicationList;
 @Accessor
 public interface ApplicationListAccessor {
 
-    @Query("select distinct app_name from applicationList")
+    @Query("select distinct appName from applicationList")
     Result<ApplicationList> getUniqueAppName();
 }

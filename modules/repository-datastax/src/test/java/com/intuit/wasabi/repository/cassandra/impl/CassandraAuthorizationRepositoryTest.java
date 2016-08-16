@@ -120,7 +120,7 @@ public class CassandraAuthorizationRepositoryTest {
     public void getUserRolesWithWildcardAppNameTest(){
         List<UserRole> userRoleList = new ArrayList<>();
         userRoleList.add(
-                UserRole.builder().app_name("test").role("test").userId("test").build()
+                UserRole.builder().appName("test").role("test").userId("test").build()
         );
         when(userRoleAccessor.getUserRolesByUserIdWithWildcardAppName(eq("test"))).thenReturn(userRoleResult);
         when(userRoleResult.iterator()).thenReturn(userRoleList.iterator());
@@ -138,7 +138,7 @@ public class CassandraAuthorizationRepositoryTest {
         List<UserRole> spiedUserRole = new ArrayList<>();
         spiedUserRole.add(
                 UserRole.builder()
-                        .app_name("test")
+                        .appName("test")
                         .role(CassandraAuthorizationRepository.SUPERADMIN)
                         .userId("test")
                         .build()
@@ -251,19 +251,19 @@ public class CassandraAuthorizationRepositoryTest {
     public void getUserRolesListTest(){
         List<com.intuit.wasabi.repository.cassandra.pojo.UserRole> userRoleList = new ArrayList<>();
         userRoleList.add(com.intuit.wasabi.repository.cassandra.pojo.UserRole.builder()
-                .app_name("test1")
+                .appName("test1")
                 .role("role1")
                 .userId("user1")
                 .build()
         );
         userRoleList.add(com.intuit.wasabi.repository.cassandra.pojo.UserRole.builder()
-                .app_name("test2")
+                .appName("test2")
                 .role("role2")
                 .userId("user2")
                 .build()
         );
         userRoleList.add(com.intuit.wasabi.repository.cassandra.pojo.UserRole.builder()
-                .app_name("test3")
+                .appName("test3")
                 .role("role3")
                 .userId("user3")
                 .build()
@@ -280,7 +280,7 @@ public class CassandraAuthorizationRepositoryTest {
     public void getUserRolesListSingleTest(){
         List<com.intuit.wasabi.repository.cassandra.pojo.UserRole> userRoleList = new ArrayList<>();
         userRoleList.add(com.intuit.wasabi.repository.cassandra.pojo.UserRole.builder()
-                .app_name("test1")
+                .appName("test1")
                 .role("role1")
                 .userId("user1")
                 .build()
@@ -319,19 +319,19 @@ public class CassandraAuthorizationRepositoryTest {
     public void getLimitedUserRolesTest(){
         List<com.intuit.wasabi.repository.cassandra.pojo.UserRole> userRoleList = new ArrayList<>();
         userRoleList.add(com.intuit.wasabi.repository.cassandra.pojo.UserRole.builder()
-                .app_name("test1")
+                .appName("test1")
                 .role("role1")
                 .userId("user1")
                 .build()
         );
         userRoleList.add(com.intuit.wasabi.repository.cassandra.pojo.UserRole.builder()
-                .app_name("test2")
+                .appName("test2")
                 .role("role2")
                 .userId("user2")
                 .build()
         );
         userRoleList.add(com.intuit.wasabi.repository.cassandra.pojo.UserRole.builder()
-                .app_name("test3")
+                .appName("test3")
                 .role("role3")
                 .userId("user3")
                 .build()
@@ -385,7 +385,7 @@ public class CassandraAuthorizationRepositoryTest {
         List<com.intuit.wasabi.repository.cassandra.pojo.UserRole> userRoleList = new ArrayList<>();
         userRoleList.add(
                 UserRole.builder()
-                        .app_name("test")
+                        .appName("test")
                         .role(CassandraAuthorizationRepository.SUPERADMIN)
                         .userId("test")
                         .build()
@@ -424,7 +424,7 @@ public class CassandraAuthorizationRepositoryTest {
         List<com.intuit.wasabi.repository.cassandra.pojo.UserRole> userRoleList = new ArrayList<>();
         userRoleList.add(
                 UserRole.builder()
-                        .app_name("test")
+                        .appName("test")
                         .role(Role.ADMIN.toString())
                         .userId("test")
                         .build()
@@ -501,7 +501,7 @@ public class CassandraAuthorizationRepositoryTest {
         expected.add(UserRole.builder()
                 .userId("user1")
                 .role(Role.READONLY.name())
-                .app_name(testApp.get().toString())
+                .appName(testApp.get().toString())
                 .build()
         );
         com.intuit.wasabi.authenticationobjects.UserInfo.Username testUser =
@@ -518,7 +518,7 @@ public class CassandraAuthorizationRepositoryTest {
         List<com.intuit.wasabi.repository.cassandra.pojo.UserRole> expected = new ArrayList<>();
         expected.add(UserRole.builder()
                 .userId("user1")
-                .app_name(testApp.get().toString())
+                .appName(testApp.get().toString())
                 .build()
         );
         com.intuit.wasabi.authenticationobjects.UserInfo.Username testUser =
@@ -533,12 +533,12 @@ public class CassandraAuthorizationRepositoryTest {
         List<com.intuit.wasabi.repository.cassandra.pojo.UserRole> expected = new ArrayList<>();
         expected.add(UserRole.builder()
                 .userId("user1")
-                .app_name("app1")
+                .appName("app1")
                 .build()
         );
         expected.add(UserRole.builder()
                 .userId("user2")
-                .app_name("app2")
+                .appName("app2")
                 .build()
         );
         com.intuit.wasabi.authenticationobjects.UserInfo.Username testUser =
@@ -555,7 +555,7 @@ public class CassandraAuthorizationRepositoryTest {
         List<com.intuit.wasabi.repository.cassandra.pojo.UserRole> expected = new ArrayList<>();
         expected.add(UserRole.builder()
                 .userId(testUser.getUsername())
-                .app_name(testApp.toString())
+                .appName(testApp.toString())
                 .role(Role.SUPERADMIN.name())
                 .build()
         );
@@ -570,7 +570,7 @@ public class CassandraAuthorizationRepositoryTest {
         Application.Name applicationName = Application.Name.valueOf("TestApp");
         AppRole appRole = AppRole.builder()
                 .role(Role.SUPERADMIN.name())
-                .app_name(applicationName.toString())
+                .appName(applicationName.toString())
                 .userId("user1")
                 .build();
 
@@ -600,7 +600,7 @@ public class CassandraAuthorizationRepositoryTest {
         Application.Name applicationName = Application.Name.valueOf("TestApp");
         AppRole appRole = AppRole.builder()
                 .role(Role.SUPERADMIN.name())
-                .app_name(applicationName.toString())
+                .appName(applicationName.toString())
                 .userId("user1")
                 .build();
 
@@ -631,7 +631,7 @@ public class CassandraAuthorizationRepositoryTest {
     public void getAppRoleListSingleElement(){
         List<com.intuit.wasabi.repository.cassandra.pojo.AppRole> appRoleList = new ArrayList<>();
         appRoleList.add(com.intuit.wasabi.repository.cassandra.pojo.AppRole.builder()
-                .app_name("testApp")
+                .appName("testApp")
                 .userId("role1")
                 .userId("user1")
                 .build()
@@ -658,19 +658,19 @@ public class CassandraAuthorizationRepositoryTest {
     public void getAppRoleListMoreThanTwoElement(){
         List<com.intuit.wasabi.repository.cassandra.pojo.AppRole> appRoleList = new ArrayList<>();
         appRoleList.add(com.intuit.wasabi.repository.cassandra.pojo.AppRole.builder()
-                .app_name("testApp")
+                .appName("testApp")
                 .userId("role1")
                 .userId("user1")
                 .build()
         );
         appRoleList.add(com.intuit.wasabi.repository.cassandra.pojo.AppRole.builder()
-                .app_name("testApp")
+                .appName("testApp")
                 .userId("role2")
                 .userId("user2")
                 .build()
         );
         appRoleList.add(com.intuit.wasabi.repository.cassandra.pojo.AppRole.builder()
-                .app_name("testApp")
+                .appName("testApp")
                 .userId("role3")
                 .userId("user3")
                 .build()
@@ -689,7 +689,7 @@ public class CassandraAuthorizationRepositoryTest {
         Application.Name applicaitonName = Application.Name.valueOf("TestApp");
         List<AppRole> appRoleList = new ArrayList<>();
         appRoleList.add(AppRole.builder()
-            .app_name(applicaitonName.toString())
+            .appName(applicaitonName.toString())
                 .userId("user1")
                 .role(Role.ADMIN.name())
                 .build()
@@ -747,14 +747,14 @@ public class CassandraAuthorizationRepositoryTest {
         List<com.intuit.wasabi.repository.cassandra.pojo.UserRole> expectedUserRoles = new ArrayList<>();
         expectedUserRoles.add(
                 com.intuit.wasabi.repository.cassandra.pojo.UserRole.builder()
-                .app_name("app1")
+                .appName("app1")
                 .userId("user1")
                 .role(Role.READONLY.name())
                 .build()
         );
         expectedUserRoles.add(
                 com.intuit.wasabi.repository.cassandra.pojo.UserRole.builder()
-                        .app_name("app2")
+                        .appName("app2")
                         .userId("user1")
                         .role(Role.READWRITE.name())
                         .build()

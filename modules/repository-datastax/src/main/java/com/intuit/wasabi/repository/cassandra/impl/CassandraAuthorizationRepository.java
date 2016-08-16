@@ -91,7 +91,7 @@ public class CassandraAuthorizationRepository  implements AuthorizationRepositor
                     .filter(t -> t.getRole() != null)
                     .map( t ->
                             UserPermissions.newInstance(
-                                    Application.Name.valueOf(t.getApp_name())
+                                    Application.Name.valueOf(t.getAppName())
                                     ,Role.valueOf(t.getRole()).getRolePermissions()).build()
                     )
                     .forEach(userPermissionsList::addPermissions);
@@ -154,7 +154,7 @@ public class CassandraAuthorizationRepository  implements AuthorizationRepositor
         return resultList.stream()
                 .filter(t -> SUPERADMIN.equalsIgnoreCase(t.getRole()) )
                 .map( m ->
-                        UserPermissions.newInstance(Application.Name.valueOf(m.getApp_name()),
+                        UserPermissions.newInstance(Application.Name.valueOf(m.getAppName()),
                                 Role.SUPERADMIN.getRolePermissions())
                                 .build()
                 )
@@ -243,7 +243,7 @@ public class CassandraAuthorizationRepository  implements AuthorizationRepositor
         resultList.stream()
                 .map(
                     r -> UserRole.newInstance(
-                            Application.Name.valueOf(r.getApp_name()),
+                            Application.Name.valueOf(r.getAppName()),
                             Role.toRole(r.getRole())
                         )
                         .withFirstName(userInfo.getFirstName())

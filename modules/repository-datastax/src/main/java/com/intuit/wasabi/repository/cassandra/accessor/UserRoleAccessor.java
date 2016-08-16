@@ -11,26 +11,26 @@ import com.intuit.wasabi.repository.cassandra.pojo.UserRole;
 @Accessor
 public interface UserRoleAccessor {
 
-    @Query("select * from user_roles where user_id = ? and app_name = ?")
+    @Query("select * from user_roles where user_id = ? and appName = ?")
     Result<UserRole> getUserRolesBy(String userId, String appName);
 
-    @Query("select * from user_roles where user_id = ? and app_name = '*'")
+    @Query("select * from user_roles where user_id = ? and appName = '*'")
     Result<UserRole> getUserRolesByUserIdWithWildcardAppName(String userId);
 
     @Query("select * from user_roles where user_id = ?")
     Result<UserRole> getUserRolesByUserId(String userId);
 
-    @Query("delete from user_roles where user_id = ? and app_name = ?")
+    @Query("delete from user_roles where user_id = ? and appName = ?")
     ResultSet deleteUserRoleBy(String userId, String appName);
 
-    @Query("insert into user_roles (user_id, app_name, role) values (?, ?, ?)")
+    @Query("insert into user_roles (user_id, appName, role) values (?, ?, ?)")
     ResultSet insertUserRoleBy(String userId, String appName, String role);
 
     //TODO: this is a hack for multitable batch statement
-    @Query("insert into user_roles (user_id, app_name, role) values (?, ?, ?)")
+    @Query("insert into user_roles (user_id, appName, role) values (?, ?, ?)")
     Statement insertUserRoleStatement(String userId, String appName, String role);
 
-    @Query("delete from user_roles where user_id = ? and app_name = ?")
+    @Query("delete from user_roles where user_id = ? and appName = ?")
     Statement deleteUserRoleStatement(String userId, String appName);
 
 }

@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class AppRole {
     @PartitionKey(0)
     @Column(name = "app_name")
-    String app_name;
+    String appName;
 
     @PartitionKey(1)
     @Column(name = "user_id")

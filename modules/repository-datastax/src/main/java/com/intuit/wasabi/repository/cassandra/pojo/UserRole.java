@@ -20,7 +20,7 @@ public class UserRole {
 
     @PartitionKey(1)
     @Column(name = "app_name")
-    String app_name;
+    String appName;
 
     String role;
 }
