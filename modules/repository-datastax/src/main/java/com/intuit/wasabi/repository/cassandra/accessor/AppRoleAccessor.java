@@ -23,6 +23,6 @@ public interface AppRoleAccessor {
     @Query("insert into app_roles (app_name, user_id, role) values (?, ?, ?)")
     Statement insertAppRoleStatement(String appName, String userId, String role);
 
-    @Query("delete from app_roles where appName = ? and user_id = ?")
+    @Query("delete from app_roles where app_name = ? and user_id = ?")
     Statement deleteAppRoleStatement(String appName, String userId);
 }
