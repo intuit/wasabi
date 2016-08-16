@@ -35,7 +35,7 @@ public interface PrioritiesAccessor {
      * @param applicationName  name of application
      * @return PrioritizedExperimentList
      */
-    @Query("select * from application where app_name = ?")
+    @Query("select * from application where appName = ?")
     Result<Application> getPriorities(String applicationName);
 
     /**
@@ -44,13 +44,13 @@ public interface PrioritiesAccessor {
      * @param applicationName           name of application
      * @param experimentPriorityList    list of experiments as their priorities
      */
-    @Query("update application set priorities = ? where app_name = ?")
+    @Query("update application set priorities = ? where appName = ?")
     void updatePriorities(List<UUID> experimentPriorityList, String applicationName);
 
     /**
      * Delete the prioritized list for an application
      * @param applicationName
      */
-    @Query("delete from application where app_name = ?")
+    @Query("delete from application where appName = ?")
     void deletePriorities(String applicationName);
 }

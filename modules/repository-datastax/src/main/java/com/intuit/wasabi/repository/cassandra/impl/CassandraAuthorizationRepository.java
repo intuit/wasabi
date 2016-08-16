@@ -91,7 +91,7 @@ public class CassandraAuthorizationRepository  implements AuthorizationRepositor
                     .filter(t -> t.getRole() != null)
                     .map( t ->
                             UserPermissions.newInstance(
-                                    Application.Name.valueOf(t.getApp_name())
+                                    Application.Name.valueOf(t.getAppName())
                                     ,Role.valueOf(t.getRole()).getRolePermissions()).build()
                     )
                     .forEach(userPermissionsList::addPermissions);
@@ -154,7 +154,7 @@ public class CassandraAuthorizationRepository  implements AuthorizationRepositor
         return resultList.stream()
                 .filter(t -> SUPERADMIN.equalsIgnoreCase(t.getRole()) )
                 .map( m ->
-                        UserPermissions.newInstance(Application.Name.valueOf(m.getApp_name()),
+                        UserPermissions.newInstance(Application.Name.valueOf(m.getAppName()),
                                 Role.SUPERADMIN.getRolePermissions())
                                 .build()
                 )
@@ -216,9 +216,10 @@ public class CassandraAuthorizationRepository  implements AuthorizationRepositor
         UserRoleList userRoleList = new UserRoleList();
         //If the userID is in the superadmin list
         if(superAdmins.size() > 0){
-            Result<String> allAppNames = applicationListAccessor.getUniqueAppName();
+            Result<ApplicationList> allAppNames = applicationListAccessor.getUniqueAppName();
             List<String> allAppNamesList = StreamSupport.stream(
                     Spliterators.spliteratorUnknownSize(allAppNames.iterator(), Spliterator.ORDERED), false)
+                    .map(t -> t.getAppName())
                     .collect(Collectors.toList());
             superAdmins.stream()
                     .map( t ->
@@ -242,7 +243,7 @@ public class CassandraAuthorizationRepository  implements AuthorizationRepositor
         resultList.stream()
                 .map(
                     r -> UserRole.newInstance(
-                            Application.Name.valueOf(r.getApp_name()),
+                            Application.Name.valueOf(r.getAppName()),
                             Role.toRole(r.getRole())
                         )
                         .withFirstName(userInfo.getFirstName())

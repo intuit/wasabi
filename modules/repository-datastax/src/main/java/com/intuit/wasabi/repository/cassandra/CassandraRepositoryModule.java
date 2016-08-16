@@ -5,11 +5,12 @@ import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.cassandra.datastax.DefaultCassandraDriver;
-import com.intuit.wasabi.repository.cassandra.accessor.AppRoleAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.UserFeedbackAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.UserInfoAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.UserRoleAccessor;
+import com.intuit.wasabi.repository.AuthorizationRepository;
+import com.intuit.wasabi.repository.cassandra.accessor.*;
+import com.intuit.wasabi.repository.cassandra.impl.CassandraAuthorizationRepository;
+import com.intuit.wasabi.repository.cassandra.impl.CassandraFeedbackRepository;
 import com.intuit.wasabi.repository.cassandra.provider.*;
+import com.intuit.wasabi.userdirectory.UserDirectoryModule;
 import org.slf4j.Logger;
 
 import javax.inject.Singleton;
@@ -26,6 +27,7 @@ public class CassandraRepositoryModule extends AbstractModule {
         bind(CassandraDriver.Configuration.class).toInstance(config);
         bind(String.class).annotatedWith(Names.named("CassandraInstanceName")).toInstance("CassandraWasabiCluster");
         bind(CassandraDriver.class).to(DefaultCassandraDriver.class).asEagerSingleton();
+        install(new UserDirectoryModule());
 
         //Binding the accessors to their providers
         //NOTE: have to use provider here because the session object that is required can only be obtained by guice internally
@@ -36,5 +38,10 @@ public class CassandraRepositoryModule extends AbstractModule {
         bind(AppRoleAccessor.class).toProvider(AppRoleAccessorProvider.class).in(Singleton.class);
         bind(UserInfoAccessor.class).toProvider(UserInfoAccessorProvider.class).in(Singleton.class);
         bind(UserRoleAccessor.class).toProvider(UserRoleAccessorProvider.class).in(Singleton.class);
+        bind(ApplicationListAccessor.class).toProvider(ApplicationListAccessorProvider.class).in(Singleton.class);
+
+        //Bind those repositories
+        bind(AuthorizationRepository.class).to(CassandraAuthorizationRepository.class).in(Singleton.class);
+        bind(FeedbackRepository.class).to(CassandraFeedbackRepository.class).in(Singleton.class);
     }
 }

@@ -79,7 +79,7 @@ public class ExperimentAccessorTest {
 //         INSERT INTO wassabi_experiment_local.experiment
 //         ("modified",
 //         "creatorid",
-//         "app_name",
+//         "appName",
 //         "start_time",
 //         "model_name",
 //         "id",

@@ -8,7 +8,7 @@ public interface BucketAccessor {
 //    @Query("select * from bucket where experiment_id = ?")
 //    Bucket getBucketBy(UUID experimentId);
 //
-//    @Query("select * from bucket where experiment_id = ? and app_name = ?")
+//    @Query("select * from bucket where experiment_id = ? and appName = ?")
 //    Result<Bucket> getBucketBy(UUID uuid, String appName);
 
 }
