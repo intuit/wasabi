@@ -103,7 +103,7 @@ Congratulations! You are the proud owner of a newly minted Wasabi instance. :)
 
 * While starting Wasabi, if you see an error when the docker containers are starting up, you could do the following:
 
-** Look at the current docker containers that have been successfully started.
+  * Look at the current docker containers that have been successfully started.
 
 ```bash
 % ./bin/wasabi.sh status
@@ -114,7 +114,7 @@ CONTAINER ID        IMAGE                    COMMAND                  CREATED   
 2d33a96abdcb        cassandra:2.1            "/docker-entrypoint.s"   27 minutes ago      Up 27 minutes       7000-7001/tcp, 0.0.0.0:9042->9042/tcp, 7199/tcp, 0.0.0.0:9160->9160/tcp   wasabi-cassandra
 ```
 
-** The above shell output shows a successful start of 3 docker containers needed by Wasabi: wasabi-main (the Wasabi server),
+  * The above shell output shows a successful start of 3 docker containers needed by Wasabi: wasabi-main (the Wasabi server),
 wasabi-mysql, and wasabi-cassandra. If any of these are not running, try starting them individually. For example, if the
 MySQL container is running, but Cassandra and Wasabi containers failed to start (perhaps due to a network timeout docker
 could not download the Cassandra image), do the following:
