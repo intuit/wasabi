@@ -516,8 +516,7 @@ our AB Testing service before migrating.</p>
 
           <h1 id="getting-started-with-wasabi">Getting Started with Wasabi</h1>
 
-<p>Installing Wasabi is straightforward. The following steps will install the needed tools, build and run a complete
-stack noting that at this time only OSX is supported.</p>
+<p>The following steps will help you install the needed tools, then build and run a complete Wasabi stack. Note, at this time, only Mac OS X is supported.</p>
 
 <h2 id="bootstrap-your-environment">Bootstrap Your Environment</h2>
 <pre class="highlight shell"><code><span class="gp">% </span>/usr/bin/ruby <span class="se">\</span>
@@ -530,20 +529,20 @@ stack noting that at this time only OSX is supported.</p>
 
 <p>Installed tools include: <a href="http://brew.sh">homebrew 0.9</a>, <a href="https://git-scm.com">git 2</a>,
 <a href="https://maven.apache.org">maven 3</a>, <a href="http://www.oracle.com/technetwork/java/javase/overview/index.html">java 1.8</a>,
-<a href="https://nodejs.org/en">node 6</a> and <a href="https://www.python.org">python 2.7</a>.</p>
+<a href="https://docker.com">docker 1.12</a>, <a href="https://nodejs.org/en">node 6</a> and <a href="https://www.python.org">python 2.7</a>.</p>
 
 <p>Similar tooling will work for Linux and Windows alike. Contribute a patch :)</p>
 
 <h2 id="start-wasabi">Start Wasabi</h2>
-<pre class="highlight shell"><code><span class="gp">% </span>./bin/wasabi.sh --build <span class="nb">true </span>start
+<pre class="highlight shell"><code><span class="gp">% </span>./bin/wasabi.sh build start
 ...
 wasabi is operational:
 
-  ui: % open http://192.168.99.100:8080     note: sign <span class="k">in </span>as admin/admin
-  api: % curl -i http://192.168.99.100:8080/api/v1/ping
-  debug: attach a remote debugger to 192.168.99.100:8180
+  ui: % open http://localhost:8080     note: sign <span class="k">in </span>as admin/admin
+  ping: % curl -i http://localhost:8080/api/v1/ping
+  debug: attach to localhost:8180
 
-<span class="gp">% </span>curl -i http://<span class="k">$(</span>docker-machine ip wasabi<span class="k">)</span>:8080/api/v1/ping
+<span class="gp">% </span>curl -i http://localhost:8080/api/v1/ping
 HTTP/1.1 200 OK
 Date: Wed, 25 May 2016 00:25:47 GMT
 ...
@@ -570,32 +569,49 @@ Server: Jetty<span class="o">(</span>9.3.z-SNAPSHOT<span class="o">)</span>
 command to verify the build:
 <div></div></p>
 
-<p>Congratulations! You are the proud owner of a newly minted and personalized full stack Wasabi instance :)</p>
-
-<p>Ok, enough celebration &hellip; let&rsquo;s get back to business.</p>
+<p>Congratulations! You are the proud owner of a newly minted Wasabi instance. :)</p>
 
 <h2 id="troubleshoot-wasabi">Troubleshoot Wasabi</h2>
 
 <blockquote>
-<p>Cannot connect to the Docker daemon. Is the docker daemon running on this host?</p>
+<p>Look at the current docker containers that have been successfully started.</p>
 </blockquote>
-<pre class="highlight shell"><code><span class="gp">% </span><span class="nb">eval</span> <span class="k">$(</span>docker-machine env wasabi<span class="k">)</span>
+<pre class="highlight shell"><code><span class="gp">% </span>./bin/wasabi.sh status
+
+CONTAINER ID        IMAGE                    COMMAND                  CREATED             STATUS              PORTS                                                                     NAMES
+8c12458057ef        wasabi-main              <span class="s2">"entrypoint.sh wasabi"</span>   25 minutes ago      Up 25 minutes       0.0.0.0:8080-&gt;8080/tcp, 0.0.0.0:8090-&gt;8090/tcp, 0.0.0.0:8180-&gt;8180/tcp    wasabi-main
+979ecc885239        mysql:5.6                <span class="s2">"docker-entrypoint.sh"</span>   26 minutes ago      Up 26 minutes       0.0.0.0:3306-&gt;3306/tcp                                                    wasabi-mysql
+2d33a96abdcb        cassandra:2.1            <span class="s2">"/docker-entrypoint.s"</span>   27 minutes ago      Up 27 minutes       7000-7001/tcp, 0.0.0.0:9042-&gt;9042/tcp, 7199/tcp, 0.0.0.0:9160-&gt;9160/tcp   wasabi-cassandra
 </code></pre>
 
 <ul>
-<li>While starting Wasabi, if you run into errors such as this, run this command in
-your terminal and re-run ./bin/wasabi.sh start
-<div></div></li>
+<li>While starting Wasabi, if you see an error when the docker containers are starting up, you could do the following:</li>
+</ul>
+
+<div></div>
+
+<div></div>
+
+<blockquote>
+<p>E.g. if Cassandra and Wasabi containers have not started, then start them individually:</p>
+</blockquote>
+<pre class="highlight shell"><code><span class="gp">% </span>./bin/wasabi.sh start:cassandra
+
+<span class="gp">% </span>./bin/wasabi.sh start:wasabi
+</code></pre>
+
+<ul>
+<li>The above shell output shows a successful start of 3 docker containers needed by Wasabi: wasabi-main (the Wasabi server), wasabi-mysql, and wasabi-cassandra. If any of these are not running, try starting them individually. For example, if the MySQL container is running, but Cassandra and Wasabi containers failed to start (perhaps due to a network timeout docker could not download the Cassandra image), do the following:</li>
 </ul>
 
 <h2 id="call-wasabi">Call Wasabi</h2>
 
-<p>These are the 3 common API&rsquo;s that you&rsquo;d use to instrument your client application with Wasabi.</p>
+<p>These are the 3 common REST endpoints that you will use to instrument your client application with Wasabi.</p>
 
-<p>Let&rsquo;s assume that you&rsquo;ve created and started an experiment &lsquo;BuyButton&rsquo; in &#39;Demo_App&rsquo; application with:</p>
+<p>Let&rsquo;s assume that you&rsquo;ve created and started an experiment, &lsquo;BuyButton,&rsquo; in the &#39;Demo_App&rsquo; application with the following buckets:</p>
 
 <ul>
-<li>&#39;BucketA&rsquo;: green button, control bucket</li>
+<li>&#39;BucketA&rsquo;: green button (control bucket)</li>
 <li>&#39;BucketB&rsquo;: orange button bucket</li>
 </ul>
 
@@ -603,7 +619,7 @@ your terminal and re-run ./bin/wasabi.sh start
 <p>Assign a user to experiment and bucket:</p>
 </blockquote>
 <pre class="highlight shell"><code><span class="gp">% </span>curl -H <span class="s2">"Content-Type: application/json"</span> <span class="se">\</span>
-    http://192.168.99.100:8080/api/v1/assignments/applications/Demo_App/experiments/BuyButton/users/userID1
+    http://localhost:8080/api/v1/assignments/applications/Demo_App/experiments/BuyButton/users/userID1
 
 <span class="o">{</span>  
    <span class="s2">"cache"</span>:true,
@@ -614,19 +630,19 @@ your terminal and re-run ./bin/wasabi.sh start
 <span class="o">}</span>
 </code></pre>
 
-<p>You can assign a user with a unique ID (e.g. &#39;userID1&rsquo;) to the experiment by calling this API Request:
-<div></div></p>
+<p>You can assign a user with a unique ID (e.g. &#39;userID1&rsquo;) to the experiment by making this HTTP request:</p>
+
+<div></div>
 
 <blockquote>
 <p>Record an impression:</p>
 </blockquote>
 <pre class="highlight shell"><code><span class="gp">% </span>curl -H <span class="s2">"Content-Type: application/json"</span> <span class="se">\</span>
     -d <span class="s2">"{</span><span class="se">\"</span><span class="s2">events</span><span class="se">\"</span><span class="s2">:[{</span><span class="se">\"</span><span class="s2">name</span><span class="se">\"</span><span class="s2">:</span><span class="se">\"</span><span class="s2">IMPRESSION</span><span class="se">\"</span><span class="s2">}]}"</span> <span class="se">\</span>
-    http://192.168.99.100:8080/api/v1/events/applications/Demo_App/experiments/BuyButton/users/userID1
+    http://localhost:8080/api/v1/events/applications/Demo_App/experiments/BuyButton/users/userID1
 </code></pre>
 
-<p>Now the &#39;userID1&rsquo; user is assigned into the &#39;BucketA&rsquo; bucket. Let&rsquo;s record an impression of their experience 
-with this API Request:
+<p>Now the &#39;userID1&rsquo; user is assigned into the &#39;BucketA&rsquo; bucket. Let&rsquo;s further record an impression, meaning the user has seen a given experience:
 <div></div></p>
 
 <blockquote>
@@ -634,10 +650,10 @@ with this API Request:
 </blockquote>
 <pre class="highlight shell"><code><span class="gp">% </span>curl -H <span class="s2">"Content-Type: application/json"</span> <span class="se">\</span>
     -d <span class="s2">"{</span><span class="se">\"</span><span class="s2">events</span><span class="se">\"</span><span class="s2">:[{</span><span class="se">\"</span><span class="s2">name</span><span class="se">\"</span><span class="s2">:</span><span class="se">\"</span><span class="s2">BuyClicked</span><span class="se">\"</span><span class="s2">}]}"</span> <span class="se">\</span>
-    http://192.168.99.100:8080/api/v1/events/applications/Demo_App/experiments/BuyButton/users/userID1
+    http://localhost:8080/api/v1/events/applications/Demo_App/experiments/BuyButton/users/userID1
 </code></pre>
 
-<p>If the &#39;userID1&rsquo; user does an action, such as clicking the buy button, you&rsquo;d record it with this API Request: 
+<p>If the &#39;userID1&rsquo; user performs an action such as clicking the Buy button, you&rsquo;d record that action with the following request:
 <div></div></p>
 
 <h2 id="developer-resources">Developer Resources</h2>
@@ -684,8 +700,8 @@ with this API Request:
 
 <p>Alas, all good things must come to an end. Let&rsquo;s clean things up a bit stop the newly created Wasabi stack:</p>
 
-<p>At this point in time we now have all the requisite tools installed and as such subsequent invocations of Wasabi will
-start up much more quickly. Additionally there is no further need to include the <em>-b true</em> or <em>&ndash;build true</em> option.</p>
+<p>At this point in time, we now have all the requisite tools installed, and subsequent invocations of Wasabi will
+start up much more quickly.</p>
 
 <div></div>
 
@@ -695,7 +711,6 @@ start up much more quickly. Additionally there is no further need to include the
   usage: wasabi.sh <span class="o">[</span>options] <span class="o">[</span>commands]
 
   options:
-    -b | --build <span class="o">[</span> <span class="nb">true</span> | <span class="nb">false</span> <span class="o">]</span>          : build; default: <span class="nb">false</span>
     -e | --endpoint <span class="o">[</span> host:port <span class="o">]</span>          : api endpoint; default: localhost:8080
     -v | --verify <span class="o">[</span> <span class="nb">true</span> | <span class="nb">false</span> <span class="o">]</span>         : verify installation configuration; default: <span class="nb">false</span>
     -s | --sleep <span class="o">[</span> sleep-time <span class="o">]</span>            : sleep/wait <span class="nb">time </span><span class="k">in </span>seconds; default: 30
@@ -703,6 +718,7 @@ start up much more quickly. Additionally there is no further need to include the
 
   commands:
     bootstrap                              : install dependencies
+    build                                  : build project
     start[:cassandra,mysql,wasabi]         : start all, cassandra, mysql, wasabi
     <span class="nb">test</span>                                   : <span class="nb">test </span>wasabi
     stop[:wasabi,cassandra,mysql]          : stop all, wasabi, cassandra, mysql
@@ -718,14 +734,11 @@ start up much more quickly. Additionally there is no further need to include the
 
 <h2 id="develop-wasabi">Develop Wasabi</h2>
 
-<p>Let&rsquo;s turn it up to 11. To facilitate developing Wasabi contributions you can easily build and run from source and readily connect to the a fore mentioned infrastructure:</p>
-
 <h3 id="build-and-run-wasabi-server">Build and Run Wasabi Server</h3>
 <pre class="highlight shell"><code><span class="gp">% </span>mvn package
 <span class="gp">% </span>./bin/wasabi.sh start:cassandra,mysql
-<span class="gp">% </span><span class="nv">dmip</span><span class="o">=</span><span class="k">$(</span>docker-machine ip wasabi<span class="k">)</span>
 <span class="gp">% </span><span class="o">(</span><span class="nb">cd </span>modules/main/target; <span class="se">\</span>
-    <span class="nv">WASABI_CONFIGURATION</span><span class="o">=</span><span class="s2">"-DnodeHosts=</span><span class="k">${</span><span class="nv">dmip</span><span class="k">}</span><span class="s2"> -Ddatabase.url.host=</span><span class="k">${</span><span class="nv">dmip</span><span class="k">}</span><span class="s2">"</span> ./wasabi-main-<span class="k">*</span>-SNAPSHOT-development/bin/run<span class="o">)</span> &amp;
+    <span class="nv">WASABI_CONFIGURATION</span><span class="o">=</span><span class="s2">"-DnodeHosts=localhost -Ddatabase.url.host=localhost"</span> ./wasabi-main-<span class="k">*</span>-SNAPSHOT-development/bin/run<span class="o">)</span> &amp;
 <span class="gp">% </span>curl -i http://localhost:8080/api/v1/ping
 ...
 </code></pre>
@@ -769,15 +782,11 @@ Wasabi server on localhost.</p>
 <blockquote>
 <p>Wasabi runtime configuration:</p>
 </blockquote>
-<pre class="highlight shell"><code>-DnodeHosts<span class="o">=</span><span class="k">$(</span>docker-machine ip wasabi<span class="k">)</span> -Ddatabase.url.host<span class="o">=</span><span class="k">$(</span>docker-machine ip wasabi<span class="k">)</span>
+<pre class="highlight shell"><code>-DnodeHosts<span class="o">=</span>localhost -Ddatabase.url.host<span class="o">=</span>localhost
 </code></pre>
 
-<p>Now while that was fun, in all likelihood you will be using an IDE to develop Wasabi features. In doing so you need only
-add the aforementioned configuration information to your Wasabi JVM runtime prior to startup:</p>
-
-<div></div>
-
-<p>Awesome! You are well on your way at this point in time.</p>
+<p>Now while that was fun, in all likelihood you will be using an IDE to work on Wasabi. In doing so, you need only
+add the configuration information above to the JVM commandline prior to startup:</p>
 
 <h3 id="run-integration-tests">Run Integration Tests</h3>
 <pre class="highlight shell"><code><span class="gp">% </span>./bin/wasabi.sh start <span class="nb">test </span>stop
@@ -786,7 +795,7 @@ add the aforementioned configuration information to your Wasabi JVM runtime prio
 <p>Code changes can readily be verified by running the growing collection of included integration tests:
 <div></div></p>
 
-<h2 id="package-and-deploy-wasabi-at-scale">Package and Deploy Wasabi at Scale</h2>
+<h2 id="package-and-deploy-at-scale">Package and Deploy at Scale</h2>
 <pre class="highlight shell"><code><span class="gp">% </span>./bin/wasabi.sh package
 <span class="gp">% </span>find ./modules -type f <span class="se">\(</span> -name <span class="s2">"*.rpm"</span> -or -name <span class="s2">"*.deb"</span> <span class="se">\)</span>
 </code></pre>
@@ -800,12 +809,37 @@ add the aforementioned configuration information to your Wasabi JVM runtime prio
 <pre class="highlight xml"><code><span class="nt">&lt;dependency&gt;</span>
     <span class="nt">&lt;groupId&gt;</span>com.intuit.wasabi<span class="nt">&lt;/groupId&gt;</span>
     <span class="nt">&lt;artifactId&gt;</span>wasabi<span class="nt">&lt;/artifactId&gt;</span>
-    <span class="nt">&lt;version&gt;</span>1.0.TBD<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;version&gt;</span>1.0.20160627213750<span class="nt">&lt;build_timestamp&gt;&lt;/version&gt;</span>
 <span class="nt">&lt;/dependency&gt;</span>
 </code></pre>
 
 <p>Wasabi is readily embeddable via the following <em>maven</em> dependency GAV family:
 <div></div></p>
+
+<h2 id="contribute">Contribute</h2>
+
+<p>We greatly encourage contributions! You can add new features, report and fix existing bugs, write docs and
+tutorials, or any of the above. Feel free to open issues and/or send pull requests.</p>
+
+<p>The <code class="prettyprint">master</code> branch of this repository contains the latest stable release of Wasabi, while snapshots are published to the <code class="prettyprint">develop</code> branch. In general, pull requests should be submitted against <code class="prettyprint">develop</code> by forking this repo into your account, developing and testing your changes, and creating pull requests to request merges. See the <a href="https://guides.github.com/activities/contributing-to-open-source/">Contributing to a Project</a>
+article for more details about how to contribute.</p>
+
+<p>Extension projects such as browser plugins, client integration libraries, and apps can be contributed under the <code class="prettyprint">contrib</code> directory.</p>
+
+<p>Steps to contribute:</p>
+
+<ol>
+<li>Fork this repository into your account on Github</li>
+<li>Clone <em>your forked repository</em> (not our original one) to your hard drive with <code class="prettyprint">git clone https://github.com/YOURUSERNAME/wasabi.git</code></li>
+<li>Design and develop your changes</li>
+<li>Add/update unit tests</li>
+<li>Add/update integration tests</li>
+<li>Add/update documentation on <code class="prettyprint">gh-pages</code> branch</li>
+<li>Create a pull request for review to request merge</li>
+<li>Obtain 2 approval <em>squirrels</em> before your changes can be merged</li>
+</ol>
+
+<p>Thank you for you contribution!</p>
 
 <h2 id="recap">Recap</h2>
 
@@ -827,7 +861,7 @@ add the aforementioned configuration information to your Wasabi JVM runtime prio
 
 <h2 id="setup-an-experiment">Setup an experiment</h2>
 
-<p>Note: make sure your Wasabi service is running (default: 192.168.99.100:8080)</p>
+<p>Note: make sure your Wasabi service is running (default: localhost:8080)</p>
 <pre class="highlight shell"><code><span class="gp">% </span>./bin/setup.sh create
 </code></pre>
 
@@ -850,7 +884,8 @@ seeing an experience (impression), and clicking a button (action).
 <div></div></p>
 
 <h2 id="track-experiment-results">Track experiment results</h2>
-<pre class="highlight shell"><code><span class="gp">% </span>open http://192.168.99.100:8080      note: sign <span class="k">in </span>as admin/admin
+<pre class="highlight shell"><code><span class="gp">% </span>open http://localhost:8080      
+<span class="c">## note: sign in as admin/admin</span>
 </code></pre>
 
 <p>Launch the Admin UI, navigate to the &#39;BuyButton&rsquo; experiment.

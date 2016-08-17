@@ -10,7 +10,7 @@ The 'client-demo' project is located under the 'contrib' directory.
 
 ##Setup an experiment
 
-Note: make sure your Wasabi service is running (default: 192.168.99.100:8080)
+Note: make sure your Wasabi service is running (default: localhost:8080)
 
 ```bash
 % ./bin/setup.sh create
@@ -37,7 +37,8 @@ seeing an experience (impression), and clicking a button (action).
 ##Track experiment results
 
 ```bash
-% open http://192.168.99.100:8080      note: sign in as admin/admin
+% open http://localhost:8080      
+## note: sign in as admin/admin
 ```
 
 Launch the Admin UI, navigate to the 'BuyButton' experiment.
