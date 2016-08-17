@@ -18,7 +18,7 @@ public interface ExperimentAccessor {
     @Query("update experiment set state = ?, modified = ? where id = ?")
     ResultSet updateExperiment(String state, Date modifiedOn, UUID uuid);
 
-    @Query("select * from experiment where appName = ?")
+    @Query("select * from experiment where app_name = ?")
     Result<Experiment> getExperimentBy(String appName);
 
 
