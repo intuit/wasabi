@@ -67,7 +67,6 @@ public interface AuditLogAccessor {
 
     /**
      * Stores an AuditLogEntry into the database.
-     * Makes sure that when no ApplicationName is supplied, the {@link #GLOBAL_ENTRY_APPLICATION} is used instead.
      *
      * @param applicationName
      * @param time
