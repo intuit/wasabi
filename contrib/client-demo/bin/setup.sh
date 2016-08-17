@@ -15,7 +15,7 @@
 # limitations under the License.
 ###############################################################################
 
-endpoint_default=192.168.99.100:8080 
+endpoint_default=localhost:8080
 
 usage() {
   [ "${1}" ] && echo "error: ${1}"
