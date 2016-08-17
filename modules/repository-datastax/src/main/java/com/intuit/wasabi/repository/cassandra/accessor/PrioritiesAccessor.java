@@ -33,7 +33,7 @@ public interface PrioritiesAccessor {
      * Get the priority list for an application
      * 
      * @param applicationName  name of application
-     * @return PrioritizedExperimentList
+     * @return application instance
      */
     @Query("select * from application where app_name = ?")
     Result<Application> getPriorities(String applicationName);
@@ -49,7 +49,7 @@ public interface PrioritiesAccessor {
 
     /**
      * Delete the prioritized list for an application
-     * @param applicationName
+     * @param applicationName the app name
      */
     @Query("delete from application where app_name = ?")
     void deletePriorities(String applicationName);

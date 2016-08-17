@@ -30,7 +30,7 @@ public interface PrioritiesRepository {
      * Returns the priority list for an application
      * 
      * @param applicationName  name of application
-     * @return PrioritizedExperimentList
+     * @return PrioritizedExperimentList prioritized experiments
      */
     PrioritizedExperimentList getPriorities(Application.Name applicationName);
 

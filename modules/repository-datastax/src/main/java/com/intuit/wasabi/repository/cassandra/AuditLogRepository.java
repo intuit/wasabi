@@ -43,7 +43,7 @@ public interface AuditLogRepository {
     /**
      * Retrieves a limited list of AuditLogEntries for all application and global events.
      *
-     * @param limit the limit
+     * @param limit the limit of audit log entries returned
      * @return a list of those AuditLogEntries
      */
     List<AuditLogEntry> getCompleteAuditLogEntryList(int limit);
@@ -60,7 +60,7 @@ public interface AuditLogRepository {
      * Retrieves a limited list of AuditLogEntries for a specified application.
      *
      * @param applicationName the application to select
-     * @param limit the limit
+     * @param limit the limit of log entried returend
      * @return a list of those AuditLogEntries
      */
     List<AuditLogEntry> getAuditLogEntryList(Application.Name applicationName, int limit);

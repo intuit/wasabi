@@ -65,12 +65,9 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
 		this.accessor = accessor;
 	}
 
-	/**
-	 * Retrieves the complete list of AuditLogEntries for all application and
-	 * global events.
-	 *
-	 * @return a list of those entries
-	 */
+    /**
+     * {@inheritDoc}
+     */
 	@Override
 	public List<AuditLogEntry> getCompleteAuditLogEntryList() {
     	LOGGER.debug("Getting complete audit log entries");
@@ -89,7 +86,7 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
 
 	/**
 	 * Helper method to get empty string for null
-	 * @param input
+	 * @param input string input
 	 * @return input or empty string
 	 */
 	private String makeEmptyStringForNull(String input) {
@@ -181,14 +178,9 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
 		return auditLogEntries;
 	}
 
-	/**
-	 * Retrieves a limited list of AuditLogEntries for all application and
-	 * global events.
-	 *
-	 * @param limit
-	 *            the limit
-	 * @return a list of those AuditLogEntries
-	 */
+    /**
+     * {@inheritDoc}
+     */
 	@Override
 	public List<AuditLogEntry> getCompleteAuditLogEntryList(int limit) {
     	LOGGER.debug("Getting complete audit log entries with limit {}", limit);
@@ -207,14 +199,9 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
 		}
 	}
 
-	/**
-	 * Retrieves the complete list of AuditLogEntries for a specified
-	 * application.
-	 *
-	 * @param applicationName
-	 *            the application to select
-	 * @return a list of those entries
-	 */
+    /**
+     * {@inheritDoc}
+     */
 	@Override
 	public List<AuditLogEntry> getAuditLogEntryList(
 			Application.Name applicationName) {
@@ -235,15 +222,9 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
 
 	}
 
-	/**
-	 * Retrieves a limited list of AuditLogEntries for a specified application.
-	 *
-	 * @param applicationName
-	 *            the application to select
-	 * @param limit
-	 *            the limit
-	 * @return a list of those AuditLogEntries
-	 */
+    /**
+     * {@inheritDoc}
+     */
 	@Override
 	public List<AuditLogEntry> getAuditLogEntryList(
 			Application.Name applicationName, int limit) {
@@ -265,11 +246,9 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
 
 	}
 
-	/**
-	 * Retrieves the complete list of AuditLogEntries for global events.
-	 *
-	 * @return a list of those entries
-	 */
+    /**
+     * {@inheritDoc}
+     */
 	@Override
 	public List<AuditLogEntry> getGlobalAuditLogEntryList() {
     	LOGGER.debug("Getting global audit log entries");
@@ -287,13 +266,9 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
 		}
 	}
 
-	/**
-	 * Retrieves a limited list of AuditLogEntries for global events.
-	 *
-	 * @param limit
-	 *            the limit
-	 * @return a list of those AuditLogEntries
-	 */
+    /**
+     * {@inheritDoc}
+     */
 	@Override
 	public List<AuditLogEntry> getGlobalAuditLogEntryList(int limit) {
     	LOGGER.debug("Getting global audit log entries with limit {}", limit);
@@ -314,15 +289,9 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
 		}
 	}
 
-	/**
-	 * Stores an AuditLogEntry into the database. Makes sure that when no
-	 * ApplicationName is supplied, the {@link #GLOBAL_ENTRY_APPLICATION} is
-	 * used instead.
-	 *
-	 * @param entry
-	 *            the entry to store
-	 * @return true on success
-	 */
+    /**
+     * {@inheritDoc}
+     */
 	@Override
 	public boolean storeEntry(AuditLogEntry entry) {
     	LOGGER.debug("Storing entry {}", entry);

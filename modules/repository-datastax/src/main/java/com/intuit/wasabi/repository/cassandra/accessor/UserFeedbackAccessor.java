@@ -30,12 +30,12 @@ public interface UserFeedbackAccessor {
 
 	/**
 	 * Create user feedback object
-	 * @param userId
-	 * @param submitted
-	 * @param score
-	 * @param comments
-	 * @param contactOk
-	 * @param userEmail
+	 * @param userId user id
+	 * @param submitted date submitted
+	 * @param score score in the feedback
+	 * @param comments user comments
+	 * @param contactOk is it ok to contact
+	 * @param userEmail usr email
 	 */
 	@Query("INSERT INTO user_feedback " +
     "(user_id, submitted, score, comments, contact_okay, user_email) " +

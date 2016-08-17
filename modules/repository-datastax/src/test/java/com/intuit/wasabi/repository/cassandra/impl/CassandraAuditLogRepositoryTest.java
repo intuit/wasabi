@@ -16,6 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 
 import static org.mockito.Mockito.*;
 
@@ -141,5 +142,23 @@ public class CassandraAuditLogRepositoryTest {
 				.thenThrow(new RuntimeException("testException"));
 		
 		List<AuditLogEntry> result = repository.getCompleteAuditLogEntryList();
+	}
+
+	@Test(expected=RepositoryException.class)
+	public void testGetGlobalAuditLogEntryThrowsException() {
+		
+		when(accessor.getAuditLogEntryList(Mockito.anyString()))
+				.thenThrow(new RuntimeException("testException"));
+		
+		List<AuditLogEntry> result = repository.getGlobalAuditLogEntryList();
+	}
+
+	@Test(expected=RepositoryException.class)
+	public void testGetGlobalAuditLogEntryWithLimitThrowsException() {
+		
+		when(accessor.getAuditLogEntryList(Mockito.anyString(),Mockito.eq(1)))
+				.thenThrow(new RuntimeException("testException"));
+		
+		List<AuditLogEntry> result = repository.getGlobalAuditLogEntryList(1);
 	}
 }

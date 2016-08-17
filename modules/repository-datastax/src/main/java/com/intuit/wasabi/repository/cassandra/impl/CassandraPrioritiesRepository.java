@@ -56,6 +56,9 @@ public class CassandraPrioritiesRepository implements PrioritiesRepository {
     	this.prioritiesAccessor = prioritiesAccessor;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public PrioritizedExperimentList getPriorities(Application.Name applicationName) {
         throw new UnsupportedOperationException("getPriorities not implemented until experimentAccessor is avaialble");
@@ -78,7 +81,7 @@ public class CassandraPrioritiesRepository implements PrioritiesRepository {
     }
 
     /**
-     * Returns the length of the priority list
+     * {@inheritDoc}
      */
     @Override
     public int getPriorityListLength(Application.Name applicationName) {
@@ -89,7 +92,7 @@ public class CassandraPrioritiesRepository implements PrioritiesRepository {
     }
 
     /**
-     * Deletes existing priority list for an application, and inserts with new priority list.
+     * {@inheritDoc}
      */
     @Override
     public void createPriorities(Application.Name applicationName, List<Experiment.ID> priorityIds) {
@@ -132,8 +135,8 @@ public class CassandraPrioritiesRepository implements PrioritiesRepository {
         }
     }
 
-    /*
-     * @see com.intuit.wasabi.repository.PrioritiesRepository#getPriorityList(com.intuit.wasabi.experimentobjects.Application.Name)
+    /**
+     * {@inheritDoc}
      */
     @Override
     public List<Experiment.ID> getPriorityList(Application.Name applicationName) {
