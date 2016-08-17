@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Interface to priorities repo
+ * Interface to priorities (application) table
  */
 @Accessor
 public interface PrioritiesAccessor {
@@ -41,8 +41,8 @@ public interface PrioritiesAccessor {
     /**
      * Update the priority list for an application
      *
-     * @param applicationName           name of application
      * @param experimentPriorityList    list of experiments as their priorities
+     * @param applicationName           name of application
      */
     @Query("update application set priorities = ? where app_name = ?")
     void updatePriorities(List<UUID> experimentPriorityList, String applicationName);
