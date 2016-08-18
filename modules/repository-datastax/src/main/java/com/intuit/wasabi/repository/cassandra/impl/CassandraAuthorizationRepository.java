@@ -83,7 +83,14 @@ public class CassandraAuthorizationRepository  implements AuthorizationRepositor
         UserPermissionsList userPermissionsList = new UserPermissionsList();
         Optional<UserPermissions> superAdminUserPermissions = getSuperAdminUserPermissions(userID, WILDCARD);
         if (superAdminUserPermissions.isPresent() ){
-            userPermissionsList.addPermissions(superAdminUserPermissions.get());
+            List<String> allAppNames = getAllApplicationNameFromApplicationList();
+            allAppNames.stream()
+                    .map(t ->
+                            UserPermissions.newInstance(
+                                    Application.Name.valueOf(t),
+                                    superAdminUserPermissions.get().getPermissions()
+                             ).build())
+                    .forEach(userPermissionsList::addPermissions);
         } else {
             List<com.intuit.wasabi.repository.cassandra.pojo.UserRole> resultList = getUserRoleList(userID,
                     Optional.empty());
@@ -154,7 +161,7 @@ public class CassandraAuthorizationRepository  implements AuthorizationRepositor
         return resultList.stream()
                 .filter(t -> SUPERADMIN.equalsIgnoreCase(t.getRole()) )
                 .map( m ->
-                        UserPermissions.newInstance(Application.Name.valueOf(m.getAppName()),
+                        UserPermissions.newInstance(applicationName,
                                 Role.SUPERADMIN.getRolePermissions())
                                 .build()
                 )
@@ -216,11 +223,7 @@ public class CassandraAuthorizationRepository  implements AuthorizationRepositor
         UserRoleList userRoleList = new UserRoleList();
         //If the userID is in the superadmin list
         if(superAdmins.size() > 0){
-            Result<ApplicationList> allAppNames = applicationListAccessor.getUniqueAppName();
-            List<String> allAppNamesList = StreamSupport.stream(
-                    Spliterators.spliteratorUnknownSize(allAppNames.iterator(), Spliterator.ORDERED), false)
-                    .map(t -> t.getAppName())
-                    .collect(Collectors.toList());
+            List<String> allAppNamesList = getAllApplicationNameFromApplicationList();
             superAdmins.stream()
                     .map( t ->
                             allAppNamesList.stream()
@@ -254,6 +257,14 @@ public class CassandraAuthorizationRepository  implements AuthorizationRepositor
                 ).forEach(userRoleList::addRole);
 
         return userRoleList;
+    }
+
+    List<String> getAllApplicationNameFromApplicationList() {
+        Result<ApplicationList> allAppNames = applicationListAccessor.getUniqueAppName();
+        return StreamSupport.stream(
+                Spliterators.spliteratorUnknownSize(allAppNames.iterator(), Spliterator.ORDERED), false)
+                .map(t -> t.getAppName())
+                .collect(Collectors.toList());
     }
 
     @Override
