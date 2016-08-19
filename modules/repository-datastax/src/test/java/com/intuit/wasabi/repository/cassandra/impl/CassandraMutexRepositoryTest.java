@@ -17,6 +17,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.datastax.driver.core.Session;
 import com.datastax.driver.mapping.Result;
+import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.Experiment.ID;
@@ -33,6 +34,9 @@ public class CassandraMutexRepositoryTest {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     Result<com.intuit.wasabi.repository.cassandra.pojo.Exclusion> resultDatastax;
 
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    CassandraDriver driver;
+    
     CassandraMutexRepository repository;
     
     Application.Name applicationName;
@@ -44,12 +48,17 @@ public class CassandraMutexRepositoryTest {
 	private ID pair;
 
 	private List<Exclusion> exclusions;
+
+	private Session session;
     
     @Before
     public void setUp() throws Exception {
     	accessor = Mockito.mock(MutexAccessor.class);
     	resultDatastax = Mockito.mock(Result.class);
-    	repository = new CassandraMutexRepository(null, accessor, null);
+    	driver = Mockito.mock(CassandraDriver.class);
+    	session = Mockito.mock(Session.class);
+    	Mockito.when(driver.getSession()).thenReturn(session);
+    	repository = new CassandraMutexRepository(null, accessor, driver);
     	base = Experiment.ID.newInstance();
     	pair = Experiment.ID.newInstance();
     	exclusions = new ArrayList<>();

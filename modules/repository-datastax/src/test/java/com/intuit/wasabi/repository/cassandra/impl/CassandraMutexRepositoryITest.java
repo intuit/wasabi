@@ -34,6 +34,8 @@ public class CassandraMutexRepositoryITest {
 	private MappingManager manager;
 
 	private Mapper<com.intuit.wasabi.repository.cassandra.pojo.Exclusion> mapper;
+
+	private CassandraDriver driver;
     
     @Before
     public void setUp() throws Exception {
@@ -41,10 +43,11 @@ public class CassandraMutexRepositoryITest {
         injector.getInstance(Key.get(String.class, Names.named("CassandraInstanceName")));
 
         session = injector.getInstance(CassandraDriver.class).getSession();
+        driver = injector.getInstance(CassandraDriver.class);
         manager = new MappingManager(session);
         mapper = manager.mapper(com.intuit.wasabi.repository.cassandra.pojo.Exclusion.class);
     	accessor = manager.createAccessor(MutexAccessor.class);
-    	repository = new CassandraMutexRepository(null, accessor, session);
+    	repository = new CassandraMutexRepository(null, accessor, driver);
     	applicationName = Application.Name.valueOf("TestApplicationName");
     }
     
