@@ -41,6 +41,8 @@ public interface MutexAccessor {
      * Delete exclusion pair
      * @param base expriment id
      * @param pair exclusion experiment id
+     * 
+     * @return Statement object
      */
     @Query("delete from exclusion where base = ? and pair = ?")
     Statement deleteExclusion(UUID base, UUID pair);
@@ -49,6 +51,8 @@ public interface MutexAccessor {
      * Create exclusion pair
      * @param base the base experiment id
      * @param pair the exclusion experiment id
+     * 
+     * @return Statement object
      */
     @Query("insert into exclusion(base, pair) values(?, ?)")
     Statement createExclusion(UUID base, UUID pair);

@@ -16,6 +16,7 @@
 package com.intuit.wasabi.repository.cassandra.impl;
 
 import com.google.inject.Inject;
+import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.ExperimentList;
 import com.intuit.wasabi.repository.MutexRepository;
@@ -41,10 +42,16 @@ import org.slf4j.LoggerFactory;
  */
 public class CassandraMutexRepository implements MutexRepository {
 
+	/**
+	 * Logger for the class
+	 */
     private static final Logger LOGGER = LoggerFactory.getLogger(CassandraMutexRepository.class);
 
+    /**
+     * TODO - Hook up experiment accessor
+     */
     private final ExperimentAccessor experimentAccessor;
-	private MutexAccessor mutexAccessor;
+	private final MutexAccessor mutexAccessor;
 
 	private Session session;
 
@@ -52,12 +59,10 @@ public class CassandraMutexRepository implements MutexRepository {
     public CassandraMutexRepository(
             ExperimentAccessor experimentAccessor,
             MutexAccessor mutexAccessor,
-            Session session)
+            CassandraDriver driver)
             throws IOException, ConnectionException {
-
-        super();
         this.experimentAccessor = experimentAccessor;
-        this.session = session;
+        this.session = driver.getSession();
         this.mutexAccessor = mutexAccessor;
     }
 
@@ -128,6 +133,7 @@ public class CassandraMutexRepository implements MutexRepository {
     /**
      * {@inheritDoc}
      */
+    // TODO - Hook up to experiment accessor
     @Override
     public ExperimentList getExclusions(Experiment.ID base) {
     	throw new UnsupportedOperationException("Not implemented yet");
@@ -148,6 +154,7 @@ public class CassandraMutexRepository implements MutexRepository {
      * {@inheritDoc}
      */
     @Override
+    // TODO - Hook up to experiment accessor
     public ExperimentList getNotExclusions(Experiment.ID base) {
     	throw new UnsupportedOperationException("Not implemented yet");
     	/*
@@ -185,6 +192,7 @@ public class CassandraMutexRepository implements MutexRepository {
     public Map<Experiment.ID, List<Experiment.ID>> getExclusivesList(
     		Collection<Experiment.ID> experimentIDCollection) {
     	LOGGER.debug("Getting exclusions for {}", experimentIDCollection);
+    	
         Map<Experiment.ID, List<Experiment.ID>> result = new HashMap<>(experimentIDCollection.size());
 
         try {
@@ -195,7 +203,9 @@ public class CassandraMutexRepository implements MutexRepository {
             throw new RepositoryException("Could not fetch mutually exclusive experiments for the list of experiments"
                     , e);
         }
+        
     	LOGGER.debug("Returning exclusions map {}", result);
+    	
         return result;
     }
 }
