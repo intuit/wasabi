@@ -15,18 +15,17 @@
  *******************************************************************************/
 package com.intuit.wasabi.eventlog.impl;
 
-import com.intuit.wasabi.eventlog.EventLog;
 import com.intuit.wasabi.eventlog.EventLogListener;
 import com.intuit.wasabi.eventlog.events.EventLogEvent;
 import com.intuit.wasabi.eventlog.events.SimpleEvent;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.lang.reflect.Field;
-import java.util.*;
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Tests for {@link EventLogImpl}.
