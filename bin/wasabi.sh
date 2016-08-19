@@ -167,7 +167,7 @@ resource() {
 }
 
 stop() {
-  ./bin/container.sh stop${1:+:$1}
+  ./bin/congit tainer.sh stop${1:+:$1}
 }
 
 status() {
@@ -177,7 +177,7 @@ status() {
 package() {
   profile=build
 
-  build true false ${profile}
+  build true ${verify} ${profile}
 
   # FIXME: move to modules/ui/build.sh
   version=$(fromPom . build project.version)
