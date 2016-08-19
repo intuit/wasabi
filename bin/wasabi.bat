@@ -19,9 +19,6 @@ rem ############################################################################
 setlocal
 call :init_logging
 
-rem Define valid commands
-set valid_commands=bootstrap build package remove resource start stop test usage
-
 if "%1"=="" (
     call :invalid_command_issued
     exit /b 1
@@ -29,6 +26,10 @@ if "%1"=="" (
 
 rem Enable delayed expansion for the parser
 setlocal enabledelayedexpansion
+
+rem Define valid commands
+set valid_commands=
+for /f %%a in ('dir /b bin\win') do set valid_commands=!valid_commands! %%~na
 
 call :info Processing Wasabi commands
 set remaining_commands=%*
@@ -78,9 +79,9 @@ set remaining_commands=%*
     )
     if defined remaining_commands goto read_commands
 call :info Wasabi done
+
+
 goto :eof
-
-
 rem LABEL: Print error and show usage, then exit with exit code 1.
 :invalid_command_issued
      call :error Invalid command: %1

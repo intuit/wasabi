@@ -17,9 +17,10 @@ rem # limitations under the License.
 rem ############################################################################
 
 setlocal
-call :error build not implemented yet
+mvn -Pdevelopment clean package javadoc:aggregate
 
 
+goto :eof
 rem FUNCTION: Logs the parameters as DEBUG.
 :debug
     rem call :log [DEBUG] %*

@@ -22,7 +22,7 @@ rem List of dependencies to install
 set choco_packages=docker,docker-machine,boot2docker,jdk8,nodejs.install,maven --version 3.3.9 --allowEmptyChecksums,ruby
 rem TODO: wait for maven repo to be fixed and remove the additional arguments
 set npm_packages=yo,grunt-cli,bower
-set gem_packages=compass
+set gem_packages=compass,fpm
 
 rem Test if administrator (see http://stackoverflow.com/a/11995662)
 net session >nul 2>&1
@@ -87,9 +87,9 @@ set remaining_packages=%gem_packages%
 
 cmd /c C:\ProgramData\chocolatey\bin\RefreshEnv.cmd
 call :info Bootstrapping done. You might need to restart your terminal.
+
+
 goto :eof
-
-
 rem FUNCTION: Logs the parameters as DEBUG.
 :debug
     call :log [DEBUG] %*

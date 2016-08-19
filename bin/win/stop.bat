@@ -20,6 +20,7 @@ setlocal
 call :error stop not implemented yet
 
 
+goto :eof
 rem FUNCTION: Logs the parameters as DEBUG.
 :debug
     rem call :log [DEBUG] %*

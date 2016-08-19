@@ -39,7 +39,6 @@ echo.
 call :color %nc% "Usage:"&echo.
 
 call :color %wc% "    bin\wasabi.bat "
-call :color %ic% "["
 call :color %cc% "command1"
 call :color %ic% "["
 call :color %rc% ":"
@@ -112,6 +111,7 @@ call :color %rc% ":"
 call :color %ac% "wasabi "
 echo.
 echo.
+
 
 goto :eof
 
