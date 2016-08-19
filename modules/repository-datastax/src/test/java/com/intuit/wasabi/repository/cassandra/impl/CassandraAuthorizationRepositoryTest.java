@@ -47,11 +47,10 @@ public class CassandraAuthorizationRepositoryTest {
     @Mock UserInfoAccessor userInfoAccessor;
     @Mock UserRoleAccessor userRoleAccessor;
 
-    @Mock Result<String> applicationListResult;
+    @Mock Result<ApplicationList> applicationListResult;
     @Mock Result<AppRole> appRoleResult;
     @Mock Result<UserInfo> userInfoResult;
     @Mock Result<UserRole> userRoleResult;
-    @Mock Result<ApplicationList> appNamesResult;
 
     @Mock UserDirectory userDirectory;
     @Mock (answer = Answers.RETURNS_DEEP_STUBS) MappingManager mappingMapager;
@@ -408,8 +407,8 @@ public class CassandraAuthorizationRepositoryTest {
                 eq(CassandraAuthorizationRepository.WILDCARD)
         );
         doReturn(userInfo).when(spyRepository).retrieveOrDefaultUser(username);
-        when(applicationListAccessor.getUniqueAppName()).thenReturn(appNamesResult);
-        when(appNamesResult.iterator()).thenReturn(allAppsNames.iterator());
+        when(applicationListAccessor.getUniqueAppName()).thenReturn(applicationListResult);
+        when(applicationListResult.iterator()).thenReturn(allAppsNames.iterator());
         UserRoleList result = spyRepository.getUserRoleList(username);
         assertThat(result.getRoleList().size(), is(allAppsNames.size()));
         result.getRoleList().forEach(
@@ -719,6 +718,9 @@ public class CassandraAuthorizationRepositoryTest {
 
     @Test
     public void getUserPermissionsListAsSuperadminTest(){
+        List<ApplicationList> allAppsNames = new ArrayList<>();
+        allAppsNames.add(ApplicationList.builder().appName("testApp1").build());
+        allAppsNames.add(ApplicationList.builder().appName("testApp2").build());
         com.intuit.wasabi.authenticationobjects.UserInfo.Username testUser =
                 com.intuit.wasabi.authenticationobjects.UserInfo.Username.valueOf("user1");
         UserPermissions expected = UserPermissions.newInstance(CassandraAuthorizationRepository.WILDCARD,
@@ -727,12 +729,16 @@ public class CassandraAuthorizationRepositoryTest {
                 eq(testUser),
                 eq(CassandraAuthorizationRepository.WILDCARD)
                 );
+        when(applicationListAccessor.getUniqueAppName()).thenReturn(applicationListResult);
+        when(applicationListResult.iterator()).thenReturn(allAppsNames.iterator());
         UserPermissionsList userPermissionsList = spyRepository.getUserPermissionsList( testUser );
-        assertThat(userPermissionsList.getPermissionsList().size(), is(1));
-        assertThat(userPermissionsList.getPermissionsList().get(0).getPermissions(),
-                is(Role.SUPERADMIN.getRolePermissions()));
-        assertThat(userPermissionsList.getPermissionsList().get(0).getApplicationName(),
-                is(CassandraAuthorizationRepository.WILDCARD));
+        assertThat(userPermissionsList.getPermissionsList().size(), is(2));
+        int i = 0;
+        for(UserPermissions userPermissions : userPermissionsList.getPermissionsList() ) {
+            assertThat(userPermissions.getPermissions(), is(Role.SUPERADMIN.getRolePermissions()));
+            assertThat(allAppsNames.get(i).getAppName(), is(userPermissions.getApplicationName().toString()));
+            i++;
+        }
     }
 
     @Test
