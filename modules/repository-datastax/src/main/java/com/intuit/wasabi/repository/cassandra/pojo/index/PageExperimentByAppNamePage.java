@@ -1,5 +1,6 @@
-package com.intuit.wasabi.repository.cassandra.pojo;
+package com.intuit.wasabi.repository.cassandra.pojo.index;
 
+import com.datastax.driver.mapping.annotations.ClusteringColumn;
 import com.datastax.driver.mapping.annotations.Column;
 import com.datastax.driver.mapping.annotations.PartitionKey;
 import com.datastax.driver.mapping.annotations.Table;
@@ -10,28 +11,22 @@ import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
-@Table(name="experiment_user_index")
+@Table(name="page_experiment_index")
 @Data
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class ExperimentUserByUserIdContextAppNameExperimentId {
-
+public class PageExperimentByAppNamePage {
     @PartitionKey(0)
-    @Column(name = "user_id")
-    String userId;
-
-    @PartitionKey(1)
-    String context;
-
-    @PartitionKey(2)
     @Column(name = "app_name")
     String appName;
 
-    @PartitionKey(3)
-    @Column(name = "experiment_id")
+    @PartitionKey(1)
+    String page;
+
+    @ClusteringColumn(0)
+    @Column(name = "exp_id")
     UUID experimentId;
 
-    String bucket;
-
+    boolean assign;
 }

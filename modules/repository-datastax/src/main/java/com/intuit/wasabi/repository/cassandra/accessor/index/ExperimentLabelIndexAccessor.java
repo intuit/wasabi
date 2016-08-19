@@ -1,4 +1,4 @@
-package com.intuit.wasabi.repository.cassandra.accessor;
+package com.intuit.wasabi.repository.cassandra.accessor.index;
 
 import com.datastax.driver.mapping.annotations.Accessor;
 

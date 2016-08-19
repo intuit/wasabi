@@ -1,10 +1,10 @@
-package com.intuit.wasabi.repository.cassandra.accessor;
+package com.intuit.wasabi.repository.cassandra.accessor.index;
 
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.mapping.Result;
 import com.datastax.driver.mapping.annotations.Accessor;
 import com.datastax.driver.mapping.annotations.Query;
-import com.intuit.wasabi.repository.cassandra.pojo.ExperimentUserByUserIdContextAppNameExperimentId;
+import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentUserByUserIdContextAppNameExperimentId;
 
 import java.util.UUID;
 

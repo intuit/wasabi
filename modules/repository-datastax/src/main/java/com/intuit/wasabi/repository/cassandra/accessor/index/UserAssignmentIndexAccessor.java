@@ -1,16 +1,16 @@
-package com.intuit.wasabi.repository.cassandra.accessor;
+package com.intuit.wasabi.repository.cassandra.accessor.index;
 
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.mapping.Result;
 import com.datastax.driver.mapping.annotations.Accessor;
 import com.datastax.driver.mapping.annotations.Query;
-import com.intuit.wasabi.repository.cassandra.pojo.UserAssignmentByUserIdContextExperimentId;
+import com.intuit.wasabi.repository.cassandra.pojo.index.UserAssignmentByUserIdContextExperimentId;
 
 import java.util.Date;
 import java.util.UUID;
 
 @Accessor
-public interface UserAssignmentLookUpAccessor {
+public interface UserAssignmentIndexAccessor {
     @Query("insert into user_assignment_look_up (experiment_id, user_id, context, created, bucket_label)" +
             " values (?, ?, ?, ?, ?)")
     ResultSet insertBy(UUID uuid, String userId, String context, Date created, String bucketLabel);

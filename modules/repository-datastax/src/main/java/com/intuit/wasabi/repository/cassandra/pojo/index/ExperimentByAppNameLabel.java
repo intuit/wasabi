@@ -1,4 +1,4 @@
-package com.intuit.wasabi.repository.cassandra.pojo;
+package com.intuit.wasabi.repository.cassandra.pojo.index;
 
 import com.datastax.driver.mapping.annotations.Column;
 import com.datastax.driver.mapping.annotations.PartitionKey;
@@ -8,29 +8,31 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
 import java.util.UUID;
 
-@Table(name="user_experiment_index")
+@Table(name="experiment_label_index")
 @Data
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserExperimentByAppNameUserIdContextExperimentId {
+public class ExperimentByAppNameLabel {
     @PartitionKey(0)
     @Column(name = "app_name")
     String appName;
 
     @PartitionKey(1)
-    @Column(name = "user_id")
-    String userId;
+    String label;
 
-    @PartitionKey(2)
-    String context;
+    UUID id;
 
-    @PartitionKey(3)
-    @Column(name = "experiment_id")
-    UUID experimentId;
+    Date modified;
 
-    @Column(name = "bucket_label")
-    String bucketLabel;
+    @Column(name = "start_time")
+    Date startTime;
+
+    @Column(name = "end_time")
+    Date endTime;
+
+    String state;
 }

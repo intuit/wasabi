@@ -1,4 +1,4 @@
-package com.intuit.wasabi.repository.cassandra.accessor;
+package com.intuit.wasabi.repository.cassandra.accessor.export;
 
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.mapping.Result;

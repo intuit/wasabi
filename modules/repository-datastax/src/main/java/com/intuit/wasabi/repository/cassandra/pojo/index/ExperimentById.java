@@ -1,4 +1,4 @@
-package com.intuit.wasabi.repository.cassandra.pojo;
+package com.intuit.wasabi.repository.cassandra.pojo.index;
 
 import com.datastax.driver.mapping.annotations.Table;
 import lombok.AllArgsConstructor;

@@ -27,6 +27,31 @@
     <artifactId>wasabi-repository-datastax</artifactId>
     <packaging>jar</packaging>
     <name>${project.artifactId}</name>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <suiteXmlFiles>
+                        <suiteXmlFile>${basedir}/src/test/authRepoIntegrationTest.xml</suiteXmlFile>
+                    </suiteXmlFiles>
+                    <argLine>-Xmx1024m</argLine>
+                    <!--<testSourceDirectory>${basedir}/src/test/java</testSourceDirectory>-->
+                    <!--<testClassesDirectory>${project.build.directory}/test-classes</testClassesDirectory>-->
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>integration-test</id>
+                        <phase>integration-test</phase>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
     <dependencies>
   		<dependency>
