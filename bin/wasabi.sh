@@ -15,7 +15,8 @@
 # limitations under the License.
 ###############################################################################
 
-formulas=("bash" "cask" "git" "maven" "wget" "python" "ruby" "node")
+formulas=("bash" "git" "maven" "wget" "python" "ruby" "node")
+taps=("caskroom/cask")
 casks=("java" "docker")
 endpoint_default=localhost:8080
 verify_default=false
@@ -92,6 +93,10 @@ bootstrap() {
 
   for formula in "${formulas[@]}"; do
     [[ ! $(brew list ${formula} 2>/dev/null) ]] && brew install ${formula} || brew upgrade ${formula} 2>/dev/null
+  done
+
+  for tap in "${taps[@]}"; do
+    brew tap ${tap}
   done
 
   for cask in "${casks[@]}"; do
