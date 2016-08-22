@@ -61,7 +61,7 @@ public class Experiment implements Cloneable, ExperimentBase {
             "in range: (0, 1]",
             required = true)
     private Double samplingPercent;
-    @ApiModelProperty(value = "description/hypothesis of the experiment", required = false)
+    @ApiModelProperty(value = "description/hypothesis of the experiment", required = true)
     private String description;
     @ApiModelProperty(value = "defines whether the hypothesis of the experiment was correct", required = false)
     private String hypothesisIsCorrect;

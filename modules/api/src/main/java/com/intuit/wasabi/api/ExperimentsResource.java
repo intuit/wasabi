@@ -316,11 +316,6 @@ public class ExperimentsResource {
             throw new ExperimentNotFoundException(experimentID);
         }
 
-        if (experiment.getDescription().isEmpty()) {
-            throw new ExperimentMissingHypothesisException(ErrorCode.ILLEGAL_ARGUMENT,
-                    "Experiments must provide a hypothesis!");
-        }
-
         if (!createNewApplication) {
             authorization.checkUserPermissions(userName, experiment.getApplicationName(), UPDATE);
         }

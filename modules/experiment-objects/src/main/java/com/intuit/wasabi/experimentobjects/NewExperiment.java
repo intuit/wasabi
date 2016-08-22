@@ -44,8 +44,8 @@ public final class NewExperiment implements ExperimentBase {
     private Date endTime;
     @ApiModelProperty(required = true)
     private Double samplingPercent;
-    @ApiModelProperty(required = false)
-    private String description = "";
+    @ApiModelProperty(required = true)
+    private String description;
     @ApiModelProperty(required = false)
     private String hypothesisIsCorrect = "";
     @ApiModelProperty(required = false)
