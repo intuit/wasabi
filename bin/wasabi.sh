@@ -191,23 +191,21 @@ package() {
   content=$(fromPom ./modules/main build application.http.content.directory)
   ui_home=${home}/../${name}-${version}-${profile}
 
+  ./bin/fpm.sh -n ${name} -v ${version} -p ${profile}
+
   (cd modules/ui; \
     mkdir -p target; \
-    # for f in app bower.json feedbackserver Gruntfile.js constants.json karma.conf.js karma-e2e.conf.js package.json test .bowerrc; do \
-    # TODO Should we remove feedbackserver? it does not exist in the current structure.
     for f in app bower.json Gruntfile.js constants.json karma.conf.js karma-e2e.conf.js package.json test .bowerrc; do \
       cp -r ${f} target; \
     done; \
     sed -i '' -e "s|http://localhost:8080|${server}|g" target/constants.json 2>/dev/null; \
     sed -i '' -e "s|VERSIONLOC|${version}|g" target/app/index.html 2>/dev/null; \
     if [ "${WASABI_OS}" == "${wasabi_os_default}" ]; then \
-    (cd target; \
-      npm install; \
-      bower install; \
-      grunt clean; \
-      grunt build --target=develop --no-color); \
+      (cd target; npm install; bower install; grunt clean); \
+    fi; \
+    (cd target; grunt build --target=develop --no-color; \
 #      grunt test); \
-    fi
+    ); \
     cp -r build target; \
     for pkg in deb rpm; do \
       sed -i '' -e "s|\${application.home}|${home}|g" target/build/${pkg}/before-install.sh 2>/dev/null; \
@@ -219,11 +217,10 @@ package() {
       sed -i '' -e "s|\${application.user}|${user}|g" target/build/${pkg}/after-install.sh 2>/dev/null; \
       sed -i '' -e "s|\${application.group}|${group}|g" target/build/${pkg}/after-install.sh 2>/dev/null; \
       sed -i '' -e "s|\${application.http.content.directory}|${content}|g" target/build/${pkg}/before-remove.sh 2>/dev/null; \
-    done)
+    done; \
+    (cd target; ../bin/fpm.sh -n ${name} -v ${version} -p ${profile}))
 
-  ./bin/fpm.sh -n ${name} -v ${version} -p ${profile}
-  find . -type f \( -name "*.rpm" -or -name "*.deb" \) -exec mv {} ./target \;
-
+#  find . -type f \( -name "*.rpm" -or -name "*.deb" \) -exec mv {} ./target \;
   echo "deployable build packages:"
 
   find . -type f \( -name "*.rpm" -or -name "*.deb" \)
