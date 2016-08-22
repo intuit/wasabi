@@ -3,6 +3,7 @@ package com.intuit.wasabi.repository.cassandra.pojo;
 import com.datastax.driver.mapping.annotations.Column;
 import com.datastax.driver.mapping.annotations.PartitionKey;
 import com.datastax.driver.mapping.annotations.Table;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -31,7 +32,7 @@ public class Experiment {
     private String description;
 
     @Column(name="sample_percent")
-    private double samplePercent;
+    private Double samplePercent;
 
     @Column(name="start_time")
     private Date startTime;
@@ -51,21 +52,23 @@ public class Experiment {
     private String rule;
 
     @Column(name="model_name")
-    private String modelName;
+    private String modelName = "";
 
     @Column(name="model_version")
-    private String modelVersion;
+    private String modelVersion = "";
 
     @Column(name="is_personalized")
-    private boolean personalized;
+    private boolean personalized = false;
 
     @Column(name="is_rapid_experiment")
-    private boolean rapidExperiment;
+    private boolean rapidExperiment = false;
 
     @Column(name="user_cap")
-    private int userCap;
+    private int userCap = Integer.MAX_VALUE;
 
     @Column(name="creatorid")
     private String creatorId;
+    
+    private String label;
 
 }
