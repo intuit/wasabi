@@ -54,8 +54,14 @@ public class Experiment extends ModelItem {
     /** The sampling percentage (0, 1]. Required. */
     public double samplingPercent;
 
-    /** The description. Optional. */
+    /** The description/hypothesis. Optional. */
     public String description;
+
+    /** The precision of the experiment hypothesis. Optional. */
+    public String hypothesisIsCorrect;
+
+    /** The results. Optional. */
+    public String results;
 
     /** The selection rules for this experiment. Optional. */
     public String rule;
@@ -276,13 +282,35 @@ public class Experiment extends ModelItem {
     }
 
     /**
-     * Sets the description and returns this instance. Allows for builder patterns.
+     * Sets the description/hypothesis and returns this instance. Allows for builder patterns.
      *
      * @param description the description
      * @return this
      */
     public Experiment setDescription(String description) {
         this.description = description;
+        return this;
+    }
+
+    /**
+     * Sets whether the hypothesis of the experiment was correct and returns this instance. Allows for builder patterns.
+     *
+     * @param hypothesisIsCorrect the description
+     * @return this
+     */
+    public Experiment setHypothesisIsCorrect(String hypothesisIsCorrect) {
+        this.hypothesisIsCorrect = hypothesisIsCorrect;
+        return this;
+    }
+
+    /**
+     * Sets the results and returns this instance. Allows for builder patterns.
+     *
+     * @param results the results
+     * @return this
+     */
+    public Experiment setResults(String results) {
+        this.results = results;
         return this;
     }
 

@@ -48,7 +48,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  * Known Issues:
  * - The python test checked for the number of experiments, but since this could be run on production environments
  *   it does not feel right to check those numbers, as they might change by other accessors.
- * 
+ *
  * These transitions are tested:
  *
  * <small>(row transitions to column)</small>
@@ -94,7 +94,7 @@ public class IntegrationExperiment extends TestBase {
         completeExperiment = ExperimentFactory.createCompleteExperiment();
         personalizationExperiment = ExperimentFactory.createCompleteExperiment();
     }
-    
+
     /**
      * Creates a test experiment to test with.
      */
@@ -239,7 +239,7 @@ public class IntegrationExperiment extends TestBase {
      */
     @DataProvider
     public Object[][] badExperimentsPOST() {
-        Experiment experiment = new Experiment();
+        Experiment experiment = new Experiment().setDescription("Sample hypothesis.");
         return new Object[][]{
                 // FIXME: jwtodd
 //                new Object[] { new Experiment(experiment.setSamplingPercent(completeExperiment.samplingPercent)), "Invalid input", HttpStatus.SC_BAD_REQUEST },
@@ -283,7 +283,6 @@ public class IntegrationExperiment extends TestBase {
         postExperiment(experiment, expectedStatusCode);
         // FIXME: jwtodd
         if (expectedError.startsWith("An unique constraint")) {
-//            Assert.assertEquals(lastError(), expectedError, "Error message not as expected.");
             Assert.assertTrue(lastError().startsWith("An unique constraint"), "Error message not as expected.");
         } else if (expectedError.startsWith("Could not create experiment")) {
             Assert.assertTrue(lastError().startsWith("Could not create"), "Error message not as expected.");

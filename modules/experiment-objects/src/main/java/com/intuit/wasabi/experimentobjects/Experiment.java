@@ -61,8 +61,12 @@ public class Experiment implements Cloneable, ExperimentBase {
             "in range: (0, 1]",
             required = true)
     private Double samplingPercent;
-    @ApiModelProperty(value = "description of the experiment", required = false)
+    @ApiModelProperty(value = "description/hypothesis of the experiment", required = true)
     private String description;
+    @ApiModelProperty(value = "defines whether the hypothesis of the experiment was correct", required = false)
+    private String hypothesisIsCorrect;
+    @ApiModelProperty(value = "results of the experiment", required = false)
+    private String results;
     @ApiModelProperty(value = "defines a user segment, i.e., if the rule validates to true, user is part of the segment", required = false)
     private String rule;
     @ApiModelProperty(value = "defines a user segment in json, i.e., if the rule validates to true, user is part of the segment", required = false)
@@ -131,6 +135,22 @@ public class Experiment implements Cloneable, ExperimentBase {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getHypothesisIsCorrect(){
+        return hypothesisIsCorrect;
+    }
+
+    public void setHypothesisIsCorrect(String hypothesisIsCorrect) {
+        this.hypothesisIsCorrect = hypothesisIsCorrect;
+    }
+
+    public String getResults() {
+        return results;
+    }
+
+    public void setResults(String results) {
+        this.results = results;
     }
 
     @Override
@@ -258,6 +278,8 @@ public class Experiment implements Cloneable, ExperimentBase {
                 .append(creationTime)
                 .append(modificationTime)
                 .append(description)
+                .append(hypothesisIsCorrect)
+                .append(results)
                 .append(rule)
                 .append(samplingPercent)
                 .append(startTime)
@@ -289,6 +311,8 @@ public class Experiment implements Cloneable, ExperimentBase {
                 .append(creationTime, other.getCreationTime())
                 .append(modificationTime, other.getModificationTime())
                 .append(description, other.getDescription())
+                .append(hypothesisIsCorrect, other.getHypothesisIsCorrect())
+                .append(results, other.getResults())
                 .append(rule, other.getRule())
                 .append(samplingPercent, other.getSamplingPercent())
                 .append(startTime, other.getStartTime())
@@ -307,7 +331,7 @@ public class Experiment implements Cloneable, ExperimentBase {
 
     @Override
     public String toString() {
-    	return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 
     @Override
@@ -462,6 +486,8 @@ public class Experiment implements Cloneable, ExperimentBase {
             instance.creationTime = copyDate(other.creationTime);
             instance.modificationTime = copyDate(other.modificationTime);
             instance.description = other.description;
+            instance.hypothesisIsCorrect = other.hypothesisIsCorrect;
+            instance.results = other.results;
             instance.rule = other.rule;
             instance.ruleJson = other.ruleJson;
             instance.samplingPercent = other.samplingPercent;
@@ -523,6 +549,18 @@ public class Experiment implements Cloneable, ExperimentBase {
 
         public Builder withDescription(final String description) {
             instance.description = description;
+
+            return this;
+        }
+
+        public Builder withHypothesisIsCorrect(final String hypothesisIsCorrect) {
+            instance.hypothesisIsCorrect = hypothesisIsCorrect;
+
+            return this;
+        }
+
+        public Builder withResults(final String results) {
+            instance.results = results;
 
             return this;
         }
@@ -642,7 +680,7 @@ public class Experiment implements Cloneable, ExperimentBase {
 
         @Override
         public boolean equals(Object obj) {
-        	   return EqualsBuilder.reflectionEquals(this, obj);
+            return EqualsBuilder.reflectionEquals(this, obj);
         }
 
         @Override
@@ -716,7 +754,7 @@ public class Experiment implements Cloneable, ExperimentBase {
 
         @Override
         public boolean equals(Object obj) {
-        	   return EqualsBuilder.reflectionEquals(this, obj);
+            return EqualsBuilder.reflectionEquals(this, obj);
         }
 
         public static class Serializer extends JsonSerializer<Label> {

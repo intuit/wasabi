@@ -1,1 +1,0 @@
-This directory contains CQL DDL for the Experiments persistence store
