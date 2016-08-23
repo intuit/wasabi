@@ -25,12 +25,9 @@ usage () {
 export JAVA_HOME=${JAVA_HOME:-/usr/local/java}
 export PATH=$JAVA_HOME/bin:$PATH
 
+
 fromPom() {
-  case $# in
-    2) mvn -f modules/$1/pom.xml help:evaluate -Dexpression=$2 | sed -n -e '/^\[.*\]/ !{ p; }';;
-    3) mvn -f modules/$1/pom.xml help:evaluate -Dexpression=$2 | sed -n -e '/^\[.*\]/ !{ p; }' | \
-         python -c "import xml.etree.ElementTree as ET; import sys; field = ET.parse(sys.stdin).getroot().find(\"$3\"); print (field.text if field != None else '')"
-  esac
+  mvn -f modules/$1/pom.xml help:evaluate -Dexpression=$2 | sed -n -e '/^\[.*\]/ !{ p; }'
 }
 
 exitOnError() {
@@ -70,14 +67,14 @@ done
 for module in "$modules"; do
   name=`fromPom $module/. project.name`
   version=`fromPom $module/. project.version`
-  email=`fromPom $module/. project.properties application.email`
+  email=`fromPom $module/. application.email`
   group=`fromPom $module/. project.groupId`
   id=$name-$version-$profile
   home=${home:-/usr/local/$id}
   log=${log:-/var/log/$id}
-  deps=`fromPom $module/. project.properties application.dependencies`
-  daemon=`fromPom $module/. project.properties application.daemon.enable`
-  daemon_deps=`fromPom $module/. project.properties application.daemon.dependencies`
+  deps=`fromPom $module/. application.dependencies`
+  daemon=`fromPom $module/. application.daemon.enable`
+  daemon_deps=`fromPom $module/. application.daemon.dependencies`
 
   echo "packaging service: $id"
 

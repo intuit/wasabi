@@ -69,10 +69,19 @@ beerMe() {
 }
 
 start_docker() {
-  docker ps ${project} >/dev/null 2>&1 || (open /Applications/Docker.app; beerMe 10)
+  # todo: wrap WASABI_OS in time
+  docker ps >/dev/null 2>&1
+  [[ $? != 0 ]] && open /Applications/Docker.app
+
+  while :; do
+    docker ps >/dev/null 2>&1
+    [[ $? = 0 ]] && break
+    beerMe 3
+  done
 }
 
 stop_docker() {
+  # todo: wrap WASABI_OS in time
   osascript -e 'quit app "Docker"'
 }
 
