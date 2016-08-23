@@ -15,7 +15,7 @@
 # limitations under the License.
 ###############################################################################
 
-formulas=("bash" "git" "maven" "wget" "python" "ruby" "node")
+formulas=("bash" "cask" "git" "maven" "wget" "ruby" "node")
 taps=("caskroom/cask")
 casks=("java" "docker")
 endpoint_default=localhost:8080
@@ -77,6 +77,7 @@ beerMe() {
 }
 
 bootstrap() {
+  # todo: add WASABI_OS
   if ! hash brew 2>/dev/null; then
     echo "${green}installing homebrew ...${reset}"
 
