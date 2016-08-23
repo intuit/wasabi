@@ -1,5 +1,6 @@
 # Wasabi - A/B Testing Platform
 
+**Support:** [![Join the chat at https://gitter.im/intuit/wasabi](https://badges.gitter.im/intuit/wasabi.svg)](https://gitter.im/intuit/wasabi?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) <br/>
 **Documentation:** [User Guide](https://intuit.github.io/wasabi/v1/guide/index.html), [JavaDocs](https://intuit.github.io/wasabi/v1/javadocs/latest/)
 <br/>
 **Continuous Integration:** [![Build Status](https://api.travis-ci.org/intuit/wasabi.svg?branch=develop)](https://travis-ci.org/intuit/wasabi)
@@ -54,12 +55,6 @@ The following steps will help you install the needed tools, then build and run a
 % ./bin/wasabi.sh bootstrap
 ```
 
-**Note**: if you have installed docker-native set the environment variable _'WASABI_OS'_
-
-```bash
-% export WASABI_OS=native
-``
-
 Installed tools include: [homebrew 0.9](http://brew.sh), [git 2](https://git-scm.com),
 [maven 3](https://maven.apache.org), [java 1.8](http://www.oracle.com/technetwork/java/javase/overview/index.html),
 [docker 1.12](https://docker.com), [node 6](https://nodejs.org/en) and [python 2.7](https://www.python.org).
@@ -76,11 +71,11 @@ command to verify the build:
 ...
 wasabi is operational:
 
-  ui: % open http://192.168.99.100:8080     note: sign in as admin/admin
-  api: % curl -i http://192.168.99.100:8080/api/v1/ping
-  debug: attach debuger to 192.168.99.100:8180
+  ui: % open http://localhost:8080     note: sign in as admin/admin
+  ping: % curl -i http://localhost:8080/api/v1/ping
+  debug: attach to localhost:8180
 
-% curl -i http://$(docker-machine ip wasabi):8080/api/v1/ping
+% curl -i http://localhost:8080/api/v1/ping
 HTTP/1.1 200 OK
 Date: Wed, 25 May 2016 00:25:47 GMT
 ...
@@ -107,14 +102,31 @@ Congratulations! You are the proud owner of a newly minted Wasabi instance. :)
 
 #### Troubleshooting
 
-* While starting Wasabi, if you run into errors such as this, run the following command in
-your terminal and re-run ./bin/wasabi.sh start:
+* While starting Wasabi, if you see an error when the docker containers are starting up, you could do the following:
 
-> Cannot connect to the Docker daemon. Is the docker daemon running on this host?
+  * Look at the current docker containers that have been successfully started.
 
 ```bash
-% eval $(docker-machine env wasabi)
+% ./bin/wasabi.sh status
+
+CONTAINER ID        IMAGE                    COMMAND                  CREATED             STATUS              PORTS                                                                     NAMES
+8c12458057ef        wasabi-main              "entrypoint.sh wasabi"   25 minutes ago      Up 25 minutes       0.0.0.0:8080->8080/tcp, 0.0.0.0:8090->8090/tcp, 0.0.0.0:8180->8180/tcp    wasabi-main
+979ecc885239        mysql:5.6                "docker-entrypoint.sh"   26 minutes ago      Up 26 minutes       0.0.0.0:3306->3306/tcp                                                    wasabi-mysql
+2d33a96abdcb        cassandra:2.1            "/docker-entrypoint.s"   27 minutes ago      Up 27 minutes       7000-7001/tcp, 0.0.0.0:9042->9042/tcp, 7199/tcp, 0.0.0.0:9160->9160/tcp   wasabi-cassandra
 ```
+
+  * The above shell output shows a successful start of 3 docker containers needed by Wasabi: wasabi-main (the Wasabi server),
+wasabi-mysql, and wasabi-cassandra. If any of these are not running, try starting them individually. For example, if the
+MySQL container is running, but Cassandra and Wasabi containers failed to start (perhaps due to a network timeout docker
+could not download the Cassandra image), do the following:
+
+```bash
+% ./bin/wasabi.sh start:cassandra
+
+% ./bin/wasabi.sh start:wasabi
+```
+
+
 
 #### Call Wasabi
 
@@ -131,7 +143,7 @@ You can assign a user with a unique ID (e.g. 'userID1') to the experiment by mak
 
 ```bash
 % curl -H "Content-Type: application/json" \
-    http://192.168.99.100:8080/api/v1/assignments/applications/Demo_App/experiments/BuyButton/users/userID1
+    http://localhost:8080/api/v1/assignments/applications/Demo_App/experiments/BuyButton/users/userID1
 
 {  
    "cache":true,
@@ -149,7 +161,7 @@ Now the 'userID1' user is assigned into the 'BucketA' bucket. Let's further reco
 ```bash
 % curl -H "Content-Type: application/json" \
     -d "{\"events\":[{\"name\":\"IMPRESSION\"}]}" \
-    http://192.168.99.100:8080/api/v1/events/applications/Demo_App/experiments/BuyButton/users/userID1
+    http://localhost:8080/api/v1/events/applications/Demo_App/experiments/BuyButton/users/userID1
 ```
 
 If the 'userID1' user performs an action such as clicking the Buy button, you'd record that action with the following request:
@@ -159,7 +171,7 @@ If the 'userID1' user performs an action such as clicking the Buy button, you'd 
 ```bash
 % curl -H "Content-Type: application/json" \
     -d "{\"events\":[{\"name\":\"BuyClicked\"}]}" \
-    http://192.168.99.100:8080/api/v1/events/applications/Demo_App/experiments/BuyButton/users/userID1
+    http://localhost:8080/api/v1/events/applications/Demo_App/experiments/BuyButton/users/userID1
 ```
 
 #### Explore Various Resources
@@ -249,9 +261,8 @@ Further, there are a number of additional wasabi.sh options available you should
 ```bash
 % mvn package
 % ./bin/wasabi.sh start:cassandra,mysql
-% dmip=$(docker-machine ip wasabi)
 % (cd modules/main/target; \
-    WASABI_CONFIGURATION="-DnodeHosts=${dmip} -Ddatabase.url.host=${dmip}" ./wasabi-main-*-SNAPSHOT-development/bin/run) &
+    WASABI_CONFIGURATION="-DnodeHosts=localhost -Ddatabase.url.host=localhost" ./wasabi-main-*-SNAPSHOT-development/bin/run) &
 % curl -i http://localhost:8080/api/v1/ping
 ...
 ```
@@ -299,7 +310,7 @@ add the configuration information above to the JVM commandline prior to startup:
 > Wasabi runtime configuration:
 
 ```bash
--DnodeHosts=$(docker-machine ip wasabi) -Ddatabase.url.host=$(docker-machine ip wasabi)
+-DnodeHosts=localhost -Ddatabase.url.host=localhost
 ```
 
 #### Run Integration Tests
