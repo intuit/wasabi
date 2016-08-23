@@ -31,6 +31,7 @@ import com.intuit.wasabi.repository.cassandra.accessor.index.UserBucketIndexAcce
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -41,6 +42,11 @@ public class UserBucketIndexAccessorITest {
     static MappingManager manager;
     static UserBucketIndexAccessor accessor;
     static String applicationName = "MyTestApplication_" + System.currentTimeMillis();
+	private static String bucketLabel;
+	private static String context;
+	private static UUID base;
+
+
 
     @BeforeClass
     public static void setup(){
@@ -50,15 +56,80 @@ public class UserBucketIndexAccessorITest {
         session = injector.getInstance(CassandraDriver.class).getSession();
         manager = new MappingManager(session);
         accessor = manager.createAccessor(UserBucketIndexAccessor.class);
-
+        base = UUID.randomUUID();
+        context = "context" + base;
+        bucketLabel = "bucketLabel" + base;
     }
 
     @Test
-    public void testGetCountZero(){   	
-    	UUID base = UUID.randomUUID();
-    	ResultSet result = accessor.countUserBy(base, UUID.randomUUID().toString(), UUID.randomUUID().toString());
+    public void testCreateAndDelete(){   	
+    	ResultSet result = accessor.countUserBy(base, context, bucketLabel);
     	long count = result.one().getLong(0);
-    	assertEquals("Random count should be zero", 0, count);	
+    	assertEquals("Random count should be eq", 0, count);	
+    	
+    	accessor.insertBy(base, "userid1", context, new Date(), 
+    			bucketLabel);
+
+    	result = accessor.countUserBy(base, context, bucketLabel);
+    	count = result.one().getLong(0);
+    	assertEquals("Random count should be eq", 1, count);	
+
+    	accessor.deleteBy(base, "userid1", context, bucketLabel);
+
+    	result = accessor.countUserBy(base, context, bucketLabel);
+    	count = result.one().getLong(0);
+    	assertEquals("Random count should be eq",0, count);	
     }
 
+    @Test
+    public void testUpsertAndDeleteTwoRows(){   	
+    	ResultSet result = accessor.countUserBy(base, context, bucketLabel);
+    	long count = result.one().getLong(0);
+    	assertEquals("Random count should be eq", 0, count);	
+    	
+    	accessor.insertBy(base, "userid1", context, new Date(), 
+    			bucketLabel);
+
+    	accessor.insertBy(base, "userid1", context, new Date(), 
+    			bucketLabel);
+
+    	result = accessor.countUserBy(base, context, bucketLabel);
+    	count = result.one().getLong(0);
+    	assertEquals("Random count should be eq", 1, count);	
+
+    	accessor.deleteBy(base, "userid1", context, bucketLabel);
+
+    	result = accessor.countUserBy(base, context, bucketLabel);
+    	count = result.one().getLong(0);
+    	assertEquals("Random count should be eq",0, count);	
+    }
+
+    @Test
+    public void testInsertAndDeleteTwoRows(){   	
+    	ResultSet result = accessor.countUserBy(base, context, bucketLabel);
+    	long count = result.one().getLong(0);
+    	assertEquals("Random count should be eq", 0, count);	
+    	
+    	accessor.insertBy(base, "userid1", context, new Date(), 
+    			bucketLabel);
+
+    	accessor.insertBy(base, "userid2", context, new Date(), 
+    			bucketLabel);
+
+    	result = accessor.countUserBy(base, context, bucketLabel);
+    	count = result.one().getLong(0);
+    	assertEquals("Random count should be eq", 2, count);	
+
+    	accessor.deleteBy(base, "userid1", context, bucketLabel);
+
+    	result = accessor.countUserBy(base, context, bucketLabel);
+    	count = result.one().getLong(0);
+    	assertEquals("Random count should be eq",1, count);	
+
+    	accessor.deleteBy(base, "userid2", context, bucketLabel);
+
+    	result = accessor.countUserBy(base, context, bucketLabel);
+    	count = result.one().getLong(0);
+    	assertEquals("Random count should be eq",0, count);	
+}
 }
