@@ -37,7 +37,7 @@
                     'applicationName': 'MyStore',
                     'experimentName': 'TestBuyButtonColor',
                     'protocol': 'http',
-                    'host': '192.168.99.100:8080'
+                    'host': 'localhost:8080'
                 });
 
                 // Check Wasabi to see if this user should be in the test and which bucket.

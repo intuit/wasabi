@@ -1517,7 +1517,8 @@
          <name>wasabi-assignment-objects</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-assignment-objects</artifactId>
-         <version>1.0.20160627222942-SNAPSHOT</version>
+         <version>1.0.20160801220857-SNAPSHOT</version>
+         <projectUrl>https://github.com/intuit/wasabi/modules/wasabi-assignment-objects</projectUrl>
          <type>jar</type>
          <licenses>
             <license>
@@ -1531,7 +1532,8 @@
          <name>wasabi-exceptions</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-exceptions</artifactId>
-         <version>1.0.20160627222942-SNAPSHOT</version>
+         <version>1.0.20160801220857-SNAPSHOT</version>
+         <projectUrl>https://github.com/intuit/wasabi/modules/wasabi-exceptions</projectUrl>
          <type>jar</type>
          <licenses>
             <license>
@@ -1545,7 +1547,8 @@
          <name>wasabi-experiment-objects</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-experiment-objects</artifactId>
-         <version>1.0.20160627222942-SNAPSHOT</version>
+         <version>1.0.20160801220857-SNAPSHOT</version>
+         <projectUrl>https://github.com/intuit/wasabi/modules/wasabi-experiment-objects</projectUrl>
          <type>jar</type>
          <licenses>
             <license>
@@ -1559,7 +1562,8 @@
          <name>wasabi-export</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-export</artifactId>
-         <version>1.0.20160627222942-SNAPSHOT</version>
+         <version>1.0.20160801220857-SNAPSHOT</version>
+         <projectUrl>https://github.com/intuit/wasabi/modules/wasabi-export</projectUrl>
          <type>jar</type>
          <licenses>
             <license>

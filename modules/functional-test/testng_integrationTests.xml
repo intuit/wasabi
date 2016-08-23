@@ -84,6 +84,11 @@
             <class name="com.intuit.wasabi.tests.service.segmentation.MutualExclusionBatchTest"/>
         </classes>
     </test>
+    <test name="IntegrationStatisticsTests">
+        <classes>
+            <class name="com.intuit.wasabi.tests.service.statistic.StatisticTest"/>
+        </classes>
+    </test>
     <test name="IntegrationPagesTests">
         <classes>
             <class name="com.intuit.wasabi.tests.service.IntegrationPages"/>

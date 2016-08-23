@@ -26,6 +26,7 @@ modules/ui/results
 modules/ui/coverage2
 modules/ui/results2
 modules/ui/dist
-modules/ui/node_modules
+node_modules
 modules/ui/app/bower_components
 modules/ui/app/scripts/config.js
+modules/ui/dist.zip

@@ -4,8 +4,8 @@
 
 # NOTE: You will need to change this variable to point at the correct Wasabi api
 # server.  For example, if you were testing against your local server, it will probably be
-# http://192.168.99.100:8080 .
-export WASABI_SERVER=http://192.168.99.100:8080/api/v1
+# http://localhost:8080 .
+export WASABI_SERVER=http://localhost:8080/api/v1
 # NOTE: CHANGE THIS TO BE YOUR LOGIN
 export WASABI_LOGIN=your_login
 export APP_NAME=MyStore
