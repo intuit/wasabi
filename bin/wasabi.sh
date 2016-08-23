@@ -43,6 +43,7 @@ options:
 commands:
   bootstrap                              : install dependencies
   build                                  : build project
+  clean                                  : clean build
   start[:cassandra,mysql,wasabi]         : start all, cassandra, mysql, wasabi
   test                                   : test wasabi
   stop[:wasabi,cassandra,mysql]          : stop all, wasabi, cassandra, mysql
@@ -77,47 +78,55 @@ beerMe() {
 }
 
 bootstrap() {
-  # todo: add WASABI_OS
-  if ! hash brew 2>/dev/null; then
-    echo "${green}installing homebrew ...${reset}"
+  if [ "${WASABI_OS}" == "${wasabi_os_default}" ]; then
+    if ! hash brew 2>/dev/null; then
+      echo "${green}installing homebrew ...${reset}"
 
-    ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+      ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
-    echo "${green}installed homebrew${reset}"
+      echo "${green}installed homebrew${reset}"
+    fi
+
+    brew update
+    brew doctor
+    brew cleanup
+
+    echo "${green}installing dependencies: ${formulas[@]} ${taps[@]} ${casks[@]} ...${reset}"
+
+    for formula in "${formulas[@]}"; do
+      [[ ! $(brew list ${formula} 2>/dev/null) ]] && brew install ${formula} || brew upgrade ${formula} 2>/dev/null
+    done
+
+    for tap in "${taps[@]}"; do
+      brew tap ${tap}
+    done
+
+    for cask in "${casks[@]}"; do
+      [[ $(brew cask list ${cask} 2>/dev/null) ]] && brew cask uninstall --force ${cask} 2>/dev/null
+      brew cask install --force ${cask}
+    done
+
+    npm config set prefix $(brew --prefix)
+
+    echo "${green}installed dependencies: ${formulas[@]} ${taps[@]} ${casks[@]}${reset}"
+  else
+    echo "${green}FIXME: linux install of ( ${formulas[@]} ${taps[@]} ${casks[@]} ) not yet implemented${reset}"
   fi
-
-  brew update
-  brew doctor
-  brew cleanup
-
-  echo "${green}installing dependencies: ${formulas[@]} ${casks[@]} ...${reset}"
-
-  for formula in "${formulas[@]}"; do
-    [[ ! $(brew list ${formula} 2>/dev/null) ]] && brew install ${formula} || brew upgrade ${formula} 2>/dev/null
-  done
-
-  for tap in "${taps[@]}"; do
-    brew tap ${tap}
-  done
-
-  for cask in "${casks[@]}"; do
-    [[ $(brew cask list ${cask} 2>/dev/null) ]] && brew cask uninstall --force ${cask} 2>/dev/null
-    brew cask install --force ${cask}
-  done
-
-  npm config set prefix $(brew --prefix)
 
   for n in yo grunt-cli bower; do
     [[ ! $(npm -g list 2>/dev/null | grep ${n}) ]] && npm -g install ${n}
   done
 
   [[ ! $(gem list | grep compass) ]] && gem install compass
-
-  echo "${green}installed dependencies: ${formulas[@]} ${casks[@]}${reset}"
 }
 
 build() {
   ./bin/build.sh -b ${1:-false} -t ${2:-false} -p ${3:-development}
+}
+
+clean() {
+  mvn clean
+  (cd modules/ui; grunt clean)
 }
 
 start() {
@@ -276,6 +285,7 @@ for command in ${@:$OPTIND}; do
   case "${command}" in
     bootstrap) bootstrap;;
     build) build true;;
+    clean) clean;;
     start) command="start:cassandra,mysql,wasabi";&
     start:*) commands=$(echo ${command} | cut -d ':' -f 2)
       (IFS=','; for command in ${commands}; do start ${command}; done);;
