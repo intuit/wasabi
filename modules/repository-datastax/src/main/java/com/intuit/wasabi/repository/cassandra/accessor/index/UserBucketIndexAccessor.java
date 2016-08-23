@@ -10,12 +10,14 @@ import java.util.UUID;
 @Accessor
 public interface UserBucketIndexAccessor {
 
-    @Query("select count(*) from user_bucket_index where experiment_id = ? and context ='?' and bucket_label = '?'")
-    Integer countUserBy(UUID experimentId, String context, String bucketLable);
+    @Query("select count(*) from user_bucket_index where experiment_id = ? and context = ? and "
+    		+ "bucket_label = ? ")
+    ResultSet countUserBy(UUID experimentId, String context, String bucketLable);
 
     @Query("insert into user_bucket_index (experiment_id, user_id, context, assigned, bucket_label) values (?, ?, ?, ?, ?)")
     ResultSet insertBy(UUID experimentId, String userId, String context, Date assigned, String bucketLabel);
 
     @Query("delete from user_bucket_index where experiment_id = ? and user_id = ? and context = ? and bucket_label = ?")
     ResultSet deleteBy(UUID experimentId, String userId, String context, String bucketLabel);
+
 }
