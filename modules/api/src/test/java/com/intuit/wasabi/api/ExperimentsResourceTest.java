@@ -94,6 +94,7 @@ public class ExperimentsResourceTest {
     private String fromStringDate = "1970-00-00 00:00:00" ;
     private String toStringDate = "2040-05-10 18:03:39";
     private String timeZoneString = "UTC";
+    private String description = "Example hypothesis.";
 
     @Before
     public void setup() {
@@ -102,7 +103,7 @@ public class ExperimentsResourceTest {
                 .withStartTime(new Date())
                 .withEndTime(new Date())
                 .withState(Experiment.State.DRAFT)
-                .withDescription("Example Hypothesis.")
+                .withDescription(description)
                 .build();
 
         bucket = Bucket.newInstance(experiment.getID(),Bucket.Label.valueOf("foo"))
@@ -169,6 +170,7 @@ public class ExperimentsResourceTest {
                 .withStartTime(date)
                 .withEndTime(date)
                 .withSamplingPercent(.90)
+                .withDescription(description)
                 .build();
         try {
             newExperiment.setApplicationName(null);
@@ -1052,6 +1054,7 @@ public class ExperimentsResourceTest {
                 .withStartTime(new Date())
                 .withEndTime(new Date())
                 .withSamplingPercent(1d)
+                .withDescription(description)
                 .withLabel(Experiment.Label.valueOf("foo"))
                 .build();
 
@@ -1061,6 +1064,7 @@ public class ExperimentsResourceTest {
                 .withStartTime(new Date())
                 .withEndTime(new Date())
                 .withSamplingPercent(.5d)
+                .withDescription(description)
                 .withLabel(Experiment.Label.valueOf("foo"))
                 .build();
 
