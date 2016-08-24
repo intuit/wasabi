@@ -1,0 +1,30 @@
+{
+	"env": {
+		"browser": true,
+		"node": true,
+		"es6": true,
+		"jest": true,
+		"commonjs": true
+	},
+	"extends": "eslint:recommended",
+
+	"parser": "babel-eslint",
+	"parserOptions": {
+		"ecmaFeatures": {
+			"experimentalObjectRestSpread": true,
+			"jsx": true
+		},
+		"sourceType": "module"
+	},
+	"plugins": [
+		"react"
+	],
+	"rules": {
+		"indent": ["error", "tab", { "SwitchCase": 1 }],
+		"quotes": ["error", "single"],
+		"semi": ["error", "always"],
+		"no-console": 0,
+		"strict": 1,
+		"no-unused-vars":  ["error", { "varsIgnorePattern": "React|Relay|[0-9a-zA-Z].Component" }]
+	}
+}
