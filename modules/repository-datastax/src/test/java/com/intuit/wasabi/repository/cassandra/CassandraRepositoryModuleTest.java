@@ -24,5 +24,9 @@ public class CassandraRepositoryModuleTest {
 
         assertThat(injector.getInstance(CassandraDriver.class), is(not(nullValue())));
         assertThat(injector.getInstance(CassandraDriver.class).isKeyspaceInitialized(), is(true));
+
+        assertThat(injector.getInstance(AuthorizationRepository.class), is(not(nullValue())));
+        assertThat(injector.getInstance(FeedbackRepository.class), is(not(nullValue())));
+        assertThat(injector.getInstance(PagesRepository.class), is(not(nullValue())));
     }
 }

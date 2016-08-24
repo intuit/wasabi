@@ -32,11 +32,12 @@ public class CassandraRepositoryModule extends AbstractModule {
         bind(CassandraDriver.class).to(DefaultCassandraDriver.class).asEagerSingleton();
         install(new UserDirectoryModule());
 
+        //Like mappers, accessors are cached at the manager level and thus, are thread-safe/sharable.
+        bind(MappingManager.class).toProvider(MappingManagerProvider.class).in(Singleton.class);
+
         //Binding the accessors to their providers
         //NOTE: have to use provider here because the session object that is required can only be obtained by guice internally
         //using the CassandraDriver.class
-        //Like mappers, accessors are cached at the manager level and thus, are thread-safe/sharable.
-        bind(MappingManager.class).toProvider(MappingManagerProvider.class).in(Singleton.class);
         bind(UserFeedbackAccessor.class).toProvider(UserFeedbackAccessorProvider.class).in(Singleton.class);
         bind(AppRoleAccessor.class).toProvider(AppRoleAccessorProvider.class).in(Singleton.class);
         bind(UserInfoAccessor.class).toProvider(UserInfoAccessorProvider.class).in(Singleton.class);

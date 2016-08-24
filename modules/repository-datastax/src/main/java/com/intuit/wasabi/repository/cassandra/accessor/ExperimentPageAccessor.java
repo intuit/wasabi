@@ -14,9 +14,6 @@ public interface ExperimentPageAccessor {
             "values(?,?,?)")
     Statement insertBy(String page, UUID experimentId, boolean assign);
 
-    @Query("delete from experiment_page where assign = ? and page = ? and exp_id = ?")
-    Statement deleteBy(boolean assign, String page, UUID experimentId);
-
     @Query("delete from experiment_page where page = ? and exp_id = ?")
     Statement deleteBy(String page, UUID experimentId);
 

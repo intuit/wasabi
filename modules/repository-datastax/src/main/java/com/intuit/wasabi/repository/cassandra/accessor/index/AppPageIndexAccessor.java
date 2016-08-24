@@ -21,6 +21,4 @@ public interface AppPageIndexAccessor {
     @Query("select * from app_page_index where app_name = ?")
     Result<AppPage> selectBy(String appName);
 
-    @Query("update app_page_index set page = ? where app_name = ?")
-    Statement updatePageBy(String page, String appName);
 }
