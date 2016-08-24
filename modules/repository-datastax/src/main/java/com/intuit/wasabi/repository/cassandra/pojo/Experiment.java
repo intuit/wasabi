@@ -45,6 +45,8 @@ public class Experiment {
     @Column(name="app_name")
     private String appName;
 
+    private String label;
+
     private Date created;
 
     private Date modified;
@@ -68,7 +70,5 @@ public class Experiment {
 
     @Column(name="creatorid")
     private String creatorId;
-    
-    private String label;
 
 }

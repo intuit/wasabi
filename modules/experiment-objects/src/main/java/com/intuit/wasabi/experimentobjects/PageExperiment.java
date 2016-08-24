@@ -51,6 +51,30 @@ public class PageExperiment implements Cloneable {
             instance = null;
             return result;
         }
+
+        public Experiment.ID getId() {
+            return instance.id;
+        }
+
+        public void setId(Experiment.ID id) {
+            instance.id = id;
+        }
+
+        public Experiment.Label getLabel() {
+            return instance.label;
+        }
+
+        public void setLabel(Experiment.Label label) {
+            instance.label = label;
+        }
+
+        public boolean getAllowNewAssignment() {
+            return instance.allowNewAssignment;
+        }
+
+        public void setAllowNewAssignment(boolean allowNewAssignment) {
+            instance.allowNewAssignment = allowNewAssignment;
+        }
     }
 
     public Experiment.ID getId() {
