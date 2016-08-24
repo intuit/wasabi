@@ -235,7 +235,7 @@ package() {
     done; \
     (cd target; ../bin/fpm.sh -n ${name} -v ${version} -p ${profile}))
 
-#  find . -type f \( -name "*.rpm" -or -name "*.deb" \) -exec mv {} ./target \;
+  find . -type f \( -name "*.rpm" -or -name "*.deb" \) -exec mv {} ./target \;
   echo "deployable build packages:"
 
   find . -type f \( -name "*.rpm" -or -name "*.deb" \)
