@@ -20,10 +20,13 @@ public interface ExperimentAccessor {
 	void deleteExperiment(UUID id);
 	
     @Query("update experiment set state = ?, modified = ? where id = ?")
-    ResultSet updateExperiment(String state, Date modifiedOn, UUID uuid);
+    ResultSet updateExperiment(String state, Date modifiedOn, UUID experimentId);
 
     @Query("select * from experiment where app_name = ?")
     Result<Experiment> getExperimentByAppName(String appName);
+
+    @Query("select * from experiment where id = ?")
+    Result<Experiment> selectBy(UUID experimentId);
 
     @Query("insert into experiment " +
                 "(id, description, rule, sample_percent, start_time, end_time, " +
