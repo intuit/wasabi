@@ -12,7 +12,7 @@ export class ItemTableComponent extends React.Component{
         this.doFilter = this.doFilter.bind(this);
     }
 
-    doFilter(element, index) {
+    doFilter(element) {
         // Filter the list using the search field input
         return (this.props.query.length <= 0 || element.name.indexOf(this.props.query) >= 0);
     }

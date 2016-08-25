@@ -10,22 +10,25 @@ class AppMain extends React.Component {
     constructor(props) {
         super(props);
 
-        this.state = {};
-
-        this.setLoggedIn = this.setLoggedIn.bind(this);
-        this.doLogout = this.doLogout.bind(this);
-
-        var session = sessionStorage.getItem('session');
-        if (session) {
-            this.state.session = JSON.parse(session);
-        }
-        else {
-            this.state.session = {
+        this.state = {
+            session: {
                 login: {
                     name: '',
                     loggedIn: false
                 }
-            };
+            }
+        };
+
+        this.setLoggedIn = this.setLoggedIn.bind(this);
+        this.doLogout = this.doLogout.bind(this);
+    }
+
+    componentDidMount() {
+        var session = sessionStorage.getItem('session');
+        if (session) {
+            this.setState({
+                session: JSON.parse(session)
+            });
         }
     }
 

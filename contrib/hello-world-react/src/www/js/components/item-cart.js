@@ -7,4 +7,4 @@ export const ItemCartComponent = props => <table style={{width: '500px'}}>
         <td className="storeProductName">{nextProduct.name}</td><td className="storePriceCell">${nextProduct.cost}</td><td style={{textAlign: 'center'}}>{nextProduct.quantity}</td><td className="buttonCell"><button onClick={() => props.removeFunc(nextProduct)}>Remove</button></td>
     </tr>)}
     </tbody>
-</table>
+</table>;

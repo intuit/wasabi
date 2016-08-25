@@ -1,6 +1,5 @@
+/*global WASABI*/
 import React from 'react';
-import ReactDOM from 'react-dom';
-
 
 export class LoginComponent extends React.Component {
     constructor(props) {
@@ -15,17 +14,6 @@ export class LoginComponent extends React.Component {
         this.onChange = this.onChange.bind(this);
         this.validate = this.validate.bind(this);
         this.submit = this.submit.bind(this);
-    }
-
-    componentDidMount() {
-        // let session = sessionStorage.getItem('session');
-        // if (session) {
-        //     session = JSON.parse(session);
-        //     if (session.login.loggedIn) {
-        //         session.login.loggedIn = false;
-        //         sessionStorage.setItem('session', JSON.stringify(session));
-        //     }
-        // }
     }
 
     validate() {
@@ -108,6 +96,7 @@ export class LoginComponent extends React.Component {
                 },
                 (error) => {
                     console.log('getAssignment: error');
+                    console.dir(error);
                     sessionStorage.setItem('session', JSON.stringify(sessionObj));
 
                     this.props.setLoggedInFunc();

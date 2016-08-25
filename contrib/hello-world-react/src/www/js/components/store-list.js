@@ -1,55 +1,56 @@
+/*global WASABI*/
 import React from 'react';
 
 import { ItemTableComponent } from './item-table';
 import { ItemCartComponent } from './item-cart';
 
 const myFields = [
-        {
-            name: 'Name',
-            fieldName: 'name',
-            headerStyle: {
-                width: '260px',
-                textAlign: 'left'
-            },
-            style: {
-                paddingLeft: '10px'
-            },
-            dataPrefix: ''
+    {
+        name: 'Name',
+        fieldName: 'name',
+        headerStyle: {
+            width: '260px',
+            textAlign: 'left'
         },
-        {
-            name: 'Cost',
-            fieldName: 'cost',
-            headerStyle: {
-                width: '100px'
-            },
-            style: {
-                textAlign: 'right',
-                paddingRight: '10px'
-            },
-            dataPrefix: '$'
+        style: {
+            paddingLeft: '10px'
         },
-        {
-            name: 'Quantity',
-            fieldName: 'quantityInput',
-            headerStyle: {
-            },
-            style: {
-                textAlign: 'center'
-            },
-            dataPrefix: ''
+        dataPrefix: ''
+    },
+    {
+        name: 'Cost',
+        fieldName: 'cost',
+        headerStyle: {
+            width: '100px'
         },
-        {
-            name: ' ',
-            fieldName: 'buyButton',
-            headerStyle: {
-                width: '50px'
-            },
-            style: {
-                textAlign: 'center'
-            },
-            dataPrefix: ''
-        }
-    ];
+        style: {
+            textAlign: 'right',
+            paddingRight: '10px'
+        },
+        dataPrefix: '$'
+    },
+    {
+        name: 'Quantity',
+        fieldName: 'quantityInput',
+        headerStyle: {
+        },
+        style: {
+            textAlign: 'center'
+        },
+        dataPrefix: ''
+    },
+    {
+        name: ' ',
+        fieldName: 'buyButton',
+        headerStyle: {
+            width: '50px'
+        },
+        style: {
+            textAlign: 'center'
+        },
+        dataPrefix: ''
+    }
+];
 
 export class StoreListComponent extends React.Component {
     constructor(props) {
@@ -60,7 +61,15 @@ export class StoreListComponent extends React.Component {
             items: [],
             myFields: myFields,
             cart: [],
-            query: ''
+            query: '',
+            session: {
+                login: {
+                    'name': '',
+                    'loggedIn': false
+                },
+                buttonColor: 'white',
+                textColor: 'black'
+            }
         };
 
         this.addToCart = this.addToCart.bind(this);
@@ -73,20 +82,29 @@ export class StoreListComponent extends React.Component {
             'protocol': 'http',
             'host': 'localhost:8080'
         });
+    }
 
+    componentDidMount() {
         var session = sessionStorage.getItem('session');
         if (session) {
-            this.state.session = JSON.parse(session);
-            if (this.state.session.switches) {
-                this.state.buttonColor = 'white'; // Control value
-                this.state.textColor = 'black';
-                if (this.state.session.switches.buyButtonColor) {
-                    this.state.buttonColor = this.state.session.switches.buyButtonColor;
-                    this.state.textColor = 'white';
+            session = JSON.parse(session);
+            this.setState({
+                session: session
+            });
+            if (session.switches) {
+                this.setState({
+                    buttonColor: 'white', // Control value
+                    textColor: 'black'
+                });
+                if (session.switches.buyButtonColor) {
+                    this.setState({
+                        buttonColor: session.switches.buyButtonColor, // Control value
+                        textColor: 'white'
+                    });
                 }
                 // Record impression, that we've shown them the tested experience.
                 WASABI.postImpression({
-                    'userID': this.state.session.login.name
+                    'userID': session.login.name
                 }).then(
                     function(response) {
                         console.log('postImpression: success');
@@ -96,23 +114,12 @@ export class StoreListComponent extends React.Component {
                     },
                     function(error) {
                         console.log('postImpression: error');
+                        console.dir(error);
                     }
                 );
             }
         }
-        else {
-            this.state.session = {
-                login: {
-                    'name': '',
-                    'loggedIn': false
-                },
-                buttonColor: 'white',
-                textColor: 'black'
-            };
-        }
-    }
 
-    componentDidMount() {
         // When the component mounts, resolve the promise from the fetch to get the list of items.
         this.props.items.then(items => {
             this.setState({
@@ -162,11 +169,12 @@ export class StoreListComponent extends React.Component {
 
         // Record the action that they clicked on the Buy button.
         WASABI.postAction(
-        'ClickedOnBuy',
-        null /* No extra action info */,
-        {
-            'userID': this.state.session.login.name
-        }).then(
+            'ClickedOnBuy',
+            null /* No extra action info */,
+            {
+                'userID': this.state.session.login.name
+            }
+        ).then(
             function (response) {
                 console.log('postAction: success');
                 if (response) {
@@ -175,12 +183,13 @@ export class StoreListComponent extends React.Component {
             },
             function (error) {
                 console.log('postAction: error');
+                console.dir(error);
             }
         );
     }
 
     removeFromCart(product) {
-        let index = this.state.cart.findIndex(function(e, index, arr) {
+        let index = this.state.cart.findIndex(function(e) {
             if (e.name === product.name) {
                 return true;
             }
