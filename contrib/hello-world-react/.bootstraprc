@@ -1,0 +1,11 @@
+loglevel: disabled
+bootstrapVersion: 4
+useFlexbox: true
+styleLoaders:
+  - style
+  - css
+  - postcss
+  - sass
+extractStyles: false
+styles: true
+scripts: false
