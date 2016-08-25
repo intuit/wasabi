@@ -116,7 +116,7 @@ public class CassandraPagesRepository implements PagesRepository{
         ));
         batch.add(experimentPageAccessor.deleteBy(pageName.toString(), experimentID.getRawID()));
         //TODO: original code does not have this
-        batch.add(appPageIndexAccessor.deleteBy(pageName.toString(), applicationName.toString()));
+//        batch.add(appPageIndexAccessor.deleteBy(pageName.toString(), applicationName.toString()));
         executeBatchStatement(experimentID, batch);
         // For experiment audit log saving the current state of the experiment's page list that has been updated
         ExperimentPageList newPageList = getExperimentPages(experimentID);
@@ -151,7 +151,7 @@ public class CassandraPagesRepository implements PagesRepository{
         ImmutableMap.Builder<Page.Name, List<PageExperiment>> result = ImmutableMap.builder();
         resultList.forEach( t -> {
                     Page page = new Page.Builder().withName(Page.Name.valueOf(t.getPage())).build();
-                    //TODO: DB change to reduce this call per page
+                    //TODO: DB change to reduce this call per page, this call may return pageexperiment not owned by the current user
                     List<PageExperiment> pageExperiments = getExperiments(applicationName, page.getName());
                     result.put(page.getName(), pageExperiments);
                 });
