@@ -33,7 +33,7 @@
         <email.service.enabled>true</email.service.enabled>
         <email.service.class.name>com.intuit.wasabi.email.impl.NoopEmailImpl</email.service.class.name>
         <email.service.host>localhost</email.service.host>
-        <email.service.from>no-reply-wasabi@intuit.com</email.service.from>
+        <email.service.from>no-reply-wasabi@example.com</email.service.from>
     </properties>
 
     <profiles>
