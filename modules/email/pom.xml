@@ -32,8 +32,8 @@
     <properties>
         <email.service.enabled>true</email.service.enabled>
         <email.service.class.name>com.intuit.wasabi.email.impl.NoopEmailImpl</email.service.class.name>
-        <email.host>mail.intuit.com</email.host>
-        <email.from>no-reply-wasabi@intuit.com</email.from>
+        <email.service.host>localhost</email.service.host>
+        <email.service.from>no-reply-wasabi@example.com</email.service.from>
     </properties>
 
     <profiles>
@@ -43,13 +43,13 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
-                <email.subject.prefix>[WASABI-DEV]</email.subject.prefix>
+                <email.service.subject.prefix>[WASABI-DEV]</email.service.subject.prefix>
             </properties>
         </profile>
         <profile>
             <id>test</id>
             <properties>
-                <email.subject.prefix>[WASABI-TEST]</email.subject.prefix>
+                <email.service.subject.prefix>[WASABI-TEST]</email.service.subject.prefix>
             </properties>
         </profile>
     </profiles>
