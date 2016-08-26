@@ -43,7 +43,7 @@ public class BasicAssignment extends TestBase {
     public void setupExperiments(String startTime, String endTime, String type, String experimentCount){
         String data = " {\"applicationName\": \"qbo\", \"label\": \"exp_"+AssignmentDataProvider.time+"_"
                 +experimentCount+"\"," +"\"samplingPercent\": 0.67, \"startTime\": \""+startTime+"\"," +
-                "\"endTime\": \""+endTime+"\"}";
+                "\"endTime\": \""+endTime+"\", \"description\": \"Some hypothesis\"}";
 
         response = apiServerConnector.doPost("/experiments", data);
         assertReturnCode(response, HttpStatus.SC_CREATED);

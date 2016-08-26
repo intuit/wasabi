@@ -393,7 +393,7 @@ module.exports = function (grunt) {
             development: {
                 constants: {
                     supportEmail: 'you@example.com',
-                    apiHostBaseUrlValue: 'http://192.168.99.100:8080/api/v1'
+                    apiHostBaseUrlValue: 'http://localhost:8080/api/v1'
                 }
             }
         },
@@ -408,6 +408,17 @@ module.exports = function (grunt) {
               }
             ]
           }
+        },
+
+        compress: {
+            main: {
+                options: {
+                  archive: 'dist.zip'
+                },
+                files: [
+                  {src: ['dist/**'], dest: ''}
+                ]
+            }
         },
 
         // By default, your `index.html`'s <!-- Usemin block --> will take care of
@@ -512,7 +523,8 @@ module.exports = function (grunt) {
         'ngconstant:dist',
         'copy:distwasabijs',
         'copy:stylesbranding',
-        'file_append'
+        'file_append',
+        'compress'
     ]);
 
     grunt.registerTask('default', [

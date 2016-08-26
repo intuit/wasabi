@@ -41,17 +41,17 @@ public class SegmentationDataProvider {
                 new Object[]{
                         "{\"applicationName\": \"segmentation_"+time+"\", \"label\": \"batch_seg_label_"+time+"_0\", " +
                                 "\"samplingPercent\": 1, \"startTime\": \""+startTime+"\", \"endTime\": \""+endTime+"\"," +
-                                "\"rule\": \"state = 'CA'\"}"
+                                "\"rule\": \"state = 'CA'\", \"description\": \"some description\"}"
                 },
                 new Object[]{
                         "{\"applicationName\": \"segmentation_"+time+"\", \"label\": \"batch_seg_label_"+time+"_1\", " +
                                 "\"samplingPercent\": 1, \"startTime\": \""+startTime+"\", \"endTime\": \""+endTime+"\"," +
-                                "\"rule\": \"state = 'RI'\"}"
+                                "\"rule\": \"state = 'RI'\", \"description\": \"some description\"}"
                 },
                 new Object[]{
                         "{\"applicationName\": \"segmentation_"+time+"\", \"label\": \"batch_seg_label_"+time+"_2\", " +
                                 "\"samplingPercent\": 1, \"startTime\": \""+startTime+"\", \"endTime\": \""+endTime+"\"," +
-                                "\"rule\": \"state = 'VA'\"}"
+                                "\"rule\": \"state = 'VA'\", \"description\": \"some description\"}"
                 }
         };
     }
@@ -91,17 +91,17 @@ public class SegmentationDataProvider {
                 new Object[]{
                         "{\"applicationName\": \"segmutex_"+time+"\", \"label\": \"exp_label_"+time+"_0\", " +
                                 "\"samplingPercent\": 1, \"startTime\": \""+startTime+"\", \"endTime\": \""+endTime+"\"," +
-                                "\"rule\": \"state = 'CA\"}"
+                                "\"rule\": \"state = 'CA\", \"description\": \"some description\"}"
                 },
                 new Object[]{
                         "{\"applicationName\": \"segmutex_"+time+"\", \"label\": \"exp_label_"+time+"_1\", " +
                                 "\"samplingPercent\": 1, \"startTime\": \""+startTime+"\", \"endTime\": \""+endTime+"\"," +
-                                "\"rule\": \"state = 'RI\"}"
+                                "\"rule\": \"state = 'RI\", \"description\": \"some description\"}"
                 },
                 new Object[]{
                         "{\"applicationName\": \"segmutex_"+time+"\", \"label\": \"exp_label_"+time+"_2\", " +
                                 "\"samplingPercent\": 1, \"startTime\": \""+startTime+"\", \"endTime\": \""+endTime+"\"," +
-                                "\"rule\": \"state = 'VA\"}"
+                                "\"rule\": \"state = 'VA\", \"description\": \"some description\"}"
                 }
         };
     }
@@ -112,17 +112,17 @@ public class SegmentationDataProvider {
                 new Object[]{
                         "{\"applicationName\": \"segmutexbatch_"+time+"\", \"label\": \"batch_exp_label_"+time+"_0\", " +
                                 "\"samplingPercent\": 1, \"startTime\": \""+startTime+"\", \"endTime\": \""+endTime+"\"," +
-                                "\"rule\": \"state = 'CA\"}"
+                                "\"rule\": \"state = 'CA\", \"description\": \"some description\"}"
                 },
                 new Object[]{
                         "{\"applicationName\": \"segmutexbatch_"+time+"\", \"label\": \"batch_exp_label_"+time+"_1\", " +
                                 "\"samplingPercent\": 1, \"startTime\": \""+startTime+"\", \"endTime\": \""+endTime+"\"," +
-                                "\"rule\": \"state = 'RI\"}"
+                                "\"rule\": \"state = 'RI\", \"description\": \"some description\"}"
                 },
                 new Object[]{
                         "{\"applicationName\": \"segmutexbatch_"+time+"\", \"label\": \"batch_exp_label_"+time+"_2\", " +
                                 "\"samplingPercent\": 1, \"startTime\": \""+startTime+"\", \"endTime\": \""+endTime+"\"," +
-                                "\"rule\": \"state = 'VA\"}"
+                                "\"rule\": \"state = 'VA\", \"description\": \"some description\"}"
                 }
         };
     }
@@ -133,17 +133,20 @@ public class SegmentationDataProvider {
                 new Object[]{
                         "{\"applicationName\": \"segmutex_"+time+"\", \"label\": \"excl_exp_label_"+time+"_0\", " +
                                 "\"samplingPercent\": 1, \"startTime\": \""+startTime+"\", \"endTime\": \""+endTime+"\"," +
-                                "\"rule\": \"(salary > 80000 && state = 'CA') || (salary > 60000 && vet = true)\"}"
+                                "\"rule\": \"(salary > 80000 && state = 'CA') || (salary > 60000 && vet = true)\"" +
+                                ", \"description\": \"some description\"}"
                 },
                 new Object[]{
                         "{\"applicationName\": \"segmutex_"+time+"\", \"label\": \"excl_exp_label_"+time+"_1\", " +
                                 "\"samplingPercent\": 1, \"startTime\": \""+startTime+"\", \"endTime\": \""+endTime+"\"," +
-                                "\"rule\": \"(salary > 80000 && state = 'CA') || (salary > 60000 && vet = true)\"}"
+                                "\"rule\": \"(salary > 80000 && state = 'CA') || (salary > 60000 && vet = true)\"" +
+                                ", \"description\": \"some description\"}"
                 },
                 new Object[]{
                         "{\"applicationName\": \"segmutex_"+time+"\", \"label\": \"excl_exp_label_"+time+"_2\", " +
                                 "\"samplingPercent\": 1, \"startTime\": \""+startTime+"\", \"endTime\": \""+endTime+"\"," +
-                                "\"rule\": \"(salary > 80000 && state = 'CA') || (salary > 60000 && vet = true)\"}"
+                                "\"rule\": \"(salary > 80000 && state = 'CA') || (salary > 60000 && vet = true)\"" +
+                                ", \"description\": \"some description\"}"
                 }
         };
     }
@@ -158,7 +161,8 @@ public class SegmentationDataProvider {
                                 "    \"startTime\": \""+startTime+"\",\n" +
                                 "    \"endTime\": \""+endTime+"\",\n" +
                                 "    \"label\": \"exp_"+time+"\",\n" +
-                                "    \"applicationName\": \"seg_valid_rule_"+time+"\" " +
+                                "    \"applicationName\": \"seg_valid_rule_"+time+"\",\n" +
+                                "    \"description\": \"some description\" " +
                                 "}"
                 },
                 new Object [] {
@@ -168,7 +172,8 @@ public class SegmentationDataProvider {
                                 "    \"startTime\": \""+startTime+"\",\n" +
                                 "    \"endTime\": \""+endTime+"\",\n" +
                                 "    \"label\": \"exp_"+time+"\",\n" +
-                                "    \"applicationName\": \"seg_valid_rule_"+time+"\" " +
+                                "    \"applicationName\": \"seg_valid_rule_"+time+"\",\n" +
+                                "    \"description\": \"some description\" " +
                                 "}"
                 },
                 new Object []{
@@ -178,7 +183,8 @@ public class SegmentationDataProvider {
                                 "    \"startTime\": \""+startTime+"\",\n" +
                                 "    \"endTime\": \""+endTime+"\",\n" +
                                 "    \"label\": \"exp_"+time+"\",\n" +
-                                "    \"applicationName\": \"seg_valid_rule_"+time+"\" " +
+                                "    \"applicationName\": \"seg_valid_rule_"+time+"\",\n" +
+                                "    \"description\": \"some description\" " +
                                 "}"
                 }
         };
@@ -192,6 +198,7 @@ public class SegmentationDataProvider {
         baseData.put("startTime", startTime);
         baseData.put("endTime", endTime);
         baseData.put("samplingPercent", 1);
+        baseData.put("description", "some description");
         List<String> applications = new ArrayList<>();
         applications.add("seg_no_rule");
         applications.add("seg_valid_rule");
