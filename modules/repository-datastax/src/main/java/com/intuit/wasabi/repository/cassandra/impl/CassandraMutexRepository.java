@@ -19,7 +19,7 @@ import com.google.inject.Inject;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.ExperimentList;
-import com.intuit.wasabi.repository.MutexRepository;
+import com.intuit.wasabi.repository.cassandra.MutexRepository;
 import com.intuit.wasabi.repository.RepositoryException;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.MutexAccessor;
@@ -47,9 +47,6 @@ public class CassandraMutexRepository implements MutexRepository {
 	 */
     private static final Logger LOGGER = LoggerFactory.getLogger(CassandraMutexRepository.class);
 
-    /**
-     * TODO - Hook up experiment accessor
-     */
     private final ExperimentAccessor experimentAccessor;
 	private final MutexAccessor mutexAccessor;
 
@@ -71,6 +68,7 @@ public class CassandraMutexRepository implements MutexRepository {
      */
     @Override
     public List<Experiment.ID> getExclusionList(Experiment.ID experimentID) {
+    	
     	LOGGER.debug("Getting exclusions for {}", experimentID);
     	
     	List<Experiment.ID> exclusionIds = new ArrayList<>();
@@ -84,6 +82,7 @@ public class CassandraMutexRepository implements MutexRepository {
         	
         	
         } catch (Exception e) {
+        	LOGGER.error("Error while getting exclusions for {}", experimentID, e);
             throw new RepositoryException("Could not fetch exclusions for experiment \"" + experimentID + "\" ", e);
         }
         
@@ -107,6 +106,8 @@ public class CassandraMutexRepository implements MutexRepository {
         			base.getRawID()));
         	session.execute(batchStatement);
         } catch (Exception e) {
+        	LOGGER.error("Error while deleting exclusions for base {} pair {}", 
+        			new Object[] {base, pair}, e);
             throw new RepositoryException("Could not delete the exclusion \"" + base + "\", \"" + pair + "\"", e);
         }
     }
@@ -119,13 +120,17 @@ public class CassandraMutexRepository implements MutexRepository {
 
     	LOGGER.debug("Create exclusions for {}", new Object [] {baseID, pairID});
         try {
+        	
         	BatchStatement batchStatement = new BatchStatement();
         	batchStatement.add(mutexAccessor.createExclusion(baseID.getRawID(), 
         			pairID.getRawID()));
         	batchStatement.add(mutexAccessor.createExclusion(pairID.getRawID(), 
         			baseID.getRawID()));
         	session.execute(batchStatement);
+        	
         } catch (Exception e) {
+        	LOGGER.error("Error while create exclusions for {}", 
+        			new Object [] {baseID, pairID},e);
             throw new RepositoryException("Could not insert the exclusion \"" + baseID + "\"", e);
         }
     }
@@ -133,56 +138,80 @@ public class CassandraMutexRepository implements MutexRepository {
     /**
      * {@inheritDoc}
      */
-    // TODO - Hook up to experiment accessor
     @Override
     public ExperimentList getExclusions(Experiment.ID base) {
-    	throw new UnsupportedOperationException("Not implemented yet");
- /*
+    	
+    	LOGGER.debug("Getting exclusion list for {}", base);
+    	
     	try {
-            Collection<Experiment.ID> pairIDs = driver.getKeyspace().prepareQuery(keyspace.exclusion_CF())
-                    .getKey(base).execute().getResult().getColumnNames();
-
-            return experimentRepository.getExperiments(new ArrayList<>(pairIDs));
-        	return null;
+    		
+    		List<Exclusion> exclusions = mutexAccessor.getExclusions(base.getRawID()).all();
+    		
+    		List<UUID> experimentIds = new ArrayList<>();
+    		for (Exclusion exclusion : exclusions)
+    			experimentIds.add(exclusion.getPair());
+    		    		
+             List<com.intuit.wasabi.repository.cassandra.pojo.Experiment> experimentPojos = 
+            		 experimentAccessor.getExperiments(experimentIds).all();
+             
+             List<Experiment> experiments = new ArrayList<>();
+             for (com.intuit.wasabi.repository.cassandra.pojo.Experiment experimentPojo : experimentPojos) {
+            	 experiments.add(ExperimentHelper.makeExperiment(experimentPojo));
+             }
+             
+             ExperimentList experimentList = new ExperimentList();
+             experimentList.setExperiments(experiments);
+             
+             return experimentList;
         } catch (Exception e) {
+        	LOGGER.error("Error whil getting exclusion list for {}", base, e);
             throw new RepositoryException("Could not retrieve the exclusions for \"" + base + "\"", e);
         }
-        */
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    // TODO - Hook up to experiment accessor
     public ExperimentList getNotExclusions(Experiment.ID base) {
-    	throw new UnsupportedOperationException("Not implemented yet");
-    	/*
+    	
+    	LOGGER.debug("Getting not exclusions list for {}", base);
+    
         try {
-            Collection<Experiment.ID> pairIDs = driver.getKeyspace().prepareQuery(keyspace.exclusion_CF())
-                    .getKey(base).execute().getResult().getColumnNames();
+    		List<Exclusion> exclusions = mutexAccessor.getExclusions(base.getRawID()).all();
+    		
+    		List<UUID> exclusionPairIds = new ArrayList<>();
+    		for (Exclusion exclusion : exclusions)
+    			exclusionPairIds.add(exclusion.getPair());
 
             //get info about the experiment
-            Experiment experiment = experimentRepository.getExperiment(base);
+            com.intuit.wasabi.repository.cassandra.pojo.Experiment experiment = 
+            		experimentAccessor.getExperimentById(base.getRawID()).one();
+            
             //get the application name
-            Application.Name appName = experiment.getApplicationName();
+            String appName = experiment.getAppName();
             //get all experiments with this application name
-            List<Experiment> ExpList = experimentRepository.getExperiments(appName);
+            List<com.intuit.wasabi.repository.cassandra.pojo.Experiment> ExpList = 
+            		experimentAccessor.getExperimentByAppName(appName).all();
+            
             List<Experiment> notMutex = new ArrayList<>();
-            for (Experiment exp : ExpList) {
-                if (!pairIDs.contains(exp.getID()) && !exp.getID().equals(base)) {
-                    notMutex.add(exp);
+            for (com.intuit.wasabi.repository.cassandra.pojo.Experiment exp : ExpList) {
+                if (!exclusionPairIds.contains(exp.getId()) && 
+                		!exp.getId().equals(base.getRawID())) {
+                    notMutex.add(ExperimentHelper.makeExperiment(exp));
                 }
             }
 
             ExperimentList result = new ExperimentList();
             result.setExperiments(notMutex);
-            return result;
-        	return null;
+            
+        	LOGGER.debug("Returning exclusions list {} for {}", new Object[] { result, base} );
+
+        	return result;
         } catch (Exception e) {
+        	LOGGER.debug("Error while getting not exclusions list for {}", base, e);
             throw new RepositoryException("Could not retrieve the exclusions for \"" + base + "\"", e);
         }
-            */
     }
 
     /**
@@ -191,6 +220,7 @@ public class CassandraMutexRepository implements MutexRepository {
     @Override
     public Map<Experiment.ID, List<Experiment.ID>> getExclusivesList(
     		Collection<Experiment.ID> experimentIDCollection) {
+    	
     	LOGGER.debug("Getting exclusions for {}", experimentIDCollection);
     	
         Map<Experiment.ID, List<Experiment.ID>> result = new HashMap<>(experimentIDCollection.size());
@@ -200,6 +230,7 @@ public class CassandraMutexRepository implements MutexRepository {
         		result.put(experimentId, getExclusionList(experimentId));
         	}
         } catch (Exception e) {
+        	LOGGER.error("Error while getting exclusions for {}", experimentIDCollection, e);
             throw new RepositoryException("Could not fetch mutually exclusive experiments for the list of experiments"
                     , e);
         }
