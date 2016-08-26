@@ -2,6 +2,8 @@ package com.intuit.wasabi.repository.cassandra.accessor;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -72,4 +74,43 @@ public class ExperimentAccessorITest {
     	
     }
 
+    @Test
+    public void insertTwoExperiments() {
+    	accessor.insertExperiment(experimentId1, 
+    			"d1", "", 1.0, date1, date2, 
+    			com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT.name(), "l1", 
+    			"app1", date1, date2, true, 
+    			"m1", "v1", true, 5000, "c1");
+    	accessor.insertExperiment(experimentId2, 
+    			"d2", "", 1.0, date1, date2, 
+    			com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT.name(), "l2", 
+    			"app2", date1, date2, true, 
+    			"m2", "v2", true, 5000, "c2");
+    	
+    	List<UUID> experimentIds = new ArrayList<>();
+    	experimentIds.add(experimentId1);
+    	experimentIds.add(experimentId2);
+    	experimentIds.sort(new Comparator<UUID>() {
+
+			@Override
+			public int compare(UUID o1, UUID o2) {
+				return o1.compareTo(o2);
+			} });
+    	
+    	Result<Experiment> experiment1 = accessor.getExperiments(experimentIds);
+    	List<Experiment> experimentResult = experiment1.all();
+    	experimentResult.sort(new Comparator<Experiment>() {
+
+			@Override
+			public int compare(Experiment o1, Experiment o2) {
+				return o1.getId().compareTo(o2.getId());
+			} });
+
+    	assertEquals("size should be same", 2, experimentResult.size());
+
+    	Experiment exp1 = experimentResult.get(0);
+    	assertEquals("Value should be same", experimentIds.get(0), exp1.getId());    	
+    	Experiment exp2 = experimentResult.get(1);
+    	assertEquals("Value should be same", experimentIds.get(1), exp2.getId());    	
+   }
 }
