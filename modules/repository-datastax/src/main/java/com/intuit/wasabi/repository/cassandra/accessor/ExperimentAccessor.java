@@ -7,6 +7,7 @@ import com.datastax.driver.mapping.annotations.Query;
 import com.intuit.wasabi.repository.cassandra.pojo.Experiment;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Accessor
