@@ -46,8 +46,6 @@ public class UserBucketIndexAccessorITest {
 	private static String context;
 	private static UUID base;
 
-
-
     @BeforeClass
     public static void setup(){
         Injector injector = Guice.createInjector(new CassandraRepositoryModule());
@@ -77,6 +75,27 @@ public class UserBucketIndexAccessorITest {
     	accessor.deleteBy(base, "userid1", context, bucketLabel);
 
     	result = accessor.countUserBy(base, context, bucketLabel);
+    	count = result.one().getLong(0);
+    	assertEquals("Random count should be eq",0, count);	
+    }
+
+    @Test
+    public void testCreateAndDeleteNullBucket(){   	
+    	String nullbucketLabel = "";
+		ResultSet result = accessor.countUserBy(base, context, nullbucketLabel);
+    	long count = result.one().getLong(0);
+    	assertEquals("Random count should be eq", 0, count);	
+    	
+    	accessor.insertBy(base, "userid1", context, new Date(), 
+    			nullbucketLabel);
+
+    	result = accessor.countUserBy(base, context, nullbucketLabel);
+    	count = result.one().getLong(0);
+    	assertEquals("Random count should be eq", 1, count);	
+
+    	accessor.deleteBy(base, "userid1", context, nullbucketLabel);
+
+    	result = accessor.countUserBy(base, context, nullbucketLabel);
     	count = result.one().getLong(0);
     	assertEquals("Random count should be eq",0, count);	
     }
@@ -131,5 +150,5 @@ public class UserBucketIndexAccessorITest {
     	result = accessor.countUserBy(base, context, bucketLabel);
     	count = result.one().getLong(0);
     	assertEquals("Random count should be eq",0, count);	
-}
+    }
 }

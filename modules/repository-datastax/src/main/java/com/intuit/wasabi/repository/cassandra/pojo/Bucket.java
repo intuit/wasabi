@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
-@Table(name="Bucket")
+@Table(name="bucket")
 @Data
 @Builder(toBuilder = true)
 @NoArgsConstructor
@@ -30,7 +30,7 @@ public class Bucket {
     double allocation;
 
     @Column(name="is_control")
-    boolean isControl;
-
+    boolean control;
+    
     String payload;
 }
