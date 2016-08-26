@@ -27,6 +27,7 @@ import com.intuit.wasabi.auditlogobjects.AuditLogAction;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.repository.AuditLogRepository;
 import com.intuit.wasabi.repository.cassandra.CassandraRepositoryModule;
+import com.intuit.wasabi.repository.cassandra.accessor.audit.AuditLogAccessor;
 import com.intuit.wasabi.repository.cassandra.pojo.UserFeedback;
 import com.intuit.wasabi.repository.cassandra.pojo.audit.AuditLog;
 

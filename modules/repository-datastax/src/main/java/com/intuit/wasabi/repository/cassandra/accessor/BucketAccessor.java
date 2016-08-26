@@ -15,13 +15,13 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.cassandra.accessor;
 
-import java.util.List;
-import java.util.UUID;
-
 import com.datastax.driver.mapping.Result;
 import com.datastax.driver.mapping.annotations.Accessor;
 import com.datastax.driver.mapping.annotations.Query;
 import com.intuit.wasabi.repository.cassandra.pojo.Bucket;
+
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Access for bucket table
@@ -80,7 +80,7 @@ public interface BucketAccessor {
      * Update bucket state
      * @param name
      * @param rawID
-     * @param string
+     * @param label
      */
     @Query("update bucket set state = ? where experiment_id = ? and label = ?")
 	void updateState(String name, UUID rawID, String label);
@@ -88,7 +88,7 @@ public interface BucketAccessor {
     /**
      * Get bucket for experiment id and label
      * @param rawID
-     * @param string
+     * @param label
      * @return bucket result
      */
     @Query("select * from bucket where experiment_id = ? and label = ?")

@@ -20,16 +20,15 @@ import com.google.inject.Inject;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
-import com.intuit.wasabi.repository.PrioritiesRepository;
 import com.intuit.wasabi.repository.RepositoryException;
+import com.intuit.wasabi.repository.cassandra.PrioritiesRepository;
 import com.intuit.wasabi.repository.cassandra.accessor.PrioritiesAccessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Cassandra priorities repository implementation

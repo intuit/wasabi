@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package com.intuit.wasabi.repository.cassandra.accessor;
-
-import java.util.Date;
-import java.util.UUID;
+package com.intuit.wasabi.repository.cassandra.accessor.audit;
 
 import com.datastax.driver.mapping.Result;
 import com.datastax.driver.mapping.annotations.Accessor;
 import com.datastax.driver.mapping.annotations.Query;
 import com.intuit.wasabi.repository.cassandra.pojo.audit.AuditLog;
+
+import java.util.Date;
+import java.util.UUID;
 
 /**
  * The AuditLogAccessor allows access to the auditlog table.

@@ -6,14 +6,20 @@ import com.google.inject.name.Names;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.cassandra.datastax.DefaultCassandraDriver;
 import com.intuit.wasabi.repository.cassandra.accessor.*;
+import com.intuit.wasabi.repository.cassandra.accessor.audit.AuditLogAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.audit.BucketAuditLogAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.audit.ExperimentAuditLogAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.index.AppPageIndexAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.index.PageExperimentIndexAccessor;
-import com.intuit.wasabi.repository.cassandra.impl.CassandraAuthorizationRepository;
-import com.intuit.wasabi.repository.cassandra.impl.CassandraFeedbackRepository;
-import com.intuit.wasabi.repository.cassandra.impl.CassandraPagesRepository;
+import com.intuit.wasabi.repository.cassandra.accessor.count.BucketAssignmentCountAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.export.UserAssignmentExportAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.index.*;
+import com.intuit.wasabi.repository.cassandra.impl.*;
 import com.intuit.wasabi.repository.cassandra.provider.*;
-import com.intuit.wasabi.repository.cassandra.impl.CassandraMutexRepository;
+import com.intuit.wasabi.repository.cassandra.provider.audit.AuditLogAccessorProvider;
+import com.intuit.wasabi.repository.cassandra.provider.audit.BucketAuditLogAccessorProvider;
+import com.intuit.wasabi.repository.cassandra.provider.audit.ExperimentAuditLogAccessorProvider;
+import com.intuit.wasabi.repository.cassandra.provider.count.BucketAssignmentCountAccessorProvider;
+import com.intuit.wasabi.repository.cassandra.provider.export.UserAssignmentExportAccessorProvider;
+import com.intuit.wasabi.repository.cassandra.provider.index.*;
 import com.intuit.wasabi.userdirectory.UserDirectoryModule;
 import org.slf4j.Logger;
 
@@ -45,16 +51,32 @@ public class CassandraRepositoryModule extends AbstractModule {
         bind(UserRoleAccessor.class).toProvider(UserRoleAccessorProvider.class).in(Singleton.class);
         bind(ApplicationListAccessor.class).toProvider(ApplicationListAccessorProvider.class).in(Singleton.class);
         bind(ExperimentAccessor.class).toProvider(ExperimentAccessorProvider.class).in(Singleton.class);
-        bind(PageExperimentIndexAccessor.class).toProvider(PageExperimentIndexAccessorProvider.class).in(Singleton.class);
         bind(ExperimentPageAccessor.class).toProvider(ExperimentPageAccessorProvider.class).in(Singleton.class);
-        bind(AppPageIndexAccessor.class).toProvider(AppPageIndexAccessorProvider.class).in(Singleton.class);
-        bind(ExperimentAuditLogAccessor.class).toProvider(ExperimentAuditLogAccessorProvider.class).in(Singleton.class);
         bind(ExclusionAccessor.class).toProvider(ExclusionAccessorProvider.class).in(Singleton.class);
+        //Bind those indexes
+        bind(AppPageIndexAccessor.class).toProvider(AppPageIndexAccessorProvider.class).in(Singleton.class);
+        bind(ExperimentLabelIndexAccessor.class).toProvider(ExperimentLabelIndexAccessorProvider.class).in(Singleton.class);
+        bind(ExperimentUserIndexAccessor.class).toProvider(ExperimentUserIndexAccessorProvider.class).in(Singleton.class);
+        bind(PageExperimentIndexAccessor.class).toProvider(PageExperimentIndexAccessorProvider.class).in(Singleton.class);
+        bind(UserAssignmentIndexAccessor.class).toProvider(UserAssignmentIndexAccessorProvider.class).in(Singleton.class);
+        bind(UserBucketIndexAccessor.class).toProvider(UserBucketIndexAccessorProvider.class).in(Singleton.class);
+        bind(UserExperimentIndexAccessor.class).toProvider(UserExperimentIndexAccessorProvider.class).in(Singleton.class);
+        //Bind those audit
+        bind(AuditLogAccessor.class).toProvider(AuditLogAccessorProvider.class).in(Singleton.class);
+        bind(BucketAuditLogAccessor.class).toProvider(BucketAuditLogAccessorProvider.class).in(Singleton.class);
+        bind(ExperimentAuditLogAccessor.class).toProvider(ExperimentAuditLogAccessorProvider.class).in(Singleton.class);
+        //Bind those count
+        bind(BucketAssignmentCountAccessor.class).toProvider(BucketAssignmentCountAccessorProvider.class).in(Singleton.class);
+        //Bind those export
+        bind(UserAssignmentExportAccessor.class).toProvider(UserAssignmentExportAccessorProvider.class).in(Singleton.class);
+
 
         //Bind those repositories
+        bind(AuditLogRepository.class).to(CassandraAuditLogRepository.class).in(Singleton.class);
         bind(AuthorizationRepository.class).to(CassandraAuthorizationRepository.class).in(Singleton.class);
         bind(FeedbackRepository.class).to(CassandraFeedbackRepository.class).in(Singleton.class);
-        bind(PagesRepository.class).to(CassandraPagesRepository.class).in(Singleton.class);
         bind(MutexRepository.class).to(CassandraMutexRepository.class).in(Singleton.class);
+        bind(PagesRepository.class).to(CassandraPagesRepository.class).in(Singleton.class);
+        bind(PrioritiesRepository.class).to(CassandraPrioritiesRepository.class).in(Singleton.class);
     }
 }
