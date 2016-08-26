@@ -37,7 +37,7 @@ import static org.junit.Assert.assertEquals;
 public class MutexAccessorITest {
     static Session session;
     static MappingManager manager;
-    static MutexAccessor accessor;
+    static ExclusionAccessor accessor;
     static String applicationName = "MyTestApplication_" + System.currentTimeMillis();
 
     @BeforeClass
@@ -47,7 +47,7 @@ public class MutexAccessorITest {
 
         session = injector.getInstance(CassandraDriver.class).getSession();
         manager = new MappingManager(session);
-        accessor = manager.createAccessor(MutexAccessor.class);
+        accessor = manager.createAccessor(ExclusionAccessor.class);
 
     }
 

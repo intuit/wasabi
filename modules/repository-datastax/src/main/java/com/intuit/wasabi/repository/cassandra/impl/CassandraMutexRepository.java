@@ -15,25 +15,24 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.cassandra.impl;
 
+import com.datastax.driver.core.BatchStatement;
+import com.datastax.driver.core.Session;
+import com.datastax.driver.mapping.Result;
 import com.google.inject.Inject;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.ExperimentList;
-import com.intuit.wasabi.repository.cassandra.MutexRepository;
 import com.intuit.wasabi.repository.RepositoryException;
+import com.intuit.wasabi.repository.cassandra.MutexRepository;
+import com.intuit.wasabi.repository.cassandra.accessor.ExclusionAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.MutexAccessor;
 import com.intuit.wasabi.repository.cassandra.pojo.Exclusion;
 import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
-import com.datastax.driver.core.BatchStatement;
-import com.datastax.driver.core.Session;
-import com.datastax.driver.mapping.Result;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Mutax repo cassandra implementation
@@ -48,14 +47,14 @@ public class CassandraMutexRepository implements MutexRepository {
     private static final Logger LOGGER = LoggerFactory.getLogger(CassandraMutexRepository.class);
 
     private final ExperimentAccessor experimentAccessor;
-	private final MutexAccessor mutexAccessor;
+	private final ExclusionAccessor mutexAccessor;
 
 	private Session session;
 
     @Inject
     public CassandraMutexRepository(
             ExperimentAccessor experimentAccessor,
-            MutexAccessor mutexAccessor,
+            ExclusionAccessor mutexAccessor,
             CassandraDriver driver)
             throws IOException, ConnectionException {
         this.experimentAccessor = experimentAccessor;

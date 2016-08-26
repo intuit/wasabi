@@ -1,15 +1,5 @@
 package com.intuit.wasabi.repository.cassandra.impl;
 
-import static org.junit.Assert.*;
-
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.junit.Before;
-import org.junit.Test;
-
 import com.datastax.driver.core.Session;
 import com.datastax.driver.mapping.Mapper;
 import com.datastax.driver.mapping.MappingManager;
@@ -23,12 +13,22 @@ import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.Experiment.ID;
 import com.intuit.wasabi.experimentobjects.ExperimentList;
 import com.intuit.wasabi.repository.cassandra.CassandraRepositoryModule;
+import com.intuit.wasabi.repository.cassandra.accessor.ExclusionAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.MutexAccessor;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class CassandraMutexRepositoryITest {
 
-    MutexAccessor accessor;
+    ExclusionAccessor accessor;
     
     CassandraMutexRepository repository;
     
@@ -56,7 +56,7 @@ public class CassandraMutexRepositoryITest {
         driver = injector.getInstance(CassandraDriver.class);
         manager = new MappingManager(session);
         mapper = manager.mapper(com.intuit.wasabi.repository.cassandra.pojo.Exclusion.class);
-    	accessor = manager.createAccessor(MutexAccessor.class);
+    	accessor = manager.createAccessor(ExclusionAccessor.class);
     	experimentAccessor = manager.createAccessor(ExperimentAccessor.class);
     	repository = new CassandraMutexRepository(experimentAccessor, accessor, driver);
     	applicationName = Application.Name.valueOf("TestApplicationName");

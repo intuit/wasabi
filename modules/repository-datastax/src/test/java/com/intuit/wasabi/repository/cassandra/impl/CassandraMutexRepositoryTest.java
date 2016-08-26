@@ -1,21 +1,5 @@
 package com.intuit.wasabi.repository.cassandra.impl;
 
-import static org.junit.Assert.*;
-import io.codearte.catchexception.shade.mockito.Mockito;
-
-import java.util.Date;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Answers;
-import org.mockito.Mock;
-import org.mockito.ReturnValues;
-import org.mockito.runners.MockitoJUnitRunner;
-
 import com.datastax.driver.core.Session;
 import com.datastax.driver.mapping.Result;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
@@ -24,14 +8,29 @@ import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.Experiment.ID;
 import com.intuit.wasabi.experimentobjects.ExperimentList;
 import com.intuit.wasabi.repository.RepositoryException;
+import com.intuit.wasabi.repository.cassandra.accessor.ExclusionAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.MutexAccessor;
 import com.intuit.wasabi.repository.cassandra.pojo.Exclusion;
+import io.codearte.catchexception.shade.mockito.Mockito;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Answers;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
+import static org.junit.Assert.assertEquals;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CassandraMutexRepositoryTest {
 
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS) MutexAccessor accessor;
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+	ExclusionAccessor accessor;
     @Mock(answer = Answers.RETURNS_DEEP_STUBS) ExperimentAccessor experimentAccessor;
     
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
@@ -61,7 +60,7 @@ public class CassandraMutexRepositoryTest {
     
     @Before
     public void setUp() throws Exception {
-    	accessor = Mockito.mock(MutexAccessor.class);
+    	accessor = Mockito.mock(ExclusionAccessor.class);
     	experimentAccessor = Mockito.mock(ExperimentAccessor.class);
     	resultDatastax = Mockito.mock(Result.class);
     	resultExperimentDatastax = Mockito.mock(Result.class);

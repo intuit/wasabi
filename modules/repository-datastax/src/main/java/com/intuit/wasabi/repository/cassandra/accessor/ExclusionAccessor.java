@@ -27,7 +27,7 @@ import java.util.UUID;
  * Interface to exclusion table
  */
 @Accessor
-public interface MutexAccessor {
+public interface ExclusionAccessor {
 
 	/**
 	 * Get exclusion for the base experiment

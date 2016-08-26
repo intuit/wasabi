@@ -13,6 +13,7 @@ import com.intuit.wasabi.repository.cassandra.impl.CassandraAuthorizationReposit
 import com.intuit.wasabi.repository.cassandra.impl.CassandraFeedbackRepository;
 import com.intuit.wasabi.repository.cassandra.impl.CassandraPagesRepository;
 import com.intuit.wasabi.repository.cassandra.provider.*;
+import com.intuit.wasabi.repository.cassandra.impl.CassandraMutexRepository;
 import com.intuit.wasabi.userdirectory.UserDirectoryModule;
 import org.slf4j.Logger;
 
@@ -48,10 +49,12 @@ public class CassandraRepositoryModule extends AbstractModule {
         bind(ExperimentPageAccessor.class).toProvider(ExperimentPageAccessorProvider.class).in(Singleton.class);
         bind(AppPageIndexAccessor.class).toProvider(AppPageIndexAccessorProvider.class).in(Singleton.class);
         bind(ExperimentAuditLogAccessor.class).toProvider(ExperimentAuditLogAccessorProvider.class).in(Singleton.class);
+        bind(ExclusionAccessor.class).toProvider(ExclusionAccessorProvider.class).in(Singleton.class);
 
         //Bind those repositories
         bind(AuthorizationRepository.class).to(CassandraAuthorizationRepository.class).in(Singleton.class);
         bind(FeedbackRepository.class).to(CassandraFeedbackRepository.class).in(Singleton.class);
         bind(PagesRepository.class).to(CassandraPagesRepository.class).in(Singleton.class);
+        bind(MutexRepository.class).to(CassandraMutexRepository.class).in(Singleton.class);
     }
 }
