@@ -12,6 +12,9 @@ import java.util.UUID;
 @Accessor
 public interface ExperimentAccessor {
 
+	@Query("select * from experiment where id IN ? ")
+    Result<Experiment> getExperiments(List<UUID> experimentIds);
+
 	@Query("select * from experiment where id = ?")
     Result<Experiment> getExperimentById(UUID experimentID);
 
