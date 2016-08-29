@@ -4,7 +4,7 @@ import com.datastax.driver.mapping.MappingManager;
 import com.google.inject.Inject;
 import com.intuit.wasabi.experimentobjects.*;
 import com.intuit.wasabi.repository.cassandra.CassandraRepositoryModule;
-import com.intuit.wasabi.repository.cassandra.PagesRepository;
+import com.intuit.wasabi.repository.PagesRepository;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
 import com.intuit.wasabi.repository.cassandra.data.PageRepositoryDataProvider;
 import org.slf4j.Logger;

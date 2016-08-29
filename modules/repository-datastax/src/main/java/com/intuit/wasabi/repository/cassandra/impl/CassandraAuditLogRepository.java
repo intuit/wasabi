@@ -25,7 +25,7 @@ import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.Experiment.Label;
-import com.intuit.wasabi.repository.cassandra.AuditLogRepository;
+import com.intuit.wasabi.repository.AuditLogRepository;
 import com.intuit.wasabi.repository.RepositoryException;
 import com.intuit.wasabi.repository.cassandra.accessor.audit.AuditLogAccessor;
 import com.intuit.wasabi.repository.cassandra.pojo.audit.AuditLog;

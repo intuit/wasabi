@@ -23,7 +23,7 @@ import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authenticationobjects.UserInfo.Username;
 import com.intuit.wasabi.feedbackobjects.UserFeedback;
 import com.intuit.wasabi.repository.RepositoryException;
-import com.intuit.wasabi.repository.cassandra.FeedbackRepository;
+import com.intuit.wasabi.repository.FeedbackRepository;
 import com.intuit.wasabi.repository.cassandra.accessor.UserFeedbackAccessor;
 
 import org.slf4j.Logger;

@@ -5,6 +5,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.cassandra.datastax.DefaultCassandraDriver;
+import com.intuit.wasabi.repository.*;
 import com.intuit.wasabi.repository.cassandra.accessor.*;
 import com.intuit.wasabi.repository.cassandra.accessor.audit.AuditLogAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.audit.BucketAuditLogAccessor;

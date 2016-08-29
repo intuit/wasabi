@@ -13,34 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package com.intuit.wasabi.repository.cassandra;
+package com.intuit.wasabi.repository;
 
-import com.intuit.wasabi.authenticationobjects.UserInfo;
-import com.intuit.wasabi.feedbackobjects.UserFeedback;
+import com.google.inject.BindingAnnotation;
 
-import java.util.List;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Repository for feedback data 
+ * Annotation for cassandra repo
  */
-public interface FeedbackRepository {
-
-	/**
-	 * Create user feedback
-	 * @param userFeedback new user feedback
-	 */
-    void createUserFeedback(UserFeedback userFeedback);
-
-    /**
-     * Get user feedback for user
-     * @param username current user name
-     * @return user feedback list
-     */
-    List<UserFeedback> getUserFeedback(UserInfo.Username username);
-
-    /**
-     * Get all feedbacks
-     * @return list of feedbacks
-     */
-    List<UserFeedback> getAllUserFeedback();
+@BindingAnnotation
+@Target({FIELD, PARAMETER, METHOD})
+@Retention(RUNTIME)
+public @interface CassandraRepository {
 }

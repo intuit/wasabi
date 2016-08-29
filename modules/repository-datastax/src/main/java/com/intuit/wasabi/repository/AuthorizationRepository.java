@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package com.intuit.wasabi.repository.cassandra;
+package com.intuit.wasabi.repository;
 
 
 import com.intuit.wasabi.authenticationobjects.UserInfo;

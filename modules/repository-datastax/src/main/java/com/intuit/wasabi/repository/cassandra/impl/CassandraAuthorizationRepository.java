@@ -13,7 +13,7 @@ import com.intuit.wasabi.authorizationobjects.*;
 import com.intuit.wasabi.authorizationobjects.UserRole;
 import com.intuit.wasabi.exceptions.AuthenticationException;
 import com.intuit.wasabi.experimentobjects.Application;
-import com.intuit.wasabi.repository.cassandra.AuthorizationRepository;
+import com.intuit.wasabi.repository.AuthorizationRepository;
 import com.intuit.wasabi.repository.RepositoryException;
 import com.intuit.wasabi.repository.cassandra.accessor.AppRoleAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.ApplicationListAccessor;
