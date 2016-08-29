@@ -15,8 +15,6 @@
 # limitations under the License.
 ###############################################################################
 
-wasabi_os_default=OSX
-
 usage () {
   echo "usage: `basename $0` [-n name] [-v version] [-p profile] [-h home] [-l log] [-t timestamp] [-m modules] [-d]"
   exit
@@ -137,7 +135,7 @@ for module in "$modules"; do
 
    for pkg in "deb" "rpm"; do
     fpm="${!pkg} $common `echo $scripts | sed -e "s/\[PKG\]/${pkg}/g"` $depends $resources"
-    if [ "${WASABI_OS}" == "${wasabi_os_default}" ]; then
+    if [ "${WASABI_OS}" == "${WASABI_OSX}" ] || [ "${WASABI_OS}" == "${WASABI_LINUX}" ]; then
       docker run -it -v `pwd`:/build --rm liuedy/centos-fpm fpm ${fpm} || exitOnError "failed to build rpm: $module"
     else
       eval fpm $fpm || exitOnError "failed to build rpm: $module"
