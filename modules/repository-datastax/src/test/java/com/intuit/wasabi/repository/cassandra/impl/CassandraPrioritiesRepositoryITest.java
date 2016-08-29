@@ -3,7 +3,9 @@ package com.intuit.wasabi.repository.cassandra.impl;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -19,12 +21,15 @@ import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.Experiment.ID;
+import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
 import com.intuit.wasabi.repository.cassandra.CassandraRepositoryModule;
+import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.PrioritiesAccessor;
 
 public class CassandraPrioritiesRepositoryITest {
 
     PrioritiesAccessor accessor;
+    ExperimentAccessor experimentAccessor;
     
     CassandraPrioritiesRepository repository;
     
@@ -37,6 +42,11 @@ public class CassandraPrioritiesRepositoryITest {
 	private MappingManager manager;
 
 	private Mapper<com.intuit.wasabi.repository.cassandra.pojo.Application> mapper;
+    static UUID experimentId1 = UUID.randomUUID();
+    static UUID experimentId2 = UUID.randomUUID();
+    static Date date1 = new Date();
+    static Date date2 = new Date();
+
     
     @Before
     public void setUp() throws Exception {
@@ -47,20 +57,48 @@ public class CassandraPrioritiesRepositoryITest {
         manager = new MappingManager(session);
         mapper = manager.mapper(com.intuit.wasabi.repository.cassandra.pojo.Application.class);
     	accessor = manager.createAccessor(PrioritiesAccessor.class);
-    	repository = new CassandraPrioritiesRepository(accessor);
-    	applicationName = Application.Name.valueOf("TestApplicationName");
+    	experimentAccessor = manager.createAccessor(ExperimentAccessor.class);
+    	repository = new CassandraPrioritiesRepository(accessor,experimentAccessor);
+    	applicationName = Application.Name.valueOf("TestApplicationName" + System.currentTimeMillis());
     	priorityIds = new ArrayList<>();
     }
     
-    // TODO - This operation is not implemented yet !!!
-	@Test(expected=UnsupportedOperationException.class)
-	public void testGetPrioritiesSuccess() {
-		
-		System.err.println("!!!! - getProrities throws UnsupportedOperationException because it is not implemented!!!!");
-		
-		repository.getPriorities(applicationName);
+	@Test
+	public void testZeroGetPrioritiesSuccess() {
+				
+		PrioritizedExperimentList result = repository.getPriorities(applicationName);
+		assertEquals("Value should be equal", 0, result.getPrioritizedExperiments().size());
 	}
 
+	@Test
+	public void testTwoGetPrioritiesSuccess() {
+		
+    	experimentAccessor.insertExperiment(experimentId1, 
+    			"d1", "", 1.0, date1, date2, 
+    			com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT.name(), "l1", 
+    			applicationName.toString(), date1, date2, true, 
+    			"m1", "v1", true, 5000, "c1");
+
+    	experimentAccessor.insertExperiment(experimentId2, 
+    			"d2", "", 1.0, date1, date2, 
+    			com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT.name(), "l2", 
+    			applicationName.toString(), date1, date2, true, 
+    			"m2", "v2", true, 5000, "c2");
+		
+    	List<UUID> priorityIds = new ArrayList<>();
+    	priorityIds.add(experimentId1);
+    	priorityIds.add(experimentId2);
+    	
+    	accessor.updatePriorities(priorityIds, applicationName.toString());
+    	
+		PrioritizedExperimentList result = repository.getPriorities(applicationName);
+		assertEquals("Value should be equal", 2, result.getPrioritizedExperiments().size());
+		
+		assertEquals("Value should be equal", experimentId1, result.getPrioritizedExperiments()
+				.get(0).getID().getRawID());
+		assertEquals("Value should be equal", experimentId2, result
+				.getPrioritizedExperiments().get(1).getID().getRawID());
+	}
 	@Test
 	public void testCreatePrioritiesOneIdSuccess() {
 		priorityIds.add(Experiment.ID.newInstance());

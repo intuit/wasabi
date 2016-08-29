@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 import io.codearte.catchexception.shade.mockito.Mockito;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,7 +18,9 @@ import com.datastax.driver.mapping.Result;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.Experiment.ID;
+import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
 import com.intuit.wasabi.repository.RepositoryException;
+import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.PrioritiesAccessor;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -27,33 +30,82 @@ public class CassandraPrioritiesRepositoryTest {
     PrioritiesAccessor accessor;
     
     @Mock
+    ExperimentAccessor experimentAccessor;
+
+    @Mock
     Result<com.intuit.wasabi.repository.cassandra.pojo.Application> resultDatastax;
 
     @Mock
 	Result<com.intuit.wasabi.repository.cassandra.pojo.Application> result;
     
+    @Mock
+    Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment> experimentResult;
+
     CassandraPrioritiesRepository repository;
     
     Application.Name applicationName;
     
     List<Experiment.ID> priorityIds;
+    List<UUID> priorityUUIDs;
+    List<com.intuit.wasabi.repository.cassandra.pojo.Application> applications;
+    com.intuit.wasabi.repository.cassandra.pojo.Application application;
+    List<com.intuit.wasabi.repository.cassandra.pojo.Experiment> experiments;
+    com.intuit.wasabi.repository.cassandra.pojo.Experiment experiment;
+    UUID experimentId = UUID.randomUUID();
+    
     
     @Before
     public void setUp() throws Exception {
     	accessor = Mockito.mock(PrioritiesAccessor.class);
+    	experimentAccessor = Mockito.mock(ExperimentAccessor.class);
     	resultDatastax = Mockito.mock(Result.class);
-    	repository = new CassandraPrioritiesRepository(accessor);
+    	result = Mockito.mock(Result.class);
+    	experimentResult = Mockito.mock(Result.class);
+    	
+    	repository = new CassandraPrioritiesRepository(accessor, experimentAccessor);
     	applicationName = Application.Name.valueOf("TestApplicationName");
     	priorityIds = new ArrayList<>();
+    	applications = new ArrayList<>();
+    	priorityUUIDs = new ArrayList<>();
+    	experiments = new ArrayList<>();
+    	application = new com.intuit.wasabi.repository.cassandra.pojo.Application();
+    	
+    	experiment = new com.intuit.wasabi.repository.cassandra.pojo.Experiment();
+		experiment.setId(experimentId);
+		experiment.setAppName("ap1");
+		experiment.setCreated(new Date());
+		experiment.setStartTime(new Date());
+		experiment.setEndTime(new Date());
+		experiment.setModified(new Date());
+		experiment.setLabel("l1");
+		experiment.setSamplePercent(.5d);
+		experiment.setState(Experiment.State.DRAFT.name());
+    	
     }
     
-    // TODO - This operation is not implemented yet !!!
-	@Test(expected=UnsupportedOperationException.class)
-	public void testGetPrioritiesSuccess() {
-		
-		System.err.println("!!!! - getProrities throws UnsupportedOperationException because it is not implemented!!!!");
-		
+	@Test(expected=RepositoryException.class)
+	public void testGetPrioritiesThrowsRepositoryException() {		
 		repository.getPriorities(applicationName);
+	}
+
+	@Test
+	public void testGetPrioritiesSuccess() {		
+		applications.add(application);
+		priorityUUIDs.add(experimentId);
+		application.setPriorities(priorityUUIDs);
+		
+		experiments.add(experiment);
+		
+		Mockito.when(accessor.getPriorities(applicationName.toString())).thenReturn(result);
+		Mockito.when(result.all()).thenReturn(applications);
+		Mockito.when(experimentAccessor.getExperiments(Mockito.anyList())).thenReturn(experimentResult);
+		Mockito.when(experimentResult.all()).thenReturn(experiments);
+		
+		PrioritizedExperimentList priorities = repository.getPriorities(applicationName);
+		
+		assertEquals("Values should be equal",1 ,priorities.getPrioritizedExperiments().size());
+		assertEquals("Values should be equal", experimentId ,
+				priorities.getPrioritizedExperiments().get(0).getID().getRawID());
 	}
 
 	@Test
