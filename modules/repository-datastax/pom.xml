@@ -104,6 +104,11 @@
             <artifactId>wasabi-auditlog-objects</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>wasabi-database</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
 
     <!--
         <dependency>

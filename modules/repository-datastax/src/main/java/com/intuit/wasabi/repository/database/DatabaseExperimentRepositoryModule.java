@@ -15,6 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.database;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
@@ -23,7 +24,6 @@ import com.intuit.wasabi.database.TransactionFactory;
 import com.intuit.wasabi.experimentobjects.ExperimentValidator;
 import com.intuit.wasabi.repository.DatabaseRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
-import com.intuit.wasabi.repository.impl.cassandra.AbstractCassandraModule;
 import org.slf4j.Logger;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -31,7 +31,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 /**
  * Guice module for database experiment module
  */
-public class DatabaseExperimentRepositoryModule extends AbstractCassandraModule {
+public class DatabaseExperimentRepositoryModule extends AbstractModule {
 
     private static final Logger LOGGER = getLogger(DatabaseExperimentRepositoryModule.class);
     @Override
