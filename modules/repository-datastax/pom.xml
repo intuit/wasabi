@@ -64,12 +64,11 @@
             <artifactId>autumn-utils</artifactId>
             <version>1.0.20160626031951</version>
         </dependency>
-        <dependency>
+         <dependency>
             <groupId>${project.parent.groupId}</groupId>
             <artifactId>wasabi-cassandra-datastax</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
-
         <dependency>
             <groupId>${project.parent.groupId}</groupId>
             <artifactId>wasabi-experiment-objects</artifactId>
@@ -77,7 +76,32 @@
         </dependency>
         <dependency>
             <groupId>${project.parent.groupId}</groupId>
-            <artifactId>wasabi-authorization</artifactId>
+            <artifactId>wasabi-authorization-objects</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>wasabi-authentication-objects</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>wasabi-analytics-objects</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>wasabi-user-directory</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>wasabi-feedback-objects</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>wasabi-auditlog-objects</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
