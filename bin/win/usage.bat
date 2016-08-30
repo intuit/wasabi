@@ -1,5 +1,3 @@
-@echo off 
-
 rem ############################################################################
 rem # Copyright 2016 Intuit
 rem #
@@ -113,6 +111,7 @@ echo.
 echo.
 
 
+endlocal
 goto :eof
 
 rem Colored output (see http://stackoverflow.com/a/10407642 )

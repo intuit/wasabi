@@ -1,5 +1,3 @@
-@echo off 
-
 rem ############################################################################
 rem # Copyright 2016 Intuit
 rem #
@@ -16,11 +14,38 @@ rem # See the License for the specific language governing permissions and
 rem # limitations under the License.
 rem ############################################################################
 
-setlocal
-call :error stop not implemented yet
+rem stop all
+if "" == "%1" (
+    call :stop_cassandra
+    call :stop_mysql
+    call :stop_wasabi
+    call :stop_docker
+    goto :eof
+)
+
+rem start individual components
+:read_params
+    if "" == "%1" goto :eof
+    call :stop_%1
+    
+    shift
+    goto :read_params
+
+set running=docker-machine ls
+echo %running%
+if "%running%" == "" (
+    call :stop_docker
+)
 
 
 goto :eof
+
+rem FUNCTION: Stops cassandra
+:stop_cassandra
+    call :info Stopping cassandra.
+    rem docker kill wasabi-cassandra
+    goto :eof
+    
 rem FUNCTION: Logs the parameters as DEBUG.
 :debug
     rem call :log [DEBUG] %*

@@ -1,5 +1,3 @@
-@echo off 
-
 rem ############################################################################
 rem # Copyright 2016 Intuit
 rem #
@@ -16,11 +14,33 @@ rem # See the License for the specific language governing permissions and
 rem # limitations under the License.
 rem ############################################################################
 
-setlocal
-call :error remove not implemented yet
+
+call :info Removing Wasabi images
+docker rmi wasabi-main >nul
+
+call :info Removing Wasabi containers
+docker rm -fv wasabi-cassandra >nul
+docker rm -fv wasabi-mysql >nul
+docker rm -fv wasabi-main >nul
+
+call :info Removing Wasabi network
+docker network rm wasabinet >nul
+
+call :info Removing wasabi machine
+docker-machine rm -f wasabi >nul
+
+call :info Clearing environment variables
+setx DOCKER_TLS_VERIFY "" >nul
+setx DOCKER_HOST "" >nul
+setx DOCKER_CERT_PATH "" >nul
+setx DOCKER_MACHINE_NAME "" >nul
+RefreshEnv
+
+call :info Done
 
 
 goto :eof
+
 rem FUNCTION: Logs the parameters as DEBUG.
 :debug
     rem call :log [DEBUG] %*

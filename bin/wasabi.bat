@@ -16,7 +16,7 @@ rem # See the License for the specific language governing permissions and
 rem # limitations under the License.
 rem ############################################################################
 
-setlocal
+
 call :init_logging
 
 if "%1"=="" (
@@ -30,6 +30,7 @@ setlocal enabledelayedexpansion
 rem Define valid commands
 set valid_commands=
 for /f %%a in ('dir /b bin\win') do set valid_commands=!valid_commands! %%~na
+
 
 call :info Processing Wasabi commands
 set remaining_commands=%*
@@ -73,13 +74,15 @@ set remaining_commands=%*
                 if defined parameters goto :read_parameters
             
             set assembled_command=bin/win/!command_name!.bat!space_parameters!
-            call :info Assembled: !assembled_command!
+            call :debug Assembled: !assembled_command!
             call !assembled_command!
         )
     )
     if defined remaining_commands goto read_commands
 call :info Wasabi done
 
+endlocal
+RefreshEnv 2>nul 1>nul
 
 goto :eof
 rem LABEL: Print error and show usage, then exit with exit code 1.

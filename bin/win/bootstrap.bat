@@ -1,5 +1,3 @@
-@echo off 
-
 rem ############################################################################
 rem # Copyright 2016 Intuit
 rem #
@@ -16,18 +14,18 @@ rem # See the License for the specific language governing permissions and
 rem # limitations under the License.
 rem ############################################################################
 
-setlocal
 
 rem List of dependencies to install
-set choco_packages=docker,docker-machine,boot2docker,jdk8,nodejs.install,maven --version 3.3.9 --allowEmptyChecksums,ruby
-rem TODO: wait for maven repo to be fixed and remove the additional arguments
-set npm_packages=yo,grunt-cli,bower
+setlocal 
+set choco_packages=docker,docker-machine,jdk8,maven --version 3.0.2 --allow-empty-checksums,nodejs.install,ruby,virtualbox --allowEmptyChecksums
+set npm_packages=bower,grunt-cli,yo
 set gem_packages=compass,fpm
 
 rem Test if administrator (see http://stackoverflow.com/a/11995662)
 net session >nul 2>&1
 if not %errorLevel% == 0 (
     call :error You need administrator rights to bootstrap Wasabi.
+    endlocal
     exit /b 1
 )
 
@@ -38,6 +36,7 @@ if not exist C:\ProgramData\chocolatey\choco.exe (
   powershell -NoProfile -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin
   if errorlevel 1 (
       call :error Can not install Chocolatey
+      endlocal
       exit /b 1
   )
   rem make sure choco writes its config
@@ -85,11 +84,12 @@ set remaining_packages=%gem_packages%
     )
     if defined remaining_packages goto :install_gem_dependencies
 
-cmd /c C:\ProgramData\chocolatey\bin\RefreshEnv.cmd
-call :info Bootstrapping done. You might need to restart your terminal.
+call :info Bootstrapping done. 
 
 
+endlocal
 goto :eof
+
 rem FUNCTION: Logs the parameters as DEBUG.
 :debug
     call :log [DEBUG] %*
