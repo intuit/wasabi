@@ -124,8 +124,8 @@ bootstrapLinux() {
     . /etc/lsb-release
     DISTRO=$DISTRIB_ID
     DISTROVER=$DISTRIB_RELEASE
-    if [ $DISTRO == "Ubuntu" ] && [ $DISTROVER == "14.04" ]; then
-      echo "${green}Operating system Ubuntu 14.04${reset}"
+    if [ $DISTRO == "Ubuntu" ] && [ $DISTROVER == "16.04" ]; then
+      echo "${green}Operating system Ubuntu 16.04${reset}"
     else
       echo "${red}Unsupported Linux distribution${reset}"
       exit 1
@@ -133,14 +133,14 @@ bootstrapLinux() {
   fi
 
   #Install Maven
-  sudo add-apt-repository -y ppa:andrei-pozolotin/maven3
   sudo apt-get update
-  sudo apt-get install -y maven3
+  sudo apt-get install -y maven
 
   #Install JAVA
-  sudo add-apt-repository ppa:webupd8team/java -y
-  sudo apt-get update
-  sudo apt-get install -y oracle-java8-set-default
+  sudo apt-get install default-jdk
+  sudo cp /etc/environment /tmp/environment
+  sudo echo "JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/" >> /tmp/environment
+  sudo cp /tmp/environment /etc/environment
 
   #Install Nodejs
   curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
@@ -152,13 +152,11 @@ bootstrapLinux() {
   #Install compass
   sudo apt-get install -y ruby
   sudo apt-get install -y ruby-compass
-  sudo apt-get remove -y ruby-compass
-  sudo gem install compass
 
   #Install docker
   sudo apt-get install -y apt-transport-https ca-certificates
   sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
-  sudo echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" > /tmp/docker.list
+  sudo echo "deb https://apt.dockerproject.org/repo ubuntu-xenial main" > /tmp/docker.list
   sudo cp /tmp/docker.list /etc/apt/sources.list.d/docker.list
   sudo rm /tmp/docker.list
   sudo apt-get purge lxc-docker
@@ -169,7 +167,6 @@ bootstrapLinux() {
   sudo groupadd docker
   sudo usermod -aG docker $USER
   echo "${green}installed dependencies.${reset}"
-  echo "Please set JAVA_HOME in your .profile script (/usr/lib/jvm/java-8-oracle/)"
 }
 
 bootstrap() {
