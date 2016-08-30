@@ -34,16 +34,7 @@ import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
 import com.intuit.wasabi.exceptions.TimeFormatException;
 import com.intuit.wasabi.exceptions.TimeZoneFormatException;
 import com.intuit.wasabi.experiment.*;
-import com.intuit.wasabi.experimentobjects.Application;
-import com.intuit.wasabi.experimentobjects.Bucket;
-import com.intuit.wasabi.experimentobjects.BucketList;
-import com.intuit.wasabi.experimentobjects.Context;
-import com.intuit.wasabi.experimentobjects.Experiment;
-import com.intuit.wasabi.experimentobjects.ExperimentIDList;
-import com.intuit.wasabi.experimentobjects.ExperimentList;
-import com.intuit.wasabi.experimentobjects.ExperimentPageList;
-import com.intuit.wasabi.experimentobjects.NewExperiment;
-import com.intuit.wasabi.experimentobjects.Page;
+import com.intuit.wasabi.experimentobjects.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -85,8 +76,10 @@ public class ExperimentsResource {
     private final String defaultTimezone;
     private final String defaultTimeFormat;
     private final HttpHeader httpHeader;
-    private final PaginationHelper<Experiment> paginationHelper;
+    private final PaginationHelper<Experiment> experimentPaginationHelper;
+    private final PaginationHelper<ExperimentDetail> experimentDetailPaginationHelper;
     private Experiments experiments;
+    private ExperimentDetails experimentDetails;
     private EventsExport export;
     private Assignments assignments;
     private Authorization authorization;
@@ -100,9 +93,11 @@ public class ExperimentsResource {
     ExperimentsResource(final Experiments experiments, final EventsExport export, final Assignments assignments,
                         final Authorization authorization, final Buckets buckets, final Mutex mutex,
                         final Pages pages, final Priorities priorities, final Favorites favorites,
+                        final ExperimentDetails experimentDetails,
                         final @Named("default.time.zone") String defaultTimezone,
                         final @Named("default.time.format") String defaultTimeFormat,
-                        final HttpHeader httpHeader, final PaginationHelper<Experiment> paginationHelper) {
+                        final HttpHeader httpHeader, final PaginationHelper<Experiment> experimentPaginationHelper,
+                        final PaginationHelper<ExperimentDetail> experimentDetailPaginationHelper) {
         this.experiments = experiments;
         this.export = export;
         this.assignments = assignments;
@@ -114,8 +109,10 @@ public class ExperimentsResource {
         this.defaultTimezone = defaultTimezone;
         this.defaultTimeFormat = defaultTimeFormat;
         this.httpHeader = httpHeader;
-        this.paginationHelper = paginationHelper;
+        this.experimentPaginationHelper = experimentPaginationHelper;
+        this.experimentDetailPaginationHelper = experimentDetailPaginationHelper;
         this.favorites = favorites;
+        this.experimentDetails = experimentDetails;
     }
 
     /**
@@ -127,7 +124,7 @@ public class ExperimentsResource {
      *
      * @param authorizationHeader the authentication headers
      * @param page the page which should be returned, defaults to 1
-     * @param perPage the number of log entries per page, defaults to 10. -1 to get all values.
+     * @param perPage the number of experiments entries per page, defaults to 10. -1 to get all values.
      * @param sort the sorting rules
      * @param filter the filter rules
      * @param timezoneOffset the time zone offset from UTC
@@ -167,6 +164,7 @@ public class ExperimentsResource {
                                    @DefaultValue(DEFAULT_TIMEZONE)
                                    @ApiParam(name = "timezone", defaultValue = DEFAULT_TIMEZONE, value = DOC_TIMEZONE)
                                    final String timezoneOffset) {
+
         ExperimentList experimentList = experiments.getExperiments();
         ExperimentList authorizedExperiments;
 
@@ -205,9 +203,110 @@ public class ExperimentsResource {
                     .forEach(experiment -> experiment.setFavorite(true));
         }
 
-        Map<String, Object> experimentResponse = paginationHelper.paginate("experiments",
+        Map<String, Object> experimentResponse = experimentPaginationHelper.paginate("experiments",
                 authorizedExperiments.getExperiments(), filter, timezoneOffset,
                 (perPage != -1 ? "-favorite," : "") + sort, page, perPage);
+
+        return httpHeader.headers().entity(experimentResponse).build();
+    }
+
+    /**
+     * Returns a list of all not-deleted experiments the user has access to. Provides additional information
+     * of the current state, with bucket information and analytic counts.
+     *
+     * This endpoint is paginated. Favorites are sorted to the front.
+     * If {@code per_page == -1}, favorites are ignored and all experiments are returned.
+     *
+     * @param authorizationHeader the authentication headers
+     * @param page the page which should be returned, defaults to 1
+     * @param perPage the number of experiments per page, defaults to 10. -1 to get all values.
+     * @param sort the sorting rules
+     * @param filter the filter rules
+     * @param timezoneOffset the time zone offset from UTC
+     * @return a response containing a map with a list with {@code 0} to {@code perPage} experiments,
+     * if that many are on the page, and a count of how many experiments match the filter criteria.
+     */
+    @GET
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "Return details of all experiments with details for the card view, with respect to the authorization",
+            response = ExperimentDetail.class)
+    @Timed
+    public Response getExperimentDetails(@HeaderParam(AUTHORIZATION)
+                                   @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+                                   final String authorizationHeader,
+
+                                   @ApiParam(required = true, defaultValue = DEFAULT_EMPTY)
+                                   final Parameters parameters,
+
+                                   @QueryParam("page")
+                                   @DefaultValue(DEFAULT_PAGE)
+                                   @ApiParam(name = "page", defaultValue = DEFAULT_PAGE, value = DOC_PAGE)
+                                   final int page,
+
+                                   @QueryParam("per_page")
+                                   @DefaultValue(DEFAULT_PER_PAGE_CARDVIEW)
+                                   @ApiParam(name = "per_page", defaultValue = DEFAULT_PER_PAGE_CARDVIEW, value = DOC_PER_PAGE)
+                                   final int perPage,
+
+                                   @QueryParam("filter")
+                                   @DefaultValue("")
+                                   @ApiParam(name = "filter", defaultValue = DEFAULT_FILTER, value = DOC_FILTER)
+                                   final String filter,
+
+                                   @QueryParam("sort")
+                                   @DefaultValue("")
+                                   @ApiParam(name = "sort", defaultValue = DEFAULT_SORT, value = DOC_SORT)
+                                   final String sort,
+
+                                   @QueryParam("timezone")
+                                   @DefaultValue(DEFAULT_TIMEZONE)
+                                   @ApiParam(name = "timezone", defaultValue = DEFAULT_TIMEZONE, value = DOC_TIMEZONE)
+                                   final String timezoneOffset) {
+        List<ExperimentDetail> experimentList = experimentDetails.getExperimentDetailsBase();
+        List<ExperimentDetail> authorizedExperiments = new ArrayList<>();
+
+        if (authorizationHeader == null) {
+            throw new AuthenticationException("No authorization given.");
+        } else {
+            Username userName = authorization.getUser(authorizationHeader);
+            Set<Application.Name> allowed = new HashSet<>();
+
+
+            for (ExperimentDetail experiment : experimentList) {
+                if (experiment == null) {
+                    continue;
+                }
+
+                Application.Name applicationName = experiment.getAppName();
+
+                if (allowed.contains(applicationName)) {
+                    authorizedExperiments.add(experiment);
+                } else {
+                    try {
+                        authorization.checkUserPermissions(userName, applicationName, READ);
+                        authorizedExperiments.add(experiment);
+                        allowed.add(applicationName);
+                    } catch (AuthenticationException ignored) {
+                        LOGGER.trace("ignoring authentication exception", ignored);
+                    }
+                }
+            }
+
+            List<Experiment.ID> favoriteList = favorites.getFavorites(userName);
+            authorizedExperiments
+                    .parallelStream()
+                    .filter(experiment -> favoriteList.contains(experiment.getId()))
+                    .forEach(experiment -> experiment.setFavorite(true));
+
+            //get details
+            experimentDetails.getAnalyticData(authorizedExperiments, parameters);
+        }
+
+        //filter and paginate
+        Map<String, Object> experimentResponse = experimentDetailPaginationHelper.paginate("?",
+                authorizedExperiments, filter, timezoneOffset,
+                (perPage != -1 ? "-favorite," : "") + sort, page, perPage);
+
 
         return httpHeader.headers().entity(experimentResponse).build();
     }
