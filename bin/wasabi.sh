@@ -44,7 +44,8 @@ commands:
   bootstrap                              : install dependencies
   build                                  : build project
   start[:cassandra,mysql,wasabi]         : start all, cassandra, mysql, wasabi
-  test                                   : test wasabi
+  test                                   : run the integration tests (needs a running wasabi)
+  test[:module-name,...]                 : run the unit tests for the specified module(s) only
   stop[:wasabi,cassandra,mysql]          : stop all, wasabi, cassandra, mysql
   resource[:ui,api,doc,cassandra,mysql]  : open resource api, javadoc, cassandra, mysql
   status                                 : display resource status
@@ -282,6 +283,8 @@ for command in ${@:$OPTIND}; do
     start) command="start:cassandra,mysql,wasabi";&
     start:*) commands=$(echo ${command} | cut -d ':' -f 2)
       (IFS=','; for command in ${commands}; do start ${command}; done);;
+    test:*) commands=$(echo ${command} | cut -d ':' -f 2)
+      (IFS=','; for command in ${commands}; do mvn "-Dtest=com.intuit.wasabi.${command/-/}.**" test -pl modules/${command} --also-make -DfailIfNoTests=false -q ; done);;
     test) test_api;;
     stop) command="stop:wasabi,mysql,cassandra";&
     stop:*) commands=$(echo ${command} | cut -d ':' -f 2)
