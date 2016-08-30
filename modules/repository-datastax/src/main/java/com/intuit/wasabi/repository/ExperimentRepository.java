@@ -21,9 +21,9 @@ import com.intuit.wasabi.assignmentobjects.Assignment;
 import com.intuit.wasabi.experimentobjects.*;
 import com.intuit.wasabi.experimentobjects.Bucket.BucketAuditInfo;
 import com.intuit.wasabi.experimentobjects.Experiment.ExperimentAuditInfo;
-import com.netflix.astyanax.MutationBatch;
-import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
-import com.netflix.astyanax.model.Rows;
+//import com.netflix.astyanax.MutationBatch;
+//import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
+//import com.netflix.astyanax.model.Rows;
 
 import java.util.Collection;
 import java.util.List;
@@ -248,15 +248,15 @@ public interface ExperimentRepository {
      * @param experiment Experiment Object
      * @throws ConnectionException exception
      */
-    void updateStateIndex(MutationBatch batch, Experiment experiment)
-            throws ConnectionException;
+//    void updateStateIndex(MutationBatch batch, Experiment experiment)
+//            throws ConnectionException;
 
     /**
      * Get experiment rows
      * @param appName Application name
      * @return experiment rows
      */
-    Rows<Experiment.ID, String> getExperimentRows(Application.Name appName);
+//    Rows<Experiment.ID, String> getExperimentRows(Application.Name appName);
 
     /**
      * Create an application at top level

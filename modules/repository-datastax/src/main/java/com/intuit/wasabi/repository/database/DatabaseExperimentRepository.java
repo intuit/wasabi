@@ -29,9 +29,6 @@ import com.intuit.wasabi.experimentobjects.Experiment.State;
 import com.intuit.wasabi.experimentobjects.exceptions.WasabiException;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.RepositoryException;
-import com.netflix.astyanax.MutationBatch;
-import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
-import com.netflix.astyanax.model.Rows;
 
 import java.util.*;
 
@@ -676,16 +673,17 @@ class DatabaseExperimentRepository implements ExperimentRepository {
         throw new UnsupportedOperationException("Not supported ");
     }
 
-    @Override
-    public void updateStateIndex(MutationBatch batch, Experiment experiment) throws ConnectionException {
-        throw new UnsupportedOperationException("Not supported ");
+// TODO - Remove these methods since they expose astynax to the client
+//    @Override
+//    public void updateStateIndex(MutationBatch batch, Experiment experiment) throws ConnectionException {
+//        throw new UnsupportedOperationException("Not supported ");
+//
+//    }
 
-    }
-
-    @Override
-    public Rows<Experiment.ID, String> getExperimentRows(Application.Name appName) {
-        throw new UnsupportedOperationException("Not supported ");
-    }
+//    @Override
+//    public Rows<Experiment.ID, String> getExperimentRows(Application.Name appName) {
+//        throw new UnsupportedOperationException("Not supported ");
+//    }
 
     @Override
     public BucketList getBuckets(Experiment.ID experimentID)
