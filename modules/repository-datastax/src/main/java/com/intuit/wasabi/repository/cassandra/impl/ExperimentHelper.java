@@ -15,6 +15,9 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.cassandra.impl;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 import com.google.common.base.Preconditions;
@@ -22,6 +25,7 @@ import com.intuit.hyrule.Rule;
 import com.intuit.hyrule.RuleBuilder;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.experimentobjects.Experiment.ID;
 import com.intuit.wasabi.experimentobjects.Experiment.State;
 
 /**
@@ -35,7 +39,16 @@ public class ExperimentHelper {
     	return Experiment.ID.valueOf(experimentId);
     }
     
-    public static Experiment makeExperiment(
+	public static List<UUID> makeUUIDs(
+			Collection<Experiment.ID> experimentIDCollection) {
+		List<UUID> experimentIds = new ArrayList<>();
+        for (ID id : experimentIDCollection) {
+        	experimentIds.add(id.getRawID());
+        }
+		return experimentIds;
+	}
+
+	public static Experiment makeExperiment(
 			com.intuit.wasabi.repository.cassandra.pojo.Experiment experimentPojo) {
     	
     	Experiment experimentObject = Experiment

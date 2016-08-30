@@ -23,7 +23,7 @@ public class BucketAuditLog {
     UUID experimentId;
 
     @PartitionKey(1)
-    String lable;
+    String label;
 
     @ClusteringColumn(0)
     Date modified;
