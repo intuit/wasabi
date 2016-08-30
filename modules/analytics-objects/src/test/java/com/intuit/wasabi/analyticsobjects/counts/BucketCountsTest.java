@@ -53,15 +53,10 @@ public class BucketCountsTest {
         assertEquals(counter.getActionCounts(), actionCounts);
         assertEquals(counter.getJointActionCounts(), jointActionCounts);
         assertEquals(counter.getImpressionCounts(), impressionCounts);
-
-        assertNotNull(counter.toString());
-        assertNotNull(counter.hashCode());
-        assertNotNull(counter.clone());
     }
 
     @Test
     public void testEqualsWithSelfAndClone(){
-    	assertEquals(counter, counter);
     	assertEquals(counter, counter.clone());
     }
 

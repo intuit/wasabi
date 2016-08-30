@@ -52,16 +52,6 @@ public class UserFeedbackTest {
     }
 
     @Test
-    public void testUserFeedback() {
-        assertNotNull(userFeedback.getUsername());
-        assertNotNull(userFeedback.getSubmitted());
-        assertNotNull(userFeedback.getScore());
-        assertNotNull(userFeedback.getComments());
-        assertNotNull(userFeedback.isContactOkay());
-        assertNotNull(userFeedback.getEmail());
-    }
-
-    @Test
     public void testUserFeedbackSet() {
         userFeedback.setUsername(username);
         userFeedback.setSubmitted(submitted);
@@ -82,9 +72,6 @@ public class UserFeedbackTest {
     public void testUserFeedbackFromOther() {
         UserFeedback other = UserFeedback.from(userFeedback).build();
 
-        assertEquals(userFeedback, userFeedback);
         assertEquals(userFeedback, other);
-        assertEquals(userFeedback.toString(), userFeedback.toString());
-        assertEquals(userFeedback.hashCode(), userFeedback.hashCode());
     }
 }

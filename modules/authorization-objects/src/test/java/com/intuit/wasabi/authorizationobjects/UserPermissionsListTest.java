@@ -40,12 +40,6 @@ public class UserPermissionsListTest {
     }
 
     @Test
-    public void testUserPermissionsList() {
-        assertNotNull(userPermissionsList.getPermissionsList());
-        assertNotNull(userPermissionsList.toString());
-    }
-
-    @Test
     public void testUserPermissionsListSet() {
         userPermissionsList.setPermissionsList(permissionsList);
         assertEquals(permissionsList, userPermissionsList.getPermissionsList());
@@ -61,8 +55,6 @@ public class UserPermissionsListTest {
         UserPermissionsList newUserPermissionsList = new UserPermissionsList(5);
 
         assertEquals(userPermissionsList, newUserPermissionsList);
-        assertEquals(userPermissionsList, userPermissionsList);
-        assertEquals(userPermissionsList.hashCode(), userPermissionsList.hashCode());
     }
 
 }

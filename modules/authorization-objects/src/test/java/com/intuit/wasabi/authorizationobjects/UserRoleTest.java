@@ -55,17 +55,6 @@ public class UserRoleTest {
     }
 
     @Test
-    public void testUserRole() {
-        assertNotNull(userRole.getApplicationName());
-        assertNotNull(userRole.getRole());
-        assertNotNull(userRole.getUserID());
-        assertNotNull(userRole.getUserEmail());
-        assertNotNull(userRole.getFirstName());
-        assertNotNull(userRole.getLastName());
-        assertNotNull(userRole.toString());
-    }
-
-    @Test
     public void testUserRoleSet() {
         userRole.setApplicationName(applicationName);
         userRole.setFirstName(firstName);
@@ -84,13 +73,8 @@ public class UserRoleTest {
     @Test
     public void testAssignmentFromOther() {
         UserRole newUserRole = UserRole.from(userRole).build();
-        assertNotNull(newUserRole.getApplicationName());
-        assertNotNull(newUserRole.getRole());
         UserRole other = getUserRole();
-
         assertEquals(userRole, other);
-        assertEquals(userRole, userRole);
-        assertEquals(userRole.hashCode(), userRole.hashCode());
     }
 
 }

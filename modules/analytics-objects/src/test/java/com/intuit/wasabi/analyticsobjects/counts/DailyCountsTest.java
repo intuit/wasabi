@@ -58,9 +58,6 @@ public class DailyCountsTest {
         assertEquals(counter.getDate(), date);
         assertEquals(counter.getCumulative(), cumulative);
         assertEquals(counter.getPerDay(), perDay);
-
-        assertNotNull(counter.toString());
-        assertNotNull(counter.hashCode());
     }
 
     @Test

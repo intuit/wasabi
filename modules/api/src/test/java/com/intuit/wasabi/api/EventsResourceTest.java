@@ -108,8 +108,4 @@ public class EventsResourceTest {
 		resource.recordExperimentsEvents(applicationName, userID, eventList);
 	}
 
-    @Test
-	public void getEventsQueueLength() throws Exception {
-		assertNotNull(resource.getEventsQueueLength());
-	}
 }

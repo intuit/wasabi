@@ -50,14 +50,6 @@ public class LoginCredentialsTest {
     }
 
     @Test
-    public void testLoginCredentials() {
-        assertNotNull(creds.getNamespaceId());
-        assertNotNull(creds.getPassword());
-        assertNotNull(creds.getUsername());
-        assertNotNull(creds.toString());
-    }
-
-    @Test
     public void testCredentialsSet() {
         creds.setNamespaceId(namespaceId);
         creds.setPassword(password);

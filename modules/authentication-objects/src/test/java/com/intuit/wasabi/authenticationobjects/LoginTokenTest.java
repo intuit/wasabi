@@ -47,13 +47,6 @@ public class LoginTokenTest {
     }
 
     @Test
-    public void testLoginToken() {
-        assertNotNull(token.getAccess_token());
-        assertNotNull(token.getToken_type());
-        assertNotNull(token.toString());
-    }
-
-    @Test
     public void testLoginTokenSet() {
         token.setAccess_token(access_token);
         token.setToken_type(token_type);
@@ -64,10 +57,7 @@ public class LoginTokenTest {
     @Test
     public void testAssignmentFromOther() {
         LoginToken other = LoginToken.from(token).build();
-
-        assertEquals(token, token);
         assertEquals(token, other);
-        assertEquals(token.hashCode(), token.hashCode());
     }
 
 }

@@ -38,9 +38,6 @@ public class ExperimentCumulativeCountsTest {
     @Test
     public void testBuilder(){
         assertEquals(counter.getDays(), days);
-
-        assertNotNull(counter.toString());
-        assertNotNull(counter.hashCode());
     }
 
     @Test

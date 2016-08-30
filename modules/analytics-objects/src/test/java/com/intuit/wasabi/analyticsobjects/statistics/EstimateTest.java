@@ -44,9 +44,6 @@ public class EstimateTest {
         assertEquals(estimator.getLowerBound(), lowerBound);
         assertEquals(estimator.getUpperBound(), upperBound);
 
-        assertNotNull(estimator.hashCode());
-        assertNotNull(estimator.toString());
-        assertNotNull(estimator.clone());
         assertTrue(estimator.equals(estimator));
         assertFalse(estimator.equals(null));
         assertFalse(estimator.equals(upperBound));

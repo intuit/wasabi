@@ -200,9 +200,4 @@ public class AssignmentsResourceTest {
                 createAssignment, ignoreSamplingPercent, headers, segmentationProfile)).thenReturn(assignmentsFromPage);
         assertNotNull(resource.postBatchAssignmentForPage(applicationName, pageName, userID, createAssignment, ignoreSamplingPercent, context, segmentationProfile, headers));
     }
-
-    @Test
-    public void getAssignmentsQueueLength() throws Exception {
-        assertNotNull(resource.getAssignmentsQueueLength());
-    }
 }

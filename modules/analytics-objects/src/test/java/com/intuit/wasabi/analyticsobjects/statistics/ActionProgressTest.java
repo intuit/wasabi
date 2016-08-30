@@ -60,9 +60,6 @@ public class ActionProgressTest {
     public void testBuilder(){
         assertEquals(actionProgress.getActionName(), actionName);
 
-        assertNotNull(actionProgress.hashCode());
-        assertNotNull(actionProgress.toString());
-        assertNotNull(actionProgress.clone());
         assertTrue(actionProgress.equals(actionProgress.clone()));
         assertTrue(actionProgress.equals(actionProgress));
         assertFalse(actionProgress.equals(null));

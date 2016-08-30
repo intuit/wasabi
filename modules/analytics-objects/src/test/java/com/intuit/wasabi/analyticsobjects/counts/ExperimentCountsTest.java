@@ -55,9 +55,6 @@ public class ExperimentCountsTest {
         assertEquals(counter.getJointActionCounts(), jointActionCounts);
         assertEquals(counter.getImpressionCounts(), impressionCounts);
         assertEquals(counter.getBuckets(), buckets);
-
-        assertNotNull(counter.toString());
-        assertNotNull(counter.hashCode());
     }
 
     @Test
@@ -135,8 +132,6 @@ public class ExperimentCountsTest {
 
         counter.addBucketCounts(label, bucketCounts);
         assertEquals(counter, counter.clone());
-        assertEquals(counter, counter);
-
     }
 
     @Test
