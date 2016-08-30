@@ -137,7 +137,7 @@ bootstrapLinux() {
   sudo apt-get install -y maven
 
   #Install JAVA
-  sudo apt-get install default-jdk
+  sudo apt-get install -y default-jdk
   sudo cp /etc/environment /tmp/environment
   sudo echo "JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/" >> /tmp/environment
   sudo cp /tmp/environment /etc/environment
