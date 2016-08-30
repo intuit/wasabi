@@ -15,24 +15,21 @@
  *******************************************************************************/
 package com.intuit.wasabi.assignmentobjects;
 
-import java.util.Date;
-
+import com.intuit.wasabi.assignmentobjects.Assignment.Status;
+import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.experimentobjects.Bucket;
+import com.intuit.wasabi.experimentobjects.Context;
+import com.intuit.wasabi.experimentobjects.Experiment;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.intuit.wasabi.assignmentobjects.Assignment.Status;
-import com.intuit.wasabi.experimentobjects.Application;
-import com.intuit.wasabi.experimentobjects.Bucket;
-import com.intuit.wasabi.experimentobjects.Context;
-import com.intuit.wasabi.experimentobjects.Experiment;
+import java.util.Date;
 
 import static junit.framework.TestCase.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AssignmentTest {
@@ -47,7 +44,7 @@ public class AssignmentTest {
     private Status status = Status.NEW_ASSIGNMENT;
     private Boolean cacheable = Boolean.valueOf(true);
 
-    private Assignment assignment;
+    private Assignment.Builder assignment;
 
     @Before
     public void setUp() throws Exception {
@@ -57,7 +54,7 @@ public class AssignmentTest {
     /**
      *
      */
-    private Assignment createAssignment() {
+    private Assignment.Builder createAssignment() {
         return Assignment.newInstance(experimentID)
                         .withApplicationName(applicationName)
                         .withBucketLabel(bucketLabel)
@@ -65,11 +62,10 @@ public class AssignmentTest {
                         .withContext(context)
                         .withCreated(created)
                         .withStatus(status)
-                        .withUserID(userID)
-                        .build();
+                        .withUserID(userID);
     }
 
-    private Assignment createAssignmentWithEmptyBucket() {
+    private Assignment.Builder createAssignmentWithEmptyBucket() {
         return Assignment.newInstance(experimentID)
                         .withApplicationName(applicationName)
                         .withBucketLabel(bucketLabel)
@@ -78,12 +74,12 @@ public class AssignmentTest {
                         .withCreated(created)
                         .withStatus(status)
                         .withUserID(userID)
-                        .withBucketEmpty(true)
-                        .build();
+                        .withBucketEmpty(true);
     }
 
     @Test
     public void testAssignment() {
+        Assignment assignment = this.assignment.build();
         assertNotNull(assignment.toString());
         assertNotNull(assignment.getApplicationName());
         assertNotNull(assignment.getBucketLabel());
@@ -99,7 +95,7 @@ public class AssignmentTest {
 
     @Test
     public void testAssignmentWithEmptyBucket() {
-    	Assignment assignment = createAssignmentWithEmptyBucket();
+    	Assignment assignment = createAssignmentWithEmptyBucket().build();
         assertNotNull(assignment.toString());
         assertNotNull(assignment.getApplicationName());
         assertNotNull(assignment.getBucketLabel());
@@ -115,8 +111,8 @@ public class AssignmentTest {
 
     @Test
     public void testAssignmentWithEmptyBucketEqualsAndHash() {
-    	Assignment assignment1 = createAssignmentWithEmptyBucket();
-    	Assignment assignment2 = createAssignmentWithEmptyBucket();
+    	Assignment assignment1 = createAssignmentWithEmptyBucket().build();
+    	Assignment assignment2 = createAssignmentWithEmptyBucket().build();
     	assertEquals(assignment1, assignment2);
     	assertEquals(assignment2, assignment1);
     	assertEquals(assignment1, assignment1);
@@ -129,9 +125,8 @@ public class AssignmentTest {
 
     @Test
     public void testAssignmentWithEmptyBucketNotEqualsAndHash() {
-    	Assignment assignment1 = createAssignmentWithEmptyBucket();
-    	Assignment assignment2 = createAssignmentWithEmptyBucket();
-    	assignment2.setBucketEmpty(false);
+    	Assignment assignment1 = createAssignmentWithEmptyBucket().build();
+    	Assignment assignment2 = createAssignmentWithEmptyBucket().withBucketEmpty(false).build();
     	assertFalse(assignment1.equals(assignment2));
     	assertFalse(assignment2.equals(assignment1));
     	assertFalse(assignment1.toString().equals(assignment2.toString()));
@@ -146,8 +141,8 @@ public class AssignmentTest {
 
     @Test
     public void testAssignmentWithEmptyBucketAndDefaultNotEqualsAndHash() {
-    	Assignment assignment1 = createAssignment();
-    	Assignment assignment2 = createAssignmentWithEmptyBucket();
+    	Assignment assignment1 = createAssignment().build();
+    	Assignment assignment2 = createAssignmentWithEmptyBucket().build();
     	assertFalse(assignment1.equals(assignment2));
     	assertFalse(assignment2.equals(assignment1));
     	assertFalse(assignment1.toString().equals(assignment2.toString()));
@@ -160,29 +155,10 @@ public class AssignmentTest {
     	assertTrue(assignment2.hashCode() == assignment2.hashCode());
     }
 
-    @Test
-    public void testAssignmentSet() {
-        assignment.setApplicationName(applicationName);
-        assignment.setBucketLabel(bucketLabel);
-        assignment.setCacheable(cacheable);
-        assignment.setContext(context);
-        assignment.setCreated(created);
-        assignment.setExperimentID(experimentID);
-        assignment.setStatus(status);
-        assignment.setUserID(userID);
-        assertEquals(applicationName, assignment.getApplicationName());
-        assertEquals(bucketLabel, assignment.getBucketLabel());
-        assertTrue(assignment.isCacheable());
-        assertEquals(context, assignment.getContext());
-        assertEquals(created, assignment.getCreated());
-        assertEquals(experimentID, assignment.getExperimentID());
-        assertEquals(status, assignment.getStatus());
-        assertEquals(userID, assignment.getUserID());
-    }
 
     @Test
     public void testAssignmentFromOther() {
-        Assignment newAssignment = Assignment.from(assignment).build();
+        Assignment newAssignment = Assignment.from(assignment.build()).build();
 
         assertNotNull(newAssignment.toString());
         assertNotNull(newAssignment.getApplicationName());
