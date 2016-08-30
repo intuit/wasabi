@@ -168,6 +168,7 @@ bootstrapLinux() {
 
   sudo groupadd docker
   sudo usermod -aG docker $USER
+  sudo usermod -aG docker root
   echo "${green}installed dependencies.${reset}"
 }
 
