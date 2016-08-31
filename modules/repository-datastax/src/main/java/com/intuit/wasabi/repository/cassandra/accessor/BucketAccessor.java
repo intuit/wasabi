@@ -93,5 +93,35 @@ public interface BucketAccessor {
      */
     @Query("select * from bucket where experiment_id = ? and label = ?")
 	Result<Bucket> getBucketByExperimentIdAndBucket(UUID rawID, String label);
+
+    /**
+     * Update control status of bucket
+     * @param isControl
+     * @param experimentId
+     * @param label
+     */
+    @Query( "update bucket set is_control= ? where experiment_id =? and label =?")
+	void updateControl(boolean isControl, UUID experimentId, String label);
+
+    /**
+     * Update bucket based on params
+     * @param description
+     * @param allocationPercent
+     * @param control
+     * @param payload
+     * @param experimentId
+     * @param label
+     */
+    @Query("update bucket " +
+                "set description = ?, allocation = ?, is_control = ?, payload = ? " +
+                "where experiment_id = ? and label = ?")
+	void updateBucket(String description, Double allocationPercent, Boolean control,
+			String payload, UUID experimentId, String label);
+
+    @Query("update bucket " +
+                "set allocation = ? " +
+                "where experiment_id = ? and label = ?")
+	void updateAllocation(Double allocation, UUID experimentId,
+			String label);
     
 }

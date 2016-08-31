@@ -48,9 +48,6 @@ public class UserFeedbackAccessorITest {
 
         session = injector.getInstance(CassandraDriver.class).getSession();
         accessor = injector.getInstance(UserFeedbackAccessor.class);
-//        manager = new MappingManager(session);
-//        mapper = manager.mapper(UserFeedback.class);
-//        accessor = manager.createAccessor(UserFeedbackAccessor.class);
         
         session.execute("delete from wasabi_experiments.user_feedback where user_id = '" + userId + "'");
     }
