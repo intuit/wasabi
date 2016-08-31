@@ -247,7 +247,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                     .withContext(assignment.getContext())
                     .withStatus(Assignment.Status.NEW_ASSIGNMENT)
                     .withCreated(paramDate)
-                    .withCacheable(null)
+                    .withCacheable(null) //TODO: WTF is null cacheable? it should be either cacheable or not
                     .build());
         } catch (ConnectionException e) {
             throw new RepositoryException("Could not save user assignment \"" +
