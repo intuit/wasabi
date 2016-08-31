@@ -128,7 +128,7 @@ for module in "$modules"; do
     done
   fi
 
-  deb="-t deb --deb-no-default-config-files"
+  deb="-t deb" # --deb-no-default-config-files"
   rpm="-t rpm --rpm-os linux"
   scripts="--before-install modules/${module}/target/extra-resources/service/[PKG]/before-install.sh\
     --after-install modules/${module}/target/extra-resources/service/[PKG]/after-install.sh\

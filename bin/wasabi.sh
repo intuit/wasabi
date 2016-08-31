@@ -15,7 +15,7 @@
 # limitations under the License.
 ###############################################################################
 
-formulas=("bash" "cask" "git" "maven" "wget" "ruby" "node")
+formulas=("bash" "cask" "git" "git-flow-avh" "maven" "wget" "ruby" "node")
 taps=("caskroom/cask")
 casks=("java" "docker")
 endpoint_default=localhost:8080
@@ -43,6 +43,7 @@ options:
 commands:
   bootstrap                              : install dependencies
   build                                  : build project
+  clean                                  : clean build
   start[:cassandra,mysql,wasabi]         : start all, cassandra, mysql, wasabi
   test                                   : run the integration tests (needs a running wasabi)
   test[:module-name,...]                 : run the unit tests for the specified module(s) only
@@ -78,47 +79,55 @@ beerMe() {
 }
 
 bootstrap() {
-  # todo: add WASABI_OS
-  if ! hash brew 2>/dev/null; then
-    echo "${green}installing homebrew ...${reset}"
+  if [ "${WASABI_OS}" == "${wasabi_os_default}" ]; then
+    if ! hash brew 2>/dev/null; then
+      echo "${green}installing homebrew ...${reset}"
 
-    ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+      ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
-    echo "${green}installed homebrew${reset}"
+      echo "${green}installed homebrew${reset}"
+    fi
+
+    brew update
+    brew doctor
+    brew cleanup
+
+    echo "${green}installing dependencies: ${formulas[@]} ${taps[@]} ${casks[@]} ...${reset}"
+
+    for formula in "${formulas[@]}"; do
+      [[ ! $(brew list ${formula} 2>/dev/null) ]] && brew install ${formula} || brew upgrade ${formula} 2>/dev/null
+    done
+
+    for tap in "${taps[@]}"; do
+      brew tap ${tap}
+    done
+
+    for cask in "${casks[@]}"; do
+      [[ $(brew cask list ${cask} 2>/dev/null) ]] && brew cask uninstall --force ${cask} 2>/dev/null
+      brew cask install --force ${cask}
+    done
+
+    npm config set prefix $(brew --prefix)
+
+    echo "${green}installed dependencies: ${formulas[@]} ${taps[@]} ${casks[@]}${reset}"
+  else
+    echo "${green}FIXME: linux install of ( ${formulas[@]} ${taps[@]} ${casks[@]} ) not yet implemented${reset}"
   fi
-
-  brew update
-  brew doctor
-  brew cleanup
-
-  echo "${green}installing dependencies: ${formulas[@]} ${casks[@]} ...${reset}"
-
-  for formula in "${formulas[@]}"; do
-    [[ ! $(brew list ${formula} 2>/dev/null) ]] && brew install ${formula} || brew upgrade ${formula} 2>/dev/null
-  done
-
-  for tap in "${taps[@]}"; do
-    brew tap ${tap}
-  done
-
-  for cask in "${casks[@]}"; do
-    [[ $(brew cask list ${cask} 2>/dev/null) ]] && brew cask uninstall --force ${cask} 2>/dev/null
-    brew cask install --force ${cask}
-  done
-
-  npm config set prefix $(brew --prefix)
 
   for n in yo grunt-cli bower; do
     [[ ! $(npm -g list 2>/dev/null | grep ${n}) ]] && npm -g install ${n}
   done
 
   [[ ! $(gem list | grep compass) ]] && gem install compass
-
-  echo "${green}installed dependencies: ${formulas[@]} ${casks[@]}${reset}"
 }
 
 build() {
   ./bin/build.sh -b ${1:-false} -t ${2:-false} -p ${3:-development}
+}
+
+clean() {
+  mvn clean
+  (cd modules/ui; grunt clean)
 }
 
 start() {
@@ -184,7 +193,7 @@ status() {
 package() {
   profile=build
 
-  build true false ${profile}
+  build true ${verify} ${profile}
 
   # FIXME: move to modules/ui/build.sh
   version=$(fromPom . build project.version)
@@ -198,23 +207,22 @@ package() {
   content=$(fromPom ./modules/main build application.http.content.directory)
   ui_home=${home}/../${name}-${version}-${profile}
 
+  ./bin/fpm.sh -n ${name} -v ${version} -p ${profile}
+
   (cd modules/ui; \
     mkdir -p target; \
-    # for f in app bower.json feedbackserver Gruntfile.js constants.json karma.conf.js karma-e2e.conf.js package.json test .bowerrc; do \
-    # TODO Should we remove feedbackserver? it does not exist in the current structure.
     for f in app bower.json Gruntfile.js constants.json karma.conf.js karma-e2e.conf.js package.json test .bowerrc; do \
       cp -r ${f} target; \
     done; \
     sed -i '' -e "s|http://localhost:8080|${server}|g" target/constants.json 2>/dev/null; \
     sed -i '' -e "s|VERSIONLOC|${version}|g" target/app/index.html 2>/dev/null; \
     if [ "${WASABI_OS}" == "${wasabi_os_default}" ]; then \
-    (cd target; \
-      npm install; \
-      bower install; \
-      grunt clean; \
-      grunt build --target=develop --no-color); \
+      (cd target; npm install; bower install; grunt clean); \
+    fi; \
+# fixme: shouldn't have to force or ignore tests
+    (cd target; grunt build --force --target=develop --no-color; \
 #      grunt test); \
-    fi
+    ); \
     cp -r build target; \
     for pkg in deb rpm; do \
       sed -i '' -e "s|\${application.home}|${home}|g" target/build/${pkg}/before-install.sh 2>/dev/null; \
@@ -226,10 +234,10 @@ package() {
       sed -i '' -e "s|\${application.user}|${user}|g" target/build/${pkg}/after-install.sh 2>/dev/null; \
       sed -i '' -e "s|\${application.group}|${group}|g" target/build/${pkg}/after-install.sh 2>/dev/null; \
       sed -i '' -e "s|\${application.http.content.directory}|${content}|g" target/build/${pkg}/before-remove.sh 2>/dev/null; \
-    done)
+    done; \
+    (cd target; ../bin/fpm.sh -n ${name} -v ${version} -p ${profile}))
 
-  ./bin/fpm.sh -n ${name} -v ${version} -p ${profile}
-  find . -type f \( -name "*.rpm" -or -name "*.deb" \) -exec mv {} ./target \;
+  find . -type f \( -name "*.rpm" -or -name "*.deb" \) -exec mv {} ./target 2>/dev/null \;
 
   echo "deployable build packages:"
 
@@ -280,6 +288,7 @@ for command in ${@:$OPTIND}; do
   case "${command}" in
     bootstrap) bootstrap;;
     build) build true;;
+    clean) clean;;
     start) command="start:cassandra,mysql,wasabi";&
     start:*) commands=$(echo ${command} | cut -d ':' -f 2)
       (IFS=','; for command in ${commands}; do start ${command}; done);;
