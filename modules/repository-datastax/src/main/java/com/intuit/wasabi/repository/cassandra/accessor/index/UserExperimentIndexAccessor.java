@@ -62,6 +62,6 @@ public interface UserExperimentIndexAccessor {
      * @return result set
      */
     @Query("delete from user_experiment_index where user_id = ? and experiment_id = ? and context = ? and app_name = ?")
-    ResultSet deleteBy(String userId, String experimentId, String context, String appName);
+    ResultSet deleteBy(String userId, UUID experimentId, String context, String appName);
 
 }

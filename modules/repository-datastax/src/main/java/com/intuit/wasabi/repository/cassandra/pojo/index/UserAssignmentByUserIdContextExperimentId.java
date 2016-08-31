@@ -27,8 +27,8 @@ import java.util.Date;
 import java.util.UUID;
 
 
-//TODO: this seems redundent since UserAssignment contains the same data with same primary key but different order
-@Table(name="user_assignment")
+//TODO: this seems redundent since UserAssignment contains the same data with same primary key but different order, do we make queries that are order specific?
+@Table(name="user_assignment_look_up")
 @Data
 @Builder(toBuilder = true)
 @NoArgsConstructor
@@ -44,7 +44,6 @@ public class UserAssignmentByUserIdContextExperimentId {
     @PartitionKey(2)
     @Column(name = "experiment_id")
     UUID experimentId;
-
 
     @Column(name = "bucket_label")
     String bucketLabel;
