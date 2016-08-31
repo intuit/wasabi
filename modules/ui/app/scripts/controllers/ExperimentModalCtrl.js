@@ -504,6 +504,7 @@ angular.module('wasabi.controllers')
 
                 $scope.startExperiment = function(isFormInvalid) {
                     if (isFormInvalid) {
+                        $scope.experimentFormSubmitted = true;
                         DialogsFactory.alertDialog('Please address the errors displayed before you can start your experiment.', 'Errors Preventing Start');
                         return;
                     }

@@ -916,7 +916,19 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                                     {key: 'experiment_id', value: experiment.id},
                                     {key: 'item_id', value: state});
 
-                                afterUpdateFunction();
+                                if (afterUpdateFunction && afterUpdateFunction === Object(afterUpdateFunction) &&
+                                    typeof afterUpdateFunction !== 'function') {
+                                    // afterUpdateFunction is actually an object where the properties should be the
+                                    // name of a state.  We should call the function associated with that property
+                                    // only after we make a change to that state.
+                                    if (afterUpdateFunction.hasOwnProperty(state)) {
+                                        afterUpdateFunction[state](experiment);
+                                    }
+                                }
+                                else {
+                                    // Otherwise, it is a function to be called for all state changes.
+                                    afterUpdateFunction();
+                                }
                             }, function(response) {
                                 that.handleGlobalError(response, 'The state of your experiment could not be changed.');
                             });
@@ -999,6 +1011,29 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                 });
 
                 return false;
+            },
+
+            openResultsModal: function (experiment, readOnly, afterResultsFunc) {
+                var modalInstance = $modal.open({
+                    templateUrl: 'views/ResultsModal.html',
+                    controller: 'ResultsModalCtrl',
+                    windowClass: 'xxx-dialog',
+                    backdrop: 'static',
+                    resolve: {
+                        experiment: function () {
+                            return experiment;
+                        },
+                        readOnly: function() {
+                            return readOnly;
+                        }
+                    }
+                });
+
+                modalInstance.result.then(function () {
+                    if (afterResultsFunc) {
+                        afterResultsFunc();
+                    }
+                });
             }
 
         };

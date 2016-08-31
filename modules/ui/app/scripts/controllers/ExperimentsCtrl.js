@@ -531,8 +531,19 @@ angular.module('wasabi.controllers').
                 UtilitiesFactory.deleteExperiment(experiment, $scope.loadExperiments);
             };
 
+            $scope.openResultsModal = function (experiment) {
+                UtilitiesFactory.openResultsModal(experiment, false, $scope.loadExperiments);
+            };
+
             $scope.changeState = function (experiment, state) {
-                UtilitiesFactory.changeState(experiment, state, $scope.loadExperiments);
+                var afterChangeActions = {
+                    // Transitioning to PAUSED, that is, stopping the experiment.  Prompt the user to enter their results.
+                    'PAUSED': $scope.openResultsModal,
+                    // In other cases, just load the experiment.
+                    'RUNNING': $scope.loadExperiments,
+                    'TERMINATED': $scope.loadExperiments
+                };
+                UtilitiesFactory.changeState(experiment, state, afterChangeActions);
             };
 
             $scope.stateImgUrl = function(state) {

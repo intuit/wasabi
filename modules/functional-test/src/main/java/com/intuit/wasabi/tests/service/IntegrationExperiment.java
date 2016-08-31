@@ -239,7 +239,7 @@ public class IntegrationExperiment extends TestBase {
      */
     @DataProvider
     public Object[][] badExperimentsPOST() {
-        Experiment experiment = new Experiment();
+        Experiment experiment = new Experiment().setDescription("Sample hypothesis.");
         return new Object[][]{
                 // FIXME: jwtodd
 //                new Object[] { new Experiment(experiment.setSamplingPercent(completeExperiment.samplingPercent)), "Invalid input", HttpStatus.SC_BAD_REQUEST },
@@ -283,7 +283,6 @@ public class IntegrationExperiment extends TestBase {
         postExperiment(experiment, expectedStatusCode);
         // FIXME: jwtodd
         if (expectedError.startsWith("An unique constraint")) {
-//            Assert.assertEquals(lastError(), expectedError, "Error message not as expected.");
             Assert.assertTrue(lastError().startsWith("An unique constraint"), "Error message not as expected.");
         } else if (expectedError.startsWith("Could not create experiment")) {
             Assert.assertTrue(lastError().startsWith("Could not create"), "Error message not as expected.");
