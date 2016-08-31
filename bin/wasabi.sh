@@ -182,7 +182,7 @@ resource() {
 }
 
 stop() {
-  ./bin/congit tainer.sh stop${1:+:$1}
+  ./bin/container.sh stop${1:+:$1}
 }
 
 status() {
