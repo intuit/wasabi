@@ -71,7 +71,8 @@ public class CassandraRepositoryModule extends AbstractModule {
         bind(BucketAssignmentCountAccessor.class).toProvider(BucketAssignmentCountAccessorProvider.class).in(Singleton.class);
         //Bind those export
         bind(UserAssignmentExportAccessor.class).toProvider(UserAssignmentExportAccessorProvider.class).in(Singleton.class);
-
+        bind(StateExperimentIndexAccessor.class).toProvider(StateExperimentIndexAccessorProvider.class).in(Singleton.class);
+        bind(BucketAccessor.class).toProvider(BucketAccessorProvider.class).in(Singleton.class);
 
         //Bind those repositories
         bind(AuditLogRepository.class).to(CassandraAuditLogRepository.class).in(Singleton.class);
