@@ -20,23 +20,24 @@ import com.datastax.driver.mapping.MappingManager;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
-import com.intuit.wasabi.repository.cassandra.accessor.index.UserBucketIndexAccessor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.intuit.wasabi.repository.cassandra.accessor.index.StateExperimentIndexAccessor;
 
-public class UserBucketIndexAccessorProvider implements Provider<UserBucketIndexAccessor> {
+/**
+ * Provider for accessor
+ */
+public class StateExperimentIndexAccessorProvider implements Provider<StateExperimentIndexAccessor> {
     private final Session session;
     private final MappingManager manager;
 
     @Inject
-    public UserBucketIndexAccessorProvider(CassandraDriver driver) {
+    public StateExperimentIndexAccessorProvider(CassandraDriver driver) {
         this.session = driver.getSession();
         this.manager = new MappingManager(session);
     }
 
 
     @Override
-    public UserBucketIndexAccessor get() {
-        return manager.createAccessor(UserBucketIndexAccessor.class);
+    public StateExperimentIndexAccessor get() {
+        return manager.createAccessor(StateExperimentIndexAccessor.class);
     }
 }
