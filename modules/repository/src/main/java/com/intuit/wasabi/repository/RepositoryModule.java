@@ -16,9 +16,17 @@
 package com.intuit.wasabi.repository;
 
 import com.google.inject.AbstractModule;
-import com.intuit.wasabi.repository.impl.cassandra.*;
+import com.googlecode.flyway.core.Flyway;
+import com.intuit.wasabi.repository.impl.cassandra.CassandraAssignmentsRepository;
+import com.intuit.wasabi.repository.impl.cassandra.CassandraAuditLogRepository;
+import com.intuit.wasabi.repository.impl.cassandra.CassandraAuthorizationRepository;
+import com.intuit.wasabi.repository.impl.cassandra.CassandraFeedbackRepository;
+import com.intuit.wasabi.repository.impl.cassandra.CassandraMutexRepository;
+import com.intuit.wasabi.repository.impl.cassandra.CassandraPagesRepository;
+import com.intuit.wasabi.repository.impl.cassandra.CassandraPrioritiesRepository;
+import com.intuit.wasabi.repository.impl.database.DatabaseExperimentRepository;
+import com.intuit.wasabi.repository.impl.database.DatabaseFavoritesRepository;
 import com.intuit.wasabi.repository.impl.database.DatabaseAnalytics;
-import com.intuit.wasabi.repository.impl.database.DatabaseAnalyticsModule;
 import org.slf4j.Logger;
 
 import java.util.Properties;
@@ -46,9 +54,8 @@ public class RepositoryModule extends AbstractModule {
     protected void configure() {
         LOGGER.debug("installing module: {}", RepositoryModule.class.getSimpleName());
 
-        install(new DatabaseAnalyticsModule());
-
         Properties properties = create(PROPERTY_NAME, RepositoryModule.class);
+
 
         bind(String.class).annotatedWith(named("assign.user.to.export"))
                 .toInstance(getProperty("assign.user.to.export", properties));
@@ -62,7 +69,14 @@ public class RepositoryModule extends AbstractModule {
                 .toInstance(Boolean.valueOf(getProperty("assign.user.to.new", properties, TRUE.toString())));
         bind(String.class).annotatedWith(named("default.time.format"))
                 .toInstance(getProperty("default.time.format", properties, "yyyy-MM-dd HH:mm:ss"));
+
+        // MySQL bindings
+        bind(Flyway.class).in(SINGLETON);
         bind(AnalyticsRepository.class).to(DatabaseAnalytics.class).in(SINGLETON);
+        bind(ExperimentRepository.class).annotatedWith(DatabaseRepository.class).to(DatabaseExperimentRepository.class).in(SINGLETON);
+        bind(FavoritesRepository.class).to(DatabaseFavoritesRepository.class).in(SINGLETON);
+
+        // Cassandra bindings
         bind(AssignmentsRepository.class).to(CassandraAssignmentsRepository.class).in(SINGLETON);
         bind(MutexRepository.class).to(CassandraMutexRepository.class).in(SINGLETON);
         bind(PrioritiesRepository.class).to(CassandraPrioritiesRepository.class).in(SINGLETON);

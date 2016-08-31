@@ -44,6 +44,7 @@ public class ExperimentsModule extends AbstractModule {
         bind(Mutex.class).to(MutexImpl.class).in(SINGLETON);
         bind(Pages.class).to(PagesImpl.class).in(SINGLETON);
         bind(Priorities.class).to(PrioritiesImpl.class).in(SINGLETON);
+        bind(Favorites.class).to(FavoritesImpl.class).in(SINGLETON);
         bind(ExperimentValidator.class).in(SINGLETON);
 
         LOGGER.debug("installed module: {}", ExperimentsModule.class.getSimpleName());

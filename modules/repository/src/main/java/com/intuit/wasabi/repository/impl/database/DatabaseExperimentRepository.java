@@ -34,6 +34,7 @@ import com.intuit.wasabi.experimentobjects.ExperimentList;
 import com.intuit.wasabi.experimentobjects.ExperimentValidator;
 import com.intuit.wasabi.experimentobjects.NewExperiment;
 import com.intuit.wasabi.experimentobjects.exceptions.WasabiException;
+import com.intuit.wasabi.repository.DatabaseRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.RepositoryException;
 import com.netflix.astyanax.MutationBatch;
@@ -54,7 +55,7 @@ import static com.intuit.wasabi.experimentobjects.Experiment.State.DELETED;
  *
  * @see ExperimentRepository
  */
-class DatabaseExperimentRepository implements ExperimentRepository {
+public class DatabaseExperimentRepository implements ExperimentRepository {
 
 
     private final ExperimentValidator validator;

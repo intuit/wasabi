@@ -119,7 +119,7 @@ public class IntegrationExperiment extends TestBase {
     @Test(groups = {"basicExperimentTests"}, dependsOnMethods = {"t_experimentOutput"}, retryAnalyzer = RetryAnalyzer.class)
     @RetryTest(maxTries = 3, warmup = 1500)
     public void t_checkRawExperimentResult() {
-        response = doGet("/experiments", null, null, HttpStatus.SC_OK, apiServerConnector);
+        response = doGet("/experiments?per_page=-1", null, null, HttpStatus.SC_OK, apiServerConnector);
 
         Assert.assertNull(response.jsonPath().get("version"), "version not hidden!");
         Assert.assertNotNull(response.jsonPath().getList("experiments"));
