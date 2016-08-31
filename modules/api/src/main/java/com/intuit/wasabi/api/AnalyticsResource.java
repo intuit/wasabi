@@ -19,26 +19,39 @@ import com.codahale.metrics.annotation.Timed;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.intuit.wasabi.analytics.Analytics;
+import com.intuit.wasabi.analytics.ExperimentDetails;
 import com.intuit.wasabi.analyticsobjects.Parameters;
 import com.intuit.wasabi.analyticsobjects.counts.AssignmentCounts;
 import com.intuit.wasabi.analyticsobjects.counts.ExperimentCounts;
 import com.intuit.wasabi.analyticsobjects.counts.ExperimentCumulativeCounts;
 import com.intuit.wasabi.analyticsobjects.statistics.ExperimentCumulativeStatistics;
 import com.intuit.wasabi.analyticsobjects.statistics.ExperimentStatistics;
+import com.intuit.wasabi.api.pagination.PaginationHelper;
+import com.intuit.wasabi.authenticationobjects.UserInfo;
+import com.intuit.wasabi.authorization.Authorization;
+import com.intuit.wasabi.exceptions.AuthenticationException;
+import com.intuit.wasabi.experiment.Favorites;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Context;
 import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.analyticsobjects.wrapper.ExperimentDetail;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.slf4j.Logger;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
-import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_EMPTY;
-import static com.intuit.wasabi.api.APISwaggerResource.EXAMPLE_AUTHORIZATION_HEADER;
+import java.util.*;
+
+import static com.intuit.wasabi.api.APISwaggerResource.*;
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_TIMEZONE;
+import static com.intuit.wasabi.api.APISwaggerResource.DOC_TIMEZONE;
+import static com.intuit.wasabi.authorizationobjects.Permission.READ;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * API endpoint for getting statistics about experiments
@@ -49,16 +62,128 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Api(value = "Analytics (Counts-Statistics for an experiment)")
 public class AnalyticsResource {
 
+    private static final Logger LOGGER = getLogger(AnalyticsResource.class);
+
     private final HttpHeader httpHeader;
     private final AuthorizedExperimentGetter authorizedExperimentGetter;
     private Analytics analytics;
+    private ExperimentDetails experimentDetails;
+    private PaginationHelper<ExperimentDetail> experimentDetailPaginationHelper;
+    private Favorites favorites;
+    private Authorization authorization;
 
     @Inject
     AnalyticsResource(final Analytics analytics, final AuthorizedExperimentGetter authorizedExperimentGetter,
-                      final HttpHeader httpHeader) {
+                      final HttpHeader httpHeader, final PaginationHelper<ExperimentDetail> experimentDetailPaginationHelper,
+                      final ExperimentDetails experimentDetails, final Favorites favorites,final Authorization authorization) {
         this.analytics = analytics;
         this.authorizedExperimentGetter = authorizedExperimentGetter;
         this.httpHeader = httpHeader;
+        this.experimentDetails = experimentDetails;
+        this.experimentDetailPaginationHelper = experimentDetailPaginationHelper;
+        this.favorites = favorites;
+        this.authorization = authorization;
+    }
+
+    /**
+     * Returns a list of all not-deleted experiments the user has access to. Provides additional information
+     * of the current state, with bucket information and analytic counts.
+     *
+     * This endpoint is paginated. Favorites are sorted to the front.
+     * If {@code per_page == -1}, favorites are ignored and all experiments are returned.
+     *
+     * @param authorizationHeader the authentication headers
+     * @param page the page which should be returned, defaults to 1
+     * @param perPage the number of experiments per page, defaults to 10. -1 to get all values.
+     * @param sort the sorting rules
+     * @param filter the filter rules
+     * @param timezoneOffset the time zone offset from UTC
+     * @return a response containing a map with a list with {@code 0} to {@code perPage} experiments,
+     * if that many are on the page, and a count of how many experiments match the filter criteria.
+     */
+    @GET
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "Return details of all experiments with details for the card view, with respect to the authorization",
+            response = ExperimentDetail.class)
+    @Timed
+    public Response getExperimentDetails(@HeaderParam(AUTHORIZATION)
+                                         @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+                                         final String authorizationHeader,
+
+                                         @ApiParam(required = true, defaultValue = DEFAULT_EMPTY)
+                                         final Parameters parameters,
+
+                                         @QueryParam("page")
+                                         @DefaultValue(DEFAULT_PAGE)
+                                         @ApiParam(name = "page", defaultValue = DEFAULT_PAGE, value = DOC_PAGE)
+                                         final int page,
+
+                                         @QueryParam("per_page")
+                                         @DefaultValue(DEFAULT_PER_PAGE_CARDVIEW)
+                                         @ApiParam(name = "per_page", defaultValue = DEFAULT_PER_PAGE_CARDVIEW, value = DOC_PER_PAGE)
+                                         final int perPage,
+
+                                         @QueryParam("filter")
+                                         @DefaultValue("")
+                                         @ApiParam(name = "filter", defaultValue = DEFAULT_FILTER, value = DOC_FILTER)
+                                         final String filter,
+
+                                         @QueryParam("sort")
+                                         @DefaultValue("")
+                                         @ApiParam(name = "sort", defaultValue = DEFAULT_SORT, value = DOC_SORT)
+                                         final String sort,
+
+                                         @QueryParam("timezone")
+                                         @DefaultValue(DEFAULT_TIMEZONE)
+                                         @ApiParam(name = "timezone", defaultValue = DEFAULT_TIMEZONE, value = DOC_TIMEZONE)
+                                         final String timezoneOffset) {
+        List<ExperimentDetail> experimentList = experimentDetails.getExperimentDetailsBase();
+        List<ExperimentDetail> authorizedExperiments = new ArrayList<>();
+
+        if (authorizationHeader == null) {
+            throw new AuthenticationException("No authorization given.");
+        } else {
+            UserInfo.Username userName = authorization.getUser(authorizationHeader);
+            Set<Application.Name> allowed = new HashSet<>();
+
+
+            for (ExperimentDetail experiment : experimentList) {
+                if (experiment == null) {
+                    continue;
+                }
+
+                Application.Name applicationName = experiment.getAppName();
+
+                if (allowed.contains(applicationName)) {
+                    authorizedExperiments.add(experiment);
+                } else {
+                    try {
+                        authorization.checkUserPermissions(userName, applicationName, READ);
+                        authorizedExperiments.add(experiment);
+                        allowed.add(applicationName);
+                    } catch (AuthenticationException ignored) {
+                        LOGGER.trace("ignoring authentication exception", ignored);
+                    }
+                }
+            }
+
+            List<Experiment.ID> favoriteList = favorites.getFavorites(userName);
+            authorizedExperiments
+                    .parallelStream()
+                    .filter(experiment -> favoriteList.contains(experiment.getId()))
+                    .forEach(experiment -> experiment.setFavorite(true));
+
+            //get details
+            experimentDetails.getAnalyticData(authorizedExperiments, parameters);
+        }
+
+        //filter and paginate
+        Map<String, Object> experimentResponse = experimentDetailPaginationHelper.paginate("?",
+                authorizedExperiments, filter, timezoneOffset,
+                (perPage != -1 ? "-favorite," : "") + sort, page, perPage);
+
+
+        return httpHeader.headers().entity(experimentResponse).build();
     }
 
     /**

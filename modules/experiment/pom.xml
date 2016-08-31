@@ -59,10 +59,5 @@
             <artifactId>wasabi-repository</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>wasabi-analytics</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
     </dependencies>
 </project>

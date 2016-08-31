@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package com.intuit.wasabi.experiment.impl;
+package com.intuit.wasabi.analytics.impl;
 
 import com.intuit.wasabi.analytics.Analytics;
+import com.intuit.wasabi.analytics.ExperimentDetails;
 import com.intuit.wasabi.analyticsobjects.Parameters;
 import com.intuit.wasabi.analyticsobjects.counts.AssignmentCounts;
 import com.intuit.wasabi.analyticsobjects.statistics.BucketStatistics;
@@ -24,7 +25,7 @@ import com.intuit.wasabi.experiment.*;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Bucket.Label;
 import com.intuit.wasabi.experimentobjects.Experiment;
-import com.intuit.wasabi.experimentobjects.ExperimentDetail;
+import com.intuit.wasabi.analyticsobjects.wrapper.ExperimentDetail;
 import com.intuit.wasabi.repository.CassandraRepository;
 import com.intuit.wasabi.repository.DatabaseRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
@@ -50,7 +51,6 @@ public class ExperimentDetailsImpl implements ExperimentDetails{
 
     private final Analytics analytics;
 
-    private final Experiments experiments;
 
 
     /**
@@ -64,11 +64,10 @@ public class ExperimentDetailsImpl implements ExperimentDetails{
     @Inject
     public ExperimentDetailsImpl(@DatabaseRepository ExperimentRepository databaseRepository,
                                  @CassandraRepository ExperimentRepository cassandraRepository,
-                                 Experiments experiments, Buckets buckets, Analytics analytics) {
+                                 Buckets buckets, Analytics analytics) {
         super();
         this.databaseRepository = databaseRepository;
         this.cassandraRepository = cassandraRepository;
-        this.experiments = experiments;
         this.buckets = buckets;
         this.analytics = analytics;
     }
@@ -146,7 +145,7 @@ public class ExperimentDetailsImpl implements ExperimentDetails{
             for(ExperimentDetail.BucketDetail b : experimentDetail.getBuckets()){
                 BucketStatistics bucketStat = bucketAnalytics.get(b.getLabel());
                 b.setActionRate(bucketStat.getJointActionRate().getEstimate().doubleValue());
-                
+
             }
         }
         return experimentDetail;

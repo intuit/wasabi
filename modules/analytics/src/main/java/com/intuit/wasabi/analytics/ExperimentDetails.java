@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package com.intuit.wasabi.experiment;
+package com.intuit.wasabi.analytics;
 
 import com.intuit.wasabi.analyticsobjects.Parameters;
-import com.intuit.wasabi.experimentobjects.ExperimentDetail;
+import com.intuit.wasabi.analyticsobjects.wrapper.ExperimentDetail;
 
 import java.util.List;
 
