@@ -71,6 +71,6 @@ for pkg in "deb" "rpm"; do
   if [ "${WASABI_OS}" == "${wasabi_os_default}" ]; then
     docker run -it -v `pwd`:/build --rm liuedy/centos-fpm fpm ${fpm} || exitOnError "failed to build rpm: $module"
   else
-    (cd target; eval fpm ${fpm}) || exitOnError "failed to build rpm: $module"
+    eval fpm ${fpm} || exitOnError "failed to build rpm: $module"
   fi
 done
