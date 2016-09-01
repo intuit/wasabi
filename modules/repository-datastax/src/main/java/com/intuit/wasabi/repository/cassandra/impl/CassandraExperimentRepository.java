@@ -627,7 +627,9 @@ class CassandraExperimentRepository implements ExperimentRepository {
 			for (com.intuit.wasabi.repository.cassandra.pojo.Experiment experimentPojo : 
 				experimentPojos ) {
 				Experiment experiment = ExperimentHelper.makeExperiment(experimentPojo);
-				result.put(experiment.getID(), experiment.getLabel(), experiment);
+                if (experiment.getState() != State.TERMINATED && experiment.getState() != State.DELETED) {
+    				result.put(experiment.getID(), experiment.getLabel(), experiment);
+                }
 			}
 			
 	        return result;
