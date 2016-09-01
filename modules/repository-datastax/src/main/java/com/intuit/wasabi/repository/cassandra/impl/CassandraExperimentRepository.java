@@ -867,7 +867,7 @@ class CassandraExperimentRepository implements ExperimentRepository {
                 CQL = CQL.substring(0, CQL.length() - 1);
             }
             CQL += " where experiment_id = ? and label = ?;";
-            args.add(b.getExperimentID().getRawID());
+            args.add(experimentID.getRawID());
             args.add(b.getLabel().toString());
         }
         CQL += "APPLY BATCH;";
