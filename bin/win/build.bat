@@ -15,10 +15,10 @@ rem # limitations under the License.
 rem ############################################################################
 
 call :info Building Service
-rem cmd /c "mvn -Pdevelopment clean test package javadoc:aggregate"
+cmd /c "mvn -Pdevelopment clean test package javadoc:aggregate"
 
 call :info Building UI
-rem cmd /c "cd modules\ui & npm install & bower install & grunt build"
+cmd /c "cd modules\ui & npm install & bower install & grunt build"
 
 call :info Finishing build
 set app-dir=target\app
