@@ -131,13 +131,7 @@ class CassandraExperimentRepository implements ExperimentRepository {
 	}
 
 	/**
-	 * Get experiment
-	 * 
-	 * @param experimentID
-	 *            experiment id
-	 * @param consistency
-	 *            cassandra consistency level
-	 * @return the experiment @ repository failure
+	 * {@inheritDoc}
 	 */
 	protected Experiment internalGetExperiment(Experiment.ID experimentID) {
 
@@ -178,15 +172,7 @@ class CassandraExperimentRepository implements ExperimentRepository {
 	}
 
 	/**
-	 * Get experiment by params
-	 * 
-	 * @param appName
-	 *            application name
-	 * @param experimentLabel
-	 *            experiment label
-	 * @param consistency
-	 *            cassandra consistency level
-	 * @return the experiment
+	 * {@inheritDoc}
 	 */
 	protected Experiment internalGetExperiment(Application.Name appName,
 			Experiment.Label experimentLabel) {
@@ -287,12 +273,7 @@ class CassandraExperimentRepository implements ExperimentRepository {
 	}
 
 	/**
-	 * Create indices for new experiment
-	 *
-	 * @param newExperiment
-	 *            the new experiment object
-	 * 
-	 *            TODO: Need more clarification
+	 * {@inheritDoc}
 	 */
     // TODO - Why is this method is on the interface - if the client does not call it, the indices will be inconsistent ?	
 	@Override
@@ -318,7 +299,7 @@ class CassandraExperimentRepository implements ExperimentRepository {
 	}
 
 	/**
-	 * Get the summary of assignments delivered for each experiment
+	 * {@inheritDoc}
 	 */
 	@Override
 	public AssignmentCounts getAssignmentCounts(Experiment.ID experimentID,
@@ -387,7 +368,7 @@ class CassandraExperimentRepository implements ExperimentRepository {
 	}
 
 	/**
-	 * Get a bucket list for a list of Experiments using a single cassandra call
+	 * {@inheritDoc}
 	 */
 	@Override
 	public Map<Experiment.ID, BucketList> getBucketList(Collection<Experiment.ID> experimentIDCollection) {
@@ -430,11 +411,7 @@ class CassandraExperimentRepository implements ExperimentRepository {
 	}
 
 	/**
-	 * Get the list of buckets for an experiment
-	 *
-	 * @param experimentID
-	 *            experiment id
-	 * @return a list of buckets
+	 * {@inheritDoc}
 	 */
 	@Override
 	public BucketList getBucketList(Experiment.ID experimentID) {
@@ -463,6 +440,9 @@ class CassandraExperimentRepository implements ExperimentRepository {
 		return bucketList;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
     public Experiment updateExperiment(Experiment experiment) {
 
@@ -634,7 +614,7 @@ class CassandraExperimentRepository implements ExperimentRepository {
     }
 
 	/**
-	 * Get the experiments for an Application
+	 * {@inheritDoc}
 	 */
 	@Override
     public Table<Experiment.ID, Experiment.Label, Experiment> getExperimentList(Application.Name appName) {
@@ -780,6 +760,9 @@ class CassandraExperimentRepository implements ExperimentRepository {
         return bucket;
     }
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
     public Bucket updateBucketAllocationPercentage(Bucket bucket, Double desiredAllocationPercentage) {
 
@@ -823,14 +806,7 @@ class CassandraExperimentRepository implements ExperimentRepository {
 	}
 
 	/**
-	 * Update bucket batch
-	 * 
-	 * @param experimentID
-	 *            the experiment id
-	 * @param bucketList
-	 *            the bucket list
-	 * 
-	 * @return BucketList
+	 * {@inheritDoc}
 	 */
 	@Override
 	public BucketList updateBucketBatch(Experiment.ID experimentID,
@@ -839,6 +815,7 @@ class CassandraExperimentRepository implements ExperimentRepository {
 		LOGGER.debug("bucket update {} for experiment id {}", new Object [] { bucketList, experimentID});
 
 		ArrayList<Object> args = new ArrayList<>();
+		
         String CQL = "BEGIN BATCH ";
         for (int i = 0; i < bucketList.getBuckets().size(); i++) {
             Bucket b = bucketList.getBuckets().get(i);
@@ -874,6 +851,7 @@ class CassandraExperimentRepository implements ExperimentRepository {
 
         LOGGER.debug("bucket update {} for experiment id {} statement{} with args {}", 
         		new Object [] { bucketList, experimentID, CQL, args});
+        
         try {
         	PreparedStatement preparedStatement = driver.getSession().prepare(CQL);
         	BoundStatement boundStatement = new BoundStatement(preparedStatement);
@@ -883,7 +861,6 @@ class CassandraExperimentRepository implements ExperimentRepository {
             throw new RepositoryException("Could not update bucket for experiment \"" + experimentID + "\"", e);
         }
 
-        // return the bucket with the updated values
         BucketList buckets;
         buckets = getBuckets(experimentID);
         return buckets;
@@ -1035,12 +1012,9 @@ class CassandraExperimentRepository implements ExperimentRepository {
 	}
 
 	/**
-	 * Update state index
-	 *
-	 * @param experiment
-	 *            the experiment object
-	 *
+	 * {@inheritDoc}
 	 */
+    @Override
 	public void updateStateIndex(Experiment experiment) {
 		LOGGER.debug("update state index experiment {} ", experiment);
 		
@@ -1055,7 +1029,7 @@ class CassandraExperimentRepository implements ExperimentRepository {
 		 }
 	}
 
-	protected void updateStateIndex(Experiment.ID experimentID, ExperimentState state) throws Exception {
+	protected void updateStateIndex(Experiment.ID experimentID, ExperimentState state) {
 
 		LOGGER.debug("update state index experiment id {} state {} ", new Object[] { experimentID, state});
 		
@@ -1113,10 +1087,7 @@ class CassandraExperimentRepository implements ExperimentRepository {
 	}
 
 	/**
-	 * Creates an application at top level
-	 * 
-	 * @param applicationName
-	 *            Application Name
+	 * {@inheritDoc}
 	 */
 	@Override
 	public void createApplication(Application.Name applicationName) {

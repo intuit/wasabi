@@ -739,8 +739,13 @@ class DatabaseExperimentRepository implements ExperimentRepository {
      */
     @Override
     public void createApplication(Application.Name applicationName) {
-        //Do nothing
+        throw new UnsupportedOperationException("Not supported ");
     }
+
+	@Override
+	public void updateStateIndex(Experiment experiment) {
+        throw new UnsupportedOperationException("Not supported ");		
+	}
 
 
 }
