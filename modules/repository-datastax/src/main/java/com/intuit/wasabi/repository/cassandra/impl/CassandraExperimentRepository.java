@@ -93,6 +93,124 @@ class CassandraExperimentRepository implements ExperimentRepository {
 	private ExperimentAuditLogAccessor experimentAuditLogAccessor;
 
 	/**
+	 * @return the experimentAccessor
+	 */
+	public ExperimentAccessor getExperimentAccessor() {
+		return experimentAccessor;
+	}
+
+	/**
+	 * @param experimentAccessor the experimentAccessor to set
+	 */
+	public void setExperimentAccessor(ExperimentAccessor experimentAccessor) {
+		this.experimentAccessor = experimentAccessor;
+	}
+
+	/**
+	 * @return the experimentLabelIndexAccessor
+	 */
+	public ExperimentLabelIndexAccessor getExperimentLabelIndexAccessor() {
+		return experimentLabelIndexAccessor;
+	}
+
+	/**
+	 * @param experimentLabelIndexAccessor the experimentLabelIndexAccessor to set
+	 */
+	public void setExperimentLabelIndexAccessor(
+			ExperimentLabelIndexAccessor experimentLabelIndexAccessor) {
+		this.experimentLabelIndexAccessor = experimentLabelIndexAccessor;
+	}
+
+	/**
+	 * @return the userBucketIndexAccessor
+	 */
+	public UserBucketIndexAccessor getUserBucketIndexAccessor() {
+		return userBucketIndexAccessor;
+	}
+
+	/**
+	 * @param userBucketIndexAccessor the userBucketIndexAccessor to set
+	 */
+	public void setUserBucketIndexAccessor(
+			UserBucketIndexAccessor userBucketIndexAccessor) {
+		this.userBucketIndexAccessor = userBucketIndexAccessor;
+	}
+
+	/**
+	 * @return the bucketAccessor
+	 */
+	public BucketAccessor getBucketAccessor() {
+		return bucketAccessor;
+	}
+
+	/**
+	 * @param bucketAccessor the bucketAccessor to set
+	 */
+	public void setBucketAccessor(BucketAccessor bucketAccessor) {
+		this.bucketAccessor = bucketAccessor;
+	}
+
+	/**
+	 * @return the applicationListAccessor
+	 */
+	public ApplicationListAccessor getApplicationListAccessor() {
+		return applicationListAccessor;
+	}
+
+	/**
+	 * @param applicationListAccessor the applicationListAccessor to set
+	 */
+	public void setApplicationListAccessor(
+			ApplicationListAccessor applicationListAccessor) {
+		this.applicationListAccessor = applicationListAccessor;
+	}
+
+	/**
+	 * @return the stateExperimentIndexAccessor
+	 */
+	public StateExperimentIndexAccessor getStateExperimentIndexAccessor() {
+		return stateExperimentIndexAccessor;
+	}
+
+	/**
+	 * @param stateExperimentIndexAccessor the stateExperimentIndexAccessor to set
+	 */
+	public void setStateExperimentIndexAccessor(
+			StateExperimentIndexAccessor stateExperimentIndexAccessor) {
+		this.stateExperimentIndexAccessor = stateExperimentIndexAccessor;
+	}
+
+	/**
+	 * @return the bucketAuditLogAccessor
+	 */
+	public BucketAuditLogAccessor getBucketAuditLogAccessor() {
+		return bucketAuditLogAccessor;
+	}
+
+	/**
+	 * @param bucketAuditLogAccessor the bucketAuditLogAccessor to set
+	 */
+	public void setBucketAuditLogAccessor(
+			BucketAuditLogAccessor bucketAuditLogAccessor) {
+		this.bucketAuditLogAccessor = bucketAuditLogAccessor;
+	}
+
+	/**
+	 * @return the experimentAuditLogAccessor
+	 */
+	public ExperimentAuditLogAccessor getExperimentAuditLogAccessor() {
+		return experimentAuditLogAccessor;
+	}
+
+	/**
+	 * @param experimentAuditLogAccessor the experimentAuditLogAccessor to set
+	 */
+	public void setExperimentAuditLogAccessor(
+			ExperimentAuditLogAccessor experimentAuditLogAccessor) {
+		this.experimentAuditLogAccessor = experimentAuditLogAccessor;
+	}
+
+	/**
 	 * Logger for this class
 	 */
 	private static final Logger LOGGER = getLogger(CassandraExperimentRepository.class);
@@ -241,10 +359,8 @@ class CassandraExperimentRepository implements ExperimentRepository {
 		try {
 			experimentAccessor.insertExperiment(
 				newExperiment.getId().getRawID(),
-				(newExperiment.getDescription() != null) ? newExperiment
-						.getDescription() : "",
-				(newExperiment.getRule() != null) ? newExperiment.getRule()
-						: "",
+				(newExperiment.getDescription() != null) ? newExperiment.getDescription() : "",
+				(newExperiment.getRule() != null) ? newExperiment.getRule() : "",
 				newExperiment.getSamplingPercent(),
 				newExperiment.getStartTime(),
 				newExperiment.getEndTime(),
@@ -281,7 +397,7 @@ class CassandraExperimentRepository implements ExperimentRepository {
 		// Point the experiment index to this experiment
 		LOGGER.debug("Create indices for new experiment Experiment {}",newExperiment);
 
-			updateExperimentLabelIndex(newExperiment.getID(),
+		updateExperimentLabelIndex(newExperiment.getID(),
 				newExperiment.getApplicationName(), newExperiment.getLabel(),
 				newExperiment.getStartTime(), newExperiment.getEndTime(),
 				State.DRAFT);
