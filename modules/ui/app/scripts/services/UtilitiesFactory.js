@@ -967,6 +967,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
             },
 
             openPluginModal: function (plugin, experiment) {
+                var exp = (experiment !== undefined ? experiment : null);
                 var modalInstance = $modal.open({
                     templateUrl: plugin.templateUrl,
                     controller: plugin.ctrlName,
@@ -974,7 +975,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                     backdrop: 'static',
                     resolve: {
                         experiment: function () {
-                            return experiment;
+                            return exp;
                         }
                     }
                 });

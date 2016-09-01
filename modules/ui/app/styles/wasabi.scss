@@ -4296,3 +4296,28 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
 .selectedLink {
     font-weight: bold;
 }
+
+.pluginDescription {
+    float: left;
+    width: 90%;
+    padding: 10px;
+    border: 1px solid rgb(203, 204, 206);
+    @include border-radius(3px);
+    overflow: hidden;
+    @include box-shadow(0 0 1px white);
+    background: rgb(246, 247, 248);
+}
+
+.hoverPopup {
+    width: 250px;
+    height: 150px;
+    padding: 10px;
+    position: absolute;
+    top: 180px;
+    right: 100px;
+    z-index: 100000;
+    display: none;
+    background-color: white;
+    border: 1px solid #aaa;
+    border-radius: 3px;
+}
