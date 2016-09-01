@@ -15,7 +15,8 @@ rem # limitations under the License.
 rem ############################################################################
 
 call :error resource not implemented yet
-
+cd modules/ui
+start grunt serve
 
 goto :eof
 

@@ -15,10 +15,10 @@ rem # limitations under the License.
 rem ############################################################################
 
 call :info Building Service
-cmd /c "mvn -Pdevelopment clean test package javadoc:aggregate"
+rem cmd /c "mvn -Pdevelopment clean test package javadoc:aggregate"
 
 call :info Building UI
-cmd /c "cd modules\ui & npm install & bower install & grunt build"
+rem cmd /c "cd modules\ui & npm install & bower install & grunt build"
 
 call :info Finishing build
 set app-dir=target\app
@@ -33,12 +33,12 @@ mkdir %lib-dir% 2>nul
 for %%M in (analytics api assignment auditlog authentication authorization database email event eventlog export main repository user-directory) do (
     copy modules\%%M\target\classes\*.properties %conf-dir% 1>nul
 )
-copy modules\main\target\classes\logback_acccess.xml %conf-dir% 1>nul
-copy modules\main\target\classes\logback.xml %conf-dir% 1>nul
-copy modules\main\target\extra-resources\service\run %bin-dir% 1>nul
-copy modules\main\target\extra-resources\docker\wasabi\Dockerfile %app-dir% 1>nul
-copy modules\main\target\extra-resources\docker\wasabi\entrypoint.sh %app-dir% 1>nul
-copy modules\main\target\wasabi-main-*-all.jar %lib-dir%\wasabi-main-all.jar 1>nul
+copy modules\main\target\classes\logback_acccess.xml %conf-dir% /y 1>nul
+copy modules\main\target\classes\logback.xml %conf-dir% /y 1>nul
+copy modules\main\target\extra-resources\service\run %bin-dir% /y 1>nul
+copy modules\main\target\extra-resources\docker\wasabi\Dockerfile %app-dir% /y 1>nul
+copy modules\main\target\extra-resources\docker\wasabi\entrypoint.sh %app-dir% /y 1>nul
+powershell -Command "Copy-item -path modules\main\target\wasabi-main-*-all.jar -destination %lib-dir%\ -force" 1>nul
 
 
 
