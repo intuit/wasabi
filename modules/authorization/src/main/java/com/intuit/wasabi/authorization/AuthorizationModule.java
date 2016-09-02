@@ -19,7 +19,7 @@ import com.google.inject.AbstractModule;
 import com.intuit.wasabi.authentication.AuthenticationModule;
 import com.intuit.wasabi.eventlog.EventLogModule;
 import com.intuit.wasabi.exceptions.AuthenticationException;
-import com.intuit.wasabi.repository.RepositoryModule;
+import com.intuit.wasabi.repository.cassandra.CassandraRepositoryModule;
 import org.slf4j.Logger;
 
 import java.util.Properties;
@@ -48,7 +48,7 @@ public class AuthorizationModule extends AbstractModule {
 
         install(new AuthenticationModule());
         install(new EventLogModule());
-        install(new RepositoryModule());
+        install(new CassandraRepositoryModule());
 
         Properties properties = create(PROPERTY_NAME, AuthorizationModule.class);
         String authorizationClassName = getProperty("authorization.class.name", properties,

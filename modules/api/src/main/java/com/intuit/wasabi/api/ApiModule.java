@@ -27,8 +27,6 @@ import com.intuit.wasabi.email.EmailModule;
 import com.intuit.wasabi.events.EventsModule;
 import com.intuit.wasabi.experiment.ExperimentsModule;
 import com.intuit.wasabi.feedback.FeedbackModule;
-import com.intuit.wasabi.repository.impl.cassandra.CassandraExperimentRepositoryModule;
-import com.intuit.wasabi.repository.impl.database.DatabaseExperimentRepositoryModule;
 import com.intuit.wasabi.userdirectory.UserDirectoryModule;
 import org.slf4j.Logger;
 
@@ -53,9 +51,9 @@ public class ApiModule extends AbstractModule {
         install(new AnalyticsModule());
         install(new AuditLogModule());
         install(new AuthorizationModule());
-        install(new CassandraExperimentRepositoryModule());
+//        install(new CassandraExperimentRepositoryModule());
         install(new DatabaseModule());
-        install(new DatabaseExperimentRepositoryModule());
+//        install(new DatabaseExperimentRepositoryModule());
         install(new EmailModule());
         install(new EventsModule());
         install(new ExperimentsModule());

@@ -21,7 +21,7 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.name.Names;
 import com.intuit.wasabi.repository.MutexRepository;
-import com.intuit.wasabi.repository.impl.cassandra.CassandraMutexRepository;
+import com.intuit.wasabi.repository.cassandra.impl.CassandraMutexRepository;
 import org.junit.Ignore;
 
 import java.util.concurrent.ThreadPoolExecutor;

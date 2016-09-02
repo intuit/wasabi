@@ -26,7 +26,7 @@ import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.ExperimentIDList;
 import com.intuit.wasabi.experimentobjects.exceptions.InvalidExperimentStateException;
 import com.intuit.wasabi.repository.RepositoryException;
-import com.intuit.wasabi.repository.impl.cassandra.CassandraMutexRepository;
+import com.intuit.wasabi.repository.cassandra.impl.CassandraMutexRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -37,10 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MutexImplTest {

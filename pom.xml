@@ -153,7 +153,6 @@ http://www.w3.org/2001/XMLSchema-instance">
         <module>modules/authorization</module>
         <module>modules/authorization-objects</module>
         <module>modules/analytics</module>
-        <module>modules/cassandra</module>
         <module>modules/database</module>
         <module>modules/email</module>
         <module>modules/event</module>
@@ -167,7 +166,6 @@ http://www.w3.org/2001/XMLSchema-instance">
         <module>modules/feedback-objects</module>
         <module>modules/functional-test</module>
         <module>modules/main</module>
-        <module>modules/repository</module>
         <module>modules/swagger-ui</module>
         <module>modules/user-directory</module>
         <module>modules/util</module>

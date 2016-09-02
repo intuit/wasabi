@@ -47,7 +47,7 @@ import com.intuit.wasabi.repository.AssignmentsRepository;
 import com.intuit.wasabi.repository.CassandraRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.MutexRepository;
-import com.intuit.wasabi.repository.impl.cassandra.ExperimentRuleCacheUpdateEnvelope;
+import com.intuit.wasabi.repository.cassandra.impl.ExperimentRuleCacheUpdateEnvelope;
 import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
 import org.slf4j.Logger;
 

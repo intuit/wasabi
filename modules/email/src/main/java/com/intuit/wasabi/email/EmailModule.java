@@ -21,7 +21,7 @@ import com.intuit.wasabi.email.impl.EmailTextProcessorImpl;
 import com.intuit.wasabi.email.impl.NoopEmailImpl;
 import com.intuit.wasabi.eventlog.EventLogModule;
 import com.intuit.wasabi.exceptions.AuthenticationException;
-import com.intuit.wasabi.repository.RepositoryModule;
+import com.intuit.wasabi.repository.cassandra.CassandraRepositoryModule;
 import org.slf4j.Logger;
 
 import java.util.Properties;
@@ -53,7 +53,7 @@ public class EmailModule extends AbstractModule {
         LOGGER.debug("installing module: {}", EmailModule.class.getSimpleName());
 
         install(new EventLogModule());
-        install(new RepositoryModule());
+        install(new CassandraRepositoryModule());
 
         Properties properties = create(PROPERTY_NAME, EmailModule.class);
 
