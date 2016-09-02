@@ -61,7 +61,7 @@ public class DatabaseExperimentRepositoryTest {
     public void setup() {
         when(transactionFactory.newTransaction()).thenReturn(transaction);
         when(transactionFactory.getDataSource()).thenReturn(dataSource);
-        repository = new DatabaseExperimentRepository(transactionFactory, experimentValidator, flyway);
+        repository = new DatabaseExperimentRepository(transactionFactory, experimentValidator, flyway, "com/intuit/wasabi/repository/impl/mysql/migration");
     }
 
     @Test
@@ -208,7 +208,7 @@ public class DatabaseExperimentRepositoryTest {
     @Test
     public void testGetExperimentsWithListOfExperimentIDs() {
         DatabaseExperimentRepository repository = spy(new DatabaseExperimentRepository(transactionFactory,
-                experimentValidator, flyway));
+                experimentValidator, flyway, "com/intuit/wasabi/repository/impl/mysql/migration"));
         List<Experiment.ID> list = Arrays.asList(Experiment.ID.newInstance());
         Experiment experiment = mock(Experiment.class);
         doReturn(experiment).when(repository).getExperiment(any(Experiment.ID.class));

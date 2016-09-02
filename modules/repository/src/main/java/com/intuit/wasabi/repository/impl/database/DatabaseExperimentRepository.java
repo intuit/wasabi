@@ -18,6 +18,7 @@ package com.intuit.wasabi.repository.impl.database;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import com.googlecode.flyway.core.Flyway;
 import com.intuit.wasabi.analyticsobjects.counts.AssignmentCounts;
 import com.intuit.wasabi.database.Transaction;
@@ -62,17 +63,17 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
     private TransactionFactory transactionFactory;
 
     @Inject
-    public DatabaseExperimentRepository(TransactionFactory transactionFactory,ExperimentValidator validator,
-                                        Flyway flyway ) {
+    public DatabaseExperimentRepository(TransactionFactory transactionFactory, ExperimentValidator validator,
+            Flyway flyway, final @Named("mysql.mutagen.root.resource.path") String mutagenRootResourcePath) {
         super();
 
         this.transactionFactory = transactionFactory;
         this.validator = validator;
-        initialize(flyway);
+        initialize(flyway, mutagenRootResourcePath);
     }
 
-    private void initialize(Flyway flyway) {
-        flyway.setLocations("com/intuit/wasabi/repository/impl/mysql/migration");
+    private void initialize(Flyway flyway, String mutagenRootResourcePath) {
+        flyway.setLocations(mutagenRootResourcePath);
         flyway.setDataSource(transactionFactory.getDataSource());
         flyway.migrate();
     }
