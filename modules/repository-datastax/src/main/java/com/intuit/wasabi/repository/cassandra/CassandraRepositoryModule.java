@@ -22,6 +22,7 @@ import com.intuit.wasabi.repository.cassandra.provider.count.BucketAssignmentCou
 import com.intuit.wasabi.repository.cassandra.provider.export.UserAssignmentExportAccessorProvider;
 import com.intuit.wasabi.repository.cassandra.provider.index.*;
 import com.intuit.wasabi.userdirectory.UserDirectoryModule;
+
 import org.slf4j.Logger;
 
 import javax.inject.Singleton;
@@ -81,5 +82,6 @@ public class CassandraRepositoryModule extends AbstractModule {
         bind(MutexRepository.class).to(CassandraMutexRepository.class).in(Singleton.class);
         bind(PagesRepository.class).to(CassandraPagesRepository.class).in(Singleton.class);
         bind(PrioritiesRepository.class).to(CassandraPrioritiesRepository.class).in(Singleton.class);
+        bind(ExperimentRepository.class).annotatedWith(CassandraRepository.class).to(CassandraExperimentRepository.class).in(Singleton.class);
     }
 }

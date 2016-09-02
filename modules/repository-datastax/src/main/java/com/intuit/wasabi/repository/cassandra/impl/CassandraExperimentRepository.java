@@ -70,7 +70,7 @@ import java.util.stream.Collectors;
  * 
  * @see ExperimentRepository
  */
-class CassandraExperimentRepository implements ExperimentRepository {
+public class CassandraExperimentRepository implements ExperimentRepository {
 
 	private final ExperimentValidator validator;
 
