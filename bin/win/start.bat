@@ -54,7 +54,7 @@ rem FUNCTION: Checks the status of mysql and starts it if needed.
     docker ps -a | findstr /c:wasabi-mysql 1>nul 2>nul
     if errorlevel 1 (
         docker run --name wasabi-mysql --net=wasabinet -p 3306:3306 -e MYSQL_ROOT_PASSWORD=mypass -d mysql:5.6
-        docker exec wasabi-mysql mysql -uroot -pmypass -e "create database if not exists wasabi;  grant all privileges on wasabi.* to 'readwrite'@'localhost' identified by 'readwrite'; grant all on *.* to 'readwrite'@'%' identified by 'readwrite'; flush privileges;"
+        docker exec wasabi-mysql mysql -uroot -pmypass -e "create database if not exists wasabi; grant all privileges on wasabi.* to 'readwrite'@'localhost' identified by 'readwrite'; grant all on *.* to 'readwrite'@'%' identified by 'readwrite'; flush privileges;"
     ) else (
         docker start wasabi-mysql 1>nul
     )
@@ -68,7 +68,8 @@ rem FUNCTION: Checks the status of wasabi and starts it if needed.
         call :build_docker_image
         for /f %%I in ('docker inspect --format "{{ .NetworkSettings.Networks.wasabinet.IPAddress }}" wasabi-cassandra') do set CASSANDRA_IP=%%I
         for /f %%I in ('docker inspect --format "{{ .NetworkSettings.Networks.wasabinet.IPAddress }}" wasabi-mysql') do set MYSQL_IP=%%I
-        docker -D run -p 8080:8080 -p 8090:8090 -p 8180:8180 -e WASABI_CONFIGURATION="-DnodeHosts=!CASSANDRA_IP! -Ddatabase.url.host=!MYSQL_IP!" --name wasabi-main wasabi-main:latest
+        docker create --net=wasabinet -p 8080:8080 -p 8090:8090 -p 8180:8180 -e WASABI_CONFIGURATION="-DnodeHosts=!CASSANDRA_IP! -Ddatabase.url.host=!MYSQL_IP!" --name wasabi-main wasabi-main:latest
+        docker start wasabi-main 1>nul
     ) else (
         docker start wasabi-main
     )
@@ -139,6 +140,7 @@ rem FUNCTION: Create a docker network for wasabi
     if errorlevel 1 (
         call :info Creating network.
         docker network create --driver bridge wasabinet 1>nul
+        rem docker network create --driver host wasabinet 1>nul
         call :info Network created.
     ) else (
         call :info Network exists.

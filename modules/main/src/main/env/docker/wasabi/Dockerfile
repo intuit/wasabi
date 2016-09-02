@@ -22,14 +22,11 @@ ENV JAVA_HOME /usr
 ENV CLASSPATH $WASABI_HOME/conf:$WASABI_HOME/lib/$WASABI_VERSION-all.jar
 ENV JAVA_OPTIONS ${WASABI_CONFIGURATION}
 
-COPY ./ ${WASABI_HOME}/
+COPY ./ ${WASABI_HOME}
 COPY ./entrypoint.sh /usr/local/
 RUN sed -i -e $'s/1>>.*2>&1//' ${WASABI_HOME}/bin/run 2>/dev/null;
 
 EXPOSE 8080 8090 8190
 
-#ENTRYPOINT ["entrypoint.sh"]
-#CMD ["wasabi"]
-
-ENTRYPOINT ["/bin/sh"]
-CMD ["/usr/local/entrypoint.sh", "wasabi"]
+ENTRYPOINT ["/usr/local/entrypoint.sh"]
+CMD ["wasabi"]

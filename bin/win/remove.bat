@@ -19,8 +19,8 @@ call :info Removing Wasabi images
 docker rmi wasabi-main >nul
 
 call :info Removing Wasabi containers
-docker rm -fv wasabi-cassandra >nul
-docker rm -fv wasabi-mysql >nul
+rem docker rm -fv wasabi-cassandra >nul
+rem docker rm -fv wasabi-mysql >nul
 docker rm -fv wasabi-main >nul
 
 call :info Removing Wasabi network
