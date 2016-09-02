@@ -50,6 +50,17 @@ public interface UserBucketIndexAccessor {
     @Query("insert into user_bucket_index (experiment_id, user_id, context, assigned, bucket_label) values (?, ?, ?, ?, ?)")
     void insertBy(UUID experimentId, String userId, String context, Date assigned, String bucketLabel);
 
+
+    /**
+     * Insert entry into the table
+     * @param experimentId
+     * @param userId
+     * @param context
+     * @param assigned
+     */
+    @Query("insert into user_bucket_index (experiment_id, user_id, context, assigned) values (?, ?, ?, ?)")
+    void insertBy(UUID experimentId, String userId, String context, Date assigned);
+
     /**
      * Delete entry from table using params
      * @param experimentId
