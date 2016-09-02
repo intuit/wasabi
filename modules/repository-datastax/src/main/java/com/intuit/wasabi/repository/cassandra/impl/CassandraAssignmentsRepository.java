@@ -711,7 +711,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         } catch (ReadTimeoutException | UnavailableException | NoHostAvailableException e) {
             throw new RepositoryException("Could not fetch the bucket assignment counts for experiment " + experiment.getID(), e);
         }
-        List<BucketAssignmentCount> bucketAssignmentCountList = new ArrayList<BucketAssignmentCount>();
+        List<BucketAssignmentCount> bucketAssignmentCountList = new ArrayList<>();
         AssignmentCounts.Builder assignmentCountsBuilder = new AssignmentCounts.Builder()
                 .withBucketAssignmentCount(bucketAssignmentCountList)
                 .withExperimentID(experiment.getID());
@@ -729,7 +729,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                     .build());
         } else {
             long totalAssignments = 0;
-            long nullAssignments = 0;
+            long totalNullAssignments = 0;
             for(com.intuit.wasabi.repository.cassandra.pojo.count.BucketAssignmentCount bucketAssignmentCount : result){
                 final Bucket.Label label = Objects.isNull(bucketAssignmentCount.getBucketLabel()) ?
                         NULL_LABEL : Bucket.Label.valueOf(bucketAssignmentCount.getBucketLabel());
@@ -737,7 +737,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                 final BucketAssignmentCount.Builder builder = new BucketAssignmentCount.Builder()
                         .withCount(bucketAssignmentCount.getCount());
                 if(NULL_LABEL.equals(label)){
-                    nullAssignments += bucketAssignmentCount.getCount();
+                    totalNullAssignments += bucketAssignmentCount.getCount();
                     bucketAssignmentCountList.add(builder.withBucket(null).build());
                 } else {
                     bucketAssignmentCountList.add(builder.withBucket(label).build());
@@ -745,8 +745,8 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
             }
             assignmentCountsBuilder
                     .withTotalUsers(new TotalUsers.Builder()
-                            .withBucketAssignments(totalAssignments - nullAssignments)
-                            .withNullAssignments(nullAssignments)
+                            .withBucketAssignments(totalAssignments - totalNullAssignments)
+                            .withNullAssignments(totalNullAssignments)
                             .withTotal(totalAssignments)
                             .build());
         }
