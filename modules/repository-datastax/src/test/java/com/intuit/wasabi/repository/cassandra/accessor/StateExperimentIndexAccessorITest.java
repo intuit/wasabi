@@ -83,7 +83,7 @@ public class StateExperimentIndexAccessorITest {
     			accessor.selectByKey(ExperimentState.NOT_DELETED.name());
     	assertEquals("Values should be eq", 0, result.all().size());
     	
-    	accessor.insert(ExperimentState.DELETED.name(), experimentId1, ByteBuffer.wrap("".getBytes()));
+    	session.execute(accessor.insert(ExperimentState.DELETED.name(), experimentId1, ByteBuffer.wrap("".getBytes())));
     	
     	result = 
     			accessor.selectByKey(ExperimentState.DELETED.name());
@@ -107,7 +107,7 @@ public class StateExperimentIndexAccessorITest {
     			accessor.selectByKey(ExperimentState.NOT_DELETED.name());
     	assertEquals("Values should be eq", 0, result.all().size());
     	
-    	accessor.insert(ExperimentState.DELETED.name(), experimentId1, ByteBuffer.wrap("".getBytes()));
+    	session.execute(accessor.insert(ExperimentState.DELETED.name(), experimentId1, ByteBuffer.wrap("".getBytes())));
     	
     	result = 
     			accessor.selectByKeyAndExperimentId(ExperimentState.DELETED.name(), experimentId1);
@@ -128,18 +128,15 @@ public class StateExperimentIndexAccessorITest {
     			accessor.selectByKey(ExperimentState.DELETED.name());
     	assertEquals("Values should be eq", 0, result.all().size());
     	
-    	result = 
-    			accessor.selectByKey(ExperimentState.NOT_DELETED.name());
+    	result = accessor.selectByKey(ExperimentState.NOT_DELETED.name());
     	assertEquals("Values should be eq", 0, result.all().size());
     	
-    	accessor.insert(ExperimentState.DELETED.name(), experimentId1, ByteBuffer.wrap("".getBytes()));
+    	session.execute(accessor.insert(ExperimentState.DELETED.name(), experimentId1, ByteBuffer.wrap("".getBytes())));
     	accessor.deleteBy(ExperimentState.DELETED.name(), experimentId1);
-    	result = 
-    			accessor.selectByKey(ExperimentState.DELETED.name());
+    	result = accessor.selectByKey(ExperimentState.DELETED.name());
     	List<StateExperimentIndex> values = result.all();
-    	assertEquals("Values should be eq", 0, values.size());
-    	result = 
-    			accessor.selectByKey(ExperimentState.NOT_DELETED.name());
+    	assertEquals("Values should be eq", 1, values.size());
+    	result = accessor.selectByKey(ExperimentState.NOT_DELETED.name());
     	assertEquals("Values should be eq", 0, result.all().size());
     }
 
@@ -153,8 +150,8 @@ public class StateExperimentIndexAccessorITest {
     			accessor.selectByKey(ExperimentState.NOT_DELETED.name());
     	assertEquals("Values should be eq", 0, result.all().size());
     	
-    	accessor.insert(ExperimentState.DELETED.name(), experimentId1, ByteBuffer.wrap("".getBytes()));
-    	accessor.insert(ExperimentState.DELETED.name(), experimentId2 , ByteBuffer.wrap("".getBytes()));
+    	session.execute(accessor.insert(ExperimentState.DELETED.name(), experimentId1, ByteBuffer.wrap("".getBytes())));
+    	session.execute(accessor.insert(ExperimentState.DELETED.name(), experimentId2 , ByteBuffer.wrap("".getBytes())));
     	
     	result = 
     			accessor.selectByKey(ExperimentState.DELETED.name());
@@ -192,8 +189,8 @@ public class StateExperimentIndexAccessorITest {
     			accessor.selectByKey(ExperimentState.NOT_DELETED.name());
     	assertEquals("Values should be eq", 0, result.all().size());
     	
-    	accessor.insert(ExperimentState.DELETED.name(), experimentId1, ByteBuffer.wrap("".getBytes()));
-    	accessor.insert(ExperimentState.NOT_DELETED.name(), experimentId2 , ByteBuffer.wrap("".getBytes()));
+    	session.execute(accessor.insert(ExperimentState.DELETED.name(), experimentId1, ByteBuffer.wrap("".getBytes())));
+    	session.execute(accessor.insert(ExperimentState.NOT_DELETED.name(), experimentId2 , ByteBuffer.wrap("".getBytes())));
     	
     	result = 
     			accessor.selectByKey(ExperimentState.DELETED.name());
