@@ -16,6 +16,7 @@
 package com.intuit.wasabi.repository.impl.database;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import com.googlecode.flyway.core.Flyway;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.database.TransactionFactory;
@@ -42,9 +43,10 @@ public class DatabaseFavoritesRepository implements FavoritesRepository {
      * @param flyway the flyway instance to initialize the database
      */
     @Inject
-    public DatabaseFavoritesRepository(final TransactionFactory transactionFactory, final Flyway flyway) {
+    public DatabaseFavoritesRepository(final TransactionFactory transactionFactory, final Flyway flyway,
+            final @Named("mysql.mutagen.root.resource.path") String mutagenRootResourcePath) {
         this.transactionFactory = transactionFactory;
-        initialize(flyway);
+        initialize(flyway, mutagenRootResourcePath);
     }
 
     /**
@@ -52,8 +54,8 @@ public class DatabaseFavoritesRepository implements FavoritesRepository {
      *
      * @param flyway flyway instance
      */
-    void initialize(Flyway flyway) {
-        flyway.setLocations("com/intuit/wasabi/repository/impl/mysql/migration");
+    void initialize(Flyway flyway, String mutagenRootResourcePath) {
+        flyway.setLocations(mutagenRootResourcePath);
         flyway.setDataSource(transactionFactory.getDataSource());
         flyway.migrate();
     }

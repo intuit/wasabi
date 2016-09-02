@@ -69,6 +69,10 @@ public class RepositoryModule extends AbstractModule {
                 .toInstance(Boolean.valueOf(getProperty("assign.user.to.new", properties, TRUE.toString())));
         bind(String.class).annotatedWith(named("default.time.format"))
                 .toInstance(getProperty("default.time.format", properties, "yyyy-MM-dd HH:mm:ss"));
+        bind(String.class).annotatedWith(named("cassandra.mutagen.root.resource.path"))
+                .toInstance(getProperty("cassandra.mutagen.root.resource.path", properties));
+        bind(String.class).annotatedWith(named("mysql.mutagen.root.resource.path"))
+                .toInstance(getProperty("mysql.mutagen.root.resource.path", properties));
 
         // MySQL bindings
         bind(Flyway.class).in(SINGLETON);
