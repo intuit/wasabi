@@ -26,7 +26,9 @@ import com.intuit.wasabi.repository.RepositoryException;
 import com.intuit.wasabi.repository.cassandra.accessor.ExclusionAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
 import com.intuit.wasabi.repository.cassandra.pojo.Exclusion;
+
 import io.codearte.catchexception.shade.mockito.Mockito;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,6 +39,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
@@ -199,7 +202,36 @@ public class CassandraMutexRepositoryTest {
 	}
 
 	@Test
-	public void testGeZeroExclusionListSuccess() {
+	public void testGetOneExclusiveListSuccess() {
+		Exclusion exc = new Exclusion(base.getRawID(), pair.getRawID());
+		exclusions.add(exc);
+		Mockito.when(accessor.getExclusions(base.getRawID())).thenReturn(resultDatastax);
+		Mockito.when(resultDatastax.all()).thenReturn(exclusions);
+		
+		ArrayList<Experiment.ID> ids = new ArrayList<>();
+		ids.add(base);
+		Map<ID, List<ID>> result = repository.getExclusivesList(ids);
+		
+		assertEquals("value should be equal", 1, result.size());
+		assertEquals("value should be equal", 1, result.get(base).size());
+		assertEquals("value should be equal", pair, result.get(base).get(0));
+	}
+
+	@Test(expected=RepositoryException.class)
+	public void testGetOneExclusiveListThrowsException() {
+		Exclusion exc = new Exclusion(base.getRawID(), pair.getRawID());
+		exclusions.add(exc);
+		Mockito.when(accessor.getExclusions(base.getRawID())).thenThrow(
+				new RuntimeException("TestException"));
+		
+		ArrayList<Experiment.ID> ids = new ArrayList<>();
+		ids.add(base);
+		Map<ID, List<ID>> result = repository.getExclusivesList(ids);
+		
+	}
+
+	@Test
+	public void testGetZeroExclusionListSuccess() {
 		Mockito.when(accessor.getExclusions(base.getRawID())).thenReturn(resultDatastax);
 		Mockito.when(resultDatastax.all()).thenReturn(exclusions);
 		List<ID> result = repository.getExclusionList(base);

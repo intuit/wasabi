@@ -65,6 +65,8 @@ public class CassandraAuditLogRepositoryITest {
 	private String applicationName;
 
 	private UserInfo userInfo;
+
+	private AuditLogEntry entry2;
     
     @Before
     public void setUp() throws Exception {
@@ -94,6 +96,15 @@ public class CassandraAuditLogRepositoryITest {
 				Bucket.Label.valueOf("b1"), 
 				"prop1", "v1", "v2");
 		
+		entry2 = 
+				new AuditLogEntry(Calendar.getInstance(),
+				userInfo,AuditLogAction.BUCKET_CHANGED,
+				Application.Name.valueOf(applicationName),
+				Experiment.Label.valueOf("l1"),
+				Experiment.ID.newInstance(), 
+				Bucket.Label.valueOf("b1"), 
+				"prop1", "v1", "v2");
+
 		entryWithMissingApplicationName = 
 				new AuditLogEntry(Calendar.getInstance(),
 				userInfo,AuditLogAction.BUCKET_CHANGED,
@@ -113,6 +124,37 @@ public class CassandraAuditLogRepositoryITest {
 		assertEquals("Value should be same", 1, result.size());
 		assertEquals("Values shouild be same", entry.toString(), 
 				result.get(0).toString());
+
+	}
+
+	@Test
+	public void testSaveOneAndGetEntryWithLimitSuccess() {
+		boolean success = repository.storeEntry(entry);
+		assertEquals("value should be same", true, success);
+		result = repository.getAuditLogEntryList(entry.getApplicationName(), 5);
+		
+		assertEquals("Value should be same", 1, result.size());
+		assertEquals("Values shouild be same", entry.toString(), 
+				result.get(0).toString());
+
+	}
+
+	@Test
+	public void testSave2AndGetOneEntryWithLimitSuccess() {
+		boolean success = repository.storeEntry(entry);
+		assertEquals("value should be same", true, success);
+
+		
+		success = repository.storeEntry(entry2);
+		assertEquals("value should be same", true, success);
+		
+		result = repository.getAuditLogEntryList(entry.getApplicationName(), 5);
+		
+		assertEquals("Value should be same", 2, result.size());
+
+		result = repository.getAuditLogEntryList(entry.getApplicationName(), 1);
+		
+		assertEquals("Value should be same", 1, result.size());
 
 	}
 

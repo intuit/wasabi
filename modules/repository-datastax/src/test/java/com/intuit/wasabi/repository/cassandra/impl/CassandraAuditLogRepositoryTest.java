@@ -120,6 +120,15 @@ public class CassandraAuditLogRepositoryTest {
 		List<AuditLogEntry> result = repository.getAuditLogEntryList(entry.getApplicationName());
 	}
 
+	@Test(expected=RepositoryException.class)
+	public void testGetEntryWithLimitThrowsException() {
+		
+		when(accessor.getAuditLogEntryList(entry.getApplicationName().toString(),2))
+				.thenThrow(new RuntimeException("testException"));
+		
+		List<AuditLogEntry> result = repository.getAuditLogEntryList(entry.getApplicationName(),2);
+	}
+
 	@Test
 	public void testGetCompleteEntrySuccess() {
 		
@@ -157,6 +166,15 @@ public class CassandraAuditLogRepositoryTest {
 				.thenThrow(new RuntimeException("testException"));
 		
 		List<AuditLogEntry> result = repository.getCompleteAuditLogEntryList();
+	}
+
+	@Test(expected=RepositoryException.class)
+	public void testGetCompleteEntryWithLimitThrowsException() {
+		
+		when(accessor.getCompleteAuditLogEntryList(4))
+				.thenThrow(new RuntimeException("testException"));
+		
+		List<AuditLogEntry> result = repository.getCompleteAuditLogEntryList(4);
 	}
 
 	@Test(expected=RepositoryException.class)
