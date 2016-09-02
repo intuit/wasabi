@@ -19,6 +19,7 @@ import com.codahale.metrics.health.HealthCheckRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.intuit.wasabi.cassandra.CassandraDriver;
 import com.intuit.wasabi.cassandra.ExperimentDriver;
 import com.intuit.wasabi.experimentobjects.ExperimentValidator;
@@ -74,14 +75,14 @@ public class CassandraExperimentRepositoryModule extends AbstractCassandraModule
     @CassandraRepository
     protected ExperimentRepository provideExperimentRepository(@ExperimentDriver CassandraDriver driver,
                                                                ExperimentsKeyspace keyspace,
-                                                               ExperimentValidator validator)
+                                                               ExperimentValidator validator,
+                                                               final @Named("cassandra.mutagen.root.resource.path") String mutagenRootResourcePath)
             throws IOException, ConnectionException {
         LOGGER.debug("Providing Cassandra experiment repository instance");
 
         CassandraMutagen mutagen = new CassandraMutagenImpl();
-        String rootResourcePath = "com/intuit/wasabi/repository/impl/cassandra/experiments/mutation";
 
-        mutagen.initialize(rootResourcePath);
+        mutagen.initialize(mutagenRootResourcePath);
 
         ExperimentRepository result = new CassandraExperimentRepository(mutagen, driver, keyspace, validator);
 

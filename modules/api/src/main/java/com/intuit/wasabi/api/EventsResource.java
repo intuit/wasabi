@@ -108,7 +108,7 @@ public class EventsResource {
             @ApiParam(value = "Customer User ID that is already assigned using assignments API")
             final User.ID userID,
 
-            @ApiParam(name = "eventList", required = true, value = "For impresison", defaultValue = DEFAULT_EVENT)
+            @ApiParam(name = "eventList", required = true, value = "For impression", defaultValue = DEFAULT_EVENT)
             final EventList eventList)
             throws Exception {
         final Date NOW = new Date();
@@ -177,7 +177,7 @@ public class EventsResource {
             final Map<Experiment.Label, Map<User.ID, List<Event>>> eventList) {
         throw new UnsupportedOperationException("Not implemented");
     }
-    
+
     /**
      * Returns number of events currently in the queue
      *

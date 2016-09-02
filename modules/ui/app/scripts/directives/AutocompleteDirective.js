@@ -31,6 +31,12 @@ angular.module('wasabi.directives').directive('abtestAutocomplete', function () 
                     }
                 });
             }
+
+            scope.$watch(function () {
+                return scope.listSource;
+            }, function (modelValue) {
+                element.autocomplete('option', 'source', modelValue);;
+            });
         }
     };
 });

@@ -21,20 +21,22 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.intuit.wasabi.analyticsobjects.Parameters;
+import com.intuit.wasabi.api.pagination.PaginationHelper;
 import com.intuit.wasabi.assignment.Assignments;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authenticationobjects.UserInfo.Username;
 import com.intuit.wasabi.authorization.Authorization;
+import com.intuit.wasabi.authorizationobjects.Permission;
 import com.intuit.wasabi.authorizationobjects.UserRole;
 import com.intuit.wasabi.events.EventsExport;
 import com.intuit.wasabi.exceptions.AuthenticationException;
 import com.intuit.wasabi.exceptions.BucketNotFoundException;
-import com.intuit.wasabi.exceptions.ExperimentMissingHypothesisException;
 import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
 import com.intuit.wasabi.exceptions.TimeFormatException;
 import com.intuit.wasabi.exceptions.TimeZoneFormatException;
 import com.intuit.wasabi.experiment.Buckets;
 import com.intuit.wasabi.experiment.Experiments;
+import com.intuit.wasabi.experiment.Favorites;
 import com.intuit.wasabi.experiment.Mutex;
 import com.intuit.wasabi.experiment.Pages;
 import com.intuit.wasabi.experiment.Priorities;
@@ -48,7 +50,6 @@ import com.intuit.wasabi.experimentobjects.ExperimentList;
 import com.intuit.wasabi.experimentobjects.ExperimentPageList;
 import com.intuit.wasabi.experimentobjects.NewExperiment;
 import com.intuit.wasabi.experimentobjects.Page;
-import com.intuit.wasabi.experimentobjects.exceptions.ErrorCode;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -76,8 +77,22 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
-import static com.intuit.wasabi.api.APISwaggerResource.*;
-import static com.intuit.wasabi.authorizationobjects.Permission.*;
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_FILTER;
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_MODBUCK;
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_PAGE;
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_PER_PAGE;
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_PUTBUCK;
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_SORT;
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_TIMEZONE;
+import static com.intuit.wasabi.api.APISwaggerResource.DOC_FILTER;
+import static com.intuit.wasabi.api.APISwaggerResource.DOC_PAGE;
+import static com.intuit.wasabi.api.APISwaggerResource.DOC_PER_PAGE;
+import static com.intuit.wasabi.api.APISwaggerResource.DOC_SORT;
+import static com.intuit.wasabi.api.APISwaggerResource.DOC_TIMEZONE;
+import static com.intuit.wasabi.api.APISwaggerResource.EXAMPLE_AUTHORIZATION_HEADER;
+import static com.intuit.wasabi.authorizationobjects.Permission.CREATE;
+import static com.intuit.wasabi.authorizationobjects.Permission.READ;
+import static com.intuit.wasabi.authorizationobjects.Permission.UPDATE;
 import static com.intuit.wasabi.authorizationobjects.Role.ADMIN;
 import static com.intuit.wasabi.authorizationobjects.UserRole.newInstance;
 import static com.intuit.wasabi.experimentobjects.Experiment.State.DELETED;
@@ -92,7 +107,6 @@ import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.Response.Status.CREATED;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -100,7 +114,6 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 @Path("/v1/experiments")
 @Produces(APPLICATION_JSON)
-
 @Singleton
 @Api(value = "Experiments (Create-Modify Experiments & Buckets)")
 public class ExperimentsResource {
@@ -109,6 +122,7 @@ public class ExperimentsResource {
     private final String defaultTimezone;
     private final String defaultTimeFormat;
     private final HttpHeader httpHeader;
+    private final PaginationHelper<Experiment> paginationHelper;
     private Experiments experiments;
     private EventsExport export;
     private Assignments assignments;
@@ -117,14 +131,15 @@ public class ExperimentsResource {
     private Mutex mutex;
     private Pages pages;
     private Priorities priorities;
+    private Favorites favorites;
 
     @Inject
     ExperimentsResource(final Experiments experiments, final EventsExport export, final Assignments assignments,
                         final Authorization authorization, final Buckets buckets, final Mutex mutex,
-                        final Pages pages, final Priorities priorities,
+                        final Pages pages, final Priorities priorities, final Favorites favorites,
                         final @Named("default.time.zone") String defaultTimezone,
                         final @Named("default.time.format") String defaultTimeFormat,
-                        final HttpHeader httpHeader) {
+                        final HttpHeader httpHeader, final PaginationHelper<Experiment> paginationHelper) {
         this.experiments = experiments;
         this.export = export;
         this.assignments = assignments;
@@ -136,14 +151,25 @@ public class ExperimentsResource {
         this.defaultTimezone = defaultTimezone;
         this.defaultTimeFormat = defaultTimeFormat;
         this.httpHeader = httpHeader;
+        this.paginationHelper = paginationHelper;
+        this.favorites = favorites;
     }
 
     /**
      * Returns a list of all experiments, with metadata. Does not return
      * metadata for deleted experiments.
      *
-     * @param authorizationHeader the ahtorization headers
-     * @return Response object
+     * This endpoint is paginated. Favorites are sorted to the front.
+     * If {@code per_page == -1}, favorites are ignored and all experiments are returned.
+     *
+     * @param authorizationHeader the authentication headers
+     * @param page the page which should be returned, defaults to 1
+     * @param perPage the number of log entries per page, defaults to 10. -1 to get all values.
+     * @param sort the sorting rules
+     * @param filter the filter rules
+     * @param timezoneOffset the time zone offset from UTC
+     * @return a response containing a map with a list with {@code 0} to {@code perPage} experiments,
+     * if that many are on the page, and a count of how many experiments match the filter criteria.
      */
     @GET
     @Produces(APPLICATION_JSON)
@@ -152,12 +178,37 @@ public class ExperimentsResource {
     @Timed
     public Response getExperiments(@HeaderParam(AUTHORIZATION)
                                    @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                   final String authorizationHeader) {
+                                   final String authorizationHeader,
+
+                                   @QueryParam("page")
+                                   @DefaultValue(DEFAULT_PAGE)
+                                   @ApiParam(name = "page", defaultValue = DEFAULT_PAGE, value = DOC_PAGE)
+                                   final int page,
+
+                                   @QueryParam("per_page")
+                                   @DefaultValue(DEFAULT_PER_PAGE)
+                                   @ApiParam(name = "per_page", defaultValue = DEFAULT_PER_PAGE, value = DOC_PER_PAGE)
+                                   final int perPage,
+
+                                   @QueryParam("filter")
+                                   @DefaultValue("")
+                                   @ApiParam(name = "filter", defaultValue = DEFAULT_FILTER, value = DOC_FILTER)
+                                   final String filter,
+
+                                   @QueryParam("sort")
+                                   @DefaultValue("")
+                                   @ApiParam(name = "sort", defaultValue = DEFAULT_SORT, value = DOC_SORT)
+                                   final String sort,
+
+                                   @QueryParam("timezone")
+                                   @DefaultValue(DEFAULT_TIMEZONE)
+                                   @ApiParam(name = "timezone", defaultValue = DEFAULT_TIMEZONE, value = DOC_TIMEZONE)
+                                   final String timezoneOffset) {
         ExperimentList experimentList = experiments.getExperiments();
         ExperimentList authorizedExperiments;
 
         if (authorizationHeader == null) {
-            authorizedExperiments = experimentList;
+            throw new AuthenticationException("No authorization given.");
         } else {
             Username userName = authorization.getUser(authorizationHeader);
             Set<Application.Name> allowed = new HashSet<>();
@@ -183,20 +234,21 @@ public class ExperimentsResource {
                     }
                 }
             }
+
+            List<Experiment.ID> favoriteList = favorites.getFavorites(userName);
+            authorizedExperiments.getExperiments()
+                    .parallelStream()
+                    .filter(experiment -> favoriteList.contains(experiment.getID()))
+                    .forEach(experiment -> experiment.setFavorite(true));
         }
 
-        return httpHeader.headers().entity(authorizedExperiments).build();
+        Map<String, Object> experimentResponse = paginationHelper.paginate("experiments",
+                authorizedExperiments.getExperiments(), filter, timezoneOffset,
+                (perPage != -1 ? "-favorite," : "") + sort, page, perPage);
+
+        return httpHeader.headers().entity(experimentResponse).build();
     }
 
-    /**
-     * Creates a new experiment, initializing its metadata as specified in the
-     * JSON body of the request.
-     *
-     * @param newExperiment        the experiemnt to create
-     * @param createNewApplication the boolean flag of whether to create new application
-     * @param authorizationHeader  the authorization headers
-     * @return Response object
-     */
     @POST
     @Consumes(APPLICATION_JSON)
     @ApiOperation(value = "Create an experiment",
@@ -364,7 +416,7 @@ public class ExperimentsResource {
             throw new ExperimentNotFoundException(experimentID);
         }
 
-        authorization.checkUserPermissions(userName, experiment.getApplicationName(), DELETE);
+        authorization.checkUserPermissions(userName, experiment.getApplicationName(), Permission.DELETE);
 
         // Note: deleting an experiment follows the same rules as
         // updating its state to "deleted" -- so reuse the code.
@@ -681,7 +733,7 @@ public class ExperimentsResource {
             throw new ExperimentNotFoundException(experimentID);
         }
 
-        authorization.checkUserPermissions(userName, experiment.getApplicationName(), DELETE);
+        authorization.checkUserPermissions(userName, experiment.getApplicationName(), Permission.DELETE);
 
         UserInfo user = authorization.getUserInfo(userName);
 
@@ -854,7 +906,7 @@ public class ExperimentsResource {
             throw new ExperimentNotFoundException(experimentID_1);
         }
 
-        authorization.checkUserPermissions(userName, experiment.getApplicationName(), DELETE);
+        authorization.checkUserPermissions(userName, experiment.getApplicationName(), Permission.DELETE);
         //this is the user that triggered the event and will be used for logging
         mutex.deleteExclusion(experimentID_1, experimentID_2, authorization.getUserInfo(userName));
 
@@ -1151,7 +1203,7 @@ public class ExperimentsResource {
             throw new ExperimentNotFoundException(experimentID);
         }
 
-        authorization.checkUserPermissions(userName, experiment.getApplicationName(), DELETE);
+        authorization.checkUserPermissions(userName, experiment.getApplicationName(), Permission.DELETE);
         pages.deletePage(experimentID, pageName, authorization.getUserInfo(userName));
 
         return httpHeader.headers(NO_CONTENT).build();

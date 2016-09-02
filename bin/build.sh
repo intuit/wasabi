@@ -121,13 +121,15 @@ chmod 755 ${home}/${id}/entrypoint.sh
 sed -i '' -e "s/chpst -u [^:]*:[^ ]* //" ${home}/${id}/bin/run 2>/dev/null
 [ ! -e ./modules/ui/dist/scripts/wasabi.js ] && build_js=true
 
-if [[ "${build}" = true || "${build_js}" = true ]] && [ "${WASABI_OS}" == "${wasabi_os_default}" ]; then
-  brew list node
-  if [[ $? -eq 1 ]]; then
-  	echo "Node.js is not installed. Installing Node.js packages..."
-  	brew install node
-  	npm install -g yo grunt-cli bower grunt-contrib-compass
-  	sudo gem install compass
+if [[ "${build}" = true || "${build_js}" = true ]]; then
+  if [ "${WASABI_OS}" == "${wasabi_os_default}" ]; then
+    brew list node
+    if [[ $? -eq 1 ]]; then
+      echo "Node.js is not installed. Installing Node.js packages..."
+      brew install node
+      npm install -g yo grunt-cli bower grunt-contrib-compass
+      sudo gem install compass
+    fi
   fi
   (cd ./modules/ui && npm install && bower install && grunt build)
 fi
