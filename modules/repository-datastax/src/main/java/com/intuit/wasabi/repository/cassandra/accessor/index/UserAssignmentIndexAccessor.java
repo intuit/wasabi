@@ -37,7 +37,7 @@ public interface UserAssignmentIndexAccessor {
 	 * @param context
 	 * @param created
 	 * @param bucketLabel
-	 * @return result set
+	 * @return resultSet
 	 */
     @Query("insert into user_assignment_look_up (experiment_id, user_id, context, created, bucket_label)" +
             " values (?, ?, ?, ?, ?)")
@@ -49,7 +49,7 @@ public interface UserAssignmentIndexAccessor {
      * @param userId
      * @param context
      * @param created
-     * @return
+     * @return resultSet
      */
     @Query("insert into user_assignment_look_up (experiment_id, user_id, context, created)" +
             " values (?, ?, ?, ?, ?)")
@@ -60,9 +60,20 @@ public interface UserAssignmentIndexAccessor {
 	 * @param experimentId
 	 * @param userId
 	 * @param context
-	 * @return results
+	 * @return result
 	 */
     @Query("select * from user_assignment_look_up where experiment_id = ? and user_id = ? and context = ?")
     Result<UserAssignmentByUserIdContextExperimentId> selectBy(UUID experimentId, String userId, String context);
+
+
+	/**
+	 * delete rows by parameters
+	 * @param userId
+	 * @param context
+	 * @param experimentId
+	 * @return resultSet
+	 */
+	@Query("delete from user_assignment_look_up where user_id = ? and context = ? and experiment_id = ?")
+	ResultSet deleteBy(String userId, String context, UUID experimentId);
 
 }

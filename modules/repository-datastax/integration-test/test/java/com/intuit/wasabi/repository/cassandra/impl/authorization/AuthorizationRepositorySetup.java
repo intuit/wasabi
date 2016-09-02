@@ -1,4 +1,4 @@
-package com.intuit.wasabi.repository.cassandra.impl.support.authorization;
+package com.intuit.wasabi.repository.cassandra.impl.authorization;
 
 import com.datastax.driver.mapping.MappingManager;
 import com.google.inject.Inject;
