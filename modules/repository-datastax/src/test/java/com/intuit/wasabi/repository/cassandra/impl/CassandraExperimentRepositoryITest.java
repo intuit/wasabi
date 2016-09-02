@@ -11,6 +11,7 @@ import com.google.inject.name.Names;
 import com.intuit.wasabi.analyticsobjects.counts.AssignmentCounts;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.exceptions.ConstraintViolationException;
+import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Application.Name;
 import com.intuit.wasabi.experimentobjects.Bucket;
@@ -149,7 +150,7 @@ public class CassandraExperimentRepositoryITest {
     	experimentID2 = repository.createExperiment(newExperiment2);
     	
     	repository.createIndicesForNewExperiment(newExperiment2);
-}
+    }
     
 	@Test
 	public void testCreateBatchBucketWith2BucketsSuccess() {
@@ -163,19 +164,83 @@ public class CassandraExperimentRepositoryITest {
 		assertEquals("Value should be equal", 2, result.getBuckets().size());
 	}
 
+	@Test(expected=RepositoryException.class)
+	public void testCreateBatchBucketSessionNullThrowsException() {
+		BucketList bucketList = new BucketList();
+		bucketList.addBucket(bucket1);
+		bucketList.addBucket(bucket2);
+		repository.setDriver(null);
+		repository.updateBucketBatch(experimentID1, bucketList);
+	}
+
+	@Test
+	public void testCreateExperimentWithNullDescriptionCreaterAndRuleSuccess() {
+		NewExperiment newExperiment = new NewExperiment(Experiment.ID.newInstance());
+		newExperiment.setApplicationName(appname);
+		newExperiment.setLabel(Experiment.Label.valueOf("el1" + System.currentTimeMillis()));
+		newExperiment.setCreatorID(null);
+		newExperiment.setDescription(null);
+		newExperiment.setRule(null);
+		newExperiment.setStartTime(new Date());
+		newExperiment.setEndTime(new Date());
+		newExperiment.setSamplingPercent(0.2);
+		ID experimentID = repository.createExperiment(newExperiment);
+		assertEquals("Values should be same", experimentID, newExperiment.getId());
+	}
+
+	@Test
+	public void testCreateBucketSuccess() {
+		
+		repository.createBucket(bucket1);
+		
+		BucketList result = repository.getBucketList(experimentID1);
+		assertEquals("Value should be equal", 1, result.getBuckets().size());
+		assertEquals("Value should be eq", bucket1.getExperimentID(), result.getBuckets().get(0).getExperimentID());
+		assertEquals("Value should be eq", bucket1.getLabel(), 
+				result.getBuckets().get(0).getLabel());
+	}
+
+	@Test(expected=RepositoryException.class)
+	public void testCreateBucketAccessorNullThrowsException() {
+		repository.setBucketAccessor(null);
+		repository.createBucket(bucket1);
+	}
+
 	@Test
 	public void testGetExperimentByIdSuccess() {
 		Experiment experiment = repository.getExperiment(experimentID1);
 		
 		assertEquals("Value should be equal", experimentID1, experiment.getID());
 	}
+	
+	@Test
+	public void testGetDeleteExperimentByIdSuccess() {
+		Experiment experiment = repository.getExperiment(experimentID1);
+		repository.deleteExperiment(newExperiment1);
+		experiment = repository.getExperiment(experimentID1);
+		assertEquals("Value should be equal", null, experiment);
+	}
 
+	@Test(expected=RepositoryException.class)
+	public void testGetDeleteExperimentAccessorNullThrowsException() {
+		Experiment experiment = repository.getExperiment(experimentID1);
+		repository.setExperimentAccessor(null);
+		repository.deleteExperiment(newExperiment1);
+	}
+	
 	@Test
 	public void testGetExperimentByAppSuccess() {
 		Table<ID, Label, Experiment> experiments = 
 				repository.getExperimentList(newExperiment1.getApplicationName());
 		
 		assertEquals("Value should be equal", 2, experiments.size());
+	}
+
+	@Test(expected=RepositoryException.class)
+	public void testGetExperimentByAppAccessorNullThrowsException() {
+		repository.setExperimentAccessor(null);
+		Table<ID, Label, Experiment> experiments = 
+				repository.getExperimentList(newExperiment1.getApplicationName());
 	}
 
 	@Test
@@ -222,9 +287,30 @@ public class CassandraExperimentRepositoryITest {
 		
 		List<Name> apps = repository.getApplicationsList();
 		assertEquals("Value should be equal", size + 1, apps.size());
-		assertTrue("App should be in the list " + apps, 
-				apps.stream().anyMatch(application -> application.toString().equals(app.toString())));
+		assertTrue("App should be in the list " + apps, apps.stream().anyMatch(application -> application.toString().equals(app.toString())));
 	}
+
+	@Test(expected=RepositoryException.class)
+	public void testCreateAppGetApplicationAccessorNullThrowsException() {
+		int size = repository.getApplicationsList().size();
+		Name app = Application.Name.valueOf("appx" + System.currentTimeMillis());
+		repository.createApplication(app);
+		
+		repository.setApplicationListAccessor(null);
+		
+		List<Name> apps = repository.getApplicationsList();
+		assertEquals("Value should be equal", size + 1, apps.size());
+		assertTrue("App should be in the list " + apps, apps.stream().anyMatch(application -> application.toString().equals(app.toString())));
+	}
+
+	@Test(expected=RepositoryException.class)
+	public void testCreateAppApplicationListAccessorThrowsException() {
+
+		repository.setApplicationListAccessor(null);
+		repository.createApplication(appname);
+		
+	}
+
 
 	@Test(expected=NullPointerException.class)
 	public void testGetExperimentNullThrowsException() {
@@ -284,6 +370,52 @@ public class CassandraExperimentRepositoryITest {
 	}
 
 	@Test
+	public void testGetExperimentsEmptyIds() {
+		List<Experiment.ID> experimentIds = new ArrayList<>();
+		 ExperimentList experiments = repository.getExperiments(experimentIds);
+		assertEquals("Value should be equal", 0, experiments.getExperiments().size());
+	}
+
+	@Test(expected=RepositoryException.class)
+	public void testGetExperimentsAccessorNullThrowsException() {
+		List<Experiment.ID> experimentIds = new ArrayList<>();
+		experimentIds.add(experimentID1);
+		experimentIds.add(experimentID2);
+		repository.setExperimentAccessor(null);
+		 ExperimentList experiments = repository.getExperiments(experimentIds);
+	}
+
+	@Test
+	public void testGetExperimentsByAppName() {
+		List<Experiment> experiments = repository.getExperiments(appname);
+		assertEquals("Value should be equal", 2, experiments.size());
+	}
+
+	@Test
+	public void testGetExperimentsDeletedByAppName() {
+		List<Experiment> experiments = repository.getExperiments(appname);
+		assertEquals("Value should be equal", 2, experiments.size());
+		experiments.stream().forEach(exp -> repository.updateExperimentState(exp,  Experiment.State.DELETED));;
+		experiments = repository.getExperiments(appname);
+		assertEquals("Value should be equal", 0, experiments.size());
+	}
+
+	@Test
+	public void testGetExperimentsTerminatedByAppName() {
+		List<Experiment> experiments = repository.getExperiments(appname);
+		assertEquals("Value should be equal", 2, experiments.size());
+		experiments.stream().forEach(exp -> repository.updateExperimentState(exp,  Experiment.State.TERMINATED));;
+		experiments = repository.getExperiments(appname);
+		assertEquals("Value should be equal", 0, experiments.size());
+	}
+
+	@Test(expected=RepositoryException.class)
+	public void testGetExperimentsByAppNameAccessorNullThrowsException() {
+		repository.setExperimentAccessor(null);
+		List<Experiment> experiments = repository.getExperiments(appname);
+	}
+
+	@Test
 	public void testGetExperimentsByOneId() {
 		List<Experiment.ID> experimentIds = new ArrayList<>();
 		experimentIds.add(experimentID1);
@@ -299,6 +431,17 @@ public class CassandraExperimentRepositoryITest {
 		repository.getExperiments();
 	}
 
+	@Test(expected=RepositoryException.class)
+	public void testGetOneBucketListWithBucketAccessorNullThrowsException() {
+		 repository.setBucketAccessor(null);
+		 Object buckets = repository.getBucketList((Experiment.ID)null);
+	}
+
+	@Test(expected=RepositoryException.class)
+	public void testGetBucketWithBucketAccessorNullThrowsException() {
+		 repository.setBucketAccessor(null);
+		 Bucket buckets = repository.getBucket(bucket1.getExperimentID(), bucket1.getLabel());
+	}
 
 	@Test
 	public void testGetOneBucketListEachByIds() {
@@ -410,6 +553,68 @@ public class CassandraExperimentRepositoryITest {
 	}
 
 	@Test
+	public void testUpdateBucketDescriptionPayloadNull() {
+		BucketList bucketList1 = new BucketList();
+		bucketList1.addBucket(bucket1);
+		
+		repository.updateBucketBatch(experimentID1, bucketList1);
+
+		List<Experiment.ID> experimentIds = new ArrayList<>();
+		experimentIds.add(experimentID1);
+		Map<ID, BucketList> buckets = repository.getBucketList(experimentIds);
+		assertEquals("Value should be equal", 1, buckets.size());
+		assertEquals("Value should be equal", 1, buckets.get(experimentID1).getBuckets().size());
+		assertEquals("Value should be equal", bucket1, buckets.get(experimentID1).getBuckets().get(0));
+		
+		assertEquals("Value should be eq", bucket1.getAllocationPercent(),buckets.get(experimentID1).getBuckets().get(0).getAllocationPercent() );
+		
+		bucket1.setDescription(null);
+		bucket1.setPayload(null);
+		Bucket bucketResult = repository.updateBucket(bucket1);
+
+		assertEquals("Value should be eq", experimentID1, bucketResult.getExperimentID());
+		assertEquals("Value should be eq", bucket1.getAllocationPercent(), bucketResult.getAllocationPercent(), 0.001);
+		assertEquals("Value should be eq", null, bucketResult.getDescription());
+		
+		assertEquals("Value should be eq", null, bucketResult.getPayload());
+	}
+	@Test(expected=RepositoryException.class)
+	public void testUpdateBucketAccessorNullThrowsException() {
+		repository.setBucketAccessor(null);
+		repository.updateBucket(bucket1);
+		Bucket bucketResult = repository.updateBucket(bucket1);
+
+	}
+
+	@Test(expected=RepositoryException.class)
+	public void testUpdateBucketNotControlAccessorNullThrowsException() {
+		repository.setBucketAccessor(null);
+		repository.updateBucket(bucket2);
+		Bucket bucketResult = repository.updateBucket(bucket1);
+
+	}
+
+	@Test(expected=RepositoryException.class)
+	public void testUpdateBucketAllocationAccessorNullThrowsException() {
+		repository.setBucketAccessor(null);
+		repository.updateBucketAllocationPercentage(bucket1,.01);
+	}
+
+	@Test(expected=RepositoryException.class)
+	public void testUpdateExperimentAccessorNullThrowsException() {
+		Experiment experiment = repository.getExperiment(experimentID1);
+		repository.setExperimentAccessor(null);
+		repository.updateExperiment(experiment);
+	}
+
+	@Test(expected=RepositoryException.class)
+	public void testUpdateExperimentStateAccessorNullThrowsException() {
+		Experiment experiment = repository.getExperiment(experimentID1);
+		repository.setExperimentAccessor(null);
+		repository.updateExperimentState(experiment, Experiment.State.PAUSED);
+	}
+
+	@Test
 	public void testUpdateExperiment() {
 
 		Experiment experiment = repository.getExperiment(experimentID1);
@@ -423,6 +628,41 @@ public class CassandraExperimentRepositoryITest {
 	}
 
 	@Test
+	public void testUpdateExperimentDescriptionRuleNull() {
+
+		Experiment experiment = repository.getExperiment(experimentID1);
+		experiment.setDescription(null);
+		experiment.setRule(null);
+		repository.updateExperiment(experiment);
+		
+		experiment = repository.getExperiment(experimentID1);
+		assertEquals("Value should be eq", experimentID1, experiment.getID());
+		assertEquals("Value should be eq", "", experiment.getDescription());
+		assertEquals("Value should be eq", "", experiment.getRule());
+	}
+
+	@Test(expected=RepositoryException.class)
+	public void testUpdateExperimentExperimentAccessorThrowsException() {
+
+		Experiment experiment = repository.getExperiment(experimentID1);
+		String description = "newDescription" + System.currentTimeMillis();
+		experiment.setDescription(description);
+		repository.setExperimentAccessor(null);
+		repository.updateExperiment(experiment);
+	}
+
+	@Test(expected=RepositoryException.class)
+	public void testUpdateExperimentExperimentLabelIndexAccessorAccessorThrowsException() {
+
+		Experiment experiment = repository.getExperiment(experimentID1);
+		String description = "newDescription" + System.currentTimeMillis();
+		experiment.setDescription(description);
+		repository.setExperimentLabelIndexAccessor(null);
+		repository.updateExperiment(experiment);
+		
+	}
+
+	@Test
 	public void testUpdateExperimentState() {
 
 		Experiment experiment = repository.getExperiment(experimentID1);
@@ -433,6 +673,35 @@ public class CassandraExperimentRepositoryITest {
 		experiment = repository.getExperiment(experimentID1);
 		assertEquals("Value should be eq", experimentID1, experiment.getID());
 		assertEquals("Value should be eq", Experiment.State.RUNNING, experiment.getState());
+	}
+
+	@Test(expected=RepositoryException.class)
+	public void testUpdateStateIndexAccessorNullThrowsException() {
+
+		Experiment experiment = repository.getExperiment(experimentID1);
+		assertEquals("Value should be eq", Experiment.State.DRAFT, experiment.getState());
+		repository.setStateExperimentIndexAccessor(null);
+		repository.updateStateIndex(experiment);
+		
+	}
+
+	@Test
+	public void testUpdateExperimentStateDeleted() {
+
+		Experiment experiment = repository.getExperiment(experimentID1);
+		assertEquals("Value should be eq", Experiment.State.DRAFT, experiment.getState());
+
+		repository.updateExperimentState(experiment, Experiment.State.DELETED);
+		
+		experiment = repository.getExperiment(experimentID1);
+		assertEquals("Value should be eq", null, experiment);
+	}
+
+	@Test
+	public void testGetUnknownExperiment() {
+
+		Experiment experiment = repository.getExperiment(Experiment.ID.newInstance());
+		assertEquals("Value should be eq", null, experiment);
 	}
 
 	@Test
@@ -452,6 +721,12 @@ public class CassandraExperimentRepositoryITest {
 		Bucket resultBucket = repository.updateBucketState(bucket1, Bucket.State.CLOSED);
 		assertEquals("Value should be eq", Bucket.State.CLOSED,resultBucket.getState());
 		
+	}
+
+	@Test(expected=RepositoryException.class)
+	public void testUpdateBucketStateAccessorNullThrowsException() {
+		repository.setBucketAccessor(null);
+		Bucket resultBucket = repository.updateBucketState(bucket1, Bucket.State.CLOSED);
 	}
 
 	@Test
@@ -523,12 +798,28 @@ public class CassandraExperimentRepositoryITest {
 				count.getAssignments().get(1).getCount());
 	}
 	
+	@Test(expected=RepositoryException.class)
+	public void testGetAssigmentsCountWithAccessorNullThrowsException() {
+		repository.setUserBucketIndexAccessor(null);
+		AssignmentCounts count = repository.getAssignmentCounts(experimentID1, QA);
+	}
+
+	@Test(expected=RepositoryException.class)
+	public void testLogBucketAuditAccessorNullThrowsException() {
+		String bucketLabel = "bkt" + System.currentTimeMillis();
+		Result<?> logs = bucketAuditLogAccessor.selectBy(experimentID1.getRawID(), bucketLabel);
+	
+		List<Bucket.BucketAuditInfo> auditLog = new ArrayList<>();
+		Bucket.BucketAuditInfo log = new Bucket.BucketAuditInfo("attr1", "o1", "n1");
+		auditLog.add(log);
+		repository.setBucketAuditLogAccessor(null);
+		repository.logBucketChanges(experimentID1, Bucket.Label.valueOf(bucketLabel), auditLog );
+	}
+
 	@Test
 	public void testLogBucketAuditSuccess() {
 		String bucketLabel = "bkt" + System.currentTimeMillis();
-		Result<?> logs = 
-				bucketAuditLogAccessor.selectBy(experimentID1.getRawID(), 
-						bucketLabel);
+		Result<?> logs = bucketAuditLogAccessor.selectBy(experimentID1.getRawID(), bucketLabel);
 	
 		assertEquals("Size should be same", 0, logs.all().size());
 		
@@ -538,9 +829,45 @@ public class CassandraExperimentRepositoryITest {
 		
 		repository.logBucketChanges(experimentID1, Bucket.Label.valueOf(bucketLabel), auditLog );
 
-		logs = 
-				bucketAuditLogAccessor.selectBy(experimentID1.getRawID(), 
-						bucketLabel);
+		logs = bucketAuditLogAccessor.selectBy(experimentID1.getRawID(), bucketLabel);
+		
+		assertEquals("Size should be same", 1, logs.all().size());
+
+	}
+
+	@Test
+	public void testLogBucketAuditOldValueNullSuccess() {
+		String bucketLabel = "bkt" + System.currentTimeMillis();
+		Result<?> logs = bucketAuditLogAccessor.selectBy(experimentID1.getRawID(), bucketLabel);
+	
+		assertEquals("Size should be same", 0, logs.all().size());
+		
+		List<Bucket.BucketAuditInfo> auditLog = new ArrayList<>();
+		Bucket.BucketAuditInfo log = new Bucket.BucketAuditInfo("attr1", null, "n1");
+		auditLog.add(log);
+		
+		repository.logBucketChanges(experimentID1, Bucket.Label.valueOf(bucketLabel), auditLog );
+
+		logs = bucketAuditLogAccessor.selectBy(experimentID1.getRawID(), bucketLabel);
+		
+		assertEquals("Size should be same", 1, logs.all().size());
+
+	}
+
+	@Test
+	public void testLogBucketAuditNewValueNullSuccess() {
+		String bucketLabel = "bkt" + System.currentTimeMillis();
+		Result<?> logs = bucketAuditLogAccessor.selectBy(experimentID1.getRawID(), bucketLabel);
+	
+		assertEquals("Size should be same", 0, logs.all().size());
+		
+		List<Bucket.BucketAuditInfo> auditLog = new ArrayList<>();
+		Bucket.BucketAuditInfo log = new Bucket.BucketAuditInfo("attr1", "ol1", null );
+		auditLog.add(log);
+		
+		repository.logBucketChanges(experimentID1, Bucket.Label.valueOf(bucketLabel), auditLog );
+
+		logs = bucketAuditLogAccessor.selectBy(experimentID1.getRawID(), bucketLabel);
 		
 		assertEquals("Size should be same", 1, logs.all().size());
 
@@ -550,8 +877,7 @@ public class CassandraExperimentRepositoryITest {
 	public void testLogExperimentAuditSuccess() {
 		Experiment.ID expid = Experiment.ID.newInstance();
 		
-		Result<?> logs = 
-				experimentAuditLogAccessor.selectBy(expid.getRawID());
+		Result<?> logs = experimentAuditLogAccessor.selectBy(expid.getRawID());
 	
 		assertEquals("Size should be same", 0, logs.all().size());
 		
@@ -560,10 +886,59 @@ public class CassandraExperimentRepositoryITest {
 		auditLog.add(log);
 		
 		repository.logExperimentChanges(expid, auditLog);
-		logs = 
-				experimentAuditLogAccessor.selectBy(expid.getRawID());
+		logs = experimentAuditLogAccessor.selectBy(expid.getRawID());
 		
 		assertEquals("Size should be same", 1, logs.all().size());
+
+	}
+
+	@Test
+	public void testLogExperimentAuditOldValueNullSuccess() {
+		Experiment.ID expid = Experiment.ID.newInstance();
+		
+		Result<?> logs = experimentAuditLogAccessor.selectBy(expid.getRawID());
+	
+		assertEquals("Size should be same", 0, logs.all().size());
+		
+		List<Experiment.ExperimentAuditInfo> auditLog = new ArrayList<>();
+		Experiment.ExperimentAuditInfo log = new Experiment.ExperimentAuditInfo("attr1", null, "n1");
+		auditLog.add(log);
+		
+		repository.logExperimentChanges(expid, auditLog);
+		logs = experimentAuditLogAccessor.selectBy(expid.getRawID());
+		
+		assertEquals("Size should be same", 1, logs.all().size());
+
+	}
+
+	@Test
+	public void testLogExperimentAuditNewValueNullSuccess() {
+		Experiment.ID expid = Experiment.ID.newInstance();
+		
+		Result<?> logs = experimentAuditLogAccessor.selectBy(expid.getRawID());
+	
+		assertEquals("Size should be same", 0, logs.all().size());
+		
+		List<Experiment.ExperimentAuditInfo> auditLog = new ArrayList<>();
+		Experiment.ExperimentAuditInfo log = new Experiment.ExperimentAuditInfo("attr1", "ol1", null);
+		auditLog.add(log);
+		
+		repository.logExperimentChanges(expid, auditLog);
+		logs = experimentAuditLogAccessor.selectBy(expid.getRawID());
+		
+		assertEquals("Size should be same", 1, logs.all().size());
+
+	}
+
+	@Test(expected=RepositoryException.class)
+	public void testLogExperimentAuditNullAccessorThrowsException() {
+		Experiment.ID expid = Experiment.ID.newInstance();
+		
+		List<Experiment.ExperimentAuditInfo> auditLog = new ArrayList<>();
+		Experiment.ExperimentAuditInfo log = new Experiment.ExperimentAuditInfo("attr1", "o1", "n1");
+		auditLog.add(log);
+		repository.setExperimentAuditLogAccessor(null);
+		repository.logExperimentChanges(expid, auditLog);
 
 	}
 
@@ -575,7 +950,17 @@ public class CassandraExperimentRepositoryITest {
 		repository.createIndicesForNewExperiment(newExperiment1);		
 	}
 
-	
+	@Test(expected=ExperimentNotFoundException.class)
+	public void testGetBucketsThrowsExperimentNotFoundException() {
+		BucketList buckets = repository.getBuckets(Experiment.ID.newInstance());
+	}
+
+	@Test(expected=RepositoryException.class)
+	public void testGetBucketsAccessorNullThrowsException() {
+		repository.setBucketAccessor(null);
+		BucketList buckets = repository.getBuckets(experimentID1);
+	}
+
 	@Test
 	public void testGetBucketsByExperimentId() {
 		BucketList bucketList1 = new BucketList();
@@ -607,6 +992,12 @@ public class CassandraExperimentRepositoryITest {
 				.equals(bucketsResponse.get(0).getLabel()));
 		assertTrue("lists should be eq", bucketsExpected.get(1).getLabel()
 				.equals(bucketsResponse.get(1).getLabel()));
+	}
+
+	@Test(expected=RepositoryException.class)
+	public void testDeleteBucketAccessorNullThrowsException() {
+		repository.setBucketAccessor(null);
+		repository.deleteBucket(experimentID1, bucket1.getLabel());		
 	}
 
 	@Test
@@ -659,15 +1050,16 @@ public class CassandraExperimentRepositoryITest {
 
 	@Test
 	public void testGetterSetter() {
-		assertNotNull("value should be eq",  repository.getApplicationListAccessor());
-		assertNotNull("value should be eq",  repository.getBucketAuditLogAccessor());
-		assertNotNull("value should be eq",  repository.getExperimentAccessor());
-		assertNotNull("value should be eq",  repository.getExperimentAuditLogAccessor());
-		assertNotNull("value should be eq",  repository.getStateExperimentIndexAccessor());
-		assertNotNull("value should be eq",  repository.getExperimentAccessor());
-		assertNotNull("value should be eq",  repository.getBucketAccessor());
-		assertNotNull("value should be eq",  repository.getExperimentLabelIndexAccessor());
-		assertNotNull("value should be eq",  repository.getUserBucketIndexAccessor());
+		assertNotNull("value should be not be null",  repository.getApplicationListAccessor());
+		assertNotNull("value should be not be null",  repository.getBucketAuditLogAccessor());
+		assertNotNull("value should be not be null",  repository.getExperimentAccessor());
+		assertNotNull("value should be not be null",  repository.getExperimentAuditLogAccessor());
+		assertNotNull("value should be not be null",  repository.getStateExperimentIndexAccessor());
+		assertNotNull("value should be not be null",  repository.getExperimentAccessor());
+		assertNotNull("value should be not be null",  repository.getBucketAccessor());
+		assertNotNull("value should be not be null",  repository.getExperimentLabelIndexAccessor());
+		assertNotNull("value should be not be null",  repository.getUserBucketIndexAccessor());
+		assertNotNull("value should be not be null",  repository.getDriver());
 		
 		repository.setApplicationListAccessor(null);;
 		assertEquals("Value should be eq", null, repository.getApplicationListAccessor());
@@ -692,6 +1084,9 @@ public class CassandraExperimentRepositoryITest {
 
 		repository.setExperimentLabelIndexAccessor(null);
 		assertEquals("Value should be eq", null, repository.getExperimentLabelIndexAccessor());
+
+		repository.setDriver(null);
+		assertEquals("Value should be eq", null, repository.getDriver());
 	}
 	
 	@Test(expected=RepositoryException.class)

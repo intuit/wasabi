@@ -314,11 +314,9 @@ class CassandraExperimentRepository implements ExperimentRepository {
 			} 
 			
 		} catch (Exception e) {
-			LOGGER.error("Error while getting experiment by app {} with label {} ",
-					new Object[] { appName, experimentLabel }, e);
+			LOGGER.error("Error while getting experiment by app {} with label {} ",	new Object[] { appName, experimentLabel }, e);
 
-			throw new RepositoryException("Could not retrieve experiment \""
-					+ appName + "\".\"" + experimentLabel + "\"", e);
+			throw new RepositoryException("Could not retrieve experiment \"" + appName + "\".\"" + experimentLabel + "\"", e);
 		}
 
 		LOGGER.debug("Returning experiment {}", experiment);
@@ -374,8 +372,7 @@ class CassandraExperimentRepository implements ExperimentRepository {
 				newExperiment.getModelVersion(),
 				newExperiment.getIsRapidExperiment(),
 				newExperiment.getUserCap(),
-				(newExperiment.getCreatorID() != null) ? newExperiment
-						.getCreatorID() : "");
+				(newExperiment.getCreatorID() != null) ? newExperiment.getCreatorID() : "");
 
 			// TODO - Do we need to create an application while creating a new experiment ?
 			createApplication(newExperiment.getApplicationName());
@@ -447,11 +444,8 @@ class CassandraExperimentRepository implements ExperimentRepository {
 				bucketAssignmentsCount += count;
 
 			} catch (Exception e) {
-				LOGGER.error(
-						"Get Assignment Counts for Experiment {} and context {} failed",
-						new Object[] { experimentID, context }, e);
-				throw new RepositoryException("Could not fetch assignmentCounts for experiment "
-								+ "with ID \"" + experimentID + "\"", e);
+				LOGGER.error("Get Assignment Counts for Experiment {} and context {} failed", new Object[] { experimentID, context }, e);
+				throw new RepositoryException("Could not fetch assignmentCounts for experiment " + "with ID \"" + experimentID + "\"", e);
 			}
 
 		}
@@ -466,21 +460,15 @@ class CassandraExperimentRepository implements ExperimentRepository {
 		} catch (Exception e) {
 			LOGGER.error("Get Assignment Counts for Experiment {} and context {} failed",
 					new Object[] { experimentID, context }, e);
-			throw new RepositoryException("Could not fetch assignmentCounts for experiment "
-							+ "with ID \"" + experimentID + "\"", e);
+			throw new RepositoryException("Could not fetch assignmentCounts for experiment " + "with ID \"" + experimentID + "\"", e);
 		}
 
-		return builder
-				.withBucketAssignmentCount(bucketAssignmentCountList)
-				.withTotalUsers(
-						new TotalUsers.Builder()
-								.withTotal(
-										bucketAssignmentsCount
-												+ nullAssignmentsCount)
+		return builder.withBucketAssignmentCount(bucketAssignmentCountList)
+				.withTotalUsers(new TotalUsers.Builder()
+								.withTotal(bucketAssignmentsCount + nullAssignmentsCount)
 								.withBucketAssignments(bucketAssignmentsCount)
 								.withNullAssignments(nullAssignmentsCount)
 								.build()).build();
-
 	}
 
 	/**
@@ -536,8 +524,8 @@ class CassandraExperimentRepository implements ExperimentRepository {
 		BucketList bucketList = new BucketList();
 
 		try {
-			Result<com.intuit.wasabi.repository.cassandra.pojo.Bucket> bucketPojos = bucketAccessor
-					.getBucketByExperimentId(experimentID.getRawID());
+			Result<com.intuit.wasabi.repository.cassandra.pojo.Bucket> bucketPojos = 
+					bucketAccessor.getBucketByExperimentId(experimentID.getRawID());
 
 			for (com.intuit.wasabi.repository.cassandra.pojo.Bucket bucketPojo : bucketPojos
 					.all()) {
@@ -879,6 +867,20 @@ class CassandraExperimentRepository implements ExperimentRepository {
     }
 
 	/**
+	 * @return the driver
+	 */
+	public CassandraDriver getDriver() {
+		return driver;
+	}
+
+	/**
+	 * @param driver the driver to set
+	 */
+	public void setDriver(CassandraDriver driver) {
+		this.driver = driver;
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -1075,6 +1077,9 @@ class CassandraExperimentRepository implements ExperimentRepository {
 			 
 			 return bucketList;
 		}
+		catch(ExperimentNotFoundException e) {
+			throw e;
+		}
 		catch(Exception e) {
 			LOGGER.error("Error while getting buckets for {}", experimentID,e);
 			throw new RepositoryException("Unable to get buckets for " + experimentID, e);
@@ -1138,9 +1143,7 @@ class CassandraExperimentRepository implements ExperimentRepository {
 		
 		try {
 			 updateStateIndex(experiment.getID(),
-					 experiment.getState() != State.DELETED
-					 ? ExperimentState.NOT_DELETED
-							 : ExperimentState.DELETED);
+					 experiment.getState() != State.DELETED  ? ExperimentState.NOT_DELETED : ExperimentState.DELETED);
 		 } catch (Exception e) {
 			 LOGGER.error("update state index experiment {} ", experiment, e);
 			 throw new RepositoryException("Exception while updating state index: " + e, e);
@@ -1159,7 +1162,7 @@ class CassandraExperimentRepository implements ExperimentRepository {
 					
 					BatchStatement batch1 = new BatchStatement();
 					Statement insertStatement1 = stateExperimentIndexAccessor.insert(ExperimentState.DELETED.name(), 
-							experimentID.getRawID(), ByteBuffer.wrap("".getBytes("")));
+							experimentID.getRawID(), ByteBuffer.wrap("".getBytes()));
 					batch1.add(insertStatement1);
 					
 					LOGGER.debug("update state index delete experiment id {} state {} ", 
