@@ -20,7 +20,7 @@ import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authorizationobjects.*;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.repository.AuthorizationRepository;
-import com.intuit.wasabi.repository.cassandra.impl.support.authorization.AuthorizationRepositorySetup;
+import com.intuit.wasabi.repository.cassandra.impl.authorization.AuthorizationRepositorySetup;
 import com.intuit.wasabi.repository.cassandra.CassandraRepositoryModule;
 import com.intuit.wasabi.repository.cassandra.data.AuthorizationRepositoryDataProvider;
 import com.intuit.wasabi.userdirectory.UserDirectory;
