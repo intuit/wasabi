@@ -36,7 +36,7 @@ public interface UserExperimentIndexAccessor {
 	 * @param bucketLabel
 	 * @return result set
 	 */
-    @Query("insert into user_experiment_index (user_id, context, app_name, experiment_id, bucket)" +
+    @Query("insert into user_experiment_index (user_id, context, app_name, experiment_id, bucket_label)" +
             " values (?, ?, ?, ?, ?)")
     ResultSet insertBy(String userId, String context, String appName, UUID experimentId, String bucketLabel);
 

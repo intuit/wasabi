@@ -52,7 +52,7 @@ public interface UserAssignmentIndexAccessor {
      * @return resultSet
      */
     @Query("insert into user_assignment_look_up (experiment_id, user_id, context, created)" +
-            " values (?, ?, ?, ?, ?)")
+            " values (?, ?, ?, ?)")
     ResultSet insertBy(UUID uuid, String userId, String context, Date created);
 
 	/**
