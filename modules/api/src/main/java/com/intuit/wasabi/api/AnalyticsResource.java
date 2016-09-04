@@ -137,45 +137,43 @@ public class AnalyticsResource {
                                          @DefaultValue(DEFAULT_TIMEZONE)
                                          @ApiParam(name = "timezone", defaultValue = DEFAULT_TIMEZONE, value = DOC_TIMEZONE)
                                          final String timezoneOffset) {
+        if (authorizationHeader == null)
+            throw new AuthenticationException("No authorization given.");
+
         List<ExperimentDetail> experimentList = experimentDetails.getExperimentDetailsBase();
         List<ExperimentDetail> authorizedExperiments = new ArrayList<>();
 
-        if (authorizationHeader == null) {
-            throw new AuthenticationException("No authorization given.");
-        } else {
-            UserInfo.Username userName = authorization.getUser(authorizationHeader);
-            Set<Application.Name> allowed = new HashSet<>();
+        UserInfo.Username userName = authorization.getUser(authorizationHeader);
+        Set<Application.Name> allowed = new HashSet<>();
 
-
-            for (ExperimentDetail experiment : experimentList) {
-                if (experiment == null) {
-                    continue;
-                }
-
-                Application.Name applicationName = experiment.getAppName();
-
-                if (allowed.contains(applicationName)) {
-                    authorizedExperiments.add(experiment);
-                } else {
-                    try {
-                        authorization.checkUserPermissions(userName, applicationName, READ);
-                        authorizedExperiments.add(experiment);
-                        allowed.add(applicationName);
-                    } catch (AuthenticationException ignored) {
-                        LOGGER.trace("ignoring authentication exception", ignored);
-                    }
-                }
+        for (ExperimentDetail experiment : experimentList) {
+            if (experiment == null) {
+                continue;
             }
 
-            List<Experiment.ID> favoriteList = favorites.getFavorites(userName);
-            authorizedExperiments
-                    .parallelStream()
-                    .filter(experiment -> favoriteList.contains(experiment.getId()))
-                    .forEach(experiment -> experiment.setFavorite(true));
+            Application.Name applicationName = experiment.getAppName();
 
-            //get details
-            experimentDetails.getAnalyticData(authorizedExperiments, parameters);
+            if (allowed.contains(applicationName)) {
+                authorizedExperiments.add(experiment);
+            } else {
+                try {
+                    authorization.checkUserPermissions(userName, applicationName, READ);
+                    authorizedExperiments.add(experiment);
+                    allowed.add(applicationName);
+                } catch (AuthenticationException ignored) {
+                    LOGGER.trace("Ignoring Authentication Exception", ignored);
+                }
+            }
         }
+
+        List<Experiment.ID> favoriteList = favorites.getFavorites(userName);
+        authorizedExperiments
+                .parallelStream()
+                .filter(experiment -> favoriteList.contains(experiment.getId()))
+                .forEach(experiment -> experiment.setFavorite(true));
+
+        //get details
+        experimentDetails.getAnalyticData(authorizedExperiments, parameters);
 
         //filter and paginate
         Map<String, Object> experimentResponse = experimentDetailPaginationHelper.paginate("?",

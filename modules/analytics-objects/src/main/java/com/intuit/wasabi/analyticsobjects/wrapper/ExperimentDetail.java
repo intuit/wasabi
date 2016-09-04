@@ -59,9 +59,11 @@ public class ExperimentDetail {
 
         private double actionRate = 0.0;
 
-        private double errorRate = 0.0;
+        private double lowerBound = 0.0;
 
-        private int userCount = 0;
+        private double upperBound = 0.0;
+
+        private long userCount = 0;
 
         public BucketDetail(Bucket.Label label, boolean isControl, double allocationPercent){
             setLabel(label);
@@ -105,19 +107,27 @@ public class ExperimentDetail {
             this.actionRate = actionRate;
         }
 
-        public double getErrorRate() {
-            return errorRate;
+        public double getLowerBound() {
+            return lowerBound;
         }
 
-        public void setErrorRate(double errorRate) {
-            this.errorRate = errorRate;
+        public void setLowerBound(double lowerBound) {
+            this.lowerBound = lowerBound;
         }
 
-        public int getUserCount() {
+        public double getUpperBound() {
+            return upperBound;
+        }
+
+        public void setUpperBound(double upperBound) {
+            this.upperBound = upperBound;
+        }
+
+        public long getUserCount() {
             return userCount;
         }
 
-        public void setUserCount(int userCount) {
+        public void setUserCount(long userCount) {
             if(userCount >= 0)
                 this.userCount = userCount;
             else throw new IllegalArgumentException("User count can not be smaller than 0");

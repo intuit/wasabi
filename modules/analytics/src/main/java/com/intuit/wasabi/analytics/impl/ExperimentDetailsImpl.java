@@ -58,8 +58,9 @@ public class ExperimentDetailsImpl implements ExperimentDetails{
      *
      * @param databaseRepository the mssql database used for analytic data
      * @param cassandraRepository repository for the experiment information
-     * @param experiments access to the experiments
      * @param buckets access to the bucket information
+     * @param analytics the analytics module that holds the methods to get bucket details and counts
+     *                  for running experiments
      */
     @Inject
     public ExperimentDetailsImpl(@DatabaseRepository ExperimentRepository databaseRepository,
@@ -144,8 +145,14 @@ public class ExperimentDetailsImpl implements ExperimentDetails{
             //bucket analytics
             for(ExperimentDetail.BucketDetail b : experimentDetail.getBuckets()){
                 BucketStatistics bucketStat = bucketAnalytics.get(b.getLabel());
-                b.setActionRate(bucketStat.getJointActionRate().getEstimate().doubleValue());
 
+                if(bucketStat.getJointActionRate() != null) {
+                    b.setActionRate(bucketStat.getJointActionRate().getEstimate().doubleValue());
+                    b.setLowerBound(bucketStat.getJointActionRate().getLowerBound());
+                    b.setUpperBound(bucketStat.getJointActionRate().getUpperBound());
+                }
+
+                b.setUserCount(bucketStat.getImpressionCounts().getUniqueUserCount());
             }
         }
         return experimentDetail;
