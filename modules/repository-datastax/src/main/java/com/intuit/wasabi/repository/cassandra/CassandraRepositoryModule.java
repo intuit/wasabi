@@ -24,7 +24,6 @@ import com.intuit.wasabi.repository.cassandra.provider.export.UserAssignmentExpo
 import com.intuit.wasabi.repository.cassandra.provider.index.*;
 import com.intuit.wasabi.repository.database.*;
 import com.intuit.wasabi.userdirectory.UserDirectoryModule;
-
 import org.slf4j.Logger;
 
 import javax.inject.Singleton;
@@ -53,20 +52,25 @@ public class CassandraRepositoryModule extends AbstractModule {
         //Binding the accessors to their providers
         //NOTE: have to use provider here because the session object that is required can only be obtained by guice internally
         //using the CassandraDriver.class
-        bind(UserFeedbackAccessor.class).toProvider(UserFeedbackAccessorProvider.class).in(Singleton.class);
-        bind(AppRoleAccessor.class).toProvider(AppRoleAccessorProvider.class).in(Singleton.class);
-        bind(UserInfoAccessor.class).toProvider(UserInfoAccessorProvider.class).in(Singleton.class);
-        bind(UserRoleAccessor.class).toProvider(UserRoleAccessorProvider.class).in(Singleton.class);
         bind(ApplicationListAccessor.class).toProvider(ApplicationListAccessorProvider.class).in(Singleton.class);
+        bind(AppRoleAccessor.class).toProvider(AppRoleAccessorProvider.class).in(Singleton.class);
+        bind(BucketAccessor.class).toProvider(BucketAccessorProvider.class).in(Singleton.class);
+        bind(ExclusionAccessor.class).toProvider(ExclusionAccessorProvider.class).in(Singleton.class);
         bind(ExperimentAccessor.class).toProvider(ExperimentAccessorProvider.class).in(Singleton.class);
         bind(ExperimentPageAccessor.class).toProvider(ExperimentPageAccessorProvider.class).in(Singleton.class);
-        bind(ExclusionAccessor.class).toProvider(ExclusionAccessorProvider.class).in(Singleton.class);
         bind(PrioritiesAccessor.class).toProvider(PrioritiesAccessorProvider.class).in(Singleton.class);
+        bind(StagingAccessor.class).toProvider(StagingAccessorProvider.class).in(Singleton.class);
+        bind(UserAssignmentAccessor.class).toProvider(UserAssignmentAccessorProvider.class).in(Singleton.class);
+        bind(UserFeedbackAccessor.class).toProvider(UserFeedbackAccessorProvider.class).in(Singleton.class);
+        bind(UserInfoAccessor.class).toProvider(UserInfoAccessorProvider.class).in(Singleton.class);
+        bind(UserRoleAccessor.class).toProvider(UserRoleAccessorProvider.class).in(Singleton.class);
+
         //Bind those indexes
         bind(AppPageIndexAccessor.class).toProvider(AppPageIndexAccessorProvider.class).in(Singleton.class);
         bind(ExperimentLabelIndexAccessor.class).toProvider(ExperimentLabelIndexAccessorProvider.class).in(Singleton.class);
         bind(ExperimentUserIndexAccessor.class).toProvider(ExperimentUserIndexAccessorProvider.class).in(Singleton.class);
         bind(PageExperimentIndexAccessor.class).toProvider(PageExperimentIndexAccessorProvider.class).in(Singleton.class);
+        bind(StateExperimentIndexAccessor.class).toProvider(StateExperimentIndexAccessorProvider.class).in(Singleton.class);
         bind(UserAssignmentIndexAccessor.class).toProvider(UserAssignmentIndexAccessorProvider.class).in(Singleton.class);
         bind(UserBucketIndexAccessor.class).toProvider(UserBucketIndexAccessorProvider.class).in(Singleton.class);
         bind(UserExperimentIndexAccessor.class).toProvider(UserExperimentIndexAccessorProvider.class).in(Singleton.class);
@@ -78,8 +82,6 @@ public class CassandraRepositoryModule extends AbstractModule {
         bind(BucketAssignmentCountAccessor.class).toProvider(BucketAssignmentCountAccessorProvider.class).in(Singleton.class);
         //Bind those export
         bind(UserAssignmentExportAccessor.class).toProvider(UserAssignmentExportAccessorProvider.class).in(Singleton.class);
-        bind(StateExperimentIndexAccessor.class).toProvider(StateExperimentIndexAccessorProvider.class).in(Singleton.class);
-        bind(BucketAccessor.class).toProvider(BucketAccessorProvider.class).in(Singleton.class);
 
         //Bind those repositories
         bind(AuditLogRepository.class).to(CassandraAuditLogRepository.class).in(Singleton.class);

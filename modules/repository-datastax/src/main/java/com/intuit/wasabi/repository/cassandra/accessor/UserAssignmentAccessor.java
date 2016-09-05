@@ -34,7 +34,7 @@ public interface UserAssignmentAccessor {
     ResultSet insertBy(UUID uuid, String userId, String context, Date created, String bucketLabel);
 
     @Query("insert into user_assignment (experiment_id, user_id, context, created)" +
-            " values (?, ?, ?, ?, ?)")
+            " values (?, ?, ?, ?)")
     ResultSet insertBy(UUID uuid, String userId, String context, Date created);
 
     @Query("select * from user_assignment where experiment_id = ? and user_id = ? and context = ?")

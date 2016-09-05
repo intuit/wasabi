@@ -7,6 +7,7 @@ import com.datastax.driver.mapping.Result;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.intuit.wasabi.analyticsobjects.Parameters;
+import com.intuit.wasabi.analyticsobjects.counts.AssignmentCounts;
 import com.intuit.wasabi.assignmentobjects.Assignment;
 import com.intuit.wasabi.assignmentobjects.User;
 import com.intuit.wasabi.eventlog.EventLog;
@@ -28,6 +29,7 @@ import com.intuit.wasabi.repository.cassandra.accessor.index.UserAssignmentIndex
 import com.intuit.wasabi.repository.cassandra.accessor.index.UserBucketIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.UserExperimentIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.pojo.UserAssignment;
+import com.intuit.wasabi.repository.cassandra.pojo.count.BucketAssignmentCount;
 import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentUserByUserIdContextAppNameExperimentId;
 import com.intuit.wasabi.repository.cassandra.pojo.index.UserAssignmentByUserIdContextExperimentId;
 import org.junit.Before;
@@ -1419,8 +1421,73 @@ public class CassandraAssignmentsRepositoryTest {
     }
 
     @Test
-    public void testAssignUser(){
+    public void testBucketAssignmentCountReadException(){
+        Experiment experiment = Experiment.withID(Experiment.ID.valueOf(this.experimentId))
+                .withIsPersonalizationEnabled(false)
+                .withIsRapidExperiment(false).build();
+        doThrow(ReadTimeoutException.class).when(bucketAssignmentCountAccessor)
+                .selectBy(eq(experiment.getID().getRawID()));
+        thrown.expect(RepositoryException.class);
+        thrown.expectMessage("Could not fetch the bucket assignment counts for experiment");
+        repository.getBucketAssignmentCount(experiment);
+    }
 
+    @Test
+    public void testBucketAssignmentCountNullResult(){
+        Experiment experiment = Experiment.withID(Experiment.ID.valueOf(this.experimentId))
+                .withIsPersonalizationEnabled(false)
+                .withIsRapidExperiment(false).build();
+        when(bucketAssignmentCountAccessor.selectBy(eq(experiment.getID().getRawID())))
+                .thenReturn(null);
+        AssignmentCounts assignmentCounts = repository.getBucketAssignmentCount(experiment);
+        assertThat(assignmentCounts.getExperimentID(), is(experiment.getID()));
+        assertThat(assignmentCounts.getAssignments().size(), is(1));
+        assertThat(assignmentCounts.getAssignments().get(0).getBucket(), is(nullValue()));
+        assertThat(assignmentCounts.getAssignments().get(0).getCount(), is(0L));
+        assertThat(assignmentCounts.getTotalUsers().getBucketAssignments(), is(0L));
+        assertThat(assignmentCounts.getTotalUsers().getNullAssignments(), is(0L));
+        assertThat(assignmentCounts.getTotalUsers().getTotal(), is(0L));
+    }
+
+    @Test
+    public void testBucketAssignmentCount(){
+        Experiment experiment = Experiment.withID(Experiment.ID.valueOf(this.experimentId))
+                .withIsPersonalizationEnabled(false)
+                .withIsRapidExperiment(false).build();
+        List<BucketAssignmentCount> mockedList = new ArrayList<>();
+        mockedList.add(BucketAssignmentCount.builder()
+                .bucketLabel("bucket-1")
+                .count(500L)
+                .experimentId(this.experimentId)
+                .build()
+        );
+        mockedList.add(BucketAssignmentCount.builder()
+                .bucketLabel(null)
+                .count(500L)
+                .experimentId(this.experimentId)
+                .build()
+        );
+        Result<BucketAssignmentCount> result = mock(Result.class);
+        when(bucketAssignmentCountAccessor.selectBy(eq(experiment.getID().getRawID())))
+                .thenReturn(result);
+        when(result.iterator()).thenReturn(mockedList.iterator());
+        AssignmentCounts assignmentCounts = repository.getBucketAssignmentCount(experiment);
+        assertThat(assignmentCounts.getExperimentID(), is(experiment.getID()));
+        assertThat(assignmentCounts.getAssignments().size(), is(mockedList.size()));
+        for(int i =0; i < mockedList.size(); i++) {
+            String label = mockedList.get(i).getBucketLabel();
+            if(Objects.isNull(label)) {
+                assertThat(assignmentCounts.getAssignments().get(i).getBucket(),
+                        is(mockedList.get(i).getBucketLabel()));
+            } else {
+                assertThat(assignmentCounts.getAssignments().get(i).getBucket(),
+                        is(Bucket.Label.valueOf(mockedList.get(i).getBucketLabel())));
+            }
+            assertThat(assignmentCounts.getAssignments().get(i).getCount(), is(mockedList.get(i).getCount()));
+        }
+        assertThat(assignmentCounts.getTotalUsers().getBucketAssignments(), is(500L));
+        assertThat(assignmentCounts.getTotalUsers().getNullAssignments(), is(500L));
+        assertThat(assignmentCounts.getTotalUsers().getTotal(), is(1000L));
     }
 
 }
