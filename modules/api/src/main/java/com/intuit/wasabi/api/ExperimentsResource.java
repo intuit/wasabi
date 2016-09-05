@@ -26,6 +26,7 @@ import com.intuit.wasabi.assignment.Assignments;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authenticationobjects.UserInfo.Username;
 import com.intuit.wasabi.authorization.Authorization;
+import com.intuit.wasabi.authorizationobjects.Permission;
 import com.intuit.wasabi.authorizationobjects.UserRole;
 import com.intuit.wasabi.events.EventsExport;
 import com.intuit.wasabi.exceptions.AuthenticationException;
@@ -33,7 +34,14 @@ import com.intuit.wasabi.exceptions.BucketNotFoundException;
 import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
 import com.intuit.wasabi.exceptions.TimeFormatException;
 import com.intuit.wasabi.exceptions.TimeZoneFormatException;
-import com.intuit.wasabi.experiment.*;
+
+import com.intuit.wasabi.experiment.Buckets;
+import com.intuit.wasabi.experiment.Experiments;
+import com.intuit.wasabi.experiment.Favorites;
+import com.intuit.wasabi.experiment.Mutex;
+import com.intuit.wasabi.experiment.Pages;
+import com.intuit.wasabi.experiment.Priorities;
+
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.BucketList;
@@ -72,8 +80,22 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
-import static com.intuit.wasabi.api.APISwaggerResource.*;
-import static com.intuit.wasabi.authorizationobjects.Permission.*;
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_FILTER;
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_MODBUCK;
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_PAGE;
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_PER_PAGE;
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_PUTBUCK;
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_SORT;
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_TIMEZONE;
+import static com.intuit.wasabi.api.APISwaggerResource.DOC_FILTER;
+import static com.intuit.wasabi.api.APISwaggerResource.DOC_PAGE;
+import static com.intuit.wasabi.api.APISwaggerResource.DOC_PER_PAGE;
+import static com.intuit.wasabi.api.APISwaggerResource.DOC_SORT;
+import static com.intuit.wasabi.api.APISwaggerResource.DOC_TIMEZONE;
+import static com.intuit.wasabi.api.APISwaggerResource.EXAMPLE_AUTHORIZATION_HEADER;
+import static com.intuit.wasabi.authorizationobjects.Permission.CREATE;
+import static com.intuit.wasabi.authorizationobjects.Permission.READ;
+import static com.intuit.wasabi.authorizationobjects.Permission.UPDATE;
 import static com.intuit.wasabi.authorizationobjects.Role.ADMIN;
 import static com.intuit.wasabi.authorizationobjects.UserRole.newInstance;
 import static com.intuit.wasabi.experimentobjects.Experiment.State.DELETED;
@@ -82,7 +104,9 @@ import static com.intuit.wasabi.experimentobjects.Experiment.from;
 import static java.lang.Boolean.FALSE;
 import static java.util.TimeZone.getTimeZone;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
-import static javax.ws.rs.core.MediaType.*;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
+import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.Response.Status.CREATED;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -399,7 +423,7 @@ public class ExperimentsResource {
             throw new ExperimentNotFoundException(experimentID);
         }
 
-        authorization.checkUserPermissions(userName, experiment.getApplicationName(), DELETE);
+        authorization.checkUserPermissions(userName, experiment.getApplicationName(), Permission.DELETE);
 
         // Note: deleting an experiment follows the same rules as
         // updating its state to "deleted" -- so reuse the code.
@@ -716,7 +740,7 @@ public class ExperimentsResource {
             throw new ExperimentNotFoundException(experimentID);
         }
 
-        authorization.checkUserPermissions(userName, experiment.getApplicationName(), DELETE);
+        authorization.checkUserPermissions(userName, experiment.getApplicationName(), Permission.DELETE);
 
         UserInfo user = authorization.getUserInfo(userName);
 
@@ -889,7 +913,7 @@ public class ExperimentsResource {
             throw new ExperimentNotFoundException(experimentID_1);
         }
 
-        authorization.checkUserPermissions(userName, experiment.getApplicationName(), DELETE);
+        authorization.checkUserPermissions(userName, experiment.getApplicationName(), Permission.DELETE);
         //this is the user that triggered the event and will be used for logging
         mutex.deleteExclusion(experimentID_1, experimentID_2, authorization.getUserInfo(userName));
 
@@ -1186,7 +1210,7 @@ public class ExperimentsResource {
             throw new ExperimentNotFoundException(experimentID);
         }
 
-        authorization.checkUserPermissions(userName, experiment.getApplicationName(), DELETE);
+        authorization.checkUserPermissions(userName, experiment.getApplicationName(), Permission.DELETE);
         pages.deletePage(experimentID, pageName, authorization.getUserInfo(userName));
 
         return httpHeader.headers(NO_CONTENT).build();

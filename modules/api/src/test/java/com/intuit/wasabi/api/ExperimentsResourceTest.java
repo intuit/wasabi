@@ -394,7 +394,6 @@ public class ExperimentsResourceTest {
                 authorization, buckets, mutex, pages, priorities, favorites, "US/New York", "YYYY-mm-DD",
                 new HttpHeader("MyApp-???"), paginationHelper);
 
-
         when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
         when(authorization.getUserInfo(USER)).thenReturn(USERINFO);
 
@@ -489,7 +488,6 @@ public class ExperimentsResourceTest {
         ExperimentsResource experimentsResource = new ExperimentsResource(experiments, eventsExport, assignments,
                 authorization, buckets, mutex, pages, priorities, favorites, "US/New York", "YYYY-mm-DD",
                 new HttpHeader("MyApp-???"), paginationHelper);
-
 
         when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
         when(experiments.getExperiment(experiment.getID())).thenReturn(null);
@@ -633,7 +631,6 @@ public class ExperimentsResourceTest {
                 authorization, buckets, mutex, pages, priorities, favorites, "US/New York", "YYYY-mm-DD",
                 new HttpHeader("MyApp-???"), paginationHelper);
 
-
         when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
         when(experiments.getExperiment(experiment.getID())).thenReturn(null);
         thrown.expect(ExperimentNotFoundException.class);
@@ -656,7 +653,6 @@ public class ExperimentsResourceTest {
         ExperimentsResource experimentsResource = new ExperimentsResource(experiments, eventsExport, assignments,
                 authorization, buckets, mutex, pages, priorities, favorites, "US/New York", "YYYY-mm-DD",
                 new HttpHeader("MyApp-???"), paginationHelper);
-
 
         when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
         when(authorization.getUserInfo(USER)).thenReturn(USERINFO);
@@ -870,7 +866,6 @@ public class ExperimentsResourceTest {
                 authorization, buckets, mutex, pages, priorities, favorites, "US/New York", "YYYY-mm-DD",
                 new HttpHeader("MyApp-???"), paginationHelper);
 
-
         Experiment experiment2 = Experiment.withID(Experiment.ID.newInstance())
                 .withApplicationName(TESTAPP)
                 .withStartTime(new Date())
@@ -1001,7 +996,6 @@ public class ExperimentsResourceTest {
                 authorization, buckets, mutex, pages, priorities, favorites, "US/New York", "YYYY-mm-DD",
                 new HttpHeader("MyApp-???"), paginationHelper);
 
-
         ExperimentPageList experimentPageList = new ExperimentPageList();
 
         when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
@@ -1044,7 +1038,6 @@ public class ExperimentsResourceTest {
         ExperimentsResource experimentsResource = new ExperimentsResource(experiments, eventsExport, assignments,
                 authorization, buckets, mutex, pages, priorities, favorites, "US/New York", "YYYY-mm-DD",
                 new HttpHeader("MyApp-???"), paginationHelper);
-
 
         when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
         when(experiments.getExperiment(experiment.getID())).thenReturn(null);
@@ -1193,7 +1186,8 @@ public class ExperimentsResourceTest {
 
         thrown.expect(ExperimentNotFoundException.class);
         ExperimentsResource experimentsResource = new ExperimentsResource(experiments, eventsExport, assignments,
-                authorization, buckets, mutex, pages, priorities, favorites, "US/New York", "YYYY-mm-DD", new HttpHeader("MyApp-???"), paginationHelper);
+                authorization, buckets, mutex, pages, priorities, favorites, "US/New York", "YYYY-mm-DD",
+                new HttpHeader("MyApp-???"), paginationHelper);
         experimentsResource.putBucket(experiment.getID(), bucketList, USERPASS);
     }
 
@@ -1207,7 +1201,8 @@ public class ExperimentsResourceTest {
         when(experiments.getExperiment(experiment.getID())).thenReturn(experiment);
 
         ExperimentsResource experimentsResource = new ExperimentsResource(experiments, eventsExport, assignments,
-                authorization, buckets, mutex, pages, priorities, favorites, "US/New York", "YYYY-mm-DD", new HttpHeader("MyApp-???"), paginationHelper);
+                authorization, buckets, mutex, pages, priorities, favorites, "US/New York", "YYYY-mm-DD",
+                new HttpHeader("MyApp-???"), paginationHelper);
 
         assertNotNull(experimentsResource.putBucket(experiment.getID(), bucketList, USERPASS));
     }
@@ -1241,8 +1236,8 @@ public class ExperimentsResourceTest {
         when(uriInfo.getAbsolutePathBuilder()).thenReturn(fromPath(PATH));
 
         ExperimentsResource experimentsResource = new ExperimentsResource(experiments, eventsExport, assignments,
-                authorization, buckets, mutex, pages, priorities, favorites, "US/New York", "YYYY-mm-DD", new HttpHeader("MyApp-???"), paginationHelper);
-
+                authorization, buckets, mutex, pages, priorities, favorites, "US/New York", "YYYY-mm-DD",
+                new HttpHeader("MyApp-???"), paginationHelper);
 
         Response response = experimentsResource.postExperiment(newExperiment, false, "Basic: "+USERPASS);
 

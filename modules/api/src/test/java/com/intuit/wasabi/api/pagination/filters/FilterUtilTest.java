@@ -22,7 +22,10 @@ import org.junit.Test;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.*;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * Tests for {@link FilterUtil}.
@@ -129,6 +132,13 @@ public class FilterUtilTest {
             Assert.assertEquals("Date not formatted correctly.",
                     testCase.getValue(),
                     FilterUtil.formatDateTimeAsUI(date, testCase.getKey()));
+        }
+
+        try {
+            FilterUtil.formatDateTimeAsUI(date, " 0200");
+            Assert.fail("Was able to format incorrect timezone.");
+        } catch (PaginationException expected) {
+            // pass
         }
     }
 
