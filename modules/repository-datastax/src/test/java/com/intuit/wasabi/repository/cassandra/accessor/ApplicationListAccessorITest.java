@@ -26,6 +26,7 @@ import com.google.inject.Key;
 import com.google.inject.name.Names;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.repository.cassandra.CassandraRepositoryModule;
+import com.intuit.wasabi.repository.cassandra.IntegrationTestBase;
 import com.intuit.wasabi.repository.cassandra.pojo.ApplicationList;
 
 import org.junit.BeforeClass;
@@ -36,19 +37,14 @@ import java.util.List;
 /**
  * These tests are just make sure that the queries work
  */
-public class ApplicationListAccessorITest {
-    static Session session;
-    static MappingManager manager;
+public class ApplicationListAccessorITest extends IntegrationTestBase {
     static ApplicationListAccessor accessor;
     static String applicationName = "MyTestApplication_" + System.currentTimeMillis();
 
     @BeforeClass
     public static void setup(){
-        Injector injector = Guice.createInjector(new CassandraRepositoryModule());
-        injector.getInstance(Key.get(String.class, Names.named("CassandraInstanceName")));
-
-        session = injector.getInstance(CassandraDriver.class).getSession();
-        manager = new MappingManager(session);
+    	IntegrationTestBase.setup();
+    	if (accessor != null) return;
         accessor = manager.createAccessor(ApplicationListAccessor.class);
     }
 

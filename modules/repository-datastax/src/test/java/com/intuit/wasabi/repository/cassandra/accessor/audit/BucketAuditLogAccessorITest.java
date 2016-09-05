@@ -17,53 +17,37 @@ package com.intuit.wasabi.repository.cassandra.accessor.audit;
 
 import static org.junit.Assert.assertEquals;
 
-import com.datastax.driver.core.Session;
-import com.datastax.driver.mapping.MappingManager;
 import com.datastax.driver.mapping.Result;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.name.Names;
-import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
-import com.intuit.wasabi.experimentobjects.Bucket.State;
-import com.intuit.wasabi.repository.cassandra.CassandraRepositoryModule;
+import com.intuit.wasabi.repository.cassandra.IntegrationTestBase;
 import com.intuit.wasabi.repository.cassandra.accessor.audit.BucketAuditLogAccessor;
-import com.intuit.wasabi.repository.cassandra.pojo.Bucket;
 import com.intuit.wasabi.repository.cassandra.pojo.audit.BucketAuditLog;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 /**
  * These tests are just make sure that the queries work
  */
-public class BucketAuditLogAccessorITest {
-    static Session session;
-    static MappingManager manager;
+public class BucketAuditLogAccessorITest extends IntegrationTestBase {
     static BucketAuditLogAccessor accessor;
     static UUID experimentId;
     static Date date;
 
     @BeforeClass
     public static void setupClass(){
-        Injector injector = Guice.createInjector(new CassandraRepositoryModule());
-        injector.getInstance(Key.get(String.class, Names.named("CassandraInstanceName")));
-
-        session = injector.getInstance(CassandraDriver.class).getSession();
-        manager = new MappingManager(session);
+    	IntegrationTestBase.setup();
+    	if (accessor != null) return;
         accessor = manager.createAccessor(BucketAuditLogAccessor.class);
         experimentId = UUID.randomUUID();
         date = new Date();
     }
 
     @Before
-    public void setup() {
+    public void setupTest() {
     	session.execute("truncate wasabi_experiments.bucket_audit_log");
     }
     

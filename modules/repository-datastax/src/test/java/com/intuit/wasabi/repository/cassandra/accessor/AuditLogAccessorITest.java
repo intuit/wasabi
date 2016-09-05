@@ -15,20 +15,11 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.cassandra.accessor;
 
-import com.datastax.driver.core.Session;
-import com.datastax.driver.mapping.Mapper;
-import com.datastax.driver.mapping.MappingManager;
 import com.datastax.driver.mapping.Result;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.name.Names;
 import com.intuit.wasabi.auditlogobjects.AuditLogAction;
-import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.repository.AuditLogRepository;
-import com.intuit.wasabi.repository.cassandra.CassandraRepositoryModule;
+import com.intuit.wasabi.repository.cassandra.IntegrationTestBase;
 import com.intuit.wasabi.repository.cassandra.accessor.audit.AuditLogAccessor;
-import com.intuit.wasabi.repository.cassandra.pojo.UserFeedback;
 import com.intuit.wasabi.repository.cassandra.pojo.audit.AuditLog;
 
 import org.junit.BeforeClass;
@@ -41,23 +32,16 @@ import java.util.UUID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class AuditLogAccessorITest {
-    static Session session;
-    static MappingManager manager;
+public class AuditLogAccessorITest extends IntegrationTestBase {
     static AuditLogAccessor accessor;
-    static Mapper<UserFeedback> mapper;
 	private static String userId = "userid1";
 	private static String applicationName;
 
     @BeforeClass
     public static void setup(){
-    	
-        Injector injector = Guice.createInjector(new CassandraRepositoryModule());
-        injector.getInstance(Key.get(String.class, Names.named("CassandraInstanceName")));
+    	IntegrationTestBase.setup();
+    	if (accessor != null) return;
 
-        session = injector.getInstance(CassandraDriver.class).getSession();
-        manager = new MappingManager(session);
-        mapper = manager.mapper(UserFeedback.class);
         accessor = manager.createAccessor(AuditLogAccessor.class);
         applicationName = "ApplicationName" + System.currentTimeMillis();
         session.execute("delete from wasabi_experiments.auditlog where application_name = '" 

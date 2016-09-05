@@ -18,14 +18,7 @@ package com.intuit.wasabi.repository.cassandra.accessor;
 import static org.junit.Assert.assertEquals;
 
 import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.Session;
-import com.datastax.driver.mapping.MappingManager;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.name.Names;
-import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
-import com.intuit.wasabi.repository.cassandra.CassandraRepositoryModule;
+import com.intuit.wasabi.repository.cassandra.IntegrationTestBase;
 import com.intuit.wasabi.repository.cassandra.accessor.index.UserBucketIndexAccessor;
 
 import org.junit.BeforeClass;
@@ -37,9 +30,7 @@ import java.util.UUID;
 /**
  * These tests are just make sure that the queries work
  */
-public class UserBucketIndexAccessorITest {
-    static Session session;
-    static MappingManager manager;
+public class UserBucketIndexAccessorITest extends IntegrationTestBase {
     static UserBucketIndexAccessor accessor;
     static String applicationName = "MyTestApplication_" + System.currentTimeMillis();
 	private static String bucketLabel;
@@ -48,12 +39,9 @@ public class UserBucketIndexAccessorITest {
 
     @BeforeClass
     public static void setup(){
-        Injector injector = Guice.createInjector(new CassandraRepositoryModule());
-        injector.getInstance(Key.get(String.class, Names.named("CassandraInstanceName")));
-
-        session = injector.getInstance(CassandraDriver.class).getSession();
-        manager = new MappingManager(session);
-        accessor = manager.createAccessor(UserBucketIndexAccessor.class);
+    	IntegrationTestBase.setup(); 
+    	if (accessor != null) return;
+    	accessor = manager.createAccessor(UserBucketIndexAccessor.class);
         base = UUID.randomUUID();
         context = "context" + base;
         bucketLabel = "bucketLabel" + base;

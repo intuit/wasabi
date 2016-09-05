@@ -15,7 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.cassandra.impl;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -23,57 +23,49 @@ import java.util.List;
 import java.util.UUID;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.datastax.driver.core.Session;
 import com.datastax.driver.mapping.Mapper;
-import com.datastax.driver.mapping.MappingManager;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.name.Names;
-import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.Experiment.ID;
 import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
-import com.intuit.wasabi.repository.cassandra.CassandraRepositoryModule;
+import com.intuit.wasabi.repository.cassandra.IntegrationTestBase;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.PrioritiesAccessor;
 
-public class CassandraPrioritiesRepositoryITest {
+public class CassandraPrioritiesRepositoryITest extends IntegrationTestBase {
 
-    PrioritiesAccessor accessor;
-    ExperimentAccessor experimentAccessor;
+    static PrioritiesAccessor accessor;
+    static ExperimentAccessor experimentAccessor;
     
-    CassandraPrioritiesRepository repository;
+    static CassandraPrioritiesRepository repository;
     
-    Application.Name applicationName;
+    static Application.Name applicationName;
     
-    List<Experiment.ID> priorityIds;
+    static List<Experiment.ID> priorityIds;
 
-	private Session session;
-
-	private MappingManager manager;
-
-	private Mapper<com.intuit.wasabi.repository.cassandra.pojo.Application> mapper;
+	private static Mapper<com.intuit.wasabi.repository.cassandra.pojo.Application> mapper;
     static UUID experimentId1 = UUID.randomUUID();
     static UUID experimentId2 = UUID.randomUUID();
     static Date date1 = new Date();
     static Date date2 = new Date();
 
     
-    @Before
-    public void setUp() throws Exception {
-        Injector injector = Guice.createInjector(new CassandraRepositoryModule());
-        injector.getInstance(Key.get(String.class, Names.named("CassandraInstanceName")));
-
-        session = injector.getInstance(CassandraDriver.class).getSession();
-        manager = new MappingManager(session);
+    @BeforeClass
+    public static void setUp() throws Exception {
+    	IntegrationTestBase.setup();
+    	if (repository != null) return;
+    	
         mapper = manager.mapper(com.intuit.wasabi.repository.cassandra.pojo.Application.class);
     	accessor = manager.createAccessor(PrioritiesAccessor.class);
     	experimentAccessor = manager.createAccessor(ExperimentAccessor.class);
     	repository = new CassandraPrioritiesRepository(accessor,experimentAccessor);
+    }
+
+    @Before
+    public void setUpLocal() {
     	applicationName = Application.Name.valueOf("TestApplicationName" + System.currentTimeMillis());
     	priorityIds = new ArrayList<>();
     }

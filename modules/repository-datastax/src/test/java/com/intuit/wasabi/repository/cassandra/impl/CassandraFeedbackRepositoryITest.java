@@ -15,28 +15,22 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.cassandra.impl;
 
-import com.datastax.driver.core.Session;
-import com.datastax.driver.mapping.MappingManager;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.name.Names;
-import com.intuit.wasabi.authenticationobjects.UserInfo.Username;
-import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
-import com.intuit.wasabi.feedbackobjects.UserFeedback;
-import com.intuit.wasabi.repository.cassandra.CassandraRepositoryModule;
-import com.intuit.wasabi.repository.cassandra.accessor.UserFeedbackAccessor;
+import static org.junit.Assert.assertEquals;
+
+import java.util.Date;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Date;
-import java.util.List;
+import com.datastax.driver.mapping.MappingManager;
+import com.intuit.wasabi.authenticationobjects.UserInfo.Username;
+import com.intuit.wasabi.feedbackobjects.UserFeedback;
+import com.intuit.wasabi.repository.cassandra.IntegrationTestBase;
+import com.intuit.wasabi.repository.cassandra.accessor.UserFeedbackAccessor;
 
-import static org.junit.Assert.assertEquals;
-
-public class CassandraFeedbackRepositoryITest {
+public class CassandraFeedbackRepositoryITest extends IntegrationTestBase {
 
     UserFeedbackAccessor accessor;
 
@@ -47,27 +41,23 @@ public class CassandraFeedbackRepositoryITest {
 	private String userId = "userid1";
 
 	private Username username;
-
-	private Session session;
     
     @Before
     public void setUp() throws Exception {
-        Injector injector = Guice.createInjector(new CassandraRepositoryModule());
-        injector.getInstance(Key.get(String.class, Names.named("CassandraInstanceName")));
+    	IntegrationTestBase.setup();
 
-        session = injector.getInstance(CassandraDriver.class).getSession();
+        if (repository != null) return;
+    	
         manager = new MappingManager(session);
         accessor = manager.createAccessor(UserFeedbackAccessor.class);
 
     	repository = new CassandraFeedbackRepository(accessor);
-        session.execute("delete from wasabi_experiments.user_feedback where user_id = '" + userId + "'");
 		username = Username.valueOf(userId);
     }
     
     @After
     public void tearDown() throws Exception {
         session.execute("delete from wasabi_experiments.user_feedback where user_id = '" + userId + "'");
-        session.close();
     }
 
     @Test

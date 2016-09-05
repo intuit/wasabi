@@ -15,15 +15,8 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.cassandra.accessor;
 
-import com.datastax.driver.core.Session;
-import com.datastax.driver.mapping.MappingManager;
 import com.datastax.driver.mapping.Result;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.name.Names;
-import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
-import com.intuit.wasabi.repository.cassandra.CassandraRepositoryModule;
+import com.intuit.wasabi.repository.cassandra.IntegrationTestBase;
 import com.intuit.wasabi.repository.cassandra.pojo.Exclusion;
 
 import org.junit.BeforeClass;
@@ -34,19 +27,14 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 
-public class MutexAccessorITest {
-    static Session session;
-    static MappingManager manager;
+public class MutexAccessorITest extends IntegrationTestBase {
     static ExclusionAccessor accessor;
     static String applicationName = "MyTestApplication_" + System.currentTimeMillis();
 
     @BeforeClass
     public static void setup(){
-        Injector injector = Guice.createInjector(new CassandraRepositoryModule());
-        injector.getInstance(Key.get(String.class, Names.named("CassandraInstanceName")));
-
-        session = injector.getInstance(CassandraDriver.class).getSession();
-        manager = new MappingManager(session);
+    	IntegrationTestBase.setup();
+    	if (accessor != null) return;
         accessor = manager.createAccessor(ExclusionAccessor.class);
 
     }

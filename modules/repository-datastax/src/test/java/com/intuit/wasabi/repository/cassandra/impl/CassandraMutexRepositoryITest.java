@@ -15,33 +15,29 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.cassandra.impl;
 
-import com.datastax.driver.core.Session;
-import com.datastax.driver.mapping.Mapper;
-import com.datastax.driver.mapping.MappingManager;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.name.Names;
-import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
-import com.intuit.wasabi.experimentobjects.Application;
-import com.intuit.wasabi.experimentobjects.Experiment;
-import com.intuit.wasabi.experimentobjects.Experiment.ID;
-import com.intuit.wasabi.experimentobjects.ExperimentList;
-import com.intuit.wasabi.repository.cassandra.CassandraRepositoryModule;
-import com.intuit.wasabi.repository.cassandra.accessor.ExclusionAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.Test;
 
-public class CassandraMutexRepositoryITest {
+import com.datastax.driver.mapping.Mapper;
+import com.datastax.driver.mapping.MappingManager;
+import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
+import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.experimentobjects.Experiment.ID;
+import com.intuit.wasabi.experimentobjects.ExperimentList;
+import com.intuit.wasabi.repository.cassandra.IntegrationTestBase;
+import com.intuit.wasabi.repository.cassandra.accessor.ExclusionAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
+
+public class CassandraMutexRepositoryITest extends IntegrationTestBase {
 
     ExclusionAccessor accessor;
     
@@ -49,9 +45,6 @@ public class CassandraMutexRepositoryITest {
     
     Application.Name applicationName;
     
-	private Session session;
-
-	private MappingManager manager;
 
 	private Mapper<com.intuit.wasabi.repository.cassandra.pojo.Exclusion> mapper;
 
@@ -64,11 +57,10 @@ public class CassandraMutexRepositoryITest {
     
     @Before
     public void setUp() throws Exception {
-        Injector injector = Guice.createInjector(new CassandraRepositoryModule());
-        injector.getInstance(Key.get(String.class, Names.named("CassandraInstanceName")));
-
-        session = injector.getInstance(CassandraDriver.class).getSession();
-        driver = injector.getInstance(CassandraDriver.class);
+    	IntegrationTestBase.setup();
+    	if (repository != null) return;
+    	
+    	driver = injector.getInstance(CassandraDriver.class);
         manager = new MappingManager(session);
         mapper = manager.mapper(com.intuit.wasabi.repository.cassandra.pojo.Exclusion.class);
     	accessor = manager.createAccessor(ExclusionAccessor.class);

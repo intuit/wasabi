@@ -15,24 +15,17 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.cassandra.impl;
 
-import com.datastax.driver.core.Session;
 import com.datastax.driver.mapping.Mapper;
-import com.datastax.driver.mapping.MappingManager;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.name.Names;
 import com.intuit.wasabi.auditlogobjects.AuditLogAction;
 import com.intuit.wasabi.auditlogobjects.AuditLogEntry;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authenticationobjects.UserInfo.Username;
-import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.repository.AuditLogRepository;
 import com.intuit.wasabi.repository.RepositoryException;
-import com.intuit.wasabi.repository.cassandra.CassandraRepositoryModule;
+import com.intuit.wasabi.repository.cassandra.IntegrationTestBase;
 import com.intuit.wasabi.repository.cassandra.accessor.audit.AuditLogAccessor;
 import com.intuit.wasabi.repository.cassandra.pojo.audit.AuditLog;
 
@@ -45,7 +38,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class CassandraAuditLogRepositoryITest {
+public class CassandraAuditLogRepositoryITest extends IntegrationTestBase {
 
     AuditLogAccessor auditLogAccessor;
 
@@ -55,10 +48,6 @@ public class CassandraAuditLogRepositoryITest {
 
 	private AuditLogEntry entry;
 	private AuditLogEntry entryWithMissingApplicationName;
-
-	private Session session;
-
-	private MappingManager manager;
 
 	private Mapper<AuditLog> mapper;
 
@@ -70,12 +59,11 @@ public class CassandraAuditLogRepositoryITest {
     
     @Before
     public void setUp() throws Exception {
-        Injector injector = Guice.createInjector(new CassandraRepositoryModule());
-        injector.getInstance(Key.get(String.class, Names.named("CassandraInstanceName")));
-
-        session = injector.getInstance(CassandraDriver.class).getSession();
-        manager = new MappingManager(session);
-        mapper = manager.mapper(AuditLog.class);
+    	IntegrationTestBase.setup();
+    	
+    	if (repository != null) return;
+        
+    	mapper = manager.mapper(AuditLog.class);
         auditLogAccessor = manager.createAccessor(AuditLogAccessor.class);
         applicationName = "ApplicationName_" + System.currentTimeMillis();
         session.execute("delete from wasabi_experiments.auditlog where application_name = '" 

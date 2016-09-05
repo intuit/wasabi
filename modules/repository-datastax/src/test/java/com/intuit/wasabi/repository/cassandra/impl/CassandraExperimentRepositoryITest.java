@@ -1,41 +1,8 @@
 package com.intuit.wasabi.repository.cassandra.impl;
 
-import com.datastax.driver.core.Session;
-import com.datastax.driver.mapping.MappingManager;
-import com.datastax.driver.mapping.Result;
-import com.google.common.collect.Table;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.name.Names;
-import com.intuit.wasabi.analyticsobjects.counts.AssignmentCounts;
-import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
-import com.intuit.wasabi.exceptions.ConstraintViolationException;
-import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
-import com.intuit.wasabi.experimentobjects.Application;
-import com.intuit.wasabi.experimentobjects.Application.Name;
-import com.intuit.wasabi.experimentobjects.Bucket;
-import com.intuit.wasabi.experimentobjects.BucketList;
-import com.intuit.wasabi.experimentobjects.Context;
-import com.intuit.wasabi.experimentobjects.Experiment.Label;
-import com.intuit.wasabi.experimentobjects.ExperimentList;
-import com.intuit.wasabi.experimentobjects.ExperimentValidator;
-import com.intuit.wasabi.experimentobjects.Bucket.State;
-import com.intuit.wasabi.experimentobjects.Experiment;
-import com.intuit.wasabi.experimentobjects.Experiment.ID;
-import com.intuit.wasabi.experimentobjects.NewExperiment;
-import com.intuit.wasabi.repository.AuditLogRepository;
-import com.intuit.wasabi.repository.RepositoryException;
-import com.intuit.wasabi.repository.cassandra.CassandraRepositoryModule;
-import com.intuit.wasabi.repository.cassandra.accessor.ApplicationListAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.BucketAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.audit.BucketAuditLogAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.audit.ExperimentAuditLogAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentLabelIndexAccessor;
-
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,23 +12,39 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.Test;
 
-public class CassandraExperimentRepositoryITest {
+import com.datastax.driver.mapping.Result;
+import com.google.common.collect.Table;
+import com.intuit.wasabi.analyticsobjects.counts.AssignmentCounts;
+import com.intuit.wasabi.exceptions.ConstraintViolationException;
+import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
+import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.experimentobjects.Application.Name;
+import com.intuit.wasabi.experimentobjects.Bucket;
+import com.intuit.wasabi.experimentobjects.Bucket.State;
+import com.intuit.wasabi.experimentobjects.BucketList;
+import com.intuit.wasabi.experimentobjects.Context;
+import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.experimentobjects.Experiment.ID;
+import com.intuit.wasabi.experimentobjects.Experiment.Label;
+import com.intuit.wasabi.experimentobjects.ExperimentList;
+import com.intuit.wasabi.experimentobjects.NewExperiment;
+import com.intuit.wasabi.repository.AuditLogRepository;
+import com.intuit.wasabi.repository.RepositoryException;
+import com.intuit.wasabi.repository.cassandra.IntegrationTestBase;
+import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.audit.BucketAuditLogAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.audit.ExperimentAuditLogAccessor;
+
+public class CassandraExperimentRepositoryITest extends IntegrationTestBase  {
 
     ExperimentAccessor experimentAccessor;
 
     CassandraExperimentRepository repository;
 
-	private Session session;
-
-	private MappingManager manager;
-
-	private String applicationName;
-
-	private CassandraDriver driver;
+//	private Session session;
 
 	private ID experimentID1;
 	private ID experimentID2;
@@ -72,13 +55,13 @@ public class CassandraExperimentRepositoryITest {
 	private NewExperiment newExperiment1;
 	private NewExperiment newExperiment2;
 
-	private ExperimentValidator validator;
-
-	private ExperimentLabelIndexAccessor experimentLabelIndexAccessor;
-	private ApplicationListAccessor applicationListAccessor;
-
-	private BucketAccessor bucketAccessor;
-
+//	private ExperimentValidator validator;
+//
+//	private ExperimentLabelIndexAccessor experimentLabelIndexAccessor;
+//	private ApplicationListAccessor applicationListAccessor;
+//
+//	private BucketAccessor bucketAccessor;
+//
 	private Context QA = Context.valueOf("qa");
 	private Application.Name appname;
 
@@ -87,28 +70,16 @@ public class CassandraExperimentRepositoryITest {
 	
     @Before
     public void setUp() throws Exception {
-        Injector injector = Guice.createInjector(new CassandraRepositoryModule());
-        injector.getInstance(Key.get(String.class, Names.named("CassandraInstanceName")));
-       
-        session = injector.getInstance(CassandraDriver.class).getSession();
-        driver = injector.getInstance(CassandraDriver.class);
-        manager = new MappingManager(session);
-        
+    	IntegrationTestBase.setup();
+
+    	if (repository != null) return;
+
         appname = Application.Name.valueOf("app1" + System.currentTimeMillis());
         
         experimentAccessor = injector.getInstance(ExperimentAccessor.class);
         bucketAuditLogAccessor = injector.getInstance(BucketAuditLogAccessor.class);
         experimentAuditLogAccessor = injector.getInstance(ExperimentAuditLogAccessor.class);
-        bucketAccessor = injector.getInstance(BucketAccessor.class);
-        experimentLabelIndexAccessor = injector.getInstance(
-        		ExperimentLabelIndexAccessor.class);
-        
-        applicationListAccessor = injector.getInstance(ApplicationListAccessor.class);
-        
-        applicationName = "ApplicationName_" + System.currentTimeMillis();
         session.execute("truncate wasabi_experiments.bucket");
-        
-        validator = new ExperimentValidator(); 
         
         session.execute("delete from wasabi_experiments.auditlog where application_name = '" 
         		+ AuditLogRepository.GLOBAL_ENTRY_APPLICATION.toString() + "'");
@@ -204,6 +175,12 @@ public class CassandraExperimentRepositoryITest {
 	public void testCreateBucketAccessorNullThrowsException() {
 		repository.setBucketAccessor(null);
 		repository.createBucket(bucket1);
+	}
+
+	@Test(expected=RepositoryException.class)
+	public void testRemoveExperimentLabelIndexAccessorNullThrowsException() {
+		repository.setExperimentLabelIndexAccessor(null);
+		repository.removeExperimentLabelIndex(appname,newExperiment1.getLabel());
 	}
 
 	@Test

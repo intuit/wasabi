@@ -9,25 +9,22 @@ import com.google.inject.Key;
 import com.google.inject.name.Names;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.repository.cassandra.CassandraRepositoryModule;
+import com.intuit.wasabi.repository.cassandra.IntegrationTestBase;
 import com.intuit.wasabi.repository.cassandra.pojo.Experiment;
+
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ExperimentAccessorTest {
-    static Session session;
-    static MappingManager manager;
+public class ExperimentAccessorTest extends IntegrationTestBase{
     static ExperimentAccessor accessor;
     static Mapper<Experiment> mapper;
     private final Logger logger = LoggerFactory.getLogger(ExperimentAccessorTest.class);
     private static final String TEST_UUID = "29f9db95-9a58-44f4-9e0f-2f1218e15e3c";
     @BeforeClass
     public static void setup(){
-        Injector injector = Guice.createInjector(new CassandraRepositoryModule());
-        injector.getInstance(Key.get(String.class, Names.named("CassandraInstanceName")));
-
-        session = injector.getInstance(CassandraDriver.class).getSession();
-        manager = new MappingManager(session);
+    	IntegrationTestBase.setup();
+    	if (accessor != null) return;
         mapper = manager.mapper(Experiment.class);
         accessor = manager.createAccessor(ExperimentAccessor.class);
     }

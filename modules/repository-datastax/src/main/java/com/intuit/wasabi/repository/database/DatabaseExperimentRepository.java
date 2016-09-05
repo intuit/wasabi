@@ -39,7 +39,7 @@ import static com.intuit.wasabi.experimentobjects.Experiment.State.DELETED;
  *
  * @see ExperimentRepository
  */
-class DatabaseExperimentRepository implements ExperimentRepository {
+public class DatabaseExperimentRepository implements ExperimentRepository {
 
 
     private final ExperimentValidator validator;

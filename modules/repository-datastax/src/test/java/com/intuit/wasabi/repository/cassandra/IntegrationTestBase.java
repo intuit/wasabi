@@ -15,35 +15,30 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.cassandra;
 
+import com.datastax.driver.core.Session;
+import com.datastax.driver.mapping.MappingManager;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.name.Names;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
-import com.intuit.wasabi.repository.AuthorizationRepository;
-import com.intuit.wasabi.repository.FeedbackRepository;
-import com.intuit.wasabi.repository.PagesRepository;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.intuit.wasabi.repository.cassandra.CassandraRepositoryModule;
 
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsNot.not;
-import static org.hamcrest.core.IsNull.nullValue;
-import static org.junit.Assert.assertThat;
+/**
+ * A utility class for creating session/etc once
+ */
+public class IntegrationTestBase {
+    protected static Session session;
+    protected static MappingManager manager;
+	protected static Injector injector;
 
-public class CassandraRepositoryModuleTest {
-
-    @Test
-    public void testConfigure() throws Exception {
-        Injector injector = Guice.createInjector(new CassandraRepositoryModule());
+    public static void setup(){
+    	if (injector != null)
+    		return;
+        injector = Guice.createInjector(new CassandraRepositoryModule());
         injector.getInstance(Key.get(String.class, Names.named("CassandraInstanceName")));
 
-        assertThat(injector.getInstance(CassandraDriver.class), is(not(nullValue())));
-        assertThat(injector.getInstance(CassandraDriver.class).isKeyspaceInitialized(), is(true));
-
-        assertThat(injector.getInstance(AuthorizationRepository.class), is(not(nullValue())));
-        assertThat(injector.getInstance(FeedbackRepository.class), is(not(nullValue())));
-        assertThat(injector.getInstance(PagesRepository.class), is(not(nullValue())));
+        session = injector.getInstance(CassandraDriver.class).getSession();
+        manager = new MappingManager(session);
     }
 }

@@ -15,17 +15,11 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.cassandra.accessor;
 
-import com.datastax.driver.core.Session;
 import com.datastax.driver.mapping.Mapper;
-import com.datastax.driver.mapping.MappingManager;
 import com.datastax.driver.mapping.Result;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.name.Names;
-import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
-import com.intuit.wasabi.repository.cassandra.CassandraRepositoryModule;
+import com.intuit.wasabi.repository.cassandra.IntegrationTestBase;
 import com.intuit.wasabi.repository.cassandra.pojo.UserFeedback;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -34,20 +28,16 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-public class UserFeedbackAccessorITest {
-    static Session session;
-    static MappingManager manager;
+public class UserFeedbackAccessorITest extends IntegrationTestBase {
     static UserFeedbackAccessor accessor;
     static Mapper<UserFeedback> mapper;
 	private static String userId = "userId1";
 
     @BeforeClass
     public static void setup(){
-        Injector injector = Guice.createInjector(new CassandraRepositoryModule());
-        injector.getInstance(Key.get(String.class, Names.named("CassandraInstanceName")));
-
-        session = injector.getInstance(CassandraDriver.class).getSession();
-        accessor = injector.getInstance(UserFeedbackAccessor.class);
+    	IntegrationTestBase.setup();
+    	if (accessor != null) return;
+    	accessor = injector.getInstance(UserFeedbackAccessor.class);
         
         session.execute("delete from wasabi_experiments.user_feedback where user_id = '" + userId + "'");
     }

@@ -17,15 +17,8 @@ package com.intuit.wasabi.repository.cassandra.accessor.audit;
 
 import static org.junit.Assert.assertEquals;
 
-import com.datastax.driver.core.Session;
-import com.datastax.driver.mapping.MappingManager;
 import com.datastax.driver.mapping.Result;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.name.Names;
-import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
-import com.intuit.wasabi.repository.cassandra.CassandraRepositoryModule;
+import com.intuit.wasabi.repository.cassandra.IntegrationTestBase;
 import com.intuit.wasabi.repository.cassandra.accessor.audit.ExperimentAuditLogAccessor;
 import com.intuit.wasabi.repository.cassandra.pojo.audit.ExperimentAuditLog;
 
@@ -39,27 +32,22 @@ import java.util.UUID;
 /**
  * These tests are just make sure that the queries work
  */
-public class ExperimentAuditLogAccessorITest {
-    static Session session;
-    static MappingManager manager;
+public class ExperimentAuditLogAccessorITest extends IntegrationTestBase {
     static ExperimentAuditLogAccessor accessor;
     static UUID experimentId;
     static Date date;
 
     @BeforeClass
     public static void setupClass(){
-        Injector injector = Guice.createInjector(new CassandraRepositoryModule());
-        injector.getInstance(Key.get(String.class, Names.named("CassandraInstanceName")));
-
-        session = injector.getInstance(CassandraDriver.class).getSession();
-        manager = new MappingManager(session);
+    	IntegrationTestBase.setup();
+    	if (accessor != null) return;
         accessor = manager.createAccessor(ExperimentAuditLogAccessor.class);
         experimentId = UUID.randomUUID();
         date = new Date();
     }
 
     @Before
-    public void setup() {
+    public void setupTest() {
     	session.execute("truncate wasabi_experiments.experiment_audit_log");
     }
     

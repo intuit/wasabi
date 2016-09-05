@@ -5,6 +5,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.cassandra.datastax.DefaultCassandraDriver;
+import com.intuit.wasabi.database.DatabaseModule;
 import com.intuit.wasabi.repository.*;
 import com.intuit.wasabi.repository.cassandra.accessor.*;
 import com.intuit.wasabi.repository.cassandra.accessor.audit.AuditLogAccessor;
@@ -21,12 +22,14 @@ import com.intuit.wasabi.repository.cassandra.provider.audit.ExperimentAuditLogA
 import com.intuit.wasabi.repository.cassandra.provider.count.BucketAssignmentCountAccessorProvider;
 import com.intuit.wasabi.repository.cassandra.provider.export.UserAssignmentExportAccessorProvider;
 import com.intuit.wasabi.repository.cassandra.provider.index.*;
+import com.intuit.wasabi.repository.database.*;
 import com.intuit.wasabi.userdirectory.UserDirectoryModule;
 
 import org.slf4j.Logger;
 
 import javax.inject.Singleton;
 
+import static com.google.inject.Scopes.SINGLETON;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class CassandraRepositoryModule extends AbstractModule {
@@ -40,6 +43,9 @@ public class CassandraRepositoryModule extends AbstractModule {
         bind(String.class).annotatedWith(Names.named("CassandraInstanceName")).toInstance("CassandraWasabiCluster");
         bind(CassandraDriver.class).to(DefaultCassandraDriver.class).asEagerSingleton();
         install(new UserDirectoryModule());
+        
+        // database module
+        install(new DatabaseModule());
 
         //Like mappers, accessors are cached at the manager level and thus, are thread-safe/sharable.
         bind(MappingManager.class).toProvider(MappingManagerProvider.class).in(Singleton.class);
@@ -83,5 +89,7 @@ public class CassandraRepositoryModule extends AbstractModule {
         bind(PagesRepository.class).to(CassandraPagesRepository.class).in(Singleton.class);
         bind(PrioritiesRepository.class).to(CassandraPrioritiesRepository.class).in(Singleton.class);
         bind(ExperimentRepository.class).annotatedWith(CassandraRepository.class).to(CassandraExperimentRepository.class).in(Singleton.class);
+        bind(ExperimentRepository.class).annotatedWith(DatabaseRepository.class).to(DatabaseExperimentRepository.class).in(Singleton.class);
+        bind(AnalyticsRepository.class).to(DatabaseAnalytics.class).in(SINGLETON);
     }
 }
