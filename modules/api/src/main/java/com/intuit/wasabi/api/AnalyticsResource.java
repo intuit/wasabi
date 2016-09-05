@@ -172,14 +172,13 @@ public class AnalyticsResource {
                 .filter(experiment -> favoriteList.contains(experiment.getId()))
                 .forEach(experiment -> experiment.setFavorite(true));
 
-        //get details
-        experimentDetails.getAnalyticData(authorizedExperiments, parameters);
-
         //filter and paginate
-        Map<String, Object> experimentResponse = experimentDetailPaginationHelper.paginate("?",
+        Map<String, Object> experimentResponse = experimentDetailPaginationHelper.paginate("experimentDetails",
                 authorizedExperiments, filter, timezoneOffset,
                 (perPage != -1 ? "-favorite," : "") + sort, page, perPage);
 
+        //and now add the analytics data
+        experimentDetails.getAnalyticData((List<ExperimentDetail>)experimentResponse.get("experimentDetails"), parameters);
 
         return httpHeader.headers().entity(experimentResponse).build();
     }

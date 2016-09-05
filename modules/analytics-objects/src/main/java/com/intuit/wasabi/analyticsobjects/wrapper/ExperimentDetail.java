@@ -47,7 +47,7 @@ public class ExperimentDetail {
 
     /**
      * This class holds the details for the Buckets. This is especially interesting for
-     * running experiments that already have assigned Users and corresponding action rates.
+     * running experiments that already have assigned users and corresponding action rates.
      */
     public class BucketDetail{
 
@@ -65,6 +65,14 @@ public class ExperimentDetail {
 
         private long userCount = 0;
 
+        /**
+         * Creates a BucketDetail with the basic information that are available for all buckets.
+         * @param label the label of the bucket
+         * @param isControl flag whether this bucket is control
+         * @param allocationPercent the allocation percentage for this bucket
+         *
+         * @see Bucket for further information
+         */
         public BucketDetail(Bucket.Label label, boolean isControl, double allocationPercent){
             setLabel(label);
             setControl(isControl);

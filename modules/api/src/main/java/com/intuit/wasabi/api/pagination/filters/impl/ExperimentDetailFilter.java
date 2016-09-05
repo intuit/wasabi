@@ -22,7 +22,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.function.BiPredicate;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 /**
  * Implements the {@link PaginationFilter} for {@link com.intuit.wasabi.analyticsobjects.wrapper.ExperimentDetail}s.
@@ -30,14 +29,14 @@ import java.util.function.Predicate;
 public class ExperimentDetailFilter extends PaginationFilter<ExperimentDetail> {
 
     public enum Property implements PaginationFilterProperty<ExperimentDetail>{
-        experiment_id(experimentDetail -> experimentDetail.getId().toString(), StringUtils::containsIgnoreCase),
         state(ExperimentDetail::getState, (state, filter) -> StringUtils.containsIgnoreCase(state.toString(), filter)),
+        state_exact(ExperimentDetail::getState, ExperimentFilter::stateTest),
         experiment_label(experimentDetail -> experimentDetail.getLabel().toString(), StringUtils::containsIgnoreCase),
         application_name(experimentDetail -> experimentDetail.getAppName().toString(), StringUtils::containsIgnoreCase),
         application_name_exact(experimentDetail -> experimentDetail.getAppName().toString(), StringUtils::equalsIgnoreCase),
-        favorite(ExperimentDetail::isFavorite, (isFavorite, filter) -> Boolean.parseBoolean(filter) == isFavorite)
-        ;
-
+        favorite(ExperimentDetail::isFavorite, (isFavorite, filter) -> Boolean.parseBoolean(filter) == isFavorite),
+        bucket_label(ExperimentDetail::getBuckets, (bucketDetails, filter) ->
+                bucketDetails.stream().anyMatch(bucketDetail -> StringUtils.containsIgnoreCase(bucketDetail.getLabel().toString(), filter)));
 
 
         private final Function<ExperimentDetail, ?> propertyExtractor;
@@ -83,23 +82,13 @@ public class ExperimentDetailFilter extends PaginationFilter<ExperimentDetail> {
         super.excludeFromFulltext(Property.application_name_exact);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean test(ExperimentDetail experimentFilter) {
-        return false;
+        return super.test(experimentFilter, Property.class);
     }
 
-    @Override
-    public Predicate<ExperimentDetail> and(Predicate<? super ExperimentDetail> other) {
-        return null;
-    }
 
-    @Override
-    public Predicate<ExperimentDetail> negate() {
-        return null;
-    }
-
-    @Override
-    public Predicate<ExperimentDetail> or(Predicate<? super ExperimentDetail> other) {
-        return null;
-    }
 }
