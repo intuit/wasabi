@@ -117,13 +117,16 @@ rem FUNCTION: Set docker environment variables correctly.
 rem FUNCTION: Create docker image for wasabi main
 :build_docker_image
     call :info Building docker image
-    setlocal enabledelayedexpansion enableextensions
-    for /f "tokens=1 delims=." %%T in ('powershell -Command "get-date -uformat %%s"') do set timestamp=%%T
-    call :debug echo Building image wasabi-main:%USERNAME%-%timestamp%
-    rem TODO shoeffner: allow --force-rm if needed
-    rem -t wasabi-main:%USERNAME%-%timestamp%
+    call :debug echo Building image wasabi-main:latest
     docker build -t wasabi-main:latest target\app
-    endlocal
+    
+    rem TODO shoeffner: allow --force-rm if needed, also unix scripts build 
+    rem wasabi-main:user-timestamp, which is not supported here for now, but
+    rem the following lines might help with that in the future:
+    rem setlocal enabledelayedexpansion enableextensions
+    rem for /f "tokens=1 delims=." %%T in ('powershell -Command "get-date -uformat %%s"') do set timestamp=%%T
+    rem endlocal
+
     goto :eof
     
 rem FUNCTION: Create a docker machine and set the proper environment variables.
@@ -149,7 +152,7 @@ rem FUNCTION: Create a docker network for wasabi
 
 rem FUNCTION: Logs the parameters as DEBUG.
 :debug
-    call :log [DEBUG] %*
+    rem call :log [DEBUG] %*
     call :log [DEBUG] %* >> wasabi_windows.log
     goto :eof
 

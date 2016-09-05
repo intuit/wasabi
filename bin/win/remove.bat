@@ -14,32 +14,90 @@ rem # See the License for the specific language governing permissions and
 rem # limitations under the License.
 rem ############################################################################
 
+rem default: just remove all containers
+if "" == "%1" (
+    call :remove_cassandra
+    call :remove_mysql
+    call :remove_wasabi
+    call :info Done
+    goto :eof
+)
 
-call :info Removing Wasabi images
-docker rmi wasabi-main >nul
+rem remove everything: containers, volumes, images, network, ...
+if "complete" == "%1" (
+    call :remove_cassandra v
+    call :remove_mysql v
+    call :remove_wasabi v
+    call :remove_image
+    call :remove_network
+    call :remove_machine
+    call :clear_env
+    call :info Done
+    goto :eof
+)
 
-call :info Removing Wasabi containers
-rem docker rm -fv wasabi-cassandra >nul
-rem docker rm -fv wasabi-mysql >nul
-docker rm -fv wasabi-main >nul
-
-call :info Removing Wasabi network
-docker network rm wasabinet >nul
-
-call :info Removing wasabi machine
-docker-machine rm -f wasabi >nul
-
-call :info Clearing environment variables
-setx DOCKER_TLS_VERIFY "" >nul
-setx DOCKER_HOST "" >nul
-setx DOCKER_CERT_PATH "" >nul
-setx DOCKER_MACHINE_NAME "" >nul
-RefreshEnv
-
+rem remove individual components
+:read_params
+    if "" == "%1" goto :eof
+    call :remove_%1
+    
+    shift
+    goto :read_params
 call :info Done
 
 
 goto :eof
+
+rem FUNCTION: Removes the cassandra container - pass v to remove the volume as well
+:remove_cassandra
+    call :info Removing Wasabi's cassandra
+    docker rm -f%1 wasabi-cassandra >nul
+    goto :eof
+
+rem FUNCTION: Removes the mysql container - pass v to remove the volume as well
+:remove_mysql
+    call :info Removing Wasabi's mysql
+    docker rm -f%1 wasabi-mysql >nul
+    goto :eof
+
+rem FUNCTION: Removes the wasabi container - pass v to remove the volume as well
+:remove_wasabi
+    call :info Removing Wasabi
+    docker rm -f%1 wasabi-main >nul
+    goto :eof
+
+rem FUNCTION: Removes the wasabi image
+:remove_image
+    call :info Removing Wasabi images
+    docker rmi wasabi-main >nul
+    goto :eof
+
+rem FUNCTION: Removes the wasabi network
+:remove_network
+    call :info Removing Wasabi network
+    docker network rm wasabinet >nul
+    goto :eof
+
+rem FUNCTION: Removes the wasabi machine
+:remove_machine
+    call :info Removing wasabi machine
+    docker-machine rm -f wasabi >nul
+    goto :eof
+    
+rem FUNCTION: Clears the docker machine variables
+:clear_env
+    call :info Clearing environment variables
+    setx DOCKER_TLS_VERIFY "" >nul
+    setx DOCKER_HOST "" >nul
+    setx DOCKER_CERT_PATH "" >nul
+    setx DOCKER_MACHINE_NAME "" >nul
+    RefreshEnv
+    goto :eof
+
+
+goto :eof
+
+rem 
 
 rem FUNCTION: Logs the parameters as DEBUG.
 :debug

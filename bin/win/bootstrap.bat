@@ -45,44 +45,43 @@ if not exist C:\ProgramData\chocolatey\choco.exe (
     call :info Found Chocolatey
 )
 
-
 call :info Installing/Upgrading Chocolatey dependencies
 set remaining_packages=%choco_packages%
-:install_chocolatey_dependencies
+:inst_choco_deps
     for /f "tokens=1* delims=," %%P in ("%remaining_packages%") do (
         set current_package=%%P
         set remaining_packages=%%Q
       
-        call :debug Installing/Upgrading via choco !current_package!
+        call :debug Installing/Upgrading via choco - !current_package!
         cmd /c C:\ProgramData\chocolatey\choco.exe upgrade !current_package! -y
     )
-    if defined remaining_packages goto :install_chocolatey_dependencies
+    if defined remaining_packages goto :inst_choco_deps
 
 
 call :info Installing/Upgrading Node.JS dependencies
 set remaining_packages=%npm_packages%
-:install_npm_dependencies
+:inst_npm_deps
     for /f "tokens=1* delims=," %%P in ("%remaining_packages%") do (
         set current_package=%%P
         set remaining_packages=%%Q
       
-        call :debug Installing/Upgrading via npm !current_package!
+        call :debug Installing/Upgrading via npm - !current_package!
         cmd /c "C:\Program Files\nodejs\npm.cmd" -g install !current_package!
     )
-    if defined remaining_packages goto :install_npm_dependencies
+    if defined remaining_packages goto :inst_npm_deps
 
 
 call :info Installing/Upgrading Ruby dependencies
 set remaining_packages=%gem_packages%
-:install_gem_dependencies
+:inst_gem_deps
     for /f "tokens=1* delims=," %%P in ("%remaining_packages%") do (
         set current_package=%%P
         set remaining_packages=%%Q
       
-        call :debug Installing/Upgrading via gem !current_package!
+        call :debug Installing/Upgrading via gem - !current_package!
         cmd /c C:\Tools\ruby23\bin\gem.cmd install !current_package!
     )
-    if defined remaining_packages goto :install_gem_dependencies
+    if defined remaining_packages goto :inst_gem_deps
 
 call :info Bootstrapping done. 
 
@@ -92,7 +91,7 @@ goto :eof
 
 rem FUNCTION: Logs the parameters as DEBUG.
 :debug
-    call :log [DEBUG] %*
+    rem call :log [DEBUG] %*
     call :log [DEBUG] %* >> wasabi_windows.log
     goto :eof
 

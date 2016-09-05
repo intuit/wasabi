@@ -25,7 +25,7 @@ if "%1"=="" (
     goto :params_read
 )
 
-rem start individual components
+rem stop individual components
 :read_params
     if "" == "%1" goto :params_read
     call :stop_%1

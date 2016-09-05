@@ -13,33 +13,71 @@ rem # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 rem # See the License for the specific language governing permissions and
 rem # limitations under the License.
 rem ############################################################################
-
-call :info Building Service
-cmd /c "mvn -Pdevelopment clean test package javadoc:aggregate"
-
-call :info Building UI
-cmd /c "cd modules\ui & npm install & bower install & grunt build"
-
-call :info Finishing build
-set app-dir=target\app
-set bin-dir=%app-dir%\bin
-set conf-dir=%app-dir%\conf
-set lib-dir=%app-dir%\lib
-
-mkdir %app-dir% 2>nul
-mkdir %conf-dir% 2>nul
-mkdir %bin-dir% 2>nul
-mkdir %lib-dir% 2>nul
-for %%M in (analytics api assignment auditlog authentication authorization database email event eventlog export main repository user-directory) do (
-    copy modules\%%M\target\classes\*.properties %conf-dir% 1>nul
+ 
+rem start all
+if "" == "%1" (
+    call :build_wasabi
+    call :build_ui
+    call :copy_files
+    goto :eof
 )
-copy modules\main\target\classes\logback_acccess.xml %conf-dir% /y 1>nul
-copy modules\main\target\classes\logback.xml %conf-dir% /y 1>nul
-copy modules\main\target\extra-resources\service\run %bin-dir% /y 1>nul
-copy modules\main\target\extra-resources\docker\wasabi\Dockerfile %app-dir% /y 1>nul
-copy modules\main\target\extra-resources\docker\wasabi\entrypoint.sh %app-dir% /y 1>nul
-powershell -Command "Copy-item -path modules\main\target\wasabi-main-*-all.jar -destination %lib-dir%\ -force" 1>nul
 
+rem start individual components
+:read_params
+    if "" == "%1" goto :eof
+    call :build_%1
+    
+    shift
+    goto :read_params
+call :copy_files
+
+
+goto :eof
+
+rem FUNCTION: builds wasabi
+:build_wasabi
+    call :info Building Wasabi Service
+    cmd /c "mvn -Pdevelopment clean test package javadoc:aggregate"
+    goto :eof
+
+rem FUNCTION: builds ui
+:build_ui
+    call :info Building UI
+    cmd /c "cd modules\ui & npm install & bower install & grunt build"
+    goto :eof
+
+rem FUNCTION: copies the build files to target\app to properly be used with docker
+:copy_files
+    call :info Finishing build
+    
+    rem wasabi files
+    set app-dir=target\app
+    set bin-dir=%app-dir%\bin
+    set conf-dir=%app-dir%\conf
+    set lib-dir=%app-dir%\lib
+    rem ensure directories
+    mkdir %app-dir% 2>nul
+    mkdir %conf-dir% 2>nul
+    mkdir %bin-dir% 2>nul
+    mkdir %lib-dir% 2>nul
+    for %%M in (analytics api assignment auditlog authentication authorization database email event eventlog export main repository user-directory) do (
+        copy modules\%%M\target\classes\*.properties %conf-dir% 1>nul
+    )
+    copy modules\main\target\classes\logback_acccess.xml %conf-dir% /y 1>nul
+    copy modules\main\target\classes\logback.xml %conf-dir% /y 1>nul
+    copy modules\main\target\extra-resources\service\run %bin-dir% /y 1>nul
+    copy modules\main\target\extra-resources\docker\wasabi\Dockerfile %app-dir% /y 1>nul
+    copy modules\main\target\extra-resources\docker\wasabi\entrypoint.sh %app-dir% /y 1>nul
+    rem The normal copy does not support * officially and creates only almost empty 
+    rem thus we fall back to the powershell copy here.
+    powershell -Command "Copy-item -path modules\main\target\wasabi-main-*-all.jar -destination %lib-dir%\ -force" 1>nul
+    
+    rem swagger doc files
+    copy modules\api\target\generated\document.html modules\swagger-ui\target\swaggerui\
+    mkdir modules\swagger-ui\target\swaggerui\swagger 2>nul
+    mkdir modules\swagger-ui\target\swaggerui\swagger\swaggerjson 2>nul
+    powershell -Command "Get-Content modules\api\target\generated\swagger-ui\swagger.json | %{$_ -replace 'localhost', '192.168.99.100'}" > modules\swagger-ui\target\swaggerui\swagger\swaggerjson\swagger.json
+    goto :eof
 
 
 goto :eof
