@@ -42,9 +42,11 @@ Learn more about how Wasabi can empower your team to move from hunches to action
 
 ## Get Started
 
-The following steps will help you install the needed tools, then build and run a complete Wasabi stack. Note, at this time, only Mac OS X is supported.
+The following steps will help you install the needed tools, then build and run a complete Wasabi stack.
 
 #### Bootstrap Your Environment
+
+##### Mac OS
 
 ```bash
 % /usr/bin/ruby \
@@ -59,7 +61,49 @@ Installed tools include: [homebrew 0.9](http://brew.sh), [git 2](https://git-scm
 [maven 3](https://maven.apache.org), [java 1.8](http://www.oracle.com/technetwork/java/javase/overview/index.html),
 [docker 1.12](https://docker.com), [node 6](https://nodejs.org/en) and [python 2.7](https://www.python.org).
 
-Similar tooling will work for Linux and Windows alike. Contribute a patch :)
+##### Windows (7+)
+
+To install Wasabi's dependencies on Windows we use [Chocolatey][url_choco] which
+needs administrator rights in your [cmd.exe][url_cmd_admin].
+
+If you have git, just run:
+```dos
+git clone https://github.com/intuit/wasabi.git
+cd wasabi
+bin\wasabi.bat bootstrap
+```
+
+If you don't have git the easiest way is to [download][url_develop_zip] the
+latest code:
+```dos
+set wasabipath=%HOMEDRIVE%%HOMEPATH%\projects
+mkdir %wasabipath%
+powershell -Command "Invoke-WebRequest -Uri https://github.com/intuit/wasabi/archive/develop.zip -OutFile %wasabipath%\wasabi.zip"
+powershell -Command "(New-Object -COM Shell.Application).NameSpace('%wasabipath%').CopyHere((New-Object -COM Shell.Application).NameSpace('%wasabipath%\wasabi.zip').Items(), 16)"
+del %wasabipath%\wasabi.zip
+ren %wasabipath%\wasabi-develop wasabi
+cd %wasabipath%\wasabi
+bin\wasabi.bat bootstrap
+```
+
+For all other processes (build, start etc.) the commands are almost the same as
+for Mac OS, just make sure to replace `bin/wasabi.sh` with `bin\wasabi.bat`.
+
+One important difference: Since docker native only supports very specific
+[Windows 10 distributions][url_hyperv], Wasabi uses the old Docker variant with
+virtualbox via docker-machine. This means you can not reach the service
+at `http://localhost:8080/`, as you do with the native implementation on Mac OS,
+but you need to use `http://192.168.99.100:8080/` instead. For development this
+means to supply the Java VM arguments
+`-DnodeHosts=192.168.99.100 -Ddatabase.url.host=192.168.99.100` when running 
+Wasabi.
+
+To use the `curl` commands consider `choco install curl`.
+
+[url_choco]: https://chocolatey.org/
+[url_cmd_admin]: https://technet.microsoft.com/en-us/library/cc947813(v=ws.10).aspx)
+[url_develop_zip]: https://github.com/intuit/wasabi/archive/develop.zip
+[url_hyperv]: https://msdn.microsoft.com/virtualization/hyperv_on_windows/quick_start/walkthrough_compatibility
 
 #### Start Wasabi
 
