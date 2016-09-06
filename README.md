@@ -46,6 +46,9 @@ The following steps will help you install the needed tools, then build and run a
 
 #### Bootstrap Your Environment
 
+
+##### Mac OS
+
 ```bash
 % /usr/bin/ruby \
   -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
@@ -59,7 +62,25 @@ Installed tools include: [homebrew 0.9](http://brew.sh), [git 2](https://git-scm
 [maven 3](https://maven.apache.org), [java 1.8](http://www.oracle.com/technetwork/java/javase/overview/index.html),
 [docker 1.12](https://docker.com), [node 6](https://nodejs.org/en) and [python 2.7](https://www.python.org).
 
-Similar tooling will work for Linux and Windows alike. Contribute a patch :)
+
+##### Ubuntu
+
+Bootstrapping on Ubuntu requires sudo privileges to install all the required dependencies. You will be prompted to enter your password. Currently only 16.04 (x64) is supported.
+
+```bash
+% sudo apt-get install git
+% git clone https://github.com/intuit/wasabi.git
+% cd wasabi
+% ./bin/wasabi.sh bootstrap
+```
+
+For all other processes (build, start etc.) the commands are same for Ubuntu and Mac OS.
+
+Installed tools include: [git 2](https://git-scm.com),
+[maven 3](https://maven.apache.org), [OpenJdk 8](http://openjdk.java.net/projects/jdk8/),
+[docker 1.12](https://docker.com), [node 6](https://nodejs.org/en) and [python 2.7](https://www.python.org)
+
+Similar tooling will work for Windows. Contribute a patch :)
 
 #### Start Wasabi
 
