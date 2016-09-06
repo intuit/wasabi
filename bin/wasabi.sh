@@ -137,11 +137,15 @@ bootstrap() {
     sudo cp /tmp/environment /etc/environment
     sudo rm -rf /tmp/environment
 
+    #Install git-flow
+    sudo apt-get install -y git-flow
+
     #Install Nodejs
     curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
     sudo apt-get install -y nodejs
     sudo npm install -g bower
     sudo npm install -g grunt-cli
+    sudo npm install -g yo
     npm config set prefix "/usr/local"
 
     #Install compass
