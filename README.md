@@ -60,13 +60,13 @@ The following steps will help you install the needed tools, then build and run a
 
 Installed tools include: [homebrew 0.9](http://brew.sh), [git 2](https://git-scm.com),
 [maven 3](https://maven.apache.org), [java 1.8](http://www.oracle.com/technetwork/java/javase/overview/index.html),
-[docker 1.12](https://docker.com), [node 6](https://nodejs.org/en) and [python 2.7](https://www.python.org).
+[docker 1.12](https://docker.com), [node 6](https://nodejs.org/en).
 
 
 ##### Windows (7+)
 
-To install Wasabi's dependencies on Windows we use [Chocolatey][url_choco] which
-needs administrator rights in your [cmd.exe][url_cmd_admin].
+To install Wasabi's dependencies on Windows we use [Chocolatey][win_choco] which
+needs administrator rights in your [cmd.exe][win_cmd_admin].
 
 If you have git, just run:
 ```dos
@@ -89,24 +89,47 @@ bin\wasabi.bat bootstrap
 ```
 
 For all other processes (build, start etc.) the commands are almost the same as
-for Mac OS, just make sure to replace `bin/wasabi.sh` with `bin\wasabi.bat`.
+for the other operating systems: just make sure to replace `bin/wasabi.sh` 
+with `bin\wasabi.bat`.
 
-One important difference: Since docker native only supports very specific
-[Windows 10 distributions][url_hyperv], Wasabi uses the old Docker variant with
-virtualbox via docker-machine. This means you can not reach the service
-at `http://localhost:8080/`, as you do with the native implementation on Mac OS,
-but you need to use `http://192.168.99.100:8080/` instead. For development this
-means to supply the Java VM arguments
+One important difference: Since Docker native only supports very specific
+[Windows 10 distributions][win_hyperv], on Windows Wasabi uses the old Docker
+variant with virtualbox via docker-machine. This means you can not reach the
+service at `http://localhost:8080/`, as you do with the native implementation on
+Mac OS, but you need to use `http://192.168.99.100:8080/` instead. For 
+development this also means to supply the Java VM arguments
 `-DnodeHosts=192.168.99.100 -Ddatabase.url.host=192.168.99.100` when running 
-Wasabi.
+Wasabi to connect to cassandra and MySQL inside the docker network.
+Another implication is that when you run wasabi locally (e.g. from your IDE) 
+that you will have to point the UI to `localhost`. By default 
+`bin\wasabi.bat resource:ui` points to `192.168.99.100`. You can use the 
+unique `bin\wasabi.bat resource:dev_ui` to use the default `localhost`.
 
 To use the `curl` commands consider `choco install curl`.
 
-[url_choco]: https://chocolatey.org/
-[url_cmd_admin]: https://technet.microsoft.com/en-us/library/cc947813(v=ws.10).aspx)
-[url_develop_zip]: https://github.com/intuit/wasabi/archive/develop.zip
-[url_hyperv]: https://msdn.microsoft.com/virtualization/hyperv_on_windows/quick_start/walkthrough_compatibility
+Installed tools include: [Chocolatey][win_choco], [Docker][choco_docker],
+[Maven 3][choco_maven], [jdk 1.8][choco_jdk], [Docker][choco_docker], 
+[docker-machine][choco_docker-machine], [VirtualBox][choco_virtualbox], 
+[node.js][choco_nodejs] (+ [bower][npm_bower], [grunt-cli][npm_grunt-cli],
+[yo][npm_yo]), and [ruby][choco_ruby] (+ [compass][gem_compass],
+[fpm][gem_fpm]).
 
+[win_choco]: https://chocolatey.org/
+[win_cmd_admin]: https://technet.microsoft.com/en-us/library/cc947813(v=ws.10).aspx)
+[url_develop_zip]: https://github.com/intuit/wasabi/archive/develop.zip
+[win_hyperv]: https://msdn.microsoft.com/virtualization/hyperv_on_windows/quick_start/walkthrough_compatibility
+[choco_docker]: https://chocolatey.org/packages/docker
+[choco_docker-machine]: https://chocolatey.org/packages/docker-machine
+[choco_jdk]: https://chocolatey.org/packages/jdk8
+[choco_maven]: https://chocolatey.org/packages/maven
+[choco_nodejs]: https://chocolatey.org/packages/nodejs.install
+[choco_virtualbox]: https://chocolatey.org/packages/virtualbox
+[choco_ruby]: https://chocolatey.org/packages/ruby
+[npm_bower]: https://www.npmjs.com/package/bower
+[npm_grunt-cli]: https://www.npmjs.com/package/grunt-cli
+[npm_yo]: https://www.npmjs.com/package/yo
+[gem_compass]: https://rubygems.org/gems/compass/versions/1.0.3
+[gem_fpm]: https://rubygems.org/gems/fpm/versions/1.4.0
 
 #### Start Wasabi
 
