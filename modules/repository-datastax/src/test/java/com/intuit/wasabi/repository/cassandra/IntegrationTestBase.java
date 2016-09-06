@@ -22,7 +22,10 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.name.Names;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
+import com.intuit.wasabi.database.DatabaseModule;
+import com.intuit.wasabi.eventlog.EventLogModule;
 import com.intuit.wasabi.repository.cassandra.CassandraRepositoryModule;
+import com.intuit.wasabi.repository.database.DatabaseExperimentRepositoryModule;
 
 /**
  * A utility class for creating session/etc once
@@ -35,7 +38,10 @@ public class IntegrationTestBase {
     public static void setup(){
     	if (injector != null)
     		return;
-        injector = Guice.createInjector(new CassandraRepositoryModule());
+        injector = Guice.createInjector(new CassandraRepositoryModule(),
+        		new DatabaseExperimentRepositoryModule(),
+        		new DatabaseModule(),
+        		new EventLogModule());
         injector.getInstance(Key.get(String.class, Names.named("CassandraInstanceName")));
 
         session = injector.getInstance(CassandraDriver.class).getSession();

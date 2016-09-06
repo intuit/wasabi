@@ -775,6 +775,9 @@ public class CassandraExperimentRepository implements ExperimentRepository {
         			bucketAccessor.getBucketByExperimentIdAndBucket(
         					experimentID.getRawID(), bucketLabel.toString()).all();
 
+        	if ( bucket.size() == 0 )
+        		return null;
+        	
         	if ( bucket.size() > 1 )
         		throw new RepositoryException("More than one row found for experiment ID " 
         				+ experimentID + " and label " + bucketLabel);

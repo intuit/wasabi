@@ -171,6 +171,14 @@ public class CassandraExperimentRepositoryITest extends IntegrationTestBase  {
 				result.getBuckets().get(0).getLabel());
 	}
 
+	@Test
+	public void testGetNotExistentBucket() {
+		
+		Bucket bucket = repository.getBucket(Experiment.ID.newInstance(), 
+				Bucket.Label.valueOf("random" + System.currentTimeMillis()));
+		assertEquals("Bucket should be null", null, bucket);
+	}
+
 	@Test(expected=RepositoryException.class)
 	public void testCreateBucketAccessorNullThrowsException() {
 		repository.setBucketAccessor(null);
