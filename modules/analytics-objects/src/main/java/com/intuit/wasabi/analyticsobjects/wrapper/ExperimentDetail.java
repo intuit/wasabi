@@ -41,6 +41,8 @@ public class ExperimentDetail {
 
     private Date modificationTime;
 
+    private Date startTime;
+
     private boolean isFavorite;
 
     private List<BucketDetail> buckets;
@@ -67,6 +69,8 @@ public class ExperimentDetail {
         private double upperBound = 0.0;
 
         private long userCount = 0;
+
+        private boolean winnerSoFar = false;
 
         /**
          * Creates a BucketDetail with the basic information that are available for all buckets.
@@ -143,6 +147,14 @@ public class ExperimentDetail {
                 this.userCount = userCount;
             else throw new IllegalArgumentException("User count can not be smaller than 0");
         }
+
+        public boolean isWinnerSoFar() {
+            return winnerSoFar;
+        }
+
+        public void setWinnerSoFar(boolean winnerSoFar) {
+            this.winnerSoFar = winnerSoFar;
+        }
     }
 
     /**
@@ -151,7 +163,8 @@ public class ExperimentDetail {
      * @param exp the experiment that provides the basic information
      */
     public ExperimentDetail(Experiment exp){
-        this(exp.getID(), exp.getState(), exp.getLabel(), exp.getApplicationName(), exp.getModificationTime());
+        this(exp.getID(), exp.getState(), exp.getLabel(), exp.getApplicationName(),
+                exp.getModificationTime(), exp.getStartTime());
     }
 
     /**
@@ -161,14 +174,17 @@ public class ExperimentDetail {
      * @param state the state of the Experiment
      * @param label the Experiment label (name)
      * @param appName the name of the Application this Experiment belongs to
+     * @param modificationTime the last time the experiment was modified
+     * @param startTime the startTime of the experiment to determine the winner so far
      */
     public ExperimentDetail(Experiment.ID id, Experiment.State state, Experiment.Label label,
-                            Application.Name appName, Date modificationTime){
+                            Application.Name appName, Date modificationTime, Date startTime){
         setId(id);
         setState(state);
         setLabel(label);
         setAppName(appName);
         setModificationTime(modificationTime);
+        setStartTime(startTime);
     }
 
     public Experiment.ID getId() {
@@ -197,7 +213,9 @@ public class ExperimentDetail {
     }
 
     private void setLabel(Experiment.Label label) {
-        this.label = label;
+        if(label != null && !label.toString().isEmpty())
+            this.label = label;
+        else throw new IllegalArgumentException("Experiment.Label is not allowed to be null for ExperimentDetail");
     }
 
     public Application.Name getAppName() {
@@ -242,6 +260,14 @@ public class ExperimentDetail {
 
     public void setModificationTime(Date modificationTime) {
         this.modificationTime = modificationTime;
+    }
+
+    public Date getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(Date startTime) {
+        this.startTime = startTime;
     }
 
     /**
