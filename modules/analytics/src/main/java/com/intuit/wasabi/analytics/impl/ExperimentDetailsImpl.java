@@ -29,10 +29,13 @@ import com.intuit.wasabi.analyticsobjects.wrapper.ExperimentDetail;
 import com.intuit.wasabi.repository.CassandraRepository;
 import com.intuit.wasabi.repository.DatabaseRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -111,7 +114,6 @@ public class ExperimentDetailsImpl implements ExperimentDetails{
     @Override
     public List<ExperimentDetail> getAnalyticData(List<ExperimentDetail> details, Parameters params) {
 
-        //add analytics information
         details.parallelStream().forEach(expd -> getAnalyticData(expd, params));
 
         return details;
@@ -133,7 +135,6 @@ public class ExperimentDetailsImpl implements ExperimentDetails{
             //experiment level analytics
             AssignmentCounts assignmentCounts = analytics.getAssignmentCounts(experimentDetail.getId(),
                                                                                 params.getContext());
-
             if (assignmentCounts != null) {
                 long totalAssignments = assignmentCounts.getTotalUsers().getTotal();
                 experimentDetail.setTotalNumberUsers(totalAssignments);
@@ -142,7 +143,12 @@ public class ExperimentDetailsImpl implements ExperimentDetails{
             ExperimentStatistics expStats = analytics.getExperimentStatistics(experimentDetail.getId(), params);
             Map<Label, BucketStatistics> bucketAnalytics = expStats.getBuckets();
 
-            //bucket analytics
+            //Bucket analytics data- progress and winners
+
+            DateTime aWeekAgo = new DateTime().minusDays(7);
+            //winner so far is only determined if the experiment ran at least a week
+            boolean checkWinnerSoFar = experimentDetail.getStartTime().before(aWeekAgo.toDate());
+
             for(ExperimentDetail.BucketDetail b : experimentDetail.getBuckets()){
                 BucketStatistics bucketStat = bucketAnalytics.get(b.getLabel());
 
@@ -153,7 +159,17 @@ public class ExperimentDetailsImpl implements ExperimentDetails{
                 }
 
                 b.setUserCount(bucketStat.getImpressionCounts().getUniqueUserCount());
+
+                if(checkWinnerSoFar){
+                    for(Bucket.Label winner : expStats.getJointProgress().getWinnersSoFar()){
+                        if(b.getLabel().equals(winner)){
+                            b.setWinnerSoFar(true);
+                            break;
+                        }
+                    }
+                }
             }
+
         }
         return experimentDetail;
     }
