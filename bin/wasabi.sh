@@ -146,7 +146,6 @@ bootstrap() {
     sudo npm install -g bower
     sudo npm install -g grunt-cli
     sudo npm install -g yo
-    npm config set prefix "/usr/local"
 
     #Install compass
     sudo apt-get install -y ruby
