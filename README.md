@@ -72,7 +72,10 @@ Bootstrapping on Ubuntu requires sudo privileges to install all the required dep
 % git clone https://github.com/intuit/wasabi.git
 % cd wasabi
 % ./bin/wasabi.sh bootstrap
+% sudo reboot
 ```
+
+NOTE: A reboot is required after running the bootstrap command on Ubuntu.
 
 For all other processes (build, start etc.) the commands are same for Ubuntu and Mac OS.
 
