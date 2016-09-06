@@ -103,6 +103,7 @@ public class AnalyticsResource {
      */
     @GET
     @Produces(APPLICATION_JSON)
+    @Path("/experiments")
     @ApiOperation(value = "Return details of all experiments with details for the card view, with respect to the authorization",
             response = ExperimentDetail.class)
     @Timed

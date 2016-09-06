@@ -25,6 +25,7 @@ import com.intuit.wasabi.api.jackson.JacksonModule;
 import com.intuit.wasabi.api.pagination.comparators.PaginationComparator;
 import com.intuit.wasabi.api.pagination.comparators.impl.AuditLogEntryComparator;
 import com.intuit.wasabi.api.pagination.comparators.impl.ExperimentComparator;
+import com.intuit.wasabi.api.pagination.comparators.impl.ExperimentDetailComparator;
 import com.intuit.wasabi.api.pagination.filters.PaginationFilter;
 import com.intuit.wasabi.api.pagination.filters.impl.AuditLogEntryFilter;
 import com.intuit.wasabi.api.pagination.filters.impl.ExperimentDetailFilter;
@@ -92,6 +93,7 @@ public class ApiModule extends AbstractModule {
         bind(new TypeLiteral<PaginationComparator<Experiment>>(){}).to(new TypeLiteral<ExperimentComparator>(){});
         bind(new TypeLiteral<PaginationFilter<Experiment>>(){}).to(new TypeLiteral<ExperimentFilter>(){});
         bind(new TypeLiteral<PaginationFilter<ExperimentDetail>>(){}).to(new TypeLiteral<ExperimentDetailFilter>(){});
+        bind(new TypeLiteral<PaginationComparator<ExperimentDetail>>(){}).to(new TypeLiteral<ExperimentDetailComparator>(){});
 
         LOGGER.debug("installed module: {}", ApiModule.class.getSimpleName());
     }

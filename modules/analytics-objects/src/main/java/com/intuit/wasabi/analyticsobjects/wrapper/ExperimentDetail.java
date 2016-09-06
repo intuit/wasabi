@@ -21,6 +21,7 @@ import com.intuit.wasabi.experimentobjects.Experiment;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,6 +38,8 @@ public class ExperimentDetail {
     private Experiment.Label label;
 
     private Application.Name appName;
+
+    private Date modificationTime;
 
     private boolean isFavorite;
 
@@ -148,7 +151,7 @@ public class ExperimentDetail {
      * @param exp the experiment that provides the basic information
      */
     public ExperimentDetail(Experiment exp){
-        this(exp.getID(), exp.getState(), exp.getLabel(), exp.getApplicationName());
+        this(exp.getID(), exp.getState(), exp.getLabel(), exp.getApplicationName(), exp.getModificationTime());
     }
 
     /**
@@ -159,11 +162,13 @@ public class ExperimentDetail {
      * @param label the Experiment label (name)
      * @param appName the name of the Application this Experiment belongs to
      */
-    public ExperimentDetail(Experiment.ID id, Experiment.State state, Experiment.Label label, Application.Name appName){
+    public ExperimentDetail(Experiment.ID id, Experiment.State state, Experiment.Label label,
+                            Application.Name appName, Date modificationTime){
         setId(id);
         setState(state);
         setLabel(label);
         setAppName(appName);
+        setModificationTime(modificationTime);
     }
 
     public Experiment.ID getId() {
@@ -229,6 +234,14 @@ public class ExperimentDetail {
         if(totalNumberUsers > -1)
             this.totalNumberUsers = totalNumberUsers;
         else throw new IllegalArgumentException("Total number of users has to be equal or greater than zero");
+    }
+
+    public Date getModificationTime() {
+        return modificationTime;
+    }
+
+    public void setModificationTime(Date modificationTime) {
+        this.modificationTime = modificationTime;
     }
 
     /**
