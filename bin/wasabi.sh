@@ -15,7 +15,7 @@
 # limitations under the License.
 ###############################################################################
 
-formulas=("bash" "cask" "git" "maven" "wget" "ruby" "node")
+formulas=("bash" "cask" "git" "git-flow-avh" "maven" "wget" "ruby" "node")
 taps=("caskroom/cask")
 casks=("java" "docker")
 endpoint_default=localhost:8080
@@ -24,7 +24,7 @@ sleep_default=30
 red=`tput setaf 9`
 green=`tput setaf 10`
 reset=`tput sgr0`
-export WASABI_OS=`uname -s`
+export WASABI_OS=${WASABI_OS:-`uname -s`}
 export WASABI_OSX="Darwin"
 export WASABI_LINUX="Linux"
 
@@ -44,8 +44,10 @@ options:
 commands:
   bootstrap                              : install dependencies
   build                                  : build project
+  clean                                  : clean build
   start[:cassandra,mysql,wasabi]         : start all, cassandra, mysql, wasabi
-  test                                   : test wasabi
+  test                                   : run the integration tests (needs a running wasabi)
+  test[:module-name,...]                 : run the unit tests for the specified module(s) only
   stop[:wasabi,cassandra,mysql]          : stop all, wasabi, cassandra, mysql
   resource[:ui,api,doc,cassandra,mysql]  : open resource api, javadoc, cassandra, mysql
   status                                 : display resource status
@@ -77,113 +79,108 @@ beerMe() {
   echo ""
 }
 
-bootstrapOSX() {
-  echo "${green}Operating system OSX${reset}"
-  if ! hash brew 2>/dev/null; then
-    echo "${green}installing homebrew ...${reset}"
+bootstrap() {
+  if [ "${WASABI_OS}" == "${WASABI_OSX}" ]; then
+    if ! hash brew 2>/dev/null; then
+      echo "${green}installing homebrew ...${reset}"
 
-    ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+      ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
-    echo "${green}installed homebrew${reset}"
+      echo "${green}installed homebrew${reset}"
+    fi
+
+    brew update
+    brew doctor
+    brew cleanup
+
+    echo "${green}installing dependencies: ${formulas[@]} ${taps[@]} ${casks[@]} ...${reset}"
+
+    for formula in "${formulas[@]}"; do
+      [[ ! $(brew list ${formula} 2>/dev/null) ]] && brew install ${formula} || brew upgrade ${formula} 2>/dev/null
+    done
+
+    for tap in "${taps[@]}"; do
+      brew tap ${tap}
+    done
+
+    for cask in "${casks[@]}"; do
+      [[ $(brew cask list ${cask} 2>/dev/null) ]] && brew cask uninstall --force ${cask} 2>/dev/null
+      brew cask install --force ${cask}
+    done
+
+    npm config set prefix $(brew --prefix)
+
+    echo "${green}installed dependencies: ${formulas[@]} ${taps[@]} ${casks[@]}${reset}"
+  elif [ "${WASABI_OS}" == "${WASABI_LINUX}" ]; then
+    echo "OS is Linux"
+    if [ -f /etc/lsb-release ]; then
+      . /etc/lsb-release
+      DISTRO=$DISTRIB_ID
+      DISTROVER=$DISTRIB_RELEASE
+      if [ $DISTRO == "Ubuntu" ] && [ $DISTROVER == "16.04" ]; then
+        echo "${green}Operating system Ubuntu 16.04${reset}"
+      else
+        echo "${red}Unsupported Linux distribution${reset}"
+        exit 1
+      fi
+    fi
+
+    #Install Maven
+    sudo apt-get update
+    sudo apt-get install -y maven
+
+    #Install JAVA
+    sudo apt-get install -y default-jdk
+    sudo cp /etc/environment /tmp/environment
+    sudo chmod 666 /tmp/environment
+    sudo echo "JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/" >> /tmp/environment
+    sudo cp /tmp/environment /etc/environment
+    sudo rm -rf /tmp/environment
+
+    #Install Nodejs
+    curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+    sudo apt-get install -y nodejs
+    sudo npm install -g bower
+    sudo npm install -g grunt-cli
+    npm config set prefix "/usr/local"
+
+    #Install compass
+    sudo apt-get install -y ruby
+    sudo apt-get install -y ruby-compass
+
+    #Install docker
+    sudo apt-get install -y apt-transport-https ca-certificates
+    sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+    sudo echo "deb https://apt.dockerproject.org/repo ubuntu-xenial main" > /tmp/docker.list
+    sudo cp /tmp/docker.list /etc/apt/sources.list.d/docker.list
+    sudo rm -rf /tmp/docker.list
+    sudo apt-get purge lxc-docker
+    sudo apt-get update
+    sudo apt-get install -y linux-image-extra-$(uname -r) linux-image-extra-virtual
+    sudo apt-get install -y docker-engine
+
+    sudo groupadd docker
+    sudo usermod -aG docker $USER
+    sudo usermod -aG docker root
+    echo "${green}installed dependencies.${reset}"
+  else
+    echo "${green}FIXME: linux install of ( ${formulas[@]} ${taps[@]} ${casks[@]} ) not yet implemented${reset}"
   fi
-
-  brew update
-  brew doctor
-  brew cleanup
-
-  echo "${green}installing dependencies: ${formulas[@]} ${casks[@]} ...${reset}"
-
-  for formula in "${formulas[@]}"; do
-    [[ ! $(brew list ${formula} 2>/dev/null) ]] && brew install ${formula} || brew upgrade ${formula} 2>/dev/null
-  done
-
-  for tap in "${taps[@]}"; do
-    brew tap ${tap}
-  done
-
-  for cask in "${casks[@]}"; do
-    [[ $(brew cask list ${cask} 2>/dev/null) ]] && brew cask uninstall --force ${cask} 2>/dev/null
-    brew cask install --force ${cask}
-  done
-
-  npm config set prefix $(brew --prefix)
 
   for n in yo grunt-cli bower; do
     [[ ! $(npm -g list 2>/dev/null | grep ${n}) ]] && npm -g install ${n}
   done
 
   [[ ! $(gem list | grep compass) ]] && gem install compass
-
-  echo "${green}installed dependencies: ${formulas[@]} ${casks[@]}${reset}"
-}
-
-
-bootstrapLinux() {
-  echo "OS is Linux"
-  if [ -f /etc/lsb-release ]; then
-    . /etc/lsb-release
-    DISTRO=$DISTRIB_ID
-    DISTROVER=$DISTRIB_RELEASE
-    if [ $DISTRO == "Ubuntu" ] && [ $DISTROVER == "16.04" ]; then
-      echo "${green}Operating system Ubuntu 16.04${reset}"
-    else
-      echo "${red}Unsupported Linux distribution${reset}"
-      exit 1
-    fi 
-  fi
-
-  #Install Maven
-  sudo apt-get update
-  sudo apt-get install -y maven
-
-  #Install JAVA
-  sudo apt-get install -y default-jdk
-  sudo cp /etc/environment /tmp/environment
-  sudo chmod 666 /tmp/environment
-  sudo echo "JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/" >> /tmp/environment
-  sudo cp /tmp/environment /etc/environment
-  sudo rm -rf /tmp/environment
-
-  #Install Nodejs
-  curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
-  sudo apt-get install -y nodejs
-  sudo npm install -g bower
-  sudo npm install -g grunt-cli
-  npm config set prefix "/usr/local"
-
-  #Install compass
-  sudo apt-get install -y ruby
-  sudo apt-get install -y ruby-compass
-
-  #Install docker
-  sudo apt-get install -y apt-transport-https ca-certificates
-  sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
-  sudo echo "deb https://apt.dockerproject.org/repo ubuntu-xenial main" > /tmp/docker.list
-  sudo cp /tmp/docker.list /etc/apt/sources.list.d/docker.list
-  sudo rm -rf /tmp/docker.list
-  sudo apt-get purge lxc-docker
-  sudo apt-get update
-  sudo apt-get install -y linux-image-extra-$(uname -r) linux-image-extra-virtual
-  sudo apt-get install -y docker-engine
-
-  sudo groupadd docker
-  sudo usermod -aG docker $USER
-  sudo usermod -aG docker root
-  echo "${green}installed dependencies.${reset}"
-}
-
-bootstrap() {
-  if [ "${WASABI_OS}" == $"${WASABI_OSX}" ]; then
-    bootstrapOSX
-  elif [ $"${WASABI_OS}" == $"${WASABI_LINUX}" ]; then
-    bootstrapLinux
-  else
-    echo "Unsupported OS"
-  fi
 }
 
 build() {
   ./bin/build.sh -b ${1:-false} -t ${2:-false} -p ${3:-development}
+}
+
+clean() {
+  mvn clean
+  (cd modules/ui; grunt clean)
 }
 
 start() {
@@ -249,7 +246,7 @@ status() {
 package() {
   profile=build
 
-  build true false ${profile}
+  build true ${verify} ${profile}
 
   # FIXME: move to modules/ui/build.sh
   version=$(fromPom . build project.version)
@@ -263,30 +260,24 @@ package() {
   content=$(fromPom ./modules/main build application.http.content.directory)
   ui_home=${home}/../${name}-${version}-${profile}
 
+  ./bin/fpm.sh -n ${name} -v ${version} -p ${profile}
+
   (cd modules/ui; \
     mkdir -p target; \
-    # for f in app bower.json feedbackserver Gruntfile.js constants.json karma.conf.js karma-e2e.conf.js package.json test .bowerrc; do \
-    # TODO Should we remove feedbackserver? it does not exist in the current structure.
     for f in app bower.json Gruntfile.js constants.json karma.conf.js karma-e2e.conf.js package.json test .bowerrc; do \
       cp -r ${f} target; \
     done; \
     sed -i '' -e "s|http://localhost:8080|${server}|g" target/constants.json 2>/dev/null; \
     sed -i '' -e "s|VERSIONLOC|${version}|g" target/app/index.html 2>/dev/null; \
-    if [ "${WASABI_OS}" == "${WASABI_OSX}" ]; then \
-    (cd target; \
-      npm install; \
-      bower install; \
-      grunt clean; \
-      grunt build --target=develop --no-color); \
+    if [[ "${WASABI_OS}" == "${WASABI_OSX}" || "${WASABI_OS}" == "${WASABI_LINUX}" ]]; then \
+#      (cd target; npm install; bower install; grunt clean); \
+      (cd target; npm install; bower install --no-optional; grunt clean); \
+    fi \
+# fixme: shouldn't have to force or ignore tests \
+#    (cd target; grunt build --target=develop --no-color; \
+    (cd target; grunt build --force --target=develop --no-color; \
 #      grunt test); \
-    elif [ "${WASABI_OS}" == "${WASABI_LINUX}" ]; then \
-      (cd target; \
-      npm install; \
-      bower install --no-optional; \
-      grunt clean; \
-      grunt build --target=develop --no-color); \
-#      grunt test); \
-    fi
+    ); \
     cp -r build target; \
     for pkg in deb rpm; do \
       sed -i '' -e "s|\${application.home}|${home}|g" target/build/${pkg}/before-install.sh 2>/dev/null; \
@@ -298,10 +289,10 @@ package() {
       sed -i '' -e "s|\${application.user}|${user}|g" target/build/${pkg}/after-install.sh 2>/dev/null; \
       sed -i '' -e "s|\${application.group}|${group}|g" target/build/${pkg}/after-install.sh 2>/dev/null; \
       sed -i '' -e "s|\${application.http.content.directory}|${content}|g" target/build/${pkg}/before-remove.sh 2>/dev/null; \
-    done)
+    done; \
+    (cd target; ../bin/fpm.sh -n ${name} -v ${version} -p ${profile}))
 
-  ./bin/fpm.sh -n ${name} -v ${version} -p ${profile}
-  find . -type f \( -name "*.rpm" -or -name "*.deb" \) -exec mv {} ./target \;
+  find . -type f \( -name "*.rpm" -or -name "*.deb" \) -exec mv {} ./target 2>/dev/null \;
 
   echo "deployable build packages:"
 
@@ -352,9 +343,12 @@ for command in ${@:$OPTIND}; do
   case "${command}" in
     bootstrap) bootstrap;;
     build) build true;;
+    clean) clean;;
     start) command="start:cassandra,mysql,wasabi";&
     start:*) commands=$(echo ${command} | cut -d ':' -f 2)
       (IFS=','; for command in ${commands}; do start ${command}; done);;
+    test:*) commands=$(echo ${command} | cut -d ':' -f 2)
+      (IFS=','; for command in ${commands}; do mvn "-Dtest=com.intuit.wasabi.${command/-/}.**" test -pl modules/${command} --also-make -DfailIfNoTests=false -q ; done);;
     test) test_api;;
     stop) command="stop:wasabi,mysql,cassandra";&
     stop:*) commands=$(echo ${command} | cut -d ':' -f 2)

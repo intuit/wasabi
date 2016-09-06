@@ -90,6 +90,8 @@ public class Experiment implements Cloneable, ExperimentBase {
     @ApiModelProperty(value = "creator of the experiment", required = false)
     private String creatorID;
 
+    private Boolean favorite;
+
 
     protected Experiment() {
         super();
@@ -270,6 +272,15 @@ public class Experiment implements Cloneable, ExperimentBase {
 
     public void setCreatorID(String creatorID) {
         this.creatorID = creatorID;
+    }
+
+    public void setFavorite(Boolean favorite) {
+        this.favorite = favorite;
+    }
+
+    @JsonIgnore
+    public Boolean isFavorite() {
+        return favorite;
     }
 
     @Override

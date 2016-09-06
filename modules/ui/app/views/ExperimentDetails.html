@@ -2,7 +2,7 @@
     <div class="exprHead">
         <div class="exprName">
             <span class="starContainer" ng-class="{favorite: experiment.isFavorite}">
-                <a href="#" favorites-star favorites-star-application-name="experiment.applicationName" favorites-star-experiment-name="experiment.label" favorites-star-parent-tag="span" after-favorite-func="setAsFavorite" ng-attr-is-favorite="{{experiment.isFavorite}}" class="star" title="Mark as Favorite"></a>
+                <a href="#" favorites-star favorites-star-experiment-id="experiment.id" favorites-star-favorites-object="favoritesObj" favorites-star-parent-tag="span" after-favorite-func="setAsFavorite" ng-attr-is-favorite="{{experiment.isFavorite}}" class="star" title="Mark as Favorite"></a>
             </span>
             <h2><div style="margin-bottom: 10px;">{{experiment.applicationName}}</div><div>{{experiment.label}}</div></h2>
         </div>
