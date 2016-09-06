@@ -158,7 +158,8 @@ public class AssignmentTest {
 
     @Test
     public void testAssignmentFromOther() {
-        Assignment newAssignment = Assignment.from(assignment.build()).build();
+    	Assignment assignmentLocal = assignment.build();
+        Assignment newAssignment = Assignment.from(assignmentLocal).build();
 
         assertNotNull(newAssignment.toString());
         assertNotNull(newAssignment.getApplicationName());
@@ -169,9 +170,9 @@ public class AssignmentTest {
         assertNotNull(newAssignment.getStatus());
         assertNotNull(newAssignment.getUserID());
 
-        assertEquals(assignment, newAssignment);
-        assertEquals(assignment, assignment);
-        assertEquals(assignment.hashCode(), assignment.hashCode());
+        assertEquals(assignmentLocal, newAssignment);
+        assertEquals(assignmentLocal, assignmentLocal);
+        assertEquals(assignmentLocal.hashCode(), assignmentLocal.hashCode());
     }
 
 
