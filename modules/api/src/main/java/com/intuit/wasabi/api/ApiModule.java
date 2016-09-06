@@ -27,6 +27,7 @@ import com.intuit.wasabi.email.EmailModule;
 import com.intuit.wasabi.events.EventsModule;
 import com.intuit.wasabi.experiment.ExperimentsModule;
 import com.intuit.wasabi.feedback.FeedbackModule;
+import com.intuit.wasabi.repository.database.DatabaseExperimentRepositoryModule;
 import com.intuit.wasabi.userdirectory.UserDirectoryModule;
 import org.slf4j.Logger;
 
@@ -46,20 +47,21 @@ public class ApiModule extends AbstractModule {
     @Override
     protected void configure() {
         LOGGER.debug("installing module: {}", ApiModule.class.getSimpleName());
-
+        //these modules are either free of other dependencies or they are required by later modules
         install(new com.intuit.autumn.api.ApiModule());
-        install(new AnalyticsModule());
+        install(new DatabaseExperimentRepositoryModule());
+        install(new DatabaseModule());
+        install(new JacksonModule());
+        install(new UserDirectoryModule());
+//        install(new CassandraExperimentRepositoryModule());
         install(new AuditLogModule());
         install(new AuthorizationModule());
-//        install(new CassandraExperimentRepositoryModule());
-        install(new DatabaseModule());
-//        install(new DatabaseExperimentRepositoryModule());
         install(new EmailModule());
         install(new EventsModule());
         install(new ExperimentsModule());
         install(new FeedbackModule());
-        install(new JacksonModule());
-        install(new UserDirectoryModule());
+        install(new AnalyticsModule());
+
 
         Properties properties = create(PROPERTY_NAME, ApiModule.class);
 

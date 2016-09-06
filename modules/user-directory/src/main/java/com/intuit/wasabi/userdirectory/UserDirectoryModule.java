@@ -16,13 +16,12 @@
 package com.intuit.wasabi.userdirectory;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
-import com.google.inject.name.Named;
+import com.google.inject.TypeLiteral;
+import com.google.inject.name.Names;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.exceptions.UserToolsException;
 import org.slf4j.Logger;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -30,7 +29,6 @@ import static com.google.inject.Scopes.SINGLETON;
 import static com.intuit.autumn.utils.PropertyFactory.create;
 import static com.intuit.autumn.utils.PropertyFactory.getProperty;
 import static java.lang.Class.forName;
-import static org.apache.commons.lang3.StringUtils.trimToNull;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class UserDirectoryModule extends AbstractModule {
@@ -46,6 +44,9 @@ public class UserDirectoryModule extends AbstractModule {
         String userToolsClassName = getProperty("user.lookup.class.name", properties,
                 "com.intuit.wasabi.userdirectory.impl.DefaultUserDirectory");
 
+        bind(String.class).annotatedWith(Names.named("userDirectoryPath")).toInstance(PROPERTY_NAME);
+        bind(new TypeLiteral<List<UserInfo>>() {}).annotatedWith(Names.named("authentication.users"))
+                .toProvider(UserInfoListProvider.class).in(SINGLETON);
         try {
             @SuppressWarnings("unchecked")
             Class<UserDirectory> userToolsClass = (Class<UserDirectory>) forName(userToolsClassName);
@@ -60,35 +61,35 @@ public class UserDirectoryModule extends AbstractModule {
         LOGGER.debug("installed module: {}", UserDirectoryModule.class.getSimpleName());
     }
 
-    @Provides
-    public @Named("authentication.users") List<UserInfo> provideUsers() {
-        Properties properties = create(PROPERTY_NAME, UserDirectoryModule.class);
-        String userIds = getProperty("user.ids", properties);
-        List<UserInfo> users = new ArrayList<UserInfo>();
-
-        for (String userId : userIds.split(":")) {
-            userId = trimToNull(userId);
-
-            // format userId:username:password:email:firstname:lastname
-            if (userId != null) {
-                String userCredentials = getProperty("user." + userId, properties);
-
-                userCredentials = trimToNull(userCredentials);
-
-                if (userCredentials != null) {
-                    final String[] userCredential = userCredentials.split(":", -1);
-
-                    users.add(new UserInfo.Builder(UserInfo.Username.valueOf(userCredential[0]))
-                            .withUserId(userId)
-                            .withPassword(userCredential[1])
-                            .withEmail(userCredential[2])
-                            .withFirstName(userCredential[3])
-                            .withLastName(userCredential[4])
-                            .build());
-                }
-            }
-        }
-
-        return users;
-    }
+//    @Provides
+//    public @Named("authentication.users") List<UserInfo> provideUsers() {
+//        Properties properties = create(PROPERTY_NAME, UserDirectoryModule.class);
+//        String userIds = getProperty("user.ids", properties);
+//        List<UserInfo> users = new ArrayList<UserInfo>();
+//
+//        for (String userId : userIds.split(":")) {
+//            userId = trimToNull(userId);
+//
+//            // format userId:username:password:email:firstname:lastname
+//            if (userId != null) {
+//                String userCredentials = getProperty("user." + userId, properties);
+//
+//                userCredentials = trimToNull(userCredentials);
+//
+//                if (userCredentials != null) {
+//                    final String[] userCredential = userCredentials.split(":", -1);
+//
+//                    users.add(new UserInfo.Builder(UserInfo.Username.valueOf(userCredential[0]))
+//                            .withUserId(userId)
+//                            .withPassword(userCredential[1])
+//                            .withEmail(userCredential[2])
+//                            .withFirstName(userCredential[3])
+//                            .withLastName(userCredential[4])
+//                            .build());
+//                }
+//            }
+//        }
+//
+//        return users;
+//    }
 }

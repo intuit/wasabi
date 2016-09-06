@@ -5,7 +5,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.cassandra.datastax.DefaultCassandraDriver;
-import com.intuit.wasabi.database.DatabaseModule;
 import com.intuit.wasabi.repository.*;
 import com.intuit.wasabi.repository.cassandra.accessor.*;
 import com.intuit.wasabi.repository.cassandra.accessor.audit.AuditLogAccessor;
@@ -22,30 +21,47 @@ import com.intuit.wasabi.repository.cassandra.provider.audit.ExperimentAuditLogA
 import com.intuit.wasabi.repository.cassandra.provider.count.BucketAssignmentCountAccessorProvider;
 import com.intuit.wasabi.repository.cassandra.provider.export.UserAssignmentExportAccessorProvider;
 import com.intuit.wasabi.repository.cassandra.provider.index.*;
-import com.intuit.wasabi.repository.database.*;
 import com.intuit.wasabi.userdirectory.UserDirectoryModule;
 import org.slf4j.Logger;
 
 import javax.inject.Singleton;
+import java.util.Properties;
 
-import static com.google.inject.Scopes.SINGLETON;
+import static com.google.inject.name.Names.named;
+import static com.intuit.autumn.utils.PropertyFactory.create;
+import static com.intuit.autumn.utils.PropertyFactory.getProperty;
+import static java.lang.Boolean.TRUE;
+import static java.lang.Integer.parseInt;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class CassandraRepositoryModule extends AbstractModule {
-    public static final String PROPERTY_NAME = "/cassandra_client_config.properties";
+    public static final String CLIENT_CONFIG_NAME = "/cassandra_client_config.properties";
+    private static final String PROPERTY_NAME = "/repository.properties";
     private static final Logger LOGGER = getLogger(CassandraRepositoryModule.class);
 
     @Override
     protected void configure() {
-        ClientConfiguration config = new ClientConfiguration(PROPERTY_NAME);
-        bind(CassandraDriver.Configuration.class).toInstance(config);
-        bind(String.class).annotatedWith(Names.named("CassandraInstanceName")).toInstance("CassandraWasabiCluster");
-        bind(CassandraDriver.class).to(DefaultCassandraDriver.class).asEagerSingleton();
         install(new UserDirectoryModule());
-        
-        // database module
-        install(new DatabaseModule());
 
+        Properties properties = create(PROPERTY_NAME, CassandraRepositoryModule.class);
+
+        bind(String.class).annotatedWith(named("assign.user.to.export"))
+                .toInstance(getProperty("assign.user.to.export", properties));
+        bind(String.class).annotatedWith(named("assign.bucket.count"))
+                .toInstance(getProperty("assign.bucket.count", properties));
+        bind(Integer.class).annotatedWith(named("export.pool.size"))
+                .toInstance(parseInt(getProperty("export.pool.size", properties, "5")));
+        bind(Boolean.class).annotatedWith(named("assign.user.to.old"))
+                .toInstance(Boolean.valueOf(getProperty("assign.user.to.old", properties, TRUE.toString())));
+        bind(Boolean.class).annotatedWith(named("assign.user.to.new"))
+                .toInstance(Boolean.valueOf(getProperty("assign.user.to.new", properties, TRUE.toString())));
+        bind(String.class).annotatedWith(named("default.time.format"))
+                .toInstance(getProperty("default.time.format", properties, "yyyy-MM-dd HH:mm:ss"));
+
+        bind(String.class).annotatedWith(Names.named("CassandraInstanceName")).toInstance("CassandraWasabiCluster");
+        bind(String.class).annotatedWith(Names.named("cassandraClientConfig")).toInstance(CLIENT_CONFIG_NAME);
+        bind(CassandraDriver.Configuration.class).toProvider(CassandraDriverConfigurationProvider.class).in(Singleton.class);
+        bind(CassandraDriver.class).to(DefaultCassandraDriver.class).asEagerSingleton();
         //Like mappers, accessors are cached at the manager level and thus, are thread-safe/sharable.
         bind(MappingManager.class).toProvider(MappingManagerProvider.class).in(Singleton.class);
 
@@ -84,6 +100,7 @@ public class CassandraRepositoryModule extends AbstractModule {
         bind(UserAssignmentExportAccessor.class).toProvider(UserAssignmentExportAccessorProvider.class).in(Singleton.class);
 
         //Bind those repositories
+        bind(AssignmentsRepository.class).to(CassandraAssignmentsRepository.class).in(Singleton.class);
         bind(AuditLogRepository.class).to(CassandraAuditLogRepository.class).in(Singleton.class);
         bind(AuthorizationRepository.class).to(CassandraAuthorizationRepository.class).in(Singleton.class);
         bind(FeedbackRepository.class).to(CassandraFeedbackRepository.class).in(Singleton.class);
@@ -91,7 +108,5 @@ public class CassandraRepositoryModule extends AbstractModule {
         bind(PagesRepository.class).to(CassandraPagesRepository.class).in(Singleton.class);
         bind(PrioritiesRepository.class).to(CassandraPrioritiesRepository.class).in(Singleton.class);
         bind(ExperimentRepository.class).annotatedWith(CassandraRepository.class).to(CassandraExperimentRepository.class).in(Singleton.class);
-        bind(ExperimentRepository.class).annotatedWith(DatabaseRepository.class).to(DatabaseExperimentRepository.class).in(Singleton.class);
-        bind(AnalyticsRepository.class).to(DatabaseAnalytics.class).in(SINGLETON);
     }
 }
