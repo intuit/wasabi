@@ -14,4 +14,36 @@ rem # See the License for the specific language governing permissions and
 rem # limitations under the License.
 rem ############################################################################
     
-call docker ps
+docker-machine status wasabi | findstr /c:Running 1>nul 2>nul
+if errorlevel 1 (
+    call :info Docker machine not running.
+) else (
+    call docker ps
+)
+
+goto :eof
+
+rem FUNCTION: Logs the parameters as DEBUG.
+:debug
+    rem call :log [DEBUG] %*
+    call :log [DEBUG] %* >> wasabi_windows.log
+    goto :eof
+
+rem FUNCTION: Logs the parameters as INFO.
+:info
+    call :log [INFO] %*
+    call :log [INFO] %* >> wasabi_windows.log
+    goto :eof
+
+rem FUNCTION: Logs the parameters as ERROR.
+:error
+    call :log [ERROR] %* 1>&2
+    call :log [ERROR] %* >> wasabi_windows.log
+    goto :eof
+
+rem FUNCTION: Logs the parameters.
+:log
+    for /f "tokens=*" %%D in ('date /t') do (
+        for /f "tokens=*" %%T in ('time /t') do echo %%D%%T  %*
+    )
+    goto :eof

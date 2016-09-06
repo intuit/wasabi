@@ -16,7 +16,7 @@ rem ############################################################################
     
 rem on empty no resource to be started
 if "" == "%1" (
-    call :error resource not specified
+    call :error no resource specified
     goto :eof
 )
 
@@ -31,11 +31,17 @@ rem start individual components
 
 goto :eof
 
-rem FUNCTION: Runs the ui and opens it. Determines if wasabi
-rem           runs locally or inside the docker machine to
-rem           change the Gruntfile accordingly.
+rem FUNCTION: Runs the UI pointing to the docker network.
 :resource_ui
-    call :info Opening UI
+    call :info Opening UI pointing to docker network
+    pushd modules\ui
+    start grunt serve --apiHost=192.168.99.100
+    popd
+    goto :eof
+
+rem FUNCTION: Runs the UI pointing to localhost.
+:resource_dev_ui
+    call :info Opening UI pointing to localhost
     pushd modules\ui
     start grunt serve
     popd

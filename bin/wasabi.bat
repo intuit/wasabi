@@ -38,7 +38,7 @@ set remaining_commands=%*
     rem Pop currently first command (split at space)
     for /f "tokens=1*" %%C in ("%remaining_commands%") do (
         set current_command=%%C
-        call :info Current command: !current_command!
+        call :debug Current command: !current_command!
         set remaining_commands=%%D
         call :debug Remaining commands: !remaining_commands!
         
@@ -79,7 +79,7 @@ set remaining_commands=%*
         )
     )
     if defined remaining_commands goto read_commands
-call :info Wasabi done
+call :debug Wasabi done
 
 endlocal
 RefreshEnv 2>nul 1>nul

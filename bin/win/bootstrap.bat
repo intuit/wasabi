@@ -17,7 +17,7 @@ rem ############################################################################
 
 rem List of dependencies to install
 setlocal 
-set choco_packages=docker,docker-machine,jdk8,maven --version 3.3.9.1 --allow-empty-checksums,nodejs.install,ruby,virtualbox --allowEmptyChecksums
+set choco_packages=docker,docker-machine,jdk8,maven,nodejs.install,ruby,virtualbox --allowEmptyChecksums
 set npm_packages=bower,grunt-cli,yo
 set gem_packages=compass,fpm
 
@@ -30,7 +30,7 @@ if not %errorLevel% == 0 (
 )
 
 rem install chocolatey
-call :info Trying to find Chocolatey
+call :debug Trying to find Chocolatey
 if not exist C:\ProgramData\chocolatey\choco.exe (
   call :info Installing Chocolatey
   powershell -NoProfile -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin
@@ -42,7 +42,7 @@ if not exist C:\ProgramData\chocolatey\choco.exe (
   rem make sure choco writes its config
   C:\ProgramData\chocolatey\choco.exe
 ) else (
-    call :info Found Chocolatey
+    call :debug Found Chocolatey
 )
 
 call :info Installing/Upgrading Chocolatey dependencies

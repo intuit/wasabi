@@ -41,7 +41,7 @@ rem FUNCTION: Checks the status of cassandra and starts it if needed.
     call :info Starting cassandra
     docker ps -a | findstr /c:wasabi-cassandra 1>nul 2>nul
     if errorlevel 1 (
-        docker -D run --name wasabi-cassandra --net=wasabinet --privileged=true -p 9042:9042 -p 9160:9160 -d cassandra:2.1
+        docker run --name wasabi-cassandra --net=wasabinet --privileged=true -p 9042:9042 -p 9160:9160 -d cassandra:2.1
     ) else (
         docker start wasabi-cassandra 1>nul
     )
@@ -77,18 +77,18 @@ rem FUNCTION: Checks the status of wasabi and starts it if needed.
 
 rem FUNCTION: Checks the status of the docker machine and starts it if needed.
 :start_docker
-    call :info Checking for docker machine
+    call :debug Checking for docker machine
     docker-machine ls -q | findstr /c:wasabi 1>nul 2>nul
     if errorlevel 1 (
         call :create_docker_machine
     ) else (
-        call :info Docker machine exists. Checking it's status.
+        call :debug Docker machine exists. Checking it's status.
         docker-machine status wasabi | findstr /c:Running 1>nul 2>nul
         if errorlevel 1 (
             call :info Docker machine restarting.
             docker-machine restart wasabi
         ) else (
-            call :info Docker machine is already running.
+            call :debug Docker machine is already running.
         )
     )
     call :set_docker_env

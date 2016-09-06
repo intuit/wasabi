@@ -97,8 +97,6 @@ rem FUNCTION: Clears the docker machine variables
 
 goto :eof
 
-rem 
-
 rem FUNCTION: Logs the parameters as DEBUG.
 :debug
     rem call :log [DEBUG] %*
