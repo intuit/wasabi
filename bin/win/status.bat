@@ -14,4 +14,4 @@ rem # See the License for the specific language governing permissions and
 rem # limitations under the License.
 rem ############################################################################
     
-docker ps
+call docker ps

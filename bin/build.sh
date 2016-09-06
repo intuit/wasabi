@@ -18,6 +18,7 @@
 profile_default=development
 build_default=false
 test_default=false
+wasabi_os_default=OSX
 
 usage() {
   [ "$1" ] && echo "error: ${1}"
@@ -73,17 +74,14 @@ module=main
 
 [[ "${build}" != "true" && "${build}" != "false" ]] && usage "invalid build parameter" 1
 [[ "${test}" != "true" && "${test}" != "false" ]] && usage "invalid test parameter" 1
+[ ! -e ./modules/main/target/wasabi-main-*-SNAPSHOT-${profile}-all.jar ] && build_jar=true
 
-if [[ "${build}" != false || "${test}" != false ]]; then
-  package=
-  tests=
-
-  [[ "${test}" = true ]] && package=test
-  [[ "${test}" = false ]] && tests="-Dmaven.test.skip=true"
+if [[ "${build}" = true || "${test}" = true || "${build_jar}" = true ]]; then
   [ "${build}" = true ] && package=package
-  [[ "${build}" = false ]] && package=test
+  [ ! -e ./modules/main/target/wasabi-main-*-SNAPSHOT-${profile}-all.jar ] && package=package
+  [ "${test}" = true ] && tests=test
 
-  mvn -P${profile} ${mvn_settings} ${tests} clean ${package} javadoc:aggregate || \
+  mvn -P${profile} ${mvn_settings} clean ${tests:--Dmaven.test.skip=true} ${package} javadoc:aggregate || \
     usage "invalid: mvn ${tests} -P${profile} ${mvn_settings} clean ${package}" 1
 fi
 
@@ -121,14 +119,17 @@ cp ${home}/${id}-all.jar ${home}/${id}/lib
 chmod 755 ${home}/${id}/bin/run
 chmod 755 ${home}/${id}/entrypoint.sh
 sed -i '' -e "s/chpst -u [^:]*:[^ ]* //" ${home}/${id}/bin/run 2>/dev/null
+[ ! -e ./modules/ui/dist/scripts/wasabi.js ] && build_js=true
 
-if [ "${build}" = true ] && [ "$OS" == "OSX" ]; then
-  brew list node
-  if [[ $? -eq 1 ]]; then
-  	echo "Node.js is not installed. Installing Node.js packages..."
-  	brew install node
-  	npm install -g yo grunt-cli bower grunt-contrib-compass
-  	sudo gem install compass
+if [[ "${build}" = true || "${build_js}" = true ]]; then
+  if [ "${WASABI_OS}" == "${wasabi_os_default}" ]; then
+    brew list node
+    if [[ $? -eq 1 ]]; then
+      echo "Node.js is not installed. Installing Node.js packages..."
+      brew install node
+      npm install -g yo grunt-cli bower grunt-contrib-compass
+      sudo gem install compass
+    fi
   fi
   (cd ./modules/ui && npm install && bower install && grunt build)
 fi

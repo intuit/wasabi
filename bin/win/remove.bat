@@ -51,37 +51,37 @@ goto :eof
 rem FUNCTION: Removes the cassandra container - pass v to remove the volume as well
 :remove_cassandra
     call :info Removing Wasabi's cassandra
-    docker rm -f%1 wasabi-cassandra >nul
+    call docker rm -f%1 wasabi-cassandra >nul
     goto :eof
 
 rem FUNCTION: Removes the mysql container - pass v to remove the volume as well
 :remove_mysql
     call :info Removing Wasabi's mysql
-    docker rm -f%1 wasabi-mysql >nul
+    call docker rm -f%1 wasabi-mysql >nul
     goto :eof
 
 rem FUNCTION: Removes the wasabi container - pass v to remove the volume as well
 :remove_wasabi
     call :info Removing Wasabi
-    docker rm -f%1 wasabi-main >nul
+    call docker rm -f%1 wasabi-main >nul
     goto :eof
 
 rem FUNCTION: Removes the wasabi image
 :remove_image
     call :info Removing Wasabi images
-    docker rmi wasabi-main >nul
+    call docker rmi wasabi-main >nul
     goto :eof
 
 rem FUNCTION: Removes the wasabi network
 :remove_network
     call :info Removing Wasabi network
-    docker network rm wasabinet >nul
+    call docker network rm wasabinet >nul
     goto :eof
 
 rem FUNCTION: Removes the wasabi machine
 :remove_machine
     call :info Removing wasabi machine
-    docker-machine rm -f wasabi >nul
+    call docker-machine rm -f wasabi >nul
     goto :eof
     
 rem FUNCTION: Clears the docker machine variables
@@ -91,7 +91,7 @@ rem FUNCTION: Clears the docker machine variables
     setx DOCKER_HOST "" >nul
     setx DOCKER_CERT_PATH "" >nul
     setx DOCKER_MACHINE_NAME "" >nul
-    RefreshEnv
+    call RefreshEnv
     goto :eof
 
 

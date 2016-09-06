@@ -15,6 +15,9 @@
  *******************************************************************************/
 package com.intuit.wasabi.api;
 
+import com.intuit.wasabi.api.pagination.PaginationHelper;
+import com.intuit.wasabi.api.pagination.comparators.impl.ExperimentComparator;
+import com.intuit.wasabi.api.pagination.filters.impl.ExperimentFilter;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authorization.Authorization;
 import com.intuit.wasabi.exceptions.AuthenticationException;
@@ -22,6 +25,7 @@ import com.intuit.wasabi.experiment.Experiments;
 import com.intuit.wasabi.experiment.Pages;
 import com.intuit.wasabi.experiment.Priorities;
 import com.intuit.wasabi.experimentobjects.*;
+import io.codearte.catchexception.shade.mockito.Mockito;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,6 +37,7 @@ import org.mockito.verification.VerificationMode;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -93,10 +98,14 @@ public class ApplicationsResourceTest {
     private ArgumentCaptor<Map<String, List<PageExperiment>>> pageExperimentsCaptor;
     private ApplicationsResource applicationsResource;
 
+    private PaginationHelper<Experiment> experimentPaginationHelper = new PaginationHelper<>(
+            new ExperimentFilter(),
+            new ExperimentComparator());
+
     @Before
     public void setup() {
         applicationsResource = new ApplicationsResource(authorizedExperimentGetter, experiments, authorization, priorities,
-                pages, httpHeader);
+                pages, httpHeader, experimentPaginationHelper);
     }
 
     @Test
@@ -161,14 +170,15 @@ public class ApplicationsResourceTest {
 
     @Test
     public void getExperiments() throws Exception {
-        when(authorizedExperimentGetter.getAuthorizedExperimentsByName("foo", applicationName))
-                .thenReturn(experimentsByName);
-        whenHttpHeader(experimentsByName);
+        doReturn(responseBuilder).when(httpHeader).headers();
+        doReturn(responseBuilder).when(responseBuilder).entity(anyCollection());
+        doReturn(response).when(responseBuilder).build();
 
-        applicationsResource.getExperiments(applicationName, "foo");
+        applicationsResource.getExperiments(applicationName, "foo", 0, -1, "", "", "");
 
         verify(authorizedExperimentGetter).getAuthorizedExperimentsByName("foo", applicationName);
-        verifyHttpHeader(experimentsByName);
+        verify(httpHeader).headers();
+        verify(responseBuilder).build();
     }
 
     @Test

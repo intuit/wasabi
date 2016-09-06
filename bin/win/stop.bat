@@ -15,7 +15,9 @@ rem # limitations under the License.
 rem ############################################################################
 
 rem check if wasabi machine is running, if not, just return
-for /f %%R in ('docker-machine status wasabi') do if not "%%R"=="Running" goto :eof
+for /f %%R in ('docker-machine status wasabi') do if "%%R"=="Running" goto :continue
+goto :eof
+:continue
 
 rem stop all
 if "%1"=="" (
@@ -34,32 +36,32 @@ rem stop individual components
     goto :read_params
 :params_read
 
-for /f %%R in ('docker ps -q') do if "%%R"=="" call :stop_docker
+for /f %%R in ('call docker ps -q') do if "%%R"=="" call :stop_docker
 
 goto :eof
 
 rem FUNCTION: Stops the cassandra container.
 :stop_cassandra
     call :info Stopping cassandra.
-    docker kill wasabi-cassandra
+    call docker kill wasabi-cassandra
     goto :eof
 
 rem FUNCTION: Stops the mysql container.
 :stop_mysql
     call :info Stopping mysql.
-    docker kill wasabi-mysql
+    call docker kill wasabi-mysql
     goto :eof
 
 rem FUNCTION: Stops the wasabi container.
 :stop_wasabi
     call :info Stopping wasabi.
-    docker kill wasabi-main
+    call docker kill wasabi-main
     goto :eof
 
 rem FUNCTION: Stops docker.
 :stop_docker
     call :info Stopping docker.
-    docker-machine stop wasabi
+    call docker-machine stop wasabi
     goto :eof
     
 rem FUNCTION: Logs the parameters as DEBUG.

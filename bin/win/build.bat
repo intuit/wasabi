@@ -43,7 +43,9 @@ rem FUNCTION: builds wasabi
 rem FUNCTION: builds ui
 :build_ui
     call :info Building UI
-    cmd /c "cd modules\ui & npm install & bower install & grunt build"
+    pushd modules\ui
+    cmd /c "npm install & bower install & grunt build"
+    popd
     goto :eof
 
 rem FUNCTION: copies the build files to target\app to properly be used with docker

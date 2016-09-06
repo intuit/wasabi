@@ -4,8 +4,8 @@
 
 angular.module('wasabi.controllers')
     .controller('ExperimentModalCtrl',
-        ['$scope', '$modalInstance', '$modal', 'ExperimentsFactory', 'experiments', 'experiment', 'UtilitiesFactory', '$rootScope', 'readOnly', 'applications', 'DialogsFactory', 'RuleEditFactory', 'ConfigFactory', 'Session', 'AuthzFactory', 'ApplicationsFactory', 'PERMISSIONS', '$cookies', 'allApplications', 'openedFromModal', 'EmailFactory',
-            function ($scope, $modalInstance, $modal, ExperimentsFactory, experiments, experiment, UtilitiesFactory, $rootScope, readOnly, applications, DialogsFactory, RuleEditFactory, ConfigFactory, Session, AuthzFactory, ApplicationsFactory, PERMISSIONS, $cookies, allApplications, openedFromModal, EmailFactory) {
+        ['$scope', '$modalInstance', '$modal', 'ExperimentsFactory', 'experiments', 'experiment', 'UtilitiesFactory', '$rootScope', 'readOnly', 'applications', 'DialogsFactory', 'RuleEditFactory', 'ConfigFactory', 'Session', 'AuthzFactory', 'ApplicationsFactory', 'PERMISSIONS', '$cookies', 'openedFromModal', 'EmailFactory', 'favoritesObj',
+            function ($scope, $modalInstance, $modal, ExperimentsFactory, experiments, experiment, UtilitiesFactory, $rootScope, readOnly, applications, DialogsFactory, RuleEditFactory, ConfigFactory, Session, AuthzFactory, ApplicationsFactory, PERMISSIONS, $cookies, openedFromModal, EmailFactory, favoritesObj) {
 
                 UtilitiesFactory.trackEvent('loadedDialog',
                     {key: 'dialog_name', value: 'createOrEditExperiment'});
@@ -23,7 +23,7 @@ angular.module('wasabi.controllers')
                 // needed to check uniqueness of name+label combination with directive
                 $scope.experiments = experiments;
                 $scope.applications = applications;
-                $scope.allApplications = allApplications;
+                $scope.allApplications = [];
                 $scope.postSubmitError = null;
                 $scope.modalInstance = $modalInstance;
                 $scope.showApplicationName2 = false;
@@ -33,6 +33,7 @@ angular.module('wasabi.controllers')
                 $scope.bucketTotalsValid = false;
                 $scope.rulesChangedNotSaved = !($scope.experiment && $scope.experiment.rule && $scope.experiment.rule.length > 0);
                 $scope.plugins = $rootScope.plugins;
+                $scope.favoritesObj = favoritesObj;
 
                 $scope.tabs = [
                     {active: true},
@@ -149,6 +150,31 @@ angular.module('wasabi.controllers')
                     }
                 };
 
+                $scope.loadAllApplications = function () {
+                    ApplicationsFactory.query().$promise.then(function (applications) {
+                        if (applications) {
+                            $scope.allApplications = [];
+                            // Make a list of only the applications for which this user doesn't have access.
+                            for (var i = 0; i < applications.length; i++) {
+                                var hasAccessForApp = false;
+                                for (var j = 0; j < $scope.applications.length; j++) {
+                                    // Check if this application is one of the ones they already have access for.
+                                    if (applications[i].applicationName === $scope.applications[j]) {
+                                        hasAccessForApp = true;
+                                        break;
+                                    }
+                                }
+                                if (!hasAccessForApp) {
+                                    $scope.allApplications.push(applications[i].applicationName);
+                                    // Note: This will be picked up by the AutocompleteDirective attached to the New Application field.
+                                }
+                            }
+                        }
+                    }, function(response) {
+                            UtilitiesFactory.handleGlobalError(response, 'The list of applications could not be retrieved.');
+                    });
+                };
+
                 $scope.typeChanged = function(rule, subForm) {
                     RuleEditFactory.typeChanged(rule, subForm);
                     $scope.rulesChangedNotSaved = true;
@@ -212,6 +238,7 @@ angular.module('wasabi.controllers')
                 };
 
                 $scope.processRule();
+                $scope.loadAllApplications();
 
                 $scope.doSaveOrCreateExperiment = function(experimentId, afterSaveFunc) {
                     var handleCreateSuccess = function(experiment, dialogName) {
@@ -477,6 +504,7 @@ angular.module('wasabi.controllers')
 
                 $scope.startExperiment = function(isFormInvalid) {
                     if (isFormInvalid) {
+                        $scope.experimentFormSubmitted = true;
                         DialogsFactory.alertDialog('Please address the errors displayed before you can start your experiment.', 'Errors Preventing Start');
                         return;
                     }

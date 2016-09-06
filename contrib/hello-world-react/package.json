@@ -1,0 +1,69 @@
+{
+  "name": "wasabi-hello-world-react",
+  "version": "1.0.0",
+  "description": "Example of how to use Wasabi in a React app.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index",
+    "postinstall": "npm run build",
+    "clean": "rimraf dist",
+    "build": "npm run clean && npm run server && npm run webpack-once",
+    "webpack": "webpack --config ./config/webpack.dev.js --watch",
+    "webpack-once": "webpack --config ./config/webpack.dev.js",
+    "server": "babel ./src --presets es2015,stage-0 --out-dir ./dist --source-maps --ignore www"
+  },
+  "author": "Scott Cressler",
+  "license": "MIT",
+  "devDependencies": {
+    "autoprefixer": "^6.3.7",
+    "babel-cli": "^6.10.1",
+    "babel-core": "^6.10.4",
+    "babel-eslint": "^6.1.2",
+    "babel-loader": "^6.2.4",
+    "babel-polyfill": "^6.9.1",
+    "babel-preset-es2015": "^6.9.0",
+    "babel-preset-react": "^6.11.1",
+    "babel-preset-stage-0": "^6.5.0",
+    "babel-relay-plugin": "^0.9.1",
+    "css-loader": "^0.23.1",
+    "eslint": "^3.0.1",
+    "eslint-plugin-react": "^6.1.1",
+    "exports-loader": "^0.6.3",
+    "extract-text-webpack-plugin": "^1.0.1",
+    "file-loader": "^0.9.0",
+    "html-loader": "^0.4.3",
+    "html-webpack-plugin": "^2.22.0",
+    "imports-loader": "^0.6.5",
+    "node-sass": "^3.8.0",
+    "null-loader": "^0.1.1",
+    "postcss": "^5.0.21",
+    "postcss-loader": "^0.10.0",
+    "raw-loader": "^0.5.1",
+    "resolve-url-loader": "^1.6.0",
+    "rimraf": "^2.5.3",
+    "sass-loader": "^4.0.0",
+    "style-loader": "^0.13.1",
+    "url-loader": "^0.5.7",
+    "webpack": "^1.13.1",
+    "webpack-merge": "^0.14.0"
+  },
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "express": "^4.14.0",
+    "react": "^15.2.1",
+    "react-dom": "^15.2.1",
+    "es6-promise": "^3.2.1",
+    "whatwg-fetch": "^1.0.0"
+  },
+  "webServer": {
+    "protocol": "http",
+    "host": "localhost",
+    "port": 3000,
+    "folder": "dist/www"
+  },
+  "mongoServer": {
+    "host": "localhost",
+    "post": 27017,
+    "dbName": "training"
+  }
+}

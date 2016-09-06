@@ -2,7 +2,7 @@
 
 #### Setup an experiment
 
-Note: make sure your Wasabi service is running (default: 192.168.99.100:8080)
+Note: make sure your Wasabi service is running (default: localhost:8080)
 
 Create and start a 'BuyButton' experiment under 'Demo_App' application with 2 buckets:
 

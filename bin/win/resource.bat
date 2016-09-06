@@ -31,19 +31,23 @@ rem start individual components
 
 goto :eof
 
-rem FUNCTION: Runs the ui and opens it
+rem FUNCTION: Runs the ui and opens it. Determines if wasabi
+rem           runs locally or inside the docker machine to
+rem           change the Gruntfile accordingly.
 :resource_ui
     call :info Opening UI
-    cd modules\ui
+    pushd modules\ui
     start grunt serve
+    popd
     goto :eof
 
 rem FUNCTION: Opens the api reference
 :resource_api
     call :info Opening API reference
-    cd modules\swagger-ui\target\swaggerui
+    pushd modules\swagger-ui\target\swaggerui
     start ruby -run -e httpd . -p 9090
     start http://localhost:9090/
+    popd
     goto :eof
     
 rem FUNCTION: Opens the javadoc

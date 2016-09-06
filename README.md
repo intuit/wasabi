@@ -46,6 +46,7 @@ The following steps will help you install the needed tools, then build and run a
 
 #### Bootstrap Your Environment
 
+
 ##### Mac OS
 
 ```bash
@@ -60,6 +61,7 @@ The following steps will help you install the needed tools, then build and run a
 Installed tools include: [homebrew 0.9](http://brew.sh), [git 2](https://git-scm.com),
 [maven 3](https://maven.apache.org), [java 1.8](http://www.oracle.com/technetwork/java/javase/overview/index.html),
 [docker 1.12](https://docker.com), [node 6](https://nodejs.org/en) and [python 2.7](https://www.python.org).
+
 
 ##### Windows (7+)
 
@@ -105,6 +107,7 @@ To use the `curl` commands consider `choco install curl`.
 [url_develop_zip]: https://github.com/intuit/wasabi/archive/develop.zip
 [url_hyperv]: https://msdn.microsoft.com/virtualization/hyperv_on_windows/quick_start/walkthrough_compatibility
 
+
 #### Start Wasabi
 
 Now that we have the necessary tools in place, let's move on to build and start Wasabi, followed by issuing a _ping_
@@ -144,11 +147,11 @@ Server: Jetty(9.3.z-SNAPSHOT)
 
 Congratulations! You are the proud owner of a newly minted Wasabi instance. :)
 
+
 #### Troubleshooting
 
 * While starting Wasabi, if you see an error when the docker containers are starting up, you could do the following:
-
-  * Look at the current docker containers that have been successfully started.
+* Look at the current docker containers that have been successfully started.
 
 ```bash
 % ./bin/wasabi.sh status
@@ -169,8 +172,6 @@ could not download the Cassandra image), do the following:
 
 % ./bin/wasabi.sh start:wasabi
 ```
-
-
 
 #### Call Wasabi
 

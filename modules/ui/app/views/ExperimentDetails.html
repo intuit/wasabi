@@ -2,7 +2,7 @@
     <div class="exprHead">
         <div class="exprName">
             <span class="starContainer" ng-class="{favorite: experiment.isFavorite}">
-                <a href="#" favorites-star favorites-star-application-name="experiment.applicationName" favorites-star-experiment-name="experiment.label" favorites-star-parent-tag="span" after-favorite-func="setAsFavorite" ng-attr-is-favorite="{{experiment.isFavorite}}" class="star" title="Mark as Favorite"></a>
+                <a href="#" favorites-star favorites-star-experiment-id="experiment.id" favorites-star-favorites-object="favoritesObj" favorites-star-parent-tag="span" after-favorite-func="setAsFavorite" ng-attr-is-favorite="{{experiment.isFavorite}}" class="star" title="Mark as Favorite"></a>
             </span>
             <h2><div style="margin-bottom: 10px;">{{experiment.applicationName}}</div><div>{{experiment.label}}</div></h2>
         </div>
@@ -84,7 +84,7 @@
     </table>
 
     <div>
-        <div style="float: left; margin-right: 862px;"><label class="descriptionLabel">Description</label></div>
+        <div style="float: left; margin-right: 862px;"><label class="descriptionLabel">Hypothesis/Description</label></div>
         <pre id="experimentDescription" spellcheck="false" class="readOnly"></pre>
         <div id="descriptionToolbar" ng-show="!readOnly" dynamic-edit input-tag="experimentDescription" select-function="saveDescription" edit-function="editDescription" cancel-function="cancelDescription" ng-model="experiment.description" class="dynamicToolbar"></div>
         <div style="margin-top: 5px; margin-bottom: 10px; font-size: 12px;"><label ng-class="{tooMany: data.descriptionLength > 256}">{{(256 - data.descriptionLength) >= 0 ? 256 - data.descriptionLength : 'NO'}} characters left</label></div>
@@ -161,6 +161,24 @@
                         </tr>
                         <tr ng-if="orderedDataRows.length <= 1"><td colspan="{{orderedDataRows[0].length}}">No action data at this time.</td></tr>                    </table>
                 </div>
+            </div>
+        </tab>
+        <tab heading="Results">
+            <div class="resultsTab">
+                <div id="resultsToolbar" ng-show="!readOnly" dynamic-edit input-tag="rule" select-function="saveResults" edit-function="editResults" cancel-function="cancelResults" ng-model="experiment.rule" class="dynamicToolbar"></div>
+            <form name="resultsForm" novalidate>
+            <div>
+                <div>
+                    <label>Results</label>
+                    <textarea ng-show="!readOnly && !data.resultsWidgetsDisabled" name="experimentResults" id="experimentResults" class="form-control" required ng-model="experiment.results" style="width: 99%; height: 55px" ng-maxlength="256" placeholder="Enter Experiment Results"></textarea>
+                    <textarea ng-show="readOnly || data.resultsWidgetsDisabled" disabled="true" name="experimentResults" class="form-control readOnly" ng-model="experiment.results" style="width: 99%; height: 55px"></textarea>
+                </div>
+                <div style="margin-top: 10px;">
+                    <label>Hypothesis Correct?</label>
+                    <select ng-class="{disabled: readOnly || data.resultsWidgetsDisabled}" ng-disabled="readOnly || data.resultsWidgetsDisabled" name="experimenthypothesisIsCorrect" id="experimenthypothesisIsCorrect" ng-model="experiment.hypothesisIsCorrect"><option value="">Select answer</option><option value="yes">Yes, my hypothesis was correct</option><option value="no">No, my hypothesis was incorrect</option><option value="indeterminate">Indeterminate</option></select>
+                </div>
+            </div>
+            </form>
             </div>
         </tab>
         <tab heading="Mutual Exclusion" ng-controller="MutualExclusionsCtrl">
