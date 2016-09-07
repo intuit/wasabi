@@ -17,7 +17,7 @@ rem ############################################################################
 
 rem List of dependencies to install
 setlocal 
-set choco_packages=docker,docker-machine,jdk8,maven,nodejs.install,ruby,virtualbox --allowEmptyChecksums
+set choco_packages=docker,docker-machine,jdk8,maven,nodejs.install,ruby,virtualbox --allowEmptyChecksums,git.install
 set npm_packages=bower,grunt-cli,yo
 set gem_packages=compass,fpm
 
