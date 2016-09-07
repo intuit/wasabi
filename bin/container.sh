@@ -153,13 +153,7 @@ start_wasabi() {
 
   echo "${green}${project}: starting${reset}"
 
-  wenv="WASABI_CONFIGURATION=-DnodeHosts=${project}-cassandra -Ddatabase.url.host=${project}-mysql"
-
-#   fixme: try to reuse the start_container() method instead of 'docker run...' directly; currently a problem with quotes in ${wenv} being passed into container.
-  #docker run --net=${docker_network} --name ${project}-main -p 8080:8080 -p 8090:8090 -p 8180:8180 \
-  #  -e "${wenv}" -d ${project}-main || \
-  #  usage "docker run --net=${docker_network} --name ${project}-main -p 8080:8080 -p 8090:8090 -p 8180:8180 -e \"${wenv}\" -d ${project}-main" 1
-  start_container ${project}-main ${project}-main "-p 8080:8080 -p 8090:8090 -p 8180:8180 -e '${wenv}'"
+  start_container ${project}-main ${project}-main "-p 8080:8080 -p 8090:8090 -p 8180:8180 -e WASABI_CONFIGURATION=\"-DnodeHosts=${project}-cassandra -Ddatabase.url.host=${project}-mysql\""
   echo -ne "${green}chill'ax ${reset}"
 
   status
@@ -188,7 +182,7 @@ start_mysql() {
 
 console_mysql() {
   pwd=mypass
-  
+
   docker run --net=${docker_network} -it --rm ${mysql} mysql -h${project}-mysql -P3306 -uroot -p${pwd} || \
     usage "unable to run command: % docker run --net=${docker_network} -it --rm ${mysql} mysql -h${wmip} -P3306 -uroot -p${pwd}" 1
 }
