@@ -86,8 +86,8 @@ stop_docker() {
 }
 
 start_container() {
-  # fix: do not re-create
-  docker network create --driver bridge ${docker_network} >/dev/null 2>&1
+  docker network ls | grep ${docker_network} 1>/dev/null || \
+    docker network create --driver bridge ${docker_network} >/dev/null 2>&1
 
   cid=$(docker ps -aqf name=${1})
 
@@ -96,7 +96,7 @@ start_container() {
       usage "docker run --net=${docker_network} --name ${1} ${3} -d ${2} ${4}" 1
     # todo: ?better way? ... see about moving polling to the app-start
     beerMe 30
-  elif [ "${cid}" != "running" ]; then
+  else
     cids=$(docker inspect --format '{{.State.Status}}' ${cid})
 
     if [ "${cids}" == "paused" ]; then
@@ -147,13 +147,12 @@ start_wasabi() {
   if [ "${verify}" = true ] || ! [ docker inspect ${project}-main >/dev/null 2>&1 ]; then
     echo "${green}${project}: building${reset}"
 
-#    sed -i -e "s|\(http://\)localhost\(:8080\)|\1${mip}\2|g" modules/main/target/${id}/content/ui/dist/scripts/config.js 2>/dev/null;
-    docker build -t ${project}-main:${USER}-$(date +%s) -t ${project}-main:latest modules/main/target/${id}
+    docker build -t ${project}-main:$(git rev-parse --short=8 HEAD) -t ${project}-main:latest modules/main/target/${id}
   fi
 
   echo "${green}${project}: starting${reset}"
 
-  start_container ${project}-main ${project}-main "-p 8080:8080 -p 8090:8090 -p 8180:8180 -e WASABI_CONFIGURATION=\"-DnodeHosts=${project}-cassandra -Ddatabase.url.host=${project}-mysql\""
+  start_container ${project}-main ${project}-main:$(git rev-parse --short=8 HEAD) "-p 8080:8080 -p 8090:8090 -p 8180:8180 -e WASABI_CONFIGURATION=\"-DnodeHosts=${project}-cassandra -Ddatabase.url.host=${project}-mysql\""
   echo -ne "${green}chill'ax ${reset}"
 
   status
@@ -167,7 +166,7 @@ start_cassandra() {
 }
 
 console_cassandra() {
-  docker run --net=${docker_network} -it --rm ${cassandra} cqlsh ${project}-cassandra || \
+  docker exec -it ${project}-cassandra cqlsh || \
     usage "unable to run command: docker run --net=${docker_network} -it --rm ${cassandra} cqlsh ${project}-cassandra" 1
 }
 
@@ -183,7 +182,7 @@ start_mysql() {
 console_mysql() {
   pwd=mypass
 
-  docker run --net=${docker_network} -it --rm ${mysql} mysql -h${project}-mysql -P3306 -uroot -p${pwd} || \
+  docker exec -it ${project}-mysql mysql -uroot -p${pwd} || \
     usage "unable to run command: % docker run --net=${docker_network} -it --rm ${mysql} mysql -h${wmip} -P3306 -uroot -p${pwd}" 1
 }
 
