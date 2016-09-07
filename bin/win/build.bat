@@ -37,7 +37,7 @@ goto :eof
 rem FUNCTION: builds wasabi
 :build_wasabi
     call :info Building Wasabi Service
-    cmd /c "mvn -Pdevelopment clean test package javadoc:aggregate -DskipTests=true"
+    cmd /c "mvn -Pdevelopment clean test package javadoc:aggregate"
     goto :eof
 
 rem FUNCTION: builds ui
