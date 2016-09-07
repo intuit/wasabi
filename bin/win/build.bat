@@ -18,7 +18,7 @@ rem start all
 if "" == "%1" (
     call :build_wasabi
     call :build_ui
-    call :copy_files
+    call :build_files
     goto :eof
 )
 
@@ -29,7 +29,7 @@ rem start individual components
     
     shift
     goto :read_params
-call :copy_files
+call :build_files
 
 
 goto :eof
@@ -37,20 +37,20 @@ goto :eof
 rem FUNCTION: builds wasabi
 :build_wasabi
     call :info Building Wasabi Service
-    cmd /c "mvn -Pdevelopment clean test package javadoc:aggregate"
+    cmd /c "mvn -Pdevelopment clean test package javadoc:aggregate -DskipTests=true"
     goto :eof
 
 rem FUNCTION: builds ui
 :build_ui
     call :info Building UI
     pushd modules\ui
-    cmd /c "npm install & bower install & grunt build"
+    cmd /c "call npm install & call %APPDATA%\npm\bower.cmd install & call %APPDATA%\npm\grunt.cmd build"
     popd
     goto :eof
 
 rem FUNCTION: copies the build files to target\app to properly be used with docker
-:copy_files
-    call :info Finishing build
+:build_files
+    call :info Aggregating files
     
     rem wasabi files
     set app-dir=target\app
@@ -70,12 +70,13 @@ rem FUNCTION: copies the build files to target\app to properly be used with dock
     copy modules\main\target\extra-resources\service\run %bin-dir% /y 1>nul
     copy modules\main\target\extra-resources\docker\wasabi\Dockerfile %app-dir% /y 1>nul
     copy modules\main\target\extra-resources\docker\wasabi\entrypoint.sh %app-dir% /y 1>nul
+    copy modules\main\target\extra-resources\docker\wasabi\.dockerignore %app-dir% /y 1>nul
     rem The normal copy does not support * officially and creates only almost empty 
     rem thus we fall back to the powershell copy here.
     powershell -Command "Copy-item -path modules\main\target\wasabi-main-*-all.jar -destination %lib-dir%\ -force" 1>nul
     
     rem swagger doc files
-    copy modules\api\target\generated\document.html modules\swagger-ui\target\swaggerui\
+    copy modules\api\target\generated\document.html modules\swagger-ui\target\swaggerui\ >nul
     mkdir modules\swagger-ui\target\swaggerui\swagger 2>nul
     mkdir modules\swagger-ui\target\swaggerui\swagger\swaggerjson 2>nul
     powershell -Command "Get-Content modules\api\target\generated\swagger-ui\swagger.json | %{$_ -replace 'localhost', '192.168.99.100'}" > modules\swagger-ui\target\swaggerui\swagger\swaggerjson\swagger.json

@@ -45,6 +45,21 @@ rem FUNCTION: Checks the status of cassandra and starts it if needed.
     ) else (
         docker start wasabi-cassandra 1>nul
     )
+    rem wait until wasabi-cassandra is running
+    set /a count=0
+    :cas_wait
+        if not "%count%" == "10" (
+            set /a count=%count%+1
+            docker ps -a | findstr /c:wasabi-cassandra | findstr /c:0.0.0.0:9042 1>nul 2>nul
+            if errorlevel 1 (
+                call :info Waiting for wasabi-cassandra %count%/10
+                ping 127.0.0.1 -n 3 >nul
+                goto :cas_wait
+            )
+        ) else (
+            call :error Can not start wasabi-cassandra, giving up.
+            exit /b 1
+        )
     goto :eof
 
 rem FUNCTION: Checks the status of mysql and starts it if needed.
@@ -54,10 +69,27 @@ rem FUNCTION: Checks the status of mysql and starts it if needed.
     docker ps -a | findstr /c:wasabi-mysql 1>nul 2>nul
     if errorlevel 1 (
         docker run --name wasabi-mysql --net=wasabinet -p 3306:3306 -e MYSQL_ROOT_PASSWORD=mypass -d mysql:5.6
-        docker exec wasabi-mysql mysql -uroot -pmypass -e "create database if not exists wasabi; grant all privileges on wasabi.* to 'readwrite'@'localhost' identified by 'readwrite'; grant all on *.* to 'readwrite'@'%' identified by 'readwrite'; flush privileges;"
     ) else (
         docker start wasabi-mysql 1>nul
     )
+    rem wait until wasabi-mysql is running
+    set /a count=0
+    :mysql_wait
+        if not "%count%" == "10" (
+            set /a count=%count%+1
+            docker ps -a | findstr /c:wasabi-mysql | findstr /c:0.0.0.0:3306 1>nul 2>nul
+            if errorlevel 1 (
+                call :info Waiting for wasabi-mysql %count%/10
+                ping 127.0.0.1 -n 3 >nul
+                goto :mysql_wait
+            )
+        ) else (
+            call :error Can not start wasabi-mysql, giving up.
+            exit /b 1
+        )
+    ping 127.0.0.1 -n 10 >nul
+    docker exec wasabi-mysql mysql -uroot -pmypass -e "create database if not exists wasabi; grant all privileges on wasabi.* to 'readwrite'@'localhost' identified by 'readwrite'; grant all on *.* to 'readwrite'@'%' identified by 'readwrite'; flush privileges;"
+    
     goto :eof
     
 rem FUNCTION: Checks the status of wasabi and starts it if needed.
@@ -65,14 +97,28 @@ rem FUNCTION: Checks the status of wasabi and starts it if needed.
     call :info Starting wasabi
     docker ps -a | findstr /c:wasabi-main 1>nul 2>nul
     if errorlevel 1 (
-        call :build_docker_image
-        for /f %%I in ('docker inspect --format "{{ .NetworkSettings.Networks.wasabinet.IPAddress }}" wasabi-cassandra') do set CASSANDRA_IP=%%I
-        for /f %%I in ('docker inspect --format "{{ .NetworkSettings.Networks.wasabinet.IPAddress }}" wasabi-mysql') do set MYSQL_IP=%%I
-        docker create --net=wasabinet -p 8080:8080 -p 8090:8090 -p 8180:8180 -e WASABI_CONFIGURATION="-DnodeHosts=!CASSANDRA_IP! -Ddatabase.url.host=!MYSQL_IP!" --name wasabi-main wasabi-main:latest
-        docker start wasabi-main 1>nul
-    ) else (
-        docker start wasabi-main
+        for /f %%H in ('"git rev-parse --short=8 HEAD"') do (
+            docker build -t wasabi-main:%%H target\app
+            docker create --net=wasabinet -p 8080:8080 -p 8090:8090 -p 8180:8180 -e WASABI_CONFIGURATION="-DnodeHosts=wasabi-cassandra -Ddatabase.url.host=wasabi-mysql" --name wasabi-main wasabi-main:%%H
+        )
     )
+    docker start wasabi-main 1>nul
+    
+    rem wait until wasabi-main is running
+    set /a count=0
+    :wasabi_wait
+        if not "%count%" == "10" (
+            set /a count=%count%+1
+            docker ps -a | findstr /c:wasabi-main | findstr /c:0.0.0.0:8080 1>nul 2>nul
+            if errorlevel 1 (
+                call :info Waiting for wasabi-main %count%/10
+                ping 127.0.0.1 -n 3 >nul
+                goto :wasabi_wait
+            )
+        ) else (
+            call :error Can not start wasabi-main, giving up.
+            exit /b 1
+        )
     goto :eof
 
 rem FUNCTION: Checks the status of the docker machine and starts it if needed.
@@ -97,7 +143,7 @@ rem FUNCTION: Checks the status of the docker machine and starts it if needed.
 
 rem FUNCTION: Set docker environment variables correctly.
 :set_docker_env
-    call :info Setting environment variables to use docker.
+    call :debug Setting environment variables to use docker.
     
     rem Thanks to setlocal this won't enable the right environment variables.
     rem Instead we hope for now for the best (i.e. people don't tinker with the 
@@ -106,7 +152,7 @@ rem FUNCTION: Set docker environment variables correctly.
     for /f "tokens=*" %%I in ('"C:\ProgramData\chocolatey\lib\docker-machine\bin\docker-machine.exe" env wasabi') do %%I
     
     for /f %%I in ('"C:\ProgramData\chocolatey\lib\docker-machine\bin\docker-machine.exe" ip wasabi') do set DOCKER_IP=%%I
-    rem set the env variables globally (they are refreshed after wasabi.bat 
+    rem set the env variables also globally (they are refreshed after wasabi.bat
     rem automatically!)
     setx DOCKER_TLS_VERIFY 1 1>nul
     setx DOCKER_HOST tcp://%DOCKER_IP%:2376 1>nul
@@ -116,16 +162,10 @@ rem FUNCTION: Set docker environment variables correctly.
     
 rem FUNCTION: Create docker image for wasabi main
 :build_docker_image
-    call :info Building docker image
-    call :debug echo Building image wasabi-main:latest
-    docker build -t wasabi-main:latest target\app
+    call :debug Building docker image
+    rem tag differently: commit hash
     
-    rem TODO shoeffner: allow --force-rm if needed, also unix scripts build 
-    rem wasabi-main:user-timestamp, which is not supported here for now, but
-    rem the following lines might help with that in the future:
-    rem setlocal enabledelayedexpansion enableextensions
-    rem for /f "tokens=1 delims=." %%T in ('powershell -Command "get-date -uformat %%s"') do set timestamp=%%T
-    rem endlocal
+
 
     goto :eof
     
@@ -143,7 +183,6 @@ rem FUNCTION: Create a docker network for wasabi
     if errorlevel 1 (
         call :info Creating network.
         docker network create --driver bridge wasabinet 1>nul
-        rem docker network create --driver host wasabinet 1>nul
         call :info Network created.
     ) else (
         call :info Network exists.
