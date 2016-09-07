@@ -16,7 +16,7 @@ rem ############################################################################
 
 rem always start docker
 call :start_docker
-    
+
 rem start all
 if "" == "%1" (
     call :start_cassandra
@@ -117,16 +117,7 @@ rem FUNCTION: Set docker environment variables correctly.
     setx DOCKER_MACHINE_NAME wasabi 1>nul
     goto :eof
     
-rem FUNCTION: Create docker image for wasabi main
-:build_docker_image
-    call :debug Building docker image
-    rem tag differently: commit hash
-    
-
-
-    goto :eof
-    
-rem FUNCTION: Create a docker machine and set the proper environment variables.
+rem FUNCTION: Create a docker machine
 :create_docker_machine
     call :info Creating docker machine
     docker-machine create --driver virtualbox wasabi

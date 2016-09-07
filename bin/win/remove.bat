@@ -83,7 +83,7 @@ rem FUNCTION: Removes the wasabi machine
     call :info Removing wasabi machine
     call docker-machine rm -f wasabi >nul
     goto :eof
-    
+
 rem FUNCTION: Clears the docker machine variables
 :clear_env
     call :info Clearing environment variables

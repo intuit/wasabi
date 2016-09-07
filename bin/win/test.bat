@@ -46,6 +46,11 @@ rem FUNCTION: Runs the unit tests for the provided module.
 rem FUNCTION: Runs the integration tests.
 :integration_tests
     call :info Running integration tests.
+
+    rem fix time delays in case they exist
+    for /f "usebackq" %%I in (`ruby -e "puts Time.now.utc.strftime(%%Q{%%Y%%m%%d%%H%%M.%%S})"`) do docker-machine ssh wasabi "sudo date --set %%I" 1>nul 2>&1
+
+    rem run integration tests
     cd modules\functional-test\target
     for /f %%J in ('dir /b *-with-dependencies.jar') do (
         java -Dapi.server.name=192.168.99.100:8080 -Duser.name=admin -Duser.password=admin -classpath classes;%%J org.testng.TestNG -d ..\..\..\functional-test.log classes\testng.xml
