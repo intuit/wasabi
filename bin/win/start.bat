@@ -41,7 +41,7 @@ rem FUNCTION: Checks the status of cassandra and starts it if needed.
     call :info Starting cassandra
     docker ps -a | findstr /c:wasabi-cassandra 1>nul 2>nul
     if errorlevel 1 (
-        docker run --name wasabi-cassandra --net=wasabinet --privileged=true -p 9042:9042 -p 9160:9160 -d cassandra:2.1
+        docker run --net=wasabinet --name wasabi-cassandra --privileged=true -p 9042:9042 -p 9160:9160 -d cassandra:2.1
     ) else (
         docker start wasabi-cassandra 1>nul
     )
@@ -53,7 +53,7 @@ rem FUNCTION: Checks the status of mysql and starts it if needed.
     
     docker ps -a | findstr /c:wasabi-mysql 1>nul 2>nul
     if errorlevel 1 (
-        docker run --name wasabi-mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=mypass -e MYSQL_DATABASE=wasabi -e MYSQL_USER=readwrite -e MYSQL_PASSWORD=readwrite -d mysql:5.6
+        docker run --net=wasabinet --name wasabi-mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=mypass -e MYSQL_DATABASE=wasabi -e MYSQL_USER=readwrite -e MYSQL_PASSWORD=readwrite -d mysql:5.6
     ) else (
         docker start wasabi-mysql 1>nul
     )

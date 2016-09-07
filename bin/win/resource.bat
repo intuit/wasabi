@@ -35,7 +35,7 @@ rem FUNCTION: Runs the UI pointing to the docker network.
 :resource_ui
     call :info Opening UI pointing to docker network
     pushd modules\ui
-    start %APPDATA%\npm\grunt.cmd serve --apiHost=192.168.99.100
+    for /f %%I in ('docker-machine ip wasabi') do start %APPDATA%\npm\grunt.cmd serve --apiHost=%%I
     popd
     goto :eof
 
@@ -65,13 +65,13 @@ rem FUNCTION: Opens the javadoc
 rem FUNCTION: Opens mysql
 :resource_mysql
     call :info Connecting to mysql
-    start docker exec --interactive --tty wasabi-mysql mysql -uroot -pmypass
+    start docker exec -it wasabi-mysql mysql -uroot -pmypass
     goto :eof
     
 rem FUNCTION: Opens cqlsh
 :resource_cassandra
     call :info Connecting to cassandra
-    start docker exec --interactive --tty wasabi-cassandra cqlsh
+    start docker exec -it wasabi-cassandra cqlsh wasabi-cassandra
     goto :eof
 
 rem FUNCTION: Logs the parameters as DEBUG.
