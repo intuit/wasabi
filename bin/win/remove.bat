@@ -51,25 +51,25 @@ goto :eof
 rem FUNCTION: Removes the cassandra container - pass v to remove the volume as well
 :remove_cassandra
     call :info Removing Wasabi's cassandra
-    call docker rm -f%1 wasabi-cassandra >nul
+    for /f "tokens=1" %%C in ('"docker ps -a | findstr /c:wasabi-cassandra"') do call docker rm -f%1 %%C >nul
     goto :eof
 
 rem FUNCTION: Removes the mysql container - pass v to remove the volume as well
 :remove_mysql
     call :info Removing Wasabi's mysql
-    call docker rm -f%1 wasabi-mysql >nul
+    for /f "tokens=1" %%C in ('"docker ps -a | findstr /c:wasabi-mysql"') do call docker rm -f%1 %%C >nul
     goto :eof
 
 rem FUNCTION: Removes the wasabi container - pass v to remove the volume as well
 :remove_wasabi
     call :info Removing Wasabi
-    call docker rm -f%1 wasabi-main >nul
+    for /f "tokens=1" %%C in ('"docker ps -a | findstr /c:wasabi-main"') do call docker rm -f%1 %%C >nul
     goto :eof
 
 rem FUNCTION: Removes the wasabi image
 :remove_image
     call :info Removing Wasabi images
-    call docker rmi wasabi-main >nul
+    for /f "tokens=2" %%T in ('"docker images | findstr /c:wasabi-main"') do call docker rmi wasabi-main:%%T >nul
     goto :eof
 
 rem FUNCTION: Removes the wasabi network

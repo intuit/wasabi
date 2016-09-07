@@ -45,21 +45,6 @@ rem FUNCTION: Checks the status of cassandra and starts it if needed.
     ) else (
         docker start wasabi-cassandra 1>nul
     )
-    rem wait until wasabi-cassandra is running
-    set /a count=0
-    :cas_wait
-        if not "%count%" == "10" (
-            set /a count=%count%+1
-            docker ps -a | findstr /c:wasabi-cassandra | findstr /c:0.0.0.0:9042 1>nul 2>nul
-            if errorlevel 1 (
-                call :info Waiting for wasabi-cassandra %count%/10
-                ping 127.0.0.1 -n 3 >nul
-                goto :cas_wait
-            )
-        ) else (
-            call :error Can not start wasabi-cassandra, giving up.
-            exit /b 1
-        )
     goto :eof
 
 rem FUNCTION: Checks the status of mysql and starts it if needed.
@@ -68,28 +53,10 @@ rem FUNCTION: Checks the status of mysql and starts it if needed.
     
     docker ps -a | findstr /c:wasabi-mysql 1>nul 2>nul
     if errorlevel 1 (
-        docker run --name wasabi-mysql --net=wasabinet -p 3306:3306 -e MYSQL_ROOT_PASSWORD=mypass -d mysql:5.6
+        docker run --name wasabi-mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=mypass -e MYSQL_DATABASE=wasabi -e MYSQL_USER=readwrite -e MYSQL_PASSWORD=readwrite -d mysql:5.6
     ) else (
         docker start wasabi-mysql 1>nul
     )
-    rem wait until wasabi-mysql is running
-    set /a count=0
-    :mysql_wait
-        if not "%count%" == "10" (
-            set /a count=%count%+1
-            docker ps -a | findstr /c:wasabi-mysql | findstr /c:0.0.0.0:3306 1>nul 2>nul
-            if errorlevel 1 (
-                call :info Waiting for wasabi-mysql %count%/10
-                ping 127.0.0.1 -n 3 >nul
-                goto :mysql_wait
-            )
-        ) else (
-            call :error Can not start wasabi-mysql, giving up.
-            exit /b 1
-        )
-    ping 127.0.0.1 -n 10 >nul
-    docker exec wasabi-mysql mysql -uroot -pmypass -e "create database if not exists wasabi; grant all privileges on wasabi.* to 'readwrite'@'localhost' identified by 'readwrite'; grant all on *.* to 'readwrite'@'%' identified by 'readwrite'; flush privileges;"
-    
     goto :eof
     
 rem FUNCTION: Checks the status of wasabi and starts it if needed.
@@ -103,22 +70,6 @@ rem FUNCTION: Checks the status of wasabi and starts it if needed.
         )
     )
     docker start wasabi-main 1>nul
-    
-    rem wait until wasabi-main is running
-    set /a count=0
-    :wasabi_wait
-        if not "%count%" == "10" (
-            set /a count=%count%+1
-            docker ps -a | findstr /c:wasabi-main | findstr /c:0.0.0.0:8080 1>nul 2>nul
-            if errorlevel 1 (
-                call :info Waiting for wasabi-main %count%/10
-                ping 127.0.0.1 -n 3 >nul
-                goto :wasabi_wait
-            )
-        ) else (
-            call :error Can not start wasabi-main, giving up.
-            exit /b 1
-        )
     goto :eof
 
 rem FUNCTION: Checks the status of the docker machine and starts it if needed.

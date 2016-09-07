@@ -43,19 +43,19 @@ goto :eof
 rem FUNCTION: Stops the cassandra container.
 :stop_cassandra
     call :info Stopping cassandra.
-    call docker kill wasabi-cassandra
+    for /f "tokens=1" %%C in ('"docker ps | findstr /c:wasabi-cassandra"') do call docker kill %%C >nul
     goto :eof
 
 rem FUNCTION: Stops the mysql container.
 :stop_mysql
     call :info Stopping mysql.
-    call docker kill wasabi-mysql
+    for /f "tokens=1" %%C in ('"docker ps | findstr /c:wasabi-mysql"') do call docker kill %%C >nul
     goto :eof
 
 rem FUNCTION: Stops the wasabi container.
 :stop_wasabi
     call :info Stopping wasabi.
-    call docker kill wasabi-main
+    for /f "tokens=1" %%C in ('"docker ps | findstr /c:wasabi-main"') do call docker kill %%C >nul
     goto :eof
 
 rem FUNCTION: Stops docker.

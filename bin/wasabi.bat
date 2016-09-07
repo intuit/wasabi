@@ -32,7 +32,7 @@ set valid_commands=
 for /f %%a in ('dir /b bin\win') do set valid_commands=!valid_commands! %%~na
 
 
-call :info Processing Wasabi commands
+call :debug Processing Wasabi commands
 set remaining_commands=%*
 :read_commands
     rem Pop currently first command (split at space)
