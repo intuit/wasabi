@@ -14,7 +14,7 @@ rem # See the License for the specific language governing permissions and
 rem # limitations under the License.
 rem ############################################################################
 
-call :error package not implemented yet
+call :error package is currently not supported on Windows
 
 
 goto :eof

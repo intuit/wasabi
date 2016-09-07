@@ -13,57 +13,16 @@ rem # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 rem # See the License for the specific language governing permissions and
 rem # limitations under the License.
 rem ############################################################################
-
-rem check if wasabi machine is running, if not, just return
-for /f %%R in ('docker-machine status wasabi') do if "%%R"=="Running" goto :continue
-goto :eof
-:continue
-
-rem stop all
-if "%1"=="" (
-    call :stop_cassandra
-    call :stop_mysql
-    call :stop_wasabi
-    goto :params_read
+    
+docker-machine status wasabi | findstr /c:Running 1>nul 2>nul
+if errorlevel 1 (
+    call :info Docker machine not running.
+) else (
+    call docker ps
 )
 
-rem stop individual components
-:read_params
-    if "" == "%1" goto :params_read
-    call :stop_%1
-    
-    shift
-    goto :read_params
-:params_read
-
-for /f %%R in ('call docker ps -q') do if "%%R"=="" call :stop_docker
-
 goto :eof
 
-rem FUNCTION: Stops the cassandra container.
-:stop_cassandra
-    call :info Stopping cassandra.
-    for /f "tokens=1" %%C in ('"docker ps | findstr /c:wasabi-cassandra"') do call docker kill %%C >nul
-    goto :eof
-
-rem FUNCTION: Stops the mysql container.
-:stop_mysql
-    call :info Stopping mysql.
-    for /f "tokens=1" %%C in ('"docker ps | findstr /c:wasabi-mysql"') do call docker kill %%C >nul
-    goto :eof
-
-rem FUNCTION: Stops the wasabi container.
-:stop_wasabi
-    call :info Stopping wasabi.
-    for /f "tokens=1" %%C in ('"docker ps | findstr /c:wasabi-main"') do call docker kill %%C >nul
-    goto :eof
-
-rem FUNCTION: Stops docker.
-:stop_docker
-    call :info Stopping docker.
-    call docker-machine stop wasabi
-    goto :eof
-    
 rem FUNCTION: Logs the parameters as DEBUG.
 :debug
     rem call :log [DEBUG] %*

@@ -141,8 +141,6 @@ start_wasabi() {
   start_docker
 
   id=$(fromPom modules/main development application.name)
-  wcip=$(docker inspect --format "{{ .NetworkSettings.Networks.${docker_network}.IPAddress }}" ${project}-cassandra)
-  wmip=$(docker inspect --format "{{ .NetworkSettings.Networks.${docker_network}.IPAddress }}" ${project}-mysql)
 
   remove_container ${project}-main
 
@@ -155,13 +153,13 @@ start_wasabi() {
 
   echo "${green}${project}: starting${reset}"
 
-  wenv="WASABI_CONFIGURATION=-DnodeHosts=${wcip} -Ddatabase.url.host=${wmip}"
+  wenv="WASABI_CONFIGURATION=-DnodeHosts=${project}-cassandra -Ddatabase.url.host=${project}-mysql"
 
 #   fixme: try to reuse the start_container() method instead of 'docker run...' directly; currently a problem with quotes in ${wenv} being passed into container.
-  docker run --net=${docker_network} --name ${project}-main -p 8080:8080 -p 8090:8090 -p 8180:8180 \
-    -e "${wenv}" -d ${project}-main || \
-    usage "docker run --net=${docker_network} --name ${project}-main -p 8080:8080 -p 8090:8090 -p 8180:8180 -e \"${wenv}\" -d ${project}-main" 1
-
+  #docker run --net=${docker_network} --name ${project}-main -p 8080:8080 -p 8090:8090 -p 8180:8180 \
+  #  -e "${wenv}" -d ${project}-main || \
+  #  usage "docker run --net=${docker_network} --name ${project}-main -p 8080:8080 -p 8090:8090 -p 8180:8180 -e \"${wenv}\" -d ${project}-main" 1
+  start_container ${project}-main ${project}-main "-p 8080:8080 -p 8090:8090 -p 8180:8180 -e '${wenv}'"
   echo -ne "${green}chill'ax ${reset}"
 
   status
@@ -175,38 +173,23 @@ start_cassandra() {
 }
 
 console_cassandra() {
-  wcip=$(docker inspect --format "{{ .NetworkSettings.Networks.${docker_network}.IPAddress }}" ${project}-cassandra)
-
-  docker run --net=${docker_network} -it --rm ${cassandra} cqlsh ${wcip} || \
-    usage "unable to run command: docker run --net=${docker_network} -it --rm ${cassandra} cqlsh ${wcip}" 1
+  docker run --net=${docker_network} -it --rm ${cassandra} cqlsh ${project}-cassandra || \
+    usage "unable to run command: docker run --net=${docker_network} -it --rm ${cassandra} cqlsh ${project}-cassandra" 1
 }
 
 start_mysql() {
   pwd=mypass
 
   start_docker
-  start_container ${project}-mysql ${mysql} "-p 3306:3306 -e MYSQL_ROOT_PASSWORD=${pwd}"
-
-  wmip=$(docker inspect --format "{{ .NetworkSettings.Networks.${docker_network}.IPAddress }}" ${project}-mysql)
-  sql=$(cat << EOF
-    create database if not exists ${project};
-    grant all privileges on ${project}.* to 'readwrite'@'localhost' identified by 'readwrite';
-    grant all on *.* to 'readwrite'@'%' identified by 'readwrite';
-    flush privileges;
-EOF
-)
-
-  docker run --net=${docker_network} -it --rm ${mysql} mysql -h${wmip} -P3306 -uroot -p${pwd} -e "${sql}" || \
-    usage "unable to run command: % docker run --net=${docker_network} -it --rm ${mysql} mysql -h${wmip} -P3306 -uroot -p${pwd} -e \"${sql}\"" 1
+  start_container ${project}-mysql ${mysql} "-p 3306:3306 -e MYSQL_ROOT_PASSWORD=${pwd} -e MYSQL_DATABASE=wasabi -e MYSQL_USER=readwrite -e MYSQL_PASSWORD=readwrite"
 
   [ "${verify}" = true ] && console_mysql
 }
 
 console_mysql() {
   pwd=mypass
-  wmip=$(docker inspect --format "{{ .NetworkSettings.Networks.${docker_network}.IPAddress }}" ${project}-mysql)
-
-  docker run --net=${docker_network} -it --rm ${mysql} mysql -h${wmip} -P3306 -uroot -p${pwd} || \
+  
+  docker run --net=${docker_network} -it --rm ${mysql} mysql -h${project}-mysql -P3306 -uroot -p${pwd} || \
     usage "unable to run command: % docker run --net=${docker_network} -it --rm ${mysql} mysql -h${wmip} -P3306 -uroot -p${pwd}" 1
 }
 

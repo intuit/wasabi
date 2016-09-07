@@ -14,10 +14,44 @@ rem # See the License for the specific language governing permissions and
 rem # limitations under the License.
 rem ############################################################################
 
-call :error test not implemented yet
+rem check if wasabi machine is running, if not: return, else: integration tests
+if "" == "%1" (
+    for /f %%R in ('docker-machine status wasabi') do if not "%%R"=="Running" (
+        call :error Wasabi is not running, please use bin\wasabi.bat start first.
+        goto :eof
+    )
+    call :integration_tests
+)
 
+rem test individual modules
+:read_params
+    if "" == "%1" goto :eof
+    call :unit_test %1
+    
+    shift
+    goto :read_params
+call :info Tests done.
 
 goto :eof
+
+rem FUNCTION: Runs the unit tests for the provided module.
+:unit_test
+    call :info Running unit tests for %1.
+    for /f %%P in ('powershell -Command "\"%1\" -replace \"-\", \"\""') do (
+        mvn "-Dtest=com.intuit.wasabi.%%P.**" test -pl modules\%1 --also-make -DfailIfNoTests=false -q
+    )
+    call :info Unit tests for %1 done.
+    goto :eof
+
+rem FUNCTION: Runs the integration tests.
+:integration_tests
+    call :info Running integration tests.
+    cd modules\functional-test\target
+    for /f %%J in ('dir /b *-with-dependencies.jar') do (
+        java -Dapi.server.name=192.168.99.100:8080 -Duser.name=admin -Duser.password=admin -classpath classes;%%J org.testng.TestNG -d ..\..\..\functional-test.log classes\testng.xml
+    )
+    call :info Integration tests done.
+    goto :eof
 
 rem FUNCTION: Logs the parameters as DEBUG.
 :debug

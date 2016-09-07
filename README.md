@@ -42,9 +42,12 @@ Learn more about how Wasabi can empower your team to move from hunches to action
 
 ## Get Started
 
-The following steps will help you install the needed tools, then build and run a complete Wasabi stack. Note, at this time, only Mac OS X is supported.
+The following steps will help you install the needed tools, then build and run a complete Wasabi stack.
 
 #### Bootstrap Your Environment
+
+
+##### Mac OS
 
 ```bash
 % /usr/bin/ruby \
@@ -57,9 +60,76 @@ The following steps will help you install the needed tools, then build and run a
 
 Installed tools include: [homebrew 0.9](http://brew.sh), [git 2](https://git-scm.com),
 [maven 3](https://maven.apache.org), [java 1.8](http://www.oracle.com/technetwork/java/javase/overview/index.html),
-[docker 1.12](https://docker.com), [node 6](https://nodejs.org/en) and [python 2.7](https://www.python.org).
+[docker 1.12](https://docker.com), [node 6](https://nodejs.org/en).
 
-Similar tooling will work for Linux and Windows alike. Contribute a patch :)
+
+##### Windows (7+)
+
+To install Wasabi's dependencies on Windows we use [Chocolatey][win_choco] which
+needs administrator rights in your [cmd.exe][win_cmd_admin].
+
+If you have git, just run:
+```dos
+git clone https://github.com/intuit/wasabi.git
+cd wasabi
+bin\wasabi.bat bootstrap
+```
+
+If you don't have git the easiest way is to [download][url_develop_zip] the
+latest code:
+```dos
+set wasabipath=%HOMEDRIVE%%HOMEPATH%\projects
+mkdir %wasabipath%
+powershell -Command "Invoke-WebRequest -Uri https://github.com/intuit/wasabi/archive/develop.zip -OutFile %wasabipath%\wasabi.zip"
+powershell -Command "(New-Object -COM Shell.Application).NameSpace('%wasabipath%').CopyHere((New-Object -COM Shell.Application).NameSpace('%wasabipath%\wasabi.zip').Items(), 16)"
+del %wasabipath%\wasabi.zip
+ren %wasabipath%\wasabi-develop wasabi
+cd %wasabipath%\wasabi
+bin\wasabi.bat bootstrap
+```
+
+For all other processes (build, start etc.) the commands are almost the same as
+for the other operating systems: just make sure to replace `bin/wasabi.sh` 
+with `bin\wasabi.bat`.
+
+One important difference: Since Docker native only supports very specific
+[Windows 10 distributions][win_hyperv], on Windows Wasabi uses the old Docker
+variant with virtualbox via docker-machine. This means you can not reach the
+service at `http://localhost:8080/`, as you do with the native implementation on
+Mac OS, but you need to use `http://192.168.99.100:8080/` instead. For 
+development this also means to supply the Java VM arguments
+`-DnodeHosts=192.168.99.100 -Ddatabase.url.host=192.168.99.100` when running 
+Wasabi to connect to cassandra and MySQL inside the docker network.
+Another implication is that when you run wasabi locally (e.g. from your IDE) 
+that you will have to point the UI to `localhost`. By default 
+`bin\wasabi.bat resource:ui` points to `192.168.99.100`. You can use the 
+unique `bin\wasabi.bat resource:dev_ui` to use the default `localhost`.
+
+To use the `curl` commands consider `choco install curl`.
+
+Installed tools include: [Chocolatey][win_choco], [Docker][choco_docker],
+[Maven 3][choco_maven], [jdk 1.8][choco_jdk], [Docker][choco_docker], 
+[docker-machine][choco_docker-machine], [VirtualBox][choco_virtualbox], 
+[node.js][choco_nodejs] (+ [bower][npm_bower], [grunt-cli][npm_grunt-cli],
+[yo][npm_yo]), and [ruby][choco_ruby] (+ [compass][gem_compass],
+[fpm][gem_fpm]).
+
+[win_choco]: https://chocolatey.org/
+[win_cmd_admin]: https://technet.microsoft.com/en-us/library/cc947813(v=ws.10).aspx)
+[url_develop_zip]: https://github.com/intuit/wasabi/archive/develop.zip
+[win_hyperv]: https://msdn.microsoft.com/virtualization/hyperv_on_windows/quick_start/walkthrough_compatibility
+[choco_docker]: https://chocolatey.org/packages/docker
+[choco_docker-machine]: https://chocolatey.org/packages/docker-machine
+[choco_jdk]: https://chocolatey.org/packages/jdk8
+[choco_maven]: https://chocolatey.org/packages/maven
+[choco_nodejs]: https://chocolatey.org/packages/nodejs.install
+[choco_virtualbox]: https://chocolatey.org/packages/virtualbox
+[choco_ruby]: https://chocolatey.org/packages/ruby
+[npm_bower]: https://www.npmjs.com/package/bower
+[npm_grunt-cli]: https://www.npmjs.com/package/grunt-cli
+[npm_yo]: https://www.npmjs.com/package/yo
+[gem_compass]: https://rubygems.org/gems/compass/versions/1.0.3
+[gem_fpm]: https://rubygems.org/gems/fpm/versions/1.4.0
 
 #### Start Wasabi
 
@@ -100,11 +170,11 @@ Server: Jetty(9.3.z-SNAPSHOT)
 
 Congratulations! You are the proud owner of a newly minted Wasabi instance. :)
 
+
 #### Troubleshooting
 
 * While starting Wasabi, if you see an error when the docker containers are starting up, you could do the following:
-
-  * Look at the current docker containers that have been successfully started.
+* Look at the current docker containers that have been successfully started.
 
 ```bash
 % ./bin/wasabi.sh status
@@ -125,8 +195,6 @@ could not download the Cassandra image), do the following:
 
 % ./bin/wasabi.sh start:wasabi
 ```
-
-
 
 #### Call Wasabi
 

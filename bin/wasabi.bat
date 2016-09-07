@@ -32,13 +32,13 @@ set valid_commands=
 for /f %%a in ('dir /b bin\win') do set valid_commands=!valid_commands! %%~na
 
 
-call :info Processing Wasabi commands
+call :debug Processing Wasabi commands
 set remaining_commands=%*
 :read_commands
     rem Pop currently first command (split at space)
     for /f "tokens=1*" %%C in ("%remaining_commands%") do (
         set current_command=%%C
-        call :info Current command: !current_command!
+        call :debug Current command: !current_command!
         set remaining_commands=%%D
         call :debug Remaining commands: !remaining_commands!
         
@@ -79,7 +79,7 @@ set remaining_commands=%*
         )
     )
     if defined remaining_commands goto read_commands
-call :info Wasabi done
+call :debug Wasabi done
 
 endlocal
 RefreshEnv 2>nul 1>nul

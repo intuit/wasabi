@@ -41,7 +41,7 @@ rem FUNCTION: Checks the status of cassandra and starts it if needed.
     call :info Starting cassandra
     docker ps -a | findstr /c:wasabi-cassandra 1>nul 2>nul
     if errorlevel 1 (
-        docker -D run --name wasabi-cassandra --net=wasabinet --privileged=true -p 9042:9042 -p 9160:9160 -d cassandra:2.1
+        docker run --name wasabi-cassandra --net=wasabinet --privileged=true -p 9042:9042 -p 9160:9160 -d cassandra:2.1
     ) else (
         docker start wasabi-cassandra 1>nul
     )
@@ -53,8 +53,7 @@ rem FUNCTION: Checks the status of mysql and starts it if needed.
     
     docker ps -a | findstr /c:wasabi-mysql 1>nul 2>nul
     if errorlevel 1 (
-        docker run --name wasabi-mysql --net=wasabinet -p 3306:3306 -e MYSQL_ROOT_PASSWORD=mypass -d mysql:5.6
-        docker exec wasabi-mysql mysql -uroot -pmypass -e "create database if not exists wasabi; grant all privileges on wasabi.* to 'readwrite'@'localhost' identified by 'readwrite'; grant all on *.* to 'readwrite'@'%' identified by 'readwrite'; flush privileges;"
+        docker run --name wasabi-mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=mypass -e MYSQL_DATABASE=wasabi -e MYSQL_USER=readwrite -e MYSQL_PASSWORD=readwrite -d mysql:5.6
     ) else (
         docker start wasabi-mysql 1>nul
     )
@@ -65,30 +64,28 @@ rem FUNCTION: Checks the status of wasabi and starts it if needed.
     call :info Starting wasabi
     docker ps -a | findstr /c:wasabi-main 1>nul 2>nul
     if errorlevel 1 (
-        call :build_docker_image
-        for /f %%I in ('docker inspect --format "{{ .NetworkSettings.Networks.wasabinet.IPAddress }}" wasabi-cassandra') do set CASSANDRA_IP=%%I
-        for /f %%I in ('docker inspect --format "{{ .NetworkSettings.Networks.wasabinet.IPAddress }}" wasabi-mysql') do set MYSQL_IP=%%I
-        docker create --net=wasabinet -p 8080:8080 -p 8090:8090 -p 8180:8180 -e WASABI_CONFIGURATION="-DnodeHosts=!CASSANDRA_IP! -Ddatabase.url.host=!MYSQL_IP!" --name wasabi-main wasabi-main:latest
-        docker start wasabi-main 1>nul
-    ) else (
-        docker start wasabi-main
+        for /f %%H in ('"git rev-parse --short=8 HEAD"') do (
+            docker build -t wasabi-main:%%H target\app
+            docker create --net=wasabinet -p 8080:8080 -p 8090:8090 -p 8180:8180 -e WASABI_CONFIGURATION="-DnodeHosts=wasabi-cassandra -Ddatabase.url.host=wasabi-mysql" --name wasabi-main wasabi-main:%%H
+        )
     )
+    docker start wasabi-main 1>nul
     goto :eof
 
 rem FUNCTION: Checks the status of the docker machine and starts it if needed.
 :start_docker
-    call :info Checking for docker machine
+    call :debug Checking for docker machine
     docker-machine ls -q | findstr /c:wasabi 1>nul 2>nul
     if errorlevel 1 (
         call :create_docker_machine
     ) else (
-        call :info Docker machine exists. Checking it's status.
+        call :debug Docker machine exists. Checking it's status.
         docker-machine status wasabi | findstr /c:Running 1>nul 2>nul
         if errorlevel 1 (
             call :info Docker machine restarting.
             docker-machine restart wasabi
         ) else (
-            call :info Docker machine is already running.
+            call :debug Docker machine is already running.
         )
     )
     call :set_docker_env
@@ -97,7 +94,7 @@ rem FUNCTION: Checks the status of the docker machine and starts it if needed.
 
 rem FUNCTION: Set docker environment variables correctly.
 :set_docker_env
-    call :info Setting environment variables to use docker.
+    call :debug Setting environment variables to use docker.
     
     rem Thanks to setlocal this won't enable the right environment variables.
     rem Instead we hope for now for the best (i.e. people don't tinker with the 
@@ -106,7 +103,7 @@ rem FUNCTION: Set docker environment variables correctly.
     for /f "tokens=*" %%I in ('"C:\ProgramData\chocolatey\lib\docker-machine\bin\docker-machine.exe" env wasabi') do %%I
     
     for /f %%I in ('"C:\ProgramData\chocolatey\lib\docker-machine\bin\docker-machine.exe" ip wasabi') do set DOCKER_IP=%%I
-    rem set the env variables globally (they are refreshed after wasabi.bat 
+    rem set the env variables also globally (they are refreshed after wasabi.bat
     rem automatically!)
     setx DOCKER_TLS_VERIFY 1 1>nul
     setx DOCKER_HOST tcp://%DOCKER_IP%:2376 1>nul
@@ -116,14 +113,11 @@ rem FUNCTION: Set docker environment variables correctly.
     
 rem FUNCTION: Create docker image for wasabi main
 :build_docker_image
-    call :info Building docker image
-    setlocal enabledelayedexpansion enableextensions
-    for /f "tokens=1 delims=." %%T in ('powershell -Command "get-date -uformat %%s"') do set timestamp=%%T
-    call :debug echo Building image wasabi-main:%USERNAME%-%timestamp%
-    rem TODO shoeffner: allow --force-rm if needed
-    rem -t wasabi-main:%USERNAME%-%timestamp%
-    docker build -t wasabi-main:latest target\app
-    endlocal
+    call :debug Building docker image
+    rem tag differently: commit hash
+    
+
+
     goto :eof
     
 rem FUNCTION: Create a docker machine and set the proper environment variables.
@@ -140,7 +134,6 @@ rem FUNCTION: Create a docker network for wasabi
     if errorlevel 1 (
         call :info Creating network.
         docker network create --driver bridge wasabinet 1>nul
-        rem docker network create --driver host wasabinet 1>nul
         call :info Network created.
     ) else (
         call :info Network exists.
@@ -149,7 +142,7 @@ rem FUNCTION: Create a docker network for wasabi
 
 rem FUNCTION: Logs the parameters as DEBUG.
 :debug
-    call :log [DEBUG] %*
+    rem call :log [DEBUG] %*
     call :log [DEBUG] %* >> wasabi_windows.log
     goto :eof
 
