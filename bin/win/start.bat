@@ -66,7 +66,7 @@ rem FUNCTION: Checks the status of wasabi and starts it if needed.
     if errorlevel 1 (
         for /f %%H in ('"git rev-parse --short=8 HEAD"') do (
             docker build -t wasabi-main:%%H target\app
-            docker create --net=wasabinet -p 8080:8080 -p 8090:8090 -p 8180:8180 -e WASABI_CONFIGURATION="-DnodeHosts=wasabi-cassandra -Ddatabase.url.host=wasabi-mysql" --name wasabi-main wasabi-main:%%H
+            docker create --net=wasabinet --name wasabi-main -p 8080:8080 -p 8090:8090 -p 8180:8180 -e WASABI_CONFIGURATION="-DnodeHosts=wasabi-cassandra -Ddatabase.url.host=wasabi-mysql" wasabi-main:%%H
         )
     )
     docker start wasabi-main 1>nul
