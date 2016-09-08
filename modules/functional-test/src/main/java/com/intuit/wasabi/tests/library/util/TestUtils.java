@@ -83,8 +83,8 @@ public class TestUtils {
      * @return a String representing a JSON array
      */
     public static String csvToJsonArray(String csv, String fieldSeparator) {
-        String[] lines = csv.split(System.getProperty("line.separator"));
-        if (lines.length == 0)
+        String[] lines = csv.split("\n"); // System.getProperty("line.separator") will not work platform independent since the service always runs on Linux
+        if (lines.length == 1) // first line is the headers, so it will always have length of 1.
             return "[]";
         String[] header = lines[0].split(fieldSeparator);
 

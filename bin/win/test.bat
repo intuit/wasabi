@@ -53,7 +53,9 @@ rem FUNCTION: Runs the integration tests.
     rem run integration tests
     cd modules\functional-test\target
     for /f %%J in ('dir /b *-with-dependencies.jar') do (
-        java -Dapi.server.name=192.168.99.100:8080 -Duser.name=admin -Duser.password=admin -classpath classes;%%J org.testng.TestNG -d ..\..\..\functional-test.log classes\testng.xml
+		for /f %%I in ('docker-machine ip wasabi') do (
+			java -Dapi.server.name=%%I:8080 -Duser.name=admin -Duser.password=admin -Ddatabase.url=jdbc:mysql://%%I/wasabi -classpath classes;%%J org.testng.TestNG -d ..\..\..\functional-test.log classes\testng.xml
+		)
     )
     call :info Integration tests done.
     goto :eof
