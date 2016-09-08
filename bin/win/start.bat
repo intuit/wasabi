@@ -121,7 +121,7 @@ rem FUNCTION: Create a docker machine
 :create_docker_machine
     call :info Creating docker machine
     docker-machine create --driver virtualbox wasabi
-    call :info Done creating docker-machine
+    call :info Done creating docker machine
     goto :eof
 
 rem FUNCTION: Create a docker network for wasabi

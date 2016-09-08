@@ -24,11 +24,12 @@ if "" == "%1" (
 
 rem start individual components
 :read_params
-    if "" == "%1" goto :eof
+    if "" == "%1" goto :params_end
     call :build_%1
     
     shift
     goto :read_params
+:params_end
 call :build_files
 
 
@@ -37,14 +38,14 @@ goto :eof
 rem FUNCTION: builds wasabi
 :build_wasabi
     call :info Building Wasabi Service
-    cmd /c "mvn -Pdevelopment clean test package javadoc:aggregate"
+    call mvn -Pdevelopment clean test package javadoc:aggregate
     goto :eof
 
 rem FUNCTION: builds ui
 :build_ui
     call :info Building UI
     pushd modules\ui
-    cmd /c "call npm install & call %APPDATA%\npm\bower.cmd install & call %APPDATA%\npm\grunt.cmd build"
+    call npm install & call %APPDATA%\npm\bower.cmd install & call %APPDATA%\npm\grunt.cmd build
     popd
     goto :eof
 
