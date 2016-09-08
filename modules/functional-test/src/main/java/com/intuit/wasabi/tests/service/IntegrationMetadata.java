@@ -64,7 +64,7 @@ public class IntegrationMetadata extends TestBase {
         Assert.assertNotNull(exp.applicationName, "Experiment creation failed (No applicationName).");
         Assert.assertNotNull(exp.label, "Experiment creation failed (No label).");
         LOGGER.info("Testing non-null default experiment description...");
-        Assert.assertNull(exp.description, "Default experiment description should be null");
+        Assert.assertEquals(exp.description,"", "Default experiment description should be null");
 
         // create a bucket, 100% allocation, description and payload missing
         Bucket bucket = postBucket(BucketFactory.createBucket(exp));
@@ -111,14 +111,14 @@ public class IntegrationMetadata extends TestBase {
         // create an experiment with {"description":""}
         Experiment exp = postExperiment(createExperiment().setDescription(""));
         LOGGER.info("Testing experiment description with empty string supplied...");
-        Assert.assertEquals(exp.description, null, "Default experiment description is not an empty string");
+        Assert.assertEquals(exp.description, "", "Default experiment description is not an empty string");
 
         // create a bucket with empty description and payload
         Bucket bucket = postBucket(BucketFactory.createBucket(exp).setDescription("").setPayload(""));
         LOGGER.info("Testing bucket description with empty string supplied");
-        Assert.assertEquals(bucket.description, null, "Bucket description should be an empty string");
+        Assert.assertEquals(bucket.description, "", "Bucket description should be an empty string");
         LOGGER.info("Testing bucket payload with empty string supplied");
-        Assert.assertEquals(bucket.payload, null, "Bucket payload should be an empty string");
+        Assert.assertEquals(bucket.payload, "", "Bucket payload should be an empty string");
 
         // cleanup
         deleteExperiment(exp);
