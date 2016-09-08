@@ -494,6 +494,19 @@ public class CassandraAssignmentsRepositoryTest {
     }
 
     @Test
+    public void testGetAssignmentOldEmptyQueryResult(){
+        List<UserAssignment> mockedResult = new ArrayList<>();
+        when(userAssignmentAccessor.selectBy(eq(experimentId), eq("testuser1"), eq("test")))
+                .thenReturn(mockedResultMapping);
+        when(mockedResultMapping.iterator()).thenReturn(mockedResult.iterator());
+        Optional<Assignment> assignment = repository.getAssignmentOld(
+                Experiment.ID.valueOf(experimentId),
+                User.ID.valueOf("testuser1"),
+                Context.valueOf("test"));
+        assertThat(assignment.isPresent(), is(false));
+    }
+
+    @Test
     public void testGetAssignmentAssignToOldIsTrue(){
         Optional<Assignment> mocked = Optional.ofNullable(mock(Assignment.class));
         doReturn(Optional.empty()).when(spyRepository).getAssignmentFromLookUp(eq(Experiment.ID.valueOf(experimentId)),

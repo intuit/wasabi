@@ -303,24 +303,11 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     public Assignment getAssignment(Experiment.ID experimentID, User.ID userID, Context context) {
         Assignment result = null;
         if (assignUserToNew) {
-            //check for the assignment data in new - user_assignment_look_up table
-        	// TODO: Had to put a try catch here since the Optinal may be empty
-        	try {
-        		result = getAssignmentFromLookUp(experimentID, userID, context).get();
-        	}
-        	catch(Exception e) {
-        		// ignore
-        	}
+            result = getAssignmentFromLookUp(experimentID, userID, context).orElseGet(() -> null);
         }
         //if it is not present in the user_assignment_look_up table and old flag is set to tru, then check for the data in user_assignment table
         if (assignUserToOld && (result == null)) {
-        	// TODO: Had to put a try catch here since the Optinal may be empty
-        	try {
-        		result = getAssignmentOld(experimentID, userID, context).get();
-        	}
-        	catch(Exception e) {
-        		// ignore
-        	}
+            result = getAssignmentOld(experimentID, userID, context).orElseGet(() -> null);
         }
         return result;
     }
