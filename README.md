@@ -63,6 +63,27 @@ Installed tools include: [homebrew 0.9](http://brew.sh), [git 2](https://git-scm
 [docker 1.12](https://docker.com), [node 6](https://nodejs.org/en).
 
 
+##### Ubuntu
+
+Bootstrapping on Ubuntu requires sudo privileges to install all the required dependencies. You will be prompted to enter your password. Currently only 16.04 (x64) is supported.
+
+```bash
+% sudo apt-get install git
+% git clone https://github.com/intuit/wasabi.git
+% cd wasabi
+% ./bin/wasabi.sh bootstrap
+% sudo reboot
+```
+
+NOTE: A reboot is required after running the bootstrap command on Ubuntu.
+
+For all other processes (build, start etc.) the commands are the same for Ubuntu and Mac OS.
+
+Installed tools include: [git 2](https://git-scm.com),
+[maven 3](https://maven.apache.org), [OpenJdk 8](http://openjdk.java.net/projects/jdk8/),
+[docker 1.12](https://docker.com), [node 6](https://nodejs.org/en) and [python 2.7](https://www.python.org)
+
+
 ##### Windows (7+)
 
 To install Wasabi's dependencies on Windows we use [Chocolatey][win_choco] which
@@ -92,23 +113,11 @@ For all other processes (build, start etc.) the commands are almost the same as
 for the other operating systems: just make sure to replace `bin/wasabi.sh` 
 with `bin\wasabi.bat`.
 
-One important difference: Since Docker native only supports very specific
-[Windows 10 distributions][win_hyperv], on Windows Wasabi uses the old Docker
-variant with virtualbox via docker-machine. This means you can not reach the
-service at `http://localhost:8080/`, as you do with the native implementation on
-Mac OS, but you need to use `http://192.168.99.100:8080/` instead. For 
-development this also means to supply the Java VM arguments
-`-DnodeHosts=192.168.99.100 -Ddatabase.url.host=192.168.99.100` when running 
-Wasabi to connect to cassandra and MySQL inside the docker network.
-Another implication is that when you run wasabi locally (e.g. from your IDE) 
-that you will have to point the UI to `localhost`. By default 
-`bin\wasabi.bat resource:ui` points to `192.168.99.100`. You can use the 
-unique `bin\wasabi.bat resource:dev_ui` to use the default `localhost`.
+If you run into problems, please consult the [FAQ](#FAQ+Windows) and create
+an issue if it doesn't help you.
 
-To use the `curl` commands consider `choco install curl`.
-
-Installed tools include: [Chocolatey][win_choco], [Docker][choco_docker],
-[Maven 3][choco_maven], [jdk 1.8][choco_jdk], [Docker][choco_docker], 
+Installed tools include: [Chocolatey][win_choco], [git][choco_git],
+[Docker][choco_docker], [Maven 3][choco_maven], [jdk 1.8][choco_jdk],
 [docker-machine][choco_docker-machine], [VirtualBox][choco_virtualbox], 
 [node.js][choco_nodejs] (+ [bower][npm_bower], [grunt-cli][npm_grunt-cli],
 [yo][npm_yo]), and [ruby][choco_ruby] (+ [compass][gem_compass],
@@ -119,6 +128,7 @@ Installed tools include: [Chocolatey][win_choco], [Docker][choco_docker],
 [url_develop_zip]: https://github.com/intuit/wasabi/archive/develop.zip
 [win_hyperv]: https://msdn.microsoft.com/virtualization/hyperv_on_windows/quick_start/walkthrough_compatibility
 [choco_docker]: https://chocolatey.org/packages/docker
+[choco_git]: https://chocolatey.org/packages/git.install
 [choco_docker-machine]: https://chocolatey.org/packages/docker-machine
 [choco_jdk]: https://chocolatey.org/packages/jdk8
 [choco_maven]: https://chocolatey.org/packages/maven
@@ -130,6 +140,8 @@ Installed tools include: [Chocolatey][win_choco], [Docker][choco_docker],
 [npm_yo]: https://www.npmjs.com/package/yo
 [gem_compass]: https://rubygems.org/gems/compass/versions/1.0.3
 [gem_fpm]: https://rubygems.org/gems/fpm/versions/1.4.0
+
+
 
 #### Start Wasabi
 
@@ -434,3 +446,33 @@ Steps to contribute:
 8. Obtain 2 approval _squirrels_ before your changes can be merged
 
 Thank you for you contribution!
+
+
+## FAQ
+
+#### FAQ Windows
+
+**How to connect an IDE's wasabi-process to the containers?**
+One important difference: Since Docker native only supports very specific
+[Windows 10 distributions][win_hyperv], we have to user docker-machine. 
+This means you can not reach the service at `http://localhost:8080/` but 
+at `http://192.168.99.100:8080/` (by default - see `docker-machine ip wasabi`).
+For development this also means to supply the Java VM arguments
+`-DnodeHosts=192.168.99.100 -Ddatabase.url.host=192.168.99.100` when running 
+Wasabi to connect to cassandra and MySQL inside the docker network.
+
+**How to connect the UI to IDE's wasabi-process?**
+You will also need to redirect the UI. By default `bin\wasabi.bat resource:ui`
+points to `docker-machine ip wasabi`. You can use the Windows exclusive
+`bin\wasabi.bat resource:dev_ui` to use `localhost` as your UI's target.
+
+**Wasabi has incorrect times! My IDE-run integration tests fail! Help!**
+It is a known problem with docker-machine that its time server stops while
+the host machine sleeps. If your system behaves weird check if 
+`docker-machine ssh wasabi date` gives you the expected UTC time. If not, run
+`for /f %I in ('ruby -e "puts Time.now.utc.strftime(%Q{%Y%m%d%H%M.%S})"') do @docker-machine ssh wasabi "sudo date --set %I"`.
+Wasabi does this time correction whenever you start the integration tests via
+`bin\wasabi.bat test`.
+
+**Swagger mentions `curl`, how do I get it?**
+To use the `curl` commands consider `choco install curl`.

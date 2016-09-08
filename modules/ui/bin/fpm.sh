@@ -9,17 +9,16 @@ usage () {
 }
 
 fromPom() {
-  case $# in
-    2) mvn -f ../../../modules/$1/pom.xml help:evaluate -Dexpression=$2 | sed -n -e '/^\[.*\]/ !{ p; }';;
-    3) mvn -f ../../../modules/$1/pom.xml help:evaluate -Dexpression=$2 | sed -n -e '/^\[.*\]/ !{ p; }' | \
-         python -c "import xml.etree.ElementTree as ET; import sys; field = ET.parse(sys.stdin).getroot().find(\"$3\"); print (field.text if field != None else '')"
-  esac
+  mvn -f ../../../modules/$1/pom.xml -P $2 help:evaluate -Dexpression=$3 | sed -n -e '/^\[.*\]/ !{ p; }'
+}
+
+exitOnError() {
+  echo "error cause: $1"
+
+  exit 1
 }
 
 name=wasabi.ui
-#version=1.0.0
-version=`fromPom main project.version`
-email=`fromPom main project.properties application.email`
 profile=development
 timestamp=`date -u "+%Y%m%d%H%M%S"`
 module=main
@@ -47,11 +46,11 @@ while getopts "n:v:p:i:h:l:t:" option; do
   esac
 done
 
+version=${version:-`fromPom main ${profile} project.version`}
 id=${name}-${version}-${profile}
 home=${home:-/usr/local/$id}
 log=${log:-/var/log/$id}
-
-echo "packaging service: $id"
+email=`fromPom main ${profile} application.email`
 
 common="-s dir --force --debug --architecture noarch --name ${name}-${profile} --version ${version}\
   --iteration ${timestamp} --license APLv2.0 --vendor tbd --category application --provides ${name}-${profile}\
@@ -68,7 +67,7 @@ scripts="--before-install build/[PKG]/before-install.sh\
 
 for pkg in "deb" "rpm"; do
   fpm="${!pkg} $common `echo $scripts | sed -e "s/\[PKG\]/${pkg}/g"` $depends $resources"
-  if [ "${WASABI_OS}" == "${wasabi_os_default}" ]; then
+  if [ "${WASABI_OS}" == "${WASABI_OSX}" ] || [ "${WASABI_OS}" == "${WASABI_LINUX}" ]; then
     docker run -it -v `pwd`:/build --rm liuedy/centos-fpm fpm ${fpm} || exitOnError "failed to build rpm: $module"
   else
     eval fpm ${fpm} || exitOnError "failed to build rpm: $module"
