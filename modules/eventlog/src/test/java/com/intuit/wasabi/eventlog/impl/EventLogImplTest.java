@@ -19,6 +19,7 @@ import com.intuit.wasabi.eventlog.EventLogListener;
 import com.intuit.wasabi.eventlog.events.EventLogEvent;
 import com.intuit.wasabi.eventlog.events.SimpleEvent;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -90,6 +91,7 @@ public class EventLogImplTest {
     }
 
     @Test
+    @Ignore("Race condition still not fixed.")
     public void testPostEvent() throws Exception {
         EventLogListener eventLogListener = Mockito.mock(EventLogListener.class);
         EventLogImpl eventLog = new EventLogImpl(2, 4);
@@ -134,8 +136,8 @@ public class EventLogImplTest {
     }
 
     @Test
+    @Ignore("Race condition still not fixed.")
     public void testRunFinally() throws Exception {
-        // FIXME: this test still relies on threads, we might need to polish it
         EventLogImpl eventLog = new EventLogImpl(1, 1);
         EventLogEvent eventLogEvent = Mockito.mock(EventLogEvent.class);
 
