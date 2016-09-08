@@ -249,6 +249,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                             userID.toString(),
                             context.getContext()
                     );
+            
             resultStream = StreamSupport.stream(
                     Spliterators.spliteratorUnknownSize(result.iterator(), Spliterator.ORDERED), false);
         } catch (ReadTimeoutException | UnavailableException | NoHostAvailableException e) {
@@ -303,11 +304,23 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         Assignment result = null;
         if (assignUserToNew) {
             //check for the assignment data in new - user_assignment_look_up table
-            result = getAssignmentFromLookUp(experimentID, userID, context).get();
+        	// TODO: Had to put a try catch here since the Optinal may be empty
+        	try {
+        		result = getAssignmentFromLookUp(experimentID, userID, context).get();
+        	}
+        	catch(Exception e) {
+        		// ignore
+        	}
         }
         //if it is not present in the user_assignment_look_up table and old flag is set to tru, then check for the data in user_assignment table
         if (assignUserToOld && (result == null)) {
-            result = getAssignmentOld(experimentID, userID, context).get();
+        	// TODO: Had to put a try catch here since the Optinal may be empty
+        	try {
+        		result = getAssignmentOld(experimentID, userID, context).get();
+        	}
+        	catch(Exception e) {
+        		// ignore
+        	}
         }
         return result;
     }
