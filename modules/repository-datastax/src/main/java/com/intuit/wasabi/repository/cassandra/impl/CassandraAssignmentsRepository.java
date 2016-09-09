@@ -48,6 +48,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
@@ -370,8 +371,9 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                         assignment.getExperimentID().getRawID(),
                         assignment.getUserID().toString(),
                         assignment.getContext().getContext(),
-                        assignment.getCreated()
-                        );
+                        assignment.getCreated(),
+                        new String(new byte[0], StandardCharsets.UTF_8 ) //Needed because of compact storage
+                );
             } else {
                 userBucketIndexAccessor.insertBy(
                         assignment.getExperimentID().getRawID(),
@@ -393,7 +395,8 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                         assignment.getUserID().toString(),
                         assignment.getContext().getContext(),
                         assignment.getApplicationName().toString(),
-                        assignment.getExperimentID().getRawID()
+                        assignment.getExperimentID().getRawID(),
+                        new String(new byte[0], StandardCharsets.UTF_8 ) //Needed because of compact storage, which is essentially just ""
                 );
             } else {
                 userExperimentIndexAccessor.insertBy(
@@ -424,12 +427,12 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                 userAssignmentIndexAccessor.insertBy(assignment.getExperimentID().getRawID(),
                         assignment.getUserID().toString(),
                         assignment.getContext().getContext(),
-                        assignment.getCreated());
+                        paramDate);
             } else {
                 userAssignmentIndexAccessor.insertBy(assignment.getExperimentID().getRawID(),
                         assignment.getUserID().toString(),
                         assignment.getContext().getContext(),
-                        assignment.getCreated(),
+                        paramDate,
                         assignment.getBucketLabel().toString());
             }
         } catch (WriteTimeoutException | UnavailableException | NoHostAvailableException e) {
@@ -454,12 +457,12 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                 userAssignmentAccessor.insertBy(assignment.getExperimentID().getRawID(),
                         assignment.getUserID().toString(),
                         assignment.getContext().getContext(),
-                        assignment.getCreated());
+                        paramDate);
             } else {
                 userAssignmentAccessor.insertBy(assignment.getExperimentID().getRawID(),
                         assignment.getUserID().toString(),
                         assignment.getContext().getContext(),
-                        assignment.getCreated(),
+                        paramDate,
                         assignment.getBucketLabel().toString());
             }
         } catch (WriteTimeoutException | UnavailableException | NoHostAvailableException e) {
@@ -486,7 +489,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                 userAssignmentExportAccessor.insertBy(assignment.getExperimentID().getRawID(),
                         assignment.getUserID().toString(),
                         assignment.getContext().getContext(),
-                        assignment.getCreated(),
+                        date,
                         day_hour,
                         "NO_ASSIGNMENT",
                         true);
@@ -494,7 +497,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                 userAssignmentExportAccessor.insertBy(assignment.getExperimentID().getRawID(),
                         assignment.getUserID().toString(),
                         assignment.getContext().getContext(),
-                        assignment.getCreated(),
+                        date,
                         day_hour,
                         assignment.getBucketLabel().toString(),
                         false);
@@ -609,8 +612,14 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     }
 
     List<Date> getUserAssignmentPartitions(Date fromTime, Date toTime){
-        final LocalDateTime startTime = LocalDateTime.ofInstant(fromTime.toInstant(), ZoneId.systemDefault());
-        final LocalDateTime endTime =  LocalDateTime.ofInstant(toTime.toInstant(), ZoneId.systemDefault());
+        final LocalDateTime startTime = LocalDateTime.ofInstant(fromTime.toInstant(), ZoneId.systemDefault())
+                .withMinute(0)
+                .withSecond(0)
+                .withNano(0);
+        final LocalDateTime endTime =  LocalDateTime.ofInstant(toTime.toInstant(), ZoneId.systemDefault())
+                .withMinute(0)
+                .withSecond(0)
+                .withNano(0);
         final long hours = Duration.between(startTime, endTime).toHours();
         return LongStream
                 .rangeClosed(0, hours)
@@ -632,6 +641,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                 writer.write(header);
                 for(Date dateHour : dateHours){
                     Result<UserAssignmentExport> result;
+                    logger.debug("Query user assignment export for experimentID={}, at dateHour={}", experimentID.getRawID(), dateHour);
                     if(ignoreNullBucket) {
                         result = userAssignmentExportAccessor.selectBy(experimentID.getRawID(), dateHour, context.getContext(), false);
                     }else{
