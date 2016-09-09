@@ -167,7 +167,7 @@ start_cassandra() {
 
 console_cassandra() {
   docker exec -it ${project}-cassandra cqlsh || \
-    usage "unable to run command: docker run --net=${docker_network} -it --rm ${cassandra} cqlsh ${project}-cassandra" 1
+    usage "unable to run command: docker exec -it ${project}-cassandra cqlsh" 1
 }
 
 start_mysql() {
@@ -183,7 +183,7 @@ console_mysql() {
   pwd=mypass
 
   docker exec -it ${project}-mysql mysql -uroot -p${pwd} || \
-    usage "unable to run command: % docker run --net=${docker_network} -it --rm ${mysql} mysql -h${wmip} -P3306 -uroot -p${pwd}" 1
+    usage "unable to run command: % docker exec -it ${project}-mysql mysql -uroot -p${pwd}" 1
 }
 
 status() {
