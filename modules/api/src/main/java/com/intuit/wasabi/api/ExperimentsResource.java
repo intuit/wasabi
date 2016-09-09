@@ -30,14 +30,18 @@ import com.intuit.wasabi.events.EventsExport;
 import com.intuit.wasabi.exceptions.*;
 import com.intuit.wasabi.experiment.*;
 import com.intuit.wasabi.experimentobjects.*;
+import com.intuit.wasabi.repository.RepositoryException;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+
 import org.slf4j.Logger;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -191,8 +195,15 @@ public class ExperimentsResource {
         String creatorID = (userName != null) ? userName.getUsername() : null;
 
         newExperiment.setCreatorID(creatorID);
-        experiments.createExperiment(newExperiment, authorization.getUserInfo(userName));
-
+        
+        // TODO - Should validate experiment before hand rather than catching errors later
+        try {
+        	experiments.createExperiment(newExperiment, authorization.getUserInfo(userName));
+        }
+        catch(RepositoryException e) {
+        	throw new RepositoryException("Could not create experiment " + newExperiment + " because " + e);
+        }
+        
         Experiment experiment = experiments.getExperiment(newExperiment.getID());
 
         if (createNewApplication) {
