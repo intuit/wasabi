@@ -282,15 +282,26 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
             * However, the below hack will return a null assignment  even though the existing assignment
             * for a user who had been assigned to an EMPTY bucket is not null
             * */
-            final boolean isBucketEmpty = experimentRepository.getBucket(experimentID, t.getBucketLabel())
-                    .getState()
-                    .equals(Bucket.State.EMPTY);
+            //TODO: this is a temporary hack to make the code behave like it was asytnax code.
+            //TODO: the comment is intentional left inplace for us to revisit it asap!!!
+
+//            final boolean isBucketEmpty = experimentRepository.getBucket(experimentID, t.getBucketLabel())
+//                    .getState()
+//                    .equals(Bucket.State.EMPTY);
+            Bucket.Label bucketLabel = t.getBucketLabel();
+            boolean isBucketEmpty = false;
+            if (bucketLabel != null &&
+                    experimentRepository.getBucket(experimentID, t.getBucketLabel()).getState().equals(Bucket.State.EMPTY)) {
+                bucketLabel = null;
+                isBucketEmpty = true;
+            }
             t.withStatus(Assignment.Status.EXISTING_ASSIGNMENT)
                     .withCacheable(false)
-                    .withBucketEmpty(isBucketEmpty);
-            if (Objects.nonNull(t.getBucketLabel()) && isBucketEmpty ){
-                t.withBucketLabel(null);
-            }
+                    .withBucketEmpty(isBucketEmpty)
+                    .withBucketLabel(bucketLabel);
+//            if (Objects.nonNull(t.getBucketLabel()) && isBucketEmpty ){
+//                t.withBucketLabel(bucketLabel);
+//            }
 
             return t.build();
         }).reduce((element, anotherElement) -> { //With reduce, we can detect if there is more than 1 elements in the stream
