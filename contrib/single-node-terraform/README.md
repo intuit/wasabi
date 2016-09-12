@@ -41,9 +41,9 @@ You can store keys to your local filesystem and reference them into terrafrom
 
 How to run
 
-terraform plan single-instance-setup 
+terraform plan single-node-terraform 
 
-terraform apply single-instance-setup
+terraform apply single-node-terraform
 
 
 
