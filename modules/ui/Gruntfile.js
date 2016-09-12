@@ -13,8 +13,8 @@
 // If a user wants to set 'key' she should call `grunt [commands...] --key=value`.
 // If the key is not supplied, the default value is used.
 function fromArgs( key, defaultValue ) {
-	const index = process.argv.findIndex(arg => arg.startsWith('--' + key + '='));
-	return index !== -1 ? process.argv[index].split(/(=)/).slice(2).join('') : defaultValue;
+    const index = process.argv.findIndex(arg => arg.startsWith('--' + key + '='));
+    return index !== -1 ? process.argv[index].split(/(=)/).slice(2).join('') : defaultValue;
 }
 
 module.exports = function (grunt) {

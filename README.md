@@ -91,22 +91,22 @@ needs administrator rights in your [cmd.exe][win_cmd_admin].
 
 If you have git, just run:
 ```dos
-git clone https://github.com/intuit/wasabi.git
-cd wasabi
-bin\wasabi.bat bootstrap
+% git clone https://github.com/intuit/wasabi.git
+% cd wasabi
+% bin\wasabi.bat bootstrap
 ```
 
 If you don't have git the easiest way is to [download][url_develop_zip] the
 latest code:
 ```dos
-set wasabipath=%HOMEDRIVE%%HOMEPATH%\projects
-mkdir %wasabipath%
-powershell -Command "Invoke-WebRequest -Uri https://github.com/intuit/wasabi/archive/develop.zip -OutFile %wasabipath%\wasabi.zip"
-powershell -Command "(New-Object -COM Shell.Application).NameSpace('%wasabipath%').CopyHere((New-Object -COM Shell.Application).NameSpace('%wasabipath%\wasabi.zip').Items(), 16)"
-del %wasabipath%\wasabi.zip
-ren %wasabipath%\wasabi-develop wasabi
-cd %wasabipath%\wasabi
-bin\wasabi.bat bootstrap
+% set wasabipath=%HOMEDRIVE%%HOMEPATH%\projects
+% mkdir %wasabipath%
+% powershell -Command "Invoke-WebRequest -Uri https://github.com/intuit/wasabi/archive/develop.zip -OutFile %wasabipath%\wasabi.zip"
+% powershell -Command "(New-Object -COM Shell.Application).NameSpace('%wasabipath%').CopyHere((New-Object -COM Shell.Application).NameSpace('%wasabipath%\wasabi.zip').Items(), 16)"
+% del %wasabipath%\wasabi.zip
+% ren %wasabipath%\wasabi-develop wasabi
+% cd %wasabipath%\wasabi
+% bin\wasabi.bat bootstrap
 ```
 
 For all other processes (build, start etc.) the commands are almost the same as
@@ -468,7 +468,7 @@ points to `docker-machine ip wasabi`. You can use the Windows exclusive
 
 **Wasabi has incorrect times! My IDE-run integration tests fail! Help!**
 It is a known problem with docker-machine that its time server stops while
-the host machine sleeps. If your system behaves weird check if 
+the host machine sleeps. If your system behaves weird, check if 
 `docker-machine ssh wasabi date` gives you the expected UTC time. If not, run
 `for /f %I in ('ruby -e "puts Time.now.utc.strftime(%Q{%Y%m%d%H%M.%S})"') do @docker-machine ssh wasabi "sudo date --set %I"`.
 Wasabi does this time correction whenever you start the integration tests via
