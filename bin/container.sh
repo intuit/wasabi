@@ -180,6 +180,7 @@ start_mysql() {
 }
 
 console_mysql() {
+  pwd=mypass
   docker run --net=${docker_network} -it --rm ${mysql} mysql -h${project}-mysql -P3306 -uroot -p${pwd} || \
     usage "unable to run command: % docker run --net=${docker_network} -it --rm ${mysql} mysql -h${project}-mysql -P3306 -uroot -p${pwd}" 1
 }
