@@ -15,6 +15,7 @@ AWS configuration
 Using terraform for setting up single node infra in the aws
 
 create ssh key pair and upload to the AWS account
+
 e.g. mkdir ssh && ssh-keygen -t rsa -C "test-key" -P '' -f ssh/test-key
 
 aws.tf will create these for you
@@ -41,6 +42,7 @@ You can store keys to your local filesystem and reference them into terrafrom
 How to run
 
 terraform plan single-instance-setup 
+
 terraform apply single-instance-setup
 
 
