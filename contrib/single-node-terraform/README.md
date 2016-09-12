@@ -16,7 +16,7 @@ Using terraform for setting up single node infra in the aws
 
 create ssh key pair and upload to the AWS account
 
-e.g. mkdir ssh && ssh-keygen -t rsa -C "test-key" -P '' -f ssh/test-key
+e.g. ssh-keygen -t rsa -C "wasabi-key" -P '' -f $HOME/.ssh/wasabi-key
 
 aws.tf will create these for you
 - create VPC

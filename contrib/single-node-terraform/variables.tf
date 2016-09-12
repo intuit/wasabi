@@ -27,12 +27,13 @@ variable "aws_gw_cidr" {
 
 variable "aws_amis" {
   default = {
-  us-west-2 = "ami-f1925191"
+  us-west-2 = "ami-6f69a40f"
   }
 }
 
 variable "artifact_path" {
-  default = "~/WORK/wasabi/target"
+  description = "provide local wasabi artifact absolute source path"
+  //default = "~/WORK/wasabi/target"
 }
 
 variable "instance_type" {
