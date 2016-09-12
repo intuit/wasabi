@@ -4320,4 +4320,9 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
     background-color: white;
     border: 1px solid #aaa;
     border-radius: 3px;
+    ul {
+        list-style: disc outside none;
+        display: list-item;
+        margin-left: 1em;
+    }
 }

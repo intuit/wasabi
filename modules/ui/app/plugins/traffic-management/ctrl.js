@@ -105,7 +105,7 @@ angular.module('wasabi.controllers').
                     $scope.mutualExclusions[exp.label] = meExperiments;
                     meExperiments.forEach(function(nextExp) {
                         $scope.setPriorityOnExperiment(nextExp);
-                        nextExp.hoverContent = '<span style="font-weight: bold;">Hi There</span><br/>More stuff is here...<br/>More stuff is here...<br/>More stuff is here...<br/>More stuff is here...<br/>More stuff is here...<br/>More stuff is here...<br/>More stuff is here...<br/>More stuff is here...<br/>More stuff is here...<br/>More stuff is here...<br/>More stuff is here...<br/>More stuff is here...<br/>More stuff is here...';
+                        nextExp.hoverContent = '<span style="font-weight: bold;">Hi There</span><br/>More stuff is here...';
                     });
 
                     // Add all of the meExperiments that are not already there to the relatedExperiments array
@@ -185,43 +185,68 @@ angular.module('wasabi.controllers').
 
                 // Next, set the Experiment Sampling Percentage of the first experiment to equal the target
                 // sampling percentage, since it is not effected by any mutual exclusion.
+                var oldHighestPrioritySamplingPercent = $scope.relatedExperiments[0].samplingPercent;
                 $scope.relatedExperiments[0].samplingPercent = $scope.relatedExperiments[0].targetSamplingPercent;
 
                 // Next, starting at the second experiment, check its mutual exclusions to see if any of the
                 // experiments it is mutually exclusive to are above it in priority (earlier in the relatedExperiments
                 // array).  If so, we need to recalculate the Experiment Sampling % from the sum of the higher priority,
                 // mutually exclusive experiment's Target Sampling %s and it's own.
-                for (var j = 1; j < $scope.relatedExperiments.length; j++) {
-                    var currentExp = $scope.relatedExperiments[j],
-                        mutexs = $scope.mutualExclusions[currentExp.label],
-                        targetSamplingPercentages = 0.0;
-
-                    for (var k = 0; k < mutexs.length; k++) {
-                        if (mutexs[k].priority < currentExp.priority) {
-                            // Get the value the user entered for this mutually exclusive experiment
-                            var relExp = $scope.relatedExperiments.filter(function(nextExp) {
-                                return nextExp.label === mutexs[k].label;
-                            });
-                            targetSamplingPercentages += parseFloat(relExp[0].targetSamplingPercent);
+                for (var j = 0; j < $scope.relatedExperiments.length; j++) {
+                    var currentExp = $scope.relatedExperiments[j], mutexs, targetSamplingPercentages, hoverMessage;
+                    if (j === 0) {
+                        // Highest priority experiment, message will be different.
+                        if (parseFloat(currentExp.samplingPercent) !== parseFloat(oldHighestPrioritySamplingPercent)) {
+                            // We have an experiment whose sampling percentage is calculated to be different.
+                            // Set the hoverContent so the hover explains why.
+                            hoverMessage = '<span style="font-weight: bold;">New Sampling Percentage</span><br/>' +
+                                'The sampling percentage of this experiment needs to be updated in order to achieve ' +
+                                $scope.multiply100(currentExp.targetSamplingPercent) + '% of ' +
+                                'total traffic. This is necessary because you have changed the target sampling percentage.';
+                            currentExp.hoverContent = hoverMessage;
+                            $scope.noSave = false;
                         }
                     }
-                    if (targetSamplingPercentages >= 1) {
-                        UtilitiesFactory.displayPageError('Sampling Percentage Too High', 'You have set the sampling percentage of some of your higher priority experiments too high.  No traffic will be left for the later experiments.');
-                        return;
-                    }
-                    var newSamp = parseFloat(currentExp.targetSamplingPercent) / (1 - targetSamplingPercentages);
-                    if (newSamp >= 1) {
-                        UtilitiesFactory.displayPageError('Sampling Percentage Too High', 'You have set the sampling percentage of some of your higher priority experiments too high.  No traffic will be left for the later experiments.');
-                        return;
-                    }
-                    if (parseFloat(currentExp.samplingPercent) !== parseFloat(newSamp.toFixed(4))) {
-                        currentExp.samplingPercent = parseFloat(newSamp.toFixed(4));
-                        $scope.noSave = false;
+                    else {
+                        // For all others, we need to calculate the target sampling percentage by looking at the higher
+                        // priority experiments.
+                        mutexs = $scope.mutualExclusions[currentExp.label];
+                        targetSamplingPercentages = 0.0;
+                        hoverMessage = '<span style="font-weight: bold;">New Sampling Percentage</span><br/>' +
+                                'The sampling percentage of this experiment needs to be updated in order to achieve ' +
+                                $scope.multiply100(currentExp.targetSamplingPercent) + '% of ' +
+                                'total traffic. This is necessary because:<br/><ul>';
+
+                        for (var k = 0; k < mutexs.length; k++) {
+                            if (mutexs[k].priority < currentExp.priority) {
+                                // Get the value the user entered for this mutually exclusive experiment
+                                var relExp = $scope.relatedExperiments.filter(function(nextExp) {
+                                    return nextExp.label === mutexs[k].label;
+                                });
+                                targetSamplingPercentages += parseFloat(relExp[0].targetSamplingPercent);
+                                hoverMessage += '<li>Mutually exclusive with higher priority experiment, ' + relExp[0].label + '</li>'
+                            }
+                        }
+                        if (targetSamplingPercentages >= 1) {
+                            UtilitiesFactory.displayPageError('Sampling Percentage Too High', 'You have set the sampling percentage of some of your higher priority experiments too high.  No traffic will be left for the later experiments.');
+                            return;
+                        }
+                        var newSamp = parseFloat(currentExp.targetSamplingPercent) / (1 - targetSamplingPercentages);
+                        if (newSamp >= 1) {
+                            UtilitiesFactory.displayPageError('Sampling Percentage Too High', 'You have set the sampling percentage of some of your higher priority experiments too high.  No traffic will be left for the later experiments.');
+                            return;
+                        }
+                        if (parseFloat(currentExp.samplingPercent) !== parseFloat(newSamp.toFixed(4))) {
+                            // We have an experiment whose sampling percentage is calculated to be different.
+                            // Set the hoverContent so the hover explains why.
+                            hoverMessage += '</ul>';
+                            currentExp.hoverContent = hoverMessage;
+                            currentExp.samplingPercent = parseFloat(newSamp.toFixed(4));
+                            $scope.noSave = false;
+                        }
                     }
                 }
             };
-
-            // <img style="width: 14px; height: 14px;" src="../../images/sidebar_icon_faq.png">
 
             $scope.save = function() {
                 $scope.noSave = true;
