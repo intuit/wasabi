@@ -18,6 +18,7 @@ package com.intuit.wasabi.experimentobjects;
 import com.intuit.hyrule.RuleBuilder;
 import com.intuit.hyrule.exceptions.InvalidSchemaException;
 import com.intuit.hyrule.exceptions.InvalidSyntaxException;
+import com.intuit.wasabi.experimentobjects.Experiment.Label;
 import com.intuit.wasabi.experimentobjects.exceptions.InvalidBucketStateTransitionException;
 import com.intuit.wasabi.experimentobjects.exceptions.InvalidExperimentStateException;
 import com.intuit.wasabi.experimentobjects.exceptions.InvalidExperimentStateTransitionException;
@@ -42,7 +43,7 @@ public class ExperimentValidator {
                 state.equals(Experiment.State.TERMINATED)) {
             return;
         }
-
+        validateLabel(experiment.getLabel());
         validateExperimentStartEnd(experiment.getStartTime(), experiment.getEndTime());
         validateSamplingPercent(experiment.getSamplingPercent());
         validateExperimentRule(experiment.getRule());
@@ -50,8 +51,13 @@ public class ExperimentValidator {
                 ,experiment.getModelName());
     }
 
-    public void validateNewExperiment(NewExperiment newExperiment) {
+    private void validateLabel(Label label) {
+    	if ( label == null )
+            throw new IllegalArgumentException("Label cannot be null");
+	}
 
+	public void validateNewExperiment(NewExperiment newExperiment) {
+		validateLabel(newExperiment.getLabel());
         validateExperimentStartEnd(newExperiment.getStartTime(),newExperiment.getEndTime());
         validateSamplingPercent(newExperiment.getSamplingPercent());
         validateExperimentRule(newExperiment.getRule());
@@ -67,7 +73,11 @@ public class ExperimentValidator {
     }
 
     protected void validateExperimentStartEnd(Date startTime, Date endTime) {
-        if ((startTime != null) && (endTime != null) && endTime.before(startTime)) {
+    	if ( startTime == null || endTime == null )
+    		throw new IllegalArgumentException("Invalid date range, start = \"" + startTime + "\", end = " +
+                "\"" + endTime + "\"");
+ 
+    	if ((startTime != null) && (endTime != null) && endTime.before(startTime)) {
             throw new IllegalArgumentException("Invalid date range, start = \"" + startTime + "\", end = " +
                     "\"" + endTime + "\"");
         }
