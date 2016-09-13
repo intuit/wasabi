@@ -52,10 +52,12 @@ home=${home:-/usr/local/$id}
 log=${log:-/var/log/$id}
 email=`fromPom main ${profile} application.email`
 
+echo "packaging service: $id, home: $home, log: $log, email: $email, pwd: `pwd`"
+
 common="-s dir --force --debug --architecture noarch --name ${name}-${profile} --version ${version}\
   --iteration ${timestamp} --license APLv2.0 --vendor tbd --category application --provides ${name}-${profile}\
   --description ${name}-${version}-${profile} --url https://github.com/intuit/wasabi\
-   --maintainer ${email}" #--directories ${home}"
+  --maintainer ${email}" #--directories ${home}"
 resources="dist/=${home}/content/ui/dist"
 #deb="-t deb --deb-no-default-config-files"
 deb="-t deb"
