@@ -4300,6 +4300,7 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
 .pluginDescription {
     float: left;
     width: 90%;
+    min-height: 50px;
     padding: 10px;
     border: 1px solid rgb(203, 204, 206);
     @include border-radius(3px);

@@ -2,7 +2,11 @@
     <div id="pluginsList" ng-show="plugins && plugins.length > 0">
         <div>
             <div ng-show="plugins && plugins.length > 0">
-                <div ng-repeat="plugin in plugins | filter:{ pluginType: 'contributeAppLevelFeature' }"><div class="pluginDescription"><span style="font-weight: bold;">{{plugin.displayName}}:</span> {{plugin.description}}</div><div style="float: right;"><button style="margin: 10px;" onclick="return false;" ng-click="openPluginModal(plugin);">Run</button></div></div>
+                <div ng-repeat="plugin in plugins | filter:{ pluginType: 'contributeAppLevelFeature' }">
+                    <div class="pluginDescription"><span style="font-weight: bold;">{{plugin.displayName}}:</span> {{plugin.description}}</div>
+                    <div style="float: right;"><button style="margin: 10px;" onclick="return false;" ng-click="openPluginModal(plugin);">Run</button></div>
+                    <div style="clear: both; height: 20px;">&nbsp;</div>
+                </div>
             </div>
         </div>
     </div>
