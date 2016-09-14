@@ -51,6 +51,7 @@ id=${name}-${version}-${profile}
 home=${home:-/usr/local/$id}
 log=${log:-/var/log/$id}
 email=`fromPom main ${profile} application.email`
+# FIXME: hack
 email=foo@bar.com
 
 echo "packaging service: $id, home: $home, log: $log, email: $email, pwd: `pwd`"

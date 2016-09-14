@@ -80,8 +80,8 @@ if [[ "${build}" = true || "${test}" = true || "${build_jar}" = true ]]; then
   [ ! -e ./modules/main/target/wasabi-main-*-SNAPSHOT-${profile}-all.jar ] && package=package
   [ "${test}" = true ] && tests=test
 
-  mvn -P${profile} ${mvn_settings} clean ${tests:--Dmaven.test.skip=true} ${package} javadoc:aggregate || \
-    usage "invalid: mvn ${tests} -P${profile} ${mvn_settings} clean ${package}" 1
+  mvn -P${profile} ${WASABI_MAVEN} clean ${tests:--Dmaven.test.skip=true} ${package} javadoc:aggregate || \
+    usage "invalid: mvn ${tests} -P${profile} ${WASABI_MAVEN} clean ${package}" 1
 fi
 
 artifact=$(fromPom ./modules/${module} ${profile} project.artifactId)
@@ -130,7 +130,7 @@ if [[ "${build}" = true || "${build_js}" = true ]]; then
       sudo gem install compass
     fi
   fi
-  (cd ./modules/ui && npm install && bower install && grunt build)
+  (cd ./modules/ui && npm install && bower install && grunt --forcce build)
 fi
 
 content=${home}/${id}/content/ui/dist
