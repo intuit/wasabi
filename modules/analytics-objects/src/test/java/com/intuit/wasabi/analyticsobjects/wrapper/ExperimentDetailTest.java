@@ -19,13 +19,13 @@ import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Experiment;
 
-import static cern.jet.math.Functions.exp;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 /**
@@ -39,6 +39,7 @@ public class ExperimentDetailTest {
     Application.Name appName = Application.Name.valueOf("TestApplicationLabelForExperimentDetail");
     Calendar modTime = Calendar.getInstance();
     Calendar startTime = Calendar.getInstance();
+
 
     {
         modTime.set(2016,8,16);
@@ -96,22 +97,43 @@ public class ExperimentDetailTest {
 
     @Test
     public void testBuckets(){
+        Bucket.Label labelA = Bucket.Label.valueOf("BucketA");
+        Bucket.Label labelB = Bucket.Label.valueOf("BucketB");
+        Bucket.Label labelC = Bucket.Label.valueOf("BucketC");
+
         List<Bucket> buckets = new ArrayList<>();
-        Bucket bucketA = Bucket.newInstance(expId, Bucket.Label.valueOf("BucketA"))
+        Bucket bucketA = Bucket.newInstance(expId,labelA)
                 .withAllocationPercent(0.8).withControl(true).build();
-        Bucket bucketB = Bucket.newInstance(expId, Bucket.Label.valueOf("BucketB"))
+        Bucket bucketB = Bucket.newInstance(expId, labelB)
                 .withAllocationPercent(0.1).withControl(false).build();
-        Bucket bucketC = Bucket.newInstance(expId, Bucket.Label.valueOf("BucketC"))
+        Bucket bucketC = Bucket.newInstance(expId, labelC)
                 .withAllocationPercent(0.1).withControl(false).build();
         buckets.add(bucketA);
         buckets.add(bucketB);
         buckets.add(bucketC);
 
+        // create experimentdetail
         ExperimentDetail expDetail = new ExperimentDetail(exp);
-
         expDetail.addBuckets(buckets);
 
         assertEquals(expDetail.getBuckets().size(), 3);
 
+        // check labels
+        List<Bucket.Label> labels = buckets.stream().map(Bucket::getLabel).collect(Collectors.toList());
+        assertEquals(labels,expDetail.getBuckets().stream().
+                map(ExperimentDetail.BucketDetail::getLabel).
+                collect(Collectors.toList()));
+
+        // check allocation percent
+        List<Double> percentage = buckets.stream().map(Bucket::getAllocationPercent).collect(Collectors.toList());
+        assertEquals(percentage,expDetail.getBuckets().stream().
+                map(ExperimentDetail.BucketDetail::getAllocationPercent).
+                collect(Collectors.toList()));
+
+        // check isControl
+        List<Boolean> controls = buckets.stream().map(Bucket::isControl).collect(Collectors.toList());
+        assertEquals(controls, expDetail.getBuckets().stream().
+                map(ExperimentDetail.BucketDetail::isControl).
+                collect(Collectors.toList()));
     }
 }
