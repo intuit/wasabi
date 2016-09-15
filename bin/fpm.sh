@@ -20,10 +20,6 @@ usage () {
   exit
 }
 
-export JAVA_HOME=${JAVA_HOME:-/usr/local/java}
-export PATH=$JAVA_HOME/bin:$PATH
-
-
 fromPom() {
   mvn -f modules/$1/pom.xml help:evaluate -Dexpression=$2 | sed -n -e '/^\[.*\]/ !{ p; }'
 }
