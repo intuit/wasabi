@@ -3,8 +3,8 @@
 /*jshint -W106*/ // disable jshint warning about camel case
 
 angular.module('wasabi.controllers')
-    .controller('SignInCtrl', ['$scope', '$rootScope', '$state', 'AuthFactory', 'AuthzFactory', 'AUTH_EVENTS', 'Session', 'UtilitiesFactory', '$cookies', 'USER_ROLES', 'WasabiFactory',
-            function ($scope, $rootScope, $state, AuthFactory, AuthzFactory, AUTH_EVENTS, Session, UtilitiesFactory, $cookies, USER_ROLES, WasabiFactory) {
+    .controller('SignInCtrl', ['$scope', '$rootScope', '$state', 'AuthFactory', 'AuthzFactory', 'AUTH_EVENTS', 'Session', 'UtilitiesFactory', '$cookies', 'USER_ROLES',
+            function ($scope, $rootScope, $state, AuthFactory, AuthzFactory, AUTH_EVENTS, Session, UtilitiesFactory, $cookies, USER_ROLES) {
 
                 $scope.credentials = {
                     username: '',
@@ -136,7 +136,7 @@ angular.module('wasabi.controllers')
                         });
                     }, function(reason) {
                         //console.log(reason);
-                        if (reason.data.error & reason.data.error.code !== 401) {
+                        if (reason.data.error && reason.data.error.code !== 401) {
                             $scope.serverDown = true;
                         }
                         else {

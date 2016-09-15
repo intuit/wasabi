@@ -7,7 +7,10 @@ app/images/**
 app/styles/**
 .tmp/**
 .sass-cache/**
+app/scripts/colResizable-1.5.min.js
 app/scripts/dynamicEdit-0.1.js
 app/scripts/mocks.js
+app/scripts/plugins.js
 karma*.conf.js
 coverage/**
+Gruntfile.js

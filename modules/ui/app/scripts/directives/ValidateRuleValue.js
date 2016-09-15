@@ -1,11 +1,9 @@
 'use strict';
 
-angular.module('wasabi.directives').directive('validateRuleValue', ['UtilitiesFactory', 'TooltipFactory', function (UtilitiesFactory, TooltipFactory) {
+angular.module('wasabi.directives').directive('validateRuleValue', ['UtilitiesFactory', function (UtilitiesFactory) {
     return {
         require: 'ngModel',
         link: function (scope, ele, attrs, c) {
-            var $tip;
-
             ele.on('blur', function () {
                 var $el = $(this);
 

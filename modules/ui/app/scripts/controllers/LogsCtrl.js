@@ -1,5 +1,4 @@
 /* global $:false */
-/* global moment:false */
 /*jshint devel:true */
 
 'use strict';

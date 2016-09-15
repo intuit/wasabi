@@ -1,3 +1,4 @@
+/* global wasabiUIPlugins:false */
 'use strict';
 
 /*

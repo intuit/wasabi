@@ -7,7 +7,9 @@ angular.module('wasabi.directives').directive('noSpaces', function() {
 
             modelCtrl.$parsers.push(function (inputValue) {
 
-                if (!inputValue) return inputValue;
+                if (!inputValue) {
+                    return inputValue;
+                }
 
                 var transformedInput = inputValue.replace(/ /g, '');
 

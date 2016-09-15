@@ -1,5 +1,4 @@
 /* global $:false */
-/* global moment:false */
 /*jshint devel:true */
 
 'use strict';
@@ -72,7 +71,7 @@ angular.module('wasabi.controllers').
                         }
                     }
                 }, function(response) {
-                        UtilitiesFactory.handleGlobalError(response, 'The list of applications could not be retrieved.');
+                    UtilitiesFactory.handleGlobalError(response, 'The list of applications could not be retrieved.');
                 });
             };
 
@@ -153,6 +152,16 @@ angular.module('wasabi.controllers').
                         function() {
                             $scope.data.editingSampling = false;
 
+                            function experimentUpdateSuccess(result) {
+                                UtilitiesFactory.trackEvent('saveItemSuccess',
+                                    {key: 'dialog_name', value: 'prioritiesSamplingPercentageChanges'},
+                                    {key: 'application_name', value: result.applicationName},
+                                    {key: 'item_id', value: result.id},
+                                    {key: 'item_label', value: result.samplingPercent});
+                            }
+                            function experimentUpdateError(response) {
+                                UtilitiesFactory.handleGlobalError(response, 'Your experiment sampling percentage could not be changed.');
+                            }
                             // Find changed percentages and save the changes
                             for (var i = 0; i < $scope.experiments.length; i++) {
                                 for (var j = 0; j < $scope.originalPercentages.length; j++) {
@@ -162,16 +171,9 @@ angular.module('wasabi.controllers').
                                         ExperimentsFactory.update({
                                             id: $scope.experiments[j].id,
                                             samplingPercent: $scope.experiments[j].samplingPercent
-                                        }).$promise.then(function (result) {
-                                                UtilitiesFactory.trackEvent('saveItemSuccess',
-                                                    {key: 'dialog_name', value: 'prioritiesSamplingPercentageChanges'},
-                                                    {key: 'application_name', value: result.applicationName},
-                                                    {key: 'item_id', value: result.id},
-                                                    {key: 'item_label', value: result.samplingPercent});
-                                            },
-                                            function(response) {
-                                                UtilitiesFactory.handleGlobalError(response, 'Your experiment sampling percentage could not be changed.');
-                                            }
+                                        }).$promise.then(
+                                            experimentUpdateSuccess,
+                                            experimentUpdateError
                                         );
                                     }
                                 }

@@ -18,7 +18,7 @@ angular.module('wasabi.controllers')
                 $scope.experiment = experiment;
                 $scope.experiment.applicationName2 = (applications.length === 1 ? '' : 'novalue');
                 $scope.readOnly = (readOnly ? readOnly : false);
-                $scope.simpleRuleEditing = $cookies['showAdvancedSegmentationEditor'] == undefined || $cookies['showAdvancedSegmentationEditor'] !== 'true';
+                $scope.simpleRuleEditing = $cookies.showAdvancedSegmentationEditor === undefined || $cookies.showAdvancedSegmentationEditor !== 'true';
                 $scope.experimentFormSubmitted = $scope.readOnly;
                 // needed to check uniqueness of name+label combination with directive
                 $scope.experiments = experiments;
@@ -154,7 +154,7 @@ angular.module('wasabi.controllers')
                     $scope.rulesChangedNotSaved = true;
                 };
 
-                $scope.ruleChanged = function(rule, subForm) {
+                $scope.ruleChanged = function() {
                     $scope.rulesChangedNotSaved = true;
                 };
 
@@ -303,14 +303,14 @@ angular.module('wasabi.controllers')
                             if (!creatingNewApplication) {
                                 ExperimentsFactory.create(newExperiment).$promise.then(
                                         function (experiment) {
-                                            handleCreateSuccess(experiment, 'createExperiment')
+                                            handleCreateSuccess(experiment, 'createExperiment');
                                         },
                                         handleCreateError);
                             }
                             else {
                                 ExperimentsFactory.createWithNewApplication(newExperiment).$promise.then(
                                     function (experiment) {
-                                        handleCreateSuccess(experiment, 'createExperimentNewApplication')
+                                        handleCreateSuccess(experiment, 'createExperimentNewApplication');
                                     },
                                     handleCreateError);
                             }
@@ -395,7 +395,8 @@ angular.module('wasabi.controllers')
                             }
                         }, function(response) {
                                 UtilitiesFactory.handleGlobalError(response, 'The list of unauthorized applications could not be retrieved.');
-                        });
+                            }
+                        );
                     };
 
                     var creatingNewApplication = (experiment.applicationName === ConfigFactory.newApplicationNamePrompt);
@@ -403,7 +404,7 @@ angular.module('wasabi.controllers')
                     if (creatingNewApplication) {
                         // We need to check for and prevent the user from creating an experiment in an existing
                         // application for which they don't have permission.
-                        preventUnauthorizedApplicationCreation(continueWithCreation)
+                        preventUnauthorizedApplicationCreation(continueWithCreation);
                     }
                     else {
                         // Don't need to do the validation because they are just creating an experiment in an
@@ -453,7 +454,7 @@ angular.module('wasabi.controllers')
                     }
                 };
 
-                $scope.saveExperiment = function (experimentId, isFormInvalid, form) {
+                $scope.saveExperiment = function (experimentId, isFormInvalid) {
                     if (!isFormInvalid) {
                         // Submit as normal
 

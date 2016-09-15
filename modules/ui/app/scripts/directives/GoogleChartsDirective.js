@@ -1,3 +1,4 @@
+/*global google:false*/
 'use strict';
 
 angular.module('wasabi.directives').directive('googleCharts', function () {

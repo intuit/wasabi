@@ -1,3 +1,4 @@
+/* global moment:false */
 'use strict';
 
 angular.module('wasabi.controllers')
@@ -22,10 +23,10 @@ angular.module('wasabi.controllers')
                     if (!isFormInvalid) {
                         if (moment($scope.data.toDate, ['YYYY-MM-DDTHH:mm:ssZ', 'ddd MMM DD YYYY HH:mm:ss ZZ']).isBefore(moment($scope.data.fromDate, ['YYYY-MM-DDTHH:mm:ssZ', 'ddd MMM DD YYYY HH:mm:ss ZZ']))) {
                             DialogsFactory.alertDialog('The To date must be after the From date.',
-                                    'Date Error',
-                                    function() {
-                                        // Nothing to do.
-                                    });
+                                'Date Error',
+                                function() {
+                                    // Nothing to do.
+                            });
                         }
                         else {
                             // Build the URL

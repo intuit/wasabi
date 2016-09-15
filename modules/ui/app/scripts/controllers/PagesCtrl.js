@@ -71,7 +71,7 @@ angular.module('wasabi.controllers').
 
             var clearPageInput = function() {
                 setTimeout(function() {
-                    $scope.pagesData.pageName = ''
+                    $scope.pagesData.pageName = '';
                     $scope.pagesData.setPageNameFocus += 1;
                 }, 30);
             };
