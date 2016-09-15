@@ -273,10 +273,11 @@ package() {
     done; \
     sed -i '' -e "s|http://localhost:8080|${server}|g" target/constants.json 2>/dev/null; \
     sed -i '' -e "s|VERSIONLOC|${version}|g" target/app/index.html 2>/dev/null; \
-    if [[ "${WASABI_OS}" == "${WASABI_OSX}" || "${WASABI_OS}" == "${WASABI_LINUX}" ]]; then \
+# SCOTT and SEBASTIAN
+#    if [[ "${WASABI_OS}" == "${WASABI_OSX}" || "${WASABI_OS}" == "${WASABI_LINUX}" ]]; then \
 #      (cd target; npm install; bower install; grunt clean); \
       (cd target; npm install; bower install --no-optional; grunt clean); \
-    fi \
+#    fi \
 # fixme: shouldn't have to force or ignore tests \
 #    (cd target; grunt build --target=develop --no-color; \
     (cd target; grunt build --force --target=develop --no-color; \
