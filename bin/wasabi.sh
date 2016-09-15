@@ -255,7 +255,7 @@ package() {
   version=$(fromPom . build project.version)
   # FIXME: server ip
   server="http://localhost:8080"
-  home=$(fromPom . build application.home)
+  home=$(fromPom ./modules/main build application.home)
   name=wasabi-ui #$(fromPom main build application.name)
   api_name=$(fromPom ./modules/main build application.name)
   user=$(fromPom ./modules/main build application.user)
