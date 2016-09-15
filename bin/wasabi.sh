@@ -257,7 +257,7 @@ package() {
   server="http://localhost:8080"
   home=$(fromPom . build application.home)
   name=wasabi-ui #$(fromPom main build application.name)
-  api_name=$(fromPom . build application.name)
+  api_name=$(fromPom ./modules/main build application.name)
   user=$(fromPom ./modules/main build application.user)
   group=$(fromPom ./modules/main build application.group)
   content=$(fromPom ./modules/main build application.http.content.directory)
