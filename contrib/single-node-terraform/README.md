@@ -67,21 +67,26 @@ It will also print information how to reach the instance.
 
 SSH into your instance and unpack the rpm.
 
-ssh -i $HOME/.ssh/wasabi-key ec2-user@$INSTANCE_IP_ADDRESS
+    ssh -i $HOME/.ssh/wasabi-key ec2-user@$INSTANCE_IP_ADDRESS
 
 Check the logs if installation is complete:
 
-tail -f /var/log/user-data.log
+    tail -f /var/log/user-data.log
 
-```cd /tmp/</path/to/your/*.rpm>```
-
-```rpm -ivh </Path/to/your/rpm>```
+    cd /tmp/</path/to/your/*.rpm>
+    rpm -ivh </Path/to/your/rpm>
 
 You can now access Wasabi on your single node!
 
+## How to run wasabi
+
+    cd /usr/local/<wasabi-main-xxxx>
+    ./bin/run &
+
+
 Test if wasabi is running
 
-```curl <hostname/ip address>:8080/api/v1/ping```
+    curl <hostname/ip address>:8080/api/v1/ping
 
 You can now access Wasabi on your single node!
 
