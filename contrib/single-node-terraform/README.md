@@ -5,8 +5,11 @@
 Install terraform and awscli (mac osx)
 
 brew doctor
+
 brew update
+
 brew upgrade
+
 brew install terraform
 
 AWS configuration
@@ -70,9 +73,9 @@ Check the logs if installation is complete:
 
 tail -f /var/log/user-data.log
 
-cd /tmp/<path to your *.rpm>
+cd /tmp/</path/to/your/*.rpm>
 
-rpm -ivh <xxxxxx.rpm>
+rpm -ivh </Path/to/your/rpm>
 
 You can now access Wasabi on your single node!
 
