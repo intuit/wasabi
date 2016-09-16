@@ -169,6 +169,14 @@ header {
   margin: 0 auto 20px auto;
 }
 
+.truncateDiv {
+    width: 790px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+}
+
 .pageError {
     display: none;
     position: fixed;
@@ -1100,6 +1108,10 @@ header {
 
 #segmentationToolbar {
     right: 44px;
+    top: 4px;
+}
+#resultsToolbar {
+    right: 4px;
     top: 4px;
 }
 .descriptionLabel {
@@ -2992,6 +3004,11 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
 #segmentationTestModal {
     width: 800px;
     left: -50px;
+}
+
+#resultsModal {
+    width: 700px;
+    left: 0;
 }
 
 #bucketAssignmentModal {

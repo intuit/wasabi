@@ -51,13 +51,13 @@ public class DatabaseAnalyticsTest {
     public void setup() throws SQLException {
         when(transactionFactory.newTransaction()).thenReturn(transaction);
         when(transactionFactory.getDataSource()).thenReturn(dataSource);
-        databaseAnalytics = spy(new DatabaseAnalytics(transactionFactory, flyway));
+        databaseAnalytics = spy(new DatabaseAnalytics(transactionFactory, flyway, "com/intuit/wasabi/repository/impl/mysql/migration"));
     }
 
     @Test
     public void initilizeTest(){
         Flyway mockedFlyway = Mockito.mock(Flyway.class);
-        databaseAnalytics.initialize(mockedFlyway);
+        databaseAnalytics.initialize(mockedFlyway, "com/intuit/wasabi/repository/impl/mysql/migration");
         verify(transactionFactory, atLeastOnce()).getDataSource();
         verify(flyway, atLeastOnce()).setLocations("com/intuit/wasabi/repository/impl/mysql/migration");
         verify(flyway, atLeastOnce()).setDataSource(dataSource);

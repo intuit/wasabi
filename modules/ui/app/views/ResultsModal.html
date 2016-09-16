@@ -1,0 +1,20 @@
+<div id="resultsModal" class="modalDialog">
+    <h1>Experiment Results</h1>
+    <form name="resultsForm" novalidate ng-submit="doSaveResults();">
+        <div class="dialogContent">
+            <div>
+                <label>Results</label>
+                <textarea ng-show="!readOnly" name="experimentResults" class="form-control" required ng-model="tmpResults" style="width: 658px; height: 75px" ng-maxlength="256" placeholder="Enter Experiment Results"></textarea>
+                <textarea ng-show="readOnly" disabled="true" name="experimentResults" class="form-control readOnly" ng-model="experiment.results" style="width: 900px; height: 55px"></textarea>
+            </div>
+            <div style="margin-top: 10px;">
+                <label>Hypothesis Correct?</label>
+                <select ng-class="{disabled: readOnly}" ng-disabled="readOnly" ng-model="tmpHypothesisCorrect"><option value="">Select answer</option><option value="yes">Yes, my hypothesis was correct</option><option value="no">No, my hypothesis was incorrect</option><option value="indeterminate">Indeterminate</option></select>
+            </div>
+            <div class="buttonBar">
+                <button id="btnSave" class="blue cancel">Save</button>
+                <button id="btnCancel" class="cancel" onclick="return false;" ng-click="cancel();">Cancel</button>
+            </div>
+        </div>
+    </form>
+</div>

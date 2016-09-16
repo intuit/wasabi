@@ -21,29 +21,85 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.intuit.wasabi.analyticsobjects.Parameters;
+import com.intuit.wasabi.api.pagination.PaginationHelper;
 import com.intuit.wasabi.assignment.Assignments;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authenticationobjects.UserInfo.Username;
 import com.intuit.wasabi.authorization.Authorization;
+import com.intuit.wasabi.authorizationobjects.Permission;
 import com.intuit.wasabi.authorizationobjects.UserRole;
 import com.intuit.wasabi.events.EventsExport;
-import com.intuit.wasabi.exceptions.*;
-import com.intuit.wasabi.experiment.*;
-import com.intuit.wasabi.experimentobjects.*;
+import com.intuit.wasabi.exceptions.AuthenticationException;
+import com.intuit.wasabi.exceptions.BucketNotFoundException;
+import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
+import com.intuit.wasabi.exceptions.TimeFormatException;
+import com.intuit.wasabi.exceptions.TimeZoneFormatException;
+import com.intuit.wasabi.experiment.Buckets;
+import com.intuit.wasabi.experiment.Experiments;
+import com.intuit.wasabi.experiment.Favorites;
+import com.intuit.wasabi.experiment.Mutex;
+import com.intuit.wasabi.experiment.Pages;
+import com.intuit.wasabi.experiment.Priorities;
+import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.experimentobjects.Bucket;
+import com.intuit.wasabi.experimentobjects.BucketList;
+import com.intuit.wasabi.experimentobjects.Context;
+import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.experimentobjects.ExperimentIDList;
+import com.intuit.wasabi.experimentobjects.ExperimentList;
+import com.intuit.wasabi.experimentobjects.ExperimentPageList;
+import com.intuit.wasabi.experimentobjects.NewExperiment;
+import com.intuit.wasabi.experimentobjects.Page;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimeZone;
 
-import static com.intuit.wasabi.api.APISwaggerResource.*;
-import static com.intuit.wasabi.authorizationobjects.Permission.*;
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_FILTER;
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_MODBUCK;
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_PAGE;
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_PER_PAGE;
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_PUTBUCK;
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_SORT;
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_TIMEZONE;
+import static com.intuit.wasabi.api.APISwaggerResource.DOC_FILTER;
+import static com.intuit.wasabi.api.APISwaggerResource.DOC_PAGE;
+import static com.intuit.wasabi.api.APISwaggerResource.DOC_PER_PAGE;
+import static com.intuit.wasabi.api.APISwaggerResource.DOC_SORT;
+import static com.intuit.wasabi.api.APISwaggerResource.DOC_TIMEZONE;
+import static com.intuit.wasabi.api.APISwaggerResource.EXAMPLE_AUTHORIZATION_HEADER;
+import static com.intuit.wasabi.authorizationobjects.Permission.CREATE;
+import static com.intuit.wasabi.authorizationobjects.Permission.READ;
+import static com.intuit.wasabi.authorizationobjects.Permission.UPDATE;
 import static com.intuit.wasabi.authorizationobjects.Role.ADMIN;
 import static com.intuit.wasabi.authorizationobjects.UserRole.newInstance;
 import static com.intuit.wasabi.experimentobjects.Experiment.State.DELETED;
@@ -65,7 +121,6 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 @Path("/v1/experiments")
 @Produces(APPLICATION_JSON)
-
 @Singleton
 @Api(value = "Experiments (Create-Modify Experiments & Buckets)")
 public class ExperimentsResource {
@@ -74,6 +129,7 @@ public class ExperimentsResource {
     private final String defaultTimezone;
     private final String defaultTimeFormat;
     private final HttpHeader httpHeader;
+    private final PaginationHelper<Experiment> paginationHelper;
     private Experiments experiments;
     private EventsExport export;
     private Assignments assignments;
@@ -82,14 +138,15 @@ public class ExperimentsResource {
     private Mutex mutex;
     private Pages pages;
     private Priorities priorities;
+    private Favorites favorites;
 
     @Inject
     ExperimentsResource(final Experiments experiments, final EventsExport export, final Assignments assignments,
                         final Authorization authorization, final Buckets buckets, final Mutex mutex,
-                        final Pages pages, final Priorities priorities,
+                        final Pages pages, final Priorities priorities, final Favorites favorites,
                         final @Named("default.time.zone") String defaultTimezone,
                         final @Named("default.time.format") String defaultTimeFormat,
-                        final HttpHeader httpHeader) {
+                        final HttpHeader httpHeader, final PaginationHelper<Experiment> paginationHelper) {
         this.experiments = experiments;
         this.export = export;
         this.assignments = assignments;
@@ -101,14 +158,25 @@ public class ExperimentsResource {
         this.defaultTimezone = defaultTimezone;
         this.defaultTimeFormat = defaultTimeFormat;
         this.httpHeader = httpHeader;
+        this.paginationHelper = paginationHelper;
+        this.favorites = favorites;
     }
 
     /**
      * Returns a list of all experiments, with metadata. Does not return
      * metadata for deleted experiments.
+     * <p>
+     * This endpoint is paginated. Favorites are sorted to the front.
+     * If {@code per_page == -1}, favorites are ignored and all experiments are returned.
      *
-     * @param authorizationHeader the ahtorization headers
-     * @return Response object
+     * @param authorizationHeader the authentication headers
+     * @param page                the page which should be returned, defaults to 1
+     * @param perPage             the number of log entries per page, defaults to 10. -1 to get all values.
+     * @param sort                the sorting rules
+     * @param filter              the filter rules
+     * @param timezoneOffset      the time zone offset from UTC
+     * @return a response containing a map with a list with {@code 0} to {@code perPage} experiments,
+     * if that many are on the page, and a count of how many experiments match the filter criteria.
      */
     @GET
     @Produces(APPLICATION_JSON)
@@ -117,12 +185,37 @@ public class ExperimentsResource {
     @Timed
     public Response getExperiments(@HeaderParam(AUTHORIZATION)
                                    @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                   final String authorizationHeader) {
+                                   final String authorizationHeader,
+
+                                   @QueryParam("page")
+                                   @DefaultValue(DEFAULT_PAGE)
+                                   @ApiParam(name = "page", defaultValue = DEFAULT_PAGE, value = DOC_PAGE)
+                                   final int page,
+
+                                   @QueryParam("per_page")
+                                   @DefaultValue(DEFAULT_PER_PAGE)
+                                   @ApiParam(name = "per_page", defaultValue = DEFAULT_PER_PAGE, value = DOC_PER_PAGE)
+                                   final int perPage,
+
+                                   @QueryParam("filter")
+                                   @DefaultValue("")
+                                   @ApiParam(name = "filter", defaultValue = DEFAULT_FILTER, value = DOC_FILTER)
+                                   final String filter,
+
+                                   @QueryParam("sort")
+                                   @DefaultValue("")
+                                   @ApiParam(name = "sort", defaultValue = DEFAULT_SORT, value = DOC_SORT)
+                                   final String sort,
+
+                                   @QueryParam("timezone")
+                                   @DefaultValue(DEFAULT_TIMEZONE)
+                                   @ApiParam(name = "timezone", defaultValue = DEFAULT_TIMEZONE, value = DOC_TIMEZONE)
+                                   final String timezoneOffset) {
         ExperimentList experimentList = experiments.getExperiments();
         ExperimentList authorizedExperiments;
 
         if (authorizationHeader == null) {
-            authorizedExperiments = experimentList;
+            throw new AuthenticationException("No authorization given.");
         } else {
             Username userName = authorization.getUser(authorizationHeader);
             Set<Application.Name> allowed = new HashSet<>();
@@ -148,20 +241,21 @@ public class ExperimentsResource {
                     }
                 }
             }
+
+            List<Experiment.ID> favoriteList = favorites.getFavorites(userName);
+            authorizedExperiments.getExperiments()
+                    .parallelStream()
+                    .filter(experiment -> favoriteList.contains(experiment.getID()))
+                    .forEach(experiment -> experiment.setFavorite(true));
         }
 
-        return httpHeader.headers().entity(authorizedExperiments).build();
+        Map<String, Object> experimentResponse = paginationHelper.paginate("experiments",
+                authorizedExperiments.getExperiments(), filter, timezoneOffset,
+                (perPage != -1 ? "-favorite," : "") + sort, page, perPage);
+
+        return httpHeader.headers().entity(experimentResponse).build();
     }
 
-    /**
-     * Creates a new experiment, initializing its metadata as specified in the
-     * JSON body of the request.
-     *
-     * @param newExperiment        the experiemnt to create
-     * @param createNewApplication the boolean flag of whether to create new application
-     * @param authorizationHeader  the authorization headers
-     * @return Response object
-     */
     @POST
     @Consumes(APPLICATION_JSON)
     @ApiOperation(value = "Create an experiment",
@@ -329,7 +423,7 @@ public class ExperimentsResource {
             throw new ExperimentNotFoundException(experimentID);
         }
 
-        authorization.checkUserPermissions(userName, experiment.getApplicationName(), DELETE);
+        authorization.checkUserPermissions(userName, experiment.getApplicationName(), Permission.DELETE);
 
         // Note: deleting an experiment follows the same rules as
         // updating its state to "deleted" -- so reuse the code.
@@ -646,7 +740,7 @@ public class ExperimentsResource {
             throw new ExperimentNotFoundException(experimentID);
         }
 
-        authorization.checkUserPermissions(userName, experiment.getApplicationName(), DELETE);
+        authorization.checkUserPermissions(userName, experiment.getApplicationName(), Permission.DELETE);
 
         UserInfo user = authorization.getUserInfo(userName);
 
@@ -819,7 +913,7 @@ public class ExperimentsResource {
             throw new ExperimentNotFoundException(experimentID_1);
         }
 
-        authorization.checkUserPermissions(userName, experiment.getApplicationName(), DELETE);
+        authorization.checkUserPermissions(userName, experiment.getApplicationName(), Permission.DELETE);
         //this is the user that triggered the event and will be used for logging
         mutex.deleteExclusion(experimentID_1, experimentID_2, authorization.getUserInfo(userName));
 
@@ -843,7 +937,7 @@ public class ExperimentsResource {
     @ApiOperation(value = "Get list of mutually exclusive experiments",
             notes = "Shows list of all experiments, in all states, that are " +
                     "mutually exclusive with input experiment.")
-            //            response = ??, //todo: update with proper object in @ApiOperation
+    //            response = ??, //todo: update with proper object in @ApiOperation
     @Timed
     public Response getExclusions(@PathParam("experimentID")
                                   @ApiParam(value = "Experiment ID")
@@ -1116,7 +1210,7 @@ public class ExperimentsResource {
             throw new ExperimentNotFoundException(experimentID);
         }
 
-        authorization.checkUserPermissions(userName, experiment.getApplicationName(), DELETE);
+        authorization.checkUserPermissions(userName, experiment.getApplicationName(), Permission.DELETE);
         pages.deletePage(experimentID, pageName, authorization.getUserInfo(userName));
 
         return httpHeader.headers(NO_CONTENT).build();
@@ -1177,4 +1271,261 @@ public class ExperimentsResource {
                                        final Page.Name pageName) {
         return httpHeader.headers().entity(pages.getPageExperiments(applicationName, pageName)).build();
     }
+
+
+    /**
+     * Returns a summary of assignment ratios per day, containing several meta information like sampling
+     * percentages and priorities.
+     *
+     * @param experimentID        the experiment ID
+     * @param from                report start date, can be "START" to use the experiment's
+     * @param to                  report end date, can be "END" to use the experiment's
+     * @param authorizationHeader authorization
+     * @param context             the context
+     * @param timezone            the timezone offset, +/-0000 or parsable by Java
+     * @return a summary of assignment ratios per day.
+     */
+    @GET
+    @Path("/{experimentID}/assignments/traffic/{from}/{to}")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "Return a summary of assignments delivered for an experiment")
+    @Timed
+    public Response getExperimentAssignmentRatioPerDay(
+            @PathParam("experimentID")
+            @ApiParam(value = "Experiment ID", required = true)
+            final Experiment.ID experimentID,
+
+            @PathParam("from")
+            @DefaultValue("START")
+            @ApiParam(value = "Start date of the format \"MM/DD/YYYY\", or \"START\" to use the experiment's start date.",
+                    required = true)
+            final String from,
+
+            @PathParam("to")
+            @DefaultValue("END")
+            @ApiParam(value = "End date of the format \"MM/DD/YYYY\", or \"END\" to use the experiment's start date.",
+                    required = true)
+            final String to,
+
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader,
+
+            @QueryParam("context")
+            @DefaultValue("PROD")
+            @ApiParam(value = "Context for the experiment, e.g. \"QA\", or \"PROD\".", required = true,
+                    defaultValue = "PROD")
+            final Context context,
+
+            @QueryParam("timezone")
+            @DefaultValue(APISwaggerResource.DEFAULT_TIMEZONE)
+            @ApiParam(value = "timezone offset, as parsable by https://docs.oracle.com/javase/8/docs/api/java/time/ZoneId.html#of-java.lang.String-",
+                    defaultValue = APISwaggerResource.DEFAULT_TIMEZONE)
+            final String timezone
+    ) {
+        // Check authorization.
+        Username username = authorization.getUser(authorizationHeader);
+        Experiment experiment = getAuthorizedExperimentOrThrow(experimentID, username);
+
+        // Parse from and to
+        final Instant fromDate = parseUIDateOrKey(from, "START", experiment.getStartTime().toInstant(), timezone, "from");
+        final Instant toDate = parseUIDateOrKey(to, "END", experiment.getStartTime().toInstant(), timezone, "to");
+
+        List<Experiment> mutexExperiments = mutex.getRecursiveMutualExclusions(experiment);
+
+        // Sort experiments by their priorities
+        Map<Experiment.ID, Integer> experimentPriorities = priorities.getPriorityPerID(experiment.getApplicationName());
+        Collections.sort(mutexExperiments, (e1, e2) -> experimentPriorities.get(e1.getID()) - experimentPriorities.get(e2.getID()));
+
+        // Retrieve daily ratios
+        ImmutableMap<String, ?> assignmentRatios = assignments.getExperimentAssignmentRatioPerDayTable(mutexExperiments, experimentPriorities, fromDate, toDate, context, timezone);
+
+        // build table and dispatch it
+        return httpHeader.headers().entity(assignmentRatios).build();
+    }
+
+    /**
+     * Returns a summary of assignment ratios per day, containing several meta information like sampling
+     * percentages and priorities.
+     *
+     * @param experimentID        the experiment ID
+     * @param fromMonth           start date's month
+     * @param fromDay             start date's day
+     * @param fromYear            start date's year
+     * @param toMonth             end date's month
+     * @param toDay               end date's day
+     * @param toYear              end date's year
+     * @param authorizationHeader authorization
+     * @param context             the context
+     * @param timezone            the timezone offset, +/-0000 or parsable by Java
+     * @return a summary of assignment ratios per day.
+     */
+    @GET
+    @Path("/{experimentID}/assignments/traffic/{fromMonth}/{fromDay}/{fromYear}/{toMonth}/{toDay}/{toYear}")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "Return a summary of assignments delivered for an experiment")
+    @Timed
+    public Response getExperimentAssignmentRatioPerDay(
+            @PathParam("experimentID")
+            @ApiParam(value = "Experiment ID", required = true)
+            final Experiment.ID experimentID,
+
+            @PathParam("fromMonth")
+            @ApiParam(value = "The start date's month.", required = true)
+            final String fromMonth,
+            @PathParam("fromDay")
+            @ApiParam(value = "The start date's day.", required = true)
+            final String fromDay,
+            @PathParam("fromYear")
+            @ApiParam(value = "The start date's year.", required = true)
+            final String fromYear,
+
+            @PathParam("toMonth")
+            @ApiParam(value = "The start date's month.", required = true)
+            final String toMonth,
+            @PathParam("toDay")
+            @ApiParam(value = "The start date's day.", required = true)
+            final String toDay,
+            @PathParam("toYear")
+            @ApiParam(value = "The start date's year.", required = true)
+            final String toYear,
+
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader,
+
+            @QueryParam("context")
+            @DefaultValue("PROD")
+            @ApiParam(value = "Context for the experiment, e.g. \"QA\", or \"PROD\".", required = true,
+                    defaultValue = "PROD")
+            final Context context,
+
+            @QueryParam("timezone")
+            @DefaultValue(APISwaggerResource.DEFAULT_TIMEZONE)
+            @ApiParam(value = "timezone offset, as parsable by https://docs.oracle.com/javase/8/docs/api/java/time/ZoneId.html#of-java.lang.String-",
+                    defaultValue = APISwaggerResource.DEFAULT_TIMEZONE)
+            final String timezone
+    ) {
+        return getExperimentAssignmentRatioPerDay(experimentID,
+                String.format("%s/%s/%s", fromMonth, fromDay, fromYear),
+                String.format("%s/%s/%s", toMonth, toDay, toYear),
+                authorizationHeader, context, timezone);
+    }
+
+
+    /**
+     * Returns a summary of assignment ratios per day, containing several meta information like sampling
+     * percentages and priorities.
+     *
+     * @param experimentID        the experiment ID
+     * @param fromMonthOrStart    the start date's month (if using END) or START
+     * @param fromDayOrToMonth    the start date's day (if using END) or the end's month (if using START)
+     * @param fromYearOrToDay     the start date's year (if using END) or the end's day (if using START)
+     * @param endOrToYear         END or the end's year (if using START)
+     * @param authorizationHeader authorization
+     * @param context             the context
+     * @param timezone            the timezone offset, +/-0000 or parsable by Java
+     * @return a summary of assignment ratios per day.
+     */
+    @GET
+    @Path("/{experimentID}/assignments/traffic/{fromMonthOrStart}/{fromDayOrToMonth}/{fromYearOrToDay}/{endOrToYear}")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "Return a summary of assignments delivered for an experiment")
+    @Timed
+    public Response getExperimentAssignmentRatioPerDay(
+            @PathParam("experimentID")
+            @ApiParam(value = "Experiment ID", required = true)
+            final Experiment.ID experimentID,
+
+            @PathParam("fromMonthOrStart")
+            @ApiParam(value = "The start date's month (if using END) or START.", required = true)
+            final String fromMonthOrStart,
+            @PathParam("fromDayOrToMonth")
+            @ApiParam(value = "The start date's day (if using END) or the end's month (if using START).", required = true)
+            final String fromDayOrToMonth,
+            @PathParam("fromYearOrToDay")
+            @ApiParam(value = "The start date's year (if using END) or the end's day (if using START).", required = true)
+            final String fromYearOrToDay,
+            @PathParam("endOrToYear")
+            @ApiParam(value = "END or the end's year (if using START).", required = true)
+            final String endOrToYear,
+
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader,
+
+            @QueryParam("context")
+            @DefaultValue("PROD")
+            @ApiParam(value = "Context for the experiment, e.g. \"QA\", or \"PROD\".", required = true,
+                    defaultValue = "PROD")
+            final Context context,
+
+            @QueryParam("timezone")
+            @DefaultValue(APISwaggerResource.DEFAULT_TIMEZONE)
+            @ApiParam(value = "timezone offset, as parsable by https://docs.oracle.com/javase/8/docs/api/java/time/ZoneId.html#of-java.lang.String-",
+                    defaultValue = APISwaggerResource.DEFAULT_TIMEZONE)
+            final String timezone
+    ) {
+        String from = "START";
+        String to = "END";
+        if (from.equalsIgnoreCase(fromMonthOrStart)) {
+            to = String.format("%s/%s/%s", fromDayOrToMonth, fromYearOrToDay, endOrToYear);
+        } else if (to.equalsIgnoreCase(endOrToYear)) {
+            from = String.format("%s/%s/%s", fromMonthOrStart, fromDayOrToMonth, fromYearOrToDay);
+        } else {
+            String message = String.format("Invalid parameters for /%s/assignments/traffic/%s/%s/%s/%s , check the last four values.",
+                    experimentID.getRawID().toString(), fromMonthOrStart, fromDayOrToMonth, fromYearOrToDay, endOrToYear);
+            throw new IllegalArgumentException(message);
+        }
+        return getExperimentAssignmentRatioPerDay(experimentID, from, to, authorizationHeader, context, timezone);
+    }
+
+    /**
+     * Gets the experiment for a given ID and checks if the user has permission.
+     * If the user has READ permissions, the experiment is returned. Otherwise the authorization throws an exception.
+     * <p>
+     * Throws an exception if the experiment is not found.
+     *
+     * @param experimentID the experiment ID
+     * @param username     the username
+     * @return the experiment
+     */
+    private Experiment getAuthorizedExperimentOrThrow(Experiment.ID experimentID, Username username) {
+        Experiment experiment;
+        if ((experiment = experiments.getExperiment(experimentID)) == null) {
+            throw new ExperimentNotFoundException(experimentID);
+        }
+        authorization.checkUserPermissions(username, experiment.getApplicationName(), READ);
+        // Hack: We need to make experiments compatible, converting CassandraExperiment
+        experiment = Experiment.from(experiment).build();
+        return experiment;
+    }
+
+    /**
+     * Parses a UI-formatted date of the format M/d/y with a timezone offset.
+     * If the date matches the key (case-insensitive), the onKeyMatch instant is returned, otherwise
+     * the parsed instant is returned, taking the timezone offset into account.
+     * <p>
+     * Throws an IllegalArgumentException if the string can not be parsed.
+     *
+     * @param uiDate          the UI formatted date
+     * @param key             the key to test it against if it's not a date
+     * @param onKeyMatch      the instant to return if key matches uiDate
+     * @param timezoneOffset  the timezone offset of the user to take into account
+     * @param debugIdentifier the debug identifier to identify problems in the exception
+     * @return a parsed instant of the ui date
+     */
+    private Instant parseUIDateOrKey(String uiDate, String key, Instant onKeyMatch, String timezoneOffset, String debugIdentifier) {
+        if (key.equalsIgnoreCase(uiDate)) {
+            return onKeyMatch;
+        } else {
+            try {
+                return LocalDate.from(DateTimeFormatter.ofPattern("M/d/y").withZone(ZoneId.of(timezoneOffset)).parse(uiDate)).atStartOfDay().toInstant(ZoneOffset.UTC);
+            } catch (DateTimeParseException e) {
+                throw new IllegalArgumentException(String.format("Can not parse \"%s\" date \"%s\", expecting format M/d/y, e.g. 05/24/2014, or \"%s\".", debugIdentifier, uiDate, key), e);
+            }
+        }
+    }
+
+
 }

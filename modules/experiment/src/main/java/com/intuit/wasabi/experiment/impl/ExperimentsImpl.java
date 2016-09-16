@@ -354,6 +354,18 @@ public class ExperimentsImpl implements Experiments {
             changeData = new ExperimentAuditInfo("description", experiment.getDescription(), updates.getDescription());
             changeList.add(changeData);
         }
+        if (updates.getHypothesisIsCorrect() != null && !updates.getHypothesisIsCorrect().equals(experiment.getHypothesisIsCorrect())) {
+            builder.withHypothesisIsCorrect(updates.getHypothesisIsCorrect());
+            requiresUpdate = true;
+            changeData = new ExperimentAuditInfo("hypothesisiscorrect", experiment.getHypothesisIsCorrect(), updates.getHypothesisIsCorrect());
+            changeList.add(changeData);
+        }
+        if (updates.getResults() != null && !updates.getResults().equals(experiment.getResults())) {
+            builder.withResults(updates.getResults());
+            requiresUpdate = true;
+            changeData = new ExperimentAuditInfo("results", experiment.getResults(), updates.getResults());
+            changeList.add(changeData);
+        }
         if (updates.getSamplingPercent() != null
                 && !updates.getSamplingPercent().equals(experiment.getSamplingPercent())) {
             builder.withSamplingPercent(updates.getSamplingPercent());

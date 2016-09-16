@@ -1,6 +1,6 @@
 <div class="panel" scroll-top>
     <span ng-if="experiment.id" class="starContainer">
-        <a href="#" favorites-star favorites-star-application-name="experiment.applicationName" favorites-star-experiment-name="experiment.label" favorites-star-parent-tag="span" after-favorite-func="setAsFavorite" ng-attr-is-favorite="{{experiment.isFavorite}}" class="star" title="Mark as Favorite"></a>
+        <a href="#" favorites-star favorites-star-experiment-id="experiment.id" favorites-star-favorites-object="favoritesObj" favorites-star-parent-tag="span" after-favorite-func="setAsFavorite" ng-attr-is-favorite="{{experiment.isFavorite}}" class="star" title="Mark as Favorite"></a>
     </span>
     <h2 ng-if="!experiment.id" class="noStar">Create Experiment</h2>
     <h2 ng-if="experiment.id">Edit Experiment</h2>
@@ -243,8 +243,9 @@
                 </div>
             </li>
             <li>
+                <label class="descriptionLabel">Hypothesis/Description</label>
                 <div style="width: 100%">
-                    <textarea ng-show="!readOnly" name="description" class="form-control" ng-model="experiment.description" style="width: 900px; height: 55px" ng-maxlength="256" placeholder="Experiment Description"></textarea>
+                    <textarea ng-show="!readOnly" name="description" class="form-control" required ng-model="experiment.description" style="width: 900px; height: 55px" ng-maxlength="256" placeholder="Experiment Hypothesis/Description"></textarea>
                     <textarea ng-show="readOnly" disabled="true" name="description" class="form-control readOnly" ng-model="experiment.description" style="width: 900px; height: 55px"></textarea>
                     <!-- Validation error -->
                     <div class="error"
@@ -254,10 +255,17 @@
                                   (experimentFormSubmitted &&
                                   experimentForm.$error && experimentForm.$error.maxlength &&
                                   experimentForm.$error.maxlength.length > 0 &&
-                                  experimentForm.$error.maxlength[0].$name === 'description')">
+                                  experimentForm.$error.maxlength[0].$name === 'description') ||
+                                  (experimentFormSubmitted &&
+                                  experimentForm.$error && experimentForm.$error.required &&
+                                  experimentForm.$error.required[0].$name === 'description')">
                         <small class="fieldError"
                                ng-show="experimentForm.$error.maxlength[0].$name === 'description'">
-                            The description must be 256 characters or less.
+                            The hypothesis/description must be 256 characters or less.
+                        </small>
+                        <small class="fieldError"
+                               ng-show="experimentForm.$error.required[0].$name === 'description'">
+                            You must provide a hypothesis/description for your experiment.
                         </small>
                     </div>
                 </div>

@@ -69,11 +69,20 @@ beerMe() {
 }
 
 start_docker() {
-  docker ps ${project} >/dev/null 2>&1 || (open /Applications/Docker.app; beerMe 10)
+  docker ps >/dev/null 2>&1
+  [[ $? != 0 && "${WASABI_OS}" == "${wasabi_os_default}" ]] && open /Applications/Docker.app
+
+  while :; do
+    docker ps >/dev/null 2>&1
+    [[ $? = 0 ]] && break
+    beerMe 3
+  done
 }
 
 stop_docker() {
-  osascript -e 'quit app "Docker"'
+  if [ "${WASABI_OS}" == "${wasabi_os_default}" ]; then
+    osascript -e 'quit app "Docker"'
+  fi
 }
 
 start_container() {
@@ -155,19 +164,7 @@ start_wasabi() {
 
   echo -ne "${green}chill'ax ${reset}"
 
-  wget -q --spider --tries=20 --waitretry=3 http://localhost:8080/api/v1/ping
-  [ $? -ne 0 ] && usage "unable to start" 1
-
-  cat << EOF
-
-${green}
-wasabi is operational:
-
-  ui: % open http://localhost:8080     note: sign in as admin/admin
-  ping: % curl -i http://localhost:8080/api/v1/ping
-  debug: attach to localhost:8180
-${reset}
-EOF
+  status
 }
 
 start_cassandra() {
@@ -214,6 +211,20 @@ console_mysql() {
 }
 
 status() {
+  wget -q --spider --tries=20 --waitretry=3 http://localhost:8080/api/v1/ping
+  [ $? -ne 0 ] && usage "not started" 1
+
+  cat << EOF
+
+${green}
+wasabi is operational:
+
+  ui: % open http://localhost:8080     note: sign in as admin/admin
+  ping: % curl -i http://localhost:8080/api/v1/ping
+  debug: attach to localhost:8180
+${reset}
+EOF
+
   docker ps 2>/dev/null
 }
 

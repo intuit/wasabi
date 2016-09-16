@@ -21,6 +21,7 @@ import com.intuit.hyrule.exceptions.InvalidSyntaxException;
 import com.intuit.wasabi.experimentobjects.exceptions.InvalidBucketStateTransitionException;
 import com.intuit.wasabi.experimentobjects.exceptions.InvalidExperimentStateException;
 import com.intuit.wasabi.experimentobjects.exceptions.InvalidExperimentStateTransitionException;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Date;
 import java.util.List;
@@ -57,6 +58,7 @@ public class ExperimentValidator {
         validateExperimentRule(newExperiment.getRule());
         validateModelNameNotNullForPersonalizedExperiments(newExperiment.getIsPersonalizationEnabled(),
                 newExperiment.getModelName());
+        validateDescriptionNotEmpty(newExperiment.getDescription());
     }
 
     protected void validateModelNameNotNullForPersonalizedExperiments(Boolean isPersonalizationEnabled, String modelName) {
@@ -163,6 +165,18 @@ public class ExperimentValidator {
         if (!bucket.isStateTransitionValid(desiredState)) {
             throw new InvalidBucketStateTransitionException("Invalid switch from state \"" + oldState +
                     "\" to invalid state \"" + desiredState+"\"");
+        }
+    }
+
+    /**
+     * Throws an exception if description is {@link StringUtils#isEmpty(CharSequence)}.
+     *
+     * @param description the description to test.
+     * @throws IllegalArgumentException on empty description
+     */
+    public void validateDescriptionNotEmpty(String description) {
+        if (StringUtils.isEmpty(description)) {
+            throw new IllegalArgumentException("Description/Hypothesis must not be empty.");
         }
     }
 }

@@ -1,6 +1,6 @@
 ///////////////////////////////////
 //Configuration
-var server = "192.168.99.100:8080";
+var server = "localhost:8080";
 var appName = "Demo_App";
 var expLabel = "BuyButton";
 var buckets = [ "BucketA", "BucketB" ];

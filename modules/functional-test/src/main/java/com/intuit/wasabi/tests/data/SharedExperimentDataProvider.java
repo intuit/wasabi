@@ -45,7 +45,7 @@ public class SharedExperimentDataProvider extends CombinableDataProvider {
 
     /**
      * This is a shared Experiment that derived from the python integration test exp_a and exp_b
-     * only lable is different from the original definiton by appending a time to it
+     * only label is different from the original definition by appending a time to it
      * @return
      */
     @DataProvider(name = "ExperimentAAndB")
@@ -54,12 +54,12 @@ public class SharedExperimentDataProvider extends CombinableDataProvider {
                 new Object[]{
                         "{\"applicationName\": \"qbo\", \"label\": \"exp_a_"+time+"\"," +
                                 "\"samplingPercent\": 1.0, \"startTime\": \""+dateTime.minusDays(1).format(formatter)+"\", " +
-                                "\"endTime\": \""+dateTime.plusDays(1).format(formatter)+"\"}"
+                                "\"endTime\": \""+dateTime.plusDays(1).format(formatter)+"\", \"description\": \"some description\"}"
                 },
                 new Object[]{
                         "{\"applicationName\": \"qbo\", \"label\": \"exp_b_"+time+"\"," +
                                 "\"samplingPercent\": 1.0, \"startTime\": \""+dateTime.minusDays(3).format(formatter)+"\", " +
-                                "\"endTime\": \""+dateTime.plusDays(8).format(formatter)+"\"}"
+                                "\"endTime\": \""+dateTime.plusDays(8).format(formatter)+"\", \"description\": \"some description\"}"
                 }
         };
     }

@@ -22,7 +22,7 @@ http://www.w3.org/2001/XMLSchema-instance">
 
     <groupId>com.intuit.wasabi</groupId>
     <artifactId>wasabi</artifactId>
-    <version>1.0.20160801220857-SNAPSHOT</version>
+    <version>1.0.20160902232623-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
     <url>https://github.com/intuit/wasabi</url>
@@ -84,6 +84,11 @@ http://www.w3.org/2001/XMLSchema-instance">
         <assign.user.to.export>true</assign.user.to.export>
         <assign.bucket.count>true</assign.bucket.count>
         <assignment.decorator.enabled>false</assignment.decorator.enabled>
+        
+        <!-- mutagen -->
+        <cassandra.mutagen.root.resource.path>com/intuit/wasabi/repository/impl/cassandra/experiments/mutation</cassandra.mutagen.root.resource.path>
+        <mysql.mutagen.root.resource.path>com/intuit/wasabi/repository/impl/mysql/migration</mysql.mutagen.root.resource.path>
+        
         <!-- FIXME: remove -->
         <assignment.decorator.service>http://decorator.example.com</assignment.decorator.service>
         <assignment.decorator.class.name>com.intuit.wasabi.assignment.impl.DefaultAssignmentDecorator
