@@ -76,11 +76,6 @@ rem FUNCTION: copies the build files to target\app to properly be used with dock
     rem thus we fall back to the powershell copy here.
     powershell -Command "Copy-item -path modules\main\target\wasabi-main-*-all.jar -destination %lib-dir%\ -force" 1>nul
     
-    rem swagger doc files
-    copy modules\api\target\generated\document.html modules\swagger-ui\target\swaggerui\ >nul
-    mkdir modules\swagger-ui\target\swaggerui\swagger 2>nul
-    mkdir modules\swagger-ui\target\swaggerui\swagger\swaggerjson 2>nul
-    powershell -Command "Get-Content modules\api\target\generated\swagger-ui\swagger.json | %{$_ -replace 'localhost', '192.168.99.100'}" > modules\swagger-ui\target\swaggerui\swagger\swaggerjson\swagger.json
     goto :eof
 
 

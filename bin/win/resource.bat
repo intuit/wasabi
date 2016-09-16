@@ -50,6 +50,13 @@ rem FUNCTION: Runs the UI pointing to localhost.
 rem FUNCTION: Opens the api reference
 :resource_api
     call :info Opening API reference
+	
+	rem prepare swagger doc files
+    copy modules\api\target\generated\document.html modules\swagger-ui\target\swaggerui\ >nul
+    mkdir modules\swagger-ui\target\swaggerui\swagger 2>nul
+    mkdir modules\swagger-ui\target\swaggerui\swagger\swaggerjson 2>nul
+    powershell -Command "(Get-Content modules\api\target\generated\swagger-ui\swagger.json) -replace 'localhost', '192.168.99.100' | Set-Content modules\swagger-ui\target\swaggerui\swagger\swaggerjson\swagger.json"
+    
     pushd modules\swagger-ui\target\swaggerui
     start ruby -run -e httpd . -p 9090
     start http://localhost:9090/
