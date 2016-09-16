@@ -66,6 +66,10 @@ SSH into your instance and unpack the rpm.
 
 ssh -i $HOME/.ssh/wasabi-key ec2-user@$INSTANCE_IP_ADDRESS
 
+Check the logs if installation is complete:
+
+tail -f /var/log/user-data.log
+
 cd /tmp/<path to your *.rpm>
 
 rpm -ivh <xxxxxx.rpm>
