@@ -67,6 +67,7 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -90,7 +91,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 public class CassandraAssignmentsRepository implements AssignmentsRepository {
 
-    private static final Logger LOGGER = getLogger(CassandraAssignmentsRepository.class);
+    private static final Logger LOG = getLogger(CassandraAssignmentsRepository.class);
     private final CassandraDriver driver;
     private final ExperimentsKeyspace keyspace;
     private final ExperimentRepository experimentRepository;
@@ -206,10 +207,8 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
 
         //Updating the assignment bucket counts, user_assignment_export
         // in a asynchronous AssignmentCountEnvelope thread
-        boolean countUp = true;
-
         assignmentsCountExecutor.execute(new AssignmentCountEnvelope(assignmentsRepository, experimentRepository,
-                dbRepository, experiment, assignment, countUp, eventLog, date, assignUserToExport, assignBucketCount));
+                dbRepository, experiment, assignment, true, eventLog, date, assignUserToExport, assignBucketCount));
 
         indexUserToExperiment(assignment);
         indexUserToBucket(assignment);
@@ -517,7 +516,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
             return result;
         } catch (ConnectionException e) {
             throw new RepositoryException("Could not retrieve assignments for " +
-                    "experimentID = \"" + appLabel + "\" userID = \"" +
+                    "application = \"" + appLabel + "\" userID = \"" +
                     userID + "\" and context " + context.getContext(), e);
         }
     }
@@ -576,7 +575,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                         .withCacheable(false)
                         .withBucketEmpty(bucketEmpty)
                         .build();
-                LOGGER.info("Assignment for experiment %s for user %s on context %s is of bucket %s", experimentID, userID, context, bucketLabel);
+                LOG.info("Assignment for experiment %s for user %s on context %s is of bucket %s", experimentID, userID, context, bucketLabel);
             }
 
             return result;
@@ -644,7 +643,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                         .withBucketEmpty(isBucketEmpty)
                         .build();
 
-                LOGGER.info("CassandraAssignmentsRepository got assignment  " + result);
+                LOG.info("CassandraAssignmentsRepository got assignment  " + result);
             }
 
             return result;
@@ -678,13 +677,12 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     @Timed
     public void deleteAssignment(Experiment experiment, User.ID userID, Context context, Application.Name appName,
                                  Assignment currentAssignment) {
-// Deletes the assignment data across all the relevant tables in a consistent manner
+        // Deletes the assignment data across all the relevant tables in a consistent manner
         deleteUserFromLookUp(experiment.getID(), userID, context);
         //Updating the assignment bucket counts by -1 in a asynchronous AssignmentCountEnvelope thread
         // false to subtract 1 from the count for the bucket
-        boolean countUp = false;
         assignmentsCountExecutor.execute(new AssignmentCountEnvelope(assignmentsRepository, experimentRepository,
-                dbRepository, experiment, currentAssignment, countUp, eventLog, null, assignUserToExport,
+                dbRepository, experiment, currentAssignment, false, eventLog, null, assignUserToExport,
                 assignBucketCount));
         deleteAssignmentOld(experiment.getID(), userID, context, appName, currentAssignment.getBucketLabel());
         removeIndexUserToExperiment(userID, experiment.getID(), context, appName);
@@ -1070,18 +1068,15 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         try {
             driver.getKeyspace()
                     .prepareQuery(keyspace.experimentAssignmentCountByDay())
-                    .withCql("UPDATE experiment_assignments_per_day SET bucket_assignments + 1 WHERE experiment_id = ? AND context = ? AND day = ? ;")
+                    .withCql("UPDATE experiment_assignments_per_day SET bucket_assignments = bucket_assignments + 1 WHERE experiment_id = ? AND context = ? AND day = ? ;")
                     .asPreparedStatement()
                     .withUUIDValue(experimentID.getRawID())
-                    .withStringValue(DateTimeFormatter.BASIC_ISO_DATE.format(date))
                     .withStringValue(context.getContext())
+                    .withStringValue(DateTimeFormatter.BASIC_ISO_DATE.withZone(ZoneId.of("UTC")).format(date))
                     .execute();
         } catch (ConnectionException e) {
-            throw new RepositoryException(
-                    String.format("Failed to update bucket_assignments in experiment_assignments_per_day for experiment %s on %s.",
-                            experimentID.getRawID().toString(),
-                            DateTimeFormatter.BASIC_ISO_DATE.format(date)),
-                    e);
+            LOG.error("Failed to update bucket_assignments in experiment_assignments_per_day for experiment {} on {}. Exception: {}",
+                    experimentID.getRawID().toString(), date, e.getMessage());
         }
     }
 
@@ -1090,18 +1085,15 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         try {
             driver.getKeyspace()
                     .prepareQuery(keyspace.experimentAssignmentCountByDay())
-                    .withCql("UPDATE experiment_assignments_per_day SET null_assignments + 1 WHERE experiment_id = ? AND context = ? AND day = ? ;")
+                    .withCql("UPDATE experiment_assignments_per_day SET null_assignments = null_assignments + 1 WHERE experiment_id = ? AND context = ? AND day = ? ;")
                     .asPreparedStatement()
                     .withUUIDValue(experimentID.getRawID())
-                    .withStringValue(DateTimeFormatter.BASIC_ISO_DATE.format(date))
                     .withStringValue(context.getContext())
+                    .withStringValue(DateTimeFormatter.BASIC_ISO_DATE.withZone(ZoneId.of("UTC")).format(date))
                     .execute();
         } catch (ConnectionException e) {
-            throw new RepositoryException(
-                    String.format("Failed to update null_assignments in experiment_assignments_per_day for experiment %s on %s.",
-                            experimentID.getRawID().toString(),
-                            DateTimeFormatter.BASIC_ISO_DATE.format(date)),
-                    e);
+            LOG.error("Failed to update null_assignments in experiment_assignments_per_day for experiment {} on {}. Exception: {}",
+                    experimentID.getRawID().toString(), date, e.getMessage());
         }
     }
 
@@ -1109,8 +1101,9 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
      * {@inheritDoc}
      */
     @Override
-    public Map<Instant, Double> getExperimentBucketAssignmentRatioPerDay(Experiment.ID experimentID, Context context, Instant fromDate, Instant toDate) {
-        Map<Instant, Double> experimentBucketAssignmentRatios = new HashMap<>();
+    public Map<String, Double> getExperimentBucketAssignmentRatioPerDay(Experiment.ID experimentID, Context context, Instant fromDate, Instant toDate) {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.BASIC_ISO_DATE.withZone(ZoneId.of("UTC"));
+        Map<String, Double> experimentBucketAssignmentRatios = new HashMap<>();
         try {
             driver.getKeyspace()
                     .prepareQuery(keyspace.experimentAssignmentCountByDay())
@@ -1118,25 +1111,36 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                     .asPreparedStatement()
                     .withUUIDValue(experimentID.getRawID())
                     .withStringValue(context.getContext())
-                    .withStringValue(DateTimeFormatter.BASIC_ISO_DATE.format(fromDate))
-                    .withStringValue(DateTimeFormatter.BASIC_ISO_DATE.format(toDate))
+                    .withStringValue(dateTimeFormatter.format(fromDate))
+                    .withStringValue(dateTimeFormatter.format(toDate))
                     .execute()
                     .getResult()
                     .getRows()
                     .forEach(row -> {
                         ColumnList<String> columns = row.getColumns();
-                        int bucketAssignments = columns.getColumnByName("bucket_assignments").getIntegerValue();
-                        int totalAssignments = bucketAssignments + columns.getColumnByName("null_assignments").getIntegerValue();
+
+                        long bucketAssignments = 0;
+                        try {
+                            bucketAssignments = columns.getLongValue("bucket_assignments", 0L);
+                        } catch (NullPointerException ignore) {
+                        }
+
+                        long totalAssignments = bucketAssignments;
+                        try {
+                            totalAssignments += columns.getLongValue("null_assignments", 0L);
+                        } catch (NullPointerException ignore) {
+                        }
+
                         experimentBucketAssignmentRatios.put(
-                                Instant.from(DateTimeFormatter.BASIC_ISO_DATE.parse(columns.getColumnByName("day").getStringValue())),
+                                columns.getColumnByName("day").getStringValue(),
                                 totalAssignments > 0 ? (double) bucketAssignments / (double) totalAssignments : 0);
                     });
         } catch (ConnectionException e) {
             throw new RepositoryException(
                     String.format("Failed to select experiment_assignments_per_day for experiment %s between %s and %s.",
                             experimentID.getRawID().toString(),
-                            DateTimeFormatter.BASIC_ISO_DATE.format(fromDate),
-                            DateTimeFormatter.BASIC_ISO_DATE.format(toDate)),
+                            fromDate,
+                            toDate),
                     e);
         }
         return experimentBucketAssignmentRatios;

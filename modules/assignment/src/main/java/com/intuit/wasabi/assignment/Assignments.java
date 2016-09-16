@@ -15,6 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.assignment;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Table;
 import com.intuit.wasabi.analyticsobjects.Parameters;
 import com.intuit.wasabi.assignmentobjects.Assignment;
@@ -205,13 +206,17 @@ public interface Assignments {
                           HttpHeaders headers);
 
     /**
-     * Gets bucket assignment ratios per day for a list of experiments.
+     * Gets bucket assignment ratios per day for a list of experiments. Also contains meta information about the
+     * experiments such as sampling percentages and priorities. The data is in rows by date and ordered by priority
+     * per row.
      *
-     * @param experiments list of experiments
-     * @param context     the context of interest
-     * @param fromDate    the first day to include
-     * @param toDate      the last day to include
-     * @return a map mapping the IDs to lists of ratios per day sorted from {@code fromDate} to {@code toDate}.
+     * @param experiments          the list of experiments
+     * @param experimentPriorities a look up map of priorities
+     * @param fromDate             the date to start reporting from
+     * @param toDate               the date to report to
+     * @param context              the context
+     * @param timezoneOffset       the timezoneOffset
+     * @return bucket assignment ratios per day and meta
      */
-    Map<Experiment.ID, Map<Instant, Double>> getExperimentAssignmentRatioPerDay(List<Experiment> experiments, Context context, Instant fromDate, Instant toDate);
+    ImmutableMap<String, ?> getExperimentAssignmentRatioPerDayTable(List<Experiment> experiments, Map<Experiment.ID, Integer> experimentPriorities, Instant fromDate, Instant toDate, Context context, String timezoneOffset);
 }

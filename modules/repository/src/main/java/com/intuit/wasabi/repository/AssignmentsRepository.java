@@ -196,6 +196,6 @@ public interface AssignmentsRepository {
      * and "nullAssignments", which each have a list of values which represent the assignment counts of new assignments
      * for each day, ordered from {@code fromDate} to {@code toDate}.
      */
-    Map<Instant, Double> getExperimentBucketAssignmentRatioPerDay(Experiment.ID experimentID, Context context, Instant fromDate, Instant toDate);
+    Map<String, Double> getExperimentBucketAssignmentRatioPerDay(Experiment.ID experimentID, Context context, Instant fromDate, Instant toDate);
 
 }

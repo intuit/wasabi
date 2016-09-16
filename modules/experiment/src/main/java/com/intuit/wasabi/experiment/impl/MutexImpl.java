@@ -33,19 +33,25 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.intuit.wasabi.experimentobjects.Experiment.State.DELETED;
 import static com.intuit.wasabi.experimentobjects.Experiment.State.TERMINATED;
 
 public class MutexImpl implements Mutex {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MutexImpl.class);
+    final Date NOW = new Date();
     private final MutexRepository mutexRepository;
     private final Experiments experiments;
     private final EventLog eventLog;
-    private static final Logger LOGGER = LoggerFactory.getLogger(MutexImpl.class);
-
-    final Date NOW = new Date();
 
     @Inject
     public MutexImpl(MutexRepository mutexRepository, Experiments experiments, EventLog eventLog) {
@@ -205,5 +211,31 @@ public class MutexImpl implements Mutex {
             results.add(tempResult);
         }
         return results;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public List<Experiment> getRecursiveMutualExclusions(Experiment experiment) {
+        List<Experiment> visitedExperiments = new ArrayList<>();
+        Set<Experiment> unvisitedExperiments = new HashSet<>();
+        unvisitedExperiments.add(experiment);
+        do {
+            Set<Experiment> newUnvisitedExperiments = new HashSet<>();
+            for (Experiment tempExperiment : unvisitedExperiments) {
+                visitedExperiments.add(tempExperiment);
+                newUnvisitedExperiments.addAll(
+                        this.getExclusions(tempExperiment.getID())
+                                .getExperiments()
+                                // Hack: We need to make experiments compatible, converting CassandraExperiments
+                                .parallelStream()
+                                .map(ce -> Experiment.from(ce).build())
+                                .collect(Collectors.toList())
+                );
+            }
+            unvisitedExperiments.addAll(newUnvisitedExperiments);
+            unvisitedExperiments.removeAll(visitedExperiments);
+        } while (!unvisitedExperiments.isEmpty());
+        return visitedExperiments;
     }
 }

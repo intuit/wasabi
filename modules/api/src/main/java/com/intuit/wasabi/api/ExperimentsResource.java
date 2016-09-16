@@ -17,7 +17,6 @@ package com.intuit.wasabi.api;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableTable;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
@@ -51,7 +50,6 @@ import com.intuit.wasabi.experimentobjects.ExperimentList;
 import com.intuit.wasabi.experimentobjects.ExperimentPageList;
 import com.intuit.wasabi.experimentobjects.NewExperiment;
 import com.intuit.wasabi.experimentobjects.Page;
-import com.intuit.wasabi.experimentobjects.PrioritizedExperiment;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -72,12 +70,12 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -85,9 +83,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_FILTER;
 import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_MODBUCK;
@@ -1279,113 +1274,258 @@ public class ExperimentsResource {
 
 
     /**
-     * @param experimentID
-     * @param context
-     * @param authorizationHeader
-     * @param from
-     * @param to
-     * @return
+     * Returns a summary of assignment ratios per day, containing several meta information like sampling
+     * percentages and priorities.
+     *
+     * @param experimentID        the experiment ID
+     * @param from                report start date, can be "START" to use the experiment's
+     * @param to                  report end date, can be "END" to use the experiment's
+     * @param authorizationHeader authorization
+     * @param context             the context
+     * @param timezone            the timezone offset, +/-0000 or parsable by Java
+     * @return a summary of assignment ratios per day.
      */
     @GET
-    @Path("/experiments/{experimentID}/assignments/traffic/{from}/{to}")
+    @Path("/{experimentID}/assignments/traffic/{from}/{to}")
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Return a summary of assignments delivered for an experiment")
     @Timed
     public Response getExperimentAssignmentRatioPerDay(
             @PathParam("experimentID")
-            @ApiParam(value = "Experiment ID")
+            @ApiParam(value = "Experiment ID", required = true)
             final Experiment.ID experimentID,
 
-            @QueryParam("context")
-            @DefaultValue("PROD")
-            @ApiParam(value = "context for the experiment, eg \"QA\", \"PROD\"")
-            final Context context,
+            @PathParam("from")
+            @DefaultValue("START")
+            @ApiParam(value = "Start date of the format \"MM/DD/YYYY\", or \"START\" to use the experiment's start date.",
+                    required = true)
+            final String from,
+
+            @PathParam("to")
+            @DefaultValue("END")
+            @ApiParam(value = "End date of the format \"MM/DD/YYYY\", or \"END\" to use the experiment's start date.",
+                    required = true)
+            final String to,
 
             @HeaderParam(AUTHORIZATION)
             @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
             final String authorizationHeader,
 
-            @PathParam("from")
-            @DefaultValue("START")
-            final String from,
+            @QueryParam("context")
+            @DefaultValue("PROD")
+            @ApiParam(value = "Context for the experiment, e.g. \"QA\", or \"PROD\".", required = true,
+                    defaultValue = "PROD")
+            final Context context,
 
-            @PathParam("to")
-            @DefaultValue("END")
-            final String to) {
+            @QueryParam("timezone")
+            @DefaultValue(APISwaggerResource.DEFAULT_TIMEZONE)
+            @ApiParam(value = "timezone offset, as parsable by https://docs.oracle.com/javase/8/docs/api/java/time/ZoneId.html#of-java.lang.String-",
+                    defaultValue = APISwaggerResource.DEFAULT_TIMEZONE)
+            final String timezone
+    ) {
         // Check authorization.
-        Username userName = authorization.getUser(authorizationHeader);
+        Username username = authorization.getUser(authorizationHeader);
+        Experiment experiment = getAuthorizedExperimentOrThrow(experimentID, username);
+
+        // Parse from and to
+        final Instant fromDate = parseUIDateOrKey(from, "START", experiment.getStartTime().toInstant(), timezone, "from");
+        final Instant toDate = parseUIDateOrKey(to, "END", experiment.getStartTime().toInstant(), timezone, "to");
+
+        List<Experiment> mutexExperiments = mutex.getRecursiveMutualExclusions(experiment);
+
+        // Sort experiments by their priorities
+        Map<Experiment.ID, Integer> experimentPriorities = priorities.getPriorityPerID(experiment.getApplicationName());
+        Collections.sort(mutexExperiments, (e1, e2) -> experimentPriorities.get(e1.getID()) - experimentPriorities.get(e2.getID()));
+
+        // Retrieve daily ratios
+        ImmutableMap<String, ?> assignmentRatios = assignments.getExperimentAssignmentRatioPerDayTable(mutexExperiments, experimentPriorities, fromDate, toDate, context, timezone);
+
+        // build table and dispatch it
+        return httpHeader.headers().entity(assignmentRatios).build();
+    }
+
+    /**
+     * Returns a summary of assignment ratios per day, containing several meta information like sampling
+     * percentages and priorities.
+     *
+     * @param experimentID        the experiment ID
+     * @param fromMonth           start date's month
+     * @param fromDay             start date's day
+     * @param fromYear            start date's year
+     * @param toMonth             end date's month
+     * @param toDay               end date's day
+     * @param toYear              end date's year
+     * @param authorizationHeader authorization
+     * @param context             the context
+     * @param timezone            the timezone offset, +/-0000 or parsable by Java
+     * @return a summary of assignment ratios per day.
+     */
+    @GET
+    @Path("/{experimentID}/assignments/traffic/{fromMonth}/{fromDay}/{fromYear}/{toMonth}/{toDay}/{toYear}")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "Return a summary of assignments delivered for an experiment")
+    @Timed
+    public Response getExperimentAssignmentRatioPerDay(
+            @PathParam("experimentID")
+            @ApiParam(value = "Experiment ID", required = true)
+            final Experiment.ID experimentID,
+
+            @PathParam("fromMonth")
+            @ApiParam(value = "The start date's month.", required = true)
+            final String fromMonth,
+            @PathParam("fromDay")
+            @ApiParam(value = "The start date's day.", required = true)
+            final String fromDay,
+            @PathParam("fromYear")
+            @ApiParam(value = "The start date's year.", required = true)
+            final String fromYear,
+
+            @PathParam("toMonth")
+            @ApiParam(value = "The start date's month.", required = true)
+            final String toMonth,
+            @PathParam("toDay")
+            @ApiParam(value = "The start date's day.", required = true)
+            final String toDay,
+            @PathParam("toYear")
+            @ApiParam(value = "The start date's year.", required = true)
+            final String toYear,
+
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader,
+
+            @QueryParam("context")
+            @DefaultValue("PROD")
+            @ApiParam(value = "Context for the experiment, e.g. \"QA\", or \"PROD\".", required = true,
+                    defaultValue = "PROD")
+            final Context context,
+
+            @QueryParam("timezone")
+            @DefaultValue(APISwaggerResource.DEFAULT_TIMEZONE)
+            @ApiParam(value = "timezone offset, as parsable by https://docs.oracle.com/javase/8/docs/api/java/time/ZoneId.html#of-java.lang.String-",
+                    defaultValue = APISwaggerResource.DEFAULT_TIMEZONE)
+            final String timezone
+    ) {
+        return getExperimentAssignmentRatioPerDay(experimentID,
+                String.format("%s/%s/%s", fromMonth, fromDay, fromYear),
+                String.format("%s/%s/%s", toMonth, toDay, toYear),
+                authorizationHeader, context, timezone);
+    }
+
+
+    /**
+     * Returns a summary of assignment ratios per day, containing several meta information like sampling
+     * percentages and priorities.
+     *
+     * @param experimentID        the experiment ID
+     * @param fromMonthOrStart    the start date's month (if using END) or START
+     * @param fromDayOrToMonth    the start date's day (if using END) or the end's month (if using START)
+     * @param fromYearOrToDay     the start date's year (if using END) or the end's day (if using START)
+     * @param endOrToYear         END or the end's year (if using START)
+     * @param authorizationHeader authorization
+     * @param context             the context
+     * @param timezone            the timezone offset, +/-0000 or parsable by Java
+     * @return a summary of assignment ratios per day.
+     */
+    @GET
+    @Path("/{experimentID}/assignments/traffic/{fromMonthOrStart}/{fromDayOrToMonth}/{fromYearOrToDay}/{endOrToYear}")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "Return a summary of assignments delivered for an experiment")
+    @Timed
+    public Response getExperimentAssignmentRatioPerDay(
+            @PathParam("experimentID")
+            @ApiParam(value = "Experiment ID", required = true)
+            final Experiment.ID experimentID,
+
+            @PathParam("fromMonthOrStart")
+            @ApiParam(value = "The start date's month (if using END) or START.", required = true)
+            final String fromMonthOrStart,
+            @PathParam("fromDayOrToMonth")
+            @ApiParam(value = "The start date's day (if using END) or the end's month (if using START).", required = true)
+            final String fromDayOrToMonth,
+            @PathParam("fromYearOrToDay")
+            @ApiParam(value = "The start date's year (if using END) or the end's day (if using START).", required = true)
+            final String fromYearOrToDay,
+            @PathParam("endOrToYear")
+            @ApiParam(value = "END or the end's year (if using START).", required = true)
+            final String endOrToYear,
+
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader,
+
+            @QueryParam("context")
+            @DefaultValue("PROD")
+            @ApiParam(value = "Context for the experiment, e.g. \"QA\", or \"PROD\".", required = true,
+                    defaultValue = "PROD")
+            final Context context,
+
+            @QueryParam("timezone")
+            @DefaultValue(APISwaggerResource.DEFAULT_TIMEZONE)
+            @ApiParam(value = "timezone offset, as parsable by https://docs.oracle.com/javase/8/docs/api/java/time/ZoneId.html#of-java.lang.String-",
+                    defaultValue = APISwaggerResource.DEFAULT_TIMEZONE)
+            final String timezone
+    ) {
+        String from = "START";
+        String to = "END";
+        if (from.equalsIgnoreCase(fromMonthOrStart)) {
+            to = String.format("%s/%s/%s", fromDayOrToMonth, fromYearOrToDay, endOrToYear);
+        } else if (to.equalsIgnoreCase(endOrToYear)) {
+            from = String.format("%s/%s/%s", fromMonthOrStart, fromDayOrToMonth, fromYearOrToDay);
+        } else {
+            String message = String.format("Invalid parameters for /%s/assignments/traffic/%s/%s/%s/%s , check the last four values.",
+                    experimentID.getRawID().toString(), fromMonthOrStart, fromDayOrToMonth, fromYearOrToDay, endOrToYear);
+            throw new IllegalArgumentException(message);
+        }
+        return getExperimentAssignmentRatioPerDay(experimentID, from, to, authorizationHeader, context, timezone);
+    }
+
+    /**
+     * Gets the experiment for a given ID and checks if the user has permission.
+     * If the user has READ permissions, the experiment is returned. Otherwise the authorization throws an exception.
+     * <p>
+     * Throws an exception if the experiment is not found.
+     *
+     * @param experimentID the experiment ID
+     * @param username     the username
+     * @return the experiment
+     */
+    private Experiment getAuthorizedExperimentOrThrow(Experiment.ID experimentID, Username username) {
         Experiment experiment;
         if ((experiment = experiments.getExperiment(experimentID)) == null) {
             throw new ExperimentNotFoundException(experimentID);
         }
-        authorization.checkUserPermissions(userName, experiment.getApplicationName(), READ);
-
-        // Parse from and to
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/d/y");
-        final Instant fromDate;
-        if ("START".equalsIgnoreCase(from)) {
-            fromDate = experiment.getStartTime().toInstant();
-        } else {
-            try {
-                fromDate = Instant.from(formatter.parse(from));
-            } catch (DateTimeParseException e) {
-                throw new IllegalArgumentException(String.format("Can not parse \"from\" date \"%s\", expecting format M/d/y, e.g. 05/24/2014, or \"START\".", from), e);
-            }
-        }
-        final Instant toDate;
-        if ("END".equalsIgnoreCase(to)) {
-            toDate = experiment.getEndTime().toInstant();
-        } else {
-            try {
-                toDate = Instant.from(formatter.parse(from));
-            } catch (DateTimeParseException e) {
-                throw new IllegalArgumentException(String.format("Can not parse \"to\" date \"%s\", expecting format M/d/y, e.g. 05/24/2014, or \"END\".", from), e);
-            }
-        }
-
-        // Perform a BFS over mutual exclusive experiments.
-        List<Experiment> visitedExperiments = new ArrayList<>();
-        Set<Experiment> unvisitedExperiments = new TreeSet<>();
-        unvisitedExperiments.add(experiment);
-        do {
-            for (Experiment tempExperiment : unvisitedExperiments) {
-                visitedExperiments.add(tempExperiment);
-                unvisitedExperiments.addAll(mutex.getExclusions(tempExperiment.getID()).getExperiments());
-            }
-            unvisitedExperiments.removeAll(visitedExperiments);
-        } while (!unvisitedExperiments.isEmpty());
-
-        // Sort experiments by their priorities
-        Map<Experiment.ID, Integer> experimentPriorities = priorities.getPriorities(experiment.getApplicationName(), false)
-                .getPrioritizedExperiments()
-                .parallelStream()
-                .collect(Collectors.toMap(PrioritizedExperiment::getID, PrioritizedExperiment::getPriority));
-        Collections.sort(visitedExperiments, (e1, e2) -> experimentPriorities.get(e1.getID()) - experimentPriorities.get(e2.getID()));
-
-        // Retrieve daily ratios
-        Map<Experiment.ID, Map<Instant, Double>> assignmentRatios = assignments.getExperimentAssignmentRatioPerDay(visitedExperiments, context, fromDate, toDate);
-
-        // Create table: fill with priorities and sampling percentages
-        ImmutableTable.Builder<String, Experiment.Label, Number> assignmentRatioTableBuilder = ImmutableTable.builder();
-        for (Experiment exp : visitedExperiments) {
-            assignmentRatioTableBuilder.put("priority", exp.getLabel(), experimentPriorities.get(exp.getID()));
-            assignmentRatioTableBuilder.put("samplingPercent", exp.getLabel(), exp.getSamplingPercent());
-        }
-
-        // Fill table up with data from daily ratios
-        IntStream.range(0, (int) Duration.between(fromDate, toDate.plus(1, ChronoUnit.DAYS)).get(ChronoUnit.DAYS))
-                .mapToObj(i -> fromDate.plus(i, ChronoUnit.DAYS))
-                .forEach(
-                        day -> {
-                            String rowKey = formatter.format(day);
-                            visitedExperiments.forEach(e ->
-                                    assignmentRatioTableBuilder.put(rowKey, e.getLabel(),
-                                            assignmentRatios.getOrDefault(experimentID, Collections.emptyMap())
-                                                    .getOrDefault(day, 0d)));
-                        }
-                );
-
-        // build table and dispatch it
-        return httpHeader.headers().entity(assignmentRatioTableBuilder.build().rowMap()).build();
+        authorization.checkUserPermissions(username, experiment.getApplicationName(), READ);
+        // Hack: We need to make experiments compatible, converting CassandraExperiment
+        experiment = Experiment.from(experiment).build();
+        return experiment;
     }
+
+    /**
+     * Parses a UI-formatted date of the format M/d/y with a timezone offset.
+     * If the date matches the key (case-insensitive), the onKeyMatch instant is returned, otherwise
+     * the parsed instant is returned, taking the timezone offset into account.
+     * <p>
+     * Throws an IllegalArgumentException if the string can not be parsed.
+     *
+     * @param uiDate          the UI formatted date
+     * @param key             the key to test it against if it's not a date
+     * @param onKeyMatch      the instant to return if key matches uiDate
+     * @param timezoneOffset  the timezone offset of the user to take into account
+     * @param debugIdentifier the debug identifier to identify problems in the exception
+     * @return a parsed instant of the ui date
+     */
+    private Instant parseUIDateOrKey(String uiDate, String key, Instant onKeyMatch, String timezoneOffset, String debugIdentifier) {
+        if (key.equalsIgnoreCase(uiDate)) {
+            return onKeyMatch;
+        } else {
+            try {
+                return LocalDate.from(DateTimeFormatter.ofPattern("M/d/y").withZone(ZoneId.of(timezoneOffset)).parse(uiDate)).atStartOfDay().toInstant(ZoneOffset.UTC);
+            } catch (DateTimeParseException e) {
+                throw new IllegalArgumentException(String.format("Can not parse \"%s\" date \"%s\", expecting format M/d/y, e.g. 05/24/2014, or \"%s\".", debugIdentifier, uiDate, key), e);
+            }
+        }
+    }
+
+
 }

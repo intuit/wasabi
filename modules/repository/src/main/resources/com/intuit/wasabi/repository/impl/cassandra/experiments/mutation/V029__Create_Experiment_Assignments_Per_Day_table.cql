@@ -5,8 +5,8 @@
 --     PrimaryKey: ((experiment_id), day)
 --
 -- To update counts for either a bucket assignment or a null assignment:
--- UPDATE experiment_assignments_per_day SET bucket_assignments + 1 WHERE experiment_id = ? AND context = ? AND day = ? ;
--- UPDATE experiment_assignments_per_day SET null_assignments + 1 WHERE experiment_id = ? AND context = ? AND day = ? ;
+-- UPDATE experiment_assignments_per_day SET bucket_assignments = bucket_assignments + 1 WHERE experiment_id = ? AND context = ? AND day = ? ;
+-- UPDATE experiment_assignments_per_day SET null_assignments = null_assignments + 1 WHERE experiment_id = ? AND context = ? AND day = ? ;
 --
 
 -- 'original' experiment_assignments_per_day table

@@ -15,6 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.assignment.impl;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -71,7 +72,11 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.security.SecureRandom;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -85,6 +90,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -1078,11 +1084,64 @@ public class AssignmentsImpl implements Assignments {
         return queueLengthMap;
     }
 
-    @Override
-    public Map<Experiment.ID, Map<Instant, Double>> getExperimentAssignmentRatioPerDay(List<Experiment> experiments, Context context, Instant fromDate, Instant toDate) {
+    /**
+     * Gets the experiment assignment ratios per day per experiment.
+     *
+     * @param experiments the list of experiments
+     * @param context     the context
+     * @param fromDate    the first day to include
+     * @param toDate      the last day to include
+     * @return a map mapping experiment IDs to their daily values for each of the given days
+     */
+    private Map<Experiment.ID, Map<String, Double>> getExperimentAssignmentRatioPerDay(List<Experiment> experiments, Context context, Instant fromDate, Instant toDate) {
         return experiments.parallelStream()
                 .collect(Collectors.toMap(Experiment::getID,
                         experiment -> assignmentsRepository.getExperimentBucketAssignmentRatioPerDay(experiment.getID(), context, fromDate, toDate)));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ImmutableMap<String, ?> getExperimentAssignmentRatioPerDayTable(List<Experiment> experiments, Map<Experiment.ID, Integer> experimentPriorities, Instant fromDate, Instant toDate, Context context, String timezoneOffset) {
+        Map<Experiment.ID, Map<String, Double>> assignmentRatios = getExperimentAssignmentRatioPerDay(experiments, context, fromDate, toDate);
+
+        // Prepare table: fill with labels, priorities, and sampling percentages
+        List<Experiment.Label> experimentLabelsList = new ArrayList<>(experiments.size());
+        List<Integer> prioritiesList = new ArrayList<>(experiments.size());
+        List<Double> samplingPercentagesList = new ArrayList<>(experiments.size());
+        for (Experiment tempExperiment : experiments) {
+            experimentLabelsList.add(tempExperiment.getLabel());
+            prioritiesList.add(experimentPriorities.get(tempExperiment.getID()));
+            samplingPercentagesList.add(tempExperiment.getSamplingPercent());
+        }
+
+        ImmutableMap.Builder<String, List<?>> assignmentRatioTableBuilder = ImmutableMap.builder();
+        assignmentRatioTableBuilder.put("experiments", experimentLabelsList);
+        assignmentRatioTableBuilder.put("priorities", prioritiesList);
+        assignmentRatioTableBuilder.put("samplingPercentages", samplingPercentagesList);
+
+        // fill table with data
+        DateTimeFormatter keyFormatter = DateTimeFormatter.BASIC_ISO_DATE.withZone(ZoneId.of("UTC"));
+        DateTimeFormatter uiFormat = DateTimeFormatter.ofPattern("M/d/y").withZone(ZoneId.of(timezoneOffset));
+        int days = (int) (Duration.between(fromDate, toDate.plus(1, ChronoUnit.DAYS)).getSeconds() / ChronoUnit.DAYS.getDuration().getSeconds());
+
+        List<Map<String, Object>> assignmentRatioCells = new ArrayList<>(days);
+
+        IntStream.range(0, days)
+                .mapToObj(i -> fromDate.plus(i, ChronoUnit.DAYS))
+                .forEach(day -> {
+                            Map<String, Object> cell = new HashMap<>();
+                            cell.put("date", uiFormat.format(day));
+                            cell.put("values", experiments.stream()
+                                    .map(e -> assignmentRatios.getOrDefault(e.getID(), Collections.emptyMap())
+                                            .getOrDefault(keyFormatter.format(day), 0d))
+                                    .collect(Collectors.toList()));
+                            assignmentRatioCells.add(cell);
+                        }
+                );
+        assignmentRatioTableBuilder.put("assignmentRatios", assignmentRatioCells);
+        return assignmentRatioTableBuilder.build();
     }
 }
 
