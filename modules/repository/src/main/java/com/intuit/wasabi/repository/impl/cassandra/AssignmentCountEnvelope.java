@@ -86,6 +86,8 @@ public class AssignmentCountEnvelope implements Runnable {
 
     @Override
     public void run() {
+        increaseExperimentAssignmentPerDayCount();
+
         try {
             // Updates the bucket assignment counts
             if (assignBucketCount) {
@@ -106,7 +108,6 @@ public class AssignmentCountEnvelope implements Runnable {
             LOGGER.error("Error updating the assignment to the user export for experiment: ", experiment.getID() +
                     " bucket label: " + assignment.getBucketLabel() + " with exception: ", e);
         }
-
 
         // For rapid experiments; checks if a set userCap is attained.
         // If so, changes the state of the experiment to PAUSED.
@@ -137,6 +138,23 @@ public class AssignmentCountEnvelope implements Runnable {
                 }
 
             }
+        }
+    }
+
+    /**
+     * Increases the experiment assignment counts for either buckets or null buckets,
+     * iff the processed assignment is a new assignment.
+     */
+    private void increaseExperimentAssignmentPerDayCount() {
+        if (!Assignment.Status.NEW_ASSIGNMENT.equals(assignment.getStatus())) {
+            return;
+        }
+        if (null == assignment.getBucketLabel()) {
+            assignmentsRepository.increaseExperimentAssignmentPerDayNullCount(experiment.getID(), date.toInstant(),
+                    assignment.getContext());
+        } else {
+            assignmentsRepository.increaseExperimentAssignmentPerDayBucketCount(experiment.getID(), date.toInstant(),
+                    assignment.getContext());
         }
     }
 }

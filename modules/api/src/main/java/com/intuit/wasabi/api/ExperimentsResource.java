@@ -17,6 +17,7 @@ package com.intuit.wasabi.api;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableTable;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
@@ -50,6 +51,7 @@ import com.intuit.wasabi.experimentobjects.ExperimentList;
 import com.intuit.wasabi.experimentobjects.ExperimentPageList;
 import com.intuit.wasabi.experimentobjects.NewExperiment;
 import com.intuit.wasabi.experimentobjects.Page;
+import com.intuit.wasabi.experimentobjects.PrioritizedExperiment;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -70,12 +72,22 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_FILTER;
 import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_MODBUCK;
@@ -158,16 +170,16 @@ public class ExperimentsResource {
     /**
      * Returns a list of all experiments, with metadata. Does not return
      * metadata for deleted experiments.
-     *
+     * <p>
      * This endpoint is paginated. Favorites are sorted to the front.
      * If {@code per_page == -1}, favorites are ignored and all experiments are returned.
      *
      * @param authorizationHeader the authentication headers
-     * @param page the page which should be returned, defaults to 1
-     * @param perPage the number of log entries per page, defaults to 10. -1 to get all values.
-     * @param sort the sorting rules
-     * @param filter the filter rules
-     * @param timezoneOffset the time zone offset from UTC
+     * @param page                the page which should be returned, defaults to 1
+     * @param perPage             the number of log entries per page, defaults to 10. -1 to get all values.
+     * @param sort                the sorting rules
+     * @param filter              the filter rules
+     * @param timezoneOffset      the time zone offset from UTC
      * @return a response containing a map with a list with {@code 0} to {@code perPage} experiments,
      * if that many are on the page, and a count of how many experiments match the filter criteria.
      */
@@ -1263,5 +1275,117 @@ public class ExperimentsResource {
                                        @ApiParam(value = "Page name where the experiment will appear")
                                        final Page.Name pageName) {
         return httpHeader.headers().entity(pages.getPageExperiments(applicationName, pageName)).build();
+    }
+
+
+    /**
+     * @param experimentID
+     * @param context
+     * @param authorizationHeader
+     * @param from
+     * @param to
+     * @return
+     */
+    @GET
+    @Path("/experiments/{experimentID}/assignments/traffic/{from}/{to}")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "Return a summary of assignments delivered for an experiment")
+    @Timed
+    public Response getExperimentAssignmentRatioPerDay(
+            @PathParam("experimentID")
+            @ApiParam(value = "Experiment ID")
+            final Experiment.ID experimentID,
+
+            @QueryParam("context")
+            @DefaultValue("PROD")
+            @ApiParam(value = "context for the experiment, eg \"QA\", \"PROD\"")
+            final Context context,
+
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader,
+
+            @PathParam("from")
+            @DefaultValue("START")
+            final String from,
+
+            @PathParam("to")
+            @DefaultValue("END")
+            final String to) {
+        // Check authorization.
+        Username userName = authorization.getUser(authorizationHeader);
+        Experiment experiment;
+        if ((experiment = experiments.getExperiment(experimentID)) == null) {
+            throw new ExperimentNotFoundException(experimentID);
+        }
+        authorization.checkUserPermissions(userName, experiment.getApplicationName(), READ);
+
+        // Parse from and to
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/d/y");
+        final Instant fromDate;
+        if ("START".equalsIgnoreCase(from)) {
+            fromDate = experiment.getStartTime().toInstant();
+        } else {
+            try {
+                fromDate = Instant.from(formatter.parse(from));
+            } catch (DateTimeParseException e) {
+                throw new IllegalArgumentException(String.format("Can not parse \"from\" date \"%s\", expecting format M/d/y, e.g. 05/24/2014, or \"START\".", from), e);
+            }
+        }
+        final Instant toDate;
+        if ("END".equalsIgnoreCase(to)) {
+            toDate = experiment.getEndTime().toInstant();
+        } else {
+            try {
+                toDate = Instant.from(formatter.parse(from));
+            } catch (DateTimeParseException e) {
+                throw new IllegalArgumentException(String.format("Can not parse \"to\" date \"%s\", expecting format M/d/y, e.g. 05/24/2014, or \"END\".", from), e);
+            }
+        }
+
+        // Perform a BFS over mutual exclusive experiments.
+        List<Experiment> visitedExperiments = new ArrayList<>();
+        Set<Experiment> unvisitedExperiments = new TreeSet<>();
+        unvisitedExperiments.add(experiment);
+        do {
+            for (Experiment tempExperiment : unvisitedExperiments) {
+                visitedExperiments.add(tempExperiment);
+                unvisitedExperiments.addAll(mutex.getExclusions(tempExperiment.getID()).getExperiments());
+            }
+            unvisitedExperiments.removeAll(visitedExperiments);
+        } while (!unvisitedExperiments.isEmpty());
+
+        // Sort experiments by their priorities
+        Map<Experiment.ID, Integer> experimentPriorities = priorities.getPriorities(experiment.getApplicationName(), false)
+                .getPrioritizedExperiments()
+                .parallelStream()
+                .collect(Collectors.toMap(PrioritizedExperiment::getID, PrioritizedExperiment::getPriority));
+        Collections.sort(visitedExperiments, (e1, e2) -> experimentPriorities.get(e1.getID()) - experimentPriorities.get(e2.getID()));
+
+        // Retrieve daily ratios
+        Map<Experiment.ID, Map<Instant, Double>> assignmentRatios = assignments.getExperimentAssignmentRatioPerDay(visitedExperiments, context, fromDate, toDate);
+
+        // Create table: fill with priorities and sampling percentages
+        ImmutableTable.Builder<String, Experiment.Label, Number> assignmentRatioTableBuilder = ImmutableTable.builder();
+        for (Experiment exp : visitedExperiments) {
+            assignmentRatioTableBuilder.put("priority", exp.getLabel(), experimentPriorities.get(exp.getID()));
+            assignmentRatioTableBuilder.put("samplingPercent", exp.getLabel(), exp.getSamplingPercent());
+        }
+
+        // Fill table up with data from daily ratios
+        IntStream.range(0, (int) Duration.between(fromDate, toDate.plus(1, ChronoUnit.DAYS)).get(ChronoUnit.DAYS))
+                .mapToObj(i -> fromDate.plus(i, ChronoUnit.DAYS))
+                .forEach(
+                        day -> {
+                            String rowKey = formatter.format(day);
+                            visitedExperiments.forEach(e ->
+                                    assignmentRatioTableBuilder.put(rowKey, e.getLabel(),
+                                            assignmentRatios.getOrDefault(experimentID, Collections.emptyMap())
+                                                    .getOrDefault(day, 0d)));
+                        }
+                );
+
+        // build table and dispatch it
+        return httpHeader.headers().entity(assignmentRatioTableBuilder.build().rowMap()).build();
     }
 }

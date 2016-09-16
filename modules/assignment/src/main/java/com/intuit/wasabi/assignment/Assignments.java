@@ -30,6 +30,7 @@ import com.intuit.wasabi.experimentobjects.Page;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.StreamingOutput;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +46,7 @@ public interface Assignments {
      *
      * @return Map of number of elements each queue
      */
-    Map <String, Integer>queuesLength();
+    Map<String, Integer> queuesLength();
 
     /**
      * Gets the Assignment for one user for an specific experiment.
@@ -138,9 +139,9 @@ public interface Assignments {
      * @return a brand new or old {@link Assignment}
      */
     List<Map> doBatchAssignments(User.ID userID, Application.Name applicationName, Context context,
-                                     boolean createAssignment, boolean overwrite, HttpHeaders headers,
-                                     ExperimentBatch experimentBatch, Page.Name pageName,
-                                     Map<Experiment.ID, Boolean> allowAssignments);
+                                 boolean createAssignment, boolean overwrite, HttpHeaders headers,
+                                 ExperimentBatch experimentBatch, Page.Name pageName,
+                                 Map<Experiment.ID, Boolean> allowAssignments);
 
     /**
      * Check if a user is in an experiment which is mutually exclusive with the given experiment
@@ -155,10 +156,10 @@ public interface Assignments {
     /**
      * Export assignments data for a given experiment ID.
      *
-     * @param experimentID the {@link com.intuit.wasabi.experimentobjects.Experiment.ID}
-     * @param context      the {@link Context}
-     * @param parameters          the parameters {@link Parameters}
-     * @param ignoreNullBucket   the boolean flag of whether to ignroe null bucket
+     * @param experimentID     the {@link com.intuit.wasabi.experimentobjects.Experiment.ID}
+     * @param context          the {@link Context}
+     * @param parameters       the parameters {@link Parameters}
+     * @param ignoreNullBucket the boolean flag of whether to ignroe null bucket
      * @return a {@link StreamingOutput} for the Assignment Data
      */
     StreamingOutput getAssignmentStream(Experiment.ID experimentID, Context context, Parameters parameters, Boolean ignoreNullBucket);
@@ -177,8 +178,8 @@ public interface Assignments {
      * @return a {@link List} of {@link HashMap}s for the generated assignments
      */
     List<Map> doPageAssignments(Application.Name applicationName, Page.Name pageName, User.ID userID,
-                                    Context context, boolean createAssignment, boolean ignoreSamplingPercent,
-                                    HttpHeaders headers, SegmentationProfile segmentationProfile);
+                                Context context, boolean createAssignment, boolean ignoreSamplingPercent,
+                                HttpHeaders headers, SegmentationProfile segmentationProfile);
 
     /**
      * This method returns the {@link Bucket} for a given experiment ID and bucketLabel.
@@ -202,4 +203,15 @@ public interface Assignments {
     boolean doSegmentTest(Application.Name applicationName, Experiment.Label experimentLabel,
                           Context context, SegmentationProfile segmentationProfile,
                           HttpHeaders headers);
+
+    /**
+     * Gets bucket assignment ratios per day for a list of experiments.
+     *
+     * @param experiments list of experiments
+     * @param context     the context of interest
+     * @param fromDate    the first day to include
+     * @param toDate      the last day to include
+     * @return a map mapping the IDs to lists of ratios per day sorted from {@code fromDate} to {@code toDate}.
+     */
+    Map<Experiment.ID, Map<Instant, Double>> getExperimentAssignmentRatioPerDay(List<Experiment> experiments, Context context, Instant fromDate, Instant toDate);
 }
