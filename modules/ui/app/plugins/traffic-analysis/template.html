@@ -61,16 +61,13 @@
                     <div class="tableContainer" style="margin-top: 10px; overflow: auto; height: 350px; clear: both;">
                         <table>
                             <thead>
-                                <tr><th style="width: 70px;">Priority</th><th style="width: 140px;">Experiment Name</th><th>9/10/2016</th><th>9/11/2016</th><th>9/12/2016</th><th style="width: 150px;">Target Sampling %</th><th style="width: 180px;">Experiment Sampling %</th></tr>
+                                <tr>
+                                    <th ng-repeat="name in experimentNames">{{name}}</th>
+                                </tr>
                             </thead>
                             <tbody>
-                                <tr ng-repeat="nextExperiment in relatedExperiments">
-                                    <td>{{nextExperiment.priority}}</td><td>{{nextExperiment.label}}</td>
-                                    <td>8.1%</td>
-                                    <td>8.2%</td>
-                                    <td>7.9%</td>
-                                    <td>{{multiply100(nextExperiment.targetSamplingPercent)}}%</td>
-                                    <td>{{multiply100(nextExperiment.samplingPercent)}}%</td>
+                                <tr ng-repeat="nextRow in dataRows">
+                                    <td ng-repeat="nextItem in nextRow track by $index">{{nextItem}}</td>
                                 </tr>
                             </tbody>
                         </table>

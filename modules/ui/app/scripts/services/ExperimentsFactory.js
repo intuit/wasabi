@@ -32,6 +32,14 @@ angular.module('wasabi.services').factory('ExperimentsFactory', ['$resource', 'C
                 },
                 isArray: true
             },
+            'getTraffic': { method: 'GET', params: {id: '@id',start: '@start',end: '@end'},
+                url: ConfigFactory.baseUrl() + '/experiments/:id/assignments/traffic/:start/:end?per_page=-1&timezone=' + (new Date().toString().match(/([-\+][0-9]+)\s/)[1]).replace('+', '%2B'),
+                transformResponse: function (data) {
+                    var parsedData = $.parseJSON(data);
+
+                    return parsedData;
+                }
+            },
             'create': { method: 'POST',
                 transformRequest: function (data) {
                     return typeof(data) === 'string' ? data : JSON.stringify(data);

@@ -20,11 +20,6 @@ angular.module('wasabi.controllers').
             $scope.meDoneNames = [];
             $scope.mutualExclusions = {};
 
-            $scope.numPendingSaves = 0;
-
-            $scope.noCalc = true;
-            $scope.noSave = true;
-
             $scope.appNames = UtilitiesFactory.getAppsWithAnyPermissions();
 
             $scope.multiply100 = function(n) {
@@ -38,7 +33,6 @@ angular.module('wasabi.controllers').
                 $scope.experimentNames = [];
                 $scope.relatedExperiments = [];
                 $scope.mutualExclusions = {};
-                $scope.noCalc = $scope.noSave = true;
             };
 
             $scope.loadExperiments = function (forceReloadFlag) {
@@ -63,7 +57,6 @@ angular.module('wasabi.controllers').
                             for (var i = 0; i < experiments.length; i++) {
                                 $scope.experimentNames.push(experiments[i].label);
                             }
-
                         }, function(response) {
                             UtilitiesFactory.handleGlobalError(response, 'The list of experiments could not be retrieved.');
                         });
@@ -149,13 +142,16 @@ angular.module('wasabi.controllers').
             };
 
             $scope.initialExperimentSelected = function() {
-                var i = 0;
+                var i = 0,
+                    startTimeObj = moment($scope.data.startTime, ['YYYY-MM-DDTHH:mm:ssZ', 'ddd MMM DD YYYY HH:mm:ss ZZ']),
+                    startTime = startTimeObj.format('MM/DD/YYYY'),
+                    endTimeObj = moment($scope.data.endTime, ['YYYY-MM-DDTHH:mm:ssZ', 'ddd MMM DD YYYY HH:mm:ss ZZ']),
+                    endTime = endTimeObj.format('MM/DD/YYYY'),
+                    timeZone = startTimeObj.format('ZZ');
 
                 $scope.relatedExperiments = [];
                 $scope.meDoneNames = [];
                 $scope.mutualExclusions = {};
-
-                $scope.noCalc = false;
 
                 //console.dir($scope.data.selectedExperiment);
                 var expSearch = $scope.experiments.filter(function(exp) {
@@ -167,8 +163,41 @@ angular.module('wasabi.controllers').
 
                     $scope.setPriorityOnExperiment($scope.relatedExperiments[0]);
 
-                    console.log('Got priorities, get MEs for ' + expSearch[0].label);
-                    $scope.getMutualExclusions($scope.relatedExperiments[0]);
+                    ExperimentsFactory.getTraffic({
+                        id: $scope.relatedExperiments[0].id,
+                        start: startTime,
+                        end: endTime
+                    }).$promise.then(function(results) {
+                        $scope.experimentNames = ['Experiments:'];
+                        $scope.dataRows = [
+                            ['Priority'],
+                            //['Target %'],
+                            ['Experiment %']
+                        ];
+                        var i = 0;
+                        if (results.experiments) {
+                            for (i = 0; i < results.experiments.length; i++) {
+                                $scope.experimentNames.push(results.experiments[i]);
+                            }
+                        }
+                        for (i = 0; i < results.priorities.length; i++) {
+                            $scope.dataRows[0].push(results.priorities[i]);
+                            $scope.dataRows[1].push($scope.multiply100(results.samplingPercentages[i]) + '%');
+                        }
+                        for (i = 0; i < results.assignmentRatios.length; i++) {
+                            var row = [results.assignmentRatios[i].date];
+                            for (var j = 0; j < results.assignmentRatios[i].values.length; j++) {
+                                row.push($scope.multiply100(results.assignmentRatios[i].values[j]).toFixed(2) + '%');
+                            }
+                            $scope.dataRows.push(row);
+                        }
+
+                        // Get the mutual exclusions data and then use that to calculate the target sampling %s
+                        $scope.getMutualExclusions($scope.relatedExperiments[0]);
+
+                    }, function(response) {
+                        UtilitiesFactory.handleGlobalError(response, 'The mutual exclusions could not be retrieved.');
+                    });
                 }
 
                 return true;
@@ -181,7 +210,7 @@ angular.module('wasabi.controllers').
                     var currentExp = $scope.relatedExperiments[j], mutexs, targetSamplingPercentages;
                     if (j === 0) {
                         // Highest priority experiment, message will be different.
-                        currentExp.targetSamplingPercent = currentExp.samplingPercent;
+                        currentExp.targetSamplingPercent = currentExp.samplingPercent.toFixed(4);
                     }
                     else {
                         // For all others, we need to calculate the target sampling percentage by looking at the higher
@@ -202,45 +231,11 @@ angular.module('wasabi.controllers').
                         currentExp.targetSamplingPercent = parseFloat(newTargetSamp.toFixed(4));
                     }
                 }
-            };
-
-            $scope.save = function() {
-                $scope.noSave = true;
-                // Save all of the changed sampling percentages
+                var targets = ['Target %'];
                 for (var i = 0; i < $scope.relatedExperiments.length; i++) {
-                    var currentExp = $scope.relatedExperiments[i];
-                    if (parseFloat(currentExp.samplingPercent) !== parseFloat(currentExp.originalSamplingPercent)) {
-                        console.log('Saving new sampling percent of ' +
-                                currentExp.samplingPercent +
-                                ' to experiment ' +
-                                currentExp.label);
-                        $scope.numPendingSaves += 1;
-                        ExperimentsFactory.update({
-                            id: currentExp.id,
-                            samplingPercent: currentExp.samplingPercent
-                        }).$promise.then(function () {
-                                $scope.numPendingSaves -= 1;
-                                UtilitiesFactory.displayPageSuccessMessage('Sampling Percentage Changes Saved', 'Your sampling percentage changes have been saved successfully.');
-                                UtilitiesFactory.trackEvent('saveItemSuccess',
-                                    {key: 'dialog_name', value: 'trafficAnalysisPluginSave'},
-                                    {key: 'application_name', value: currentExp.applicationName},
-                                    {key: 'item_id', value: currentExp.id},
-                                    {key: 'item_label', value: currentExp.label});
-
-                                if ($scope.numPendingSaves === 0) {
-                                    $scope.data.selectedExperiment = '';
-                                    $scope.loadExperiments(true);
-                                }
-                            },
-                            function(response) {
-                                $scope.numPendingSaves -= 1;
-                                UtilitiesFactory.handleGlobalError(response);
-                            }
-                        );
-                    }
-                    // Clear out the inputs
-                    currentExp.targetSamplingPercent = 0;
+                    targets[i + 1] = $scope.multiply100($scope.relatedExperiments[i].targetSamplingPercent) + '%';
                 }
+                $scope.dataRows.splice(1, 0, targets);
             };
 
             $scope.showHover = function(expName) {
@@ -252,7 +247,8 @@ angular.module('wasabi.controllers').
             };
 
             if ($scope.appNames.length === 1) {
-                $scope.onSelectAppName($scope.appNames[0]);
+                $scope.data.applicationName = $scope.appNames[0];
+                $scope.onSelectAppName();
             }
 
             $scope.cancel = function() {

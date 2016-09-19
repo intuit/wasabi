@@ -129,16 +129,50 @@ angular.module('wasabi.controllers').
                     });
 
                     $scope.meDoneNames.push(exp.label);
-                    meExperiments.forEach(function(nextExp) {
-                        if ($scope.meDoneNames.indexOf(nextExp.label) < 0) {
-                            // Only do this one if we haven't already done it (avoid indefinite loop!)
-                            $scope.getMutualExclusions(nextExp);
-                        }
-                    });
+                    if ($scope.meDoneNames.length === $scope.relatedExperiments.length) {
+                        console.log('*** We have processed all the mutual exclusions');
+                        $scope.calculateTargetSamplingPercentages();
+                    }
+                    else {
+                        meExperiments.forEach(function(nextExp) {
+                            if ($scope.meDoneNames.indexOf(nextExp.label) < 0) {
+                                // Only do this one if we haven't already done it (avoid indefinite loop!)
+                                $scope.getMutualExclusions(nextExp);
+                            }
+                        });
+                    }
                 }, function(response) {
                     UtilitiesFactory.handleGlobalError(response, 'The mutual exclusions could not be retrieved.');
                 });
             };
+
+            $scope.calculateTargetSamplingPercentages = function() {
+                for (var j = 0; j < $scope.relatedExperiments.length; j++) {
+                    var currentExp = $scope.relatedExperiments[j], mutexs, targetSamplingPercentages;
+                    if (j === 0) {
+                        // Highest priority experiment, message will be different.
+                        currentExp.targetSamplingPercent = currentExp.samplingPercent.toFixed(4);
+                    }
+                    else {
+                        // For all others, we need to calculate the target sampling percentage by looking at the higher
+                        // priority experiments.
+                        mutexs = $scope.mutualExclusions[currentExp.label];
+                        targetSamplingPercentages = 0.0;
+
+                        for (var k = 0; k < mutexs.length; k++) {
+                            if (mutexs[k].priority < currentExp.priority) {
+                                // Get the value the user entered for this mutually exclusive experiment
+                                var relExp = $scope.relatedExperiments.filter(function(nextExp) {
+                                    return nextExp.label === mutexs[k].label;
+                                });
+                                targetSamplingPercentages += parseFloat(relExp[0].targetSamplingPercent);
+                            }
+                        }
+                        var newTargetSamp = parseFloat(currentExp.samplingPercent) * (1 - targetSamplingPercentages);
+                        currentExp.targetSamplingPercent = parseFloat(newTargetSamp.toFixed(4));
+                    }
+                }
+            }
 
             $scope.initialExperimentSelected = function() {
                 var i = 0;
@@ -296,7 +330,8 @@ angular.module('wasabi.controllers').
             };
 
             if ($scope.appNames.length === 1) {
-                $scope.onSelectAppName($scope.appNames[0]);
+                $scope.data.applicationName = $scope.appNames[0];
+                $scope.onSelectAppName();
             }
 
             $scope.cancel = function() {
