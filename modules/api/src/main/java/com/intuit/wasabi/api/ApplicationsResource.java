@@ -25,17 +25,29 @@ import com.intuit.wasabi.exceptions.AuthenticationException;
 import com.intuit.wasabi.experiment.Experiments;
 import com.intuit.wasabi.experiment.Pages;
 import com.intuit.wasabi.experiment.Priorities;
-import com.intuit.wasabi.experimentobjects.*;
+import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.experimentobjects.ExperimentIDList;
+import com.intuit.wasabi.experimentobjects.ExperimentList;
+import com.intuit.wasabi.experimentobjects.Page;
+import com.intuit.wasabi.experimentobjects.PageExperiment;
+import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
-import javax.ws.rs.*;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Map;
 
-import static com.intuit.wasabi.api.APISwaggerResource.*;
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_MODEXP;
+import static com.intuit.wasabi.api.APISwaggerResource.EXAMPLE_AUTHORIZATION_HEADER;
 import static com.intuit.wasabi.authorizationobjects.Permission.READ;
 import static com.intuit.wasabi.authorizationobjects.Permission.UPDATE;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
@@ -96,11 +108,11 @@ public class ApplicationsResource {
 
     /**
      * Returns metadata for the specified experiment.
-     *
+     * <p>
      * Does not return metadata for a deleted experiment.
      *
-     * @param applicationName the application name
-     * @param experimentLabel the experiment label
+     * @param applicationName     the application name
+     * @param experimentLabel     the experiment label
      * @param authorizationHeader the authorization headers
      * @return Response object
      */
@@ -129,20 +141,12 @@ public class ApplicationsResource {
 
     /**
      * Returns metadata for all experiments within an application.
-     *
+     * <p>
      * Does not return metadata for a deleted or terminated experiment.
      *
-     * This endpoint is paginated.
-     *
-     * @param applicationName the application name
+     * @param applicationName     the application name
      * @param authorizationHeader the authentication headers
-     * @param page the page which should be returned, defaults to 1
-     * @param perPage the number of log entries per page, defaults to 10. -1 to get all values.
-     * @param sort the sorting rules
-     * @param filter the filter rules
-     * @param timezoneOffset the time zone offset from UTC
-     * @return a response containing a map with a list with {@code 0} to {@code perPage} experiments,
-     * if that many are on the page, and a count of how many experiments match the filter criteria.
+     * @return a response containing a list with experiments
      */
     @GET
     @Path("/{applicationName}/experiments")
@@ -156,45 +160,16 @@ public class ApplicationsResource {
 
                                    @HeaderParam(AUTHORIZATION)
                                    @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                   final String authorizationHeader,
-
-                                   @QueryParam("page")
-                                   @DefaultValue(DEFAULT_PAGE)
-                                   @ApiParam(name = "page", defaultValue = DEFAULT_PAGE, value = DOC_PAGE)
-                                   final int page,
-
-                                   @QueryParam("per_page")
-                                   @DefaultValue(DEFAULT_PER_PAGE)
-                                   @ApiParam(name = "per_page", defaultValue = DEFAULT_PER_PAGE, value = DOC_PER_PAGE)
-                                   final int perPage,
-
-                                   @QueryParam("filter")
-                                   @DefaultValue("")
-                                   @ApiParam(name = "filter", defaultValue = DEFAULT_FILTER, value = DOC_FILTER)
-                                   final String filter,
-
-                                   @QueryParam("sort")
-                                   @DefaultValue("")
-                                   @ApiParam(name = "sort", defaultValue = DEFAULT_SORT, value = DOC_SORT)
-                                   final String sort,
-
-                                   @QueryParam("timezone")
-                                   @DefaultValue(DEFAULT_TIMEZONE)
-                                   @ApiParam(name = "timezone", defaultValue = DEFAULT_TIMEZONE, value = DOC_TIMEZONE)
-                                   final String timezoneOffset) {
-        List<Experiment> experimentList = authorizedExperimentGetter.getAuthorizedExperimentsByName(authorizationHeader,
-                applicationName);
-
-        Map<String, Object> response = experimentPaginationHelper.paginate("experiments", experimentList, filter, timezoneOffset, sort, page, perPage);
-
-        return httpHeader.headers().entity(response).build();
+                                   final String authorizationHeader
+    ) {
+        return httpHeader.headers().entity(authorizedExperimentGetter.getAuthorizedExperimentsByName(authorizationHeader, applicationName)).build();
     }
 
     /**
      * Creates a rank ordered priority list
      *
-     * @param applicationName the application name
-     * @param experimentIDList the list of experiment ids
+     * @param applicationName     the application name
+     * @param experimentIDList    the list of experiment ids
      * @param authorizationHeader the authorization headers
      * @return Response object
      */
@@ -224,7 +199,7 @@ public class ApplicationsResource {
      * Returns the full, ordered priority list for an application
      * along with experiment meta-data and associated priority
      *
-     * @param applicationName the application name
+     * @param applicationName     the application name
      * @param authorizationHeader the authorization headers
      * @return Response object
      */
@@ -233,7 +208,7 @@ public class ApplicationsResource {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Get the priority list for an application",
             notes = "The returned priority list is rank ordered.")
-            //            response = ??, //todo: update with proper object
+    //            response = ??, //todo: update with proper object
     @Timed
     public Response getPriorities(@PathParam("applicationName")
                                   @ApiParam(value = "Application Name")
@@ -252,8 +227,8 @@ public class ApplicationsResource {
     /**
      * Returns the set of pages associated with the application.
      *
-     * @param applicationName the application name
-     * @param authorizationHeader      the authorization headers
+     * @param applicationName     the application name
+     * @param authorizationHeader the authorization headers
      * @return Response object
      */
     @GET
@@ -279,9 +254,9 @@ public class ApplicationsResource {
     /**
      * Get the experiment information(id and allowNewAssignment) for the associated experiments for a page
      *
-     * @param applicationName the application name
-     * @param pageName        the page name
-     * @param authorizationHeader      the authorization headers
+     * @param applicationName     the application name
+     * @param pageName            the page name
+     * @param authorizationHeader the authorization headers
      * @return Response object
      */
     @GET
@@ -312,8 +287,8 @@ public class ApplicationsResource {
     /**
      * Returns the set of pages with their associated experiments for an application.
      *
-     * @param applicationName the application name
-     * @param authorizationHeader      the authorization headers
+     * @param applicationName     the application name
+     * @param authorizationHeader the authorization headers
      * @return Response object
      */
     @GET
@@ -322,12 +297,12 @@ public class ApplicationsResource {
     @ApiOperation(value = "Get the set of pages associated with an application.")
     @Timed
     public Response getPageAndExperimentsForApplication(@PathParam("applicationName")
-                                                      @ApiParam(value = "Application Name")
-                                                      final Application.Name applicationName,
+                                                        @ApiParam(value = "Application Name")
+                                                        final Application.Name applicationName,
 
-                                                      @HeaderParam(AUTHORIZATION)
-                                                      @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                                      final String authorizationHeader) {
+                                                        @HeaderParam(AUTHORIZATION)
+                                                        @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+                                                        final String authorizationHeader) {
         authorization.checkUserPermissions(authorization.getUser(authorizationHeader), applicationName, READ);
 
         Map<Page.Name, List<PageExperiment>> pageExperimentListMap = pages.getPageAndExperimentList(applicationName);
