@@ -2,10 +2,10 @@
 'use strict';
 
 angular.module('wasabi.controllers').
-    controllerProvider.register('TrafficAnalysisCtrl', ['$scope', '$rootScope', 'UtilitiesFactory', '$modalInstance', 'ApplicationsFactory', 'MutualExclusionsFactory', 'PrioritiesFactory', 'ExperimentsFactory',
-        function ($scope, $rootScope, UtilitiesFactory, $modalInstance, ApplicationsFactory, MutualExclusionsFactory, PrioritiesFactory, ExperimentsFactory) {
+    controllerProvider.register('TrafficAnalysisCtrl', ['$scope', '$rootScope', 'UtilitiesFactory', '$modalInstance', 'ApplicationsFactory', 'MutualExclusionsFactory', 'PrioritiesFactory', 'ExperimentsFactory', '$cookies',
+        function ($scope, $rootScope, UtilitiesFactory, $modalInstance, ApplicationsFactory, MutualExclusionsFactory, PrioritiesFactory, ExperimentsFactory, $cookies) {
             $scope.data = {
-                applicationName: '',
+                applicationName: ($cookies.wasabiDefaultApplication ? $cookies.wasabiDefaultApplication : ''),
                 selectedExperiment: '',
                 startTime: moment(0, 'HH').subtract(3, 'days').format('YYYY-MM-DDTHH:mm:ssZZ'),
                 endTime: moment().subtract(1, 'days').format('YYYY-MM-DDTHH:mm:ssZZ')
@@ -247,12 +247,16 @@ angular.module('wasabi.controllers').
             };
 
             $scope.onSelectAppName = function() {
+                $cookies.wasabiDefaultApplication = $scope.data.applicationName;
                 $scope.loadExperiments();
             };
 
             if ($scope.appNames.length === 1) {
                 $scope.data.applicationName = $scope.appNames[0];
                 $scope.onSelectAppName();
+            }
+            else if ($scope.data.applicationName && $scope.data.applicationName.length > 0) {
+                $scope.loadExperiments();
             }
 
             $scope.cancel = function() {

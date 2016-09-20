@@ -4,8 +4,8 @@
 'use strict';
 
 angular.module('wasabi.controllers').
-    controller('PrioritiesCtrl', ['$scope', '$filter', '$http', '$stateParams', 'PrioritiesFactory', '$modal', 'UtilitiesFactory', '$rootScope', 'DialogsFactory', 'AUTH_EVENTS', '$state', 'PERMISSIONS', 'ConfigFactory', 'ApplicationsFactory', 'ExperimentsFactory',
-        function ($scope, $filter, $http, $stateParams, PrioritiesFactory, $modal, UtilitiesFactory, $rootScope, DialogsFactory, AUTH_EVENTS, $state, PERMISSIONS, ConfigFactory, ApplicationsFactory, ExperimentsFactory) {
+    controller('PrioritiesCtrl', ['$scope', '$filter', '$http', '$stateParams', 'PrioritiesFactory', '$modal', 'UtilitiesFactory', '$rootScope', 'DialogsFactory', 'AUTH_EVENTS', '$state', 'PERMISSIONS', 'ConfigFactory', 'ApplicationsFactory', 'ExperimentsFactory', '$cookies',
+        function ($scope, $filter, $http, $stateParams, PrioritiesFactory, $modal, UtilitiesFactory, $rootScope, DialogsFactory, AUTH_EVENTS, $state, PERMISSIONS, ConfigFactory, ApplicationsFactory, ExperimentsFactory, $cookies) {
 
             $scope.data = {
                 applicationName: '', // This is bound to the selection in the application name drop down menu.
@@ -17,7 +17,6 @@ angular.module('wasabi.controllers').
             // This is passed in as a parameter on the URL. The selection in the drop down will cause an URL
             // with this parameter to be hit. This is necessary so that going "back" from the details page will
             // come back to the correct form of the Priorities table.
-            // TODO: Reconcile this with code below.
             $scope.applicationName = $stateParams.appname;
             $scope.allApplications = [];
             $scope.noDrag = false;
@@ -31,7 +30,15 @@ angular.module('wasabi.controllers').
             UtilitiesFactory.hideHeading(false);
             UtilitiesFactory.selectTopLevelTab('Priority');
 
-            $scope.changePage = function() {
+            $scope.changePage = function(destinationApp) {
+                if (destinationApp !== undefined) {
+                    $scope.data.applicationName = destinationApp;
+                }
+                if ($scope.data.applicationName && $scope.data.applicationName === $stateParams.appname) {
+                    // The URL already matches the applicationName, so we don't need to do anything.
+                    return;
+                }
+                $cookies.wasabiDefaultApplication = $scope.data.applicationName;
                 $state.go('priorities', {'appname': $scope.data.applicationName});
             };
 
@@ -92,7 +99,7 @@ angular.module('wasabi.controllers').
 
             $scope.onSelectAppName = function(selectedApp) {
                 if (selectedApp) {
-                    $scope.applicationName = selectedApp;
+                    $scope.applicationName = $cookies.wasabiDefaultApplication = selectedApp;
                     $scope.noDrag = $scope.readOnly = !$scope.hasUpdatePermission(selectedApp);
                     PrioritiesFactory.query({applicationName: selectedApp}).$promise.then(function (priorities) {
                         $scope.experiments = priorities;
@@ -109,13 +116,18 @@ angular.module('wasabi.controllers').
             };
 
             if ($scope.appNames.length === 1) {
-                $scope.onSelectAppName($scope.appNames[0]);
+                $scope.changePage($scope.appNames[0]);
             }
 
             // If we are on a version of this page for a specific application, this will cause the $watch below
             // to populate the table with the correct data for the correct application.
-            // TODO: Reconcile this with code above.
+            if (!$scope.applicationName && $cookies.wasabiDefaultApplication) {
+                $scope.applicationName = $cookies.wasabiDefaultApplication;
+            }
             $scope.data.applicationName = $scope.applicationName;
+            if ($scope.data.applicationName) {
+                $scope.changePage();
+            }
             $scope.$watch(function() {
                     return $scope.appNames.length;
                 },
@@ -126,14 +138,23 @@ angular.module('wasabi.controllers').
                     $scope.$evalAsync(function() {
                         // As a workaround of the fact that modifying the model *DOES NOT* seem to cause the menu to be set
                         // to reflect it, we are using jQuery to move the menu to the correct value.
-                        var choiceIndex = 0;
+                        var choiceIndex = 0, foundIt = false;
                         for (var i = 0; i < $scope.appNames.length; i++) {
                             if ($scope.appNames[i] === $scope.applicationName) {
+                                foundIt = true;
                                 choiceIndex = i + 1;
                             }
                         }
-                        $('#applicationNameChoice').prop('selectedIndex', choiceIndex);
-                        $scope.onSelectAppName($scope.applicationName);
+                        if (foundIt) {
+                            $('#applicationNameChoice').prop('selectedIndex', choiceIndex);
+                            $scope.onSelectAppName($scope.applicationName);
+                        }
+                        else {
+                            // Possible that they went to a URL that had an application they don't have access to,
+                            // or the cookie on the browser has an application they don't have access to.
+                            $cookies.wasabiDefaultApplication = '';
+                            $scope.data.applicationName = '';
+                        }
                     });
                 }
             );
