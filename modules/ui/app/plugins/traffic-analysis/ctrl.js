@@ -238,6 +238,10 @@ angular.module('wasabi.controllers').
                 $scope.dataRows.splice(1, 0, targets);
             };
 
+            $scope.refresh = function() {
+                $scope.initialExperimentSelected();
+            }
+
             $scope.showHover = function(expName) {
                 return true;
             };

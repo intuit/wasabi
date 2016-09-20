@@ -57,6 +57,7 @@
                             </p>
                         </div>
                         <span ng-show="readOnly">{{data.endTime | date:'M/d/yyyy a'}}</span>
+                        <button id="btnTrafficAnalysisRefresh" class="cancel" onclick="return false;" ng-click="refresh();">Refresh</button>
                     </div>
                     <div class="tableContainer" style="margin-top: 10px; overflow: auto; height: 350px; clear: both;">
                         <table>
