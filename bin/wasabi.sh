@@ -249,8 +249,7 @@ status() {
 }
 
 package() {
-  # FIXME: profile=profile_default ? profile = build
-  profile=build
+  [ "${profile}" == "${profile_default}" ] && profile=build
 
   build true ${verify} ${profile}
 
