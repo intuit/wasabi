@@ -18,6 +18,7 @@
 formulas=("bash" "cask" "git" "git-flow-avh" "maven" "wget" "ruby" "node")
 taps=("caskroom/cask")
 casks=("java" "docker")
+profile_default=development
 endpoint_default=localhost:8080
 verify_default=false
 sleep_default=30
@@ -37,6 +38,7 @@ ${green}
 usage: `basename ${0}` [options] [commands]
 
 options:
+  -p | --profile [ profile ]             : profile; default ${profile_default}
   -e | --endpoint [ host:port ]          : api endpoint; default: ${endpoint_default}
   -v | --verify [ true | false ]         : verify installation configuration; default: ${verify_default}
   -s | --sleep [ sleep-time ]            : sleep/wait time in seconds; default: ${sleep_default}
@@ -217,7 +219,6 @@ resource() {
         ./bin/wasabi.sh status >/dev/null 2>&1 || ./bin/wasabi.sh start:docker
 #        jip=localhost
         ./bin/wasabi.sh remove:wasabi >/dev/null 2>&1
-        profile=development
         module=main
         home=./modules/${module}/target
         artifact=$(fromPom ./modules/${module} ${profile} project.artifactId)
@@ -248,6 +249,7 @@ status() {
 }
 
 package() {
+  # FIXME: profile=profile_default ? profile = build
   profile=build
 
   build true ${verify} ${profile}
@@ -312,12 +314,14 @@ remove() {
   ./bin/container.sh remove${1:+:$1}
 }
 
-optspec=":b:e:f:p:v:s:h-:"
+optspec=":e:p:v:s:h-:"
 
 while getopts "${optspec}" opt; do
   case "${opt}" in
     -)
       case "${OPTARG}" in
+        profile) profile="${!OPTIND}"; OPTIND=$(( ${OPTIND} + 1 ));;
+        profile=*) profile="${OPTARG#*=}";;
         endpoint) endpoint="${!OPTIND}"; OPTIND=$(( ${OPTIND} + 1 ));;
         endpoint=*) endpoint="${OPTARG#*=}";;
         verify) verify="${!OPTIND}"; OPTIND=$(( ${OPTIND} + 1 ));;
@@ -327,6 +331,7 @@ while getopts "${optspec}" opt; do
         help) usage;;
         *) [ "${OPTERR}" = 1 ] && [ "${optspec:0:1}" != ":" ] && echo "unknown option --${OPTARG}";;
       esac;;
+    p) profile=${OPTARG};;
     e) endpoint=${OPTARG};;
     v) verify=${OPTARG};;
     s) sleep=${OPTARG};;
@@ -338,6 +343,7 @@ done
 
 [ $# -eq 0 ] && usage "unspecified command" 1
 
+profile=${profile:=${profile_default}}
 endpoint=${endpoint:=${endpoint_default}}
 verify=${verify:=${verify_default}}
 sleep=${sleep:=${sleep_default}}
