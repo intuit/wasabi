@@ -459,7 +459,7 @@ This means you can not reach the service at `http://localhost:8080/` but
 at `http://192.168.99.100:8080/` (by default - see `docker-machine ip wasabi`).
 For development this also means to supply the Java VM arguments
 `-DnodeHosts=192.168.99.100 -Ddatabase.url.host=192.168.99.100` when running 
-Wasabi to connect to cassandra and MySQL inside the docker network.
+Wasabi to connect to Cassandra and MySQL inside the docker network.
 
 **How to connect the UI to IDE's wasabi-process?**
 You will also need to redirect the UI. By default `bin\wasabi.bat resource:ui`
