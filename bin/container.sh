@@ -166,24 +166,23 @@ start_cassandra() {
 }
 
 console_cassandra() {
-  docker exec -it ${project}-cassandra cqlsh || \
-    usage "unable to run command: docker run --net=${docker_network} -it --rm ${cassandra} cqlsh ${project}-cassandra" 1
+  docker run --net=${docker_network} -it --rm ${cassandra} cqlsh ${project}-cassandra || \
+    usage "unable to run command: % docker run --net=${docker_network} -it --rm ${cassandra} cqlsh ${project}-cassandra" 1
 }
 
 start_mysql() {
   pwd=mypass
 
   start_docker
-  start_container ${project}-mysql ${mysql} "-p 3306:3306 -e MYSQL_ROOT_PASSWORD=${pwd} -e MYSQL_DATABASE=wasabi -e MYSQL_USER=readwrite -e MYSQL_PASSWORD=readwrite"
+  start_container ${project}-mysql ${mysql} "-p 3306:3306 -e MYSQL_ROOT_PASSWORD=${pwd} -e MYSQL_DATABASE=${project} -e MYSQL_USER=readwrite -e MYSQL_PASSWORD=readwrite"
 
   [ "${verify}" = true ] && console_mysql
 }
 
 console_mysql() {
   pwd=mypass
-
-  docker exec -it ${project}-mysql mysql -uroot -p${pwd} || \
-    usage "unable to run command: % docker run --net=${docker_network} -it --rm ${mysql} mysql -h${wmip} -P3306 -uroot -p${pwd}" 1
+  docker run --net=${docker_network} -it --rm ${mysql} mysql -h${project}-mysql -P3306 -uroot -p${pwd} || \
+    usage "unable to run command: % docker run --net=${docker_network} -it --rm ${mysql} mysql -h${project}-mysql -P3306 -uroot -p${pwd}" 1
 }
 
 status() {

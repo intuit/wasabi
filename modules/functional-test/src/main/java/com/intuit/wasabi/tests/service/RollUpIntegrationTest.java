@@ -138,9 +138,6 @@ public class RollUpIntegrationTest extends TestBase {
     @BeforeClass
     public void prepareDBConnection() throws Exception {
         Class.forName("com.mysql.jdbc.Driver").newInstance();
-        setPropertyFromSystemProperty("database.url", "database.url");
-        setPropertyFromSystemProperty("database.username", "database.username");
-        setPropertyFromSystemProperty("database.password", "database.password");
         connection = DriverManager.getConnection(
                 appProperties.getProperty("database.url"),
                 appProperties.getProperty("database.username"),

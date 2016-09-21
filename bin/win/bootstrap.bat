@@ -16,7 +16,7 @@ rem ############################################################################
 
 
 rem List of dependencies to install
-setlocal 
+setlocal
 set choco_packages=docker,docker-machine,jdk8,maven,nodejs.install,ruby,virtualbox --allowEmptyChecksums,git.install
 set npm_packages=bower,grunt-cli,yo
 set gem_packages=compass,fpm
@@ -32,15 +32,15 @@ if not %errorLevel% == 0 (
 rem install chocolatey
 call :debug Trying to find Chocolatey
 if not exist C:\ProgramData\chocolatey\choco.exe (
-  call :info Installing Chocolatey
-  powershell -NoProfile -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin
-  if errorlevel 1 (
-      call :error Can not install Chocolatey
-      endlocal
-      exit /b 1
-  )
-  rem make sure choco writes its config
-  C:\ProgramData\chocolatey\choco.exe
+    call :info Installing Chocolatey
+    powershell -NoProfile -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin
+    if errorlevel 1 (
+        call :error Can not install Chocolatey
+        endlocal
+        exit /b 1
+    )
+    rem make sure choco writes its config
+    C:\ProgramData\chocolatey\choco.exe
 ) else (
     call :debug Found Chocolatey
 )
@@ -51,7 +51,7 @@ set remaining_packages=%choco_packages%
     for /f "tokens=1* delims=," %%P in ("%remaining_packages%") do (
         set current_package=%%P
         set remaining_packages=%%Q
-      
+
         call :debug Installing/Upgrading via choco - !current_package!
         cmd /c C:\ProgramData\chocolatey\choco.exe upgrade !current_package! -y
     )
@@ -64,7 +64,7 @@ set remaining_packages=%npm_packages%
     for /f "tokens=1* delims=," %%P in ("%remaining_packages%") do (
         set current_package=%%P
         set remaining_packages=%%Q
-      
+
         call :debug Installing/Upgrading via npm - !current_package!
         cmd /c "C:\Program Files\nodejs\npm.cmd" -g install !current_package!
     )
@@ -77,13 +77,13 @@ set remaining_packages=%gem_packages%
     for /f "tokens=1* delims=," %%P in ("%remaining_packages%") do (
         set current_package=%%P
         set remaining_packages=%%Q
-      
+
         call :debug Installing/Upgrading via gem - !current_package!
         cmd /c C:\Tools\ruby23\bin\gem.cmd install !current_package!
     )
     if defined remaining_packages goto :inst_gem_deps
 
-call :info Bootstrapping done. 
+call :info Bootstrapping done.
 
 
 endlocal
