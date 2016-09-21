@@ -40,7 +40,7 @@ if not exist C:\ProgramData\chocolatey\choco.exe (
         exit /b 1
     )
     rem make sure choco writes its config
-    C:\ProgramData\chocolatey\choco.exe
+    %ProgramData%\chocolatey\choco.exe
 ) else (
     call :debug Found Chocolatey
 )
@@ -53,7 +53,7 @@ set remaining_packages=%choco_packages%
         set remaining_packages=%%Q
 
         call :debug Installing/Upgrading via choco - !current_package!
-        cmd /c C:\ProgramData\chocolatey\choco.exe upgrade !current_package! -y
+        cmd /c %ProgramData%\chocolatey\choco.exe upgrade !current_package! -y
     )
     if defined remaining_packages goto :inst_choco_deps
 
@@ -66,7 +66,7 @@ set remaining_packages=%npm_packages%
         set remaining_packages=%%Q
 
         call :debug Installing/Upgrading via npm - !current_package!
-        cmd /c "C:\Program Files\nodejs\npm.cmd" -g install !current_package!
+        cmd /c "%ProgramFiles%\nodejs\npm.cmd" -g install !current_package!
     )
     if defined remaining_packages goto :inst_npm_deps
 
