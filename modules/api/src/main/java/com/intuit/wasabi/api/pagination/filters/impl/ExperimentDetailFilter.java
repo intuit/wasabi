@@ -16,6 +16,7 @@
 package com.intuit.wasabi.api.pagination.filters.impl;
 
 import com.intuit.wasabi.analyticsobjects.wrapper.ExperimentDetail;
+import com.intuit.wasabi.api.pagination.filters.FilterUtil;
 import com.intuit.wasabi.api.pagination.filters.PaginationFilter;
 import com.intuit.wasabi.api.pagination.filters.PaginationFilterProperty;
 import org.apache.commons.lang3.StringUtils;
@@ -36,8 +37,8 @@ public class ExperimentDetailFilter extends PaginationFilter<ExperimentDetail> {
         application_name_exact(experimentDetail -> experimentDetail.getAppName().toString(), StringUtils::equalsIgnoreCase),
         favorite(ExperimentDetail::isFavorite, (isFavorite, filter) -> Boolean.parseBoolean(filter) == isFavorite),
         bucket_label(ExperimentDetail::getBuckets, (bucketDetails, filter) ->
-                bucketDetails.stream().anyMatch(bucketDetail -> StringUtils.containsIgnoreCase(bucketDetail.getLabel().toString(), filter)));
-
+                bucketDetails.stream().anyMatch(bucketDetail -> StringUtils.containsIgnoreCase(bucketDetail.getLabel().toString(), filter))),
+        mod_time(experimentDetail -> experimentDetail.getModificationTime(), FilterUtil::extractTimeZoneAndTestDate);
 
         private final Function<ExperimentDetail, ?> propertyExtractor;
         private final BiPredicate<?, String> filterPredicate;
