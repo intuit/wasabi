@@ -18,7 +18,6 @@ package com.intuit.wasabi.analyticsobjects.wrapper;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Experiment;
-
 import static org.junit.Assert.*;
 import org.junit.Test;
 
@@ -39,7 +38,6 @@ public class ExperimentDetailTest {
     Application.Name appName = Application.Name.valueOf("TestApplicationLabelForExperimentDetail");
     Calendar modTime = Calendar.getInstance();
     Calendar startTime = Calendar.getInstance();
-
 
     {
         modTime.set(2016,8,16);
