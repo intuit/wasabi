@@ -24,6 +24,8 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 
+import static cern.clhep.Units.s;
+
 /**
  * Implements the {@link PaginationFilter} for {@link com.intuit.wasabi.analyticsobjects.wrapper.ExperimentDetail}s.
  */
@@ -80,7 +82,8 @@ public class ExperimentDetailFilter extends PaginationFilter<ExperimentDetail> {
      *
      */
     public ExperimentDetailFilter() {
-        super.excludeFromFulltext(Property.application_name_exact);
+        super.registerFilterModifierForProperties(FilterUtil.FilterModifier.APPEND_TIMEZONEOFFSET, Property.mod_time);
+        super.excludeFromFulltext(Property.application_name_exact, Property.mod_time);
     }
 
     /**

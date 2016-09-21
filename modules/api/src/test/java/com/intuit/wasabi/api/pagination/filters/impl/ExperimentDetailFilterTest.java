@@ -74,8 +74,8 @@ public class ExperimentDetailFilterTest {
         testCases.put("experiment_label=ExperimentLabel", true);
         testCases.put("bucket_label=Bucket2", true);
         testCases.put("application_name=testApp", false);
-        //testCases.put("mod_time=Summer", false); //FIXME: why is this not working?
-        //testCases.put("Experiment", true);
+        testCases.put("mod_time=Summer", false);
+        testCases.put("Experiment", true);
 
         for (Map.Entry<String, Boolean> testCase : testCases.entrySet()) {
             experimentDetailFilter.replaceFilter(testCase.getKey(), "+0000");
