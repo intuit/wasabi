@@ -30,30 +30,21 @@ import com.intuit.wasabi.repository.CassandraRepository;
 import com.intuit.wasabi.repository.DatabaseRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import org.joda.time.DateTime;
-import org.slf4j.Logger;
 
 import javax.inject.Inject;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
-import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Implementation of {@link ExperimentDetails}
  */
 public class ExperimentDetailsImpl implements ExperimentDetails{
 
-    private static final Logger LOGGER = getLogger(ExperimentDetailsImpl.class);
-
     private final ExperimentRepository databaseRepository;
     private final ExperimentRepository cassandraRepository;
     private final Buckets buckets;
-
     private final Analytics analytics;
-
 
 
     /**
@@ -124,10 +115,9 @@ public class ExperimentDetailsImpl implements ExperimentDetails{
      *
      * @param experimentDetail the {@link ExperimentDetail} that needs to be enhanced with analytics data
      * @param params {@link Parameters} for the Analytics calls- containing the context for example
-     * @return
+     * @return the same object with additional analytic information
      */
-    private ExperimentDetail getAnalyticData(ExperimentDetail experimentDetail, Parameters params){
-
+     /*test*/ ExperimentDetail getAnalyticData(ExperimentDetail experimentDetail, Parameters params){
 
         // analytics data is only necessary for running/paused/terminated experiments
         if(!experimentDetail.getState().equals(Experiment.State.DRAFT)) {
@@ -141,36 +131,44 @@ public class ExperimentDetailsImpl implements ExperimentDetails{
             }
 
             ExperimentStatistics expStats = analytics.getExperimentStatistics(experimentDetail.getId(), params);
-            Map<Label, BucketStatistics> bucketAnalytics = expStats.getBuckets();
-
-            //Bucket analytics data- progress and winners
-
-            DateTime aWeekAgo = new DateTime().minusDays(7);
-            //winner so far is only determined if the experiment ran at least a week
-            boolean checkWinnerSoFar = experimentDetail.getStartTime().before(aWeekAgo.toDate());
-
-            for(ExperimentDetail.BucketDetail b : experimentDetail.getBuckets()){
-                BucketStatistics bucketStat = bucketAnalytics.get(b.getLabel());
-
-                if(bucketStat.getJointActionRate() != null) {
-                    b.setActionRate(bucketStat.getJointActionRate().getEstimate().doubleValue());
-                    b.setLowerBound(bucketStat.getJointActionRate().getLowerBound());
-                    b.setUpperBound(bucketStat.getJointActionRate().getUpperBound());
-                }
-
-                b.setUserCount(bucketStat.getImpressionCounts().getUniqueUserCount());
-
-                if(checkWinnerSoFar){
-                    for(Bucket.Label winner : expStats.getJointProgress().getWinnersSoFar()){
-                        if(b.getLabel().equals(winner)){
-                            b.setWinnerSoFar(true);
-                            break;
-                        }
-                    }
-                }
-            }
+            getBucketDetails(experimentDetail,expStats);
 
         }
         return experimentDetail;
+    }
+
+    /**
+     * Encapsulates the AnalyticsData retrieval for the Buckets of an Experiment.
+     *
+     * @param experimentDetail the {@link ExperimentDetail} of which the Bucketinformation is retrieved
+     * @param expStats the ExperimentStatistics belonging to this Experiment
+     */
+     /*test*/ void getBucketDetails(ExperimentDetail experimentDetail, ExperimentStatistics expStats){
+        DateTime aWeekAgo = new DateTime().minusDays(7);
+        //winner so far is only determined if the experiment ran at least a week
+        boolean checkWinnerSoFar = experimentDetail.getStartTime().before(aWeekAgo.toDate());
+
+        Map<Label, BucketStatistics> bucketAnalytics = expStats.getBuckets();
+
+        for(ExperimentDetail.BucketDetail b : experimentDetail.getBuckets()){
+            BucketStatistics bucketStat = bucketAnalytics.get(b.getLabel());
+
+            if(bucketStat.getJointActionRate() != null) {
+                b.setActionRate(bucketStat.getJointActionRate().getEstimate());
+                b.setLowerBound(bucketStat.getJointActionRate().getLowerBound());
+                b.setUpperBound(bucketStat.getJointActionRate().getUpperBound());
+            }
+
+            b.setUserCount(bucketStat.getImpressionCounts().getUniqueUserCount());
+
+            if(checkWinnerSoFar){
+                for(Bucket.Label winner : expStats.getJointProgress().getWinnersSoFar()){
+                    if(b.getLabel().equals(winner)){
+                        b.setWinnerSoFar(true);
+                        break;
+                    }
+                }
+            }
+        }
     }
 }

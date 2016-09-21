@@ -3606,7 +3606,6 @@ public class TestBase extends ServiceTestBase {
     }
 
 
-
     /////////////////////
     // CUSTOM requests //
     /////////////////////
@@ -4042,7 +4041,6 @@ public class TestBase extends ServiceTestBase {
     ////////////////////////
     // favorites endpoint //
     ////////////////////////
-
 
     /**
      * Sends a GET request to favorites.

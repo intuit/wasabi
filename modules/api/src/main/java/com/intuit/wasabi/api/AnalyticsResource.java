@@ -92,6 +92,11 @@ public class AnalyticsResource {
      * This endpoint is paginated. Favorites are sorted to the front.
      * If {@code per_page == -1}, favorites are ignored and all experiments are returned.
      *
+     * Sample call: curl -H 'Content-Type: application/json' --user admin:jabba01 -X POST
+     * -d '{"fromTime":"2014-06-10T00:00:00-0000","toTime":"2014-06-10T00:00:00-0000","confidenceLevel":0.99,
+     * "effectSize":0.0,"actions":[],"isSingleShot":false,"context":"prod"}'
+     * 'http://localhost:8080/api/v1/analytics/experiments?per_page=5&page=1'
+     *
      * @param authorizationHeader the authentication headers
      * @param page the page which should be returned, defaults to 1
      * @param perPage the number of experiments per page, defaults to 10. -1 to get all values.
@@ -101,7 +106,7 @@ public class AnalyticsResource {
      * @return a response containing a map with a list with {@code 0} to {@code perPage} experiments,
      * if that many are on the page, and a count of how many experiments match the filter criteria.
      */
-    @GET
+    @POST
     @Produces(APPLICATION_JSON)
     @Path("/experiments")
     @ApiOperation(value = "Return details of all experiments with details for the card view, with respect to the authorization",

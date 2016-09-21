@@ -19,6 +19,7 @@ import com.intuit.wasabi.tests.library.TestBase;
 import com.intuit.wasabi.tests.library.util.ModelAssert;
 import com.intuit.wasabi.tests.library.util.TestUtils;
 import com.intuit.wasabi.tests.model.Experiment;
+import com.intuit.wasabi.tests.model.analytics.AnalyticsParameters;
 import com.intuit.wasabi.tests.model.factory.ExperimentFactory;
 import com.jayway.restassured.path.json.JsonPath;
 import org.testng.Assert;
@@ -30,6 +31,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.intuit.wasabi.tests.data.SharedExperimentDataProvider.today;
 
 public class PaginationTest extends TestBase {
     private final List<Experiment> experimentList = new ArrayList<>(12);
@@ -240,6 +243,23 @@ public class PaginationTest extends TestBase {
                 .getList("logEntries");
 
         Assert.assertEquals(auditLogEntryMaps.size(), 10, "There is not the correct number of audit log entries.");
+    }
+
+    @Test(dependsOnGroups = {"pagination_pages"}, groups = {"experiment_details"})
+    public void t_ExperimentDetailsPaginationSmoke() {
+        AnalyticsParameters params = new AnalyticsParameters();
+
+        params.confidenceLevel = 0.99d;
+        params.fromTime = "2016-08-10T00:00:00-0000";
+        params.toTime = "2016-10-20T00:00:00-0000";
+        params.context = "prod";
+
+        List<Map<String, Object>> experimentDetails = apiServerConnector
+                .doPost("analytics/experiments?per_page=10&page=1&filter=" + experimentPrefix + ",state=DRAFT",params)
+                .jsonPath()
+                .getList("experimentDetails");
+        Assert.assertNotNull(experimentDetails);
+        Assert.assertEquals(experimentDetails.size(), 10, "There is not the correct number of ExperimentDetail entries.");
     }
 
     private List<Experiment> getPaginatedExperiments(int page, int perPage, String sort, String filter) {
