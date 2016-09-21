@@ -18,6 +18,8 @@ package com.intuit.wasabi.analyticsobjects.wrapper;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Experiment;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -284,6 +286,11 @@ public class ExperimentDetail {
 
         setBuckets(details);
 
+    }
+
+    @Override
+    public String toString(){
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 
 

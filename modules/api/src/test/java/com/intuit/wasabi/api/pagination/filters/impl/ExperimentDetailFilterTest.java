@@ -16,9 +16,6 @@
 package com.intuit.wasabi.api.pagination.filters.impl;
 
 import com.intuit.wasabi.analyticsobjects.wrapper.ExperimentDetail;
-import com.intuit.wasabi.auditlogobjects.AuditLogAction;
-import com.intuit.wasabi.auditlogobjects.AuditLogEntry;
-import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Experiment;
@@ -28,7 +25,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
+
 
 /**
  * Test class for {@link ExperimentDetailFilter}
@@ -66,11 +70,12 @@ public class ExperimentDetailFilterTest {
         ExperimentDetailFilter experimentDetailFilter = new ExperimentDetailFilter();
 
         HashMap<String, Boolean> testCases = new HashMap<>();
+
         testCases.put("experiment_label=ExperimentLabel", true);
         testCases.put("bucket_label=Bucket2", true);
         testCases.put("application_name=testApp", false);
         //testCases.put("mod_time=Summer", false); //FIXME: why is this not working?
-        //testCases.put("experiment_label=ExperimentLabel", true);
+        //testCases.put("Experiment", true);
 
         for (Map.Entry<String, Boolean> testCase : testCases.entrySet()) {
             experimentDetailFilter.replaceFilter(testCase.getKey(), "+0000");
