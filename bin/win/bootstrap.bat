@@ -29,21 +29,21 @@ if not %errorLevel% == 0 (
     exit /b 1
 )
 
-rem install chocolatey
+
 call :debug Trying to find Chocolatey
-if not exist C:\ProgramData\chocolatey\choco.exe (
-    call :info Installing Chocolatey
-    powershell -NoProfile -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin
-    if errorlevel 1 (
-        call :error Can not install Chocolatey
-        endlocal
-        exit /b 1
-    )
-    rem make sure choco writes its config
+if exist %ProgramData%\chocolatey\choco.exe goto choco_exists
+	call :info Installing Chocolatey
+		powershell -NoProfile -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin
+		if errorlevel 1 (
+			call :error Can not install Chocolatey
+			endlocal
+			exit /b 1
+		)
+		rem make sure choco writes its config
     %ProgramData%\chocolatey\choco.exe
-) else (
-    call :debug Found Chocolatey
-)
+:choco_exists
+call :debug Found Chocolatey
+
 
 call :info Installing/Upgrading Chocolatey dependencies
 set remaining_packages=%choco_packages%
