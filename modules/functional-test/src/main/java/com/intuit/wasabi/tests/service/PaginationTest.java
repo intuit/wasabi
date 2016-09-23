@@ -247,15 +247,9 @@ public class PaginationTest extends TestBase {
 
     @Test(dependsOnGroups = {"pagination_pages"}, groups = {"experiment_details"})
     public void t_ExperimentDetailsPaginationSmoke() {
-        AnalyticsParameters params = new AnalyticsParameters();
-
-        params.confidenceLevel = 0.99d;
-        params.fromTime = "2016-08-10T00:00:00-0000";
-        params.toTime = "2016-10-20T00:00:00-0000";
-        params.context = "prod";
 
         List<Map<String, Object>> experimentDetails = apiServerConnector
-                .doPost("analytics/experiments?per_page=10&page=1&filter=" + experimentPrefix + ",state=DRAFT",params)
+                .doGet("analytics/experiments?per_page=10&page=1&filter=" + experimentPrefix + ",state=DRAFT")
                 .jsonPath()
                 .getList("experimentDetails");
         Assert.assertNotNull(experimentDetails);

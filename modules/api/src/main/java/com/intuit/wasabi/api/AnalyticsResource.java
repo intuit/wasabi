@@ -98,6 +98,7 @@ public class AnalyticsResource {
      * 'http://localhost:8080/api/v1/analytics/experiments?per_page=5&page=1'
      *
      * @param authorizationHeader the authentication headers
+     * @param context the context in which the analytics data should be retrieved
      * @param page the page which should be returned, defaults to 1
      * @param perPage the number of experiments per page, defaults to 10. -1 to get all values.
      * @param sort the sorting rules
@@ -106,7 +107,7 @@ public class AnalyticsResource {
      * @return a response containing a map with a list with {@code 0} to {@code perPage} experiments,
      * if that many are on the page, and a count of how many experiments match the filter criteria.
      */
-    @POST
+    @GET
     @Produces(APPLICATION_JSON)
     @Path("/experiments")
     @ApiOperation(value = "Return details of all experiments with details for the card view, with respect to the authorization",
@@ -116,8 +117,10 @@ public class AnalyticsResource {
                                          @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
                                          final String authorizationHeader,
 
-                                         @ApiParam(required = true, defaultValue = DEFAULT_EMPTY)
-                                         final Parameters parameters,
+                                         @QueryParam("context")
+                                         @DefaultValue("PROD")
+                                         @ApiParam(value = "context for the experiment, eg \"QA\", \"PROD\"")
+                                         final Context context,
 
                                          @QueryParam("page")
                                          @DefaultValue(DEFAULT_PAGE)
@@ -184,6 +187,7 @@ public class AnalyticsResource {
                 (perPage != -1 ? "-favorite," : "") + sort, page, perPage);
 
         //and now add the analytics data
+        Parameters parameters = createParameters(context);
         experimentDetails.getAnalyticData((List<ExperimentDetail>)experimentResponse.get("experimentDetails"), parameters);
 
         return httpHeader.headers().entity(experimentResponse).build();
