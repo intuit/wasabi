@@ -24,14 +24,31 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 
-import static cern.clhep.Units.s;
-
 /**
  * Implements the {@link PaginationFilter} for {@link com.intuit.wasabi.analyticsobjects.wrapper.ExperimentDetail}s.
  */
 public class ExperimentDetailFilter extends PaginationFilter<ExperimentDetail> {
 
-    public enum Property implements PaginationFilterProperty<ExperimentDetail>{
+    /**
+     * Initializes the ExperimentDetailFilter.
+     * <p>
+     * Registers modifiers to handle timezones correctly and excludes duplicate and specialized search query fields
+     * from fulltext search to avoid difficulties in overly specific queries and to avoid duplications.
+     */
+    public ExperimentDetailFilter() {
+        super.registerFilterModifierForProperties(FilterUtil.FilterModifier.APPEND_TIMEZONEOFFSET, Property.mod_time);
+        super.excludeFromFulltext(Property.application_name_exact, Property.mod_time, Property.favorite);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean test(ExperimentDetail experimentFilter) {
+        return super.test(experimentFilter, Property.class);
+    }
+
+    public enum Property implements PaginationFilterProperty<ExperimentDetail> {
         state(ExperimentDetail::getState, (state, filter) -> StringUtils.containsIgnoreCase(state.toString(), filter)),
         state_exact(ExperimentDetail::getState, ExperimentFilter::stateTest),
         experiment_label(experimentDetail -> experimentDetail.getLabel().toString(), StringUtils::containsIgnoreCase),
@@ -40,7 +57,7 @@ public class ExperimentDetailFilter extends PaginationFilter<ExperimentDetail> {
         favorite(ExperimentDetail::isFavorite, (isFavorite, filter) -> Boolean.parseBoolean(filter) == isFavorite),
         bucket_label(ExperimentDetail::getBuckets, (bucketDetails, filter) ->
                 bucketDetails.stream().anyMatch(bucketDetail -> StringUtils.containsIgnoreCase(bucketDetail.getLabel().toString(), filter))),
-        mod_time(experimentDetail -> experimentDetail.getModificationTime(), FilterUtil::extractTimeZoneAndTestDate);
+        mod_time(ExperimentDetail::getModificationTime, FilterUtil::extractTimeZoneAndTestDate);
 
         private final Function<ExperimentDetail, ?> propertyExtractor;
         private final BiPredicate<?, String> filterPredicate;
@@ -49,8 +66,8 @@ public class ExperimentDetailFilter extends PaginationFilter<ExperimentDetail> {
          * Creates a Property.
          *
          * @param propertyExtractor the property extractor
-         * @param filterPredicate the filter predicate
-         * @param <T> the property type
+         * @param filterPredicate   the filter predicate
+         * @param <T>               the property type
          */
         <T> Property(Function<ExperimentDetail, T> propertyExtractor, BiPredicate<T, String> filterPredicate) {
             this.propertyExtractor = propertyExtractor;
@@ -72,26 +89,6 @@ public class ExperimentDetailFilter extends PaginationFilter<ExperimentDetail> {
         public BiPredicate<?, String> getFilterPredicate() {
             return filterPredicate;
         }
-    }
-
-    /**
-     * Initializes the ExperimentDetailFilter.
-     *
-     * Registers modifiers to handle timezones correctly and excludes duplicate and specialized search query fields
-     * from fulltext search to avoid difficulties in overly specific queries and to avoid duplications.
-     *
-     */
-    public ExperimentDetailFilter() {
-        super.registerFilterModifierForProperties(FilterUtil.FilterModifier.APPEND_TIMEZONEOFFSET, Property.mod_time);
-        super.excludeFromFulltext(Property.application_name_exact, Property.mod_time);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean test(ExperimentDetail experimentFilter) {
-        return super.test(experimentFilter, Property.class);
     }
 
 

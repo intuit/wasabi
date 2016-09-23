@@ -26,6 +26,7 @@ import com.intuit.wasabi.analyticsobjects.counts.ExperimentCounts;
 import com.intuit.wasabi.analyticsobjects.counts.ExperimentCumulativeCounts;
 import com.intuit.wasabi.analyticsobjects.statistics.ExperimentCumulativeStatistics;
 import com.intuit.wasabi.analyticsobjects.statistics.ExperimentStatistics;
+import com.intuit.wasabi.analyticsobjects.wrapper.ExperimentDetail;
 import com.intuit.wasabi.api.pagination.PaginationHelper;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authorization.Authorization;
@@ -34,20 +35,39 @@ import com.intuit.wasabi.experiment.Favorites;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Context;
 import com.intuit.wasabi.experimentobjects.Experiment;
-import com.intuit.wasabi.analyticsobjects.wrapper.ExperimentDetail;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import java.util.*;
-
-import static com.intuit.wasabi.api.APISwaggerResource.*;
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_EMPTY;
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_FILTER;
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_PAGE;
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_PER_PAGE_CARDVIEW;
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_SORT;
 import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_TIMEZONE;
+import static com.intuit.wasabi.api.APISwaggerResource.DOC_FILTER;
+import static com.intuit.wasabi.api.APISwaggerResource.DOC_PAGE;
+import static com.intuit.wasabi.api.APISwaggerResource.DOC_PER_PAGE;
+import static com.intuit.wasabi.api.APISwaggerResource.DOC_SORT;
 import static com.intuit.wasabi.api.APISwaggerResource.DOC_TIMEZONE;
+import static com.intuit.wasabi.api.APISwaggerResource.EXAMPLE_AUTHORIZATION_HEADER;
 import static com.intuit.wasabi.authorizationobjects.Permission.READ;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -75,7 +95,7 @@ public class AnalyticsResource {
     @Inject
     AnalyticsResource(final Analytics analytics, final AuthorizedExperimentGetter authorizedExperimentGetter,
                       final HttpHeader httpHeader, final PaginationHelper<ExperimentDetail> experimentDetailPaginationHelper,
-                      final ExperimentDetails experimentDetails, final Favorites favorites,final Authorization authorization) {
+                      final ExperimentDetails experimentDetails, final Favorites favorites, final Authorization authorization) {
         this.analytics = analytics;
         this.authorizedExperimentGetter = authorizedExperimentGetter;
         this.httpHeader = httpHeader;
@@ -88,22 +108,22 @@ public class AnalyticsResource {
     /**
      * Returns a list of all not-deleted experiments the user has access to. Provides additional information
      * of the current state, with bucket information and analytic counts.
-     *
+     * <p>
      * This endpoint is paginated. Favorites are sorted to the front.
      * If {@code per_page == -1}, favorites are ignored and all experiments are returned.
-     *
+     * <p>
      * Sample call: curl -H 'Content-Type: application/json' --user admin:jabba01 -X POST
      * -d '{"fromTime":"2014-06-10T00:00:00-0000","toTime":"2014-06-10T00:00:00-0000","confidenceLevel":0.99,
      * "effectSize":0.0,"actions":[],"isSingleShot":false,"context":"prod"}'
      * 'http://localhost:8080/api/v1/analytics/experiments?per_page=5&page=1'
      *
      * @param authorizationHeader the authentication headers
-     * @param context the context in which the analytics data should be retrieved
-     * @param page the page which should be returned, defaults to 1
-     * @param perPage the number of experiments per page, defaults to 10. -1 to get all values.
-     * @param sort the sorting rules
-     * @param filter the filter rules
-     * @param timezoneOffset the time zone offset from UTC
+     * @param context             the context in which the analytics data should be retrieved
+     * @param page                the page which should be returned, defaults to 1
+     * @param perPage             the number of experiments per page, defaults to 10. -1 to get all values.
+     * @param sort                the sorting rules
+     * @param filter              the filter rules
+     * @param timezoneOffset      the time zone offset from UTC
      * @return a response containing a map with a list with {@code 0} to {@code perPage} experiments,
      * if that many are on the page, and a count of how many experiments match the filter criteria.
      */
@@ -188,14 +208,15 @@ public class AnalyticsResource {
 
         //and now add the analytics data
         Parameters parameters = createParameters(context);
-        experimentDetails.getAnalyticData((List<ExperimentDetail>)experimentResponse.get("experimentDetails"), parameters);
+
+        experimentResponse.put("experimentDetails", experimentDetails.getAnalyticData((List<ExperimentDetail>) experimentResponse.get("experimentDetails"), parameters));
 
         return httpHeader.headers().entity(experimentResponse).build();
     }
 
     /**
      * Returns a number of summary counts for the specified experiment.
-     *
+     * <p>
      * Returns unique and non-unique counts at the experiment, bucket, and action levels for both actions and impressions.
      *
      * @param experimentID        the unique experiment ID
@@ -275,7 +296,7 @@ public class AnalyticsResource {
 
     /**
      * Returns a number of summary counts for the specified experiment, by day.
-     *
+     * <p>
      * Returns unique and non-unique counts at the experiment, bucket, and action levels for both actions and impressions.
      * For each day, includes counts for that day and cumulative counts, calculated from the beginning of the experiment.
      *
@@ -349,7 +370,7 @@ public class AnalyticsResource {
 
     /**
      * Returns a number of summary counts and statistics for the specified experiment.
-     *
+     * <p>
      * Returns unique and non-unique counts at the experiment, bucket, and action levels for both actions and impressions.
      * Also returns a number of statistics calculated from the unique counts.
      *
@@ -423,7 +444,7 @@ public class AnalyticsResource {
 
     /**
      * Returns a number of summary counts and statistics for the specified experiment, by day
-     *
+     * <p>
      * Returns unique and non-unique counts at the experiment, bucket, and action levels for both actions and impressions.
      * For each day, includes counts for that day and cumulative counts, calculated from the beginning of the experiment.
      * Also returns a number of statistics calculated from the unique counts.
@@ -500,6 +521,7 @@ public class AnalyticsResource {
 
     /**
      * Get assignments count
+     *
      * @param experimentID
      * @param context
      * @param authorizationHeader
