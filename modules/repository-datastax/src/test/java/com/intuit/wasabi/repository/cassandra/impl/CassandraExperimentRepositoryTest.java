@@ -181,6 +181,7 @@ public class CassandraExperimentRepositoryTest extends IntegrationTestBase  {
 	@Test(expected=RepositoryException.class)
 	public void testGetExperimentByAppAccessorMockThrowsException() {
 		repository.setExperimentAccessor(mockExperimentAccessor);
+		Mockito.doThrow(new RuntimeException("test")).when(mockExperimentAccessor).getExperimentByAppName(Mockito.anyString());		
 		Table<ID, Label, Experiment> experiments = 
 				repository.getExperimentList(newExperiment1.getApplicationName());
 	}

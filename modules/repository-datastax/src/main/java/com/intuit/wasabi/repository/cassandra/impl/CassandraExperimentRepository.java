@@ -738,7 +738,7 @@ public class CassandraExperimentRepository implements ExperimentRepository {
 			
 	        return result;
         } catch (Exception e) {
-            throw new RepositoryException("Could not retrieve experiment list " + appName.toString(), e);
+            throw new RepositoryException("Could not retrieve experiment list " + appName.toString() + "because: " + e, e);
         }
     }
 
@@ -756,7 +756,7 @@ public class CassandraExperimentRepository implements ExperimentRepository {
         	
         	
         } catch (Exception e) {
-            throw new RepositoryException("Could not retrieve the application names", e);
+            throw new RepositoryException("Could not retrieve the application names because : " + e, e);
         }
         return result;
     }
@@ -788,7 +788,7 @@ public class CassandraExperimentRepository implements ExperimentRepository {
             return result;
         } catch (Exception e) {
             throw new RepositoryException("Could not retrieve bucket \"" +
-                    bucketLabel + "\" in experiment \"" + experimentID + "\"", e);
+                    bucketLabel + "\" in experiment \"" + experimentID + "\" because " + e, e);
         }
     }
 
@@ -815,7 +815,7 @@ public class CassandraExperimentRepository implements ExperimentRepository {
 			
 		} catch (Exception e) {
 			LOGGER.error("Error creating bucket {}", newBucket, e);
-			throw new RepositoryException("Could not create bucket \"" + newBucket + "\"", e); 
+			throw new RepositoryException("Could not create bucket \"" + newBucket + "\" because " + e, e); 
 	    }
 	}
 
