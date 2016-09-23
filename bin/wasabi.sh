@@ -64,7 +64,7 @@ EOF
 }
 
 fromPom() {
-    mvn -f $1/pom.xml -P $2 help:evaluate -Dexpression=$3 | sed -n -e '/^\[.*\]/ !{ p; }'
+    mvn ${WASABI_MAVEN} -f $1/pom.xml -P $2 help:evaluate -Dexpression=$3 | sed -n -e '/^\[.*\]/ !{ p; }'
 }
 
 beerMe() {
@@ -185,7 +185,7 @@ build() {
 }
 
 clean() {
-  mvn clean
+  mvn ${WASABI_MAVEN} clean
   (cd modules/ui; grunt clean)
 }
 
@@ -313,7 +313,7 @@ remove() {
   ./bin/container.sh remove${1:+:$1}
 }
 
-optspec=":e:p:v:s:h-:"
+optspec=":p:e:v:s:h-:"
 
 while getopts "${optspec}" opt; do
   case "${opt}" in
@@ -358,7 +358,8 @@ for command in ${@:$OPTIND}; do
     start:*) commands=$(echo ${command} | cut -d ':' -f 2)
       (IFS=','; for command in ${commands}; do start ${command}; done);;
     test:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for command in ${commands}; do mvn "-Dtest=com.intuit.wasabi.${command/-/}.**" test -pl modules/${command} --also-make -DfailIfNoTests=false -q ; done);;
+      (IFS=','; for command in ${commands}; do \
+        mvn ${WASABI_MAVEN} "-Dtest=com.intuit.wasabi.${command/-/}.**" test -pl modules/${command} --also-make -DfailIfNoTests=false -q ; done);;
     test) test_api;;
     stop) command="stop:wasabi,mysql,cassandra";&
     stop:*) commands=$(echo ${command} | cut -d ':' -f 2)

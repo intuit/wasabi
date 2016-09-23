@@ -50,7 +50,7 @@ EOF
 }
 
 fromPom() {
-    mvn -f $1/pom.xml -P $2 help:evaluate -Dexpression=$3 | sed -n -e '/^\[.*\]/ !{ p; }'
+    mvn ${WASABI_MAVEN} -f $1/pom.xml -P $2 help:evaluate -Dexpression=$3 | sed -n -e '/^\[.*\]/ !{ p; }'
 }
 
 beerMe() {
