@@ -252,7 +252,6 @@ package() {
   [ "${profile}" == "${profile_default}" ] && profile=build
 
   build true ${verify} ${profile}
-  exit
 
   # FIXME: move to modules/ui/build.sh
   version=$(fromPom . build project.version)
