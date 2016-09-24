@@ -87,7 +87,7 @@ public class AssignmentCountEnvelope implements Runnable {
     @Override
     public void run() {
         if (countUp) {
-            increaseExperimentAssignmentPerDayCount();
+            assignmentsRepository.insertExperimentBucketAssignment(experiment.getID(), date.toInstant(), null != assignment.getBucketLabel());
         }
 
         try {
@@ -140,20 +140,6 @@ public class AssignmentCountEnvelope implements Runnable {
                 }
 
             }
-        }
-    }
-
-    /**
-     * Increases the experiment assignment counts for either buckets or null buckets,
-     * iff the processed assignment is a new assignment.
-     */
-    private void increaseExperimentAssignmentPerDayCount() {
-        if (null == assignment.getBucketLabel()) {
-            assignmentsRepository.increaseExperimentAssignmentPerDayNullCount(experiment.getID(), date.toInstant(),
-                    assignment.getContext());
-        } else {
-            assignmentsRepository.increaseExperimentAssignmentPerDayBucketCount(experiment.getID(), date.toInstant(),
-                    assignment.getContext());
         }
     }
 }

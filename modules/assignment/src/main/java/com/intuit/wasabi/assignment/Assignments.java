@@ -31,7 +31,7 @@ import com.intuit.wasabi.experimentobjects.Page;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.StreamingOutput;
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -214,9 +214,7 @@ public interface Assignments {
      * @param experimentPriorities a look up map of priorities
      * @param fromDate             the date to start reporting from
      * @param toDate               the date to report to
-     * @param context              the context
-     * @param timezoneOffset       the timezoneOffset
      * @return bucket assignment ratios per day and meta
      */
-    ImmutableMap<String, ?> getExperimentAssignmentRatioPerDayTable(List<Experiment> experiments, Map<Experiment.ID, Integer> experimentPriorities, Instant fromDate, Instant toDate, Context context, String timezoneOffset);
+    ImmutableMap<String, ?> getExperimentAssignmentRatioPerDayTable(List<Experiment> experiments, Map<Experiment.ID, Integer> experimentPriorities, OffsetDateTime fromDate, OffsetDateTime toDate);
 }

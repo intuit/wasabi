@@ -27,6 +27,7 @@ import com.intuit.wasabi.experimentobjects.Experiment;
 
 import javax.ws.rs.core.StreamingOutput;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
@@ -168,34 +169,24 @@ public interface AssignmentsRepository {
     AssignmentCounts getBucketAssignmentCount(Experiment experiment);
 
     /**
-     * Updates the bucket assignment counts per day for an experiment.
+     * Inserts an assignment type to be counted by {@link #getExperimentBucketAssignmentRatioPerDay(Experiment.ID, OffsetDateTime, OffsetDateTime)}.
      *
-     * @param experimentID the experiment ID
-     * @param date         the date representing the day
-     * @param context      the experiment context
+     * @param experimentID     the experiment ID
+     * @param date             the date of the assignment
+     * @param bucketAssignment the assignment status: true = bucket assignment; false = null assignment
      */
-    void increaseExperimentAssignmentPerDayBucketCount(Experiment.ID experimentID, Instant date, Context context);
-
-    /**
-     * Updates the null assignment counts per day for an experiment.
-     *
-     * @param experimentID the experiment ID
-     * @param date         the date representing the day
-     * @param context      the experiment context
-     */
-    void increaseExperimentAssignmentPerDayNullCount(Experiment.ID experimentID, Instant date, Context context);
+    void insertExperimentBucketAssignment(Experiment.ID experimentID, Instant date, boolean bucketAssignment);
 
     /**
      * Gets assignment counts per day for an experiment.
      *
      * @param experimentID the experiment ID
-     * @param context      the experiment context
      * @param fromDate     the first day to include
      * @param toDate       the last day to include
      * @return A map entry with the experiment ID as its key. It maps to a Map containing the keys "bucketAssignments"
      * and "nullAssignments", which each have a list of values which represent the assignment counts of new assignments
      * for each day, ordered from {@code fromDate} to {@code toDate}.
      */
-    Map<String, Double> getExperimentBucketAssignmentRatioPerDay(Experiment.ID experimentID, Context context, Instant fromDate, Instant toDate);
+    Map<OffsetDateTime, Double> getExperimentBucketAssignmentRatioPerDay(Experiment.ID experimentID, OffsetDateTime fromDate, OffsetDateTime toDate);
 
 }

@@ -159,8 +159,8 @@ public class ExperimentsKeyspaceImpl implements ExperimentsKeyspace {
                     StringSerializer.get());
     private ColumnFamily<Application.Name, String> AUDITLOG_CF = ColumnFamily
             .newColumnFamily("auditlog", ApplicationNameSerializer.get(), StringSerializer.get());
-    private ColumnFamily<ExperimentIDContextBasicISODateComposite, String> EXPERIMENT_ASSIGNMENT_COUNT_BY_DAY = ColumnFamily
-            .newColumnFamily("experiment_assignments_per_day", ExperimentIDContextBasicISODateComposite.Serializer.get(),
+    private ColumnFamily<Experiment.ID, String> EXPERIMENT_ASSIGNMENT_TYPE = ColumnFamily
+            .newColumnFamily("experiment_assignment_type", ExperimentIDSerializer.get(),
                     StringSerializer.get());
 
     @Override
@@ -289,7 +289,7 @@ public class ExperimentsKeyspaceImpl implements ExperimentsKeyspace {
     }
 
     @Override
-    public ColumnFamily<ExperimentIDContextBasicISODateComposite, String> experimentAssignmentCountByDay() {
-        return EXPERIMENT_ASSIGNMENT_COUNT_BY_DAY;
+    public ColumnFamily<Experiment.ID, String> experimentAssignmentType() {
+        return EXPERIMENT_ASSIGNMENT_TYPE;
     }
 }

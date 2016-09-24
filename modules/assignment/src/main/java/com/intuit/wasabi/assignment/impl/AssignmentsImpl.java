@@ -73,8 +73,7 @@ import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.time.Duration;
-import java.time.Instant;
-import java.time.ZoneId;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -1088,23 +1087,22 @@ public class AssignmentsImpl implements Assignments {
      * Gets the experiment assignment ratios per day per experiment.
      *
      * @param experiments the list of experiments
-     * @param context     the context
      * @param fromDate    the first day to include
      * @param toDate      the last day to include
      * @return a map mapping experiment IDs to their daily values for each of the given days
      */
-    private Map<Experiment.ID, Map<String, Double>> getExperimentAssignmentRatioPerDay(List<Experiment> experiments, Context context, Instant fromDate, Instant toDate) {
+    private Map<Experiment.ID, Map<OffsetDateTime, Double>> getExperimentAssignmentRatioPerDay(List<Experiment> experiments, OffsetDateTime fromDate, OffsetDateTime toDate) {
         return experiments.parallelStream()
                 .collect(Collectors.toMap(Experiment::getID,
-                        experiment -> assignmentsRepository.getExperimentBucketAssignmentRatioPerDay(experiment.getID(), context, fromDate, toDate)));
+                        experiment -> assignmentsRepository.getExperimentBucketAssignmentRatioPerDay(experiment.getID(), fromDate, toDate)));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public ImmutableMap<String, ?> getExperimentAssignmentRatioPerDayTable(List<Experiment> experiments, Map<Experiment.ID, Integer> experimentPriorities, Instant fromDate, Instant toDate, Context context, String timezoneOffset) {
-        Map<Experiment.ID, Map<String, Double>> assignmentRatios = getExperimentAssignmentRatioPerDay(experiments, context, fromDate, toDate);
+    public ImmutableMap<String, ?> getExperimentAssignmentRatioPerDayTable(List<Experiment> experiments, Map<Experiment.ID, Integer> experimentPriorities, OffsetDateTime fromDate, OffsetDateTime toDate) {
+        Map<Experiment.ID, Map<OffsetDateTime, Double>> assignmentRatios = getExperimentAssignmentRatioPerDay(experiments, fromDate, toDate);
 
         // Prepare table: fill with labels, priorities, and sampling percentages
         List<Experiment.Label> experimentLabelsList = new ArrayList<>(experiments.size());
@@ -1122,20 +1120,20 @@ public class AssignmentsImpl implements Assignments {
         assignmentRatioTableBuilder.put("samplingPercentages", samplingPercentagesList);
 
         // fill table with data
-        DateTimeFormatter keyFormatter = DateTimeFormatter.BASIC_ISO_DATE.withZone(ZoneId.of("UTC"));
-        DateTimeFormatter uiFormat = DateTimeFormatter.ofPattern("M/d/y").withZone(ZoneId.of(timezoneOffset));
-        int days = (int) (Duration.between(fromDate, toDate.plus(1, ChronoUnit.DAYS)).getSeconds() / ChronoUnit.DAYS.getDuration().getSeconds());
+        DateTimeFormatter uiFormat = DateTimeFormatter.ofPattern("M/d/y");
+        int days = (int) Duration.between(fromDate, toDate.plusDays(1)).toDays();
 
         List<Map<String, Object>> assignmentRatioCells = new ArrayList<>(days);
 
         IntStream.range(0, days)
-                .mapToObj(i -> fromDate.plus(i, ChronoUnit.DAYS))
-                .forEach(day -> {
+                .mapToObj(fromDate::plusDays)
+                .forEach(date -> {
+                            OffsetDateTime dateKey = date.equals(fromDate) ? date : date.truncatedTo(ChronoUnit.DAYS);
                             Map<String, Object> cell = new HashMap<>();
-                            cell.put("date", uiFormat.format(day));
+                            cell.put("date", uiFormat.format(date));
                             cell.put("values", experiments.stream()
                                     .map(e -> assignmentRatios.getOrDefault(e.getID(), Collections.emptyMap())
-                                            .getOrDefault(keyFormatter.format(day), 0d))
+                                            .getOrDefault(dateKey, 0.0))
                                     .collect(Collectors.toList()));
                             assignmentRatioCells.add(cell);
                         }

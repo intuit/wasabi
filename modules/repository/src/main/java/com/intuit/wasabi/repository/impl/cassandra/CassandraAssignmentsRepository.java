@@ -67,8 +67,8 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
+import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -1064,35 +1064,18 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     }
 
     @Override
-    public void increaseExperimentAssignmentPerDayBucketCount(Experiment.ID experimentID, Instant date, Context context) {
+    public void insertExperimentBucketAssignment(Experiment.ID experimentID, Instant date, boolean bucketAssignment) {
         try {
             driver.getKeyspace()
-                    .prepareQuery(keyspace.experimentAssignmentCountByDay())
-                    .withCql("UPDATE experiment_assignments_per_day SET bucket_assignments = bucket_assignments + 1 WHERE experiment_id = ? AND context = ? AND day = ? ;")
+                    .prepareQuery(keyspace.experimentAssignmentType())
+                    .withCql("INSERT INTO experiment_assignment_type ( experiment_id, timestamp, bucket_assignment ) VALUES ( ?, ?, ? );")
                     .asPreparedStatement()
                     .withUUIDValue(experimentID.getRawID())
-                    .withStringValue(context.getContext())
-                    .withStringValue(DateTimeFormatter.BASIC_ISO_DATE.withZone(ZoneId.of("UTC")).format(date))
+                    .withLongValue(date.toEpochMilli())
+                    .withBooleanValue(bucketAssignment)
                     .execute();
         } catch (ConnectionException e) {
-            LOG.error("Failed to update bucket_assignments in experiment_assignments_per_day for experiment {} on {}. Exception: {}",
-                    experimentID.getRawID().toString(), date, e.getMessage());
-        }
-    }
-
-    @Override
-    public void increaseExperimentAssignmentPerDayNullCount(Experiment.ID experimentID, Instant date, Context context) {
-        try {
-            driver.getKeyspace()
-                    .prepareQuery(keyspace.experimentAssignmentCountByDay())
-                    .withCql("UPDATE experiment_assignments_per_day SET null_assignments = null_assignments + 1 WHERE experiment_id = ? AND context = ? AND day = ? ;")
-                    .asPreparedStatement()
-                    .withUUIDValue(experimentID.getRawID())
-                    .withStringValue(context.getContext())
-                    .withStringValue(DateTimeFormatter.BASIC_ISO_DATE.withZone(ZoneId.of("UTC")).format(date))
-                    .execute();
-        } catch (ConnectionException e) {
-            LOG.error("Failed to update null_assignments in experiment_assignments_per_day for experiment {} on {}. Exception: {}",
+            LOG.error("Failed to write into experiment_assignment_type for experiment {} on {}. Exception: {}",
                     experimentID.getRawID().toString(), date, e.getMessage());
         }
     }
@@ -1101,48 +1084,50 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
      * {@inheritDoc}
      */
     @Override
-    public Map<String, Double> getExperimentBucketAssignmentRatioPerDay(Experiment.ID experimentID, Context context, Instant fromDate, Instant toDate) {
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.BASIC_ISO_DATE.withZone(ZoneId.of("UTC"));
-        Map<String, Double> experimentBucketAssignmentRatios = new HashMap<>();
-        try {
-            driver.getKeyspace()
-                    .prepareQuery(keyspace.experimentAssignmentCountByDay())
-                    .withCql("SELECT * FROM experiment_assignments_per_day WHERE experiment_id = ? AND context = ? AND day >= ? AND day <= ? ;")
-                    .asPreparedStatement()
-                    .withUUIDValue(experimentID.getRawID())
-                    .withStringValue(context.getContext())
-                    .withStringValue(dateTimeFormatter.format(fromDate))
-                    .withStringValue(dateTimeFormatter.format(toDate))
-                    .execute()
-                    .getResult()
-                    .getRows()
-                    .forEach(row -> {
-                        ColumnList<String> columns = row.getColumns();
+    public Map<OffsetDateTime, Double> getExperimentBucketAssignmentRatioPerDay(Experiment.ID experimentID, OffsetDateTime fromDate, OffsetDateTime toDate) {
 
-                        long bucketAssignments = 0;
-                        try {
-                            bucketAssignments = columns.getLongValue("bucket_assignments", 0L);
-                        } catch (NullPointerException ignore) {
-                        }
+        Map<OffsetDateTime, Double> experimentBucketAssignmentRatios = new HashMap<>();
 
-                        long totalAssignments = bucketAssignments;
-                        try {
-                            totalAssignments += columns.getLongValue("null_assignments", 0L);
-                        } catch (NullPointerException ignore) {
-                        }
+        OffsetDateTime currentDate = fromDate;
+        do { // while (currentDate.isBefore(toDate))
+            OffsetDateTime currentDatePlusOne = currentDate.plusDays(1).truncatedTo(ChronoUnit.DAYS);
 
-                        experimentBucketAssignmentRatios.put(
-                                columns.getColumnByName("day").getStringValue(),
-                                totalAssignments > 0 ? (double) bucketAssignments / (double) totalAssignments : 0);
-                    });
-        } catch (ConnectionException e) {
-            throw new RepositoryException(
-                    String.format("Failed to select experiment_assignments_per_day for experiment %s between %s and %s.",
-                            experimentID.getRawID().toString(),
-                            fromDate,
-                            toDate),
-                    e);
-        }
+            // counts[0]: bucket assignments, counts[1]: total
+            final int[] counts = new int[2];
+            try {
+                driver.getKeyspace()
+                        .prepareQuery(keyspace.experimentAssignmentType())
+                        .withCql("SELECT bucket_assignment FROM experiment_assignment_type WHERE experiment_id = ? AND timestamp >= ? AND timestamp < ? ;")
+                        .asPreparedStatement()
+                        .withUUIDValue(experimentID.getRawID())
+                        .withLongValue(currentDate.toInstant().toEpochMilli())
+                        .withLongValue(currentDatePlusOne.toInstant().toEpochMilli())
+                        .execute()
+                        .getResult()
+                        .getRows()
+                        .forEach(row -> {
+                            ColumnList<String> columns = row.getColumns();
+                            try {
+                                if (columns.getBooleanValue("bucket_assignment", false)) {
+                                    counts[0] += 1;
+                                }
+                                counts[1] += 1;
+                            } catch (NullPointerException ignore) {
+                            }
+                        });
+            } catch (ConnectionException e) {
+                throw new RepositoryException(
+                        String.format("Failed to select from experiment_assignment_type for experiment %s between %s and %s.",
+                                experimentID.getRawID().toString(),
+                                currentDate.toString(),
+                                currentDate.plusDays(1).toString()),
+                        e);
+            }
+            experimentBucketAssignmentRatios.put(currentDate, counts[1] > 0 ? (double) counts[0] / (double) counts[1] : 0);
+
+            currentDate = currentDatePlusOne;
+        } while (!currentDate.isAfter(toDate));
+
         return experimentBucketAssignmentRatios;
     }
 

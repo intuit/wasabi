@@ -122,7 +122,7 @@ public interface ExperimentsKeyspace extends RepositoryKeyspace {
 
     ColumnFamily<Experiment.ID, String> bucketAssignmentCountsCF();
 
-    ColumnFamily<ExperimentIDContextBasicISODateComposite, String> experimentAssignmentCountByDay();
+    ColumnFamily<Experiment.ID, String> experimentAssignmentType();
 
     /**
      * The {@code auditlog} column family definition
@@ -266,27 +266,6 @@ public interface ExperimentsKeyspace extends RepositoryKeyspace {
 
             public Serializer() {
                 super(AppNamePageComposite.class);
-            }
-
-            public static Serializer get() {
-                return INSTANCE;
-            }
-        }
-    }
-
-    class ExperimentIDContextBasicISODateComposite {
-        @Component(ordinal = 0)
-        Experiment.ID experimentID;
-        @Component(ordinal = 1)
-        String context;
-        @Component(ordinal = 2)
-        String basicISODate;
-
-        public static class Serializer extends AnnotatedCompositeSerializer<ExperimentIDContextBasicISODateComposite> {
-            private static final Serializer INSTANCE = new Serializer();
-
-            Serializer() {
-                super(ExperimentIDContextBasicISODateComposite.class);
             }
 
             public static Serializer get() {
