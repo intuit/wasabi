@@ -111,7 +111,8 @@ latest code:
 
 For all other processes (build, start etc.) the commands are almost the same as
 for the other operating systems: just make sure to replace `bin/wasabi.sh` 
-with `bin\wasabi.bat`.
+with `bin\wasabi.bat`. Note that the UI needs to be started with a separate server, so
+`bin\wasabi.bat resource:ui` is a must on Windows.
 
 If you run into problems, please consult the [FAQ](#FAQ+Windows) and create
 an issue if it doesn't help you.
@@ -182,31 +183,6 @@ Server: Jetty(9.3.z-SNAPSHOT)
 
 Congratulations! You are the proud owner of a newly minted Wasabi instance. :)
 
-
-#### Troubleshooting
-
-* While starting Wasabi, if you see an error when the docker containers are starting up, you could do the following:
-* Look at the current docker containers that have been successfully started.
-
-```bash
-% ./bin/wasabi.sh status
-
-CONTAINER ID        IMAGE                    COMMAND                  CREATED             STATUS              PORTS                                                                     NAMES
-8c12458057ef        wasabi-main              "entrypoint.sh wasabi"   25 minutes ago      Up 25 minutes       0.0.0.0:8080->8080/tcp, 0.0.0.0:8090->8090/tcp, 0.0.0.0:8180->8180/tcp    wasabi-main
-979ecc885239        mysql:5.6                "docker-entrypoint.sh"   26 minutes ago      Up 26 minutes       0.0.0.0:3306->3306/tcp                                                    wasabi-mysql
-2d33a96abdcb        cassandra:2.1            "/docker-entrypoint.s"   27 minutes ago      Up 27 minutes       7000-7001/tcp, 0.0.0.0:9042->9042/tcp, 7199/tcp, 0.0.0.0:9160->9160/tcp   wasabi-cassandra
-```
-
-  * The above shell output shows a successful start of 3 docker containers needed by Wasabi: wasabi-main (the Wasabi server),
-wasabi-mysql, and wasabi-cassandra. If any of these are not running, try starting them individually. For example, if the
-MySQL container is running, but Cassandra and Wasabi containers failed to start (perhaps due to a network timeout docker
-could not download the Cassandra image), do the following:
-
-```bash
-% ./bin/wasabi.sh start:cassandra
-
-% ./bin/wasabi.sh start:wasabi
-```
 
 #### Call Wasabi
 
@@ -385,9 +361,7 @@ development: {
 ```
 
 Now while that was fun, in all likelihood you will be using an IDE to work on Wasabi. In doing so, you need only
-add the configuration information above to the JVM commandline prior to startup:
-
-> Wasabi runtime configuration:
+add the configuration information below to the JVM commandline prior to startup:
 
 ```bash
 -DnodeHosts=localhost -Ddatabase.url.host=localhost
@@ -448,11 +422,38 @@ Steps to contribute:
 Thank you for you contribution!
 
 
-## FAQ
+## Troubleshooting &amp; FAQ
+
+#### General
+
+##### I see errors when starting up docker containers.
+If you see an error when the docker containers are starting up, check which docker containers that have been successfully started.
+
+```bash
+% ./bin/wasabi.sh status
+
+CONTAINER ID        IMAGE                    COMMAND                  CREATED             STATUS              PORTS                                                                     NAMES
+8c12458057ef        wasabi-main              "entrypoint.sh wasabi"   25 minutes ago      Up 25 minutes       0.0.0.0:8080->8080/tcp, 0.0.0.0:8090->8090/tcp, 0.0.0.0:8180->8180/tcp    wasabi-main
+979ecc885239        mysql:5.6                "docker-entrypoint.sh"   26 minutes ago      Up 26 minutes       0.0.0.0:3306->3306/tcp                                                    wasabi-mysql
+2d33a96abdcb        cassandra:2.1            "/docker-entrypoint.s"   27 minutes ago      Up 27 minutes       7000-7001/tcp, 0.0.0.0:9042->9042/tcp, 7199/tcp, 0.0.0.0:9160->9160/tcp   wasabi-cassandra
+```
+The above shell output shows a successful start of 3 docker containers needed by Wasabi: wasabi-main (the Wasabi server),
+wasabi-mysql, and wasabi-cassandra. If any of these are not running, try starting them individually. For example, if the
+MySQL container is running, but Cassandra and Wasabi containers failed to start (perhaps due to a network timeout docker
+could not download the Cassandra image), do the following:
+
+```bash
+% ./bin/wasabi.sh start:cassandra
+% ./bin/wasabi.sh start:wasabi
+```
 
 #### FAQ Windows
 
-**How to connect an IDE's wasabi-process to the containers?**
+##### I can't run VirtualMachine properly.
+Check if your computer has virtualization enabled. For this you need to enter your BIOS (or UEFI)
+and in general search for Intel VT or AMD-V and enable them. 
+
+##### How to connect an IDE's wasabi-process to the containers?
 One important difference: Since Docker native only supports very specific
 [Windows 10 distributions][win_hyperv], we have to user docker-machine. 
 This means you can not reach the service at `http://localhost:8080/` but 
@@ -461,12 +462,16 @@ For development this also means to supply the Java VM arguments
 `-DnodeHosts=192.168.99.100 -Ddatabase.url.host=192.168.99.100` when running 
 Wasabi to connect to Cassandra and MySQL inside the docker network.
 
-**How to connect the UI to IDE's wasabi-process?**
+##### How to connect the UI to IDE's wasabi-process?
 You will also need to redirect the UI. By default `bin\wasabi.bat resource:ui`
 points to `docker-machine ip wasabi`. You can use the Windows exclusive
 `bin\wasabi.bat resource:dev_ui` to use `localhost` as your UI's target.
 
-**Wasabi has incorrect times! My IDE-run integration tests fail! Help!**
+##### When I open 127.0.0.1:9000 in my browser, I don't see the UI.
+For Windows, you have to first start a little server. Just run `bin\wasabi.bat resource:ui`
+to use the development grunt server. The UI should start automatically.
+
+##### Wasabi has incorrect times! My IDE-run integration tests fail! Help!
 It is a known problem with docker-machine that its time server stops while
 the host machine sleeps. If your system behaves weird, check if 
 `docker-machine ssh wasabi date` gives you the expected UTC time. If not, run
@@ -474,5 +479,5 @@ the host machine sleeps. If your system behaves weird, check if
 Wasabi does this time correction whenever you start the integration tests via
 `bin\wasabi.bat test`.
 
-**Swagger mentions `curl`, how do I get it?**
+##### Swagger mentions `curl`, how do I get it?
 To use the `curl` commands consider `choco install curl`.
