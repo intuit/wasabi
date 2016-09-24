@@ -135,10 +135,7 @@ fi
 
 content=${home}/${id}/content/ui/dist
 
-echo "content: $content"
 mkdir -p ${content}
-echo "pwd: `pwd`"
-ls
 cp -R ./modules/ui/target/dist/ ${content}
 mkdir -p ${content}/swagger/swaggerjson
 cp -R ./modules/swagger-ui/target/swaggerui/ ${content}/swagger
