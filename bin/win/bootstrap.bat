@@ -83,6 +83,16 @@ set remaining_packages=%gem_packages%
     )
     if defined remaining_packages goto :inst_gem_deps
 
+git status >nul 2>nul
+if errorlevel 1 (
+	call :info Initializing git repository
+	git init
+	git remote add origin https://github.com/intuit/wasabi.git
+	git fetch
+	git reset --hard origin/develop
+	git checkout develop
+	git status
+)
 call :info Bootstrapping done.
 
 
