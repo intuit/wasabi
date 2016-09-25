@@ -20,10 +20,6 @@ usage () {
   exit
 }
 
-export JAVA_HOME=${JAVA_HOME:-/usr/local/java}
-export PATH=$JAVA_HOME/bin:$PATH
-
-
 fromPom() {
   mvn -f modules/$1/pom.xml help:evaluate -Dexpression=$2 | sed -n -e '/^\[.*\]/ !{ p; }'
 }
@@ -114,13 +110,13 @@ for module in "$modules"; do
     resources="$resources    modules/${module}/target/extra-resources/service/run=/etc/service/${id}/run"
   fi
 
-  if [ ! -z "$deps" ]; then
+  if [ ! -z "$deps" -a ! "$deps" == "null object or invalid expression" ]; then
     for dep in $deps; do
       depends="$depends --depends $dep"
     done
   fi
 
-  if [ "$daemon" = "true" -a ! -z "$daemon_deps" ]; then
+  if [ "$daemon" = "true" -a ! -z "$daemon_deps" -a ! "$daemon_deps" == "null object or invalid expression" ]; then
     for dep in $daemon_deps; do
       depends="$depends --depends $dep"
     done

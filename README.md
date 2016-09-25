@@ -419,7 +419,7 @@ Steps to contribute:
 7. Create a pull request for review to request merge
 8. Obtain 2 approval _squirrels_ before your changes can be merged
 
-Thank you for you contribution!
+Thank you for your contribution!
 
 
 ## Troubleshooting &amp; FAQ
@@ -481,3 +481,4 @@ Wasabi does this time correction whenever you start the integration tests via
 
 ##### Swagger mentions `curl`, how do I get it?
 To use the `curl` commands consider `choco install curl`.
+
