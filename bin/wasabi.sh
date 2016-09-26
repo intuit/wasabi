@@ -310,10 +310,15 @@ remove() {
   ./bin/container.sh remove${1:+:$1}
 }
 
+unit_test() {
+  command=$1
+  mvn "-Dtest=com.intuit.wasabi.${command/-/}.**" test -pl modules/${command} --also-make -DfailIfNoTests=false -q
+}
+
 exec_commands() {
-        prefix=$1
-        commands=$(echo $2 | cut -d ':' -f 2)
-        (IFS=','; for command in ${commands}; do ${prefix} ${command}; done)
+  prefix=$1
+  commands=$(echo $2 | cut -d ':' -f 2)
+  (IFS=','; for command in ${commands}; do ${prefix} ${command}; done)
 }
 
 optspec=":b:e:f:p:v:s:h-:"
@@ -355,8 +360,7 @@ for command in ${@:$OPTIND}; do
     clean) clean;;
     start) exec_commands start "cassandra,mysql,wasabi";;
     start:*) exec_commands start ${command};;
-    test:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for command in ${commands}; do mvn "-Dtest=com.intuit.wasabi.${command/-/}.**" test -pl modules/${command} --also-make -DfailIfNoTests=false -q ; done);;
+    test:*) exec_commands unit_test ${command};;
     test) test_api;;
     stop) exec_commands stop "wasabi,mysql,cassandra";;
     stop:*) exec_commands stop ${command};;

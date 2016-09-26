@@ -229,15 +229,15 @@ EOF
 }
 
 exec_commands_simple() {
-        prefix=$1
-        commands=$(echo $2 | cut -d ':' -f 2)
-        (IFS=','; for command in ${commands}; do ${prefix}${command}; done)
+  prefix=$1
+  commands=$(echo $2 | cut -d ':' -f 2)
+  (IFS=','; for command in ${commands}; do ${prefix}${command}; done)
 }
 
 exec_commands_project() {
-        prefix=$1
-        commands=$(echo $2 | cut -d ':' -f 2)
-	(IFS=','; for command in ${commands}; do ${prefix} ${project}-${command/${project}/main}; done)
+  prefix=$1
+  commands=$(echo $2 | cut -d ':' -f 2)
+  (IFS=','; for command in ${commands}; do ${prefix} ${project}-${command/${project}/main}; done)
 }
 
 
