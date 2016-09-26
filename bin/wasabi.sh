@@ -310,6 +310,17 @@ remove() {
   ./bin/container.sh remove${1:+:$1}
 }
 
+unit_test() {
+  command=$1
+  mvn "-Dtest=com.intuit.wasabi.${command/-/}.**" test -pl modules/${command} --also-make -DfailIfNoTests=false -q
+}
+
+exec_commands() {
+  prefix=$1
+  commands=$(echo $2 | cut -d ':' -f 2)
+  (IFS=','; for command in ${commands}; do ${prefix} ${command}; done)
+}
+
 optspec=":b:e:f:p:v:s:h-:"
 
 while getopts "${optspec}" opt; do
@@ -347,26 +358,20 @@ for command in ${@:$OPTIND}; do
     bootstrap) bootstrap;;
     build) build true;;
     clean) clean;;
-    start) command="start:cassandra,mysql,wasabi";&
-    start:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for command in ${commands}; do start ${command}; done);;
-    test:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for command in ${commands}; do mvn "-Dtest=com.intuit.wasabi.${command/-/}.**" test -pl modules/${command} --also-make -DfailIfNoTests=false -q ; done);;
+    start) exec_commands start "cassandra,mysql,wasabi";;
+    start:*) exec_commands start ${command};;
+    test:*) exec_commands unit_test ${command};;
     test) test_api;;
-    stop) command="stop:wasabi,mysql,cassandra";&
-    stop:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for command in ${commands}; do stop ${command}; done);;
-    resource) command="resource:ui,api,doc,casssandra,mysql";&
-    resource:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for command in ${commands}; do resource ${command}; done);;
+    stop) exec_commands stop "wasabi,mysql,cassandra";;
+    stop:*) exec_commands stop ${command};;
+    resource) exec_commands resource "ui,api,doc,cassandra,mysql";;
+    resource:*) exec_commands resource ${command};;
     status) status;;
-    remove) command="remove:wasabi,cassandra,mysql";&
-    remove:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for command in ${commands}; do remove ${command}; done);;
+    remove) exec_commands remove "wasabi,cassandra,mysql";;
+    remove:*) exec_commands remove ${command};;
     package) package;;
     release) release;;
-    release:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for command in ${commands}; do release ${command}; done);;
+    release:*) exec_commands release ${command};;
     "") usage "unknown command: ${command}" 1;;
     *) usage "unknown command: ${command}" 1;;
   esac
