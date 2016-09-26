@@ -241,37 +241,17 @@ public class IntegrationExperiment extends TestBase {
     public Object[][] badExperimentsPOST() {
         Experiment experiment = new Experiment();
         return new Object[][]{
-                // FIXME: jwtodd
-//                new Object[] { new Experiment(experiment.setSamplingPercent(completeExperiment.samplingPercent)), 
-        			//"Invalid input", HttpStatus.SC_BAD_REQUEST },
                 new Object[]{new Experiment(experiment.setSamplingPercent(completeExperiment.samplingPercent)), 
                 		"Experiment application name cannot be null or an empty string", HttpStatus.SC_BAD_REQUEST},
-                // FIXME: jwtodd
-//                new Object[] { new Experiment(experiment.setStartTime(completeExperiment.startTime)), 
-                		//"Invalid input", HttpStatus.SC_BAD_REQUEST },
                 new Object[]{new Experiment(experiment.setStartTime(completeExperiment.startTime)), 
                 		"Experiment application name cannot be null or an empty string", HttpStatus.SC_BAD_REQUEST},
-//                new Object[] { new Experiment(experiment.setEndTime(completeExperiment.endTime)), 
-                		//"Invalid input", HttpStatus.SC_BAD_REQUEST },
                 new Object[]{new Experiment(experiment.setEndTime(completeExperiment.endTime)), 
                 		"Experiment application name cannot be null or an empty string", HttpStatus.SC_BAD_REQUEST},
-//                new Object[] { new Experiment(experiment.setLabel(completeExperiment.label)), "Invalid input", HttpStatus.SC_BAD_REQUEST },
                 new Object[]{new Experiment(experiment.setLabel(completeExperiment.label)), "Experiment application name cannot be null or an empty string", HttpStatus.SC_BAD_REQUEST},
-                // FIXME: jwtodd
-//                new Object[] { new Experiment(experiment.setApplication(ApplicationFactory.defaultApplication())), "Uniqueness constraint violated", HttpStatus.SC_BAD_REQUEST },
                 new Object[]{new Experiment(experiment.setApplication(ApplicationFactory.defaultApplication())), "An unique constraint was violated: An active experiment with label \"SW50ZWdyVGVzdA_1461232889078App_PRIMARY\".\"SW50ZWdyVGVzdA_Experiment_14612328892453\" already exists (id = 70139a10-489b-49bd-ac4c-c7c92ec79917) (null)", HttpStatus.SC_BAD_REQUEST},
-
-                // FIXME: jwtodd
-//                new Object[] { ExperimentFactory.createExperiment().setState(Constants.EXPERIMENT_STATE_DRAFT), "Invalid input", HttpStatus.SC_BAD_REQUEST },
                 new Object[]{ExperimentFactory.createExperiment().setState(Constants.EXPERIMENT_STATE_DRAFT), "Unrecognized property \"state\"", HttpStatus.SC_BAD_REQUEST},
-                // FIXME: jwtodd
-//                new Object[] { ExperimentFactory.createCompleteExperiment().setStartTime((String) null), 
-                //"Repository error", HttpStatus.SC_INTERNAL_SERVER_ERROR },
                 new Object[]{ExperimentFactory.createCompleteExperiment().setStartTime((String) null), 
                 		"Invalid date range - Could not create experiment \"NewExperiment[id=20533222-2a3f-459d-b6b6-5e05ad1104e3,label=SW50ZWdyVGVzdA_Experiment_146123290282853,applicationName=SW50ZWdyVGVzdA_1461232889078App_PRIMARY,startTime=<null>,endTime=Thu Jun 02 10:01:42 UTC 2016,samplingPercent=1.0,description=A sample Experiment description.,rule=(salary < 10000) && (state = 'VA'),isPersonalizationEnabled=false,modelName=,modelVersion=,isRapidExperiment=false,userCap=0,creatorID="+userName+"]\"", HttpStatus.SC_BAD_REQUEST},
-                // FIXME: jwtodd
-//                new Object[] { ExperimentFactory.createCompleteExperiment().setEndTime((String) null), 
-                //"Repository error", HttpStatus.SC_INTERNAL_SERVER_ERROR },
                 new Object[]{ExperimentFactory.createCompleteExperiment().setEndTime((String) null), 
                 		"Invalid date range - Could not create experiment \"NewExperiment[id=97daea3b-1523-43e7-8d7c-d7eba2c18ff5,label=SW50ZWdyVGVzdA_Experiment_146123290282954,applicationName=SW50ZWdyVGVzdA_1461232889078App_PRIMARY,startTime=Thu Apr 21 10:01:42 UTC 2016,endTime=<null>,samplingPercent=1.0,description=A sample Experiment description.,rule=(salary < 10000) && (state = 'VA'),isPersonalizationEnabled=false,modelName=,modelVersion=,isRapidExperiment=false,userCap=0,creatorID="+userName+"]\"", HttpStatus.SC_BAD_REQUEST},
                 // FIXME: jwtodd
