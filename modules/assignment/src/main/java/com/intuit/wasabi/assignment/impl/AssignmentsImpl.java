@@ -1091,7 +1091,7 @@ public class AssignmentsImpl implements Assignments {
      * @param toDate      the last day to include
      * @return a map mapping experiment IDs to their daily values for each of the given days
      */
-    private Map<Experiment.ID, Map<OffsetDateTime, Double>> getExperimentAssignmentRatioPerDay(List<Experiment> experiments, OffsetDateTime fromDate, OffsetDateTime toDate) {
+    /*test*/ Map<Experiment.ID, Map<OffsetDateTime, Double>> getExperimentAssignmentRatioPerDay(List<Experiment> experiments, OffsetDateTime fromDate, OffsetDateTime toDate) {
         return experiments.parallelStream()
                 .collect(Collectors.toMap(Experiment::getID,
                         experiment -> assignmentsRepository.getExperimentBucketAssignmentRatioPerDay(experiment.getID(), fromDate, toDate)));

@@ -70,11 +70,13 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -1349,7 +1351,7 @@ public class ExperimentsResource {
      * @param username     the username
      * @return the experiment
      */
-    private Experiment getAuthorizedExperimentOrThrow(Experiment.ID experimentID, Username username) {
+    /*test*/ Experiment getAuthorizedExperimentOrThrow(Experiment.ID experimentID, Username username) {
         Experiment experiment;
         if ((experiment = experiments.getExperiment(experimentID)) == null) {
             throw new ExperimentNotFoundException(experimentID);
@@ -1374,14 +1376,16 @@ public class ExperimentsResource {
      * @param debugIdentifier the debug identifier to identify problems in the exception
      * @return a parsed instant of the ui date
      */
-    private OffsetDateTime parseUIDateOrKey(String uiDate, String key, Instant onKeyMatch, String timezoneOffset, String debugIdentifier) {
+    /*test*/ OffsetDateTime parseUIDateOrKey(String uiDate, String key, Instant onKeyMatch, String timezoneOffset, String debugIdentifier) {
         if (key.equalsIgnoreCase(uiDate)) {
-            return OffsetDateTime.of(LocalDateTime.ofInstant(onKeyMatch, ZoneOffset.UTC), ZoneOffset.of(timezoneOffset));
+            return OffsetDateTime.ofInstant(onKeyMatch, ZoneId.of("UTC"));
         }
         try {
             return OffsetDateTime.of(LocalDateTime.of(LocalDate.from(DateTimeFormatter.ofPattern("M/d/y").parse(uiDate)), LocalTime.MIDNIGHT), ZoneOffset.of(timezoneOffset));
         } catch (DateTimeParseException e) {
             throw new IllegalArgumentException(String.format("Can not parse \"%s\" date \"%s\", expecting format M/d/y, e.g. 05/24/2014, or \"%s\".", debugIdentifier, uiDate, key), e);
+        } catch (DateTimeException e) {
+            throw new IllegalArgumentException(String.format("No proper timezoneOffset given (\"%s\"), expecting format -0000 or +0000.", timezoneOffset));
         }
     }
 
