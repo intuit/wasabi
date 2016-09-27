@@ -4249,6 +4249,10 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
     height: 85%;
     position: absolute;
     padding-right: 15px;
+    li span {
+        position: relative;
+        left: -17px;
+    }
 }
 
 /* end help */
