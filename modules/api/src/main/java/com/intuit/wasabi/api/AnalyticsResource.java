@@ -24,6 +24,7 @@ import com.intuit.wasabi.analyticsobjects.Parameters;
 import com.intuit.wasabi.analyticsobjects.counts.AssignmentCounts;
 import com.intuit.wasabi.analyticsobjects.counts.ExperimentCounts;
 import com.intuit.wasabi.analyticsobjects.counts.ExperimentCumulativeCounts;
+import com.intuit.wasabi.analyticsobjects.metrics.BinomialMetrics;
 import com.intuit.wasabi.analyticsobjects.statistics.ExperimentCumulativeStatistics;
 import com.intuit.wasabi.analyticsobjects.statistics.ExperimentStatistics;
 import com.intuit.wasabi.analyticsobjects.wrapper.ExperimentDetail;
@@ -208,8 +209,12 @@ public class AnalyticsResource {
 
         //and now add the analytics data
         Parameters parameters = createParameters(context);
+        parameters.setMetric(BinomialMetrics.NORMAL_APPROX);
 
-        experimentResponse.put("experimentDetails", experimentDetails.getAnalyticData((List<ExperimentDetail>) experimentResponse.get("experimentDetails"), parameters));
+        List<ExperimentDetail> expDetailsWithAnalytics = experimentDetails.getAnalyticData(
+                (List<ExperimentDetail>) experimentResponse.get("experimentDetails"), parameters);
+
+        experimentResponse.put("experimentDetails", expDetailsWithAnalytics);
 
         return httpHeader.headers().entity(experimentResponse).build();
     }
