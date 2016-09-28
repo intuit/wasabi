@@ -72,12 +72,12 @@ public class EventSubmissionBeforeAssignmentTest  extends TestBase{
 		//create buckets within the experiment
 		List<Bucket> buckets = postBuckets(BucketFactory.createCompleteBuckets(experiment, 2));
 		Assert.assertEquals(buckets.size(), 2);
-		
+
 		//change the state of the experiment from DRAFT to RUNNING
 		experiment.state = Constants.EXPERIMENT_STATE_RUNNING;
-        exp = putExperiment(experiment);
-        assertEqualModelItems(exp, experiment);
-		
+		exp = putExperiment(experiment);
+		assertEqualModelItems(exp, experiment);
+
 	}
 
 
@@ -96,8 +96,8 @@ public class EventSubmissionBeforeAssignmentTest  extends TestBase{
 	@AfterClass
 	public void testCleanUp(){
 		experiment.state = Constants.EXPERIMENT_STATE_TERMINATED;
-        Experiment exp = putExperiment(experiment);
-        experiment.update(exp);
+		Experiment exp = putExperiment(experiment);
+		experiment.update(exp);
 		deleteExperiment(experiment);
 	}
 
