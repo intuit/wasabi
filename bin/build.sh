@@ -120,6 +120,7 @@ chmod 755 ${home}/${id}/entrypoint.sh
 sed -i '' -e "s/chpst -u [^:]*:[^ ]* //" ${home}/${id}/bin/run 2>/dev/null
 [ ! -e ./modules/ui/target/dist/scripts/wasabi.js ] && build_js=true
 
+echo ">>>bower: `which bower`"
 if [[ "${build}" = true || "${build_js}" = true ]]; then
   if [ "${WASABI_OS}" == "${WASABI_OSX}" ]; then
     brew list node
@@ -132,6 +133,7 @@ if [[ "${build}" = true || "${build_js}" = true ]]; then
   fi
   (cd ./modules/ui && npm install && bower install && grunt --force build)
 fi
+exit
 
 content=${home}/${id}/content/ui/dist
 
