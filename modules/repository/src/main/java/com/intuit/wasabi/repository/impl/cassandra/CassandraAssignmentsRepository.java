@@ -48,6 +48,7 @@ import com.intuit.wasabi.repository.impl.cassandra.serializer.ExperimentIDSerial
 import com.intuit.wasabi.repository.impl.cassandra.serializer.UserIDSerializer;
 import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
 import com.netflix.astyanax.model.ColumnList;
+import com.netflix.astyanax.model.Row;
 import com.netflix.astyanax.model.Rows;
 import com.netflix.astyanax.query.PreparedCqlQuery;
 import com.netflix.astyanax.serializers.DateSerializer;
@@ -101,8 +102,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     private final Boolean assignUserToExport;
     private final Boolean assignBucketCount;
     private final String defaultTimeFormat;
-    private LinkedBlockingQueue assignmentsCountQueue = new LinkedBlockingQueue<>();
-    private int assignmentsCountThreadPoolSize;
     private ThreadPoolExecutor assignmentsCountExecutor;
     private boolean assignUserToOld;
     private boolean assignUserToNew;
@@ -127,15 +126,14 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         this.dbRepository = dbRepository;
         this.assignmentsRepository = assignmentsRepository;
         this.eventLog = eventLog;
-        this.assignmentsCountThreadPoolSize = assignmentsCountThreadPoolSize;
         this.assignUserToOld = assignUserToOld;
         this.assignUserToNew = assignUserToNew;
         this.assignUserToExport = assignUserToExport;
         this.assignBucketCount = assignBucketCount;
         this.defaultTimeFormat = defaultTimeFormat;
 
-        assignmentsCountExecutor = (ThreadPoolExecutor) new ThreadPoolExecutor(assignmentsCountThreadPoolSize,
-                assignmentsCountThreadPoolSize, 0L, MILLISECONDS, assignmentsCountQueue);
+        assignmentsCountExecutor = new ThreadPoolExecutor(assignmentsCountThreadPoolSize,
+                assignmentsCountThreadPoolSize, 0L, MILLISECONDS, new LinkedBlockingQueue<>());
     }
 
     @Override
@@ -802,7 +800,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         final List<DateHour> dateHours = getUserAssignmentPartitions(from_ts_new, to_ts_new);
         final String CQL;
 
-        if (ignoreNullBucket == false) {
+        if (!ignoreNullBucket) {
             CQL =
                     "select * from user_assignment_export " +
                             "where experiment_id = ? and day_hour = ? and context = ?";
@@ -1094,8 +1092,9 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
 
             // counts[0]: bucket assignments, counts[1]: total
             final int[] counts = new int[2];
+            Rows<Experiment.ID, String> rows;
             try {
-                driver.getKeyspace()
+                rows = driver.getKeyspace()
                         .prepareQuery(keyspace.experimentAssignmentType())
                         .withCql("SELECT bucket_assignment FROM experiment_assignment_type WHERE experiment_id = ? AND timestamp >= ? AND timestamp < ? ;")
                         .asPreparedStatement()
@@ -1104,17 +1103,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                         .withLongValue(currentDatePlusOne.toInstant().toEpochMilli())
                         .execute()
                         .getResult()
-                        .getRows()
-                        .forEach(row -> {
-                            ColumnList<String> columns = row.getColumns();
-                            try {
-                                if (columns.getBooleanValue("bucket_assignment", false)) {
-                                    counts[0] += 1;
-                                }
-                                counts[1] += 1;
-                            } catch (NullPointerException ignore) {
-                            }
-                        });
+                        .getRows();
             } catch (ConnectionException e) {
                 throw new RepositoryException(
                         String.format("Failed to select from experiment_assignment_type for experiment %s between %s and %s.",
@@ -1122,6 +1111,16 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                                 currentDate.toString(),
                                 currentDate.plusDays(1).toString()),
                         e);
+            }
+            for (Row<Experiment.ID, String> row : rows) {
+                ColumnList<String> columns = row.getColumns();
+                try {
+                    if (columns.getBooleanValue("bucket_assignment", false)) {
+                        counts[0] += 1;
+                    }
+                    counts[1] += 1;
+                } catch (NullPointerException ignore) {
+                }
             }
             experimentBucketAssignmentRatios.put(currentDate, counts[1] > 0 ? (double) counts[0] / (double) counts[1] : 0);
 
