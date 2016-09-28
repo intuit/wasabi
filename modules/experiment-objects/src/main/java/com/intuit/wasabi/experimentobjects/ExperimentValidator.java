@@ -77,7 +77,7 @@ public class ExperimentValidator {
     		throw new IllegalArgumentException("Invalid date range, start = \"" + startTime + "\", end = " +
                 "\"" + endTime + "\"");
  
-    	if ((startTime != null) && (endTime != null) && endTime.before(startTime)) {
+    	if (endTime.before(startTime)) {
             throw new IllegalArgumentException("Invalid date range, start = \"" + startTime + "\", end = " +
                     "\"" + endTime + "\"");
         }
