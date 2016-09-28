@@ -53,52 +53,52 @@ import com.intuit.wasabi.tests.model.factory.UserFactory;
  */
 public class EventSubmissionBeforeAssignmentTest  extends TestBase{
 
-	static final Logger LOGGER = LoggerFactory.getLogger(EventSubmissionBeforeAssignmentTest.class);
-	Experiment experiment;
+    static final Logger LOGGER = LoggerFactory.getLogger(EventSubmissionBeforeAssignmentTest.class);
+    Experiment experiment;
 
-	@BeforeClass
-	public void testSetUp()
-	{
-		//create an experiment and populate the experiment POJO		
-		experiment = ExperimentFactory.createExperiment();
-		DefaultNameExclusionStrategy experimentComparisonStrategy = new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson");
-		experiment.setSerializationStrategy(experimentComparisonStrategy);
-		Experiment exp = postExperiment(experiment);
-		Assert.assertNotNull(exp.creationTime, "Experiment creation failed (No creationTime).");
-		Assert.assertNotNull(exp.modificationTime, "Experiment creation failed (No modificationTime).");
-		Assert.assertNotNull(exp.state, "Experiment creation failed (No state).");
-		experiment.update(exp);
+    @BeforeClass
+    public void testSetUp()
+    {
+        //create an experiment and populate the experiment POJO        
+        experiment = ExperimentFactory.createExperiment();
+        DefaultNameExclusionStrategy experimentComparisonStrategy = new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson");
+        experiment.setSerializationStrategy(experimentComparisonStrategy);
+        Experiment exp = postExperiment(experiment);
+        Assert.assertNotNull(exp.creationTime, "Experiment creation failed (No creationTime).");
+        Assert.assertNotNull(exp.modificationTime, "Experiment creation failed (No modificationTime).");
+        Assert.assertNotNull(exp.state, "Experiment creation failed (No state).");
+        experiment.update(exp);
 
-		//create buckets within the experiment
-		List<Bucket> buckets = postBuckets(BucketFactory.createCompleteBuckets(experiment, 2));
-		Assert.assertEquals(buckets.size(), 2);
+        //create buckets within the experiment
+        List<Bucket> buckets = postBuckets(BucketFactory.createCompleteBuckets(experiment, 2));
+        Assert.assertEquals(buckets.size(), 2);
 
-		//change the state of the experiment from DRAFT to RUNNING
-		experiment.state = Constants.EXPERIMENT_STATE_RUNNING;
-		exp = putExperiment(experiment);
-		assertEqualModelItems(exp, experiment);
+        //change the state of the experiment from DRAFT to RUNNING
+        experiment.state = Constants.EXPERIMENT_STATE_RUNNING;
+        exp = putExperiment(experiment);
+        assertEqualModelItems(exp, experiment);
 
-	}
-
-
-	@Test()
-	public void createImpression()
-	{
-		//create user
-		User user = UserFactory.createUser();
-
-		//create an event of type IMPRESSION and post it to the event endpoint
-		Event impression = EventFactory.createImpression();
-		postEvent(impression, experiment, user, HttpStatus.SC_BAD_REQUEST);
-	}
+    }
 
 
-	@AfterClass
-	public void testCleanUp(){
-		experiment.state = Constants.EXPERIMENT_STATE_TERMINATED;
-		Experiment exp = putExperiment(experiment);
-		experiment.update(exp);
-		deleteExperiment(experiment);
-	}
+    @Test()
+    public void createImpression()
+    {
+        //create user
+        User user = UserFactory.createUser();
+
+        //create an event of type IMPRESSION and post it to the event endpoint
+        Event impression = EventFactory.createImpression();
+        postEvent(impression, experiment, user, HttpStatus.SC_BAD_REQUEST);
+    }
+
+
+    @AfterClass
+    public void testCleanUp(){
+        experiment.state = Constants.EXPERIMENT_STATE_TERMINATED;
+        Experiment exp = putExperiment(experiment);
+        experiment.update(exp);
+        deleteExperiment(experiment);
+    }
 
 }
