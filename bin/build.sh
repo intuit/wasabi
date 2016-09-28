@@ -133,7 +133,6 @@ if [[ "${build}" = true || "${build_js}" = true ]]; then
   fi
   (cd ./modules/ui && npm install && bower install && grunt --force build)
 fi
-exit
 
 content=${home}/${id}/content/ui/dist
 
