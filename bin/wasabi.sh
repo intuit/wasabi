@@ -268,6 +268,7 @@ package() {
 
   ./bin/fpm.sh -n ${name} -v ${version} -p ${profile}
 
+# FIXME: don't rebuild, cp dist/* target/*
   (cd modules/ui; \
     mkdir -p target; \
     for f in app bower.json Gruntfile.js constants.json karma.conf.js karma-e2e.conf.js package.json test .bowerrc; do \
