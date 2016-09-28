@@ -211,12 +211,42 @@ public class AnalyticsResource {
         Parameters parameters = createParameters(context);
         parameters.setMetric(BinomialMetrics.NORMAL_APPROX);
 
-        List<ExperimentDetail> expDetailsWithAnalytics = experimentDetails.getAnalyticData(
-                (List<ExperimentDetail>) experimentResponse.get("experimentDetails"), parameters);
+        List<ExperimentDetail> expDetailsWithAnalytics = (List<ExperimentDetail>)
+                experimentResponse.get("experimentDetails");
+
+        //expDetailsWithAnalytics = experimentDetails.getAnalyticData(
+        //        (List<ExperimentDetail>) experimentResponse.get("experimentDetails"), parameters);
+
+        setDummyValues(expDetailsWithAnalytics);
+
 
         experimentResponse.put("experimentDetails", expDetailsWithAnalytics);
 
         return httpHeader.headers().entity(experimentResponse).build();
+    }
+
+    private void setDummyValues(List<ExperimentDetail> expDetailsWithAnalytics) {
+
+        for(ExperimentDetail expDetail : expDetailsWithAnalytics){
+            if(Math.random() > 0.5){
+                expDetail.setTotalNumberUsers(4212443l);
+                for(ExperimentDetail.BucketDetail bd : expDetail.getBuckets()){
+                    bd.setActionRate(0.6);
+                    bd.setUpperBound(0.8);
+                    bd.setLowerBound(0.5);
+                    bd.setWinnerSoFar(Math.random()>0.7);
+                }
+            }
+            else{
+                expDetail.setTotalNumberUsers(346745l);
+                for(ExperimentDetail.BucketDetail bd : expDetail.getBuckets()){
+                    bd.setActionRate(0.3);
+                    bd.setUpperBound(0.56);
+                    bd.setLowerBound(0.43);
+                    bd.setWinnerSoFar(Math.random()>0.9);
+                }
+            }
+        }
     }
 
     /**
