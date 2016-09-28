@@ -4227,6 +4227,7 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
     ul {
         list-style-position: inside;
         list-style-type: disc;
+        margin-left: 10px;
     }
     ol {
         list-style-position: inside;
@@ -4248,6 +4249,10 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
     height: 85%;
     position: absolute;
     padding-right: 15px;
+    li span {
+        position: relative;
+        left: -17px;
+    }
 }
 
 /* end help */
