@@ -18,6 +18,10 @@
 
 package com.intuit.wasabi.tests.service.assignment;
 
+import static com.intuit.wasabi.tests.library.util.ModelAssert.assertEqualModelItems;
+
+import java.util.List;
+
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,13 +29,15 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import com.intuit.wasabi.tests.data.AssignmentDataProvider;
 import com.intuit.wasabi.tests.library.TestBase;
+import com.intuit.wasabi.tests.library.util.Constants;
 import com.intuit.wasabi.tests.library.util.serialstrategies.DefaultNameExclusionStrategy;
-import com.intuit.wasabi.tests.model.Assignment;
+import com.intuit.wasabi.tests.model.Bucket;
+import com.intuit.wasabi.tests.model.Event;
 import com.intuit.wasabi.tests.model.Experiment;
 import com.intuit.wasabi.tests.model.User;
+import com.intuit.wasabi.tests.model.factory.BucketFactory;
+import com.intuit.wasabi.tests.model.factory.EventFactory;
 import com.intuit.wasabi.tests.model.factory.ExperimentFactory;
 import com.intuit.wasabi.tests.model.factory.UserFactory;
 
@@ -45,13 +51,13 @@ import com.intuit.wasabi.tests.model.factory.UserFactory;
  * test: do a post on the
  * aftertest: clean 
  */
-public class CreateEventForUnassignedUserTest  extends TestBase{
+public class EventSubmissionBeforeAssignmentTest  extends TestBase{
 
-	static final Logger LOGGER = LoggerFactory.getLogger(CreateEventForUnassignedUserTest.class);
+	static final Logger LOGGER = LoggerFactory.getLogger(EventSubmissionBeforeAssignmentTest.class);
 	Experiment experiment;
 
 	@BeforeClass
-	public void t_setup()
+	public void testSetUp()
 	{
 		//create an experiment and populate the experiment POJO		
 		experiment = ExperimentFactory.createExperiment();
@@ -64,47 +70,35 @@ public class CreateEventForUnassignedUserTest  extends TestBase{
 		experiment.update(exp);
 
 		//create buckets within the experiment
-		String url = "/experiments/"+experiment.id+"/buckets";
-		String bucketA = "{\"label\": \"red\", \"allocationPercent\": 0.5, \"isControl\": false, " +
-				"\"description\": \"Bucket red\",\"payload\": \"This is bucket red\"}";
-		response = apiServerConnector.doPost(url, bucketA);
-		assertReturnCode(response, HttpStatus.SC_CREATED);
-		String bucketB = "{\"label\": \"blue\", \"allocationPercent\": 0.5, \"isControl\": false, " +
-				"\"description\": \"Bucket blue\",\"payload\": \"This is bucket blue\"}";
-		response = apiServerConnector.doPost(url, bucketB);
-
-
+		List<Bucket> buckets = postBuckets(BucketFactory.createCompleteBuckets(experiment, 2));
+		Assert.assertEquals(buckets.size(), 2);
+		
 		//change the state of the experiment from DRAFT to RUNNING
-		assertReturnCode(response, HttpStatus.SC_CREATED);
-		response = apiServerConnector.doPut("experiments/"+experiment.id, "{\"state\": \"RUNNING\"}");
-		assertReturnCode(response, HttpStatus.SC_OK);
+		experiment.state = Constants.EXPERIMENT_STATE_RUNNING;
+        exp = putExperiment(experiment);
+        assertEqualModelItems(exp, experiment);
+		
 	}
 
 
 	@Test()
-	public void t_replicateBug()
+	public void createImpression()
 	{
 		//create user
 		User user = UserFactory.createUser();
 
-		//create an event of type IMPRESSION
-		String payload = "{\"events\":[{\"name\":\"IMPRESSION\"}]}";
-
-		//build the url and post it to the event endpoint
-		String url =  "/events/applications/"+experiment.applicationName+"/"+"experiments/"+experiment.label+"/users/"+user.userID;
-		response = apiServerConnector.doPost(url, payload);
-		
-		//TO-DO: change asserting the error code to the new value after fix from dev
-		Assert.assertTrue((response.getStatusCode()!=HttpStatus.SC_CREATED)," status code should not be 201" );
+		//create an event of type IMPRESSION and post it to the event endpoint
+		Event impression = EventFactory.createImpression();
+		postEvent(impression, experiment, user, HttpStatus.SC_BAD_REQUEST);
 	}
 
 
 	@AfterClass
-	public void t_cleanUp(){
-		response = apiServerConnector.doPut("experiments/"+experiment.id, "{\"state\": \"TERMINATED\"}");
-		assertReturnCode(response, HttpStatus.SC_OK);
-		response = apiServerConnector.doDelete("experiments/"+experiment.id);
-		assertReturnCode(response, HttpStatus.SC_NO_CONTENT);
+	public void testCleanUp(){
+		experiment.state = Constants.EXPERIMENT_STATE_TERMINATED;
+        Experiment exp = putExperiment(experiment);
+        experiment.update(exp);
+		deleteExperiment(experiment);
 	}
 
 }
