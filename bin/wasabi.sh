@@ -249,6 +249,7 @@ status() {
 }
 
 package() {
+  # FIXME: ?how to package profile=development?
   [ "${profile}" == "${profile_default}" ] && profile=build
 
   build true ${verify} ${profile}
@@ -274,16 +275,9 @@ package() {
     done; \
     sed -i '' -e "s|http://localhost:8080|${server}|g" target/constants.json 2>/dev/null; \
     sed -i '' -e "s|VERSIONLOC|${version}|g" target/app/index.html 2>/dev/null; \
-# SCOTT and SEBASTIAN
-#    if [[ "${WASABI_OS}" == "${WASABI_OSX}" || "${WASABI_OS}" == "${WASABI_LINUX}" ]]; then \
-#      (cd target; npm install; bower install; grunt clean); \
-      (cd target; npm install; bower install --no-optional; grunt clean); \
-#    fi \
-# fixme: shouldn't have to force or ignore tests \
-#    (cd target; grunt build --target=develop --no-color; \
-    (cd target; grunt build --force --target=develop --no-color; \
-#      grunt test); \
-    ); \
+    (cd target; npm install; bower install --no-optional; grunt clean); \
+#    (cd target; grunt build --force --target=develop --no-color; grunt test); \
+    (cd target; grunt build --force --target=develop --no-color); \
     cp -r build target; \
     for pkg in deb rpm; do \
       sed -i '' -e "s|\${application.home}|${home}|g" target/build/${pkg}/before-install.sh 2>/dev/null; \
