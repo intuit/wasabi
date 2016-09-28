@@ -131,7 +131,7 @@ if [[ "${build}" = true || "${build_js}" = true ]]; then
       sudo gem install compass
     fi
   fi
-  (cd ./modules/ui && npm install && bower install && grunt --force build)
+  (cd ./modules/ui && npm install && bower install && grunt build)
 fi
 
 content=${home}/${id}/content/ui/dist

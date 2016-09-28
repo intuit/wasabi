@@ -277,7 +277,7 @@ package() {
     sed -i '' -e "s|VERSIONLOC|${version}|g" target/app/index.html 2>/dev/null; \
     (cd target; npm install; bower install --no-optional; grunt clean); \
 #    (cd target; grunt build --force --target=develop --no-color; grunt test); \
-    (cd target; grunt build --force --target=develop --no-color); \
+    (cd target; grunt build --target=develop --no-color; grunt test); \
     cp -r build target; \
     for pkg in deb rpm; do \
       sed -i '' -e "s|\${application.home}|${home}|g" target/build/${pkg}/before-install.sh 2>/dev/null; \
