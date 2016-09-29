@@ -212,7 +212,6 @@ public class CassandraAuthorizationRepository  implements AuthorizationRepositor
 
     @Override
     public void setUserRole(UserRole userRole) {
-        //TODO: why do we need both of these
         BatchStatement batch = new BatchStatement();
         batch.add(userRoleAccessor.insertUserRoleStatement(
                 userRole.getUserID().toString(),
