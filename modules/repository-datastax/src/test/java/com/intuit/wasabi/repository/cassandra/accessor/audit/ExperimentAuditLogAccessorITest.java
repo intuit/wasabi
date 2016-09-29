@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import com.datastax.driver.mapping.Result;
 import com.intuit.wasabi.repository.cassandra.IntegrationTestBase;
 import com.intuit.wasabi.repository.cassandra.accessor.audit.ExperimentAuditLogAccessor;
+import com.intuit.wasabi.repository.cassandra.pojo.audit.BucketAuditLog;
 import com.intuit.wasabi.repository.cassandra.pojo.audit.ExperimentAuditLog;
 
 import org.junit.Before;
@@ -27,6 +28,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -59,8 +61,14 @@ public class ExperimentAuditLogAccessorITest extends IntegrationTestBase {
     	accessor.insertBy(experimentId, date, "a1", "v1", "v2");
     	
     	result = accessor.selectBy(experimentId);
-    	assertEquals("Value should be eq", 1, result.all().size());
-
+    	List<ExperimentAuditLog> values = result.all();
+    	assertEquals("Value should be eq", 1, values.size());
+    	assertEquals("Value should be eq", "a1", values.get(0).getAttributeName());
+    	assertEquals("Value should be eq", "v1", values.get(0).getOldValue());
+    	assertEquals("Value should be eq", "v2", values.get(0).getNewValue());
+    	assertEquals("Value should be eq", date, values.get(0).getModified());
+    	assertEquals("Value should be eq", experimentId, values.get(0).getExperimentId());
+    	    	
     	accessor.deleteBy(experimentId);
     	
     	result = accessor.selectBy(experimentId);

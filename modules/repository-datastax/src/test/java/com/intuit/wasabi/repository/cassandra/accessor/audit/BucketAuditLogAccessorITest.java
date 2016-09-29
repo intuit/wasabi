@@ -27,6 +27,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -59,8 +60,10 @@ public class BucketAuditLogAccessorITest extends IntegrationTestBase {
     	accessor.insertBy(experimentId, "l1", date, "a1", "v1", "v2");
     	
     	result = accessor.selectBy(experimentId, "l1");
-    	assertEquals("Value should be eq", 1, result.all().size());
-
+    	List<BucketAuditLog> values = result.all();
+    	assertEquals("Value should be eq", 1, values.size());
+    	assertEquals("Value should be eq", "l1", values.get(0).getLabel());
+    	
     	accessor.deleteBy(experimentId, "l1");
     	
     	result = accessor.selectBy(experimentId, "l1");

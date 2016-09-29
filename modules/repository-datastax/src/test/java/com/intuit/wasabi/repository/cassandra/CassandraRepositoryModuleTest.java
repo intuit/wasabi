@@ -15,6 +15,13 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.cassandra;
 
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNot.not;
+import static org.hamcrest.core.IsNull.nullValue;
+import static org.junit.Assert.assertThat;
+
+import org.junit.Test;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -25,13 +32,19 @@ import com.intuit.wasabi.eventlog.EventLogModule;
 import com.intuit.wasabi.repository.AuthorizationRepository;
 import com.intuit.wasabi.repository.FeedbackRepository;
 import com.intuit.wasabi.repository.PagesRepository;
+import com.intuit.wasabi.repository.cassandra.accessor.BucketAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.ExclusionAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.PrioritiesAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.StagingAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.UserAssignmentAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.audit.AuditLogAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.count.BucketAssignmentCountAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.export.UserAssignmentExportAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentUserIndexAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.index.UserAssignmentIndexAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.index.UserExperimentIndexAccessor;
+import com.intuit.wasabi.repository.cassandra.impl.CassandraFeedbackRepository;
 import com.intuit.wasabi.repository.database.DatabaseExperimentRepositoryModule;
-import org.junit.Test;
-
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsNot.not;
-import static org.hamcrest.core.IsNull.nullValue;
-import static org.junit.Assert.assertThat;
 
 public class CassandraRepositoryModuleTest {
 
@@ -49,5 +62,18 @@ public class CassandraRepositoryModuleTest {
         assertThat(injector.getInstance(AuthorizationRepository.class), is(not(nullValue())));
         assertThat(injector.getInstance(FeedbackRepository.class), is(not(nullValue())));
         assertThat(injector.getInstance(PagesRepository.class), is(not(nullValue())));
+        assertThat(injector.getInstance(CassandraFeedbackRepository.class), is(not(nullValue())));
+        assertThat(injector.getInstance(UserAssignmentAccessor.class), is(not(nullValue())));
+        assertThat(injector.getInstance(BucketAccessor.class), is(not(nullValue())));
+        assertThat(injector.getInstance(ExclusionAccessor.class), is(not(nullValue())));
+        assertThat(injector.getInstance(PrioritiesAccessor.class), is(not(nullValue())));
+        assertThat(injector.getInstance(StagingAccessor.class), is(not(nullValue())));
+        assertThat(injector.getInstance(ExperimentUserIndexAccessor.class), is(not(nullValue())));
+        assertThat(injector.getInstance(UserAssignmentIndexAccessor.class), is(not(nullValue())));
+        assertThat(injector.getInstance(UserExperimentIndexAccessor.class), is(not(nullValue())));
+        assertThat(injector.getInstance(AuditLogAccessor.class), is(not(nullValue())));
+        assertThat(injector.getInstance(BucketAssignmentCountAccessor.class), is(not(nullValue())));
+        assertThat(injector.getInstance(UserAssignmentExportAccessor.class), is(not(nullValue())));
+               
     }
 }
