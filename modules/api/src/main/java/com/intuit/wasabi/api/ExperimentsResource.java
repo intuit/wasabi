@@ -71,12 +71,10 @@ import javax.ws.rs.core.StreamingOutput;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.DateTimeException;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -1299,14 +1297,14 @@ public class ExperimentsResource {
             final Experiment.ID experimentID,
 
             @PathParam("from")
-            @DefaultValue("START")
-            @ApiParam(value = "Start date of the format \"MM/DD/YYYY\", or \"START\" to use the experiment's start date.",
+            @DefaultValue("")
+            @ApiParam(value = "Start date of the format \"MM/DD/YYYY\" to use the experiment's start date, e.g. 8/23/1997. Must be URL encoded!",
                     required = true)
             final String from,
 
             @PathParam("to")
-            @DefaultValue("END")
-            @ApiParam(value = "End date of the format \"MM/DD/YYYY\", or \"END\" to use the experiment's start date.",
+            @DefaultValue("")
+            @ApiParam(value = "End date of the format \"MM/DD/YYYY\" to use the experiment's start date, e.g. 8/23/1997. Must be URL encoded!",
                     required = true)
             final String to,
 
@@ -1325,8 +1323,8 @@ public class ExperimentsResource {
         Experiment experiment = getAuthorizedExperimentOrThrow(experimentID, username);
 
         // Parse from and to
-        OffsetDateTime fromDate = parseUIDateOrKey(from, "START", experiment.getStartTime().toInstant(), timezone, "from");
-        OffsetDateTime toDate = parseUIDateOrKey(to, "END", experiment.getEndTime().toInstant(), timezone, "to");
+        OffsetDateTime fromDate = parseUIDate(from, timezone, "from");
+        OffsetDateTime toDate = parseUIDate(to, timezone, "to");
 
         List<Experiment> mutexExperiments = mutex.getRecursiveMutualExclusions(experiment);
 
@@ -1370,20 +1368,15 @@ public class ExperimentsResource {
      * Throws an IllegalArgumentException if the string can not be parsed.
      *
      * @param uiDate          the UI formatted date
-     * @param key             the key to test it against if it's not a date
-     * @param onKeyMatch      the date to return if key matches uiDate
      * @param timezoneOffset  the timezone offset of the user to take into account
      * @param debugIdentifier the debug identifier to identify problems in the exception
      * @return a parsed instant of the ui date
      */
-    /*test*/ OffsetDateTime parseUIDateOrKey(String uiDate, String key, Instant onKeyMatch, String timezoneOffset, String debugIdentifier) {
-        if (key.equalsIgnoreCase(uiDate)) {
-            return OffsetDateTime.ofInstant(onKeyMatch, ZoneId.of("UTC"));
-        }
+    /*test*/ OffsetDateTime parseUIDate(String uiDate, String timezoneOffset, String debugIdentifier) {
         try {
             return OffsetDateTime.of(LocalDateTime.of(LocalDate.from(DateTimeFormatter.ofPattern("M/d/y").parse(uiDate)), LocalTime.MIDNIGHT), ZoneOffset.of(timezoneOffset));
         } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException(String.format("Can not parse \"%s\" date \"%s\", expecting format M/d/y, e.g. 05/24/2014, or \"%s\".", debugIdentifier, uiDate, key), e);
+            throw new IllegalArgumentException(String.format("Can not parse \"%s\" date \"%s\", expecting format M/d/y, e.g. 05/24/2014.", debugIdentifier, uiDate), e);
         } catch (DateTimeException e) {
             throw new IllegalArgumentException(String.format("No proper timezoneOffset given (\"%s\"), expecting format -0000 or +0000.", timezoneOffset));
         }

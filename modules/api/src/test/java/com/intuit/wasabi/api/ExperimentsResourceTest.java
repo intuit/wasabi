@@ -57,9 +57,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -160,7 +158,7 @@ public class ExperimentsResourceTest {
 
         experimentsResource = new ExperimentsResource(experiments, eventsExport, assignments,
                 authorization, buckets, mutex, pages, priorities, favorites, "US/New York", "YYYY-mm-DD", new HttpHeader("MyApp-???"), paginationHelper);
-        doReturn(Collections.<Experiment.ID>emptyList()).when(favorites).getFavorites(Mockito.any());
+        doReturn(Collections.emptyList()).when(favorites).getFavorites(Mockito.any());
     }
 
     @Test
@@ -1148,28 +1146,21 @@ public class ExperimentsResourceTest {
 
     @Test
     public void testParseUIDateOrKey() {
-        String key = "SPECIALKEY";
-        Instant onMatch = Instant.now();
-
-        // Key matches
-        OffsetDateTime offsetDateTime = experimentsResource.parseUIDateOrKey("SPECIALKEY", key, onMatch, "+0000", "");
-        Assert.assertEquals("Should return an OffsetDateTime of the Instant.", OffsetDateTime.ofInstant(onMatch, ZoneId.of("UTC")), offsetDateTime);
-
-        // Default: Key does not match: parse uiDate
-        offsetDateTime = experimentsResource.parseUIDateOrKey("08/07/1997", key, onMatch, "-0700", "");
+        // Default: parse uiDate
+        OffsetDateTime offsetDateTime = experimentsResource.parseUIDate("08/07/1997", "-0700", "");
         OffsetDateTime expected = OffsetDateTime.of(1997, 8, 7, 0, 0, 0, 0, ZoneOffset.of("-0700"));
         Assert.assertEquals("Should return an OffsetDateTime similar to August 7, 1997 with an offset of -0700.", expected, offsetDateTime);
 
-        // Key does not match and date is not parsable
+        // Date is not parsable
         try {
-            experimentsResource.parseUIDateOrKey("UN/Parse/able", key, onMatch, "+0000", "");
+            experimentsResource.parseUIDate("UN/Parse/able", "+0000", "");
             Assert.fail("Should throw IllegalArgumentException for input UN/Parse/able");
         } catch (IllegalArgumentException ignored) {
         }
 
         // Invalid timezone
         try {
-            experimentsResource.parseUIDateOrKey("08/07/1997", key, onMatch, "illegal", "");
+            experimentsResource.parseUIDate("08/07/1997", "illegal", "");
             Assert.fail("Should throw IllegalArgumentException for timezoneOffset illegal");
         } catch (IllegalArgumentException ignored) {
         }
