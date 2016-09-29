@@ -224,12 +224,14 @@ http://www.w3.org/2001/XMLSchema-instance">
                 </exclusion>
             </exclusions>
         </dependency>
+<!--
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>6.9.6</version>
             <scope>test</scope>
         </dependency>
+-->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
