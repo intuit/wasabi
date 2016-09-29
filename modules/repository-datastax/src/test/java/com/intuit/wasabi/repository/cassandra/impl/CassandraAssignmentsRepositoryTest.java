@@ -661,7 +661,7 @@ public class CassandraAssignmentsRepositoryTest {
                         eq(expected.getBucketLabel().toString()));
         thrown.expect(RepositoryException.class);
         thrown.expectMessage("Could not save user assignment");
-        repository.assignUserToLookUp(expected, null);
+        repository.assignUserToLookUp(expected, expected.getCreated());
     }
 
 
@@ -1162,12 +1162,12 @@ public class CassandraAssignmentsRepositoryTest {
                 .withUserID(User.ID.valueOf("testuser1"))
                 .build();
         repository.indexUserToExperiment(assignment);
-        verify(userExperimentIndexAccessor, times(1))
+        verify(userExperimentIndexAccessor, times(0))
                 .insertBy(eq(assignment.getUserID().toString()),
                         eq(assignment.getContext().getContext()),
                         eq(APPLICATION_NAME.toString()),
                         eq(this.experimentId));
-        verify(userExperimentIndexAccessor, times(0))
+        verify(userExperimentIndexAccessor, times(1))
                 .insertBy(eq(assignment.getUserID().toString()),
                         eq(assignment.getContext().getContext()),
                         eq(APPLICATION_NAME.toString()),
@@ -1222,13 +1222,13 @@ public class CassandraAssignmentsRepositoryTest {
                 .withCreated(new Date())
                 .build();
         repository.indexUserToBucket(assignment);
-        verify(userBucketIndexAccessor, times(1))
+        verify(userBucketIndexAccessor, times(0))
                 .insertBy(eq(this.experimentId),
                         eq(assignment.getUserID().toString()),
                         eq(assignment.getContext().getContext()),
                         eq(assignment.getCreated())
                 );
-        verify(userBucketIndexAccessor, times(0))
+        verify(userBucketIndexAccessor, times(1))
                 .insertBy(eq(this.experimentId),
                         eq(assignment.getUserID().toString()),
                         eq(assignment.getContext().getContext()),
