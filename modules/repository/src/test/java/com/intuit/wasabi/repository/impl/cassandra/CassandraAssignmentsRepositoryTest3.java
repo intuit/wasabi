@@ -137,7 +137,7 @@ public class CassandraAssignmentsRepositoryTest3 {
     }
 
     @Test
-    public void testGetExperimentBucketAssignmentRatioPerDay() {
+    public void testGetExperimentBucketAssignmentRatioPerDay() throws ConnectionException {
         // Objects to probe on
         Experiment.ID experimentID = Experiment.ID.newInstance();
         OffsetDateTime fromDate = OffsetDateTime.of(2016, 9, 25, 0, 0, 0, 0, ZoneOffset.UTC);
@@ -167,10 +167,10 @@ public class CassandraAssignmentsRepositoryTest3 {
                 result.keySet().containsAll(Arrays.asList(
                         fromDate, fromDate.plusDays(1), fromDate.plusDays(2), fromDate.plusDays(3)
                 )));
-        result.values().forEach(System.out::println);
         Assert.assertTrue("Result should always have 0.5 as the result Double.",
                 result.values().stream().allMatch(d -> d.equals(0.5))
         );
+        verify(preparedCqlQuery, times(4)).execute();
 
         // Throw test
         doThrowOnExecute();
@@ -179,5 +179,7 @@ public class CassandraAssignmentsRepositoryTest3 {
             Assert.fail("Should throw RepositoryException on failure.");
         } catch (RepositoryException ignored) {
         }
+        verify(preparedCqlQuery, times(5)).execute();
+
     }
 }
