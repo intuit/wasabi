@@ -20,12 +20,13 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.name.Names;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
+import com.intuit.wasabi.database.DatabaseModule;
+import com.intuit.wasabi.eventlog.EventLogModule;
 import com.intuit.wasabi.repository.AuthorizationRepository;
 import com.intuit.wasabi.repository.FeedbackRepository;
 import com.intuit.wasabi.repository.PagesRepository;
+import com.intuit.wasabi.repository.database.DatabaseExperimentRepositoryModule;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
@@ -36,7 +37,10 @@ public class CassandraRepositoryModuleTest {
 
     @Test
     public void testConfigure() throws Exception {
-        Injector injector = Guice.createInjector(new CassandraRepositoryModule());
+        Injector injector = Guice.createInjector(new EventLogModule(),
+                new DatabaseModule(),
+                new DatabaseExperimentRepositoryModule(),
+                new CassandraRepositoryModule());
         injector.getInstance(Key.get(String.class, Names.named("CassandraInstanceName")));
 
         assertThat(injector.getInstance(CassandraDriver.class), is(not(nullValue())));
