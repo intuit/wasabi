@@ -346,6 +346,8 @@ public class CassandraExperimentRepositoryTest extends IntegrationTestBase  {
 		Experiment experiment = repository.getExperiment(experimentID1);
 		assertEquals("Value should be eq", Experiment.State.DRAFT, experiment.getState());
 		repository.setStateExperimentIndexAccessor(mockStateExperimentIndexAccessor);
+		Mockito.doThrow(new RuntimeException("runtime")).when(mockStateExperimentIndexAccessor)
+		.insert(Mockito.any(), Mockito.any(), Mockito.any());
 		repository.updateStateIndex(experiment);
 		
 	}
@@ -353,6 +355,9 @@ public class CassandraExperimentRepositoryTest extends IntegrationTestBase  {
 	@Test(expected=RepositoryException.class)
 	public void testUpdateBucketStateAccessorMockThrowsException() {
 		repository.setBucketAccessor(mockBucketAccessor);
+		Mockito.doThrow(new RuntimeException("runtime")).when(mockBucketAccessor)
+			.updateState(Mockito.any(), Mockito.any(), Mockito.any());
+		
 		Bucket resultBucket = repository.updateBucketState(bucket1, Bucket.State.CLOSED);
 	}
 
@@ -407,6 +412,9 @@ public class CassandraExperimentRepositoryTest extends IntegrationTestBase  {
 	public void testCreateIndexesForExperimentStateIndexAccessorMockThrowsException() {
 		newExperiment1.setId(Experiment.ID.newInstance());
 		repository.setStateExperimentIndexAccessor(mockStateExperimentIndexAccessor);
+		Mockito.doThrow(new RuntimeException("runtime")).when(mockStateExperimentIndexAccessor)
+		.insert(Mockito.any(), Mockito.any(), Mockito.any());
+		
 		repository.createIndicesForNewExperiment(newExperiment1);		
 	}
 
