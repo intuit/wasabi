@@ -22,6 +22,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
 import com.intuit.wasabi.tests.library.TestBase;
@@ -77,6 +78,14 @@ public class PastDatedExperimentCreationTest extends TestBase{
         experiment.state = Constants.EXPERIMENT_STATE_RUNNING;
         exp = putExperiment(experiment);
         assertEqualModelItems(exp, experiment);
+    }
+    
+    @AfterClass
+    public void testCleanUp(){
+        experiment.state = Constants.EXPERIMENT_STATE_TERMINATED;
+        Experiment exp = putExperiment(experiment);
+        experiment.update(exp);
+        deleteExperiment(experiment);
     }
 
 
