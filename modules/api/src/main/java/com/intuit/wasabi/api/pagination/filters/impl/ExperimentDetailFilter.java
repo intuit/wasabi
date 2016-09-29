@@ -36,7 +36,8 @@ public class ExperimentDetailFilter extends PaginationFilter<ExperimentDetail> {
      * from fulltext search to avoid difficulties in overly specific queries and to avoid duplications.
      */
     public ExperimentDetailFilter() {
-        super.registerFilterModifierForProperties(FilterUtil.FilterModifier.APPEND_TIMEZONEOFFSET, Property.mod_time);
+        super.registerFilterModifierForProperties(FilterUtil.FilterModifier.APPEND_TIMEZONEOFFSET, Property.mod_time,
+                Property.start_time, Property.end_time);
         super.excludeFromFulltext(Property.application_name_exact, Property.mod_time, Property.favorite);
     }
 
