@@ -45,6 +45,8 @@ public class ExperimentDetail {
 
     private Date startTime;
 
+    private Date endTime;
+
     private boolean isFavorite;
 
     private List<BucketDetail> buckets;
@@ -61,6 +63,8 @@ public class ExperimentDetail {
         private boolean isControl;
 
         private Bucket.Label label;
+
+        private Bucket.State state;
 
         private double allocationPercent = 0.0;
 
@@ -82,10 +86,11 @@ public class ExperimentDetail {
          *
          * @see Bucket for further information
          */
-        public BucketDetail(Bucket.Label label, boolean isControl, double allocationPercent){
+        public BucketDetail(Bucket.Label label, boolean isControl, double allocationPercent, Bucket.State state){
             setLabel(label);
             setControl(isControl);
             setAllocationPercent(allocationPercent);
+            setState(state);
         }
 
         public boolean isControl() {
@@ -157,6 +162,14 @@ public class ExperimentDetail {
         public void setWinnerSoFar(boolean winnerSoFar) {
             this.winnerSoFar = winnerSoFar;
         }
+
+        public Bucket.State getState() {
+            return state;
+        }
+
+        public void setState(Bucket.State state) {
+            this.state = state;
+        }
     }
 
     /**
@@ -166,7 +179,7 @@ public class ExperimentDetail {
      */
     public ExperimentDetail(Experiment exp){
         this(exp.getID(), exp.getState(), exp.getLabel(), exp.getApplicationName(),
-                exp.getModificationTime(), exp.getStartTime());
+                exp.getModificationTime(), exp.getStartTime(), exp.getEndTime());
     }
 
     /**
@@ -180,13 +193,15 @@ public class ExperimentDetail {
      * @param startTime the startTime of the experiment to determine the winner so far
      */
     public ExperimentDetail(Experiment.ID id, Experiment.State state, Experiment.Label label,
-                            Application.Name appName, Date modificationTime, Date startTime){
+                            Application.Name appName, Date modificationTime, Date startTime,
+                            Date endTime){
         setId(id);
         setState(state);
         setLabel(label);
         setAppName(appName);
         setModificationTime(modificationTime);
         setStartTime(startTime);
+        setEndTime(endTime);
     }
 
     public Experiment.ID getId() {
@@ -272,6 +287,14 @@ public class ExperimentDetail {
         this.startTime = startTime;
     }
 
+    public Date getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(Date endTime) {
+        this.endTime = endTime;
+    }
+
     /**
      * This method takes a list of buckets and transforms it to the {@link BucketDetail}s that are needed
      * for later extension.
@@ -281,7 +304,7 @@ public class ExperimentDetail {
     public void addBuckets(List<Bucket> buckets){
 
         List<BucketDetail> details = buckets.stream()
-                .map(b -> new BucketDetail(b.getLabel(), b.isControl(), b.getAllocationPercent()))
+                .map(b -> new BucketDetail(b.getLabel(), b.isControl(), b.getAllocationPercent(), b.getState()))
                 .collect(Collectors.toList());
 
         setBuckets(details);

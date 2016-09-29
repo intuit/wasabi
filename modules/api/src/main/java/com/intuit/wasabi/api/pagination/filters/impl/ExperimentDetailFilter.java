@@ -57,7 +57,9 @@ public class ExperimentDetailFilter extends PaginationFilter<ExperimentDetail> {
         favorite(ExperimentDetail::isFavorite, (isFavorite, filter) -> Boolean.parseBoolean(filter) == isFavorite),
         bucket_label(ExperimentDetail::getBuckets, (bucketDetails, filter) ->
                 bucketDetails.stream().anyMatch(bucketDetail -> StringUtils.containsIgnoreCase(bucketDetail.getLabel().toString(), filter))),
-        mod_time(ExperimentDetail::getModificationTime, FilterUtil::extractTimeZoneAndTestDate);
+        mod_time(ExperimentDetail::getModificationTime, FilterUtil::extractTimeZoneAndTestDate),
+        start_time(ExperimentDetail::getStartTime, FilterUtil::extractTimeZoneAndTestDate),
+        end_time(ExperimentDetail::getEndTime, FilterUtil::extractTimeZoneAndTestDate);
 
         private final Function<ExperimentDetail, ?> propertyExtractor;
         private final BiPredicate<?, String> filterPredicate;

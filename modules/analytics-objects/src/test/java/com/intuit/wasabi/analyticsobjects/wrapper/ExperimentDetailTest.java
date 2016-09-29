@@ -38,10 +38,13 @@ public class ExperimentDetailTest {
     Application.Name appName = Application.Name.valueOf("TestApplicationLabelForExperimentDetail");
     Calendar modTime = Calendar.getInstance();
     Calendar startTime = Calendar.getInstance();
+    Calendar endTime = Calendar.getInstance();
 
     {
         modTime.set(2016,8,16);
         startTime.set(2016,8,1);
+        endTime.set(2017,10,12);
+
     }
 
     Experiment exp = Experiment.withID(expId).withApplicationName(appName).withModificationTime(modTime.getTime())
@@ -51,32 +54,37 @@ public class ExperimentDetailTest {
     @Test
     public void testConstructor(){
         ExperimentDetail expDetail = new ExperimentDetail(expId, expState, expLabel, appName, modTime.getTime(),
-                startTime.getTime());
+                startTime.getTime(), endTime.getTime());
         assertEquals(expDetail.getAppName(), appName);
         assertEquals(expDetail.getId(), expId);
         assertEquals(expDetail.getLabel(), expLabel);
         assertEquals(expDetail.getState(), expState);
         assertEquals(expDetail.getModificationTime(), modTime.getTime());
+        assertEquals(expDetail.getEndTime(), endTime.getTime());
     }
 
     @Test(expected=IllegalArgumentException.class)
     public void testConstraintsId(){
-        new ExperimentDetail(null, expState, expLabel, appName, modTime.getTime(), startTime.getTime());
+        new ExperimentDetail(null, expState, expLabel, appName, modTime.getTime(),
+                startTime.getTime(), endTime.getTime());
     }
 
     @Test(expected=IllegalArgumentException.class)
     public void testConstraintsState(){
-        new ExperimentDetail(expId, null, expLabel, appName, modTime.getTime(), startTime.getTime());
+        new ExperimentDetail(expId, null, expLabel, appName, modTime.getTime(),
+                startTime.getTime(), endTime.getTime());
     }
 
     @Test(expected=IllegalArgumentException.class)
     public void testConstraintsLabel(){
-        new ExperimentDetail(expId, expState, null, appName, modTime.getTime(), startTime.getTime());
+        new ExperimentDetail(expId, expState, null, appName, modTime.getTime(),
+                startTime.getTime(), endTime.getTime());
     }
 
     @Test(expected=IllegalArgumentException.class)
     public void testConstraintsAppName(){
-        new ExperimentDetail(expId, expState, expLabel, null, modTime.getTime(), startTime.getTime());
+        new ExperimentDetail(expId, expState, expLabel, null, modTime.getTime(),
+                startTime.getTime(), endTime.getTime());
     }
 
     @Test

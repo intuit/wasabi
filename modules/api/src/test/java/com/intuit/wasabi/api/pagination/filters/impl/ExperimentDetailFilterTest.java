@@ -52,8 +52,11 @@ public class ExperimentDetailFilterTest {
         Date modTime = cal.getTime();
         cal.add(Calendar.DATE, 1);
         Date startTime = cal.getTime();
+        cal.add(Calendar.DATE, 14);
+        Date endTime = cal.getTime();
 
-        experimentDetail = new ExperimentDetail(expId, Experiment.State.RUNNING, expLabel, appName, modTime, startTime);
+        experimentDetail = new ExperimentDetail(expId, Experiment.State.RUNNING, expLabel, appName,
+                modTime, startTime, endTime);
 
         Bucket b1 = Bucket.newInstance(expId, Bucket.Label.valueOf("Bucket1")).withAllocationPercent(0.6).build();
         Bucket b2 = Bucket.newInstance(expId, Bucket.Label.valueOf("Bucket2")).withAllocationPercent(0.4).build();
