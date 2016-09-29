@@ -55,26 +55,6 @@ public class ExperimentFactory {
                     .setDescription("A sample Experiment description.");
     }
     
-    
-    /**
-     * Creates a basic Experiment with start date dated 30 days in past and end date dated 10 days in the past.
-     * The values are a name, the default application, a start and end time and the sampling percentage (100%), as
-     * well as a hypothesis/description.
-     *
-     * Sets the creatorID to admin email
-     *
-     * @return a default Experiment.
-     */
-    public static Experiment createPreviousDatedExperiment()
-    {
-        return new Experiment(Constants.DEFAULT_PREFIX_EXPERIMENT + System.currentTimeMillis() + internalId++,
-                ApplicationFactory.defaultApplication(),
-                TestUtils.relativeTimeString(-30),
-                TestUtils.relativeTimeString(-10), 1)
-                    .setCreatorID(USER_ID)
-                    .setDescription("A sample Experiment description.");
-    }
-
     /**
      * Creates a basic Experiment with the required default values and the optional value
      * rule. (No ID!)

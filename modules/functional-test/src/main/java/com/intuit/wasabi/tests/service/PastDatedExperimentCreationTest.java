@@ -26,6 +26,7 @@ import org.testng.annotations.Test;
 
 import com.intuit.wasabi.tests.library.TestBase;
 import com.intuit.wasabi.tests.library.util.Constants;
+import com.intuit.wasabi.tests.library.util.TestUtils;
 import com.intuit.wasabi.tests.library.util.serialstrategies.DefaultNameExclusionStrategy;
 import com.intuit.wasabi.tests.model.Bucket;
 import com.intuit.wasabi.tests.model.Experiment;
@@ -46,13 +47,23 @@ public class PastDatedExperimentCreationTest extends TestBase{
     static final Logger LOGGER = LoggerFactory.getLogger(PastDatedExperimentCreationTest.class);
     Experiment experiment;
 
+    /**
+     * creates an experiment that is previous dated
+     */
     @Test
-    public void testSetUp()
+    public void createPreviousDatedExperiment()
     {
-        experiment = ExperimentFactory.createPreviousDatedExperiment();
+        //create an experiment
+        experiment = ExperimentFactory.createExperiment();
         DefaultNameExclusionStrategy experimentComparisonStrategy = new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson");
         experiment.setSerializationStrategy(experimentComparisonStrategy);
+        
+        //set start time and end time in previous
+        experiment.startTime = TestUtils.relativeTimeString(-10);
+        experiment.endTime = TestUtils.relativeTimeString(-5);
         Experiment exp = postExperiment(experiment);
+        
+        //do the required asserts
         Assert.assertNotNull(exp.creationTime, "Experiment creation failed (No creationTime).");
         Assert.assertNotNull(exp.modificationTime, "Experiment creation failed (No modificationTime).");
         Assert.assertNotNull(exp.state, "Experiment creation failed (No state).");
