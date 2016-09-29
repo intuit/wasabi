@@ -59,7 +59,7 @@ abstract class ExceptionProvider<T extends Throwable> implements ExceptionMapper
     private String serialize(final MediaType type, final Status status, final String message) {
         String serializedMessage = message;
 
-        // FIXME: ?assume type alway is json?
+        // FIXME: ?assume type always is json?
         if (type.equals(APPLICATION_JSON_TYPE)) {
             serializedMessage = exceptionJsonifier.serialize(status, message);
         }

@@ -16,7 +16,7 @@
 package com.intuit.wasabi.api.error;
 
 import com.intuit.wasabi.api.HttpHeader;
-import com.intuit.wasabi.experimentobjects.exceptions.InvalidIdentifierException;
+import com.sun.jersey.api.NotFoundException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,45 +29,47 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class InvalidIdentifierExceptionProviderTest {
+public class NotFoundExceptionProviderTest {
 
     @Mock
     private HttpHeader httpHeader;
+    @Mock
     private ExceptionJsonifier exceptionJsonifier;
     @Mock
-    private InvalidIdentifierException invalidIdentifierException;
+    private NotFoundException notFoundException;
     @Mock
     private ResponseBuilder responseBuilder;
     @Mock
     private Response response;
     @Captor
     private ArgumentCaptor<Object> entity;
-    private InvalidIdentifierExceptionProvider invalidIdentifierExceptionProvider;
+    private NotFoundExceptionProvider notFoundExceptionProvider;
 
     @Before
     public void before() {
-        exceptionJsonifier = new ExceptionJsonifier();
-        invalidIdentifierExceptionProvider = new InvalidIdentifierExceptionProvider(httpHeader, exceptionJsonifier);
+        notFoundExceptionProvider = new NotFoundExceptionProvider(httpHeader, exceptionJsonifier);
     }
 
     @Test
     public void toResponse() throws Exception {
-        when(httpHeader.headers(BAD_REQUEST)).thenReturn(responseBuilder);
+        when(httpHeader.headers(NOT_FOUND)).thenReturn(responseBuilder);
         when(responseBuilder.type(APPLICATION_JSON_TYPE)).thenReturn(responseBuilder);
-        when(invalidIdentifierException.getMessage()).thenReturn("error");
-        when(responseBuilder.entity("{\"error\":{\"code\":400,\"message\":\"error\"}}")).thenReturn(responseBuilder);
+        when(notFoundException.getMessage()).thenReturn("error");
+        when(exceptionJsonifier.serialize(NOT_FOUND, "error")).thenReturn("json");
+        when(responseBuilder.entity("json")).thenReturn(responseBuilder);
         when(responseBuilder.build()).thenReturn(response);
 
-        invalidIdentifierExceptionProvider.toResponse(invalidIdentifierException);
+        notFoundExceptionProvider.toResponse(notFoundException);
 
-        verify(httpHeader).headers(BAD_REQUEST);
+        verify(httpHeader).headers(NOT_FOUND);
+        verify(exceptionJsonifier).serialize(NOT_FOUND, "error");
         verify(responseBuilder).type(APPLICATION_JSON_TYPE);
-        verify(responseBuilder).entity("{\"error\":{\"code\":400,\"message\":\"error\"}}");
+        verify(responseBuilder).entity("json");
         verify(responseBuilder).build();
     }
 }

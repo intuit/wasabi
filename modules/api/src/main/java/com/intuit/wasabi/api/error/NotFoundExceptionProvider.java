@@ -16,19 +16,19 @@
 package com.intuit.wasabi.api.error;
 
 import com.intuit.wasabi.api.HttpHeader;
+import com.sun.jersey.api.NotFoundException;
 
 import javax.inject.Inject;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.ext.Provider;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
-import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 @Provider
-public class WebApplicationExceptionProvider extends ExceptionProvider<WebApplicationException> {
+public class NotFoundExceptionProvider extends ExceptionProvider<NotFoundException> {
 
     @Inject
-    public WebApplicationExceptionProvider(final HttpHeader httpHeader, final ExceptionJsonifier exceptionJsonifier) {
-        super(INTERNAL_SERVER_ERROR, APPLICATION_JSON_TYPE, httpHeader, exceptionJsonifier);
+    public NotFoundExceptionProvider(final HttpHeader httpHeader, final ExceptionJsonifier exceptionJsonifier) {
+        super(NOT_FOUND, APPLICATION_JSON_TYPE, httpHeader, exceptionJsonifier);
     }
 }
