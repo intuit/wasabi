@@ -101,14 +101,14 @@
                 <div class="summaryBody">
                     <ul class="buckets" ng-if="experiment.sortedBuckets && experiment.sortedBuckets.length > 0">
                         <li ng-repeat="bucket in experiment.sortedBuckets" custom-tooltip="{{bucket.homePageTooltip}}" ng-class="{closed: bucket.state === 'CLOSED', indeterminate: bucket.improvementClass === 'indeterminate', winner: bucket.improvementClass === 'winner', indeterminate: bucket.improvementClass === 'loser', noWinner: bucket.improvementClass === 'no-winner'}">
-                            <label>{{bucket.label}} <span ng-if="bucket.control">(control)</span><span ng-if="bucket.isBaseLine">(baseline)</span></label>
+                            <label>{{bucket.label}} <span ng-if="bucket.isControl">(control)</span><span ng-if="bucket.isBaseLine">(baseline)</span></label>
                             <div>{{bucket.actionRate | number:1}} <span>&plusmn;{{actionDiffForCardView(bucket) | number:1}}%</span></div>
                             <div title="Bucket assignments" class="bucketAssignments" ng-if="bucket.userCount >= 0">{{bucket.userCount}}</div>
                         </li>
                     </ul>
                     <ul class="buckets" ng-if="(!experiment.sortedBuckets) && (experiment.buckets && experiment.buckets.length > 0)">
                         <li ng-repeat="bucket in experiment.buckets" custom-tooltip="{{bucket.homePageTooltip}}" class="noWinnerNotRunning">
-                            <label>{{bucket.label}} <span ng-if="getBucket(bucket.label, experiment).control">(control)</span><span ng-if="getBucket(bucket.label, experiment).isBaseLine">(baseline)</span></label>
+                            <label>{{bucket.label}} <span ng-if="getBucket(bucket.label, experiment).isControl">(control)</span><span ng-if="getBucket(bucket.label, experiment).isBaseLine">(baseline)</span></label>
                             <div>{{multiply100(bucket.allocationPercent)}}%</div>
                         </li>
                     </ul>

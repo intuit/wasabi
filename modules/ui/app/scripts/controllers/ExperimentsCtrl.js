@@ -453,7 +453,7 @@ angular.module('wasabi.controllers').
                                     for (var j = 0; j < experiments[i].buckets.length; j++) {
                                         if (experiments[i].buckets[j].state && experiments[i].buckets[j].state == 'OPEN') {
                                             // Ignore anything but Open buckets for the Card View.
-                                            if (experiments[i].buckets[j].control) {
+                                            if (experiments[i].buckets[j].isControl) {
                                                 experiments[i].hasControlBucket = true;
                                                 experiments[i].controlBucketLabel = experiments[i].buckets[j].label;
                                             }
