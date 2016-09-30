@@ -79,7 +79,7 @@ if [[ "${build}" = true || "${test}" = true || "${build_jar}" = true ]]; then
   [ "${build}" = true ] && package=package
   [ ! -e ./modules/main/target/wasabi-main-*-SNAPSHOT-${profile}-all.jar ] && package=package
   # FIXME: is jacoco:prepare required?
-  [ "${test}" = true ] && tests="org.jacoco:jacoco-maven-plugin:prepare-agent cobertura:cobertura -Dcobertura.report.format=xml test"
+  [ "${test}" = true ] && tests="org.jacoco:jacoco-maven-plugin:prepare-agent cobertura:cobertura -Dcobertura.report.format=xml findbugs:check test"
 
   mvn ${WASABI_MAVEN} -P${profile} clean ${tests:--Dmaven.test.skip=true} ${package} javadoc:aggregate || \
     usage "invalid: mvn ${WASABI_MAVEN} -P${profile} clean ${tests:--Dmaven.test.skip=true} ${package} javadoc:aggregate" 1
