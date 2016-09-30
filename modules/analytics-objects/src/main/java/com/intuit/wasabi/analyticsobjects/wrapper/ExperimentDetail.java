@@ -41,7 +41,7 @@ public class ExperimentDetail {
 
     private Experiment.Label label;
 
-    private Application.Name appName;
+    private Application.Name applicationName;
 
     private Date modificationTime;
 
@@ -201,7 +201,7 @@ public class ExperimentDetail {
         setId(id);
         setState(state);
         setLabel(label);
-        setAppName(appName);
+        setApplicationName(appName);
         setModificationTime(modificationTime);
         setStartTime(startTime);
         setEndTime(endTime);
@@ -238,13 +238,13 @@ public class ExperimentDetail {
         else throw new IllegalArgumentException("Experiment.Label is not allowed to be null for ExperimentDetail");
     }
 
-    public Application.Name getAppName() {
-        return appName;
+    public Application.Name getApplicationName() {
+        return applicationName;
     }
 
-    private void setAppName(Application.Name appName) {
-        if(appName != null && !isEmpty(appName.toString()))
-            this.appName = appName;
+    private void setApplicationName(Application.Name applicationName) {
+        if(applicationName != null && !isEmpty(applicationName.toString()))
+            this.applicationName = applicationName;
         else throw new IllegalArgumentException("Application Name can not be empty for ExperimentDetail");
     }
 

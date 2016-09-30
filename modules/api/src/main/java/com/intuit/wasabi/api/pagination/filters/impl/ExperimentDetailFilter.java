@@ -55,8 +55,8 @@ public class ExperimentDetailFilter extends PaginationFilter<ExperimentDetail> {
         state(ExperimentDetail::getState, (state, filter) -> StringUtils.containsIgnoreCase(state.toString(), filter)),
         state_exact(ExperimentDetail::getState, ExperimentFilter::stateTest),
         experiment_label(experimentDetail -> experimentDetail.getLabel().toString(), StringUtils::containsIgnoreCase),
-        application_name(experimentDetail -> experimentDetail.getAppName().toString(), StringUtils::containsIgnoreCase),
-        application_name_exact(experimentDetail -> experimentDetail.getAppName().toString(), StringUtils::equalsIgnoreCase),
+        application_name(experimentDetail -> experimentDetail.getApplicationName().toString(), StringUtils::containsIgnoreCase),
+        application_name_exact(experimentDetail -> experimentDetail.getApplicationName().toString(), StringUtils::equalsIgnoreCase),
         favorite(ExperimentDetail::isFavorite, (isFavorite, filter) -> Boolean.parseBoolean(filter) == isFavorite),
         bucket_label(ExperimentDetail::getBuckets, (bucketDetails, filter) ->
                 bucketDetails.stream().anyMatch(bucketDetail ->
