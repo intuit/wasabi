@@ -55,7 +55,7 @@ public class ExperimentDetailTest {
     public void testConstructor(){
         ExperimentDetail expDetail = new ExperimentDetail(expId, expState, expLabel, appName, modTime.getTime(),
                 startTime.getTime(), endTime.getTime());
-        assertEquals(expDetail.getAppName(), appName);
+        assertEquals(expDetail.getApplicationName(), appName);
         assertEquals(expDetail.getId(), expId);
         assertEquals(expDetail.getLabel(), expLabel);
         assertEquals(expDetail.getState(), expState);
@@ -93,7 +93,7 @@ public class ExperimentDetailTest {
         ExperimentDetail expDetail = new ExperimentDetail(exp);
 
         assertEquals(exp.getID(), expDetail.getId());
-        assertEquals(exp.getApplicationName(), expDetail.getAppName());
+        assertEquals(exp.getApplicationName(), expDetail.getApplicationName());
         assertEquals(exp.getModificationTime(), expDetail.getModificationTime());
         assertEquals(exp.getLabel(), expDetail.getLabel());
         assertEquals(exp.getStartTime(), expDetail.getStartTime());

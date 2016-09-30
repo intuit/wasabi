@@ -181,7 +181,7 @@ public class AnalyticsResource {
                 continue;
             }
 
-            Application.Name applicationName = experiment.getAppName();
+            Application.Name applicationName = experiment.getApplicationName();
 
             if (allowed.contains(applicationName)) {
                 authorizedExperiments.add(experiment);
