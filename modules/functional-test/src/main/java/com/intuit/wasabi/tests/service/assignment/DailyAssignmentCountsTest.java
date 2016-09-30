@@ -52,6 +52,13 @@ public class DailyAssignmentCountsTest extends TestBase {
     private List<Experiment> mutexListB;
     private List<Experiment> mutexListC;
 
+    /**
+     * Sets up 10 experiments.
+     * Experiments 1 - 3 are mutually exclusive to each other (List A).
+     * Experiments 4 and 5 are mutually exclusive to each other (List B).
+     * Experiments 6 - 9 are mutually exclusive in a circular fashion (List C).
+     * Experiment 10 is not mutually exclusive.
+     */
     @BeforeClass(dependsOnGroups = {"ping"})
     public void setup() {
         for (int i = 0; i < 10; ++i) {
@@ -77,6 +84,12 @@ public class DailyAssignmentCountsTest extends TestBase {
         // experiments.get(9) stays alone for now, will be added to a more complex test.
     }
 
+    /**
+     * Asserts that all experiment labels are present in the result.
+     *
+     * @param experiments the expected experiments
+     * @param result      the result
+     */
     private void assertExperimentLabels(List<Experiment> experiments, Map<String, List<?>> result) {
         Assert.assertTrue(result.containsKey("experiments"), "Expected 'experiments' key.");
 
@@ -88,6 +101,13 @@ public class DailyAssignmentCountsTest extends TestBase {
         Assert.assertEqualsNoOrder(experimentLabels.toArray(), expectedLabelsNoOrder.toArray(), "Not all experiment labels are given.");
     }
 
+    /**
+     * Asserts that all priorities are present in the result, then asserts that their order matches the order of the
+     * experiment labels.
+     *
+     * @param experiments the expected experiments
+     * @param result      the result
+     */
     private void assertPriorities(List<Experiment> experiments, Map<String, List<?>> result) {
         Assert.assertTrue(result.containsKey("priorities"), "Expected 'priorities' key.");
 
@@ -108,6 +128,12 @@ public class DailyAssignmentCountsTest extends TestBase {
         Assert.assertEquals(priorities, expectedPrioritiesSorted, "Priorities and Labels are not in the same order.");
     }
 
+    /**
+     * Asserts that for each experiment there are all sampling percentages given.
+     *
+     * @param experiments the expected experiments
+     * @param result      the result
+     */
     private void assertSamplingPercentages(List<Experiment> experiments, Map<String, List<?>> result) {
         Assert.assertTrue(result.containsKey("samplingPercentages"), "Expected 'samplingPercentages' key.");
 
@@ -119,6 +145,13 @@ public class DailyAssignmentCountsTest extends TestBase {
         Assert.assertEqualsNoOrder(samplingPercentages.toArray(), expectedSamplingPercentages.toArray(), "Not all sampling percentages are given.");
     }
 
+    /**
+     * Asserts that all assignment ratios for each day are given and correct: on the first and last day 0 percent (= 0.0),
+     * on the day in the middle 100 percent (= 1.0).
+     *
+     * @param experiments the expected experiments
+     * @param result      the result
+     */
     private void assertAssignmentRatios(List<Experiment> experiments, Map<String, List<?>> result) {
         Assert.assertTrue(result.containsKey("assignmentRatios"), "Expected 'assignmentRatios' key.");
 
@@ -142,6 +175,12 @@ public class DailyAssignmentCountsTest extends TestBase {
         Assert.assertEqualsNoOrder(assignmentRatios.toArray(), expectedAssignmentRatios.toArray(), "Not all assignment ratios are correct.");
     }
 
+    /**
+     * Asserts all important asserts in this order: Experiment labels, priorities, sampling percentages, assignment ratios.
+     *
+     * @param experiments the expected experiments
+     * @param result      the result
+     */
     private void runAllAsserts(List<Experiment> experiments, Map<String, List<?>> result) {
         assertExperimentLabels(experiments, result);
         assertPriorities(experiments, result);
@@ -149,6 +188,9 @@ public class DailyAssignmentCountsTest extends TestBase {
         assertAssignmentRatios(experiments, result);
     }
 
+    /**
+     * Tests the single, non-mutex experiment.
+     */
     @Test(groups = "basicTrafficTests")
     public void testSingleExperiment() {
         Map<String, List<?>> result = getTraffic(experiments.get(9), startDate, endDate);
@@ -156,24 +198,36 @@ public class DailyAssignmentCountsTest extends TestBase {
         runAllAsserts(experimentsList, result);
     }
 
+    /**
+     * Tests list A.
+     */
     @Test(groups = "basicTrafficTests")
     public void testAllMutuallyExclusiveA() {
         Map<String, List<?>> resultA = getTraffic(mutexListA.get(0), startDate, endDate);
         runAllAsserts(mutexListA, resultA);
     }
 
+    /**
+     * Tests list B.
+     */
     @Test(groups = "basicTrafficTests")
     public void testAllMutuallyExclusiveB() {
         Map<String, List<?>> resultB = getTraffic(mutexListB.get(0), startDate, endDate);
         runAllAsserts(mutexListB, resultB);
     }
 
+    /**
+     * Tests list C.
+     */
     @Test(groups = "basicTrafficTests")
     public void testCircularMutuallyExclusive() {
         Map<String, List<?>> resultC = getTraffic(mutexListC.get(0), startDate, endDate);
         runAllAsserts(mutexListC, resultC);
     }
 
+    /**
+     * Makes A0 and B0 mutex, tests the combined (mutex-chained) lists thereafter.
+     */
     @Test(dependsOnGroups = "basicTrafficTests")
     public void testTwoListCombination() {
         // Setup: make A and B mutex
@@ -186,6 +240,11 @@ public class DailyAssignmentCountsTest extends TestBase {
         runAllAsserts(combinedList, result);
     }
 
+    /**
+     * Combines C2 and the single experiment, as well as A2 and the single experiment, leading to a chain between
+     * all ten experiments via the then formerly single experiment.
+     * Tests the resulting list of all experiments.
+     */
     @Test(dependsOnMethods = "testTwoListCombination")
     public void testFullCombination() {
         postExclusions(Arrays.asList(mutexListC.get(2), experiments.get(9))); // combine the setA/B combination with set C
@@ -194,6 +253,10 @@ public class DailyAssignmentCountsTest extends TestBase {
         runAllAsserts(experiments, result);
     }
 
+    /**
+     * Deletes the link between lists A/B and list C, i.e. the formerly single experiment. Checks if the results are
+     * back to the previous state.
+     */
     @Test(dependsOnMethods = "testFullCombination")
     public void testConnectingExperimentDeleted() {
         putExperiment(experiments.get(9).setState(Constants.EXPERIMENT_STATE_TERMINATED));
@@ -209,26 +272,47 @@ public class DailyAssignmentCountsTest extends TestBase {
         runAllAsserts(mutexListC, resultC);
     }
 
+    /**
+     * Tests for an unknown experiment ID. Should simply return a 404.
+     */
     @Test(dependsOnGroups = "ping")
     public void testUnknownExperiment() {
         getTraffic(ExperimentFactory.createExperiment().setId(UUID.randomUUID().toString()), startDate, endDate, HttpStatus.SC_NOT_FOUND);
     }
 
+    /**
+     * Provides a set of illegal date values: not properly URL encoded or strings which are not date parseable.
+     *
+     * @return illegal date values to be provided for {@link #testIllegalDateInputs(String, String, int)}.
+     */
     @DataProvider
     public Object[][] illegalDateProvider() {
         return new Object[][]{
                 new Object[]{"5/6/2013", "9%2F5%2F2014", HttpStatus.SC_NOT_FOUND},
                 new Object[]{"5%2F6%2F2013", "9/5/2014", HttpStatus.SC_NOT_FOUND},
                 new Object[]{"yesterday", "9/5/2014", HttpStatus.SC_NOT_FOUND},
-                new Object[]{"yesterday", "9/5/2014", HttpStatus.SC_NOT_FOUND},
+                new Object[]{"9/5/2014", "tomorrow", HttpStatus.SC_NOT_FOUND},
         };
     }
 
+    /**
+     * Tests the illegal date values provided by {@link #illegalDateProvider()}.
+     * <p>
+     * Uses the default API Server connector to avoid the automatic URL encoding done for convenience
+     * in {@link TestBase#getTraffic(Experiment, String, String, int)}.
+     *
+     * @param start          the start date
+     * @param end            the end date
+     * @param expectedStatus the expected status
+     */
     @Test(dependsOnGroups = "ping", dataProvider = "illegalDateProvider")
     public void testIllegalDateInputs(String start, String end, int expectedStatus) {
         getTraffic(experiments.get(0), start, end, expectedStatus, apiServerConnector);
     }
 
+    /**
+     * Deletes all experiments.
+     */
     @AfterClass
     public void cleanUp() {
         toCleanUp.addAll(experiments);
