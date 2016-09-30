@@ -159,7 +159,7 @@ public class ExperimentDetailsImpl implements ExperimentDetails{
                 b.setUpperBound(bucketStat.getJointActionRate().getUpperBound());
             }
 
-            b.setUserCount(bucketStat.getImpressionCounts().getUniqueUserCount());
+            b.setCount(bucketStat.getImpressionCounts().getUniqueUserCount());
 
             if(checkWinnerSoFar){
                 for(Bucket.Label winner : expStats.getJointProgress().getWinnersSoFar()){

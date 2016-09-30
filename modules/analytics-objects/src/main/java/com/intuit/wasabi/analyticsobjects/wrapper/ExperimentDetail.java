@@ -77,7 +77,7 @@ public class ExperimentDetail {
 
         private double upperBound = 0.0;
 
-        private long userCount = 0;
+        private long count = 0;
 
         private boolean winnerSoFar = false;
 
@@ -148,13 +148,13 @@ public class ExperimentDetail {
             this.upperBound = upperBound;
         }
 
-        public long getUserCount() {
-            return userCount;
+        public long getCount() {
+            return count;
         }
 
-        public void setUserCount(long userCount) {
-            if(userCount >= 0)
-                this.userCount = userCount;
+        public void setCount(long count) {
+            if(count >= 0)
+                this.count = count;
             else throw new IllegalArgumentException("User count can not be smaller than 0");
         }
 
