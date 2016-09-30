@@ -407,7 +407,7 @@ http://www.w3.org/2001/XMLSchema-instance">
                     <aggregate>true</aggregate>
                     <instrumentation>
                         <excludes>
-                            <exclude>com/intuit/wasabi/tests/**/*.class</exclude>
+                            <exclude>com/intuit/wasabi/**/*Test.class</exclude>
                         </excludes>
                     </instrumentation>
                 </configuration>
