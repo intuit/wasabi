@@ -21,6 +21,7 @@ import com.intuit.wasabi.api.pagination.filters.PaginationFilter;
 import com.intuit.wasabi.api.pagination.filters.PaginationFilterProperty;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.ws.rs.HEAD;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 
