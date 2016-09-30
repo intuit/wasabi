@@ -386,6 +386,7 @@ http://www.w3.org/2001/XMLSchema-instance">
                 <version>${jacoco.version}</version>
                 <configuration>
                     <destFile>${project.build.directory}/jacoco.exec</destFile>
+                    <append>true</append>
                 </configuration>
                 <executions>
                     <execution>
