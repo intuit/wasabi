@@ -17,14 +17,12 @@ package com.intuit.wasabi.experimentobjects;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
-import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-
-import java.util.Date;
-
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+
+import java.util.Date;
 
 /**
  * Specification of a new experiment
@@ -204,7 +202,7 @@ public final class NewExperiment implements ExperimentBase {
     }
 
     public void setApplicationName(Application.Name value) {
-        Preconditions.checkNotNull(value);
+//        Preconditions.checkNotNull(value);
         applicationName = value;
     }
 
@@ -213,7 +211,7 @@ public final class NewExperiment implements ExperimentBase {
     }
 
     public void setCreatorID(String value) {
-        Preconditions.checkNotNull(value);
+//        Preconditions.checkNotNull(value);
         creatorID = value;
     }
 

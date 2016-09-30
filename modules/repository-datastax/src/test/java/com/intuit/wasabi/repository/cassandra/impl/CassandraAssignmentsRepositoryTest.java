@@ -744,7 +744,7 @@ public class CassandraAssignmentsRepositoryTest {
                         eq(expected.getBucketLabel().toString()));
         thrown.expect(RepositoryException.class);
         thrown.expectMessage("Could not save user to the old table user assignment ");
-        repository.assignUserToOld(expected, null);
+        repository.assignUserToOld(expected, expected.getCreated());
     }
 
 
