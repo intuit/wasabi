@@ -385,7 +385,7 @@ http://www.w3.org/2001/XMLSchema-instance">
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${jacoco.version}</version>
                 <configuration>
-                    <destFile>${build.directory}</destFile>
+                    <destFile>${build.directory}/jacoco.exec</destFile>
                 </configuration>
                 <executions>
                     <execution>
