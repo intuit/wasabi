@@ -42,7 +42,9 @@ http://www.w3.org/2001/XMLSchema-instance">
         <application.home>/usr/local/${application.name}</application.home>
 
         <jacoco.version>0.7.2.201409121644</jacoco.version>
+<!--
         <jacoco.destFile>${basedir}/../../target/jacoco.exec</jacoco.destFile>
+-->
 
         <http.proxy.host>http://insert.your.proxy.host.here</http.proxy.host>
         <http.proxy.port>80</http.proxy.port>
