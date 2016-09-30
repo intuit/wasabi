@@ -82,6 +82,7 @@ if [[ "${build}" = true || "${test}" = true || "${build_jar}" = true ]]; then
 
   mvn ${WASABI_MAVEN} -P${profile} clean ${tests:--Dmaven.test.skip=true} ${package} javadoc:aggregate || \
     usage "invalid: mvn ${WASABI_MAVEN} -P${profile} clean ${tests:--Dmaven.test.skip=true} ${package} javadoc:aggregate" 1
+exit
 fi
 
 artifact=$(fromPom ./modules/${module} ${profile} project.artifactId)
