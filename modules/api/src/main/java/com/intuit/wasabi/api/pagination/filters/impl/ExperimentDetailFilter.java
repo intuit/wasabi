@@ -39,7 +39,7 @@ public class ExperimentDetailFilter extends PaginationFilter<ExperimentDetail> {
         super.registerFilterModifierForProperties(FilterUtil.FilterModifier.APPEND_TIMEZONEOFFSET, Property.mod_time,
                 Property.start_time, Property.end_time);
         super.excludeFromFulltext(Property.application_name_exact, Property.mod_time,
-                Property.end_time, Property.start_time, Property.favorite);
+                Property.end_time, Property.start_time, Property.favorite, Property.isControl);
     }
 
     /**
@@ -58,7 +58,10 @@ public class ExperimentDetailFilter extends PaginationFilter<ExperimentDetail> {
         application_name_exact(experimentDetail -> experimentDetail.getAppName().toString(), StringUtils::equalsIgnoreCase),
         favorite(ExperimentDetail::isFavorite, (isFavorite, filter) -> Boolean.parseBoolean(filter) == isFavorite),
         bucket_label(ExperimentDetail::getBuckets, (bucketDetails, filter) ->
-                bucketDetails.stream().anyMatch(bucketDetail -> StringUtils.containsIgnoreCase(bucketDetail.getLabel().toString(), filter))),
+                bucketDetails.stream().anyMatch(bucketDetail ->
+                        StringUtils.containsIgnoreCase(bucketDetail.getLabel().toString(), filter))),
+        isControl(ExperimentDetail::getBuckets, ((bucketDetails, filter) ->
+                bucketDetails.stream().anyMatch(bucketDetail -> bucketDetail.isControl() == Boolean.valueOf(filter)))),
         mod_time(ExperimentDetail::getModificationTime, FilterUtil::extractTimeZoneAndTestDate),
         start_time(ExperimentDetail::getStartTime, FilterUtil::extractTimeZoneAndTestDate),
         end_time(ExperimentDetail::getEndTime, FilterUtil::extractTimeZoneAndTestDate);

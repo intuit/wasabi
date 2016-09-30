@@ -27,6 +27,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * An ExperimentDetail is a wrapper class which holds additional information
  * apart from the basics of an Experiment and is used in the card view feature of the UI.
@@ -60,7 +62,8 @@ public class ExperimentDetail {
      */
     public class BucketDetail{
 
-        private boolean isControl;
+        @JsonProperty("isControl")
+        private boolean control;
 
         private Bucket.Label label;
 
@@ -81,24 +84,24 @@ public class ExperimentDetail {
         /**
          * Creates a BucketDetail with the basic information that are available for all buckets.
          * @param label the label of the bucket
-         * @param isControl flag whether this bucket is control
+         * @param control flag whether this bucket is control
          * @param allocationPercent the allocation percentage for this bucket
          *
          * @see Bucket for further information
          */
-        public BucketDetail(Bucket.Label label, boolean isControl, double allocationPercent, Bucket.State state){
+        public BucketDetail(Bucket.Label label, boolean control, double allocationPercent, Bucket.State state){
             setLabel(label);
-            setControl(isControl);
+            setControl(control);
             setAllocationPercent(allocationPercent);
             setState(state);
         }
 
         public boolean isControl() {
-            return isControl;
+            return control;
         }
 
         public void setControl(boolean control) {
-            isControl = control;
+            this.control = control;
         }
 
         public Bucket.Label getLabel() {
