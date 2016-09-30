@@ -45,6 +45,7 @@ http://www.w3.org/2001/XMLSchema-instance">
 <!--
         <jacoco.destFile>${basedir}/../../target/jacoco.exec</jacoco.destFile>
 -->
+        <jacoco.destFile>${build.directory}/target/jacoco.exec</jacoco.destFile>
 
         <http.proxy.host>http://insert.your.proxy.host.here</http.proxy.host>
         <http.proxy.port>80</http.proxy.port>
