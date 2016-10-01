@@ -16,8 +16,8 @@
 package com.intuit.wasabi.api.pagination.comparators;
 
 import com.intuit.wasabi.api.pagination.comparators.impl.AuditLogEntryComparator;
-import com.intuit.wasabi.exceptions.PaginationException;
-import com.intuit.wasabi.experimentobjects.exceptions.ErrorCode;
+import com.intuit.wasabi.api.pagination.exceptions.PaginationException;
+import com.intuit.wasabi.exceptions.ErrorCode;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -15,7 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.exceptions;
 
-import static com.intuit.wasabi.experimentobjects.exceptions.ErrorCode.USER_TOOLS_FAILED;
+import static com.intuit.wasabi.exceptions.ErrorCode.USER_TOOLS_FAILED;
 
 public class UserToolsException extends WasabiServerException {
 

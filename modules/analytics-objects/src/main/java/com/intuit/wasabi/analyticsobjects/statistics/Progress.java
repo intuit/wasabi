@@ -16,7 +16,7 @@
 package com.intuit.wasabi.analyticsobjects.statistics;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.intuit.wasabi.exceptions.AnalyticsException;
+import com.intuit.wasabi.analyticsobjects.exceptions.AnalyticsException;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;

@@ -18,7 +18,7 @@ package com.intuit.wasabi.userdirectory.impl;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
-import com.intuit.wasabi.exceptions.AuthenticationException;
+import com.intuit.wasabi.authenticationobjects.exceptions.AuthenticationException;
 import com.intuit.wasabi.userdirectory.UserDirectory;
 import com.intuit.wasabi.userdirectory.UserDirectoryModule;
 import org.junit.Before;
@@ -33,7 +33,7 @@ import static org.junit.Assert.*;
 public class DefaultUserDirectoryTest {
 
     private UserDirectory userDirectory;
-    
+
     @Before
     public void setUp() throws Exception {
     	System.getProperties().put("user.lookup.class.name",
@@ -59,7 +59,7 @@ public class DefaultUserDirectoryTest {
         assertNotNull(userDirectory.lookupUserByEmail("wasabi_admin@example.com"));
         assertNotNull(userDirectory.lookupUserByEmail("wasabi_reader@example.com"));
     }
-    
+
     @Test
     public void testExistingUser(){
         UserInfo user = userDirectory.lookupUserByEmail("admin@example.com");
@@ -96,7 +96,7 @@ public class DefaultUserDirectoryTest {
         assertThat(user.getUsername().getUsername(), is("admin"));
         assertThat(user.getFirstName(), is("Wasabi"));
         assertThat(user.getLastName(), is("Admin"));
-        
+
         user = userDirectory.lookupUser(UserInfo.Username.valueOf("wasabi_admin"));
         assertThat(user.getEmail(), is("wasabi_admin@example.com"));
         assertThat(user.getUsername().getUsername(), is("wasabi_admin"));

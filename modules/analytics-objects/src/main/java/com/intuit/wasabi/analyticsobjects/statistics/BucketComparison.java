@@ -18,7 +18,7 @@ package com.intuit.wasabi.analyticsobjects.statistics;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.intuit.wasabi.analyticsobjects.Event;
 import com.intuit.wasabi.analyticsobjects.Event.Name;
-import com.intuit.wasabi.exceptions.AnalyticsException;
+import com.intuit.wasabi.analyticsobjects.exceptions.AnalyticsException;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;

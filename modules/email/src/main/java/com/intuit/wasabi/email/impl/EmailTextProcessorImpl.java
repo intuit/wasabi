@@ -26,8 +26,8 @@ import com.intuit.wasabi.email.EmailTextProcessor;
 import com.intuit.wasabi.email.TextTemplates;
 import com.intuit.wasabi.eventlog.EventLogEventType;
 import com.intuit.wasabi.eventlog.events.*;
-import com.intuit.wasabi.exceptions.EventLogException;
-import com.intuit.wasabi.exceptions.WasabiEmailException;
+import com.intuit.wasabi.eventlog.exceptions.EventLogException;
+import com.intuit.wasabi.email.exceptions.EmailException;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.ExperimentBase;
@@ -208,7 +208,7 @@ public class EmailTextProcessorImpl implements EmailTextProcessor {
 
         //no admins, no email!
         if (adressors.isEmpty()) {
-            throw new WasabiEmailException("No Admins with an valid email registered for this Application");
+            throw new EmailException("No Admins with an valid email registered for this Application");
         }
 
         return adressors;

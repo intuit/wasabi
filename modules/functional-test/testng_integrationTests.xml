@@ -18,86 +18,61 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 
 <suite name="IntegrationTests" parallel="false">
-    <test name="IntegrationAuthTests">
+    <test name="AuthTests">
         <classes>
-            <class name="com.intuit.wasabi.tests.service.IntegrationAuthentication" />
-            <class name="com.intuit.wasabi.tests.service.IntegrationAuthorization" />
+            <class name="com.intuit.wasabi.tests.service.auth.AuthenticationTest" />
+            <class name="com.intuit.wasabi.tests.service.auth.AuthorizationTest" />
         </classes>
     </test>
-    <test name="IntegrationAssignmentTests">
+    <test name="ExperimentTests">
         <classes>
-            <class name="com.intuit.wasabi.tests.service.assignment.BasicAssignment" />
-            <class name="com.intuit.wasabi.tests.service.assignment.BatchAssignment" />
-            <class name="com.intuit.wasabi.tests.service.assignment.PutAssignment" />
-            <class name="com.intuit.wasabi.tests.service.assignment.ExportAssignment" />
+            <class name="com.intuit.wasabi.tests.service.experiment.ExperimentTest" />
+            <class name="com.intuit.wasabi.tests.service.experiment.MutualExclusionTest" />
+            <class name="com.intuit.wasabi.tests.service.experiment.BucketTest" />
+            <class name="com.intuit.wasabi.tests.service.experiment.MetadataTest" />
+            <class name="com.intuit.wasabi.tests.service.experiment.PagesTest" />
+            <class name="com.intuit.wasabi.tests.service.experiment.PaginationTest" />
+            <class name="com.intuit.wasabi.tests.service.experiment.FavoritesTest" />
         </classes>
     </test>
-    <test name="IntegrationBucketTests">
+    <test name="AssignmentTests">
         <classes>
-            <class name="com.intuit.wasabi.tests.service.IntegrationBucket" />
-            <class name="com.intuit.wasabi.tests.service.EmptyBucketUserAssignmentTest" />
-            <class name="com.intuit.wasabi.tests.service.EmptyBucketUserAssignmentToEmptyBucket" />
-            <class name="com.intuit.wasabi.tests.service.BucketIntegrationTest" />
-            <class name="com.intuit.wasabi.tests.service.ContextIntegrationTest" />
-            <class name="com.intuit.wasabi.tests.service.ContextMutexIntegrationTest" />
+            <class name="com.intuit.wasabi.tests.service.assignment.BasicAssignmentTest" />
+            <class name="com.intuit.wasabi.tests.service.assignment.BatchAssignmentTest" />
+            <class name="com.intuit.wasabi.tests.service.assignment.PutAssignmentTest" />
+            <class name="com.intuit.wasabi.tests.service.assignment.ExportAssignmentTest" />
+            <class name="com.intuit.wasabi.tests.service.assignment.EmptyBucketUserAssignmentTest" />
+            <class name="com.intuit.wasabi.tests.service.assignment.EmptyBucketUserAssignmentToEmptyBucketTest" />
+            <class name="com.intuit.wasabi.tests.service.assignment.ContextTest" />
+            <class name="com.intuit.wasabi.tests.service.assignment.ContextMutexTest" />
         </classes>
     </test>
-    <test name="IntegrationRollupTests">
+    <test name="EventsTests">
         <classes>
-            <class name="com.intuit.wasabi.tests.service.RollUpIntegrationTest" />
-            <class name="com.intuit.wasabi.tests.service.RollUpBadCallsIntegrationTest" />
+            <class name="com.intuit.wasabi.tests.service.events.EventsTest" />
         </classes>
     </test>
-    <test name="IntegrationExperimentTests">
-        <classes>
-            <class name="com.intuit.wasabi.tests.service.IntegrationExperiment" />
-            <class name="com.intuit.wasabi.tests.service.IntegrationMutualExclusion" />
-        </classes>
-    </test>
-    <test name="IntegrationEventsTests">
-        <classes>
-            <class name="com.intuit.wasabi.tests.service.EventsIntegrationTest" />
-        </classes>
-    </test>
-    <test name="IntegrationCountTests">
-        <classes>
-            <class name="com.intuit.wasabi.tests.service.CountIntegrationTest" />
-            <class name="com.intuit.wasabi.tests.service.CountDailyIntegrationTest" />
-        </classes>
-    </test>
-    <test name="IntegrationTestsMisc">
-        <classes>
-            <class name="com.intuit.wasabi.tests.service.IntegrationMetadata" />
-        </classes>
-    </test>
-    <test name="IntegrationPriorityTests">
+    <test name="PriorityTests">
         <classes>
             <class name="com.intuit.wasabi.tests.service.priority.BasicPriorityTest" />
             <class name="com.intuit.wasabi.tests.service.priority.BatchPriorityAssignmentTest" />
         </classes>
     </test>
-    <test name="IntegrationSegmentationTests">
+    <test name="SegmentationTests">
         <classes>
-            <class name="com.intuit.wasabi.tests.service.segmentation.RuleTest"/>
-            <class name="com.intuit.wasabi.tests.service.segmentation.BatchRuleTest"/>
-            <class name="com.intuit.wasabi.tests.service.segmentation.MutualExclusionTest"/>
-            <class name="com.intuit.wasabi.tests.service.segmentation.MutualExclusionBatchTest"/>
+            <class name="com.intuit.wasabi.tests.service.segmentation.RuleTest" />
+            <class name="com.intuit.wasabi.tests.service.segmentation.BatchRuleTest" />
+            <class name="com.intuit.wasabi.tests.service.segmentation.MutualExclusionSegmentationTest" />
+            <class name="com.intuit.wasabi.tests.service.segmentation.MutualExclusionBatchTest" />
         </classes>
     </test>
-    <test name="IntegrationStatisticsTests">
+    <test name="StatisticsTests">
         <classes>
-            <class name="com.intuit.wasabi.tests.service.statistic.StatisticTest"/>
-        </classes>
-    </test>
-    <test name="IntegrationPagesTests">
-        <classes>
-            <class name="com.intuit.wasabi.tests.service.IntegrationPages"/>
-        </classes>
-    </test>
-    <test name="IntegrationPaginationTests">
-        <classes>
-            <class name="com.intuit.wasabi.tests.service.PaginationTest" />
-            <class name="com.intuit.wasabi.tests.service.FavoritesTest" />
+            <class name="com.intuit.wasabi.tests.service.statistics.CountTest" />
+            <class name="com.intuit.wasabi.tests.service.statistics.CountDailyTest" />
+            <class name="com.intuit.wasabi.tests.service.statistics.StatisticsTest" />
+            <class name="com.intuit.wasabi.tests.service.statistics.RollUpTest" />
+            <class name="com.intuit.wasabi.tests.service.statistics.RollUpBadCallsTest" />
         </classes>
     </test>
 </suite>

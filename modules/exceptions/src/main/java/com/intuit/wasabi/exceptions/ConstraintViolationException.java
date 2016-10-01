@@ -15,9 +15,6 @@
  *******************************************************************************/
 package com.intuit.wasabi.exceptions;
 
-import com.intuit.wasabi.experimentobjects.exceptions.ErrorCode;
-import com.intuit.wasabi.experimentobjects.exceptions.WasabiClientException;
-
 import java.util.Map;
 
 /**

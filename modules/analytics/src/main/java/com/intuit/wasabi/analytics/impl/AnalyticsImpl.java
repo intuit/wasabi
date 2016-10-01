@@ -26,7 +26,7 @@ import com.intuit.wasabi.analyticsobjects.statistics.*;
 import com.intuit.wasabi.database.Transaction;
 import com.intuit.wasabi.database.Transaction.Block;
 import com.intuit.wasabi.database.TransactionFactory;
-import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
+import com.intuit.wasabi.experimentobjects.exception.ExperimentNotFoundException;
 import com.intuit.wasabi.experiment.Experiments;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Context;

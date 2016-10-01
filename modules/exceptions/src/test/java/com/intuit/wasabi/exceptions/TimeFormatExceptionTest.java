@@ -17,7 +17,7 @@ package com.intuit.wasabi.exceptions;
 
 import org.junit.Test;
 
-import static com.intuit.wasabi.experimentobjects.exceptions.ErrorCode.INVALID_TIME_FORMAT;
+import static com.intuit.wasabi.exceptions.ErrorCode.INVALID_TIME_FORMAT;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 

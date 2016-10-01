@@ -17,14 +17,14 @@ package com.intuit.wasabi.experiment;
 
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.eventlog.EventLog;
-import com.intuit.wasabi.exceptions.EndTimeHasPassedException;
-import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
+import com.intuit.wasabi.experimentobjects.exception.EndTimeHasPassedException;
+import com.intuit.wasabi.experimentobjects.exception.ExperimentNotFoundException;
 import com.intuit.wasabi.experiment.impl.ExperimentsImpl;
 import com.intuit.wasabi.experiment.impl.MutexImpl;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.ExperimentIDList;
-import com.intuit.wasabi.experimentobjects.exceptions.InvalidExperimentStateException;
+import com.intuit.wasabi.experimentobjects.exception.InvalidExperimentStateException;
 import com.intuit.wasabi.repository.RepositoryException;
 import com.intuit.wasabi.repository.impl.cassandra.CassandraMutexRepository;
 import org.junit.Test;

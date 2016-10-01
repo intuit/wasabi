@@ -31,7 +31,7 @@ import com.intuit.wasabi.assignmentobjects.User;
 import com.intuit.wasabi.cassandra.CassandraDriver;
 import com.intuit.wasabi.cassandra.ExperimentDriver;
 import com.intuit.wasabi.eventlog.EventLog;
-import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
+import com.intuit.wasabi.experimentobjects.exception.ExperimentNotFoundException;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Context;
@@ -612,7 +612,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                 * However, the below hack will return a null assignment  even though the existing assignment
                 * for a user who had been assigned to an EMPTY bucket is not null
                 * */
-                boolean isBucketEmpty = false; 
+                boolean isBucketEmpty = false;
                 if (bucketLabel != null &&
                         experimentRepository.getBucket(experimentID, bucketLabel).getState().equals(Bucket.State.EMPTY)) {
                     bucketLabel = null;

@@ -19,7 +19,7 @@ import com.codahale.metrics.annotation.Timed;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.intuit.wasabi.authentication.Authentication;
-import com.intuit.wasabi.exceptions.AuthenticationException;
+import com.intuit.wasabi.authenticationobjects.exceptions.AuthenticationException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;

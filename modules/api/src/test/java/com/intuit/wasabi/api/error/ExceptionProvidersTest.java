@@ -6,14 +6,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.intuit.hyrule.exceptions.InvalidConditionException;
 import com.intuit.wasabi.api.HttpHeader;
-import com.intuit.wasabi.exceptions.ApplicationNotFoundException;
-import com.intuit.wasabi.exceptions.AssignmentNotFoundException;
-import com.intuit.wasabi.exceptions.AuthenticationException;
-import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
+import com.intuit.wasabi.assignmentobjects.exceptions.AssignmentNotFoundException;
+import com.intuit.wasabi.authenticationobjects.exceptions.AuthenticationException;
+import com.intuit.wasabi.exceptions.InvalidIdentifierException;
 import com.intuit.wasabi.exceptions.InvalidProfileException;
+import com.intuit.wasabi.exceptions.WasabiClientException;
 import com.intuit.wasabi.exceptions.WasabiServerException;
-import com.intuit.wasabi.experimentobjects.exceptions.InvalidIdentifierException;
-import com.intuit.wasabi.experimentobjects.exceptions.WasabiClientException;
+import com.intuit.wasabi.experimentobjects.exception.ApplicationNotFoundException;
+import com.intuit.wasabi.experimentobjects.exception.ExperimentNotFoundException;
+import com.sun.jersey.api.NotFoundException;
+import com.sun.jersey.api.ParamException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,27 +39,26 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(Parameterized.class)
 public class ExceptionProvidersTest<P extends ExceptionProvider<E>, E extends Exception> {
-    
-    private static final String ERROR = "ExceptionProviderTest tested this exception.";
+
+    private static final String ERROR = "ExceptionProvidersTest tested this exception.";
     protected static HttpHeader httpHeader = new HttpHeader("Application");
     protected static ExceptionJsonifier exceptionJsonifier = new ExceptionJsonifier();
-    private final Response.Status expectedStatusCode;
+    private final Response.Status expectedResponseStatus;
     protected E exception;
     private P provider;
 
     /**
      * Mocks an exception for the provided class and stores the expected status code.
      *
-     * @param provider           an instance of the exception provider to test
-     * @param exceptionClass     the exception class to mock it properly
-     * @param expectedStatusCode the expected status code for this exception
+     * @param provider               an instance of the exception provider to test
+     * @param exceptionClass         the exception class to mock it properly
+     * @param expectedResponseStatus the expected status code for this exception
      */
-    public ExceptionProvidersTest(P provider, Class<E> exceptionClass, Response.Status expectedStatusCode) {
+    public ExceptionProvidersTest(P provider, Class<E> exceptionClass, Response.Status expectedResponseStatus) {
         this.provider = provider;
-        this.expectedStatusCode = expectedStatusCode;
+        this.expectedResponseStatus = expectedResponseStatus;
         exception = Mockito.mock(exceptionClass);
         when(exception.getMessage()).thenAnswer(i -> ERROR);
-        System.out.println(provider.getClass());
     }
 
     /**
@@ -65,7 +66,7 @@ public class ExceptionProvidersTest<P extends ExceptionProvider<E>, E extends Ex
      *
      * @return a collection of test cases
      */
-    @Parameters
+    @Parameters(name = "{index}: {1} -> {2} ({0})")
     public static Collection<Object[]> testCases() {
         List<Object[]> testCases = new LinkedList<>();
         testCases.add(new Object[]{new ApplicationNotFoundExceptionProvider(httpHeader, exceptionJsonifier),
@@ -100,7 +101,16 @@ public class ExceptionProvidersTest<P extends ExceptionProvider<E>, E extends Ex
                 Response.Status.BAD_REQUEST});
         testCases.add(new Object[]{new JsonMappingExceptionProvider(httpHeader, exceptionJsonifier),
                 JsonMappingException.class,
-                Response.Status.INTERNAL_SERVER_ERROR});
+                Response.Status.BAD_REQUEST});
+        testCases.add(new Object[]{new NotFoundExceptionProvider(httpHeader, exceptionJsonifier),
+                NotFoundException.class,
+                Response.Status.NOT_FOUND});
+        testCases.add(new Object[]{new ParamExceptionProvider(httpHeader, exceptionJsonifier),
+                ParamException.class,
+                Response.Status.NOT_FOUND});
+        testCases.add(new Object[]{new ParamExceptionProvider(httpHeader, exceptionJsonifier),
+                ParamException.PathParamException.class,
+                Response.Status.NOT_FOUND});
         testCases.add(new Object[]{new WebApplicationExceptionProvider(httpHeader, exceptionJsonifier),
                 WebApplicationException.class,
                 Response.Status.INTERNAL_SERVER_ERROR});
@@ -118,7 +128,7 @@ public class ExceptionProvidersTest<P extends ExceptionProvider<E>, E extends Ex
         Response response = provider.toResponse(exception);
 
         Assert.assertEquals("Status code was incorrect.",
-                expectedStatusCode,
+                expectedResponseStatus,
                 Response.Status.fromStatusCode(response.getStatus()));
         Assert.assertEquals("Content-Type should always be application/json ()",
                 MediaType.APPLICATION_JSON_TYPE,

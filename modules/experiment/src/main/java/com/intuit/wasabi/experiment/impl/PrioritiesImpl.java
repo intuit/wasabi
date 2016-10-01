@@ -15,7 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.experiment.impl;
 
-import com.intuit.wasabi.exceptions.ApplicationNotFoundException;
+import com.intuit.wasabi.experimentobjects.exception.ApplicationNotFoundException;
 import com.intuit.wasabi.experiment.Experiments;
 import com.intuit.wasabi.experiment.Priorities;
 import com.intuit.wasabi.experimentobjects.Application;
@@ -43,7 +43,7 @@ public class PrioritiesImpl implements Priorities {
         this.prioritiesRepository = prioritiesRepository;
         this.experiments = experiments;
     }
-    
+
     /**
      * {@inheritDoc}
      */

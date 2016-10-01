@@ -20,12 +20,11 @@ import com.intuit.wasabi.api.pagination.comparators.impl.ExperimentComparator;
 import com.intuit.wasabi.api.pagination.filters.impl.ExperimentFilter;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authorization.Authorization;
-import com.intuit.wasabi.exceptions.AuthenticationException;
+import com.intuit.wasabi.authenticationobjects.exceptions.AuthenticationException;
 import com.intuit.wasabi.experiment.Experiments;
 import com.intuit.wasabi.experiment.Pages;
 import com.intuit.wasabi.experiment.Priorities;
 import com.intuit.wasabi.experimentobjects.*;
-import io.codearte.catchexception.shade.mockito.Mockito;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,7 +36,6 @@ import org.mockito.verification.VerificationMode;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 

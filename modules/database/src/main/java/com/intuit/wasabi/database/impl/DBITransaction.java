@@ -20,7 +20,7 @@ import com.intuit.wasabi.database.Transaction;
 import com.intuit.wasabi.exceptions.ConstraintViolationException;
 import com.intuit.wasabi.exceptions.DatabaseException;
 import com.intuit.wasabi.exceptions.WasabiServerException;
-import com.intuit.wasabi.experimentobjects.exceptions.WasabiException;
+import com.intuit.wasabi.exceptions.WasabiException;
 import org.skife.jdbi.v2.DBI;
 import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.Update;

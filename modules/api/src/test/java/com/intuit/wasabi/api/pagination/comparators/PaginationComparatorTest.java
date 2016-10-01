@@ -15,7 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.api.pagination.comparators;
 
-import com.intuit.wasabi.exceptions.PaginationException;
+import com.intuit.wasabi.api.pagination.exceptions.PaginationException;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -72,11 +72,11 @@ public class PaginationComparatorTest {
         }
 
         private enum Property implements PaginationComparatorProperty<Object> {
-            string(Object::toString, String::compareToIgnoreCase),
-            hash(Object::hashCode, Integer::compareTo),
-            alwaysnpeforhash1234(TestObjectComparator::nullPointerLambda1234,
+            STRING(Object::toString, String::compareToIgnoreCase),
+            HASH(Object::hashCode, Integer::compareTo),
+            ALWAYSNPEFORHASH1234(TestObjectComparator::nullPointerLambda1234,
                     (ignored, ignored2) -> 0),
-            alwaysnpeforhash2345(TestObjectComparator::nullPointerLambda2345,
+            ALWAYSNPEFORHASH2345(TestObjectComparator::nullPointerLambda2345,
                     (ignored, ignored2) -> 0);
 
             private final Function<Object, ?> propertyExtractor;

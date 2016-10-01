@@ -15,7 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.api.pagination.filters;
 
-import com.intuit.wasabi.exceptions.PaginationException;
+import com.intuit.wasabi.api.pagination.exceptions.PaginationException;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -41,45 +41,6 @@ public class PaginationFilterTest {
             return 1234;
         }
     };
-
-    /**
-     * The example TestObjectFilter implementation to test the PaginationFilter more conveniently.
-     */
-    public static class TestObjectFilter extends PaginationFilter<Object> {
-        @Override
-        public boolean test(Object object) {
-            return super.test(object, Property.class);
-        }
-
-        private static String nullPointerLambda(Object ignored) {
-            throw new NullPointerException("This simulates null pointer accesses.");
-        }
-
-        private enum Property implements PaginationFilterProperty<Object> {
-            string(Object::toString, StringUtils::containsIgnoreCase),
-            hash(Object::hashCode, (hash, filter) ->
-                    StringUtils.containsIgnoreCase(Integer.toString(hash), filter)),
-            alwaysnull(TestObjectFilter::nullPointerLambda, (ignored, ignored2) -> true);
-
-            private final Function<Object, ?> propertyExtractor;
-            private final BiPredicate<?, String> filterPredicate;
-
-            <T> Property(Function<Object, T> propertyExtractor, BiPredicate<T, String> filterPredicate) {
-                this.propertyExtractor = propertyExtractor;
-                this.filterPredicate = filterPredicate;
-            }
-
-            @Override
-            public Function<Object, ?> getPropertyExtractor() {
-                return propertyExtractor;
-            }
-
-            @Override
-            public BiPredicate<?, String> getFilterPredicate() {
-                return filterPredicate;
-            }
-        }
-    }
 
     @Test
     public void testReplaceFilter() throws Exception {
@@ -220,14 +181,14 @@ public class PaginationFilterTest {
     public void testModifyFilterForKey() throws Exception {
         TestObjectFilter objectFilter = new TestObjectFilter();
         objectFilter.registerFilterModifierForProperties(FilterUtil.FilterModifier.APPEND_TIMEZONEOFFSET,
-                TestObjectFilter.Property.string);
+                TestObjectFilter.Property.STRING);
 
-        Assert.assertEquals("Did not modify string!",
+        Assert.assertEquals("Did not modify.STRING!",
                 FilterUtil.FilterModifier.APPEND_TIMEZONEOFFSET.apply("timezone", objectFilter),
-                objectFilter.modifyFilterForKey(TestObjectFilter.Property.string, "timezone"));
-        Assert.assertEquals("Did modify hash!",
+                objectFilter.modifyFilterForKey(TestObjectFilter.Property.STRING, "timezone"));
+        Assert.assertEquals("Did modify.HASH!",
                 "",
-                objectFilter.modifyFilterForKey(TestObjectFilter.Property.hash, ""));
+                objectFilter.modifyFilterForKey(TestObjectFilter.Property.HASH, ""));
     }
 
     @Test
@@ -298,25 +259,25 @@ public class PaginationFilterTest {
     public void testRegisterFilterModifierForProperties() throws Exception {
         TestObjectFilter objectFilter1 = new TestObjectFilter();
         objectFilter1.registerFilterModifierForProperties(FilterUtil.FilterModifier.APPEND_TIMEZONEOFFSET,
-                TestObjectFilter.Property.hash);
+                TestObjectFilter.Property.HASH);
         Assert.assertTrue("Modifier not correctly added (objectFilter1).",
-                objectFilter1.filterModifiers.containsKey(TestObjectFilter.Property.hash));
+                objectFilter1.filterModifiers.containsKey(TestObjectFilter.Property.HASH));
         Assert.assertEquals("Modifier not correct (objectFilter1).",
                 FilterUtil.FilterModifier.APPEND_TIMEZONEOFFSET,
-                objectFilter1.filterModifiers.get(TestObjectFilter.Property.hash));
+                objectFilter1.filterModifiers.get(TestObjectFilter.Property.HASH));
         Assert.assertEquals("Incorrect number of modifiers (objectFilter1).",
                 1,
                 objectFilter1.filterModifiers.size());
 
         TestObjectFilter objectFilter2 = new TestObjectFilter();
         objectFilter2.registerFilterModifierForProperties(FilterUtil.FilterModifier.APPEND_TIMEZONEOFFSET,
-                TestObjectFilter.Property.hash, TestObjectFilter.Property.string);
+                TestObjectFilter.Property.HASH, TestObjectFilter.Property.STRING);
         Assert.assertEquals("Modifier not correct (objectFilter2, hash).",
                 FilterUtil.FilterModifier.APPEND_TIMEZONEOFFSET,
-                objectFilter2.filterModifiers.get(TestObjectFilter.Property.hash));
+                objectFilter2.filterModifiers.get(TestObjectFilter.Property.HASH));
         Assert.assertEquals("Modifier not correct (objectFilter2, string).",
                 FilterUtil.FilterModifier.APPEND_TIMEZONEOFFSET,
-                objectFilter2.filterModifiers.get(TestObjectFilter.Property.string));
+                objectFilter2.filterModifiers.get(TestObjectFilter.Property.STRING));
         Assert.assertEquals("Incorrect number of modifiers (objectFilter2).",
                 2,
                 objectFilter2.filterModifiers.size());
@@ -326,7 +287,7 @@ public class PaginationFilterTest {
     @Test
     public void testExcludeFromFulltext() throws Exception {
         TestObjectFilter objectFilter = new TestObjectFilter();
-        objectFilter.excludeFromFulltext(TestObjectFilter.Property.string);
+        objectFilter.excludeFromFulltext(TestObjectFilter.Property.STRING);
 
         objectFilter.replaceFilter("match", "");
         Assert.assertFalse("Did match 'match' although the field was excluded.",
@@ -355,6 +316,45 @@ public class PaginationFilterTest {
 
         objectFilter.replaceFilter("myFilter", "");
         Assert.assertEquals("New filter is not correct.", objectFilter.getFilter(), "myFilter");
+    }
+
+    /**
+     * The example TestObjectFilter implementation to test the PaginationFilter more conveniently.
+     */
+    public static class TestObjectFilter extends PaginationFilter<Object> {
+        private static String nullPointerLambda(Object ignored) {
+            throw new NullPointerException("This simulates null pointer accesses.");
+        }
+
+        @Override
+        public boolean test(Object object) {
+            return super.test(object, Property.class);
+        }
+
+        private enum Property implements PaginationFilterProperty<Object> {
+            STRING(Object::toString, StringUtils::containsIgnoreCase),
+            HASH(Object::hashCode, (hash, filter) ->
+                    StringUtils.containsIgnoreCase(Integer.toString(hash), filter)),
+            ALWAYSNULL(TestObjectFilter::nullPointerLambda, (ignored, ignored2) -> true);
+
+            private final Function<Object, ?> propertyExtractor;
+            private final BiPredicate<?, String> filterPredicate;
+
+            <T> Property(Function<Object, T> propertyExtractor, BiPredicate<T, String> filterPredicate) {
+                this.propertyExtractor = propertyExtractor;
+                this.filterPredicate = filterPredicate;
+            }
+
+            @Override
+            public Function<Object, ?> getPropertyExtractor() {
+                return propertyExtractor;
+            }
+
+            @Override
+            public BiPredicate<?, String> getFilterPredicate() {
+                return filterPredicate;
+            }
+        }
     }
 
 }

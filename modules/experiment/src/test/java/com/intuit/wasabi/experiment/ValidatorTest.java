@@ -19,7 +19,7 @@ import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.ExperimentValidator;
-import com.intuit.wasabi.experimentobjects.exceptions.InvalidExperimentStateException;
+import com.intuit.wasabi.experimentobjects.exception.InvalidExperimentStateException;
 import org.junit.Before;
 import org.junit.Test;
 

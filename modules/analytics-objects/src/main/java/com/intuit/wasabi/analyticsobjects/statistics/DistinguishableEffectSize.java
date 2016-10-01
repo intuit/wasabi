@@ -15,7 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.analyticsobjects.statistics;
 
-import com.intuit.wasabi.exceptions.AnalyticsException;
+import com.intuit.wasabi.analyticsobjects.exceptions.AnalyticsException;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;

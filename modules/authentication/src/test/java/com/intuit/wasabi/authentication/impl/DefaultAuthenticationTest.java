@@ -25,7 +25,7 @@ import com.intuit.wasabi.authentication.AuthenticationModule;
 import com.intuit.wasabi.authentication.TestUtil;
 import com.intuit.wasabi.authenticationobjects.LoginToken;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
-import com.intuit.wasabi.exceptions.AuthenticationException;
+import com.intuit.wasabi.authenticationobjects.exceptions.AuthenticationException;
 import com.intuit.wasabi.userdirectory.UserDirectoryModule;
 
 import org.junit.Test;
@@ -46,7 +46,7 @@ public class DefaultAuthenticationTest {
     public static final String WASABI_READER_WASABI01 = "wasabi_reader:wasabi01";
     public static final String WASABI_ADMIN = "admin";
     public static final String ADMIN_EXAMPLE_COM = "admin@example.com";
-    private Authentication defaultAuthentication = null; 
+    private Authentication defaultAuthentication = null;
 
     @Before
     public void setUp() throws Exception {

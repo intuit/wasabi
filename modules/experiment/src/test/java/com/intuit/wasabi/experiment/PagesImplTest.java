@@ -18,8 +18,8 @@ package com.intuit.wasabi.experiment;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.eventlog.EventLog;
 import com.intuit.wasabi.eventlog.events.ExperimentChangeEvent;
-import com.intuit.wasabi.exceptions.ApplicationNotFoundException;
-import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
+import com.intuit.wasabi.experimentobjects.exception.ApplicationNotFoundException;
+import com.intuit.wasabi.experimentobjects.exception.ExperimentNotFoundException;
 import com.intuit.wasabi.experiment.impl.PagesImpl;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Experiment;
@@ -29,7 +29,7 @@ import com.intuit.wasabi.experimentobjects.ExperimentPage;
 import com.intuit.wasabi.experimentobjects.ExperimentPageList;
 import com.intuit.wasabi.experimentobjects.Page;
 import com.intuit.wasabi.experimentobjects.PageExperiment;
-import com.intuit.wasabi.experimentobjects.exceptions.InvalidExperimentStateException;
+import com.intuit.wasabi.experimentobjects.exception.InvalidExperimentStateException;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.PagesRepository;
 
@@ -217,20 +217,20 @@ public class PagesImplTest {
         //Put Pages for first experiment, app
         ExperimentList experimentList = new ExperimentList();
         experimentList.addExperiment(experiment);
-        
+
         List<PageExperiment> pageExperiments = new ArrayList<>();
         PageExperiment pe = new PageExperiment();
         pe.setId(ID.newInstance());
         pageExperiments.add(pe);
-        
+
         Collection<Experiment.ID> ids = new ArrayList<>();
         ids.add(experiment.getID());
-        
+
         when(pagesRepository.getExperiments(any(Application.Name.class), any(Page.Name.class))).thenReturn(pageExperiments);
         when(cassandraRepository.getExperiments(anyCollection())).thenReturn(experimentList);
-        
+
         ExperimentList experimentListResult = pagesImpl.getPageExperiments(testApp, page.getName());
-       
+
         assertEquals(1, experimentListResult.getExperiments().size());
     }
 
@@ -249,10 +249,10 @@ public class PagesImplTest {
         UserInfo user = UserInfo.from(UserInfo.Username.valueOf("user")).build();
         willDoNothing().given(eventLog).postEvent(any(ExperimentChangeEvent.class));
         pagesImpl.erasePageData(testApp, experimentID, user);
-        
+
         verify(experiments).getExperiment(experimentID);
         verify(eventLog).postEvent(any(ExperimentChangeEvent.class));
-        
+
     }
 
     @Test

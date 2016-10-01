@@ -22,7 +22,7 @@ import com.intuit.wasabi.userdirectory.UserDirectory;
 import com.intuit.wasabi.authorizationobjects.*;
 import com.intuit.wasabi.cassandra.CassandraDriver;
 import com.intuit.wasabi.cassandra.ExperimentDriver;
-import com.intuit.wasabi.exceptions.AuthenticationException;
+import com.intuit.wasabi.authenticationobjects.exceptions.AuthenticationException;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.repository.AuthorizationRepository;
 import com.intuit.wasabi.repository.CassandraRepository;
@@ -44,7 +44,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Cassandra AuthorizationRepository implementation
- * 
+ *
  *  @see AuthorizationRepository
  */
 public class CassandraAuthorizationRepository implements AuthorizationRepository {

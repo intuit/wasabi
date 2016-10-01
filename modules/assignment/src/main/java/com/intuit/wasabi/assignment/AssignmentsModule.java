@@ -20,7 +20,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
 import com.intuit.wasabi.assignmentobjects.AssignmentEnvelopePayload;
-import com.intuit.wasabi.exceptions.AssignmentException;
+import com.intuit.wasabi.assignmentobjects.exceptions.AssignmentException;
 import com.intuit.wasabi.export.DatabaseExport;
 import com.intuit.wasabi.export.Envelope;
 import com.intuit.wasabi.export.WebExport;

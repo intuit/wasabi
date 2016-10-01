@@ -18,7 +18,7 @@ package com.intuit.wasabi.analyticsobjects.counts;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.intuit.wasabi.analyticsobjects.Event;
 import com.intuit.wasabi.analyticsobjects.Event.Name;
-import com.intuit.wasabi.exceptions.AnalyticsException;
+import com.intuit.wasabi.analyticsobjects.exceptions.AnalyticsException;
 import io.swagger.annotations.ApiModelProperty;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -87,12 +87,12 @@ public abstract class AbstractContainerCounts implements ContainerCounts, Clonea
     public int hashCode() {
     	return HashCodeBuilder.reflectionHashCode(this);
     }
-    
+
     @Override
     public boolean equals(Object obj) {
     	   return EqualsBuilder.reflectionEquals(this, obj);
     }
-    
+
     @Override
     public AbstractContainerCounts clone() {
         AbstractContainerCounts cloned;

@@ -15,9 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.exceptions;
 
-import com.intuit.wasabi.experimentobjects.exceptions.WasabiClientException;
-
-import static com.intuit.wasabi.experimentobjects.exceptions.ErrorCode.INVALID_PROFILE;
+import static com.intuit.wasabi.exceptions.ErrorCode.INVALID_PROFILE;
 
 /**
  * Indicates profile has missing attributes or has wrong types of attributes

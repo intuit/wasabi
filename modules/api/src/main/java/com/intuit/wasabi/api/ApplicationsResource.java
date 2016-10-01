@@ -21,7 +21,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.intuit.wasabi.api.pagination.PaginationHelper;
 import com.intuit.wasabi.authorization.Authorization;
-import com.intuit.wasabi.exceptions.AuthenticationException;
+import com.intuit.wasabi.authenticationobjects.exceptions.AuthenticationException;
 import com.intuit.wasabi.experiment.Experiments;
 import com.intuit.wasabi.experiment.Pages;
 import com.intuit.wasabi.experiment.Priorities;

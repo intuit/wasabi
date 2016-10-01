@@ -26,7 +26,7 @@ import com.intuit.wasabi.analyticsobjects.counts.TotalUsers;
 import com.intuit.wasabi.cassandra.CassandraDriver;
 import com.intuit.wasabi.cassandra.ExperimentDriver;
 import com.intuit.wasabi.exceptions.ConstraintViolationException;
-import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
+import com.intuit.wasabi.experimentobjects.exception.ExperimentNotFoundException;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Bucket.BucketAuditInfo;
@@ -64,7 +64,7 @@ import java.util.*;
 
 /**
  * Cassandra experiment repo
- * 
+ *
  * @see ExperimentRepository
  */
 class CassandraExperimentRepository extends AbstractCassandraRepository<ExperimentsKeyspace> implements
@@ -232,7 +232,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
         }
 
         // Yes, there is a race condition here, where two experiments
-        // being created with the same app name/label could result in one being 
+        // being created with the same app name/label could result in one being
         // clobbered. In practice, this should never happen, but...
         // TODO: Implement a transactional recipe
         final String CQL = "insert into experiment " +
@@ -294,7 +294,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
      * Create indices for new experiment
      *
      * @param newExperiment the new experiment object
-     * 
+     *
      * TODO: Need more clarification
      */
     @Override
@@ -954,10 +954,10 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
 
     /**
      * Update bucket batch
-     * 
+     *
      * @param experimentID the experiment id
      * @param bucketList  the bucket list
-     * 
+     *
      * @return BucketList
      */
     @Override

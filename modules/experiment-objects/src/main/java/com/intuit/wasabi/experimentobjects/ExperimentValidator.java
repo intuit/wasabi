@@ -18,9 +18,9 @@ package com.intuit.wasabi.experimentobjects;
 import com.intuit.hyrule.RuleBuilder;
 import com.intuit.hyrule.exceptions.InvalidSchemaException;
 import com.intuit.hyrule.exceptions.InvalidSyntaxException;
-import com.intuit.wasabi.experimentobjects.exceptions.InvalidBucketStateTransitionException;
-import com.intuit.wasabi.experimentobjects.exceptions.InvalidExperimentStateException;
-import com.intuit.wasabi.experimentobjects.exceptions.InvalidExperimentStateTransitionException;
+import com.intuit.wasabi.experimentobjects.exception.InvalidBucketStateTransitionException;
+import com.intuit.wasabi.experimentobjects.exception.InvalidExperimentStateException;
+import com.intuit.wasabi.experimentobjects.exception.InvalidExperimentStateTransitionException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Date;

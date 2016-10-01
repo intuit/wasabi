@@ -24,11 +24,11 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Preconditions;
-import com.intuit.wasabi.experimentobjects.exceptions.InvalidIdentifierException;
 
 import java.io.IOException;
 import java.util.Objects;
 
+import com.intuit.wasabi.exceptions.InvalidIdentifierException;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 /**

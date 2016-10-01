@@ -19,7 +19,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.intuit.wasabi.analyticsobjects.metrics.BinomialMetrics;
 import com.intuit.wasabi.analyticsobjects.metrics.BinomialMetrics.BinomialMetric;
-import com.intuit.wasabi.exceptions.AnalyticsException;
+import com.intuit.wasabi.analyticsobjects.exceptions.AnalyticsException;
 import com.intuit.wasabi.experimentobjects.Context;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

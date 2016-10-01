@@ -18,7 +18,7 @@ package com.intuit.wasabi.auditlog;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.intuit.wasabi.eventlog.EventLogModule;
-import com.intuit.wasabi.exceptions.AuditLogException;
+import com.intuit.wasabi.auditlogobjects.exceptions.AuditLogException;
 import org.slf4j.Logger;
 
 import java.util.Properties;

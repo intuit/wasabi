@@ -16,7 +16,7 @@
 package com.intuit.wasabi.authentication;
 
 
-import com.intuit.wasabi.exceptions.AuthenticationException;
+import com.intuit.wasabi.authenticationobjects.exceptions.AuthenticationException;
 import com.intuit.wasabi.authenticationobjects.LoginToken;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 

@@ -16,7 +16,7 @@
 package com.intuit.wasabi.eventlog;
 
 import com.google.inject.AbstractModule;
-import com.intuit.wasabi.exceptions.EventLogException;
+import com.intuit.wasabi.eventlog.exceptions.EventLogException;
 import org.slf4j.Logger;
 
 import java.util.Properties;

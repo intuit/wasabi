@@ -22,7 +22,7 @@ import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.eventlog.EventLog;
 import com.intuit.wasabi.eventlog.events.ExperimentChangeEvent;
 import com.intuit.wasabi.eventlog.events.ExperimentCreateEvent;
-import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
+import com.intuit.wasabi.experimentobjects.exception.ExperimentNotFoundException;
 import com.intuit.wasabi.experiment.Buckets;
 import com.intuit.wasabi.experiment.Experiments;
 import com.intuit.wasabi.experiment.Pages;

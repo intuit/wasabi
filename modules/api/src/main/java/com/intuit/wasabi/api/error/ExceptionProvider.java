@@ -16,14 +16,20 @@
 package com.intuit.wasabi.api.error;
 
 import com.intuit.wasabi.api.HttpHeader;
-import com.intuit.wasabi.experimentobjects.exceptions.WasabiClientException;
-import com.intuit.wasabi.experimentobjects.exceptions.WasabiException;
+import com.intuit.wasabi.exceptions.WasabiClientException;
+import com.intuit.wasabi.exceptions.WasabiException;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nullable;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
@@ -54,7 +60,7 @@ abstract class ExceptionProvider<T extends Throwable> implements ExceptionMapper
 
         return httpHeader.headers(responseStatus)
                 .type(type)
-                .entity(serialize(responseStatus, e.getMessage()))
+                .entity(serialize(responseStatus, buildErrorMessage(e)))
                 .build();
     }
 
@@ -67,5 +73,25 @@ abstract class ExceptionProvider<T extends Throwable> implements ExceptionMapper
             return fromStatusCode(e.getErrorCode().getResponseCode());
         }
         return e instanceof WasabiClientException ? BAD_REQUEST : INTERNAL_SERVER_ERROR;
+    }
+
+    String buildErrorMessage(final T e) {
+        String message = e.getMessage();
+        if (!StringUtils.isEmpty(message)) {
+            if (null != e.getCause() && !StringUtils.isEmpty(e.getCause().getMessage())) {
+                message += " -- Cause: " + e.getCause().getMessage();
+            }
+            return message;
+        }
+        if (e instanceof WebApplicationException) {
+            MultivaluedMap<String, Object> metadata = ((WebApplicationException) e).getResponse().getMetadata();
+            List<Object> allowed = metadata.getOrDefault("Allow", Collections.emptyList());
+            if (allowed.isEmpty()) {
+                return "No HTTP method allowed, did you provide the wrong URI?";
+            }
+            return "Something about your request was wrong. Maybe you used an unrecognized HTTP method? Allowed are: "
+                    + Arrays.toString(allowed.toArray());
+        }
+        return "Something about your request was wrong. Please send your request to the developer team so they can debug it.";
     }
 }

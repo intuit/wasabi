@@ -15,7 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.api.pagination.filters.impl;
 
-import com.intuit.wasabi.exceptions.PaginationException;
+import com.intuit.wasabi.api.pagination.exceptions.PaginationException;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import org.junit.Assert;

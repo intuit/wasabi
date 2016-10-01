@@ -21,9 +21,9 @@ import com.intuit.wasabi.authorizationobjects.UserRole;
 import com.intuit.wasabi.authorizationobjects.UserRoleList;
 import com.intuit.wasabi.email.EmailLinksList;
 import com.intuit.wasabi.email.EmailTextProcessor;
+import com.intuit.wasabi.email.exceptions.EmailException;
 import com.intuit.wasabi.eventlog.EventLogEventType;
 import com.intuit.wasabi.eventlog.events.*;
-import com.intuit.wasabi.exceptions.WasabiEmailException;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Experiment;
@@ -162,7 +162,7 @@ public class EmailTextProcessorImplTest {
 
     }
 
-    @Test(expected = WasabiEmailException.class)
+    @Test(expected = EmailException.class)
     public void testNoAdminsForApp(){
 
         UserRoleList roleListMock = mock(UserRoleList.class);
@@ -204,7 +204,7 @@ public class EmailTextProcessorImplTest {
 
         EventLogEvent event = new ExperimentChangeEvent(exp,"label","newUiFeature","NewUI");
         String emailMessage = textProcessor.getMessage(event);
-        
+
         assertTrue(emailMessage.contains(appName.toString()));
         assertTrue(emailMessage.contains(label.toString()));
         assertTrue(emailMessage.contains(id.toString()));

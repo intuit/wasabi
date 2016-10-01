@@ -19,7 +19,7 @@ import com.intuit.wasabi.authentication.Authentication;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authorizationobjects.*;
 import com.intuit.wasabi.eventlog.EventLog;
-import com.intuit.wasabi.exceptions.AuthenticationException;
+import com.intuit.wasabi.authenticationobjects.exceptions.AuthenticationException;
 import com.intuit.wasabi.experiment.Experiments;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Experiment;

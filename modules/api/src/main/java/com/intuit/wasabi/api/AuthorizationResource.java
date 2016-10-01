@@ -26,7 +26,7 @@ import com.intuit.wasabi.authorizationobjects.UserPermissions;
 import com.intuit.wasabi.authorizationobjects.UserPermissionsList;
 import com.intuit.wasabi.authorizationobjects.UserRole;
 import com.intuit.wasabi.authorizationobjects.UserRoleList;
-import com.intuit.wasabi.exceptions.AuthenticationException;
+import com.intuit.wasabi.authenticationobjects.exceptions.AuthenticationException;
 import com.intuit.wasabi.experimentobjects.Application;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

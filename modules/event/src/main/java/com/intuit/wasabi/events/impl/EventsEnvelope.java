@@ -20,7 +20,7 @@ import com.intuit.wasabi.assignmentobjects.Assignment;
 import com.intuit.wasabi.database.Transaction;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Experiment;
-import com.intuit.wasabi.experimentobjects.exceptions.WasabiClientException;
+import com.intuit.wasabi.exceptions.WasabiClientException;
 import org.slf4j.Logger;
 import static org.slf4j.LoggerFactory.getLogger;
 

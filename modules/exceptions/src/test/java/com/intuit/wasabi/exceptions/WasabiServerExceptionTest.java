@@ -21,8 +21,6 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.intuit.wasabi.experimentobjects.exceptions.ErrorCode;
-
 @RunWith(MockitoJUnitRunner.class)
 public class WasabiServerExceptionTest {
 

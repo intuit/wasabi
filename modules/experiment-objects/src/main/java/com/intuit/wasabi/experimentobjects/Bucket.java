@@ -26,7 +26,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Preconditions;
-import com.intuit.wasabi.experimentobjects.exceptions.InvalidIdentifierException;
+import com.intuit.wasabi.exceptions.InvalidIdentifierException;
 import com.netflix.astyanax.model.ColumnList;
 import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -154,17 +154,17 @@ public class Bucket {
 
     @Override
     public String toString() {
-    	return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 
     @Override
     public int hashCode() {
-    	return HashCodeBuilder.reflectionHashCode(this);
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override
     public boolean equals(Object obj) {
-    	   return EqualsBuilder.reflectionEquals(this, obj);
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 
     public boolean isStateTransitionValid(State desiredState) {
@@ -197,6 +197,7 @@ public class Bucket {
 
             private static final Map<State, ArrayList<State>> m =
                     new EnumMap<>(State.class);
+
             static {
                 for (BucketStateTransition trans :
                         BucketStateTransition.values()) {
@@ -206,6 +207,7 @@ public class Bucket {
                     }
                 }
             }
+
             //TODO: remove state from enum
             private final transient List<State> allowedStateTransitions;
 
@@ -340,7 +342,7 @@ public class Bucket {
 
         @Override
         public boolean equals(Object obj) {
-        	   return EqualsBuilder.reflectionEquals(this, obj);
+            return EqualsBuilder.reflectionEquals(this, obj);
         }
 
         public static class Serializer extends JsonSerializer<Label> {
@@ -386,12 +388,12 @@ public class Bucket {
 
         @Override
         public int hashCode() {
-        	return HashCodeBuilder.reflectionHashCode(this);
+            return HashCodeBuilder.reflectionHashCode(this);
         }
 
         @Override
         public boolean equals(Object obj) {
-        	   return EqualsBuilder.reflectionEquals(this, obj);
+            return EqualsBuilder.reflectionEquals(this, obj);
         }
     }
 }

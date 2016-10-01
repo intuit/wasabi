@@ -19,7 +19,7 @@ import com.google.inject.Inject;
 import com.intuit.wasabi.analyticsobjects.Parameters;
 import com.intuit.wasabi.database.TransactionFactory;
 import com.intuit.wasabi.events.EventsExport;
-import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
+import com.intuit.wasabi.experimentobjects.exception.ExperimentNotFoundException;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.repository.DatabaseRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;

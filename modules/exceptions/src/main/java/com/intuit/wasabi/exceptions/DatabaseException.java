@@ -15,21 +15,17 @@
  *******************************************************************************/
 package com.intuit.wasabi.exceptions;
 
-import static com.intuit.wasabi.experimentobjects.exceptions.ErrorCode.DATABASE_ERROR;
+import static com.intuit.wasabi.exceptions.ErrorCode.DATABASE_ERROR;
 
-/**
- *
- *
- */
 public class DatabaseException extends WasabiServerException {
 
     private static final long serialVersionUID = -8054400972051159221L;
 
     public DatabaseException(String message) {
-		this(message,null);
-	}
+        this(message, null);
+    }
 
-	public DatabaseException(String message, Throwable rootCause) {
-		super(DATABASE_ERROR,message,rootCause);
-	}
+    public DatabaseException(String message, Throwable rootCause) {
+        super(DATABASE_ERROR, message, rootCause);
+    }
 }

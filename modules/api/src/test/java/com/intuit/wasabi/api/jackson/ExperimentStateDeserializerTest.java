@@ -17,6 +17,7 @@ package com.intuit.wasabi.api.jackson;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
+import com.intuit.wasabi.api.jackson.serializers.ExperimentStateDeserializer;
 import com.intuit.wasabi.experimentobjects.Experiment.State;
 import org.junit.Test;
 

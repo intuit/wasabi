@@ -23,7 +23,7 @@ import com.intuit.wasabi.assignment.Assignments;
 import com.intuit.wasabi.assignmentobjects.Assignment;
 import com.intuit.wasabi.assignmentobjects.SegmentationProfile;
 import com.intuit.wasabi.assignmentobjects.User;
-import com.intuit.wasabi.exceptions.AssignmentNotFoundException;
+import com.intuit.wasabi.assignmentobjects.exceptions.AssignmentNotFoundException;
 import com.intuit.wasabi.experimentobjects.*;
 import com.intuit.wasabi.experimentobjects.Bucket.Label;
 import io.swagger.annotations.Api;

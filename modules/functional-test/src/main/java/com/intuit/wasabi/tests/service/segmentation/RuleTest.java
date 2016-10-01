@@ -25,7 +25,6 @@ import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterSuite;
 import org.testng.annotations.Test;
 
 import java.util.HashMap;

@@ -18,9 +18,9 @@ package com.intuit.wasabi.api.pagination.filters.impl;
 import com.intuit.wasabi.api.pagination.filters.FilterUtil;
 import com.intuit.wasabi.api.pagination.filters.PaginationFilter;
 import com.intuit.wasabi.api.pagination.filters.PaginationFilterProperty;
-import com.intuit.wasabi.exceptions.PaginationException;
+import com.intuit.wasabi.api.pagination.exceptions.PaginationException;
 import com.intuit.wasabi.experimentobjects.Experiment;
-import com.intuit.wasabi.experimentobjects.exceptions.ErrorCode;
+import com.intuit.wasabi.exceptions.ErrorCode;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDate;

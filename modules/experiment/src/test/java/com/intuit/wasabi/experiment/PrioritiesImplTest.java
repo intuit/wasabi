@@ -15,7 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.experiment;
 
-import com.intuit.wasabi.exceptions.ApplicationNotFoundException;
+import com.intuit.wasabi.experimentobjects.exception.ApplicationNotFoundException;
 import com.intuit.wasabi.experiment.impl.PrioritiesImpl;
 import com.intuit.wasabi.experimentobjects.*;
 import com.intuit.wasabi.repository.PrioritiesRepository;

@@ -18,7 +18,7 @@ package com.intuit.wasabi.authorization;
 import com.google.inject.AbstractModule;
 import com.intuit.wasabi.authentication.AuthenticationModule;
 import com.intuit.wasabi.eventlog.EventLogModule;
-import com.intuit.wasabi.exceptions.AuthenticationException;
+import com.intuit.wasabi.authenticationobjects.exceptions.AuthenticationException;
 import com.intuit.wasabi.repository.RepositoryModule;
 import org.slf4j.Logger;
 
@@ -37,7 +37,7 @@ public class AuthorizationModule extends AbstractModule {
 
     private static final String PROPERTY_NAME = "/authorization.properties";
     private static final Logger LOGGER = getLogger(AuthorizationModule.class);
-    
+
     /*
      * @see com.google.inject.AbstractModule#configure()
      */
