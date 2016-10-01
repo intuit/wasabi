@@ -17,7 +17,12 @@ package com.intuit.wasabi.tests.service.experiment;
 
 import com.intuit.wasabi.tests.library.TestBase;
 import com.intuit.wasabi.tests.library.util.Constants;
-import com.intuit.wasabi.tests.model.*;
+import com.intuit.wasabi.tests.model.Application;
+import com.intuit.wasabi.tests.model.Assignment;
+import com.intuit.wasabi.tests.model.Bucket;
+import com.intuit.wasabi.tests.model.Experiment;
+import com.intuit.wasabi.tests.model.Page;
+import com.intuit.wasabi.tests.model.User;
 import com.intuit.wasabi.tests.model.factory.ApplicationFactory;
 import com.intuit.wasabi.tests.model.factory.BucketFactory;
 import com.intuit.wasabi.tests.model.factory.ExperimentFactory;
@@ -33,6 +38,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.TimeZone;
+
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -45,7 +51,7 @@ public class PagesTest extends TestBase {
     private static final Logger LOGGER = getLogger(PagesTest.class);
     private static final double SAMPLING_PERCENT = 1.0;
     private static final double ALLOCATION_PERCENT = 1.0;
-    private static final String TIMESTAMP_STR=""+System.currentTimeMillis();
+    private static final String TIMESTAMP_STR = "" + System.currentTimeMillis();
 
     private static Experiment exp_b;
 
@@ -66,17 +72,16 @@ public class PagesTest extends TestBase {
     /**
      * This method queries list of experiments by application and page. Returns true if found.
      *
-     * @param exp
-     * @param page
-     * @return
+     * @param exp  the experiment
+     * @param page the page
+     * @return search result
      */
     private boolean findExperimentByPage(Experiment exp, Page page) {
         boolean found = false;
         //Getting the list of pages for the application
         List<Experiment> experiments = getExperimentsByApplicationPage(new Application(exp.applicationName), page);
         for (Experiment e : experiments) {
-            if (e.label.equals(exp.label))
-            {
+            if (e.label.equals(exp.label)) {
                 found = true;
             }
         }
@@ -90,10 +95,10 @@ public class PagesTest extends TestBase {
     /**
      * This method tests posting page after setting experiment to the desired experimentState.
      *
-     * @param exp
-     * @param pageName
-     * @param allowAssignment
-     * @param experimentState
+     * @param exp             the experiment
+     * @param pageName        the page name
+     * @param allowAssignment new assignment toggle
+     * @param isDeletePage    true if the page should be deleted
      */
     private Page testPostPage(Experiment exp, String pageName, boolean allowAssignment, boolean isDeletePage) {
 
@@ -108,8 +113,7 @@ public class PagesTest extends TestBase {
 
         assertPageTrue(page, exp);
 
-        if (isDeletePage)
-        {
+        if (isDeletePage) {
             response = deletePages(exp, page);
             Assert.assertEquals(response.getStatusCode(), HttpStatus.SC_NO_CONTENT);
 
@@ -123,7 +127,7 @@ public class PagesTest extends TestBase {
     }
 
     private Experiment testExperimentChangeState(Experiment exp, String experimentState) {
-        LOGGER.info("Changing the experiment exp "+exp.id+" state to " + experimentState);
+        LOGGER.info("Changing the experiment exp " + exp.id + " state to " + experimentState);
         exp.setState(experimentState);
         Assert.assertEquals(exp.state, experimentState, "Experiment state is not changed to " + experimentState);
 
@@ -163,6 +167,9 @@ public class PagesTest extends TestBase {
     /**
      * Creates the experiment with provided startTime , endTime and experiment Label
      *
+     * @param startTime the start time
+     * @param endTime   the end time
+     * @param expSuffix the experiment label suffix
      * @return experiment
      */
     private Experiment createExperiment(String startTime, String endTime, String expSuffix) {
@@ -171,14 +178,14 @@ public class PagesTest extends TestBase {
                 .setEndTime(endTime)
                 .setLabel(PREFIX_EXPERIMENT + TIMESTAMP_STR + expSuffix)
                 .setSamplingPercent(SAMPLING_PERCENT)
-                .setApplication(ApplicationFactory.createApplication().setName(PREFIX_APPLICATION+TIMESTAMP_STR));
+                .setApplication(ApplicationFactory.createApplication().setName(PREFIX_APPLICATION + TIMESTAMP_STR));
     }
 
     /**
      * Tests posting page for expired experiment with past start and end times
      */
     @Test(dependsOnGroups = {"ping"})
-    public void t_expiredExperimentPages() {
+    public void expiredExperimentPages() {
 
         String pastStartTime = getDatePlusDays(-10);
         String pastEndTime = getDatePlusDays(-5);
@@ -204,8 +211,8 @@ public class PagesTest extends TestBase {
     /**
      * Tests posting bucket and page for draft experiment with past start and future end times
      */
-    @Test(dependsOnMethods = {"t_expiredExperimentPages"})
-    public void t_draftExperimentPages() {
+    @Test(dependsOnMethods = {"expiredExperimentPages"})
+    public void draftExperimentPages() {
         String pastStartTime = getDatePlusDays(-10);
         String futureEndTime = getDatePlusDays(10);
 
@@ -244,8 +251,8 @@ public class PagesTest extends TestBase {
     /**
      * Tests posting bucket and page for paused experiment with past start and future end times
      */
-    @Test(dependsOnMethods = {"t_draftExperimentPages"})
-    public void t_pausedExperimentPages() {
+    @Test(dependsOnMethods = {"draftExperimentPages"})
+    public void pausedExperimentPages() {
         String pastStartTime = getDatePlusDays(-10);
         String futureEndTime = getDatePlusDays(10);
 
@@ -297,8 +304,8 @@ public class PagesTest extends TestBase {
     /**
      * Tests posting new pages for terminated experiment
      */
-    @Test(dependsOnMethods = {"t_pausedExperimentPages"})
-    public void t_terminatedExperimentPages() {
+    @Test(dependsOnMethods = {"pausedExperimentPages"})
+    public void terminatedExperimentPages() {
         String pastStartTime = getDatePlusDays(-10);
         String futureEndTime = getDatePlusDays(10);
 
@@ -328,8 +335,8 @@ public class PagesTest extends TestBase {
     /**
      * Tests posting new pages for deleted experiment
      */
-    @Test(dependsOnMethods = {"t_terminatedExperimentPages"})
-    public void t_deletedExperimentPages() {
+    @Test(dependsOnMethods = {"terminatedExperimentPages"})
+    public void deletedExperimentPages() {
         String pastStartTime = getDatePlusDays(-10);
         String futureEndTime = getDatePlusDays(10);
 
@@ -356,16 +363,16 @@ public class PagesTest extends TestBase {
     /**
      * create new experiment b
      */
-    @Test(dependsOnMethods = {"t_deletedExperimentPages"})
-    public void t_createNewExperiment_b() {
+    @Test(dependsOnMethods = {"deletedExperimentPages"})
+    public void createNewExperimentB() {
         exp_b = testCreateNewExperimentWithBucket("red", "red bucket", "HTML-JS-red", "b");
     }
 
     /**
      * Test posting page to experiment in different state.
      */
-    @Test(dependsOnMethods = {"t_createNewExperiment_b"})
-    public void t_postPagesByExperimentState_exp_b() {
+    @Test(dependsOnMethods = {"createNewExperimentB"})
+    public void postPagesByExperimentStateExpB() {
 
         testPostPage(exp_b, "home", true);
         exp_b = testExperimentChangeState(exp_b, Constants.EXPERIMENT_STATE_RUNNING);
@@ -374,8 +381,8 @@ public class PagesTest extends TestBase {
         testPostPage(exp_b, "shoppingCart", true);
     }
 
-    @Test(dependsOnMethods = {"t_postPagesByExperimentState_exp_b"})
-    public void t_retrievePagesAcrossExperiments() {
+    @Test(dependsOnMethods = {"postPagesByExperimentStateExpB"})
+    public void retrievePagesAcrossExperiments() {
 
         LOGGER.info("Testing retrieving pages of applications across experiments");
         Experiment exp_c = testCreateNewExperimentWithBucket("blue", "blue bucket", "HTML-JS-blue", "c");
@@ -387,38 +394,38 @@ public class PagesTest extends TestBase {
 
         Response response = postPages(exp_c, page, HttpStatus.SC_CREATED);
         Assert.assertEquals(response.getStatusCode(), 201);
-        LOGGER.info("Verifying if page '"+ newPage +"' is found by querying the application " + exp_c.applicationName);
+        LOGGER.info("Verifying if page '" + newPage + "' is found by querying the application " + exp_c.applicationName);
         boolean found = findExperimentByPage(exp_c, page);
         Assert.assertTrue(found);
 
-        LOGGER.info("Verifying if page '"+ newPage +"' is found by querying the experiment " + exp_c.id);
+        LOGGER.info("Verifying if page '" + newPage + "' is found by querying the experiment " + exp_c.id);
         assertPageTrue(page, exp_c);
 
         // try to post page for exp b
         response = postPages(exp_b, page, HttpStatus.SC_CREATED);
         Assert.assertEquals(response.getStatusCode(), 201);
 
-        LOGGER.info("Verifying if page '"+ newPage +"' is found in both exp_b '"+ exp_b.id +"' and exp_c '" + exp_c.id +"' by querying the application " + exp_c.applicationName);
+        LOGGER.info("Verifying if page '" + newPage + "' is found in both exp_b '" + exp_b.id + "' and exp_c '" + exp_c.id + "' by querying the application " + exp_c.applicationName);
         found = findExperimentByPage(exp_b, page);
         Assert.assertTrue(found);
         found = findExperimentByPage(exp_c, page);
         Assert.assertTrue(found);
 
-        LOGGER.info("Deleting page "+page.name +" from exp_c " +exp_c.id);
+        LOGGER.info("Deleting page " + page.name + " from exp_c " + exp_c.id);
         response = deletePages(exp_c, page);
         Assert.assertEquals(response.getStatusCode(), HttpStatus.SC_NO_CONTENT);
-        LOGGER.info("Verifying page "+page.name +" is not in exp_c " +exp_c.id);
+        LOGGER.info("Verifying page " + page.name + " is not in exp_c " + exp_c.id);
         found = findExperimentByPage(exp_c, page);
         Assert.assertFalse(found);
 
-        LOGGER.info("Deleting page "+page.name +" from exp_b " +exp_b.id);
+        LOGGER.info("Deleting page " + page.name + " from exp_b " + exp_b.id);
         response = deletePages(exp_b, page);
         Assert.assertEquals(response.getStatusCode(), HttpStatus.SC_NO_CONTENT);
-        LOGGER.info("Verifying page "+page.name +" is not in exp_b " +exp_b.id);
+        LOGGER.info("Verifying page " + page.name + " is not in exp_b " + exp_b.id);
         found = findExperimentByPage(exp_b, page);
         Assert.assertFalse(found);
 
-        LOGGER.info("Verifying non of the experiments have "+page.name + ".");
+        LOGGER.info("Verifying non of the experiments have " + page.name + ".");
         found = findExperimentByPage(exp_b, page);
         Assert.assertFalse(found);
 
@@ -428,8 +435,8 @@ public class PagesTest extends TestBase {
     /**
      * Test posting page to experiment in different state.
      */
-    @Test(dependsOnMethods = {"t_retrievePagesAcrossExperiments"})
-    public void t_postPagesToExperment_TerminateState_exp_b() {
+    @Test(dependsOnMethods = {"retrievePagesAcrossExperiments"})
+    public void postPagesToExperimentTerminateStateExpb() {
         exp_b = testExperimentChangeState(exp_b, Constants.EXPERIMENT_STATE_TERMINATED);
 
         // try to post page for exp b in terminated state
@@ -448,8 +455,8 @@ public class PagesTest extends TestBase {
     /**
      * Tests batch assignments
      */
-    @Test(dependsOnMethods = { "t_postPagesToExperment_TerminateState_exp_b" })
-    public void t_batchExperimentPages() {
+    @Test(dependsOnMethods = {"postPagesToExperimentTerminateStateExpb"})
+    public void batchExperimentPages() {
 
         Experiment exp_X = testCreateNewExperimentWithBucket("red", "red bucket", "HTML-JS-red", "X");
         Experiment exp_Y = testCreateNewExperimentWithBucket("blue", "blue bucket", "HTML-JS-blue", "Y");
@@ -520,8 +527,8 @@ public class PagesTest extends TestBase {
      * JBA-227: Search Pages API: Create 3 valid Experiment.Two experiments have page testPage1.Third has some other page.
      * The experiment list for page testPage1 will retrieve two correct experiments.
      */
-    @Test(dependsOnMethods = { "t_batchExperimentPages" })
-    public void t_batchExperimentPages_Issue_JBA_227() {
+    @Test(dependsOnMethods = {"batchExperimentPages"})
+    public void batchExperimentPages_Issue_JBA_227() {
 
         LOGGER.info("Creating the second valid new experiment AA");
         Experiment exp_aa = testCreateNewExperimentWithBucket("red", "red bucket", "HTML-JS-red", "AA", 10, 20);
@@ -538,16 +545,16 @@ public class PagesTest extends TestBase {
         String otherPageName = "otherPage";
         Page otherPage = testPostPage(exp_cc, otherPageName, false /* allowAssignment=false */, false);
 
-        LOGGER.info("Verifying if page '"+ testPage1Name +"' is found in both exp_aa '"+ exp_aa.id +"' and exp_bb '" + exp_bb.id +"' by querying the application " + exp_aa.applicationName);
+        LOGGER.info("Verifying if page '" + testPage1Name + "' is found in both exp_aa '" + exp_aa.id + "' and exp_bb '" + exp_bb.id + "' by querying the application " + exp_aa.applicationName);
         boolean found = findExperimentByPage(exp_aa, testPage1);
         Assert.assertTrue(found);
-        LOGGER.info("Found page " + testPage1Name + " in exp_aa "+exp_aa.id);
+        LOGGER.info("Found page " + testPage1Name + " in exp_aa " + exp_aa.id);
         found = findExperimentByPage(exp_bb, testPage1);
         Assert.assertTrue(found);
-        LOGGER.info("Found page " + testPage1Name + " in exp_bb "+exp_bb.id);
+        LOGGER.info("Found page " + testPage1Name + " in exp_bb " + exp_bb.id);
 
         found = findExperimentByPage(exp_cc, testPage1);
-        LOGGER.info("Should not find page " + testPage1Name + " in exp_cc "+exp_cc.id);
+        LOGGER.info("Should not find page " + testPage1Name + " in exp_cc " + exp_cc.id);
         Assert.assertFalse(found);
 
         deletePages(exp_aa, testPage1);
@@ -558,6 +565,7 @@ public class PagesTest extends TestBase {
         deleteExperiment(exp_bb);
         deleteExperiment(exp_cc);
     }
+
     /**
      * Returns date n days later in UTC timezone as string
      *

@@ -28,17 +28,17 @@ import org.testng.annotations.Test;
 
 
 public class PutAssignmentTest extends TestBase {
-    static final Logger LOGGER = LoggerFactory.getLogger(PutAssignmentTest.class);
-    Experiment experiment;
-    String experimentLable;
-    String appName;
+    private static final Logger LOGGER = LoggerFactory.getLogger(PutAssignmentTest.class);
+    private Experiment experiment;
+    private String experimentLable;
+    private String appName;
 
-    @Test(groups={"setup"}, dataProvider = "PutAssignmentExperimentData", dataProviderClass = AssignmentDataProvider.class)
-    public void t_setup(String appName, String label, String experimentData, String bucketLable, String bucketData){
+    @Test(groups = {"setup"}, dataProvider = "PutAssignmentExperimentData", dataProviderClass = AssignmentDataProvider.class)
+    public void setup(String appName, String label, String experimentData, String bucketLable, String bucketData) {
         response = apiServerConnector.doPost("/experiments", experimentData);
         assertReturnCode(response, HttpStatus.SC_CREATED);
         experiment = ExperimentFactory.createFromJSONString(response.asString());
-        String url = "/experiments/"+experiment.id+"/buckets";
+        String url = "/experiments/" + experiment.id + "/buckets";
         response = apiServerConnector.doPost(url, bucketData);
         assertReturnCode(response, HttpStatus.SC_CREATED);
         this.experimentLable = label;
@@ -46,63 +46,61 @@ public class PutAssignmentTest extends TestBase {
     }
 
 
-    @Test(dependsOnGroups = {"setup"}, groups={"stateTest"},
+    @Test(dependsOnGroups = {"setup"}, groups = {"stateTest"},
             dataProvider = "PutAssignmentStates", dataProviderClass = AssignmentDataProvider.class)
-    public void t_NullAssignmentToBucketAssignment(String state, int statusCode){
-        response = apiServerConnector.doPut("/experiments/" + experiment.id, "{\"state\": \""+state+"\"}");
+    public void nullAssignmentToBucketAssignment(String state, int statusCode) {
+        response = apiServerConnector.doPut("/experiments/" + experiment.id, "{\"state\": \"" + state + "\"}");
         assertReturnCode(response, HttpStatus.SC_OK);
-        String url = "/assignments/applications/"+this.appName+"/experiments/"+this.experimentLable+"/users/";
-        if( !"DRAFT".equals(state) && !"TERMINATED".equals(state)){
+        String url = "/assignments/applications/" + this.appName + "/experiments/" + this.experimentLable + "/users/";
+        if (!"DRAFT".equals(state) && !"TERMINATED".equals(state)) {
             assignUserStateFromNullToBucket(state, url);
             assignUserStateFromBucketToNull(state, url);
         } else {
-            response = apiServerConnector.doPut(url+"user-"+state+"-1", "{\"assignment\": null}");
+            response = apiServerConnector.doPut(url + "user-" + state + "-1", "{\"assignment\": null}");
             Assert.assertEquals(response.getStatusCode(), statusCode);
-            response = apiServerConnector.doPut(url+"user-"+state+"-2", "{\"assignment\": null}");
+            response = apiServerConnector.doPut(url + "user-" + state + "-2", "{\"assignment\": null}");
             Assert.assertEquals(response.getStatusCode(), statusCode);
         }
     }
 
     private void assignUserStateFromNullToBucket(String state, String url) {
-        response = apiServerConnector.doPut(url+"user-"+state+"-1", "{\"assignment\": null}");
-        LOGGER.info("State="+state+ " status=" + response.getStatusCode() + " response=" + response.asString());
+        response = apiServerConnector.doPut(url + "user-" + state + "-1", "{\"assignment\": null}");
+        LOGGER.info("State=" + state + " status=" + response.getStatusCode() + " response=" + response.asString());
         Assert.assertEquals(response.asString().contains("NEW_ASSIGNMENT"), true);
         Assert.assertEquals(response.asString().contains("null"), true);
-        response = apiServerConnector.doPut(url+"user-"+state+"-1", "{\"assignment\": \"onlybucket\", \"overwrite\":false}");
+        response = apiServerConnector.doPut(url + "user-" + state + "-1", "{\"assignment\": \"onlybucket\", \"overwrite\":false}");
         assertReturnCode(response, HttpStatus.SC_CONFLICT);
-        response = apiServerConnector.doGet(url+"user-"+state+"-1");
+        response = apiServerConnector.doGet(url + "user-" + state + "-1");
         assertReturnCode(response, HttpStatus.SC_OK);
         Assert.assertEquals(response.asString().contains("EXISTING_ASSIGNMENT"), true);
-        response = apiServerConnector.doPut(url+"user-"+state+"-1", "{\"assignment\": \"onlybucket\", \"overwrite\":true}");
+        response = apiServerConnector.doPut(url + "user-" + state + "-1", "{\"assignment\": \"onlybucket\", \"overwrite\":true}");
         assertReturnCode(response, HttpStatus.SC_OK);
         Assert.assertEquals(response.asString().contains("NEW_ASSIGNMENT"), true);
         Assert.assertEquals(response.asString().contains("onlybucket"), true);
-        LOGGER.debug("State="+state+ " status=" + response.getStatusCode() + " response=" + response.asString());
+        LOGGER.debug("State=" + state + " status=" + response.getStatusCode() + " response=" + response.asString());
     }
 
     private void assignUserStateFromBucketToNull(String state, String url) {
-        response = apiServerConnector.doPut(url+"user-"+state+"-2", "{\"assignment\": \"onlybucket\"}");
-        LOGGER.debug("State="+state+ " status=" + response.getStatusCode() + " response=" + response.asString());
+        response = apiServerConnector.doPut(url + "user-" + state + "-2", "{\"assignment\": \"onlybucket\"}");
+        LOGGER.debug("State=" + state + " status=" + response.getStatusCode() + " response=" + response.asString());
         Assert.assertEquals(response.asString().contains("NEW_ASSIGNMENT"), true);
         Assert.assertEquals(response.asString().contains("onlybucket"), true);
-        response = apiServerConnector.doPut(url+"user-"+state+"-2", "{\"assignment\": null, \"overwrite\":false}");
+        response = apiServerConnector.doPut(url + "user-" + state + "-2", "{\"assignment\": null, \"overwrite\":false}");
         assertReturnCode(response, HttpStatus.SC_CONFLICT);
-        response = apiServerConnector.doGet(url+"user-"+state+"-2");
+        response = apiServerConnector.doGet(url + "user-" + state + "-2");
         assertReturnCode(response, HttpStatus.SC_OK);
         Assert.assertEquals(response.asString().contains("EXISTING_ASSIGNMENT"), true);
-        response = apiServerConnector.doPut(url+"user-"+state+"-2", "{\"assignment\": null, \"overwrite\":true}");
+        response = apiServerConnector.doPut(url + "user-" + state + "-2", "{\"assignment\": null, \"overwrite\":true}");
         assertReturnCode(response, HttpStatus.SC_OK);
         Assert.assertEquals(response.asString().contains("NEW_ASSIGNMENT"), true);
         Assert.assertEquals(response.asString().contains("null"), true);
-        LOGGER.debug("State="+state+ " status=" + response.getStatusCode() + " response=" + response.asString());
+        LOGGER.debug("State=" + state + " status=" + response.getStatusCode() + " response=" + response.asString());
     }
 
     @AfterClass
-    public void t_cleanUp(){
-        response = apiServerConnector.doPut("experiments/"+experiment.id, "{\"state\": \"TERMINATED\"}");
-        assertReturnCode(response, HttpStatus.SC_OK);
-        response = apiServerConnector.doDelete("experiments/"+experiment.id);
-        assertReturnCode(response, HttpStatus.SC_NO_CONTENT);
+    public void cleanUp() {
+        toCleanUp.add(experiment);
+        cleanUpExperiments();
     }
 
 }

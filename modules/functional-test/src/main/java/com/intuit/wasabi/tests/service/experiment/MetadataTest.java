@@ -31,22 +31,20 @@ public class MetadataTest extends TestBase {
 
     private static final String PREFIX_EXPERIMENT = "metadataNullTest_";
     private static final Logger LOGGER = getLogger(MetadataTest.class);
-    private final double samplingPercent = 1.0;
-    private final String startTime = "2013-01-01T00:00:00+0000";
-    private final String endTime = "2014-01-01T00:00:00+0000";
     private int count = 0;
 
     /**
      * Creates a sample basic experiment
+     *
      * @return sample experiment
      */
     private Experiment createExperiment() {
         return ExperimentFactory.createExperiment()
                 .setDescription("Sample Description.")
-                .setStartTime(startTime)
-                .setEndTime(endTime)
+                .setStartTime("2013-01-01T00:00:00+0000")
+                .setEndTime("2014-01-01T00:00:00+0000")
                 .setLabel(PREFIX_EXPERIMENT + System.currentTimeMillis() + count++)
-                .setSamplingPercent(samplingPercent)
+                .setSamplingPercent(1.0)
                 .setApplication(ApplicationFactory.defaultApplication());
     }
 
@@ -56,7 +54,7 @@ public class MetadataTest extends TestBase {
      * from the json input.
      */
     @Test(dependsOnGroups = {"ping"})
-    public void t_defaultDescriptionPayLoadEmpty() {
+    public void defaultDescriptionPayLoadEmpty() {
         // create experiment with description missing
         Experiment exp = postExperiment(createExperiment());
 
@@ -81,7 +79,7 @@ public class MetadataTest extends TestBase {
      * consistent with supplied strings for these fields
      */
     @Test(dependsOnGroups = {"ping"})
-    public void t_descriptionPayLoadProvided() {
+    public void descriptionPayLoadProvided() {
         // create Experiment with given description
         String description = "Non-null metadata";
         Experiment exp = postExperiment(createExperiment().setDescription(description));
@@ -106,7 +104,7 @@ public class MetadataTest extends TestBase {
      * explicitly set to empty string
      */
     @Test(dependsOnGroups = {"ping"})
-    public void t_defaultDescriptionPayLoadNull() {
+    public void defaultDescriptionPayLoadNull() {
         // create an experiment with {"description":""}
         Experiment exp = postExperiment(createExperiment());
 

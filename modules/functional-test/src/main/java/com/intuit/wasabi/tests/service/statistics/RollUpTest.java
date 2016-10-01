@@ -15,24 +15,6 @@
  *******************************************************************************/
 package com.intuit.wasabi.tests.service.statistics;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import org.apache.http.HttpStatus;
-import org.testng.Assert;
-
-import static org.testng.Assert.*;
-
 import com.intuit.wasabi.tests.library.TestBase;
 import com.intuit.wasabi.tests.library.util.serialstrategies.DefaultNameExclusionStrategy;
 import com.intuit.wasabi.tests.model.Assignment;
@@ -47,17 +29,39 @@ import com.intuit.wasabi.tests.model.factory.EventFactory;
 import com.intuit.wasabi.tests.model.factory.ExperimentFactory;
 import com.intuit.wasabi.tests.model.factory.UserFactory;
 import com.jayway.restassured.response.Response;
+import org.apache.http.HttpStatus;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import static com.intuit.wasabi.tests.library.util.Constants.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import static com.intuit.wasabi.tests.library.util.Constants.EXPERIMENT_STATE_RUNNING;
+import static com.intuit.wasabi.tests.library.util.Constants.NEW_ASSIGNMENT;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 
 /**
  * RollUp integration tests
  */
 public class RollUpTest extends TestBase {
 
+    private static final String RED = "red";
+    private static final String BLUE = "blue";
+    private static final String PROD = "PROD";
+    private static final String QA = "QA";
     private static final String CONTEXT = "context";
     private static final String ACTION = "action";
     private static final String DISTINCT_USER_COUNT = "distinct_user_count";
@@ -65,26 +69,20 @@ public class RollUpTest extends TestBase {
     private static final String BUCKET_LABEL = "bucket_label";
     private static final String FROM_TIME = "fromTime";
     private static final String QBO = "qbo";
-    protected static final String RED = "red";
-    protected static final String BLUE = "blue";
-
-    protected static final String PROD = "PROD";
-    protected static final String QA = "QA";
-
     private String yesterday;
     private String today;
     private String tomorrow;
 
     private Experiment experiment;
     private List<Bucket> buckets = new ArrayList<>();
-    private String[] labels = { BLUE, RED };
-    private double[] allocations = { .50, .50, };
-    private boolean[] control = { false, true };
+    private String[] labels = {BLUE, RED};
+    private double[] allocations = {.50, .50,};
+    private boolean[] control = {false, true};
     private User userBill = UserFactory.createUser("Bill");
     private User userJane = UserFactory.createUser("Jane");
     private User userTom = UserFactory.createUser("Tom");
 
-    private User[] users = { userBill, userJane, userTom };
+    private User[] users = {userBill, userJane, userTom};
 
     private String actionImpression = "IMPRESSION";
     private String actionClick = "click";
@@ -149,8 +147,8 @@ public class RollUpTest extends TestBase {
         connection.close();
     }
 
-    @Test(dependsOnGroups = { "ping" })
-    public void t_CreateTwoBuckets() {
+    @Test(dependsOnGroups = {"ping"})
+    public void createTwoBuckets() {
         Experiment exp = postExperiment(experiment);
         Assert.assertNotNull(exp.creationTime,
                 "Experiment creation failed (No creationTime).");
@@ -174,6 +172,9 @@ public class RollUpTest extends TestBase {
                 }
 
             }
+            if (matching == null) {
+                continue;
+            }
             assertEquals(result.label, matching.label);
             assertEquals(result.isControl, matching.isControl);
             assertEquals(result.allocationPercent, matching.allocationPercent);
@@ -184,8 +185,8 @@ public class RollUpTest extends TestBase {
 
     }
 
-    @Test(dependsOnMethods = { "t_CreateTwoBuckets" })
-    public void t_CheckBasicCounts() throws Exception {
+    @Test(dependsOnMethods = {"createTwoBuckets"})
+    public void checkBasicCounts() throws Exception {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(FROM_TIME, "");
         List<Event> events = postEvents(experiment, parameters, true,
@@ -198,7 +199,7 @@ public class RollUpTest extends TestBase {
                 + "from event_action where hex(experiment_id) = '"
                 + experiment.id.replace("-", "") + "' group by bucket_label";
         try (Statement statement = connection.createStatement();
-                ResultSet result = statement.executeQuery(queryGroupByBucket)) {
+             ResultSet result = statement.executeQuery(queryGroupByBucket)) {
             if (result.next()) {
                 String bucket = result.getString(BUCKET_LABEL);
                 int userCount = result.getInt(USER_COUNT);
@@ -212,8 +213,8 @@ public class RollUpTest extends TestBase {
         }
     }
 
-    @Test(dependsOnMethods = { "t_CheckBasicCounts" })
-    public void t_PostAssignments() {
+    @Test(dependsOnMethods = {"checkBasicCounts"})
+    public void postAssignments() {
 
         for (User user : users) {
             Assignment result = postAssignment(experiment, user, PROD);
@@ -236,8 +237,8 @@ public class RollUpTest extends TestBase {
         }
     }
 
-    @Test(dependsOnMethods = { "t_PostAssignments" })
-    public void t_PostImpressionsYesterday() {
+    @Test(dependsOnMethods = {"postAssignments"})
+    public void postImpressionsYesterday() {
         for (User user : users) {
             Event event = EventFactory.createEvent();
             event.context = PROD;
@@ -259,9 +260,9 @@ public class RollUpTest extends TestBase {
 
     }
 
-    @Test(dependsOnMethods = { "t_PostImpressionsYesterday" })
-    public void t_PostClickToday() {
-        User[] users = { userBill, userJane, userTom };
+    @Test(dependsOnMethods = {"postImpressionsYesterday"})
+    public void postClickToday() {
+        User[] users = {userBill, userJane, userTom};
         for (User user : users) {
             Event event = EventFactory.createEvent();
             event.context = PROD;
@@ -284,9 +285,9 @@ public class RollUpTest extends TestBase {
 
     }
 
-    @Test(dependsOnMethods = { "t_PostClickToday" })
-    public void t_PostLoveItTomorrow() {
-        User[] users = { userJane, userTom };
+    @Test(dependsOnMethods = {"postClickToday"})
+    public void postLoveItTomorrow() {
+        User[] users = {userJane, userTom};
         for (User user : users) {
             Event event = EventFactory.createEvent();
             event.context = PROD;
@@ -305,19 +306,15 @@ public class RollUpTest extends TestBase {
 
         assertEquals(events.size(), 4);
         for (Event event : events) {
-            if (event.name.equals(actionLoveIt)
-                    || event.name.equals(actionImpression)) {
-                // ok
-            } else {
+            if (!(event.name.equals(actionLoveIt)
+                    || event.name.equals(actionImpression)))
                 fail("event not loveit or impression: " + event);
-            }
         }
-
     }
 
-    @Test(dependsOnMethods = { "t_PostClickToday" })
-    public void t_PostImpressionTomorrowQA() {
-        User[] users = { userTom, userBill };
+    @Test(dependsOnMethods = {"postClickToday"})
+    public void postImpressionTomorrowQA() {
+        User[] users = {userTom, userBill};
         for (User user : users) {
             Event event = EventFactory.createEvent();
             event.context = QA;
@@ -329,8 +326,8 @@ public class RollUpTest extends TestBase {
         }
     }
 
-    @Test(dependsOnMethods = { "t_PostImpressionTomorrowQA" })
-    public void t_CheckEventsForYesterdayByBucketFromMySQLAllContext()
+    @Test(dependsOnMethods = {"postImpressionTomorrowQA"})
+    public void checkEventsForYesterdayByBucketFromMySQLAllContext()
             throws Exception {
 
         String queryGroupByBucket = "select bucket_label, "
@@ -341,7 +338,7 @@ public class RollUpTest extends TestBase {
                 + "' group by bucket_label";
 
         try (Statement statement = connection.createStatement();
-                ResultSet result = statement.executeQuery(queryGroupByBucket)) {
+             ResultSet result = statement.executeQuery(queryGroupByBucket)) {
             if (result.next()) {
                 String bucket = result.getString(BUCKET_LABEL);
                 int userCount = result.getInt(USER_COUNT);
@@ -357,8 +354,8 @@ public class RollUpTest extends TestBase {
         }
     }
 
-    @Test(dependsOnMethods = { "t_PostImpressionTomorrowQA" })
-    public void t_CheckEventsForYesterdayByBucketAndActionFromMySQLAllContext()
+    @Test(dependsOnMethods = {"postImpressionTomorrowQA"})
+    public void checkEventsForYesterdayByBucketAndActionFromMySQLAllContext()
             throws Exception {
 
         String queryGroupByBucketAndAction = "select bucket_label, action, "
@@ -369,8 +366,8 @@ public class RollUpTest extends TestBase {
                 + "' group by bucket_label, action";
 
         try (Statement statement = connection.createStatement();
-                ResultSet result = statement
-                        .executeQuery(queryGroupByBucketAndAction)) {
+             ResultSet result = statement
+                     .executeQuery(queryGroupByBucketAndAction)) {
             if (result.next()) {
                 String bucket = result.getString(BUCKET_LABEL);
                 int userCount = result.getInt(USER_COUNT);
@@ -386,8 +383,8 @@ public class RollUpTest extends TestBase {
         }
     }
 
-    @Test(dependsOnMethods = { "t_PostImpressionTomorrowQA" })
-    public void t_CheckImpressionForYesterdayByBucketFromMySQLAllContext()
+    @Test(dependsOnMethods = {"postImpressionTomorrowQA"})
+    public void checkImpressionForYesterdayByBucketFromMySQLAllContext()
             throws Exception {
 
         String queryGroupByBucket = "select bucket_label, "
@@ -397,7 +394,7 @@ public class RollUpTest extends TestBase {
                 + "' and timestamp = '" + this.yesterday
                 + "' group by bucket_label";
         try (Statement statement = connection.createStatement();
-                ResultSet result = statement.executeQuery(queryGroupByBucket)) {
+             ResultSet result = statement.executeQuery(queryGroupByBucket)) {
             int userCount = 0;
             int distinctUserCount = 0;
             boolean atLeastOneRow = false;
@@ -416,8 +413,8 @@ public class RollUpTest extends TestBase {
         }
     }
 
-    @Test(dependsOnMethods = { "t_PostImpressionTomorrowQA" })
-    public void t_CheckImpressionForYesterdayByBucketFromMySQLProdContext()
+    @Test(dependsOnMethods = {"postImpressionTomorrowQA"})
+    public void checkImpressionForYesterdayByBucketFromMySQLProdContext()
             throws Exception {
 
         String queryGroupByBucket = "select bucket_label, "
@@ -428,7 +425,7 @@ public class RollUpTest extends TestBase {
                 + "' group by bucket_label";
 
         try (Statement statement = connection.createStatement();
-                ResultSet result = statement.executeQuery(queryGroupByBucket)) {
+             ResultSet result = statement.executeQuery(queryGroupByBucket)) {
             int userCount = 0;
             int distinctUserCount = 0;
             boolean atLeastOneRow = false;
@@ -447,8 +444,8 @@ public class RollUpTest extends TestBase {
         }
     }
 
-    @Test(dependsOnMethods = { "t_PostImpressionTomorrowQA" })
-    public void t_CheckImpressionForYesterdayByBucketFromMySQLQAContext()
+    @Test(dependsOnMethods = {"postImpressionTomorrowQA"})
+    public void checkImpressionForYesterdayByBucketFromMySQLQAContext()
             throws Exception {
 
         String queryGroupByBucket = "select bucket_label, "
@@ -459,7 +456,7 @@ public class RollUpTest extends TestBase {
                 + "' group by bucket_label";
 
         try (Statement statement = connection.createStatement();
-                ResultSet result = statement.executeQuery(queryGroupByBucket)) {
+             ResultSet result = statement.executeQuery(queryGroupByBucket)) {
             if (result.next()) {
                 fail("Should have no rows for query: " + queryGroupByBucket);
             }
@@ -467,8 +464,8 @@ public class RollUpTest extends TestBase {
 
     }
 
-    @Test(dependsOnMethods = { "t_PostImpressionTomorrowQA" })
-    public void t_CheckImpressionForTomorrowByBucketFromMySQLProdContext()
+    @Test(dependsOnMethods = {"postImpressionTomorrowQA"})
+    public void checkImpressionForTomorrowByBucketFromMySQLProdContext()
             throws Exception {
         String queryGroupByBucket = "select bucket_label, "
                 + "count(user_id) as user_count, count(distinct user_id) as distinct_user_count  "
@@ -478,7 +475,7 @@ public class RollUpTest extends TestBase {
                 + "' group by bucket_label";
 
         try (Statement statement = connection.createStatement();
-                ResultSet result = statement.executeQuery(queryGroupByBucket)) {
+             ResultSet result = statement.executeQuery(queryGroupByBucket)) {
             if (result.next()) {
                 fail("Should have no rows for query: " + queryGroupByBucket);
             }
@@ -486,8 +483,8 @@ public class RollUpTest extends TestBase {
 
     }
 
-    @Test(dependsOnMethods = { "t_PostImpressionTomorrowQA" })
-    public void t_CheckEventsForTodayByBucketFromMySQLAllContext()
+    @Test(dependsOnMethods = {"postImpressionTomorrowQA"})
+    public void checkEventsForTodayByBucketFromMySQLAllContext()
             throws Exception {
 
         String queryGroupByBucket = "select bucket_label, "
@@ -498,12 +495,12 @@ public class RollUpTest extends TestBase {
                 + "' group by bucket_label";
 
         try (Statement statement = connection.createStatement();
-                ResultSet result = statement.executeQuery(queryGroupByBucket)) {
+             ResultSet result = statement.executeQuery(queryGroupByBucket)) {
             int userCount = 0;
             int distinctUserCount = 0;
             boolean atLeastOneRow = false;
             while (result.next()) {
-                String bucket = result.getString(BUCKET_LABEL);
+                result.getString(BUCKET_LABEL);
                 userCount += result.getInt(USER_COUNT);
                 distinctUserCount += result.getInt(DISTINCT_USER_COUNT);
                 atLeastOneRow = true;
@@ -517,8 +514,8 @@ public class RollUpTest extends TestBase {
         }
     }
 
-    @Test(dependsOnMethods = { "t_PostImpressionTomorrowQA" })
-    public void t_CheckEventsForTodayByBucketAndActionFromMySQLAllContext()
+    @Test(dependsOnMethods = {"postImpressionTomorrowQA"})
+    public void checkEventsForTodayByBucketAndActionFromMySQLAllContext()
             throws Exception {
 
         String queryGroupByBucketAndAction = "select bucket_label, action, "
@@ -529,8 +526,8 @@ public class RollUpTest extends TestBase {
                 + "' group by bucket_label, action";
 
         try (Statement statement = connection.createStatement();
-                ResultSet result = statement
-                        .executeQuery(queryGroupByBucketAndAction)) {
+             ResultSet result = statement
+                     .executeQuery(queryGroupByBucketAndAction)) {
             int userCount = 0;
             int distinctUserCount = 0;
             boolean atLeastOneRow = false;
@@ -550,8 +547,8 @@ public class RollUpTest extends TestBase {
         }
     }
 
-    @Test(dependsOnMethods = { "t_PostImpressionTomorrowQA" })
-    public void t_CheckEventsForTodayByBucketFromMySQLQAContext()
+    @Test(dependsOnMethods = {"postImpressionTomorrowQA"})
+    public void checkEventsForTodayByBucketFromMySQLQAContext()
             throws Exception {
 
         String queryGroupByBucket = "select bucket_label, "
@@ -561,7 +558,7 @@ public class RollUpTest extends TestBase {
                 + "' and context = 'QA' and timestamp = '" + this.today
                 + "' group by bucket_label";
         try (Statement statement = connection.createStatement();
-                ResultSet result = statement.executeQuery(queryGroupByBucket)) {
+             ResultSet result = statement.executeQuery(queryGroupByBucket)) {
             if (result.next()) {
                 fail("There should be no row expected for query: "
                         + queryGroupByBucket);
@@ -569,8 +566,8 @@ public class RollUpTest extends TestBase {
         }
     }
 
-    @Test(dependsOnMethods = { "t_PostImpressionTomorrowQA" })
-    public void t_CheckEventsForTodayByBucketAndActionFromMySQLQAContext()
+    @Test(dependsOnMethods = {"postImpressionTomorrowQA"})
+    public void checkEventsForTodayByBucketAndActionFromMySQLQAContext()
             throws Exception {
 
         String queryGroupByBucketAndAction = "select bucket_label, action, "
@@ -580,8 +577,8 @@ public class RollUpTest extends TestBase {
                 + "' and context = 'QA' and timestamp = '" + this.today
                 + "' group by bucket_label, action";
         try (Statement statement = connection.createStatement();
-                ResultSet result = statement
-                        .executeQuery(queryGroupByBucketAndAction)) {
+             ResultSet result = statement
+                     .executeQuery(queryGroupByBucketAndAction)) {
             if (result.next()) {
                 fail("There should be no row expected for query: "
                         + queryGroupByBucketAndAction);
@@ -589,8 +586,8 @@ public class RollUpTest extends TestBase {
         }
     }
 
-    @Test(dependsOnMethods = { "t_PostImpressionTomorrowQA" })
-    public void t_CheckEventsForTomorrowByBucketFromMySQLAllContext()
+    @Test(dependsOnMethods = {"postImpressionTomorrowQA"})
+    public void checkEventsForTomorrowByBucketFromMySQLAllContext()
             throws Exception {
 
         String queryGroupByBucket = "select bucket_label, "
@@ -600,12 +597,12 @@ public class RollUpTest extends TestBase {
                 + "' and timestamp = '" + this.tomorrow
                 + "' group by bucket_label";
         try (Statement statement = connection.createStatement();
-                ResultSet result = statement.executeQuery(queryGroupByBucket)) {
+             ResultSet result = statement.executeQuery(queryGroupByBucket)) {
             int userCount = 0;
             int distinctUserCount = 0;
             boolean atLeastOneRow = false;
             while (result.next()) {
-                String bucket = result.getString(BUCKET_LABEL);
+                result.getString(BUCKET_LABEL);
                 userCount += result.getInt(USER_COUNT);
                 distinctUserCount += result.getInt(DISTINCT_USER_COUNT);
                 atLeastOneRow = true;
@@ -619,8 +616,8 @@ public class RollUpTest extends TestBase {
         }
     }
 
-    @Test(dependsOnMethods = { "t_PostImpressionTomorrowQA" })
-    public void t_CheckEventsForTomorrowByBucketAndActionFromMySQLAllContext()
+    @Test(dependsOnMethods = {"postImpressionTomorrowQA"})
+    public void checkEventsForTomorrowByBucketAndActionFromMySQLAllContext()
             throws Exception {
 
         String queryGroupByBucketAndAction = "select bucket_label, action, "
@@ -630,8 +627,8 @@ public class RollUpTest extends TestBase {
                 + "' and timestamp = '" + this.tomorrow
                 + "' group by bucket_label, action";
         try (Statement statement = connection.createStatement();
-                ResultSet result = statement
-                        .executeQuery(queryGroupByBucketAndAction)) {
+             ResultSet result = statement
+                     .executeQuery(queryGroupByBucketAndAction)) {
             int userCount = 0;
             int distinctUserCount = 0;
             boolean atLeastOneRow = false;
@@ -640,9 +637,7 @@ public class RollUpTest extends TestBase {
                 userCount += result.getInt(USER_COUNT);
                 distinctUserCount += result.getInt(DISTINCT_USER_COUNT);
                 atLeastOneRow = true;
-                if (RED.equals(bucket) || BLUE.equals(bucket)) {
-                    // ok
-                } else {
+                if (!(RED.equals(bucket) || BLUE.equals(bucket))) {
                     fail("Bucket should be red or blue " + bucket);
                 }
             }
@@ -655,8 +650,8 @@ public class RollUpTest extends TestBase {
         }
     }
 
-    @Test(dependsOnMethods = { "t_PostImpressionTomorrowQA" })
-    public void t_CheckImpressionForTodayByBucketFromMySQLAllContext()
+    @Test(dependsOnMethods = {"postImpressionTomorrowQA"})
+    public void checkImpressionForTodayByBucketFromMySQLAllContext()
             throws Exception {
 
         String queryGroupByBucket = "select bucket_label, "
@@ -666,15 +661,15 @@ public class RollUpTest extends TestBase {
                 + "' and timestamp = '" + this.today
                 + "' group by bucket_label";
         try (Statement statement = connection.createStatement();
-                ResultSet result = statement.executeQuery(queryGroupByBucket)) {
+             ResultSet result = statement.executeQuery(queryGroupByBucket)) {
             if (result.next()) {
                 fail("should be no impressions for today " + queryGroupByBucket);
             }
         }
     }
 
-    @Test(dependsOnMethods = { "t_PostImpressionTomorrowQA" })
-    public void t_CheckImpressionForTomorrowByBucketFromMySQLAllContext()
+    @Test(dependsOnMethods = {"postImpressionTomorrowQA"})
+    public void checkImpressionForTomorrowByBucketFromMySQLAllContext()
             throws Exception {
 
         String queryGroupByBucket = "select bucket_label, "
@@ -684,12 +679,12 @@ public class RollUpTest extends TestBase {
                 + "' and timestamp = '" + this.tomorrow
                 + "' group by bucket_label";
         try (Statement statement = connection.createStatement();
-                ResultSet result = statement.executeQuery(queryGroupByBucket)) {
+             ResultSet result = statement.executeQuery(queryGroupByBucket)) {
             int userCount = 0;
             int distinctUserCount = 0;
             boolean atLeastOneRow = false;
             while (result.next()) {
-                String bucket = result.getString(BUCKET_LABEL);
+                result.getString(BUCKET_LABEL);
                 userCount += result.getInt(USER_COUNT);
                 distinctUserCount += result.getInt(DISTINCT_USER_COUNT);
                 atLeastOneRow = true;
@@ -703,8 +698,8 @@ public class RollUpTest extends TestBase {
         }
     }
 
-    @Test(dependsOnMethods = { "t_PostImpressionTomorrowQA" })
-    public void t_PostRollUpsForTomorrow() throws Exception {
+    @Test(dependsOnMethods = {"postImpressionTomorrowQA"})
+    public void postRollUpsForTomorrow() throws Exception {
 
         AnalyticsParameters paramsQA = new AnalyticsParameters();
         paramsQA.confidenceLevel = .9999999d;
@@ -919,8 +914,8 @@ public class RollUpTest extends TestBase {
 
         try (Statement statementActionByBucketActionContext = connection
                 .createStatement();
-                ResultSet resultActionByBucketActionContext = statementActionByBucketActionContext
-                        .executeQuery(queryActionByBucketActionContext)) {
+             ResultSet resultActionByBucketActionContext = statementActionByBucketActionContext
+                     .executeQuery(queryActionByBucketActionContext)) {
             while (resultActionByBucketActionContext.next()) {
                 String bucket = resultActionByBucketActionContext
                         .getString(BUCKET_LABEL);
@@ -1099,8 +1094,8 @@ public class RollUpTest extends TestBase {
 
         try (Statement statementActionByBucketActionContextCumulative = connection
                 .createStatement();
-                ResultSet resultActionByBucketActionContextCumulative = statementActionByBucketActionContextCumulative
-                        .executeQuery(queryActionByBucketActionContextCumulative)) {
+             ResultSet resultActionByBucketActionContextCumulative = statementActionByBucketActionContextCumulative
+                     .executeQuery(queryActionByBucketActionContextCumulative)) {
 
             while (resultActionByBucketActionContextCumulative.next()) {
                 String bucket = resultActionByBucketActionContextCumulative
@@ -1127,15 +1122,15 @@ public class RollUpTest extends TestBase {
 
     private void insertIntoRollUp(String rollUpQuery) throws SQLException {
         try (Statement statement = connection.createStatement();
-                ResultSet resultSet = statement.executeQuery(rollUpQuery)) {
+             ResultSet resultSet = statement.executeQuery(rollUpQuery)) {
         }
     }
 
     private int[] getUserAndDistinctUserCount(Connection connection,
-            String query) throws SQLException {
+                                              String query) throws SQLException {
 
         try (Statement statement = connection.createStatement();
-                ResultSet result = statement.executeQuery(query)) {
+             ResultSet result = statement.executeQuery(query)) {
 
             if (!result.next())
                 fail("Should have at least one row for query " + query);
@@ -1143,7 +1138,7 @@ public class RollUpTest extends TestBase {
             int userCount = result.getInt(USER_COUNT);
             int distinctUserCount = result.getInt(DISTINCT_USER_COUNT);
 
-            return new int[] { userCount, distinctUserCount };
+            return new int[]{userCount, distinctUserCount};
         }
     }
 

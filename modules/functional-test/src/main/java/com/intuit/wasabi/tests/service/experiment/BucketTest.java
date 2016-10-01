@@ -73,7 +73,7 @@ public class BucketTest extends TestBase {
     }
 
     @Test(dependsOnGroups = {"ping"})
-    public void t_CreateThreeBuckets() {
+    public void createThreeBuckets() {
         Experiment exp = postExperiment(experiment);
         Assert.assertNotNull(exp.creationTime, "Experiment creation failed (No creationTime).");
         Assert.assertNotNull(exp.modificationTime, "Experiment creation failed (No modificationTime).");
@@ -91,7 +91,9 @@ public class BucketTest extends TestBase {
                     matching = cand;
                     break;
                 }
-
+            }
+            if (null == matching) {
+                Assert.fail("No matching bucket found.");
             }
             assertEquals(result.label, matching.label);
             assertEquals(result.isControl, matching.isControl);
@@ -101,7 +103,7 @@ public class BucketTest extends TestBase {
     }
 
     @Test(dependsOnGroups = {"ping"})
-    public void t_CreateThreeBucketsWithIsControlToggle() {
+    public void createThreeBucketsWithIsControlToggle() {
         Experiment experimentLocal = ExperimentFactory.createExperiment();
         experimentLocal = postExperiment(experimentLocal);
 
@@ -110,23 +112,26 @@ public class BucketTest extends TestBase {
         boolean[] control = {false, true, false};
         List<Bucket> buckets = BucketFactory.createCompleteBuckets(experimentLocal, allocations, labels, control);
         List<Bucket> resultBuckets = postBuckets(buckets);
-        for (Bucket bucket : resultBuckets)
+        for (Bucket bucket : resultBuckets) {
             bucket.isControl = true;
+        }
 
         List<Bucket> resultAfterIsControl = putBuckets(resultBuckets);
         int isControl = 0;
-        for (Bucket bucket : resultAfterIsControl)
-            if (bucket.isControl)
+        for (Bucket bucket : resultAfterIsControl) {
+            if (bucket.isControl) {
                 isControl++;
+            }
+        }
 
         assertEquals(isControl, 3);
 
         experimentLocal.state = EXPERIMENT_STATE_RUNNING;
-        experimentLocal = putExperiment(experimentLocal);
+        putExperiment(experimentLocal);
     }
 
-    @Test(dependsOnMethods = {"t_CreateThreeBuckets"})
-    public void t_ChangeControl() {
+    @Test(dependsOnMethods = {"createThreeBuckets"})
+    public void changeControl() {
         List<Bucket> resultBuckets = getBuckets(experiment);
 
         Assert.assertEquals(buckets, resultBuckets);
@@ -140,14 +145,18 @@ public class BucketTest extends TestBase {
                 }
 
             }
+            if (null == matching) {
+                Assert.fail("No matching bucket found.");
+            }
             assertEquals(result.label, matching.label);
             assertEquals(result.isControl, matching.isControl);
             assertEquals(result.allocationPercent, matching.allocationPercent);
             assertEquals(result.description, matching.description);
-            if (result.label.equals("white"))
+            if (result.label.equals("white")) {
                 assertEquals(true, result.isControl);
-            else
+            } else {
                 assertEquals(false, result.isControl);
+            }
         }
 
         Bucket newIsControlBucket = resultBuckets.get(0);
@@ -166,6 +175,9 @@ public class BucketTest extends TestBase {
                 }
 
             }
+            if (null == matching) {
+                Assert.fail("No matching bucket found.");
+            }
             assertEquals(result.label, matching.label);
             assertEquals(result.allocationPercent, matching.allocationPercent);
             assertEquals(result.description, matching.description);
@@ -176,8 +188,8 @@ public class BucketTest extends TestBase {
         }
     }
 
-    @Test(dependsOnMethods = {"t_ChangeControl"})
-    public void t_ChangeDescription() {
+    @Test(dependsOnMethods = {"changeControl"})
+    public void changeDescription() {
         List<Bucket> resultBuckets = getBuckets(experiment);
 
         Bucket newUpdatedBucket = resultBuckets.get(0);
@@ -195,14 +207,17 @@ public class BucketTest extends TestBase {
             }
 
         }
+        if (null == matching) {
+            Assert.fail("No matching bucket found.");
+        }
         assertEquals(resultOfPut.label, matching.label);
         assertEquals(resultOfPut.allocationPercent, matching.allocationPercent);
         assertEquals(resultOfPut.description, matching.description);
         assertEquals(resultOfPut.isControl, matching.isControl);
     }
 
-    @Test(dependsOnMethods = {"t_ChangeDescription"})
-    public void t_ChangePayload() {
+    @Test(dependsOnMethods = {"changeDescription"})
+    public void changePayload() {
         List<Bucket> resultBuckets = getBuckets(experiment);
 
         Bucket newUpdatedBucket = resultBuckets.get(0);
@@ -212,22 +227,25 @@ public class BucketTest extends TestBase {
 
         List<Bucket> resultBucketsAfterChange = getBuckets(experiment);
 
+        Bucket matching = null;
         for (Bucket result : resultBucketsAfterChange) {
-            Bucket matching = null;
             if (result.label.equals(resultOfPut.label)) {
-                matching = newUpdatedBucket;
+                matching = result;
                 break;
             }
 
         }
-        assertEquals(resultOfPut.label, newUpdatedBucket.label);
-        assertEquals(resultOfPut.allocationPercent, newUpdatedBucket.allocationPercent);
-        assertEquals(resultOfPut.description, newUpdatedBucket.description);
-        assertEquals(resultOfPut.isControl, newUpdatedBucket.isControl);
+        if (null == matching) {
+            Assert.fail("No matching bucket found.");
+        }
+        assertEquals(matching.label, newUpdatedBucket.label);
+        assertEquals(matching.allocationPercent, newUpdatedBucket.allocationPercent);
+        assertEquals(matching.description, newUpdatedBucket.description);
+        assertEquals(matching.isControl, newUpdatedBucket.isControl);
     }
 
-    @Test(dependsOnMethods = {"t_ChangeControl"})
-    public void t_CreateJunkBucketAndDelete() {
+    @Test(dependsOnMethods = {"changeControl"})
+    public void createJunkBucketAndDelete() {
         Bucket junkBucket = BucketFactory.createBucket(experiment);
         junkBucket.setLabel("muwaahhahhhahhello").setAllocationPercent(.99).setControl(true).
                 setDescription("junk").setPayload("junk payload");
@@ -247,7 +265,9 @@ public class BucketTest extends TestBase {
                 }
 
             }
-
+            if (null == matching) {
+                Assert.fail("No matching bucket found.");
+            }
             assertEquals(result.label, matching.label);
             assertEquals(result.allocationPercent, matching.allocationPercent);
             assertEquals(result.payload, matching.payload);
@@ -267,35 +287,35 @@ public class BucketTest extends TestBase {
 
     }
 
-    @Test(dependsOnMethods = {"t_CreateThreeBuckets"})
-    public void t_CreateDuplicateBucket() {
+    @Test(dependsOnMethods = {"createThreeBuckets"})
+    public void createDuplicateBucket() {
         Bucket junkBucket = BucketFactory.createBucket(experiment);
         junkBucket.setLabel("white").setAllocationPercent(.99).setControl(true).
                 setDescription("junk").setPayload("junk payload");
         junkBucket.setState(BUCKET_STATE_OPEN);
-        Bucket junkBucketResult = postBucket(junkBucket, HttpStatus.SC_BAD_REQUEST);
+        postBucket(junkBucket, HttpStatus.SC_BAD_REQUEST);
     }
 
-    @Test(dependsOnMethods = {"t_CreateThreeBuckets"})
-    public void t_CreateBadAllocationBucketLessThanZero() {
+    @Test(dependsOnMethods = {"createThreeBuckets"})
+    public void createBadAllocationBucketLessThanZero() {
         Bucket junkBucket1 = BucketFactory.createBucket(experiment);
         junkBucket1.setLabel("orange1").setAllocationPercent(-.01).setControl(true).
                 setDescription("junk").setPayload("junk payload");
         junkBucket1.setState(BUCKET_STATE_OPEN);
-        Bucket junkBucketResult1 = postBucket(junkBucket1, HttpStatus.SC_BAD_REQUEST);
+        postBucket(junkBucket1, HttpStatus.SC_BAD_REQUEST);
     }
 
-    @Test(dependsOnMethods = {"t_CreateBadAllocationBucketLessThanZero"})
-    public void t_CreateBadAllocationBucketGreaterThan1() {
+    @Test(dependsOnMethods = {"createBadAllocationBucketLessThanZero"})
+    public void createBadAllocationBucketGreaterThan1() {
         Bucket junkBucket2 = BucketFactory.createBucket(experiment);
         junkBucket2.setLabel("orange2").setAllocationPercent(1.01).setControl(true).
                 setDescription("junk").setPayload("junk payload");
         junkBucket2.setState(BUCKET_STATE_OPEN);
-        Bucket junkBucketResult = postBucket(junkBucket2, HttpStatus.SC_BAD_REQUEST);
+        postBucket(junkBucket2, HttpStatus.SC_BAD_REQUEST);
     }
 
-    @Test(dependsOnMethods = {"t_CreateThreeBuckets"})
-    public void t_CreateBadBucketUsingJson() {
+    @Test(dependsOnMethods = {"createThreeBuckets"})
+    public void createBadBucketUsingJson() {
         String url = "/experiments/" + experiment.id + "/buckets";
         String data = "{}";
         response = apiServerConnector.doPost(url, data);
@@ -315,8 +335,8 @@ public class BucketTest extends TestBase {
 
     }
 
-    @Test(dependsOnMethods = {"t_CreateThreeBuckets"})
-    public void t_DeleteBadBucketUsingJson() {
+    @Test(dependsOnMethods = {"createThreeBuckets"})
+    public void deleteBadBucketUsingJson() {
         String url = "/experiments/unknownexperiment/buckets";
         response = apiServerConnector.doDelete(url);
         assertReturnCode(response, HttpStatus.SC_INTERNAL_SERVER_ERROR);
@@ -330,8 +350,8 @@ public class BucketTest extends TestBase {
         assertReturnCode(response, HttpStatus.SC_NOT_FOUND);
     }
 
-    @Test(dependsOnMethods = {"t_CreateThreeBuckets"})
-    public void t_UpdateBucketAfterExperimentRunning() {
+    @Test(dependsOnMethods = {"createThreeBuckets"})
+    public void updateBucketAfterExperimentRunning() {
         Bucket junkBucket1 = BucketFactory.createBucket(experiment);
         junkBucket1.setLabel("orange1").setAllocationPercent(-.01).setControl(true).
                 setDescription("junk").setPayload("junk payload");
@@ -345,56 +365,56 @@ public class BucketTest extends TestBase {
         postBucket(junkBucket2, HttpStatus.SC_BAD_REQUEST);
     }
 
-    @Test(dependsOnMethods = {"t_CreateThreeBuckets"})
-    public void t_UpdateBucketsWithNoChange() {
+    @Test(dependsOnMethods = {"createThreeBuckets"})
+    public void updateBucketsWithNoChange() {
         List<Bucket> bucketResults = putBuckets(buckets, HttpStatus.SC_OK);
         assertEquals(bucketResults.size(), 3);
         assertEquals(bucketResults, buckets);
     }
 
-    @Test(dependsOnMethods = {"t_CreateThreeBuckets"})
-    public void t_UpdateBadAllocationBucketLessThanZero() {
+    @Test(dependsOnMethods = {"createThreeBuckets"})
+    public void updateBadAllocationBucketLessThanZero() {
         Bucket junkBucket1 = BucketFactory.createBucket(experiment);
         junkBucket1.setLabel("blue").setAllocationPercent(-.01).setControl(true).
                 setDescription("junk").setPayload("junk payload");
         junkBucket1.setState(BUCKET_STATE_OPEN);
-        Bucket junkBucketResult1 = putBucket(junkBucket1, HttpStatus.SC_BAD_REQUEST);
+        putBucket(junkBucket1, HttpStatus.SC_BAD_REQUEST);
     }
 
-    @Test(dependsOnMethods = {"t_CreateThreeBuckets"}, groups = {"basicBucketTests"})
-    public void t_UpdateBadAllocationBucketGreaterThan1() {
+    @Test(dependsOnMethods = {"createThreeBuckets"}, groups = {"basicBucketTests"})
+    public void updateBadAllocationBucketGreaterThan1() {
         Bucket junkBucket1 = BucketFactory.createBucket(experiment);
         junkBucket1.setLabel("blue").setAllocationPercent(1.01).setControl(true).
                 setDescription("junk").setPayload("junk payload");
         junkBucket1.setState(BUCKET_STATE_OPEN);
-        Bucket junkBucketResult1 = putBucket(junkBucket1, HttpStatus.SC_BAD_REQUEST);
+        putBucket(junkBucket1, HttpStatus.SC_BAD_REQUEST);
     }
 
     @Test(dependsOnGroups = {"ping"})
-    public void t_UpdateInvalidBucket() {
+    public void updateInvalidBucket() {
         Experiment exp = ExperimentFactory.createCompleteExperiment();
         postExperiment(exp);
         Bucket junkBucket = BucketFactory.createBucket(experiment);
         junkBucket.setLabel("0").setAllocationPercent(.5);
-        Bucket junkBucketResult = postBucket(junkBucket, HttpStatus.SC_BAD_REQUEST);
+        postBucket(junkBucket, HttpStatus.SC_BAD_REQUEST);
     }
 
-    @Test(dependsOnMethods = {"t_CreateThreeBuckets"})
-    public void t_UpdateUnknownBucket() {
+    @Test(dependsOnMethods = {"createThreeBuckets"})
+    public void updateUnknownBucket() {
         Bucket junkBucket = BucketFactory.createBucket(experiment);
         junkBucket.setLabel("unknown" + UUID.randomUUID()).setAllocationPercent(-.01);
-        Bucket junkBucketResult = postBucket(junkBucket, HttpStatus.SC_BAD_REQUEST);
+        postBucket(junkBucket, HttpStatus.SC_BAD_REQUEST);
     }
 
-    @Test(dependsOnMethods = {"t_CreateJunkBucketAndDelete"})
-    public void t_SetExperimentStateToRunning() {
+    @Test(dependsOnMethods = {"createJunkBucketAndDelete"})
+    public void setExperimentStateToRunning() {
         experiment.state = "RUNNING";
         experiment = putExperiment(experiment);
         assertEquals(EXPERIMENT_STATE_RUNNING, experiment.state);
     }
 
-    @Test(dependsOnMethods = {"t_SetExperimentStateToRunning"})
-    public void t_SetBucketStateToClosed() {
+    @Test(dependsOnMethods = {"setExperimentStateToRunning"})
+    public void setBucketStateToClosed() {
         List<Bucket> resultBuckets = getBuckets(experiment);
 
         Bucket newUpdatedBucket = resultBuckets.get(0);
@@ -415,8 +435,8 @@ public class BucketTest extends TestBase {
 
     }
 
-    @Test(dependsOnMethods = {"t_SetBucketStateToClosed"})
-    public void t_TerminateThreeBucketExperimentExperiment() {
+    @Test(dependsOnMethods = {"setBucketStateToClosed"})
+    public void terminateThreeBucketExperimentExperiment() {
         experiment.state = EXPERIMENT_STATE_TERMINATED;
         experiment = putExperiment(experiment);
         assertEquals(EXPERIMENT_STATE_TERMINATED, experiment.state);
@@ -425,8 +445,8 @@ public class BucketTest extends TestBase {
 
     }
 
-    @Test(dependsOnMethods = {"t_TerminateThreeBucketExperimentExperiment"})
-    public void t_DeleteThreeBucketExperimentExperiment() {
+    @Test(dependsOnMethods = {"terminateThreeBucketExperimentExperiment"})
+    public void deleteThreeBucketExperimentExperiment() {
         experiment.state = EXPERIMENT_STATE_DELETED;
         experiment = putExperiment(experiment, HttpStatus.SC_NO_CONTENT);
         assertEquals(experiment.state, null);
@@ -434,7 +454,7 @@ public class BucketTest extends TestBase {
     }
 
     @Test(dependsOnGroups = {"ping"})
-    public void t_CreateExperimentAllocation1SuccessOnRunningExperiment() {
+    public void createExperimentAllocation1SuccessOnRunningExperiment() {
         Experiment newExperiment = ExperimentFactory.createExperiment();
         newExperiment = postExperiment(newExperiment);
 
@@ -463,7 +483,7 @@ public class BucketTest extends TestBase {
     }
 
     @Test(dependsOnGroups = {"ping"})
-    public void t_CreateExperimentWithAllAttributesOfBuckets() {
+    public void createExperimentWithAllAttributesOfBuckets() {
         Experiment newExperiment = ExperimentFactory.createExperiment();
         newExperiment = postExperiment(newExperiment);
 
@@ -490,7 +510,7 @@ public class BucketTest extends TestBase {
         terminateAndDelete(newExperiment);
     }
 
-    protected void terminateAndDelete(Experiment experiment) {
+    private void terminateAndDelete(Experiment experiment) {
         experiment.state = EXPERIMENT_STATE_TERMINATED;
         putExperiment(experiment);
         experiment.state = EXPERIMENT_STATE_DELETED;
@@ -498,7 +518,7 @@ public class BucketTest extends TestBase {
     }
 
     @Test(dependsOnGroups = {"ping"})
-    public void t_CreateExperimentAllocationLessThan1FailureOnRunningExperiment() {
+    public void createExperimentAllocationLessThan1FailureOnRunningExperiment() {
         Experiment newExperiment = ExperimentFactory.createExperiment();
         newExperiment = postExperiment(newExperiment);
 
@@ -514,7 +534,7 @@ public class BucketTest extends TestBase {
     }
 
     @Test(dependsOnGroups = {"ping"})
-    public void t_CreateExperimentAllocationGreaterThan1FailureOnRunningExperiment() {
+    public void createExperimentAllocationGreaterThan1FailureOnRunningExperiment() {
         Experiment newExperiment = ExperimentFactory.createExperiment();
         newExperiment = postExperiment(newExperiment);
 
@@ -530,7 +550,7 @@ public class BucketTest extends TestBase {
     }
 
     @Test(dependsOnGroups = {"ping"})
-    public void t_CreateExperimentWithSingleBucketAndCloseState() {
+    public void createExperimentWithSingleBucketAndCloseState() {
         Experiment newExperiment = ExperimentFactory.createExperiment();
         newExperiment.samplingPercent = 1.0;
         newExperiment = postExperiment(newExperiment);
@@ -547,7 +567,7 @@ public class BucketTest extends TestBase {
         putExperiment(newExperiment, HttpStatus.SC_OK);
 
         User user = UserFactory.createUser("u1");
-        Assignment assignment = getAssignment(newExperiment, user);
+        getAssignment(newExperiment, user);
 
         List<Assignment> assignments = getAssignments(newExperiment);
         assertEquals(assignments.size(), 1);
@@ -569,7 +589,7 @@ public class BucketTest extends TestBase {
     }
 
     @Test(dependsOnGroups = {"ping"})
-    public void t_CreateExperimentWithSingleBucketAndEmptyState() {
+    public void createExperimentWithSingleBucketAndEmptyState() {
         Experiment newExperiment = ExperimentFactory.createExperiment();
         String[] labels = {"blue"};
         double[] allocations = {1.0};
@@ -583,7 +603,7 @@ public class BucketTest extends TestBase {
         newExperiment.state = EXPERIMENT_STATE_RUNNING;
         putExperiment(newExperiment, HttpStatus.SC_OK);
         User user = UserFactory.createUser("u1");
-        Assignment assignment = getAssignment(newExperiment, user);
+        getAssignment(newExperiment, user);
 
         List<Assignment> assignments = getAssignments(newExperiment);
         assertEquals(assignments.size(), 1);
@@ -605,7 +625,7 @@ public class BucketTest extends TestBase {
     }
 
     @Test(dependsOnGroups = {"ping"})
-    public void t_UpdateBucketDescriptionOnRunningExperimentAllowed() {
+    public void updateBucketDescriptionOnRunningExperimentAllowed() {
         Experiment newExperiment = ExperimentFactory.createExperiment();
         String[] labels = {"blue", "red", "black"};
         double[] allocations = {.40, .30, 0.30};
@@ -627,7 +647,7 @@ public class BucketTest extends TestBase {
     }
 
     @Test(dependsOnGroups = {"ping"})
-    public void t_UpdateMultipleBucketsUsingJson() {
+    public void updateMultipleBucketsUsingJson() {
         Experiment newExperiment = ExperimentFactory.createExperiment();
         String[] labels = {"blue", "red", "black"};
         double[] allocations = {.40, .30, 0.30};
@@ -659,7 +679,7 @@ public class BucketTest extends TestBase {
     }
 
     @Test(dependsOnGroups = {"ping"})
-    public void t_GetAssignmentsForUser() {
+    public void getAssignmentsForUser() {
         Experiment newExperiment = ExperimentFactory.createExperiment();
         String[] labels = {"blue", "red", "black"};
         double[] allocations = {.40, .30, 0.30};
@@ -681,7 +701,7 @@ public class BucketTest extends TestBase {
     }
 
     @Test(dependsOnGroups = {"ping"})
-    public void t_GetAssignmentsForUserWithClosedBucket() {
+    public void getAssignmentsForUserWithClosedBucket() {
         Experiment newExperiment = ExperimentFactory.createExperiment();
         String[] labels = {"blue"};
         double[] allocations = {1.0};
@@ -707,7 +727,7 @@ public class BucketTest extends TestBase {
     }
 
     @Test(dependsOnGroups = {"ping"})
-    public void t_UpdateBucketPayloadOnRunningExperimentAllowed() {
+    public void updateBucketPayloadOnRunningExperimentAllowed() {
         Experiment newExperiment = ExperimentFactory.createExperiment();
         String[] labels = {"blue", "red", "black"};
         double[] allocations = {.40, .30, 0.30};
@@ -728,7 +748,7 @@ public class BucketTest extends TestBase {
     }
 
     @Test(dependsOnGroups = {"ping"})
-    public void t_UpdateBucketStateOnRunningExperimentNotAllowed() {
+    public void updateBucketStateOnRunningExperimentNotAllowed() {
         Experiment newExperiment = ExperimentFactory.createExperiment();
         String[] labels = {"blue", "red", "black"};
         double[] allocations = {.40, .30, 0.30};
@@ -742,7 +762,7 @@ public class BucketTest extends TestBase {
 
         Bucket changingBucket1 = buckets.get(1);
         changingBucket1.state = BUCKET_STATE_CLOSED;
-        Bucket changingBucket1after = putBucket(changingBucket1, HttpStatus.SC_BAD_REQUEST);
+        putBucket(changingBucket1, HttpStatus.SC_BAD_REQUEST);
 
         Bucket bucketAfterChange = getBucket(changingBucket1);
         assertEquals(bucketAfterChange.state, BUCKET_STATE_OPEN);
@@ -751,7 +771,7 @@ public class BucketTest extends TestBase {
     }
 
     @Test(dependsOnGroups = {"ping"})
-    public void t_UpdateBucketLabelOnRunningExperimentNotAllowed() {
+    public void updateBucketLabelOnRunningExperimentNotAllowed() {
         Experiment newExperiment = ExperimentFactory.createExperiment();
         String[] labels = {"blue", "red", "black"};
         double[] allocations = {.40, .30, 0.30};

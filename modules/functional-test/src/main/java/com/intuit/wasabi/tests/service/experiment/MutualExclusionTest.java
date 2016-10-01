@@ -62,7 +62,7 @@ public class MutualExclusionTest extends TestBase {
      * Tests mutual exclusions.
      */
     @Test(dependsOnGroups = {"ping"})
-    public void t_testMutualExclusion() {
+    public void testMutualExclusion() {
         ArrayList<Experiment> experiments = new ArrayList<>(Constants.EXP_SPAWN_COUNT);
 
         LOGGER.info("Testing mutual exclusion functionality...");
@@ -122,7 +122,7 @@ public class MutualExclusionTest extends TestBase {
      * Prepares the assignments test.
      */
     @Test(dependsOnGroups = {"ping"})
-    public void t_prepareTestMutualExclusionAssignments() {
+    public void prepareTestMutualExclusionAssignments() {
         experimentEx1 = postExperiment(ExperimentFactory.createExperiment());
         toCleanUp.add(experimentEx1);
         experimentEx2 = postExperiment(ExperimentFactory.createExperiment());
@@ -136,9 +136,9 @@ public class MutualExclusionTest extends TestBase {
     /**
      * Checks if the mutual exclusions are correct.
      */
-    @Test(dependsOnMethods = {"t_prepareTestMutualExclusionAssignments"}, retryAnalyzer = RetryAnalyzer.class)
+    @Test(dependsOnMethods = {"prepareTestMutualExclusionAssignments"}, retryAnalyzer = RetryAnalyzer.class)
     @RetryTest(warmup = 1000, maxTries = 3)
-    public void t_checkMutualExclusions() {
+    public void checkMutualExclusions() {
         Assert.assertTrue(getExclusions(experimentEx1).contains(experimentEx2), "Experiment 1 should be mutual exclusive with Experiment 2.");
         Assert.assertTrue(getExclusions(experimentEx2).contains(experimentEx1), "Experiment 2 should be mutual exclusive with Experiment 1.");
     }
@@ -146,8 +146,8 @@ public class MutualExclusionTest extends TestBase {
     /**
      * Prepares buckets for the assignment test.
      */
-    @Test(dependsOnMethods = {"t_prepareTestMutualExclusionAssignments"})
-    public void t_prepareBucketsForMutualExclusionAssignment() {
+    @Test(dependsOnMethods = {"prepareTestMutualExclusionAssignments"})
+    public void prepareBucketsForMutualExclusionAssignment() {
         postBucket(BucketFactory.createBucket(experimentEx1).setAllocationPercent(1));
         postBucket(BucketFactory.createBucket(experimentEx2).setAllocationPercent(1));
         postBucket(BucketFactory.createBucket(experimentNonEx).setAllocationPercent(1));
@@ -156,9 +156,9 @@ public class MutualExclusionTest extends TestBase {
     /**
      * Starts experiments.
      */
-    @Test(dependsOnMethods = {"t_prepareBucketsForMutualExclusionAssignment"}, retryAnalyzer = RetryAnalyzer.class)
+    @Test(dependsOnMethods = {"prepareBucketsForMutualExclusionAssignment"}, retryAnalyzer = RetryAnalyzer.class)
     @RetryTest(maxTries = 3, warmup = 1000)
-    public void t_startExperimentsForMutualExclusionAssignment() {
+    public void startExperimentsForMutualExclusionAssignment() {
         experimentEx1.setState(Constants.EXPERIMENT_STATE_RUNNING);
         experimentEx1 = putExperiment(experimentEx1);
         Experiment got = getExperiment(experimentEx1);
@@ -181,8 +181,8 @@ public class MutualExclusionTest extends TestBase {
      * around as well, which should not work.
      * Additionally both users are assigned to the non-mutual exclusive experiment, which should always work.
      */
-    @Test(dependsOnMethods = {"t_startExperimentsForMutualExclusionAssignment"})
-    public void t_mutualExclusionAssignment() {
+    @Test(dependsOnMethods = {"startExperimentsForMutualExclusionAssignment"})
+    public void mutualExclusionAssignment() {
         user1 = UserFactory.createUser();
         user2 = UserFactory.createUser();
 
@@ -198,8 +198,8 @@ public class MutualExclusionTest extends TestBase {
     /**
      * Assigns users to non-mutual experiments.
      */
-    @Test(dependsOnMethods = {"t_mutualExclusionAssignment"})
-    public void t_nonMutualExclusionAssignment() {
+    @Test(dependsOnMethods = {"mutualExclusionAssignment"})
+    public void nonMutualExclusionAssignment() {
         Assignment assignmentNonExU1 = postAssignment(experimentNonEx, user1);
         Assert.assertNotNull(assignmentNonExU1.assignment);
         Assert.assertTrue(Arrays.asList(Constants.ASSIGNMENT_NEW_ASSIGNMENT, Constants.ASSIGNMENT_EXISTING_ASSIGNMENT).contains(assignmentNonExU1.status));
@@ -212,8 +212,8 @@ public class MutualExclusionTest extends TestBase {
     /**
      * Checks if the assignments were placed correctly.
      */
-    @Test(dependsOnMethods = {"t_mutualExclusionAssignment"})
-    public void t_checkExistingAssignments() {
+    @Test(dependsOnMethods = {"mutualExclusionAssignment"})
+    public void checkExistingAssignments() {
         Assignment assignmentEx1U1 = postAssignment(experimentEx1, user1);
         Assert.assertNotNull(assignmentEx1U1.assignment);
         Assert.assertEquals(assignmentEx1U1.status, Constants.ASSIGNMENT_EXISTING_ASSIGNMENT);
@@ -225,8 +225,8 @@ public class MutualExclusionTest extends TestBase {
     /**
      * Checks if an assignment for mutual exclusive experiments can happen.
      */
-    @Test(dependsOnMethods = {"t_checkExistingAssignments"})
-    public void t_mutualExclusionAssignmentFail() {
+    @Test(dependsOnMethods = {"checkExistingAssignments"})
+    public void mutualExclusionAssignmentFail() {
         Assignment assignmentEx2U1 = postAssignment(experimentEx2, user1);
         Assert.assertNull(assignmentEx2U1.assignment);
         Assert.assertEquals(assignmentEx2U1.status, Constants.ASSIGNMENT_NEW_ASSIGNMENT);
@@ -238,16 +238,16 @@ public class MutualExclusionTest extends TestBase {
     /**
      * Deletes the mutex between experimentEx1 and experimentEx2
      */
-    @Test(dependsOnMethods = {"t_mutualExclusionAssignmentFail"})
-    public void t_deleteMutualExclusion() {
+    @Test(dependsOnMethods = {"mutualExclusionAssignmentFail"})
+    public void deleteMutualExclusion() {
         deleteExclusion(experimentEx1, experimentEx2);
     }
 
     /**
      * Retries assignments for users to previously mutual-exclusive assignments, should return the same results as before.
      */
-    @Test(dependsOnMethods = {"t_deleteMutualExclusion"})
-    public void t_reassignToNotMutexAnymore() {
+    @Test(dependsOnMethods = {"deleteMutualExclusion"})
+    public void reassignToNotMutexAnymore() {
         // Ex 1 U 1
         Assignment assignmentEx1U1 = postAssignment(experimentEx1, user1);
         Assert.assertNotNull(assignmentEx1U1.assignment);
@@ -272,8 +272,8 @@ public class MutualExclusionTest extends TestBase {
     /**
      * Tries to assign a new user to previously mutual-exclusive assignments.
      */
-    @Test(dependsOnMethods = {"t_deleteMutualExclusion"})
-    public void t_assignToNotMutexAnymore() {
+    @Test(dependsOnMethods = {"deleteMutualExclusion"})
+    public void assignToNotMutexAnymore() {
         User user = UserFactory.createUser();
         Assignment assignmentEx2U1 = postAssignment(experimentEx2, user);
         Assert.assertNotNull(assignmentEx2U1.assignment);
@@ -288,7 +288,7 @@ public class MutualExclusionTest extends TestBase {
      */
     @Test(dependsOnGroups = {"ping"}, retryAnalyzer = RetryAnalyzer.class)
     @RetryTest(maxTries = 3, warmup = 2000)
-    public void t_prepBatchAssignmentMutEx() {
+    public void prepBatchAssignmentMutEx() {
         batchMutExExperiments.clear();
         for (int i = 0; i < 5; ++i) {
             Experiment exp = ExperimentFactory.createExperiment();
@@ -303,9 +303,9 @@ public class MutualExclusionTest extends TestBase {
     /**
      * Starts the prepared experiments.
      */
-    @Test(dependsOnMethods = {"t_prepBatchAssignmentMutEx"})
-    public void t_startBatchExperiments() {
-        for(Experiment exp : batchMutExExperiments) {
+    @Test(dependsOnMethods = {"prepBatchAssignmentMutEx"})
+    public void startBatchExperiments() {
+        for (Experiment exp : batchMutExExperiments) {
             postBuckets(BucketFactory.createBuckets(exp, 1));
             Experiment update = putExperiment(exp.setState(Constants.EXPERIMENT_STATE_RUNNING));
             assertEqualModelItems(update, exp, new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson"));
@@ -315,13 +315,13 @@ public class MutualExclusionTest extends TestBase {
     /**
      * Does batch assignments.
      */
-    @Test(dependsOnMethods = {"t_startBatchExperiments"})
-    public void t_batchAssignments() {
+    @Test(dependsOnMethods = {"startBatchExperiments"})
+    public void batchAssignments() {
         List<Assignment> assignments = postAssignments(ApplicationFactory.defaultApplication(), UserFactory.createUser(), batchMutExExperiments);
         Assert.assertEquals(assignments.size(), 5, "Exactly 5 assignments should be returned for mutual exclusive experiments.");
         int nonNullAssignments = 0;
         for (Assignment assignment : assignments) {
-            nonNullAssignments += assignment.assignment != null? 1 : 0;
+            nonNullAssignments += assignment.assignment != null ? 1 : 0;
         }
         Assert.assertEquals(nonNullAssignments, 1, "Exactly one assignment should not be null.");
     }
@@ -329,21 +329,21 @@ public class MutualExclusionTest extends TestBase {
     /**
      * Removes one mutex.
      */
-    @Test(dependsOnMethods = {"t_batchAssignments"})
-    public void t_removeOneBatchMutEx() {
+    @Test(dependsOnMethods = {"batchAssignments"})
+    public void removeOneBatchMutEx() {
         deleteExclusion(batchMutExExperiments.get(0), batchMutExExperiments.get(1));
     }
 
     /**
      * Retries batch assignments with a new user.
      */
-    @Test(dependsOnMethods = {"t_removeOneBatchMutEx"})
-    public void t_batchAssignmentsAfterDeletion() {
+    @Test(dependsOnMethods = {"removeOneBatchMutEx"})
+    public void batchAssignmentsAfterDeletion() {
         List<Assignment> assignments = postAssignments(ApplicationFactory.defaultApplication(), UserFactory.createUser(), batchMutExExperiments);
         Assert.assertEquals(assignments.size(), 5, "Five assignments should be returned for mutual exclusive experiments.");
         int nonNullAssignments = 0;
         for (Assignment assignment : assignments) {
-            nonNullAssignments += assignment.assignment != null? 1 : 0;
+            nonNullAssignments += assignment.assignment != null ? 1 : 0;
         }
         Assert.assertEquals(nonNullAssignments, 2, "Exactly two assignment should not be null.");
     }
@@ -352,7 +352,7 @@ public class MutualExclusionTest extends TestBase {
      * Creates an experiment in the default and one in another app.
      */
     @Test(dependsOnGroups = {"ping"})
-    public void t_createAdditionalApp() {
+    public void createAdditionalApp() {
         experimentDefApp = ExperimentFactory.createExperiment();
         experimentOtherApp = ExperimentFactory.createExperiment().setApplication(ApplicationFactory.createApplication());
         Experiment created = postExperiment(experimentDefApp);
@@ -368,8 +368,8 @@ public class MutualExclusionTest extends TestBase {
     /**
      * Tries several invalid requests.
      */
-    @Test(dependsOnMethods = {"t_createAdditionalApp", "t_removeOneBatchMutEx"})
-    public void t_invalidRequests() {
+    @Test(dependsOnMethods = {"createAdditionalApp", "removeOneBatchMutEx"})
+    public void invalidRequests() {
         // check TERMINATED experiment
         putExperiment(batchMutExExperiments.get(0).setState(Constants.EXPERIMENT_STATE_TERMINATED));
 
@@ -399,8 +399,8 @@ public class MutualExclusionTest extends TestBase {
         // passed End time
         Experiment endTimePassedExperiment = postExperiment(
                 ExperimentFactory.createExperiment()
-                    .setEndTime(TestUtils.relativeTimeString(-3))
-                    .setStartTime(TestUtils.relativeTimeString(-4)));
+                        .setEndTime(TestUtils.relativeTimeString(-3))
+                        .setStartTime(TestUtils.relativeTimeString(-4)));
         toCleanUp.add(endTimePassedExperiment);
         postBuckets(BucketFactory.createBuckets(endTimePassedExperiment, 2));
         putExperiment(endTimePassedExperiment.setState(Constants.EXPERIMENT_STATE_RUNNING));

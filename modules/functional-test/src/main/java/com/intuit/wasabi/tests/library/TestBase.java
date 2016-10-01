@@ -3769,7 +3769,7 @@ public class TestBase extends ServiceTestBase {
      * @param apiServerConnector the server connector to use
      * @return a list of user feedbacks
      */
-    public List<UserFeedback> getFeedbacks(int expectedStatus, APIServerConnector apiServerConnector) {
+    public List<UserFeedback> getFeedback(int expectedStatus, APIServerConnector apiServerConnector) {
         response = apiServerConnector.doGet("feedback");
 
         assertReturnCode(response, expectedStatus);
@@ -3792,7 +3792,7 @@ public class TestBase extends ServiceTestBase {
      * @param username           user name
      * @return a list of user feedbacks
      */
-    public List<UserFeedback> getFeedbacksByUsername(int expectedStatus, APIServerConnector apiServerConnector, String username) {
+    public List<UserFeedback> getFeedbackByUsername(int expectedStatus, APIServerConnector apiServerConnector, String username) {
         response = apiServerConnector.doGet("feedback/users/" + username);
 
         assertReturnCode(response, expectedStatus);

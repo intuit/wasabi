@@ -28,7 +28,11 @@ import org.testng.annotations.Test;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 public class PaginationTest extends TestBase {
@@ -41,7 +45,7 @@ public class PaginationTest extends TestBase {
 
     /**
      * Sets up 12 experiments to test pagination properly.
-     *
+     * <p>
      * The experiments can easily be ordered from first to last ascending by their name (ending in Exp00...11)
      * or descending by their sampling percentage (100...89).
      */
@@ -51,8 +55,8 @@ public class PaginationTest extends TestBase {
         for (int i = 0; i < 12; i++) {
             experimentList.add(postExperiment(
                     ExperimentFactory.createCompleteExperiment()
-                                     .setLabel(String.format(experimentPrefix + "Exp%02d", i))
-                                     .setSamplingPercent((100-i)/100.0d)));
+                            .setLabel(String.format(experimentPrefix + "Exp%02d", i))
+                            .setSamplingPercent((100 - i) / 100.0d)));
         }
     }
 
@@ -68,14 +72,14 @@ public class PaginationTest extends TestBase {
     }
 
     @Test(dependsOnGroups = {"ping"}, groups = {"pagination_smoke"})
-    public void t_ExperimentPaginationSmokeByName() {
+    public void experimentPaginationSmokeByName() {
         List<Experiment> results = getPaginatedExperiments(2, 4, "experiment_name", null);
 
         ModelAssert.assertEqualModelItems(results, experimentList.subList(4, 8));
     }
 
     @Test(dependsOnGroups = {"ping"}, groups = {"pagination_smoke"})
-    public void t_ExperimentPaginationSmokeByCreationTime() {
+    public void experimentPaginationSmokeByCreationTime() {
         List<Experiment> results = getPaginatedExperiments(4, 2, "-creation_time", null);
 
         List<Experiment> expected = new ArrayList<>(experimentList.subList(4, 6));
@@ -85,62 +89,62 @@ public class PaginationTest extends TestBase {
     }
 
     @Test(dependsOnGroups = {"pagination_smoke"}, groups = {"pagination_pages"})
-    public void t_ExperimentPaginationNonExistingLatePage() {
+    public void experimentPaginationNonExistingLatePage() {
         List<Experiment> results = getPaginatedExperiments(4, 10, "experiment_name", null);
 
-        ModelAssert.assertEqualModelItems(results, Collections.<Experiment> emptyList());
+        ModelAssert.assertEqualModelItems(results, Collections.emptyList());
     }
 
     @Test(dependsOnGroups = {"pagination_smoke"}, groups = {"pagination_pages"})
-    public void t_ExperimentPaginationNonExistingNegativePage() {
+    public void experimentPaginationNonExistingNegativePage() {
         List<Experiment> results = getPaginatedExperiments(-4, 10, "experiment_name", null);
 
-        ModelAssert.assertEqualModelItems(results, Collections.<Experiment> emptyList());
+        ModelAssert.assertEqualModelItems(results, Collections.emptyList());
     }
 
     @Test(dependsOnGroups = {"pagination_smoke"}, groups = {"pagination_pages"})
-    public void t_ExperimentPaginationEmptyPage() {
+    public void experimentPaginationEmptyPage() {
         List<Experiment> results = getPaginatedExperiments(1, 0, "experiment_name", null);
-        ModelAssert.assertEqualModelItems(results, Collections.<Experiment> emptyList());
+        ModelAssert.assertEqualModelItems(results, Collections.emptyList());
     }
 
     @Test(dependsOnGroups = {"pagination_smoke"}, groups = {"pagination_pages"})
-    public void t_ExperimentPaginationFilterByName() {
+    public void experimentPaginationFilterByName() {
         List<Experiment> results = getPaginatedExperiments(1, 10, "experiment_name", "experiment_name=5");
 
         ModelAssert.assertEqualModelItems(results, experimentList.subList(5, 6));
     }
 
     @Test(dependsOnGroups = {"pagination_smoke"}, groups = {"pagination_pages"})
-    public void t_ExperimentPaginationFilterByIllegalKey() {
+    public void experimentPaginationFilterByIllegalKey() {
         String exception = getPaginationException(1, 10, "experiment_name", "illegal_key=some_value");
 
         Assert.assertTrue(exception.contains("illegal_key"));
     }
 
     @Test(dependsOnGroups = {"pagination_smoke"}, groups = {"pagination_pages"})
-    public void t_ExperimentPaginationSortByIllegalKey() {
+    public void experimentPaginationSortByIllegalKey() {
         String exception = getPaginationException(1, 10, "non_existent_sortorder", null);
 
         Assert.assertTrue(exception.contains("non_existent_sortorder"));
     }
 
     @Test(dependsOnGroups = {"pagination_pages"}, groups = {"pagination_date_constraints"})
-    public void t_ExperimentPaginationFilterByDateConstraintAfter() {
+    public void experimentPaginationFilterByDateConstraintAfter() {
         List<Experiment> results = getPaginatedExperiments(1, 10, "experiment_name", "date_constraint_start=isafter:03/15/2000");
 
         ModelAssert.assertEqualModelItems(results, experimentList.subList(0, 10));
     }
 
     @Test(dependsOnGroups = {"pagination_pages"}, groups = {"pagination_date_constraints"})
-    public void t_ExperimentPaginationFilterByDateConstraintBefore() {
+    public void experimentPaginationFilterByDateConstraintBefore() {
         List<Experiment> results = getPaginatedExperiments(1, 10, "experiment_name", "date_constraint_start=isbefore:03/15/3000");
 
         ModelAssert.assertEqualModelItems(results, experimentList.subList(0, 10));
     }
 
     @Test(dependsOnGroups = {"pagination_pages"}, groups = {"pagination_date_constraints"})
-    public void t_ExperimentPaginationFilterByDateConstraintOn() {
+    public void experimentPaginationFilterByDateConstraintOn() {
         SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/YYYY");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
         String date = "00/00/0000";
@@ -156,7 +160,7 @@ public class PaginationTest extends TestBase {
     }
 
     @Test(dependsOnGroups = {"pagination_pages"}, groups = {"pagination_date_constraints"})
-    public void t_ExperimentPaginationFilterByDateConstraintBetween() {
+    public void experimentPaginationFilterByDateConstraintBetween() {
         SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/YYYY");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
         String date = "00/00/0000";
@@ -172,7 +176,7 @@ public class PaginationTest extends TestBase {
     }
 
     @Test(dependsOnGroups = {"pagination_pages"}, groups = {"pagination_date_constraints"})
-    public void t_ExperimentPaginationFilterByIllegalDateConstraints() {
+    public void experimentPaginationFilterByIllegalDateConstraints() {
         String exception = getPaginationException(1, 10, "experiment_name", "date_constraint_start=isafter:15/3/2000");
         Assert.assertTrue(exception.contains("Wrong format"), "Format day/month");
 
@@ -190,7 +194,7 @@ public class PaginationTest extends TestBase {
     }
 
     @Test(dependsOnGroups = {"pagination_pages"}, groups = {"pagination_experiment_state"})
-    public void t_ExperimentPaginationFilterByStateNotTerminated() {
+    public void experimentPaginationFilterByStateNotTerminated() {
         List<Experiment> results = getPaginatedExperiments(1, 5, "experiment_name", "state_exact=notterminated");
 
         ModelAssert.assertEqualModelItems(results, experimentList.subList(0, 5));
@@ -198,42 +202,42 @@ public class PaginationTest extends TestBase {
 
 
     @Test(dependsOnGroups = {"pagination_pages"}, groups = {"pagination_experiment_state"})
-    public void t_ExperimentPaginationFilterByStateAny() {
+    public void experimentPaginationFilterByStateAny() {
         List<Experiment> results = getPaginatedExperiments(1, 5, "experiment_name", "state_exact=any");
 
         ModelAssert.assertEqualModelItems(results, experimentList.subList(0, 5));
     }
 
     @Test(dependsOnGroups = {"pagination_pages"}, groups = {"pagination_experiment_state"})
-    public void t_ExperimentPaginationFilterByStateTerminated() {
+    public void experimentPaginationFilterByStateTerminated() {
         List<Experiment> results = getPaginatedExperiments(1, 5, "experiment_name", "state_exact=terminated");
 
-        ModelAssert.assertEqualModelItems(results, Collections.<Experiment> emptyList());
+        ModelAssert.assertEqualModelItems(results, Collections.<Experiment>emptyList());
     }
 
     @Test(dependsOnGroups = {"pagination_pages"}, groups = {"pagination_experiment_state"})
-    public void t_ExperimentPaginationFilterByStateRunning() {
+    public void experimentPaginationFilterByStateRunning() {
         List<Experiment> results = getPaginatedExperiments(1, 5, "experiment_name", "state_exact=running");
 
-        ModelAssert.assertEqualModelItems(results, Collections.<Experiment> emptyList());
+        ModelAssert.assertEqualModelItems(results, Collections.<Experiment>emptyList());
     }
 
     @Test(dependsOnGroups = {"pagination_pages"}, groups = {"pagination_experiment_state"})
-    public void t_ExperimentPaginationFilterByStateDraft() {
+    public void experimentPaginationFilterByStateDraft() {
         List<Experiment> results = getPaginatedExperiments(1, 5, "experiment_name", "state_exact=draft");
 
         ModelAssert.assertEqualModelItems(results, experimentList.subList(0, 5));
     }
 
     @Test(dependsOnGroups = {"pagination_pages"}, groups = {"pagination_experiment_state"})
-    public void t_ExperimentPaginationFilterByStatePaused() {
+    public void experimentPaginationFilterByStatePaused() {
         List<Experiment> results = getPaginatedExperiments(1, 5, "experiment_name", "state_exact=paused");
 
-        ModelAssert.assertEqualModelItems(results, Collections.<Experiment> emptyList());
+        ModelAssert.assertEqualModelItems(results, Collections.<Experiment>emptyList());
     }
 
     @Test(dependsOnGroups = {"pagination_pages"}, groups = {"auditlog_smoke"})
-    public void t_AuditLogPaginationSmoke() {
+    public void auditLogPaginationSmoke() {
         List<Map<String, Object>> auditLogEntryMaps = apiServerConnector
                 .doGet("logs?per_page=10&page=1&sort=time&filter=" + experimentPrefix + ",username=admin")
                 .jsonPath()
@@ -256,9 +260,9 @@ public class PaginationTest extends TestBase {
 
     private JsonPath getExperimentJsonPath(int page, int perPage, String sort, String filter) {
         return apiServerConnector.doGet("experiments?per_page=" + perPage
-                        + "&page=" + page
-                        + "&sort=" + (sort != null ? sort : "")
-                        + "&filter=" + experimentPrefix + (filter != null ? "," + filter : "")
-                        + "&timezone=+0000").jsonPath();
+                + "&page=" + page
+                + "&sort=" + (sort != null ? sort : "")
+                + "&filter=" + experimentPrefix + (filter != null ? "," + filter : "")
+                + "&timezone=+0000").jsonPath();
     }
 }

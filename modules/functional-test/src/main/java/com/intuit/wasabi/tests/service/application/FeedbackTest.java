@@ -53,29 +53,13 @@ public class FeedbackTest extends TestBase {
      * @return a set of user data
      */
     @DataProvider
-    public Object[][] ValidAuthProvider() {
+    public Object[][] validAuthProvider() {
         String userName = appProperties.getProperty("user-name");
         String password = appProperties.getProperty("password");
         String userEmail = appProperties.getProperty("user-email");
 
         return new Object[][]{
                 {userName, password, userEmail}
-        };
-    }
-
-
-    /**
-     * Provides invalid user credentials.
-     *
-     * @return a set of user data
-     */
-    @DataProvider
-    public Object[][] InvalidAuthProvider() {
-        return new Object[][]{
-                {"user@foo.com", ""},
-                {"", "user01"},
-                {"user@foo.com", "notMyPassword"},
-                {"", ""}
         };
     }
 
@@ -92,7 +76,7 @@ public class FeedbackTest extends TestBase {
      * @param userName the user name
      * @param password the user pass
      */
-    @Test(dataProvider = "ValidAuthProvider", dependsOnGroups = {"ping"})
+    @Test(dataProvider = "validAuthProvider", dependsOnGroups = {"ping"})
     public void createUserFeedback(String userName, String password, String userEmail) {
         APIServerConnector asc = apiServerConnector.clone();
         asc.setUserNameAndPassword(userName, password);
@@ -113,7 +97,7 @@ public class FeedbackTest extends TestBase {
      * @param userName the user name
      * @param password the user pass
      */
-    @Test(dataProvider = "ValidAuthProvider", dependsOnGroups = {"ping"})
+    @Test(dataProvider = "validAuthProvider", dependsOnGroups = {"ping"})
     public void createUserFeedbackIsContactOkFalse(String userName, String password, String userEmail) {
         APIServerConnector asc = apiServerConnector.clone();
         asc.setUserNameAndPassword(userName, password);
@@ -134,12 +118,12 @@ public class FeedbackTest extends TestBase {
      * @param userName the user name
      * @param password the user pass
      */
-    @Test(dependsOnMethods = {"createUserFeedback"}, dataProvider = "ValidAuthProvider", dependsOnGroups = {"ping"})
-    public void getUserFeedbacksAuth(String userName, String password, String userEmail) {
+    @Test(dependsOnMethods = {"createUserFeedback"}, dataProvider = "validAuthProvider", dependsOnGroups = {"ping"})
+    public void getUserFeedbackAuth(String userName, String password, String userEmail) {
 
         APIServerConnector asc = apiServerConnector.clone();
         asc.setUserNameAndPassword(userName, password);
-        List<UserFeedback> userFeedbackList = getFeedbacks(HttpStatus.SC_OK, asc);
+        List<UserFeedback> userFeedbackList = getFeedback(HttpStatus.SC_OK, asc);
 
         boolean found = false;
         for (UserFeedback userFeedback : userFeedbackList) {
@@ -160,12 +144,12 @@ public class FeedbackTest extends TestBase {
      * @param userName the user name
      * @param password the user pass
      */
-    @Test(dependsOnMethods = {"createUserFeedback"}, dataProvider = "ValidAuthProvider", dependsOnGroups = {"ping"})
-    public void getUserFeedbacksByUsernameAuth(String userName, String password, String userEmail) {
+    @Test(dependsOnMethods = {"createUserFeedback"}, dataProvider = "validAuthProvider", dependsOnGroups = {"ping"})
+    public void getUserFeedbackByUsernameAuth(String userName, String password, String userEmail) {
 
         APIServerConnector asc = apiServerConnector.clone();
         asc.setUserNameAndPassword(userName, password);
-        List<UserFeedback> userFeedbackList = getFeedbacksByUsername(HttpStatus.SC_OK, asc, userName);
+        List<UserFeedback> userFeedbackList = getFeedbackByUsername(HttpStatus.SC_OK, asc, userName);
 
         boolean found = false;
         for (UserFeedback userFeedback : userFeedbackList) {
@@ -189,12 +173,12 @@ public class FeedbackTest extends TestBase {
      * @param userName the user name
      * @param password the user pass
      */
-    @Test(dependsOnMethods = {"createUserFeedbackIsContactOkFalse"}, dataProvider = "ValidAuthProvider", dependsOnGroups = {"ping"})
-    public void getUserFeedbacksByUsernameAuthIsContactOkFalse(String userName, String password, String userEmail) {
+    @Test(dependsOnMethods = {"createUserFeedbackIsContactOkFalse"}, dataProvider = "validAuthProvider", dependsOnGroups = {"ping"})
+    public void getUserFeedbackByUsernameAuthIsContactOkFalse(String userName, String password, String userEmail) {
 
         APIServerConnector asc = apiServerConnector.clone();
         asc.setUserNameAndPassword(userName, password);
-        List<UserFeedback> userFeedbackList = getFeedbacksByUsername(HttpStatus.SC_OK, asc, userName);
+        List<UserFeedback> userFeedbackList = getFeedbackByUsername(HttpStatus.SC_OK, asc, userName);
 
         boolean found = false;
         for (UserFeedback userFeedback : userFeedbackList) {
@@ -219,7 +203,7 @@ public class FeedbackTest extends TestBase {
      * @param userName the user name
      * @param password the user pass
      */
-    @Test(dataProvider = "ValidAuthProvider", dependsOnGroups = {"ping"})
+    @Test(dataProvider = "validAuthProvider", dependsOnGroups = {"ping"})
     public void createUserFeedbackHasScore0(String userName, String password, String userEmail) {
         APIServerConnector asc = apiServerConnector.clone();
         asc.setUserNameAndPassword(userName, password);
@@ -236,7 +220,7 @@ public class FeedbackTest extends TestBase {
      * @param userName the user name
      * @param password the user pass
      */
-    @Test(dataProvider = "ValidAuthProvider", dependsOnGroups = {"ping"})
+    @Test(dataProvider = "validAuthProvider", dependsOnGroups = {"ping"})
     public void createUserFeedbackHasScoreMinus1(String userName,
                                                  String password, String userEmail) {
         APIServerConnector asc = apiServerConnector.clone();
@@ -254,7 +238,7 @@ public class FeedbackTest extends TestBase {
      * @param userName the user name
      * @param password the user pass
      */
-    @Test(dataProvider = "ValidAuthProvider", dependsOnGroups = {"ping"})
+    @Test(dataProvider = "validAuthProvider", dependsOnGroups = {"ping"})
     public void createUserFeedbackHasScore11(String userName, String password, String userEmail) {
         APIServerConnector asc = apiServerConnector.clone();
         asc.setUserNameAndPassword(userName, password);
@@ -271,7 +255,7 @@ public class FeedbackTest extends TestBase {
      * @param userName the user name
      * @param password the user pass
      */
-    @Test(dataProvider = "ValidAuthProvider", dependsOnGroups = {"ping"})
+    @Test(dataProvider = "validAuthProvider", dependsOnGroups = {"ping"})
     public void createUserFeedbackIsContactOkayFalse(String userName,
                                                      String password, String userEmail) {
         APIServerConnector asc = apiServerConnector.clone();

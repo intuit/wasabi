@@ -35,8 +35,8 @@ public class MutualExclusionSegmentationTest extends TestBase {
     private final List<Experiment> validExperimentsLists = new ArrayList<>();
 
 
-    @Test(groups= {"setup"}, dataProvider = "experimentSetup", dataProviderClass = SegmentationDataProvider.class)
-    public void t_setupExperiment(String data){
+    @Test(groups = {"setup"}, dataProvider = "experimentSetup", dataProviderClass = SegmentationDataProvider.class)
+    public void setupExperiment(String data) {
         LOGGER.debug(data);
         response = apiServerConnector.doPost("/experiments", data);
         LOGGER.debug(response.jsonPath().prettify());
@@ -45,58 +45,58 @@ public class MutualExclusionSegmentationTest extends TestBase {
         assertReturnCode(response, HttpStatus.SC_CREATED);
     }
 
-    @Test(dependsOnMethods = {"t_setupExperiment"}, groups= {"setup"})
-    public void t_setupBucketsAndStartExperiment(){
+    @Test(dependsOnMethods = {"setupExperiment"}, groups = {"setup"})
+    public void setupBucketsAndStartExperiment() {
         String redBucket = "{\"label\": \"red\", \"allocationPercent\": 0.5, \"isControl\": false, \"description\": \"\"}";
         String blueBucket = "{\"label\": \"blue\", \"allocationPercent\": 0.5, \"isControl\": false, \"description\": \"\"}";
-        for(Experiment experiment : validExperimentsLists){
-            response = apiServerConnector.doPost("/experiments/"+experiment.id+"/buckets", redBucket);
+        for (Experiment experiment : validExperimentsLists) {
+            response = apiServerConnector.doPost("/experiments/" + experiment.id + "/buckets", redBucket);
             assertReturnCode(response, HttpStatus.SC_CREATED);
-            response = apiServerConnector.doPost("/experiments/"+experiment.id+"/buckets", blueBucket);
+            response = apiServerConnector.doPost("/experiments/" + experiment.id + "/buckets", blueBucket);
             assertReturnCode(response, HttpStatus.SC_CREATED);
-            response = apiServerConnector.doPut("/experiments/"+experiment.id, "{\"state\": \"RUNNING\"}");
+            response = apiServerConnector.doPut("/experiments/" + experiment.id, "{\"state\": \"RUNNING\"}");
             assertReturnCode(response, HttpStatus.SC_OK);
         }
     }
 
-    @Test(dependsOnMethods = {"t_setupBucketsAndStartExperiment"}, groups={"setup"})
-    public void t_setupMutualExclusionRules(){
-        String mutex_experiments= "{\"experimentIDs\": [\""+validExperimentsLists.get(1).id+"\",\""+
-                validExperimentsLists.get(2).id+"\"]}";
-        LOGGER.debug("experiment mutex is "+ mutex_experiments);
-        response = apiServerConnector.doPost("/experiments/"+validExperimentsLists.get(0).id+"/exclusions",
+    @Test(dependsOnMethods = {"setupBucketsAndStartExperiment"}, groups = {"setup"})
+    public void setupMutualExclusionRules() {
+        String mutex_experiments = "{\"experimentIDs\": [\"" + validExperimentsLists.get(1).id + "\",\"" +
+                validExperimentsLists.get(2).id + "\"]}";
+        LOGGER.debug("experiment mutex is " + mutex_experiments);
+        response = apiServerConnector.doPost("/experiments/" + validExperimentsLists.get(0).id + "/exclusions",
                 mutex_experiments);
         assertReturnCode(response, HttpStatus.SC_CREATED);
     }
 
-    @Test(dependsOnGroups = {"setup"}, groups={"test"})
-    public void t_mutualExclusionNoProfileMatch(){
-        String url = "/assignments/applications/segmutex_"+SegmentationDataProvider.time+"/experiments/"+
-                validExperimentsLists.get(1).label+"/users";
+    @Test(dependsOnGroups = {"setup"}, groups = {"test"})
+    public void mutualExclusionNoProfileMatch() {
+        String url = "/assignments/applications/segmutex_" + SegmentationDataProvider.time + "/experiments/" +
+                validExperimentsLists.get(1).label + "/users";
         String data = "{\"profile\": {\"salary\": 1000, \"state\": \"CA\", \"vet\": true}}";
-        response = apiServerConnector.doPost(url+"/Billy", data);
+        response = apiServerConnector.doPost(url + "/Billy", data);
         LOGGER.debug(response.asString());
         assertReturnCode(response, HttpStatus.SC_OK);
         Assert.assertEquals(response.asString().contains("NO_PROFILE_MATCH"), true);
     }
 
-    @Test(dependsOnGroups = {"setup"}, groups={"test"})
-    public void t_assignCorrectRule(){
-        String url = "/assignments/applications/segmutex_"+SegmentationDataProvider.time+"/experiments/"+
-                validExperimentsLists.get(0).label+"/users";
+    @Test(dependsOnGroups = {"setup"}, groups = {"test"})
+    public void assignCorrectRule() {
+        String url = "/assignments/applications/segmutex_" + SegmentationDataProvider.time + "/experiments/" +
+                validExperimentsLists.get(0).label + "/users";
         String data = "{\"profile\": {\"salary\": 80000, \"state\": \"CA\", \"vet\": true}}";
-        response = apiServerConnector.doPost(url+"/Billy", data);
+        response = apiServerConnector.doPost(url + "/Billy", data);
         LOGGER.debug(response.asString());
         assertReturnCode(response, HttpStatus.SC_OK);
         Assert.assertEquals(response.asString().contains("NEW_ASSIGNMENT"), true);
     }
 
-    @Test(dependsOnMethods = {"t_assignCorrectRule"}, groups={"test"})
-    public void t_assignCorrectRuleMutexExperiemnt(){
-        String url = "/assignments/applications/segmutex_"+SegmentationDataProvider.time+"/experiments/"+
-                validExperimentsLists.get(0).label+"/users";
+    @Test(dependsOnMethods = {"assignCorrectRule"}, groups = {"test"})
+    public void assignCorrectRuleMutexExperiemnt() {
+        String url = "/assignments/applications/segmutex_" + SegmentationDataProvider.time + "/experiments/" +
+                validExperimentsLists.get(0).label + "/users";
         String data = "{\"profile\": {\"salary\": 80000, \"state\": \"CA\", \"vet\": true}}";
-        response = apiServerConnector.doPost(url+"/Billy", data);
+        response = apiServerConnector.doPost(url + "/Billy", data);
         LOGGER.debug(response.asString());
         assertReturnCode(response, HttpStatus.SC_OK);
         Assert.assertEquals(response.asString().contains("EXISTING_ASSIGNMENT"), true);
@@ -104,14 +104,9 @@ public class MutualExclusionSegmentationTest extends TestBase {
 
 
     @AfterClass
-    public void t_cleanUp(){
-        LOGGER.info("Clean up experiments");
-        for(Experiment experiment : validExperimentsLists){
-            response = apiServerConnector.doPut("experiments/"+experiment.id, "{\"state\": \"TERMINATED\"}");
-            assertReturnCode(response, HttpStatus.SC_OK);
-            response = apiServerConnector.doDelete("experiments/"+experiment.id);
-            assertReturnCode(response, HttpStatus.SC_NO_CONTENT);
-        }
+    public void cleanUp() {
+        toCleanUp.addAll(validExperimentsLists);
+        cleanUpExperiments();
     }
 
 }

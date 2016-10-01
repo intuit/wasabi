@@ -50,13 +50,13 @@ public class FavoritesTest extends TestBase {
     }
 
     @Test
-    public void t_getEmptyFavorites() {
+    public void testGetEmptyFavorites() {
         List<String> favorites = getFavorites();
         Assert.assertTrue(favorites.isEmpty(), "Favorites are not empty!");
     }
 
-    @Test(dependsOnMethods = {"t_getEmptyFavorites"})
-    public void t_addFavorites() {
+    @Test(dependsOnMethods = {"testGetEmptyFavorites"})
+    public void testAddFavorites() {
         List<String> favorites = addFavorite(experimentList.get(0).id);
         Assert.assertEquals(favorites.size(), 1, "There is not exactly one favorite!");
         Assert.assertEquals(favorites.get(0), experimentList.get(0).id,
@@ -70,8 +70,8 @@ public class FavoritesTest extends TestBase {
                 "The favorites don't contain the second ID (index 1) after insertion.");
     }
 
-    @Test(dependsOnMethods = {"t_addFavorites"})
-    public void t_getFavorites() {
+    @Test(dependsOnMethods = {"testAddFavorites"})
+    public void testGetFavorites() {
         List<String> favorites = getFavorites();
         Assert.assertEquals(favorites.size(), 2, "There are not exactly two favorites!");
         Assert.assertTrue(favorites.contains(experimentList.get(0).id),
@@ -80,8 +80,8 @@ public class FavoritesTest extends TestBase {
                 "The favorites don't contain the second ID (index 1) anymore.");
     }
 
-    @Test(dependsOnMethods = {"t_addFavorites", "t_getFavorites"})
-    public void t_getFavoritesDeletedExperiment() {
+    @Test(dependsOnMethods = {"testAddFavorites", "testGetFavorites"})
+    public void testGetFavoritesDeletedExperiment() {
         addFavorite(experimentList.get(2).id);
         deleteExperiment(experimentList.get(2));
 
@@ -96,8 +96,8 @@ public class FavoritesTest extends TestBase {
                 "The favorites do contain the third ID (index 2), which is wrong.");
     }
 
-    @Test(dependsOnMethods = {"t_getFavorites", "t_getFavoritesDeletedExperiment"})
-    public void t_deleteOneFavorite() {
+    @Test(dependsOnMethods = {"testGetFavorites", "testGetFavoritesDeletedExperiment"})
+    public void testDeleteOneFavorite() {
         List<String> favorites = deleteFavorite(experimentList.get(0).id);
         Assert.assertEquals(favorites.size(), 1, "There is not only one remaining favorite!");
         Assert.assertFalse(favorites.contains(experimentList.get(0).id),
@@ -106,8 +106,8 @@ public class FavoritesTest extends TestBase {
                 "The favorites don't contain the second ID (index 1) anymore.");
     }
 
-    @Test(dependsOnMethods = {"t_deleteOneFavorite"})
-    public void t_deleteFavorites() {
+    @Test(dependsOnMethods = {"testDeleteOneFavorite"})
+    public void testDeleteFavorites() {
         List<String> favorites = deleteFavorite(experimentList.get(1).id);
         Assert.assertEquals(favorites.size(), 0, "There are remaining favorites!");
     }

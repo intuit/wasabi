@@ -42,14 +42,14 @@ import java.util.stream.Collectors;
  * Created on 5/16/16.
  */
 public class BatchAssignmentTest extends TestBase {
-    static final Logger LOGGER = LoggerFactory.getLogger(BatchAssignmentTest.class);
-    List<Experiment> experimentList = new ArrayList<>();
-    List<String> experimentLabels = new ArrayList<>();
-    List<Experiment> experimentBadList = new ArrayList<>();
-    List<String> experimentBadLabels = new ArrayList<>();
+    private static final Logger LOGGER = LoggerFactory.getLogger(BatchAssignmentTest.class);
+    private List<Experiment> experimentList = new ArrayList<>();
+    private List<String> experimentLabels = new ArrayList<>();
+    private List<Experiment> experimentBadList = new ArrayList<>();
+    private List<String> experimentBadLabels = new ArrayList<>();
 
     @Test(groups = {"setup"}, dataProvider = "BatchAssignmentExperimentData", dataProviderClass = AssignmentDataProvider.class)
-    public void t_setup(String experimentData) {
+    public void setup(String experimentData) {
         response = apiServerConnector.doPost("/experiments", experimentData);
         assertReturnCode(response, HttpStatus.SC_CREATED);
         Experiment experiment = ExperimentFactory.createFromJSONString(response.asString());
@@ -67,7 +67,7 @@ public class BatchAssignmentTest extends TestBase {
     }
 
     @Test(groups = {"setup"}, dataProvider = "BatchAssignmentBadExperimentData", dataProviderClass = AssignmentDataProvider.class)
-    public void t_setupBadExperiment(String experimentData) {
+    public void setupBadExperiment(String experimentData) {
         response = apiServerConnector.doPost("/experiments", experimentData);
         assertReturnCode(response, HttpStatus.SC_CREATED);
         Experiment experiment = ExperimentFactory.createFromJSONString(response.asString());
@@ -88,7 +88,7 @@ public class BatchAssignmentTest extends TestBase {
 
     @Test(groups = {"batchAssign"}, dependsOnGroups = {"setup"},
             dataProvider = "BatchAssignmentStateAndExpectedValues", dataProviderClass = AssignmentDataProvider.class)
-    public void t_batchAssign(String state, boolean isAssignment, String status) {
+    public void batchAssign(String state, boolean isAssignment, String status) {
 
         String lables = "{\"labels\": [" + experimentLabels.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(",")) + "]}";
         String url = "/assignments/applications/testBatch/users/batchUser";
@@ -114,14 +114,10 @@ public class BatchAssignmentTest extends TestBase {
 
 
     @AfterClass
-    public void t_cleanUp() {
-        for (Experiment experiment : experimentList) {
-            response = apiServerConnector.doPut("experiments/" + experiment.id, "{\"state\": \"RUNNING\"}");
-            response = apiServerConnector.doPut("experiments/" + experiment.id, "{\"state\": \"TERMINATED\"}");
-            assertReturnCode(response, HttpStatus.SC_OK);
-            response = apiServerConnector.doDelete("experiments/" + experiment.id);
-            assertReturnCode(response, HttpStatus.SC_NO_CONTENT);
-        }
+    public void cleanUp() {
+        toCleanUp.addAll(experimentBadList);
+        toCleanUp.addAll(experimentList);
+        cleanUpExperiments();
     }
 
 }

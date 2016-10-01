@@ -36,7 +36,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Tests for experiment priorities in application.
- *
  */
 public class PrioritiesTest extends TestBase {
 
@@ -44,30 +43,27 @@ public class PrioritiesTest extends TestBase {
 
     private final Application priorityApp = ApplicationFactory.createApplication().setName(Constants.DEFAULT_PREFIX_APPLICATION + "PrioritiesTest");
     private final Application newApp = ApplicationFactory.createApplication().setName(Constants.NEW_PREFIX_APPLICATION + "PrioritiesTest");
-    private Experiment experiment;
-
     private final List<Experiment> experiments = new ArrayList<>(Constants.EXP_SPAWN_COUNT);
-    private List<Experiment> priorities;
     private final String[] labels = {"red", "blue"};
     private final double[] allocations = {.50, .50};
     private final boolean[] control = {false, false};
+    private Experiment experiment;
+    private List<Experiment> priorities;
 
     /**
      * Cleans up the app first.
      */
     @Test(dependsOnGroups = {"ping"})
-    public void t_prepareApp() {
+    public void prepareApp() {
         List<Experiment> experiments = getApplicationExperiments(priorityApp);
-        for (Experiment experiment : experiments) {
-            deleteExperiment(experiment);
-        }
+        experiments.forEach(this::deleteExperiment);
     }
 
     /**
      * Tests priority handling.
      */
-    @Test(dependsOnMethods = {"t_prepareApp"})
-    public void t_createAndValidatePriorityList() {
+    @Test(dependsOnMethods = {"prepareApp"})
+    public void createAndValidatePriorityList() {
 
         LOGGER.info("Creating %d experiments.", Constants.EXP_SPAWN_COUNT);
 
@@ -96,8 +92,8 @@ public class PrioritiesTest extends TestBase {
     /**
      * Tests that priority list will not accept invalid uuids.
      */
-    @Test(dependsOnMethods = {"t_createAndValidatePriorityList"})
-    public void t_testNewExperimentAddDeleteFlowOnPriorityList() {
+    @Test(dependsOnMethods = {"createAndValidatePriorityList"})
+    public void testNewExperimentAddDeleteFlowOnPriorityList() {
         LOGGER.info("Adding a new experiment to the application.");
         Experiment nExperiment = ExperimentFactory.createExperiment().setApplication(priorityApp);
         Experiment created = postExperiment(nExperiment);
@@ -125,8 +121,8 @@ public class PrioritiesTest extends TestBase {
     /**
      * Tests that priority list will not accept experiment of different applications.
      */
-    @Test(dependsOnMethods = {"t_createAndValidatePriorityList"})
-    public void t_testAddingExperimentOfDifferentAppToPriorityList() {
+    @Test(dependsOnMethods = {"createAndValidatePriorityList"})
+    public void testAddingExperimentOfDifferentAppToPriorityList() {
         LOGGER.info("Checking that priority list will not accept experiments from a different application");
         Experiment experiment = ExperimentFactory.createExperiment().setApplication(newApp);
         Experiment expForDifferentAppCreated = postExperiment(experiment);
@@ -151,8 +147,8 @@ public class PrioritiesTest extends TestBase {
     /**
      * Tests that priority list will not accept experiments with invalid uuids.
      */
-    @Test(dependsOnMethods = {"t_createAndValidatePriorityList"})
-    public void t_testAddingInvalidUUIDExperimentToPriorityList() {
+    @Test(dependsOnMethods = {"createAndValidatePriorityList"})
+    public void testAddingInvalidUUIDExperimentToPriorityList() {
         LOGGER.info("Checking that priority list will not accept invalid uuids");
         Experiment invalidUUIDExperiment = new Experiment();
         invalidUUIDExperiment.id = "bbbac42e-50c5-4c9a-a398-8588bf6bbe33";
@@ -176,8 +172,8 @@ public class PrioritiesTest extends TestBase {
     /**
      * Tests that priority list will not accept experiments in TERMINATED or DELETED states.
      */
-    @Test(dependsOnMethods = {"t_createAndValidatePriorityList"})
-    public void t_testAddingTerminatedExperimentToPriorityList() {
+    @Test(dependsOnMethods = {"createAndValidatePriorityList"})
+    public void testAddingTerminatedExperimentToPriorityList() {
         LOGGER.info("Checking that priority list will not accept experiments in TERMINATED or DELETED states");
         experiment = ExperimentFactory.createExperiment().setApplication(priorityApp);
         Experiment experimentToBeTerminated = postExperiment(experiment);

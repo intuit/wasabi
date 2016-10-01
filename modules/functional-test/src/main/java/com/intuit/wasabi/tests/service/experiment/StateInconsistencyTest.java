@@ -62,7 +62,7 @@ public class StateInconsistencyTest extends TestBase {
      * Posts the experiment.
      */
     @Test(dependsOnGroups = {"ping"})
-    public void t_createExperiment() {
+    public void createExperiment() {
         Experiment created = postExperiment(experiment);
 
         experiment.setState(Constants.EXPERIMENT_STATE_DRAFT);
@@ -74,9 +74,9 @@ public class StateInconsistencyTest extends TestBase {
     /**
      * Checks if the experiment was in fact created.
      */
-    @Test(dependsOnMethods = {"t_createExperiment"}, retryAnalyzer = RetryAnalyzer.class)
+    @Test(dependsOnMethods = {"createExperiment"}, retryAnalyzer = RetryAnalyzer.class)
     @RetryTest(maxTries = 3, warmup = 500)
-    public void t_checkExperiment() {
+    public void checkExperiment() {
         Experiment updated = getExperiment(experiment);
         assertEqualModelItems(updated, experiment, comparisonStrategy);
     }
@@ -84,9 +84,9 @@ public class StateInconsistencyTest extends TestBase {
     /**
      * Creates buckets for the experiments and posts them.
      */
-    @Test(dependsOnMethods = {"t_checkExperiment"}, retryAnalyzer = RetryAnalyzer.class)
+    @Test(dependsOnMethods = {"checkExperiment"}, retryAnalyzer = RetryAnalyzer.class)
     @RetryTest(warmup = 500)
-    public void t_createBuckets() {
+    public void createBuckets() {
         List<Bucket> buckets = BucketFactory.createBuckets(experiment, new double[]{
                 0.3, 0.3, 0.4
         }, BucketFactory.bucketNameColors(3));
@@ -112,9 +112,9 @@ public class StateInconsistencyTest extends TestBase {
      *
      * @param state new state
      */
-    @Test(dependsOnMethods = {"t_createBuckets"}, dataProvider = "experimentStates", retryAnalyzer = RetryAnalyzer.class)
+    @Test(dependsOnMethods = {"createBuckets"}, dataProvider = "experimentStates", retryAnalyzer = RetryAnalyzer.class)
     @RetryTest(warmup = 500, maxTries = 3)
-    public void t_iterateStates(String state) {
+    public void iterateStates(String state) {
         experiment.setSerializationStrategy(putStateStrategy);
         experiment.setState(state);
         Experiment updated = putExperiment(experiment);
@@ -124,8 +124,8 @@ public class StateInconsistencyTest extends TestBase {
     /**
      * Deletes experiments.
      */
-    @Test(dependsOnMethods = {"t_iterateStates"})
-    public void t_deleteExperiment() {
+    @Test(dependsOnMethods = {"iterateStates"})
+    public void deleteExperiment() {
         deleteExperiment(experiment);
     }
 

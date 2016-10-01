@@ -15,7 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.tests.service.segmentation;
 
-
+import com.intuit.wasabi.tests.library.APIServerConnector;
 import com.intuit.wasabi.tests.library.TestBase;
 import com.intuit.wasabi.tests.library.util.Constants;
 import com.intuit.wasabi.tests.library.util.RetryAnalyzer;
@@ -31,7 +31,6 @@ import com.intuit.wasabi.tests.model.factory.AssignmentFactory;
 import com.intuit.wasabi.tests.model.factory.BucketFactory;
 import com.intuit.wasabi.tests.model.factory.ExperimentFactory;
 import com.intuit.wasabi.tests.model.factory.UserFactory;
-import com.intuit.wasabi.tests.library.APIServerConnector;
 import org.apache.http.HttpStatus;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeTest;
@@ -48,7 +47,7 @@ import static com.intuit.wasabi.tests.library.util.ModelAssert.assertEqualModelI
  */
 public class SegmentOnHttpHeaderTest extends TestBase {
 
-	private Experiment experiment;
+    private Experiment experiment;
     private User user;
     private User user2;
     private List<Bucket> buckets;
@@ -66,14 +65,14 @@ public class SegmentOnHttpHeaderTest extends TestBase {
      */
     @Test(dependsOnGroups = {"ping"}, retryAnalyzer = RetryAnalyzer.class)
     @RetryTest(maxTries = 3, warmup = 2000)
-	public void prepareExperiment() {
+    public void prepareExperiment() {
         experiment = ExperimentFactory.createExperiment().setRule("User-Agent = \"" + matchAgentValue + "\"");
         Experiment created = postExperiment(experiment);
 
         experiment.setState(Constants.EXPERIMENT_STATE_DRAFT);
         assertEqualModelItems(created, experiment, defExpStrategy);
         experiment.update(created);
-	}
+    }
 
     @Test(dependsOnMethods = {"prepareExperiment"}, retryAnalyzer = RetryAnalyzer.class)
     @RetryTest(maxTries = 3, warmup = 2000)
@@ -100,13 +99,13 @@ public class SegmentOnHttpHeaderTest extends TestBase {
     @DataProvider
     public Object[][] dataProviderAssignments() {
         return new Object[][]{
-                new Object[]{ user,  "No" + matchAgentValue, Constants.ASSIGNMENT_NO_PROFILE_MATCH,    true },
-                new Object[]{ user,  "No" + matchAgentValue, Constants.ASSIGNMENT_EXISTING_ASSIGNMENT, false },
-                new Object[]{ user,         matchAgentValue, Constants.ASSIGNMENT_NEW_ASSIGNMENT,      true },
-                new Object[]{ user,  "No" + matchAgentValue, Constants.ASSIGNMENT_EXISTING_ASSIGNMENT, true },
-                new Object[]{ user,         matchAgentValue, Constants.ASSIGNMENT_EXISTING_ASSIGNMENT, true },
-                new Object[]{ user2, "No" + matchAgentValue, Constants.ASSIGNMENT_NO_PROFILE_MATCH,    true },
-                new Object[]{ user2,        matchAgentValue, Constants.ASSIGNMENT_NEW_ASSIGNMENT,      true },
+                new Object[]{user, "No" + matchAgentValue, Constants.ASSIGNMENT_NO_PROFILE_MATCH, true},
+                new Object[]{user, "No" + matchAgentValue, Constants.ASSIGNMENT_EXISTING_ASSIGNMENT, false},
+                new Object[]{user, matchAgentValue, Constants.ASSIGNMENT_NEW_ASSIGNMENT, true},
+                new Object[]{user, "No" + matchAgentValue, Constants.ASSIGNMENT_EXISTING_ASSIGNMENT, true},
+                new Object[]{user, matchAgentValue, Constants.ASSIGNMENT_EXISTING_ASSIGNMENT, true},
+                new Object[]{user2, "No" + matchAgentValue, Constants.ASSIGNMENT_NO_PROFILE_MATCH, true},
+                new Object[]{user2, matchAgentValue, Constants.ASSIGNMENT_NEW_ASSIGNMENT, true},
         };
     }
 
@@ -114,20 +113,20 @@ public class SegmentOnHttpHeaderTest extends TestBase {
      * Tries to assign users to buckets with the provided user agents.
      *
      * @param user           the user
-     * @param userAgent the user agent to use
+     * @param userAgent      the user agent to use
      * @param expectedStatus the expected assignment status
      * @param shouldPass     the flag of if this is passed or not
      */
-	@Test(dependsOnMethods = {"startExperiment"}, dataProvider = "dataProviderAssignments")
+    @Test(dependsOnMethods = {"startExperiment"}, dataProvider = "dataProviderAssignments")
     @RetryTest(warmup = 2500)
-	public void assignUsersToBucket(User user, String userAgent, String expectedStatus, boolean shouldPass) {
-		APIServerConnector ascWithAgent = apiServerConnector.clone();
+    public void assignUsersToBucket(User user, String userAgent, String expectedStatus, boolean shouldPass) {
+        APIServerConnector ascWithAgent = apiServerConnector.clone();
         ascWithAgent.putHeaderMapKVP("User-Agent", userAgent);
 
         Assignment expected = AssignmentFactory.createAssignment().setStatus(expectedStatus);
         Assignment assignment = getAssignment(experiment, user, null, true, false, HttpStatus.SC_OK, ascWithAgent);
         assertEqualModelItems(assignment, expected, new DefaultNameInclusionStrategy("status"), shouldPass);
-	}
+    }
 
     /**
      * Provides different bucket states.
@@ -137,8 +136,8 @@ public class SegmentOnHttpHeaderTest extends TestBase {
     @DataProvider
     public Object[][] dataProviderBuckets() {
         return new Object[][]{
-            new Object[]{ Constants.BUCKET_STATE_CLOSED },
-            new Object[]{ Constants.BUCKET_STATE_EMPTY },
+                new Object[]{Constants.BUCKET_STATE_CLOSED},
+                new Object[]{Constants.BUCKET_STATE_EMPTY},
         };
     }
 

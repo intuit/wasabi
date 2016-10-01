@@ -76,9 +76,9 @@ import static org.slf4j.LoggerFactory.getLogger;
  * <ul>
  * <li>x: not possible</li>
  * <li>o: not covered</li>
- * <li>b: covered by {@link #t_basicStateTransitions(String, int)}</li>
- * <li>c: covered by {@link #t_complexStateTransitions()}</li>
- * <li>r: covered by {@link #t_remainingTransitionTests()}</li>
+ * <li>b: covered by {@link #basicStateTransitions(String, int)}</li>
+ * <li>c: covered by {@link #complexStateTransitions()}</li>
+ * <li>r: covered by {@link #remainingTransitionTests()}</li>
  * </ul>
  */
 public class ExperimentTest extends TestBase {
@@ -87,14 +87,12 @@ public class ExperimentTest extends TestBase {
     private Experiment initialExperiment;
     private Experiment completeExperiment;
     private Experiment personalizationExperiment;
-    private String userName;
 
     /**
      * Sets up the user information and create application and experiment.
      */
     @BeforeClass
     public void init() {
-        userName = appProperties.getProperty("user-name");
         initialExperiment = ExperimentFactory.createCompleteExperiment();
         completeExperiment = ExperimentFactory.createCompleteExperiment();
         personalizationExperiment = ExperimentFactory.createCompleteExperiment();
@@ -104,7 +102,7 @@ public class ExperimentTest extends TestBase {
      * Creates a test experiment to test with.
      */
     @Test(groups = {"basicExperimentTests"}, dependsOnGroups = {"ping"})
-    public void t_createTestExperiment() {
+    public void createTestExperiment() {
         Experiment created = postExperiment(initialExperiment);
         initialExperiment.update(created);
     }
@@ -112,8 +110,8 @@ public class ExperimentTest extends TestBase {
     /**
      * Checks if the experiment output is a correctly formatted list.
      */
-    @Test(groups = {"basicExperimentTests"}, dependsOnMethods = {"t_createTestExperiment"})
-    public void t_experimentOutput() {
+    @Test(groups = {"basicExperimentTests"}, dependsOnMethods = {"createTestExperiment"})
+    public void experimentOutput() {
         List<Experiment> experiments = getExperiments();
         Assert.assertTrue(experiments.size() > 0, "List did not contain any elements - should be at least 1.");
     }
@@ -121,9 +119,9 @@ public class ExperimentTest extends TestBase {
     /**
      * Checks the raw output of an experiment to see if there are unintended or missing fields.
      */
-    @Test(groups = {"basicExperimentTests"}, dependsOnMethods = {"t_experimentOutput"}, retryAnalyzer = RetryAnalyzer.class)
+    @Test(groups = {"basicExperimentTests"}, dependsOnMethods = {"experimentOutput"}, retryAnalyzer = RetryAnalyzer.class)
     @RetryTest(maxTries = 3, warmup = 1500)
-    public void t_checkRawExperimentResult() {
+    public void checkRawExperimentResult() {
         response = doGet("/experiments?per_page=-1", null, null, HttpStatus.SC_OK, apiServerConnector);
 
         Assert.assertNull(response.jsonPath().get("version"), "version not hidden!");
@@ -186,7 +184,7 @@ public class ExperimentTest extends TestBase {
      * @param httpStatus the HTTP status code
      */
     @Test(dependsOnGroups = {"ping"}, dataProvider = "invalidIdProvider")
-    public void t_checkInvalidIDs(String id, String status, int httpStatus) {
+    public void checkInvalidIDs(String id, String status, int httpStatus) {
         Experiment experiment = new Experiment();
         experiment.id = id;
         getExperiment(experiment, httpStatus);
@@ -199,7 +197,7 @@ public class ExperimentTest extends TestBase {
      * @throws java.text.ParseException if the dates are not correctly formatted.
      */
     @Test(dependsOnGroups = {"ping"})
-    public void t_createAndValidateExperiment() throws java.text.ParseException {
+    public void createAndValidateExperiment() throws java.text.ParseException {
         Calendar now = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         now.add(Calendar.SECOND, -2); // adjust: drops milliseconds. -2 to avoid all problems with that
         Calendar latest = (Calendar) now.clone();
@@ -250,8 +248,8 @@ public class ExperimentTest extends TestBase {
      * @param expectedError      the expected error
      * @param expectedStatusCode the expected HTTP status code
      */
-    @Test(dependsOnMethods = {"t_createAndValidateExperiment"}, dataProvider = "badExperimentsPOST")
-    public void t_failPostExperiments(Experiment experiment, String expectedError, int expectedStatusCode) {
+    @Test(dependsOnMethods = {"createAndValidateExperiment"}, dataProvider = "badExperimentsPOST")
+    public void failPostExperiments(Experiment experiment, String expectedError, int expectedStatusCode) {
         postExperiment(experiment, expectedStatusCode);
         Assert.assertTrue(lastError().contains(expectedError), "Error message \"" + lastError()
                 + "\" does not contain \"" + expectedError + "\"");
@@ -280,7 +278,7 @@ public class ExperimentTest extends TestBase {
      * @param expectedStatusCode the expected HTTP status code
      */
     @Test(dependsOnGroups = {"ping"}, dataProvider = "badExperimentsDELETE")
-    public void t_failDeleteExperiments(Experiment experiment, String expectedError, int expectedStatusCode) {
+    public void failDeleteExperiments(Experiment experiment, String expectedError, int expectedStatusCode) {
         deleteExperiment(experiment, expectedStatusCode);
         Assert.assertTrue(lastError().contains(expectedError), "Error message \"" + lastError()
                 + "\" does not contain \"" + expectedError + "\"");
@@ -288,7 +286,7 @@ public class ExperimentTest extends TestBase {
 
     /**
      * Returns mal-formatted or incomplete experiments and their error messages for PUT requests.
-     * Does not change the state (see {@link #t_basicStateTransitions(String, int)}).
+     * Does not change the state (see {@link #basicStateTransitions(String, int)}).
      *
      * @return an experiment JSON String and an expected error message
      */
@@ -317,8 +315,8 @@ public class ExperimentTest extends TestBase {
      * @param expectedStatusCode the expected HTTP status code
      */
     @SuppressWarnings("unchecked")
-    @Test(dependsOnMethods = {"t_createAndValidateExperiment"}, dataProvider = "badExperimentsPUT")
-    public void t_failPutExperiments(String experiment, String expectedError, int expectedStatusCode) {
+    @Test(dependsOnMethods = {"createAndValidateExperiment"}, dataProvider = "badExperimentsPUT")
+    public void failPutExperiments(String experiment, String expectedError, int expectedStatusCode) {
         Map<String, Object> mapping = new HashMap<>();
         mapping = new GsonBuilder().create().fromJson(experiment, mapping.getClass());
         doPut("experiments/" + mapping.get("id"), null, experiment, expectedStatusCode, apiServerConnector);
@@ -366,8 +364,8 @@ public class ExperimentTest extends TestBase {
     /**
      * Creates a single bucket for the completeExperiment.
      */
-    @Test(dependsOnMethods = {"t_failPutExperiments", "t_failPostExperiments", "t_failDeleteExperiments"})
-    public void t_createBucket() {
+    @Test(dependsOnMethods = {"failPutExperiments", "failPostExperiments", "failDeleteExperiments"})
+    public void createBucket() {
         Bucket bucket = BucketFactory.createBucket(completeExperiment).setAllocationPercent(1);
         postBucket(bucket);
     }
@@ -378,8 +376,8 @@ public class ExperimentTest extends TestBase {
      * @param state      the state to change to
      * @param statusCode the expected http status code
      */
-    @Test(dependsOnMethods = {"t_createBucket"}, dataProvider = "state")
-    public void t_basicStateTransitions(String state, int statusCode) {
+    @Test(dependsOnMethods = {"createBucket"}, dataProvider = "state")
+    public void basicStateTransitions(String state, int statusCode) {
         completeExperiment.setState(state);
         Experiment updated = putExperiment(completeExperiment, statusCode);
         if (lastError().equals("") && updated.id != null) {
@@ -396,8 +394,8 @@ public class ExperimentTest extends TestBase {
      * <p>
      * Each with 0 buckets, buckets with fewer than 100% allocation and the correct amount of buckets with allocations.
      */
-    @Test(dependsOnMethods = {"t_failPutExperiments", "t_failPostExperiments", "t_failDeleteExperiments"})
-    public void t_complexStateTransitions() {
+    @Test(dependsOnMethods = {"failPutExperiments", "failPostExperiments", "failDeleteExperiments"})
+    public void complexStateTransitions() {
         // rely on previous tests that this works
         Experiment experiment = postExperiment(ExperimentFactory.createExperiment());
 
@@ -431,8 +429,8 @@ public class ExperimentTest extends TestBase {
     /**
      * Deletes initialExperiment and checks if the initialExperiment and completeExperiment are gone.
      */
-    @Test(dependsOnMethods = {"t_complexStateTransitions", "t_basicStateTransitions"}, alwaysRun = true)
-    public void t_checkIfExperimentsAreDeletedProperly() {
+    @Test(dependsOnMethods = {"complexStateTransitions", "basicStateTransitions"}, alwaysRun = true)
+    public void checkIfExperimentsAreDeletedProperly() {
         deleteExperiment(initialExperiment);
         List<Experiment> experiments = getExperiments();
         initialExperiment.setSerializationStrategy(new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson"));
@@ -444,8 +442,8 @@ public class ExperimentTest extends TestBase {
     /**
      * Recreates an experiment, that is an experiment with a label used before.
      */
-    @Test(dependsOnMethods = {"t_checkIfExperimentsAreDeletedProperly"})
-    public void t_recreateExperiment() {
+    @Test(dependsOnMethods = {"checkIfExperimentsAreDeletedProperly"})
+    public void recreateExperiment() {
         initialExperiment.setState(null);
         initialExperiment.getSerializationStrategy().add("id");
         Experiment created = postExperiment(initialExperiment);
@@ -458,8 +456,8 @@ public class ExperimentTest extends TestBase {
      * Checks the transitions which are not covered yet by the other tests.
      * These are: DR -&gt; T and DR -&gt; DEL
      */
-    @Test(dependsOnMethods = {"t_recreateExperiment"})
-    public void t_remainingTransitionTests() {
+    @Test(dependsOnMethods = {"recreateExperiment"})
+    public void remainingTransitionTests() {
         // DR -> T -> DEL
         initialExperiment.setState(Constants.EXPERIMENT_STATE_TERMINATED);
         putExperiment(initialExperiment, HttpStatus.SC_BAD_REQUEST);
@@ -492,8 +490,8 @@ public class ExperimentTest extends TestBase {
      * @param end        the end time
      * @throws ParseException when parse date time failed
      */
-    @Test(dependsOnMethods = {"t_remainingTransitionTests"}, dataProvider = "dates")
-    public void t_validDateBehaviourOnTransitions(String identifier, String start, String end) throws ParseException {
+    @Test(dependsOnMethods = {"remainingTransitionTests"}, dataProvider = "dates")
+    public void validDateBehaviourOnTransitions(String identifier, String start, String end) throws ParseException {
         LOGGER.info("Testing " + identifier + " behaviour.");
 
         // use a start time in the near future to make sure nothing goes wrong unexpectedly
@@ -563,7 +561,7 @@ public class ExperimentTest extends TestBase {
      * Checks modelName is not empty if personalization is enabled.
      */
     @Test(groups = {"basicExperimentTests"}, dependsOnGroups = {"ping"})
-    public void t_createTestPersonalizationExperiment() {
+    public void createTestPersonalizationExperiment() {
         // Creates a new experiment.
         Experiment createdSimpleExperiment = postExperiment(personalizationExperiment);
 

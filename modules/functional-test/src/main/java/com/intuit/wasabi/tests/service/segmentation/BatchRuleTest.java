@@ -39,9 +39,9 @@ public class BatchRuleTest extends TestBase {
     private static final Logger LOGGER = getLogger(BatchRuleTest.class);
     private final List<Experiment> validExperimentsLists = new ArrayList<>();
 
-    @Test(groups= {"createExperimentWithSegementation"},
+    @Test(groups = {"createExperimentWithSegementation"},
             dataProvider = "batchSetup", dataProviderClass = SegmentationDataProvider.class)
-    public void t_setupExperiment(String data){
+    public void setupExperiment(String data) {
         LOGGER.debug(data);
         response = apiServerConnector.doPost("/experiments", data);
         LOGGER.debug(response.jsonPath().prettify());
@@ -50,35 +50,35 @@ public class BatchRuleTest extends TestBase {
         assertReturnCode(response, HttpStatus.SC_CREATED);
     }
 
-    @Test(dependsOnMethods = {"t_setupExperiment"}, groups= {"createExperimentWithSegementation"})
-    public void t_setupBucketsAndStartExperiment(){
+    @Test(dependsOnMethods = {"setupExperiment"}, groups = {"createExperimentWithSegementation"})
+    public void setupBucketsAndStartExperiment() {
         String redBucket = "{\"label\": \"red\", \"allocationPercent\": 0.5, \"isControl\": false, \"description\": \"\"}";
         String blueBucket = "{\"label\": \"blue\", \"allocationPercent\": 0.5, \"isControl\": false, \"description\": \"\"}";
-        for(Experiment experiment : validExperimentsLists){
-            response = apiServerConnector.doPost("/experiments/"+experiment.id+"/buckets", redBucket);
+        for (Experiment experiment : validExperimentsLists) {
+            response = apiServerConnector.doPost("/experiments/" + experiment.id + "/buckets", redBucket);
             assertReturnCode(response, HttpStatus.SC_CREATED);
-            response = apiServerConnector.doPost("/experiments/"+experiment.id+"/buckets", blueBucket);
+            response = apiServerConnector.doPost("/experiments/" + experiment.id + "/buckets", blueBucket);
             assertReturnCode(response, HttpStatus.SC_CREATED);
-            response = apiServerConnector.doPut("/experiments/"+experiment.id, "{\"state\": \"RUNNING\"}");
+            response = apiServerConnector.doPut("/experiments/" + experiment.id, "{\"state\": \"RUNNING\"}");
             assertReturnCode(response, HttpStatus.SC_OK);
         }
     }
 
-    @Test(dependsOnGroups= {"createExperimentWithSegementation"}, groups= {"batchAssignment"},
+    @Test(dependsOnGroups = {"createExperimentWithSegementation"}, groups = {"batchAssignment"},
             dataProvider = "batchAssignmentData", dataProviderClass = SegmentationDataProvider.class)
-    public void t_batchAssignExperiment(int index, String applicationName, String userId, String data) {
+    public void batchAssignExperiment(int index, String applicationName, String userId, String data) {
         LOGGER.debug(data);
-        response = apiServerConnector.doPost("/assignments/applications/"+applicationName+"/users/"+userId, data);
+        response = apiServerConnector.doPost("/assignments/applications/" + applicationName + "/users/" + userId, data);
         Type listType = new TypeToken<Map<String, ArrayList<Assignment>>>() {
         }.getType();
         Map<String, List<Assignment>> batchAssignmentResult = new Gson().fromJson(response.asString(), listType);
         LOGGER.debug(response.asString());
         List<Assignment> assignments = batchAssignmentResult.get("assignments");
-        for(int i =0; i< assignments.size(); i++){
+        for (int i = 0; i < assignments.size(); i++) {
             Assignment assignment = assignments.get(i);
-            if (i == index){
+            if (i == index) {
                 Assert.assertEquals(assignment.status.contains("NEW_ASSIGNMENT"), true);
-            }else{
+            } else {
                 Assert.assertEquals(assignment.status.contains("NO_PROFILE_MATCH"), true);
             }
         }
@@ -86,12 +86,12 @@ public class BatchRuleTest extends TestBase {
 
 
     @AfterClass
-    public void t_cleanUp(){
+    public void cleanUp() {
         LOGGER.info("Clean up experiments");
-        for(Experiment experiment : validExperimentsLists){
-            response = apiServerConnector.doPut("experiments/"+experiment.id, "{\"state\": \"TERMINATED\"}");
+        for (Experiment experiment : validExperimentsLists) {
+            response = apiServerConnector.doPut("experiments/" + experiment.id, "{\"state\": \"TERMINATED\"}");
             assertReturnCode(response, HttpStatus.SC_OK);
-            response = apiServerConnector.doDelete("experiments/"+experiment.id);
+            response = apiServerConnector.doDelete("experiments/" + experiment.id);
             assertReturnCode(response, HttpStatus.SC_NO_CONTENT);
         }
     }

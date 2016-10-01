@@ -30,8 +30,7 @@ public class RepeatStateInconsistencyTestFactory extends TestBase {
     /**
      * Instantiates repetitionCount {@link StateInconsistencyTest} tests.
      *
-     *
-     * @param repetitionCount    the number of times to repeat
+     * @param repetitionCount the number of times to repeat
      * @return repetitionCount tests.
      */
     @Factory

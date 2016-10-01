@@ -1,25 +1,18 @@
-/*
-# Copyright 2016 Intuit
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-###############################################################################
-
-#
-# Integration tests (client-side) of timestamp
-# Requires the full stack to be running: service, DB, Cassandra, log uploader
-#
-*/
-
+/*******************************************************************************
+ * Copyright 2016 Intuit
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package com.intuit.wasabi.tests.service.statistics;
 
 import com.intuit.wasabi.tests.library.TestBase;
@@ -81,10 +74,8 @@ public class TimeStampTest extends TestBase {
     public Object[][] sampleExperiment() {
         String label = "timestampTest_" + System.currentTimeMillis();
         Application application = new Application("Wasabi_timestamp_test");
-        String startTime = EXPERIMENT_START;
-        String endTime = TOMORROW;
         Double samplingPercent = 1.0;
-        Experiment experiment = new Experiment(label, application, startTime, endTime, samplingPercent);
+        Experiment experiment = new Experiment(label, application, EXPERIMENT_START, TOMORROW, samplingPercent);
         return new Object[][]{
                 new Object[]{experiment}
         };
@@ -145,8 +136,7 @@ public class TimeStampTest extends TestBase {
     @Test
     public void setupUser() {
         // Create fake user
-        String username = TIMESTAMP_USER;
-        outUser = createUser(username);
+        outUser = createUser(TIMESTAMP_USER);
     }
 
     // Ensures that the correct amount of impressions are being registered with respect to the timestamp and experiment

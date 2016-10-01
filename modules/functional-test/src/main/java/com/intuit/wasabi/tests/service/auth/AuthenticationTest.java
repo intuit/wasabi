@@ -117,7 +117,7 @@ public class AuthenticationTest extends TestBase {
      */
     @Test(dependsOnGroups = {"ping"}, retryAnalyzer = RetryAnalyzer.class)
     @RetryTest(maxTries = 3, warmup = 2000)
-    public void t_checkUser() {
+    public void checkUser() {
         APIUser apiUserNew = getUserExists(apiUser);
         Assert.assertEquals(apiUserNew.email, apiUser.email, "E-Mails do not match.");
     }
@@ -127,7 +127,7 @@ public class AuthenticationTest extends TestBase {
      */
     @Test(dependsOnGroups = {"ping"}, retryAnalyzer = RetryAnalyzer.class)
     @RetryTest(maxTries = 3, warmup = 2000)
-    public void t_checkInvalidUser() {
+    public void checkInvalidUser() {
         APIUser invalidApiUser = APIUserFactory.createAPIUser().setEmail("non-existing-mail@example.org");
         APIUser apiUserNew = getUserExists(invalidApiUser, HttpStatus.SC_UNAUTHORIZED);
         Assert.assertNull(apiUserNew.email);
@@ -138,7 +138,7 @@ public class AuthenticationTest extends TestBase {
      */
     @Test(dependsOnGroups = {"ping"}, retryAnalyzer = RetryAnalyzer.class)
     @RetryTest(maxTries = 3, warmup = 2000)
-    public void t_checkInvalidUserEmailNull() {
+    public void checkInvalidUserEmailNull() {
         APIUser invalidApiUser = APIUserFactory.createAPIUser().setEmail(null);
         APIUser apiUserNew = getUserExists(invalidApiUser, HttpStatus.SC_NOT_FOUND);
         Assert.assertNull(apiUserNew.email);
@@ -147,9 +147,9 @@ public class AuthenticationTest extends TestBase {
     /**
      * Tries to login with the default user.
      */
-    @Test(dependsOnMethods = {"t_checkUser"}, retryAnalyzer = RetryAnalyzer.class)
+    @Test(dependsOnMethods = {"checkUser"}, retryAnalyzer = RetryAnalyzer.class)
     @RetryTest(maxTries = 3, warmup = 2000)
-    public void t_login() {
+    public void login() {
         AccessToken token = postLogin(apiUser);
         assertEqualAdmin(token);
     }
@@ -166,8 +166,8 @@ public class AuthenticationTest extends TestBase {
      * Tries to login with invalid users and requests.
      */
     @Test(dependsOnGroups = {"ping"})
-    public void t_loginFail() {
-        postLogin(null, "wrong_grant_type", HttpStatus.SC_UNAUTHORIZED);
+    public void loginFail() {
+        postLogin(null, "wrong_grantype", HttpStatus.SC_UNAUTHORIZED);
 
         // would expect SC_UNAUTHORIZED as well
         postLogin(null, null, HttpStatus.SC_INTERNAL_SERVER_ERROR);
@@ -176,19 +176,19 @@ public class AuthenticationTest extends TestBase {
                         .createAPIUser()
                         .setUsername("invalidusername")
                         .setPassword("1234Password"),
-                "client_credentials", HttpStatus.SC_UNAUTHORIZED);
+                "cliencredentials", HttpStatus.SC_UNAUTHORIZED);
 
 
         postLogin(new APIUser(apiUser).setPassword("1234Password"),
-                "client_credentials", HttpStatus.SC_UNAUTHORIZED);
+                "cliencredentials", HttpStatus.SC_UNAUTHORIZED);
     }
 
     /**
      * Tries to login with the default user.
      */
-    @Test(dependsOnMethods = {"t_checkUser"}, retryAnalyzer = RetryAnalyzer.class)
+    @Test(dependsOnMethods = {"checkUser"}, retryAnalyzer = RetryAnalyzer.class)
     @RetryTest(maxTries = 3, warmup = 2000)
-    public void t_sessionLogin() {
+    public void sessionLogin() {
         token = postLogin(apiUser);
         assertEqualAdmin(token);
     }
@@ -196,9 +196,9 @@ public class AuthenticationTest extends TestBase {
     /**
      * Tries to verify a token.
      */
-    @Test(dependsOnMethods = {"t_sessionLogin"}, retryAnalyzer = RetryAnalyzer.class)
+    @Test(dependsOnMethods = {"sessionLogin"}, retryAnalyzer = RetryAnalyzer.class)
     @RetryTest(maxTries = 3, warmup = 2000)
-    public void t_sessionVerifyToken() {
+    public void sessionVerifyToken() {
         AccessToken newToken = getVerifyToken(token);
         assertEqualModelItems(newToken, token);
     }
@@ -206,9 +206,9 @@ public class AuthenticationTest extends TestBase {
     /**
      * Tries to do a request with the received token.
      */
-    @Test(dependsOnMethods = {"t_sessionVerifyToken"}, retryAnalyzer = RetryAnalyzer.class)
+    @Test(dependsOnMethods = {"sessionVerifyToken"}, retryAnalyzer = RetryAnalyzer.class)
     @RetryTest(maxTries = 3, warmup = 2000)
-    public void t_sessionRequestWithToken() {
+    public void sessionRequestWithToken() {
         APIServerConnector asc = apiServerConnector.clone();
         asc.setAuthToken(token.token_type, token.access_token);
         asc.setUserNameAndPassword(null, null);
@@ -224,9 +224,9 @@ public class AuthenticationTest extends TestBase {
      * Tries to logout from a session
      * TODO: This does not seem to do anything?
      */
-    @Test(dependsOnMethods = {"t_sessionRequestWithToken", "t_sessionVerifyInvalidToken"}, retryAnalyzer = RetryAnalyzer.class, alwaysRun = true)
+    @Test(dependsOnMethods = {"sessionRequestWithToken", "sessionVerifyInvalidToken"}, retryAnalyzer = RetryAnalyzer.class, alwaysRun = true)
     @RetryTest(maxTries = 3, warmup = 2000)
-    public void t_sessionLogout() {
+    public void sessionLogout() {
         getLogout(token);
     }
 
@@ -234,9 +234,9 @@ public class AuthenticationTest extends TestBase {
     /**
      * Tries to verify invalid tokens.
      */
-    @Test(dependsOnMethods = {"t_sessionVerifyToken"}, retryAnalyzer = RetryAnalyzer.class)
+    @Test(dependsOnMethods = {"sessionVerifyToken"}, retryAnalyzer = RetryAnalyzer.class)
     @RetryTest(maxTries = 3, warmup = 2000)
-    public void t_sessionVerifyInvalidToken() {
+    public void sessionVerifyInvalidToken() {
         AccessToken invalidToken = AccessTokenFactory.createAccessToken();
         AccessToken newToken = getVerifyToken(invalidToken, HttpStatus.SC_UNAUTHORIZED);
         assertEqualModelItems(newToken, token, null, false);
@@ -253,9 +253,9 @@ public class AuthenticationTest extends TestBase {
     /**
      * Tries to verify a modified (thus invalid) token.
      */
-    @Test(dependsOnMethods = {"t_sessionVerifyToken"}, retryAnalyzer = RetryAnalyzer.class)
+    @Test(dependsOnMethods = {"sessionVerifyToken"}, retryAnalyzer = RetryAnalyzer.class)
     @RetryTest(maxTries = 3, warmup = 2000)
-    public void t_sessionVerifyModifiedToken() {
+    public void sessionVerifyModifiedToken() {
         token = postLogin(apiUser);
         AccessToken accessToken = new AccessToken(token);
         accessToken.access_token = token.access_token.substring(0, token.access_token.length() / 2)
@@ -270,10 +270,10 @@ public class AuthenticationTest extends TestBase {
      * Tries to login with a formerly valid access token.
      * FIXME: Currently the logout does nothing since username and password is never really used and all tokens will be returned as admin
      */
-//    @Test(dependsOnMethods = {"t_sessionLogout"}, retryAnalyzer = RetryAnalyzer.class)
+//    @Test(dependsOnMethods = {"sessionLogout"}, retryAnalyzer = RetryAnalyzer.class)
 //    @Test(retryAnalyzer = RetryAnalyzer.class)
 //    @RetryTest(maxTries = 3, warmup = 2000)
-//    public void t_requestAfterLogout() {
+//    public void requestAfterLogout() {
 //        APIServerConnector asc = apiServerConnector.clone();
 //        asc.setUserNameAndPassword(null, null);
 //        asc.setAuthToken(token.token_type, token.access_token);

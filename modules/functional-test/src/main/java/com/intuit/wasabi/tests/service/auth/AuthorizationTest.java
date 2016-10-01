@@ -100,7 +100,7 @@ public class AuthorizationTest extends TestBase {
      * POSTs the experiment to the server and updates it with the returned values.
      */
     @Test(dependsOnGroups = {"ping"})
-    public void t_createExperiments() {
+    public void createExperiments() {
         Experiment exp = postExperiment(experiment);
         Assert.assertNotNull(exp.creationTime, "Experiment creation failed (No creationTime).");
         Assert.assertNotNull(exp.modificationTime, "Experiment creation failed (No modificationTime).");
@@ -111,8 +111,8 @@ public class AuthorizationTest extends TestBase {
     /**
      * Test getting user permission
      */
-    @Test(dependsOnMethods = {"t_createExperiments"})
-    public void t_getUserPermissions() {
+    @Test(dependsOnMethods = {"createExperiments"})
+    public void getUserPermissions() {
         String uri = "authorization/users/" + userName + "/permissions";
         response = apiServerConnector.doGet(uri);
         assertReturnCode(response, HttpStatus.SC_OK);
@@ -141,13 +141,13 @@ public class AuthorizationTest extends TestBase {
     /**
      * Test getting user application permission
      */
-    @Test(dependsOnMethods = {"t_createExperiments"})
-    public void t_getUserAppPermissions() {
+    @Test(dependsOnMethods = {"createExperiments"})
+    public void getUserAppPermissions() {
         String uri = "authorization/users/" + userName + "/applications/" + experiment.applicationName + "/permissions";
         response = apiServerConnector.doGet(uri);
         assertReturnCode(response, HttpStatus.SC_OK);
         @SuppressWarnings("rawtypes")
-        HashMap jsonMap = (HashMap) response.jsonPath().get();
+        HashMap jsonMap = response.jsonPath().get();
         Assert.assertNotNull(jsonMap);
         @SuppressWarnings("unchecked")
         List<String> permissions = (List<String>) jsonMap.get("permissions");
@@ -164,8 +164,8 @@ public class AuthorizationTest extends TestBase {
     /**
      * Test getting user roles
      */
-    @Test(dependsOnMethods = {"t_getUserPermissions"})
-    public void t_getUserRoles() {
+    @Test(dependsOnMethods = {"getUserPermissions"})
+    public void getUserRoles() {
 
         String testRole = "superadmin";
         String uri = "authorization/roles/" + testRole + "/permissions";
@@ -173,7 +173,7 @@ public class AuthorizationTest extends TestBase {
 
         assertReturnCode(response, HttpStatus.SC_OK);
         @SuppressWarnings("rawtypes")
-        HashMap jsonMap = (HashMap) response.jsonPath().get();
+        HashMap jsonMap = response.jsonPath().get();
         Assert.assertNotNull(jsonMap);
         Assert.assertTrue(jsonMap.toString().contains("SUPERADMIN"));
     }
@@ -181,8 +181,8 @@ public class AuthorizationTest extends TestBase {
     /**
      * Test getting application user roles
      */
-    @Test(dependsOnMethods = {"t_getUserRoles"})
-    public void t_getApplicationUsersByRole() {
+    @Test(dependsOnMethods = {"getUserRoles"})
+    public void getApplicationUsersByRole() {
 
         String uri = "authorization/applications/" + experiment.applicationName;
         response = apiServerConnector.doGet(uri);
@@ -215,8 +215,8 @@ public class AuthorizationTest extends TestBase {
     /**
      * Testing getting application user role again but this time it will return nothing because user role is deleted.
      */
-    @Test(dependsOnMethods = {"t_getUserRoles"})
-    public void t_getApplicationUsersByRoleAgain() {
+    @Test(dependsOnMethods = {"getUserRoles"})
+    public void getApplicationUsersByRoleAgain() {
 
         // delete the user role
         String uri = "authorization/applications/" + experiment.applicationName + "/users/" + userName + "/roles";
@@ -233,8 +233,8 @@ public class AuthorizationTest extends TestBase {
     /**
      * Deletes experiments.
      */
-    @Test(dependsOnMethods = {"t_getApplicationUsersByRoleAgain"})
-    public void t_deleteExperiments() {
+    @Test(dependsOnMethods = {"getApplicationUsersByRoleAgain"})
+    public void deleteExperiments() {
         deleteExperiment(experiment);
     }
 }

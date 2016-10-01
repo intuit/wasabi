@@ -33,8 +33,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BasicAssignmentTest extends TestBase {
-    static final Logger LOGGER = LoggerFactory.getLogger(BasicAssignmentTest.class);
-    List<ExperimentMeta> experimentList = new ArrayList<>();
+    private static final Logger LOGGER = LoggerFactory.getLogger(BasicAssignmentTest.class);
+    private List<ExperimentMeta> experimentList = new ArrayList<>();
 
     @Test(groups = {"setup"}, dataProvider = "ExperimentTimes", dataProviderClass = AssignmentDataProvider.class)
     public void setupExperiments(String startTime, String endTime, String type, String experimentCount) {
@@ -65,7 +65,7 @@ public class BasicAssignmentTest extends TestBase {
 
     @Test(dependsOnGroups = {"setup"}, groups = {"stateTest"}, dataProvider = "ExperimentUsers",
             dataProviderClass = AssignmentDataProvider.class)
-    public void t_draftStateAssignment(String user) {
+    public void draftStateAssignment(String user) {
         for (ExperimentMeta experimentMeta : experimentList) {
             response = apiServerConnector.doPut("/experiments/" + experimentMeta.getExperiment().id,
                     "{\"state\": \"DRAFT\"}");
@@ -80,9 +80,9 @@ public class BasicAssignmentTest extends TestBase {
         }
     }
 
-    @Test(dependsOnGroups = {"setup"}, dependsOnMethods = {"t_draftStateAssignment"}, groups = {"stateTest"},
+    @Test(dependsOnGroups = {"setup"}, dependsOnMethods = {"draftStateAssignment"}, groups = {"stateTest"},
             dataProvider = "ExperimentUsers", dataProviderClass = AssignmentDataProvider.class)
-    public void t_runningStateAssignment(String user) {
+    public void runningStateAssignment(String user) {
         for (ExperimentMeta experimentMeta : experimentList) {
             response = apiServerConnector.doPut("/experiments/" + experimentMeta.getExperiment().id,
                     "{\"state\": \"RUNNING\"}");
@@ -118,10 +118,10 @@ public class BasicAssignmentTest extends TestBase {
     }
 
 
-    @Test(dependsOnGroups = {"setup"}, dependsOnMethods = {"t_draftStateAssignment", "t_runningStateAssignment"},
+    @Test(dependsOnGroups = {"setup"}, dependsOnMethods = {"draftStateAssignment", "runningStateAssignment"},
             groups = {"stateTest"},
             dataProvider = "ExperimentUsers", dataProviderClass = AssignmentDataProvider.class)
-    public void t_pausedStateAssignment(String user) {
+    public void pausedStateAssignment(String user) {
         for (ExperimentMeta experimentMeta : experimentList) {
             response = apiServerConnector.doPut("/experiments/" + experimentMeta.getExperiment().id,
                     "{\"state\": \"PAUSED\"}");
@@ -157,9 +157,9 @@ public class BasicAssignmentTest extends TestBase {
     }
 
     @Test(dependsOnGroups = {"setup"}, groups = {"stateTest"},
-            dependsOnMethods = {"t_draftStateAssignment", "t_runningStateAssignment", "t_pausedStateAssignment"},
+            dependsOnMethods = {"draftStateAssignment", "runningStateAssignment", "pausedStateAssignment"},
             dataProvider = "ExperimentUsers", dataProviderClass = AssignmentDataProvider.class)
-    public void t_runningAfterPausedStateAssignment(String user) {
+    public void runningAfterPausedStateAssignment(String user) {
         for (ExperimentMeta experimentMeta : experimentList) {
             response = apiServerConnector.doPut("/experiments/" + experimentMeta.getExperiment().id,
                     "{\"state\": \"RUNNING\"}");
@@ -195,7 +195,7 @@ public class BasicAssignmentTest extends TestBase {
     }
 
     @Test(dependsOnGroups = {"setup", "stateTest"}, groups = {"firstCall"})
-    public void t_firstCallToPausedExperiment() {
+    public void firstCallToPausedExperiment() {
         ExperimentMeta experimentMeta = experimentList.get(experimentList.size() - 1);
         response = apiServerConnector.doPut("/experiments/" + experimentMeta.getExperiment().id,
                 "{\"state\": \"PAUSED\"}");
@@ -225,7 +225,7 @@ public class BasicAssignmentTest extends TestBase {
 
 
     @AfterClass
-    public void t_cleanUp() {
+    public void cleanUp() {
         for (ExperimentMeta experiment : experimentList) {
             response = apiServerConnector.doPut("experiments/" + experiment.getExperiment().id, "{\"state\": \"RUNNING\"}");
             response = apiServerConnector.doPut("experiments/" + experiment.getExperiment().id, "{\"state\": \"TERMINATED\"}");

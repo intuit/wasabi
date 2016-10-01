@@ -24,6 +24,7 @@ import com.intuit.wasabi.tests.model.factory.BucketFactory;
 import com.intuit.wasabi.tests.model.factory.ExperimentFactory;
 import org.apache.http.HttpStatus;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
@@ -38,8 +39,8 @@ import static org.testng.Assert.assertEquals;
  */
 public class RollUpBadCallsTest extends TestBase {
 
-    protected static final String RED = "red";
-    protected static final String BLUE = "blue";
+    private static final String RED = "red";
+    private static final String BLUE = "blue";
     private static final String QBO = "qbo";
     private Experiment experiment;
     private List<Bucket> buckets = new ArrayList<>();
@@ -47,10 +48,8 @@ public class RollUpBadCallsTest extends TestBase {
     private double[] allocations = {.50, .50,};
     private boolean[] control = {false, true};
 
-    /**
-     * Initializes a default experiment.
-     */
-    public RollUpBadCallsTest() throws Exception {
+    @BeforeClass
+    public void setup() throws Exception {
 
         setResponseLogLengthLimit(1000);
 
@@ -66,7 +65,7 @@ public class RollUpBadCallsTest extends TestBase {
     }
 
     @Test(dependsOnGroups = {"ping"})
-    public void t_CreateTwoBuckets() {
+    public void createTwoBuckets() {
         Experiment exp = postExperiment(experiment);
         Assert.assertNotNull(exp.creationTime,
                 "Experiment creation failed (No creationTime).");
@@ -90,6 +89,9 @@ public class RollUpBadCallsTest extends TestBase {
                 }
 
             }
+            if (null == matching) {
+                continue;
+            }
             assertEquals(result.label, matching.label);
             assertEquals(result.isControl, matching.isControl);
             assertEquals(result.allocationPercent, matching.allocationPercent);
@@ -100,8 +102,8 @@ public class RollUpBadCallsTest extends TestBase {
 
     }
 
-    @Test(dependsOnMethods = {"t_CreateTwoBuckets"})
-    public void t_BadRequestCountsExperimentIdFoobar() {
+    @Test(dependsOnMethods = {"createTwoBuckets"})
+    public void badRequestCountsExperimentIdFoobar() {
         Experiment experiment = ExperimentFactory.createExperiment();
         experiment.id = "foobar";
         AnalyticsParameters parameters = new AnalyticsParameters();
@@ -110,8 +112,8 @@ public class RollUpBadCallsTest extends TestBase {
 
     }
 
-    @Test(dependsOnMethods = {"t_CreateTwoBuckets"})
-    public void t_BadRequestCountsExperimentId0() {
+    @Test(dependsOnMethods = {"createTwoBuckets"})
+    public void badRequestCountsExperimentId0() {
         Experiment experiment = ExperimentFactory.createExperiment();
         experiment.id = "0";
         AnalyticsParameters parameters = new AnalyticsParameters();
@@ -120,24 +122,24 @@ public class RollUpBadCallsTest extends TestBase {
 
     }
 
-    @Test(dependsOnMethods = {"t_CreateTwoBuckets"})
-    public void t_BadRequestCountsFromTimeFoobar() {
+    @Test(dependsOnMethods = {"createTwoBuckets"})
+    public void badRequestCountsFromTimeFoobar() {
         AnalyticsParameters parameters = new AnalyticsParameters();
         parameters.fromTime = "foobar";
         postExperimentCounts(experiment, parameters, HttpStatus.SC_BAD_REQUEST);
 
     }
 
-    @Test(dependsOnMethods = {"t_CreateTwoBuckets"})
-    public void t_BadRequestCountToTimeFoobar() {
+    @Test(dependsOnMethods = {"createTwoBuckets"})
+    public void badRequestCountToTimeFoobar() {
         AnalyticsParameters parameters = new AnalyticsParameters();
         parameters.toTime = "foobar";
         postExperimentCounts(experiment, parameters, HttpStatus.SC_BAD_REQUEST);
 
     }
 
-    @Test(dependsOnMethods = {"t_CreateTwoBuckets"})
-    public void t_BadRequestCountDailiesExperimentIdFoobar() {
+    @Test(dependsOnMethods = {"createTwoBuckets"})
+    public void badRequestCountDailiesExperimentIdFoobar() {
         Experiment experiment = ExperimentFactory.createExperiment();
         experiment.id = "foobar";
         AnalyticsParameters parameters = new AnalyticsParameters();
@@ -146,8 +148,8 @@ public class RollUpBadCallsTest extends TestBase {
 
     }
 
-    @Test(dependsOnMethods = {"t_CreateTwoBuckets"})
-    public void t_BadRequestCountDailiesExperimentId0() {
+    @Test(dependsOnMethods = {"createTwoBuckets"})
+    public void badRequestCountDailiesExperimentId0() {
         Experiment experiment = ExperimentFactory.createExperiment();
         experiment.id = "0";
         AnalyticsParameters parameters = new AnalyticsParameters();
@@ -156,8 +158,8 @@ public class RollUpBadCallsTest extends TestBase {
 
     }
 
-    @Test(dependsOnMethods = {"t_CreateTwoBuckets"})
-    public void t_BadRequestCountDailesFromTimeFoobar() {
+    @Test(dependsOnMethods = {"createTwoBuckets"})
+    public void badRequestCountDailesFromTimeFoobar() {
         AnalyticsParameters parameters = new AnalyticsParameters();
         parameters.fromTime = "foobar";
         postExperimentCumulativeCounts(experiment, parameters,
@@ -165,8 +167,8 @@ public class RollUpBadCallsTest extends TestBase {
 
     }
 
-    @Test(dependsOnMethods = {"t_CreateTwoBuckets"})
-    public void t_BadRequestCountDailiesToTimeFoobar() {
+    @Test(dependsOnMethods = {"createTwoBuckets"})
+    public void badRequestCountDailiesToTimeFoobar() {
         AnalyticsParameters parameters = new AnalyticsParameters();
         parameters.toTime = "foobar";
         postExperimentCumulativeCounts(experiment, parameters,
@@ -174,8 +176,8 @@ public class RollUpBadCallsTest extends TestBase {
 
     }
 
-    @Test(dependsOnMethods = {"t_CreateTwoBuckets"})
-    public void t_BadRequestPostStatisticsExperimentIdFoobar() {
+    @Test(dependsOnMethods = {"createTwoBuckets"})
+    public void badRequestPostStatisticsExperimentIdFoobar() {
         Experiment experiment = ExperimentFactory.createExperiment();
         experiment.id = "foobar";
         AnalyticsParameters parameters = new AnalyticsParameters();
@@ -184,8 +186,8 @@ public class RollUpBadCallsTest extends TestBase {
 
     }
 
-    @Test(dependsOnMethods = {"t_CreateTwoBuckets"})
-    public void t_BadRequestPostStatisticsExperimentId0() {
+    @Test(dependsOnMethods = {"createTwoBuckets"})
+    public void badRequestPostStatisticsExperimentId0() {
         Experiment experiment = ExperimentFactory.createExperiment();
         experiment.id = "0";
         AnalyticsParameters parameters = new AnalyticsParameters();
@@ -194,24 +196,24 @@ public class RollUpBadCallsTest extends TestBase {
 
     }
 
-    @Test(dependsOnMethods = {"t_CreateTwoBuckets"})
-    public void t_BadRequestPostStatisticsFromTimeFoobar() {
+    @Test(dependsOnMethods = {"createTwoBuckets"})
+    public void badRequestPostStatisticsFromTimeFoobar() {
         AnalyticsParameters parameters = new AnalyticsParameters();
         parameters.fromTime = "foobar";
         postStatistics(experiment, parameters, HttpStatus.SC_BAD_REQUEST);
 
     }
 
-    @Test(dependsOnMethods = {"t_CreateTwoBuckets"})
-    public void t_BadRequestPostStatisticsToTimeFoobar() {
+    @Test(dependsOnMethods = {"createTwoBuckets"})
+    public void badRequestPostStatisticsToTimeFoobar() {
         AnalyticsParameters parameters = new AnalyticsParameters();
         parameters.toTime = "foobar";
         postStatistics(experiment, parameters, HttpStatus.SC_BAD_REQUEST);
 
     }
 
-    @Test(dependsOnMethods = {"t_CreateTwoBuckets"})
-    public void t_BadRequestPostDailyStatisticsExperimentIdFoobar() {
+    @Test(dependsOnMethods = {"createTwoBuckets"})
+    public void badRequestPostDailyStatisticsExperimentIdFoobar() {
         Experiment experiment = ExperimentFactory.createExperiment();
         experiment.id = "foobar";
         AnalyticsParameters parameters = new AnalyticsParameters();
@@ -220,8 +222,8 @@ public class RollUpBadCallsTest extends TestBase {
 
     }
 
-    @Test(dependsOnMethods = {"t_CreateTwoBuckets"})
-    public void t_BadRequestPostDailyStasticsExperimentId0() {
+    @Test(dependsOnMethods = {"createTwoBuckets"})
+    public void badRequestPostDailyStasticsExperimentId0() {
         Experiment experiment = ExperimentFactory.createExperiment();
         experiment.id = "0";
         AnalyticsParameters parameters = new AnalyticsParameters();
@@ -230,16 +232,16 @@ public class RollUpBadCallsTest extends TestBase {
 
     }
 
-    @Test(dependsOnMethods = {"t_CreateTwoBuckets"})
-    public void t_BadRequestPostDailyStatisticsFromTimeFoobar() {
+    @Test(dependsOnMethods = {"createTwoBuckets"})
+    public void badRequestPostDailyStatisticsFromTimeFoobar() {
         AnalyticsParameters parameters = new AnalyticsParameters();
         parameters.fromTime = "foobar";
         postDailyStatistics(experiment, parameters, HttpStatus.SC_BAD_REQUEST);
 
     }
 
-    @Test(dependsOnMethods = {"t_CreateTwoBuckets"})
-    public void t_BadRequestPostDailyStatisticsToTimeFoobar() {
+    @Test(dependsOnMethods = {"createTwoBuckets"})
+    public void badRequestPostDailyStatisticsToTimeFoobar() {
         AnalyticsParameters parameters = new AnalyticsParameters();
         parameters.toTime = "foobar";
         postDailyStatistics(experiment, parameters, HttpStatus.SC_BAD_REQUEST);
