@@ -34,11 +34,11 @@ public class AuditLogEntryFilter extends PaginationFilter<AuditLogEntry> {
      * Initializes the AuditLogEntryFilter.
      *
      * Registers the {@link com.intuit.wasabi.api.pagination.filters.FilterUtil.FilterModifier#APPEND_TIMEZONEOFFSET}
-     * for {@link Property#time} to handle timezones.
+     * for {@link Property#TIME} to handle timezones.
      */
     public AuditLogEntryFilter() {
         super.registerFilterModifierForProperties(FilterUtil.FilterModifier.APPEND_TIMEZONEOFFSET,
-                Property.time);
+                Property.TIME);
     }
 
     /**
@@ -47,22 +47,22 @@ public class AuditLogEntryFilter extends PaginationFilter<AuditLogEntry> {
      * @see PaginationFilterProperty
      */
     private enum Property implements PaginationFilterProperty<AuditLogEntry> {
-        firstname(auditLogEntry -> auditLogEntry.getUser().getFirstName(), StringUtils::containsIgnoreCase),
-        lastname(auditLogEntry -> auditLogEntry.getUser().getLastName(), StringUtils::containsIgnoreCase),
-        username(auditLogEntry -> auditLogEntry.getUser().getUsername().getUsername(), StringUtils::containsIgnoreCase),
-        userid(auditLogEntry -> auditLogEntry.getUser().getUserId(), StringUtils::containsIgnoreCase),
-        mail(auditLogEntry -> auditLogEntry.getUser().getEmail(), StringUtils::containsIgnoreCase),
-        action(auditLogEntry -> auditLogEntry.getAction().toString(), StringUtils::containsIgnoreCase),
-        description(AuditLogAction::getDescription, StringUtils::containsIgnoreCase),
-        experiment(auditLogEntry -> auditLogEntry.getExperimentLabel().toString(), StringUtils::containsIgnoreCase),
-        experimentid(auditLogEntry -> auditLogEntry.getExperimentId().toString(), String::equals),
-        bucket(auditLogEntry -> auditLogEntry.getBucketLabel().toString(), StringUtils::containsIgnoreCase),
-        app(auditLogEntry -> auditLogEntry.getApplicationName().toString(), StringUtils::containsIgnoreCase),
-        time(auditLogEntry -> auditLogEntry.getTime().getTime(), FilterUtil::extractTimeZoneAndTestDate),
-        attribute(AuditLogEntry::getChangedProperty, StringUtils::containsIgnoreCase),
-        before(AuditLogEntry::getBefore, StringUtils::containsIgnoreCase),
-        after(AuditLogEntry::getAfter, StringUtils::containsIgnoreCase),
-        user(auditLogEntry -> auditLogEntry.getUser().getFirstName() + " " + auditLogEntry.getUser().getLastName(), StringUtils::containsIgnoreCase),
+        FIRSTNAME(auditLogEntry -> auditLogEntry.getUser().getFirstName(), StringUtils::containsIgnoreCase),
+        LASTNAME(auditLogEntry -> auditLogEntry.getUser().getLastName(), StringUtils::containsIgnoreCase),
+        USERNAME(auditLogEntry -> auditLogEntry.getUser().getUsername().getUsername(), StringUtils::containsIgnoreCase),
+        USERID(auditLogEntry -> auditLogEntry.getUser().getUserId(), StringUtils::containsIgnoreCase),
+        MAIL(auditLogEntry -> auditLogEntry.getUser().getEmail(), StringUtils::containsIgnoreCase),
+        ACTION(auditLogEntry -> auditLogEntry.getAction().toString(), StringUtils::containsIgnoreCase),
+        DESCRIPTION(AuditLogAction::getDescription, StringUtils::containsIgnoreCase),
+        EXPERIMENT(auditLogEntry -> auditLogEntry.getExperimentLabel().toString(), StringUtils::containsIgnoreCase),
+        EXPERIMENTID(auditLogEntry -> auditLogEntry.getExperimentId().toString(), String::equals),
+        BUCKET(auditLogEntry -> auditLogEntry.getBucketLabel().toString(), StringUtils::containsIgnoreCase),
+        APP(auditLogEntry -> auditLogEntry.getApplicationName().toString(), StringUtils::containsIgnoreCase),
+        TIME(auditLogEntry -> auditLogEntry.getTime().getTime(), FilterUtil::extractTimeZoneAndTestDate),
+        ATTRIBUTE(AuditLogEntry::getChangedProperty, StringUtils::containsIgnoreCase),
+        BEFORE(AuditLogEntry::getBefore, StringUtils::containsIgnoreCase),
+        AFTER(AuditLogEntry::getAfter, StringUtils::containsIgnoreCase),
+        USER(auditLogEntry -> auditLogEntry.getUser().getFirstName() + " " + auditLogEntry.getUser().getLastName(), StringUtils::containsIgnoreCase),
         ;
 
         private final Function<AuditLogEntry, ?> propertyExtractor;
