@@ -26,8 +26,10 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 public class EventLogSystem {
 
-    private static final Logger LOGGER = getLogger(EventLogSystem.class);
-    /** The event log thread. */
+    private static final Logger LOG = getLogger(EventLogSystem.class);
+    /**
+     * The event log thread.
+     */
     private final Thread eventLogThread;
 
     /**
@@ -46,7 +48,7 @@ public class EventLogSystem {
      */
     public void start() {
         eventLogThread.start();
-        LOGGER.info("Started " + eventLogThread.getName() + " with ID " + eventLogThread.getId() + ".");
+        LOG.info("Started {} with ID {}.", eventLogThread.getName(), eventLogThread.getId());
     }
 
     /**
@@ -54,12 +56,12 @@ public class EventLogSystem {
      */
     public void stop() {
         eventLogThread.interrupt();
-        LOGGER.info("Interrupted " + eventLogThread.getName() + " with ID " + eventLogThread.getId() + ".");
+        LOG.info("Interrupted {} with ID {}.", eventLogThread.getName(), eventLogThread.getId());
         try {
             eventLogThread.join(5000);
-            LOGGER.info(eventLogThread.getName() + " with ID " + eventLogThread.getId() + " joined.");
+            LOG.info("{} with ID {} joined.", eventLogThread.getName(), eventLogThread.getId());
         } catch (InterruptedException e) {
-            LOGGER.warn("Was interrupted while joining " + eventLogThread.getName() + ".", e);
+            LOG.warn("App was interrupted while joining {}. Error: {}", eventLogThread.getName(), e.getMessage());
         }
     }
 }

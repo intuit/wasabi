@@ -20,10 +20,20 @@ import com.google.inject.name.Named;
 import com.intuit.wasabi.eventlog.EventLog;
 import com.intuit.wasabi.eventlog.EventLogListener;
 import com.intuit.wasabi.eventlog.events.EventLogEvent;
+import com.intuit.wasabi.eventlog.events.SimpleEvent;
 import org.slf4j.Logger;
 
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static java.lang.Class.forName;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -37,17 +47,17 @@ public class EventLogImpl implements EventLog {
 
     private static final Logger LOGGER = getLogger(EventLogImpl.class);
     /**
-     * Executes the {@link EventLogEventEnvelope}s.
-     */
-    private final ThreadPoolExecutor eventPostThreadPoolExecutor;
-    /**
      * The listener subscriptions.
      */
-    /*test*/ final Map<EventLogListener, List<Class<? extends EventLogEvent>>> listeners;
+    final Map<EventLogListener, List<Class<? extends EventLogEvent>>> listeners;
     /**
      * the event Deque
      */
-    /*test*/ final Deque<EventLogEvent> eventDeque;
+    final Deque<EventLogEvent> eventDeque;
+    /**
+     * Executes the {@link EventLogEventEnvelope}s.
+     */
+    private final ThreadPoolExecutor eventPostThreadPoolExecutor;
 
     /**
      * Creates the event pool executor. Should be called by Guice.
@@ -126,7 +136,7 @@ public class EventLogImpl implements EventLog {
      * @param event    the event
      * @return true if the listener is registered for the event
      */
-    private boolean isSubscribed(EventLogListener listener, EventLogEvent event) {
+    boolean isSubscribed(EventLogListener listener, EventLogEvent event) {
         List<Class<? extends EventLogEvent>> subscriptions = listeners.get(listener);
 
         // class and super classes
@@ -154,7 +164,7 @@ public class EventLogImpl implements EventLog {
     @Override
     public void run() {
         try {
-            while (!Thread.currentThread().isInterrupted() && Thread.currentThread().isAlive()) {
+            do {
                 if (!eventDeque.isEmpty()) {
                     prepareEnvelope(eventDeque.pollFirst());
                 } else {
@@ -162,9 +172,10 @@ public class EventLogImpl implements EventLog {
                         Thread.sleep(500);
                     } catch (InterruptedException e) {
                         LOGGER.warn("Interrupted while sleeping.", e);
+                        Thread.currentThread().interrupt();
                     }
                 }
-            }
+            } while (!Thread.currentThread().isInterrupted() && Thread.currentThread().isAlive());
         } finally {
             LOGGER.info("Shutting down event system, posting remaining events -- new events will not be processed.");
             if (!eventDeque.isEmpty()) {
@@ -179,14 +190,11 @@ public class EventLogImpl implements EventLog {
      *
      * @param event the vent to prepare
      */
-    /*test*/ void prepareEnvelope(final EventLogEvent event) {
-        if (event == null) {
-            return;
-        }
-        for (EventLogListener eventLogListener : listeners.keySet()) {
-            if (isSubscribed(eventLogListener, event)) {
-                eventPostThreadPoolExecutor.submit(new EventLogEventEnvelope(event, eventLogListener));
-            }
-        }
+    private void prepareEnvelope(final EventLogEvent event) {
+        EventLogEvent realEvent = Optional.ofNullable(event).orElseGet(() -> new SimpleEvent("Someone sent a null event."));
+        listeners.keySet().parallelStream()
+                .filter(eventLogListener -> isSubscribed(eventLogListener, realEvent))
+                .forEach(eventLogListener -> eventPostThreadPoolExecutor
+                        .submit(new EventLogEventEnvelope(realEvent, eventLogListener)));
     }
 }

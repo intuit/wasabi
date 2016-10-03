@@ -15,28 +15,29 @@
  *******************************************************************************/
 package com.intuit.wasabi.eventlog;
 
+import org.junit.Test;
 import org.mockito.Mock;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertNotNull;
 import java.lang.reflect.Field;
-import org.junit.Test;
-import com.intuit.wasabi.eventlog.EventLogSystem;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 public class EventLogServiceTest {
 
-	@Mock private EventLog eventLog;
-	
+    @Mock
+    private EventLog eventLog;
+
     @Test
     public void instantiatable() throws Exception {
         new EventLogService(eventLog);
     }
-    
+
     @Test
     public void testStartup() throws Exception {
-    	EventLogService eventLogService = new EventLogService(eventLog);
-    	eventLogService.startUp();
+        EventLogService eventLogService = new EventLogService(eventLog);
+        eventLogService.startUp();
         Field eventLogSystemField = eventLogService.getClass().getDeclaredField("eventLogSystem");
         eventLogSystemField.setAccessible(true);
         EventLogSystem eventLogSystem = (EventLogSystem) eventLogSystemField.get(eventLogService);
@@ -46,29 +47,29 @@ public class EventLogServiceTest {
         eventLogThreadField.setAccessible(true);
         Thread eventThread = (Thread) eventLogThreadField.get(eventLogSystem);
         assertNotNull(eventThread);
-        
+
         assertEquals("EventLogThread", eventThread.getName());
-        
-    	eventLogService.startUp();
+
+        eventLogService.startUp();
     }
 
     @Test
     public void testShutdown() throws Exception {
-    	EventLogService eventLogService = new EventLogService(eventLog);
-    	eventLogService.shutDown();
+        EventLogService eventLogService = new EventLogService(eventLog);
+        eventLogService.shutDown();
         Field eventLogSystemField = eventLogService.getClass().getDeclaredField("eventLogSystem");
         eventLogSystemField.setAccessible(true);
         EventLogSystem eventLogSystem = (EventLogSystem) eventLogSystemField.get(eventLogService);
         assertNull(eventLogSystem);
 
-    	eventLogService.startUp();
-    	eventLogService.shutDown();
+        eventLogService.startUp();
+        eventLogService.shutDown();
         eventLogSystemField = eventLogService.getClass().getDeclaredField("eventLogSystem");
         eventLogSystemField.setAccessible(true);
         eventLogSystem = (EventLogSystem) eventLogSystemField.get(eventLogService);
         assertNull(eventLogSystem);
- 
 
-    }    
-    
+
+    }
+
 }
