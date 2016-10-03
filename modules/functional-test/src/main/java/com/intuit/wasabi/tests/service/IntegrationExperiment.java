@@ -48,7 +48,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  * Known Issues:
  * - The python test checked for the number of experiments, but since this could be run on production environments
  *   it does not feel right to check those numbers, as they might change by other accessors.
- * 
+ *
  * These transitions are tested:
  *
  * <small>(row transitions to column)</small>
@@ -94,7 +94,7 @@ public class IntegrationExperiment extends TestBase {
         completeExperiment = ExperimentFactory.createCompleteExperiment();
         personalizationExperiment = ExperimentFactory.createCompleteExperiment();
     }
-    
+
     /**
      * Creates a test experiment to test with.
      */
@@ -119,7 +119,7 @@ public class IntegrationExperiment extends TestBase {
     @Test(groups = {"basicExperimentTests"}, dependsOnMethods = {"t_experimentOutput"}, retryAnalyzer = RetryAnalyzer.class)
     @RetryTest(maxTries = 3, warmup = 1500)
     public void t_checkRawExperimentResult() {
-        response = doGet("/experiments", null, null, HttpStatus.SC_OK, apiServerConnector);
+        response = doGet("/experiments?per_page=-1", null, null, HttpStatus.SC_OK, apiServerConnector);
 
         Assert.assertNull(response.jsonPath().get("version"), "version not hidden!");
         Assert.assertNotNull(response.jsonPath().getList("experiments"));
@@ -239,7 +239,7 @@ public class IntegrationExperiment extends TestBase {
      */
     @DataProvider
     public Object[][] badExperimentsPOST() {
-        Experiment experiment = new Experiment();
+        Experiment experiment = new Experiment().setDescription("Sample hypothesis.");
         return new Object[][]{
                 new Object[]{new Experiment(experiment.setSamplingPercent(completeExperiment.samplingPercent)), 
                 		"Experiment application name cannot be null or an empty string", HttpStatus.SC_BAD_REQUEST},
@@ -273,7 +273,6 @@ public class IntegrationExperiment extends TestBase {
         postExperiment(experiment, expectedStatusCode);
         // FIXME: jwtodd
         if (expectedError.startsWith("An unique constraint")) {
-//            Assert.assertEquals(lastError(), expectedError, "Error message not as expected.");
             Assert.assertTrue(lastError().startsWith("An unique constraint"), "Error message not as expected.");
         } else if (expectedError.startsWith("Could not create experiment")) {
             Assert.assertTrue(lastError().startsWith("Could not create"), "Error message not as expected.");

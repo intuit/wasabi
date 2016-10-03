@@ -44,8 +44,12 @@ public final class NewExperiment implements ExperimentBase {
     private Date endTime;
     @ApiModelProperty(required = true)
     private Double samplingPercent;
+    @ApiModelProperty(required = true)
+    private String description;
     @ApiModelProperty(required = false)
-    private String description = "";
+    private String hypothesisIsCorrect = "";
+    @ApiModelProperty(required = false)
+    private String results = "";
     @ApiModelProperty(required = false)
     private String rule = "";
     @ApiModelProperty(required = false)
@@ -102,7 +106,11 @@ public final class NewExperiment implements ExperimentBase {
 		this.description = description;
 	}
 
-	public void setRule(String rule) {
+    public void setHypothesisIsCorrect(String hypothesisIsCorrect) { this.hypothesisIsCorrect = hypothesisIsCorrect; }
+
+    public void setResults(String results) { this.results = results; }
+
+    public void setRule(String rule) {
 		this.rule = rule;
 	}
 
@@ -110,7 +118,7 @@ public final class NewExperiment implements ExperimentBase {
 		this.isPersonalizationEnabled = isPersonalizationEnabled;
 	}
 
-	public void setModelName(String modelName) {
+    public void setModelName(String modelName) {
 		this.modelName = modelName;
 	}
 
@@ -165,6 +173,10 @@ public final class NewExperiment implements ExperimentBase {
     public String getDescription() {
         return description;
     }
+
+    public String getHypothesisIsCorrect() { return hypothesisIsCorrect; }
+
+    public String getResults() { return results;  }
 
     @Override
     public String getRule() {

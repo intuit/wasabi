@@ -44,8 +44,19 @@ angular.module('wasabi.controllers').
                 return UtilitiesFactory.hasPermission(appName, PERMISSIONS.updatePerm);
             };
 
+            $scope.openResultsModal = function (experiment) {
+                UtilitiesFactory.openResultsModal(experiment, false, $scope.loadPrioritiesAfterAction);
+            };
+
             $scope.changeState = function (experiment, state) {
-                UtilitiesFactory.changeState(experiment, state, $scope.loadPrioritiesAfterAction);
+                var afterChangeActions = {
+                    // Transitioning to PAUSED, that is, stopping the experiment.  Prompt the user to enter their results.
+                    'PAUSED': $scope.openResultsModal,
+                    // In other cases, just load the experiment.
+                    'RUNNING': $scope.loadPrioritiesAfterAction,
+                    'TERMINATED': $scope.loadPrioritiesAfterAction
+                };
+                UtilitiesFactory.changeState(experiment, state, afterChangeActions);
             };
 
             $scope.deleteExperiment = function (experiment) {

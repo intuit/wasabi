@@ -236,10 +236,10 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
         // clobbered. In practice, this should never happen, but...
         // TODO: Implement a transactional recipe
         final String CQL = "insert into experiment " +
-                "(id, description, rule, sample_percent, start_time, end_time, " +
+                "(id, description, hypothesisiscorrect, results, rule, sample_percent, start_time, end_time, " +
                 "   state, label, app_name, created, modified, is_personalized, model_name, model_version," +
                 " is_rapid_experiment, user_cap, creatorid) " +
-                "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try {
             final Experiment.ID experimentID = newExperiment.getID();
@@ -258,6 +258,8 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
                     .withStringValue(newExperiment.getDescription() != null
                             ? newExperiment.getDescription()
                             : "")
+                    .withStringValue(newExperiment.getHypothesisIsCorrect() != null ? newExperiment.getHypothesisIsCorrect() : "")
+                    .withStringValue(newExperiment.getResults() != null ? newExperiment.getResults() : "")
                     .withStringValue(newExperiment.getRule() != null
                             ? newExperiment.getRule()
                             : "")
@@ -464,7 +466,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
         validator.validateExperiment(experiment);
 
         final String CQL = "update experiment " +
-                "set description = ?, rule = ?, sample_percent = ?, " +
+                "set description = ?, hypothesisiscorrect = ?, results = ?, rule = ?, sample_percent = ?, " +
                 "start_time = ?, end_time = ?, " +
                 "state=?, label=?, app_name=?, modified=? , is_personalized=?, model_name=?, model_version=?," +
                 " is_rapid_experiment=?, user_cap=?" +
@@ -482,6 +484,8 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
                     .withStringValue(experiment.getDescription() != null
                             ? experiment.getDescription()
                             : "")
+                    .withStringValue(experiment.getHypothesisIsCorrect() != null ? experiment.getHypothesisIsCorrect() : "")
+                    .withStringValue(experiment.getResults() != null ? experiment.getResults() : "")
                     .withStringValue(experiment.getRule() != null
                             ? experiment.getRule()
                             : "")

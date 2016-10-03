@@ -825,6 +825,23 @@
          </downloadUrls>
       </dependency>
       <dependency>
+         <name>MySQL Connector/J</name>
+         <groupId>mysql</groupId>
+         <artifactId>mysql-connector-java</artifactId>
+         <version>5.1.6</version>
+         <projectUrl>http://dev.mysql.com/doc/connector-j/en/</projectUrl>
+         <type>jar</type>
+         <licenses>
+            <license>
+               <name>The GNU General Public License, Version 2</name>
+               <url>http://www.gnu.org/licenses/old-licenses/gpl-2.0.html</url>
+            </license>
+         </licenses>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/mysql/mysql-connector-java/5.1.6/mysql-connector-java-5.1.6.jar</string>
+         </downloadUrls>
+      </dependency>
+      <dependency>
          <name>null</name>
          <groupId>com.github.fge</groupId>
          <artifactId>json-schema-validator</artifactId>
