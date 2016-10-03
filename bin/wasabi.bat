@@ -1,4 +1,4 @@
-@echo off 
+@echo off
 
 rem ############################################################################
 rem # Copyright 2016 Intuit
@@ -41,14 +41,14 @@ set remaining_commands=%*
         call :debug Current command: !current_command!
         set remaining_commands=%%D
         call :debug Remaining commands: !remaining_commands!
-        
+
         rem Process current command. Split command and parameters at :
         for /f "tokens=1* delims=:" %%F in ("!current_command!") do (
             set command_name=%%F
             call :debug Command name: !command_name!
             set parameters=%%G
             call :debug Command parameters: !parameters!
-            
+
             rem Check command validity
             for %%V in (%valid_commands%) do (
                 if /I "!command_name!"=="%%V" goto :valid_command
@@ -57,7 +57,7 @@ set remaining_commands=%*
             exit /b 1
             :valid_command
             set space_parameters=
-            
+
             rem Read command paramaters from parameter string
             :read_parameters
                 rem Pop first parameter (split at , )
@@ -66,14 +66,14 @@ set remaining_commands=%*
                     call :debug Current parameter: !param!
                      set parameters=%%Q
                     call :debug Remaining parameters: !parameters!
-                    
+
                     rem Append parameter to parameter list - now space separated
                     set space_parameters=!space_parameters! !param!
                     call :debug Collected parameters: !space_parameters!
                 )
                 if defined parameters goto :read_parameters
-            
-            set assembled_command=bin/win/!command_name!.bat!space_parameters!
+
+            set assembled_command=bin\win\!command_name!.bat!space_parameters!
             call :debug Assembled: !assembled_command!
             call !assembled_command!
         )
@@ -88,7 +88,7 @@ goto :eof
 rem LABEL: Print error and show usage, then exit with exit code 1.
 :invalid_command_issued
      call :error Invalid command: %1
-     call "bin/win/usage.bat"
+     call "bin\win\usage.bat"
      goto :eof
 
 rem FUNCTION: Initializes the debug log.
