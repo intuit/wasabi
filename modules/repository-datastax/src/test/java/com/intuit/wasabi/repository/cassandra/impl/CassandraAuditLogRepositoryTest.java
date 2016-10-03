@@ -53,6 +53,9 @@ public class CassandraAuditLogRepositoryTest {
     @Mock
 	Result<com.intuit.wasabi.repository.cassandra.pojo.audit.AuditLog> mockResult;
     
+    @Mock
+    AuditLog mockAuditLog;
+    
     CassandraAuditLogRepository repository;
 
 	private UserInfo userInfo;
@@ -92,6 +95,54 @@ public class CassandraAuditLogRepositoryTest {
     	dbEntries.add(dbEntry);
     }
     
+	@Test
+	public void testAuditLogGetActionThrowsException() {
+		doThrow(new RuntimeException("runtimeexcep")).when(mockAuditLog).getAction();
+		when(mockAuditLog.getTime()).thenReturn(new Date());
+		when(mockAuditLog.getAppName()).thenReturn("testApp");
+		ArrayList<AuditLog> entries = new ArrayList<>();
+		entries.add(mockAuditLog);
+		List<AuditLogEntry> result = repository.makeAuditLogEntries(entries);
+		assertEquals("Size should be eq", 1, result.size());
+		assertEquals("value shoudl be eq", AuditLogAction.UNSPECIFIED_ACTION, result.get(0).getAction());
+	}
+
+	@Test
+	public void testAuditLogGetBuckeLabelThrowsException() {
+		doThrow(new RuntimeException("runtimeexcep")).when(mockAuditLog).getBucketLabel();
+		when(mockAuditLog.getTime()).thenReturn(new Date());
+		when(mockAuditLog.getAppName()).thenReturn("testApp");
+		ArrayList<AuditLog> entries = new ArrayList<>();
+		entries.add(mockAuditLog);
+		List<AuditLogEntry> result = repository.makeAuditLogEntries(entries);
+		assertEquals("Size should be eq", 1, result.size());
+		assertEquals("value shoudl be eq", null, result.get(0).getBucketLabel());
+	}
+
+	@Test
+	public void testAuditLogGetExperimentLabelThrowsException() {
+		doThrow(new RuntimeException("runtimeexcep")).when(mockAuditLog).getExperimentLabel();
+		when(mockAuditLog.getTime()).thenReturn(new Date());
+		when(mockAuditLog.getAppName()).thenReturn("testApp");
+		ArrayList<AuditLog> entries = new ArrayList<>();
+		entries.add(mockAuditLog);
+		List<AuditLogEntry> result = repository.makeAuditLogEntries(entries);
+		assertEquals("Size should be eq", 1, result.size());
+		assertEquals("value shoudl be eq", null, result.get(0).getExperimentLabel());
+	}
+
+	@Test
+	public void testAuditLogGetExprimentIdThrowsException() {
+		doThrow(new RuntimeException("runtimeexcep")).when(mockAuditLog).getExperimentId();
+		when(mockAuditLog.getTime()).thenReturn(new Date());
+		when(mockAuditLog.getAppName()).thenReturn("testApp");
+		ArrayList<AuditLog> entries = new ArrayList<>();
+		entries.add(mockAuditLog);
+		List<AuditLogEntry> result = repository.makeAuditLogEntries(entries);
+		assertEquals("Size should be eq", 1, result.size());
+		assertEquals("value shoudl be eq", null, result.get(0).getExperimentId());
+	}
+
 	@Test
 	public void testSaveAndGetEntrySuccess() {
 		

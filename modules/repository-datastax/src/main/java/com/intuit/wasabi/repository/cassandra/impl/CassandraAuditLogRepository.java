@@ -98,7 +98,7 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
 	 * @param entries audit log table pojo list
 	 * @return audit log domain object list
 	 */
-	private List<AuditLogEntry> makeAuditLogEntries(List<AuditLog> entries) {
+	protected List<AuditLogEntry> makeAuditLogEntries(List<AuditLog> entries) {
 		List<AuditLogEntry> auditLogEntries = new ArrayList<>(entries.size());
 
 		for (AuditLog auditLog : entries) {
@@ -122,43 +122,48 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
 			// The intent of the multiple try blocks is to get as much info to
 			// the client as possible. The exceptions are logged as warn
 			AuditLogAction ala = null;
+			String action = null;
 			try {
-				ala = AuditLogAction.valueOf(auditLog.getAction());
+				action = auditLog.getAction();
+				ala = AuditLogAction.valueOf(action);
 			} catch (Exception e) {
 				LOGGER.warn("Exception while creating audit log action: "
-						+ auditLog.getAction(), e);
+						+ action, e);
 				ala = AuditLogAction.UNSPECIFIED_ACTION;
 			}
 
 			Bucket.Label bucketLabel = null;
+			String bucketLabelString = null;
 			try {
-				String label = auditLog.getBucketLabel();
-				if ( ! StringUtils.isBlank(label) )
-					bucketLabel = Bucket.Label.valueOf(label);
+				bucketLabelString = auditLog.getBucketLabel();
+				if ( ! StringUtils.isBlank(bucketLabelString) )
+					bucketLabel = Bucket.Label.valueOf(bucketLabelString);
 			} catch (Exception e) {
-				LOGGER.warn("Exception while creating audit log exp label: "
-						+ auditLog.getBucketLabel(), e);
+				LOGGER.warn("Exception while creating audit log bucket label: "
+						+ bucketLabelString, e);
 			}
 
 			Experiment.Label experimentLabel = null;
+			String expLabelString = null;
 			try {
-				String label = auditLog.getExperimentLabel();
-				if ( ! StringUtils.isBlank(label) )
-					experimentLabel = Label.valueOf(label);
+				expLabelString = auditLog.getExperimentLabel();
+				if ( ! StringUtils.isBlank(expLabelString) )
+					experimentLabel = Label.valueOf(expLabelString);
 			} catch (Exception e) {
-				LOGGER.warn("Exception while creating audit log bucket label: "
-						+ auditLog.getExperimentLabel(), e);
+				LOGGER.warn("Exception while creating audit log experiment label: "
+						+ expLabelString, e);
 			}
 
 			Experiment.ID experimentId = null;
+			UUID expId = null;
 			try {
-				UUID expId = auditLog.getExperimentId();
+				expId = auditLog.getExperimentId();
 				if ( expId != null )
 					experimentId = Experiment.ID
 						.valueOf(expId);
 			} catch (Exception e) {
-				LOGGER.warn("Exception while creating audit log bucket label: "
-						+ auditLog.getExperimentId(), e);
+				LOGGER.warn("Exception while creating audit log experiment id: "
+						+ expId, e);
 			}
 
 			// Set application name only if it is not GLOBAL_ENTRY_APPLICATION

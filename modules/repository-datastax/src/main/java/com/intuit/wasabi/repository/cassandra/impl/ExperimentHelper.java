@@ -85,7 +85,7 @@ public class ExperimentHelper {
     	return experimentObject;
 	}
 
-	private static String convertRuleToJson(String rule) {
+	protected static String convertRuleToJson(String rule) {
 	    String decoratedRule = "";
 	    if (rule != null && !rule.isEmpty()) {
 	        Rule expRule = new RuleBuilder().parseExpression(rule);
