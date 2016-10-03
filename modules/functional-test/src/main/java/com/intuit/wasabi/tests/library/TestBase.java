@@ -76,8 +76,6 @@ import java.util.Properties;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-//import com.intuit.wasabi.util.PropertyFetcher;
-
 /**
  * A TestBase for new test sets.
  */

@@ -138,7 +138,8 @@ public class ModelAssert {
      * @param actual   list one
      * @param expected list two
      */
-    public static void assertEqualModelItems(List<? extends ModelItem> actual, List<? extends ModelItem> expected) {
+    public static void assertEqualModelItems(List<? extends ModelItem> actual,
+                                             List<? extends ModelItem> expected) {
         assertEqualModelItems(actual, expected, null);
     }
 
@@ -153,7 +154,9 @@ public class ModelAssert {
      * @param expected     list two
      * @param tempStrategy the (temporary) serialization strategy
      */
-    public static void assertEqualModelItems(List<? extends ModelItem> actual, List<? extends ModelItem> expected, SerializationStrategy tempStrategy) {
+    public static void assertEqualModelItems(List<? extends ModelItem> actual,
+                                             List<? extends ModelItem> expected,
+                                             SerializationStrategy tempStrategy) {
         assertEqualModelItems(actual, expected, tempStrategy, true);
     }
 
@@ -169,7 +172,10 @@ public class ModelAssert {
      * @param tempStrategy the (temporary) serialization strategy
      * @param equalItems   if false, the items must not be equal
      */
-    public static void assertEqualModelItems(List<? extends ModelItem> actual, List<? extends ModelItem> expected, SerializationStrategy tempStrategy, boolean equalItems) {
+    public static void assertEqualModelItems(List<? extends ModelItem> actual,
+                                             List<? extends ModelItem> expected,
+                                             SerializationStrategy tempStrategy,
+                                             boolean equalItems) {
         logInfo(actual, expected, tempStrategy, equalItems);
         if (expected == null) {
             if (equalItems) {
@@ -246,7 +252,10 @@ public class ModelAssert {
      * @param tempStrategy the (temporary) serialization strategy
      * @param equalItems   if false, the items must not be equal
      */
-    public static void assertEqualModelItemsNoOrder(List<? extends ModelItem> actual, List<? extends ModelItem> expected, SerializationStrategy tempStrategy, boolean equalItems) {
+    public static void assertEqualModelItemsNoOrder(List<? extends ModelItem> actual,
+                                                    List<? extends ModelItem> expected,
+                                                    SerializationStrategy tempStrategy,
+                                                    boolean equalItems) {
         logInfo(actual, expected, tempStrategy, equalItems);
         if (expected == null) {
             if (equalItems) {
@@ -321,7 +330,8 @@ public class ModelAssert {
      * @param actual   map one
      * @param expected map two
      */
-    public static void assertEqualModelItems(Map<? extends ModelItem, ? extends ModelItem> actual, Map<? extends ModelItem, ? extends ModelItem> expected) {
+    public static void assertEqualModelItems(Map<? extends ModelItem, ? extends ModelItem> actual,
+                                             Map<? extends ModelItem, ? extends ModelItem> expected) {
         assertEqualModelItems(actual, expected, null);
     }
 
@@ -333,7 +343,9 @@ public class ModelAssert {
      * @param expected     map two
      * @param tempStrategy the (temporary) serialization strategy
      */
-    public static void assertEqualModelItems(Map<? extends ModelItem, ? extends ModelItem> actual, Map<? extends ModelItem, ? extends ModelItem> expected, SerializationStrategy tempStrategy) {
+    public static void assertEqualModelItems(Map<? extends ModelItem, ? extends ModelItem> actual,
+                                             Map<? extends ModelItem, ? extends ModelItem> expected,
+                                             SerializationStrategy tempStrategy) {
         assertEqualModelItems(actual, expected, tempStrategy, true);
     }
 
@@ -346,7 +358,10 @@ public class ModelAssert {
      * @param tempStrategy the (temporary) serialization strategy
      * @param equalItems   if false, the items must not be equal
      */
-    public static void assertEqualModelItems(Map<? extends ModelItem, ? extends ModelItem> actual, Map<? extends ModelItem, ? extends ModelItem> expected, SerializationStrategy tempStrategy, boolean equalItems) {
+    public static void assertEqualModelItems(Map<? extends ModelItem, ? extends ModelItem> actual,
+                                             Map<? extends ModelItem, ? extends ModelItem> expected,
+                                             SerializationStrategy tempStrategy,
+                                             boolean equalItems) {
         logInfo(actual, expected, tempStrategy, equalItems);
         if (expected == null) {
             if (equalItems) {
