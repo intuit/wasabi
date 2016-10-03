@@ -50,7 +50,7 @@ public class EmptyBucketGetUserAssignmentToEmptyBucketTest extends TestBase {
      * Test scenario where user is being reassigned from empty bucket to another empty bucket
      */
     @Test(dependsOnGroups = {"ping"})
-    public void t_AddUserToExperimentWith2BucektsAndEmptyBucketBothAndReassignToAnotherEmptyBucket() {
+    public void t_AddUserToExperimentWith2BucketsAndEmptyBucketBothAndReassignToAnotherEmptyBucket() {
         Experiment exp = postExperiment(experiment);
         Assert.assertNotNull(exp.creationTime, "Experiment creation failed.");
         Assert.assertNotNull(exp.modificationTime, "Experiment creation failed (No modificationTime).");
@@ -76,7 +76,7 @@ public class EmptyBucketGetUserAssignmentToEmptyBucketTest extends TestBase {
        List<Bucket> emptyBucket = new ArrayList<>();
        emptyBucket.add(buckets.get(0));
        emptyBucket.add(buckets.get(1));
-       emptyBucket = putBucketsState(emptyBucket, Constants.BUCKET_STATE_EMPTY);
+       putBucketsState(emptyBucket, Constants.BUCKET_STATE_EMPTY);
        
        // There should be no bucket available for user
        Assignment getAssignmentAfterAllEmptyBuckets = getAssignment(experiment, specialUser);

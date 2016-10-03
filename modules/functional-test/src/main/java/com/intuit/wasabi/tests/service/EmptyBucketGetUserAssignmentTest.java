@@ -45,7 +45,6 @@ public class EmptyBucketGetUserAssignmentTest extends TestBase {
 
     private Experiment experiment;
     private List<Bucket> buckets = new ArrayList<>();
-    private User specialUser = UserFactory.createUser("SpecialForBucketTest");
     private User specialUser2 = UserFactory.createUser("Special2ForBucketTest");
 
     /**
@@ -84,10 +83,10 @@ public class EmptyBucketGetUserAssignmentTest extends TestBase {
         Assignment putAssignmentFor2 = putAssignment(experiment, assignment, specialUser2);
         assertEqualModelItems(putAssignmentFor2, assignment, new DefaultNameInclusionStrategy("assignment"));
 
-       // Empty bucke to which use is assigned
+       // Empty bucket to which use is assigned
        List<Bucket> emptyBucket = new ArrayList<>();
        emptyBucket.add(buckets.get(0));
-       emptyBucket = putBucketsState(emptyBucket, Constants.BUCKET_STATE_EMPTY);
+       putBucketsState(emptyBucket, Constants.BUCKET_STATE_EMPTY);
        
        // Get assignment after emptying bucket
        Assignment getAssignmentAfterEmpty = getAssignment(experiment, specialUser2);
