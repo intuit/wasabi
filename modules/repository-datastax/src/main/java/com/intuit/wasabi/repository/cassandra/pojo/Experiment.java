@@ -86,4 +86,10 @@ public class Experiment {
     @Column(name="creatorid")
     private String creatorId;
 
+    @Column(name="hypothesis_is_correct")
+    private String hypothesisIsCorrect;
+
+    @Column(name="results")
+    private String results;
+
 }

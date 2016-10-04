@@ -15,17 +15,6 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.cassandra.impl;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
 import com.datastax.driver.mapping.Mapper;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Experiment;
@@ -34,6 +23,16 @@ import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
 import com.intuit.wasabi.repository.cassandra.IntegrationTestBase;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.PrioritiesAccessor;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
+import static org.junit.Assert.assertEquals;
 
 public class CassandraPrioritiesRepositoryITest extends IntegrationTestBase {
 
@@ -81,13 +80,13 @@ public class CassandraPrioritiesRepositoryITest extends IntegrationTestBase {
 	public void testTwoGetPrioritiesSuccess() {
 		
     	experimentAccessor.insertExperiment(experimentId1, 
-    			"d1", "", 1.0, date1, date2, 
+    			"d1", "yes", "r1", "", 1.0, date1, date2,
     			com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT.name(), "l1", 
     			applicationName.toString(), date1, date2, true, 
     			"m1", "v1", true, 5000, "c1");
 
     	experimentAccessor.insertExperiment(experimentId2, 
-    			"d2", "", 1.0, date1, date2, 
+    			"d2", "yes", "r2", "", 1.0, date1, date2,
     			com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT.name(), "l2", 
     			applicationName.toString(), date1, date2, true, 
     			"m2", "v2", true, 5000, "c2");

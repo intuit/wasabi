@@ -15,17 +15,6 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.cassandra.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.junit.Before;
-import org.junit.Test;
-
 import com.datastax.driver.mapping.Mapper;
 import com.datastax.driver.mapping.MappingManager;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
@@ -36,6 +25,16 @@ import com.intuit.wasabi.experimentobjects.ExperimentList;
 import com.intuit.wasabi.repository.cassandra.IntegrationTestBase;
 import com.intuit.wasabi.repository.cassandra.accessor.ExclusionAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class CassandraMutexRepositoryITest extends IntegrationTestBase {
 
@@ -76,12 +75,12 @@ public class CassandraMutexRepositoryITest extends IntegrationTestBase {
 		Experiment.ID pair = Experiment.ID.newInstance();
 
     	experimentAccessor.insertExperiment(base.getRawID(), 
-    			"d1", "", 1.0, date1, date2, 
+    			"d1", "yes", "r1", "", 1.0, date1, date2,
     			com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT.name(), "l1", 
     			"app1", date1, date2, true, 
     			"m1", "v1", true, 5000, "c1");
     	experimentAccessor.insertExperiment(pair.getRawID(), 
-    			"d2", "", 1.0, date1, date2, 
+    			"d2", "no", "r2", "", 1.0, date1, date2,
     			com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT.name(), "l2", 
     			"app2", date1, date2, true, 
     			"m2", "v2", true, 5000, "c2");
@@ -105,17 +104,17 @@ public class CassandraMutexRepositoryITest extends IntegrationTestBase {
 		Experiment.ID pair2 = Experiment.ID.newInstance();
 
     	experimentAccessor.insertExperiment(base.getRawID(), 
-    			"d1", "", 1.0, date1, date2, 
+    			"d1", "yes", "r1", "", 1.0, date1, date2,
     			com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT.name(), "l1", 
     			"app1", date1, date2, true, 
     			"m1", "v1", true, 5000, "c1");
     	experimentAccessor.insertExperiment(pair1.getRawID(), 
-    			"d2", "", 1.0, date1, date2, 
+    			"d2", "yes", "r2", "", 1.0, date1, date2,
     			com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT.name(), "l2", 
     			"app2", date1, date2, true, 
     			"m2", "v2", true, 5000, "c2");
     	experimentAccessor.insertExperiment(pair2.getRawID(), 
-    			"d2", "", 1.0, date1, date2, 
+    			"d2", "yes", "r2", "", 1.0, date1, date2,
     			com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT.name(), "l2", 
     			"app2", date1, date2, true, 
     			"m2", "v2", true, 5000, "c2");
@@ -152,19 +151,19 @@ public class CassandraMutexRepositoryITest extends IntegrationTestBase {
 		String appName = "app" + System.currentTimeMillis();
 		
     	experimentAccessor.insertExperiment(base.getRawID(), 
-    			"d1", "", 1.0, date1, date2, 
+    			"d1", "yes", "r1", "", 1.0, date1, date2,
     			com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT.name(), "l1", 
     			appName, date1, date2, true, 
     			"m1", "v1", true, 5000, "c1");
     	
     	experimentAccessor.insertExperiment(pair1.getRawID(), 
-    			"d2", "", 1.0, date1, date2, 
+    			"d2", "yes", "r2", "", 1.0, date1, date2,
     			com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT.name(), "l2", 
     			appName, date1, date2, true, 
     			"m2", "v2", true, 5000, "c2");
     	
     	experimentAccessor.insertExperiment(notExclusion.getRawID(), 
-    			"d2", "", 1.0, date1, date2, 
+    			"d2", "yes", "r2", "", 1.0, date1, date2,
     			com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT.name(), "l2", 
     			appName, date1, date2, true, 
     			"m2", "v2", true, 5000, "c2");

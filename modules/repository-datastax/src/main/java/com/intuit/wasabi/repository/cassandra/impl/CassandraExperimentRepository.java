@@ -15,13 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.cassandra.impl;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
-import com.datastax.driver.core.BatchStatement;
-import com.datastax.driver.core.BoundStatement;
-import com.datastax.driver.core.PreparedStatement;
-import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.Statement;
+import com.datastax.driver.core.*;
 import com.datastax.driver.mapping.Result;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashBasedTable;
@@ -33,37 +27,31 @@ import com.intuit.wasabi.analyticsobjects.counts.TotalUsers;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.exceptions.ConstraintViolationException;
 import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
-import com.intuit.wasabi.experimentobjects.Application;
-import com.intuit.wasabi.experimentobjects.Bucket;
+import com.intuit.wasabi.experimentobjects.*;
 import com.intuit.wasabi.experimentobjects.Bucket.BucketAuditInfo;
-import com.intuit.wasabi.experimentobjects.BucketList;
-import com.intuit.wasabi.experimentobjects.Context;
-import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.Experiment.ExperimentAuditInfo;
 import com.intuit.wasabi.experimentobjects.Experiment.ID;
 import com.intuit.wasabi.experimentobjects.Experiment.State;
-import com.intuit.wasabi.experimentobjects.ExperimentList;
-import com.intuit.wasabi.experimentobjects.ExperimentValidator;
-import com.intuit.wasabi.experimentobjects.NewExperiment;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.RepositoryException;
-import com.intuit.wasabi.repository.cassandra.accessor.audit.BucketAuditLogAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.audit.ExperimentAuditLogAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentState;
 import com.intuit.wasabi.repository.cassandra.accessor.ApplicationListAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.BucketAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.audit.BucketAuditLogAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.audit.ExperimentAuditLogAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentLabelIndexAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentState;
 import com.intuit.wasabi.repository.cassandra.accessor.index.StateExperimentIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.UserBucketIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentByAppNameLabel;
 import com.intuit.wasabi.repository.cassandra.pojo.index.StateExperimentIndex;
-
 import org.slf4j.Logger;
 
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Cassandra experiment repository
@@ -358,6 +346,8 @@ public class CassandraExperimentRepository implements ExperimentRepository {
 			experimentAccessor.insertExperiment(
 				newExperiment.getId().getRawID(),
 				(newExperiment.getDescription() != null) ? newExperiment.getDescription() : "",
+                (newExperiment.getHypothesisIsCorrect() != null) ? newExperiment.getHypothesisIsCorrect() : "",
+                (newExperiment.getResults() != null) ? newExperiment.getResults() : "",
 				(newExperiment.getRule() != null) ? newExperiment.getRule() : "",
 				newExperiment.getSamplingPercent(),
 				newExperiment.getStartTime(),
@@ -560,7 +550,9 @@ public class CassandraExperimentRepository implements ExperimentRepository {
 		   final Date NOW = new Date();
 	
 		   experimentAccessor.updateExperiment(
-				   experiment.getDescription() != null ? experiment.getDescription() : "", 
+				   experiment.getDescription() != null ? experiment.getDescription() : "",
+                   (experiment.getHypothesisIsCorrect() != null) ? experiment.getHypothesisIsCorrect() : "",
+                   (experiment.getResults() != null) ? experiment.getResults() : "",
                    experiment.getRule() != null ? experiment.getRule() : "", 
                    experiment.getSamplingPercent(), 
                    experiment.getStartTime(), 

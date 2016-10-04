@@ -1,19 +1,14 @@
 package com.intuit.wasabi.repository.cassandra.accessor;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
 import com.datastax.driver.mapping.Result;
 import com.intuit.wasabi.repository.cassandra.IntegrationTestBase;
 import com.intuit.wasabi.repository.cassandra.pojo.Experiment;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.util.*;
+
+import static org.junit.Assert.assertEquals;
 
 public class ExperimentAccessorITest extends IntegrationTestBase {
     static ExperimentAccessor accessor;
@@ -32,7 +27,7 @@ public class ExperimentAccessorITest extends IntegrationTestBase {
     @Test
     public void insertOneExperiments() {
     	accessor.insertExperiment(experimentId1, 
-    			"d1", "", 1.0, date1, date2, 
+    			"d1", "yes", "r1", "", 1.0, date1, date2,
     			com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT.name(), "l1", 
     			"app1", date1, date2, true, 
     			"m1", "v1", true, 5000, "c1");
@@ -43,6 +38,8 @@ public class ExperimentAccessorITest extends IntegrationTestBase {
     	Experiment exp = experimentResult.get(0);
     	assertEquals("Value should be same", experimentId1, exp.getId());
     	assertEquals("Value should be same", "d1", exp.getDescription());
+    	assertEquals("Value should be same", "yes", exp.getHypothesisIsCorrect());
+    	assertEquals("Value should be same", "r1", exp.getResults());
     	assertEquals("Value should be same", "", exp.getRule());
     	assertEquals("Value should be same", 1.0, exp.getSamplePercent(), 0.0001d);
     	assertEquals("Value should be same", date1, exp.getStartTime());
@@ -61,12 +58,12 @@ public class ExperimentAccessorITest extends IntegrationTestBase {
     @Test
     public void insertTwoExperiments() {
     	accessor.insertExperiment(experimentId1, 
-    			"d1", "", 1.0, date1, date2, 
+    			"d1", "yes", "r1", "", 1.0, date1, date2,
     			com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT.name(), "l1", 
     			"app1", date1, date2, true, 
     			"m1", "v1", true, 5000, "c1");
     	accessor.insertExperiment(experimentId2, 
-    			"d2", "", 1.0, date1, date2, 
+    			"d2", "no", "r2", "", 1.0, date1, date2,
     			com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT.name(), "l2", 
     			"app2", date1, date2, true, 
     			"m2", "v2", true, 5000, "c2");

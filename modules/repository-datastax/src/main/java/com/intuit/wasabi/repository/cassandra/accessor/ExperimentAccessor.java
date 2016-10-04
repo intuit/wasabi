@@ -39,17 +39,20 @@ public interface ExperimentAccessor {
 
 	@Query("delete from experiment where id = ?")
 	void deleteExperiment(UUID id);
-	
+
+    //TODO: figure out a better name?
     @Query("update experiment set state = ?, modified = ? where id = ?")
     ResultSet updateExperiment(String state, Date modifiedOn, UUID experimentId);
 
     @Query("update experiment " +
-                "set description = ?, rule = ?, sample_percent = ?, " +
+                "set description = ?, hypothesis_is_correct = ?, results = ?," +
+                "rule = ?, sample_percent = ?, " +
                 "start_time = ?, end_time = ?, " +
                 "state=?, label=?, app_name=?, modified=? , is_personalized=?, model_name=?, model_version=?," +
                 " is_rapid_experiment=?, user_cap=?" +
                 " where id = ?")
-    ResultSet updateExperiment(String description, String rule, double sample_percent,
+    ResultSet updateExperiment(String description, String hypothesisIsCorrect, String results,
+                               String rule, double sample_percent,
     		Date start_time, Date end_time, String state, String label, String app_name,
     		Date modified, boolean is_personalized, String model_name, String model_version,
     		boolean is_rapid_experiment, int user_cap, UUID experimentId);
@@ -62,11 +65,12 @@ public interface ExperimentAccessor {
     Result<Experiment> selectBy(UUID experimentId);
 
     @Query("insert into experiment " +
-                "(id, description, rule, sample_percent, start_time, end_time, " +
+                "(id, description, hypothesis_is_correct, results, rule, sample_percent, start_time, end_time, " +
                 "   state, label, app_name, created, modified, is_personalized, model_name, model_version," +
                 " is_rapid_experiment, user_cap, creatorid) " +
-                "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
-    void insertExperiment(UUID experimentId, String description, String rule, double samplePercent,
+                "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+    void insertExperiment(UUID experimentId, String description, String hypothesisIsCorrect, String results,
+                          String rule, double samplePercent,
     		Date startTime, Date endTime, String state, String label, String appName,
     		Date created, Date modified, boolean isPersonalized, String modelName,
     		String modelVersion, boolean isRapidExperiment, int userCap, String creatorid);
