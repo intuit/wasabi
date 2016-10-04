@@ -288,6 +288,7 @@ public class DatabaseExperimentRepositoryTest {
         NewExperiment mockedNewExperiment = NewExperiment.withID(id).withSamplingPercent(1.0)
                 .withLabel(Experiment.Label.valueOf("testLabel"))
                 .withStartTime(new Date())
+                .withDescription("TEST")
                 .withEndTime(new Date())
                 .withAppName(Application.Name.valueOf("TestApp")).build();
 
@@ -456,6 +457,7 @@ public class DatabaseExperimentRepositoryTest {
         when(transaction.update(anyString(), Matchers.anyVararg())).thenReturn(0);
         BDDCatchException.when(repository).deleteExperiment(
         		NewExperiment.withID(Experiment.ID.newInstance())
+                .withDescription("TEST")
         		.withStartTime(new Date()).withEndTime(new Date())
                 .withSamplingPercent(0.5).withLabel(Experiment.Label.valueOf("l1")).build());
         BDDCatchException.then(caughtException())

@@ -217,7 +217,7 @@ public class IntegrationExperiment extends TestBase {
         latest.add(Calendar.SECOND, 15);
         Experiment created = postExperiment(completeExperiment);
         completeExperiment.setState(Constants.EXPERIMENT_STATE_DRAFT);
-        assertEqualModelItems(created, completeExperiment, new DefaultNameExclusionStrategy("id", "creationTime", "modificationTime", "ruleJson"));
+        assertEqualModelItems(created, completeExperiment, new DefaultNameExclusionStrategy("id", "creationTime", "modificationTime", "results", "ruleJson", "hypothesisIsCorrect"));
 
         String nowStr = TestUtils.getTimeString(now);
         String latestStr = TestUtils.getTimeString(latest);

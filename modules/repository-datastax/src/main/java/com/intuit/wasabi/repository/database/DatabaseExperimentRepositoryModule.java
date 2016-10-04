@@ -24,8 +24,10 @@ import com.intuit.wasabi.database.TransactionFactory;
 import com.intuit.wasabi.experimentobjects.ExperimentValidator;
 import com.intuit.wasabi.repository.DatabaseRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
+import com.intuit.wasabi.repository.FavoritesRepository;
 import org.slf4j.Logger;
 
+import static com.google.inject.Scopes.SINGLETON;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -37,7 +39,7 @@ public class DatabaseExperimentRepositoryModule extends AbstractModule {
     @Override
     protected void configure() {
         LOGGER.debug("installing module: {}", DatabaseExperimentRepositoryModule.class.getSimpleName());
-
+        bind(FavoritesRepository.class).to(DatabaseFavoritesRepository.class).in(SINGLETON);
         LOGGER.debug("installed module: {}", DatabaseExperimentRepositoryModule.class.getSimpleName());
     }
 

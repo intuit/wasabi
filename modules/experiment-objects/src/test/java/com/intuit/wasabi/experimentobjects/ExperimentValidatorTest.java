@@ -15,32 +15,36 @@
  *******************************************************************************/
 package com.intuit.wasabi.experimentobjects;
 
-import java.util.Date;
-
 import org.junit.Test;
 
+import java.util.Date;
+
 public class ExperimentValidatorTest {
+	static final String DUMMY_DESCRIPTION = "TEST";
 
 	ExperimentValidator experimentValidator = new ExperimentValidator();
 	
 	@Test(expected=IllegalArgumentException.class)
 	public void testExperimentLabelStartEndNull() {
-		Experiment experiment = Experiment.withID(Experiment.ID.newInstance()).build();
+		Experiment experiment = Experiment.withID(Experiment.ID.newInstance())
+                .withDescription(DUMMY_DESCRIPTION).build();
 		experiment.setState(Experiment.State.DRAFT);
 		experimentValidator.validateExperiment(experiment);
 	}
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testNewExperimentLabelStartEndNull() {
-		NewExperiment newExperiment = NewExperiment.withID(Experiment.ID.newInstance()).build();
+		NewExperiment newExperiment = NewExperiment.withID(Experiment.ID.newInstance())
+                .withDescription(DUMMY_DESCRIPTION).build();
 
 		experimentValidator.validateNewExperiment(newExperiment);
 	}
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testExperimentStartEndNull() {
-		Experiment experiment = Experiment.withID(Experiment.ID.newInstance()).
-				withLabel(Experiment.Label.valueOf("l1")).build();
+		Experiment experiment = Experiment.withID(Experiment.ID.newInstance())
+                .withDescription(DUMMY_DESCRIPTION)
+				.withLabel(Experiment.Label.valueOf("l1")).build();
 		experiment.setState(Experiment.State.DRAFT);
 
 		experimentValidator.validateExperiment(experiment);
@@ -48,8 +52,9 @@ public class ExperimentValidatorTest {
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testNewExperimentStartNull() {
-		NewExperiment newExperiment = NewExperiment.withID(Experiment.ID.newInstance()).
-				withLabel(Experiment.Label.valueOf("l1")).build();
+		NewExperiment newExperiment = NewExperiment.withID(Experiment.ID.newInstance())
+                .withDescription(DUMMY_DESCRIPTION)
+                .withLabel(Experiment.Label.valueOf("l1")).build();
 
 		experimentValidator.validateNewExperiment(newExperiment);
 	}
@@ -57,7 +62,8 @@ public class ExperimentValidatorTest {
 	@Test(expected=IllegalArgumentException.class)
 	public void testExperimentEndNull() {
 		Experiment experiment = Experiment.withID(Experiment.ID.newInstance()).
-				withLabel(Experiment.Label.valueOf("l1")).withStartTime(new Date()).build();
+				withLabel(Experiment.Label.valueOf("l1")).withStartTime(new Date())
+                .withDescription(DUMMY_DESCRIPTION).build();
 		experiment.setState(Experiment.State.DRAFT);
 
 		experimentValidator.validateExperiment(experiment);
@@ -66,7 +72,8 @@ public class ExperimentValidatorTest {
 	@Test(expected=IllegalArgumentException.class)
 	public void testNewExperimentEndNull() {
 		NewExperiment newExperiment = NewExperiment.withID(Experiment.ID.newInstance()).
-				withLabel(Experiment.Label.valueOf("l1")).withStartTime(new Date()).build();;
+				withLabel(Experiment.Label.valueOf("l1")).withStartTime(new Date())
+                .withDescription(DUMMY_DESCRIPTION).build();;
 		experimentValidator.validateNewExperiment(newExperiment);
 	}
 
@@ -74,6 +81,7 @@ public class ExperimentValidatorTest {
 	public void testExperimentSuccess() {
 		Experiment experiment = Experiment.withID(Experiment.ID.newInstance()).
 				withLabel(Experiment.Label.valueOf("l1")).withStartTime(new Date()).
+                withDescription(DUMMY_DESCRIPTION).
 				withSamplingPercent(1.0d).
 				withEndTime(new Date()).build();
 		experiment.setState(Experiment.State.DRAFT);
@@ -85,6 +93,7 @@ public class ExperimentValidatorTest {
 	public void testNewExperimentSuccess() {
 		NewExperiment newExperiment = NewExperiment.withID(Experiment.ID.newInstance()).
 				withLabel(Experiment.Label.valueOf("l1")).withStartTime(new Date()).
+                withDescription(DUMMY_DESCRIPTION).
 				withSamplingPercent(1.0d).
 				withEndTime(new Date()).build();
 

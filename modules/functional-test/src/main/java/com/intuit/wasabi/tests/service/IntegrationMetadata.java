@@ -21,6 +21,7 @@ import com.intuit.wasabi.tests.model.Experiment;
 import com.intuit.wasabi.tests.model.factory.ApplicationFactory;
 import com.intuit.wasabi.tests.model.factory.BucketFactory;
 import com.intuit.wasabi.tests.model.factory.ExperimentFactory;
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -58,14 +59,15 @@ public class IntegrationMetadata extends TestBase {
     @Test(dependsOnGroups = {"ping"})
     public void t_defaultDescriptionPayLoadEmpty() {
         // create experiment with description missing
-        Experiment exp = postExperiment(createExperiment());
+        Experiment expected = createExperiment();
+        Experiment exp = postExperiment(expected);
 
         // extract experiment parameters from the JSON out object
         Assert.assertNotNull(exp.id, "Experiment creation failed (No id).");
         Assert.assertNotNull(exp.applicationName, "Experiment creation failed (No applicationName).");
         Assert.assertNotNull(exp.label, "Experiment creation failed (No label).");
         LOGGER.info("Testing non-null default experiment description...");
-        Assert.assertEquals(exp.description,"", "Default experiment description should be null");
+        Assert.assertEquals(exp.description, expected.description, "Default experiment description should match");
 
         // create a bucket, 100% allocation, description and payload missing
         Bucket bucket = postBucket(BucketFactory.createBucket(exp));
@@ -107,22 +109,19 @@ public class IntegrationMetadata extends TestBase {
      * are empty strings if the supplied "description" and "payload" are
      * explicitly set to empty string
      */
-    @Test(dependsOnGroups = {"ping"})
+//    @Test(dependsOnGroups = {"ping"})
+    @Test
     public void t_defaultDescriptionPayLoadNull() {
         // create an experiment with {"description":""}
-        Experiment exp = postExperiment(createExperiment().setDescription(""));
-        LOGGER.info("Testing experiment description with empty string supplied...");
-        Assert.assertEquals(exp.description, "", "Default experiment description is not an empty string");
-
-        // create a bucket with empty description and payload
-        Bucket bucket = postBucket(BucketFactory.createBucket(exp).setDescription("").setPayload(""));
-        LOGGER.info("Testing bucket description with empty string supplied");
-        Assert.assertEquals(bucket.description, "", "Bucket description should be an empty string");
-        LOGGER.info("Testing bucket payload with empty string supplied");
-        Assert.assertEquals(bucket.payload, "", "Bucket payload should be an empty string");
-
-        // cleanup
-        deleteExperiment(exp);
+        /* expected response is
+            "error": {
+                "code": 400,
+                "message": "Description/Hypothesis must not be empty."
+            }
+         */
+        Experiment exp = postExperiment(createExperiment().setDescription(""), HttpStatus.SC_BAD_REQUEST);
+        String errorMessage = lastError();
+        Assert.assertEquals(errorMessage, "Description/Hypothesis must not be empty.");
     }
 
 }

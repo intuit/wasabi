@@ -1,41 +1,28 @@
 package com.intuit.wasabi.repository.cassandra.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import org.junit.Before;
-import org.junit.Test;
-
 import com.datastax.driver.mapping.Result;
 import com.google.common.collect.Table;
 import com.intuit.wasabi.analyticsobjects.counts.AssignmentCounts;
 import com.intuit.wasabi.exceptions.ConstraintViolationException;
 import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
-import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.experimentobjects.*;
 import com.intuit.wasabi.experimentobjects.Application.Name;
-import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Bucket.State;
-import com.intuit.wasabi.experimentobjects.BucketList;
-import com.intuit.wasabi.experimentobjects.Context;
-import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.Experiment.ID;
 import com.intuit.wasabi.experimentobjects.Experiment.Label;
-import com.intuit.wasabi.experimentobjects.ExperimentList;
-import com.intuit.wasabi.experimentobjects.NewExperiment;
 import com.intuit.wasabi.repository.AuditLogRepository;
 import com.intuit.wasabi.repository.RepositoryException;
 import com.intuit.wasabi.repository.cassandra.IntegrationTestBase;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.audit.BucketAuditLogAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.audit.ExperimentAuditLogAccessor;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Integration tests
@@ -135,7 +122,7 @@ public class CassandraExperimentRepositoryITest extends IntegrationTestBase  {
 		newExperiment.setApplicationName(appname);
 		newExperiment.setLabel(Experiment.Label.valueOf("el1" + System.currentTimeMillis()));
 		newExperiment.setCreatorID("");
-		newExperiment.setDescription(null);
+		newExperiment.setDescription("TEST");
 		newExperiment.setRule(null);
 		newExperiment.setStartTime(new Date());
 		newExperiment.setEndTime(new Date());
