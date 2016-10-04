@@ -232,7 +232,6 @@ public class AnalyticsResource {
                     bd.setActionRate(0.6);
                     bd.setUpperBound(0.8);
                     bd.setLowerBound(0.5);
-                    bd.setWinnerSoFar(Math.random()>0.7);
                 }
             }
             else{
@@ -241,7 +240,9 @@ public class AnalyticsResource {
                     bd.setActionRate(0.3);
                     bd.setUpperBound(0.56);
                     bd.setLowerBound(0.43);
-                    bd.setWinnerSoFar(Math.random()>0.9);
+                    double coin = Math.random();
+                    bd.setWinnerSoFar(coin>0.9);
+                    bd.setLoserSoFar(coin<0.9);
                 }
             }
         }
