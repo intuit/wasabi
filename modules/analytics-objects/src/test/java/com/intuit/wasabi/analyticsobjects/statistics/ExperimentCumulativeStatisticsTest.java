@@ -3,8 +3,6 @@ package com.intuit.wasabi.analyticsobjects.statistics;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.ArrayList;
@@ -14,7 +12,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 /**
- * Created on 4/14/16.
+ * Tests the {@link ExperimentCumulativeStatistics}.
  */
 @RunWith(MockitoJUnitRunner.class)
 public class ExperimentCumulativeStatisticsTest {

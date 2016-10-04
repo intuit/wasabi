@@ -32,25 +32,29 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+/**
+ * Tests the {@link BucketStatistics}
+ */
 public class BucketStatisticsTest {
-    Bucket.Label label;
-    Map<Event.Name, ActionCounts> actionCountsMap;
-    Map<Event.Name, ActionRate> actionRateMap;
-    Counts jointActionCounts;
-    Counts impressionCounts;
-    Estimate jointActionRate;
-    Map<Bucket.Label, BucketComparison> bucketComparisons;
-    BucketStatistics bucketStatistics;
+
+    private Bucket.Label label;
+    private Map<Event.Name, ActionCounts> actionCountsMap;
+    private Map<Event.Name, ActionRate> actionRateMap;
+    private Counts jointActionCounts;
+    private Counts impressionCounts;
+    private Estimate jointActionRate;
+    private Map<Bucket.Label, BucketComparison> bucketComparisons;
+    private BucketStatistics bucketStatistics;
 
     @Before
     public void setup(){
         label = Bucket.Label.valueOf("TestWinner");
-        actionCountsMap = new HashMap<Event.Name, ActionCounts>();
-        actionRateMap = new HashMap<Event.Name, ActionRate>();
+        actionCountsMap = new HashMap<>();
+        actionRateMap = new HashMap<>();
         jointActionCounts = new Counts();
         impressionCounts = new Counts();
         jointActionRate = new Estimate();
-        bucketComparisons = new HashMap<Bucket.Label, BucketComparison>();
+        bucketComparisons = new HashMap<>();
         bucketStatistics = new BucketStatistics.Builder().withLabel(label)
                 .withActionCounts(actionCountsMap).withActionRates(actionRateMap)
                 .withJointActionCounts(jointActionCounts).withImpressionCounts(impressionCounts)
@@ -96,9 +100,16 @@ public class BucketStatisticsTest {
         assertEquals(bucketStatistics.getImpressionCounts(), impressionCounts);
         assertEquals(bucketStatistics.getJointActionRate(), jointActionRate);
 
-        assertNotNull(bucketStatistics.hashCode());
-        assertNotNull(bucketStatistics.toString());
-        assertNotNull(bucketStatistics.clone());
+        assertEquals(bucketStatistics.hashCode(), bucketStatistics.clone().hashCode());
+
+        String bucketStats = bucketStatistics.toString();
+        assertTrue(bucketStats.contains(label.toString()));
+        assertTrue(bucketStats.contains(actionCountsMap.toString()));
+        assertTrue(bucketStats.contains(actionRateMap.toString()));
+        assertTrue(bucketStats.contains(jointActionCounts.toString()));
+        assertTrue(bucketStats.contains(impressionCounts.toString()));
+        assertTrue(bucketStats.contains(jointActionRate.toString()));
+
         assertTrue(bucketStatistics.equals(bucketStatistics));
         assertFalse(bucketStatistics.equals(null));
         assertFalse(bucketStatistics.equals(bucketComparisons));

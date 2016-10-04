@@ -17,23 +17,25 @@ package com.intuit.wasabi.analyticsobjects.statistics;
 
 import com.intuit.wasabi.analyticsobjects.Event;
 import com.intuit.wasabi.experimentobjects.Bucket;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import static junit.framework.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+/**
+ * Tests the {@link ActionComparisonStatistics}.
+ */
 public class ActionComparisonStatisticsTest {
-    Event.Name actionName;
-    boolean sufficientData;
-    Double fractionDataCollected;
-    Bucket.Label clearComparisonWinner;
-    Estimate actionRateDifference;
-    DistinguishableEffectSize smallestDistinguishableEffectSize;
-    ActionComparisonStatistics actionComparisonStatistics;
+
+    private Event.Name actionName;
+    private boolean sufficientData;
+    private Double fractionDataCollected;
+    private Bucket.Label clearComparisonWinner;
+    private Estimate actionRateDifference;
+    private DistinguishableEffectSize smallestDistinguishableEffectSize;
+    private ActionComparisonStatistics actionComparisonStatistics;
 
     @Before
     public void setup(){
@@ -54,24 +56,36 @@ public class ActionComparisonStatisticsTest {
         assertEquals(actionComparisonStatistics.getActionName(), actionName);
 
 
-        ComparisonStatistics statistics = new ComparisonStatistics.Builder().withActionRateDifference(actionRateDifference)
+        ComparisonStatistics statistics = new ComparisonStatistics.Builder()
+                .withActionRateDifference(actionRateDifference)
                 .withClearComparisonWinner(clearComparisonWinner).withFractionDataCollected(fractionDataCollected)
-                .withSmallestDistinguishableEffectSize(smallestDistinguishableEffectSize).withSufficientData(sufficientData).build();
-        ActionComparisonStatistics otherActionComparisonStatistics = new ActionComparisonStatistics.Builder().withActionName(actionName)
-                                                                    .withComparisonStatistic(statistics).build();
+                .withSmallestDistinguishableEffectSize(smallestDistinguishableEffectSize)
+                .withSufficientData(sufficientData).build();
 
-        assertNotNull(actionComparisonStatistics.hashCode());
-        assertNotNull(actionComparisonStatistics.toString());
-        assertNotNull(actionComparisonStatistics.clone());
+        ActionComparisonStatistics otherActionComparisonStatistics = new ActionComparisonStatistics.Builder()
+                .withActionName(actionName)
+                .withComparisonStatistic(statistics).build();
+
+        String actionCompare = actionComparisonStatistics.toString();
+        assertTrue(actionCompare.contains(clearComparisonWinner.toString()));
+        assertTrue(actionCompare.contains(actionName.toString()));
+        assertTrue(actionCompare.contains(actionRateDifference.toString()));
+        assertTrue(actionCompare.contains(fractionDataCollected.toString()));
+        assertTrue(actionCompare.contains(smallestDistinguishableEffectSize.toString()));
+        assertTrue(actionCompare.contains(actionComparisonStatistics.toString()));
+
+        assertEquals(actionComparisonStatistics.hashCode(), actionComparisonStatistics.clone().hashCode());
         assertTrue(actionComparisonStatistics.equals(otherActionComparisonStatistics));
         assertTrue(actionComparisonStatistics.equals(actionComparisonStatistics));
-        assertFalse(actionComparisonStatistics.equals(null));
-        Assert.assertFalse(actionComparisonStatistics.equals(statistics));
+        assertFalse(actionComparisonStatistics.equals(statistics));
     }
 
     @Test
     public void testSettersAndGetters(){
         actionComparisonStatistics.setActionName(null);
         assertEquals(actionComparisonStatistics.getActionName(), null);
+
+        actionComparisonStatistics.setActionRateDifference(null);
+        assertEquals(actionComparisonStatistics.getActionRateDifference(), null);
     }
 }

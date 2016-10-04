@@ -19,14 +19,17 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+/**
+ * Test for the {@link DistinguishableEffectSize}.
+ */
 public class DistinguishableEffectSizeTest {
-    Double negativeEffectSize;
-    Double positiveEffectSize;
-    DistinguishableEffectSize effectSize;
+
+    private Double negativeEffectSize;
+    private Double positiveEffectSize;
+    private DistinguishableEffectSize effectSize;
 
     @Before
     public void setup(){
@@ -43,9 +46,11 @@ public class DistinguishableEffectSizeTest {
 
         DistinguishableEffectSize otherEffectSize = new DistinguishableEffectSize(negativeEffectSize, positiveEffectSize);
 
-        assertNotNull(effectSize.hashCode());
-        assertNotNull(effectSize.toString());
-        assertNotNull(effectSize.clone());
+        assertEquals(effectSize.hashCode(), effectSize.clone().hashCode());
+
+        String efSize =  effectSize.toString();
+        assertTrue(efSize.contains(String.valueOf(negativeEffectSize)));
+        assertTrue(efSize.contains(String.valueOf(positiveEffectSize)));
 
         assertTrue(effectSize.equals(otherEffectSize));
         assertTrue(effectSize.equals(effectSize));
