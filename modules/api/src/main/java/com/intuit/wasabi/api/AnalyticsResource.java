@@ -220,7 +220,7 @@ public class AnalyticsResource {
 
         return httpHeader.headers().entity(experimentResponse).build();
     }
-    
+
     /**
      * Returns a number of summary counts for the specified experiment.
      * <p>
