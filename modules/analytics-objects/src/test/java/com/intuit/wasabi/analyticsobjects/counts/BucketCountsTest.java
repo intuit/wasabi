@@ -25,23 +25,27 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+/**
+ * This class tests the {@link BucketCounts}.
+ */
 public class BucketCountsTest {
-    Bucket.Label label;
-    Counts impressionCounts;
-    Counts jointActionCounts;
-    Map<Event.Name, ActionCounts> actionCounts;
-    BucketCounts counter;
+
+    private Bucket.Label label;
+    private Counts impressionCounts;
+    private Counts jointActionCounts;
+    private Map<Event.Name, ActionCounts> actionCounts;
+    private BucketCounts counter;
 
     @Before
     public void setup(){
         label = Bucket.Label.valueOf("TestLabel");
         impressionCounts = new Counts.Builder().withEventCount(100).withUniqueUserCount(100).build();
         jointActionCounts = new Counts.Builder().withEventCount(200).withUniqueUserCount(200).build();
-        actionCounts = new HashMap<Event.Name, ActionCounts>();
+        actionCounts = new HashMap<>();
         counter = new BucketCounts.Builder().withLabel(label)
                                 .withJointActionCounts(jointActionCounts).withImpressionCounts(impressionCounts)
                                 .withActionCounts(actionCounts).build();
@@ -54,15 +58,24 @@ public class BucketCountsTest {
         assertEquals(counter.getJointActionCounts(), jointActionCounts);
         assertEquals(counter.getImpressionCounts(), impressionCounts);
 
-        assertNotNull(counter.toString());
-        assertNotNull(counter.hashCode());
-        assertNotNull(counter.clone());
+        String counterString = counter.toString();
+        assertTrue(counterString.contains("eventCount=100"));
+        assertTrue(counterString.contains("uniqueUserCount=100"));
+        assertTrue(counterString.contains("eventCount=200"));
+        assertTrue(counterString.contains("uniqueUserCount=200"));
     }
 
     @Test
-    public void testEqualsWithSelfAndClone(){
-    	assertEquals(counter, counter);
-    	assertEquals(counter, counter.clone());
+    public void testCloneAndHashCode(){
+        BucketCounts countClone = counter.clone();
+        assertEquals(counter.getLabel(), countClone.getLabel());
+        assertEquals(counter.getActionCounts(), countClone.getActionCounts());
+        assertEquals(counter.getImpressionCounts(), countClone.getImpressionCounts());
+        assertEquals(counter.getJointActionCounts(), countClone.getJointActionCounts());
+
+        assertEquals(counter.hashCode(), countClone.hashCode());
+        countClone.setImpressionCounts(new Counts(42,42));
+        assertNotEquals(counter.hashCode(), countClone.hashCode());
     }
 
     @Test

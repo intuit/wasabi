@@ -18,6 +18,7 @@ package com.intuit.wasabi.analyticsobjects.counts;
 import com.intuit.wasabi.analyticsobjects.Event;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import org.joda.time.DateTime;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -27,12 +28,16 @@ import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
 
+/**
+ * This class tests the {@link DailyCounts}.
+ */
 public class DailyCountsTest {
-    String date;
-    ExperimentCounts perDay;
-    ExperimentCounts cumulative;
 
-    DailyCounts counter;
+    private String date;
+    private ExperimentCounts perDay;
+    private ExperimentCounts cumulative;
+
+    private DailyCounts counter;
 
     @Before
     public void setup(){
@@ -59,8 +64,10 @@ public class DailyCountsTest {
         assertEquals(counter.getCumulative(), cumulative);
         assertEquals(counter.getPerDay(), perDay);
 
-        assertNotNull(counter.toString());
-        assertNotNull(counter.hashCode());
+        String counterString = counter.toString();
+        assertTrue(counterString.contains(date));
+        assertTrue(counterString.contains(perDay.toString()));
+        assertTrue(counterString.contains(cumulative.toString()));
     }
 
     @Test
@@ -73,6 +80,8 @@ public class DailyCountsTest {
         assertEquals(clonedCounter.getPerDay(), perDay);
 
         assertTrue(counter.equals(clonedCounter));
+
+        assertEquals(clonedCounter.hashCode(), counter.hashCode());
     }
 
 }

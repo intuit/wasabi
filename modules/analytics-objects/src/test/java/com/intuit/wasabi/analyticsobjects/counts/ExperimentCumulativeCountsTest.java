@@ -21,17 +21,21 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
+/**
+ * This class tests the {@link ExperimentCumulativeCounts}.
+ */
 public class ExperimentCumulativeCountsTest {
-    List<DailyCounts> days;
-    ExperimentCumulativeCounts counter;
+
+    private List<DailyCounts> days;
+    private ExperimentCumulativeCounts counter;
 
     @Before
     public void setup(){
-        days = new ArrayList<DailyCounts>();
+        days = new ArrayList<>();
         counter = new ExperimentCumulativeCounts.Builder().withDays(days).build();
     }
 
@@ -39,8 +43,11 @@ public class ExperimentCumulativeCountsTest {
     public void testBuilder(){
         assertEquals(counter.getDays(), days);
 
-        assertNotNull(counter.toString());
-        assertNotNull(counter.hashCode());
+        assertTrue(counter.toString().contains(days.toString()));
+        ExperimentCumulativeCounts countClone = counter.clone();
+        assertTrue(counter.hashCode() == countClone.hashCode());
+        countClone.addDays(new DailyCounts.Builder().build());
+        assertFalse(counter.hashCode() == countClone.hashCode());
     }
 
     @Test
@@ -77,7 +84,7 @@ public class ExperimentCumulativeCountsTest {
     @Test
     public void testNotEquals(){
         ExperimentCumulativeCounts counter1 = new ExperimentCumulativeCounts.Builder().withDays(days).build();
-        ArrayList<DailyCounts> days2 = new ArrayList<DailyCounts>();
+        ArrayList<DailyCounts> days2 = new ArrayList<>();
         days.add(new DailyCounts.Builder().setDate("2016-03-01 12:12:12z").build());
         ExperimentCumulativeCounts counter2 = new ExperimentCumulativeCounts.Builder().withDays(days2).build();
         
