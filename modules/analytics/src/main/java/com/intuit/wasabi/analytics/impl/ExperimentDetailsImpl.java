@@ -104,7 +104,6 @@ public class ExperimentDetailsImpl implements ExperimentDetails{
      */
     @Override
     public List<ExperimentDetail> getAnalyticData(List<ExperimentDetail> details, Parameters params) {
-
         details.parallelStream().forEach(expd -> getAnalyticData(expd, params));
 
         return details;

@@ -210,13 +210,14 @@ public class AnalyticsResource {
         //and now add the analytics data
         Parameters parameters = createParameters(context);
         parameters.setMetric(BinomialMetrics.NORMAL_APPROX);
+        parameters.parse();
 
         List<ExperimentDetail> expDetailsWithAnalytics = (List<ExperimentDetail>)
                 experimentResponse.get("experimentDetails");
 
-        //expDetailsWithAnalytics = experimentDetails.getAnalyticData(expDetailsWithAnalytics, parameters);
+        expDetailsWithAnalytics = experimentDetails.getAnalyticData(expDetailsWithAnalytics, parameters);
 
-        setDummyValues(expDetailsWithAnalytics);
+        //setDummyValues(expDetailsWithAnalytics);
 
         experimentResponse.put("experimentDetails", expDetailsWithAnalytics);
 
