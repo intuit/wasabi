@@ -145,7 +145,7 @@ public class ExperimentDetailsImpl implements ExperimentDetails{
      */
      /*test*/ void getBucketDetails(ExperimentDetail experimentDetail, ExperimentStatistics expStats){
         DateTime aWeekAgo = new DateTime().minusDays(7);
-        //winner so far is only determined if the experiment ran at least a week
+        //winner/loser so far is only determined if the experiment ran at least a week
         boolean checkWinnerSoFar = experimentDetail.getStartTime().before(aWeekAgo.toDate());
 
         Map<Label, BucketStatistics> bucketAnalytics = expStats.getBuckets();
@@ -162,11 +162,15 @@ public class ExperimentDetailsImpl implements ExperimentDetails{
             b.setCount(bucketStat.getImpressionCounts().getUniqueUserCount());
 
             if(checkWinnerSoFar){
-                for(Bucket.Label winner : expStats.getJointProgress().getWinnersSoFar()){
-                    if(b.getLabel().equals(winner)){
-                        b.setWinnerSoFar(true);
-                        break;
-                    }
+                b.setWinnerSoFar(false);
+                b.setLoserSoFar(false);
+
+                if(expStats.getJointProgress().getWinnersSoFar().contains(b.getLabel())){
+                    b.setWinnerSoFar(true);
+                }
+
+                if(expStats.getJointProgress().getLosersSoFar().contains(b.getLabel())){
+                    b.setLoserSoFar(true);
                 }
             }
 

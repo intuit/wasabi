@@ -214,11 +214,9 @@ public class AnalyticsResource {
         List<ExperimentDetail> expDetailsWithAnalytics = (List<ExperimentDetail>)
                 experimentResponse.get("experimentDetails");
 
-        //expDetailsWithAnalytics = experimentDetails.getAnalyticData(
-        //        (List<ExperimentDetail>) experimentResponse.get("experimentDetails"), parameters);
+        //expDetailsWithAnalytics = experimentDetails.getAnalyticData(expDetailsWithAnalytics, parameters);
 
         setDummyValues(expDetailsWithAnalytics);
-
 
         experimentResponse.put("experimentDetails", expDetailsWithAnalytics);
 

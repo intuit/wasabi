@@ -79,7 +79,10 @@ public class ExperimentDetail {
 
         private long count = 0;
 
-        private boolean winnerSoFar = false;
+        // null for the following fields mean that it is not yet determinable if they are winners/losers
+        // since the experiment is not running long enough
+        private Boolean winnerSoFar = null;
+        private Boolean loserSoFar = null;
 
         /**
          * Creates a BucketDetail with the basic information that are available for all buckets.
@@ -158,12 +161,20 @@ public class ExperimentDetail {
             else throw new IllegalArgumentException("User count can not be smaller than 0");
         }
 
-        public boolean isWinnerSoFar() {
+        public Boolean isWinnerSoFar() {
             return winnerSoFar;
         }
 
-        public void setWinnerSoFar(boolean winnerSoFar) {
+        public void setWinnerSoFar(Boolean winnerSoFar) {
             this.winnerSoFar = winnerSoFar;
+        }
+
+        public Boolean isLoserSoFar() {
+            return loserSoFar;
+        }
+
+        public void setLoserSoFar(Boolean loserSoFar) {
+            this.loserSoFar = loserSoFar;
         }
 
         public Bucket.State getState() {
