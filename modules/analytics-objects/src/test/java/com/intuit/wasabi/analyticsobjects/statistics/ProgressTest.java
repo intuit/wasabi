@@ -20,7 +20,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static junit.framework.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -33,16 +35,16 @@ import static org.junit.Assert.assertTrue;
  */
 public class ProgressTest {
 
-    private List<Bucket.Label> winnersSoFar;
-    private List<Bucket.Label> losersSoFar;
+    private Set<Bucket.Label> winnersSoFar;
+    private Set<Bucket.Label> losersSoFar;
     private boolean hasSufficientData;
     private Double fractionDataCollected;
     private Progress progress;
 
     @Before
     public void setup(){
-        winnersSoFar = new ArrayList<>();
-        losersSoFar = new ArrayList<>();
+        winnersSoFar = new HashSet<>();
+        losersSoFar = new HashSet<>();
         Bucket.Label winner = Bucket.Label.valueOf("TestWinner");
         Bucket.Label loser = Bucket.Label.valueOf("TestLoser");
         winnersSoFar.add(winner);
@@ -79,8 +81,9 @@ public class ProgressTest {
     @Test
     public void testAddWinners(){
         progress.setWinnersSoFar(null);
-        progress.addToWinnersSoFarList(Bucket.Label.valueOf("TestWinner"));
-        assertNotNull(progress.getWinnersSoFar());
+        Bucket.Label bucketLabel = Bucket.Label.valueOf("TestWinner");
+        progress.addToWinnersSoFarList(bucketLabel);
+        assertTrue(progress.getWinnersSoFar().contains(bucketLabel));
         try{
             progress.addToWinnersSoFarList(null);
             fail();
@@ -94,8 +97,9 @@ public class ProgressTest {
     @Test
     public void testAddLosers() {
         progress.setLosersSoFar(null);
-        progress.addToLosersSoFarList(Bucket.Label.valueOf("TestLoser"));
-        assertNotNull(progress.getLosersSoFar());
+        Bucket.Label bucketLabel = Bucket.Label.valueOf("TestLoser");
+        progress.addToLosersSoFarList(bucketLabel);
+        assertTrue(progress.getLosersSoFar().contains(bucketLabel));
         try {
             progress.addToLosersSoFarList(null);
             fail();
