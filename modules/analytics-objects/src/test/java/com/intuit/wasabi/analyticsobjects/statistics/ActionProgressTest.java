@@ -21,7 +21,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static junit.framework.Assert.assertFalse;
 import static org.junit.Assert.assertEquals;
@@ -33,8 +35,8 @@ import static org.junit.Assert.assertTrue;
 public class ActionProgressTest {
 
     private Event.Name actionName;
-    private List<Bucket.Label> winnersSoFar;
-    private List<Bucket.Label> losersSoFar;
+    private Set<Bucket.Label> winnersSoFar;
+    private Set<Bucket.Label> losersSoFar;
     private boolean hasSufficientData;
     private Double fractionDataCollected;
     private Progress progress;
@@ -43,8 +45,8 @@ public class ActionProgressTest {
     @Before
     public void setup(){
         actionName = Event.Name.valueOf("TestAction");
-        winnersSoFar = new ArrayList<>();
-        losersSoFar = new ArrayList<>();
+        winnersSoFar = new HashSet<>();
+        losersSoFar = new HashSet<>();
         Bucket.Label winner = Bucket.Label.valueOf("TestWinner");
         Bucket.Label loser = Bucket.Label.valueOf("TestLoser");
         winnersSoFar.add(winner);
