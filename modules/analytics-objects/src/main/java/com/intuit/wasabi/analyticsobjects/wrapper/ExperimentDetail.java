@@ -132,7 +132,9 @@ public class ExperimentDetail {
         }
 
         public void setActionRate(double actionRate) {
-            this.actionRate = actionRate;
+            if(!Double.isNaN(actionRate)){
+                this.actionRate = actionRate;
+            }
         }
 
         public double getLowerBound() {

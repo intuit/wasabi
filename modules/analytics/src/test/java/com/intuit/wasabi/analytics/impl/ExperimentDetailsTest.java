@@ -54,15 +54,13 @@ public class ExperimentDetailsTest{
     @Mock
     ExperimentRepository cassandraRepo;
     @Mock
-    ExperimentRepository mysqlRepo;
-    @Mock
     ExperimentStatistics expStats;
 
     ExperimentDetailsImpl expDetails;
 
     @Before
     public void setUp(){
-        expDetails = new ExperimentDetailsImpl(mysqlRepo,cassandraRepo,buckets,analytics);
+        expDetails = new ExperimentDetailsImpl(cassandraRepo,buckets,analytics);
     }
 
     @Test

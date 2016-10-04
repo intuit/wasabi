@@ -41,7 +41,6 @@ import java.util.Map;
  */
 public class ExperimentDetailsImpl implements ExperimentDetails{
 
-    private final ExperimentRepository databaseRepository;
     private final ExperimentRepository cassandraRepository;
     private final Buckets buckets;
     private final Analytics analytics;
@@ -50,18 +49,15 @@ public class ExperimentDetailsImpl implements ExperimentDetails{
     /**
      * Constructor of the ExperimentDetails.
      *
-     * @param databaseRepository the mssql database used for analytic data
      * @param cassandraRepository repository for the experiment information
      * @param buckets access to the bucket information
      * @param analytics the analytics module that holds the methods to get bucket details and counts
      *                  for running experiments
      */
     @Inject
-    public ExperimentDetailsImpl(@DatabaseRepository ExperimentRepository databaseRepository,
-                                 @CassandraRepository ExperimentRepository cassandraRepository,
+    public ExperimentDetailsImpl(@CassandraRepository ExperimentRepository cassandraRepository,
                                  Buckets buckets, Analytics analytics) {
         super();
-        this.databaseRepository = databaseRepository;
         this.cassandraRepository = cassandraRepository;
         this.buckets = buckets;
         this.analytics = analytics;
@@ -116,7 +112,7 @@ public class ExperimentDetailsImpl implements ExperimentDetails{
      * @param params {@link Parameters} for the Analytics calls- containing the context for example
      * @return the same object with additional analytic information
      */
-     /*test*/ ExperimentDetail getAnalyticData(ExperimentDetail experimentDetail, Parameters params){
+     ExperimentDetail getAnalyticData(ExperimentDetail experimentDetail, Parameters params){
 
         // analytics data is only necessary for running/paused/terminated experiments
         if(!experimentDetail.getState().equals(Experiment.State.DRAFT)) {
@@ -142,7 +138,7 @@ public class ExperimentDetailsImpl implements ExperimentDetails{
      * @param experimentDetail the {@link ExperimentDetail} of which the Bucketinformation is retrieved
      * @param expStats the ExperimentStatistics belonging to this Experiment
      */
-     /*test*/ void getBucketDetails(ExperimentDetail experimentDetail, ExperimentStatistics expStats){
+    void getBucketDetails(ExperimentDetail experimentDetail, ExperimentStatistics expStats){
         DateTime aWeekAgo = new DateTime().minusDays(7);
         //winner/loser so far is only determined if the experiment ran at least a week
         boolean checkWinnerSoFar = experimentDetail.getStartTime().before(aWeekAgo.toDate());
