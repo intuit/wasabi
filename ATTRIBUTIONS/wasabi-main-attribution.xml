@@ -1429,7 +1429,7 @@
          <type>jar</type>
          <licenses/>
          <downloadUrls>
-            <string>file:/Users/jtodd1/Documents/projects/wasabi/modules/main/../../repository/Hyrule/Hyrule/0.0.1/Hyrule-0.0.1.jar</string>
+            <string>TBD</string>
          </downloadUrls>
       </dependency>
       <dependency>
@@ -1583,23 +1583,6 @@
          </licenses>
          <downloadUrls>
             <string>https://repo.maven.apache.org/maven2/com/fasterxml/jackson/module/jackson-module-jaxb-annotations/2.7.2/jackson-module-jaxb-annotations-2.7.2.jar</string>
-         </downloadUrls>
-      </dependency>
-      <dependency>
-         <name>JaCoCo :: Agent</name>
-         <groupId>org.jacoco</groupId>
-         <artifactId>org.jacoco.agent</artifactId>
-         <version>0.7.2.201409121644</version>
-         <projectUrl>http://org.jacoco.agent</projectUrl>
-         <type>pom</type>
-         <licenses>
-            <license>
-               <name>Eclipse Public License v1.0</name>
-               <url>http://www.eclipse.org/legal/epl-v10.html</url>
-            </license>
-         </licenses>
-         <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/org/jacoco/org.jacoco.agent/0.7.2.201409121644/org.jacoco.agent-0.7.2.201409121644.pom</string>
          </downloadUrls>
       </dependency>
       <dependency>

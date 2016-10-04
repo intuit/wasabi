@@ -28,6 +28,72 @@ http://www.w3.org/2001/XMLSchema-instance">
     <url>https://github.com/intuit/wasabi</url>
     <description>Opinionated micro-service kernel.</description>
 
+    <properties>
+        <default.time.zone>UTC</default.time.zone>
+        <default.time.format>yyyy-MM-dd HH:mm:ss</default.time.format>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <timestamp>${maven.build.timestamp}</timestamp>
+        <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
+
+        <application.name>${project.name}-${project.version}-${application.profile}</application.name>
+        <application.version>1.0</application.version>
+        <application.home>/usr/local/${application.name}</application.home>
+
+        <http.proxy.host>http://insert.your.proxy.host.here</http.proxy.host>
+        <http.proxy.port>80</http.proxy.port>
+
+        <mysql.host>localhost</mysql.host>
+        <mysql.port>3306</mysql.port>
+        <mysql.dbName>wasabi</mysql.dbName>
+        <mysql.Args>verifyServerCertificate=false&amp;useSSL=false&amp;requireSSL=false&amp;autoReconnect=true&amp;autoReconnectForPools=true</mysql.Args>
+
+        <cassandra.experiments.keyspaceName>wasabi_experiments</cassandra.experiments.keyspaceName>
+        <cassandra.experiments.nodeHosts>localhost</cassandra.experiments.nodeHosts>
+        <cassandra.experiments.port>9160</cassandra.experiments.port>
+        <cassandra.experiments.useSSL>false</cassandra.experiments.useSSL>
+        <cassandra.experiments.defaultReadConsistency>CL_ONE</cassandra.experiments.defaultReadConsistency>
+        <cassandra.experiments.replicationStrategy>SimpleStrategy</cassandra.experiments.replicationStrategy>
+        <cassandra.experiments.replicationFactor>1</cassandra.experiments.replicationFactor>
+        <cassandra.experiments.defaultWriteConsistency>CL_QUORUM</cassandra.experiments.defaultWriteConsistency>
+        <cassandra.experiments.nodeDiscoveryType>NONE</cassandra.experiments.nodeDiscoveryType>
+        <cassandra.experiments.connectionPoolType>ROUND_ROBIN</cassandra.experiments.connectionPoolType>
+        <cassandra.events.nodeHosts>localhost</cassandra.events.nodeHosts>
+        <cassandra.events.port>9160</cassandra.events.port>
+
+        <export.rest.assignment.web.class.name>com.intuit.wasabi.assignment.impl.NoopWebAssignmentEnvelope</export.rest.assignment.web.class.name>
+        <export.rest.assignment.db.class.name>com.intuit.wasabi.assignment.impl.NoopDatabaseAssignmentEnvelope</export.rest.assignment.db.class.name>
+        <export.rest.event.db.class.name>com.intuit.wasabi.assignment.impl.NoopDatabaseAssignmentEnvelope</export.rest.event.db.class.name>
+        <export.rest.client.connectionTimeout>5000</export.rest.client.connectionTimeout>
+        <export.rest.client.socketTimeout>10000</export.rest.client.socketTimeout>
+        <user.lookup.class.name>com.intuit.wasabi.userdirectory.impl.DefaultUserDirectory</user.lookup.class.name>
+        <authorization.class.name>com.intuit.wasabi.authorization.impl.DefaultAuthorization</authorization.class.name>
+        <authentication.class.name>com.intuit.wasabi.authentication.impl.DefaultAuthentication</authentication.class.name>
+
+        <assign.user.to.old>true</assign.user.to.old>
+        <assign.user.to.new>false</assign.user.to.new>
+        <assign.user.to.export>true</assign.user.to.export>
+        <assign.bucket.count>true</assign.bucket.count>
+        <assignment.decorator.enabled>false</assignment.decorator.enabled>
+
+        <!-- mutagen -->
+        <cassandra.mutagen.root.resource.path>com/intuit/wasabi/repository/impl/cassandra/experiments/mutation
+        </cassandra.mutagen.root.resource.path>
+        <mysql.mutagen.root.resource.path>com/intuit/wasabi/repository/impl/mysql/migration
+        </mysql.mutagen.root.resource.path>
+
+        <!-- FIXME: remove -->
+        <assignment.decorator.service>http://decorator.example.com</assignment.decorator.service>
+        <assignment.decorator.class.name>com.intuit.wasabi.assignment.impl.DefaultAssignmentDecorator</assignment.decorator.class.name>
+        <assignments.class.name>com.intuit.wasabi.assignment.impl.AssignmentsImpl</assignments.class.name>
+
+        <swaggerHost>localhost:8080</swaggerHost>
+        <swaggerUrl>${swaggerHost}/api</swaggerUrl>
+        <swaggerServicePath>swagger/swaggerjson/swagger.json</swaggerServicePath>
+        <swaggerServiceUrl>/${swaggerServicePath}</swaggerServiceUrl>
+    </properties>
+
     <profiles>
         <profile>
             <id>development</id>
@@ -72,82 +138,6 @@ http://www.w3.org/2001/XMLSchema-instance">
             </build>
         </profile>
     </profiles>
-
-    <properties>
-        <default.time.zone>UTC</default.time.zone>
-        <default.time.format>yyyy-MM-dd HH:mm:ss</default.time.format>
-
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <timestamp>${maven.build.timestamp}</timestamp>
-        <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
-
-        <application.name>${project.name}-${project.version}-${application.profile}</application.name>
-        <application.version>1.0</application.version>
-        <application.home>/usr/local/${application.name}</application.home>
-
-        <jacoco.version>0.7.2.201409121644</jacoco.version>
-        <!--
-                <jacoco.destFile>${basedir}/../../target/jacoco.exec</jacoco.destFile>
-        <jacoco.destFile>${build.directory}/jacoco.exec</jacoco.destFile>
-        -->
-
-        <http.proxy.host>http://insert.your.proxy.host.here</http.proxy.host>
-        <http.proxy.port>80</http.proxy.port>
-
-        <mysql.host>localhost</mysql.host>
-        <mysql.port>3306</mysql.port>
-        <mysql.dbName>wasabi</mysql.dbName>
-        <mysql.Args>verifyServerCertificate=false&amp;useSSL=false&amp;requireSSL=false&amp;autoReconnect=true&amp;autoReconnectForPools=true</mysql.Args>
-
-        <cassandra.experiments.keyspaceName>wasabi_experiments</cassandra.experiments.keyspaceName>
-        <cassandra.experiments.nodeHosts>localhost</cassandra.experiments.nodeHosts>
-        <cassandra.experiments.port>9160</cassandra.experiments.port>
-        <cassandra.experiments.useSSL>false</cassandra.experiments.useSSL>
-        <cassandra.experiments.defaultReadConsistency>CL_ONE</cassandra.experiments.defaultReadConsistency>
-        <cassandra.experiments.replicationStrategy>SimpleStrategy</cassandra.experiments.replicationStrategy>
-        <cassandra.experiments.replicationFactor>1</cassandra.experiments.replicationFactor>
-        <cassandra.experiments.defaultWriteConsistency>CL_QUORUM</cassandra.experiments.defaultWriteConsistency>
-        <cassandra.experiments.nodeDiscoveryType>NONE</cassandra.experiments.nodeDiscoveryType>
-        <cassandra.experiments.connectionPoolType>ROUND_ROBIN</cassandra.experiments.connectionPoolType>
-        <cassandra.events.nodeHosts>localhost</cassandra.events.nodeHosts>
-        <cassandra.events.port>9160</cassandra.events.port>
-
-        <export.rest.assignment.web.class.name>com.intuit.wasabi.assignment.impl.NoopWebAssignmentEnvelope
-        </export.rest.assignment.web.class.name>
-        <export.rest.assignment.db.class.name>com.intuit.wasabi.assignment.impl.NoopDatabaseAssignmentEnvelope
-        </export.rest.assignment.db.class.name>
-        <export.rest.event.db.class.name>com.intuit.wasabi.assignment.impl.NoopDatabaseAssignmentEnvelope
-        </export.rest.event.db.class.name>
-        <export.rest.client.connectionTimeout>5000</export.rest.client.connectionTimeout>
-        <export.rest.client.socketTimeout>10000</export.rest.client.socketTimeout>
-        <user.lookup.class.name>com.intuit.wasabi.userdirectory.impl.DefaultUserDirectory</user.lookup.class.name>
-        <authorization.class.name>com.intuit.wasabi.authorization.impl.DefaultAuthorization
-        </authorization.class.name>
-        <authentication.class.name>com.intuit.wasabi.authentication.impl.DefaultAuthentication
-        </authentication.class.name>
-
-        <assign.user.to.old>true</assign.user.to.old>
-        <assign.user.to.new>false</assign.user.to.new>
-        <assign.user.to.export>true</assign.user.to.export>
-        <assign.bucket.count>true</assign.bucket.count>
-        <assignment.decorator.enabled>false</assignment.decorator.enabled>
-
-        <!-- mutagen -->
-        <cassandra.mutagen.root.resource.path>com/intuit/wasabi/repository/impl/cassandra/experiments/mutation</cassandra.mutagen.root.resource.path>
-        <mysql.mutagen.root.resource.path>com/intuit/wasabi/repository/impl/mysql/migration</mysql.mutagen.root.resource.path>
-
-        <!-- FIXME: remove -->
-        <assignment.decorator.service>http://decorator.example.com</assignment.decorator.service>
-        <assignment.decorator.class.name>com.intuit.wasabi.assignment.impl.DefaultAssignmentDecorator
-        </assignment.decorator.class.name>
-        <assignments.class.name>com.intuit.wasabi.assignment.impl.AssignmentsImpl</assignments.class.name>
-
-        <swaggerHost>localhost:8080</swaggerHost>
-        <swaggerUrl>${swaggerHost}/api</swaggerUrl>
-        <swaggerServicePath>swagger/swaggerjson/swagger.json</swaggerServicePath>
-        <swaggerServiceUrl>/${swaggerServicePath}</swaggerServiceUrl>
-    </properties>
 
     <modules>
         <module>modules/analytics-objects</module>
@@ -322,14 +312,6 @@ http://www.w3.org/2001/XMLSchema-instance">
             <version>3.2.0</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.jacoco</groupId>
-            <artifactId>org.jacoco.agent</artifactId>
-            <version>${jacoco.version}</version>
-            <type>pom</type>
-            <!-- FIXME: ?don't we want to scope this to test only? -->
-            <scope>test</scope>
-        </dependency>
     </dependencies>
     <distributionManagement>
         <snapshotRepository>
@@ -352,6 +334,11 @@ http://www.w3.org/2001/XMLSchema-instance">
                         <source>1.8</source>
                         <target>1.8</target>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.sonarsource.scanner.maven</groupId>
+                    <artifactId>sonar-maven-plugin</artifactId>
+                    <version>3.1.1</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -383,11 +370,7 @@ http://www.w3.org/2001/XMLSchema-instance">
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${jacoco.version}</version>
-                <configuration>
-                    <destFile>${project.build.directory}/jacoco.exec</destFile>
-                    <append>true</append>
-                </configuration>
+                <version>0.7.5.201505241946</version>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
