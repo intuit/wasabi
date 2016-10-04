@@ -216,39 +216,11 @@ public class AnalyticsResource {
                 experimentResponse.get("experimentDetails");
 
         expDetailsWithAnalytics = experimentDetails.getAnalyticData(expDetailsWithAnalytics, parameters);
-
-        //setDummyValues(expDetailsWithAnalytics);
-
         experimentResponse.put("experimentDetails", expDetailsWithAnalytics);
 
         return httpHeader.headers().entity(experimentResponse).build();
     }
-
-    private void setDummyValues(List<ExperimentDetail> expDetailsWithAnalytics) {
-
-        for(ExperimentDetail expDetail : expDetailsWithAnalytics){
-            if(Math.random() > 0.5){
-                expDetail.setTotalNumberUsers(4212443l);
-                for(ExperimentDetail.BucketDetail bd : expDetail.getBuckets()){
-                    bd.setActionRate(0.6);
-                    bd.setUpperBound(0.8);
-                    bd.setLowerBound(0.5);
-                }
-            }
-            else{
-                expDetail.setTotalNumberUsers(346745l);
-                for(ExperimentDetail.BucketDetail bd : expDetail.getBuckets()){
-                    bd.setActionRate(0.3);
-                    bd.setUpperBound(0.56);
-                    bd.setLowerBound(0.43);
-                    double coin = Math.random();
-                    bd.setWinnerSoFar(coin>0.9);
-                    bd.setLoserSoFar(coin<0.9);
-                }
-            }
-        }
-    }
-
+    
     /**
      * Returns a number of summary counts for the specified experiment.
      * <p>
