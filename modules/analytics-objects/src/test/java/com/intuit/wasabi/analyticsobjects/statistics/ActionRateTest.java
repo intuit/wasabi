@@ -20,16 +20,19 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+/**
+ * Tests the {@link ActionRate}.
+ */
 public class ActionRateTest {
-    Double estimate;
-    Double lowerBound;
-    Double upperBound;
-    Event.Name actionName;
-    ActionRate actionRate;
+
+    private Double estimate;
+    private Double lowerBound;
+    private Double upperBound;
+    private Event.Name actionName;
+    private ActionRate actionRate;
 
     @Before
     public void setup(){
@@ -49,9 +52,13 @@ public class ActionRateTest {
                 .withUpperBound(upperBound).build();
         ActionRate otherActionRate = new ActionRate.Builder().withActionName(actionName).withEstimate(estimator).build();
 
-        assertNotNull(actionRate.hashCode());
-        assertNotNull(actionRate.toString());
-        assertNotNull(actionRate.clone());
+        String actRate = actionRate.toString();
+        assertTrue(actRate.contains(actionName.toString()));
+        assertTrue(actRate.contains(estimate.toString()));
+        assertTrue(actRate.contains(lowerBound.toString()));
+        assertTrue(actRate.contains(upperBound.toString()));
+
+        assertEquals(actionRate.hashCode(), actionRate.clone().hashCode());
 
         assertTrue(actionRate.equals(otherActionRate));
         assertTrue(actionRate.equals(actionRate));

@@ -19,15 +19,18 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+/**
+ * Tests the {@link Estimate}.
+ */
 public class EstimateTest {
-    Double estimate;
-    Double lowerBound;
-    Double upperBound;
-    Estimate estimator;
+
+    private Double estimate;
+    private Double lowerBound;
+    private Double upperBound;
+    private Estimate estimator;
 
     @Before
     public void setup(){
@@ -44,9 +47,13 @@ public class EstimateTest {
         assertEquals(estimator.getLowerBound(), lowerBound);
         assertEquals(estimator.getUpperBound(), upperBound);
 
-        assertNotNull(estimator.hashCode());
-        assertNotNull(estimator.toString());
-        assertNotNull(estimator.clone());
+        assertEquals(estimator.hashCode(), estimator.clone().hashCode());
+
+        String est = estimator.toString();
+        assertTrue(est.contains(String.valueOf(estimate)));
+        assertTrue(est.contains(String.valueOf(lowerBound)));
+        assertTrue(est.contains(String.valueOf(upperBound)));
+
         assertTrue(estimator.equals(estimator));
         assertFalse(estimator.equals(null));
         assertFalse(estimator.equals(upperBound));

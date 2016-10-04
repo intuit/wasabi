@@ -28,25 +28,30 @@ import static org.junit.Assert.fail;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+/**
+ * Tests the {@link Progress}.
+ */
 public class ProgressTest {
-    List<Bucket.Label> winnersSoFar;
-    List<Bucket.Label> losersSoFar;
-    boolean hasSufficientData;
-    Double fractionDataCollected;
-    Progress progress;
+
+    private List<Bucket.Label> winnersSoFar;
+    private List<Bucket.Label> losersSoFar;
+    private boolean hasSufficientData;
+    private Double fractionDataCollected;
+    private Progress progress;
 
     @Before
     public void setup(){
-        winnersSoFar = new ArrayList<Bucket.Label>();
-        losersSoFar = new ArrayList<Bucket.Label>();
+        winnersSoFar = new ArrayList<>();
+        losersSoFar = new ArrayList<>();
         Bucket.Label winner = Bucket.Label.valueOf("TestWinner");
         Bucket.Label loser = Bucket.Label.valueOf("TestLoser");
         winnersSoFar.add(winner);
         losersSoFar.add(loser);
         hasSufficientData = true;
         fractionDataCollected = 0.5;
-        progress = new Progress.Builder().withFractionDataCollected(fractionDataCollected).withSufficientData(hasSufficientData)
-                    .withWinnersSoFar(winnersSoFar).withLosersSoFar(losersSoFar).build();
+        progress = new Progress.Builder().withFractionDataCollected(fractionDataCollected)
+                .withSufficientData(hasSufficientData)
+                .withWinnersSoFar(winnersSoFar).withLosersSoFar(losersSoFar).build();
 
     }
 
@@ -57,9 +62,14 @@ public class ProgressTest {
         assertEquals(progress.getWinnersSoFar(), winnersSoFar);
         assertEquals(progress.isHasSufficientData(), hasSufficientData);
 
-        assertNotNull(progress.hashCode());
-        assertNotNull(progress.toString());
-        assertNotNull(progress.clone());
+        assertEquals(progress.hashCode(), progress.clone().hashCode());
+
+        String prog = progress.toString();
+        assertTrue(prog.contains(String.valueOf(fractionDataCollected)));
+        assertTrue(prog.contains(losersSoFar.toString()));
+        assertTrue(prog.contains(winnersSoFar.toString()));
+        assertTrue(prog.contains(String.valueOf(hasSufficientData)));
+
         assertTrue(progress.equals(progress.clone()));
         assertTrue(progress.equals(progress));
         assertFalse(progress.equals(null));

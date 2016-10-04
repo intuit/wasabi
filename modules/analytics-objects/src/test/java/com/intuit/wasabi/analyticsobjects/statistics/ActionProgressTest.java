@@ -17,7 +17,6 @@ package com.intuit.wasabi.analyticsobjects.statistics;
 
 import com.intuit.wasabi.analyticsobjects.Event;
 import com.intuit.wasabi.experimentobjects.Bucket;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -25,34 +24,38 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static junit.framework.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+/**
+ * Test for the {@link ActionProgress}.
+ */
 public class ActionProgressTest {
-    Event.Name actionName;
-    List<Bucket.Label> winnersSoFar;
-    List<Bucket.Label> losersSoFar;
-    boolean hasSufficientData;
-    Double fractionDataCollected;
-    Progress progress;
-    ActionProgress actionProgress;
+
+    private Event.Name actionName;
+    private List<Bucket.Label> winnersSoFar;
+    private List<Bucket.Label> losersSoFar;
+    private boolean hasSufficientData;
+    private Double fractionDataCollected;
+    private Progress progress;
+    private ActionProgress actionProgress;
 
     @Before
     public void setup(){
         actionName = Event.Name.valueOf("TestAction");
-        winnersSoFar = new ArrayList<Bucket.Label>();
-        losersSoFar = new ArrayList<Bucket.Label>();
+        winnersSoFar = new ArrayList<>();
+        losersSoFar = new ArrayList<>();
         Bucket.Label winner = Bucket.Label.valueOf("TestWinner");
         Bucket.Label loser = Bucket.Label.valueOf("TestLoser");
         winnersSoFar.add(winner);
         losersSoFar.add(loser);
         hasSufficientData = true;
         fractionDataCollected = 0.5;
-        progress = new Progress();
-        actionProgress = new ActionProgress.Builder().withActionName(actionName).withFractionDataCollected(fractionDataCollected)
-                .withSufficientData(hasSufficientData).withWinnersSoFarList(winnersSoFar).withLosersSoFarList(losersSoFar)
-                .withProgress(progress).build();
+
+        actionProgress = new ActionProgress.Builder().withActionName(actionName)
+                .withFractionDataCollected(fractionDataCollected)
+                .withSufficientData(hasSufficientData).withWinnersSoFarList(winnersSoFar)
+                .withLosersSoFarList(losersSoFar).build();
 
     }
 
@@ -60,13 +63,34 @@ public class ActionProgressTest {
     public void testBuilder(){
         assertEquals(actionProgress.getActionName(), actionName);
 
-        assertNotNull(actionProgress.hashCode());
-        assertNotNull(actionProgress.toString());
-        assertNotNull(actionProgress.clone());
+        assertTrue(actionProgress.hashCode() == actionProgress.clone().hashCode());
+
+        String actionProg = actionProgress.toString();
+        assertTrue(actionProg.contains(actionName.toString()));
+        assertTrue(actionProg.contains(fractionDataCollected.toString()));
+        assertTrue(actionProg.contains(String.valueOf(hasSufficientData)));
+        assertTrue(actionProg.contains(String.valueOf(winnersSoFar)));
+        assertTrue(actionProg.contains(String.valueOf(losersSoFar)));
+
         assertTrue(actionProgress.equals(actionProgress.clone()));
         assertTrue(actionProgress.equals(actionProgress));
         assertFalse(actionProgress.equals(null));
-        Assert.assertFalse(actionProgress.equals(progress));
+        assertFalse(actionProgress.equals(progress));
+    }
+
+    @Test
+    public void testBuilderWithProgress(){
+        Progress prog = new Progress();
+        prog.setFractionDataCollected(fractionDataCollected);
+        prog.setHasSufficientData(false);
+        prog.setLosersSoFar(losersSoFar);
+        prog.setWinnersSoFar(winnersSoFar);
+
+        actionProgress =  new ActionProgress.Builder().withProgress(prog).build();
+
+        assertEquals(actionProgress.getFractionDataCollected(), fractionDataCollected);
+        assertEquals(actionProgress.getLosersSoFar(), losersSoFar);
+        assertEquals(actionProgress.getWinnersSoFar(), winnersSoFar);
     }
 
     @Test

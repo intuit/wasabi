@@ -21,31 +21,36 @@ import com.intuit.wasabi.analyticsobjects.counts.Counts;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Bucket.Label;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static junit.framework.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertNotEquals;
 
+/**
+ * Tests the {@link BucketBasicStatistics}
+ */
 public class BucketBasicStatisticsTest {
-    Bucket.Label label;
-    Map<Event.Name, ActionCounts> actionCountsMap;
-    Map<Event.Name, ActionRate> actionRateMap;
-    Counts jointActionCounts;
-    Counts impressionCounts;
-    Estimate jointActionRate;
-    BucketBasicStatistics bucketBasicStatistics;
+
+    private Bucket.Label label;
+    private Map<Event.Name, ActionCounts> actionCountsMap;
+    private Map<Event.Name, ActionRate> actionRateMap;
+    private Counts jointActionCounts;
+    private Counts impressionCounts;
+    private Estimate jointActionRate;
+    private BucketBasicStatistics bucketBasicStatistics;
 
     @Before
     public void setup(){
         label = Bucket.Label.valueOf("TestWinner");
-        actionCountsMap = new HashMap<Event.Name, ActionCounts>();
-        actionRateMap = new HashMap<Event.Name, ActionRate>();
+        actionCountsMap = new HashMap<>();
+        actionRateMap = new HashMap<>();
         jointActionCounts = new Counts();
         impressionCounts = new Counts();
         jointActionRate = new Estimate();
@@ -74,8 +79,6 @@ public class BucketBasicStatisticsTest {
                 .withActionCounts(actionCountsMap).withActionRates(actionRateMap)
                 .withJointActionCounts(jointActionCounts2).withImpressionCounts(impressionCounts)
                 .withJointActionRate(jointActionRate).build();
-        System.out.println(bucketBasicStatistics);
-        System.out.println(bucketBasicStatistics2);
         assertFalse(bucketBasicStatistics.equals(bucketBasicStatistics2));
     }
 
@@ -101,9 +104,18 @@ public class BucketBasicStatisticsTest {
         assertEquals(bucketBasicStatistics.getImpressionCounts(), impressionCounts);
         assertEquals(bucketBasicStatistics.getJointActionRate(), jointActionRate);
 
-        assertNotNull(bucketBasicStatistics.hashCode());
-        assertNotNull(bucketBasicStatistics.toString());
-        assertNotNull(bucketBasicStatistics.clone());
+        assertEquals(bucketBasicStatistics, bucketBasicStatistics.clone());
+        assertEquals(bucketBasicStatistics.hashCode(), bucketBasicStatistics.clone().hashCode());
+
+        String buckBasicStats = bucketBasicStatistics.toString();
+
+        assertTrue(buckBasicStats.contains(label.toString()));
+        assertTrue(buckBasicStats.contains(actionCountsMap.toString()));
+        assertTrue(buckBasicStats.contains(actionRateMap.toString()));
+        assertTrue(buckBasicStats.contains(jointActionCounts.toString()));
+        assertTrue(buckBasicStats.contains(impressionCounts.toString()));
+        assertTrue(buckBasicStats.contains(jointActionRate.toString()));
+
         assertTrue(bucketBasicStatistics.equals(bucketBasicStatistics));
         assertFalse(bucketBasicStatistics.equals(null));
     }

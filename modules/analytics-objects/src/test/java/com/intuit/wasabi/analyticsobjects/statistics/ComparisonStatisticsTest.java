@@ -20,17 +20,20 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static junit.framework.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+/**
+ * Tests the {@link ComparisonStatistics}.
+ */
 public class ComparisonStatisticsTest {
-    boolean sufficientData;
-    Double fractionDataCollected;
-    Bucket.Label clearComparisonWinner;
-    Estimate actionRateDifference;
-    DistinguishableEffectSize smallestDistinguishableEffectSize;
-    ComparisonStatistics statistics;
+
+    private boolean sufficientData;
+    private Double fractionDataCollected;
+    private Bucket.Label clearComparisonWinner;
+    private Estimate actionRateDifference;
+    private DistinguishableEffectSize smallestDistinguishableEffectSize;
+    private ComparisonStatistics statistics;
 
     @Before
     public void setup(){
@@ -52,9 +55,15 @@ public class ComparisonStatisticsTest {
         assertEquals(statistics.getActionRateDifference(), actionRateDifference);
         assertEquals(statistics.getSmallestDistinguishableEffectSize(), smallestDistinguishableEffectSize);
 
-        assertNotNull(statistics.hashCode());
-        assertNotNull(statistics.toString());
-        assertNotNull(statistics.clone());
+        assertEquals(statistics.hashCode(), statistics.clone().hashCode());
+
+        String stats = statistics.toString();
+        assertTrue(stats.contains(fractionDataCollected.toString()));
+        assertTrue(stats.contains(String.valueOf(sufficientData)));
+        assertTrue(stats.contains(clearComparisonWinner.toString()));
+        assertTrue(stats.contains(actionRateDifference.toString()));
+        assertTrue(stats.contains(smallestDistinguishableEffectSize.toString()));
+
         assertTrue(statistics.equals(statistics.clone()));
         assertTrue(statistics.equals(statistics));
         assertFalse(statistics.equals(null));
