@@ -18,14 +18,19 @@ package com.intuit.wasabi.analyticsobjects.counts;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+/**
+ * This class tests the {@link Counts}.
+ */
 public class CountsTest {
-    Counts counter;
-    long eventCount;
-    long uniqueUserCount;
+
+    private Counts counter;
+    private long eventCount;
+    private long uniqueUserCount;
 
     @Before
     public void setup(){
@@ -38,10 +43,22 @@ public class CountsTest {
     public void testBuilder(){
         assertEquals(counter.getEventCount(), eventCount);
         assertEquals(counter.getUniqueUserCount(), uniqueUserCount);
-        assertNotNull(counter.clone());
-        assertNotNull(counter.hashCode());
-        assertNotNull(counter.toString());
+
+        String counterString = counter.toString();
+        assertTrue(counterString.contains("eventCount=500000"));
+        assertTrue(counterString.contains("uniqueUserCount=500000"));
     }
+    @Test
+    public void testCloneAndHashCode(){
+        Counts countClone = counter.clone();
+        assertEquals(counter.getUniqueUserCount(), countClone.getUniqueUserCount());
+        assertEquals(counter.getEventCount(), countClone.getEventCount());
+
+        assertEquals(counter.hashCode(), countClone.hashCode());
+        countClone.setEventCount(42);
+        assertNotEquals(counter.hashCode(), countClone.hashCode());
+    }
+
 
     @Test
     public void testAddEventCount(){
@@ -59,9 +76,6 @@ public class CountsTest {
 
     @Test
     public void testAddCount(){
-        // Reset to setup value due to previous tests
-        counter.setEventCount(eventCount);
-        counter.setUniqueUserCount(uniqueUserCount);
         Counts addCounter = new Counts.Builder().withEventCount(eventCount).withUniqueUserCount(uniqueUserCount).build();
         assertTrue(counter.equals(addCounter));
         long addEventValue = 100000;

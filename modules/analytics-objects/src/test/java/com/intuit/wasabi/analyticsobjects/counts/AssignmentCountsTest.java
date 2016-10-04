@@ -23,6 +23,9 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
+/**
+ * This class tests the {@link AssignmentCounts}
+ */
 public class AssignmentCountsTest {
 
     @Test

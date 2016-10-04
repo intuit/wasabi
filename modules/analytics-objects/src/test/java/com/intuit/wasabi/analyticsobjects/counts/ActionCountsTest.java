@@ -19,16 +19,20 @@ import com.intuit.wasabi.analyticsobjects.Event;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+/**
+ * This class tests the {@link ActionCounts}.
+ */
 public class ActionCountsTest {
-    Event.Name testEvent;
-    long eventCount;
-    long uniqueUserCount;
-    Counts counter;
-    ActionCounts actionCounter;
+
+    private Event.Name testEvent;
+    private long eventCount;
+    private long uniqueUserCount;
+    private Counts counter;
+    private ActionCounts actionCounter;
 
     @Before
     public void setup(){
@@ -44,9 +48,16 @@ public class ActionCountsTest {
         assertEquals(actionCounter.getActionName(), testEvent);
         assertEquals(actionCounter.getEventCount(), eventCount);
         assertEquals(actionCounter.getUniqueUserCount(), uniqueUserCount);
-        System.out.println(actionCounter.toString());
-        assertNotNull(actionCounter.toString());
-        assertNotNull(actionCounter.hashCode());
+        assertTrue(actionCounter.toString().contains("eventCount=500000"));
+        assertTrue(actionCounter.toString().contains("uniqueUserCount=500000"));
+    }
+
+    @Test
+    public void testHashCode(){
+        ActionCounts actionCountsOther = actionCounter.clone();
+        assertEquals(actionCountsOther.hashCode(), actionCounter.hashCode());
+        actionCountsOther.setEventCount(42l);
+        assertNotEquals(actionCountsOther.hashCode(), actionCounter.hashCode());
     }
 
     @Test
@@ -66,7 +77,12 @@ public class ActionCountsTest {
         assertEquals(newActionCounter.getEventCount(), eventCount);
         assertEquals(newActionCounter.getUniqueUserCount(), uniqueUserCount);
         assertTrue(actionCounter.equals(newActionCounter));
-        assertNotNull(actionCounter.clone());
+
+        ActionCounts actionCounterClone = actionCounter.clone();
+        assertTrue(actionCounterClone.equals(actionCounter));
+        assertEquals(actionCounterClone.getActionName(), actionCounter.getActionName());
+        assertEquals(actionCounterClone.getEventCount(), actionCounter.getEventCount());
+        assertEquals(actionCounterClone.getUniqueUserCount(), actionCounter.getUniqueUserCount());
     }
 
 }

@@ -20,6 +20,9 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
+/**
+ * This class tests the {@link BucketAssignmentCount}.
+ */
 public class BucketAssignmentCountTest {
 
     @Test
