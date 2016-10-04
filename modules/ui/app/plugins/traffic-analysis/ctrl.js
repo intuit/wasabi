@@ -2,8 +2,8 @@
 'use strict';
 
 angular.module('wasabi.controllers').
-    controllerProvider.register('TrafficAnalysisCtrl', ['$scope', '$rootScope', 'UtilitiesFactory', '$modalInstance', 'ApplicationsFactory', 'MutualExclusionsFactory', 'PrioritiesFactory', 'ExperimentsFactory', '$cookies',
-        function ($scope, $rootScope, UtilitiesFactory, $modalInstance, ApplicationsFactory, MutualExclusionsFactory, PrioritiesFactory, ExperimentsFactory, $cookies) {
+    controllerProvider.register('TrafficAnalysisCtrl', ['$scope', '$rootScope', 'UtilitiesFactory', '$modalInstance', 'ApplicationsFactory', 'MutualExclusionsFactory', 'PrioritiesFactory', 'ExperimentsFactory', '$cookies', 'TrafficManagementShared',
+        function ($scope, $rootScope, UtilitiesFactory, $modalInstance, ApplicationsFactory, MutualExclusionsFactory, PrioritiesFactory, ExperimentsFactory, $cookies, TrafficManagementShared) {
             $scope.data = {
                 applicationName: ($cookies.wasabiDefaultApplication ? $cookies.wasabiDefaultApplication : ''),
                 selectedExperiment: '',
@@ -15,6 +15,7 @@ angular.module('wasabi.controllers').
 
             $scope.experiments = [];
             $scope.experimentNames = [];
+            $scope.columnNames = [];
             $scope.relatedExperiments = [];
             $scope.priorities = [];
             $scope.meDoneNames = [];
@@ -30,7 +31,7 @@ angular.module('wasabi.controllers').
                 $scope.currentApplicationName = '';
                 $scope.priorities = [];
                 $scope.experiments = [];
-                $scope.experimentNames = [];
+                $scope.columnNames = [];
                 $scope.relatedExperiments = [];
                 $scope.mutualExclusions = {};
             };
@@ -84,61 +85,13 @@ angular.module('wasabi.controllers').
                 }
                 else {
                     UtilitiesFactory.displayPageError('Problem Getting Experiments', 'There was a problem retrieving the priorities for the experiment with label, ' + exp.label);
-                    // TODO: Handle aborting?
                     return false;
                 }
                 return true;
             };
 
             $scope.getMutualExclusions = function(exp) {
-                console.log('Getting MEs for ' + exp.label);
-                MutualExclusionsFactory.query({
-                    experimentId: exp.id,
-                    exclusiveFlag: true
-                }).$promise.then(function (meExperiments) {
-                    // Keep track of the mutual exclusions for each experiment so we can calculate the
-                    // sampling percentages that are effected by the mutual exclusions.
-                    $scope.mutualExclusions[exp.label] = meExperiments;
-                    meExperiments.forEach(function(nextExp) {
-                        $scope.setPriorityOnExperiment(nextExp);
-                    });
-
-                    // Add all of the meExperiments that are not already there to the relatedExperiments array
-                    for (var i = 0; i < meExperiments.length; i++) {
-                        // Check if it is already in there
-                        var expSearch = $scope.relatedExperiments.filter(function(exp) {
-                            return exp.label === meExperiments[i].label;
-                        });
-                        if (expSearch.length <= 0) {
-                            // Add it to the array
-                            console.log('Adding ' + meExperiments[i].label + ' to relatedExperiments');
-                            $scope.relatedExperiments.push(meExperiments[i]);
-                        }
-                    }
-
-                    // The priority field from the priorities was added to the
-                    // mutual exclusion list when we saved it off above.  This will
-                    // allow us to sort by it.
-                    $scope.relatedExperiments.sort(function (a, b) {
-                        return a.priority > b.priority;
-                    });
-
-                    $scope.meDoneNames.push(exp.label);
-                    if ($scope.meDoneNames.length === $scope.relatedExperiments.length) {
-                        console.log('*** We have processed all the mutual exclusions');
-                        $scope.calculate();
-                    }
-                    else {
-                        meExperiments.forEach(function(nextExp) {
-                            if ($scope.meDoneNames.indexOf(nextExp.label) < 0) {
-                                // Only do this one if we haven't already done it (avoid indefinite loop!)
-                                $scope.getMutualExclusions(nextExp);
-                            }
-                        });
-                    }
-                }, function(response) {
-                    UtilitiesFactory.handleGlobalError(response, 'The mutual exclusions could not be retrieved.');
-                });
+                TrafficManagementShared.getMutualExclusions(exp, $scope, $scope.calculate);
             };
 
             $scope.initialExperimentSelected = function() {
@@ -153,7 +106,6 @@ angular.module('wasabi.controllers').
                 $scope.meDoneNames = [];
                 $scope.mutualExclusions = {};
 
-                //console.dir($scope.data.selectedExperiment);
                 var expSearch = $scope.experiments.filter(function(exp) {
                     return exp.label === $scope.data.selectedExperiment;
                 });
@@ -168,16 +120,15 @@ angular.module('wasabi.controllers').
                         start: startTime,
                         end: endTime
                     }).$promise.then(function(results) {
-                        $scope.experimentNames = ['Experiments:'];
+                        $scope.columnNames = ['Experiments:'];
                         $scope.dataRows = [
                             ['Priority'],
-                            //['Target %'],
                             ['Experiment %']
                         ];
                         var i = 0;
                         if (results.experiments) {
                             for (i = 0; i < results.experiments.length; i++) {
-                                $scope.experimentNames.push(results.experiments[i]);
+                                $scope.columnNames.push(results.experiments[i]);
                             }
                         }
                         for (i = 0; i < results.priorities.length; i++) {
@@ -192,6 +143,12 @@ angular.module('wasabi.controllers').
                             $scope.dataRows.push(row);
                         }
 
+                        // Prepare the structure used by TrafficManagementShared.getMutualExclusions() to keep track of which
+                        // experiments we've gotten the mutual exclusions for.
+                        $scope.pendingMEs = [{
+                            label: expSearch[0].label,
+                            processed: false
+                        }];
                         // Get the mutual exclusions data and then use that to calculate the target sampling %s
                         $scope.getMutualExclusions($scope.relatedExperiments[0]);
 
@@ -205,32 +162,7 @@ angular.module('wasabi.controllers').
 
             $scope.calculate = function() {
                 // Note that the experiments are listed in priority order.
-
-                for (var j = 0; j < $scope.relatedExperiments.length; j++) {
-                    var currentExp = $scope.relatedExperiments[j], mutexs, targetSamplingPercentages;
-                    if (j === 0) {
-                        // Highest priority experiment, message will be different.
-                        currentExp.targetSamplingPercent = currentExp.samplingPercent.toFixed(4);
-                    }
-                    else {
-                        // For all others, we need to calculate the target sampling percentage by looking at the higher
-                        // priority experiments.
-                        mutexs = $scope.mutualExclusions[currentExp.label];
-                        targetSamplingPercentages = 0.0;
-
-                        for (var k = 0; k < mutexs.length; k++) {
-                            if (mutexs[k].priority < currentExp.priority) {
-                                // Get the value the user entered for this mutually exclusive experiment
-                                var relExp = $scope.relatedExperiments.filter(function(nextExp) {
-                                    return nextExp.label === mutexs[k].label;
-                                });
-                                targetSamplingPercentages += parseFloat(relExp[0].targetSamplingPercent);
-                            }
-                        }
-                        var newTargetSamp = parseFloat(currentExp.samplingPercent) * (1 - targetSamplingPercentages);
-                        currentExp.targetSamplingPercent = parseFloat(newTargetSamp.toFixed(4));
-                    }
-                }
+                // Also note that this function is called after we have calculated the target sampling percentages.
                 var targets = ['Target %'];
                 for (var i = 0; i < $scope.relatedExperiments.length; i++) {
                     targets[i + 1] = $scope.multiply100($scope.relatedExperiments[i].targetSamplingPercent) + '%';

@@ -1,5 +1,10 @@
 var wasabiUIPlugins = [
     {
+        'pluginType': 'contributeSharedCode',
+        'description': 'Shared code to be loaded by both the Traffic Management plugins.',
+        'ctrl': 'plugins/traffic-management-shared/ctrl.js'
+    },
+    {
         'pluginType': 'contributeAppLevelFeature',
         'displayName': 'Traffic Estimator',
         'description': 'This is a plugin to aid in determining the sampling percentages for multiple, mutually exclusive experiments through the use of target sampling percentages.',

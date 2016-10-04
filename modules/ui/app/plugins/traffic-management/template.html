@@ -24,7 +24,7 @@
                                 <tr ng-repeat="nextExperiment in relatedExperiments">
                                     <td>{{nextExperiment.priority}}</td><td>{{nextExperiment.label}}</td>
                                     <td><input type="number" class="samplingInput" convert-percent ng-model="nextExperiment.targetSamplingPercent"/></td>
-                                    <td><span style="text-decoration: line-through">{{nextExperiment.originalSamplingPercent !== nextExperiment.samplingPercent ? multiply100(nextExperiment.originalSamplingPercent) : ''}}</span> {{multiply100(nextExperiment.samplingPercent)}} <span hover-popup hover-content-source="nextExperiment.hoverContent" style="position: relative; top: -10px;" ng-show="nextExperiment.originalSamplingPercent !== nextExperiment.samplingPercent"><img style="width: 14px; height: 14px;" src="../../images/sidebar_icon_faq.png"></span></td>
+                                    <td><span style="text-decoration: line-through">{{nextExperiment.oldSamplingPercent}}</span> {{multiply100(nextExperiment.samplingPercent)}} <span hover-popup hover-content-source="nextExperiment.hoverContent" style="position: relative; top: -10px;" ng-show="nextExperiment.oldSamplingPercent !== ''"><img style="width: 14px; height: 14px;" src="../../images/sidebar_icon_faq.png"></span></td>
                                 </tr>
                             </tbody>
                         </table>

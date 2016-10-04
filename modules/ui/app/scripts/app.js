@@ -5,12 +5,18 @@
  * create sub modules (with [] in the end)
  */
 var ctrlModule = angular.module('wasabi.controllers', ['config']);
-angular.module('wasabi.services', ['ngResource']);
+var svcModule = angular.module('wasabi.services', ['ngResource']);
 angular.module('wasabi.directives', ['ngCookies']);
 
 ctrlModule.config(['$controllerProvider',
         function ($controllerProvider) {
             ctrlModule.controllerProvider = $controllerProvider;
+        }
+]);
+
+svcModule.config(['$provide',
+        function ($provide) {
+            svcModule.provide = $provide;
         }
 ]);
 
