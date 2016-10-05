@@ -4318,3 +4318,7 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
 .selectedLink {
     font-weight: bold;
 }
+
+.notAllowed {
+    cursor: no-drop !important;
+}
