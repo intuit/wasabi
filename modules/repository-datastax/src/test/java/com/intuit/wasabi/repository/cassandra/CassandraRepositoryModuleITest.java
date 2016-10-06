@@ -15,13 +15,6 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.cassandra;
 
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsNot.not;
-import static org.hamcrest.core.IsNull.nullValue;
-import static org.junit.Assert.assertThat;
-
-import org.junit.Test;
-
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -32,11 +25,7 @@ import com.intuit.wasabi.eventlog.EventLogModule;
 import com.intuit.wasabi.repository.AuthorizationRepository;
 import com.intuit.wasabi.repository.FeedbackRepository;
 import com.intuit.wasabi.repository.PagesRepository;
-import com.intuit.wasabi.repository.cassandra.accessor.BucketAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.ExclusionAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.PrioritiesAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.StagingAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.UserAssignmentAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.*;
 import com.intuit.wasabi.repository.cassandra.accessor.audit.AuditLogAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.count.BucketAssignmentCountAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.export.UserAssignmentExportAccessor;
@@ -45,12 +34,21 @@ import com.intuit.wasabi.repository.cassandra.accessor.index.UserAssignmentIndex
 import com.intuit.wasabi.repository.cassandra.accessor.index.UserExperimentIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.impl.CassandraFeedbackRepository;
 import com.intuit.wasabi.repository.database.DatabaseExperimentRepositoryModule;
+import com.intuit.wasabi.userdirectory.UserDirectoryModule;
+import org.junit.Test;
+
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNot.not;
+import static org.hamcrest.core.IsNull.nullValue;
+import static org.junit.Assert.assertThat;
 
 public class CassandraRepositoryModuleITest {
 
     @Test
     public void testConfigure() throws Exception {
-        Injector injector = Guice.createInjector(new EventLogModule(),
+        Injector injector = Guice.createInjector(
+                new UserDirectoryModule(),
+                new EventLogModule(),
                 new DatabaseModule(),
                 new DatabaseExperimentRepositoryModule(),
                 new CassandraRepositoryModule());

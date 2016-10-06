@@ -24,8 +24,8 @@ import com.google.inject.name.Names;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.database.DatabaseModule;
 import com.intuit.wasabi.eventlog.EventLogModule;
-import com.intuit.wasabi.repository.cassandra.CassandraRepositoryModule;
 import com.intuit.wasabi.repository.database.DatabaseExperimentRepositoryModule;
+import com.intuit.wasabi.userdirectory.UserDirectoryModule;
 
 /**
  * A utility class for creating session/etc once
@@ -38,7 +38,9 @@ public class IntegrationTestBase {
     public static void setup(){
     	if (injector != null)
     		return;
-        injector = Guice.createInjector(new CassandraRepositoryModule(),
+        injector = Guice.createInjector(
+                new UserDirectoryModule(),
+                new CassandraRepositoryModule(),
         		new DatabaseExperimentRepositoryModule(),
         		new DatabaseModule(),
         		new EventLogModule());

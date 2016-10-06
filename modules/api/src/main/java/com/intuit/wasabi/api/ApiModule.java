@@ -37,7 +37,6 @@ import com.intuit.wasabi.experiment.ExperimentsModule;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.feedback.FeedbackModule;
 import com.intuit.wasabi.repository.database.DatabaseExperimentRepositoryModule;
-
 import com.intuit.wasabi.userdirectory.UserDirectoryModule;
 import org.slf4j.Logger;
 
@@ -59,11 +58,10 @@ public class ApiModule extends AbstractModule {
         LOGGER.debug("installing module: {}", ApiModule.class.getSimpleName());
         //these modules are either free of other dependencies or they are required by later modules
         install(new com.intuit.autumn.api.ApiModule());
+        install(new UserDirectoryModule());
         install(new DatabaseExperimentRepositoryModule());
         install(new DatabaseModule());
         install(new JacksonModule());
-        install(new UserDirectoryModule());
-//        install(new CassandraExperimentRepositoryModule());
         install(new AuditLogModule());
         install(new AuthorizationModule());
 

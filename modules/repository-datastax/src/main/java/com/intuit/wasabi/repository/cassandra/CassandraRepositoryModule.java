@@ -21,7 +21,6 @@ import com.intuit.wasabi.repository.cassandra.provider.audit.ExperimentAuditLogA
 import com.intuit.wasabi.repository.cassandra.provider.count.BucketAssignmentCountAccessorProvider;
 import com.intuit.wasabi.repository.cassandra.provider.export.UserAssignmentExportAccessorProvider;
 import com.intuit.wasabi.repository.cassandra.provider.index.*;
-import com.intuit.wasabi.userdirectory.UserDirectoryModule;
 import org.slf4j.Logger;
 
 import javax.inject.Singleton;
@@ -41,8 +40,6 @@ public class CassandraRepositoryModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        install(new UserDirectoryModule());
-
         Properties properties = create(PROPERTY_NAME, CassandraRepositoryModule.class);
 
         bind(String.class).annotatedWith(named("assign.user.to.export"))

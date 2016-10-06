@@ -15,13 +15,6 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.cassandra;
 
-import static org.junit.Assert.*;
-
-import java.util.Arrays;
-import java.util.Optional;
-
-import org.junit.Test;
-
 import com.datastax.driver.core.ConsistencyLevel;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -30,12 +23,22 @@ import com.intuit.wasabi.cassandra.datastax.CassandraDriver.Configuration;
 import com.intuit.wasabi.database.DatabaseModule;
 import com.intuit.wasabi.eventlog.EventLogModule;
 import com.intuit.wasabi.repository.database.DatabaseExperimentRepositoryModule;
+import com.intuit.wasabi.userdirectory.UserDirectoryModule;
+import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.Optional;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class ClientConfigurationITest {
 
 	@Test
 	public void testDefaultProperties() {
-        Injector injector = Guice.createInjector(new EventLogModule(),
+        Injector injector = Guice.createInjector(
+                new UserDirectoryModule(),
+                new EventLogModule(),
                 new DatabaseModule(),
                 new DatabaseExperimentRepositoryModule(),
                 new CassandraRepositoryModule());
