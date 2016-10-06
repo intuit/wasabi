@@ -28,6 +28,7 @@ import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.Experiment.ID;
 import com.intuit.wasabi.experimentobjects.Experiment.Label;
 import com.intuit.wasabi.experimentobjects.ExperimentList;
+import com.intuit.wasabi.experimentobjects.ExperimentValidator;
 import com.intuit.wasabi.experimentobjects.NewExperiment;
 import com.intuit.wasabi.repository.AuditLogRepository;
 import com.intuit.wasabi.repository.RepositoryException;
@@ -41,9 +42,7 @@ import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentLabelInde
 import com.intuit.wasabi.repository.cassandra.accessor.index.StateExperimentIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.UserBucketIndexAccessor;
 
-public class CassandraExperimentRepositoryTest extends IntegrationTestBase  {
-
-    ExperimentAccessor experimentAccessor;
+public class CassandraExperimentRepositoryTest {
 
     CassandraExperimentRepository repository;
 
@@ -63,9 +62,6 @@ public class CassandraExperimentRepositoryTest extends IntegrationTestBase  {
 
 	private Context QA = Context.valueOf("qa");
 	private Application.Name appname;
-
-	private BucketAuditLogAccessor bucketAuditLogAccessor;
-	private ExperimentAuditLogAccessor experimentAuditLogAccessor;
 
 	private CassandraDriver mockDriver;
 
@@ -91,24 +87,19 @@ public class CassandraExperimentRepositoryTest extends IntegrationTestBase  {
     	mockExperimentAuditLogAccessor = Mockito.mock(ExperimentAuditLogAccessor.class);
     	mockApplicationListAccessor = Mockito.mock(ApplicationListAccessor.class);
     	mockExperimentLabelIndexAccessor = Mockito.mock(ExperimentLabelIndexAccessor.class);
-    	IntegrationTestBase.setup();
 
     	if (repository != null) return;
 
         appname = Application.Name.valueOf("app1" + System.currentTimeMillis());
         
-        experimentAccessor = injector.getInstance(ExperimentAccessor.class);
-        bucketAuditLogAccessor = injector.getInstance(BucketAuditLogAccessor.class);
-        experimentAuditLogAccessor = injector.getInstance(ExperimentAuditLogAccessor.class);
-        session.execute("truncate wasabi_experiments.bucket");
-        
-        session.execute("delete from wasabi_experiments.auditlog where application_name = '" 
-        		+ AuditLogRepository.GLOBAL_ENTRY_APPLICATION.toString() + "'");
-        
 		experimentID1 = Experiment.ID.valueOf(UUID.randomUUID());
 		experimentID2 = Experiment.ID.valueOf(UUID.randomUUID());
-		
-    	repository = injector.getInstance(CassandraExperimentRepository.class);;
+
+		repository = new CassandraExperimentRepository(
+				mockDriver, mockExperimentAccessor, mockExperimentLabelIndexAccessor, 
+				mockUserBucketIndexAccessor, mockBucketAccessor, mockApplicationListAccessor, 
+				mockBucketAuditLogAccessor, mockExperimentAuditLogAccessor, 
+				mockStateExperimentIndexAccessor, new ExperimentValidator());
     	bucket1 = Bucket.newInstance(experimentID1,Bucket.Label.valueOf("bl1")).withAllocationPercent(.23)
     			.withControl(true)
     			.withDescription("b1").withPayload("p1")
@@ -127,10 +118,8 @@ public class CassandraExperimentRepositoryTest extends IntegrationTestBase  {
     	newExperiment1.setStartTime(new Date());
     	newExperiment1.setEndTime(new Date());
     	newExperiment1.setSamplingPercent(0.2);
-    	experimentID1 = repository.createExperiment(newExperiment1);
+    	experimentID1 = newExperiment1.getId();
     	
-    	repository.createIndicesForNewExperiment(newExperiment1);
-
     	newExperiment2 = new NewExperiment(experimentID2);
     	newExperiment2.setApplicationName(appname);
     	newExperiment2.setLabel(Experiment.Label.valueOf("el2" + System.currentTimeMillis()));
@@ -139,9 +128,8 @@ public class CassandraExperimentRepositoryTest extends IntegrationTestBase  {
     	newExperiment2.setStartTime(new Date());
     	newExperiment2.setEndTime(new Date());
     	newExperiment2.setSamplingPercent(0.2);
-    	experimentID2 = repository.createExperiment(newExperiment2);
+    	experimentID2 = newExperiment2.getId();
     	
-    	repository.createIndicesForNewExperiment(newExperiment2);
     }
     
 	@Test(expected=RepositoryException.class)
@@ -193,7 +181,9 @@ public class CassandraExperimentRepositoryTest extends IntegrationTestBase  {
 		repository.createApplication(app);
 		
 		repository.setApplicationListAccessor(mockApplicationListAccessor);
-		
+		Mockito.doThrow(new RuntimeException("testexception")).when(
+				 mockApplicationListAccessor).getUniqueAppName();
+
 		List<Name> apps = repository.getApplicationsList();
 		assertEquals("Value should be equal", size + 1, apps.size());
 		assertTrue("App should be in the list " + apps, apps.stream().anyMatch(application -> application.toString().equals(app.toString())));
@@ -212,12 +202,18 @@ public class CassandraExperimentRepositoryTest extends IntegrationTestBase  {
 	@Test(expected=RepositoryException.class)
 	public void testGetExperimentAccessorMockThrowsException() {
 		repository.setExperimentAccessor(mockExperimentAccessor);
+		Mockito.doThrow(new RuntimeException("runtime")).when(mockExperimentAccessor)
+			.getExperimentById(Mockito.any());
+		
 		Experiment experiment = repository.getExperiment(experimentID1);		
 	}
 
 	@Test(expected=RepositoryException.class)
 	public void testGetExperimentLabelIndexAccessorMockThrowsException() {
 		repository.setExperimentLabelIndexAccessor(mockExperimentLabelIndexAccessor);
+		Mockito.doThrow(new RuntimeException("runtime")).when(mockExperimentLabelIndexAccessor)
+			.getExperimentBy(Mockito.any(), Mockito.any());
+
 		Experiment experiment = repository.getExperiment(appname, newExperiment1.getLabel());		
 	}
 
@@ -227,18 +223,27 @@ public class CassandraExperimentRepositoryTest extends IntegrationTestBase  {
 		experimentIds.add(experimentID1);
 		experimentIds.add(experimentID2);
 		repository.setExperimentAccessor(mockExperimentAccessor);
-		 ExperimentList experiments = repository.getExperiments(experimentIds);
+		Mockito.doThrow(new RuntimeException("runtime")).when(mockExperimentAccessor)
+			.getExperiments(Mockito.any());
+		
+		ExperimentList experiments = repository.getExperiments(experimentIds);
 	}
 
 	@Test(expected=RepositoryException.class)
 	public void testGetExperimentsByAppNameAccessorMockThrowsException() {
 		repository.setExperimentAccessor(mockExperimentAccessor);
+		Mockito.doThrow(new RuntimeException("runtime")).when(mockExperimentAccessor)
+			.getExperimentByAppName(Mockito.any());
+
 		List<Experiment> experiments = repository.getExperiments(appname);
 	}
 
 	@Test(expected=RepositoryException.class)
 	public void testGetExperimentsStateExperimentAccesorMockSuccess() {
 		repository.setStateExperimentIndexAccessor(mockStateExperimentIndexAccessor);
+		 Mockito.doThrow(new RuntimeException("testexception")).when(
+					mockStateExperimentIndexAccessor).selectByKey(Mockito.any());
+
 		repository.getExperiments();
 	}
 
@@ -246,7 +251,7 @@ public class CassandraExperimentRepositoryTest extends IntegrationTestBase  {
 	public void testGetOneBucketListWithBucketAccessorMockThrowsException() {
 		 repository.setBucketAccessor(mockBucketAccessor);
 		 Mockito.doThrow(new RuntimeException("testexception")).when(
-					mockBucketAccessor).getBucketByExperimentId(null);
+					mockBucketAccessor).getBucketByExperimentIdAndBucket(UUID.randomUUID(), "l1");
 
 		 Object buckets = repository.getBucketList((Experiment.ID)null);
 	}
@@ -254,6 +259,9 @@ public class CassandraExperimentRepositoryTest extends IntegrationTestBase  {
 	@Test(expected=RepositoryException.class)
 	public void testGetBucketWithBucketAccessorMockThrowsException() {
 		 repository.setBucketAccessor(mockBucketAccessor);
+		 Mockito.doThrow(new RuntimeException("testexception")).when(
+					mockBucketAccessor).getBucketByExperimentId(null);
+		 
 		 Bucket buckets = repository.getBucket(bucket1.getExperimentID(), bucket1.getLabel());
 	}
 
@@ -269,29 +277,35 @@ public class CassandraExperimentRepositoryTest extends IntegrationTestBase  {
 		experimentIds.add(experimentID2);
 		
 		repository.setBucketAccessor(mockBucketAccessor);
-		
+		Mockito.doThrow(new RuntimeException("testexception")).when(
+					mockBucketAccessor).getBucketByExperimentId(null);
+
 		Map<ID, BucketList> buckets = repository.getBucketList(experimentIds);
 	}
 
 	@Test(expected=RepositoryException.class)
 	public void testUpdateBucketAccessorMockThrowsException() {
 		repository.setBucketAccessor(mockBucketAccessor);
+		Mockito.doThrow(new RuntimeException("testexception")).when(
+				mockBucketAccessor).getBucketByExperimentId(null);
 		repository.updateBucket(bucket1);
-		Bucket bucketResult = repository.updateBucket(bucket1);
-
 	}
 
 	@Test(expected=RepositoryException.class)
 	public void testUpdateBucketNotControlAccessorMockThrowsException() {
 		repository.setBucketAccessor(mockBucketAccessor);
+		Mockito.doThrow(new RuntimeException("testexception")).when(
+				mockBucketAccessor).updateBucket(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), 
+						Mockito.any(), Mockito.any());
 		repository.updateBucket(bucket2);
-		Bucket bucketResult = repository.updateBucket(bucket1);
 
 	}
 
 	@Test(expected=RepositoryException.class)
 	public void testUpdateBucketAllocationAccessorMockThrowsException() {
 		repository.setBucketAccessor(mockBucketAccessor);
+		Mockito.doThrow(new RuntimeException("testexception")).when(
+				mockBucketAccessor).updateAllocation(0.01,bucket1.getExperimentID().getRawID(), bucket1.getLabel().toString());
 		repository.updateBucketAllocationPercentage(bucket1,.01);
 	}
 
@@ -381,8 +395,6 @@ public class CassandraExperimentRepositoryTest extends IntegrationTestBase  {
 	@Test(expected=RepositoryException.class)
 	public void testLogBucketAuditAccessorMockThrowsException() {
 		String bucketLabel = "bkt" + System.currentTimeMillis();
-		Result<?> logs = bucketAuditLogAccessor.selectBy(experimentID1.getRawID(), bucketLabel);
-	
 		List<Bucket.BucketAuditInfo> auditLog = new ArrayList<>();
 		Bucket.BucketAuditInfo log = new Bucket.BucketAuditInfo("attr1", "o1", "n1");
 		auditLog.add(log);
@@ -485,7 +497,7 @@ public class CassandraExperimentRepositoryTest extends IntegrationTestBase  {
 	}
 	
 	@Test(expected=RepositoryException.class)
-	public void testCreateExperimentExperimentAccessorMockThrowsException() {
+	public void testCreateExperimentExperimentAccessorThrowsException() {
 		repository.setExperimentAccessor(mockExperimentAccessor);
 		newExperiment1.setId(Experiment.ID.newInstance());;
 		ID experimentId = repository.createExperiment(newExperiment1);		

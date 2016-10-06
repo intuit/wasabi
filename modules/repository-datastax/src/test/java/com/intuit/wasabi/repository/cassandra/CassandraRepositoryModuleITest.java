@@ -46,7 +46,7 @@ import com.intuit.wasabi.repository.cassandra.accessor.index.UserExperimentIndex
 import com.intuit.wasabi.repository.cassandra.impl.CassandraFeedbackRepository;
 import com.intuit.wasabi.repository.database.DatabaseExperimentRepositoryModule;
 
-public class CassandraRepositoryModuleTest {
+public class CassandraRepositoryModuleITest {
 
     @Test
     public void testConfigure() throws Exception {

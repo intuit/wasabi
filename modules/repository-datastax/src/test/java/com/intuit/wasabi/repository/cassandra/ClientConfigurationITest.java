@@ -31,7 +31,7 @@ import com.intuit.wasabi.database.DatabaseModule;
 import com.intuit.wasabi.eventlog.EventLogModule;
 import com.intuit.wasabi.repository.database.DatabaseExperimentRepositoryModule;
 
-public class ClientConfigurationTest {
+public class ClientConfigurationITest {
 
 	@Test
 	public void testDefaultProperties() {
