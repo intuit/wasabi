@@ -220,7 +220,7 @@ public class AssignmentsImpl implements Assignments {
         }
 
         Assignment assignment = assignmentsRepository.getAssignment(experimentID, userID, context);
-        if (assignment == null) {
+        if (assignment == null || assignment.isBucketEmpty()) {
             if (createAssignment) {
                 if (experiment.getState() == Experiment.State.PAUSED) {
                     return nullAssignment(userID, applicationName, experimentID,
@@ -321,8 +321,7 @@ public class AssignmentsImpl implements Assignments {
      * assignment if the user is assignable to this experiment. Includes a Page.Name to identify the page through which
      * the assignment was delivered.
      */
-    @Override
-    public Assignment getAssignment(User.ID userID, Application.Name applicationName, Experiment.Label experimentLabel,
+    protected Assignment getAssignment(User.ID userID, Application.Name applicationName, Experiment.Label experimentLabel,
                                     Context context, boolean createAssignment, boolean ignoreSamplingPercent,
                                     SegmentationProfile segmentationProfile, HttpHeaders headers, Page.Name pageName,
                                     Experiment experiment, BucketList bucketList,
@@ -357,8 +356,9 @@ public class AssignmentsImpl implements Assignments {
                     Assignment.Status.EXPERIMENT_EXPIRED);
         }
 
+        // FIXME - Code duplication with getSingleAssignment
         Assignment assignment = getAssignment(experimentID, userID, context, userAssignments, bucketList);
-        if (assignment == null) {
+        if (assignment == null || assignment.isBucketEmpty()) {
             if (createAssignment) {
                 if (experiment.getState() == Experiment.State.PAUSED) {
                     return nullAssignment(userID, applicationName, experimentID, Assignment.Status.EXPERIMENT_PAUSED);
