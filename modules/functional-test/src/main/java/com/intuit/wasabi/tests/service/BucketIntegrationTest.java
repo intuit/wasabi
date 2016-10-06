@@ -775,4 +775,32 @@ public class BucketIntegrationTest extends TestBase {
 
         terminateAndDelete(newExperiment);
     }
+    
+    /**
+     * This test case tests scenario where we are creating multiple
+     * buckets all of which are set to control group. When we start 
+     * RUNNING the experiment, the experiment should fail. This test
+     * validates that the logic to check that only 1 bucket is assigned
+     * as control bucket is handled during the start of experiment
+     * but not during the creation of buckets. Below test tests for
+     * two buckets, but holds true for multiple buckets
+     */
+    @Test(dependsOnGroups = {"ping"})
+    public void t_MultipleControlBucketsExperimentNotAllowed()
+    {
+    	//create an experiment with both buckets being control group
+    	Experiment experiment = ExperimentFactory.createExperiment();
+    	String [] labels = { "bucket1", "bucket2"};
+        double [] allocations = { .40, .60};
+        boolean [] control = { true, true};
+        experiment = postExperiment(experiment);
+        List<Bucket> buckets = BucketFactory.createCompleteBuckets(experiment, allocations, labels, control);
+        List<Bucket> resultBuckets = postBuckets(buckets);
+        assertEquals(resultBuckets.size(), 2);
+        
+        //change experiment state and assert it to a bad request
+        experiment.state = EXPERIMENT_STATE_RUNNING;
+        putExperiment(experiment, HttpStatus.SC_BAD_REQUEST);
+    	
+    }
 }
