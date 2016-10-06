@@ -84,11 +84,11 @@ http://www.w3.org/2001/XMLSchema-instance">
         <assign.user.to.export>true</assign.user.to.export>
         <assign.bucket.count>true</assign.bucket.count>
         <assignment.decorator.enabled>false</assignment.decorator.enabled>
-        
+
         <!-- mutagen -->
         <cassandra.mutagen.root.resource.path>com/intuit/wasabi/repository/impl/cassandra/experiments/mutation</cassandra.mutagen.root.resource.path>
         <mysql.mutagen.root.resource.path>com/intuit/wasabi/repository/impl/mysql/migration</mysql.mutagen.root.resource.path>
-        
+
         <!-- FIXME: remove -->
         <assignment.decorator.service>http://decorator.example.com</assignment.decorator.service>
         <assignment.decorator.class.name>com.intuit.wasabi.assignment.impl.DefaultAssignmentDecorator
@@ -102,49 +102,103 @@ http://www.w3.org/2001/XMLSchema-instance">
     </properties>
 
     <profiles>
-        <profile>
-            <id>development</id>
-            <activation>
+      <profile>
+          <id>development</id>
+          <activation>
                 <activeByDefault>true</activeByDefault>
-            </activation>
-            <properties>
-                <application.profile>development</application.profile>
-                <application.home>./${application.name}</application.home>
-                <application.http.host>localhost</application.http.host>
-                <application.http.port>8080</application.http.port>
-            </properties>
-        </profile>
-        <profile>
-            <id>build</id>
-            <properties>
-                <application.profile>build</application.profile>
-            </properties>
-        </profile>
-        <profile>
-            <id>sign</id>
-            <properties>
-                <application.profile>sign</application.profile>
-            </properties>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
+          </activation>
+          <properties>
+              <application.profile>development</application.profile>
+              <application.home>./${application.name}</application.home>
+              <application.http.host>localhost</application.http.host>
+              <application.http.port>8080</application.http.port>
+          </properties>
+          <build>
+              <plugins>
+                <plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+          				<artifactId>maven-surefire-plugin</artifactId>
+          				<version>2.11</version>
+          				<dependencies>
+          					<dependency>
+          						<groupId>org.apache.maven.surefire</groupId>
+          						<artifactId>surefire-junit47</artifactId>
+          						<version>2.12</version>
+          					</dependency>
+          				</dependencies>
+          				<configuration>
+          					<excludes>
+          						<exclude>**/*ITest.class</exclude>
+          					</excludes>
+          				</configuration>
+                </plugin>
+              </plugins>
             </build>
-        </profile>
-    </profiles>
+          </profile>
+            <profile>
+              <id>integration</id>
+              <activation>
+                  <activeByDefault>false</activeByDefault>
+              </activation>
+              <properties>
+                  <application.profile>development</application.profile>
+                  <application.home>./${application.name}</application.home>
+                  <application.http.host>${cassandra.experiments.nodeHosts}</application.http.host>
+                  <application.http.port>8080</application.http.port>
+              </properties>
+              <build>
+                  <plugins>
+                    <plugin>
+                      <groupId>org.apache.maven.plugins</groupId>
+                			<artifactId>maven-surefire-plugin</artifactId>
+                			<version>2.11</version>
+                			<dependencies>
+                				<dependency>
+                					<groupId>org.apache.maven.surefire</groupId>
+                					<artifactId>surefire-junit47</artifactId>
+                					<version>2.12</version>
+                				</dependency>
+                			</dependencies>
+                			<configuration>
+                				<includes>
+                					<include>**/*.class</include>
+                				</includes>
+                			</configuration>
+                    </plugin>
+                  </plugins>
+                </build>
+              </profile>
+              <profile>
+                <id>build</id>
+                <properties>
+                    <application.profile>build</application.profile>
+                </properties>
+              </profile>
+              <profile>
+                  <id>sign</id>
+                  <properties>
+                      <application.profile>sign</application.profile>
+                  </properties>
+                  <build>
+                      <plugins>
+                          <plugin>
+                              <groupId>org.apache.maven.plugins</groupId>
+                              <artifactId>maven-gpg-plugin</artifactId>
+                              <version>1.6</version>
+                              <executions>
+                                  <execution>
+                                      <id>sign-artifacts</id>
+                                      <phase>verify</phase>
+                                      <goals>
+                                          <goal>sign</goal>
+                                      </goals>
+                                  </execution>
+                              </executions>
+                          </plugin>
+                      </plugins>
+                  </build>
+              </profile>
+            </profiles>
 
     <modules>
         <module>modules/analytics-objects</module>
