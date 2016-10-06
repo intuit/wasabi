@@ -34,7 +34,7 @@ if [ "$IS_CONTAINER" = true ] ; then
 else
     echo 'Not in container, assuming cassandra is up and running as a process'
     echo "cqlsh -e \"CREATE KEYSPACE IF NOT EXISTS wasabi_experiments WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 1};\" --username=${CQLSH_USERNAME} --password=\"${CQLSH_PASSWORD}\" ${CQLSH_HOST:-localhost}"
-    cqlsh -e \"CREATE KEYSPACE IF NOT EXISTS wasabi_experiments WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 1};\" --username=${CQLSH_USERNAME} --password="${CQLSH_PASSWORD}" ${CQLSH_HOST:-localhost}
+    cqlsh -e "CREATE KEYSPACE IF NOT EXISTS wasabi_experiments WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 1};" --username=${CQLSH_USERNAME} --password="${CQLSH_PASSWORD}" ${CQLSH_HOST:-localhost}
 fi
 
 if [ $? -ne 0 ]; then
