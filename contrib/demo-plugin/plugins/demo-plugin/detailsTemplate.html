@@ -1,0 +1,27 @@
+<div id="priorityDetailsModal" class="modalDialog" style="width: 700px; left: 0;">
+    <h1>Priority</h1>
+    <form name="priorityForm">
+        <div class="dialogContent">
+             <div>
+                <div id="priorityToolbar" ng-show="!readOnly" dynamic-edit input-tag="experimentPriority" select-function="savePriority" edit-function="editPriority" cancel-function="cancelPriority" ng-model="experimentPriority" class="dynamicToolbar" style="top: 43px; left: 330px;"></div>
+
+                <ul class="formLayout oneCol" ng-show="!readOnly">
+                    <li class="layout8020">
+                        <div style="width: 320px;">
+                            <label ng-class="{disabled: data.disableFields}">Priority</label>
+                            <input id="priority" name="priority" ng-model="experimentPriority" class="form-control text" ng-disabled="data.disableFields" ng-class="{disabled: data.disableFields}"/>&nbsp;&nbsp;
+                        </div>
+                    </li>
+                </ul>
+                <div ng-show="readOnly">
+                    <label>Priority is {{experimentPriority}}</label>
+                </div>
+
+                <div class="buttonBar">
+                    <button id="btnSavePriorityCancel" class="blue cancel" onclick="return false;" ng-click="cancel();">Close</button>
+                </div>
+            </div>
+        </div>
+    </form>
+
+</div>
