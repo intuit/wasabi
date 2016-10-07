@@ -356,7 +356,7 @@ sleep=${sleep:=${sleep_default}}
 for command in ${@:$OPTIND}; do
   case "${command}" in
     bootstrap) bootstrap;;
-    build) build true;;
+    build) build true ${verify} ${profile};;
     clean) clean;;
     start) exec_commands start "cassandra,mysql,wasabi";;
     start:*) exec_commands start ${command};;
