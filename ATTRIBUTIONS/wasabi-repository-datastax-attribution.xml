@@ -180,17 +180,17 @@
          <name>Apache Commons Lang</name>
          <groupId>org.apache.commons</groupId>
          <artifactId>commons-lang3</artifactId>
-         <version>3.4</version>
+         <version>3.3</version>
          <projectUrl>http://commons.apache.org/proper/commons-lang/</projectUrl>
          <type>jar</type>
          <licenses>
             <license>
-               <name>Apache License, Version 2.0</name>
+               <name>The Apache Software License, Version 2.0</name>
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
          <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.4/commons-lang3-3.4.jar</string>
+            <string>https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.3/commons-lang3-3.3.jar</string>
          </downloadUrls>
       </dependency>
       <dependency>
@@ -381,23 +381,6 @@
          </downloadUrls>
       </dependency>
       <dependency>
-         <name>astyanax</name>
-         <groupId>com.netflix.astyanax</groupId>
-         <artifactId>astyanax</artifactId>
-         <version>2.0.1</version>
-         <projectUrl>https://github.com/Netflix/astyanax</projectUrl>
-         <type>jar</type>
-         <licenses>
-            <license>
-               <name>The Apache Software License, Version 2.0</name>
-               <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            </license>
-         </licenses>
-         <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/com/netflix/astyanax/astyanax/2.0.1/astyanax-2.0.1.jar</string>
-         </downloadUrls>
-      </dependency>
-      <dependency>
          <name>astyanax-cassandra</name>
          <groupId>com.netflix.astyanax</groupId>
          <artifactId>astyanax-cassandra</artifactId>
@@ -415,23 +398,6 @@
          </downloadUrls>
       </dependency>
       <dependency>
-         <name>astyanax-contrib</name>
-         <groupId>com.netflix.astyanax</groupId>
-         <artifactId>astyanax-contrib</artifactId>
-         <version>2.0.1</version>
-         <projectUrl>https://github.com/Netflix/astyanax</projectUrl>
-         <type>jar</type>
-         <licenses>
-            <license>
-               <name>The Apache Software License, Version 2.0</name>
-               <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            </license>
-         </licenses>
-         <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/com/netflix/astyanax/astyanax-contrib/2.0.1/astyanax-contrib-2.0.1.jar</string>
-         </downloadUrls>
-      </dependency>
-      <dependency>
          <name>astyanax-core</name>
          <groupId>com.netflix.astyanax</groupId>
          <artifactId>astyanax-core</artifactId>
@@ -446,125 +412,6 @@
          </licenses>
          <downloadUrls>
             <string>https://repo.maven.apache.org/maven2/com/netflix/astyanax/astyanax-core/2.0.1/astyanax-core-2.0.1.jar</string>
-         </downloadUrls>
-      </dependency>
-      <dependency>
-         <name>astyanax-cql</name>
-         <groupId>com.netflix.astyanax</groupId>
-         <artifactId>astyanax-cql</artifactId>
-         <version>2.0.1</version>
-         <projectUrl>https://github.com/Netflix/astyanax</projectUrl>
-         <type>jar</type>
-         <licenses>
-            <license>
-               <name>The Apache Software License, Version 2.0</name>
-               <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            </license>
-         </licenses>
-         <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/com/netflix/astyanax/astyanax-cql/2.0.1/astyanax-cql-2.0.1.jar</string>
-         </downloadUrls>
-      </dependency>
-      <dependency>
-         <name>astyanax-entity-mapper</name>
-         <groupId>com.netflix.astyanax</groupId>
-         <artifactId>astyanax-entity-mapper</artifactId>
-         <version>2.0.1</version>
-         <projectUrl>https://github.com/Netflix/astyanax</projectUrl>
-         <type>jar</type>
-         <licenses>
-            <license>
-               <name>The Apache Software License, Version 2.0</name>
-               <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            </license>
-         </licenses>
-         <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/com/netflix/astyanax/astyanax-entity-mapper/2.0.1/astyanax-entity-mapper-2.0.1.jar</string>
-         </downloadUrls>
-      </dependency>
-      <dependency>
-         <name>astyanax-examples</name>
-         <groupId>com.netflix.astyanax</groupId>
-         <artifactId>astyanax-examples</artifactId>
-         <version>2.0.1</version>
-         <projectUrl>https://github.com/Netflix/astyanax</projectUrl>
-         <type>jar</type>
-         <licenses>
-            <license>
-               <name>The Apache Software License, Version 2.0</name>
-               <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            </license>
-         </licenses>
-         <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/com/netflix/astyanax/astyanax-examples/2.0.1/astyanax-examples-2.0.1.jar</string>
-         </downloadUrls>
-      </dependency>
-      <dependency>
-         <name>astyanax-queue</name>
-         <groupId>com.netflix.astyanax</groupId>
-         <artifactId>astyanax-queue</artifactId>
-         <version>2.0.1</version>
-         <projectUrl>https://github.com/Netflix/astyanax</projectUrl>
-         <type>jar</type>
-         <licenses>
-            <license>
-               <name>The Apache Software License, Version 2.0</name>
-               <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            </license>
-         </licenses>
-         <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/com/netflix/astyanax/astyanax-queue/2.0.1/astyanax-queue-2.0.1.jar</string>
-         </downloadUrls>
-      </dependency>
-      <dependency>
-         <name>astyanax-recipes</name>
-         <groupId>com.netflix.astyanax</groupId>
-         <artifactId>astyanax-recipes</artifactId>
-         <version>2.0.1</version>
-         <projectUrl>https://github.com/Netflix/astyanax</projectUrl>
-         <type>jar</type>
-         <licenses>
-            <license>
-               <name>The Apache Software License, Version 2.0</name>
-               <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            </license>
-         </licenses>
-         <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/com/netflix/astyanax/astyanax-recipes/2.0.1/astyanax-recipes-2.0.1.jar</string>
-         </downloadUrls>
-      </dependency>
-      <dependency>
-         <name>astyanax-test</name>
-         <groupId>com.netflix.astyanax</groupId>
-         <artifactId>astyanax-test</artifactId>
-         <version>2.0.1</version>
-         <projectUrl>https://github.com/Netflix/astyanax</projectUrl>
-         <type>jar</type>
-         <licenses>
-            <license>
-               <name>The Apache Software License, Version 2.0</name>
-               <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            </license>
-         </licenses>
-         <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/com/netflix/astyanax/astyanax-test/2.0.1/astyanax-test-2.0.1.jar</string>
-         </downloadUrls>
-      </dependency>
-      <dependency>
-         <name>astyanax-thrift</name>
-         <groupId>com.netflix.astyanax</groupId>
-         <artifactId>astyanax-thrift</artifactId>
-         <version>2.0.1</version>
-         <projectUrl>https://github.com/Netflix/astyanax</projectUrl>
-         <type>jar</type>
-         <licenses>
-            <license>
-               <name>The Apache Software License, Version 2.0</name>
-               <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            </license>
-         </licenses>
-         <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/com/netflix/astyanax/astyanax-thrift/2.0.1/astyanax-thrift-2.0.1.jar</string>
          </downloadUrls>
       </dependency>
       <dependency>
@@ -814,7 +661,7 @@
          <name>Data Mapper for Jackson</name>
          <groupId>org.codehaus.jackson</groupId>
          <artifactId>jackson-mapper-asl</artifactId>
-         <version>1.9.2</version>
+         <version>1.9.11</version>
          <projectUrl>http://jackson.codehaus.org</projectUrl>
          <type>jar</type>
          <licenses>
@@ -824,14 +671,14 @@
             </license>
          </licenses>
          <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/org/codehaus/jackson/jackson-mapper-asl/1.9.2/jackson-mapper-asl-1.9.2.jar</string>
+            <string>https://repo.maven.apache.org/maven2/org/codehaus/jackson/jackson-mapper-asl/1.9.11/jackson-mapper-asl-1.9.11.jar</string>
          </downloadUrls>
       </dependency>
       <dependency>
          <name>DataStax Java Driver for Apache Cassandra - Core</name>
          <groupId>com.datastax.cassandra</groupId>
          <artifactId>cassandra-driver-core</artifactId>
-         <version>2.0.3</version>
+         <version>3.0.3</version>
          <projectUrl>https://github.com/datastax/java-driver</projectUrl>
          <type>jar</type>
          <licenses>
@@ -841,7 +688,24 @@
             </license>
          </licenses>
          <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/com/datastax/cassandra/cassandra-driver-core/2.0.3/cassandra-driver-core-2.0.3.jar</string>
+            <string>https://repo.maven.apache.org/maven2/com/datastax/cassandra/cassandra-driver-core/3.0.3/cassandra-driver-core-3.0.3.jar</string>
+         </downloadUrls>
+      </dependency>
+      <dependency>
+         <name>DataStax Java Driver for Apache Cassandra - Object Mapping</name>
+         <groupId>com.datastax.cassandra</groupId>
+         <artifactId>cassandra-driver-mapping</artifactId>
+         <version>3.0.3</version>
+         <projectUrl>https://github.com/datastax/java-driver</projectUrl>
+         <type>jar</type>
+         <licenses>
+            <license>
+               <name>Apache 2</name>
+               <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            </license>
+         </licenses>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/com/datastax/cassandra/cassandra-driver-mapping/3.0.3/cassandra-driver-mapping-3.0.3.jar</string>
          </downloadUrls>
       </dependency>
       <dependency>
@@ -875,40 +739,6 @@
          </licenses>
          <downloadUrls>
             <string>https://repo.maven.apache.org/maven2/org/easymock/easymock/3.4/easymock-3.4.jar</string>
-         </downloadUrls>
-      </dependency>
-      <dependency>
-         <name>Enterprise JavaBeans (EJB) 3.0</name>
-         <groupId>javax.persistence</groupId>
-         <artifactId>persistence-api</artifactId>
-         <version>1.0</version>
-         <projectUrl>http://www.jcp.org/en/jsr/detail?id=220</projectUrl>
-         <type>jar</type>
-         <licenses>
-            <license>
-               <name>Common Development and Distribution License (CDDL) v1.0</name>
-               <url>http://www.sun.com/cddl/cddl.html</url>
-            </license>
-         </licenses>
-         <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/javax/persistence/persistence-api/1.0/persistence-api-1.0.jar</string>
-         </downloadUrls>
-      </dependency>
-      <dependency>
-         <name>eureka-client</name>
-         <groupId>com.netflix.eureka</groupId>
-         <artifactId>eureka-client</artifactId>
-         <version>1.1.110</version>
-         <projectUrl>https://github.com/Netflix/eureka</projectUrl>
-         <type>jar</type>
-         <licenses>
-            <license>
-               <name>The Apache Software License, Version 2.0</name>
-               <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            </license>
-         </licenses>
-         <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/com/netflix/eureka/eureka-client/1.1.110/eureka-client-1.1.110.jar</string>
          </downloadUrls>
       </dependency>
       <dependency>
@@ -1035,8 +865,8 @@
          <name>Guava: Google Core Libraries for Java</name>
          <groupId>com.google.guava</groupId>
          <artifactId>guava</artifactId>
-         <version>16.0.1</version>
-         <projectUrl>http://code.google.com/p/guava-libraries/guava</projectUrl>
+         <version>19.0</version>
+         <projectUrl>https://github.com/google/guava/guava</projectUrl>
          <type>jar</type>
          <licenses>
             <license>
@@ -1045,7 +875,7 @@
             </license>
          </licenses>
          <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/com/google/guava/guava/16.0.1/guava-16.0.1.jar</string>
+            <string>https://repo.maven.apache.org/maven2/com/google/guava/guava/19.0/guava-19.0.jar</string>
          </downloadUrls>
       </dependency>
       <dependency>
@@ -1141,14 +971,14 @@
          <type>jar</type>
          <licenses/>
          <downloadUrls>
-            <string>file:/Users/jtodd1/Documents/projects/wasabi/modules/authorization/../../repository/Hyrule/Hyrule/0.0.1/Hyrule-0.0.1.jar</string>
+            <string>file:/Users/jtodd1/Documents/projects/wasabi/modules/repository-datastax/../../repository/Hyrule/Hyrule/0.0.1/Hyrule-0.0.1.jar</string>
          </downloadUrls>
       </dependency>
       <dependency>
          <name>Jackson</name>
          <groupId>org.codehaus.jackson</groupId>
          <artifactId>jackson-core-asl</artifactId>
-         <version>1.9.2</version>
+         <version>1.9.11</version>
          <projectUrl>http://jackson.codehaus.org</projectUrl>
          <type>jar</type>
          <licenses>
@@ -1158,7 +988,7 @@
             </license>
          </licenses>
          <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/org/codehaus/jackson/jackson-core-asl/1.9.2/jackson-core-asl-1.9.2.jar</string>
+            <string>https://repo.maven.apache.org/maven2/org/codehaus/jackson/jackson-core-asl/1.9.11/jackson-core-asl-1.9.11.jar</string>
          </downloadUrls>
       </dependency>
       <dependency>
@@ -1534,7 +1364,7 @@
          <name>JSON.simple</name>
          <groupId>com.googlecode.json-simple</groupId>
          <artifactId>json-simple</artifactId>
-         <version>1.1.1</version>
+         <version>1.1</version>
          <projectUrl>http://code.google.com/p/json-simple/</projectUrl>
          <type>jar</type>
          <licenses>
@@ -1544,7 +1374,7 @@
             </license>
          </licenses>
          <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/com/googlecode/json-simple/json-simple/1.1.1/json-simple-1.1.1.jar</string>
+            <string>https://repo.maven.apache.org/maven2/com/googlecode/json-simple/json-simple/1.1/json-simple-1.1.jar</string>
          </downloadUrls>
       </dependency>
       <dependency>
@@ -1655,7 +1485,7 @@
          <name>LZ4 and xxHash</name>
          <groupId>net.jpountz.lz4</groupId>
          <artifactId>lz4</artifactId>
-         <version>1.1.0</version>
+         <version>1.2.0</version>
          <projectUrl>https://github.com/jpountz/lz4-java</projectUrl>
          <type>jar</type>
          <licenses>
@@ -1665,14 +1495,14 @@
             </license>
          </licenses>
          <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/net/jpountz/lz4/lz4/1.1.0/lz4-1.1.0.jar</string>
+            <string>https://repo.maven.apache.org/maven2/net/jpountz/lz4/lz4/1.2.0/lz4-1.2.0.jar</string>
          </downloadUrls>
       </dependency>
       <dependency>
          <name>Metrics Core</name>
-         <groupId>com.codahale.metrics</groupId>
+         <groupId>io.dropwizard.metrics</groupId>
          <artifactId>metrics-core</artifactId>
-         <version>3.0.2</version>
+         <version>3.1.2</version>
          <projectUrl>http://metrics.codahale.com/metrics-core/</projectUrl>
          <type>jar</type>
          <licenses>
@@ -1682,7 +1512,7 @@
             </license>
          </licenses>
          <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/com/codahale/metrics/metrics-core/3.0.2/metrics-core-3.0.2.jar</string>
+            <string>https://repo.maven.apache.org/maven2/io/dropwizard/metrics/metrics-core/3.1.2/metrics-core-3.1.2.jar</string>
          </downloadUrls>
       </dependency>
       <dependency>
@@ -1737,27 +1567,6 @@
          </downloadUrls>
       </dependency>
       <dependency>
-         <name>MXP1: Xml Pull Parser 3rd Edition (XPP3)</name>
-         <groupId>xpp3</groupId>
-         <artifactId>xpp3_min</artifactId>
-         <version>1.1.4c</version>
-         <projectUrl>http://www.extreme.indiana.edu/xgws/xsoap/xpp/mxp1/</projectUrl>
-         <type>jar</type>
-         <licenses>
-            <license>
-               <name>Indiana University Extreme! Lab Software License, vesion 1.1.1</name>
-               <url>http://www.extreme.indiana.edu/viewcvs/~checkout~/XPP3/java/LICENSE.txt</url>
-            </license>
-            <license>
-               <name>Public Domain</name>
-               <url>http://creativecommons.org/licenses/publicdomain</url>
-            </license>
-         </licenses>
-         <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/xpp3/xpp3_min/1.1.4c/xpp3_min-1.1.4c.jar</string>
-         </downloadUrls>
-      </dependency>
-      <dependency>
          <name>MySQL Connector/J</name>
          <groupId>mysql</groupId>
          <artifactId>mysql-connector-java</artifactId>
@@ -1772,6 +1581,91 @@
          </licenses>
          <downloadUrls>
             <string>https://repo.maven.apache.org/maven2/mysql/mysql-connector-java/5.1.38/mysql-connector-java-5.1.38.jar</string>
+         </downloadUrls>
+      </dependency>
+      <dependency>
+         <name>Netty/Buffer</name>
+         <groupId>io.netty</groupId>
+         <artifactId>netty-buffer</artifactId>
+         <version>4.0.37.Final</version>
+         <projectUrl>http://netty.io/netty-buffer/</projectUrl>
+         <type>jar</type>
+         <licenses>
+            <license>
+               <name>Apache License, Version 2.0</name>
+               <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+            </license>
+         </licenses>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/io/netty/netty-buffer/4.0.37.Final/netty-buffer-4.0.37.Final.jar</string>
+         </downloadUrls>
+      </dependency>
+      <dependency>
+         <name>Netty/Codec</name>
+         <groupId>io.netty</groupId>
+         <artifactId>netty-codec</artifactId>
+         <version>4.0.37.Final</version>
+         <projectUrl>http://netty.io/netty-codec/</projectUrl>
+         <type>jar</type>
+         <licenses>
+            <license>
+               <name>Apache License, Version 2.0</name>
+               <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+            </license>
+         </licenses>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/io/netty/netty-codec/4.0.37.Final/netty-codec-4.0.37.Final.jar</string>
+         </downloadUrls>
+      </dependency>
+      <dependency>
+         <name>Netty/Common</name>
+         <groupId>io.netty</groupId>
+         <artifactId>netty-common</artifactId>
+         <version>4.0.37.Final</version>
+         <projectUrl>http://netty.io/netty-common/</projectUrl>
+         <type>jar</type>
+         <licenses>
+            <license>
+               <name>Apache License, Version 2.0</name>
+               <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+            </license>
+         </licenses>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/io/netty/netty-common/4.0.37.Final/netty-common-4.0.37.Final.jar</string>
+         </downloadUrls>
+      </dependency>
+      <dependency>
+         <name>Netty/Handler</name>
+         <groupId>io.netty</groupId>
+         <artifactId>netty-handler</artifactId>
+         <version>4.0.37.Final</version>
+         <projectUrl>http://netty.io/netty-handler/</projectUrl>
+         <type>jar</type>
+         <licenses>
+            <license>
+               <name>Apache License, Version 2.0</name>
+               <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+            </license>
+         </licenses>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/io/netty/netty-handler/4.0.37.Final/netty-handler-4.0.37.Final.jar</string>
+         </downloadUrls>
+      </dependency>
+      <dependency>
+         <name>Netty/Transport</name>
+         <groupId>io.netty</groupId>
+         <artifactId>netty-transport</artifactId>
+         <version>4.0.37.Final</version>
+         <projectUrl>http://netty.io/netty-transport/</projectUrl>
+         <type>jar</type>
+         <licenses>
+            <license>
+               <name>Apache License, Version 2.0</name>
+               <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+            </license>
+         </licenses>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/io/netty/netty-transport/4.0.37.Final/netty-transport-4.0.37.Final.jar</string>
          </downloadUrls>
       </dependency>
       <dependency>
@@ -1928,11 +1822,45 @@
          </downloadUrls>
       </dependency>
       <dependency>
-         <name>servo-core</name>
-         <groupId>com.netflix.servo</groupId>
-         <artifactId>servo-core</artifactId>
-         <version>0.4.36</version>
-         <projectUrl>https://github.com/Netflix/OSS-netflix-servo-release</projectUrl>
+         <name>Project Lombok</name>
+         <groupId>org.projectlombok</groupId>
+         <artifactId>lombok</artifactId>
+         <version>1.16.10</version>
+         <projectUrl>https://projectlombok.org</projectUrl>
+         <type>jar</type>
+         <licenses>
+            <license>
+               <name>The MIT License</name>
+               <url>https://projectlombok.org/LICENSE</url>
+            </license>
+         </licenses>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/org/projectlombok/lombok/1.16.10/lombok-1.16.10.jar</string>
+         </downloadUrls>
+      </dependency>
+      <dependency>
+         <name>reactive-streams</name>
+         <groupId>org.reactivestreams</groupId>
+         <artifactId>reactive-streams</artifactId>
+         <version>1.0.0</version>
+         <projectUrl>http://www.reactive-streams.org/</projectUrl>
+         <type>jar</type>
+         <licenses>
+            <license>
+               <name>CC0</name>
+               <url>http://creativecommons.org/publicdomain/zero/1.0/</url>
+            </license>
+         </licenses>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/org/reactivestreams/reactive-streams/1.0.0/reactive-streams-1.0.0.jar</string>
+         </downloadUrls>
+      </dependency>
+      <dependency>
+         <name>rxjava</name>
+         <groupId>io.reactivex</groupId>
+         <artifactId>rxjava</artifactId>
+         <version>1.1.7</version>
+         <projectUrl>https://github.com/ReactiveX/RxJava</projectUrl>
          <type>jar</type>
          <licenses>
             <license>
@@ -1941,7 +1869,7 @@
             </license>
          </licenses>
          <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/com/netflix/servo/servo-core/0.4.36/servo-core-0.4.36.jar</string>
+            <string>https://repo.maven.apache.org/maven2/io/reactivex/rxjava/1.1.7/rxjava-1.1.7.jar</string>
          </downloadUrls>
       </dependency>
       <dependency>
@@ -2084,11 +2012,11 @@
          </downloadUrls>
       </dependency>
       <dependency>
-         <name>toddfast-mutagen</name>
-         <groupId>com.toddfast.mutagen</groupId>
-         <artifactId>mutagen</artifactId>
-         <version>0.3.0</version>
-         <projectUrl>https://github.com/toddfast/mutagen</projectUrl>
+         <name>troilus-core</name>
+         <groupId>net.oneandone.troilus</groupId>
+         <artifactId>troilus-core</artifactId>
+         <version>0.18</version>
+         <projectUrl>http://1and1.github.io/foss-parent/troilus-parent/troilus-core</projectUrl>
          <type>jar</type>
          <licenses>
             <license>
@@ -2097,15 +2025,15 @@
             </license>
          </licenses>
          <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/com/toddfast/mutagen/mutagen/0.3.0/mutagen-0.3.0.jar</string>
+            <string>https://repo.maven.apache.org/maven2/net/oneandone/troilus/troilus-core/0.18/troilus-core-0.18.jar</string>
          </downloadUrls>
       </dependency>
       <dependency>
-         <name>toddfast-mutagen-cassandra</name>
-         <groupId>com.toddfast.mutagen</groupId>
-         <artifactId>mutagen-cassandra</artifactId>
-         <version>0.4.0</version>
-         <projectUrl>https://github.com/toddfast/mutagen-cassandra</projectUrl>
+         <name>troilus-core-java7</name>
+         <groupId>net.oneandone.troilus</groupId>
+         <artifactId>troilus-core-java7</artifactId>
+         <version>0.18</version>
+         <projectUrl>http://1and1.github.io/foss-parent/troilus-parent/troilus-core-java7</projectUrl>
          <type>jar</type>
          <licenses>
             <license>
@@ -2114,7 +2042,7 @@
             </license>
          </licenses>
          <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/com/toddfast/mutagen/mutagen-cassandra/0.4.0/mutagen-cassandra-0.4.0.jar</string>
+            <string>https://repo.maven.apache.org/maven2/net/oneandone/troilus/troilus-core-java7/0.18/troilus-core-java7-0.18.jar</string>
          </downloadUrls>
       </dependency>
       <dependency>
@@ -2180,21 +2108,6 @@
          <downloadUrls/>
       </dependency>
       <dependency>
-         <name>wasabi-authentication</name>
-         <groupId>com.intuit.wasabi</groupId>
-         <artifactId>wasabi-authentication</artifactId>
-         <version>1.0.20160902232623-SNAPSHOT</version>
-         <projectUrl>https://github.com/intuit/wasabi/modules/wasabi-authentication</projectUrl>
-         <type>jar</type>
-         <licenses>
-            <license>
-               <name>Apache</name>
-               <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-            </license>
-         </licenses>
-         <downloadUrls/>
-      </dependency>
-      <dependency>
          <name>wasabi-authentication-objects</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-authentication-objects</artifactId>
@@ -2225,11 +2138,11 @@
          <downloadUrls/>
       </dependency>
       <dependency>
-         <name>wasabi-cassandra</name>
+         <name>wasabi-cassandra-datastax</name>
          <groupId>com.intuit.wasabi</groupId>
-         <artifactId>wasabi-cassandra</artifactId>
+         <artifactId>wasabi-cassandra-datastax</artifactId>
          <version>1.0.20160902232623-SNAPSHOT</version>
-         <projectUrl>https://github.com/intuit/wasabi/modules/wasabi-cassandra</projectUrl>
+         <projectUrl>https://github.com/intuit/wasabi/modules/wasabi-cassandra-datastax</projectUrl>
          <type>jar</type>
          <licenses>
             <license>
@@ -2285,21 +2198,6 @@
          <downloadUrls/>
       </dependency>
       <dependency>
-         <name>wasabi-experiment</name>
-         <groupId>com.intuit.wasabi</groupId>
-         <artifactId>wasabi-experiment</artifactId>
-         <version>1.0.20160902232623-SNAPSHOT</version>
-         <projectUrl>https://github.com/intuit/wasabi/modules/wasabi-experiment</projectUrl>
-         <type>jar</type>
-         <licenses>
-            <license>
-               <name>Apache</name>
-               <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-            </license>
-         </licenses>
-         <downloadUrls/>
-      </dependency>
-      <dependency>
          <name>wasabi-experiment-objects</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-experiment-objects</artifactId>
@@ -2345,21 +2243,6 @@
          <downloadUrls/>
       </dependency>
       <dependency>
-         <name>wasabi-repository</name>
-         <groupId>com.intuit.wasabi</groupId>
-         <artifactId>wasabi-repository</artifactId>
-         <version>1.0.20160902232623-SNAPSHOT</version>
-         <projectUrl>https://github.com/intuit/wasabi/modules/wasabi-repository</projectUrl>
-         <type>jar</type>
-         <licenses>
-            <license>
-               <name>Apache</name>
-               <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-            </license>
-         </licenses>
-         <downloadUrls/>
-      </dependency>
-      <dependency>
          <name>wasabi-user-directory</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-user-directory</artifactId>
@@ -2393,40 +2276,6 @@
          </licenses>
          <downloadUrls>
             <string>https://repo.maven.apache.org/maven2/org/codehaus/jackson/jackson-xc/1.9.2/jackson-xc-1.9.2.jar</string>
-         </downloadUrls>
-      </dependency>
-      <dependency>
-         <name>XML Pull Parsing API</name>
-         <groupId>xmlpull</groupId>
-         <artifactId>xmlpull</artifactId>
-         <version>1.1.3.1</version>
-         <projectUrl>http://www.xmlpull.org</projectUrl>
-         <type>jar</type>
-         <licenses>
-            <license>
-               <name>Public Domain</name>
-               <url>http://www.xmlpull.org/v1/download/unpacked/LICENSE.txt</url>
-            </license>
-         </licenses>
-         <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/xmlpull/xmlpull/1.1.3.1/xmlpull-1.1.3.1.jar</string>
-         </downloadUrls>
-      </dependency>
-      <dependency>
-         <name>XStream Core</name>
-         <groupId>com.thoughtworks.xstream</groupId>
-         <artifactId>xstream</artifactId>
-         <version>1.4.2</version>
-         <projectUrl>http://codehaus.org/xstream-parent/xstream/</projectUrl>
-         <type>jar</type>
-         <licenses>
-            <license>
-               <name>BSD style</name>
-               <url>http://xstream.codehaus.com/license.html</url>
-            </license>
-         </licenses>
-         <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/com/thoughtworks/xstream/xstream/1.4.2/xstream-1.4.2.jar</string>
          </downloadUrls>
       </dependency>
    </dependencies>

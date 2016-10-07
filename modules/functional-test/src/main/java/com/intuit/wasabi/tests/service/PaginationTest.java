@@ -17,6 +17,7 @@ package com.intuit.wasabi.tests.service;
 
 import com.intuit.wasabi.tests.library.TestBase;
 import com.intuit.wasabi.tests.library.util.ModelAssert;
+import com.intuit.wasabi.tests.library.util.RetryTest;
 import com.intuit.wasabi.tests.library.util.TestUtils;
 import com.intuit.wasabi.tests.model.Experiment;
 import com.intuit.wasabi.tests.model.factory.ExperimentFactory;
@@ -233,6 +234,7 @@ public class PaginationTest extends TestBase {
     }
 
     @Test(dependsOnGroups = {"pagination_pages"}, groups = {"auditlog_smoke"})
+    @RetryTest(warmup = 5000)
     public void t_AuditLogPaginationSmoke() {
         List<Map<String, Object>> auditLogEntryMaps = apiServerConnector
                 .doGet("logs?per_page=10&page=1&sort=time&filter=" + experimentPrefix + ",username=admin")
