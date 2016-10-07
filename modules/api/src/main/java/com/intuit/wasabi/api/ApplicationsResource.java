@@ -69,19 +69,17 @@ public class ApplicationsResource {
     private Authorization authorization;
     private Pages pages;
     private Priorities priorities;
-    private PaginationHelper<Experiment> experimentPaginationHelper;
 
     @Inject
     ApplicationsResource(final AuthorizedExperimentGetter authorizedExperimentGetter, final Experiments experiments,
                          final Authorization authorization, final Priorities priorities, final Pages pages,
-                         final HttpHeader httpHeader, final PaginationHelper<Experiment> experimentPaginationHelper) {
+                         final HttpHeader httpHeader) {
         this.authorizedExperimentGetter = authorizedExperimentGetter;
         this.pages = pages;
         this.experiments = experiments;
         this.authorization = authorization;
         this.priorities = priorities;
         this.httpHeader = httpHeader;
-        this.experimentPaginationHelper = experimentPaginationHelper;
     }
 
     /**

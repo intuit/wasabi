@@ -15,9 +15,6 @@
  *******************************************************************************/
 package com.intuit.wasabi.api;
 
-import com.intuit.wasabi.api.pagination.PaginationHelper;
-import com.intuit.wasabi.api.pagination.comparators.impl.ExperimentComparator;
-import com.intuit.wasabi.api.pagination.filters.impl.ExperimentFilter;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authorization.Authorization;
 import com.intuit.wasabi.exceptions.AuthenticationException;
@@ -105,14 +102,10 @@ public class ApplicationsResourceTest {
     private ArgumentCaptor<Map<String, List<PageExperiment>>> pageExperimentsCaptor;
     private ApplicationsResource applicationsResource;
 
-    private PaginationHelper<Experiment> experimentPaginationHelper = new PaginationHelper<>(
-            new ExperimentFilter(),
-            new ExperimentComparator());
-
     @Before
     public void setup() {
         applicationsResource = new ApplicationsResource(authorizedExperimentGetter, experiments, authorization, priorities,
-                pages, httpHeader, experimentPaginationHelper);
+                pages, httpHeader);
     }
 
     @Test
