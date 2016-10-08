@@ -69,7 +69,7 @@ public class PastDatedExperimentCreationTest extends TestBase{
         Assert.assertNotNull(exp.modificationTime, "Experiment creation failed (No modificationTime).");
         Assert.assertNotNull(exp.state, "Experiment creation failed (No state).");
         experiment.update(exp);
-
+        System.out.println(exp.id);
         //create buckets within the experiment
         List<Bucket> buckets = postBuckets(BucketFactory.createCompleteBuckets(experiment, 2));
         Assert.assertEquals(buckets.size(), 2);
