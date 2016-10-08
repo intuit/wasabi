@@ -183,8 +183,8 @@ public class SmokeTest extends TestBase {
     /**
      * Assigns users to buckets.
      */
-    @Test(dependsOnMethods = {"t_startExperiment"})
-    @RetryTest(maxTries = 3, warmup = 5000)
+    @Test(dependsOnMethods = {"t_retrieveRunningExperiment"})
+    @RetryTest(maxTries = 3, warmup = 1500)
     public void t_assignUsersToBuckets() {
         for (User user : users) {
             Assignment assignment = getAssignment(experiment, user);
