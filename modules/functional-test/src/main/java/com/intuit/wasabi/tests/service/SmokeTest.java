@@ -183,7 +183,7 @@ public class SmokeTest extends TestBase {
     /**
      * Assigns users to buckets.
      */
-    @Test(dependsOnMethods = {"startExperiment"})
+    @Test(dependsOnMethods = {"retrieveRunningExperiment"})
     @RetryTest(maxTries = 3, warmup = 1500)
     public void assignUsersToBuckets() {
         for (User user : users) {
