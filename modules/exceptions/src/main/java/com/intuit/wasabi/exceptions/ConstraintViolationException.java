@@ -16,6 +16,7 @@
 package com.intuit.wasabi.exceptions;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Signals a constraint violation in the database
@@ -32,7 +33,7 @@ public class ConstraintViolationException extends WasabiClientException {
     public ConstraintViolationException(Reason reason, String message,
                                         Map<String, Object> properties) {
         super(reason.getErrorCode(), reason.getMessage() + ": " +
-                (message != null ? message + " " : "") + "(" + properties + ")");
+                (Objects.nonNull(message) ? message + " " : "") + "(" + properties + ")");
         this.reason = reason;
     }
 

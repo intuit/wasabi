@@ -21,6 +21,7 @@ import com.netflix.astyanax.serializers.ComparatorType;
 import com.netflix.astyanax.serializers.StringSerializer;
 
 import java.nio.ByteBuffer;
+import java.util.Objects;
 
 /**
  * Astyanax serializer for {@link Context}
@@ -50,7 +51,7 @@ public class ContextSerializer extends AbstractSerializer<Context> {
 
     @Override
     public ByteBuffer toByteBuffer(Context value) {
-        if (value == null) {
+        if (Objects.isNull(value)) {
             return null;
         }
 
@@ -59,7 +60,7 @@ public class ContextSerializer extends AbstractSerializer<Context> {
 
     @Override
     public Context fromByteBuffer(ByteBuffer byteBuffer) {
-        if (byteBuffer == null) {
+        if (Objects.isNull(byteBuffer)) {
             return null;
         }
 

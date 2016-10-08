@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class StatisticsTestUtils {
 
@@ -124,11 +125,11 @@ public class StatisticsTestUtils {
     static String timeRangeQueryBuilder(String start, String end) {
         StringBuffer sb = new StringBuffer("{");
         boolean haveStart = false;
-        if (start != null) {
+        if (Objects.nonNull(start)) {
             sb.append("\"fromTime\": \"").append(start).append("\"");
             haveStart = true;
         }
-        if (end != null) {
+        if (Objects.nonNull(end)) {
             if (haveStart) {
                 sb.append(",");
             }

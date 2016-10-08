@@ -21,6 +21,8 @@ import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.ExperimentBase;
 
+import java.util.Objects;
+
 /**
  * This event denotes a change in a bucket property.
  */
@@ -55,10 +57,10 @@ public class BucketChangeEvent extends AbstractChangeEvent implements BucketEven
      */
     public BucketChangeEvent(UserInfo user, ExperimentBase experiment, Bucket bucket, String propertyName, String before, String after) {
         super(user, propertyName, before, after);
-        if (experiment == null) {
+        if (Objects.isNull(experiment)) {
             throw new IllegalArgumentException("Experiment must not be null!");
         }
-        if (bucket == null) {
+        if (Objects.isNull(bucket)) {
             throw new IllegalArgumentException("Bucket must not be null!");
         }
         this.experiment = experiment;

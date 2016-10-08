@@ -20,6 +20,7 @@ import com.intuit.wasabi.eventlog.EventLog;
 import com.intuit.wasabi.eventlog.EventLogEventType;
 
 import java.util.Calendar;
+import java.util.Objects;
 
 /**
  * An abstract event without a description.
@@ -37,7 +38,7 @@ public abstract class AbstractEvent implements EventLogEvent {
      */
     public AbstractEvent(UserInfo user) {
         this.time = Calendar.getInstance();
-        this.user = user == null ? EventLog.SYSTEM_USER : user;
+        this.user = Objects.isNull(user) ? EventLog.SYSTEM_USER : user;
     }
 
     /**

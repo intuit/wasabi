@@ -26,6 +26,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * Attempt at building response object for GET assignment API to hang swagger annotations on.
@@ -147,7 +148,7 @@ public class Assignment {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) {
+        if (Objects.isNull(obj)) {
             return false;
         }
         if (obj == this) {

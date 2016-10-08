@@ -25,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Validates various model instances
@@ -48,12 +49,12 @@ public class ExperimentValidator {
         validateSamplingPercent(experiment.getSamplingPercent());
         validateExperimentRule(experiment.getRule());
         validateModelNameNotNullForPersonalizedExperiments(experiment.getIsPersonalizationEnabled()
-                ,experiment.getModelName());
+                , experiment.getModelName());
     }
 
     public void validateNewExperiment(NewExperiment newExperiment) {
 
-        validateExperimentStartEnd(newExperiment.getStartTime(),newExperiment.getEndTime());
+        validateExperimentStartEnd(newExperiment.getStartTime(), newExperiment.getEndTime());
         validateSamplingPercent(newExperiment.getSamplingPercent());
         validateExperimentRule(newExperiment.getRule());
         validateModelNameNotNullForPersonalizedExperiments(newExperiment.getIsPersonalizationEnabled(),
@@ -62,14 +63,14 @@ public class ExperimentValidator {
     }
 
     protected void validateModelNameNotNullForPersonalizedExperiments(Boolean isPersonalizationEnabled, String modelName) {
-        if (isPersonalizationEnabled != null && isPersonalizationEnabled &&
-                (null == modelName || "".equals(modelName.trim()))) {
+        if (Objects.nonNull(isPersonalizationEnabled) && isPersonalizationEnabled &&
+                (Objects.isNull(modelName) || "".equals(modelName.trim()))) {
             throw new IllegalArgumentException("Personalization enabled without specification of a model name");
         }
     }
 
     protected void validateExperimentStartEnd(Date startTime, Date endTime) {
-        if ((startTime != null) && (endTime != null) && endTime.before(startTime)) {
+        if (Objects.nonNull((startTime)) && (Objects.nonNull(endTime)) && endTime.before(startTime)) {
             throw new IllegalArgumentException("Invalid date range, start = \"" + startTime + "\", end = " +
                     "\"" + endTime + "\"");
         }
@@ -77,7 +78,7 @@ public class ExperimentValidator {
 
     protected void validateExperimentRule(String rule) {
         // validate if rule is not empty string
-        if(rule != null && !rule.trim().isEmpty()) {
+        if (Objects.nonNull(rule) && !rule.trim().isEmpty()) {
             try {
                 new RuleBuilder().parseExpression(rule);
             } catch (InvalidSyntaxException | IllegalArgumentException | InvalidSchemaException e) {
@@ -87,7 +88,7 @@ public class ExperimentValidator {
     }
 
     protected void validateSamplingPercent(Double rate) {
-        if (rate == null) {
+        if (Objects.isNull(rate)) {
             throw new IllegalArgumentException(
                     "Experiment sampling percent cannot be null");
         }
@@ -107,13 +108,13 @@ public class ExperimentValidator {
 
         if (!oldState.isStateTransitionAllowed(newState)) {
             throw new InvalidExperimentStateTransitionException("Invalid switch from state \"" + oldState +
-                    "\" to invalid state \"" + newState+"\"");
+                    "\" to invalid state \"" + newState + "\"");
         }
     }
 
     public void validateExperimentBuckets(List<Bucket> buckets) {
 
-        if ((buckets == null) || (buckets.isEmpty())) {
+        if (Objects.isNull((buckets)) || (buckets.isEmpty())) {
             throw new IllegalArgumentException("No experiment buckets specified");
         }
 
@@ -126,7 +127,7 @@ public class ExperimentValidator {
 
             totalAllocation += val;
 
-            if (bucket.getState() == Bucket.State.OPEN || bucket.getState() == null){
+            if (bucket.getState() == Bucket.State.OPEN || Objects.isNull(bucket.getState())) {
                 nOpen++;
             }
             if (bucket.isControl()) {
@@ -153,7 +154,7 @@ public class ExperimentValidator {
         Experiment.State state = experiment.getState();
 
         if (!state.equals(Experiment.State.DRAFT)) {
-            throw new InvalidExperimentStateException(experiment.getID(), Experiment.State.DRAFT,experiment.getState());
+            throw new InvalidExperimentStateException(experiment.getID(), Experiment.State.DRAFT, experiment.getState());
         }
     }
 
@@ -164,7 +165,7 @@ public class ExperimentValidator {
 
         if (!bucket.isStateTransitionValid(desiredState)) {
             throw new InvalidBucketStateTransitionException("Invalid switch from state \"" + oldState +
-                    "\" to invalid state \"" + desiredState+"\"");
+                    "\" to invalid state \"" + desiredState + "\"");
         }
     }
 

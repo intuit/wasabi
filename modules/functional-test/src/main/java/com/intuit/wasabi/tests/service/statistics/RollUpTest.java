@@ -46,6 +46,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import static com.intuit.wasabi.tests.library.util.Constants.EXPERIMENT_STATE_RUNNING;
@@ -172,7 +173,7 @@ public class RollUpTest extends TestBase {
                 }
 
             }
-            if (matching == null) {
+            if (Objects.isNull(matching)) {
                 continue;
             }
             assertEquals(result.label, matching.label);

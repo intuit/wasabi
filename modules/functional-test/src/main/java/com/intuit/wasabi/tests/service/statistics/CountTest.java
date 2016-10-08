@@ -42,6 +42,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -156,7 +157,7 @@ public class CountTest extends TestBase {
                     break;
                 }
             }
-            if (null == matching) {
+            if (Objects.isNull(matching)) {
                 Assert.fail("No matching bucket found.");
             }
             assertEquals(result.label, matching.label);
@@ -360,37 +361,37 @@ public class CountTest extends TestBase {
 
         int redClickActionCount = 0;
 
-        if (counts.buckets.get(RED).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionClick)))
             redClickActionCount = counts.buckets.get(RED).actionCounts.get(actionClick).eventCount;
 
         int redClickUniqueUserCount = 0;
-        if (counts.buckets.get(RED).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionClick)))
             redClickUniqueUserCount = counts.buckets.get(RED).actionCounts.get(actionClick).uniqueUserCount;
 
         int blueClickActionCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionClick)))
             blueClickActionCount = counts.buckets.get(BLUE).actionCounts.get(actionClick).eventCount;
 
         int blueClickUniqueUserCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionClick)))
             blueClickUniqueUserCount = counts.buckets.get(BLUE).actionCounts.get(actionClick).uniqueUserCount;
         assertEquals(4, redClickActionCount + blueClickActionCount);
         assertEquals(2, redClickUniqueUserCount + blueClickUniqueUserCount);
 
         int redLoveItActionCount = 0;
-        if (counts.buckets.get(RED).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionLoveIt)))
             redLoveItActionCount = counts.buckets.get(RED).actionCounts.get(actionLoveIt).eventCount;
 
         int redLoveItUniqueUserCount = 0;
-        if (counts.buckets.get(RED).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionLoveIt)))
             redLoveItUniqueUserCount = counts.buckets.get(RED).actionCounts.get(actionLoveIt).uniqueUserCount;
 
         int blueLoveItActionCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionLoveIt)))
             blueLoveItActionCount = counts.buckets.get(BLUE).actionCounts.get(actionLoveIt).eventCount;
 
         int blueLoveItUniqueUserCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionLoveIt)))
             blueLoveItUniqueUserCount = counts.buckets.get(BLUE).actionCounts.get(actionLoveIt).uniqueUserCount;
 
         assertEquals(2, redLoveItActionCount + blueLoveItActionCount);
@@ -435,38 +436,38 @@ public class CountTest extends TestBase {
 
         int redClickActionCount = 0;
 
-        if (counts.buckets.get(RED).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionClick)))
             redClickActionCount = counts.buckets.get(RED).actionCounts.get(actionClick).eventCount;
 
         int redClickUniqueUserCount = 0;
-        if (counts.buckets.get(RED).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionClick)))
             redClickUniqueUserCount = counts.buckets.get(RED).actionCounts.get(actionClick).uniqueUserCount;
 
         int blueClickActionCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionClick)))
             blueClickActionCount = counts.buckets.get(BLUE).actionCounts.get(actionClick).eventCount;
 
         int blueClickUniqueUserCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionClick)))
             blueClickUniqueUserCount = counts.buckets.get(BLUE).actionCounts.get(actionClick).uniqueUserCount;
         assertEquals(4, redClickActionCount + blueClickActionCount);
         assertEquals(2, redClickUniqueUserCount + blueClickUniqueUserCount);
 
         int redLoveItActionCount = 0;
 
-        if (counts.buckets.get(RED).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionLoveIt)))
             redLoveItActionCount = counts.buckets.get(RED).actionCounts.get(actionLoveIt).eventCount;
 
         int redLoveItUniqueUserCount = 0;
-        if (counts.buckets.get(RED).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionLoveIt)))
             redLoveItUniqueUserCount = counts.buckets.get(RED).actionCounts.get(actionLoveIt).uniqueUserCount;
 
         int blueLoveItActionCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionLoveIt)))
             blueLoveItActionCount = counts.buckets.get(BLUE).actionCounts.get(actionLoveIt).eventCount;
 
         int blueLoveItUniqueUserCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionLoveIt)))
             blueLoveItUniqueUserCount = counts.buckets.get(BLUE).actionCounts.get(actionLoveIt).uniqueUserCount;
 
         assertEquals(0, redLoveItActionCount + blueLoveItActionCount);
@@ -511,19 +512,19 @@ public class CountTest extends TestBase {
 
         int redClickActionCount = 0;
 
-        if (counts.buckets.get(RED).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionClick)))
             redClickActionCount = counts.buckets.get(RED).actionCounts.get(actionClick).eventCount;
 
         int redClickUniqueUserCount = 0;
-        if (counts.buckets.get(RED).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionClick)))
             redClickUniqueUserCount = counts.buckets.get(RED).actionCounts.get(actionClick).uniqueUserCount;
 
         int blueClickActionCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionClick)))
             blueClickActionCount = counts.buckets.get(BLUE).actionCounts.get(actionClick).eventCount;
 
         int blueClickUniqueUserCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionClick)))
             blueClickUniqueUserCount = counts.buckets.get(BLUE).actionCounts.get(actionClick).uniqueUserCount;
 
         assertEquals(0, redClickActionCount + blueClickActionCount);
@@ -531,19 +532,19 @@ public class CountTest extends TestBase {
 
         int redLoveItActionCount = 0;
 
-        if (counts.buckets.get(RED).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionLoveIt)))
             redLoveItActionCount = counts.buckets.get(RED).actionCounts.get(actionLoveIt).eventCount;
 
         int redLoveItUniqueUserCount = 0;
-        if (counts.buckets.get(RED).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionLoveIt)))
             redLoveItUniqueUserCount = counts.buckets.get(RED).actionCounts.get(actionLoveIt).uniqueUserCount;
 
         int blueLoveItActionCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionLoveIt)))
             blueLoveItActionCount = counts.buckets.get(BLUE).actionCounts.get(actionLoveIt).eventCount;
 
         int blueLoveItUniqueUserCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionLoveIt)))
             blueLoveItUniqueUserCount = counts.buckets.get(BLUE).actionCounts.get(actionLoveIt).uniqueUserCount;
 
         assertEquals(2, redLoveItActionCount + blueLoveItActionCount);
@@ -581,45 +582,45 @@ public class CountTest extends TestBase {
                 counts.buckets.get(RED).jointActionCounts.uniqueUserCount +
                         counts.buckets.get(BLUE).jointActionCounts.uniqueUserCount);
 
-        assertEquals(0, counts.actionCounts.get(actionLoveIt) == null ? 0 : counts.actionCounts.get(actionLoveIt).eventCount);
-        assertEquals(0, counts.actionCounts.get(actionLoveIt) == null ? 0 : counts.actionCounts.get(actionLoveIt).uniqueUserCount);
-        assertEquals(0, counts.actionCounts.get(actionClick) == null ? 0 : counts.actionCounts.get(actionClick).eventCount);
-        assertEquals(0, counts.actionCounts.get(actionClick) == null ? 0 : counts.actionCounts.get(actionClick).uniqueUserCount);
+        assertEquals(0, Objects.isNull(counts.actionCounts.get(actionLoveIt)) ? 0 : counts.actionCounts.get(actionLoveIt).eventCount);
+        assertEquals(0, Objects.isNull(counts.actionCounts.get(actionLoveIt)) ? 0 : counts.actionCounts.get(actionLoveIt).uniqueUserCount);
+        assertEquals(0, Objects.isNull(counts.actionCounts.get(actionClick)) ? 0 : counts.actionCounts.get(actionClick).eventCount);
+        assertEquals(0, Objects.isNull(counts.actionCounts.get(actionClick)) ? 0 : counts.actionCounts.get(actionClick).uniqueUserCount);
 
         int redClickActionCount = 0;
 
-        if (counts.buckets.get(RED).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionClick)))
             redClickActionCount = counts.buckets.get(RED).actionCounts.get(actionClick).eventCount;
 
         int redClickUniqueUserCount = 0;
-        if (counts.buckets.get(RED).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionClick)))
             redClickUniqueUserCount = counts.buckets.get(RED).actionCounts.get(actionClick).uniqueUserCount;
 
         int blueClickActionCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionClick)))
             blueClickActionCount = counts.buckets.get(BLUE).actionCounts.get(actionClick).eventCount;
 
         int blueClickUniqueUserCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionClick)))
             blueClickUniqueUserCount = counts.buckets.get(BLUE).actionCounts.get(actionClick).uniqueUserCount;
 
         assertEquals(0, redClickActionCount + blueClickActionCount);
         assertEquals(0, redClickUniqueUserCount + blueClickUniqueUserCount);
 
         int redLoveItActionCount = 0;
-        if (counts.buckets.get(RED).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionLoveIt)))
             redLoveItActionCount = counts.buckets.get(RED).actionCounts.get(actionLoveIt).eventCount;
 
         int redLoveItUniqueUserCount = 0;
-        if (counts.buckets.get(RED).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionLoveIt)))
             redLoveItUniqueUserCount = counts.buckets.get(RED).actionCounts.get(actionLoveIt).uniqueUserCount;
 
         int blueLoveItActionCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionLoveIt)))
             blueLoveItActionCount = counts.buckets.get(BLUE).actionCounts.get(actionLoveIt).eventCount;
 
         int blueLoveItUniqueUserCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionLoveIt)))
             blueLoveItUniqueUserCount = counts.buckets.get(BLUE).actionCounts.get(actionLoveIt).uniqueUserCount;
 
         assertEquals(0, redLoveItActionCount + blueLoveItActionCount);
@@ -658,26 +659,26 @@ public class CountTest extends TestBase {
                 counts.buckets.get(RED).jointActionCounts.uniqueUserCount +
                         counts.buckets.get(BLUE).jointActionCounts.uniqueUserCount);
 
-        assertEquals(0, counts.actionCounts.get(actionLoveIt) == null ? 0 : counts.actionCounts.get(actionLoveIt).eventCount);
-        assertEquals(0, counts.actionCounts.get(actionLoveIt) == null ? 0 : counts.actionCounts.get(actionLoveIt).uniqueUserCount);
-        assertEquals(0, counts.actionCounts.get(actionClick) == null ? 0 : counts.actionCounts.get(actionClick).eventCount);
-        assertEquals(0, counts.actionCounts.get(actionClick) == null ? 0 : counts.actionCounts.get(actionClick).uniqueUserCount);
+        assertEquals(0, Objects.isNull(counts.actionCounts.get(actionLoveIt)) ? 0 : counts.actionCounts.get(actionLoveIt).eventCount);
+        assertEquals(0, Objects.isNull(counts.actionCounts.get(actionLoveIt)) ? 0 : counts.actionCounts.get(actionLoveIt).uniqueUserCount);
+        assertEquals(0, Objects.isNull(counts.actionCounts.get(actionClick)) ? 0 : counts.actionCounts.get(actionClick).eventCount);
+        assertEquals(0, Objects.isNull(counts.actionCounts.get(actionClick)) ? 0 : counts.actionCounts.get(actionClick).uniqueUserCount);
 
         int redClickActionCount = 0;
 
-        if (counts.buckets.get(RED).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionClick)))
             redClickActionCount = counts.buckets.get(RED).actionCounts.get(actionClick).eventCount;
 
         int redClickUniqueUserCount = 0;
-        if (counts.buckets.get(RED).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionClick)))
             redClickUniqueUserCount = counts.buckets.get(RED).actionCounts.get(actionClick).uniqueUserCount;
 
         int blueClickActionCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionClick)))
             blueClickActionCount = counts.buckets.get(BLUE).actionCounts.get(actionClick).eventCount;
 
         int blueClickUniqueUserCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionClick)))
             blueClickUniqueUserCount = counts.buckets.get(BLUE).actionCounts.get(actionClick).uniqueUserCount;
 
         assertEquals(0, redClickActionCount + blueClickActionCount);
@@ -685,19 +686,19 @@ public class CountTest extends TestBase {
 
         int redLoveItActionCount = 0;
 
-        if (counts.buckets.get(RED).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionLoveIt)))
             redLoveItActionCount = counts.buckets.get(RED).actionCounts.get(actionLoveIt).eventCount;
 
         int redLoveItUniqueUserCount = 0;
-        if (counts.buckets.get(RED).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionLoveIt)))
             redLoveItUniqueUserCount = counts.buckets.get(RED).actionCounts.get(actionLoveIt).uniqueUserCount;
 
         int blueLoveItActionCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionLoveIt)))
             blueLoveItActionCount = counts.buckets.get(BLUE).actionCounts.get(actionLoveIt).eventCount;
 
         int blueLoveItUniqueUserCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionLoveIt)))
             blueLoveItUniqueUserCount = counts.buckets.get(BLUE).actionCounts.get(actionLoveIt).uniqueUserCount;
         assertEquals(0, redLoveItActionCount + blueLoveItActionCount);
         assertEquals(0, redLoveItUniqueUserCount + blueLoveItUniqueUserCount);
@@ -743,38 +744,38 @@ public class CountTest extends TestBase {
 
         int redClickActionCount = 0;
 
-        if (counts.buckets.get(RED).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionClick)))
             redClickActionCount = counts.buckets.get(RED).actionCounts.get(actionClick).eventCount;
 
         int redClickUniqueUserCount = 0;
-        if (counts.buckets.get(RED).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionClick)))
             redClickUniqueUserCount = counts.buckets.get(RED).actionCounts.get(actionClick).uniqueUserCount;
 
         int blueClickActionCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionClick)))
             blueClickActionCount = counts.buckets.get(BLUE).actionCounts.get(actionClick).eventCount;
 
         int blueClickUniqueUserCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionClick)))
             blueClickUniqueUserCount = counts.buckets.get(BLUE).actionCounts.get(actionClick).uniqueUserCount;
 
         assertEquals(2, redClickActionCount + blueClickActionCount);
         assertEquals(2, redClickUniqueUserCount + blueClickUniqueUserCount);
 
         int redLoveItActionCount = 0;
-        if (counts.buckets.get(RED).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionLoveIt)))
             redLoveItActionCount = counts.buckets.get(RED).actionCounts.get(actionLoveIt).eventCount;
 
         int redLoveItUniqueUserCount = 0;
-        if (counts.buckets.get(RED).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionLoveIt)))
             redLoveItUniqueUserCount = counts.buckets.get(RED).actionCounts.get(actionLoveIt).uniqueUserCount;
 
         int blueLoveItActionCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionLoveIt)))
             blueLoveItActionCount = counts.buckets.get(BLUE).actionCounts.get(actionLoveIt).eventCount;
 
         int blueLoveItUniqueUserCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionLoveIt)))
             blueLoveItUniqueUserCount = counts.buckets.get(BLUE).actionCounts.get(actionLoveIt).uniqueUserCount;
 
         assertEquals(0, redLoveItActionCount + blueLoveItActionCount);
@@ -818,37 +819,37 @@ public class CountTest extends TestBase {
         assertEquals(null, counts.actionCounts.get(actionClick));
 
         int redClickActionCount = 0;
-        if (counts.buckets.get(RED).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionClick)))
             redClickActionCount = counts.buckets.get(RED).actionCounts.get(actionClick).eventCount;
 
         int redClickUniqueUserCount = 0;
-        if (counts.buckets.get(RED).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionClick)))
             redClickUniqueUserCount = counts.buckets.get(RED).actionCounts.get(actionClick).uniqueUserCount;
 
         int blueClickActionCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionClick)))
             blueClickActionCount = counts.buckets.get(BLUE).actionCounts.get(actionClick).eventCount;
 
         int blueClickUniqueUserCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionClick)))
             blueClickUniqueUserCount = counts.buckets.get(BLUE).actionCounts.get(actionClick).uniqueUserCount;
         assertEquals(0, redClickActionCount + blueClickActionCount);
         assertEquals(0, redClickUniqueUserCount + blueClickUniqueUserCount);
 
         int redLoveItActionCount = 0;
-        if (counts.buckets.get(RED).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionLoveIt)))
             redLoveItActionCount = counts.buckets.get(RED).actionCounts.get(actionLoveIt).eventCount;
 
         int redLoveItUniqueUserCount = 0;
-        if (counts.buckets.get(RED).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionLoveIt)))
             redLoveItUniqueUserCount = counts.buckets.get(RED).actionCounts.get(actionLoveIt).uniqueUserCount;
 
         int blueLoveItActionCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionLoveIt)))
             blueLoveItActionCount = counts.buckets.get(BLUE).actionCounts.get(actionLoveIt).eventCount;
 
         int blueLoveItUniqueUserCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionLoveIt)))
             blueLoveItUniqueUserCount = counts.buckets.get(BLUE).actionCounts.get(actionLoveIt).uniqueUserCount;
         assertEquals(2, redLoveItActionCount + blueLoveItActionCount);
         assertEquals(2, redLoveItUniqueUserCount + blueLoveItUniqueUserCount);
@@ -891,37 +892,37 @@ public class CountTest extends TestBase {
         assertEquals(null, counts.actionCounts.get(actionClick));
 
         int redClickActionCount = 0;
-        if (counts.buckets.get(RED).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionClick)))
             redClickActionCount = counts.buckets.get(RED).actionCounts.get(actionClick).eventCount;
 
         int redClickUniqueUserCount = 0;
-        if (counts.buckets.get(RED).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionClick)))
             redClickUniqueUserCount = counts.buckets.get(RED).actionCounts.get(actionClick).uniqueUserCount;
 
         int blueClickActionCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionClick)))
             blueClickActionCount = counts.buckets.get(BLUE).actionCounts.get(actionClick).eventCount;
 
         int blueClickUniqueUserCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionClick)))
             blueClickUniqueUserCount = counts.buckets.get(BLUE).actionCounts.get(actionClick).uniqueUserCount;
         assertEquals(0, redClickActionCount + blueClickActionCount);
         assertEquals(0, redClickUniqueUserCount + blueClickUniqueUserCount);
 
         int redLoveItActionCount = 0;
-        if (counts.buckets.get(RED).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionLoveIt)))
             redLoveItActionCount = counts.buckets.get(RED).actionCounts.get(actionLoveIt).eventCount;
 
         int redLoveItUniqueUserCount = 0;
-        if (counts.buckets.get(RED).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionLoveIt)))
             redLoveItUniqueUserCount = counts.buckets.get(RED).actionCounts.get(actionLoveIt).uniqueUserCount;
 
         int blueLoveItActionCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionLoveIt)))
             blueLoveItActionCount = counts.buckets.get(BLUE).actionCounts.get(actionLoveIt).eventCount;
 
         int blueLoveItUniqueUserCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionLoveIt)))
             blueLoveItUniqueUserCount = counts.buckets.get(BLUE).actionCounts.get(actionLoveIt).uniqueUserCount;
         assertEquals(0, redLoveItActionCount + blueLoveItActionCount);
         assertEquals(0, redLoveItUniqueUserCount + blueLoveItUniqueUserCount);
@@ -965,37 +966,37 @@ public class CountTest extends TestBase {
         assertEquals(2, counts.actionCounts.get(actionClick).uniqueUserCount);
 
         int redClickActionCount = 0;
-        if (counts.buckets.get(RED).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionClick)))
             redClickActionCount = counts.buckets.get(RED).actionCounts.get(actionClick).eventCount;
 
         int redClickUniqueUserCount = 0;
-        if (counts.buckets.get(RED).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionClick)))
             redClickUniqueUserCount = counts.buckets.get(RED).actionCounts.get(actionClick).uniqueUserCount;
 
         int blueClickActionCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionClick)))
             blueClickActionCount = counts.buckets.get(BLUE).actionCounts.get(actionClick).eventCount;
 
         int blueClickUniqueUserCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionClick)))
             blueClickUniqueUserCount = counts.buckets.get(BLUE).actionCounts.get(actionClick).uniqueUserCount;
         assertEquals(4, redClickActionCount + blueClickActionCount);
         assertEquals(2, redClickUniqueUserCount + blueClickUniqueUserCount);
 
         int redLoveItActionCount = 0;
-        if (counts.buckets.get(RED).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionLoveIt)))
             redLoveItActionCount = counts.buckets.get(RED).actionCounts.get(actionLoveIt).eventCount;
 
         int redLoveItUniqueUserCount = 0;
-        if (counts.buckets.get(RED).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionLoveIt)))
             redLoveItUniqueUserCount = counts.buckets.get(RED).actionCounts.get(actionLoveIt).uniqueUserCount;
 
         int blueLoveItActionCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionLoveIt)))
             blueLoveItActionCount = counts.buckets.get(BLUE).actionCounts.get(actionLoveIt).eventCount;
 
         int blueLoveItUniqueUserCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionLoveIt)))
             blueLoveItUniqueUserCount = counts.buckets.get(BLUE).actionCounts.get(actionLoveIt).uniqueUserCount;
         assertEquals(2, redLoveItActionCount + blueLoveItActionCount);
         assertEquals(2, redLoveItUniqueUserCount + blueLoveItUniqueUserCount);
@@ -1034,43 +1035,43 @@ public class CountTest extends TestBase {
                         counts.buckets.get(BLUE).jointActionCounts.uniqueUserCount);
         assertEquals(2, counts.actionCounts.get(actionLoveIt).eventCount);
         assertEquals(2, counts.actionCounts.get(actionLoveIt).uniqueUserCount);
-        assertEquals(2, counts.actionCounts.get(actionClick) == null ? 0 :
+        assertEquals(2, Objects.isNull(counts.actionCounts.get(actionClick)) ? 0 :
                 counts.actionCounts.get(actionClick).eventCount);
-        assertEquals(2, counts.actionCounts.get(actionClick) == null ? 0 :
+        assertEquals(2, Objects.isNull(counts.actionCounts.get(actionClick)) ? 0 :
                 counts.actionCounts.get(actionClick).uniqueUserCount);
 
         int redClickActionCount = 0;
-        if (counts.buckets.get(RED).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionClick)))
             redClickActionCount = counts.buckets.get(RED).actionCounts.get(actionClick).eventCount;
 
         int redClickUniqueUserCount = 0;
-        if (counts.buckets.get(RED).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionClick)))
             redClickUniqueUserCount = counts.buckets.get(RED).actionCounts.get(actionClick).uniqueUserCount;
 
         int blueClickActionCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionClick)))
             blueClickActionCount = counts.buckets.get(BLUE).actionCounts.get(actionClick).eventCount;
 
         int blueClickUniqueUserCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionClick)))
             blueClickUniqueUserCount = counts.buckets.get(BLUE).actionCounts.get(actionClick).uniqueUserCount;
         assertEquals(2, redClickActionCount + blueClickActionCount);
         assertEquals(2, redClickUniqueUserCount + blueClickUniqueUserCount);
 
         int redLoveItActionCount = 0;
-        if (counts.buckets.get(RED).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionLoveIt)))
             redLoveItActionCount = counts.buckets.get(RED).actionCounts.get(actionLoveIt).eventCount;
 
         int redLoveItUniqueUserCount = 0;
-        if (counts.buckets.get(RED).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(RED).actionCounts.get(actionLoveIt)))
             redLoveItUniqueUserCount = counts.buckets.get(RED).actionCounts.get(actionLoveIt).uniqueUserCount;
 
         int blueLoveItActionCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionLoveIt)))
             blueLoveItActionCount = counts.buckets.get(BLUE).actionCounts.get(actionLoveIt).eventCount;
 
         int blueLoveItUniqueUserCount = 0;
-        if (counts.buckets.get(BLUE).actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(counts.buckets.get(BLUE).actionCounts.get(actionLoveIt)))
             blueLoveItUniqueUserCount = counts.buckets.get(BLUE).actionCounts.get(actionLoveIt).uniqueUserCount;
         assertEquals(2, redLoveItActionCount + blueLoveItActionCount);
         assertEquals(2, redLoveItUniqueUserCount + blueLoveItUniqueUserCount);

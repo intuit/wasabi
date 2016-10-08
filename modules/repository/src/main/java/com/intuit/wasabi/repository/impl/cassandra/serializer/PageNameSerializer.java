@@ -21,6 +21,7 @@ import com.netflix.astyanax.serializers.ComparatorType;
 import com.netflix.astyanax.serializers.StringSerializer;
 
 import java.nio.ByteBuffer;
+import java.util.Objects;
 
 /**
  * Serializer for
@@ -51,7 +52,7 @@ public class PageNameSerializer extends AbstractSerializer<Page.Name> {
 
     @Override
     public ByteBuffer toByteBuffer(Page.Name value) {
-        if (value == null) {
+        if (Objects.isNull(value)) {
             return null;
         }
         return StringSerializer.get().toByteBuffer(value.toString());
@@ -59,7 +60,7 @@ public class PageNameSerializer extends AbstractSerializer<Page.Name> {
 
     @Override
     public Page.Name fromByteBuffer(ByteBuffer byteBuffer) {
-        if (byteBuffer == null) {
+        if (Objects.isNull(byteBuffer)) {
             return null;
         }
         String result = StringSerializer.get().fromByteBuffer(byteBuffer);

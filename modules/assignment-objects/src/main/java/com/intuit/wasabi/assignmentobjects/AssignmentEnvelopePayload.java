@@ -27,6 +27,7 @@ import org.json.simple.JSONObject;
 
 import javax.ws.rs.core.HttpHeaders;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * Export envelope payload for assignments
@@ -319,22 +320,22 @@ public class AssignmentEnvelopePayload implements EnvelopePayload {
     public String toJson() {
         JSONObject assignmentJson = new JSONObject();
         assignmentJson.put("userID", userID.toString());
-        assignmentJson.put("applicationName", applicationName != null ? applicationName.toString() : "");
-        assignmentJson.put("experimentLabel", experimentLabel != null ? experimentLabel.toString() : "");
-        assignmentJson.put("context", context != null ? context.toString() : "PROD");
+        assignmentJson.put("applicationName", Objects.nonNull(applicationName) ? applicationName.toString() : "");
+        assignmentJson.put("experimentLabel", Objects.nonNull(experimentLabel) ? experimentLabel.toString() : "");
+        assignmentJson.put("context", Objects.nonNull(context) ? context.toString() : "PROD");
         assignmentJson.put("createAssignment", createAssignment);
         assignmentJson.put("putAssignment", putAssignment);
         assignmentJson.put("ignoreSamplingPercent", ignoreSamplingPercent);
-        assignmentJson.put("segmentationProfile", segmentationProfile != null ?
-                segmentationProfile.getProfile() != null ?
+        assignmentJson.put("segmentationProfile", Objects.nonNull(segmentationProfile) ?
+                Objects.nonNull(segmentationProfile.getProfile()) ?
                         segmentationProfile.getProfile().toString() : "" : "");
-        assignmentJson.put("experimentID", experimentID != null ? experimentID.toString() : "");
-        assignmentJson.put("pageName", pageName != null ? pageName.toString() : "");
-        assignmentJson.put("assignmentStatus", assignmentStatus != null ?
+        assignmentJson.put("experimentID", Objects.nonNull(experimentID) ? experimentID.toString() : "");
+        assignmentJson.put("pageName", Objects.nonNull(pageName) ? pageName.toString() : "");
+        assignmentJson.put("assignmentStatus", Objects.nonNull(assignmentStatus) ?
                 assignmentStatus.toString() : "");
-        assignmentJson.put("bucketLabel", bucketLabel != null ? bucketLabel.toString() : "NULL");
+        assignmentJson.put("bucketLabel", Objects.nonNull(bucketLabel) ? bucketLabel.toString() : "NULL");
         assignmentJson.put("time_uuid", UUIDGen.getTimeUUID());
-        assignmentJson.put("epochTimestamp", date != null ? date.getTime() : "");
+        assignmentJson.put("epochTimestamp", Objects.nonNull(date) ? date.getTime() : "");
         assignmentJson.put("messageType", MessageType.ASSIGNMENT.toString());
         return assignmentJson.toString();
     }

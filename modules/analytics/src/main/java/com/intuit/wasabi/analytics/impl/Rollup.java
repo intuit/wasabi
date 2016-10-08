@@ -22,6 +22,7 @@ import org.joda.time.DateTimeZone;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.intuit.autumn.utils.PropertyFactory.create;
 import static com.intuit.wasabi.analytics.impl.AnalyticsImpl.PROPERTY_NAME;
@@ -94,7 +95,7 @@ public class Rollup {
     }
 
     public boolean isFreshEnough() {
-        if (latestAvailableRollupDate == null) {
+        if (Objects.isNull(latestAvailableRollupDate)) {
             return false;
         }
         DateMidnight earliestValidDate = comparisonDate().minusDays(getMaxAllowedRollupAgeDays());

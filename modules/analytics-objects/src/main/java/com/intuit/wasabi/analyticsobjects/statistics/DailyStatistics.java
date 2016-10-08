@@ -23,9 +23,11 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.util.Objects;
+
 /**
  * Daily statistics wrapper class
- *
+ * <p>
  * {@see ExperimentBasicStatistics}
  * {@see ExperimentStatistics}
  */
@@ -42,33 +44,6 @@ public class DailyStatistics extends DailyBase implements Cloneable {
         this.cumulative = builder.cumulative_;
     }
 
-
-    public static class Builder extends DailyBase.Builder<Builder> {
-        private ExperimentBasicStatistics perDay_;
-        private ExperimentStatistics cumulative_;
-
-        public Builder(){}
-
-        public Builder withPerDay(ExperimentBasicStatistics value){
-            perDay_ = value;
-            return getThis();
-        }
-        public Builder withCumulative(ExperimentStatistics value){
-            cumulative_ = value;
-            return getThis();
-        }
-
-        public DailyStatistics build(){
-            return new DailyStatistics(this);
-        }
-
-        @Override
-        protected Builder getThis() {
-            return this;
-        }
-
-    }
-
     public ExperimentBasicStatistics getPerDay() {
         return perDay;
     }
@@ -77,20 +52,19 @@ public class DailyStatistics extends DailyBase implements Cloneable {
         return cumulative;
     }
 
-
     @Override
     public String toString() {
-    	return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 
     @Override
     public int hashCode() {
-    	return HashCodeBuilder.reflectionHashCode(this);
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override
     public boolean equals(Object obj) {
-    	   return EqualsBuilder.reflectionEquals(this, obj);
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 
     @Override
@@ -104,14 +78,42 @@ public class DailyStatistics extends DailyBase implements Cloneable {
             throw new AnalyticsException("DailyStatistics clone not supported: " + e.getMessage(), e);
         }
 
-        if (perDay != null) {
+        if (Objects.nonNull(perDay)) {
             cloned.perDay = perDay.clone();
         }
 
-        if (cumulative != null) {
+        if (Objects.nonNull(cumulative)) {
             cloned.cumulative = cumulative.clone();
         }
 
         return cloned;
+    }
+
+    public static class Builder extends DailyBase.Builder<Builder> {
+        private ExperimentBasicStatistics perDay_;
+        private ExperimentStatistics cumulative_;
+
+        public Builder() {
+        }
+
+        public Builder withPerDay(ExperimentBasicStatistics value) {
+            perDay_ = value;
+            return getThis();
+        }
+
+        public Builder withCumulative(ExperimentStatistics value) {
+            cumulative_ = value;
+            return getThis();
+        }
+
+        public DailyStatistics build() {
+            return new DailyStatistics(this);
+        }
+
+        @Override
+        protected Builder getThis() {
+            return this;
+        }
+
     }
 }

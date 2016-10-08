@@ -30,8 +30,6 @@ import static org.junit.Assert.assertThat;
 
 public class ExperimentStateDeserializerTest {
 
-    ExperimentStateDeserializer experimentStateDeserializer = new ExperimentStateDeserializer();
-
     @Test
     public void canDeserializeUpperCase() throws Exception {
         assertThat(parsedValueFor("RUNNING"), is(equalTo(State.RUNNING)));
@@ -52,6 +50,6 @@ public class ExperimentStateDeserializerTest {
         jsonParser.nextToken();
         jsonParser.nextToken();
         jsonParser.nextToken();
-        return experimentStateDeserializer.deserialize(jsonParser, null);
+        return new ExperimentStateDeserializer().deserialize(jsonParser, null);
     }
 }

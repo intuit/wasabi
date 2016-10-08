@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -122,7 +123,7 @@ public class EventLogImpl implements EventLog {
      */
     @Override
     public void postEvent(EventLogEvent event) {
-        if (event == null) {
+        if (Objects.isNull(event)) {
             LOGGER.warn("null-Event skipped.");
             return;
         }

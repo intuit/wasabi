@@ -27,6 +27,8 @@ import com.netflix.astyanax.model.ConsistencyLevel;
 import com.netflix.astyanax.thrift.ThriftFamilyFactory;
 import org.apache.commons.lang.StringUtils;
 
+import java.util.Objects;
+
 import static com.intuit.wasabi.cassandra.DefaultCassandraConstant.DEFAULT_CASSANDRA_VERSION;
 import static com.intuit.wasabi.cassandra.DefaultCassandraConstant.DEFAULT_CQL_VERSION;
 import static com.netflix.astyanax.model.ConsistencyLevel.CL_QUORUM;
@@ -59,13 +61,13 @@ public class AstyanaxContextProvider implements Provider<AstyanaxContext<Keyspac
 
         ConsistencyLevel readConsistency = configuration.getDefaultReadConsistency();
 
-        if (readConsistency == null ) {
+        if (Objects.isNull(readConsistency) ) {
             readConsistency = CL_QUORUM;
         }
 
         ConsistencyLevel writeConsistency = configuration.getDefaultWriteConsistency();
 
-        if (writeConsistency == null) {
+        if (Objects.isNull(writeConsistency)) {
             writeConsistency = CL_QUORUM;
         }
 

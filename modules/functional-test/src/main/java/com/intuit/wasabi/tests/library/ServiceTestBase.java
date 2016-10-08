@@ -30,6 +30,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -87,7 +88,7 @@ public class ServiceTestBase {
      */
     public String prettyResponse(Response response) {
         String prettyResponse = "";
-        if (response != null && response.toString() != null && !response.toString().isEmpty()) {
+        if (Objects.nonNull(response) && Objects.nonNull(response.toString()) && !response.toString().isEmpty()) {
             try {
                 prettyResponse = response.jsonPath().prettify();
                 prettyResponse = prettyResponse.replaceAll("\\\\n", System.getProperty("line.separator"));

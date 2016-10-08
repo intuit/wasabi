@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
@@ -261,8 +262,8 @@ public class PaginationTest extends TestBase {
     private JsonPath getExperimentJsonPath(int page, int perPage, String sort, String filter) {
         return apiServerConnector.doGet("experiments?per_page=" + perPage
                 + "&page=" + page
-                + "&sort=" + (sort != null ? sort : "")
-                + "&filter=" + experimentPrefix + (filter != null ? "," + filter : "")
+                + "&sort=" + (Objects.nonNull(sort) ? sort : "")
+                + "&filter=" + experimentPrefix + (Objects.nonNull(filter) ? "," + filter : "")
                 + "&timezone=+0000").jsonPath();
     }
 }

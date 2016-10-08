@@ -21,27 +21,36 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authenticationobjects.UserInfo.Username;
+import com.intuit.wasabi.authenticationobjects.exceptions.AuthenticationException;
 import com.intuit.wasabi.authorization.Authorization;
 import com.intuit.wasabi.authorizationobjects.UserPermissions;
 import com.intuit.wasabi.authorizationobjects.UserPermissionsList;
 import com.intuit.wasabi.authorizationobjects.UserRole;
 import com.intuit.wasabi.authorizationobjects.UserRoleList;
-import com.intuit.wasabi.authenticationobjects.exceptions.AuthenticationException;
 import com.intuit.wasabi.experimentobjects.Application;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.intuit.wasabi.api.APISwaggerResource.EXAMPLE_ALL_ROLES;
 import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_ROLE;
+import static com.intuit.wasabi.api.APISwaggerResource.EXAMPLE_ALL_ROLES;
 import static com.intuit.wasabi.api.APISwaggerResource.EXAMPLE_AUTHORIZATION_HEADER;
 import static com.intuit.wasabi.authorizationobjects.Permission.ADMIN;
 import static com.intuit.wasabi.authorizationobjects.Role.toRole;
@@ -90,7 +99,7 @@ public class AuthorizationResource {
     /**
      * Get permissions for a user across applications
      *
-     * @param userID User ID
+     * @param userID              User ID
      * @param authorizationHeader
      * @return Response object
      */
@@ -146,7 +155,7 @@ public class AuthorizationResource {
                                           final Username userID,
 
                                           @PathParam("applicationName")
-                                          @ApiParam(value="Application Name")
+                                          @ApiParam(value = "Application Name")
                                           final Application.Name applicationName,
 
                                           @HeaderParam(AUTHORIZATION)
@@ -165,6 +174,7 @@ public class AuthorizationResource {
 
     /**
      * Assign roles for a list of users and applications
+     *
      * @param userRoleList
      * @param authorizationHeader
      * @return Response object
@@ -189,10 +199,11 @@ public class AuthorizationResource {
 
     /**
      * Get user role
+     *
      * @param userID
      * @param authorizationHeader
      * @return Response object
-    */
+     */
     @GET
     @Path("/users/{userID}/roles")
     @Produces(APPLICATION_JSON)
@@ -229,8 +240,9 @@ public class AuthorizationResource {
 
     /**
      * Update user roles
-     * @param userRoleList list of roles for the user
-     * @param authorizationHeader   http header
+     *
+     * @param userRoleList        list of roles for the user
+     * @param authorizationHeader http header
      * @return response object
      */
     @PUT
@@ -252,11 +264,11 @@ public class AuthorizationResource {
     }
 
     private List<Map> updateUserRole(@ApiParam(required = true)
-                                     UserRoleList userRoleList,
+                                             UserRoleList userRoleList,
 
                                      @HeaderParam(AUTHORIZATION)
                                      @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                     String authorizationHeader) {
+                                             String authorizationHeader) {
         Username subject = authorization.getUser(authorizationHeader);
         UserInfo admin = authorization.getUserInfo(subject);
         List<Map> status = newArrayList();
@@ -282,6 +294,7 @@ public class AuthorizationResource {
 
     /**
      * Delete a user's role within an application
+     *
      * @param applicationName
      * @param userID
      * @param authorizationHeader
@@ -315,6 +328,7 @@ public class AuthorizationResource {
 
     /**
      * Get roles for users
+     *
      * @param applicationName
      * @param authorizationHeader
      * @return Response object
@@ -334,7 +348,7 @@ public class AuthorizationResource {
         // As long as you are an authenticated user, anyone should be able to see list of applications and admins
         Username userName = authorization.getUser(authorizationHeader);
 
-        if (userName == null) {
+        if (Objects.isNull(userName)) {
             throw new AuthenticationException("User is not authenticated");
         }
 
@@ -355,11 +369,11 @@ public class AuthorizationResource {
     @Timed
     public Response getUserList(@HeaderParam(AUTHORIZATION)
                                 @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                String authHeader) {
+                                        String authHeader) {
 
         UserInfo.Username subject = authorization.getUser(authHeader);
 
-        if (subject == null) {
+        if (Objects.isNull(subject)) {
             throw new AuthenticationException("User is not authenticated");
         }
 

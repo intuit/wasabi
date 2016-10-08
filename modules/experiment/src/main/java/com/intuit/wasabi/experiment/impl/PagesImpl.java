@@ -19,8 +19,6 @@ package com.intuit.wasabi.experiment.impl;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.eventlog.EventLog;
 import com.intuit.wasabi.eventlog.events.ExperimentChangeEvent;
-import com.intuit.wasabi.experimentobjects.exception.ApplicationNotFoundException;
-import com.intuit.wasabi.experimentobjects.exception.ExperimentNotFoundException;
 import com.intuit.wasabi.experiment.Experiments;
 import com.intuit.wasabi.experiment.Pages;
 import com.intuit.wasabi.experimentobjects.Application;
@@ -30,6 +28,8 @@ import com.intuit.wasabi.experimentobjects.ExperimentPage;
 import com.intuit.wasabi.experimentobjects.ExperimentPageList;
 import com.intuit.wasabi.experimentobjects.Page;
 import com.intuit.wasabi.experimentobjects.PageExperiment;
+import com.intuit.wasabi.experimentobjects.exception.ApplicationNotFoundException;
+import com.intuit.wasabi.experimentobjects.exception.ExperimentNotFoundException;
 import com.intuit.wasabi.experimentobjects.exception.InvalidExperimentStateException;
 import com.intuit.wasabi.repository.CassandraRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.intuit.wasabi.experimentobjects.Experiment.State.TERMINATED;
 
@@ -71,7 +72,7 @@ public class PagesImpl implements Pages {
         pagesRepository.postPages(applicationName, experimentID, experimentPageList);
 
         Experiment experiment = experiments.getExperiment(experimentID);
-        if (experiment != null) {
+        if (Objects.nonNull(experiment)) {
             List<String> pageNames = new ArrayList<>();
             for (ExperimentPage experimentPage : experimentPageList.getPages()) {
                 pageNames.add(experimentPage.getName().toString());
@@ -89,7 +90,8 @@ public class PagesImpl implements Pages {
         Application.Name applicationName = getApplicationNameForModifyingPages(experimentID);
         pagesRepository.deletePage(applicationName, experimentID, pageName);
 
-        Experiment experiment = experiments.getExperiment(experimentID);if (experiment != null) {
+        Experiment experiment = experiments.getExperiment(experimentID);
+        if (Objects.nonNull(experiment)) {
             eventLog.postEvent(new ExperimentChangeEvent(user, experiment, "pages", pageName.toString(), null));
         }
     }
@@ -102,7 +104,7 @@ public class PagesImpl implements Pages {
         Experiment experiment = experiments.getExperiment(experimentID);
 
         // Throw an exception if the experiment is not found
-        if (experiment == null) {
+        if (Objects.isNull(experiment)) {
             throw new ExperimentNotFoundException(experimentID);
         }
         return pagesRepository.getExperimentPages(experimentID);
@@ -116,7 +118,7 @@ public class PagesImpl implements Pages {
 
         ExperimentList result = new ExperimentList();
 
-        if (applicationName == null || applicationName.toString().isEmpty() || pageName == null || pageName.toString().isEmpty()) {
+        if (Objects.isNull(applicationName) || applicationName.toString().isEmpty() || Objects.isNull(pageName) || pageName.toString().isEmpty()) {
             return result;
         } else {
 
@@ -141,7 +143,7 @@ public class PagesImpl implements Pages {
         pagesRepository.erasePageData(applicationName, experimentID);
 
         Experiment experiment = experiments.getExperiment(experimentID);
-        if (experiment != null) {
+        if (Objects.nonNull(experiment)) {
             eventLog.postEvent(new ExperimentChangeEvent(user, experiment, "pages", "all pages", null));
         }
     }
@@ -151,7 +153,7 @@ public class PagesImpl implements Pages {
         Experiment experiment = experiments.getExperiment(experimentID);
 
         // Throw an exception if the experiment is not found
-        if (experiment == null) {
+        if (Objects.isNull(experiment)) {
             throw new ExperimentNotFoundException(experimentID);
         }
         Application.Name applicationName = experiment.getApplicationName();
@@ -176,7 +178,7 @@ public class PagesImpl implements Pages {
     @Override
     public List<Page> getPageList(Application.Name applicationName) {
         // Throw an exception if application name is invalid
-        if (applicationName == null || StringUtils.isBlank(applicationName.toString())){
+        if (Objects.isNull(applicationName) || StringUtils.isBlank(applicationName.toString())) {
             throw new ApplicationNotFoundException("The Application name can not be null or empty");
         }
         return pagesRepository.getPageList(applicationName);
@@ -188,7 +190,7 @@ public class PagesImpl implements Pages {
     @Override
     public List<PageExperiment> getExperiments(Application.Name applicationName, Page.Name pageName) {
         // Throw an exception if application name is invalid
-        if (applicationName == null || StringUtils.isBlank(applicationName.toString())){
+        if (Objects.isNull(applicationName) || StringUtils.isBlank(applicationName.toString())) {
             throw new ApplicationNotFoundException("The Application name can not be null or empty");
         }
 
@@ -201,7 +203,7 @@ public class PagesImpl implements Pages {
     @Override
     public Map<Page.Name, List<PageExperiment>> getPageAndExperimentList(Application.Name applicationName) {
         // Throw an exception if application name is invalid
-        if (applicationName == null || StringUtils.isBlank(applicationName.toString())){
+        if (Objects.isNull(applicationName) || StringUtils.isBlank(applicationName.toString())) {
             throw new ApplicationNotFoundException("The Application name can not be null or empty");
         }
         return pagesRepository.getPageExperimentList(applicationName);

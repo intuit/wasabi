@@ -23,9 +23,11 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.util.Objects;
+
 /**
  * DTO that saves the comparison of a action or bucket
- *
+ * <p>
  * Fields:
  * <ul>
  * <li>boolean indicating if sufficient data has been collected </li>
@@ -86,17 +88,17 @@ public class ComparisonStatistics implements Cloneable {
 
     @Override
     public String toString() {
-    	return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 
     @Override
     public int hashCode() {
-    	return HashCodeBuilder.reflectionHashCode(this);
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override
     public boolean equals(Object obj) {
-    	   return EqualsBuilder.reflectionEquals(this, obj);
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 
     @Override
@@ -110,11 +112,11 @@ public class ComparisonStatistics implements Cloneable {
             throw new AnalyticsException("ComparisonStatistics clone not supported: " + e.getMessage(), e);
         }
 
-        if (actionRateDifference != null) {
+        if (Objects.nonNull(actionRateDifference)) {
             cloned.setActionRateDifference(actionRateDifference.clone());
         }
 
-        if (smallestDistinguishableEffectSize != null) {
+        if (Objects.nonNull(smallestDistinguishableEffectSize)) {
             cloned.setSmallestDistinguishableEffectSize(smallestDistinguishableEffectSize.clone());
         }
 

@@ -31,6 +31,7 @@ import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class BasicAssignmentTest extends TestBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicAssignmentTest.class);
@@ -106,7 +107,7 @@ public class BasicAssignmentTest extends TestBase {
                     assertReturnCode(response, HttpStatus.SC_OK);
                     Assert.assertEquals(response.asString().contains("NEW_ASSIGNMENT"), true);
                     Assignment assignment = AssignmentFactory.createFromJSONString(response.asString());
-                    Assert.assertEquals(null == assignment.assignment ||
+                    Assert.assertEquals(Objects.isNull(assignment.assignment) ||
                             "blue".equals(assignment.assignment) ||
                             "red".equals(assignment.assignment), true);
                 }
@@ -145,7 +146,7 @@ public class BasicAssignmentTest extends TestBase {
                     assertReturnCode(response, HttpStatus.SC_OK);
                     Assert.assertEquals(response.asString().contains("EXISTING_ASSIGNMENT"), true);
                     Assignment assignment = AssignmentFactory.createFromJSONString(response.asString());
-                    Assert.assertEquals(null == assignment.assignment ||
+                    Assert.assertEquals(Objects.isNull(assignment.assignment) ||
                             "blue".equals(assignment.assignment) ||
                             "red".equals(assignment.assignment), true);
                 }
@@ -183,7 +184,7 @@ public class BasicAssignmentTest extends TestBase {
                     assertReturnCode(response, HttpStatus.SC_OK);
                     Assert.assertEquals(response.asString().contains("EXISTING_ASSIGNMENT"), true);
                     Assignment assignment = AssignmentFactory.createFromJSONString(response.asString());
-                    Assert.assertEquals(null == assignment.assignment ||
+                    Assert.assertEquals(Objects.isNull(assignment.assignment) ||
                             "blue".equals(assignment.assignment) ||
                             "red".equals(assignment.assignment), true);
                 }

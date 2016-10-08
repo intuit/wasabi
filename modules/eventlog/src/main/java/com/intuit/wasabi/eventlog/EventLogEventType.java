@@ -23,6 +23,8 @@ import com.intuit.wasabi.eventlog.events.ExperimentChangeEvent;
 import com.intuit.wasabi.eventlog.events.ExperimentCreateEvent;
 import com.intuit.wasabi.eventlog.events.SimpleEvent;
 
+import java.util.Objects;
+
 /**
  * Holds the Event types for specific event implementations, for easy switches.
  */
@@ -48,7 +50,7 @@ public enum EventLogEventType {
      * @return the matching EventLogEventType or {@link EventLogEventType#UNKNOWN} if no match can be found.
      */
     public static EventLogEventType getType(EventLogEvent event) {
-        if (event != null) {
+        if (Objects.nonNull(event)) {
             for (EventLogEventType type : values()) {
                 if (event.getClass().equals(type.eventClass)) {
                     return type;
@@ -57,7 +59,6 @@ public enum EventLogEventType {
         }
         return UNKNOWN;
     }
-
 
 
 }

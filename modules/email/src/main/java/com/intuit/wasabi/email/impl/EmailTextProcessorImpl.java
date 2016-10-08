@@ -16,7 +16,6 @@
 package com.intuit.wasabi.email.impl;
 
 import com.google.inject.Inject;
-
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authorizationobjects.Role;
 import com.intuit.wasabi.authorizationobjects.UserRole;
@@ -24,10 +23,15 @@ import com.intuit.wasabi.authorizationobjects.UserRoleList;
 import com.intuit.wasabi.email.EmailLinksList;
 import com.intuit.wasabi.email.EmailTextProcessor;
 import com.intuit.wasabi.email.TextTemplates;
-import com.intuit.wasabi.eventlog.EventLogEventType;
-import com.intuit.wasabi.eventlog.events.*;
-import com.intuit.wasabi.eventlog.exceptions.EventLogException;
 import com.intuit.wasabi.email.exceptions.EmailException;
+import com.intuit.wasabi.eventlog.EventLogEventType;
+import com.intuit.wasabi.eventlog.events.BucketChangeEvent;
+import com.intuit.wasabi.eventlog.events.BucketCreateEvent;
+import com.intuit.wasabi.eventlog.events.EventLogEvent;
+import com.intuit.wasabi.eventlog.events.ExperimentChangeEvent;
+import com.intuit.wasabi.eventlog.events.ExperimentCreateEvent;
+import com.intuit.wasabi.eventlog.events.ExperimentEvent;
+import com.intuit.wasabi.eventlog.exceptions.EventLogException;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.ExperimentBase;
@@ -36,10 +40,27 @@ import org.apache.commons.validator.routines.EmailValidator;
 import org.slf4j.Logger;
 import org.stringtemplate.v4.ST;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
-import static com.intuit.wasabi.email.WasabiEmailFields.*;
-import static com.intuit.wasabi.email.TextTemplates.*;
+import static com.intuit.wasabi.email.TextTemplates.APP_ACCESS;
+import static com.intuit.wasabi.email.TextTemplates.BUCKET_CHANGE;
+import static com.intuit.wasabi.email.TextTemplates.BUCKET_CREATED;
+import static com.intuit.wasabi.email.TextTemplates.EXPERIMENT_CHANGED;
+import static com.intuit.wasabi.email.TextTemplates.EXPERIMENT_CREATED;
+import static com.intuit.wasabi.email.WasabiEmailFields.APPLICATION_NAME;
+import static com.intuit.wasabi.email.WasabiEmailFields.BUCKET_NAME;
+import static com.intuit.wasabi.email.WasabiEmailFields.EMAIL_LINKS;
+import static com.intuit.wasabi.email.WasabiEmailFields.EXPERIMENT_ID;
+import static com.intuit.wasabi.email.WasabiEmailFields.EXPERIMENT_LABEL;
+import static com.intuit.wasabi.email.WasabiEmailFields.FIELD_AFTER;
+import static com.intuit.wasabi.email.WasabiEmailFields.FIELD_BEFORE;
+import static com.intuit.wasabi.email.WasabiEmailFields.FIELD_NAME;
+import static com.intuit.wasabi.email.WasabiEmailFields.USER_NAME;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -47,9 +68,9 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 public class EmailTextProcessorImpl implements EmailTextProcessor {
 
+    private final static Logger LOGGER = getLogger(EmailTextProcessorImpl.class);
     /* need this for getting the admins to an experiment */
     private AuthorizationRepository authorizationRepository;
-    private final static Logger LOGGER = getLogger(EmailTextProcessorImpl.class);
 
     @Inject
     public EmailTextProcessorImpl(final AuthorizationRepository authorizationRepository) {
@@ -176,7 +197,7 @@ public class EmailTextProcessorImpl implements EmailTextProcessor {
         Set<String> adressors;
 
         ExperimentBase exp = event.getExperiment();
-        if (exp != null) {
+        if (Objects.nonNull(exp)) {
             adressors = getAdminEmails(exp.getApplicationName());
         } else {
             throw new EventLogException("An ExperimentEvent was recorded without having an Experiment!");
@@ -232,7 +253,7 @@ public class EmailTextProcessorImpl implements EmailTextProcessor {
         put(variables, APPLICATION_NAME, String.valueOf(exp.getApplicationName()));
         put(variables, USER_NAME, getUserRepresentation(expEvent.getUser()));
         put(variables, FIELD_NAME, expEvent.getPropertyName());
-        if (expEvent.getPropertyName() != null && "sampling_percent".equalsIgnoreCase(expEvent.getPropertyName())) {
+        if (Objects.nonNull(expEvent.getPropertyName()) && "sampling_percent".equalsIgnoreCase(expEvent.getPropertyName())) {
             put(variables, FIELD_BEFORE, String.valueOf(((double) Math.round(Double.parseDouble(expEvent.getBefore()) * 10000d) / 10000d) * 100).concat("%"));
             put(variables, FIELD_AFTER, String.valueOf(((double) Math.round(Double.parseDouble(expEvent.getAfter()) * 10000d) / 10000d) * 100).concat("%"));
         } else {
@@ -304,7 +325,7 @@ public class EmailTextProcessorImpl implements EmailTextProcessor {
         put(variables, APPLICATION_NAME, String.valueOf(exp.getApplicationName()));
         put(variables, USER_NAME, getUserRepresentation(buckEvent.getUser()));
         put(variables, FIELD_NAME, buckEvent.getPropertyName());
-        if (buckEvent.getPropertyName() != null && "allocation".equalsIgnoreCase(buckEvent.getPropertyName())) {
+        if (Objects.nonNull(buckEvent.getPropertyName()) && "allocation".equalsIgnoreCase(buckEvent.getPropertyName())) {
             put(variables, FIELD_BEFORE, String.valueOf(((double) Math.round(Double.parseDouble(buckEvent.getBefore()) * 10000d) / 10000d) * 100).concat("%"));
             put(variables, FIELD_AFTER, String.valueOf(((double) Math.round(Double.parseDouble(buckEvent.getAfter()) * 10000d) / 10000d) * 100).concat("%"));
         } else {
@@ -334,7 +355,7 @@ public class EmailTextProcessorImpl implements EmailTextProcessor {
      */
     private String getUserRepresentation(UserInfo user) {
         String userRep = "nobody";
-        if (user == null) {
+        if (Objects.isNull(user)) {
             LOGGER.debug("User was null for a given email - setting her to " + userRep);
         } else {
             userRep = user.getFirstName() + " " + user.getLastName() + " <" + user.getEmail() + ">";
@@ -351,9 +372,9 @@ public class EmailTextProcessorImpl implements EmailTextProcessor {
      * @return the complete message
      */
     private String replaceVariablesInTemplate(Map<String, String> variables, ST template) {
-        if (variables != null) {
+        if (Objects.nonNull(variables)) {
             for (String key : variables.keySet()) {
-                String representation = variables.get(key) == null ? "null" : variables.get(key);
+                String representation = Objects.isNull(variables.get(key)) ? "null" : variables.get(key);
                 template.add(key, representation);
             }
         }

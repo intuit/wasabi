@@ -24,6 +24,7 @@ import org.json.simple.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * A class to holds a map of key values (user attributes) for segmentation with Hyrule
@@ -89,7 +90,7 @@ public class SegmentationProfile {
     }
 
     public void addAttribute(String key, Object value) {
-        if (profile != null && key != null && value != null) {
+        if (Objects.nonNull(profile) && Objects.nonNull(key) && Objects.nonNull(value)) {
             profile.put(key, value);
         }
     }
@@ -99,7 +100,7 @@ public class SegmentationProfile {
     }
 
     public boolean hasAttribute(String key) {
-        return profile != null && profile.containsKey(key);
+        return Objects.nonNull(profile) && profile.containsKey(key);
     }
 
     @Override

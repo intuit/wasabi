@@ -31,6 +31,7 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -61,12 +62,12 @@ public class TearDownTestExperiments extends TestBase {
         String appNameRegexPost = ").*/ }";
         String appNameRegexCore = Constants.DEFAULT_PREFIX_APPLICATION;
 
-        if (applicationPrefixes != null && applicationPrefixes.length() > 0) {
+        if (Objects.nonNull(applicationPrefixes) && applicationPrefixes.length() > 0) {
             appNameRegexCore += "|" + applicationPrefixes;
         }
 
         String appApplicationPrefixes = appProperties.getProperty("application-prefixes", "");
-        if (appApplicationPrefixes != null && appApplicationPrefixes.length() > 0) {
+        if (Objects.nonNull(appApplicationPrefixes) && appApplicationPrefixes.length() > 0) {
             appNameRegexCore += "|" + appApplicationPrefixes;
         }
 

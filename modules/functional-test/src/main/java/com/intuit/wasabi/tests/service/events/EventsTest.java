@@ -39,6 +39,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import static com.intuit.wasabi.tests.library.util.Constants.EXPERIMENT_STATE_RUNNING;
@@ -158,7 +159,7 @@ public class EventsTest extends TestBase {
                 }
 
             }
-            if (null == matching) {
+            if (Objects.isNull(matching)) {
                 Assert.fail("No matching bucket found.");
             }
             assertEquals(result.label, matching.label);

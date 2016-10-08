@@ -43,6 +43,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TimeZone;
 
 import static com.intuit.wasabi.tests.library.util.ModelAssert.assertEqualModelItems;
@@ -141,7 +142,7 @@ public class ExperimentTest extends TestBase {
                     String name = field.getName();
                     fieldNames.add(name);
                     try {
-                        if (field.get(initialExperiment) != null) {
+                        if (Objects.nonNull(field.get(initialExperiment))) {
                             Assert.assertNotNull(experimentMap.get(name), name + " should not be null!");
                         } else {
                             Assert.assertNull(experimentMap.get(name), name + " should be null!");
@@ -380,7 +381,7 @@ public class ExperimentTest extends TestBase {
     public void basicStateTransitions(String state, int statusCode) {
         completeExperiment.setState(state);
         Experiment updated = putExperiment(completeExperiment, statusCode);
-        if (lastError().equals("") && updated.id != null) {
+        if (lastError().equals("") && Objects.nonNull(updated.id)) {
             assertEqualModelItems(updated, completeExperiment, new DefaultNameExclusionStrategy("id", "creationTime", "modificationTime", "ruleJson"));
             completeExperiment.update(updated);
         }

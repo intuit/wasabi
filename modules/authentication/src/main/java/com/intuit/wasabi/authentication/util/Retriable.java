@@ -18,6 +18,7 @@ package com.intuit.wasabi.authentication.util;
 import org.slf4j.Logger;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.Objects;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -96,7 +97,7 @@ public abstract class Retriable<T> {
                 trial++;
                 return retriableCall();
             } catch (Exception e) {
-                if (e.getCause() != null && e.getCause() instanceof java.net.UnknownHostException) {
+                if (Objects.nonNull(e.getCause()) && e.getCause() instanceof java.net.UnknownHostException) {
                     if (trial == times) {
                         throw new RetriableException("Failed after " + times + " tries.", e);
                     }

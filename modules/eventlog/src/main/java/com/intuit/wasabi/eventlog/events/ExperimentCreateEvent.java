@@ -20,6 +20,8 @@ import com.intuit.wasabi.eventlog.EventLog;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.ExperimentBase;
 
+import java.util.Objects;
+
 /**
  * An event to be used when an experiment is created.
  */
@@ -40,12 +42,12 @@ public class ExperimentCreateEvent extends AbstractEvent implements ExperimentEv
     /**
      * Creates a new event denoting experiment creation.
      *
-     * @param user the user
+     * @param user       the user
      * @param experiment the experiment (must not be null)
      */
     public ExperimentCreateEvent(UserInfo user, ExperimentBase experiment) {
         super(user);
-        if (experiment == null) {
+        if (Objects.isNull(experiment)) {
             throw new IllegalArgumentException("Experiment must not be null!");
         }
         this.experiment = experiment;

@@ -15,8 +15,8 @@
  *******************************************************************************/
 package com.intuit.wasabi.api.pagination.filters;
 
-import com.intuit.wasabi.api.pagination.filters.impl.AuditLogEntryFilter;
 import com.intuit.wasabi.api.pagination.exceptions.PaginationException;
+import com.intuit.wasabi.api.pagination.filters.impl.AuditLogEntryFilter;
 import com.intuit.wasabi.exceptions.ErrorCode;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
@@ -175,8 +176,8 @@ public abstract class PaginationFilter<T> implements Predicate<T> {
      * @return {@code this}
      */
     public final PaginationFilter<T> replaceFilter(final String filter, final String timeZoneOffset) {
-        this.filter = filter == null ? "" : filter;
-        if (timeZoneOffset == null) {
+        this.filter = Objects.isNull(filter) ? "" : filter;
+        if (Objects.isNull(timeZoneOffset)) {
             this.timeZoneOffset = "+0000";
         } else {
             this.timeZoneOffset = timeZoneOffset.isEmpty() ? this.timeZoneOffset : timeZoneOffset;
@@ -283,7 +284,7 @@ public abstract class PaginationFilter<T> implements Predicate<T> {
             return false;
         }
 
-        return property != null && filterFunction.test(property, filterValue);
+        return Objects.nonNull(property) && filterFunction.test(property, filterValue);
     }
 
     /**
@@ -313,11 +314,7 @@ public abstract class PaginationFilter<T> implements Predicate<T> {
      * @return the key-value part of the filter
      */
     final String getKeyValuePartOfFilter(String filter) {
-        if (filter == null) {
-            return "";
-        }
-
-        if (!filter.contains(SEPARATOR)) {
+        if (Objects.isNull(filter) || !filter.contains(SEPARATOR)) {
             return "";
         }
 
@@ -344,7 +341,7 @@ public abstract class PaginationFilter<T> implements Predicate<T> {
      * @return the fulltext part of the filter
      */
     final String getFulltextPartOfFilter(String filter) {
-        if (filter == null) {
+        if (Objects.isNull(filter)) {
             return "";
         }
 

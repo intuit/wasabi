@@ -26,7 +26,11 @@ import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.repository.AuditLogRepository;
 import com.intuit.wasabi.repository.RepositoryException;
-import com.intuit.wasabi.repository.impl.cassandra.serializer.*;
+import com.intuit.wasabi.repository.impl.cassandra.serializer.ApplicationNameSerializer;
+import com.intuit.wasabi.repository.impl.cassandra.serializer.BucketLabelSerializer;
+import com.intuit.wasabi.repository.impl.cassandra.serializer.ExperimentIDSerializer;
+import com.intuit.wasabi.repository.impl.cassandra.serializer.ExperimentLabelSerializer;
+import com.intuit.wasabi.repository.impl.cassandra.serializer.UsernameSerializer;
 import com.netflix.astyanax.connectionpool.OperationResult;
 import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
 import com.netflix.astyanax.model.ColumnList;
@@ -43,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -145,11 +150,11 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
      * @param entry the entry to store
      * @return true on success
      * @throws RepositoryException if the required entry values {@link AuditLogEntry#getAction()},
-     *      {@link AuditLogEntry#getUser()}, {@link AuditLogEntry#getTime()} or the entry itself are null.
+     *                             {@link AuditLogEntry#getUser()}, {@link AuditLogEntry#getTime()} or the entry itself are null.
      */
     @Override
     public boolean storeEntry(AuditLogEntry entry) {
-        if (entry == null || entry.getAction() == null || entry.getUser() == null || entry.getTime() == null) {
+        if (Objects.isNull(entry) || Objects.isNull(entry.getAction()) || Objects.isNull(entry.getUser()) || Objects.isNull(entry.getTime())) {
             throw new RepositoryException("Can not insert AuditLogEntry " + entry + " into database, required values are null.");
         }
         String cql = "INSERT INTO auditlog ( event_id, application_name, time, action, "
@@ -159,36 +164,36 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
                 + " VALUES ( uuid(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? );";
 
         PreparedCqlQuery<Application.Name, String> cqlQuery = driver.getKeyspace().prepareQuery(keyspace.auditlogCF()).withCql(cql).asPreparedStatement()
-                .withByteBufferValue(entry.getApplicationName() == null ? AuditLogRepository.GLOBAL_ENTRY_APPLICATION : entry.getApplicationName(), ApplicationNameSerializer.get())
+                .withByteBufferValue(Objects.nonNull(entry.getApplicationName()) ? AuditLogRepository.GLOBAL_ENTRY_APPLICATION : entry.getApplicationName(), ApplicationNameSerializer.get())
                 .withByteBufferValue(entry.getTime().getTime(), DateSerializer.get())
                 .withStringValue(entry.getAction().toString())
-                .withStringValue(entry.getUser().getFirstName() != null ? entry.getUser().getFirstName() : "")
-                .withStringValue(entry.getUser().getLastName() != null ? entry.getUser().getLastName() : "")
-                .withStringValue(entry.getUser().getEmail() != null ? entry.getUser().getEmail() : "")
+                .withStringValue(Objects.nonNull(entry.getUser().getFirstName()) ? entry.getUser().getFirstName() : "")
+                .withStringValue(Objects.nonNull(entry.getUser().getLastName()) ? entry.getUser().getLastName() : "")
+                .withStringValue(Objects.nonNull(entry.getUser().getEmail()) ? entry.getUser().getEmail() : "")
                 .withByteBufferValue(entry.getUser().getUsername(), UsernameSerializer.get())
-                .withStringValue(entry.getUser().getUserId() != null ? entry.getUser().getUserId() : "");
+                .withStringValue(Objects.nonNull(entry.getUser().getUserId()) ? entry.getUser().getUserId() : "");
 
-        if (entry.getExperimentId() != null) {
+        if (Objects.nonNull(entry.getExperimentId())) {
             cqlQuery.withByteBufferValue(entry.getExperimentId(), ExperimentIDSerializer.get());
         } else {
             cqlQuery.withStringValue("");
         }
 
-        if (entry.getExperimentLabel() != null) {
+        if (Objects.nonNull(entry.getExperimentLabel())) {
             cqlQuery.withByteBufferValue(entry.getExperimentLabel(), ExperimentLabelSerializer.get());
         } else {
             cqlQuery.withStringValue("");
         }
 
-        if (entry.getBucketLabel() != null) {
+        if (Objects.nonNull(entry.getBucketLabel())) {
             cqlQuery.withByteBufferValue(entry.getBucketLabel(), BucketLabelSerializer.get());
         } else {
             cqlQuery.withStringValue("");
         }
 
-        cqlQuery.withStringValue(entry.getChangedProperty() != null ? entry.getChangedProperty() : "")
-                .withStringValue(entry.getBefore() != null ? entry.getBefore() : "")
-                .withStringValue(entry.getAfter() != null ? entry.getAfter() : "");
+        cqlQuery.withStringValue(Objects.nonNull(entry.getChangedProperty()) ? entry.getChangedProperty() : "")
+                .withStringValue(Objects.nonNull(entry.getBefore()) ? entry.getBefore() : "")
+                .withStringValue(Objects.nonNull(entry.getAfter()) ? entry.getAfter() : "");
 
         try {
             cqlQuery.execute();
@@ -203,10 +208,9 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
     /**
      * Allows cql select or update queries which have only an ApplicationName as a prepared value.
      *
-     * @param cql the query
+     * @param cql             the query
      * @param applicationName the application to put in
      * @return the resulting rows.
-     *
      * @throws RepositoryException if an {@link ConnectionException} occurs.
      */
     /*test*/ Rows<Application.Name, String> cqlWithApplication(String cql, Application.Name applicationName) {
@@ -232,7 +236,6 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
      *
      * @param cql the query
      * @return the resulting rows.
-     *
      * @throws RepositoryException if an {@link ConnectionException} occurs.
      */
     /*test*/ Rows<Application.Name, String> cqlSelectAll(String cql) {
@@ -256,14 +259,14 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
      * If the rowKey is null, the key will be read from the query.
      *
      * @param rowKey the key used to query cassandra
-     * @param rows the rows object
+     * @param rows   the rows object
      * @return a list of AuditLogEntries
      */
     /*test*/ List<AuditLogEntry> readAuditLogEntryList(Application.Name rowKey, Rows<Application.Name, String> rows) {
         List<AuditLogEntry> auditLogEntries = new ArrayList<>();
         for (Row<Application.Name, String> row : rows) {
             AuditLogEntry auditLogEntry;
-            if ((auditLogEntry = readAuditLogEntry(rowKey == null ? row.getKey() : rowKey, row.getColumns())) != null) {
+            if (Objects.nonNull(auditLogEntry = readAuditLogEntry(Objects.isNull(rowKey) ? row.getKey() : rowKey, row.getColumns()))) {
                 auditLogEntries.add(auditLogEntry);
             }
         }
@@ -274,11 +277,11 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
      * Reads an AuditLogEntry from a ColumnList.
      *
      * @param applicationName the application name / row key
-     * @param columnList the columnList
+     * @param columnList      the columnList
      * @return the auditLogEntry
      */
     /*test*/ AuditLogEntry readAuditLogEntry(Application.Name applicationName, ColumnList<String> columnList) {
-        if (columnList == null) {
+        if (Objects.isNull(columnList)) {
             return null;
         }
         try {
@@ -288,7 +291,7 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
             // deserialize time
             Calendar time = null;
             Date date;
-            if ((date = columnList.getDateValue("time", null)) != null) {
+            if (Objects.nonNull(date = columnList.getDateValue("time", null))) {
                 time = Calendar.getInstance();
                 time.setTime(date);
             }
@@ -301,8 +304,8 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
             String userid = columnList.getStringValue("user_userid", "");
             UserInfo user = null;
             if (!StringUtils.isBlank(username) || !StringUtils.isBlank(userid)) {
-                user = (username != null ? UserInfo.from(UserInfo.Username.valueOf(username))
-                                         : UserInfo.from(UserInfo.Username.valueOf(userid)))
+                user = (Objects.nonNull(username) ? UserInfo.from(UserInfo.Username.valueOf(username))
+                        : UserInfo.from(UserInfo.Username.valueOf(userid)))
                         .withFirstName(StringUtils.isBlank(firstname) ? null : firstname)
                         .withLastName(StringUtils.isBlank(lastname) ? null : lastname)
                         .withUserId(StringUtils.isBlank(userid) ? null : userid)

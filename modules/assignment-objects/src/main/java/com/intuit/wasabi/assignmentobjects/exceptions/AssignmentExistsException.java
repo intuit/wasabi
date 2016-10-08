@@ -35,8 +35,9 @@ public class AssignmentExistsException extends WasabiClientException {
 
     public AssignmentExistsException(User.ID userID, Application.Name applicationName, Experiment.Label experimentLabel,
                                      Throwable rootCause) {
-        super(ErrorCode.ASSIGNMENT_EXISTS_VIOLATION, "Assignment for userID \"" + userID + "\", applicationLabel \"" +
-                                                     applicationName + "\", and experimentLabel \"" + experimentLabel +
-                                                     "\" already exists", rootCause);
+        super(ErrorCode.ASSIGNMENT_EXISTS_VIOLATION,
+                String.format("Assignment for userID %s , applicationLabel %s, and experimentLabel %s already exists",
+                        userID, applicationName, experimentLabel)
+                , rootCause);
     }
 }

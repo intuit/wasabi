@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -67,30 +68,30 @@ public class DefaultCassandraDriver implements CassandraDriver {
     }
 
     private void initialize() throws IOException, ConnectionException {
-        if (context == null) {
+        if (Objects.isNull(context)) {
             synchronized (DefaultCassandraDriver.class) {
 
 
                 String cassandraVersion = getConfiguration().getTargetVersion();
-                if (cassandraVersion == null
+                if (Objects.isNull(cassandraVersion)
                         || cassandraVersion.trim().isEmpty()) {
                     cassandraVersion = DEFAULT_CASSANDRA_VERSION;
                 }
 
                 String cqlVersion = getConfiguration().getCQLVersion();
-                if (cqlVersion == null || cqlVersion.trim().isEmpty()) {
+                if (Objects.isNull(cqlVersion) || cqlVersion.trim().isEmpty()) {
                     cqlVersion = DEFAULT_CQL_VERSION;
                 }
 
                 ConsistencyLevel readConsistency =
                         getConfiguration().getDefaultReadConsistency();
-                if (readConsistency == null) {
+                if (Objects.isNull(readConsistency)) {
                     readConsistency = ConsistencyLevel.CL_QUORUM;
                 }
 
                 ConsistencyLevel writeConsistency =
                         getConfiguration().getDefaultWriteConsistency();
-                if (writeConsistency == null) {
+                if (Objects.isNull(writeConsistency)) {
                     writeConsistency = ConsistencyLevel.CL_QUORUM;
                 }
 
@@ -128,18 +129,18 @@ public class DefaultCassandraDriver implements CassandraDriver {
 //                  .forCluster("ClusterName") // Not sure why this is helpful
                         .forKeyspace(getConfiguration().getKeyspaceName())
                         .withAstyanaxConfiguration(new AstyanaxConfigurationImpl()
-                                        .setTargetCassandraVersion(cassandraVersion)
-                                        .setCqlVersion(cqlVersion)
-                                        .setDefaultReadConsistencyLevel(readConsistency)
-                                        .setDefaultWriteConsistencyLevel(writeConsistency)
-                                        .setDiscoveryType(configuration.getNodeDiscoveryType())
-                                        .setConnectionPoolType(configuration.getConnectionPoolType())
+                                .setTargetCassandraVersion(cassandraVersion)
+                                .setCqlVersion(cqlVersion)
+                                .setDefaultReadConsistencyLevel(readConsistency)
+                                .setDefaultWriteConsistencyLevel(writeConsistency)
+                                .setDiscoveryType(configuration.getNodeDiscoveryType())
+                                .setConnectionPoolType(configuration.getConnectionPoolType())
                         )
                         .withConnectionPoolConfiguration(conf)
-                                // TODO: Does this need to be externalized?
+                        // TODO: Does this need to be externalized?
 //                    .withConnectionPoolMonitor(
 //                        new CountingConnectionPoolMonitor())
-                                // This is useful for development
+                        // This is useful for development
                         .withConnectionPoolMonitor(new Slf4jConnectionPoolMonitorImpl())
                         .buildKeyspace(ThriftFamilyFactory.getInstance());
 
@@ -148,7 +149,7 @@ public class DefaultCassandraDriver implements CassandraDriver {
 
                 // Try to get the definition to test if the keyspace exists
                 try {
-                    if (keyspace.describeKeyspace() != null) {
+                    if (Objects.nonNull(keyspace.describeKeyspace())) {
                         keyspaceInitialized = true;
                     }
                 } catch (BadRequestException e) {
@@ -198,12 +199,12 @@ public class DefaultCassandraDriver implements CassandraDriver {
 
                 LOGGER.info("Creating keyspace \"{}\"", keyspace.getKeyspaceName());
 
-                Map<String, Object> keyspaceConfig = new HashMap<String, Object>();
-                Map<String, Object> strategyOptions = new HashMap<String, Object>();
+                Map<String, Object> keyspaceConfig = new HashMap<>();
+                Map<String, Object> strategyOptions = new HashMap<>();
 
                 String keyspaceReplicationStrategy = config.getKeyspaceStrategyClass();
                 // Get the keyspaceReplicationStrategy and default it to SimpleStrategy
-                if (keyspaceReplicationStrategy == null || keyspaceReplicationStrategy.trim().isEmpty()) {
+                if (Objects.isNull(keyspaceReplicationStrategy) || keyspaceReplicationStrategy.trim().isEmpty()) {
                     keyspaceReplicationStrategy = "SimpleStrategy";
                 }
 

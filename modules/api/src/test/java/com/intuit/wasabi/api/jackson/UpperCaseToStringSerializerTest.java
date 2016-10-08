@@ -26,12 +26,6 @@ import java.io.StringWriter;
 
 import static org.junit.Assert.assertThat;
 
-/*
-import org.codehaus.jackson.Version;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.module.SimpleModule;
-*/
-
 public class UpperCaseToStringSerializerTest {
 
     @Test

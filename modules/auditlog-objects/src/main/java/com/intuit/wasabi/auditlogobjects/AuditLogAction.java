@@ -27,6 +27,7 @@ import com.intuit.wasabi.experimentobjects.Experiment;
 import org.apache.commons.lang3.StringUtils;
 
 import java.text.DecimalFormat;
+import java.util.Objects;
 
 /**
  * Lists the known audit log actions.
@@ -70,7 +71,7 @@ public enum AuditLogAction {
      * @return a simple description of the entry's action
      */
     public static String getDescription(AuditLogEntry entry) {
-        if (entry != null && entry.getAction() != null) {
+        if (Objects.nonNull(entry) && Objects.nonNull(entry.getAction())) {
             switch (entry.getAction()) {
                 case EXPERIMENT_CREATED:
                     return "created experiment";
@@ -141,7 +142,7 @@ public enum AuditLogAction {
         switch (entry.getChangedProperty()) {
             // direct experiment properties
             case "state":
-                if (entry.getAfter() != null) {
+                if (Objects.nonNull(entry.getAfter())) {
                     switch (Experiment.State.valueOf(entry.getAfter())) {
                         case DRAFT:
                             return "set experiment into draft state";

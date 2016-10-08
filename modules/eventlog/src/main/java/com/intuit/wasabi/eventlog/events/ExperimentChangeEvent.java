@@ -20,6 +20,8 @@ import com.intuit.wasabi.eventlog.EventLog;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.ExperimentBase;
 
+import java.util.Objects;
+
 /**
  * This event denotes a change in an experiment property.
  */
@@ -31,10 +33,10 @@ public class ExperimentChangeEvent extends AbstractChangeEvent implements Experi
     /**
      * Creates an event denoting an experiment property change, invoked by the {@link EventLog#SYSTEM_USER}.
      *
-     * @param experiment the experiment (must not be null)
+     * @param experiment   the experiment (must not be null)
      * @param propertyName the changed property (must not be blank)
-     * @param before the state before
-     * @param after the state after
+     * @param before       the state before
+     * @param after        the state after
      */
     public ExperimentChangeEvent(ExperimentBase experiment, String propertyName, String before, String after) {
         this(null, experiment, propertyName, before, after);
@@ -43,15 +45,15 @@ public class ExperimentChangeEvent extends AbstractChangeEvent implements Experi
     /**
      * Creates an event denoting an experiment property change.
      *
-     * @param user the user
-     * @param experiment the experiment (must not be null)
+     * @param user         the user
+     * @param experiment   the experiment (must not be null)
      * @param propertyName the changed property (must not be blank)
-     * @param before the state before
-     * @param after the state after
+     * @param before       the state before
+     * @param after        the state after
      */
     public ExperimentChangeEvent(UserInfo user, ExperimentBase experiment, String propertyName, String before, String after) {
         super(user, propertyName, before, after);
-        if (experiment == null) {
+        if (Objects.isNull(experiment)) {
             throw new IllegalArgumentException("Experiment must not be null!");
         }
         this.experiment = experiment;

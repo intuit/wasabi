@@ -32,6 +32,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 
 /**
  * DTO to save the statistics of an experiment. <br>
@@ -95,7 +96,7 @@ public class ExperimentStatistics extends AbstractContainerStatistics {
 
     @JsonIgnore
     public void addToBucketStatistics(Bucket.Label bucketLabel, BucketStatistics item) {
-        if (this.buckets == null) {
+        if (Objects.isNull(this.buckets)) {
             this.buckets = new HashMap<>();
         }
         this.buckets.put(bucketLabel, item);
@@ -103,7 +104,7 @@ public class ExperimentStatistics extends AbstractContainerStatistics {
 
     @JsonIgnore
     public void addToActionProgress(Event.Name actionName, ActionProgress item) {
-        if (this.actionProgress == null) {
+        if (Objects.isNull(this.actionProgress)) {
             this.actionProgress = new HashMap<>();
         }
         this.actionProgress.put(actionName, item);
@@ -111,32 +112,32 @@ public class ExperimentStatistics extends AbstractContainerStatistics {
 
     @Override
     public String toString() {
-    	return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 
     @Override
     public int hashCode() {
-    	return HashCodeBuilder.reflectionHashCode(this);
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override
     public boolean equals(Object obj) {
-    	   return EqualsBuilder.reflectionEquals(this, obj);
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 
     @Override
     public ExperimentStatistics clone() {
         ExperimentStatistics cloned = (ExperimentStatistics) super.clone();
 
-        if (jointProgress != null) {
+        if (Objects.nonNull(jointProgress)) {
             cloned.setJointProgress(jointProgress.clone());
         }
 
-        if (experimentProgress != null) {
+        if (Objects.nonNull(experimentProgress)) {
             cloned.setExperimentProgress(experimentProgress.clone());
         }
 
-        if (buckets != null) {
+        if (Objects.nonNull(buckets)) {
             Map<Bucket.Label, BucketStatistics> clonedBuckets = new HashMap<>();
             for (Entry<Label, BucketStatistics> entry : buckets.entrySet()) {
                 clonedBuckets.put(entry.getKey(), entry.getValue().clone());
@@ -144,7 +145,7 @@ public class ExperimentStatistics extends AbstractContainerStatistics {
             cloned.setBuckets(clonedBuckets);
         }
 
-        if (actionProgress != null) {
+        if (Objects.nonNull(actionProgress)) {
             Map<Event.Name, ActionProgress> clonedActions = new HashMap<>();
             for (Entry<Name, ActionProgress> entry : actionProgress.entrySet()) {
                 clonedActions.put(entry.getKey(), entry.getValue().clone());

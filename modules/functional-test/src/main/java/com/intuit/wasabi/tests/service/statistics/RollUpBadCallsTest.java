@@ -29,6 +29,7 @@ import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import static com.intuit.wasabi.tests.library.util.Constants.EXPERIMENT_STATE_RUNNING;
@@ -89,7 +90,7 @@ public class RollUpBadCallsTest extends TestBase {
                 }
 
             }
-            if (null == matching) {
+            if (Objects.isNull(matching)) {
                 continue;
             }
             assertEquals(result.label, matching.label);

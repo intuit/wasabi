@@ -25,13 +25,11 @@ import com.intuit.wasabi.api.pagination.PaginationHelper;
 import com.intuit.wasabi.assignment.Assignments;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authenticationobjects.UserInfo.Username;
+import com.intuit.wasabi.authenticationobjects.exceptions.AuthenticationException;
 import com.intuit.wasabi.authorization.Authorization;
 import com.intuit.wasabi.authorizationobjects.Permission;
 import com.intuit.wasabi.authorizationobjects.UserRole;
 import com.intuit.wasabi.events.EventsExport;
-import com.intuit.wasabi.authenticationobjects.exceptions.AuthenticationException;
-import com.intuit.wasabi.experimentobjects.exception.BucketNotFoundException;
-import com.intuit.wasabi.experimentobjects.exception.ExperimentNotFoundException;
 import com.intuit.wasabi.exceptions.TimeFormatException;
 import com.intuit.wasabi.exceptions.TimeZoneFormatException;
 import com.intuit.wasabi.experiment.Buckets;
@@ -50,6 +48,8 @@ import com.intuit.wasabi.experimentobjects.ExperimentList;
 import com.intuit.wasabi.experimentobjects.ExperimentPageList;
 import com.intuit.wasabi.experimentobjects.NewExperiment;
 import com.intuit.wasabi.experimentobjects.Page;
+import com.intuit.wasabi.experimentobjects.exception.BucketNotFoundException;
+import com.intuit.wasabi.experimentobjects.exception.ExperimentNotFoundException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -74,6 +74,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
 
@@ -158,16 +159,16 @@ public class ExperimentsResource {
     /**
      * Returns a list of all experiments, with metadata. Does not return
      * metadata for deleted experiments.
-     *
+     * <p>
      * This endpoint is paginated. Favorites are sorted to the front.
      * If {@code per_page == -1}, favorites are ignored and all experiments are returned.
      *
      * @param authorizationHeader the authentication headers
-     * @param page the page which should be returned, defaults to 1
-     * @param perPage the number of log entries per page, defaults to 10. -1 to get all values.
-     * @param sort the sorting rules
-     * @param filter the filter rules
-     * @param timezoneOffset the time zone offset from UTC
+     * @param page                the page which should be returned, defaults to 1
+     * @param perPage             the number of log entries per page, defaults to 10. -1 to get all values.
+     * @param sort                the sorting rules
+     * @param filter              the filter rules
+     * @param timezoneOffset      the time zone offset from UTC
      * @return a response containing a map with a list with {@code 0} to {@code perPage} experiments,
      * if that many are on the page, and a count of how many experiments match the filter criteria.
      */
@@ -207,7 +208,7 @@ public class ExperimentsResource {
         ExperimentList experimentList = experiments.getExperiments();
         ExperimentList authorizedExperiments;
 
-        if (authorizationHeader == null) {
+        if (Objects.isNull(authorizationHeader)) {
             throw new AuthenticationException("No authorization given.");
         } else {
             Username userName = authorization.getUser(authorizationHeader);
@@ -216,7 +217,7 @@ public class ExperimentsResource {
             authorizedExperiments = new ExperimentList();
 
             for (Experiment experiment : experimentList.getExperiments()) {
-                if (experiment == null) {
+                if (Objects.isNull(experiment)) {
                     continue;
                 }
 
@@ -264,7 +265,7 @@ public class ExperimentsResource {
                                    @HeaderParam(AUTHORIZATION)
                                    @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
                                    final String authorizationHeader) {
-        if (newExperiment.getApplicationName() == null || isBlank(newExperiment.getApplicationName().toString())) {
+        if (Objects.isNull(newExperiment.getApplicationName()) || isBlank(newExperiment.getApplicationName().toString())) {
             throw new IllegalArgumentException("Experiment application name cannot be null or an empty string");
         }
 
@@ -275,7 +276,7 @@ public class ExperimentsResource {
         }
 
         // Avoid causing breaking change in API request body, derive creatorID from auth headers
-        String creatorID = (userName != null) ? userName.getUsername() : null;
+        String creatorID = (Objects.nonNull(userName)) ? userName.getUsername() : null;
 
         newExperiment.setCreatorID(creatorID);
         experiments.createExperiment(newExperiment, authorization.getUserInfo(userName));
@@ -314,11 +315,11 @@ public class ExperimentsResource {
                                   final String authorizationHeader) {
         Experiment experiment = experiments.getExperiment(experimentID);
 
-        if (experiment == null) {
+        if (Objects.isNull(experiment)) {
             throw new ExperimentNotFoundException(experimentID);
         }
 
-        if (authorizationHeader != null) {
+        if (Objects.nonNull(authorizationHeader)) {
             Username userName = authorization.getUser(authorizationHeader);
 
             authorization.checkUserPermissions(userName, experiment.getApplicationName(), READ);
@@ -364,7 +365,7 @@ public class ExperimentsResource {
         Experiment experiment = experiments.getExperiment(experimentID);
 
         // Throw an exception if the current experiment is not valid
-        if (experiment == null) {
+        if (Objects.isNull(experiment)) {
             throw new ExperimentNotFoundException(experimentID);
         }
 
@@ -373,7 +374,7 @@ public class ExperimentsResource {
         }
 
         experiment = experiments.updateExperiment(experimentID, experimentEntity, authorization.getUserInfo(userName));
-        assert experiment != null : "Error updating experiment";
+        assert Objects.nonNull(experiment) : "Error updating experiment";
 
         if ((createNewApplication) && !experiment.getState().equals(DELETED)) {
             UserRole userRole = newInstance(experiment.getApplicationName(), ADMIN).withUserID(userName).build();
@@ -412,7 +413,7 @@ public class ExperimentsResource {
         Username userName = authorization.getUser(authorizationHeader);
         Experiment experiment = experiments.getExperiment(experimentID);
 
-        if (experiment == null) {
+        if (Objects.isNull(experiment)) {
             throw new ExperimentNotFoundException(experimentID);
         }
 
@@ -424,7 +425,7 @@ public class ExperimentsResource {
 
         experiment = experiments.updateExperiment(experimentID, updatedExperiment, authorization.getUserInfo(userName));
 
-        assert experiment != null : "Error deleting experiment";
+        assert Objects.nonNull(experiment) : "Error deleting experiment";
 
         return httpHeader.headers(NO_CONTENT).build();
     }
@@ -449,7 +450,7 @@ public class ExperimentsResource {
                                @HeaderParam(AUTHORIZATION)
                                @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
                                final String authorizationHeader) {
-        if (authorizationHeader != null) {
+        if (Objects.nonNull(authorizationHeader)) {
             Username userName = authorization.getUser(authorizationHeader);
 
             authorization.checkUserPermissions(userName, experiments.getExperiment(experimentID).getApplicationName(),
@@ -489,7 +490,7 @@ public class ExperimentsResource {
         Username userName = authorization.getUser(authorizationHeader);
         Experiment experiment = experiments.getExperiment(experimentID);
 
-        if (experiment == null) {
+        if (Objects.isNull(experiment)) {
             throw new ExperimentNotFoundException(experimentID);
         }
 
@@ -503,7 +504,7 @@ public class ExperimentsResource {
         UserInfo user = authorization.getUserInfo(userName);
         Bucket bucket = buckets.createBucket(experimentID, newBucket, user);
 
-        assert bucket != null : "Created bucket was null";
+        assert Objects.nonNull(bucket) : "Created bucket was null";
 
         return httpHeader.headers(CREATED).entity(bucket).build();
     }
@@ -538,7 +539,7 @@ public class ExperimentsResource {
         Username userName = authorization.getUser(authorizationHeader);
         Experiment experiment = experiments.getExperiment(experimentID);
 
-        if (experiment == null) {
+        if (Objects.isNull(experiment)) {
             throw new ExperimentNotFoundException(experimentID);
         }
 
@@ -578,11 +579,11 @@ public class ExperimentsResource {
                               @HeaderParam(AUTHORIZATION)
                               @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
                               final String authorizationHeader) {
-        if (authorizationHeader != null) {
+        if (Objects.nonNull(authorizationHeader)) {
             Username userName = authorization.getUser(authorizationHeader);
             Experiment experiment = experiments.getExperiment(experimentID);
 
-            if (experiment == null) {
+            if (Objects.isNull(experiment)) {
                 throw new ExperimentNotFoundException(experimentID);
             }
 
@@ -591,7 +592,7 @@ public class ExperimentsResource {
 
         Bucket bucket = buckets.getBucket(experimentID, bucketLabel);
 
-        if (bucket == null) {
+        if (Objects.isNull(bucket)) {
             throw new BucketNotFoundException(bucketLabel);
         }
 
@@ -634,7 +635,7 @@ public class ExperimentsResource {
         Experiment experiment = experiments.getExperiment(experimentID);
 
         // Throw an exception if the current experiment is not valid
-        if (experiment == null) {
+        if (Objects.isNull(experiment)) {
             throw new ExperimentNotFoundException(experimentID);
         }
 
@@ -643,7 +644,7 @@ public class ExperimentsResource {
         UserInfo user = authorization.getUserInfo(userName);
         Bucket bucket = buckets.updateBucket(experimentID, bucketLabel, bucketEntity, user);
 
-        assert bucket != null : "Error updating bucket";
+        assert Objects.nonNull(bucket) : "Error updating bucket";
 
         return httpHeader.headers().entity(bucket).build();
     }
@@ -685,7 +686,7 @@ public class ExperimentsResource {
         Experiment experiment = experiments.getExperiment(experimentID);
 
         // Throw an exception if the current experiment is not valid
-        if (experiment == null) {
+        if (Objects.isNull(experiment)) {
             throw new ExperimentNotFoundException(experimentID);
         }
 
@@ -694,7 +695,7 @@ public class ExperimentsResource {
         UserInfo user = authorization.getUserInfo(userName);
         Bucket bucket = buckets.updateBucketState(experimentID, bucketLabel, desiredState, user);
 
-        assert bucket != null : "Error updating bucket state";
+        assert Objects.nonNull(bucket) : "Error updating bucket state";
 
         return httpHeader.headers().entity(bucket).build();
     }
@@ -729,7 +730,7 @@ public class ExperimentsResource {
         Username userName = authorization.getUser(authorizationHeader);
         Experiment experiment = experiments.getExperiment(experimentID);
 
-        if (experiment == null) {
+        if (Objects.isNull(experiment)) {
             throw new ExperimentNotFoundException(experimentID);
         }
 
@@ -765,11 +766,11 @@ public class ExperimentsResource {
                                       @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
                                       final String authorizationHeader) {
         //TODO: this check is redundant because it is checked again in regardless is exportActions
-        if (authorizationHeader != null) {
+        if (Objects.nonNull(authorizationHeader)) {
             Username userName = authorization.getUser(authorizationHeader);
             Experiment experiment = experiments.getExperiment(experimentID);
 
-            if (experiment == null) {
+            if (Objects.isNull(experiment)) {
                 throw new ExperimentNotFoundException(experimentID);
             }
 
@@ -808,7 +809,7 @@ public class ExperimentsResource {
         Experiment experiment = experiments.getExperiment(experimentID);
 
         // Throw an exception if the current experiment is not valid
-        if (experiment == null) {
+        if (Objects.isNull(experiment)) {
             throw new ExperimentNotFoundException(experimentID);
         }
 
@@ -855,7 +856,7 @@ public class ExperimentsResource {
         Experiment experiment = experiments.getExperiment(experimentID);
 
         // Throw an exception if the current experiment is not valid
-        if (experiment == null) {
+        if (Objects.isNull(experiment)) {
             throw new ExperimentNotFoundException(experimentID);
         }
 
@@ -902,7 +903,7 @@ public class ExperimentsResource {
         Experiment experiment = experiments.getExperiment(experimentID_1);
 
         // Throw an exception if the current experiment is not valid
-        if (experiment == null) {
+        if (Objects.isNull(experiment)) {
             throw new ExperimentNotFoundException(experimentID_1);
         }
 
@@ -947,11 +948,11 @@ public class ExperimentsResource {
                                   @HeaderParam(AUTHORIZATION)
                                   @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
                                   final String authorizationHeader) {
-        if (authorizationHeader != null) {
+        if (Objects.nonNull(authorizationHeader)) {
             Username userName = authorization.getUser(authorizationHeader);
             Experiment experiment = experiments.getExperiment(experimentID);
 
-            if (experiment == null) {
+            if (Objects.isNull(experiment)) {
                 throw new ExperimentNotFoundException(experimentID);
             }
 
@@ -1005,7 +1006,7 @@ public class ExperimentsResource {
         Experiment experiment = experiments.getExperiment(experimentID);
 
         // Throw an exception if the current experiment is not valid
-        if (experiment == null) {
+        if (Objects.isNull(experiment)) {
             throw new ExperimentNotFoundException(experimentID);
         }
 
@@ -1066,11 +1067,11 @@ public class ExperimentsResource {
                                       @HeaderParam(AUTHORIZATION)
                                       @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
                                       final String authorizationHeader) throws ParseException {
-        if (authorizationHeader != null) {
+        if (Objects.nonNull(authorizationHeader)) {
             Username userName = authorization.getUser(authorizationHeader);
             Experiment experiment = experiments.getExperiment(experimentID);
 
-            if (experiment == null) {
+            if (Objects.isNull(experiment)) {
                 throw new ExperimentNotFoundException(experimentID);
             }
 
@@ -1082,7 +1083,7 @@ public class ExperimentsResource {
         //Setting the filtering behavior on the null buckets --default is set to get all the assignments
         Boolean ignoreNullBucket = FALSE;
 
-        if (ignoreStringNullBucket != null) {
+        if (Objects.nonNull(ignoreStringNullBucket)) {
             ignoreNullBucket = Boolean.parseBoolean(ignoreStringNullBucket);
         }
 
@@ -1091,7 +1092,7 @@ public class ExperimentsResource {
         //Input format of the dates
         SimpleDateFormat sdf = new SimpleDateFormat(defaultTimeFormat);
 
-        if (timeZoneString != null) {
+        if (Objects.nonNull(timeZoneString)) {
             TimeZone timeZone = getTimeZone(timeZoneString);
 
             //Note: TimeZone.getTimeZone doesn't have an inbuilt error catch. Hence, the below check is necessary.
@@ -1105,7 +1106,7 @@ public class ExperimentsResource {
             parameters.setTimeZone(timeZone);
         }
 
-        if (fromStringDate != null) {
+        if (Objects.nonNull(fromStringDate)) {
             try {
                 Date fromDate = sdf.parse(fromStringDate);
 
@@ -1115,7 +1116,7 @@ public class ExperimentsResource {
             }
         }
 
-        if (toStringDate != null) {
+        if (Objects.nonNull(toStringDate)) {
             try {
                 Date toDate = sdf.parse(toStringDate);
 
@@ -1161,7 +1162,7 @@ public class ExperimentsResource {
         Experiment experiment = experiments.getExperiment(experimentID);
 
         // Throw an exception if the current experiment is not valid
-        if (experiment == null) {
+        if (Objects.isNull(experiment)) {
             throw new ExperimentNotFoundException(experimentID);
         }
 
@@ -1199,7 +1200,7 @@ public class ExperimentsResource {
         Experiment experiment = experiments.getExperiment(experimentID);
 
         // Throw an exception if the current experiment is not valid
-        if (experiment == null) {
+        if (Objects.isNull(experiment)) {
             throw new ExperimentNotFoundException(experimentID);
         }
 
@@ -1227,11 +1228,11 @@ public class ExperimentsResource {
                                        @HeaderParam(AUTHORIZATION)
                                        @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
                                        final String authorizationHeader) {
-        if (authorizationHeader != null) {
+        if (Objects.nonNull(authorizationHeader)) {
             Username userName = authorization.getUser(authorizationHeader);
             Experiment experiment = experiments.getExperiment(experimentID);
 
-            if (experiment == null) {
+            if (Objects.isNull(experiment)) {
                 throw new ExperimentNotFoundException(experimentID);
             }
 

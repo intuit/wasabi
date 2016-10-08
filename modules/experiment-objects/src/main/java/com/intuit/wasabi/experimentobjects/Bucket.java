@@ -97,7 +97,7 @@ public class Bucket {
     }
 
     public void setLabel(Bucket.Label value) {
-        if (value == null) {
+        if (Objects.isNull(value)) {
             throw new IllegalArgumentException("The Bucket label can not be empty, choose a name!");
         }
         this.label = value;
@@ -110,7 +110,7 @@ public class Bucket {
 
     @JsonIgnore
     public void setControl(Boolean value) {
-        if (value == null) {
+        if (Objects.isNull(value)) {
             throw new IllegalArgumentException("It has to be specified whether this Bucket is control");
         }
         this.control = value;
@@ -121,7 +121,7 @@ public class Bucket {
     }
 
     public void setAllocationPercent(Double value) {
-        if (value == null || value < 0.0 || value > 1.0) {
+        if (Objects.isNull(value) || value < 0.0 || value > 1.0) {
             throw new IllegalArgumentException("Bucket allocation percent (" + value +
                     ") must be between 0.0 and 1.0");
         }
@@ -238,7 +238,7 @@ public class Bucket {
             instance = new Bucket();
             instance.experimentID = other.getExperimentID();
             instance.label = other.getLabel();
-            instance.control = other.isControl() == null ? Boolean.FALSE : other.isControl();
+            instance.control = Objects.isNull(other.isControl()) ? Boolean.FALSE : other.isControl();
             instance.allocationPercent = other.getAllocationPercent();
             instance.description = other.getDescription();
             instance.payload = other.getPayload();

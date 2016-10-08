@@ -93,19 +93,6 @@
             <artifactId>jackson-databind</artifactId>
             <version>2.7.2</version>
         </dependency>
-        <!--<dependency>-->
-        <!--<groupId>io.dropwizard.metrics</groupId>-->
-        <!--<artifactId>metrics-annotation</artifactId>-->
-        <!--<version>3.1.2</version>-->
-        <!--</dependency>-->
-        <!-- FIXME: we might need to run against jersey 1.18.1 for this to work -->
-        <!--
-        <dependency>
-            <groupId>io.dropwizard.metrics</groupId>
-            <artifactId>metrics-jersey</artifactId>
-            <version>3.1.2</version>
-        </dependency>
-        -->
         <dependency>
             <groupId>Hyrule</groupId>
             <artifactId>Hyrule</artifactId>
@@ -115,32 +102,6 @@
 
     <build>
         <plugins>
-            <!--<plugin>
-                <groupId>com.github.kongchen</groupId>
-                <artifactId>swagger-maven-plugin</artifactId>
-                <version>2.0</version>
-                <configuration>
-                    <apiSources>
-                        <apiSource>
-                            <locations>com.intuit.wasabi.api</locations>
-                            <apiVersion>v1</apiVersion>
-                            <basePath>${swaggerUrl}</basePath>
-                            <outputTemplate>${basedir}/src/main/apidocs/strapdown.html.mustache</outputTemplate>
-                            <outputPath>${project.build.directory}/swagger/apis.html</outputPath>
-                            <mustacheFileRoot>${basedir}/src/main/apidocs/</mustacheFileRoot>
-                            <swaggerDirectory>${project.build.directory}/swagger/apidocs</swaggerDirectory>
-                        </apiSource>
-                    </apiSources>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>-->
             <plugin>
                 <groupId>com.github.kongchen</groupId>
                 <artifactId>swagger-maven-plugin</artifactId>
@@ -157,10 +118,6 @@
                                 <title>AB Testing</title>
                                 <version>v1</version>
                             </info>
-                            <!-- Support classpath or file absolute path here.
-                            1) classpath e.g: "classpath:/markdown.hbs", "classpath:/templates/hello.html"
-                            2) file e.g: "${basedir}/src/main/resources/markdown.hbs",
-                                "${basedir}/src/main/resources/template/hello.html" -->
                             <templatePath>${basedir}/templates/strapdown.html.hbs</templatePath>
                             <outputPath>${project.build.directory}/generated/document.html</outputPath>
                             <swaggerDirectory>${project.build.directory}/generated/swagger-ui</swaggerDirectory>

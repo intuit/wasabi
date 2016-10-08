@@ -25,9 +25,10 @@ public class DefaultRestEndPointConfiguration implements RestEndPoint.Configurat
 
     /**
      * Constructor setup for testing or future injection purpose
+     *
      * @param properties the properties that contains the data
      */
-    protected DefaultRestEndPointConfiguration(Properties properties){
+    protected DefaultRestEndPointConfiguration(Properties properties) {
         this.properties = properties;
     }
 
@@ -58,10 +59,7 @@ public class DefaultRestEndPointConfiguration implements RestEndPoint.Configurat
      */
     @Override
     public int getPort() {
-        if (properties.get("export.rest.port") != null) {
-            return Integer.parseInt((String) properties.get("export.rest.port"));
-        }
-        return 0;
+        return Integer.parseInt(String.valueOf(properties.getOrDefault("export.rest.port", "0")));
     }
 
     /**

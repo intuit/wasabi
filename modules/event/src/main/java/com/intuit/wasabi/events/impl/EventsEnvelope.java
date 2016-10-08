@@ -22,6 +22,9 @@ import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.exceptions.WasabiClientException;
 import org.slf4j.Logger;
+
+import java.util.Objects;
+
 import static org.slf4j.LoggerFactory.getLogger;
 
 class EventsEnvelope implements Runnable {
@@ -53,19 +56,19 @@ class EventsEnvelope implements Runnable {
     void recordEvent(Assignment assignment, Event event)
             throws Exception {
         String actionNameString = event.getName().toString();
-        String payload = (event.getPayload() != null)
+        String payload = (Objects.nonNull(event.getPayload()))
                 ? event.getPayload().toString()
                 : null;
         String userIDString = assignment.getUserID().toString();
 
-        String context = (event.getContext() != null)
+        String context = (Objects.nonNull(event.getContext()))
                 ? event.getContext().getContext()
                 : "PROD";
 
         Experiment.ID experimentIDValue = assignment.getExperimentID();
         Bucket.Label bucketLabelValue = assignment.getBucketLabel();
 
-        if (bucketLabelValue != null && experimentIDValue != null) {
+        if (Objects.nonNull(bucketLabelValue) && Objects.nonNull(experimentIDValue)) {
             // TODO: will need to update for future additions of non-binary event types
             if (event.getType().equals(Event.Type.IMPRESSION)) {
                 transaction.insert("INSERT INTO event_impression " +

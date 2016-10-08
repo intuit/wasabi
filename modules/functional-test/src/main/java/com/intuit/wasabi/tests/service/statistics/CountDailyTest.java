@@ -42,6 +42,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import static com.intuit.wasabi.tests.library.util.Constants.EXPERIMENT_STATE_RUNNING;
@@ -134,7 +135,7 @@ public class CountDailyTest extends TestBase {
                 }
 
             }
-            if (null == matching) {
+            if (Objects.isNull(matching)) {
                 Assert.fail("No matching bucket found.");
             }
             assertEquals(result.label, matching.label);
@@ -289,19 +290,19 @@ public class CountDailyTest extends TestBase {
                         countsYesterday.buckets.get(BLUE).jointActionCounts.uniqueUserCount);
 
         int redActionClickCount = 0;
-        if (countsYesterday.actionCounts.get(RED) != null)
+        if (Objects.nonNull(countsYesterday.actionCounts.get(RED)))
             redActionClickCount = countsYesterday.actionCounts.get(RED).eventCount;
 
         int redActionUniqueCount = 0;
-        if (countsYesterday.actionCounts.get(RED) != null)
+        if (Objects.nonNull(countsYesterday.actionCounts.get(RED)))
             redActionUniqueCount = countsYesterday.actionCounts.get(RED).uniqueUserCount;
 
         int blueActionClickCount = 0;
-        if (countsYesterday.actionCounts.get(BLUE) != null)
+        if (Objects.nonNull(countsYesterday.actionCounts.get(BLUE)))
             blueActionClickCount = countsYesterday.actionCounts.get(BLUE).eventCount;
 
         int blueActionUniqueCount = 0;
-        if (countsYesterday.actionCounts.get(BLUE) != null)
+        if (Objects.nonNull(countsYesterday.actionCounts.get(BLUE)))
             blueActionUniqueCount = countsYesterday.actionCounts.get(BLUE).uniqueUserCount;
 
 
@@ -350,22 +351,22 @@ public class CountDailyTest extends TestBase {
                         countsToday.buckets.get(BLUE).jointActionCounts.uniqueUserCount);
 
         int actionClickCount = 0;
-        if (countsToday.actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(countsToday.actionCounts.get(actionClick)))
             actionClickCount = countsToday.actionCounts.get(actionClick).eventCount;
 
         int actionUniqueCount = 0;
-        if (countsToday.actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(countsToday.actionCounts.get(actionClick)))
             actionUniqueCount = countsToday.actionCounts.get(actionClick).uniqueUserCount;
 
         assertEquals(3, actionClickCount);
         assertEquals(3, actionUniqueCount);
 
         int actionLoveItCount = 0;
-        if (countsToday.actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(countsToday.actionCounts.get(actionLoveIt)))
             actionLoveItCount = countsToday.actionCounts.get(actionLoveIt).eventCount;
 
         int actionLoveItUniqueCount = 0;
-        if (countsToday.actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(countsToday.actionCounts.get(actionLoveIt)))
             actionLoveItUniqueCount = countsToday.actionCounts.get(actionLoveIt).uniqueUserCount;
 
         assertEquals(0, actionLoveItCount);
@@ -412,19 +413,19 @@ public class CountDailyTest extends TestBase {
                         countsYesterday.buckets.get(BLUE).jointActionCounts.uniqueUserCount);
 
         int redActionClickCount = 0;
-        if (countsYesterday.actionCounts.get(RED) != null)
+        if (Objects.nonNull(countsYesterday.actionCounts.get(RED)))
             redActionClickCount = countsYesterday.actionCounts.get(RED).eventCount;
 
         int redActionUniqueCount = 0;
-        if (countsYesterday.actionCounts.get(RED) != null)
+        if (Objects.nonNull(countsYesterday.actionCounts.get(RED)))
             redActionUniqueCount = countsYesterday.actionCounts.get(RED).uniqueUserCount;
 
         int blueActionClickCount = 0;
-        if (countsYesterday.actionCounts.get(BLUE) != null)
+        if (Objects.nonNull(countsYesterday.actionCounts.get(BLUE)))
             blueActionClickCount = countsYesterday.actionCounts.get(BLUE).eventCount;
 
         int blueActionUniqueCount = 0;
-        if (countsYesterday.actionCounts.get(BLUE) != null)
+        if (Objects.nonNull(countsYesterday.actionCounts.get(BLUE)))
             blueActionUniqueCount = countsYesterday.actionCounts.get(BLUE).uniqueUserCount;
 
 
@@ -455,22 +456,22 @@ public class CountDailyTest extends TestBase {
                         countsToday.buckets.get(BLUE).jointActionCounts.uniqueUserCount);
 
         int actionClickCount = 0;
-        if (countsToday.actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(countsToday.actionCounts.get(actionClick)))
             actionClickCount = countsToday.actionCounts.get(actionClick).eventCount;
 
         int actionUniqueCount = 0;
-        if (countsToday.actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(countsToday.actionCounts.get(actionClick)))
             actionUniqueCount = countsToday.actionCounts.get(actionClick).uniqueUserCount;
 
         assertEquals(3, actionClickCount);
         assertEquals(3, actionUniqueCount);
 
         int actionLoveItCount = 0;
-        if (countsToday.actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(countsToday.actionCounts.get(actionLoveIt)))
             actionLoveItCount = countsToday.actionCounts.get(actionLoveIt).eventCount;
 
         int actionLoveItUniqueCount = 0;
-        if (countsToday.actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(countsToday.actionCounts.get(actionLoveIt)))
             actionLoveItUniqueCount = countsToday.actionCounts.get(actionLoveIt).uniqueUserCount;
 
         assertEquals(0, actionLoveItCount);
@@ -518,19 +519,19 @@ public class CountDailyTest extends TestBase {
                         countsYesterday.buckets.get(BLUE).jointActionCounts.uniqueUserCount);
 
         int redActionClickCount = 0;
-        if (countsYesterday.actionCounts.get(RED) != null)
+        if (Objects.nonNull(countsYesterday.actionCounts.get(RED)))
             redActionClickCount = countsYesterday.actionCounts.get(RED).eventCount;
 
         int redActionUniqueCount = 0;
-        if (countsYesterday.actionCounts.get(RED) != null)
+        if (Objects.nonNull(countsYesterday.actionCounts.get(RED)))
             redActionUniqueCount = countsYesterday.actionCounts.get(RED).uniqueUserCount;
 
         int blueActionClickCount = 0;
-        if (countsYesterday.actionCounts.get(BLUE) != null)
+        if (Objects.nonNull(countsYesterday.actionCounts.get(BLUE)))
             blueActionClickCount = countsYesterday.actionCounts.get(BLUE).eventCount;
 
         int blueActionUniqueCount = 0;
-        if (countsYesterday.actionCounts.get(BLUE) != null)
+        if (Objects.nonNull(countsYesterday.actionCounts.get(BLUE)))
             blueActionUniqueCount = countsYesterday.actionCounts.get(BLUE).uniqueUserCount;
 
 
@@ -561,22 +562,22 @@ public class CountDailyTest extends TestBase {
                         countsToday.buckets.get(BLUE).jointActionCounts.uniqueUserCount);
 
         int actionClickCount = 0;
-        if (countsToday.actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(countsToday.actionCounts.get(actionClick)))
             actionClickCount = countsToday.actionCounts.get(actionClick).eventCount;
 
         int actionUniqueCount = 0;
-        if (countsToday.actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(countsToday.actionCounts.get(actionClick)))
             actionUniqueCount = countsToday.actionCounts.get(actionClick).uniqueUserCount;
 
         assertEquals(3, actionClickCount);
         assertEquals(3, actionUniqueCount);
 
         int actionLoveItCount = 0;
-        if (countsToday.actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(countsToday.actionCounts.get(actionLoveIt)))
             actionLoveItCount = countsToday.actionCounts.get(actionLoveIt).eventCount;
 
         int actionLoveItUniqueCount = 0;
-        if (countsToday.actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(countsToday.actionCounts.get(actionLoveIt)))
             actionLoveItUniqueCount = countsToday.actionCounts.get(actionLoveIt).uniqueUserCount;
 
         assertEquals(0, actionLoveItCount);
@@ -606,22 +607,22 @@ public class CountDailyTest extends TestBase {
                         countsTomorrow.buckets.get(BLUE).jointActionCounts.uniqueUserCount);
 
         int actionClickCount3 = 0;
-        if (countsTomorrow.actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(countsTomorrow.actionCounts.get(actionClick)))
             actionClickCount3 = countsTomorrow.actionCounts.get(actionClick).eventCount;
 
         int actionUniqueCount3 = 0;
-        if (countsTomorrow.actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(countsTomorrow.actionCounts.get(actionClick)))
             actionUniqueCount3 = countsTomorrow.actionCounts.get(actionClick).uniqueUserCount;
 
         assertEquals(0, actionClickCount3);
         assertEquals(0, actionUniqueCount3);
 
         int actionLoveItCount3 = 0;
-        if (countsTomorrow.actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(countsTomorrow.actionCounts.get(actionLoveIt)))
             actionLoveItCount3 = countsTomorrow.actionCounts.get(actionLoveIt).eventCount;
 
         int actionLoveItUniqueCount3 = 0;
-        if (countsTomorrow.actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(countsTomorrow.actionCounts.get(actionLoveIt)))
             actionLoveItUniqueCount3 = countsTomorrow.actionCounts.get(actionLoveIt).uniqueUserCount;
 
         assertEquals(2, actionLoveItCount3);
@@ -668,19 +669,19 @@ public class CountDailyTest extends TestBase {
                         countsYesterday.buckets.get(BLUE).jointActionCounts.uniqueUserCount);
 
         int redActionClickCount = 0;
-        if (countsYesterday.actionCounts.get(RED) != null)
+        if (Objects.nonNull(countsYesterday.actionCounts.get(RED)))
             redActionClickCount = countsYesterday.actionCounts.get(RED).eventCount;
 
         int redActionUniqueCount = 0;
-        if (countsYesterday.actionCounts.get(RED) != null)
+        if (Objects.nonNull(countsYesterday.actionCounts.get(RED)))
             redActionUniqueCount = countsYesterday.actionCounts.get(RED).uniqueUserCount;
 
         int blueActionClickCount = 0;
-        if (countsYesterday.actionCounts.get(BLUE) != null)
+        if (Objects.nonNull(countsYesterday.actionCounts.get(BLUE)))
             blueActionClickCount = countsYesterday.actionCounts.get(BLUE).eventCount;
 
         int blueActionUniqueCount = 0;
-        if (countsYesterday.actionCounts.get(BLUE) != null)
+        if (Objects.nonNull(countsYesterday.actionCounts.get(BLUE)))
             blueActionUniqueCount = countsYesterday.actionCounts.get(BLUE).uniqueUserCount;
 
 
@@ -711,22 +712,22 @@ public class CountDailyTest extends TestBase {
                         countsToday.buckets.get(BLUE).jointActionCounts.uniqueUserCount);
 
         int actionClickCount = 0;
-        if (countsToday.actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(countsToday.actionCounts.get(actionClick)))
             actionClickCount = countsToday.actionCounts.get(actionClick).eventCount;
 
         int actionUniqueCount = 0;
-        if (countsToday.actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(countsToday.actionCounts.get(actionClick)))
             actionUniqueCount = countsToday.actionCounts.get(actionClick).uniqueUserCount;
 
         assertEquals(0, actionClickCount);
         assertEquals(0, actionUniqueCount);
 
         int actionLoveItCount = 0;
-        if (countsToday.actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(countsToday.actionCounts.get(actionLoveIt)))
             actionLoveItCount = countsToday.actionCounts.get(actionLoveIt).eventCount;
 
         int actionLoveItUniqueCount = 0;
-        if (countsToday.actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(countsToday.actionCounts.get(actionLoveIt)))
             actionLoveItUniqueCount = countsToday.actionCounts.get(actionLoveIt).uniqueUserCount;
 
         assertEquals(2, actionLoveItCount);
@@ -774,22 +775,22 @@ public class CountDailyTest extends TestBase {
                         countsTomorrow.buckets.get(BLUE).jointActionCounts.uniqueUserCount);
 
         int actionClickCount = 0;
-        if (countsTomorrow.actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(countsTomorrow.actionCounts.get(actionClick)))
             actionClickCount = countsTomorrow.actionCounts.get(actionClick).eventCount;
 
         int actionUniqueCount = 0;
-        if (countsTomorrow.actionCounts.get(actionClick) != null)
+        if (Objects.nonNull(countsTomorrow.actionCounts.get(actionClick)))
             actionUniqueCount = countsTomorrow.actionCounts.get(actionClick).uniqueUserCount;
 
         assertEquals(0, actionClickCount);
         assertEquals(0, actionUniqueCount);
 
         int actionLoveItCount = 0;
-        if (countsTomorrow.actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(countsTomorrow.actionCounts.get(actionLoveIt)))
             actionLoveItCount = countsTomorrow.actionCounts.get(actionLoveIt).eventCount;
 
         int actionLoveItUniqueCount = 0;
-        if (countsTomorrow.actionCounts.get(actionLoveIt) != null)
+        if (Objects.nonNull(countsTomorrow.actionCounts.get(actionLoveIt)))
             actionLoveItUniqueCount = countsTomorrow.actionCounts.get(actionLoveIt).uniqueUserCount;
 
         assertEquals(2, actionLoveItCount);

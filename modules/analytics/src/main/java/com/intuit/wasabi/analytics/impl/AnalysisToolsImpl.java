@@ -24,11 +24,28 @@ import com.intuit.wasabi.analyticsobjects.counts.BucketCounts;
 import com.intuit.wasabi.analyticsobjects.counts.Counts;
 import com.intuit.wasabi.analyticsobjects.counts.ExperimentCounts;
 import com.intuit.wasabi.analyticsobjects.metrics.BinomialMetrics;
-import com.intuit.wasabi.analyticsobjects.statistics.*;
+import com.intuit.wasabi.analyticsobjects.statistics.AbstractContainerStatistics;
+import com.intuit.wasabi.analyticsobjects.statistics.ActionComparisonStatistics;
+import com.intuit.wasabi.analyticsobjects.statistics.ActionProgress;
+import com.intuit.wasabi.analyticsobjects.statistics.ActionRate;
+import com.intuit.wasabi.analyticsobjects.statistics.BucketComparison;
+import com.intuit.wasabi.analyticsobjects.statistics.BucketStatistics;
+import com.intuit.wasabi.analyticsobjects.statistics.ComparisonStatistics;
+import com.intuit.wasabi.analyticsobjects.statistics.DistinguishableEffectSize;
+import com.intuit.wasabi.analyticsobjects.statistics.Estimate;
+import com.intuit.wasabi.analyticsobjects.statistics.ExperimentStatistics;
+import com.intuit.wasabi.analyticsobjects.statistics.Progress;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import org.slf4j.Logger;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 import static java.lang.Double.NaN;
 import static java.lang.Math.max;
@@ -61,9 +78,9 @@ public class AnalysisToolsImpl implements AnalysisTools {
         try {
             jointRate = metric.estimateRate(uniqueImpressions, container.getJointActionCounts().getUniqueUserCount());
         } catch (IllegalArgumentException iae) {
-        	if ( LOGGER.isWarnEnabled() )
-        		LOGGER.warn("BinomialMetric.estimateRate called with invalid arguments by " +
-                    "AnalyticsService.generateRates: ", iae);
+            if (LOGGER.isWarnEnabled())
+                LOGGER.warn("BinomialMetric.estimateRate called with invalid arguments by " +
+                        "AnalyticsService.generateRates: ", iae);
 
             jointRate = new Estimate(NaN, NaN, NaN);
         }
@@ -77,9 +94,9 @@ public class AnalysisToolsImpl implements AnalysisTools {
             try {
                 rate = metric.estimateRate(uniqueImpressions, action.getUniqueUserCount());
             } catch (IllegalArgumentException iae) {
-            	if ( LOGGER.isWarnEnabled() )
-            		LOGGER.warn("BinomialMetric.estimateRate called with invalid arguments by " +
-                        "AnalyticsService.generateRates: ", iae);
+                if (LOGGER.isWarnEnabled())
+                    LOGGER.warn("BinomialMetric.estimateRate called with invalid arguments by " +
+                            "AnalyticsService.generateRates: ", iae);
 
                 rate = new Estimate(NaN, NaN, NaN);
             }
@@ -139,7 +156,7 @@ public class AnalysisToolsImpl implements AnalysisTools {
                             .withFractionDataCollected(fractionData)
                             .build();
 
-                    jointComparison.setSufficientData( DoubleMath.fuzzyEquals(fractionData, 1.0, Math.ulp(1.0)));
+                    jointComparison.setSufficientData(DoubleMath.fuzzyEquals(fractionData, 1.0, Math.ulp(1.0)));
 
                     computeClearComparisonWinner(bucket, otherBucket, rateDifference, jointComparison);
 
@@ -171,7 +188,7 @@ public class AnalysisToolsImpl implements AnalysisTools {
                             effects = metric.distinguishableEffectSizes(bucketImpressions,
                                     bucketUniqueCounts, otherBucketImpressions, otherBucketUniqueCounts);
                         } catch (IllegalArgumentException iae) {
-                            LOGGER.warn("BinomialMetric.distinguishableEffectSizes called with invalid arguments by AnalyticsService.generateBucketComparisons: ",  iae);
+                            LOGGER.warn("BinomialMetric.distinguishableEffectSizes called with invalid arguments by AnalyticsService.generateBucketComparisons: ", iae);
 
                             effects = new DistinguishableEffectSize(NaN, NaN);
                         }
@@ -183,7 +200,7 @@ public class AnalysisToolsImpl implements AnalysisTools {
                                 .withFractionDataCollected(fractionData)
                                 .build();
 
-                        actionComparison.setSufficientData( DoubleMath.fuzzyEquals(fractionData, 1.0, Math.ulp(1.0)) );
+                        actionComparison.setSufficientData(DoubleMath.fuzzyEquals(fractionData, 1.0, Math.ulp(1.0)));
 
                         computeClearComparisonWinner(bucket, otherBucket, rateDifference, actionComparison);
 
@@ -254,7 +271,7 @@ public class AnalysisToolsImpl implements AnalysisTools {
             for (ActionCounts bucketCounts : bucketActionCounts.values()) {
                 Event.Name actionName = bucketCounts.getActionName();
                 ActionCounts currentExperimentCounts = experimentActionCounts.get(actionName);
-                if (currentExperimentCounts == null) {
+                if (Objects.isNull(currentExperimentCounts)) {
                     experimentActionCounts.put(actionName, bucketCounts.clone());
                 } else {
                     currentExperimentCounts.addCount(bucketCounts);
@@ -284,11 +301,11 @@ public class AnalysisToolsImpl implements AnalysisTools {
         for (BucketStatistics bucket : buckets.values()) {
             Bucket.Label bucketName = bucket.getLabel();
 
-            if (bucket.getBucketComparisons() != null) {
+            if (Objects.nonNull(bucket.getBucketComparisons())) {
                 for (BucketComparison comparison : bucket.getBucketComparisons().values()) {
                     ComparisonStatistics jointComparison = comparison.getJointActionComparison();
 
-                    if (comparison.getJointActionComparison().getClearComparisonWinner() != null) {
+                    if (Objects.nonNull(comparison.getJointActionComparison().getClearComparisonWinner())) {
                         //count the number of times a bucket is clearly better than another (a "win")
                         CountComparisonWinnerOrAddBucketToLosers(losers, bucketWins, bucketName, jointComparison);
                     }
@@ -296,8 +313,8 @@ public class AnalysisToolsImpl implements AnalysisTools {
                     //keep the smallest fraction of data value
                     Double jointFraction = jointComparison.getFractionDataCollected();
 
-                    if (jointFraction != null) {
-                        if (fractionOfData == null) {
+                    if (Objects.nonNull(jointFraction)) {
+                        if (Objects.isNull(fractionOfData)) {
                             fractionOfData = jointFraction;
                         } else {
                             fractionOfData = min(fractionOfData, jointFraction);
@@ -305,7 +322,7 @@ public class AnalysisToolsImpl implements AnalysisTools {
                     }
 
                     //create set of all actions comparisons to be used later
-                    if (comparison.getActionComparisons() != null) {
+                    if (Objects.nonNull(comparison.getActionComparisons())) {
                         actionNames.addAll(comparison.getActionComparisons().keySet());
                     }
                 }
@@ -329,12 +346,12 @@ public class AnalysisToolsImpl implements AnalysisTools {
             //also add any bucket with is not clearly worse than these buckets
             for (Bucket.Label bucketLabel : winners) {
                 BucketStatistics bucket = buckets.get(bucketLabel);
-                if (bucket.getBucketComparisons() != null) {
+                if (Objects.nonNull(bucket.getBucketComparisons())) {
                     for (BucketComparison comparison : bucket.getBucketComparisons().values()) {
                         Bucket.Label winnerName = comparison.getJointActionComparison().getClearComparisonWinner();
                         Bucket.Label otherBucketName = comparison.getOtherLabel();
 
-                        if (winnerName == null || winnerName.equals(otherBucketName)) {
+                        if (Objects.isNull(winnerName) || winnerName.equals(otherBucketName)) {
                             winnersToAdd.add(otherBucketName);
                         }
                     }
@@ -350,7 +367,7 @@ public class AnalysisToolsImpl implements AnalysisTools {
         losersList.addAll(losers);
 
         boolean sufficientData = false;
-        if (fractionOfData != null) {
+        if (Objects.nonNull(fractionOfData)) {
             sufficientData = DoubleMath.fuzzyEquals(fractionOfData, 1.0, Math.ulp(1.0));
         }
 
@@ -374,12 +391,12 @@ public class AnalysisToolsImpl implements AnalysisTools {
             for (BucketStatistics bucket : buckets.values()) {
                 Bucket.Label bucketName = bucket.getLabel();
 
-                if (bucket.getBucketComparisons() != null) {
+                if (Objects.nonNull(bucket.getBucketComparisons())) {
                     for (BucketComparison comparison : bucket.getBucketComparisons().values()) {
 
                         ActionComparisonStatistics action = comparison.getActionComparisons().get(actionName);
-                        if (action != null) {
-                            if (action.getClearComparisonWinner() != null) {
+                        if (Objects.nonNull(action)) {
+                            if (Objects.nonNull(action.getClearComparisonWinner())) {
                                 //count the number of times a bucket is clearly better than another (a "win")
                                 CountComparisonWinnerOrAddBucketToLosers(losers, bucketWins, bucketName, action);
                             }
@@ -387,8 +404,8 @@ public class AnalysisToolsImpl implements AnalysisTools {
                             //keep the smallest fraction of data value
                             Double actionFraction = action.getFractionDataCollected();
 
-                            if (actionFraction != null) {
-                                if (fractionOfData == null) {
+                            if (Objects.nonNull(actionFraction)) {
+                                if (Objects.isNull(fractionOfData)) {
                                     fractionOfData = actionFraction;
                                 } else {
                                     fractionOfData = min(fractionOfData, actionFraction);
@@ -415,14 +432,14 @@ public class AnalysisToolsImpl implements AnalysisTools {
                 //also add any bucket with is not clearly worse than these buckets
                 for (Bucket.Label bucketLabel : winners) {
                     BucketStatistics bucket = buckets.get(bucketLabel);
-                    if (bucket.getBucketComparisons() != null) {
+                    if (Objects.nonNull(bucket.getBucketComparisons())) {
                         for (BucketComparison comparison : bucket.getBucketComparisons().values()) {
                             ActionComparisonStatistics action = comparison.getActionComparisons().get(actionName);
-                            if (action != null) {
+                            if (Objects.nonNull(action)) {
                                 Bucket.Label winnerName = action.getClearComparisonWinner();
                                 Bucket.Label otherBucketName = comparison.getOtherLabel();
 
-                                if (winnerName == null || winnerName.equals(otherBucketName)) {
+                                if (Objects.isNull(winnerName) || winnerName.equals(otherBucketName)) {
                                     winnersToAdd.add(otherBucketName);
                                 }
                             }
@@ -439,7 +456,7 @@ public class AnalysisToolsImpl implements AnalysisTools {
             losersList.addAll(losers);
 
             sufficientData = false;
-            if (fractionOfData != null) {
+            if (Objects.nonNull(fractionOfData)) {
                 sufficientData = DoubleMath.fuzzyEquals(fractionOfData, 1.0, Math.ulp(1.0));
             }
 
@@ -463,14 +480,14 @@ public class AnalysisToolsImpl implements AnalysisTools {
         for (ActionProgress actionProgress : actionProgresses.values()) {
             //take the set intersection for winners and losers
             Set<Bucket.Label> winnersSet = new HashSet<>(actionProgress.getWinnersSoFar());
-            if (winners == null) {
+            if (Objects.isNull(winners)) {
                 winners = winnersSet;
             } else {
                 winners.retainAll(winnersSet);
             }
 
             Set<Bucket.Label> losersSet = new HashSet<>(actionProgress.getLosersSoFar());
-            if (losers == null) {
+            if (Objects.isNull(losers)) {
                 losers = losersSet;
             } else {
                 losers.retainAll(losersSet);
@@ -478,10 +495,10 @@ public class AnalysisToolsImpl implements AnalysisTools {
 
             //average the fraction of data--here we keep the running sum
             Double actionFraction = actionProgress.getFractionDataCollected();
-            if (actionFraction != null) {
+            if (Objects.nonNull(actionFraction)) {
                 numberActions += 1;
 
-                if (fractionOfData == null) {
+                if (Objects.isNull(fractionOfData)) {
                     fractionOfData = actionFraction;
                 } else {
                     fractionOfData += actionFraction;
@@ -490,21 +507,21 @@ public class AnalysisToolsImpl implements AnalysisTools {
         }
 
         //now divide to get the average for fraction of data
-        if (fractionOfData != null) {
+        if (Objects.nonNull(fractionOfData)) {
             fractionOfData /= numberActions;
         }
 
         //convert sets to lists
         winnersList = new ArrayList<>();
-        if (winners != null) {
+        if (Objects.nonNull(winners)) {
             winnersList.addAll(winners);
         }
         losersList = new ArrayList<>();
-        if (losers != null) {
+        if (Objects.nonNull(losers)) {
             losersList.addAll(losers);
         }
 
-        sufficientData = fractionOfData != null && (Math.abs(fractionOfData - 1.0f) < FLOAT_POINT_DIFFERENCE_EPSILON);
+        sufficientData = Objects.nonNull(fractionOfData) && (Math.abs(fractionOfData - 1.0f) < FLOAT_POINT_DIFFERENCE_EPSILON);
 
         experiment.setExperimentProgress(new Progress.Builder().withWinnersSoFar(winnersList)
                 .withLosersSoFar(losersList)
@@ -516,7 +533,7 @@ public class AnalysisToolsImpl implements AnalysisTools {
     private void CountComparisonWinnerOrAddBucketToLosers(Set<Bucket.Label> losers, Map<Bucket.Label, Integer> bucketWins, Bucket.Label bucketName, ComparisonStatistics jointComparison) {
         if (jointComparison.getClearComparisonWinner().equals(bucketName)) {
             Integer currentWins = bucketWins.get(bucketName);
-            if (currentWins == null) {
+            if (Objects.isNull(currentWins)) {
                 bucketWins.put(bucketName, 1);
             } else {
                 bucketWins.put(bucketName, currentWins + 1);

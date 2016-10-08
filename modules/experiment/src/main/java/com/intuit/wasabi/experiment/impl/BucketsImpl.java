@@ -100,7 +100,7 @@ public class BucketsImpl implements Buckets {
     public Bucket createBucket(Experiment.ID experimentID, Bucket newBucket, UserInfo user) {
 
         Experiment experiment = experiments.getExperiment(experimentID);
-        if (experiment == null) {
+        if (Objects.isNull(experiment)) {
             throw new ExperimentNotFoundException(experimentID);
         }
 
@@ -143,13 +143,13 @@ public class BucketsImpl implements Buckets {
 
     private void checkBucketConstraint(Experiment experiment, Bucket newBucket) {
         Bucket test = cassandraRepository.getBucket(newBucket.getExperimentID(), newBucket.getLabel());
-        if (test != null) {
+        if (Objects.nonNull(test)) {
             throw new ConstraintViolationException(ConstraintViolationException.Reason.UNIQUE_CONSTRAINT_VIOLATION,
                     "Bucket label must be unique within an experiment", null);
         }
 
         if (!experiment.getState().equals(Experiment.State.DRAFT) &&
-                newBucket.isControl() != null && newBucket.isControl()) {
+                Objects.nonNull(newBucket.isControl()) && newBucket.isControl()) {
             throw new ConstraintViolationException(ConstraintViolationException.Reason.APPLICATION_CONSTRAINT_VIOLATION,
                     "Bucket added to a running experiment may not be a control bucket", null);
         }
@@ -207,12 +207,12 @@ public class BucketsImpl implements Buckets {
                                final Bucket updates, UserInfo user) {
 
         Experiment experiment = experiments.getExperiment(experimentID);
-        if (experiment == null) {
+        if (Objects.isNull(experiment)) {
             throw new ExperimentNotFoundException(experimentID);
         }
 
         Bucket bucket = getBucket(experimentID, bucketLabel);
-        if (bucket == null) {
+        if (Objects.isNull(bucket)) {
             throw new BucketNotFoundException(bucketLabel);
         }
         // Save the state of the bucket; used for reverting the cassandra changes
@@ -261,12 +261,12 @@ public class BucketsImpl implements Buckets {
                                     Bucket.State desiredState, UserInfo user) {
 
         Experiment experiment = experiments.getExperiment(experimentID);
-        if (experiment == null) {
+        if (Objects.isNull(experiment)) {
             throw new ExperimentNotFoundException(experimentID);
         }
 
         Bucket bucket = getBucket(experimentID, bucketLabel);
-        if (bucket == null) {
+        if (Objects.isNull(bucket)) {
             throw new BucketNotFoundException(bucketLabel);
         }
 
@@ -407,7 +407,7 @@ public class BucketsImpl implements Buckets {
     // Isolate the scope of this bucket retrieval
     public Bucket.Builder getBucketBuilder(Experiment.ID experimentID, Bucket.Label bucketLabel) {
         Bucket bucket = getBucket(experimentID, bucketLabel);
-        if (bucket == null) {
+        if (Objects.isNull(bucket)) {
             throw new BucketNotFoundException(bucketLabel);
         }
 
@@ -422,7 +422,7 @@ public class BucketsImpl implements Buckets {
                              UserInfo user) {
 
         Experiment experiment = experiments.getExperiment(experimentID);
-        if (experiment == null) {
+        if (Objects.isNull(experiment)) {
             throw new ExperimentNotFoundException(experimentID);
         }
         validator.ensureStateIsDraft(experiment);
@@ -440,7 +440,7 @@ public class BucketsImpl implements Buckets {
                 eventLog.postEvent(new BucketDeleteEvent(user, experiment, bucket));
             }
         } catch (Exception e) {
-            if (bucket != null) {
+            if (Objects.nonNull(bucket)) {
                 Bucket newBucket = Bucket.newInstance(experimentID, bucketLabel)
                         .withAllocationPercent(bucket.getAllocationPercent())
                         .withControl(bucket.isControl())
@@ -460,15 +460,15 @@ public class BucketsImpl implements Buckets {
     @Override
     public void validateBucketChanges(Bucket bucket, Bucket updates) {
 
-        if (updates.getExperimentID() != null && !updates.getExperimentID().equals(bucket.getExperimentID())) {
+        if (Objects.nonNull(updates.getExperimentID()) && !updates.getExperimentID().equals(bucket.getExperimentID())) {
             throw new IllegalArgumentException("Invalid value for experimentID \"" + updates.getExperimentID() + " \"." +
                     " Cannot update ExperimentID");
         }
-        if (updates.getLabel() != null && !updates.getLabel().equals(bucket.getLabel())) {
+        if (Objects.nonNull(updates.getLabel()) && !updates.getLabel().equals(bucket.getLabel())) {
             throw new IllegalArgumentException("Invalid value for bucket label \"" + updates.getLabel() + " \". " +
                     "Cannot update bucket label");
         }
-        if (updates.getState() != null && !updates.getState().equals(bucket.getState())) {
+        if (Objects.nonNull(updates.getState()) && !updates.getState().equals(bucket.getState())) {
             throw new IllegalArgumentException("Cannot update the state of a bucket using this api");
         }
     }
@@ -483,13 +483,13 @@ public class BucketsImpl implements Buckets {
         List<Bucket.BucketAuditInfo> changeList = new ArrayList<>();
         Bucket.BucketAuditInfo changeData;
 
-        if (updates.isControl() != null && !updates.isControl().equals(bucket.isControl())) {
+        if (Objects.nonNull(updates.isControl()) && !updates.isControl().equals(bucket.isControl())) {
             builder.withControl(updates.isControl());
             changeData = new Bucket.BucketAuditInfo("is_control", bucket.isControl().toString(), updates.isControl().toString());
             changeList.add(changeData);
         }
 
-        if (updates.getAllocationPercent() != null &&
+        if (Objects.nonNull(updates.getAllocationPercent()) &&
                 !updates.getAllocationPercent().equals(bucket.getAllocationPercent())) {
             builder.withAllocationPercent(updates.getAllocationPercent());
             changeData = new Bucket.BucketAuditInfo("allocation", bucket.getAllocationPercent().toString(),
@@ -497,13 +497,13 @@ public class BucketsImpl implements Buckets {
             changeList.add(changeData);
         }
 
-        if (updates.getDescription() != null && !updates.getDescription().equals(bucket.getDescription())) {
+        if (Objects.nonNull(updates.getDescription()) && !updates.getDescription().equals(bucket.getDescription())) {
             builder.withDescription(updates.getDescription());
             changeData = new Bucket.BucketAuditInfo("description", bucket.getDescription(), updates.getDescription());
             changeList.add(changeData);
         }
 
-        if (updates.getPayload() != null && !updates.getPayload().equals(bucket.getPayload())) {
+        if (Objects.nonNull(updates.getPayload()) && !updates.getPayload().equals(bucket.getPayload())) {
             builder.withPayload(updates.getPayload());
             changeData = new Bucket.BucketAuditInfo("payload", bucket.getPayload(), updates.getPayload());
             changeList.add(changeData);
@@ -518,7 +518,7 @@ public class BucketsImpl implements Buckets {
     public BucketList updateBucketBatch(Experiment.ID experimentID, BucketList bucketList, UserInfo user) {
 
         Experiment experiment = experiments.getExperiment(experimentID);
-        if (experiment == null) {
+        if (Objects.isNull(experiment)) {
             throw new ExperimentNotFoundException(experimentID);
         }
 
@@ -527,14 +527,14 @@ public class BucketsImpl implements Buckets {
         List<List<Bucket.BucketAuditInfo>> allChanges = new ArrayList<>();
         BucketList oldBuckets = buckets.getBuckets(experimentID);
 
-        if (oldBuckets == null) {
+        if (Objects.isNull(oldBuckets)) {
             throw new IllegalStateException("No Buckets could be found for this experiment");
         }
 
         Bucket oldBucket;
         for (Bucket bucket : bucketList.getBuckets()) {
 
-            if (bucket.getLabel() == null) {
+            if (Objects.isNull(bucket.getLabel())) {
                 throw new IllegalArgumentException("error, bucket label was null");
             }
 
@@ -544,10 +544,10 @@ public class BucketsImpl implements Buckets {
                     oldBucket = b;
                 }
             }
-            if (oldBucket == null) {
+            if (Objects.isNull(oldBucket)) {
                 throw new BucketNotFoundException(bucket.getLabel());
             }
-            if (bucket.isControl() == null) {
+            if (Objects.isNull(bucket.isControl())) {
                 bucket.setControl(oldBucket.isControl());
             }
             buckets.validateBucketChanges(oldBucket, bucket);

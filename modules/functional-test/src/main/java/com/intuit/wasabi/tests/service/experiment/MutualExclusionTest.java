@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import static com.intuit.wasabi.tests.library.util.ModelAssert.assertEqualModelItems;
 import static com.intuit.wasabi.tests.library.util.ModelAssert.assertEqualModelItemsNoOrder;
@@ -321,7 +322,7 @@ public class MutualExclusionTest extends TestBase {
         Assert.assertEquals(assignments.size(), 5, "Exactly 5 assignments should be returned for mutual exclusive experiments.");
         int nonNullAssignments = 0;
         for (Assignment assignment : assignments) {
-            nonNullAssignments += assignment.assignment != null ? 1 : 0;
+            nonNullAssignments += Objects.nonNull(assignment.assignment) ? 1 : 0;
         }
         Assert.assertEquals(nonNullAssignments, 1, "Exactly one assignment should not be null.");
     }
@@ -343,7 +344,7 @@ public class MutualExclusionTest extends TestBase {
         Assert.assertEquals(assignments.size(), 5, "Five assignments should be returned for mutual exclusive experiments.");
         int nonNullAssignments = 0;
         for (Assignment assignment : assignments) {
-            nonNullAssignments += assignment.assignment != null ? 1 : 0;
+            nonNullAssignments += Objects.nonNull(assignment.assignment) ? 1 : 0;
         }
         Assert.assertEquals(nonNullAssignments, 2, "Exactly two assignment should not be null.");
     }

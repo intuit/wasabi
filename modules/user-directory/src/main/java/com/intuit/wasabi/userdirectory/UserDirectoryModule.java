@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 
 import static com.google.inject.Scopes.SINGLETON;
@@ -70,12 +71,12 @@ public class UserDirectoryModule extends AbstractModule {
             userId = trimToNull(userId);
 
             // format userId:username:password:email:firstname:lastname
-            if (userId != null) {
+            if (Objects.nonNull(userId)) {
                 String userCredentials = getProperty("user." + userId, properties);
 
                 userCredentials = trimToNull(userCredentials);
 
-                if (userCredentials != null) {
+                if (Objects.nonNull(userCredentials)) {
                     final String[] userCredential = userCredentials.split(":", -1);
 
                     users.add(new UserInfo.Builder(UserInfo.Username.valueOf(userCredential[0]))

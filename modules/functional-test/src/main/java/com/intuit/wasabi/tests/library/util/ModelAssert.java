@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Stack;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -52,7 +53,7 @@ public class ModelAssert {
                 expected);
         if (expected instanceof ModelItem) {
             logString += String.format("\n\tStrategy: %s",
-                    (strategy == null ? ((ModelItem) expected).getSerializationStrategy() : strategy));
+                    (Objects.isNull(strategy) ? ((ModelItem) expected).getSerializationStrategy() : strategy));
         }
         LOGGER.info(logString);
     }
@@ -96,7 +97,7 @@ public class ModelAssert {
      */
     public static void assertEqualModelItems(ModelItem actual, ModelItem expected, SerializationStrategy tempStrategy, boolean equalItems) {
         logInfo(actual, expected, tempStrategy, equalItems);
-        if (expected == null) {
+        if (Objects.isNull(expected)) {
             if (equalItems) {
                 Assert.assertNull(actual, "actual is not null");
             } else {
@@ -108,14 +109,14 @@ public class ModelAssert {
         if (equalItems) {
             Assert.assertNotNull(actual, "actual is null");
         } else {
-            if (actual == null) {
+            if (Objects.isNull(actual)) {
                 Assert.assertTrue(true);
                 return;
             }
         }
 
         SerializationStrategy serializationStrategy = expected.getSerializationStrategy();
-        if (tempStrategy != null) {
+        if (Objects.nonNull(tempStrategy)) {
             expected.setSerializationStrategy(tempStrategy);
         }
 
@@ -125,7 +126,7 @@ public class ModelAssert {
             Assert.assertNotEquals(actual, expected, "The two tested items are equal.");
         }
 
-        if (tempStrategy != null) {
+        if (Objects.nonNull(tempStrategy)) {
             expected.setSerializationStrategy(serializationStrategy);
         }
     }
@@ -177,7 +178,7 @@ public class ModelAssert {
                                              SerializationStrategy tempStrategy,
                                              boolean equalItems) {
         logInfo(actual, expected, tempStrategy, equalItems);
-        if (expected == null) {
+        if (Objects.isNull(expected)) {
             if (equalItems) {
                 Assert.assertNull(actual, "actual is not null");
             } else {
@@ -189,7 +190,7 @@ public class ModelAssert {
         if (equalItems) {
             Assert.assertNotNull(actual, "actual is null");
         } else {
-            if (actual == null) {
+            if (Objects.isNull(actual)) {
                 Assert.assertTrue(true);
                 return;
             }
@@ -257,7 +258,7 @@ public class ModelAssert {
                                                     SerializationStrategy tempStrategy,
                                                     boolean equalItems) {
         logInfo(actual, expected, tempStrategy, equalItems);
-        if (expected == null) {
+        if (Objects.isNull(expected)) {
             if (equalItems) {
                 Assert.assertNull(actual, "actual is not null");
             } else {
@@ -269,7 +270,7 @@ public class ModelAssert {
         if (equalItems) {
             Assert.assertNotNull(actual, "actual is null");
         } else {
-            if (actual == null) {
+            if (Objects.isNull(actual)) {
                 Assert.assertTrue(true);
                 return;
             }
@@ -287,7 +288,7 @@ public class ModelAssert {
         // save serialization strategies (might overwrite some but since they are static it should not matter)
         Stack<SerializationStrategy> strategiesExpected = new Stack<>();
         Stack<SerializationStrategy> strategiesActual = new Stack<>();
-        if (tempStrategy != null) {
+        if (Objects.nonNull(tempStrategy)) {
             for (ModelItem mItem : expected) {
                 strategiesExpected.push(mItem.getSerializationStrategy());
                 mItem.setSerializationStrategy(tempStrategy);
@@ -306,7 +307,7 @@ public class ModelAssert {
         }
 
         // restore serialization strategies in reversed order, thus hopefully getting the same state as it was before.
-        if (tempStrategy != null) {
+        if (Objects.nonNull(tempStrategy)) {
             List<ModelItem> revActual = new ArrayList<>(actual.size());
             revActual.addAll(actual);
             Collections.reverse(revActual);
@@ -363,7 +364,7 @@ public class ModelAssert {
                                              SerializationStrategy tempStrategy,
                                              boolean equalItems) {
         logInfo(actual, expected, tempStrategy, equalItems);
-        if (expected == null) {
+        if (Objects.isNull(expected)) {
             if (equalItems) {
                 Assert.assertNull(actual, "actual is not null");
             } else {
@@ -375,7 +376,7 @@ public class ModelAssert {
         if (equalItems) {
             Assert.assertNotNull(actual, "actual is null");
         } else {
-            if (actual == null) {
+            if (Objects.isNull(actual)) {
                 Assert.assertTrue(true);
                 return;
             }

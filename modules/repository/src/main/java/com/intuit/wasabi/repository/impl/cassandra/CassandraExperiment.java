@@ -24,6 +24,7 @@ import com.intuit.wasabi.repository.impl.cassandra.serializer.ExperimentIDSerial
 import com.netflix.astyanax.model.ColumnList;
 
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * An immutable {@link Experiment} read from Cassandra
@@ -85,7 +86,7 @@ import java.util.Date;
 
     private String convertRuleToJson(String rule) {
         String decoratedRule = "";
-        if (rule != null && !rule.isEmpty()) {
+        if (Objects.nonNull(rule) && !rule.isEmpty()) {
             Rule expRule = new RuleBuilder().parseExpression(rule);
             decoratedRule = expRule.getJSONRepresentation();
         }

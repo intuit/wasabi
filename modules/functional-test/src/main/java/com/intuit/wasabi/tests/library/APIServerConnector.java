@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.RestAssured.preemptive;
@@ -141,7 +142,7 @@ public class APIServerConnector {
     // Private helper Methods
     public String getJsonString(Object jsonBody) {
         String jsonString = null;
-        if (jsonBody != null) {
+        if (Objects.nonNull(jsonBody)) {
             if (jsonBody.getClass() == String.class) {
                 jsonString = (String) jsonBody;
             } else {
@@ -166,18 +167,18 @@ public class APIServerConnector {
     private String curlCallString(String method, String url, String formJSON) {
 
         String dataString = "";
-        if (formJSON != null && !formJSON.isEmpty()) {
+        if (Objects.nonNull(formJSON) && !formJSON.isEmpty()) {
             dataString = "-d '" + formJSON + "' ";
         }
 
         String authString = "";
-        if (userName != null && !userName.isEmpty()) {
+        if (Objects.nonNull(userName) && !userName.isEmpty()) {
             authString = "-u $api_user:$api_user_password "; // Don't print actual values!
         }
 
         String agentString = "";
         String contentTypeString = "-H \"Content-Type:application/json\" "; // Default is JSON
-        if (this.headerMap != null) {
+        if (Objects.nonNull(this.headerMap)) {
             for (Map.Entry<String, String> entry : this.headerMap.entrySet()) {
                 String key = entry.getKey();
                 String value = entry.getValue();
@@ -215,10 +216,10 @@ public class APIServerConnector {
         reqBuilder.setRelaxedHTTPSValidation();
         reqBuilder.log(LogDetail.ALL); // NIT use setting to control this
 
-        if (userName != null) {
+        if (Objects.nonNull(userName)) {
             reqBuilder.setAuth(preemptive().basic(this.userName, this.password));
         }
-        if (headerMap != null) {
+        if (Objects.nonNull(headerMap)) {
             reqBuilder.addHeaders(headerMap);
         }
 
@@ -244,7 +245,7 @@ public class APIServerConnector {
         LOGGER.info(curlCallString(method, url, formJSON));
 
         RequestSpecification specification = given().spec(this.requestSpec);
-        if (null != formJSON) {
+        if (Objects.nonNull(formJSON)) {
             specification = specification.body(formJSON);
         }
 

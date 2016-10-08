@@ -318,7 +318,7 @@ public class Experiment implements Cloneable, ExperimentBase {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null)
+        if (Objects.isNull(obj))
             return false;
         if (obj == this)
             return true;
@@ -373,7 +373,7 @@ public class Experiment implements Cloneable, ExperimentBase {
      */
 
     public boolean isStateTransitionValid(State desiredState) {
-        if (state == null) {
+        if (Objects.isNull(state)) {
             return false;
         } else {
             return state.isStateTransitionAllowed(desiredState);
@@ -527,7 +527,7 @@ public class Experiment implements Cloneable, ExperimentBase {
         }
 
         private Date copyDate(Date date) {
-            return date != null
+            return Objects.nonNull(date)
                     ? new Date(date.getTime())
                     : null;
         }

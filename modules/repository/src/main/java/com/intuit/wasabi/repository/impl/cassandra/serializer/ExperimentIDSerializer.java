@@ -21,6 +21,7 @@ import com.netflix.astyanax.serializers.ComparatorType;
 import com.netflix.astyanax.serializers.UUIDSerializer;
 
 import java.nio.ByteBuffer;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -28,9 +29,9 @@ import java.util.UUID;
  */
 public class ExperimentIDSerializer extends AbstractSerializer<Experiment.ID> {
 
-	/**
-	 * Singleton instance
-	 */
+    /**
+     * Singleton instance
+     */
     private static final ExperimentIDSerializer INSTANCE =
             new ExperimentIDSerializer();
 
@@ -43,6 +44,7 @@ public class ExperimentIDSerializer extends AbstractSerializer<Experiment.ID> {
 
     /**
      * Get the instance of serializer
+     *
      * @return instance
      */
     public static ExperimentIDSerializer get() {
@@ -51,7 +53,7 @@ public class ExperimentIDSerializer extends AbstractSerializer<Experiment.ID> {
 
     @Override
     public ByteBuffer toByteBuffer(Experiment.ID experimentID) {
-        if (experimentID == null) {
+        if (Objects.isNull(experimentID)) {
             return null;
         }
 
@@ -60,7 +62,7 @@ public class ExperimentIDSerializer extends AbstractSerializer<Experiment.ID> {
 
     @Override
     public Experiment.ID fromByteBuffer(ByteBuffer byteBuffer) {
-        if (byteBuffer == null) {
+        if (Objects.isNull(byteBuffer)) {
             return null;
         }
 

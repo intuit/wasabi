@@ -35,6 +35,7 @@ import org.testng.annotations.Test;
 
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Objects;
 
 import static com.intuit.wasabi.tests.library.util.ModelAssert.assertEqualModelItems;
 
@@ -101,7 +102,7 @@ public class AuthenticationTest extends TestBase {
         if (email.equals("mail@example.org")) {
             email = appProperties.getProperty("user-email");
         }
-        if (validTokenPattern == null) {
+        if (Objects.isNull(validTokenPattern)) {
             validTokenPattern = appProperties.getProperty("validTokenPattern");
         }
         apiUser = APIUserFactory.createAPIUser()
@@ -155,8 +156,8 @@ public class AuthenticationTest extends TestBase {
     }
 
     private void assertEqualAdmin(AccessToken token) {
-        if (token != null) {
-            Assert.assertEquals(token.access_token,
+        if (Objects.nonNull(token)) {
+            Assert.assertEquals(token.accessToken,
                     new String(Base64.encodeBase64((username + ":" + password).getBytes(Charset.defaultCharset()))),
                     token + " did not match admin");
         }
@@ -210,7 +211,7 @@ public class AuthenticationTest extends TestBase {
     @RetryTest(maxTries = 3, warmup = 2000)
     public void sessionRequestWithToken() {
         APIServerConnector asc = apiServerConnector.clone();
-        asc.setAuthToken(token.token_type, token.access_token);
+        asc.setAuthToken(token.tokenType, token.accessToken);
         asc.setUserNameAndPassword(null, null);
         Experiment created = postExperiment(ExperimentFactory.createExperiment(), HttpStatus.SC_CREATED, asc);
         List<Experiment> experiments = getExperiments(HttpStatus.SC_OK, asc);
@@ -245,7 +246,7 @@ public class AuthenticationTest extends TestBase {
         newToken = getVerifyToken(invalidToken, HttpStatus.SC_UNAUTHORIZED);
         assertEqualModelItems(newToken, token, null, false);
 
-        invalidToken.setTokenType("OtherRealm").setAccessToken(token.access_token);
+        invalidToken.setTokenType("OtherRealm").setAccessToken(token.accessToken);
         newToken = getVerifyToken(invalidToken, HttpStatus.SC_UNAUTHORIZED);
         assertEqualModelItems(newToken, token, null, false);
     }
@@ -258,9 +259,9 @@ public class AuthenticationTest extends TestBase {
     public void sessionVerifyModifiedToken() {
         token = postLogin(apiUser);
         AccessToken accessToken = new AccessToken(token);
-        accessToken.access_token = token.access_token.substring(0, token.access_token.length() / 2)
+        accessToken.accessToken = token.accessToken.substring(0, token.accessToken.length() / 2)
                 + "a"
-                + token.access_token.substring(token.access_token.length() / 2, token.access_token.length());
+                + token.accessToken.substring(token.accessToken.length() / 2, token.accessToken.length());
 
         AccessToken newToken = getVerifyToken(accessToken, HttpStatus.SC_UNAUTHORIZED);
         assertEqualModelItems(newToken, accessToken, null, false);

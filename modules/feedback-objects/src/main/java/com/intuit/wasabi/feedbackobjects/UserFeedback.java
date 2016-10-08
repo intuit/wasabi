@@ -24,6 +24,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.Date;
+import java.util.Objects;
 
 public class UserFeedback {
 
@@ -152,7 +153,7 @@ public class UserFeedback {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) return false;
+        if (Objects.isNull(obj)) return false;
         if (obj == this) return true;
         if (!(obj instanceof UserFeedback))
             return false;

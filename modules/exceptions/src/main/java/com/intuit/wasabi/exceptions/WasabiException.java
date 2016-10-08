@@ -15,6 +15,8 @@
  *******************************************************************************/
 package com.intuit.wasabi.exceptions;
 
+import java.util.Objects;
+
 /**
  * Base exception for all our custom exceptions
  */
@@ -33,10 +35,10 @@ public abstract class WasabiException extends RuntimeException {
 
     protected WasabiException(ErrorCode errorCode, String message,
                               Throwable cause) {
-        super((null == errorCode ? ErrorCode.UNKNOWN_ERROR : errorCode).toString() + ": " + message, cause);
+        super((Objects.isNull(errorCode) ? ErrorCode.UNKNOWN_ERROR : errorCode).toString() + ": " + message, cause);
 
         this.errorCode = errorCode;
-        if (null != message) {
+        if (Objects.nonNull(message)) {
             this.detailMessage = message;
         }
     }

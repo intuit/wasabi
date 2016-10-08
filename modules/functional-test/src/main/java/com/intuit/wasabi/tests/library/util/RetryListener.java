@@ -25,6 +25,7 @@ import org.testng.TestListenerAdapter;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -117,7 +118,7 @@ public class RetryListener extends TestListenerAdapter {
                 for (ITestResult result : testContext.getFailedButWithinSuccessPercentageTests().getAllResults()) {
                     if (result.getMethod().equals(method)) {
                         testContext.getFailedButWithinSuccessPercentageTests().removeResult(result);
-                        if (!failed && failResult == null) {
+                        if (!failed && Objects.isNull(failResult)) {
                             failResult = result;
                         }
                     }
@@ -125,7 +126,7 @@ public class RetryListener extends TestListenerAdapter {
                 for (ITestResult result : testContext.getPassedTests().getAllResults()) {
                     if (result.getMethod().equals(method)) {
                         testContext.getPassedTests().removeResult(result);
-                        if (!failed && failResult == null) {
+                        if (!failed && Objects.isNull(failResult)) {
                             failResult = result;
                         }
                     }
@@ -133,12 +134,12 @@ public class RetryListener extends TestListenerAdapter {
                 for (ITestResult result : testContext.getSkippedTests().getAllResults()) {
                     if (result.getMethod().equals(method)) {
                         testContext.getSkippedTests().removeResult(result);
-                        if (!failed && failResult == null) {
+                        if (!failed && Objects.isNull(failResult)) {
                             failResult = result;
                         }
                     }
                 }
-                if (!failed && failResult != null) {
+                if (!failed && Objects.nonNull(failResult)) {
                     testContext.getFailedTests().addResult(failResult, method);
                 }
                 continue;

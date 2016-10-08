@@ -19,8 +19,8 @@ import com.intuit.wasabi.database.HandleBlock;
 import com.intuit.wasabi.database.Transaction;
 import com.intuit.wasabi.exceptions.ConstraintViolationException;
 import com.intuit.wasabi.exceptions.DatabaseException;
-import com.intuit.wasabi.exceptions.WasabiServerException;
 import com.intuit.wasabi.exceptions.WasabiException;
+import com.intuit.wasabi.exceptions.WasabiServerException;
 import org.skife.jdbi.v2.DBI;
 import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.Update;
@@ -32,6 +32,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -41,11 +42,11 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class DBITransaction implements Transaction {
 
     private static final Logger LOGGER = getLogger(DBITransaction.class);
+    private final Pattern notNullPattern = compile("^.*Column \'(\\S+)\' cannot be null");
+    private final Pattern duplicateEntryPattern = compile("^.*Duplicate entry \'(\\S+)\' for key \'(\\S+)\'");
     private Handle handle;
     private DBI dbi;
     private boolean inTransaction = false;
-    private final Pattern notNullPattern = compile("^.*Column \'(\\S+)\' cannot be null");
-    private final Pattern duplicateEntryPattern = compile("^.*Duplicate entry \'(\\S+)\' for key \'(\\S+)\'");
 
     public DBITransaction(DBI dbi) {
         this.dbi = dbi;
@@ -55,7 +56,7 @@ public class DBITransaction implements Transaction {
      * {@inheritDoc}
      */
     @Override
-    public Object transaction(Block block)  {
+    public Object transaction(Block block) {
         try {
             begin();
             Object value = block.value(this);
@@ -96,13 +97,13 @@ public class DBITransaction implements Transaction {
      * {@inheritDoc}
      */
     @Override
-    public List select(final String query, final Object... params)  {
+    public List select(final String query, final Object... params) {
         return (List) perform(new HandleBlock() {
             /**
              * {@inheritDoc}
              */
             @Override
-            public Object value(Handle arg)  {
+            public Object value(Handle arg) {
                 return handle.select(query, params);
             }
         });
@@ -120,19 +121,18 @@ public class DBITransaction implements Transaction {
      * {@inheritDoc}
      */
     @Override
-    public Integer insertAndReturnKey(final String query, final Object... params)  {
+    public Integer insertAndReturnKey(final String query, final Object... params) {
         return insert(true, query, params);
     }
 
-    private Integer insert(final boolean shouldReturnId, final String query, final Object... params)
-             {
+    private Integer insert(final boolean shouldReturnId, final String query, final Object... params) {
         try {
             return (Integer) perform(new HandleBlock() {
                 /**
                  * {@inheritDoc}
                  */
                 @Override
-                public Object value(Handle handle)  {
+                public Object value(Handle handle) {
                     Update statement = handle.createStatement(query);
 
                     for (int i = 0; i < params.length; i++) {
@@ -154,26 +154,26 @@ public class DBITransaction implements Transaction {
      * {@inheritDoc}
      */
     @Override
-    public Integer update(final String query, final Object... params)  {
+    public Integer update(final String query, final Object... params) {
         return (Integer) perform(new HandleBlock() {
             /**
              * {@inheritDoc}
              */
             @Override
-            public Object value(Handle handle)  {
+            public Object value(Handle handle) {
                 return handle.update(query, params);
             }
         });
     }
 
-    private Object perform(HandleBlock block)  {
+    private Object perform(HandleBlock block) {
         handle = getHandle();
         try {
             return block.value(handle);
         } catch (DBIException ex) {
             Exception inner = (Exception) ex.getCause();
 
-            if (inner != null) {
+            if (Objects.nonNull(inner)) {
                 throw remapMySQLException((SQLException) inner);
             }
 
@@ -186,7 +186,7 @@ public class DBITransaction implements Transaction {
     }
 
     protected Handle getHandle() {
-        if (null == handle) {
+        if (Objects.isNull(handle)) {
             handle = dbi.open();
             // Force MySQL timezone to UTC
             handle.execute("set time_zone = \"+0:00\"");
@@ -242,7 +242,7 @@ public class DBITransaction implements Transaction {
     }
 
     private boolean handleIsMissing() {
-        if (handle == null) {
+        if (Objects.isNull(handle)) {
             LOGGER.warn("no handle present - this should not happen");
 
             return true;
@@ -251,7 +251,7 @@ public class DBITransaction implements Transaction {
         return false;
     }
 
-    private WasabiException remapMySQLException(SQLException ex)  {
+    private WasabiException remapMySQLException(SQLException ex) {
         String msg = ex.getMessage();
         final Matcher notNull = notNullPattern.matcher(msg);
 

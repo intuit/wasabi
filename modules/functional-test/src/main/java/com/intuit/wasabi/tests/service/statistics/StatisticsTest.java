@@ -43,6 +43,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public class StatisticsTest extends TestBase {
@@ -86,7 +87,7 @@ public class StatisticsTest extends TestBase {
             assertReturnCode(response, HttpStatus.SC_OK);
             Assert.assertEquals(response.asString().contains("NEW_ASSIGNMENT"), true);
             Assignment assignment = AssignmentFactory.createFromJSONString(response.asString());
-            Assert.assertEquals(null == assignment.assignment ||
+            Assert.assertEquals(Objects.isNull(assignment.assignment) ||
                     "blue".equals(assignment.assignment) ||
                     "red".equals(assignment.assignment), true);
         }

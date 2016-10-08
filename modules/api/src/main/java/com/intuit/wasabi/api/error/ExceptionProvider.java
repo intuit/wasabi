@@ -30,6 +30,7 @@ import javax.ws.rs.ext.ExceptionMapper;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
@@ -54,7 +55,7 @@ abstract class ExceptionProvider<T extends Throwable> implements ExceptionMapper
     public Response toResponse(final T e) {
         Status responseStatus = this.status;
 
-        if (null == responseStatus && e instanceof WasabiException) {
+        if (Objects.isNull(responseStatus) && e instanceof WasabiException) {
             responseStatus = getWasabiExceptionResponseStatus((WasabiException) e);
         }
 
@@ -69,7 +70,7 @@ abstract class ExceptionProvider<T extends Throwable> implements ExceptionMapper
     }
 
     <U extends WasabiException> Status getWasabiExceptionResponseStatus(final U e) {
-        if (null != e.getErrorCode()) {
+        if (Objects.nonNull(e.getErrorCode())) {
             return fromStatusCode(e.getErrorCode().getResponseCode());
         }
         return e instanceof WasabiClientException ? BAD_REQUEST : INTERNAL_SERVER_ERROR;
@@ -78,7 +79,7 @@ abstract class ExceptionProvider<T extends Throwable> implements ExceptionMapper
     String buildErrorMessage(final T e) {
         String message = e.getMessage();
         if (!StringUtils.isEmpty(message)) {
-            if (null != e.getCause() && !StringUtils.isEmpty(e.getCause().getMessage())) {
+            if (Objects.nonNull(e.getCause()) && !StringUtils.isEmpty(e.getCause().getMessage())) {
                 message += " -- Cause: " + e.getCause().getMessage();
             }
             return message;

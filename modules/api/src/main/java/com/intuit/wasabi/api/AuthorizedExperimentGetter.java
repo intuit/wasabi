@@ -18,13 +18,14 @@ package com.intuit.wasabi.api;
 import com.google.inject.Inject;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authorization.Authorization;
-import com.intuit.wasabi.experimentobjects.exception.ApplicationNotFoundException;
-import com.intuit.wasabi.experimentobjects.exception.ExperimentNotFoundException;
 import com.intuit.wasabi.experiment.Experiments;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.experimentobjects.exception.ApplicationNotFoundException;
+import com.intuit.wasabi.experimentobjects.exception.ExperimentNotFoundException;
 
 import java.util.List;
+import java.util.Objects;
 
 import static com.intuit.wasabi.authorizationobjects.Permission.READ;
 
@@ -44,7 +45,7 @@ class AuthorizedExperimentGetter {
         UserInfo.Username userName = authorization.getUser(authorizationHeader);
         Experiment experiment = experiments.getExperiment(experimentId);
 
-        if (experiment == null) {
+        if (Objects.isNull(experiment)) {
             throw new ExperimentNotFoundException(experimentId);
         }
 
@@ -60,7 +61,7 @@ class AuthorizedExperimentGetter {
 
         Experiment experiment = experiments.getExperiment(applicationName, experimentLabel);
 
-        if (experiment == null) {
+        if (Objects.isNull(experiment)) {
             throw new ExperimentNotFoundException(experimentLabel);
         }
 
@@ -73,7 +74,7 @@ class AuthorizedExperimentGetter {
 
         List<Experiment> experimentList = this.experiments.getExperiments(applicationName);
 
-        if (experimentList == null) {
+        if (Objects.isNull(experimentList)) {
             throw new ApplicationNotFoundException(applicationName);
         }
 

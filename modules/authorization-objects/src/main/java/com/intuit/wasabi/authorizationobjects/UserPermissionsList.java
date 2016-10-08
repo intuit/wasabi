@@ -19,6 +19,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -50,7 +51,7 @@ public class UserPermissionsList {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) return false;
+        if (Objects.isNull(obj)) return false;
         if (obj == this) return true;
         if (!(obj instanceof UserPermissionsList))
             return false;

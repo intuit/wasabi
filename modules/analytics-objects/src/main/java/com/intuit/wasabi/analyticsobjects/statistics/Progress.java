@@ -26,10 +26,11 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * DTO to save the progress of a bucket or an action. <br>
- *
+ * <p>
  * Fields:
  * <ul>
  * <li>list of winners</li>
@@ -47,10 +48,10 @@ public class Progress implements Cloneable {
     //todo: this should really be a set
     protected List<Bucket.Label> losersSoFar;
     @ApiModelProperty(value = "if sufficient data has been collected to observe the effect size of interest",
-                      required = true)
+            required = true)
     protected boolean hasSufficientData;
     @ApiModelProperty(value = "fraction of data that has been collected to observe the effect size of interest",
-                      required = true)
+            required = true)
     protected Double fractionDataCollected;
 
     public List<Bucket.Label> getWinnersSoFar() {
@@ -87,9 +88,9 @@ public class Progress implements Cloneable {
 
     @JsonIgnore
     public void addToWinnersSoFarList(Bucket.Label winner) {
-        if (this.winnersSoFar == null) {
+        if (Objects.isNull(this.winnersSoFar)) {
             this.winnersSoFar = new ArrayList<>();
-        } else if (winner == null) {
+        } else if (Objects.isNull(winner)) {
             throw new IllegalArgumentException();
         } else {
             this.winnersSoFar.add(winner);
@@ -98,9 +99,9 @@ public class Progress implements Cloneable {
 
     @JsonIgnore
     public void addToLosersSoFarList(Bucket.Label loser) {
-        if (this.losersSoFar == null) {
+        if (Objects.isNull(this.losersSoFar)) {
             this.losersSoFar = new ArrayList<>();
-        } else if (loser == null) {
+        } else if (Objects.isNull(loser)) {
             throw new IllegalArgumentException();
         } else {
             this.losersSoFar.add(loser);
@@ -109,17 +110,17 @@ public class Progress implements Cloneable {
 
     @Override
     public String toString() {
-    	return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 
     @Override
     public int hashCode() {
-    	return HashCodeBuilder.reflectionHashCode(this);
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override
     public boolean equals(Object obj) {
-    	   return EqualsBuilder.reflectionEquals(this, obj);
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 
     @Override

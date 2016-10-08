@@ -27,8 +27,6 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-//import org.codehaus.jackson.JsonParser;
-
 /**
  * Test for the {@link SQLTimestampDeserializerTest}
  * <p>

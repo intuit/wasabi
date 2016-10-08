@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -129,7 +130,7 @@ public abstract class PaginationComparator<T> implements Comparator<T> {
      * @return this
      */
     public PaginationComparator<T> replaceSortorder(String sortOrder) {
-        this.sortOrder = sortOrder == null ? "" : sortOrder;
+        this.sortOrder = Objects.isNull(sortOrder) ? "" : sortOrder;
         return this;
     }
 
@@ -277,13 +278,13 @@ public abstract class PaginationComparator<T> implements Comparator<T> {
      * @return -1, 0, 1, 2 - see description for details.
      */
     int compareNull(Object left, Object right, boolean descending) {
-        if (left != null && right != null) {
+        if (Objects.nonNull(left) && Objects.nonNull(right)) {
             return 2;
         }
-        if (left != null) {
+        if (Objects.nonNull(left)) {
             return descending ? 1 : -1;
         }
-        if (right != null) {
+        if (Objects.nonNull(right)) {
             return descending ? -1 : 1;
         }
         return 0;

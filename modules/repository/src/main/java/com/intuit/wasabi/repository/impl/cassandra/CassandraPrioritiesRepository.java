@@ -36,10 +36,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Cassandra priorities repository impl
- * 
+ *
  * @see PrioritiesRepository
  */
 public class CassandraPrioritiesRepository implements PrioritiesRepository {
@@ -64,7 +65,7 @@ public class CassandraPrioritiesRepository implements PrioritiesRepository {
         PrioritizedExperimentList prioritizedExperimentList = new PrioritizedExperimentList();
 
         List<Experiment.ID> priorityList = getPriorityList(applicationName);
-        if (priorityList != null) {
+        if (Objects.nonNull(priorityList)) {
             ExperimentList experimentList = experimentRepository.getExperiments(priorityList);
             int priorityValue = 1;
             for (Experiment experiment : experimentList.getExperiments()) {
@@ -86,7 +87,6 @@ public class CassandraPrioritiesRepository implements PrioritiesRepository {
 
     /**
      * Deletes existing priority list for an application, and inserts with new priority list.
-     *
      */
     @Override
     public void createPriorities(Application.Name applicationName, List<Experiment.ID> experimentPriorityList) {
@@ -113,7 +113,7 @@ public class CassandraPrioritiesRepository implements PrioritiesRepository {
                         .withCql(CQL).asPreparedStatement()
                         // Application name
                         .withByteBufferValue(applicationName, ApplicationNameSerializer.get())
-                                // Experiment priority list
+                        // Experiment priority list
                         .withByteBufferValue(experimentPriorityList, ExperimentIDListSerializer.get())
                         .execute().getResult();
             } catch (Exception e) {
@@ -161,8 +161,9 @@ public class CassandraPrioritiesRepository implements PrioritiesRepository {
 
     /**
      * Get not exclusion list
-	 * TODO : More clarification
-     * @param base  base experiment id
+     * TODO : More clarification
+     *
+     * @param base base experiment id
      * @return experiment list
      */
     public ExperimentList getNotExclusions(Experiment.ID base) {

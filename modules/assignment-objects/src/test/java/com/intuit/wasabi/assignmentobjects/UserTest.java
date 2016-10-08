@@ -20,7 +20,10 @@ import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UserTest {
@@ -42,7 +45,7 @@ public class UserTest {
         User.ID userID1 = User.ID.valueOf("abcdefg");
         assertEquals(userID1, userID1);
         assertTrue(!userID1.equals(new Object()));
-        assertTrue(userID != null);
+        assertNotNull(userID);
         assertTrue(!userID1.equals(userID));
     }
 

@@ -28,6 +28,7 @@ import com.intuit.wasabi.experimentobjects.ExperimentBase;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Objects;
 import java.util.TimeZone;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -80,9 +81,9 @@ public class AuditLogEntry {
                          Bucket.Label bucketLabel,
                          String changedProperty, String before, String after) {
         this(time, user, action,
-                experiment == null ? null : experiment.getApplicationName(),
-                experiment == null ? null : experiment.getLabel(),
-                experiment == null ? null : experiment.getID(),
+                Objects.isNull(experiment) ? null : experiment.getApplicationName(),
+                Objects.isNull(experiment) ? null : experiment.getLabel(),
+                Objects.isNull(experiment) ? null : experiment.getID(),
                 bucketLabel, changedProperty, before, after);
     }
 
@@ -109,14 +110,14 @@ public class AuditLogEntry {
                          Experiment.Label experimentLabel, Experiment.ID experimentId,
                          Bucket.Label bucketLabel,
                          String changedProperty, String before, String after) {
-        if (time == null) {
+        if (Objects.isNull(time)) {
             throw new IllegalArgumentException("time must not be null");
         }
 
-        if (user == null) {
+        if (Objects.isNull(user)) {
             throw new IllegalArgumentException("username must not be null");
         }
-        if (action == null) {
+        if (Objects.isNull(action)) {
             throw new IllegalArgumentException("action must not be null");
         }
         this.time = time;
@@ -274,37 +275,37 @@ public class AuditLogEntry {
             jgen.writeEndObject();
 
             // application
-            if (value.getApplicationName() != null) {
+            if (Objects.nonNull(value.getApplicationName())) {
                 jgen.writeObjectField("applicationName", value.getApplicationName());
             }
 
             // experiment
-            if (value.getExperimentLabel() != null || value.getExperimentId() != null) {
+            if (Objects.nonNull(value.getExperimentLabel()) || Objects.nonNull(value.getExperimentId())) {
                 jgen.writeFieldName("experiment");
                 jgen.writeStartObject();
-                if (value.getExperimentLabel() != null) {
+                if (Objects.nonNull(value.getExperimentLabel())) {
                     jgen.writeObjectField("experimentLabel", value.getExperimentLabel());
                 }
-                if (value.getExperimentId() != null) {
+                if (Objects.nonNull(value.getExperimentId())) {
                     jgen.writeObjectField("experimentId", value.getExperimentId());
                 }
                 jgen.writeEndObject();
             }
 
             // bucket
-            if (value.getBucketLabel() != null) {
+            if (Objects.nonNull(value.getBucketLabel())) {
                 jgen.writeObjectField("bucketLabel", value.getBucketLabel());
             }
 
             // changed property
-            if (value.getChangedProperty() != null) {
+            if (Objects.nonNull(value.getChangedProperty())) {
                 jgen.writeFieldName("change");
                 jgen.writeStartObject();
                 jgen.writeStringField("changedAttribute", value.getChangedProperty());
-                if (value.getBefore() != null) {
+                if (Objects.nonNull(value.getBefore())) {
                     jgen.writeStringField("before", value.getBefore());
                 }
-                if (value.getAfter() != null) {
+                if (Objects.nonNull(value.getAfter())) {
                     jgen.writeStringField("after", value.getAfter());
                 }
                 jgen.writeEndObject();

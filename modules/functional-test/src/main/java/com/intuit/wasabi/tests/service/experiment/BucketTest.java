@@ -31,6 +31,7 @@ import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import static com.intuit.wasabi.tests.library.util.Constants.BUCKET_STATE_CLOSED;
@@ -92,7 +93,7 @@ public class BucketTest extends TestBase {
                     break;
                 }
             }
-            if (null == matching) {
+            if (Objects.isNull(matching)) {
                 Assert.fail("No matching bucket found.");
             }
             assertEquals(result.label, matching.label);
@@ -145,7 +146,7 @@ public class BucketTest extends TestBase {
                 }
 
             }
-            if (null == matching) {
+            if (Objects.isNull(matching)) {
                 Assert.fail("No matching bucket found.");
             }
             assertEquals(result.label, matching.label);
@@ -175,7 +176,7 @@ public class BucketTest extends TestBase {
                 }
 
             }
-            if (null == matching) {
+            if (Objects.isNull(matching)) {
                 Assert.fail("No matching bucket found.");
             }
             assertEquals(result.label, matching.label);
@@ -207,7 +208,7 @@ public class BucketTest extends TestBase {
             }
 
         }
-        if (null == matching) {
+        if (Objects.isNull(matching)) {
             Assert.fail("No matching bucket found.");
         }
         assertEquals(resultOfPut.label, matching.label);
@@ -235,7 +236,7 @@ public class BucketTest extends TestBase {
             }
 
         }
-        if (null == matching) {
+        if (Objects.isNull(matching)) {
             Assert.fail("No matching bucket found.");
         }
         assertEquals(matching.label, newUpdatedBucket.label);
@@ -265,7 +266,7 @@ public class BucketTest extends TestBase {
                 }
 
             }
-            if (null == matching) {
+            if (Objects.isNull(matching)) {
                 Assert.fail("No matching bucket found.");
             }
             assertEquals(result.label, matching.label);

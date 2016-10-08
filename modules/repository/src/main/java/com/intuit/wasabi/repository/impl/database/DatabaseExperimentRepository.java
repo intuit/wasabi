@@ -23,8 +23,7 @@ import com.googlecode.flyway.core.Flyway;
 import com.intuit.wasabi.analyticsobjects.counts.AssignmentCounts;
 import com.intuit.wasabi.database.Transaction;
 import com.intuit.wasabi.database.TransactionFactory;
-import com.intuit.wasabi.experimentobjects.exception.BucketNotFoundException;
-import com.intuit.wasabi.experimentobjects.exception.ExperimentNotFoundException;
+import com.intuit.wasabi.exceptions.WasabiException;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.BucketList;
@@ -34,7 +33,8 @@ import com.intuit.wasabi.experimentobjects.Experiment.State;
 import com.intuit.wasabi.experimentobjects.ExperimentList;
 import com.intuit.wasabi.experimentobjects.ExperimentValidator;
 import com.intuit.wasabi.experimentobjects.NewExperiment;
-import com.intuit.wasabi.exceptions.WasabiException;
+import com.intuit.wasabi.experimentobjects.exception.BucketNotFoundException;
+import com.intuit.wasabi.experimentobjects.exception.ExperimentNotFoundException;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.RepositoryException;
 import com.netflix.astyanax.MutationBatch;
@@ -47,6 +47,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.intuit.wasabi.experimentobjects.Experiment.State.DELETED;
 
@@ -63,7 +64,7 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
 
     @Inject
     public DatabaseExperimentRepository(TransactionFactory transactionFactory, ExperimentValidator validator,
-            Flyway flyway, final @Named("mysql.mutagen.root.resource.path") String mutagenRootResourcePath) {
+                                        Flyway flyway, final @Named("mysql.mutagen.root.resource.path") String mutagenRootResourcePath) {
         super();
 
         this.transactionFactory = transactionFactory;
@@ -242,7 +243,7 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
             newTransaction().insert(
                     SQL,
                     newExperiment.getID(),
-                    newExperiment.getDescription() != null
+                    Objects.nonNull(newExperiment.getDescription())
                             ? newExperiment.getDescription()
                             : "",
                     newExperiment.getSamplingPercent(),
@@ -275,7 +276,7 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
 
         int rowCount = newTransaction().update(
                 SQL,
-                experiment.getDescription() != null
+                Objects.nonNull(experiment.getDescription())
                         ? experiment.getDescription()
                         : "",
                 experiment.getSamplingPercent(),
@@ -343,15 +344,15 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
             newTransaction().insert(
                     SQL,
                     newBucket.getExperimentID(),
-                    newBucket.getDescription() != null
+                    Objects.nonNull(newBucket.getDescription())
                             ? newBucket.getDescription()
                             : "",
                     newBucket.getLabel().toString(),
                     newBucket.getAllocationPercent(),
-                    newBucket.isControl() != null
+                    Objects.nonNull(newBucket.isControl())
                             ? newBucket.isControl()
                             : false,
-                    newBucket.getPayload() != null
+                    Objects.nonNull(newBucket.getPayload())
                             ? newBucket.getPayload()
                             : "",
                     Bucket.State.OPEN.toString());
@@ -372,7 +373,7 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
         Preconditions.checkNotNull(bucket.getExperimentID(),
                 "Bucket experiment ID cannot be null");
         Preconditions.checkArgument(
-                bucket.getLabel() != null
+                Objects.nonNull(bucket.getLabel())
                         && !bucket.getLabel().toString().trim().isEmpty(),
                 "Bucket external label cannot be null or an empty string");
         Preconditions.checkArgument(bucket.getAllocationPercent() >= 0d,
@@ -403,12 +404,12 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
 
         newTransaction().update(
                 SQL,
-                bucket.getDescription() != null
+                Objects.nonNull(bucket.getDescription())
                         ? bucket.getDescription()
                         : "",
                 bucket.getAllocationPercent(),
                 bucket.isControl(),
-                bucket.getPayload() != null
+                Objects.nonNull(bucket.getPayload())
                         ? bucket.getPayload()
                         : "",
                 bucket.getExperimentID(),
@@ -469,7 +470,7 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
 
         boolean hasval = false;
         for (int i = 0; i < bucketListSize; i++) {
-            if (bucketList.getBuckets().get(i).getState() != null) {
+            if (Objects.nonNull(bucketList.getBuckets().get(i).getState())) {
                 hasval = true;
                 break;
             }
@@ -478,7 +479,7 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
             SQL.append("state = CASE label ");
             for (int i = 0; i < bucketListSize; i++) {
                 Bucket b = bucketList.getBuckets().get(i);
-                if (b.getState() != null) {
+                if (Objects.nonNull(b.getState())) {
                     SQL.append("WHEN ? then ? ");
                 }
             }
@@ -487,7 +488,7 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
 
         hasval = false;
         for (int i = 0; i < bucketListSize; i++) {
-            if (bucketList.getBuckets().get(i).getAllocationPercent() != null) {
+            if (Objects.nonNull(bucketList.getBuckets().get(i).getAllocationPercent())) {
                 hasval = true;
                 break;
             }
@@ -496,7 +497,7 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
             SQL.append("allocation_percent = CASE label ");
             for (int i = 0; i < bucketListSize; i++) {
                 Bucket b = bucketList.getBuckets().get(i);
-                if (b.getAllocationPercent() != null) {
+                if (Objects.nonNull(b.getAllocationPercent())) {
                     SQL.append("WHEN ? then ? ");
                 }
             }
@@ -505,7 +506,7 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
 
         hasval = false;
         for (int i = 0; i < bucketListSize; i++) {
-            if (bucketList.getBuckets().get(i).isControl() != null) {
+            if (Objects.nonNull(bucketList.getBuckets().get(i).isControl())) {
                 hasval = true;
                 break;
             }
@@ -514,7 +515,7 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
             SQL.append("is_control = CASE label ");
             for (int i = 0; i < bucketListSize; i++) {
                 Bucket b = bucketList.getBuckets().get(i);
-                if (b.isControl() != null) {
+                if (Objects.nonNull(b.isControl())) {
                     SQL.append("WHEN ? then ? ");
                 }
             }
@@ -523,7 +524,7 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
 
         hasval = false;
         for (int i = 0; i < bucketListSize; i++) {
-            if (bucketList.getBuckets().get(i).getPayload() != null) {
+            if (Objects.nonNull(bucketList.getBuckets().get(i).getPayload())) {
                 hasval = true;
                 break;
             }
@@ -532,7 +533,7 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
             SQL.append("payload = CASE label ");
             for (int i = 0; i < bucketListSize; i++) {
                 Bucket b = bucketList.getBuckets().get(i);
-                if (b.getPayload() != null) {
+                if (Objects.nonNull(b.getPayload())) {
                     SQL.append("WHEN ? then ? ");
                 }
             }
@@ -541,7 +542,7 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
 
         hasval = false;
         for (int i = 0; i < bucketListSize; i++) {
-            if (bucketList.getBuckets().get(i).getDescription() != null) {
+            if (Objects.nonNull(bucketList.getBuckets().get(i).getDescription())) {
                 hasval = true;
                 break;
             }
@@ -550,7 +551,7 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
             SQL.append("description = CASE label ");
             for (int i = 0; i < bucketListSize; i++) {
                 Bucket b = bucketList.getBuckets().get(i);
-                if (b.getDescription() != null) {
+                if (Objects.nonNull(b.getDescription())) {
                     SQL.append("WHEN ? then ? ");
                 }
             }
@@ -561,7 +562,7 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
             SQL.setLength(SQL.length() - 1);
         }
 
-        SQL.append( " WHERE experiment_id = ? and label in (");
+        SQL.append(" WHERE experiment_id = ? and label in (");
         for (int i = 0; i < bucketListSize; i++) {
             SQL.append("?,");
         }
@@ -569,38 +570,37 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
         SQL.append(")");
 
 
-
         for (int i = 0; i < bucketListSize; i++) {
             Bucket b = bucketList.getBuckets().get(i);
-            if (b.getState() != null) {
+            if (Objects.nonNull(b.getState())) {
                 args.add(b.getLabel().toString());
                 args.add(b.getState().toString());
             }
         }
         for (int i = 0; i < bucketListSize; i++) {
             Bucket b = bucketList.getBuckets().get(i);
-            if (b.getAllocationPercent() != null) {
+            if (Objects.nonNull(b.getAllocationPercent())) {
                 args.add(b.getLabel().toString());
                 args.add(b.getAllocationPercent().toString());
             }
         }
         for (int i = 0; i < bucketListSize; i++) {
             Bucket b = bucketList.getBuckets().get(i);
-            if (b.isControl() != null) {
+            if (Objects.nonNull(b.isControl())) {
                 args.add(b.getLabel().toString());
                 args.add(b.isControl().toString());
             }
         }
         for (int i = 0; i < bucketListSize; i++) {
             Bucket b = bucketList.getBuckets().get(i);
-            if (b.getPayload() != null) {
+            if (Objects.nonNull(b.getPayload())) {
                 args.add(b.getLabel().toString());
                 args.add(b.getPayload());
             }
         }
         for (int i = 0; i < bucketListSize; i++) {
             Bucket b = bucketList.getBuckets().get(i);
-            if (b.getDescription() != null) {
+            if (Objects.nonNull(b.getDescription())) {
                 args.add(b.getLabel().toString());
                 args.add(b.getDescription());
             }
@@ -750,6 +750,7 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
 
     /**
      * Creates an application at top level
+     *
      * @param applicationName Application Name
      */
     @Override

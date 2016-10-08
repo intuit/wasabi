@@ -21,6 +21,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class UserRoleList {
 
@@ -36,12 +37,12 @@ public class UserRoleList {
         roleList = new ArrayList<>(initialSize);
     }
 
-    public void setRoleList(List<UserRole> roleList) {
-        this.roleList = roleList;
-    }
-
     public List<UserRole> getRoleList() {
         return roleList;
+    }
+
+    public void setRoleList(List<UserRole> roleList) {
+        this.roleList = roleList;
     }
 
     public void addRole(UserRole value) {
@@ -50,7 +51,7 @@ public class UserRoleList {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) {
+        if (Objects.isNull(obj)) {
             return false;
         }
         if (obj == this) {

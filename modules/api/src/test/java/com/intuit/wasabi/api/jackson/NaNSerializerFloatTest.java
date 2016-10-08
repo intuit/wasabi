@@ -26,8 +26,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
-//import org.codehaus.jackson.JsonGenerator;
-
 /**
  * Unit test for the {@link NaNSerializerFloat}
  * <p>

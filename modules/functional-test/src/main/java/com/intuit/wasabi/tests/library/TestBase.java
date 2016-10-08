@@ -72,6 +72,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -203,7 +204,7 @@ public class TestBase extends ServiceTestBase {
      */
     protected void setPropertyFromSystemProperty(String sysPropKey, String internalPropKey) {
         String systemValueStr = System.getProperty(sysPropKey);
-        if (systemValueStr != null && !systemValueStr.isEmpty()) {
+        if (Objects.nonNull(systemValueStr) && !systemValueStr.isEmpty()) {
             LOGGER.info("Setting property '" + internalPropKey + "' to: '" + systemValueStr + "' based on system property '" + sysPropKey + "'");
             appProperties.setProperty(internalPropKey, systemValueStr);
         }
@@ -382,7 +383,7 @@ public class TestBase extends ServiceTestBase {
      * @return the new experiment
      */
     public Experiment postExperiment(Experiment experiment, boolean createNewApplication, int expectedStatus, APIServerConnector apiServerConnector) {
-        response = apiServerConnector.doPost("experiments?createNewApplication=" + createNewApplication, experiment == null ? null : experiment.toJSONString());
+        response = apiServerConnector.doPost("experiments?createNewApplication=" + createNewApplication, Objects.isNull(experiment) ? null : experiment.toJSONString());
         // FIXME: jwtodd
         assertReturnCode(response, response.getStatusCode() == 500 ? 500 : expectedStatus);
         return ExperimentFactory.createFromJSONString(response.jsonPath().prettify());
@@ -1299,7 +1300,7 @@ public class TestBase extends ServiceTestBase {
     public List<Event> postEvents(Experiment experiment, Map<String, Object> parameters, boolean keepInvalidKeys, int expectedStatus, APIServerConnector apiServerConnector) {
         String uri = "experiments/" + experiment.id + "/events";
 
-        if (parameters != null) {
+        if (Objects.nonNull(parameters)) {
 
             Map<String, String> keyMapping = new HashMap<>();
             keyMapping.put("confidenceLevel", "DOUBLE");
@@ -1313,20 +1314,20 @@ public class TestBase extends ServiceTestBase {
             keyMapping.put("singleShot", "BOOLEAN");
 
             for (String key : parameters.keySet()) {
-                switch (keyMapping.get(key) == null ? "INVALID" : keyMapping.get(key)) {
+                switch (Objects.isNull(keyMapping.get(key)) ? "INVALID" : keyMapping.get(key)) {
                     case "DOUBLE":
                         if (!(parameters.get(key) instanceof Double) || (parameters.get(key)).equals(Double.NaN)) {
                             parameters.remove(key);
                         }
                         break;
                     case "STRING":
-                        if (parameters.get(key) == null) {
+                        if (Objects.isNull(parameters.get(key))) {
                             parameters.remove(key);
                         }
                         break;
                     case "LIST":
                         try {
-                            if (parameters.get(key) == null || !(parameters.get(key) instanceof List) || ((List) parameters.get(key)).size() == 0) {
+                            if (Objects.isNull(parameters.get(key)) || !(parameters.get(key) instanceof List) || ((List) parameters.get(key)).size() == 0) {
                                 parameters.remove(key);
                             }
                         } catch (ClassCastException ex) { // should never happen...
@@ -1765,7 +1766,7 @@ public class TestBase extends ServiceTestBase {
      */
     public List<Assignment> getAssignments(Experiment experiment, String context, int expectedStatus, APIServerConnector apiServerConnector) {
         String uri = "experiments/" + experiment.id + "/assignments";
-        if (context != null) {
+        if (Objects.nonNull(context)) {
             context = TestUtils.wrapJsonIntoObject(context, "context");
         }
         response = apiServerConnector.doGet(uri, context);
@@ -2095,9 +2096,9 @@ public class TestBase extends ServiceTestBase {
     public Assignment getAssignment(Experiment experiment, User user, String context, boolean createAssignment, boolean ignoreSamplingPercent, int expectedStatus, APIServerConnector apiServerConnector) {
         String uri = "assignments/applications/" + experiment.applicationName + "/experiments/" + experiment.label
                 + "/users/" + user.userID;
-        if (context != null || !createAssignment || ignoreSamplingPercent) {
+        if (Objects.nonNull(context) || !createAssignment || ignoreSamplingPercent) {
             uri += "?";
-            if (context != null) {
+            if (Objects.nonNull(context)) {
                 uri += "context=" + context + "&";
             }
             if (!createAssignment) {
@@ -2217,9 +2218,9 @@ public class TestBase extends ServiceTestBase {
     public Assignment postAssignment(Experiment experiment, User user, String context, boolean createAssignment, boolean ignoreSamplingPercent, Map<String, Object> profile, int expectedStatus, APIServerConnector apiServerConnector) {
         String uri = "assignments/applications/" + experiment.applicationName + "/experiments/" + experiment.label
                 + "/users/" + user.userID;
-        if (context != null || !createAssignment || ignoreSamplingPercent) {
+        if (Objects.nonNull(context) || !createAssignment || ignoreSamplingPercent) {
             uri += "?";
-            if (context != null) {
+            if (Objects.nonNull(context)) {
                 uri += "context=" + context + "&";
             }
             if (!createAssignment) {
@@ -2401,7 +2402,7 @@ public class TestBase extends ServiceTestBase {
      */
     public Assignment putAssignment(Experiment experiment, Assignment assignment, User user, String context, int expectedStatus, APIServerConnector apiServerConnector) {
         String uri = "assignments/applications/" + experiment.applicationName + "/experiments/" + experiment.label
-                + "/users/" + user.userID + (context != null ? ("?context=" + context) : "");
+                + "/users/" + user.userID + (Objects.nonNull(context) ? ("?context=" + context) : "");
 
         SerializationStrategy serializationStrategy = new DefaultNameExclusionStrategy("payload", "context", "cache", "experimentLabel", "status");
         SerializationStrategy tempStrategy = assignment.getSerializationStrategy();
@@ -2493,9 +2494,9 @@ public class TestBase extends ServiceTestBase {
      */
     public List<Assignment> postAssignments(Application application, User user, List<Experiment> experiments, String context, boolean create, int expectedStatus, APIServerConnector apiServerConnector) {
         String uri = "assignments/applications/" + application.name + "/users/" + user.userID;
-        if ((context != null) || !create) {
+        if (Objects.nonNull((context)) || !create) {
             uri += "?";
-            if (context != null) {
+            if (Objects.nonNull(context)) {
                 uri += "context=" + context + "&";
             }
             if (!create) {
@@ -2620,9 +2621,9 @@ public class TestBase extends ServiceTestBase {
      */
     public List<Assignment> getAssignments(Application application, Page page, User user, String context, boolean createAssignment, boolean ignoreSamplingPercent, int expectedStatus, APIServerConnector apiServerConnector) {
         String uri = "assignments/applications/" + application.name + "/pages/" + page.name + "/users/" + user.userID;
-        if (context != null || !createAssignment || ignoreSamplingPercent) {
+        if (Objects.nonNull(context) || !createAssignment || ignoreSamplingPercent) {
             uri += "?";
-            if (context != null) {
+            if (Objects.nonNull(context)) {
                 uri += "context=" + context + "&";
             }
             if (!createAssignment) {
@@ -2762,9 +2763,9 @@ public class TestBase extends ServiceTestBase {
      */
     public List<Assignment> postAssignments(Application application, Page page, User user, Map<String, Object> segmentationProfile, String context, boolean createAssignment, boolean ignoreSamplingPercent, int expectedStatus, APIServerConnector apiServerConnector) {
         String uri = "assignments/applications/" + application.name + "/pages/" + page.name + "/users/" + user.userID;
-        if (context != null || !createAssignment || ignoreSamplingPercent) {
+        if (Objects.nonNull(context) || !createAssignment || ignoreSamplingPercent) {
             uri += "?";
-            if (context != null) {
+            if (Objects.nonNull(context)) {
                 uri += "context=" + context + "&";
             }
             if (!createAssignment) {
@@ -2776,7 +2777,7 @@ public class TestBase extends ServiceTestBase {
             uri = uri.substring(0, uri.length() - 1);
         }
 
-        if (segmentationProfile != null) {
+        if (Objects.nonNull(segmentationProfile)) {
             String segmentationProfileJSON = TestUtils.wrapJsonIntoObject(simpleGson.toJson(segmentationProfile), "profile");
             response = apiServerConnector.doPost(uri, segmentationProfileJSON);
         } else {
@@ -3252,7 +3253,7 @@ public class TestBase extends ServiceTestBase {
      */
     public ExperimentCounts getExperimentCounts(Experiment experiment, String context, int expectedStatus, APIServerConnector apiServerConnector) {
         String uri = "analytics/experiments/" + experiment.id + "/counts";
-        if (context != null) {
+        if (Objects.nonNull(context)) {
             uri += "?context=" + context;
         }
 
@@ -3354,7 +3355,7 @@ public class TestBase extends ServiceTestBase {
      */
     public ExperimentCumulativeCounts getExperimentCumulativeCounts(Experiment experiment, String context, int expectedStatus, APIServerConnector apiServerConnector) {
         String uri = "analytics/experiments/" + experiment.id + "/counts/dailies";
-        if (context != null) {
+        if (Objects.nonNull(context)) {
             uri += "?context=" + context;
         }
 
@@ -3456,7 +3457,7 @@ public class TestBase extends ServiceTestBase {
      */
     public ExperimentStatistics getStatistics(Experiment experiment, String context, int expectedStatus, APIServerConnector apiServerConnector) {
         String uri = "analytics/experiments/" + experiment.id + "/statistics";
-        if (context != null) {
+        if (Objects.nonNull(context)) {
             uri += "?context=" + context;
         }
 
@@ -3558,7 +3559,7 @@ public class TestBase extends ServiceTestBase {
      */
     public ExperimentCumulativeStatistics getDailyStatistics(Experiment experiment, String context, int expectedStatus, APIServerConnector apiServerConnector) {
         String uri = "analytics/experiments/" + experiment.id + "/statistics/dailies";
-        if (context != null) {
+        if (Objects.nonNull(context)) {
             uri += "?context=" + context;
         }
 
@@ -3625,7 +3626,7 @@ public class TestBase extends ServiceTestBase {
      */
     public String getAssignmentSummary(Experiment experiment, String context, int expectedStatus, APIServerConnector apiServerConnector) {
         String uri = "analytics/applications/" + experiment.applicationName + "/experiments/" + experiment.label + "/assignments/counts";
-        if (context != null) {
+        if (Objects.nonNull(context)) {
             uri += "?context=" + context;
         }
 
@@ -3652,7 +3653,7 @@ public class TestBase extends ServiceTestBase {
      * @return the response
      */
     public Response doPost(String uri, Map<String, Object> uriParameters, Object requestBody, int expectedStatus, APIServerConnector apiServerConnector) {
-        if (uriParameters != null && uriParameters.size() > 0) {
+        if (Objects.nonNull(uriParameters) && uriParameters.size() > 0) {
             uri += "?";
             for (Map.Entry<String, Object> parameter : uriParameters.entrySet()) {
                 uri += parameter.getKey() + "=" + parameter.getValue() + "&";
@@ -3677,7 +3678,7 @@ public class TestBase extends ServiceTestBase {
      * @return the response
      */
     public Response doGet(String uri, Map<String, Object> uriParameters, Object requestBody, int expectedStatus, APIServerConnector apiServerConnector) {
-        if (uriParameters != null && uriParameters.size() > 0) {
+        if (Objects.nonNull(uriParameters) && uriParameters.size() > 0) {
             uri += "?";
             for (Map.Entry<String, Object> parameter : uriParameters.entrySet()) {
                 uri += parameter.getKey() + "=" + parameter.getValue() + "&";
@@ -3702,7 +3703,7 @@ public class TestBase extends ServiceTestBase {
      * @return the response
      */
     public Response doDelete(String uri, Map<String, Object> uriParameters, Object requestBody, int expectedStatus, APIServerConnector apiServerConnector) {
-        if (uriParameters != null && uriParameters.size() > 0) {
+        if (Objects.nonNull(uriParameters) && uriParameters.size() > 0) {
             uri += "?";
             for (Map.Entry<String, Object> parameter : uriParameters.entrySet()) {
                 uri += parameter.getKey() + "=" + parameter.getValue() + "&";
@@ -3727,7 +3728,7 @@ public class TestBase extends ServiceTestBase {
      * @return the response
      */
     public Response doPut(String uri, Map<String, Object> uriParameters, Object requestBody, int expectedStatus, APIServerConnector apiServerConnector) {
-        if (uriParameters != null && uriParameters.size() > 0) {
+        if (Objects.nonNull(uriParameters) && uriParameters.size() > 0) {
             uri += "?";
             for (Map.Entry<String, Object> parameter : uriParameters.entrySet()) {
                 uri += parameter.getKey() + "=" + parameter.getValue() + "&";
@@ -3754,7 +3755,7 @@ public class TestBase extends ServiceTestBase {
      * @return response The response of a request made by REST Assured
      */
     public Response postFeedback(UserFeedback userFeedback, int expectedStatus, APIServerConnector apiServerConnector) {
-        response = apiServerConnector.doPost("feedback", userFeedback == null ? null : userFeedback.toJSONString());
+        response = apiServerConnector.doPost("feedback", Objects.isNull(userFeedback) ? null : userFeedback.toJSONString());
         assertReturnCode(response, expectedStatus);
         return response;
     }
@@ -3816,7 +3817,7 @@ public class TestBase extends ServiceTestBase {
      * The response must contain HTTP {@link HttpStatus#SC_OK}.
      * <p>
      * Uses the default APIServerConnector's user credentials and
-     * requests a {@code grant_type} of "client_credentials".
+     * requests a {@code grantType} of "client_credentials".
      * It always copies the APIServerConnector before setting any additional fields.
      *
      * @return the token
@@ -3830,7 +3831,7 @@ public class TestBase extends ServiceTestBase {
      * The response must contain {@link HttpStatus#SC_OK}.
      * <p>
      * If the apiUser is null, it uses the default APIServerConnector's
-     * user credentials and requests a {@code grant_type} of "client_credentials".
+     * user credentials and requests a {@code grantType} of "client_credentials".
      * Otherwise it uses a copied APIServerConnector and sets the user credentials
      * according to apiUser.
      * <p>
@@ -3852,17 +3853,17 @@ public class TestBase extends ServiceTestBase {
      * Otherwise it uses a copied APIServerConnector and sets the user credentials
      * according to apiUser.
      * <p>
-     * Requests the specified {@code grant_type}. (Default is
-     * "client_credentials"). If null, no grant_type is requested.
+     * Requests the specified {@code grantType}. (Default is
+     * "client_credentials"). If null, no grantType is requested.
      * <p>
      * It always copies the APIServerConnector before setting any additional fields.
      *
-     * @param apiUser    the APIUser
-     * @param grant_type the requested grant_type
+     * @param apiUser   the APIUser
+     * @param grantType the requested grantType
      * @return the token
      */
-    public AccessToken postLogin(APIUser apiUser, String grant_type) {
-        return postLogin(apiUser, grant_type, HttpStatus.SC_OK);
+    public AccessToken postLogin(APIUser apiUser, String grantType) {
+        return postLogin(apiUser, grantType, HttpStatus.SC_OK);
     }
 
     /**
@@ -3874,18 +3875,18 @@ public class TestBase extends ServiceTestBase {
      * Otherwise it uses a copied APIServerConnector and sets the user credentials
      * according to apiUser.
      * <p>
-     * Requests the specified {@code grant_type}. (Default is
-     * "client_credentials"). If null, no grant_type is requested.
+     * Requests the specified {@code grantType}. (Default is
+     * "client_credentials"). If null, no grantType is requested.
      * <p>
      * It always copies the APIServerConnector before setting any additional fields.
      *
      * @param apiUser        the APIUser
-     * @param grant_type     the requested grant_type
+     * @param grantType      the requested grantType
      * @param expectedStatus the expected status code
      * @return the token
      */
-    public AccessToken postLogin(APIUser apiUser, String grant_type, int expectedStatus) {
-        return postLogin(apiUser, grant_type, expectedStatus, apiServerConnector);
+    public AccessToken postLogin(APIUser apiUser, String grantType, int expectedStatus) {
+        return postLogin(apiUser, grantType, expectedStatus, apiServerConnector);
     }
 
     /**
@@ -3897,27 +3898,27 @@ public class TestBase extends ServiceTestBase {
      * Otherwise it copies the supplied APIServerConnector and sets the user credentials
      * according to apiUser.
      * <p>
-     * Requests the specified {@code grant_type}. (Default is
-     * "client_credentials"). If null, no grant_type is requested.
+     * Requests the specified {@code grantType}. (Default is
+     * "client_credentials"). If null, no grantType is requested.
      * <p>
      * It always copies the APIServerConnector before setting any additional fields.
      *
      * @param apiUser            the APIUser
-     * @param grant_type         the requested grant_type
+     * @param grantType          the requested grantType
      * @param expectedStatus     the expected status code
      * @param apiServerConnector the api server connector
      * @return the token
      */
-    public AccessToken postLogin(APIUser apiUser, String grant_type, int expectedStatus, APIServerConnector apiServerConnector) {
+    public AccessToken postLogin(APIUser apiUser, String grantType, int expectedStatus, APIServerConnector apiServerConnector) {
         String uri = "authentication/login";
         APIServerConnector asc = apiServerConnector.clone();
         String body = "";
-        if (apiUser != null) {
+        if (Objects.nonNull(apiUser)) {
             asc.setUserNameAndPassword(apiUser.username, apiUser.password);
         }
-        if (grant_type != null) {
+        if (Objects.nonNull(grantType)) {
             asc.setContentType(ContentType.URLENC);
-            body = "grant_type=" + grant_type;
+            body = "grant_type=" + grantType;
         }
 
         response = asc.doPost(uri, body);
@@ -3962,7 +3963,7 @@ public class TestBase extends ServiceTestBase {
      */
     public APIUser getUserExists(APIUser apiUser, int expectedStatus, APIServerConnector apiServerConnector) {
         String uri = "authentication/users/";
-        if (apiUser.email != null) {
+        if (Objects.nonNull(apiUser.email)) {
             uri += apiUser.email;
         }
         response = apiServerConnector.doGet(uri);
@@ -4012,7 +4013,7 @@ public class TestBase extends ServiceTestBase {
     public AccessToken getVerifyToken(AccessToken accessToken, int expectedStatus, APIServerConnector apiServerConnector) {
         String uri = "authentication/verifyToken";
         APIServerConnector asc = apiServerConnector.clone();
-        asc.setAuthToken(accessToken.token_type, accessToken.access_token);
+        asc.setAuthToken(accessToken.tokenType, accessToken.accessToken);
         asc.setUserNameAndPassword(null, null);
         response = asc.doGet(uri);
         assertReturnCode(response, expectedStatus);
@@ -4060,7 +4061,7 @@ public class TestBase extends ServiceTestBase {
     public Response getLogout(AccessToken token, int expectedStatus, APIServerConnector apiServerConnector) {
         String uri = "authentication/logout";
         APIServerConnector asc = apiServerConnector.clone();
-        asc.setAuthToken(token.token_type, token.access_token);
+        asc.setAuthToken(token.tokenType, token.accessToken);
         asc.setUserNameAndPassword(null, null);
         response = asc.doGet(uri);
         assertReturnCode(response, expectedStatus);
@@ -4144,7 +4145,7 @@ public class TestBase extends ServiceTestBase {
                 continue;
             }
             Experiment realExperiment = ExperimentFactory.createFromJSONString(response.jsonPath().prettify());
-            if (realExperiment != null && realExperiment.state != null) {
+            if (Objects.nonNull(realExperiment) && Objects.nonNull(realExperiment.state)) {
                 switch (realExperiment.state) {
                     case Constants.EXPERIMENT_STATE_RUNNING: // fall through
                     case Constants.EXPERIMENT_STATE_PAUSED: // terminate and fall through
