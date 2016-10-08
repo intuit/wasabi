@@ -164,7 +164,7 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
                 + " VALUES ( uuid(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? );";
 
         PreparedCqlQuery<Application.Name, String> cqlQuery = driver.getKeyspace().prepareQuery(keyspace.auditlogCF()).withCql(cql).asPreparedStatement()
-                .withByteBufferValue(Objects.nonNull(entry.getApplicationName()) ? AuditLogRepository.GLOBAL_ENTRY_APPLICATION : entry.getApplicationName(), ApplicationNameSerializer.get())
+                .withByteBufferValue(Objects.nonNull(entry.getApplicationName()) ? entry.getApplicationName() : AuditLogRepository.GLOBAL_ENTRY_APPLICATION, ApplicationNameSerializer.get())
                 .withByteBufferValue(entry.getTime().getTime(), DateSerializer.get())
                 .withStringValue(entry.getAction().toString())
                 .withStringValue(Objects.nonNull(entry.getUser().getFirstName()) ? entry.getUser().getFirstName() : "")
