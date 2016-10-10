@@ -146,6 +146,17 @@ start_wasabi() {
 
   remove_container ${project}-main
 
+  #Get the current location of the script
+  SOURCE="${BASH_SOURCE[0]}"
+  while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+    DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+    SOURCE="$(readlink "$SOURCE")"
+    [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+  done
+  DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+  source $DIR/migration.sh
+
   if [ "${verify}" = true ] || ! [ docker inspect ${project}-main >/dev/null 2>&1 ]; then
     echo "${green}${project}: building${reset}"
 
