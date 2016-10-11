@@ -15,79 +15,50 @@
  *******************************************************************************/
 package com.intuit.wasabi.tests.service;
 
-import static com.intuit.wasabi.tests.library.util.ModelAssert.assertEqualModelItems;
-
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.Test;
-
 import com.intuit.wasabi.tests.library.TestBase;
-import com.intuit.wasabi.tests.library.util.Constants;
+import com.intuit.wasabi.tests.library.util.ModelAssert;
 import com.intuit.wasabi.tests.library.util.TestUtils;
 import com.intuit.wasabi.tests.library.util.serialstrategies.DefaultNameExclusionStrategy;
-import com.intuit.wasabi.tests.model.Bucket;
 import com.intuit.wasabi.tests.model.Experiment;
-import com.intuit.wasabi.tests.model.factory.BucketFactory;
 import com.intuit.wasabi.tests.model.factory.ExperimentFactory;
+import org.apache.http.HttpStatus;
+import org.testng.annotations.Test;
 
-/**
- * 
- * @created on 09/28/2016 as part of below issue
- * https://github.com/intuit/wasabi/issues/93
- * 
- * steps followed
- * beforetest: setup require data
- * test: do a post on the
- * aftertest: clean 
- */
-public class PastDatedExperimentCreationTest extends TestBase{
-    static final Logger LOGGER = LoggerFactory.getLogger(PastDatedExperimentCreationTest.class);
+public class PastDatedExperimentCreationTest extends TestBase {
     Experiment experiment;
 
     /**
-     * creates an experiment that is previous dated
+     * Creates an experiment with a start date in the past and an end date in the past.
+     * This should be an unsuccessful operation.
      */
     @Test
-    public void createPreviousDatedExperiment()
-    {
+    public void createExperimentPastEndDate() {
         //create an experiment
-        experiment = ExperimentFactory.createExperiment();
-        DefaultNameExclusionStrategy experimentComparisonStrategy = new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson");
-        experiment.setSerializationStrategy(experimentComparisonStrategy);
-        
-        //set start time and end time in previous
+        experiment = ExperimentFactory.createCompleteExperiment();
+        toCleanUp.add(experiment);
+
+        // set start time and end time to previous dates
         experiment.startTime = TestUtils.relativeTimeString(-10);
         experiment.endTime = TestUtils.relativeTimeString(-5);
-        Experiment exp = postExperiment(experiment);
-        
-        //do the required asserts
-        Assert.assertNotNull(exp.creationTime, "Experiment creation failed (No creationTime).");
-        Assert.assertNotNull(exp.modificationTime, "Experiment creation failed (No modificationTime).");
-        Assert.assertNotNull(exp.state, "Experiment creation failed (No state).");
-        experiment.update(exp);
-        
-        
-        //create buckets within the experiment
-        List<Bucket> buckets = postBuckets(BucketFactory.createCompleteBuckets(experiment, 2));
-        Assert.assertEquals(buckets.size(), 2);
-        
-        //change the state of experiment to running
-        experiment.state = Constants.EXPERIMENT_STATE_RUNNING;
-        exp = putExperiment(experiment);
-        assertEqualModelItems(exp, experiment);
-    }
-    
-    @AfterClass
-    public void testCleanUp(){
-        experiment.state = Constants.EXPERIMENT_STATE_TERMINATED;
-        Experiment exp = putExperiment(experiment);
-        experiment.update(exp);
-        deleteExperiment(experiment);
+        postExperiment(experiment, HttpStatus.SC_BAD_REQUEST);
     }
 
+
+    /**
+     * Creates an experiment with a start date in the past and an end date in the future.
+     * This should be a successful operation.
+     */
+    @Test
+    public void createExperimentPastStartDateFutureEndDate() {
+        //create an experiment
+        experiment = ExperimentFactory.createCompleteExperiment();
+        toCleanUp.add(experiment);
+
+        // set start time and end time to previous dates
+        experiment.startTime = TestUtils.relativeTimeString(-10);
+        experiment.endTime = TestUtils.relativeTimeString(5);
+        Experiment exp = postExperiment(experiment);
+        ModelAssert.assertEqualModelItems(exp, experiment, new DefaultNameExclusionStrategy("id", "creationTime", "modificationTime", "ruleJson"));
+    }
 
 }

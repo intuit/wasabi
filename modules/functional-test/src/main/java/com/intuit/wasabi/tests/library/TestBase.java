@@ -352,7 +352,6 @@ public class TestBase extends ServiceTestBase {
     public Experiment postExperiment(Experiment experiment, boolean createNewApplication, int expectedStatus, APIServerConnector apiServerConnector) {
         response = apiServerConnector.doPost("experiments?createNewApplication=" + createNewApplication, experiment==null?null:experiment.toJSONString());
         // FIXME: jwtodd
-        System.out.println("response: "+response.asString());
         assertReturnCode(response, response.getStatusCode() == 500 ? 500 : expectedStatus);
         return ExperimentFactory.createFromJSONString(response.jsonPath().prettify());
     }
