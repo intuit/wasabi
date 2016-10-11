@@ -22,9 +22,14 @@
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG}.access.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>%d{yyyy-MM-dd}.log.zip</fileNamePattern>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>${LOG}.%i.log.zip</fileNamePattern>
+            <minIndex>1</minIndex>
+            <maxIndex>6</maxIndex>
         </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+           <maxFileSize>500MB</maxFileSize>
+        </triggeringPolicy>
         <encoder>
             <pattern>combined</pattern>
         </encoder>

@@ -24,8 +24,9 @@ sleep_default=30
 red=`tput setaf 9`
 green=`tput setaf 10`
 reset=`tput sgr0`
-wasabi_os_default=OSX
-export WASABI_OS=${WASABI_OS:-${wasabi_os_default}}
+export WASABI_OS=${WASABI_OS:-`uname -s`}
+export WASABI_OSX="Darwin"
+export WASABI_LINUX="Linux"
 
 usage() {
   [ "${1}" ] && echo "${red}error: ${1}${reset}"
@@ -79,7 +80,7 @@ beerMe() {
 }
 
 bootstrap() {
-  if [ "${WASABI_OS}" == "${wasabi_os_default}" ]; then
+  if [ "${WASABI_OS}" == "${WASABI_OSX}" ]; then
     if ! hash brew 2>/dev/null; then
       echo "${green}installing homebrew ...${reset}"
 
@@ -110,6 +111,61 @@ bootstrap() {
     npm config set prefix $(brew --prefix)
 
     echo "${green}installed dependencies: ${formulas[@]} ${taps[@]} ${casks[@]}${reset}"
+  elif [ "${WASABI_OS}" == "${WASABI_LINUX}" ]; then
+    echo "OS is Linux"
+    if [ -f /etc/lsb-release ]; then
+      . /etc/lsb-release
+      DISTRO=$DISTRIB_ID
+      DISTROVER=$DISTRIB_RELEASE
+      if [ $DISTRO == "Ubuntu" ] && [ $DISTROVER == "16.04" ]; then
+        echo "${green}Operating system Ubuntu 16.04${reset}"
+      else
+        echo "${red}Unsupported Linux distribution${reset}"
+        exit 1
+      fi
+    fi
+
+    #Install Maven
+    sudo apt-get update
+    sudo apt-get install -y maven
+
+    #Install JAVA
+    sudo apt-get install -y default-jdk
+    sudo cp /etc/environment /tmp/environment
+    sudo chmod 666 /tmp/environment
+    sudo echo "JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/" >> /tmp/environment
+    sudo cp /tmp/environment /etc/environment
+    sudo rm -rf /tmp/environment
+
+    #Install git-flow
+    sudo apt-get install -y git-flow
+
+    #Install Nodejs
+    curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+    sudo apt-get install -y nodejs
+    sudo npm install -g bower
+    sudo npm install -g grunt-cli
+    sudo npm install -g yo
+
+    #Install compass
+    sudo apt-get install -y ruby
+    sudo apt-get install -y ruby-compass
+
+    #Install docker
+    sudo apt-get install -y apt-transport-https ca-certificates
+    sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+    sudo echo "deb https://apt.dockerproject.org/repo ubuntu-xenial main" > /tmp/docker.list
+    sudo cp /tmp/docker.list /etc/apt/sources.list.d/docker.list
+    sudo rm -rf /tmp/docker.list
+    sudo apt-get purge lxc-docker
+    sudo apt-get update
+    sudo apt-get install -y linux-image-extra-$(uname -r) linux-image-extra-virtual
+    sudo apt-get install -y docker-engine
+
+    sudo groupadd docker
+    sudo usermod -aG docker $USER
+    sudo usermod -aG docker root
+    echo "${green}installed dependencies.${reset}"
   else
     echo "${green}FIXME: linux install of ( ${formulas[@]} ${taps[@]} ${casks[@]} ) not yet implemented${reset}"
   fi
@@ -199,9 +255,9 @@ package() {
   version=$(fromPom . build project.version)
   # FIXME: server ip
   server="http://localhost:8080"
-  home=$(fromPom . build application.home)
+  home=$(fromPom ./modules/main build application.home)
   name=wasabi-ui #$(fromPom main build application.name)
-  api_name=$(fromPom . build application.name)
+  api_name=$(fromPom ./modules/main build application.name)
   user=$(fromPom ./modules/main build application.user)
   group=$(fromPom ./modules/main build application.group)
   content=$(fromPom ./modules/main build application.http.content.directory)
@@ -216,10 +272,12 @@ package() {
     done; \
     sed -i '' -e "s|http://localhost:8080|${server}|g" target/constants.json 2>/dev/null; \
     sed -i '' -e "s|VERSIONLOC|${version}|g" target/app/index.html 2>/dev/null; \
-    if [ "${WASABI_OS}" == "${wasabi_os_default}" ]; then \
-      (cd target; npm install; bower install; grunt clean); \
-    fi; \
-# fixme: shouldn't have to force or ignore tests
+    if [[ "${WASABI_OS}" == "${WASABI_OSX}" || "${WASABI_OS}" == "${WASABI_LINUX}" ]]; then \
+#      (cd target; npm install; bower install; grunt clean); \
+      (cd target; npm install; bower install --no-optional; grunt clean); \
+    fi \
+# fixme: shouldn't have to force or ignore tests \
+#    (cd target; grunt build --target=develop --no-color; \
     (cd target; grunt build --force --target=develop --no-color; \
 #      grunt test); \
     ); \
@@ -250,6 +308,17 @@ release() {
 
 remove() {
   ./bin/container.sh remove${1:+:$1}
+}
+
+unit_test() {
+  command=$1
+  mvn "-Dtest=com.intuit.wasabi.${command/-/}.**" test -pl modules/${command} --also-make -DfailIfNoTests=false -q
+}
+
+exec_commands() {
+  prefix=$1
+  commands=$(echo $2 | cut -d ':' -f 2)
+  (IFS=','; for command in ${commands}; do ${prefix} ${command}; done)
 }
 
 optspec=":b:e:f:p:v:s:h-:"
@@ -289,26 +358,20 @@ for command in ${@:$OPTIND}; do
     bootstrap) bootstrap;;
     build) build true;;
     clean) clean;;
-    start) command="start:cassandra,mysql,wasabi";&
-    start:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for command in ${commands}; do start ${command}; done);;
-    test:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for command in ${commands}; do mvn "-Dtest=com.intuit.wasabi.${command/-/}.**" test -pl modules/${command} --also-make -DfailIfNoTests=false -q ; done);;
+    start) exec_commands start "cassandra,mysql,wasabi";;
+    start:*) exec_commands start ${command};;
+    test:*) exec_commands unit_test ${command};;
     test) test_api;;
-    stop) command="stop:wasabi,mysql,cassandra";&
-    stop:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for command in ${commands}; do stop ${command}; done);;
-    resource) command="resource:ui,api,doc,casssandra,mysql";&
-    resource:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for command in ${commands}; do resource ${command}; done);;
+    stop) exec_commands stop "wasabi,mysql,cassandra";;
+    stop:*) exec_commands stop ${command};;
+    resource) exec_commands resource "ui,api,doc,cassandra,mysql";;
+    resource:*) exec_commands resource ${command};;
     status) status;;
-    remove) command="remove:wasabi,cassandra,mysql";&
-    remove:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for command in ${commands}; do remove ${command}; done);;
+    remove) exec_commands remove "wasabi,cassandra,mysql";;
+    remove:*) exec_commands remove ${command};;
     package) package;;
     release) release;;
-    release:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for command in ${commands}; do release ${command}; done);;
+    release:*) exec_commands release ${command};;
     "") usage "unknown command: ${command}" 1;;
     *) usage "unknown command: ${command}" 1;;
   esac
