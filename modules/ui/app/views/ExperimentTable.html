@@ -102,7 +102,7 @@
                     <ul class="buckets" ng-if="experiment.sortedBuckets && experiment.sortedBuckets.length > 0">
                         <li ng-repeat="bucket in experiment.sortedBuckets" custom-tooltip="{{bucket.homePageTooltip}}" ng-class="{closed: bucket.state === 'CLOSED', indeterminate: bucket.improvementClass === 'indeterminate', winner: bucket.improvementClass === 'winner', indeterminate: bucket.improvementClass === 'loser', noWinner: bucket.improvementClass === 'no-winner'}">
                             <label>{{bucket.label}} <span ng-if="bucket.isControl">(control)</span><span ng-if="bucket.isBaseLine">(baseline)</span></label>
-                            <div>{{bucket.actionRate | number:1}} <span>&plusmn;{{actionDiffForCardView(bucket) | number:1}}%</span></div>
+                            <div>{{multiply100(bucket.actionRate) | number:1}} <span>&plusmn;{{actionDiffForCardView(bucket) | number:1}}%</span></div>
                             <div title="Bucket assignments" class="bucketAssignments" ng-if="bucket.count >= 0">{{bucket.count}}</div>
                         </li>
                     </ul>
