@@ -58,7 +58,7 @@ public class PastDatedExperimentCreationTest extends TestBase {
         experiment.startTime = TestUtils.relativeTimeString(-10);
         experiment.endTime = TestUtils.relativeTimeString(5);
         Experiment exp = postExperiment(experiment);
-        ModelAssert.assertEqualModelItems(exp, experiment, new DefaultNameExclusionStrategy("id", "creationTime", "modificationTime", "ruleJson"));
+        ModelAssert.assertEqualModelItems(exp, experiment, new DefaultNameExclusionStrategy("id", "state", "creationTime", "modificationTime", "ruleJson"));
     }
 
 }

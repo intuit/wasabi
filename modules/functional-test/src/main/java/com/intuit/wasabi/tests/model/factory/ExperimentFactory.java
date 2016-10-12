@@ -52,8 +52,7 @@ public class ExperimentFactory {
                 TestUtils.currentTimeString(),
                 TestUtils.relativeTimeString(42), 1)
                 .setCreatorID(USER_ID)
-                .setDescription("A sample Experiment description.")
-                .setState(Constants.EXPERIMENT_STATE_DRAFT);
+                .setDescription("A sample Experiment description.");
     }
 
     /**

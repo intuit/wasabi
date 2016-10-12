@@ -74,7 +74,7 @@ public class EventSubmissionBeforeAssignmentTest extends TestBase {
 
         //create an event of type IMPRESSION and post it to the event endpoint
         Event impression = EventFactory.createImpression();
-        postEvent(impression, experiment, user, HttpStatus.SC_BAD_REQUEST);
+        postEvent(impression, experiment, user, HttpStatus.SC_NOT_FOUND);
     }
 
 
