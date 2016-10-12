@@ -129,6 +129,10 @@
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE"/>
     </logger>
+    <logger name="com.intuit.wasabi.repository.impl.database.DatabaseAnalytics" level="DEBUG">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </logger>
 
     <root level="${log.level}">
         <appender-ref ref="FILE"/>
