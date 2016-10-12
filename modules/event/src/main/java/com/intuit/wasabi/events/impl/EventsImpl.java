@@ -26,7 +26,6 @@ import com.intuit.wasabi.database.TransactionFactory;
 import com.intuit.wasabi.eventobjects.EventEnvelopePayload;
 import com.intuit.wasabi.events.EventIngestionExecutor;
 import com.intuit.wasabi.events.Events;
-import com.intuit.wasabi.events.EventsMBean;
 import com.intuit.wasabi.exceptions.AssignmentNotFoundException;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Context;
@@ -44,23 +43,23 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
- * This class <b>asychronously</b> posts events to the events database (mysql in this implementation).
+ * This class <b>asynchronously</b> posts events to the events database (mysql in this implementation).
  * <br></br>
  * <b>Note: Since the post to the events database is asynchronous, there is a chance of loosing events if the process is shut down abruptly while the event queue is not empty.</b>
  * <br></br>
  * <STRONG>WARNING: This class may loose events data</STRONG>
  */
-public class EventsImpl implements Events, EventsMBean {
+public class EventsImpl implements Events {
 
-    protected static final String MYSQL = "mysql";
+    static final String MYSQL = "mysql";
     private static final Logger LOGGER = getLogger(EventsImpl.class);
     /**
      * Executors to ingest event data to real time ingestion system.
      */
-    protected Map<String, EventIngestionExecutor> eventIngestionExecutors;
+    private Map<String, EventIngestionExecutor> eventIngestionExecutors;
     private Assignments assignments;
     private TransactionFactory transactionFactory;
-    private LinkedBlockingQueue mysqlQueue = new LinkedBlockingQueue<>();
+    private LinkedBlockingQueue<Runnable> mysqlQueue = new LinkedBlockingQueue<>();
     private ThreadPoolExecutor mysqlExecutor;
 
     @Inject
@@ -150,20 +149,11 @@ public class EventsImpl implements Events, EventsMBean {
 
     @Override
     public Map<String, Integer> queuesLength() {
-        Map<String, Integer> queueLengthMap = new HashMap<String, Integer>();
-        queueLengthMap.put(MYSQL, new Integer(mysqlQueue.size()));
+        Map<String, Integer> queueLengthMap = new HashMap<>();
+        queueLengthMap.put(MYSQL, mysqlQueue.size());
         for (String name : eventIngestionExecutors.keySet()) {
-            queueLengthMap.put(name.toLowerCase(), new Integer(eventIngestionExecutors.get(name).queueLength()));
+            queueLengthMap.put(name.toLowerCase(), eventIngestionExecutors.get(name).queueLength());
         }
         return queueLengthMap;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int getQueueSize() {
-        // FIXME: is this MBean method really used??
-        return mysqlQueue.size();
     }
 }
