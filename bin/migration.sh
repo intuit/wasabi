@@ -21,6 +21,7 @@
 # CQLSH_PASSWORD: the password to connect to remote cluster. [Optional]. default to empty
 # CQLSH_HOST: the contact point for remote cluster. [Optional]. default to localhost
 # CQL_MIGRATION_SCRIPTS: the directory contains all cql migration scripts. [Optional]. default to $PROEJCT_HOME/modules/repository-datastax/db/mutation/
+# CASSANDRA_REPLICATION: the replication factor for cassandra keyspace. [Optional]. default to 1.
 ###############################################################################
 
 #Get the current location of the script
@@ -38,12 +39,12 @@ IS_CONTAINER=`docker inspect -f {{.State.Running}} $CONTAINER_NAME`
 
 if [ "$IS_CONTAINER" = true ] ; then
     echo 'Since we are in a container'
-    echo "docker exec -it ${CONTAINER_NAME} \"cqlsh -e \"CREATE KEYSPACE IF NOT EXISTS wasabi_experiments WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 1};\" --username=${CQLSH_USERNAME} --password=\"${CQLSH_PASSWORD}\" ${CQLSH_HOST:-localhost} ${CASSANDRA_PORT:-9042}\""
-    docker exec -it ${CONTAINER_NAME} cqlsh -e "CREATE KEYSPACE IF NOT EXISTS wasabi_experiments WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 1};" --username=${CQLSH_USERNAME} --password="${CQLSH_PASSWORD}" ${CQLSH_HOST:-localhost} ${CASSANDRA_PORT:-9042}
+    echo "docker exec -it ${CONTAINER_NAME} \"cqlsh -e \"CREATE KEYSPACE IF NOT EXISTS wasabi_experiments WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : ${CASSANDRA_REPLICATION:-1}};\" --username=${CQLSH_USERNAME} --password=\"${CQLSH_PASSWORD}\" ${CQLSH_HOST:-localhost} ${CASSANDRA_PORT:-9042}\""
+    docker exec -it ${CONTAINER_NAME} cqlsh -e "CREATE KEYSPACE IF NOT EXISTS wasabi_experiments WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : ${CASSANDRA_REPLICATION:-1}};" --username=${CQLSH_USERNAME} --password="${CQLSH_PASSWORD}" ${CQLSH_HOST:-localhost} ${CASSANDRA_PORT:-9042}
 else
     echo 'Not in container, assuming cassandra is up and running as a process'
-    echo "cqlsh -e \"CREATE KEYSPACE IF NOT EXISTS wasabi_experiments WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 1};\" --username=${CQLSH_USERNAME} --password=\"${CQLSH_PASSWORD}\" ${CQLSH_HOST:-localhost} ${CASSANDRA_PORT:-9042}"
-    cqlsh -e "CREATE KEYSPACE IF NOT EXISTS wasabi_experiments WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 1};" --username=${CQLSH_USERNAME} --password="${CQLSH_PASSWORD}" ${CQLSH_HOST:-localhost} ${CASSANDRA_PORT:-9042}
+    echo "cqlsh -e \"CREATE KEYSPACE IF NOT EXISTS wasabi_experiments WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : ${CASSANDRA_REPLICATION:-1}};\" --username=${CQLSH_USERNAME} --password=\"${CQLSH_PASSWORD}\" ${CQLSH_HOST:-localhost} ${CASSANDRA_PORT:-9042}"
+    cqlsh -e "CREATE KEYSPACE IF NOT EXISTS wasabi_experiments WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : ${CASSANDRA_REPLICATION:-1}};" --username=${CQLSH_USERNAME} --password="${CQLSH_PASSWORD}" ${CQLSH_HOST:-localhost} ${CASSANDRA_PORT:-9042}
 fi
 
 if [ $? -ne 0 ]; then
@@ -53,6 +54,7 @@ fi
 
 #Download Cassandra Migration tool
 filename="cassandra-migration-0.9-20160930.013737-27-jar-with-dependencies.jar"
+#Sanpshot can be used if you want to latest features
 #URL="https://oss.sonatype.org/content/repositories/snapshots/com/builtamont/cassandra-migration/0.9-SNAPSHOT/$filename"
 URL="https://oss.sonatype.org/content/repositories/public/com/builtamont/cassandra-migration/0.9-SNAPSHOT/$filename"
 scratch=$(mktemp -d -t tmp.cassandra-migration)
