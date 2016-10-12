@@ -22,15 +22,35 @@ import com.intuit.wasabi.tests.library.util.RetryAnalyzer;
 import com.intuit.wasabi.tests.library.util.RetryTest;
 import com.intuit.wasabi.tests.library.util.serialstrategies.DefaultNameExclusionStrategy;
 import com.intuit.wasabi.tests.library.util.serialstrategies.DefaultNameInclusionStrategy;
-import com.intuit.wasabi.tests.model.*;
-import com.intuit.wasabi.tests.model.analytics.*;
-import com.intuit.wasabi.tests.model.factory.*;
+import com.intuit.wasabi.tests.model.Assignment;
+import com.intuit.wasabi.tests.model.Bucket;
+import com.intuit.wasabi.tests.model.Event;
+import com.intuit.wasabi.tests.model.Experiment;
+import com.intuit.wasabi.tests.model.Page;
+import com.intuit.wasabi.tests.model.User;
+import com.intuit.wasabi.tests.model.analytics.BucketStatistics;
+import com.intuit.wasabi.tests.model.analytics.Counts;
+import com.intuit.wasabi.tests.model.analytics.DailyStatistics;
+import com.intuit.wasabi.tests.model.analytics.ExperimentBasicStatistics;
+import com.intuit.wasabi.tests.model.analytics.ExperimentCumulativeStatistics;
+import com.intuit.wasabi.tests.model.analytics.ExperimentStatistics;
+import com.intuit.wasabi.tests.model.factory.ApplicationFactory;
+import com.intuit.wasabi.tests.model.factory.AssignmentFactory;
+import com.intuit.wasabi.tests.model.factory.BucketFactory;
+import com.intuit.wasabi.tests.model.factory.EventFactory;
+import com.intuit.wasabi.tests.model.factory.ExperimentFactory;
+import com.intuit.wasabi.tests.model.factory.UserFactory;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.intuit.wasabi.tests.library.util.ModelAssert.assertEqualModelItems;
 import static com.intuit.wasabi.tests.library.util.ModelAssert.assertEqualModelItemsNoOrder;
@@ -163,7 +183,7 @@ public class SmokeTest extends TestBase {
     /**
      * Assigns users to buckets.
      */
-    @Test(dependsOnMethods = {"t_startExperiment"})
+    @Test(dependsOnMethods = {"t_retrieveRunningExperiment"})
     @RetryTest(maxTries = 3, warmup = 1500)
     public void t_assignUsersToBuckets() {
         for (User user : users) {
@@ -236,7 +256,7 @@ public class SmokeTest extends TestBase {
         assignments.clear();
         for (int i = 0; i < users.size(); ++i) {
             Assignment assignment = AssignmentFactory.createAssignment()
-                    .setAssignment(buckets.get(i%buckets.size()).label)
+                    .setAssignment(buckets.get(i % buckets.size()).label)
                     .setExperimentLabel(experiment.label)
                     .setOverwrite(true);
             Assignment putAssignment = putAssignment(experiment, assignment, users.get(i));
@@ -251,21 +271,21 @@ public class SmokeTest extends TestBase {
     @Test(dependsOnMethods = {"t_setUserAssignments"})
     public void t_submitEvents() {
         for (int i = 0; i < users.size(); ++i) {
-            Event[] events = new Event[impressionsFactorPerUser * (i+1)];
+            Event[] events = new Event[impressionsFactorPerUser * (i + 1)];
             Arrays.fill(events, EventFactory.createEvent());
-            postEvents(Arrays.asList(events), experiment, users.get(i),HttpStatus.SC_CREATED);
+            postEvents(Arrays.asList(events), experiment, users.get(i), HttpStatus.SC_CREATED);
 
             // store the number of impressions for easier calculations later
-            userImpressions.put(users.get(i), impressionsFactorPerUser * (i+1));
+            userImpressions.put(users.get(i), impressionsFactorPerUser * (i + 1));
         }
-        postEvent(EventFactory.createAction(), experiment, specialUser,HttpStatus.SC_CREATED);
+        postEvent(EventFactory.createAction(), experiment, specialUser, HttpStatus.SC_CREATED);
         postEvent(EventFactory.createAction().setName("Action2"), experiment, users.get(1), HttpStatus.SC_CREATED);
     }
 
     /**
      * Retrieve all events and count them.
      */
-    @Test(dependsOnMethods = {"t_submitEvents"}, retryAnalyzer = RetryAnalyzer.class )
+    @Test(dependsOnMethods = {"t_submitEvents"}, retryAnalyzer = RetryAnalyzer.class)
     @RetryTest(maxTries = 3, warmup = 2000)
     public void t_retrieveEvents() {
         int expectedEventCount = 2; // 2 actions + for all users (userIndex + 1) * 5 IMPRESSIONs
@@ -285,7 +305,7 @@ public class SmokeTest extends TestBase {
                 continue;
             }
             if (event.name.equals(action2.name)) {
-                assertEqualModelItems(event, action2, new DefaultNameExclusionStrategy("timestamp", "payload","userId"));
+                assertEqualModelItems(event, action2, new DefaultNameExclusionStrategy("timestamp", "payload", "userId"));
                 actionCount++;
             }
         }
@@ -295,19 +315,19 @@ public class SmokeTest extends TestBase {
     /**
      * Asserts the daily summaries. The same as t_dailySummaryOfDerivedStatistics, but for another endpoint.
      */
-    @Test(dependsOnMethods = {"t_submitEvents"}, retryAnalyzer = RetryAnalyzer.class )
-    @RetryTest(maxTries = 3, warmup = 2000)
+    @Test(dependsOnMethods = {"t_submitEvents"}, retryAnalyzer = RetryAnalyzer.class)
+    @RetryTest(maxTries = 3, warmup = 2500)
     public void t_dailySummary() {
         ExperimentCumulativeStatistics dailies = getDailyStatistics(experiment);
 
         List<DailyStatistics> filteredStatistics =
                 new ModelUtil<DailyStatistics>().filterList(dailies.days,
-                    new ModelUtil.Filter<DailyStatistics>() {
-                        @Override
-                        public boolean filter(DailyStatistics daily) {
-                            return daily.perDay.impressionCounts.eventCount > 0;
-                        }
-                    });
+                        new ModelUtil.Filter<DailyStatistics>() {
+                            @Override
+                            public boolean filter(DailyStatistics daily) {
+                                return daily.perDay.impressionCounts.eventCount > 0;
+                            }
+                        });
 
         Assert.assertEquals(filteredStatistics.size(), 1, "Only one day should have more than 0 impressions.");
 
@@ -366,7 +386,7 @@ public class SmokeTest extends TestBase {
     /**
      * Checks if there are sufficient data (which shouldn't be there).
      */
-    @Test(dependsOnMethods = {"t_submitEvents"}, retryAnalyzer = RetryAnalyzer.class )
+    @Test(dependsOnMethods = {"t_submitEvents"}, retryAnalyzer = RetryAnalyzer.class)
     @RetryTest(maxTries = 3, warmup = 2000)
     public void t_summaryWithDerivedStatistics() {
         ExperimentStatistics statistics = getStatistics(experiment);
@@ -376,7 +396,7 @@ public class SmokeTest extends TestBase {
     /**
      * Asserts the daily summaries. The same as t_dailySummary, but for another endpoint.
      */
-    @Test(dependsOnMethods = {"t_submitEvents"}, retryAnalyzer = RetryAnalyzer.class )
+    @Test(dependsOnMethods = {"t_submitEvents"}, retryAnalyzer = RetryAnalyzer.class)
     @RetryTest(maxTries = 3, warmup = 2000)
     public void t_dailySummaryOfDerivedStatistics() {
         ExperimentCumulativeStatistics dailies = getDailyStatistics(experiment);
@@ -449,7 +469,7 @@ public class SmokeTest extends TestBase {
     /**
      * closes the buckets
      */
-    @Test(dependsOnMethods = { "t_dailySummary", "t_retrieveEvents", "t_summaryWithDerivedStatistics", "t_dailySummaryOfDerivedStatistics" }, retryAnalyzer = RetryAnalyzer.class)
+    @Test(dependsOnMethods = {"t_dailySummary", "t_retrieveEvents", "t_summaryWithDerivedStatistics", "t_dailySummaryOfDerivedStatistics"}, retryAnalyzer = RetryAnalyzer.class)
     @RetryTest(warmup = 2000, maxTries = 3)
     public void t_closeBuckets() {
         for (Bucket bucket : buckets) {
@@ -547,7 +567,7 @@ public class SmokeTest extends TestBase {
         assertEqualModelItemsNoOrder(retrievedPages, pages);
     }
 
-    @Test(dependsOnMethods = { "t_getPages", "t_retrieveExperimentAssignments", "t_emptyBucket" })
+    @Test(dependsOnMethods = {"t_getPages", "t_retrieveExperimentAssignments", "t_emptyBucket"})
     public void t_pauseExperiments() {
         Experiment terminated = putExperiment(experiment.setState(Constants.EXPERIMENT_STATE_PAUSED));
         assertEqualModelItems(terminated, experiment);

@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 
 
 /**
@@ -41,9 +42,9 @@ public class ExperimentDetailTest {
     Calendar endTime = Calendar.getInstance();
 
     {
-        modTime.set(2016,8,16);
-        startTime.set(2016,8,1);
-        endTime.set(2017,10,12);
+        modTime.set(2016, 8, 16);
+        startTime.set(2016, 8, 1);
+        endTime.set(2017, 10, 12);
 
     }
 
@@ -52,7 +53,7 @@ public class ExperimentDetailTest {
 
 
     @Test
-    public void testConstructor(){
+    public void testConstructor() {
         ExperimentDetail expDetail = new ExperimentDetail(expId, expState, expLabel, appName, modTime.getTime(),
                 startTime.getTime(), endTime.getTime());
         assertEquals(expDetail.getApplicationName(), appName);
@@ -63,32 +64,32 @@ public class ExperimentDetailTest {
         assertEquals(expDetail.getEndTime(), endTime.getTime());
     }
 
-    @Test(expected=IllegalArgumentException.class)
-    public void testConstraintsId(){
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstraintsId() {
         new ExperimentDetail(null, expState, expLabel, appName, modTime.getTime(),
                 startTime.getTime(), endTime.getTime());
     }
 
-    @Test(expected=IllegalArgumentException.class)
-    public void testConstraintsState(){
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstraintsState() {
         new ExperimentDetail(expId, null, expLabel, appName, modTime.getTime(),
                 startTime.getTime(), endTime.getTime());
     }
 
-    @Test(expected=IllegalArgumentException.class)
-    public void testConstraintsLabel(){
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstraintsLabel() {
         new ExperimentDetail(expId, expState, null, appName, modTime.getTime(),
                 startTime.getTime(), endTime.getTime());
     }
 
-    @Test(expected=IllegalArgumentException.class)
-    public void testConstraintsAppName(){
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstraintsAppName() {
         new ExperimentDetail(expId, expState, expLabel, null, modTime.getTime(),
                 startTime.getTime(), endTime.getTime());
     }
 
     @Test
-    public void testCreationFromExperiment(){
+    public void testCreationFromExperiment() {
 
         ExperimentDetail expDetail = new ExperimentDetail(exp);
 
@@ -102,13 +103,13 @@ public class ExperimentDetailTest {
     }
 
     @Test
-    public void testBuckets(){
+    public void testBuckets() {
         Bucket.Label labelA = Bucket.Label.valueOf("BucketA");
         Bucket.Label labelB = Bucket.Label.valueOf("BucketB");
         Bucket.Label labelC = Bucket.Label.valueOf("BucketC");
 
         List<Bucket> buckets = new ArrayList<>();
-        Bucket bucketA = Bucket.newInstance(expId,labelA)
+        Bucket bucketA = Bucket.newInstance(expId, labelA)
                 .withAllocationPercent(0.8).withControl(true).build();
         Bucket bucketB = Bucket.newInstance(expId, labelB)
                 .withAllocationPercent(0.1).withControl(false).build();
@@ -126,13 +127,13 @@ public class ExperimentDetailTest {
 
         // check labels
         List<Bucket.Label> labels = buckets.stream().map(Bucket::getLabel).collect(Collectors.toList());
-        assertEquals(labels,expDetail.getBuckets().stream().
+        assertEquals(labels, expDetail.getBuckets().stream().
                 map(ExperimentDetail.BucketDetail::getLabel).
                 collect(Collectors.toList()));
 
         // check allocation percent
         List<Double> percentage = buckets.stream().map(Bucket::getAllocationPercent).collect(Collectors.toList());
-        assertEquals(percentage,expDetail.getBuckets().stream().
+        assertEquals(percentage, expDetail.getBuckets().stream().
                 map(ExperimentDetail.BucketDetail::getAllocationPercent).
                 collect(Collectors.toList()));
 
@@ -142,4 +143,63 @@ public class ExperimentDetailTest {
                 map(ExperimentDetail.BucketDetail::isControl).
                 collect(Collectors.toList()));
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testInvalidValueCounts() {
+        Bucket.Label labelA = Bucket.Label.valueOf("BucketA");
+        List<Bucket> buckets = new ArrayList<>();
+        Bucket bucketA = Bucket.newInstance(expId, labelA)
+                .withAllocationPercent(1.01).withControl(true).build();
+        buckets.add(bucketA);
+
+        ExperimentDetail expDetail = new ExperimentDetail(exp);
+        expDetail.addBuckets(buckets);
+
+        ExperimentDetail.BucketDetail buckDetails = expDetail.getBuckets().get(0);
+        buckDetails.setCount(-1l);
+    }
+
+    @Test
+    public void testAnalyticsFields() {
+        Bucket.Label labelA = Bucket.Label.valueOf("BucketA");
+
+        List<Bucket> buckets = new ArrayList<>();
+        Bucket bucketA = Bucket.newInstance(expId, labelA)
+                .withAllocationPercent(0.8).withControl(true).build();
+        buckets.add(bucketA);
+
+        // create experimentdetail
+        ExperimentDetail expDetail = new ExperimentDetail(exp);
+        expDetail.addBuckets(buckets);
+
+
+        // check actionRate
+        double actionRate = 0.5;
+        expDetail.getBuckets().get(0).setActionRate(actionRate);
+        assertTrue(actionRate == expDetail.getBuckets().get(0).getActionRate());
+
+        // check LowerBound
+        double lowerBound = 0.12;
+        expDetail.getBuckets().get(0).setLowerBound(lowerBound);
+        assertTrue(lowerBound == expDetail.getBuckets().get(0).getLowerBound());
+
+        // check UpperBound
+        double upperBound = 0.42;
+        expDetail.getBuckets().get(0).setUpperBound(upperBound);
+        assertTrue(upperBound == expDetail.getBuckets().get(0).getUpperBound());
+
+        // check Count
+        long count = 17284l;
+        expDetail.getBuckets().get(0).setCount(count);
+        assertTrue(count == expDetail.getBuckets().get(0).getCount());
+
+        // check winner
+        Boolean winnerSoFar = true;
+        expDetail.getBuckets().get(0).setWinnerSoFar(winnerSoFar);
+        assertTrue(expDetail.getBuckets().get(0).isWinnerSoFar());
+
+        assertTrue(expDetail.getBuckets().get(0).isLoserSoFar() == null);
+
+    }
 }
+

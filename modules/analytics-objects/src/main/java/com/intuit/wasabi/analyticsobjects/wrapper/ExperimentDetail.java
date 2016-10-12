@@ -122,9 +122,9 @@ public class ExperimentDetail {
         }
 
         public void setAllocationPercent(double allocationPercent) {
-            if(allocationPercent >= 0.0)
+            if(allocationPercent >= 0.0 && allocationPercent <= 1.0)
                 this.allocationPercent = allocationPercent;
-            else throw new IllegalArgumentException("AllocationPercent can not be smaller than 0 for a bucket");
+            else throw new IllegalArgumentException("AllocationPercent must be between 0.0 and 1.0 for a bucket");
         }
 
         public double getActionRate() {
@@ -246,7 +246,7 @@ public class ExperimentDetail {
     }
 
     private void setLabel(Experiment.Label label) {
-        if(label != null && !label.toString().isEmpty())
+        if(label != null)
             this.label = label;
         else throw new IllegalArgumentException("Experiment.Label is not allowed to be null for ExperimentDetail");
     }
