@@ -21,13 +21,12 @@ import com.intuit.wasabi.analyticsobjects.Parameters;
 import com.intuit.wasabi.analyticsobjects.counts.AssignmentCounts;
 import com.intuit.wasabi.analyticsobjects.statistics.BucketStatistics;
 import com.intuit.wasabi.analyticsobjects.statistics.ExperimentStatistics;
-import com.intuit.wasabi.experiment.*;
+import com.intuit.wasabi.analyticsobjects.wrapper.ExperimentDetail;
+import com.intuit.wasabi.experiment.Buckets;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Bucket.Label;
 import com.intuit.wasabi.experimentobjects.Experiment;
-import com.intuit.wasabi.analyticsobjects.wrapper.ExperimentDetail;
 import com.intuit.wasabi.repository.CassandraRepository;
-import com.intuit.wasabi.repository.DatabaseRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import org.joda.time.DateTime;
 
@@ -35,11 +34,12 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Implementation of {@link ExperimentDetails}
  */
-public class ExperimentDetailsImpl implements ExperimentDetails{
+public class ExperimentDetailsImpl implements ExperimentDetails {
 
     private final ExperimentRepository cassandraRepository;
     private final Buckets buckets;
@@ -50,9 +50,9 @@ public class ExperimentDetailsImpl implements ExperimentDetails{
      * Constructor of the ExperimentDetails.
      *
      * @param cassandraRepository repository for the experiment information
-     * @param buckets access to the bucket information
-     * @param analytics the analytics module that holds the methods to get bucket details and counts
-     *                  for running experiments
+     * @param buckets             access to the bucket information
+     * @param analytics           the analytics module that holds the methods to get bucket details and counts
+     *                            for running experiments
      */
     @Inject
     public ExperimentDetailsImpl(@CassandraRepository ExperimentRepository cassandraRepository,
@@ -75,7 +75,7 @@ public class ExperimentDetailsImpl implements ExperimentDetails{
         exps.forEach(e -> details.add(new ExperimentDetail(e)));
 
         //add bucket information
-        details.parallelStream().forEach(expd -> getBucketData(expd));
+        details.parallelStream().forEach(this::getBucketData);
 
         return details;
     }
@@ -88,7 +88,7 @@ public class ExperimentDetailsImpl implements ExperimentDetails{
      * @param exp the experiment that should be enriched with bucket data
      * @return the same ExperimentDetail object but with additional information
      */
-    private ExperimentDetail getBucketData(ExperimentDetail exp){
+    private ExperimentDetail getBucketData(ExperimentDetail exp) {
         List<Bucket> buckList = buckets.getBuckets(exp.getId()).getBuckets();
         exp.addBuckets(buckList);
 
@@ -109,24 +109,24 @@ public class ExperimentDetailsImpl implements ExperimentDetails{
      * Retrieves the analytics data for the buckets and the experiment itself.
      *
      * @param experimentDetail the {@link ExperimentDetail} that needs to be enhanced with analytics data
-     * @param params {@link Parameters} for the Analytics calls- containing the context for example
+     * @param params           {@link Parameters} for the Analytics calls- containing the context for example
      * @return the same object with additional analytic information
      */
-     ExperimentDetail getAnalyticData(ExperimentDetail experimentDetail, Parameters params){
+    ExperimentDetail getAnalyticData(ExperimentDetail experimentDetail, Parameters params) {
 
         // analytics data is only necessary for running/paused/terminated experiments
-        if(!experimentDetail.getState().equals(Experiment.State.DRAFT)) {
+        if (!experimentDetail.getState().equals(Experiment.State.DRAFT)) {
 
             //experiment level analytics
             AssignmentCounts assignmentCounts = analytics.getAssignmentCounts(experimentDetail.getId(),
-                                                                                params.getContext());
+                    params.getContext());
             if (assignmentCounts != null) {
                 long totalAssignments = assignmentCounts.getTotalUsers().getTotal();
                 experimentDetail.setTotalNumberUsers(totalAssignments);
             }
 
             ExperimentStatistics expStats = analytics.getExperimentStatistics(experimentDetail.getId(), params);
-            getBucketDetails(experimentDetail,expStats);
+            getBucketDetails(experimentDetail, expStats);
 
         }
         return experimentDetail;
@@ -136,19 +136,25 @@ public class ExperimentDetailsImpl implements ExperimentDetails{
      * Encapsulates the AnalyticsData retrieval for the Buckets of an Experiment.
      *
      * @param experimentDetail the {@link ExperimentDetail} of which the Bucketinformation is retrieved
-     * @param expStats the ExperimentStatistics belonging to this Experiment
+     * @param expStats         the ExperimentStatistics belonging to this Experiment
      */
-    void getBucketDetails(ExperimentDetail experimentDetail, ExperimentStatistics expStats){
+    void getBucketDetails(ExperimentDetail experimentDetail, ExperimentStatistics expStats) {
         DateTime aWeekAgo = new DateTime().minusDays(7);
         //winner/loser so far is only determined if the experiment ran at least a week
         boolean checkWinnerSoFar = experimentDetail.getStartTime().before(aWeekAgo.toDate());
 
         Map<Label, BucketStatistics> bucketAnalytics = expStats.getBuckets();
 
-        for(ExperimentDetail.BucketDetail b : experimentDetail.getBuckets()){
+        for (ExperimentDetail.BucketDetail b : experimentDetail.getBuckets()) {
             BucketStatistics bucketStat = bucketAnalytics.get(b.getLabel());
 
-            if(bucketStat.getJointActionRate() != null) {
+            if (Objects.isNull(bucketStat)) {
+                b.setWinnerSoFar(false);
+                b.setLoserSoFar(false);
+                continue;
+            }
+
+            if (bucketStat.getJointActionRate() != null) {
                 b.setActionRate(bucketStat.getJointActionRate().getEstimate());
                 b.setLowerBound(bucketStat.getJointActionRate().getLowerBound());
                 b.setUpperBound(bucketStat.getJointActionRate().getUpperBound());
@@ -156,15 +162,15 @@ public class ExperimentDetailsImpl implements ExperimentDetails{
 
             b.setCount(bucketStat.getImpressionCounts().getUniqueUserCount());
 
-            if(checkWinnerSoFar){
+            if (checkWinnerSoFar) {
                 b.setWinnerSoFar(false);
                 b.setLoserSoFar(false);
 
-                if(expStats.getJointProgress().getWinnersSoFar().contains(b.getLabel())){
+                if (expStats.getJointProgress().getWinnersSoFar().contains(b.getLabel())) {
                     b.setWinnerSoFar(true);
                 }
 
-                if(expStats.getJointProgress().getLosersSoFar().contains(b.getLabel())){
+                if (expStats.getJointProgress().getLosersSoFar().contains(b.getLabel())) {
                     b.setLoserSoFar(true);
                 }
             }

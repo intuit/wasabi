@@ -23,8 +23,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
+import java.util.Objects;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static javax.ws.rs.core.Response.Status.fromStatusCode;
 
 abstract class ExceptionProvider<T extends Throwable> implements ExceptionMapper<T> {
@@ -52,18 +52,17 @@ abstract class ExceptionProvider<T extends Throwable> implements ExceptionMapper
 
         return httpHeader.headers(responseStatus)
                 .type(type)
-                .entity(serialize(type, responseStatus, e.getMessage()))
+                .entity(serialize(responseStatus, e))
                 .build();
     }
 
-    private String serialize(final MediaType type, final Status status, final String message) {
-        String serializedMessage = message;
-
-        // FIXME: ?assume type alway is json?
-        if (type.equals(APPLICATION_JSON_TYPE)) {
-            serializedMessage = exceptionJsonifier.serialize(status, message);
+    private String serialize(final Status status, final Throwable exception) {
+        Throwable exceptionCause = exception;
+        int levels = 0;
+        while (Objects.isNull(exceptionCause.getMessage()) && Objects.nonNull(exceptionCause.getCause())) {
+            exceptionCause = exceptionCause.getCause();
+            levels++;
         }
-
-        return serializedMessage;
+        return exceptionJsonifier.serialize(status, exceptionCause.getMessage());
     }
 }
