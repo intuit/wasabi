@@ -30,7 +30,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
@@ -88,24 +90,6 @@ public class EventsResourceTest {
 
         resource.recordEvents(applicationName, experimentLabel, userID, eventList);
         verify(events).recordEvents(any(Application.Name.class), any(Experiment.Label.class), any(User.ID.class), any(EventList.class), any(Set.class));
-    }
-
-    @Test
-    public void recordUsersEvents() throws UnsupportedOperationException {
-        Map<User.ID, List<Event>> eventList = new HashMap<>();
-
-        thrown.expect(UnsupportedOperationException.class);
-        thrown.expectMessage("Not implemented");
-        resource.recordUsersEvents(applicationName, experimentLabel, eventList);
-    }
-
-    @Test
-    public void recordExperimentsEvents() throws Exception {
-        Map<Experiment.Label, Map<User.ID, List<Event>>> eventList = new HashMap<>();
-
-        thrown.expect(UnsupportedOperationException.class);
-        thrown.expectMessage("Not implemented");
-        resource.recordExperimentsEvents(applicationName, userID, eventList);
     }
 
     @Test

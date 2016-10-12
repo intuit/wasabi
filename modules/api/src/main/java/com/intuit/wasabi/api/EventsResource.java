@@ -38,8 +38,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_EVENT;
@@ -139,52 +137,6 @@ public class EventsResource {
         events.recordEvents(applicationName, experimentLabel, userID, eventList, contextSet);
 
         return httpHeader.headers(CREATED).build();
-    }
-
-    /**
-     * Submit events for users within the context of a specific application
-     * and experiment. Each event is an impression or action.
-     *
-     * @param applicationName the application name
-     * @param experimentLabel the experiment label
-     * @param eventList       the {@link com.intuit.wasabi.analyticsobjects.EventList} event list
-     * @throws UnsupportedOperationException UnsupportedOperationException
-     */
-    @POST
-    @Path("applications/{applicationName}/experiments/{experimentLabel}/users")
-    @Consumes(APPLICATION_JSON)
-    @Produces(APPLICATION_JSON)
-    @Timed
-    public Response recordUsersEvents(
-            @PathParam("applicationName")
-            final Application.Name applicationName,
-
-            @PathParam("experimentLabel")
-            final Experiment.Label experimentLabel,
-
-            final Map<User.ID, List<Event>> eventList) {
-        throw new UnsupportedOperationException("Not implemented");
-    }
-
-    /**
-     * Submit events for users and experiments within the context of a
-     * specific application. Each event is an impression or action.
-     *
-     * @param applicationName the application name
-     * @param userID          the user id
-     * @param eventList       the {@link com.intuit.wasabi.analyticsobjects.EventList} event list
-     * @throws UnsupportedOperationException always throws
-     */
-    @POST
-    @Path("applications/{applicationName}/experiments")
-    @Consumes(APPLICATION_JSON)
-    @Produces(APPLICATION_JSON)
-    @Timed
-    public Response recordExperimentsEvents(
-            @PathParam("applicationName") final Application.Name applicationName,
-            @PathParam("userID") final User.ID userID,
-            final Map<Experiment.Label, Map<User.ID, List<Event>>> eventList) {
-        throw new UnsupportedOperationException("Not implemented");
     }
 
     /**

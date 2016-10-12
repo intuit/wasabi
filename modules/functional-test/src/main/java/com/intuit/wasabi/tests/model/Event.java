@@ -23,29 +23,31 @@ import com.intuit.wasabi.tests.library.util.serialstrategies.SerializationStrate
  * By default all events are IMPRESSIONs.
  */
 public class Event extends ModelItem {
-    /** this event's timestamp */
-    public String timestamp;
-
-    /** The event type, by default "IMPRESSION", but can be different to represent an Action. */
-    public String name = "IMPRESSION";
-
-    /** this event's context */
-    public String context;
-
-    /** The payload coming with the event. */
-    public String payload;
-
-    /** This event's value. */
-    public String value;
-
-    public String userId;
-    
-    public void setUserId(String userId) {
-		this.userId = userId;
-	}
-
-	/** The serialization strategy for comparisons and JSON serialization. */
+    /**
+     * The serialization strategy for comparisons and JSON serialization.
+     */
     private static SerializationStrategy serializationStrategy = new DefaultNameExclusionStrategy();
+    /**
+     * this event's timestamp
+     */
+    public String timestamp;
+    /**
+     * The event type, by default "IMPRESSION", but can be different to represent an Action.
+     */
+    public String name = "IMPRESSION";
+    /**
+     * this event's context
+     */
+    public String context;
+    /**
+     * The payload coming with the event.
+     */
+    public String payload;
+    /**
+     * This event's value.
+     */
+    public String value;
+    public String userId;
 
     /**
      * Creates a simple IMPRESSION.
@@ -53,8 +55,6 @@ public class Event extends ModelItem {
     public Event() {
     }
 
-    
-    
     /**
      * Copies an event.
      *
@@ -64,6 +64,7 @@ public class Event extends ModelItem {
         update(other);
     }
 
+
     /**
      * Creates a specific Event.
      *
@@ -71,6 +72,10 @@ public class Event extends ModelItem {
      */
     public Event(String name) {
         this.setName(name);
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     /**
@@ -118,15 +123,13 @@ public class Event extends ModelItem {
     }
 
     /**
-     * Sets this event's value. Note that this has currently no effect as the value is not implemented.
-     * TODO: once supported remove the note
+     * Returns the current SerializationStrategy.
      *
-     * @param value the new value
-     * @return this
+     * @return the current SerializationStategy.
      */
-    public Event setValue(String value) {
-        this.value = value;
-        return this;
+    @Override
+    public SerializationStrategy getSerializationStrategy() {
+        return Event.serializationStrategy;
     }
 
     /**
@@ -138,15 +141,5 @@ public class Event extends ModelItem {
     @Override
     public void setSerializationStrategy(SerializationStrategy serializationStrategy) {
         Event.serializationStrategy = serializationStrategy;
-    }
-
-    /**
-     * Returns the current SerializationStrategy.
-     *
-     * @return the current SerializationStategy.
-     */
-    @Override
-    public SerializationStrategy getSerializationStrategy() {
-        return Event.serializationStrategy;
     }
 }
