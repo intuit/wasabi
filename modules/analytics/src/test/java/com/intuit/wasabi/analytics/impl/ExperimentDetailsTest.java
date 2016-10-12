@@ -142,7 +142,7 @@ public class ExperimentDetailsTest {
         AssignmentCounts counts = mock(AssignmentCounts.class);
         TotalUsers totUsers = mock(TotalUsers.class);
         when(counts.getTotalUsers()).thenReturn(totUsers);
-        when(counts.getTotalUsers().getTotal()).thenReturn(42l);
+        when(counts.getTotalUsers().getBucketAssignments()).thenReturn(42l);
         when(analytics.getAssignmentCounts(any(), any(Context.class))).thenReturn(counts);
 
         when(analytics.getExperimentStatistics(eq(expId), any(Parameters.class))).thenReturn(expStats);
