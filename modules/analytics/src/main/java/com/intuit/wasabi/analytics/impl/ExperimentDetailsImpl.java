@@ -121,8 +121,8 @@ public class ExperimentDetailsImpl implements ExperimentDetails {
             AssignmentCounts assignmentCounts = analytics.getAssignmentCounts(experimentDetail.getId(),
                     params.getContext());
             if (!Objects.isNull(assignmentCounts)) {
-                long totalAssignments = assignmentCounts.getTotalUsers().getTotal();
-                experimentDetail.setTotalNumberUsers(totalAssignments);
+                long onlyBucketAssignments = assignmentCounts.getTotalUsers().getBucketAssignments();
+                experimentDetail.setTotalNumberUsers(onlyBucketAssignments);
             }
 
             ExperimentStatistics expStats = analytics.getExperimentStatistics(experimentDetail.getId(), params);
