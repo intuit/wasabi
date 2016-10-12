@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -120,7 +120,7 @@ public class ExperimentDetailsImpl implements ExperimentDetails {
             //experiment level analytics
             AssignmentCounts assignmentCounts = analytics.getAssignmentCounts(experimentDetail.getId(),
                     params.getContext());
-            if (assignmentCounts != null) {
+            if (!Objects.isNull(assignmentCounts)) {
                 long totalAssignments = assignmentCounts.getTotalUsers().getTotal();
                 experimentDetail.setTotalNumberUsers(totalAssignments);
             }
@@ -149,12 +149,10 @@ public class ExperimentDetailsImpl implements ExperimentDetails {
             BucketStatistics bucketStat = bucketAnalytics.get(b.getLabel());
 
             if (Objects.isNull(bucketStat)) {
-                b.setWinnerSoFar(false);
-                b.setLoserSoFar(false);
                 continue;
             }
 
-            if (bucketStat.getJointActionRate() != null) {
+            if (!Objects.isNull(bucketStat.getJointActionRate())) {
                 b.setActionRate(bucketStat.getJointActionRate().getEstimate());
                 b.setLowerBound(bucketStat.getJointActionRate().getLowerBound());
                 b.setUpperBound(bucketStat.getJointActionRate().getUpperBound());
@@ -163,6 +161,7 @@ public class ExperimentDetailsImpl implements ExperimentDetails {
             b.setCount(bucketStat.getImpressionCounts().getUniqueUserCount());
 
             if (checkWinnerSoFar) {
+                // assigning boolean values has meaning in this case
                 b.setWinnerSoFar(false);
                 b.setLoserSoFar(false);
 
