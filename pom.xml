@@ -78,10 +78,8 @@ http://www.w3.org/2001/XMLSchema-instance">
         <assignment.decorator.enabled>false</assignment.decorator.enabled>
 
         <!-- mutagen -->
-        <cassandra.mutagen.root.resource.path>com/intuit/wasabi/repository/impl/cassandra/experiments/mutation
-        </cassandra.mutagen.root.resource.path>
-        <mysql.mutagen.root.resource.path>com/intuit/wasabi/repository/impl/mysql/migration
-        </mysql.mutagen.root.resource.path>
+        <cassandra.mutagen.root.resource.path>com/intuit/wasabi/repository/impl/cassandra/experiments/mutation</cassandra.mutagen.root.resource.path>
+        <mysql.mutagen.root.resource.path>com/intuit/wasabi/repository/impl/mysql/migration</mysql.mutagen.root.resource.path>
 
         <!-- FIXME: remove -->
         <assignment.decorator.service>http://decorator.example.com</assignment.decorator.service>
