@@ -697,11 +697,8 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                         var significance = 'undetermined';
                         if (experiment.sortedBuckets[i].winnerSoFar) {
                             significance = 'winner so far';
-                        // TODO: Need to change this to handle whatever Andrea does to give us losers so far and indeterminate.
-/*
-                        } else if ($.inArray(bucketLabel, statistics.jointProgress.losersSoFar) !== -1) {
+                        } else if (experiment.sortedBuckets[i].loserSoFar) {
                             return 'loser so far';
-*/
                         }
 
                         if (significance === 'winner so far') {
