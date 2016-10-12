@@ -482,3 +482,11 @@ Wasabi does this time correction whenever you start the integration tests via
 ##### Swagger mentions `curl`, how do I get it?
 To use the `curl` commands consider `choco install curl`.
 
+##### I want to test a specific branch, but when I download the zip I end up on develop.
+If you chose to use the zip file over git you can checkout the branch after you bootstrapped wasabi 
+(i.e. installed git). For example if the branch is `feature/new-auth-mechanism` you would run the 
+following command: 
+```dos
+git checkout feature/new-auth-mechanism
+```
+Note that the `git checkout` is usually enough, if not, try `git reset --hard origin/feature/new-auth-mechanism` before.
