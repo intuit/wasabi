@@ -15,16 +15,10 @@
 # limitations under the License.
 ###############################################################################
 
-wasabi_os_default=OSX
-
 usage () {
   echo "usage: `basename $0` [-n name] [-v version] [-p profile] [-h home] [-l log] [-t timestamp] [-m modules] [-d]"
   exit
 }
-
-export JAVA_HOME=${JAVA_HOME:-/usr/local/java}
-export PATH=$JAVA_HOME/bin:$PATH
-
 
 fromPom() {
   mvn -f modules/$1/pom.xml help:evaluate -Dexpression=$2 | sed -n -e '/^\[.*\]/ !{ p; }'
@@ -116,13 +110,13 @@ for module in "$modules"; do
     resources="$resources    modules/${module}/target/extra-resources/service/run=/etc/service/${id}/run"
   fi
 
-  if [ ! -z "$deps" ]; then
+  if [ ! -z "$deps" -a ! "$deps" == "null object or invalid expression" ]; then
     for dep in $deps; do
       depends="$depends --depends $dep"
     done
   fi
 
-  if [ "$daemon" = "true" -a ! -z "$daemon_deps" ]; then
+  if [ "$daemon" = "true" -a ! -z "$daemon_deps" -a ! "$daemon_deps" == "null object or invalid expression" ]; then
     for dep in $daemon_deps; do
       depends="$depends --depends $dep"
     done
@@ -137,7 +131,7 @@ for module in "$modules"; do
 
    for pkg in "deb" "rpm"; do
     fpm="${!pkg} $common `echo $scripts | sed -e "s/\[PKG\]/${pkg}/g"` $depends $resources"
-    if [ "${WASABI_OS}" == "${wasabi_os_default}" ]; then
+    if [ "${WASABI_OS}" == "${WASABI_OSX}" ] || [ "${WASABI_OS}" == "${WASABI_LINUX}" ]; then
       docker run -it -v `pwd`:/build --rm liuedy/centos-fpm fpm ${fpm} || exitOnError "failed to build rpm: $module"
     else
       eval fpm $fpm || exitOnError "failed to build rpm: $module"

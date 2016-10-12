@@ -18,7 +18,6 @@
 profile_default=development
 build_default=false
 test_default=false
-wasabi_os_default=OSX
 
 usage() {
   [ "$1" ] && echo "error: ${1}"
@@ -122,7 +121,7 @@ sed -i '' -e "s/chpst -u [^:]*:[^ ]* //" ${home}/${id}/bin/run 2>/dev/null
 [ ! -e ./modules/ui/dist/scripts/wasabi.js ] && build_js=true
 
 if [[ "${build}" = true || "${build_js}" = true ]]; then
-  if [ "${WASABI_OS}" == "${wasabi_os_default}" ]; then
+  if [ "${WASABI_OS}" == "${WASABI_OSX}" ]; then
     brew list node
     if [[ $? -eq 1 ]]; then
       echo "Node.js is not installed. Installing Node.js packages..."
