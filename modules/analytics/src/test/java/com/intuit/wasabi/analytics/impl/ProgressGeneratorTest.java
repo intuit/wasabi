@@ -64,10 +64,6 @@ public class ProgressGeneratorTest {
     private Bucket.Label bucket3Label = Bucket.Label.valueOf("three");
     private Bucket.Label bucket4Label = Bucket.Label.valueOf("four");
 
-//    public ProgressGeneratorTest(AnalysisTools analysisTools) {
-//        this.analysisTools = analysisTools;
-//    }
-
     @Before
     public void before() {
         ActionCounts click1 = new ActionCounts.Builder().withActionName(clickName).withEventCount(7)

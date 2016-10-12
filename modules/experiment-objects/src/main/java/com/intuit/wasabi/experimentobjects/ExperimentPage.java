@@ -16,6 +16,7 @@
 package com.intuit.wasabi.experimentobjects;
 
 import io.swagger.annotations.ApiModelProperty;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -83,12 +84,7 @@ public class ExperimentPage implements Cloneable {
     }
 
     @Override
-    public ExperimentPage clone() {
-        try {
+    public ExperimentPage clone() throws CloneNotSupportedException {
             return (ExperimentPage) super.clone();
-        } catch (CloneNotSupportedException e) {
-            // Should never happen
-            throw new RuntimeException(e);
-        }
     }
 }
