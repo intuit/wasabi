@@ -19,3 +19,7 @@ echo Created bucket NoCardView
 echo Starting experiment
 curl -u ${WASABI_LOGIN} -X PUT -H "Content-Type: application/json" -d '{"state":"RUNNING"}' "${WASABI_SERVER}/experiments/${EXPERIMENT_ID}"
 echo Experiment started
+
+echo Assigning admin
+curl -u ${WASABI_LOGIN} -H "Content-Type: application/json" -X PUT -d '{"assignment":null, "overwrite": true }' ${WASABI_SERVER}/assignments/applications/${APP_NAME}/experiments/CardViewTest/users/admin
+echo admin assigned
