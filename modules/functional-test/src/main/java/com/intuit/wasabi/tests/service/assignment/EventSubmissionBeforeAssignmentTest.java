@@ -68,7 +68,7 @@ public class EventSubmissionBeforeAssignmentTest extends TestBase {
 
 
     @Test
-    public void createImpression() {
+    public void createDefaultImpression() {
         //create user
         User user = UserFactory.createUser();
 
@@ -76,7 +76,44 @@ public class EventSubmissionBeforeAssignmentTest extends TestBase {
         Event impression = EventFactory.createImpression();
         postEvent(impression, experiment, user, HttpStatus.SC_NOT_FOUND);
     }
+    
+    
+    @Test
+    public void createImpressionWithContextSetForProd() {
+        //create user
+        User user = UserFactory.createUser();
 
+        //create an event of type IMPRESSION and post it to the event endpoint
+        Event impression = EventFactory.createImpression();
+        impression.context="prod";
+        postEvent(impression, experiment, user, HttpStatus.SC_NOT_FOUND);
+    }
+
+    @Test
+    public void createImpressionWithContextSetForQA() {
+        //create user
+        User user = UserFactory.createUser();
+
+        
+        //create an event of type IMPRESSION and post it to the event endpoint
+        Event impression = EventFactory.createImpression();
+        impression.context="QA";
+        postEvent(impression, experiment, user, HttpStatus.SC_NOT_FOUND);
+    }
+    
+    
+    @Test
+    public void createImpressionWithContextSetForBothQAAndProd() {
+        //create user
+        User user = UserFactory.createUser();
+
+        //create an event of type IMPRESSION and post it to the event endpoint
+        Event impression = EventFactory.createImpression();
+        impression.context="QA";
+        postEvent(impression, experiment, user, HttpStatus.SC_NOT_FOUND);
+        impression.context ="PROD";
+        postEvent(impression, experiment, user, HttpStatus.SC_CREATED);
+    }
 
     @AfterClass
     public void testCleanUp() {
