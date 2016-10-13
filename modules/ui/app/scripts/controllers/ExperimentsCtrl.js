@@ -514,12 +514,12 @@ angular.module('wasabi.controllers').
             if (tmpSearchSettings) {
                 $scope.data = JSON.parse(tmpSearchSettings);
             }
-            if (!$scope.data.lastSearchWasSimple) {
-                $scope.showMoreLessSearch(true);
-            }
-
             if ($scope.data.enableCardView && $scope.data.showGrid) {
                 $scope.loadCardViewExperiments();
+            }
+
+            if (!$scope.data.lastSearchWasSimple) {
+                $scope.showMoreLessSearch(true);
             }
 
             UtilitiesFactory.hideHeading(false);
