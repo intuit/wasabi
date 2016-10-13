@@ -19,6 +19,7 @@ import com.intuit.wasabi.analytics.Analytics;
 import com.intuit.wasabi.analytics.ExperimentDetails;
 import com.intuit.wasabi.analyticsobjects.Parameters;
 import com.intuit.wasabi.analyticsobjects.counts.AssignmentCounts;
+import com.intuit.wasabi.analyticsobjects.counts.BucketAssignmentCount;
 import com.intuit.wasabi.analyticsobjects.statistics.BucketStatistics;
 import com.intuit.wasabi.analyticsobjects.statistics.ExperimentStatistics;
 import com.intuit.wasabi.analyticsobjects.wrapper.ExperimentDetail;
@@ -126,7 +127,7 @@ public class ExperimentDetailsImpl implements ExperimentDetails {
             }
 
             ExperimentStatistics expStats = analytics.getExperimentStatistics(experimentDetail.getId(), params);
-            getBucketDetails(experimentDetail, expStats);
+            getBucketDetails(experimentDetail, expStats, assignmentCounts);
 
         }
         return experimentDetail;
@@ -137,13 +138,15 @@ public class ExperimentDetailsImpl implements ExperimentDetails {
      *
      * @param experimentDetail the {@link ExperimentDetail} of which the Bucketinformation is retrieved
      * @param expStats         the ExperimentStatistics belonging to this Experiment
+     * @param assignmentCounts the {@link AssignmentCounts} for the buckets
      */
-    void getBucketDetails(ExperimentDetail experimentDetail, ExperimentStatistics expStats) {
+    void getBucketDetails(ExperimentDetail experimentDetail, ExperimentStatistics expStats, AssignmentCounts assignmentCounts) {
         DateTime aWeekAgo = new DateTime().minusDays(7);
         //winner/loser so far is only determined if the experiment ran at least a week
         boolean checkWinnerSoFar = experimentDetail.getStartTime().before(aWeekAgo.toDate());
 
         Map<Label, BucketStatistics> bucketAnalytics = expStats.getBuckets();
+        List<BucketAssignmentCount> bucketAssignments = assignmentCounts.getAssignments();
 
         for (ExperimentDetail.BucketDetail b : experimentDetail.getBuckets()) {
             BucketStatistics bucketStat = bucketAnalytics.get(b.getLabel());
@@ -158,7 +161,12 @@ public class ExperimentDetailsImpl implements ExperimentDetails {
                 b.setUpperBound(bucketStat.getJointActionRate().getUpperBound());
             }
 
-            b.setCount(bucketStat.getImpressionCounts().getUniqueUserCount());
+            for (BucketAssignmentCount bucketAssignmentCount : bucketAssignments) {
+                if (b.getLabel().equals(bucketAssignmentCount.getBucket())) {
+                    b.setCount(bucketAssignmentCount.getCount());
+                    break;
+                }
+            }
 
             if (checkWinnerSoFar) {
                 // assigning boolean values has meaning in this case

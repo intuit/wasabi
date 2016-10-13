@@ -527,12 +527,12 @@ public class AnalyticsResource {
     }
 
     /**
-     * Get assignments count
+     * Gets assignment counts for the experiment in total and the specific buckets.
      *
-     * @param experimentID
-     * @param context
-     * @param authorizationHeader
-     * @return Response object
+     * @param experimentID        the ID of the experiment that the counts should be retrieved for
+     * @param context             can be either "PROD" or "QA"
+     * @param authorizationHeader the authorization header for this call
+     * @return The total {@link AssignmentCounts} and the AssignmentCounts per Bucket
      */
     @GET
     @Path("/experiments/{experimentID}/assignments/counts")

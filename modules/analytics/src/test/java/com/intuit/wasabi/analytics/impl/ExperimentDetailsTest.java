@@ -18,6 +18,7 @@ package com.intuit.wasabi.analytics.impl;
 import com.intuit.wasabi.analytics.Analytics;
 import com.intuit.wasabi.analyticsobjects.Parameters;
 import com.intuit.wasabi.analyticsobjects.counts.AssignmentCounts;
+import com.intuit.wasabi.analyticsobjects.counts.BucketAssignmentCount;
 import com.intuit.wasabi.analyticsobjects.counts.Counts;
 import com.intuit.wasabi.analyticsobjects.counts.TotalUsers;
 import com.intuit.wasabi.analyticsobjects.statistics.BucketStatistics;
@@ -197,7 +198,9 @@ public class ExperimentDetailsTest {
         when(expStats.getJointProgress().getWinnersSoFar()).thenReturn(winnerSoFar);
 
         //check if winner so far works
-        expDetails.getBucketDetails(expDetail, expStats);
+        AssignmentCounts assignmentCounts = mock(AssignmentCounts.class);
+        when(assignmentCounts.getAssignments()).thenReturn(new ArrayList<>());
+        expDetails.getBucketDetails(expDetail, expStats, assignmentCounts);
 
         verify(bd1).setActionRate(0.42);
         verify(bd2).setActionRate(0.99);
