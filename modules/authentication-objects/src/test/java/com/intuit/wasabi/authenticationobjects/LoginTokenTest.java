@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,9 +21,11 @@ import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+/**
+ * Test for the {@link LoginToken}
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class LoginTokenTest {
 
@@ -37,9 +39,6 @@ public class LoginTokenTest {
         token = getLoginToken();
     }
 
-    /**
-     * @return
-     */
     private LoginToken getLoginToken() {
         return LoginToken.withAccessToken(access_token)
                 .withTokenType(token_type)
@@ -48,9 +47,10 @@ public class LoginTokenTest {
 
     @Test
     public void testLoginToken() {
-        assertNotNull(token.getAccess_token());
-        assertNotNull(token.getToken_type());
-        assertNotNull(token.toString());
+        assertEquals(token.getAccess_token(), access_token);
+        assertEquals(token.getToken_type(), token_type);
+        assertTrue(token.toString().contains(access_token));
+        assertTrue(token.toString().contains(token_type));
     }
 
     @Test
