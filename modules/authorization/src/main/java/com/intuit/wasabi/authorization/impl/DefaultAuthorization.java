@@ -17,11 +17,16 @@ package com.intuit.wasabi.authorization.impl;
 
 import com.google.common.base.Optional;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
+import com.intuit.wasabi.authenticationobjects.exceptions.AuthenticationException;
 import com.intuit.wasabi.authorization.Authorization;
-import com.intuit.wasabi.authorizationobjects.*;
+import com.intuit.wasabi.authorizationobjects.Permission;
+import com.intuit.wasabi.authorizationobjects.Role;
+import com.intuit.wasabi.authorizationobjects.UserPermissions;
+import com.intuit.wasabi.authorizationobjects.UserPermissionsList;
+import com.intuit.wasabi.authorizationobjects.UserRole;
+import com.intuit.wasabi.authorizationobjects.UserRoleList;
 import com.intuit.wasabi.eventlog.EventLog;
 import com.intuit.wasabi.eventlog.events.AuthorizationChangeEvent;
-import com.intuit.wasabi.exceptions.AuthenticationException;
 import com.intuit.wasabi.experiment.Experiments;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Experiment;
@@ -36,6 +41,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.intuit.wasabi.authorizationobjects.Permission.SUPERADMIN;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -101,7 +107,7 @@ public class DefaultAuthorization implements Authorization {
         //get the user's permissions for this applicationName
         UserPermissions userPermissions = getUserPermissions(userID, applicationName);
         //check that the user is permitted to perform the action
-        if (userPermissions == null || !userPermissions.getPermissions().contains(permission)) {
+        if (Objects.isNull(userPermissions) || !userPermissions.getPermissions().contains(permission)) {
             throw new AuthenticationException("error, user " + userID + " not authorized to " + permission
                     .toString() + " on application " + applicationName.toString());
         }
@@ -142,10 +148,10 @@ public class DefaultAuthorization implements Authorization {
                 // prepare event for log
                 UserInfo user = getUserInfo(userRole.getUserID());
                 eventLog.postEvent(new AuthorizationChangeEvent(admin, userRole.getApplicationName(), user,
-                        oldRole == null || "superadmin".equalsIgnoreCase(oldRole.toString()) ? null : oldRole.toString(),
+                        Objects.isNull(oldRole) || "superadmin".equalsIgnoreCase(oldRole.toString()) ? null : oldRole.toString(),
                         userRole.getRole().toString()));
             } catch (RepositoryException e) {
-                LOGGER.info("RepoitoryException for setting user Role in DefaultAuthorization " , e);
+                LOGGER.info("RepoitoryException for setting user Role in DefaultAuthorization ", e);
                 status.put("roleAssignmentStatus", "FAILED");
                 status.put("reason", "RepositoryException");
             }
@@ -163,7 +169,7 @@ public class DefaultAuthorization implements Authorization {
 
     @Override
     public void checkSuperAdmin(UserInfo.Username userID) {
-        if (authorizationRepository.checkSuperAdminPermissions(userID, null) == null) {
+        if (Objects.isNull(authorizationRepository.checkSuperAdminPermissions(userID, null))) {
             throw new AuthenticationException("error, user " + userID + " is not a superadmin");
         }
     }
@@ -171,7 +177,7 @@ public class DefaultAuthorization implements Authorization {
     @Override
     public UserInfo getUserInfo(UserInfo.Username userID) {
         UserInfo result;
-        if (userID != null && !StringUtils.isBlank(userID.toString())) {
+        if (Objects.nonNull(userID) && !StringUtils.isBlank(userID.toString())) {
             result = authorizationRepository.getUserInfo(userID);
         } else {
             throw new AuthenticationException("The user name was null or empty for retrieving the UserInfo.");

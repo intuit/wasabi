@@ -21,6 +21,7 @@ import com.netflix.astyanax.serializers.ComparatorType;
 import com.netflix.astyanax.serializers.StringSerializer;
 
 import java.nio.ByteBuffer;
+import java.util.Objects;
 
 /**
  * Astyanax serializer for
@@ -50,7 +51,7 @@ public class BucketStateSerializer extends AbstractSerializer<State> {
 
     @Override
     public ByteBuffer toByteBuffer(State value) {
-        if (value == null) {
+        if (Objects.isNull(value)) {
             return null;
         }
         return StringSerializer.get().toByteBuffer(value.toString());
@@ -58,7 +59,7 @@ public class BucketStateSerializer extends AbstractSerializer<State> {
 
     @Override
     public State fromByteBuffer(ByteBuffer byteBuffer) {
-        if (byteBuffer == null) {
+        if (Objects.isNull(byteBuffer)) {
             return null;
         }
 

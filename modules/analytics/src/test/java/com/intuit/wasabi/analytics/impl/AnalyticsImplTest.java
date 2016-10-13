@@ -24,7 +24,7 @@ import com.intuit.wasabi.analyticsobjects.metrics.BinomialMetrics;
 import com.intuit.wasabi.analyticsobjects.statistics.BucketStatistics;
 import com.intuit.wasabi.analyticsobjects.statistics.ExperimentStatistics;
 import com.intuit.wasabi.database.TransactionFactory;
-import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
+import com.intuit.wasabi.experimentobjects.exception.ExperimentNotFoundException;
 import com.intuit.wasabi.experiment.Experiments;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Context;

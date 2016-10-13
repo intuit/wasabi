@@ -24,6 +24,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * Object for holding an experiment with Priotization.
@@ -254,7 +255,7 @@ public class PrioritizedExperiment implements Cloneable, ExperimentBase {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null)
+        if (Objects.isNull(obj))
             return false;
         if (obj == this)
             return true;
@@ -343,7 +344,7 @@ public class PrioritizedExperiment implements Cloneable, ExperimentBase {
         }
 
         private Date copyDate(Date date) {
-            return date != null
+            return Objects.nonNull(date)
                     ? new Date(date.getTime())
                     : null;
         }

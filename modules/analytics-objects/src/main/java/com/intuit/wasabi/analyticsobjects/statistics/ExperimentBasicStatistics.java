@@ -30,6 +30,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 
 /**
  * Base class for experiment stats
@@ -110,7 +111,7 @@ public class ExperimentBasicStatistics extends AbstractContainerStatistics {
     public ExperimentBasicStatistics clone() {
         ExperimentBasicStatistics cloned = (ExperimentBasicStatistics) super.clone();
 
-        if (buckets != null) {
+        if (Objects.nonNull(buckets)) {
             Map<Bucket.Label, BucketBasicStatistics> clonedBuckets = new HashMap<>();
             for ( Entry<Label, BucketBasicStatistics> entry : buckets.entrySet()) {
                 clonedBuckets.put(entry.getKey(), entry.getValue().clone());

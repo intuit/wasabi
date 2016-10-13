@@ -19,6 +19,7 @@ import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.ExperimentIDList;
 import com.intuit.wasabi.experimentobjects.ExperimentList;
+import com.intuit.wasabi.experimentobjects.exception.ExperimentNotFoundException;
 
 import java.util.List;
 import java.util.Map;
@@ -49,7 +50,7 @@ public interface Mutex {
 
     /**
      * Creates a new mutual exclusion rule and adds it to the database
-     * 
+     *
      * @param experimentID experimentID object containing experiment uuid
      * @param experimentIDList experimentList object containing list of experiment uuid's
      * @param user the {@link UserInfo} who triggered the creation of an exclusion
@@ -59,12 +60,12 @@ public interface Mutex {
 
     /**
      * Deletes a mutual exclusion relation between 2 experiments by removing it from the database.
-     * 
+     *
      * @param expID1 ID of experiment 1
      * @param expID2 ID of experiment 2
      * @param user the {@link UserInfo} who deleted the exclusion
      *
-     * @throws com.intuit.wasabi.exceptions.ExperimentNotFoundException if expID_1 or expID_2 is null.
+     * @throws ExperimentNotFoundException if expID_1 or expID_2 is null.
      */
     void deleteExclusion(Experiment.ID expID1, Experiment.ID expID2, UserInfo user);
 }

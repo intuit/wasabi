@@ -26,7 +26,6 @@ import com.intuit.wasabi.analyticsobjects.counts.TotalUsers;
 import com.intuit.wasabi.cassandra.CassandraDriver;
 import com.intuit.wasabi.cassandra.ExperimentDriver;
 import com.intuit.wasabi.exceptions.ConstraintViolationException;
-import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Bucket.BucketAuditInfo;
@@ -38,6 +37,7 @@ import com.intuit.wasabi.experimentobjects.Experiment.State;
 import com.intuit.wasabi.experimentobjects.ExperimentList;
 import com.intuit.wasabi.experimentobjects.ExperimentValidator;
 import com.intuit.wasabi.experimentobjects.NewExperiment;
+import com.intuit.wasabi.experimentobjects.exception.ExperimentNotFoundException;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.RepositoryException;
 import com.intuit.wasabi.repository.impl.cassandra.serializer.ApplicationNameSerializer;
@@ -60,11 +60,17 @@ import com.toddfast.mutagen.cassandra.CassandraMutagen;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Cassandra experiment repo
- * 
+ *
  * @see ExperimentRepository
  */
 class CassandraExperimentRepository extends AbstractCassandraRepository<ExperimentsKeyspace> implements
@@ -74,11 +80,12 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
 
     /**
      * Constructor
-     * @param mutagen cassandra mutagen
-     * @param driver  cassandra driver
-     * @param keyspace cassandra keyspace
+     *
+     * @param mutagen   cassandra mutagen
+     * @param driver    cassandra driver
+     * @param keyspace  cassandra keyspace
      * @param validator experiment validator
-     * @throws IOException io exception
+     * @throws IOException         io exception
      * @throws ConnectionException when connection failed
      */
     @Inject
@@ -101,21 +108,21 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
 
     /**
      * Get experiment
+     *
      * @param experimentID experiment id
-     * @param consistency cassandra consistency level
+     * @param consistency  cassandra consistency level
      * @return the experiment
      * @ repository failure
      */
     private Experiment getExperiment(Experiment.ID experimentID,
-                                     ConsistencyLevel consistency)
-             {
+                                     ConsistencyLevel consistency) {
 
         Preconditions.checkNotNull(experimentID, "Parameter \"experimentID\" cannot be null");
 
         final String CQL = "select * from experiment " +
                 "where id = ?";
 
-        final ConsistencyLevel CONSISTENCY = consistency != null
+        final ConsistencyLevel CONSISTENCY = Objects.nonNull(consistency)
                 ? consistency
                 : ConsistencyLevel.CL_QUORUM;
 
@@ -141,7 +148,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
             }
 
             // Mask experiments that are in the deleted state
-            if (result != null && result.getState() == State.DELETED) {
+            if (Objects.nonNull(result) && result.getState() == State.DELETED) {
                 result = null;
             }
 
@@ -162,9 +169,10 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
 
     /**
      * Get experiment by params
-     * @param appName application name
+     *
+     * @param appName         application name
      * @param experimentLabel experiment label
-     * @param consistency  cassandra consistency level
+     * @param consistency     cassandra consistency level
      * @return the experiment
      */
     private Experiment getExperiment(Application.Name appName,
@@ -177,7 +185,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
                 "where app_name = ? and label = ?";
 
 
-        final ConsistencyLevel CONSISTENCY = (consistency != null)
+        final ConsistencyLevel CONSISTENCY = (Objects.nonNull(consistency))
                 ? consistency
                 : ConsistencyLevel.CL_QUORUM;
 
@@ -214,8 +222,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
      * {@inheritDoc}
      */
     @Override
-    public Experiment.ID createExperiment(NewExperiment newExperiment)
-             {
+    public Experiment.ID createExperiment(NewExperiment newExperiment) {
 
         validator.validateNewExperiment(newExperiment);
 
@@ -224,7 +231,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
                 getExperiment(newExperiment.getApplicationName(), newExperiment.getLabel(),
                         ConsistencyLevel.CL_QUORUM);
 
-        if (existingExperiment != null) {
+        if (Objects.nonNull(existingExperiment)) {
             throw new ConstraintViolationException(ConstraintViolationException.Reason.UNIQUE_CONSTRAINT_VIOLATION,
                     "An active experiment with label \"" + newExperiment.getApplicationName() + "\".\"" +
                             newExperiment.getLabel() + "\" already exists (id = " + existingExperiment.getID() + ")",
@@ -232,7 +239,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
         }
 
         // Yes, there is a race condition here, where two experiments
-        // being created with the same app name/label could result in one being 
+        // being created with the same app name/label could result in one being
         // clobbered. In practice, this should never happen, but...
         // TODO: Implement a transactional recipe
         final String CQL = "insert into experiment " +
@@ -255,12 +262,12 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
                     .withCql(CQL)
                     .asPreparedStatement()
                     .withByteBufferValue(experimentID, ExperimentIDSerializer.get())
-                    .withStringValue(newExperiment.getDescription() != null
+                    .withStringValue(Objects.nonNull(newExperiment.getDescription())
                             ? newExperiment.getDescription()
                             : "")
-                    .withStringValue(newExperiment.getHypothesisIsCorrect() != null ? newExperiment.getHypothesisIsCorrect() : "")
-                    .withStringValue(newExperiment.getResults() != null ? newExperiment.getResults() : "")
-                    .withStringValue(newExperiment.getRule() != null
+                    .withStringValue(Objects.nonNull(newExperiment.getHypothesisIsCorrect()) ? newExperiment.getHypothesisIsCorrect() : "")
+                    .withStringValue(Objects.nonNull(newExperiment.getResults()) ? newExperiment.getResults() : "")
+                    .withStringValue(Objects.nonNull(newExperiment.getRule())
                             ? newExperiment.getRule()
                             : "")
                     .withDoubleValue(newExperiment.getSamplingPercent())
@@ -269,17 +276,17 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
                     .withByteBufferValue(STATE, ExperimentStateSerializer.get())
                     .withByteBufferValue(newExperiment.getLabel(), ExperimentLabelSerializer.get())
                     .withByteBufferValue(newExperiment.getApplicationName(), ApplicationNameSerializer.get())
-                            // created
+                    // created
                     .withByteBufferValue(NOW, DateSerializer.get())
-                            // modified
+                    // modified
                     .withByteBufferValue(NOW, DateSerializer.get())
-                            //isPersonalizationEnabled
+                    //isPersonalizationEnabled
                     .withBooleanValue(newExperiment.getIsPersonalizationEnabled())
                     .withStringValue(newExperiment.getModelName())
                     .withStringValue(newExperiment.getModelVersion())
                     .withBooleanValue(newExperiment.getIsRapidExperiment())
                     .withIntegerValue(newExperiment.getUserCap())
-                    .withStringValue(newExperiment.getCreatorID() != null
+                    .withStringValue(Objects.nonNull(newExperiment.getCreatorID())
                             ? newExperiment.getCreatorID()
                             : "")
                     .execute();
@@ -294,8 +301,8 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
      * Create indices for new experiment
      *
      * @param newExperiment the new experiment object
-     * 
-     * TODO: Need more clarification
+     *                      <p>
+     *                      TODO: Need more clarification
      */
     @Override
     public void createIndicesForNewExperiment(NewExperiment newExperiment) {
@@ -415,7 +422,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
                 for (Row<Bucket.Label, String> row : rows) {
                     Bucket bucket = Bucket.from(row.getColumns()).build();
                     BucketList bucketList = result.get(bucket.getExperimentID());
-                    if (bucketList == null) {
+                    if (Objects.isNull(bucketList)) {
                         bucketList = new BucketList();
                         bucketList.addBucket(bucket);
                     } else {
@@ -459,8 +466,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
     }
 
     @Override
-    public Experiment updateExperiment(Experiment experiment)
-             {
+    public Experiment updateExperiment(Experiment experiment) {
 
         validator.validateExperiment(experiment);
 
@@ -480,12 +486,12 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
                     .prepareQuery(getKeyspace().experimentCF())
                     .withCql(CQL)
                     .asPreparedStatement()
-                    .withStringValue(experiment.getDescription() != null
+                    .withStringValue(Objects.nonNull(experiment.getDescription())
                             ? experiment.getDescription()
                             : "")
-                    .withStringValue(experiment.getHypothesisIsCorrect() != null ? experiment.getHypothesisIsCorrect() : "")
-                    .withStringValue(experiment.getResults() != null ? experiment.getResults() : "")
-                    .withStringValue(experiment.getRule() != null
+                    .withStringValue(Objects.nonNull(experiment.getHypothesisIsCorrect()) ? experiment.getHypothesisIsCorrect() : "")
+                    .withStringValue(Objects.nonNull(experiment.getResults()) ? experiment.getResults() : "")
+                    .withStringValue(Objects.nonNull(experiment.getRule())
                             ? experiment.getRule()
                             : "")
                     .withDoubleValue(experiment.getSamplingPercent())
@@ -519,9 +525,8 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
     /**
      * {@inheritDoc}
      */
-   @Override
-    public Experiment updateExperimentState(Experiment experiment, State state)
-             {
+    @Override
+    public Experiment updateExperimentState(Experiment experiment, State state) {
 
         validator.validateExperiment(experiment);
 
@@ -558,9 +563,9 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
         return experiment;
     }
 
-   /**
-    * {@inheritDoc}
-    */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<Experiment.ID> getExperiments() {
 
@@ -591,7 +596,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
             for (int i = 0; i < rows.size(); i++) {
                 ColumnList<String> columns = rows.getRowByIndex(i).getColumns();
                 Experiment result = new CassandraExperiment(columns);
-                if (result != null && result.getState() != null &&
+                if (Objects.nonNull(result) && Objects.nonNull(result.getState()) &&
                         result.getState() != State.TERMINATED &&
                         result.getState() != State.DELETED) {
                     experiments.add(result);
@@ -605,7 +610,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
      * {@inheritDoc}
      */
     @Override
-    public void deleteExperiment(NewExperiment newExperiment)  {
+    public void deleteExperiment(NewExperiment newExperiment) {
 
         Experiment.ID experimentID = newExperiment.getID();
 
@@ -627,7 +632,6 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
      * Get experiment rows
      *
      * @param appName {@link Application.Name}
-     *
      * @return Experiment rows
      */
     @Override
@@ -702,7 +706,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
     /**
      * {@inheritDoc}
      */
-   @Override
+    @Override
     public List<Application.Name> getApplicationsList() {
 
         List<Application.Name> result = new ArrayList<>();
@@ -731,9 +735,9 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
         return result;
     }
 
-   /**
-    * {@inheritDoc}
-    */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Bucket getBucket(Experiment.ID experimentID, Bucket.Label bucketLabel) {
 
@@ -793,14 +797,14 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
                     .asPreparedStatement()
                     .withByteBufferValue(newBucket.getExperimentID(), ExperimentIDSerializer.get())
                     .withByteBufferValue(newBucket.getLabel(), BucketLabelSerializer.get())
-                    .withStringValue(newBucket.getDescription() != null
+                    .withStringValue(Objects.nonNull(newBucket.getDescription())
                             ? newBucket.getDescription()
                             : "")
                     .withDoubleValue(newBucket.getAllocationPercent())
-                    .withBooleanValue(newBucket.isControl() != null
+                    .withBooleanValue(Objects.nonNull(newBucket.isControl())
                             ? newBucket.isControl()
                             : false)
-                    .withStringValue(newBucket.getPayload() != null
+                    .withStringValue(Objects.nonNull(newBucket.getPayload())
                             ? newBucket.getPayload()
                             : "")
                     .withByteBufferValue(STATE, BucketStateSerializer.get())
@@ -875,12 +879,12 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
                     .prepareQuery(getKeyspace().bucketCF())
                     .withCql(CQL)
                     .asPreparedStatement()
-                    .withStringValue(bucket.getDescription() != null
+                    .withStringValue(Objects.nonNull(bucket.getDescription())
                             ? bucket.getDescription()
                             : "")
                     .withDoubleValue(bucket.getAllocationPercent())
                     .withBooleanValue(bucket.isControl())
-                    .withStringValue(bucket.getPayload() != null
+                    .withStringValue(Objects.nonNull(bucket.getPayload())
                             ? bucket.getPayload()
                             : "")
                     .withByteBufferValue(bucket.getExperimentID(), ExperimentIDSerializer.get())
@@ -926,7 +930,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
      * {@inheritDoc}
      */
     @Override
-    public Bucket updateBucketState(Bucket bucket, Bucket.State desiredState)  {
+    public Bucket updateBucketState(Bucket bucket, Bucket.State desiredState) {
 
         final String CQL = "update bucket " +
                 "set state = ? " +
@@ -954,10 +958,9 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
 
     /**
      * Update bucket batch
-     * 
+     *
      * @param experimentID the experiment id
-     * @param bucketList  the bucket list
-     * 
+     * @param bucketList   the bucket list
      * @return BucketList
      */
     @Override
@@ -967,19 +970,19 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
         for (int i = 0; i < bucketList.getBuckets().size(); i++) {
             Bucket b = bucketList.getBuckets().get(i);
             CQL += "UPDATE bucket SET ";
-            if (b.getState() != null) {
+            if (Objects.nonNull(b.getState())) {
                 CQL += "state = ?,";
             }
-            if (b.getAllocationPercent() != null) {
+            if (Objects.nonNull(b.getAllocationPercent())) {
                 CQL += "allocation = ?,";
             }
-            if (b.getDescription() != null) {
+            if (Objects.nonNull(b.getDescription())) {
                 CQL += "description = ?,";
             }
-            if (b.isControl() != null) {
+            if (Objects.nonNull(b.isControl())) {
                 CQL += "is_control = ?,";
             }
-            if (b.getPayload() != null) {
+            if (Objects.nonNull(b.getPayload())) {
                 CQL += "payload = ?,";
             }
             if (",".equals(CQL.substring(CQL.length() - 1, CQL.length()))) {
@@ -997,19 +1000,19 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
 
             for (int i = 0; i < bucketList.getBuckets().size(); i++) {
                 Bucket b = bucketList.getBuckets().get(i);
-                if (b.getState() != null) {
+                if (Objects.nonNull(b.getState())) {
                     temp = temp.withByteBufferValue(b.getState(), BucketStateSerializer.get());
                 }
-                if (b.getAllocationPercent() != null) {
+                if (Objects.nonNull(b.getAllocationPercent())) {
                     temp = temp.withDoubleValue(b.getAllocationPercent());
                 }
-                if (b.getDescription() != null) {
+                if (Objects.nonNull(b.getDescription())) {
                     temp = temp.withStringValue(b.getDescription());
                 }
-                if (b.isControl() != null) {
+                if (Objects.nonNull(b.isControl())) {
                     temp = temp.withBooleanValue(b.isControl());
                 }
-                if (b.getPayload() != null) {
+                if (Objects.nonNull(b.getPayload())) {
                     temp = temp.withStringValue(b.getPayload());
                 }
                 temp = temp.withByteBufferValue(experimentID, ExperimentIDSerializer.get());
@@ -1063,7 +1066,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
      */
     @Override
     public void logBucketChanges(Experiment.ID experimentID, Bucket.Label bucketLabel,
-                                 List<BucketAuditInfo> changeList)  {
+                                 List<BucketAuditInfo> changeList) {
 
         final long NOW = System.currentTimeMillis();
         final String CQL = "insert into bucket_audit_log " +
@@ -1079,8 +1082,8 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
                         .withByteBufferValue(bucketLabel, BucketLabelSerializer.get())
                         .withLongValue(NOW)
                         .withStringValue(changeData.getAttributeName())
-                        .withStringValue((changeData.getOldValue() != null) ? changeData.getOldValue() : "")
-                        .withStringValue((changeData.getNewValue() != null) ? changeData.getNewValue() : "")
+                        .withStringValue(Objects.nonNull(changeData.getOldValue()) ? changeData.getOldValue() : "")
+                        .withStringValue(Objects.nonNull(changeData.getNewValue()) ? changeData.getNewValue() : "")
                         .execute();
             }
         } catch (ConnectionException e) {
@@ -1108,10 +1111,10 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
                         .withByteBufferValue(experimentID, ExperimentIDSerializer.get())
                         .withLongValue(NOW)
                         .withStringValue(changeData.getAttributeName())
-                        .withStringValue((changeData.getOldValue() != null)
+                        .withStringValue(Objects.nonNull(changeData.getOldValue())
                                 ? changeData.getOldValue()
                                 : "")
-                        .withStringValue((changeData.getNewValue() != null)
+                        .withStringValue(Objects.nonNull(changeData.getNewValue())
                                 ? changeData.getNewValue()
                                 : "")
                         .execute();
@@ -1132,7 +1135,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
 
         // Check if the experiment is live
         Experiment experiment = getExperiment(experimentID);
-        if (experiment == null) {
+        if (Objects.isNull(experiment)) {
             throw new ExperimentNotFoundException(experimentID);
         }
 
@@ -1183,7 +1186,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
                     .withCql(CQL)
                     .asPreparedStatement()
                     .withByteBufferValue(experimentID, ExperimentIDSerializer.get())
-                            // modified
+                    // modified
                     .withByteBufferValue(NOW, DateSerializer.get())
                     .withByteBufferValue(startTime, DateSerializer.get())
                     .withByteBufferValue(endTime, DateSerializer.get())
@@ -1223,9 +1226,8 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
     /**
      * Update state index
      *
-     * @param batch {@link MutationBatch}
+     * @param batch      {@link MutationBatch}
      * @param experiment the experiment object
-     *
      */
     @Override
     public void updateStateIndex(MutationBatch batch, Experiment experiment)
@@ -1240,7 +1242,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
                                   ExperimentsKeyspace.ExperimentStateIndexKey index)
             throws ConnectionException {
 
-        final MutationBatch BATCH = (batch != null)
+        final MutationBatch BATCH = (Objects.nonNull(batch))
                 ? batch
                 : getDriver().getKeyspace().prepareMutationBatch();
 
@@ -1267,7 +1269,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
         BATCH.withRow(getKeyspace().stateExperimentIndexCF(), DELETE)
                 .deleteColumn(experimentID);
 
-        if (batch == null) {
+        if (Objects.isNull(batch)) {
             BATCH.execute();
         }
     }
@@ -1275,6 +1277,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
 
     /**
      * Creates an application at top level
+     *
      * @param applicationName Application Name
      */
     @Override

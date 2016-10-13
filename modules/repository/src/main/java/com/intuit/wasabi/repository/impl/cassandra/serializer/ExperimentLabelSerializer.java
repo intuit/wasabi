@@ -21,6 +21,7 @@ import com.netflix.astyanax.serializers.ComparatorType;
 import com.netflix.astyanax.serializers.StringSerializer;
 
 import java.nio.ByteBuffer;
+import java.util.Objects;
 
 /**
  * Astyanax serializer for
@@ -52,7 +53,7 @@ public class ExperimentLabelSerializer
 
     @Override
     public ByteBuffer toByteBuffer(Experiment.Label value) {
-        if (value == null) {
+        if (Objects.isNull(value)) {
             return null;
         }
 
@@ -61,7 +62,7 @@ public class ExperimentLabelSerializer
 
     @Override
     public Experiment.Label fromByteBuffer(ByteBuffer byteBuffer) {
-        if (byteBuffer == null) {
+        if (Objects.isNull(byteBuffer)) {
             return null;
         }
 

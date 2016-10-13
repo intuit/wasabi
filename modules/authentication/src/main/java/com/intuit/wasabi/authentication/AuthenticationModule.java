@@ -16,7 +16,7 @@
 package com.intuit.wasabi.authentication;
 
 import com.google.inject.AbstractModule;
-import com.intuit.wasabi.exceptions.AuthenticationException;
+import com.intuit.wasabi.authenticationobjects.exceptions.AuthenticationException;
 import org.slf4j.Logger;
 
 import java.util.Properties;

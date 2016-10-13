@@ -16,12 +16,15 @@
  *  ******************************************************************************
  */
 package com.intuit.wasabi.tests.model;
+
 import java.time.LocalDateTime;
+import java.util.Objects;
+
 /**
  * Created on 6/16/16.
  */
 
-public class EventDateTime{
+public class EventDateTime {
     String eventLabel;
     LocalDateTime eventDatetime;
 
@@ -53,15 +56,16 @@ public class EventDateTime{
 
         EventDateTime that = (EventDateTime) o;
 
-        if (eventLabel != null ? !eventLabel.equals(that.eventLabel) : that.eventLabel != null) return false;
-        return eventDatetime != null ? eventDatetime.equals(that.eventDatetime) : that.eventDatetime == null;
+        if (Objects.nonNull(eventLabel) ? !eventLabel.equals(that.eventLabel) : Objects.nonNull(that.eventLabel))
+            return false;
+        return Objects.nonNull(eventDatetime) ? eventDatetime.equals(that.eventDatetime) : Objects.isNull(that.eventDatetime);
 
     }
 
     @Override
     public int hashCode() {
-        int result = eventLabel != null ? eventLabel.hashCode() : 0;
-        result = 31 * result + (eventDatetime != null ? eventDatetime.hashCode() : 0);
+        int result = Objects.nonNull(eventLabel) ? eventLabel.hashCode() : 0;
+        result = 31 * result + (Objects.nonNull(eventDatetime) ? eventDatetime.hashCode() : 0);
         return result;
     }
 }

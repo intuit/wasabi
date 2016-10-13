@@ -21,16 +21,18 @@ import com.netflix.astyanax.serializers.ComparatorType;
 import com.netflix.astyanax.serializers.StringSerializer;
 
 import java.nio.ByteBuffer;
+import java.util.Objects;
 
 /**
  * Astyanax serializer for
+ *
  * @see User.ID
  */
 public class UserIDSerializer extends AbstractSerializer<User.ID> {
 
-	/**
-	 * Singleton instance
-	 */
+    /**
+     * Singleton instance
+     */
     private static final UserIDSerializer INSTANCE =
             new UserIDSerializer();
 
@@ -43,6 +45,7 @@ public class UserIDSerializer extends AbstractSerializer<User.ID> {
 
     /**
      * Get the instance
+     *
      * @return instance
      */
     public static UserIDSerializer get() {
@@ -51,7 +54,7 @@ public class UserIDSerializer extends AbstractSerializer<User.ID> {
 
     @Override
     public ByteBuffer toByteBuffer(User.ID value) {
-        if (value == null) {
+        if (Objects.isNull(value)) {
             return null;
         }
 
@@ -60,7 +63,7 @@ public class UserIDSerializer extends AbstractSerializer<User.ID> {
 
     @Override
     public User.ID fromByteBuffer(ByteBuffer byteBuffer) {
-        if (byteBuffer == null) {
+        if (Objects.isNull(byteBuffer)) {
             return null;
         }
 

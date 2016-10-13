@@ -17,6 +17,7 @@ package com.intuit.wasabi.api.jackson;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
+import com.intuit.wasabi.api.jackson.serializers.ExperimentStateDeserializer;
 import com.intuit.wasabi.experimentobjects.Experiment.State;
 import org.junit.Test;
 
@@ -28,8 +29,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 public class ExperimentStateDeserializerTest {
-
-    ExperimentStateDeserializer experimentStateDeserializer = new ExperimentStateDeserializer();
 
     @Test
     public void canDeserializeUpperCase() throws Exception {
@@ -51,6 +50,6 @@ public class ExperimentStateDeserializerTest {
         jsonParser.nextToken();
         jsonParser.nextToken();
         jsonParser.nextToken();
-        return experimentStateDeserializer.deserialize(jsonParser, null);
+        return new ExperimentStateDeserializer().deserialize(jsonParser, null);
     }
 }

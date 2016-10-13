@@ -16,17 +16,22 @@
 package com.intuit.wasabi.tests.library.util;
 
 import org.slf4j.Logger;
-import org.testng.*;
+import org.testng.IResultMap;
+import org.testng.ITestContext;
+import org.testng.ITestNGMethod;
+import org.testng.ITestResult;
+import org.testng.TestListenerAdapter;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Allows to retry tests multiple times without their (eventually succeeded) failures being reported.
- *
+ * <p>
  * Annotate your test class with {@code @Listeners(value = RetryListener.class)} to enable this listener.
  * Addition
  */
@@ -113,7 +118,7 @@ public class RetryListener extends TestListenerAdapter {
                 for (ITestResult result : testContext.getFailedButWithinSuccessPercentageTests().getAllResults()) {
                     if (result.getMethod().equals(method)) {
                         testContext.getFailedButWithinSuccessPercentageTests().removeResult(result);
-                        if (!failed && failResult == null) {
+                        if (!failed && Objects.isNull(failResult)) {
                             failResult = result;
                         }
                     }
@@ -121,7 +126,7 @@ public class RetryListener extends TestListenerAdapter {
                 for (ITestResult result : testContext.getPassedTests().getAllResults()) {
                     if (result.getMethod().equals(method)) {
                         testContext.getPassedTests().removeResult(result);
-                        if (!failed && failResult == null) {
+                        if (!failed && Objects.isNull(failResult)) {
                             failResult = result;
                         }
                     }
@@ -129,12 +134,12 @@ public class RetryListener extends TestListenerAdapter {
                 for (ITestResult result : testContext.getSkippedTests().getAllResults()) {
                     if (result.getMethod().equals(method)) {
                         testContext.getSkippedTests().removeResult(result);
-                        if (!failed && failResult == null) {
+                        if (!failed && Objects.isNull(failResult)) {
                             failResult = result;
                         }
                     }
                 }
-                if (!failed && failResult != null) {
+                if (!failed && Objects.nonNull(failResult)) {
                     testContext.getFailedTests().addResult(failResult, method);
                 }
                 continue;
@@ -176,13 +181,13 @@ public class RetryListener extends TestListenerAdapter {
         String resultString = ("\n\n\nINTEGRATION TESTS DETAILED RESULTS:"
                 + "\n TOTAL TESTS: " + total
                 + String.format("\n  %4d %-10s\n\t", passedMap.getAllMethods().size(), "passed:")
-                    + (passedMap.getAllMethods().size() == 0 ? "" : passedMap.getAllMethods())
+                + (passedMap.getAllMethods().size() == 0 ? "" : passedMap.getAllMethods())
                 + String.format("\n  %4d %-10s\n\t", failedMap.getAllMethods().size(), "failed:")
-                    + (failedMap.getAllMethods().size() == 0 ? "" : failedMap.getAllMethods())
+                + (failedMap.getAllMethods().size() == 0 ? "" : failedMap.getAllMethods())
                 + String.format("\n  %4d %-10s\n\t", skippedMap.getAllMethods().size(), "skipped:")
-                    + (skippedMap.getAllMethods().size() == 0 ? "" : skippedMap.getAllMethods())
+                + (skippedMap.getAllMethods().size() == 0 ? "" : skippedMap.getAllMethods())
                 + String.format("\n  %4d %-10s\n\t", failedButMap.getAllMethods().size(), "failedBut:")
-                    + (failedButMap.getAllMethods().size() == 0 ? "" : failedButMap.getAllMethods())
+                + (failedButMap.getAllMethods().size() == 0 ? "" : failedButMap.getAllMethods())
                 + "\n\n\n").replace(search, replace).replace("\t[", "\t").replace("]]", "]");
         LOGGER.info(resultString);
     }

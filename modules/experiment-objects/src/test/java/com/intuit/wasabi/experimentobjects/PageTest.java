@@ -15,7 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.experimentobjects;
 
-import com.intuit.wasabi.experimentobjects.exceptions.InvalidIdentifierException;
+import com.intuit.wasabi.exceptions.InvalidIdentifierException;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

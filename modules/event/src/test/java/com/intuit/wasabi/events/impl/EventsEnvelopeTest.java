@@ -19,11 +19,11 @@ import com.intuit.wasabi.analyticsobjects.Event;
 import com.intuit.wasabi.assignmentobjects.Assignment;
 import com.intuit.wasabi.assignmentobjects.User;
 import com.intuit.wasabi.database.Transaction;
-import com.intuit.wasabi.exceptions.ApplicationNotFoundException;
+import com.intuit.wasabi.experimentobjects.exception.ApplicationNotFoundException;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Context;
 import com.intuit.wasabi.experimentobjects.Experiment;
-import com.intuit.wasabi.experimentobjects.exceptions.WasabiClientException;
+import com.intuit.wasabi.exceptions.WasabiClientException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -56,7 +56,7 @@ public class EventsEnvelopeTest {
     private Event event;
     @Mock
     private Logger logger;
-    
+
     @Before
     public void setup() {
         assignment = Mockito.mock(Assignment.class);
@@ -91,7 +91,7 @@ public class EventsEnvelopeTest {
     @Test
     public void testRecordEventThrowsWasabiClientException() throws Exception {
     	mockStatic(LoggerFactory.class);
-    	
+
         given(event.getName()).willReturn(Event.Name.valueOf("ASSIGNMENT"));
         given(event.getType()).willReturn(Event.Type.IMPRESSION);
         given(assignment.getUserID()).willReturn(User.ID.valueOf("user-a"));
@@ -103,13 +103,13 @@ public class EventsEnvelopeTest {
         given(getLogger(any(Class.class))).willReturn(logger);
         logger.warn(any(String.class));
         BDDMockito.willThrow(jce).given(transaction).
-        	insert(any(String.class), any(String.class), any(Experiment.ID.class), 
+        	insert(any(String.class), any(String.class), any(Experiment.ID.class),
         			any(Bucket.Label.class), any(String.class), any(Date.class), any(String.class));
         eventsEnvelope.run();
 
         verify(event, times(1)).getName();
         verify(assignment, times(1)).getBucketLabel();
-        verify(transaction, times(1)).insert(any(String.class), any(String.class), any(Experiment.ID.class), 
+        verify(transaction, times(1)).insert(any(String.class), any(String.class), any(Experiment.ID.class),
     			any(Bucket.Label.class), any(String.class), any(Date.class), any(String.class));
         // Find a way to validate log message
         verify(logger, times(1)).warn(any(String.class));

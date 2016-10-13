@@ -6,38 +6,19 @@ The tests use [TestNG](http://testng.org/doc/) and are implemented using
 [Gson](https://google-gson.googlecode.com/svn/trunk/gson/docs/javadocs/index.html).
 
 
-#Checklist
-
-This checklist will help you writing new tests, and also documents which tests are covered how or where. If you want to 
-know more about the tests and how to write them, read on.
-
-| Test                         | Class                           | testng.xml | testng_{TEST}.xml | run-{TEST}.sh       | pom.xml | README.md | done  |
-|------------------------------|---------------------------------|------------|-------------------|---------------------|---------|-----------|-------|
-| SmokeTest                    | service.SmokeTest               | yes        | smokeTest         | functional-tests    | yes     | yes       | done  |
-| AuthTest                     | service.AuthTest                | yes        | authTest          | authtest            | yes     | yes       | done  |
-| IntegrationTests\*           | service.IntegrationExperiment   | yes        | integration       | --                  | yes     | yes       | 05/21 |
-| ForcedFailure                | library.ForcedFailuresTest      | no         | forcedfailure     | forcedfailuretest   | yes     | yes       | done  |
-| PreparePerformanceTest       | library.SetupPerformanceTest    | no         | prepPerfTest      | perfsetup           | yes     | yes       | done  |
-| Priorities                   | service.PrioritiesTest          | yes        | prioritiesTest    | --                  | yes     | yes       | done  |
-| SegmentOnHttpHeader          | service.SegmentOnHttpHeaderTest | yes        | segHttpHeader     | --                  | yes     | yes       | done  |
-| SegmentationRuleCacheFix     | service.SegementationRuleChacheFix | yes     | segRuleFix        | --                  | yes     | yes       | done  |
-| Teardown                     | library.TearDownTestExperiments | yes        | teardown          | teardown            | yes     | yes       | done  |
-| StateInconsistency           | service.StateInconsistencyTest  | yes        | repeatStateInconsistency | --           | yes     | yes       | done  |
-| RetryTest                    | library.RetryTestClass          | no         | retryTestExample  | --                  | yes     | yes       | done  |
-
-\* The integration tests are a collection of many tests, collected in one big suite file (`testng_integrationTests.xml`). 
+The integration tests are a collection of many tests, collected in one big suite file (`testng_integrationTests.xml`). 
 Most of your tests should probably go there. However it might be of use to have them in their own XML-files to
 run them individually when working on a specific test or feature.
 
 
-#Test list
+# Test list
 
 Each xml-File contains one test-suite. Feel free to add more, but please describe then in a single sentence in this
 file. If needed you can add more detailed descriptions of each test in their corresponding XML-Files or
 your Testclasses JavaDoc. That also means that if you want to have more information about a specific test, please
 refer to those points.
 
-##Service tests
+## Service tests
 
 These are tests supposed to be run when a new successful build was done. It is recommended to run them in the listed
 order (or just run `testng.xml`, as it employs all of the following and the teardown), but they should be independent 
@@ -46,7 +27,7 @@ from each other.
 * Test preparation
   1. `testng_initialTeardown.xml`: Just a copy of the teardown to trick TestNG into running it twice.
   2. `testng_smokeTest.xml`: Tests the basic functionality of the core components with (hopefully) correct inputs.
-* Integration tests (`testng_integrationTests.xml`) (p
+* Integration tests (`testng_integrationTests.xml`)
   1. `IntegrationExperiment.java`: Experiment integration tests: Creation, Deletion, State transitions.
   2. `IntegrationBucket.java`: Bucket integration tests.
   3. `IntegrationMutualExclusion.java`: Creates experiments and adds/removes mutual exclusions subsequently.
@@ -61,7 +42,7 @@ from each other.
       Uses the `service.factory.RepeatStateInconsistencyTestFactory`.
 
 
-##Library tests
+## Library tests
 
 These tests are considered part of the library and do not actually test much but prepare for other tests or can be
 used to tear down tests.
@@ -76,7 +57,7 @@ used to tear down tests.
 
 
 
-#Running Tests
+# Running Tests
 
 Since the integration tests are made with the [TestNG](http://testng.org/) test framework, it is possible to run them 
 in several ways. For Jenkins you want to be able to run them from the command line, which will briefly be explained 
@@ -86,7 +67,7 @@ While writing tests and to run them locally, you might want to integrate them as
 whichever IDE you use). IntelliJ is covered below, for other IDEs please refer to their documentations or see if
 TestNG's [documentation got you covered](http://testng.org/doc/documentation-main.html#running-testng).
 
-##Command line
+## Command line
 
 To run the tests from the command line you can use this command from the `modules/functional_test/target` folder:
 
@@ -102,7 +83,7 @@ Replace the variables `${var}` as follows:
 * `PWD`: The user password, the default is `wasabi01`.
 * `LOGXMLDIR`: The directory with the `logback.xml` file, e.g. `classes`.
 * `JAR`: The jar file (with dependencies) produced by the maven build, e.g. 
-    `wasabi-functional-test-20150721051958-SNAPSHOT-jar-with-dependencies.jar`. Remember to replace the version number.
+    `wasabi-functional-test-*-jar-with-dependencies.jar`. Remember to replace the version number.
 * `OUTPUTDIR`: The output directory, e.g. `functional-test-results/functional-testng-out`.
 * `TESTNGXML`: The xml to use, usually prefixed with `classes/`, e.g. `classes/testng.xml`.
 
@@ -114,27 +95,13 @@ java -Dapi.server.name=localhost:8080 -Duser.name=wasabi@example.com -Duser.pass
 
 For some tests you can add more `-Dsomething` switches, but you have to dive into the files to learn more.
 
-##Command line alternative
+## IntelliJ
 
-The project already creates scripts to make it more convenient to run tests. To use them just run
-them, they are located in the `target/scripts/` folder. They also sometimes allow several arguments.
-
-An example (Creates 10 Experiments with 4 Buckets each, starts them and enables mutual exclusions):
-
-```bash
-sh target/scripts/run-perfsetup.sh -m true -e 10 -b 4
-```
-
-Note that most scripts are not well documented according to their parameters, so having a look inside them to 
-figure out what they set is worth it!
-
-##IntelliJ
-
-###Default test configurations
+### Default test configurations
 
 Right-click on the `*.xml` you want to run and choose `Run...`.
 
-###Custom test configurations
+### Custom test configurations
 
 You can also create Run configurations yourself by going to `Run -> Edit Configurations...`.
 Click on the little `+` on the top left of the run configurations and choose `TestNG`. Choose `Suite` and enter
@@ -149,9 +116,9 @@ As a last step provide a value for `Use classpath of module`: usually this is th
 You can then just run all configurations as you are used to. 
 
 
-#Writing Tests
+# Writing Tests
 
-##The Test framework
+## The Test framework
 
 This section will get you started with writing integration tests. To add a test to the build folders you need to
 add it to the `modules/functional_tests/pom.xml`, in the section `build.resources` where the other XML files are:
@@ -168,10 +135,9 @@ add it to the `modules/functional_tests/pom.xml`, in the section `build.resource
 <!-- ... -->
 ```
 
-**Note that one very important limitation is that because of some limitations in the logging framework it is not possible
-to run parallel tests, as some reused objects can make problems.**
+**Note that it is not possible to run parallel tests**
 
-###tests.library-Package
+### tests.library-Package
 
 The library package contains useful helpers to make setting up a test fast and easy.
 The most important class here is the `TestBase`. It has lots of convenience methods for most API endpoints and offers a 
@@ -250,13 +216,14 @@ More useful is the `TearDownTestExperiments`, which should be used after all int
 up and removes all experiments. However since it is only guaranteed on suite-level or by `dependsOnMethods` when these
 cleanups are performed and thus certain race conditions can apply, you should only use this carefully. It is better
 to just add your cleanup experiments to the `TestBase().toCleanUp` experiment list, which will just clean up
-those at the end of a test.
+those at the end of a test. To force cleanup of the experiments in the `toCleanUp` list you can simply call 
+`TestBase#cleanUpExperiments()`.
 
 Please **note**: The first method *should* depend the group `ping`. If it depends on the method, then the ping test
 will be executed twice - once as part of the super class `TestBase` and once as part of your test class. By allowing
 the group dependency it will only be run once, as TestNG does not instantiate it again.
 
-###testng.xml
+### testng.xml
 
 This xml-File contains all tests which are to be run by Jenkins after a build. There are lots of other xml files
 starting with `testng_`, those usually contain the tests individually plus the teardown. 
@@ -304,7 +271,7 @@ be called. For these purposes use the `@BeforeClass`/`@AfterClass` annotations.
 Also take care of the order of the tests, as it might be important. Sometimes it is enough to just make sure
 that the dependencies work correctly.
 
-###ModelItems
+### ModelItems
 
 In the `model` package you will find lots of very basic Java classes. These describe items you will receive (or can 
 send) to the API using the methods provided by the `TestBase`. Internally 
@@ -318,7 +285,7 @@ to track differences. To assert the state of an item the `library/util/ModelAsse
 `public static void assertModelItems(...)` methods which can compare single `ModelItem`s, lists of `ModelItem`s and even
 maps.
 
-###SerializationStrategies
+### SerializationStrategies
 
 For some comparisons you want to exclude certain fields (for example the experiments' `modificationDate`s), or compare
 just two (a bucket name and its state). To do this, you can either set a static SerializationStrategy for a specific 
@@ -342,14 +309,14 @@ There are two default implementations for the `SerializationStrategy`, the `Defa
 write more elaborate serialization strategies which exclude all boolean fields or all fields which have a specific 
 value, etc.
 
-###Adding parameters
+### Adding parameters
 
 Most methods in the `TestBase` allow it to rapidly add certain parameters on the fly, usually those needed for
 requests. However, in case those are not enough it is possible to create your own request with the 
 `TestBase` methods `doPost/doPut/doGet/doDelete` which take parameter maps for POST- and GET-parameters. If even the
 status codes are uncertain, feel free to use the same methods directly with the `APIServerConnector`.
 
-###Automatically retrying tests
+### Automatically retrying tests
 
 If tests shall be retried multiple times on failures without reporting them if they eventually succeed, it is possible
 to annotate them correctly. See the `RetryTestClass.java` for a detailed example implementation.
@@ -453,7 +420,7 @@ public void createBuckets() {
 Note that you have to care of circular dependencies and that you spell the groups correctly. TestNG will otherwise fail.
 If you set up everything correctly TestNG will figure out an order of the tests and run them accordingly.
 
-##Examples
+## Examples
 
 The best examples are probably the `RetryTestClass` in the `library` package and the `SmokeTest` in the `service` 
 package. Also you should have a look at their corresponding xml files, `testng_retryTestExample.xml` and 
@@ -461,7 +428,7 @@ package. Also you should have a look at their corresponding xml files, `testng_r
 
 For a complete test you should try to stick to the following pattern:
 
-###`testng_myTest.xml`
+### `testng_myTest.xml`
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -485,7 +452,7 @@ For a complete test you should try to stick to the following pattern:
 </suite>
 ```
 
-###`MyTest.java`
+### `MyTest.java`
 
 ```java
 package com.intuit.wasabi.tests.service;
@@ -550,9 +517,6 @@ However, adding or removing very volatile fields (as for example the `Experiment
 in broken tests, as the serialization strategies might no longer work correctly. In that case you can either update
 all effected tests or implement your own inheriting classes.
 
-It is planned though that eventually serialization strategies are refactored and common strategies (as
-`new DefaultNameExclusionStrategy("id", "creationTime", "modificationTime", "ruleJson")` for experiments) are accessible
-through a Factory.
 
 ### New ModelItems
 
@@ -601,19 +565,3 @@ public class NewItem extends ModelItem {
 
 }
 ```
-
-
-#TODO List/Possible feature additions
-        
-*These should be done at one point in the future.*
-
-* [x] Finish JavaDoc in TestBase.
-* [x] Finish this file.
-* [ ] More test coverage.
-* [ ] Refactor serialization strategies.
-* [ ] Analytics ModelItems.
-
-*Most of these are optional or of low importance.*
-
-* [ ] analytics package has no factories or convenience methods.
-* [ ] BucketStatistics.bucketComparisons is just an Object at the moment, could be modeled better.

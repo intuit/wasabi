@@ -16,6 +16,7 @@
 package com.intuit.wasabi.eventlog;
 
 import com.google.inject.CreationException;
+import org.junit.Assert;
 import org.junit.Test;
 
 import static com.google.inject.Guice.createInjector;
@@ -27,16 +28,15 @@ import static java.lang.System.setProperty;
 
 public class EventLogModuleTest {
 
-    // FIXME: add positive tests
-//    @Test
-//    @Ignore("FIXME")
-//    public void testConfigure() throws Exception {
-//        setProperty("eventlog.class.name", "com.intuit.wasabi.eventlog.impl.EventLogImpl");
-//
-//        Injector injector = createInjector(new EventLogModule());
-//
-//        injector.getInstance(EventLogModule.class);
-//    }
+    @Test
+    public void testConfigure() throws Exception {
+        setProperty("eventlog.class.name", "com.intuit.wasabi.eventlog.impl.EventLogImpl");
+        try {
+            createInjector(new EventLogModule()).getInstance(EventLogModule.class);
+        } catch (CreationException exception) {
+            Assert.fail("Should have found an instance!");
+        }
+    }
 
     @Test(expected = CreationException.class)
     public void testConfigureFail() throws Exception {

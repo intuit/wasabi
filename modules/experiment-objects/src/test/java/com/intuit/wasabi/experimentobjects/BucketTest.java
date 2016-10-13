@@ -15,7 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.experimentobjects;
 
-import com.intuit.wasabi.experimentobjects.exceptions.InvalidBucketStateTransitionException;
+import com.intuit.wasabi.experimentobjects.exception.InvalidBucketStateTransitionException;
 import org.junit.Test;
 
 import java.util.Calendar;

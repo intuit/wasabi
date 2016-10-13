@@ -17,7 +17,7 @@ package com.intuit.wasabi.api.error;
 
 import com.google.inject.Inject;
 import com.intuit.wasabi.api.HttpHeader;
-import com.intuit.wasabi.exceptions.AssignmentNotFoundException;
+import com.intuit.wasabi.assignmentobjects.exceptions.AssignmentNotFoundException;
 
 import javax.ws.rs.ext.Provider;
 

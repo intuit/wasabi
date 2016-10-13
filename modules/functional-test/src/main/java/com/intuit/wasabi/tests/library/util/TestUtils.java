@@ -21,7 +21,14 @@ import com.google.gson.JsonElement;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * Provides several static methods useful for the test classes.
@@ -63,12 +70,12 @@ public class TestUtils {
 
     /**
      * Wraps a JSON String into a JSON object.
-     *
+     * <p>
      * If the JSON String where {@code str} and the JSON object {@code obj} the resulting
      * JSON String would be: {@code {"obj":str}}.
      *
      * @param jsonString the JSON String to wrap
-     * @param object the object to wrap into
+     * @param object     the object to wrap into
      * @return the new JSON string
      */
     public static String wrapJsonIntoObject(String jsonString, String object) {
@@ -78,7 +85,7 @@ public class TestUtils {
     /**
      * Turns a csv with a header row into a JSON array.
      *
-     * @param csv the csv string
+     * @param csv            the csv string
      * @param fieldSeparator the column separators
      * @return a String representing a JSON array
      */

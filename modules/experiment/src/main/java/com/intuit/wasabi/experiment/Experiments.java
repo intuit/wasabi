@@ -20,7 +20,6 @@ import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.ExperimentList;
 import com.intuit.wasabi.experimentobjects.NewExperiment;
-import com.intuit.wasabi.experimentobjects.exceptions.InvalidExperimentStateTransitionException;
 
 import java.util.List;
 

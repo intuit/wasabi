@@ -16,8 +16,7 @@
 package com.intuit.wasabi.tests.library;
 
 /**
- * <tt>ServiceTestBase</tt> - a base class for Web Service API testing using TestNG and Rest-Assured. 
- *
+ * <tt>ServiceTestBase</tt> - a base class for Web Service API testing using TestNG and Rest-Assured.
  */
 
 
@@ -31,10 +30,9 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 import static org.slf4j.LoggerFactory.getLogger;
-
-///////////////////////////////////////////////////////////////////////////
 
 public class ServiceTestBase {
 
@@ -82,15 +80,15 @@ public class ServiceTestBase {
 
     /**
      * Returns {@code response} as a String attempting to improve readability
-     *
+     * <p>
      * If body is empty return the empty string.
      *
-     * @param response  the response returned by a REST API call
+     * @param response the response returned by a REST API call
      * @return the response as a string
      */
     public String prettyResponse(Response response) {
         String prettyResponse = "";
-        if (response != null && response.toString() != null && ! response.toString().isEmpty()) {
+        if (Objects.nonNull(response) && Objects.nonNull(response.toString()) && !response.toString().isEmpty()) {
             try {
                 prettyResponse = response.jsonPath().prettify();
                 prettyResponse = prettyResponse.replaceAll("\\\\n", System.getProperty("line.separator"));
@@ -112,7 +110,7 @@ public class ServiceTestBase {
     /**
      * Writes the response to log at the INFO level
      *
-     * @param response  the response returned by a REST API call
+     * @param response the response returned by a REST API call
      */
     public void infoLogResponse(Response response) {
         String prettyResponse = prettyResponse(response);
@@ -125,11 +123,11 @@ public class ServiceTestBase {
     /**
      * Asserts that the {@code response} has the {code expectedStatusCode}
      *
-     * @param response  the response returned by a REST API call
-     * @param expectedStatusCode  the status code expected in the response
+     * @param response           the response returned by a REST API call
+     * @param expectedStatusCode the status code expected in the response
      */
     public void assertReturnCode(Response response, int expectedStatusCode) {
-    	System.out.println("Response was: " + prettyResponse(response));
+        System.out.println("Response was: " + prettyResponse(response));
         int actualStatusCode = response.getStatusCode();
 
         Assert.assertEquals(actualStatusCode, expectedStatusCode,
@@ -159,7 +157,7 @@ public class ServiceTestBase {
 
     @BeforeClass
     protected void runBeforeClassBase() {
-        logger.debug("======> Base BeforeClass: "+ this.getClass().getName() +" <======");
+        logger.debug("======> Base BeforeClass: " + this.getClass().getName() + " <======");
     }
 
     @AfterClass
@@ -169,7 +167,7 @@ public class ServiceTestBase {
 
     /**
      * Will run before all annotated test methods.
-     *
+     * <p>
      * Prints the method name to the log.
      * Also, set the global {@code response} object to null o avoid that the
      * AfterMethod prints a prior methods response, if the failure/abort occurred before a new response is set.
@@ -177,7 +175,7 @@ public class ServiceTestBase {
      * @param method TestNG will pass in the method about to be called.
      */
     @BeforeMethod
-    protected void runBeforeMethodBase(Method method)  {
+    protected void runBeforeMethodBase(Method method) {
         logger.info("======> Base Starting test: " + method.getName() + " <======");
         response = null;
     }

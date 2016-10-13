@@ -22,7 +22,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authenticationobjects.UserInfo.Username;
-import com.intuit.wasabi.exceptions.AuthenticationException;
+import com.intuit.wasabi.authenticationobjects.exceptions.AuthenticationException;
 import com.intuit.wasabi.userdirectory.UserDirectory;
 
 import java.util.List;

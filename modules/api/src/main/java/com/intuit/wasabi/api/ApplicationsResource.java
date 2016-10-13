@@ -19,9 +19,8 @@ import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.intuit.wasabi.api.pagination.PaginationHelper;
+import com.intuit.wasabi.authenticationobjects.exceptions.AuthenticationException;
 import com.intuit.wasabi.authorization.Authorization;
-import com.intuit.wasabi.exceptions.AuthenticationException;
 import com.intuit.wasabi.experiment.Experiments;
 import com.intuit.wasabi.experiment.Pages;
 import com.intuit.wasabi.experiment.Priorities;
@@ -45,6 +44,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_MODEXP;
 import static com.intuit.wasabi.api.APISwaggerResource.EXAMPLE_AUTHORIZATION_HEADER;
@@ -53,6 +53,7 @@ import static com.intuit.wasabi.authorizationobjects.Permission.UPDATE;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
+
 
 /**
  * API endpoint for accessing & managing applications
@@ -95,7 +96,7 @@ public class ApplicationsResource {
     public Response getApplications(@HeaderParam(AUTHORIZATION)
                                     @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
                                     final String authorizationHeader) {
-        if (authorization.getUser(authorizationHeader) == null) {
+        if (Objects.isNull(authorization.getUser(authorizationHeader))) {
             throw new AuthenticationException("User is not authenticated");
         }
 

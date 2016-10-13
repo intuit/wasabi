@@ -21,6 +21,8 @@ import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.ExperimentBase;
 
+import java.util.Objects;
+
 /**
  * This event denotes a change in a bucket property.
  */
@@ -34,7 +36,7 @@ public class BucketCreateEvent extends AbstractEvent implements BucketEvent, Cre
      * Creates a new event denoting bucket creation, invoked by the {@link EventLog#SYSTEM_USER}.
      *
      * @param experiment the experiment (must not be null)
-     * @param bucket the bucket
+     * @param bucket     the bucket
      */
     public BucketCreateEvent(ExperimentBase experiment, Bucket bucket) {
         this(null, experiment, bucket);
@@ -43,16 +45,16 @@ public class BucketCreateEvent extends AbstractEvent implements BucketEvent, Cre
     /**
      * Creates a new event denoting bucket creation.
      *
-     * @param user the user
+     * @param user       the user
      * @param experiment the experiment (must not be null)
-     * @param bucket the bucket
+     * @param bucket     the bucket
      */
     public BucketCreateEvent(UserInfo user, ExperimentBase experiment, Bucket bucket) {
         super(user);
-        if (experiment == null) {
+        if (Objects.isNull(experiment)) {
             throw new IllegalArgumentException("Experiment must not be null!");
         }
-        if (bucket == null) {
+        if (Objects.isNull(bucket)) {
             throw new IllegalArgumentException("Bucket must not be null!");
         }
         this.experiment = experiment;

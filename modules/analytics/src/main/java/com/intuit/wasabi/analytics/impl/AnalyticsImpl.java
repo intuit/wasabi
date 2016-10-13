@@ -20,17 +20,28 @@ import com.intuit.wasabi.analytics.AnalysisTools;
 import com.intuit.wasabi.analytics.Analytics;
 import com.intuit.wasabi.analyticsobjects.Event;
 import com.intuit.wasabi.analyticsobjects.Parameters;
-import com.intuit.wasabi.analyticsobjects.counts.*;
+import com.intuit.wasabi.analyticsobjects.counts.ActionCounts;
+import com.intuit.wasabi.analyticsobjects.counts.AssignmentCounts;
+import com.intuit.wasabi.analyticsobjects.counts.BucketCounts;
+import com.intuit.wasabi.analyticsobjects.counts.Counts;
+import com.intuit.wasabi.analyticsobjects.counts.DailyCounts;
+import com.intuit.wasabi.analyticsobjects.counts.ExperimentCounts;
+import com.intuit.wasabi.analyticsobjects.counts.ExperimentCumulativeCounts;
 import com.intuit.wasabi.analyticsobjects.metrics.BinomialMetrics.BinomialMetric;
-import com.intuit.wasabi.analyticsobjects.statistics.*;
+import com.intuit.wasabi.analyticsobjects.statistics.BucketBasicStatistics;
+import com.intuit.wasabi.analyticsobjects.statistics.BucketStatistics;
+import com.intuit.wasabi.analyticsobjects.statistics.DailyStatistics;
+import com.intuit.wasabi.analyticsobjects.statistics.ExperimentBasicStatistics;
+import com.intuit.wasabi.analyticsobjects.statistics.ExperimentCumulativeStatistics;
+import com.intuit.wasabi.analyticsobjects.statistics.ExperimentStatistics;
 import com.intuit.wasabi.database.Transaction;
 import com.intuit.wasabi.database.Transaction.Block;
 import com.intuit.wasabi.database.TransactionFactory;
-import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
 import com.intuit.wasabi.experiment.Experiments;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Context;
 import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.experimentobjects.exception.ExperimentNotFoundException;
 import com.intuit.wasabi.repository.AnalyticsRepository;
 import com.intuit.wasabi.repository.AssignmentsRepository;
 import com.intuit.wasabi.repository.CassandraRepository;
@@ -40,7 +51,15 @@ import org.slf4j.Logger;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Properties;
+import java.util.TimeZone;
 
 import static com.intuit.autumn.utils.PropertyFactory.create;
 import static com.intuit.autumn.utils.PropertyFactory.getProperty;
@@ -325,9 +344,9 @@ public class AnalyticsImpl implements Analytics {
                             } else {
                                 //carry over cumulative counts from previous day if there are no new counts
                                 if (currentDay > 0) {
-                                    DailyCounts currentDailyCounts =  days.get(currentDay);
-                                    DailyCounts missingDailyCounts =  getPreviousDayDailyCountAsCurrentDailyCount(
-                                            currentDailyCounts, days, currentDay) ;
+                                    DailyCounts currentDailyCounts = days.get(currentDay);
+                                    DailyCounts missingDailyCounts = getPreviousDayDailyCountAsCurrentDailyCount(
+                                            currentDailyCounts, days, currentDay);
                                     days.set(currentDay, missingDailyCounts);
                                 }
 
@@ -350,7 +369,7 @@ public class AnalyticsImpl implements Analytics {
                 for (; currentDay < numberDays; currentDay += 1) {
                     DailyCounts thisDailyCounts = days.get(currentDay);
                     DailyCounts currentDailyCount = getPreviousDayDailyCountAsCurrentDailyCount(
-                            thisDailyCounts, days, currentDay) ;
+                            thisDailyCounts, days, currentDay);
 
                     days.set(currentDay, currentDailyCount);
                 }
@@ -364,7 +383,7 @@ public class AnalyticsImpl implements Analytics {
         DailyCounts.Builder dailyCountsBuilder = new DailyCounts.Builder()
                 .setDate(currentDailyCount.getDate())
                 .withPerDay(currentDailyCount.getPerDay())
-                .withCumulative( days.get(currentDay - 1).getCumulative() );
+                .withCumulative(days.get(currentDay - 1).getCumulative());
         return dailyCountsBuilder.build();
     }
 
@@ -379,14 +398,14 @@ public class AnalyticsImpl implements Analytics {
         //set start and end timestamps and use to create calendars
         Date start_ts = parameters.getFromTime();
 
-        if (start_ts == null) {
+        if (Objects.isNull(start_ts)) {
             start_ts = exp.getStartTime();
         }
 
         Calendar start_cal = createCalendarMidnight(start_ts);
         Date end_ts = parameters.getToTime();
 
-        if (end_ts == null) {
+        if (Objects.isNull(end_ts)) {
             end_ts = exp.getEndTime();
         }
 
@@ -528,7 +547,7 @@ public class AnalyticsImpl implements Analytics {
 
         // Uses counters
         Experiment experiment = cassandraRepository.getExperiment(experimentID);
-        if (release_date != null && release_date.before(experiment.getCreationTime())) {
+        if (Objects.nonNull(release_date) && release_date.before(experiment.getCreationTime())) {
             return assignmentRepository.getBucketAssignmentCount(experiment);
         } else {
             return cassandraRepository.getAssignmentCounts(experimentID, context);
@@ -552,7 +571,7 @@ public class AnalyticsImpl implements Analytics {
             Bucket.Label bucketLabel = bucket.getLabel();
             BucketStatistics bucketWithStats = new BucketStatistics.Builder()
                     .withBucketCounts(bucket)
-                    .withBucketComparisons(new HashMap<Bucket.Label, BucketComparison>())
+                    .withBucketComparisons(new HashMap<>())
                     .build();
 
             analysisTools.generateRate(bucketWithStats, metric);
@@ -569,22 +588,18 @@ public class AnalyticsImpl implements Analytics {
         Experiment exp = getExperimentIfExists(experimentID);
         Date to = parameters.getToTime();
 
-        if (parameters.getFromTime() != null || parameters.getActions() != null) {
+        if (Objects.nonNull(parameters.getFromTime()) || Objects.nonNull(parameters.getActions())) {
             return true;
-        } else if (to != null) {
-
-            // Get the date of the most recent rollup.  Check to make sure that the toTime specified is >= last rollup
-            // Return true if the date of the most recent rollup is before the specified toTime
-            return analyticsRepository.checkMostRecentRollup(exp, parameters, to);
-        } else {
-            return false;
         }
+        // Get the date of the most recent rollup.  Check to make sure that the toTime specified is >= last rollup
+        // Return true if the date of the most recent rollup is before the specified toTime
+        return Objects.nonNull(to) && analyticsRepository.checkMostRecentRollup(exp, parameters, to);
     }
 
     // TODO would be nice if experiment existence could be checked without hitting the db
     Experiment getExperimentIfExists(final Experiment.ID experimentID) {
         Experiment experiment = experiments.getExperiment(experimentID);
-        if (experiment == null) {
+        if (Objects.isNull(experiment)) {
             throw new ExperimentNotFoundException(experimentID);
         }
         return experiment;

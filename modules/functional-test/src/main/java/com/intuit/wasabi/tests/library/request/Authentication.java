@@ -16,11 +16,10 @@
 package com.intuit.wasabi.tests.library.request;
 
 import retrofit.client.Response;
-import retrofit.http.*;
-
-/**
- * Created on 1/29/16.
- */
+import retrofit.http.GET;
+import retrofit.http.Header;
+import retrofit.http.Headers;
+import retrofit.http.POST;
 
 public interface Authentication {
     @Headers({"Cache-Control: no-cache",

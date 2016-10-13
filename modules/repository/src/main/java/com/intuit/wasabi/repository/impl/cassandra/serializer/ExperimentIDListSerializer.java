@@ -24,6 +24,7 @@ import org.apache.cassandra.db.marshal.UUIDType;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -36,7 +37,7 @@ public class ExperimentIDListSerializer extends AbstractSerializer<List<Experime
 	 */
     private static final ExperimentIDListSerializer INSTANCE =
             new ExperimentIDListSerializer();
-    
+
     private final ListSerializer<UUID> delegate = new ListSerializer(UUIDType.instance);
 
 
@@ -57,7 +58,7 @@ public class ExperimentIDListSerializer extends AbstractSerializer<List<Experime
 
     @Override
     public ByteBuffer toByteBuffer(List<Experiment.ID> experimentIDs) {
-        if (experimentIDs == null) {
+        if (Objects.isNull(experimentIDs)) {
             return null;
         }
         List<UUID> uuidList = new ArrayList<UUID>(experimentIDs.size());
@@ -69,7 +70,7 @@ public class ExperimentIDListSerializer extends AbstractSerializer<List<Experime
 
     @Override
     public List<Experiment.ID> fromByteBuffer(ByteBuffer byteBuffer) {
-        if (byteBuffer == null) {
+        if (Objects.isNull(byteBuffer)) {
             return null;
         }
         List<UUID> uuidList = delegate.fromByteBuffer(byteBuffer);

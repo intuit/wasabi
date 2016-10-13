@@ -17,8 +17,10 @@ package com.intuit.wasabi.tests.model.factory;
 
 import com.google.gson.GsonBuilder;
 import com.intuit.wasabi.tests.library.util.Constants;
-import com.intuit.wasabi.tests.model.Experiment;
 import com.intuit.wasabi.tests.library.util.TestUtils;
+import com.intuit.wasabi.tests.model.Experiment;
+
+import java.util.Objects;
 
 /**
  * A factory for Experiments.
@@ -33,15 +35,16 @@ public class ExperimentFactory {
     private static int internalId = 0;
 
     static {
-        if (System.getProperty("user-name") != null)
+        if (Objects.nonNull(System.getProperty("user-name"))) {
             USER_ID = System.getProperty("user-name");
+        }
     }
 
     /**
      * Creates a basic Experiment with the required default values but no ID.
      * The values are a name, the default application, a start and end time and the sampling percentage (100%), as
      * well as a hypothesis/description.
-     *
+     * <p>
      * Sets the creatorID to admin email
      *
      * @return a default Experiment.
@@ -51,8 +54,8 @@ public class ExperimentFactory {
                 ApplicationFactory.defaultApplication(),
                 TestUtils.currentTimeString(),
                 TestUtils.relativeTimeString(42), 1)
-                    .setCreatorID(USER_ID)
-                    .setDescription("A sample Experiment description.");
+                .setCreatorID(USER_ID)
+                .setDescription("A sample Experiment description.");
     }
 
     /**

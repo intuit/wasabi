@@ -19,12 +19,12 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.intuit.wasabi.analyticsobjects.Event;
 import com.intuit.wasabi.analyticsobjects.EventList;
-import com.intuit.wasabi.events.EventIngestionExecutor;
 import com.intuit.wasabi.assignment.Assignments;
 import com.intuit.wasabi.assignmentobjects.Assignment;
-import com.intuit.wasabi.eventobjects.EventEnvelopePayload;
 import com.intuit.wasabi.assignmentobjects.User;
 import com.intuit.wasabi.database.TransactionFactory;
+import com.intuit.wasabi.eventobjects.EventEnvelopePayload;
+import com.intuit.wasabi.events.EventIngestionExecutor;
 import com.intuit.wasabi.events.Events;
 import com.intuit.wasabi.events.EventsMBean;
 import com.intuit.wasabi.experimentobjects.Application;
@@ -34,7 +34,9 @@ import org.slf4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -50,22 +52,22 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 public class EventsImpl implements Events, EventsMBean {
 
-    private static final Logger LOGGER = getLogger(EventsImpl.class);
     protected static final String MYSQL = "mysql";
-    private Assignments assignments;
-    private TransactionFactory transactionFactory;
-    private LinkedBlockingQueue mysqlQueue = new LinkedBlockingQueue<>();
-    private ThreadPoolExecutor mysqlExecutor;
+    private static final Logger LOGGER = getLogger(EventsImpl.class);
     /**
      * Executors to ingest event data to real time ingestion system.
      */
     protected Map<String, EventIngestionExecutor> eventIngestionExecutors;
+    private Assignments assignments;
+    private TransactionFactory transactionFactory;
+    private BlockingQueue<Runnable> mysqlQueue = new LinkedBlockingQueue<>();
+    private ThreadPoolExecutor mysqlExecutor;
 
     @Inject
     public EventsImpl(Map<String, EventIngestionExecutor> eventIngestionExecutors,
-            final @Named("executor.threadpool.size") Integer threadPoolSize,
-            final Assignments assignments,
-            final TransactionFactory transactionFactory) {
+                      final @Named("executor.threadpool.size") Integer threadPoolSize,
+                      final Assignments assignments,
+                      final TransactionFactory transactionFactory) {
         super();
         this.eventIngestionExecutors = eventIngestionExecutors;
         this.transactionFactory = transactionFactory;
@@ -84,7 +86,7 @@ public class EventsImpl implements Events, EventsMBean {
 
         for (Event event : events.getEvents()) {
             Assignment assignment = assignmentHashMap.get(event.getContext());
-            if (assignment != null) {
+            if (Objects.nonNull(assignment)) {
                 postEventToMysql(assignment, event);
                 ingestEventToRealTimeSystems(applicationName, experimentLabel, event, assignment);
             }
@@ -93,14 +95,14 @@ public class EventsImpl implements Events, EventsMBean {
 
     // This method ingests event to real time ingestion systems.
     private void ingestEventToRealTimeSystems(Application.Name applicationName, Experiment.Label experimentLabel, Event event,
-            Assignment assignment) {
+                                              Assignment assignment) {
         for (String name : eventIngestionExecutors.keySet()) {
             eventIngestionExecutors.get(name).execute(new EventEnvelopePayload(applicationName, experimentLabel, assignment, event));
         }
     }
 
     protected Map<Context, Assignment> getAssignments(User.ID userID, Application.Name applicationName,
-                                                          Experiment.Label experimentLabel, Set<Context> contextSet) {
+                                                      Experiment.Label experimentLabel, Set<Context> contextSet) {
         Map<Context, Assignment> assignmentHashMap = new HashMap<>();
         for (Context context : contextSet) {
             Assignment assignment = assignments.getAssignment(
@@ -114,20 +116,21 @@ public class EventsImpl implements Events, EventsMBean {
         try {
             mysqlExecutor.execute(makeEventEnvelope(assignment, event));
         } catch (Exception e) {
-            LOGGER.warn("Mysql error: Unable to record event " + event.toString() + " for the user "
-                    + assignment.getUserID().toString() + " for context " + assignment.getContext(), e);
+            LOGGER.warn("Mysql error: Unable to record event {} for the user {} for context {}",
+                    event.toString(), assignment.getUserID().toString(), assignment.getContext(), e);
         }
     }
 
     /**
      * Helper method to instantiate events envelope
-     * @param assignment
-     * @param event
-     * @return
+     *
+     * @param assignment the assignment to wrap
+     * @param event      the event to wrap
+     * @return the EventsEnvelope wrapping this event
      */
-	protected EventsEnvelope makeEventEnvelope(Assignment assignment, Event event) {
-		return new EventsEnvelope(assignment, event, transactionFactory.newTransaction());
-	}
+    protected EventsEnvelope makeEventEnvelope(Assignment assignment, Event event) {
+        return new EventsEnvelope(assignment, event, transactionFactory.newTransaction());
+    }
 
     /**
      * {@inheritDoc}
@@ -139,11 +142,11 @@ public class EventsImpl implements Events, EventsMBean {
 
     @Override
     public Map<String, Integer> queuesLength() {
-        Map<String, Integer> queueLengthMap = new HashMap<String, Integer>();
-        queueLengthMap.put(MYSQL, new Integer(mysqlQueue.size()));
+        Map<String, Integer> queueLengthMap = new HashMap<>();
+        queueLengthMap.put(MYSQL, mysqlQueue.size());
         for (String name : eventIngestionExecutors.keySet()) {
-            queueLengthMap.put(name.toLowerCase(), new Integer(eventIngestionExecutors.get(name).queueLength()));
-        }        
+            queueLengthMap.put(name.toLowerCase(), eventIngestionExecutors.get(name).queueLength());
+        }
         return queueLengthMap;
     }
 
@@ -154,5 +157,5 @@ public class EventsImpl implements Events, EventsMBean {
     public int getQueueSize() {
         // FIXME: is this MBean method really used??
         return mysqlQueue.size();
-    } 
+    }
 }

@@ -22,13 +22,18 @@ import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.eventlog.EventLog;
 import com.intuit.wasabi.eventlog.events.ExperimentChangeEvent;
 import com.intuit.wasabi.eventlog.events.ExperimentCreateEvent;
-import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
 import com.intuit.wasabi.experiment.Buckets;
 import com.intuit.wasabi.experiment.Experiments;
 import com.intuit.wasabi.experiment.Pages;
 import com.intuit.wasabi.experiment.Priorities;
-import com.intuit.wasabi.experimentobjects.*;
+import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.experimentobjects.BucketList;
+import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.Experiment.ExperimentAuditInfo;
+import com.intuit.wasabi.experimentobjects.ExperimentList;
+import com.intuit.wasabi.experimentobjects.ExperimentValidator;
+import com.intuit.wasabi.experimentobjects.NewExperiment;
+import com.intuit.wasabi.experimentobjects.exception.ExperimentNotFoundException;
 import com.intuit.wasabi.repository.CassandraRepository;
 import com.intuit.wasabi.repository.DatabaseRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
@@ -39,15 +44,19 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
-import static com.intuit.wasabi.experimentobjects.Experiment.State.*;
+import static com.intuit.wasabi.experimentobjects.Experiment.State.DELETED;
+import static com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT;
+import static com.intuit.wasabi.experimentobjects.Experiment.State.PAUSED;
+import static com.intuit.wasabi.experimentobjects.Experiment.State.RUNNING;
+import static com.intuit.wasabi.experimentobjects.Experiment.State.TERMINATED;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * A thin wrapper around Cassandra implementation at com.intuit.wasabi.repository.impl.cassandra.CassandraExperimentRepository
  * {@link com.intuit.wasabi.repository.ExperimentRepository}
  * to keep business logic out of the persistence layer
- *
  */
 public class ExperimentsImpl implements Experiments {
 
@@ -182,7 +191,7 @@ public class ExperimentsImpl implements Experiments {
     @Override
     public void checkStateTransition(Experiment.ID experimentID, Experiment.State currentState,
                                      Experiment.State desiredState) {
-        if (desiredState != null && !currentState.equals(desiredState)) {
+        if (Objects.nonNull(desiredState) && !currentState.equals(desiredState)) {
 
             // Throw an exception if the StateTransition is invalid
             validator.validateStateTransition(currentState, desiredState);
@@ -208,15 +217,15 @@ public class ExperimentsImpl implements Experiments {
     @Override
     public void checkForIllegalUpdate(Experiment experiment, Experiment updates) {
         // Throw an exception if ID, ModificationTime or CreationTime is being updated.
-        if (updates.getID() != null && !updates.getID().equals(experiment.getID())) {
+        if (Objects.nonNull(updates.getID()) && !updates.getID().equals(experiment.getID())) {
             throw new IllegalArgumentException("Invalid experimentID \"" + updates.getID() + "\" " +
                     "Cannot change experiment ID");
         }
-        if (updates.getCreationTime() != null && !updates.getCreationTime().equals(experiment.getCreationTime())) {
+        if (Objects.nonNull(updates.getCreationTime()) && !updates.getCreationTime().equals(experiment.getCreationTime())) {
             throw new IllegalArgumentException("Invalid creationTime \"" + updates.getCreationTime() + "\" " +
                     "Experiment creation time cannot be modified");
         }
-        if (updates.getModificationTime() != null
+        if (Objects.nonNull(updates.getModificationTime())
                 && !updates.getModificationTime().equals(experiment.getModificationTime())) {
             throw new IllegalArgumentException("Invalid modificationTime \"" + updates.getModificationTime() + "\" " +
                     "Experiment modification time cannot be modified");
@@ -234,29 +243,29 @@ public class ExperimentsImpl implements Experiments {
         * */
         if (experiment.getState().equals(TERMINATED)) {
 
-            if (updates.getApplicationName() != null &&
+            if (Objects.nonNull(updates.getApplicationName()) &&
                     !updates.getApplicationName().equals(experiment.getApplicationName())) {
                 throw new IllegalArgumentException("Invalid application name \"" + updates.getApplicationName() + "\" " +
                         "Cannot change application name when the experiment is in TERMINATED state");
             }
-            if (updates.getLabel() != null && !updates.getLabel().equals(experiment.getLabel())) {
+            if (Objects.nonNull(updates.getLabel()) && !updates.getLabel().equals(experiment.getLabel())) {
                 throw new IllegalArgumentException("Invalid label \"" + updates.getLabel() + "\" " +
                         "Cannot change label when the experiment is in TERMINATED state");
             }
-            if (updates.getStartTime() != null && !updates.getStartTime().equals(experiment.getStartTime())) {
+            if (Objects.nonNull(updates.getStartTime()) && !updates.getStartTime().equals(experiment.getStartTime())) {
                 throw new IllegalArgumentException("Invalid startTime \"" + updates.getStartTime() + "\" " +
                         "Cannot change start time when the experiment is in TERMINATED state");
             }
-            if (updates.getEndTime() != null && !updates.getEndTime().equals(experiment.getEndTime())) {
+            if (Objects.nonNull(updates.getEndTime()) && !updates.getEndTime().equals(experiment.getEndTime())) {
                 throw new IllegalArgumentException("Invalid endTime \"" + updates.getEndTime() + "\" " +
                         "Cannot change end time when the experiment is in TERMINATED state");
             }
-            if (updates.getSamplingPercent() != null &&
+            if (Objects.nonNull(updates.getSamplingPercent()) &&
                     !updates.getSamplingPercent().equals(experiment.getSamplingPercent())) {
                 throw new IllegalArgumentException("Invalid sampling percentage \"" + updates.getSamplingPercent() + "\" " +
                         "Cannot change sampling percentage when the experiment is in TERMINATED state");
             }
-            if (updates.getRule() != null && !updates.getRule().equals(experiment.getRule())) {
+            if (Objects.nonNull(updates.getRule()) && !updates.getRule().equals(experiment.getRule())) {
                 throw new IllegalArgumentException("Invalid rule \"" + updates.getRule() + "\" " +
                         "Cannot change sampling rule when the experiment is in TERMINATED state");
             }
@@ -275,14 +284,14 @@ public class ExperimentsImpl implements Experiments {
         or when the established startTime/endTime has already passed.
         */
         if (experiment.getState().equals(RUNNING) || experiment.getState().equals(PAUSED)) {
-            if (updates.getApplicationName() != null &&
+            if (Objects.nonNull(updates.getApplicationName()) &&
                     !updates.getApplicationName().equals(experiment.getApplicationName()))
                 throw new IllegalArgumentException("Cannot change AppName when the experiment is not in DRAFT state");
-            if (updates.getLabel() != null && !updates.getLabel().equals(experiment.getLabel()))
+            if (Objects.nonNull(updates.getLabel()) && !updates.getLabel().equals(experiment.getLabel()))
                 throw new IllegalArgumentException("Cannot change Label when the experiment is not in DRAFT state");
-            if (updates.getStartTime() != null && !updates.getStartTime().equals(experiment.getStartTime()))
+            if (Objects.nonNull(updates.getStartTime()) && !updates.getStartTime().equals(experiment.getStartTime()))
                 checkForIllegalExperimentStartTime(experiment, updates);
-            if (updates.getEndTime() != null && !updates.getEndTime().equals(experiment.getEndTime()))
+            if (Objects.nonNull(updates.getEndTime()) && !updates.getEndTime().equals(experiment.getEndTime()))
                 checkForIllegalExperimentEndTime(experiment, updates);
         }
     }
@@ -295,7 +304,7 @@ public class ExperimentsImpl implements Experiments {
             throw new IllegalArgumentException("Invalid endTime \"" + update.getEndTime() + "\". " +
                     "Cannot update the experiment endTime that has already passed");
         } else {
-            if (update.getStartTime() != null) {
+            if (Objects.nonNull(update.getStartTime())) {
                 if (update.getEndTime().before(update.getStartTime())) {
                     throw new IllegalArgumentException("Invalid startTime \"" + update.getEndTime() + "\". " +
                             "Cannot update the experiment endTime to a value preceding the experiment startTime");
@@ -317,7 +326,7 @@ public class ExperimentsImpl implements Experiments {
             throw new IllegalArgumentException("Invalid startTime \"" + update.getStartTime() + "\". " +
                     "Cannot update the experiment startTime that has already passed");
         } else {
-            if (update.getEndTime() != null) {
+            if (Objects.nonNull(update.getEndTime())) {
                 if (update.getStartTime().after(update.getEndTime())) {
                     throw new IllegalArgumentException("Invalid startTime \"" + update.getStartTime() + "\". " +
                             "Cannot update the experiment startTime to a value beyond the experiment endTime");
@@ -341,32 +350,32 @@ public class ExperimentsImpl implements Experiments {
         boolean requiresUpdate = false;
         ExperimentAuditInfo changeData;
 
-        if (updates.getState() != null && !updates.getState().equals(experiment.getState())) {
+        if (Objects.nonNull(updates.getState()) && !updates.getState().equals(experiment.getState())) {
             builder.withState(updates.getState());
             requiresUpdate = true;
             changeData = new ExperimentAuditInfo("state", experiment.getState().toString(),
                     updates.getState().toString());
             changeList.add(changeData);
         }
-        if (updates.getDescription() != null && !updates.getDescription().equals(experiment.getDescription())) {
+        if (Objects.nonNull(updates.getDescription()) && !updates.getDescription().equals(experiment.getDescription())) {
             builder.withDescription(updates.getDescription());
             requiresUpdate = true;
             changeData = new ExperimentAuditInfo("description", experiment.getDescription(), updates.getDescription());
             changeList.add(changeData);
         }
-        if (updates.getHypothesisIsCorrect() != null && !updates.getHypothesisIsCorrect().equals(experiment.getHypothesisIsCorrect())) {
+        if (Objects.nonNull(updates.getHypothesisIsCorrect()) && !updates.getHypothesisIsCorrect().equals(experiment.getHypothesisIsCorrect())) {
             builder.withHypothesisIsCorrect(updates.getHypothesisIsCorrect());
             requiresUpdate = true;
             changeData = new ExperimentAuditInfo("hypothesis_is_correct", experiment.getHypothesisIsCorrect(), updates.getHypothesisIsCorrect());
             changeList.add(changeData);
         }
-        if (updates.getResults() != null && !updates.getResults().equals(experiment.getResults())) {
+        if (Objects.nonNull(updates.getResults()) && !updates.getResults().equals(experiment.getResults())) {
             builder.withResults(updates.getResults());
             requiresUpdate = true;
             changeData = new ExperimentAuditInfo("results", experiment.getResults(), updates.getResults());
             changeList.add(changeData);
         }
-        if (updates.getSamplingPercent() != null
+        if (Objects.nonNull(updates.getSamplingPercent())
                 && !updates.getSamplingPercent().equals(experiment.getSamplingPercent())) {
             builder.withSamplingPercent(updates.getSamplingPercent());
             requiresUpdate = true;
@@ -374,14 +383,14 @@ public class ExperimentsImpl implements Experiments {
                     updates.getSamplingPercent().toString());
             changeList.add(changeData);
         }
-        if (updates.getStartTime() != null && !updates.getStartTime().equals(experiment.getStartTime())) {
+        if (Objects.nonNull(updates.getStartTime()) && !updates.getStartTime().equals(experiment.getStartTime())) {
             builder.withStartTime(updates.getStartTime());
             requiresUpdate = true;
             changeData = new ExperimentAuditInfo("start_time", experiment.getStartTime().toString(),
                     updates.getStartTime().toString());
             changeList.add(changeData);
         }
-        if (updates.getEndTime() != null
+        if (Objects.nonNull(updates.getEndTime())
                 && !updates.getEndTime().equals(experiment.getEndTime())) {
             builder.withEndTime(updates.getEndTime());
             requiresUpdate = true;
@@ -389,7 +398,7 @@ public class ExperimentsImpl implements Experiments {
             changeList.add(changeData);
         }
 
-        if (updates.getIsPersonalizationEnabled() != null
+        if (Objects.nonNull(updates.getIsPersonalizationEnabled())
                 && !updates.getIsPersonalizationEnabled().equals(experiment.getIsPersonalizationEnabled())) {
             builder.withIsPersonalizationEnabled(updates.getIsPersonalizationEnabled());
             requiresUpdate = true;
@@ -399,21 +408,21 @@ public class ExperimentsImpl implements Experiments {
             changeList.add(changeData);
         }
 
-        if (updates.getModelName() != null && !updates.getModelName().equals(experiment.getModelName())) {
+        if (Objects.nonNull(updates.getModelName()) && !updates.getModelName().equals(experiment.getModelName())) {
             builder.withModelName(updates.getModelName());
             requiresUpdate = true;
             changeData = new ExperimentAuditInfo("modelName", experiment.getModelName(), updates.getModelName());
             changeList.add(changeData);
         }
 
-        if (updates.getModelVersion() != null && !updates.getModelVersion().equals(experiment.getModelVersion())) {
+        if (Objects.nonNull(updates.getModelVersion()) && !updates.getModelVersion().equals(experiment.getModelVersion())) {
             builder.withModelVersion(updates.getModelVersion());
             requiresUpdate = true;
             changeData = new ExperimentAuditInfo("modelVersion", experiment.getModelVersion(), updates.getModelVersion());
             changeList.add(changeData);
         }
 
-        if (updates.getIsRapidExperiment() != null
+        if (Objects.nonNull(updates.getIsRapidExperiment())
                 && !updates.getIsRapidExperiment().equals(experiment.getIsRapidExperiment())) {
             builder.withIsRapidExperiment(updates.getIsRapidExperiment());
             requiresUpdate = true;
@@ -423,7 +432,7 @@ public class ExperimentsImpl implements Experiments {
             changeList.add(changeData);
         }
 
-        if (updates.getUserCap() != null
+        if (Objects.nonNull(updates.getUserCap())
                 && !updates.getUserCap().equals(experiment.getUserCap())) {
             builder.withUserCap(updates.getUserCap());
             requiresUpdate = true;
@@ -433,7 +442,7 @@ public class ExperimentsImpl implements Experiments {
             changeList.add(changeData);
         }
 
-        if (updates.getRule() != null && !updates.getRule().equals(experiment.getRule())) {
+        if (Objects.nonNull(updates.getRule()) && !updates.getRule().equals(experiment.getRule())) {
             builder.withRule(updates.getRule());
             requiresUpdate = true;
             changeData = new ExperimentAuditInfo("rule",
@@ -446,11 +455,11 @@ public class ExperimentsImpl implements Experiments {
         * Application name and label cannot be changed once the experiment is beyond the DRAFT state.
         * Hence, we are not including them as a part of the audit log.
         */
-        if (updates.getLabel() != null && !updates.getLabel().equals(experiment.getLabel())) {
+        if (Objects.nonNull(updates.getLabel()) && !updates.getLabel().equals(experiment.getLabel())) {
             builder.withLabel(updates.getLabel());
             requiresUpdate = true;
         }
-        if (updates.getApplicationName() != null
+        if (Objects.nonNull(updates.getApplicationName())
                 && !updates.getApplicationName().equals(experiment.getApplicationName())) {
             builder.withApplicationName(updates.getApplicationName());
             requiresUpdate = true;
@@ -466,16 +475,16 @@ public class ExperimentsImpl implements Experiments {
     public void updateSegmentationRule(Experiment experiment, UserInfo user) {
         Rule oldRule = ruleCache.getRule(experiment.getID());
         Rule newRule;
-        if (experiment.getRule() != null && experiment.getRule().length() != 0) {
+        if (Objects.nonNull(experiment.getRule()) && experiment.getRule().length() != 0) {
             newRule = new RuleBuilder().parseExpression(experiment.getRule());
             ruleCache.setRule(experiment.getID(), newRule);
             LOGGER.debug("Segmentation rule of " + experiment.getID() + " updated from "
-                    + (oldRule != null ? oldRule.getExpressionRepresentation() : null) +
-                    " to " + (newRule != null ? newRule.getExpressionRepresentation() : null));
+                    + (Objects.nonNull(oldRule) ? oldRule.getExpressionRepresentation() : null) +
+                    " to " + (Objects.nonNull(newRule) ? newRule.getExpressionRepresentation() : null));
         } else {
             ruleCache.clearRule(experiment.getID());
             LOGGER.debug("Segmentation rule of " + experiment.getID() + " cleared "
-                    + (oldRule != null ? oldRule.getExpressionRepresentation() : null));
+                    + (Objects.nonNull(oldRule) ? oldRule.getExpressionRepresentation() : null));
         }
     }
 
@@ -490,7 +499,7 @@ public class ExperimentsImpl implements Experiments {
         // Save the current experiment to be reverted back in case of mysql failure
         Experiment oldExperiment = experiment;
         // Throw an exception if the current experiment is not valid
-        if (experiment == null) {
+        if (Objects.isNull(experiment)) {
             throw new ExperimentNotFoundException(experimentID);
         }
 
@@ -513,7 +522,7 @@ public class ExperimentsImpl implements Experiments {
             experiment = builder.build();
             boolean applicationNameChanged = !experiment.getApplicationName().equals(oldExperiment.getApplicationName
                     ());
-            boolean segmentationRuleChanged = (experiment.getRule() != null && oldExperiment.getRule() != null) && !experiment.getRule().equals(oldExperiment.getRule());
+            boolean segmentationRuleChanged = (Objects.nonNull(experiment.getRule()) && Objects.nonNull(oldExperiment.getRule())) && !experiment.getRule().equals(oldExperiment.getRule());
 
             // Throw an exception if the updated experiment is not valid
             validator.validateExperiment(experiment);
@@ -550,7 +559,7 @@ public class ExperimentsImpl implements Experiments {
                 }
             }
 
-            if (desiredState != null && (desiredState.equals(TERMINATED) || desiredState.equals(DELETED))) {
+            if (Objects.nonNull(desiredState) && (desiredState.equals(TERMINATED) || desiredState.equals(DELETED))) {
                 // Remove the experiment from the priority list
                 priorities.removeFromPriorityList(experiment.getApplicationName(), experimentID);
                 // Remove the experiment from the page related data

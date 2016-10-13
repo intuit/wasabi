@@ -17,7 +17,7 @@ package com.intuit.wasabi.analyticsobjects.counts;
 
 import com.intuit.wasabi.analyticsobjects.Event;
 import com.intuit.wasabi.experimentobjects.Bucket;
-import com.intuit.wasabi.test.util.TestUtils;
+import com.intuit.wasabi.analyticsobjects.TestUtils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -100,7 +100,7 @@ public class ExperimentCountsTest {
 
         ExperimentCounts clonedExperimentCount = counter.clone();
         assertEquals(1, clonedExperimentCount.getBuckets().size());
-        
+
         TestUtils.assertMapsEqual(counter.getBuckets(), clonedExperimentCount.getBuckets());
 
     }

@@ -15,7 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.analyticsobjects.statistics;
 
-import com.intuit.wasabi.exceptions.AnalyticsException;
+import com.intuit.wasabi.analyticsobjects.exceptions.AnalyticsException;
 import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -24,6 +24,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * This is a wrapper DTO to save the List of DailyStatistics
@@ -84,7 +85,7 @@ public class ExperimentCumulativeStatistics implements Cloneable {
             throw new AnalyticsException("ExperimentCumulativeStatistics clone not supported: " + e.getMessage(), e);
         }
 
-        if (days != null) {
+        if (Objects.nonNull(days)) {
             List<DailyStatistics> clonedDays = new ArrayList<DailyStatistics>();
             for (DailyStatistics day : days) {
                 clonedDays.add(day.clone());

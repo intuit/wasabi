@@ -17,7 +17,7 @@ package com.intuit.wasabi.repository;
 
 import com.intuit.wasabi.exceptions.WasabiServerException;
 
-import static com.intuit.wasabi.experimentobjects.exceptions.ErrorCode.REPOSITORY_ERROR;
+import static com.intuit.wasabi.exceptions.ErrorCode.REPOSITORY_ERROR;
 
 /**
  * Signals that an error accessing or manipulating a repository has occurred

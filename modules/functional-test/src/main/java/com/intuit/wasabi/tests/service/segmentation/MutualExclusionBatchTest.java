@@ -26,8 +26,6 @@ import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterSuite;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.lang.reflect.Type;
@@ -41,8 +39,8 @@ public class MutualExclusionBatchTest extends TestBase {
     private static final Logger LOGGER = getLogger(MutualExclusionBatchTest.class);
     private final List<Experiment> validExperimentsLists = new ArrayList<>();
 
-    @Test(groups= {"setup"}, dataProvider = "mutexBatchExperimentSetup", dataProviderClass = SegmentationDataProvider.class)
-    public void t_setupExperiment(String data){
+    @Test(groups = {"setup"}, dataProvider = "mutexBatchExperimentSetup", dataProviderClass = SegmentationDataProvider.class)
+    public void setupExperiment(String data) {
         LOGGER.debug(data);
         response = apiServerConnector.doPost("/experiments", data);
         LOGGER.debug(response.jsonPath().prettify());
@@ -51,30 +49,30 @@ public class MutualExclusionBatchTest extends TestBase {
         assertReturnCode(response, HttpStatus.SC_CREATED);
         String redBucket = "{\"label\": \"red\", \"allocationPercent\": 0.5, \"isControl\": false, \"description\": \"\"}";
         String blueBucket = "{\"label\": \"blue\", \"allocationPercent\": 0.5, \"isControl\": false, \"description\": \"\"}";
-        response = apiServerConnector.doPost("/experiments/"+experiment.id+"/buckets", redBucket);
+        response = apiServerConnector.doPost("/experiments/" + experiment.id + "/buckets", redBucket);
         assertReturnCode(response, HttpStatus.SC_CREATED);
-        response = apiServerConnector.doPost("/experiments/"+experiment.id+"/buckets", blueBucket);
+        response = apiServerConnector.doPost("/experiments/" + experiment.id + "/buckets", blueBucket);
         assertReturnCode(response, HttpStatus.SC_CREATED);
-        response = apiServerConnector.doPut("/experiments/"+experiment.id, "{\"state\": \"RUNNING\"}");
+        response = apiServerConnector.doPut("/experiments/" + experiment.id, "{\"state\": \"RUNNING\"}");
         assertReturnCode(response, HttpStatus.SC_OK);
     }
 
-    @Test(dependsOnMethods = {"t_setupExperiment"}, groups = {"setup"})
-    public void t_setMutualExclusion(){
-        String mutex_experiments= "{\"experimentIDs\": [\""+validExperimentsLists.get(1).id+"\",\""+
-                validExperimentsLists.get(2).id+"\"]}";
-        LOGGER.debug("experiment mutex is "+ mutex_experiments);
-        response = apiServerConnector.doPost("/experiments/"+validExperimentsLists.get(0).id+"/exclusions",
+    @Test(dependsOnMethods = {"setupExperiment"}, groups = {"setup"})
+    public void setMutualExclusion() {
+        String mutex_experiments = "{\"experimentIDs\": [\"" + validExperimentsLists.get(1).id + "\",\"" +
+                validExperimentsLists.get(2).id + "\"]}";
+        LOGGER.debug("experiment mutex is " + mutex_experiments);
+        response = apiServerConnector.doPost("/experiments/" + validExperimentsLists.get(0).id + "/exclusions",
                 mutex_experiments);
         assertReturnCode(response, HttpStatus.SC_CREATED);
     }
 
 
-    @Test(dependsOnGroups = {"setup"}, groups={"test"})
-    public void t_batchAssignmentWithMutexExclusion(){
-        String url = "/assignments/applications/segmutexbatch_"+SegmentationDataProvider.time+"/users/user_0";
-        String data = "{\"labels\": [\"batch_exp_label_"+SegmentationDataProvider.time+"_0\",\"batch_exp_label_"
-                +SegmentationDataProvider.time+"_1\",\"batch_exp_label_"+SegmentationDataProvider.time+"_2\"]," +
+    @Test(dependsOnGroups = {"setup"}, groups = {"test"})
+    public void batchAssignmentWithMutexExclusion() {
+        String url = "/assignments/applications/segmutexbatch_" + SegmentationDataProvider.time + "/users/user_0";
+        String data = "{\"labels\": [\"batch_exp_label_" + SegmentationDataProvider.time + "_0\",\"batch_exp_label_"
+                + SegmentationDataProvider.time + "_1\",\"batch_exp_label_" + SegmentationDataProvider.time + "_2\"]," +
                 "\"profile\": {\"state\":\"CA\"}}";
         response = apiServerConnector.doPost(url, data);
         LOGGER.debug(response.asString());
@@ -93,14 +91,9 @@ public class MutualExclusionBatchTest extends TestBase {
 
 
     @AfterClass
-    public void t_cleanUp(){
-        LOGGER.info("Clean up experiments");
-        for(Experiment experiment : validExperimentsLists){
-            response = apiServerConnector.doPut("experiments/"+experiment.id, "{\"state\": \"TERMINATED\"}");
-            assertReturnCode(response, HttpStatus.SC_OK);
-            response = apiServerConnector.doDelete("experiments/"+experiment.id);
-            assertReturnCode(response, HttpStatus.SC_NO_CONTENT);
-        }
+    public void cleanUp() {
+        toCleanUp.addAll(validExperimentsLists);
+        cleanUpExperiments();
     }
 
 }

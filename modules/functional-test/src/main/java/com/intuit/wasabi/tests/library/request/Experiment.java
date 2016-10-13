@@ -16,11 +16,15 @@
 package com.intuit.wasabi.tests.library.request;
 
 import retrofit.client.Response;
-import retrofit.http.*;
+import retrofit.http.Body;
+import retrofit.http.DELETE;
+import retrofit.http.Header;
+import retrofit.http.Headers;
+import retrofit.http.POST;
+import retrofit.http.PUT;
+import retrofit.http.Path;
+import retrofit.http.Query;
 
-/**
- * Created on 1/29/16.
- */
 public interface Experiment {
     @Headers({"Accept: application/json",
             "User-Agent: TestAgent"})
@@ -28,7 +32,6 @@ public interface Experiment {
     Response createExperiment(@Header("Authorization") String authHeader,
                               @Query("createNewApplication") String create,
                               @Body String body);
-
 
 
     @Headers({"Accept: application/json",
@@ -52,9 +55,6 @@ public interface Experiment {
     @DELETE("experiments/{experimentId}")
     Response deleteExperiment(@Header("Authorization") String authHeader,
                               @Path("experimentId") String experimentId);
-
-
-
 
 
 }

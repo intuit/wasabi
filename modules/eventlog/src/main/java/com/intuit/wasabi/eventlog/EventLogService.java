@@ -19,6 +19,8 @@ import com.google.common.util.concurrent.AbstractIdleService;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 
+import java.util.Objects;
+
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class EventLogService extends AbstractIdleService {
@@ -34,7 +36,7 @@ public class EventLogService extends AbstractIdleService {
 
     @Override
     protected void startUp() throws Exception {
-        if (eventLogSystem != null) {
+        if (Objects.nonNull(eventLogSystem)) {
             LOGGER.info("already started {}", serviceName());
 
             return;
@@ -47,7 +49,7 @@ public class EventLogService extends AbstractIdleService {
 
     @Override
     protected void shutDown() throws Exception {
-        if (eventLogSystem == null) {
+        if (Objects.isNull(eventLogSystem)) {
             LOGGER.info("already stopped {}", serviceName());
 
             return;

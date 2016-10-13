@@ -17,13 +17,14 @@ package com.intuit.wasabi.analyticsobjects;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.intuit.wasabi.analyticsobjects.exceptions.AnalyticsException;
 import com.intuit.wasabi.analyticsobjects.metrics.BinomialMetrics;
 import com.intuit.wasabi.analyticsobjects.metrics.BinomialMetrics.BinomialMetric;
-import com.intuit.wasabi.exceptions.AnalyticsException;
 import com.intuit.wasabi.experimentobjects.Context;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.util.Date;
 import java.util.List;
@@ -31,17 +32,17 @@ import java.util.TimeZone;
 
 /**
  * Parameters available for use when calling analytics APIs.
- *
+ * <p>
  * valid for both counts and statistics APIs:
  * fromTime, toTime: end points on time interval to consider
  * actions: subset of actions to consider
- *
+ * <p>
  * valid for statistics APIs only:
  * metric: metric to use for statistics calculations
  * confidenceLevel: confidence level on (0, 1) scale, so 0.95 = 95%
  * effectSize: difference in action rates on [-1, 1] scale
  * singleShot: boolean flag indicating if the amount of data to be collected is predetermined and fixed
- *
+ * <p>
  * not for public use:
  * mode: used for statistics testing
  */
@@ -185,23 +186,12 @@ public class Parameters implements Cloneable {
 
     @Override
     public boolean equals(Object obj) {
-    	   return EqualsBuilder.reflectionEquals(this, obj);
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 
     @Override
     public int hashCode() {
-        int result = fromTime != null ? fromTime.hashCode() : 0;
-        result = 31 * result + (toTime != null ? toTime.hashCode() : 0);
-        result = 31 * result + (confidenceLevel != null ? confidenceLevel.hashCode() : 0);
-        result = 31 * result + (effectSize != null ? effectSize.hashCode() : 0);
-        result = 31 * result + (actions != null ? actions.hashCode() : 0);
-        result = 31 * result + (singleShot != null ? singleShot.hashCode() : 0);
-        result = 31 * result + (metric != null ? metric.hashCode() : 0);
-        result = 31 * result + (mode != null ? mode.hashCode() : 0);
-        result = 31 * result + (context != null ? context.hashCode() : 0);
-        result = 31 * result + (metricImpl != null ? metricImpl.hashCode() : 0);
-        result = 31 * result + (timeZone != null ? timeZone.hashCode() : 0);
-        return result;
+        return HashCodeBuilder.reflectionHashCode(1, 31, this);
     }
 
     public enum Mode {

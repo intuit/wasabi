@@ -16,7 +16,7 @@
 package com.intuit.wasabi.api.error;
 
 import com.intuit.wasabi.api.HttpHeader;
-import com.intuit.wasabi.experimentobjects.exceptions.WasabiException;
+import com.intuit.wasabi.exceptions.WasabiException;
 
 import javax.inject.Inject;
 import javax.ws.rs.ext.Provider;

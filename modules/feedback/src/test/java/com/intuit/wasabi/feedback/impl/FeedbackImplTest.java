@@ -16,7 +16,7 @@
 package com.intuit.wasabi.feedback.impl;
 
 import com.intuit.wasabi.authenticationobjects.UserInfo;
-import com.intuit.wasabi.exceptions.AuthenticationException;
+import com.intuit.wasabi.authenticationobjects.exceptions.AuthenticationException;
 import com.intuit.wasabi.feedbackobjects.UserFeedback;
 import com.intuit.wasabi.repository.FeedbackRepository;
 import com.intuit.wasabi.repository.RepositoryException;

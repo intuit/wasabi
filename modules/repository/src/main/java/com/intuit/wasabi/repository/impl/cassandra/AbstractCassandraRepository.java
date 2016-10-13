@@ -23,6 +23,7 @@ import com.toddfast.mutagen.cassandra.CassandraMutagen;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -85,14 +86,14 @@ public class AbstractCassandraRepository<K extends RepositoryKeyspace> {
         State<Integer> state = result.getLastState();
 
         if (result.isMutationComplete()) {
-            LOGGER.info("Schema mutation complete. Final state: {}", state != null
+            LOGGER.info("Schema mutation complete. Final state: {}", Objects.nonNull(state)
                     ? state.getID()
                     : "null");
         }
 
-        if (result.getException() != null) {
+        if (Objects.nonNull(result.getException())) {
             String message = "Exception mutating schema " +
-                    "(last state: " + (state != null ? state.getID() : "null") +
+                    "(last state: " + (Objects.nonNull(state) ? state.getID() : "null") +
                     ", completed mutations: \"" + result.getCompletedMutations() +
                     "\", remaining mutations: \"" + result.getRemainingMutations() +
                     "\")";

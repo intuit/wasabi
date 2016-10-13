@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 class ImpressionsActionsResourceParser {
 
@@ -30,19 +31,19 @@ class ImpressionsActionsResourceParser {
 
     /**
      * Parses JSON submission for impressions and actions.
-     *
+     * <p>
      * Replaces a null timestamp with the current UTC time.
      *
      * @param body the JSON submission for either impressions or actions
      */
-    static void parse (Map<Application.Name, List<List<String>>> body) {
+    static void parse(Map<Application.Name, List<List<String>>> body) {
         Date now = new Date();
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXX");
         String timestamp = df.format(now);
 
         for (List<List<String>> submissions : body.values()) {
             for (List<String> submission : submissions) {
-                if (submission.get(0) == null) {
+                if (Objects.isNull(submission.get(0))) {
                     submission.set(0, timestamp);
                 }
             }

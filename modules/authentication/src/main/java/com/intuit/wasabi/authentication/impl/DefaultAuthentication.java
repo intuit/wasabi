@@ -23,7 +23,7 @@ import com.google.inject.Inject;
 import com.intuit.wasabi.authentication.Authentication;
 import com.intuit.wasabi.authenticationobjects.LoginToken;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
-import com.intuit.wasabi.exceptions.AuthenticationException;
+import com.intuit.wasabi.authenticationobjects.exceptions.AuthenticationException;
 import com.intuit.wasabi.userdirectory.UserDirectory;
 import org.slf4j.Logger;
 

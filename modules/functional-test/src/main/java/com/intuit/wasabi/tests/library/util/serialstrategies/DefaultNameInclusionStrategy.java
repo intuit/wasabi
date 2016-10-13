@@ -26,11 +26,14 @@ import java.util.List;
  */
 public class DefaultNameInclusionStrategy implements SerializationStrategy {
 
-    /** the whitelist */
+    /**
+     * the whitelist
+     */
     private List<String> whitelist;
 
     /**
      * Whitelists method names.
+     *
      * @param includes names to whitelist.
      */
     public DefaultNameInclusionStrategy(String... includes) {

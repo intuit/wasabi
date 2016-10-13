@@ -15,11 +15,6 @@
  *******************************************************************************/
 package com.intuit.wasabi.authenticationobjects;
 
-import java.io.IOException;
-
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -30,6 +25,11 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Preconditions;
 import io.swagger.annotations.ApiModelProperty;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+import java.io.IOException;
+import java.util.Objects;
 
 /**
  * Information about admin users, IE not users in the assignments/events sense
@@ -40,7 +40,7 @@ public class UserInfo {
     private Username username;
     @ApiModelProperty(value = "user password", required = false)
     private String password;
-   	@ApiModelProperty(value = "numerical user ID", required = false)
+    @ApiModelProperty(value = "numerical user ID", required = false)
     private String userId;
     @ApiModelProperty(value = "the first name of the user", required = false)
     private String firstName;
@@ -53,6 +53,14 @@ public class UserInfo {
         super();
     }
 
+    public static Builder newInstance(Username username) {
+        return new Builder(username);
+    }
+
+    public static Builder from(Username username) {
+        return new Builder(username);
+    }
+
     public Username getUsername() {
         return username;
     }
@@ -62,28 +70,28 @@ public class UserInfo {
     }
 
     public String getPassword() {
-		return password;
-	}
+        return password;
+    }
 
-	public void setPassword(String password) {
-		this.password = password;
-	}
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
     /**
-	 * @return the userId
-	 */
-	public String getUserId() {
-		return userId;
-	}
+     * @return the userId
+     */
+    public String getUserId() {
+        return userId;
+    }
 
-	/**
-	 * @param userId the userId to set
-	 */
-	public void setUserId(String userId) {
-		this.userId = userId;
-	}
+    /**
+     * @param userId the userId to set
+     */
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 
-	public String getFirstName() {
+    public String getFirstName() {
         return firstName;
     }
 
@@ -107,15 +115,45 @@ public class UserInfo {
         this.email = email;
     }
 
-    public static Builder newInstance(Username username) {
-        return new Builder(username);
+    @Override
+    public String toString() {
+        return "UserInfo [username=" + username + ", userId=" + userId +
+                ", firstName=" + firstName + ", lastName=" +
+                lastName + ", email=" + email + "]";
     }
 
-    public static Builder from(Username username) {
-        return new Builder(username);
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(1, 31)
+                .append(username)
+                .append(userId)
+                .append(firstName)
+                .append(lastName)
+                .append(email)
+                .toHashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (Objects.isNull(obj)) return false;
+        if (obj == this) return true;
+        if (!(obj instanceof UserInfo)) {
+            return false;
+        }
+
+        UserInfo other = (UserInfo) obj;
+        return new EqualsBuilder()
+                .append(username, other.getUsername())
+                .append(userId, other.getUserId())
+                .append(firstName, other.getFirstName())
+                .append(lastName, other.getLastName())
+                .append(email, other.getEmail())
+                .isEquals();
     }
 
     public static class Builder {
+
+        private UserInfo instance;
 
         public Builder(Username username) {
             instance = new UserInfo();
@@ -123,8 +161,8 @@ public class UserInfo {
         }
 
         public Builder withUserId(final String userId) {
-        	this.instance.userId = userId;
-        	return this;
+            this.instance.userId = userId;
+            return this;
         }
 
         public Builder withFirstName(final String name) {
@@ -152,44 +190,6 @@ public class UserInfo {
             instance = null;
             return result;
         }
-
-        private UserInfo instance;
-    }
-
-    @Override
-    public String toString() {
-        return "UserInfo [username=" + username + ", userId=" + userId +
-                ", firstName=" + firstName + ", lastName=" +
-                lastName + ", email=" + email + "]";
-    }
-
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder(1, 31)
-                .append(username)
-                .append(userId)
-                .append(firstName)
-                .append(lastName)
-                .append(email)
-                .toHashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) return false;
-        if (obj == this) return true;
-        if (!(obj instanceof UserInfo)) {
-            return false;
-        }
-
-        UserInfo other = (UserInfo) obj;
-        return new EqualsBuilder()
-                .append(username, other.getUsername())
-                .append(userId, other.getUserId())
-                .append(firstName, other.getFirstName())
-                .append(lastName, other.getLastName())
-                .append(email, other.getEmail())
-                .isEquals();
     }
 
     @JsonSerialize(using = UserInfo.Username.Serializer.class)
@@ -198,35 +198,36 @@ public class UserInfo {
 
         private String username;
 
-        public String getUsername() {
-            return username;
-        }
-        public void setUsername(String username) {
-            this.username = username;
-        }
-
         private Username(String username) {
             super();
             this.username = Preconditions.checkNotNull(username);
         }
 
+        public static Username valueOf(String value) {
+            return new Username(value.toLowerCase());
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
         @Override
         public int hashCode() {
-        	return HashCodeBuilder.reflectionHashCode(this);
+            return HashCodeBuilder.reflectionHashCode(this);
         }
 
         @Override
         public boolean equals(Object obj) {
-        	   return EqualsBuilder.reflectionEquals(this, obj);
+            return EqualsBuilder.reflectionEquals(this, obj);
         }
 
         @Override
         public String toString() {
             return username;
-        }
-
-        public static Username valueOf(String value) {
-            return new Username(value.toLowerCase());
         }
 
         public static class Serializer extends JsonSerializer<Username> {

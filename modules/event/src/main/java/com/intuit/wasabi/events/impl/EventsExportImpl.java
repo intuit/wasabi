@@ -19,8 +19,8 @@ import com.google.inject.Inject;
 import com.intuit.wasabi.analyticsobjects.Parameters;
 import com.intuit.wasabi.database.TransactionFactory;
 import com.intuit.wasabi.events.EventsExport;
-import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
 import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.experimentobjects.exception.ExperimentNotFoundException;
 import com.intuit.wasabi.repository.DatabaseRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import org.skife.jdbi.v2.DBI;
@@ -28,10 +28,15 @@ import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.ResultIterator;
 
 import javax.ws.rs.core.StreamingOutput;
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * This class exports events from a given Experiment.ID.
@@ -60,14 +65,14 @@ public class EventsExportImpl implements EventsExport {
         // Check to make sure that experiment exists
         Experiment id = getExperiment(experimentID);
 
-        if (id == null) {
+        if (Objects.isNull(id)) {
             throw new ExperimentNotFoundException(experimentID);
         }
 
         Date fromTs = parameters.getFromTime();
         Date toTs = parameters.getToTime();
-        Timestamp fromTsNew = fromTs != null ? new Timestamp(fromTs.getTime()) : new Timestamp(id.getStartTime().getTime());
-        Timestamp toTsNew = toTs != null ? new Timestamp(toTs.getTime()) : new Timestamp(id.getEndTime().getTime());
+        Timestamp fromTsNew = Objects.nonNull(fromTs) ? new Timestamp(fromTs.getTime()) : new Timestamp(id.getStartTime().getTime());
+        Timestamp toTsNew = Objects.nonNull(toTs) ? new Timestamp(toTs.getTime()) : new Timestamp(id.getEndTime().getTime());
 
         final Date fromTsFinal = fromTsNew;
         final Date toTsFinal = toTsNew;

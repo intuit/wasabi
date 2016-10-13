@@ -42,12 +42,13 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Pages repo cassandra implementation
- * 
+ *
  * @see PagesRepository
  */
 public class CassandraPagesRepository implements PagesRepository {
@@ -251,7 +252,7 @@ public class CassandraPagesRepository implements PagesRepository {
                 Experiment.ID experimentID = Experiment.ID.valueOf(row.getColumns()
                         .getColumnByName("exp_id").getUUIDValue());
                 Experiment experiment = experimentRepository.getExperiment(experimentID);
-                if (experiment == null) {
+                if (Objects.isNull(experiment)) {
                     continue;
                 }
                 Experiment.Label label = experiment.getLabel();

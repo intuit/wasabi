@@ -22,11 +22,10 @@ import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.email.EmailLinksList;
 import com.intuit.wasabi.email.EmailService;
 import com.intuit.wasabi.email.EmailTextProcessor;
-import com.intuit.wasabi.exceptions.WasabiEmailException;
+import com.intuit.wasabi.email.exceptions.EmailException;
 import com.intuit.wasabi.experimentobjects.Application;
-import com.intuit.wasabi.experimentobjects.exceptions.ErrorCode;
+import com.intuit.wasabi.exceptions.ErrorCode;
 import org.apache.commons.mail.Email;
-import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.slf4j.Logger;
@@ -63,7 +62,7 @@ public class EmailServiceImpl implements EmailService {
         setHost(host);
 
         setFrom(from);
-        
+
         this.subjectPrefix = subjectPrefix;
         this.emailTextProcessor = emailTextProcessor;
     }
@@ -148,14 +147,14 @@ public class EmailServiceImpl implements EmailService {
                 email.setMsg(msg);
                 email.addTo(clearTo);
                 email.send();
-            } catch (EmailException mailExcp) {
+            } catch (org.apache.commons.mail.EmailException mailExcp) {
                 LOGGER.error("Email could not be send because of " + mailExcp.getMessage());
-                throw new WasabiEmailException("Email: " + emailToString(subject, msg, to) + " could not be sent.", mailExcp);
+                throw new EmailException("Email: " + emailToString(subject, msg, to) + " could not be sent.", mailExcp);
             }
         } else {
             //if the service is not active log the email that would have been send and throw error
             LOGGER.info("EmailService would have sent: " + emailToString(subject, msg, to));
-            throw new WasabiEmailException(ErrorCode.EMAIL_NOT_ACTIVE_ERROR, "The EmailService is not active.");
+            throw new EmailException(ErrorCode.EMAIL_NOT_ACTIVE_ERROR, "The EmailService is not active.");
         }
     }
 

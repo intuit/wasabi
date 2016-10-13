@@ -44,15 +44,15 @@ public class ExperimentComparator extends PaginationComparator<Experiment> {
      * @see PaginationComparatorProperty
      */
     private enum Property implements PaginationComparatorProperty<Experiment> {
-        application_name(experiment -> experiment.getApplicationName().toString(), String::compareToIgnoreCase),
-        experiment_name(experiment -> experiment.getLabel().toString(), String::compareToIgnoreCase),
-        created_by(Experiment::getCreatorID, String::compareToIgnoreCase),
-        creation_time(Experiment::getCreationTime, Date::compareTo),
-        start_time(Experiment::getStartTime, Date::compareTo),
-        end_time(Experiment::getEndTime, Date::compareTo),
-        modification_time(Experiment::getModificationTime, Date::compareTo),
-        state(experiment -> experiment.getState().name(), String::compareToIgnoreCase),
-        favorite(Experiment::isFavorite, Boolean::compareTo)
+        APPLICATION_NAME(experiment -> experiment.getApplicationName().toString(), String::compareToIgnoreCase),
+        EXPERIMENT_NAME(experiment -> experiment.getLabel().toString(), String::compareToIgnoreCase),
+        CREATED_BY(Experiment::getCreatorID, String::compareToIgnoreCase),
+        CREATION_TIME(Experiment::getCreationTime, Date::compareTo),
+        START_TIME(Experiment::getStartTime, Date::compareTo),
+        END_TIME(Experiment::getEndTime, Date::compareTo),
+        MODIFICATION_TIME(Experiment::getModificationTime, Date::compareTo),
+        STATE(experiment -> experiment.getState().name(), String::compareToIgnoreCase),
+        FAVORITE(Experiment::isFavorite, Boolean::compareTo)
         ;
 
         private final Function<Experiment, ?> propertyExtractor;

@@ -28,6 +28,8 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Base class for holding statistics and counts
@@ -59,39 +61,37 @@ public abstract class AbstractContainerStatistics extends AbstractContainerCount
 
     @JsonIgnore
     public void addToActionRate(Event.Name actionName, ActionRate actionRate) {
-        if (this.actionRates == null) {
-            this.actionRates = new HashMap<>();
-        }
+        this.actionRates = Optional.ofNullable(this.actionRates).orElse(new HashMap<>());
         this.actionRates.put(actionName, actionRate);
     }
 
     @Override
     public String toString() {
-    	return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 
     @Override
     public int hashCode() {
-    	return HashCodeBuilder.reflectionHashCode(this);
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override
     public boolean equals(Object obj) {
-    	   return EqualsBuilder.reflectionEquals(this, obj);
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 
     @Override
     public AbstractContainerStatistics clone() {
         AbstractContainerStatistics cloned = (AbstractContainerStatistics) super.clone();
 
-        if (jointActionRate != null) {
+        if (Objects.nonNull(jointActionRate)) {
             cloned.setJointActionRate(jointActionRate.clone());
 
         }
 
-        if (actionRates != null) {
+        if (Objects.nonNull(actionRates)) {
             Map<Event.Name, ActionRate> clonedActions = new HashMap<>();
-            for ( Entry<Name, ActionRate> entry : actionRates.entrySet()) {
+            for (Entry<Name, ActionRate> entry : actionRates.entrySet()) {
                 clonedActions.put(entry.getKey(), entry.getValue().clone());
             }
             cloned.setActionRates(clonedActions);

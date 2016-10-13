@@ -18,14 +18,14 @@ package com.intuit.wasabi.experiment.impl;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.eventlog.EventLog;
 import com.intuit.wasabi.eventlog.events.ExperimentChangeEvent;
-import com.intuit.wasabi.exceptions.EndTimeHasPassedException;
-import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
 import com.intuit.wasabi.experiment.Experiments;
 import com.intuit.wasabi.experiment.Mutex;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.ExperimentIDList;
 import com.intuit.wasabi.experimentobjects.ExperimentList;
-import com.intuit.wasabi.experimentobjects.exceptions.InvalidExperimentStateException;
+import com.intuit.wasabi.experimentobjects.exception.EndTimeHasPassedException;
+import com.intuit.wasabi.experimentobjects.exception.ExperimentNotFoundException;
+import com.intuit.wasabi.experimentobjects.exception.InvalidExperimentStateException;
 import com.intuit.wasabi.repository.MutexRepository;
 import com.intuit.wasabi.repository.RepositoryException;
 import org.slf4j.Logger;
@@ -33,19 +33,23 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import static com.intuit.wasabi.experimentobjects.Experiment.State.DELETED;
 import static com.intuit.wasabi.experimentobjects.Experiment.State.TERMINATED;
 
 public class MutexImpl implements Mutex {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MutexImpl.class);
+    final Date NOW = new Date();
     private final MutexRepository mutexRepository;
     private final Experiments experiments;
     private final EventLog eventLog;
-    private static final Logger LOGGER = LoggerFactory.getLogger(MutexImpl.class);
-
-    final Date NOW = new Date();
 
     @Inject
     public MutexImpl(MutexRepository mutexRepository, Experiments experiments, EventLog eventLog) {
@@ -63,7 +67,7 @@ public class MutexImpl implements Mutex {
 
         // Throw an exception if the input experiment is not valid
         final Experiment expID = experiments.getExperiment(experimentID);
-        if (expID.getID() == null) {
+        if (Objects.isNull(expID.getID())) {
             throw new ExperimentNotFoundException(experimentID);
         }
         return mutexRepository.getExclusions(experimentID);
@@ -75,7 +79,7 @@ public class MutexImpl implements Mutex {
     @Override
     public ExperimentList getNotExclusions(Experiment.ID experimentID) {
         // Throw an exception if the input experiment is not valid
-        if (experimentID == null) {
+        if (Objects.isNull(experimentID)) {
             throw new ExperimentNotFoundException("error, experiment not found");
         }
         return mutexRepository.getNotExclusions(experimentID);
@@ -113,7 +117,7 @@ public class MutexImpl implements Mutex {
         Experiment baseExp = experiments.getExperiment(baseID);
 
         // Throw an exception if the base experiment is not valid
-        if (baseExp == null) {
+        if (Objects.isNull(baseExp)) {
             throw new ExperimentNotFoundException(baseID);
         }
 
@@ -151,7 +155,7 @@ public class MutexImpl implements Mutex {
             // Check to see if pair experiment exists
             Experiment pairExp = experiments.getExperiment(pairID);
 
-            if (pairExp == null) {
+            if (Objects.isNull(pairExp)) {
                 tempResult.put("status", "FAILED");
                 tempResult.put("reason", "Experiment2 not found.");
                 results.add(tempResult);
@@ -161,8 +165,8 @@ public class MutexImpl implements Mutex {
             // Check to see if base and pair experiments are in the same application
             if (!pairExp.getApplicationName().equals(baseExp.getApplicationName())) {
                 tempResult.put("status", "FAILED");
-                tempResult.put("reason", new StringBuilder("Experiments 1 and 2 are not in the same application. ")
-                        .append("Mutual exclusion rules can only be defined for experiments within the same application.").toString());
+                tempResult.put("reason", "Experiments 1 and 2 are not in the same application. " +
+                        "Mutual exclusion rules can only be defined for experiments within the same application.");
                 results.add(tempResult);
                 continue;
             }
@@ -193,7 +197,7 @@ public class MutexImpl implements Mutex {
             try {
                 mutexRepository.createExclusion(baseID, pairID);
                 eventLog.postEvent(new ExperimentChangeEvent(user, baseExp, "mutex",
-                        null, pairExp.getLabel() == null ? null : pairExp.getLabel().toString()));
+                        null, Objects.isNull(pairExp.getLabel()) ? null : pairExp.getLabel().toString()));
             } catch (RepositoryException rExp) {
                 LOGGER.error("Unable to store data in repository: ", rExp);
                 tempResult.put("status", "FAILED");

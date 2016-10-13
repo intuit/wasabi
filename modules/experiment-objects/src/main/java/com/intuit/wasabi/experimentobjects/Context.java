@@ -16,7 +16,7 @@
 package com.intuit.wasabi.experimentobjects;
 
 import com.google.common.base.Preconditions;
-import com.intuit.wasabi.experimentobjects.exceptions.InvalidIdentifierException;
+import com.intuit.wasabi.exceptions.InvalidIdentifierException;
 import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;

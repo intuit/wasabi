@@ -15,9 +15,6 @@
  *******************************************************************************/
 package com.intuit.wasabi.exceptions;
 
-import com.intuit.wasabi.experimentobjects.exceptions.ErrorCode;
-import com.intuit.wasabi.experimentobjects.exceptions.WasabiException;
-
 /**
  * Base exception for all server-side exceptions
  */

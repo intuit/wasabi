@@ -23,13 +23,13 @@ import org.slf4j.Logger;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Objects;
 import java.util.TimeZone;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Runnable for updating rule caching
- *
  */
 public class ExperimentRuleCacheUpdateEnvelope implements Runnable {
 
@@ -49,17 +49,17 @@ public class ExperimentRuleCacheUpdateEnvelope implements Runnable {
     public void run() {
 
         try {
-            if (cassandraRuleString != null) {
+            if (Objects.nonNull(cassandraRuleString)) {
                 Rule cassandraRule = getExperimentRule(cassandraRuleString);
                 if (!ruleCache.containsRule(experimentID) ||
                         !cassandraRule.equals(ruleCache.getRule(experimentID))) {
                     Rule oldRule = ruleCache.getRule(experimentID);
                     ruleCache.setRule(experimentID, cassandraRule);
                     LOGGER.info(getUTCTime() + " Segmentation rule of " + experimentID + " updated from " +
-                            (oldRule != null ? oldRule.getExpressionRepresentation() : null) + " to " +
+                            (Objects.nonNull(oldRule) ? oldRule.getExpressionRepresentation() : null) + " to " +
                             cassandraRule.getExpressionRepresentation());
                 }
-            } else if (cassandraRuleString == null && ruleCache.getRule(experimentID) != null) {
+            } else if (Objects.nonNull(ruleCache.getRule(experimentID))) {
                 Rule oldRule = ruleCache.getRule(experimentID);
                 ruleCache.setRule(experimentID, null);
                 LOGGER.info(getUTCTime() + " Segmentation rule of " + experimentID + " updated from " +

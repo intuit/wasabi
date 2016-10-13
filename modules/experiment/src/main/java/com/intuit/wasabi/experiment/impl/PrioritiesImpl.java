@@ -15,19 +15,20 @@
  *******************************************************************************/
 package com.intuit.wasabi.experiment.impl;
 
-import com.intuit.wasabi.exceptions.ApplicationNotFoundException;
 import com.intuit.wasabi.experiment.Experiments;
 import com.intuit.wasabi.experiment.Priorities;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.ExperimentIDList;
 import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
+import com.intuit.wasabi.experimentobjects.exception.ApplicationNotFoundException;
 import com.intuit.wasabi.repository.PrioritiesRepository;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import static com.intuit.wasabi.experimentobjects.Experiment.State.TERMINATED;
@@ -43,7 +44,7 @@ public class PrioritiesImpl implements Priorities {
         this.prioritiesRepository = prioritiesRepository;
         this.experiments = experiments;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -51,7 +52,7 @@ public class PrioritiesImpl implements Priorities {
     public void setPriority(Experiment.ID experimentID, int priorityNum) {
 
         Experiment experiment = experiments.getExperiment(experimentID);
-        if (experiment == null || experiment.getState().equals(TERMINATED)) {
+        if (Objects.isNull(experiment) || experiment.getState().equals(TERMINATED)) {
             return;
         }
         Application.Name applicationName = experiment.getApplicationName();
@@ -93,7 +94,7 @@ public class PrioritiesImpl implements Priorities {
     public void appendToPriorityList(Experiment.ID experimentID) {
         Application.Name applicationName = experiments.getExperiment(experimentID).getApplicationName();
         List<Experiment.ID> priorityList = prioritiesRepository.getPriorityList(applicationName);
-        if (priorityList == null) {
+        if (Objects.isNull(priorityList)) {
             priorityList = new ArrayList<>(1);
         }
 
@@ -112,7 +113,7 @@ public class PrioritiesImpl implements Priorities {
     @Override
     public void removeFromPriorityList(Application.Name applicationName, Experiment.ID experimentID) {
         List<Experiment.ID> priorityList = prioritiesRepository.getPriorityList(applicationName);
-        if (priorityList != null && priorityList.contains(experimentID)) {
+        if (Objects.nonNull(priorityList) && priorityList.contains(experimentID)) {
             priorityList.remove(experimentID);
             prioritiesRepository.createPriorities(applicationName, priorityList);
         }
@@ -126,8 +127,8 @@ public class PrioritiesImpl implements Priorities {
                                  boolean verifyPriorityList) {
 
         // Throw an exception if application name is invalid
-        if (applicationName == null) {
-            throw new ApplicationNotFoundException((Application.Name)null);
+        if (Objects.isNull(applicationName)) {
+            throw new ApplicationNotFoundException((Application.Name) null);
         }
 
         if (verifyPriorityList) {
@@ -151,7 +152,7 @@ public class PrioritiesImpl implements Priorities {
             // Remove DELETED experiments from the priorityList
             // Remove experiments not belonging to the pertinent application
             // Remove TERMINATED experiments from the priorityList
-            if (experiment == null || !experiment.getApplicationName().equals(applicationName) ||
+            if (Objects.isNull(experiment) || !experiment.getApplicationName().equals(applicationName) ||
                     experiment.getState().equals(TERMINATED)) {
                 experimentSet.remove(experimentID);
             }
@@ -179,7 +180,7 @@ public class PrioritiesImpl implements Priorities {
         if (verifyPriorityList) {
             List<Experiment.ID> priorityList = prioritiesRepository.getPriorityList(applicationName);
             List<Experiment> experimentList = experiments.getExperiments(applicationName);
-            if ((priorityList != null ? priorityList.size() : 0) != experimentList.size()) {
+            if ((Objects.nonNull(priorityList) ? priorityList.size() : 0) != experimentList.size()) {
                 prioritiesRepository.createPriorities(applicationName, cleanPriorityList(applicationName, priorityList));
             }
         }

@@ -16,7 +16,7 @@
 package com.intuit.wasabi.analyticsobjects.counts;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.intuit.wasabi.exceptions.AnalyticsException;
+import com.intuit.wasabi.analyticsobjects.exceptions.AnalyticsException;
 import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -25,10 +25,12 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Top level DTO to save the cumulative counts for an Experiment
- *
+ * <p>
  * Fields:
  * <ul>
  * <li>List of {@link DailyCounts} with the counts for each day</li>
@@ -42,10 +44,7 @@ public class ExperimentCumulativeCounts implements Cloneable {
 
     @JsonIgnore
     public void addDays(DailyCounts day) {
-        if (this.days == null) {
-            this.days = new ArrayList<>();
-        }
-
+        this.days = Optional.ofNullable(this.days).orElse(new ArrayList<>());
         this.days.add(day);
     }
 
@@ -59,17 +58,17 @@ public class ExperimentCumulativeCounts implements Cloneable {
 
     @Override
     public String toString() {
-    	return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 
     @Override
     public int hashCode() {
-    	return HashCodeBuilder.reflectionHashCode(this);
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override
     public boolean equals(Object obj) {
-    	   return EqualsBuilder.reflectionEquals(this, obj);
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 
     @Override
@@ -83,8 +82,8 @@ public class ExperimentCumulativeCounts implements Cloneable {
             throw new AnalyticsException("ExperimentCumulativeCounts clone not supported: " + e.getMessage(), e);
         }
 
-        if (days != null) {
-            List<DailyCounts> clonedDays = new ArrayList<DailyCounts>();
+        if (Objects.nonNull(days)) {
+            List<DailyCounts> clonedDays = new ArrayList<>();
 
             for (DailyCounts day : days) {
                 clonedDays.add(day.clone());

@@ -15,7 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.api.pagination.filters.impl;
 
-import com.intuit.wasabi.exceptions.PaginationException;
+import com.intuit.wasabi.api.pagination.exceptions.PaginationException;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import org.junit.Assert;
@@ -147,7 +147,7 @@ public class ExperimentFilterTest {
     }
 
     @Test
-    public void testConstraintTest() throws Exception {
+    public void testConstraintDateTest() throws Exception {
         Date date = Date.from(Instant.from(DateTimeFormatter.ISO_DATE_TIME.parse("2014-02-13T13:42:45+00:00")));
 
         HashMap<String, Boolean> testCases = new HashMap<>();
@@ -173,7 +173,7 @@ public class ExperimentFilterTest {
         for (Map.Entry<String, Boolean> testCase : testCases.entrySet()) {
             Assert.assertEquals("Test case " + testCase.getKey() + " failed.",
                     testCase.getValue(),
-                    ExperimentFilter.constraintTest(date, testCase.getKey()));
+                    ExperimentFilter.constraintDateTest(date, testCase.getKey()));
         }
 
         List<String> throwCases = new ArrayList<>();
@@ -190,7 +190,7 @@ public class ExperimentFilterTest {
 
         for (String throwCase : throwCases) {
             try {
-                ExperimentFilter.constraintTest(date, throwCase);
+                ExperimentFilter.constraintDateTest(date, throwCase);
                 Assert.fail(throwCase + " passed, but should have thrown.");
             } catch (PaginationException ignored) {
                 // expected

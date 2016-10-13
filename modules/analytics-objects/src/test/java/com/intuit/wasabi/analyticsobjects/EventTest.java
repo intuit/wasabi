@@ -16,8 +16,6 @@
 package com.intuit.wasabi.analyticsobjects;
 
 import com.intuit.wasabi.experimentobjects.Context;
-import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -44,17 +42,17 @@ public class EventTest {
     public void testSetPayLoadNotNull() {
         Event event = new Event();
         event.setPayload(Event.Payload.valueOf("one"));
-        assertEquals("one",event.getPayload().toString());
+        assertEquals("one", event.getPayload().toString());
     }
 
-    @Test(expected=IllegalArgumentException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testSetPayLoadNull() {
         Event event = new Event();
         event.setPayload(null);
     }
 
     @Test
-    public void enumTest(){
+    public void enumTest() {
         Set<String> expected = new HashSet<>(Arrays.asList("IMPRESSION", "BINARY_ACTION"));
         Set<String> actual = new HashSet<>();
         for (Event.Type t : Event.Type.values())
@@ -63,8 +61,8 @@ public class EventTest {
     }
 
     @Test
-    public void getterAndSetterTest(){
-        Context c =  Context.newInstance("Test").build();
+    public void getterAndSetterTest() {
+        Context c = Context.newInstance("Test").build();
         Event event = new Event();
         event.setContext(c);
         assertThat(event.getContext(), is(c));
@@ -100,16 +98,17 @@ public class EventTest {
     }
 
     @Test
-    public void testEqual(){
+    public void testEqual() {
         Event e1 = new Event();
         Event e2 = e1.clone();
         assertThat(e1, is(e2));
     }
 
     @Test
-    public void testHashCode(){
+    public void testHashCode() {
         Event event = new Event();
-        assertThat(event.hashCode(), is(-1985862199));
+        Event event2 = new Event();
+        assertThat(event.hashCode(), is(event2.hashCode()));
         assertThat(event.toString(), containsString("Event"));
     }
 }

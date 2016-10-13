@@ -20,7 +20,7 @@ import com.intuit.wasabi.email.impl.EmailEventLogListener;
 import com.intuit.wasabi.email.impl.EmailTextProcessorImpl;
 import com.intuit.wasabi.email.impl.NoopEmailImpl;
 import com.intuit.wasabi.eventlog.EventLogModule;
-import com.intuit.wasabi.exceptions.AuthenticationException;
+import com.intuit.wasabi.authenticationobjects.exceptions.AuthenticationException;
 import com.intuit.wasabi.repository.RepositoryModule;
 import org.slf4j.Logger;
 

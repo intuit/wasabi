@@ -24,6 +24,23 @@ import java.util.List;
 public class ModelUtil<T> {
 
     /**
+     * Filteres a list according to the supplied filter strategy.
+     *
+     * @param dataList the list to filter
+     * @param filter   the filter to use
+     * @return the filtered list
+     */
+    public List<T> filterList(List<T> dataList, Filter<T> filter) {
+        List<T> filteredList = new ArrayList<T>();
+        for (T dataItem : dataList) {
+            if (filter.filter(dataItem)) {
+                filteredList.add(dataItem);
+            }
+        }
+        return filteredList;
+    }
+
+    /**
      * This interface describes a filter to filter collections.
      *
      * @param <T> the class to be filtered
@@ -37,23 +54,6 @@ public class ModelUtil<T> {
          * @return true if it shall be contained
          */
         boolean filter(T collectionItem);
-    }
-
-    /**
-     * Filteres a list according to the supplied filter strategy.
-     *
-     * @param dataList the list to filter
-     * @param filter the filter to use
-     * @return the filtered list
-     */
-    public List<T> filterList(List<T> dataList, Filter<T> filter) {
-        List<T> filteredList = new ArrayList<T>();
-        for (T dataItem : dataList) {
-            if (filter.filter(dataItem)) {
-                filteredList.add(dataItem);
-            }
-        }
-        return filteredList;
     }
 
 }

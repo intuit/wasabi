@@ -15,9 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.exceptions;
 
-import com.intuit.wasabi.experimentobjects.exceptions.WasabiClientException;
-
-import static com.intuit.wasabi.experimentobjects.exceptions.ErrorCode.INVALID_TIME_ZONE;
+import static com.intuit.wasabi.exceptions.ErrorCode.INVALID_TIME_ZONE;
 
 
 /**

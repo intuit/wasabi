@@ -31,7 +31,12 @@ import com.intuit.wasabi.repository.AnalyticsRepository;
 import com.intuit.wasabi.repository.RepositoryException;
 
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Database analytics impl of analytics repo
@@ -51,7 +56,7 @@ public class DatabaseAnalytics implements AnalyticsRepository {
      */
     @Inject
     public DatabaseAnalytics(TransactionFactory transactionFactory, Flyway flyway,
-            final @Named("mysql.mutagen.root.resource.path") String mutagenRootResourcePath) {
+                             final @Named("mysql.mutagen.root.resource.path") String mutagenRootResourcePath) {
         super();
 
         this.transactionFactory = transactionFactory;
@@ -99,8 +104,8 @@ public class DatabaseAnalytics implements AnalyticsRepository {
 
         try {
             //build and execute SQL queries for counts
-            Date from_ts = parameters.getFromTime();
-            Date to_ts = parameters.getToTime();
+            Date fromTs = parameters.getFromTime();
+            Date toTs = parameters.getToTime();
             String sqlBase = "bucket_label as bid, count(user_id) as c, count(distinct user_id) as cu";
             StringBuilder sqlParams = new StringBuilder(" where experiment_id = ? and context = ?");
             List params = new ArrayList();
@@ -108,21 +113,21 @@ public class DatabaseAnalytics implements AnalyticsRepository {
             params.add(parameters.getContext().getContext());
 
 
-            if (from_ts != null) {
-                params.add(from_ts);
-                sqlParams.append( " and timestamp >= ?" );
+            if (Objects.nonNull(fromTs)) {
+                params.add(fromTs);
+                sqlParams.append(" and timestamp >= ?");
             }
 
-            if (to_ts != null) {
-                params.add(to_ts);
-                sqlParams.append( " and timestamp <= ?");
+            if (Objects.nonNull(toTs)) {
+                params.add(toTs);
+                sqlParams.append(" and timestamp <= ?");
             }
 
             addActionsToSql(parameters, sqlParams, params);
 
             Object[] bucketSqlData = new Object[params.size()];
             params.toArray(bucketSqlData);
-            
+
             String sqlActions = "select action, " + sqlBase + " from event_action" +
                     sqlParams.toString() + " group by bucket_label, action";
             List<Map> actionsRows = transaction.select(sqlActions, bucketSqlData);
@@ -151,8 +156,8 @@ public class DatabaseAnalytics implements AnalyticsRepository {
         try {
 
             //build and execute SQL queries for counts
-            Date from_ts = parameters.getFromTime();
-            Date to_ts = parameters.getToTime();
+            Date fromTs = parameters.getFromTime();
+            Date toTs = parameters.getToTime();
             String sqlBase = "bucket_label as bid, count(user_id) as c, count(distinct user_id) as cu";
             StringBuilder sqlParams = new StringBuilder(" where experiment_id = ? and context = ?");
             List params = new ArrayList();
@@ -160,13 +165,13 @@ public class DatabaseAnalytics implements AnalyticsRepository {
             params.add(parameters.getContext().getContext());
 
 
-            if (from_ts != null) {
-                params.add(from_ts);
+            if (Objects.nonNull(fromTs)) {
+                params.add(fromTs);
                 sqlParams.append(" and timestamp >= ?");
             }
 
-            if (to_ts != null) {
-                params.add(to_ts);
+            if (Objects.nonNull(toTs)) {
+                params.add(toTs);
                 sqlParams.append(" and timestamp <= ?");
             }
 
@@ -187,17 +192,17 @@ public class DatabaseAnalytics implements AnalyticsRepository {
 
     void addActionsToSql(Parameters parameters, StringBuilder sqlParams, List params) {
         List<String> actions = parameters.getActions();
-        if (actions != null) {
+        if (Objects.nonNull(actions)) {
             int num_actions = actions.size();
-            if( num_actions >= 1){
-                sqlParams.append( " and action in (?");
+            if (num_actions >= 1) {
+                sqlParams.append(" and action in (?");
                 params.add(actions.get(0));
             }
             for (int num = 1; num < num_actions; num++) {
-                sqlParams.append( ",?" );
+                sqlParams.append(",?");
                 params.add(actions.get(num));
             }
-            if( num_actions >= 1) {
+            if (num_actions >= 1) {
                 sqlParams.append(") ");
             }
         }
@@ -213,8 +218,8 @@ public class DatabaseAnalytics implements AnalyticsRepository {
         try {
 
             //build and execute SQL queries for counts
-            Date from_ts = parameters.getFromTime();
-            Date to_ts = parameters.getToTime();
+            Date fromTs = parameters.getFromTime();
+            Date toTs = parameters.getToTime();
             String sqlBase = "bucket_label as bid, count(user_id) as c, count(distinct user_id) as cu";
             String sqlParams = " where experiment_id = ? and context = ?";
             List params = new ArrayList();
@@ -222,13 +227,13 @@ public class DatabaseAnalytics implements AnalyticsRepository {
             params.add(parameters.getContext().getContext());
 
 
-            if (from_ts != null) {
-                params.add(from_ts);
+            if (Objects.nonNull(fromTs)) {
+                params.add(fromTs);
                 sqlParams += " and timestamp >= ?";
             }
 
-            if (to_ts != null) {
-                params.add(to_ts);
+            if (Objects.nonNull(toTs)) {
+                params.add(toTs);
                 sqlParams += " and timestamp <= ?";
             }
 

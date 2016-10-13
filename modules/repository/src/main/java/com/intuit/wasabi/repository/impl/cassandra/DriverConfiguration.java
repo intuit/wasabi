@@ -20,13 +20,17 @@ import com.netflix.astyanax.connectionpool.NodeDiscoveryType;
 import com.netflix.astyanax.connectionpool.impl.ConnectionPoolType;
 import com.netflix.astyanax.model.ConsistencyLevel;
 
+import java.util.Objects;
 import java.util.Properties;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.intuit.autumn.utils.PropertyFactory.create;
 import static com.intuit.autumn.utils.PropertyFactory.getProperty;
-import static com.netflix.astyanax.connectionpool.NodeDiscoveryType.*;
-import static com.netflix.astyanax.connectionpool.impl.ConnectionPoolType.*;
+import static com.netflix.astyanax.connectionpool.NodeDiscoveryType.DISCOVERY_SERVICE;
+import static com.netflix.astyanax.connectionpool.NodeDiscoveryType.NONE;
+import static com.netflix.astyanax.connectionpool.NodeDiscoveryType.RING_DESCRIBE;
+import static com.netflix.astyanax.connectionpool.impl.ConnectionPoolType.BAG;
+import static com.netflix.astyanax.connectionpool.impl.ConnectionPoolType.ROUND_ROBIN;
 import static com.netflix.astyanax.connectionpool.impl.ConnectionPoolType.TOKEN_AWARE;
 import static com.netflix.astyanax.model.ConsistencyLevel.CL_QUORUM;
 import static java.lang.Boolean.FALSE;
@@ -142,7 +146,7 @@ public class DriverConfiguration implements CassandraDriver.Configuration {
         ConnectionPoolType result = TOKEN_AWARE;
         String value = getProperty("connectionPoolType", properties);
 
-        if (! isBlank(value)) {
+        if (!isBlank(value)) {
             if ("ROUND_ROBIN".equalsIgnoreCase(value)) {
                 result = ROUND_ROBIN;
             } else if ("BAG".equalsIgnoreCase(value)) {
@@ -163,7 +167,7 @@ public class DriverConfiguration implements CassandraDriver.Configuration {
         NodeDiscoveryType result = RING_DESCRIBE;
         String value = getProperty("nodeDiscoveryType", properties);
 
-        if (value != null && !value.trim().isEmpty()) {
+        if (Objects.nonNull(value) && !value.trim().isEmpty()) {
             if ("DISCOVERY_SERVICE".equalsIgnoreCase(value)) {
                 result = DISCOVERY_SERVICE;
             } else if ("TOKEN_AWARE".equalsIgnoreCase(value)) {

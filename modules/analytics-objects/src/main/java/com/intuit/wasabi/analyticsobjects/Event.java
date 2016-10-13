@@ -24,7 +24,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Preconditions;
-import com.intuit.wasabi.exceptions.AnalyticsException;
+import com.intuit.wasabi.analyticsobjects.exceptions.AnalyticsException;
 import com.intuit.wasabi.experimentobjects.Context;
 import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -32,6 +32,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * An event represents an users interaction with the experiment. When they are presented
@@ -41,14 +42,13 @@ import java.util.Date;
 public class Event implements Cloneable {
 
     public static final String IMPRESSION = "IMPRESSION";
-    String emptyString = "";
     @ApiModelProperty(value = "time at which the event occurred; defaults to the current time", hidden = true)
     private Date timestamp;
     @ApiModelProperty(value = "DO NOT USE", hidden = true)
     private Type type;
-    @ApiModelProperty(example = "IMPRESSION OR myEventName", value = "Event ID; Use \"IMPRESSION\" for impressions", dataType = "String",  required = true)
+    @ApiModelProperty(example = "IMPRESSION OR myEventName", value = "Event ID; Use \"IMPRESSION\" for impressions", dataType = "String", required = true)
     private Event.Name name;
-    @ApiModelProperty(value = "context for the event, eg \"PROD\", \"QA\"", dataType = "String",  required = false, hidden = true)
+    @ApiModelProperty(value = "context for the event, eg \"PROD\", \"QA\"", dataType = "String", required = false, hidden = true)
     private Context context = Context.valueOf("PROD");
     @ApiModelProperty(value = "payload for the event; defaults to null", dataType = "String")
     private Payload payload;
@@ -93,7 +93,7 @@ public class Event implements Cloneable {
     }
 
     public void setPayload(Payload value) {
-        if (value == null || value.toString() == null) {
+        if (Objects.isNull(value) || Objects.isNull(value.toString())) {
             throw new IllegalArgumentException("Invalid value for payload. Payload should not be null.");
         } else if (value.toString().length() > 4096) {
             throw new IllegalArgumentException(
@@ -113,12 +113,12 @@ public class Event implements Cloneable {
 
     @Override
     public int hashCode() {
-    	return HashCodeBuilder.reflectionHashCode(this);
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override
     public boolean equals(Object obj) {
-    	   return EqualsBuilder.reflectionEquals(this, obj);
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 
     @Override
@@ -132,12 +132,13 @@ public class Event implements Cloneable {
 
     @Override
     public String toString() {
-        return "Event={\"timestamp\":\"" + (timestamp != null ? timestamp : emptyString) + "\"" +
-                ",\"type\":\"" + (type != null ? type.toString() : emptyString) + "\"" +
-                ",\"name\":\"" + (name != null ? name.toString() : emptyString) + "\"" +
-                ",\"context\":\"" + (context != null ? context.toString() : emptyString) + "\"" +
-                ",\"payload\":\"" + (payload != null ? payload.toString() : emptyString) + "\"" +
-                ",\"value\":\"" + (value != null ? value : emptyString) + "\"}";
+        return String.format("Event={timestamp:%s, type:%s, name:%s, context:%s, payload:%s, value:%s}",
+                Objects.toString(timestamp, ""),
+                Objects.toString(type, ""),
+                Objects.toString(name, ""),
+                Objects.toString(context, ""),
+                Objects.toString(payload, ""),
+                Objects.toString(value, ""));
     }
 
     public enum Type {
@@ -170,12 +171,12 @@ public class Event implements Cloneable {
 
         @Override
         public int hashCode() {
-        	return HashCodeBuilder.reflectionHashCode(this);
+            return HashCodeBuilder.reflectionHashCode(this);
         }
 
         @Override
         public boolean equals(Object obj) {
-        	   return EqualsBuilder.reflectionEquals(this, obj);
+            return EqualsBuilder.reflectionEquals(this, obj);
         }
 
         public static class Serializer extends JsonSerializer<Name> {
@@ -224,12 +225,12 @@ public class Event implements Cloneable {
 
         @Override
         public int hashCode() {
-        	return HashCodeBuilder.reflectionHashCode(this);
+            return HashCodeBuilder.reflectionHashCode(this);
         }
 
         @Override
         public boolean equals(Object obj) {
-        	   return EqualsBuilder.reflectionEquals(this, obj);
+            return EqualsBuilder.reflectionEquals(this, obj);
         }
 
         public static class Serializer extends JsonSerializer<Payload> {

@@ -16,15 +16,24 @@
 package com.intuit.wasabi.api.error;
 
 import com.intuit.wasabi.api.HttpHeader;
-import com.intuit.wasabi.experimentobjects.exceptions.WasabiException;
+import com.intuit.wasabi.exceptions.WasabiClientException;
+import com.intuit.wasabi.exceptions.WasabiException;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nullable;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.fromStatusCode;
 
 abstract class ExceptionProvider<T extends Throwable> implements ExceptionMapper<T> {
@@ -46,24 +55,44 @@ abstract class ExceptionProvider<T extends Throwable> implements ExceptionMapper
     public Response toResponse(final T e) {
         Status responseStatus = this.status;
 
-        if (responseStatus == null && e instanceof WasabiException) {
-            responseStatus = fromStatusCode(((WasabiException) e).getErrorCode().getResponseCode());
+        if (Objects.isNull(responseStatus) && e instanceof WasabiException) {
+            responseStatus = getWasabiExceptionResponseStatus((WasabiException) e);
         }
 
         return httpHeader.headers(responseStatus)
                 .type(type)
-                .entity(serialize(type, responseStatus, e.getMessage()))
+                .entity(serialize(responseStatus, buildErrorMessage(e)))
                 .build();
     }
 
-    private String serialize(final MediaType type, final Status status, final String message) {
-        String serializedMessage = message;
+    private String serialize(final Status status, final String message) {
+        return exceptionJsonifier.serialize(status, message);
+    }
 
-        // FIXME: ?assume type alway is json?
-        if (type.equals(APPLICATION_JSON_TYPE)) {
-            serializedMessage = exceptionJsonifier.serialize(status, message);
+    <U extends WasabiException> Status getWasabiExceptionResponseStatus(final U e) {
+        if (Objects.nonNull(e.getErrorCode())) {
+            return fromStatusCode(e.getErrorCode().getResponseCode());
         }
+        return e instanceof WasabiClientException ? BAD_REQUEST : INTERNAL_SERVER_ERROR;
+    }
 
-        return serializedMessage;
+    String buildErrorMessage(final T e) {
+        String message = e.getMessage();
+        if (!StringUtils.isEmpty(message)) {
+            if (Objects.nonNull(e.getCause()) && !StringUtils.isEmpty(e.getCause().getMessage())) {
+                message += " -- Cause: " + e.getCause().getMessage();
+            }
+            return message;
+        }
+        if (e instanceof WebApplicationException) {
+            MultivaluedMap<String, Object> metadata = ((WebApplicationException) e).getResponse().getMetadata();
+            List<Object> allowed = metadata.getOrDefault("Allow", Collections.emptyList());
+            if (allowed.isEmpty()) {
+                return "No HTTP method allowed, did you provide the wrong URI?";
+            }
+            return "Something about your request was wrong. Maybe you used an unrecognized HTTP method? Allowed are: "
+                    + Arrays.toString(allowed.toArray());
+        }
+        return "Something about your request was wrong. Please send your request to the developer team so they can debug it.";
     }
 }

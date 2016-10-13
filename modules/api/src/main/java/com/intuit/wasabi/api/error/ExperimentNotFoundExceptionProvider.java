@@ -17,7 +17,7 @@ package com.intuit.wasabi.api.error;
 
 import com.google.inject.Inject;
 import com.intuit.wasabi.api.HttpHeader;
-import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
+import com.intuit.wasabi.experimentobjects.exception.ExperimentNotFoundException;
 
 import javax.ws.rs.ext.Provider;
 

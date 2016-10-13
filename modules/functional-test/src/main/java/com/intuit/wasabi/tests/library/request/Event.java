@@ -16,11 +16,13 @@
 package com.intuit.wasabi.tests.library.request;
 
 import retrofit.client.Response;
-import retrofit.http.*;
+import retrofit.http.Body;
+import retrofit.http.GET;
+import retrofit.http.Header;
+import retrofit.http.Headers;
+import retrofit.http.POST;
+import retrofit.http.Path;
 
-/**
- * Created on 1/29/16.
- */
 public interface Event {
 
     @Headers({"Accept: application/json",

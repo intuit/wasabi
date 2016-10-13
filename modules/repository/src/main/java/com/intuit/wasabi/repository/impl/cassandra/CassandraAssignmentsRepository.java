@@ -31,12 +31,17 @@ import com.intuit.wasabi.assignmentobjects.User;
 import com.intuit.wasabi.cassandra.CassandraDriver;
 import com.intuit.wasabi.cassandra.ExperimentDriver;
 import com.intuit.wasabi.eventlog.EventLog;
-import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Context;
 import com.intuit.wasabi.experimentobjects.Experiment;
-import com.intuit.wasabi.repository.*;
+import com.intuit.wasabi.experimentobjects.exception.ExperimentNotFoundException;
+import com.intuit.wasabi.repository.AssignmentsRepository;
+import com.intuit.wasabi.repository.CassandraRepository;
+import com.intuit.wasabi.repository.Constants;
+import com.intuit.wasabi.repository.DatabaseRepository;
+import com.intuit.wasabi.repository.ExperimentRepository;
+import com.intuit.wasabi.repository.RepositoryException;
 import com.intuit.wasabi.repository.impl.cassandra.serializer.ApplicationNameSerializer;
 import com.intuit.wasabi.repository.impl.cassandra.serializer.BucketLabelSerializer;
 import com.intuit.wasabi.repository.impl.cassandra.serializer.ExperimentIDSerializer;
@@ -61,7 +66,14 @@ import java.nio.ByteBuffer;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -75,6 +87,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 public class CassandraAssignmentsRepository implements AssignmentsRepository {
 
+    private static final Logger LOGGER = getLogger(CassandraAssignmentsRepository.class);
     private final CassandraDriver driver;
     private final ExperimentsKeyspace keyspace;
     private final ExperimentRepository experimentRepository;
@@ -89,7 +102,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     private ThreadPoolExecutor assignmentsCountExecutor;
     private boolean assignUserToOld;
     private boolean assignUserToNew;
-    private static final Logger LOGGER = getLogger(CassandraAssignmentsRepository.class);
 
     @Inject
     public CassandraAssignmentsRepository(@CassandraRepository ExperimentRepository experimentRepository,
@@ -150,7 +162,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                 for (int i = 0; i < rows.size(); i++) {
                     ColumnList<String> columns = rows.getRowByIndex(i).getColumns();
                     //check that the bucket assignment is not null
-                    if (columns.getStringValue("bucket", null) != null) {
+                    if (Objects.nonNull(columns.getStringValue("bucket", null))) {
                         result.add(Experiment.ID.valueOf(columns.getUUIDValue("experiment_id", null)));
                     }
                 }
@@ -214,10 +226,10 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     protected Assignment assignUserToLookUp(Assignment assignment, Date date) {
         final String CQL;
         Date paramDate = date;
-        if (paramDate == null) {
+        if (Objects.isNull(paramDate)) {
             paramDate = new Date();
         }
-        if (assignment.getBucketLabel() != null) {
+        if (Objects.nonNull(assignment.getBucketLabel())) {
             CQL = "insert into user_assignment_look_up " +
                     "(experiment_id, user_id, context, created, bucket_label) " +
                     "values (?, ?, ?, ?, ?)";
@@ -237,7 +249,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                             .withByteBufferValue(assignment.getUserID(), UserIDSerializer.get())
                             .withStringValue(assignment.getContext().getContext())
                             .withByteBufferValue(paramDate, DateSerializer.get());
-            if (assignment.getBucketLabel() != null) {
+            if (Objects.nonNull(assignment.getBucketLabel())) {
                 query.withByteBufferValue(assignment.getBucketLabel(), BucketLabelSerializer.get());
             }
             query.execute();
@@ -261,7 +273,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     public Assignment assignUserToOld(Assignment assignment, Date date) {
         final String CQL;
 
-        if (assignment.getBucketLabel() != null) {
+        if (Objects.nonNull(assignment.getBucketLabel())) {
             CQL = "insert into user_assignment " +
                     "(experiment_id, user_id, context, created, bucket_label) " +
                     "values (?, ?, ?, ?, ?)";
@@ -282,7 +294,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                             .withStringValue(assignment.getContext().getContext())
                             .withByteBufferValue(date, DateSerializer.get());
 
-            if (assignment.getBucketLabel() != null) {
+            if (Objects.nonNull(assignment.getBucketLabel())) {
                 query.withByteBufferValue(assignment.getBucketLabel(), BucketLabelSerializer.get());
             }
 
@@ -352,7 +364,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                             .withStringValue(assignment.getContext().getContext())
                             .withByteBufferValue(date, DateSerializer.get())
                             .withByteBufferValue(day_hour, DateSerializer.get());
-            if (assignment.getBucketLabel() != null) {
+            if (Objects.nonNull(assignment.getBucketLabel())) {
                 query.withByteBufferValue(assignment.getBucketLabel(), BucketLabelSerializer.get());
                 query.withBooleanValue(false);
             } else {
@@ -371,7 +383,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     @Timed
     private void indexExperimentsToUser(Assignment assignment) {
 
-        String CQL = (assignment.getBucketLabel() != null)
+        String CQL = (Objects.nonNull(assignment.getBucketLabel()))
 
                 ? "insert into experiment_user_index " +
                 "(user_id, context, app_name, experiment_id, bucket) " +
@@ -391,7 +403,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                             .withStringValue(assignment.getContext().getContext())
                             .withByteBufferValue(assignment.getApplicationName(), ApplicationNameSerializer.get())
                             .withByteBufferValue(assignment.getExperimentID(), ExperimentIDSerializer.get());
-            if (assignment.getBucketLabel() != null) {
+            if (Objects.nonNull(assignment.getBucketLabel())) {
                 query.withByteBufferValue(assignment.getBucketLabel(), BucketLabelSerializer.get());
             }
             query.execute();
@@ -418,7 +430,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                             .withByteBufferValue(assignment.getExperimentID(), ExperimentIDSerializer.get());
 
 
-            if (assignment.getBucketLabel() != null) {
+            if (Objects.nonNull(assignment.getBucketLabel())) {
                 query.withByteBufferValue(assignment.getBucketLabel(), BucketLabelSerializer.get());
             } else {
                 query.withValue(ByteBuffer.wrap(new byte[0]));
@@ -452,7 +464,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                             .withByteBufferValue(NOW, DateSerializer.get());
 
 
-            if (assignment.getBucketLabel() != null) {
+            if (Objects.nonNull(assignment.getBucketLabel())) {
                 query.withByteBufferValue(assignment.getBucketLabel(), BucketLabelSerializer.get());
             } else {
                 query.withValue(ByteBuffer.wrap(new byte[0]));
@@ -533,7 +545,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                 Date created = Preconditions.checkNotNull(columns.getDateValue("created", null));
                 Context contextdb = Context.valueOf(columns.getStringValue("context", null));
                 String rawBucketLabel = columns.getStringValue("bucket_label", null);
-                Bucket.Label bucketLabel = (rawBucketLabel != null)
+                Bucket.Label bucketLabel = (Objects.nonNull(rawBucketLabel))
                         ? Bucket.Label.valueOf(rawBucketLabel)
                         : null;
 
@@ -548,8 +560,8 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                 * for a user who had been assigned to an EMPTY bucket is not null
                 * */
                 boolean bucketEmpty = experimentRepository.getBucket(experimentID, bucketLabel).getState().equals(Bucket.State.EMPTY);
-                if (bucketLabel != null &&
-                        bucketEmpty ) {
+                if (Objects.nonNull(bucketLabel) &&
+                        bucketEmpty) {
                     bucketLabel = null;
                 }
                 result = Assignment.newInstance(experimentIDdb)
@@ -598,7 +610,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                 Date created = Preconditions.checkNotNull(columns.getDateValue("created", null));
                 Context contextdb = Context.valueOf(columns.getStringValue("context", null));
                 String rawBucketLabel = columns.getStringValue("bucket_label", null);
-                Bucket.Label bucketLabel = (rawBucketLabel != null)
+                Bucket.Label bucketLabel = (Objects.nonNull(rawBucketLabel))
                         ? Bucket.Label.valueOf(rawBucketLabel)
                         : null;
 
@@ -612,8 +624,8 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                 * However, the below hack will return a null assignment  even though the existing assignment
                 * for a user who had been assigned to an EMPTY bucket is not null
                 * */
-                boolean isBucketEmpty = false; 
-                if (bucketLabel != null &&
+                boolean isBucketEmpty = false;
+                if (Objects.nonNull(bucketLabel) &&
                         experimentRepository.getBucket(experimentID, bucketLabel).getState().equals(Bucket.State.EMPTY)) {
                     bucketLabel = null;
                     isBucketEmpty = true;
@@ -649,7 +661,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
             result = getAssignmentFromLookUp(experimentID, userID, context);
         }
         //if it is not present in the user_assignment_look_up table and old flag is set to tru, then check for the data in user_assignment table
-        if (assignUserToOld && (result == null)) {
+        if (assignUserToOld && (Objects.isNull(result))) {
             result = getAssignmentOld(experimentID, userID, context);
         }
         return result;
@@ -716,7 +728,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
      * @param appName      application name
      */
     public void removeIndexUserToExperiment(User.ID userID, Experiment.ID experimentID, Context context,
-                                             Application.Name appName) {
+                                            Application.Name appName) {
         final String CQL = "delete from user_experiment_index " +
                 "where user_id = ? and experiment_id = ? and context = ? and app_name = ?";
 
@@ -763,33 +775,33 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     public StreamingOutput getAssignmentStream(final Experiment.ID experimentID, final Context context,
                                                final Parameters parameters, final Boolean ignoreNullBucket) {
         final Experiment id = experimentRepository.getExperiment(experimentID);
-        if (id == null) {
+        if (Objects.isNull(id)) {
             throw new ExperimentNotFoundException(experimentID);
         }
-        Date from_ts = parameters.getFromTime();
-        Date to_ts = parameters.getToTime();
-        Timestamp from_ts_new;
-        if (from_ts != null) {
-            from_ts_new = new Timestamp(from_ts.getTime());
+        Date fromTs = parameters.getFromTime();
+        Date toTs = parameters.getToTime();
+        Timestamp fromTsNew;
+        if (Objects.nonNull(fromTs)) {
+            fromTsNew = new Timestamp(fromTs.getTime());
         } else {
-            from_ts = id.getCreationTime(); //Sets the default lower limit time of download to experiment creation time
-            from_ts_new = new Timestamp(from_ts.getTime());
+            fromTs = id.getCreationTime(); //Sets the default lower limit time of download to experiment creation time
+            fromTsNew = new Timestamp(fromTs.getTime());
         }
 
-        Timestamp to_ts_new;
-        if (to_ts != null) {
-            to_ts_new = new Timestamp(to_ts.getTime());
+        Timestamp toTsNew;
+        if (Objects.nonNull(toTs)) {
+            toTsNew = new Timestamp(toTs.getTime());
         } else {
-            to_ts = new Date(); // Sets the default upper limit time of download to current time stamp
-            to_ts_new = new Timestamp(to_ts.getTime());
+            toTs = new Date(); // Sets the default upper limit time of download to current time stamp
+            toTsNew = new Timestamp(toTs.getTime());
 
         }
 
         // Fetches the relevant partitions for a given time window where the user assignments data resides.
-        final List<DateHour> dateHours = getUserAssignmentPartitions(from_ts_new, to_ts_new);
+        final List<DateHour> dateHours = getUserAssignmentPartitions(fromTsNew, toTsNew);
         final String CQL;
 
-        if (ignoreNullBucket == false) {
+        if (!ignoreNullBucket) {
             CQL =
                     "select * from user_assignment_export " +
                             "where experiment_id = ? and day_hour = ? and context = ?";
@@ -802,7 +814,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         return new StreamingOutput() {
             @Override
             public void write(OutputStream os) throws IOException, WebApplicationException {
-                Writer writer = new BufferedWriter(new OutputStreamWriter(os, Constants.DEFAULT_CHAR_SET ));
+                Writer writer = new BufferedWriter(new OutputStreamWriter(os, Constants.DEFAULT_CHAR_SET));
 
                 String header = "experiment_id" + "\t" +
                         "user_id" + "\t" +
@@ -871,7 +883,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
      * @param appName      application name
      */
     public void removeIndexExperimentsToUser(User.ID userID, Experiment.ID experimentID, Context context,
-                                              Application.Name appName) {
+                                             Application.Name appName) {
         String CQL = "delete from experiment_user_index " +
                 "where user_id = ? and experiment_id = ? and context = ? and app_name = ?";
 
@@ -953,7 +965,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         Bucket.Label bucketLabel = assignment.getBucketLabel();
         Bucket.Label bucketLabel1 = null;
         String CQL;
-        bucketLabel1 = (bucketLabel == null) ? Bucket.Label.valueOf("NULL") : bucketLabel;
+        bucketLabel1 = (Objects.isNull(bucketLabel)) ? Bucket.Label.valueOf("NULL") : bucketLabel;
         if (countUp) {
             CQL = "UPDATE bucket_assignment_counts SET bucket_assignment_count = bucket_assignment_count + 1 " +
                     "WHERE experiment_id =? and bucket_label = ?";
@@ -1006,12 +1018,12 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
             if (!rows.isEmpty()) {
                 for (int i = 0; i < rows.size(); i++) {
                     ColumnList<String> columns = rows.getRowByIndex(i).getColumns();
-                    if (columns.getStringValue("bucket_label", null) != null) {
+                    if (Objects.nonNull(columns.getStringValue("bucket_label", null))) {
                         Bucket.Label bucketLabel = Bucket.Label.valueOf(columns.getStringValue("bucket_label", null));
                         Long numberOfAssignments = columns.getColumnByName("bucket_assignment_count").getLongValue();
                         totalAssignments = totalAssignments + numberOfAssignments.intValue();
                         // Updates the BucketAssignmentCountList with # of assignments for that bucket
-                        if (bucketAssignmentCountList != null) {
+                        if (Objects.nonNull(bucketAssignmentCountList)) {
                             if (!"NULL".equals(bucketLabel.toString())) {
                                 bucketAssignmentCountList.add(new BucketAssignmentCount.Builder()
                                         .withBucket(bucketLabel)
@@ -1045,7 +1057,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                 .withBucketAssignmentCount(bucketAssignmentCountList)
                 .withExperimentID(experiment.getID())
                 .withTotalUsers(new TotalUsers.Builder()
-                        .withBucketAssignments((long)totalAssignments - nullAssignments)
+                        .withBucketAssignments((long) totalAssignments - nullAssignments)
                         .withNullAssignments(nullAssignments)
                         .withTotal(totalAssignments)
                         .build()).build();

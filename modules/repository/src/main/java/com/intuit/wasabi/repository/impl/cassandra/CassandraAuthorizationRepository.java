@@ -18,11 +18,14 @@ package com.intuit.wasabi.repository.impl.cassandra;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
-import com.intuit.wasabi.userdirectory.UserDirectory;
-import com.intuit.wasabi.authorizationobjects.*;
+import com.intuit.wasabi.authenticationobjects.exceptions.AuthenticationException;
+import com.intuit.wasabi.authorizationobjects.Role;
+import com.intuit.wasabi.authorizationobjects.UserPermissions;
+import com.intuit.wasabi.authorizationobjects.UserPermissionsList;
+import com.intuit.wasabi.authorizationobjects.UserRole;
+import com.intuit.wasabi.authorizationobjects.UserRoleList;
 import com.intuit.wasabi.cassandra.CassandraDriver;
 import com.intuit.wasabi.cassandra.ExperimentDriver;
-import com.intuit.wasabi.exceptions.AuthenticationException;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.repository.AuthorizationRepository;
 import com.intuit.wasabi.repository.CassandraRepository;
@@ -30,6 +33,7 @@ import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.RepositoryException;
 import com.intuit.wasabi.repository.impl.cassandra.serializer.ApplicationNameSerializer;
 import com.intuit.wasabi.repository.impl.cassandra.serializer.UsernameSerializer;
+import com.intuit.wasabi.userdirectory.UserDirectory;
 import com.netflix.astyanax.connectionpool.OperationResult;
 import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
 import com.netflix.astyanax.model.CqlResult;
@@ -39,13 +43,14 @@ import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Cassandra AuthorizationRepository implementation
- * 
- *  @see AuthorizationRepository
+ *
+ * @see AuthorizationRepository
  */
 public class CassandraAuthorizationRepository implements AuthorizationRepository {
 
@@ -55,16 +60,17 @@ public class CassandraAuthorizationRepository implements AuthorizationRepository
     private final ExperimentRepository experimentRepository;
     private final UserDirectory userDirectory;
     private final String userNonNullMsg = "Parameter \"userID\" cannot be null";
-    private final String applicationNonNullMsg =  "Parameter \"applicationName\" cannot be null";
+    private final String applicationNonNullMsg = "Parameter \"applicationName\" cannot be null";
     private final String CQL_ROLES = "select * from user_roles where user_id = ? and app_name = ?";
 
     /**
      * Constructor
-     * @param driver     cassandra driver
-     * @param keyspace   cassandra keyspace
-     * @param experimentRepository  experiment repository
-     * @param userDirectory       user tools
-     * @throws IOException    io exception
+     *
+     * @param driver               cassandra driver
+     * @param keyspace             cassandra keyspace
+     * @param experimentRepository experiment repository
+     * @param userDirectory        user tools
+     * @throws IOException         io exception
      * @throws ConnectionException connection exception
      */
     @Inject
@@ -104,7 +110,7 @@ public class CassandraAuthorizationRepository implements AuthorizationRepository
                 Row<UserInfo.Username, String> row = rows.getRowByIndex(0);
                 Role role = Role.toRole(row.getColumns().getStringValue("role", ""));
                 UserInfo userInfo = getUserInfo(userID);
-                if (userInfo == null) {
+                if (Objects.isNull(userInfo)) {
                     userInfo = lookupUser(userID);
                     setUserInfo(userInfo);
                 }
@@ -179,7 +185,7 @@ public class CassandraAuthorizationRepository implements AuthorizationRepository
                 Role role = Role.toRole(row1.getColumns().getStringValue("role", ""));
                 Application.Name applicationName = Application.Name.valueOf(row1.getColumns().getStringValue("app_name",
                         ""));
-                assert role != null;
+                assert Objects.nonNull(role);
                 userPermissions = UserPermissions.newInstance(applicationName, role.getRolePermissions()).build();
                 userPermissionsList.addPermissions(userPermissions);
             }
@@ -225,7 +231,7 @@ public class CassandraAuthorizationRepository implements AuthorizationRepository
                 UserInfo.Username userID = UserInfo.Username.valueOf(row.getColumns().getStringValue("user_id", ""));
 
                 UserInfo userInfo = getUserInfo(userID);
-                if (userInfo == null) {
+                if (Objects.isNull(userInfo)) {
                     userInfo = lookupUser(userID);
                 }
 
@@ -309,7 +315,7 @@ public class CassandraAuthorizationRepository implements AuthorizationRepository
 
                 Row<UserInfo.Username, String> row1 = rows1.getRowByIndex(0);
                 Role role = Role.toRole(row1.getColumns().getStringValue("role", ""));
-                assert role != null;
+                assert Objects.nonNull(role);
                 userPermissions = UserPermissions.newInstance(applicationName, role.getRolePermissions()).build();
             }
 
@@ -440,7 +446,7 @@ public class CassandraAuthorizationRepository implements AuthorizationRepository
             //get user info from cassandra
             UserInfo userInfo = getUserInfo(userID);
             //if the user did not exist in cassandra
-            if (userInfo == null) {
+            if (Objects.isNull(userInfo)) {
                 try {
                     //get the user from workforce lookup
                     LOGGER.debug("Workforce-getUserRoleList: looking up user " + userID.toString());

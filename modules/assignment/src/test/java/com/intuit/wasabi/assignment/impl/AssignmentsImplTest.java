@@ -20,15 +20,28 @@ import com.google.common.collect.Table;
 import com.google.inject.Provider;
 import com.intuit.hyrule.Rule;
 import com.intuit.wasabi.assignment.AssignmentDecorator;
-import com.intuit.wasabi.assignment.AssignmentIngestionExecutor;
 import com.intuit.wasabi.assignment.Assignments;
-import com.intuit.wasabi.assignmentobjects.*;
+import com.intuit.wasabi.assignmentobjects.Assignment;
+import com.intuit.wasabi.assignmentobjects.AssignmentEnvelopePayload;
+import com.intuit.wasabi.assignmentobjects.PersonalizationEngineResponse;
+import com.intuit.wasabi.assignmentobjects.RuleCache;
+import com.intuit.wasabi.assignmentobjects.SegmentationProfile;
+import com.intuit.wasabi.assignmentobjects.User;
 import com.intuit.wasabi.cassandra.CassandraDriver;
 import com.intuit.wasabi.eventlog.EventLog;
 import com.intuit.wasabi.experiment.Mutex;
 import com.intuit.wasabi.experiment.Pages;
 import com.intuit.wasabi.experiment.Priorities;
-import com.intuit.wasabi.experimentobjects.*;
+import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.experimentobjects.Bucket;
+import com.intuit.wasabi.experimentobjects.BucketList;
+import com.intuit.wasabi.experimentobjects.Context;
+import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.experimentobjects.ExperimentBatch;
+import com.intuit.wasabi.experimentobjects.Page;
+import com.intuit.wasabi.experimentobjects.PageExperiment;
+import com.intuit.wasabi.experimentobjects.PrioritizedExperiment;
+import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
 import com.intuit.wasabi.export.DatabaseExport;
 import com.intuit.wasabi.export.Envelope;
 import com.intuit.wasabi.export.WebExport;
@@ -48,12 +61,23 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.ws.rs.core.HttpHeaders;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.RETURNS_DEEP_STUBS;
 import static org.mockito.BDDMockito.any;
 import static org.mockito.BDDMockito.doReturn;
@@ -88,21 +112,21 @@ public class AssignmentsImplTest {
     private ThreadPoolExecutor threadPoolExecutor = mock(ThreadPoolExecutor.class, RETURNS_DEEP_STUBS);
     private Provider<Envelope<AssignmentEnvelopePayload, DatabaseExport>> assignmentDBEnvelopeProvider =
             mock(Provider.class, RETURNS_DEEP_STUBS);
-    private Provider<Envelope<AssignmentEnvelopePayload, WebExport>> assignmentWebEnvelopeProvider=
+    private Provider<Envelope<AssignmentEnvelopePayload, WebExport>> assignmentWebEnvelopeProvider =
             mock(Provider.class, RETURNS_DEEP_STUBS);
     private AssignmentsRepository assignmentsRepository = mock(AssignmentsRepository.class, RETURNS_DEEP_STUBS);
     private AssignmentsImpl assignmentsImpl;
 
     @Before
     public void setup() throws IOException, ConnectionException {
-        this.assignmentsImpl = new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
+        this.assignmentsImpl = new AssignmentsImpl(new HashMap<>(),
                 experimentRepository, assignmentsRepository, mutexRepository,
                 ruleCache, pages, priorities, assignmentDBEnvelopeProvider, assignmentWebEnvelopeProvider,
-                assignmentDecorator, threadPoolExecutor, eventLog);
+                assignmentDecorator, threadPoolExecutor);
     }
 
     @Test
-    public void testQueueLength(){
+    public void testQueueLength() {
         when(threadPoolExecutor.getQueue().size()).thenReturn(0);
         Map<String, Integer> queueLengthMap = new HashMap<String, Integer>();
         queueLengthMap.put(AssignmentsImpl.RULE_CACHE, new Integer(0));
@@ -110,7 +134,7 @@ public class AssignmentsImplTest {
     }
 
     @Test
-    public void testGetSingleAssignmentNullAssignmentExperimentNotFound(){
+    public void testGetSingleAssignmentNullAssignmentExperimentNotFound() {
         Application.Name appName = Application.Name.valueOf("Test");
         Experiment.Label label = Experiment.Label.valueOf("label");
         User.ID user = User.ID.valueOf("testUser");
@@ -132,11 +156,10 @@ public class AssignmentsImplTest {
 
     @Test
     public void testGetSingleAssignmentNullAssignmentExperimentInDraftState() throws IOException, ConnectionException {
-        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
+        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<>(),
                 experimentRepository, assignmentsRepository,
                 mutexRepository, ruleCache, pages, priorities, assignmentDBEnvelopeProvider,
-                assignmentWebEnvelopeProvider, assignmentDecorator, threadPoolExecutor,
-                eventLog));
+                assignmentWebEnvelopeProvider, assignmentDecorator, threadPoolExecutor));
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class);
         when(experiment.getID()).thenReturn(id);
@@ -161,7 +184,7 @@ public class AssignmentsImplTest {
     }
 
     @Test
-    public void testGetSingleAssignmentNullAssignmentExperimentNotStarted(){
+    public void testGetSingleAssignmentNullAssignmentExperimentNotStarted() {
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         when(experiment.getID()).thenReturn(id);
@@ -186,7 +209,7 @@ public class AssignmentsImplTest {
     }
 
     @Test
-    public void testGetSingleAssignmentNullAssignmentExperimentExpired(){
+    public void testGetSingleAssignmentNullAssignmentExperimentExpired() {
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         when(experiment.getID()).thenReturn(id);
@@ -211,7 +234,7 @@ public class AssignmentsImplTest {
     }
 
     @Test
-    public void testGetSingleAssignmentNullAssignmentExperimentPaused(){
+    public void testGetSingleAssignmentNullAssignmentExperimentPaused() {
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         when(experiment.getID()).thenReturn(id);
@@ -239,10 +262,10 @@ public class AssignmentsImplTest {
 
     @Test
     public void testGetSingleAssignmentNullAssignmentExperimentNoProfileMatch() throws IOException, ConnectionException {
-        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
+        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<>(),
                 experimentRepository, assignmentsRepository,
                 mutexRepository, ruleCache, pages, priorities, assignmentDBEnvelopeProvider,
-                assignmentWebEnvelopeProvider, assignmentDecorator, threadPoolExecutor, eventLog));
+                assignmentWebEnvelopeProvider, assignmentDecorator, threadPoolExecutor));
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         when(experiment.getID()).thenReturn(id);
@@ -272,7 +295,7 @@ public class AssignmentsImplTest {
     }
 
     @Test(expected = AssertionError.class)
-    public void testGetSingleAssignmentAssertExistingAssignment(){
+    public void testGetSingleAssignmentAssertExistingAssignment() {
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         when(experiment.getID()).thenReturn(id);
@@ -295,10 +318,10 @@ public class AssignmentsImplTest {
 
     @Test(expected = AssertionError.class)
     public void testGetSingleAssignmentProfileMatchAssertNewAssignment() throws IOException, ConnectionException {
-        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
+        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<>(),
                 experimentRepository, assignmentsRepository,
                 mutexRepository, ruleCache, pages, priorities, assignmentDBEnvelopeProvider,
-                assignmentWebEnvelopeProvider, assignmentDecorator, threadPoolExecutor, eventLog));
+                assignmentWebEnvelopeProvider, assignmentDecorator, threadPoolExecutor));
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         Assignment assignment = mock(Assignment.class);
@@ -326,10 +349,10 @@ public class AssignmentsImplTest {
 
     @Test
     public void testGetSingleAssignmentSuccess() throws IOException, ConnectionException {
-        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
+        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<>(),
                 experimentRepository, assignmentsRepository,
                 mutexRepository, ruleCache, pages, priorities, assignmentDBEnvelopeProvider,
-                assignmentWebEnvelopeProvider, assignmentDecorator,  threadPoolExecutor, eventLog));
+                assignmentWebEnvelopeProvider, assignmentDecorator, threadPoolExecutor));
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         Assignment assignment = mock(Assignment.class);
@@ -345,7 +368,7 @@ public class AssignmentsImplTest {
         when(assignmentsRepository.getAssignment(eq(id), eq(user), any(Context.class))).thenReturn(assignment);
         when(assignment.getStatus()).thenReturn(Assignment.Status.EXISTING_ASSIGNMENT);
         Assignment result = assignmentsImpl.getSingleAssignment(user, appName, label, context, true, true,
-                    null, null, pageName);
+                null, null, pageName);
         verify(threadPoolExecutor, times(1)).execute(any(ExperimentRuleCacheUpdateEnvelope.class));
         assertThat(result, is(assignment));
     }
@@ -386,10 +409,10 @@ public class AssignmentsImplTest {
         HttpHeaders headers = mock(HttpHeaders.class);
         when(experimentRepository.getExperimentList(eq(appName))).thenReturn(table);
         Assignment assignment = mock(Assignment.class);
-        AssignmentsImpl assignmentsImpl = spy( new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
+        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<>(),
                 experimentRepository, assignmentsRepository,
                 mutexRepository, ruleCache, pages, priorities, assignmentDBEnvelopeProvider,
-                assignmentWebEnvelopeProvider, assignmentDecorator,  threadPoolExecutor, eventLog));
+                assignmentWebEnvelopeProvider, assignmentDecorator, threadPoolExecutor));
 
         doReturn(assignment).when(assignmentsImpl).getAssignment(eq(userID), eq(appName), eq(label),
                 eq(context), any(boolean.class), any(boolean.class), eq(segmentationProfile),
@@ -629,7 +652,7 @@ public class AssignmentsImplTest {
         Mockito.when(assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-a"), context)).thenReturn(newAssignment);
 
         assignment = assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-a"), context);
-        assert assignment.getBucketLabel() == null;
+        assert Objects.isNull(assignment.getBucketLabel());
         assert assignment.getStatus() == Assignment.Status.NEW_ASSIGNMENT;
 
         redBucket.setState(Bucket.State.CLOSED);
@@ -660,7 +683,7 @@ public class AssignmentsImplTest {
         Mockito.when(assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-b"), context)).thenReturn(newAssignment);
 
         assignment = assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-b"), context);
-        assert assignment.getBucketLabel() == null;
+        assert Objects.isNull(assignment.getBucketLabel());
         assert assignment.getStatus() == Assignment.Status.NEW_ASSIGNMENT;
 
         newAssignment = Assignment.newInstance(assignment.getExperimentID())
@@ -676,7 +699,7 @@ public class AssignmentsImplTest {
         assignment = assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-b"), context);
 
         assert assignment.getStatus() == Assignment.Status.EXISTING_ASSIGNMENT;
-        assert assignment.getBucketLabel() == null;
+        assert Objects.isNull(assignment.getBucketLabel());
 
         builder = Assignment.newInstance(experiment.getID())
                 .withApplicationName(experiment.getApplicationName())
@@ -704,9 +727,9 @@ public class AssignmentsImplTest {
 
     @Test
     public void checkMutexWithExperimentNullTrue() throws Exception {
-    	AssignmentsImpl impl = new AssignmentsImpl(assignmentsRepository, mutexRepository);
-    	boolean value = impl.checkMutex(null, null, Context.valueOf("dummystring"));
-    	then(value).isEqualTo(true);
+        AssignmentsImpl impl = new AssignmentsImpl(assignmentsRepository, mutexRepository);
+        boolean value = impl.checkMutex(null, null, Context.valueOf("dummystring"));
+        then(value).isEqualTo(true);
     }
 
     /* FIXME
@@ -1026,11 +1049,11 @@ public class AssignmentsImplTest {
 
         List<Map> batchAssignments = new ArrayList<>();
         Map<String, Object> tempResult = new HashMap<>();
-        tempResult.put("assignment", newAssignment_2.getBucketLabel() != null ? newAssignment_2.getBucketLabel().toString() : null);
+        tempResult.put("assignment", Objects.nonNull(newAssignment_2.getBucketLabel()) ? newAssignment_2.getBucketLabel().toString() : null);
         tempResult.put("status", newAssignment_2.getStatus());
         batchAssignments.add(tempResult);
         Map<String, Object> tempResult1 = new HashMap<>();
-        tempResult1.put("assignment", newAssignment.getBucketLabel() != null ? newAssignment.getBucketLabel().toString() : null);
+        tempResult1.put("assignment", Objects.nonNull(newAssignment.getBucketLabel()) ? newAssignment.getBucketLabel().toString() : null);
         tempResult1.put("status", newAssignment.getStatus());
         batchAssignments.add(tempResult1);
 
@@ -1040,7 +1063,7 @@ public class AssignmentsImplTest {
         assert batchAssignments.size() == 2;
         assert batchAssignments.get(0).get("assignment").toString().equals(redBucket.getLabel().toString());
         assert batchAssignments.get(0).get("status").toString().equals(Assignment.Status.EXISTING_ASSIGNMENT.toString());
-        assert batchAssignments.get(1).get("assignment") == null;
+        assert Objects.isNull(batchAssignments.get(1).get("assignment"));
         assert batchAssignments.get(1).get("status").toString().equals(Assignment.Status.NEW_ASSIGNMENT.toString());
     }
 
@@ -1160,11 +1183,11 @@ public class AssignmentsImplTest {
 
         List<Map> pageAssignments = new ArrayList<>();
         Map<String, Object> tempResult = new HashMap<>();
-        tempResult.put("assignment", newAssignment_2.getBucketLabel() != null ? newAssignment_2.getBucketLabel().toString() : null);
+        tempResult.put("assignment", Objects.nonNull(newAssignment_2.getBucketLabel()) ? newAssignment_2.getBucketLabel().toString() : null);
         tempResult.put("status", newAssignment_2.getStatus());
         pageAssignments.add(tempResult);
         Map<String, Object> tempResult1 = new HashMap<>();
-        tempResult1.put("assignment", newAssignment.getBucketLabel() != null ? newAssignment.getBucketLabel().toString() : null);
+        tempResult1.put("assignment", Objects.nonNull(newAssignment.getBucketLabel()) ? newAssignment.getBucketLabel().toString() : null);
         tempResult1.put("status", newAssignment.getStatus());
         pageAssignments.add(tempResult1);
 
@@ -1173,7 +1196,7 @@ public class AssignmentsImplTest {
         assert pageAssignments.size() == 2;
         assert pageAssignments.get(0).get("assignment").toString().equals(redBucket.getLabel().toString());
         assert pageAssignments.get(0).get("status").toString().equals(Assignment.Status.EXISTING_ASSIGNMENT.toString());
-        assert pageAssignments.get(1).get("assignment") == null;
+        assert Objects.isNull(pageAssignments.get(1).get("assignment"));
         assert pageAssignments.get(1).get("status").toString().equals(Assignment.Status.NEW_ASSIGNMENT.toString());
     }
 
@@ -1279,7 +1302,7 @@ public class AssignmentsImplTest {
 
         Mockito.when(cassandraAssignments.putAssignment(userA, testApp, expLabel, context, null, true)).thenReturn(newAssignment);
         assert newAssignment_2.getStatus() == Assignment.Status.NEW_ASSIGNMENT;
-        assert newAssignment_2.getBucketLabel() == null;
+        assert Objects.isNull(newAssignment_2.getBucketLabel());
     }
 
     // FIXME:

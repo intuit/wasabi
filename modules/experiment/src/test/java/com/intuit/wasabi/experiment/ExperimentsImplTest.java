@@ -19,13 +19,17 @@ import com.googlecode.catchexception.apis.CatchExceptionBdd;
 import com.intuit.wasabi.assignmentobjects.RuleCache;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.eventlog.EventLog;
-import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
+import com.intuit.wasabi.exceptions.InvalidIdentifierException;
 import com.intuit.wasabi.experiment.impl.ExperimentsImpl;
-import com.intuit.wasabi.experimentobjects.*;
+import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.Experiment.ExperimentAuditInfo;
 import com.intuit.wasabi.experimentobjects.Experiment.Label;
 import com.intuit.wasabi.experimentobjects.Experiment.State;
-import com.intuit.wasabi.experimentobjects.exceptions.InvalidIdentifierException;
+import com.intuit.wasabi.experimentobjects.ExperimentList;
+import com.intuit.wasabi.experimentobjects.ExperimentValidator;
+import com.intuit.wasabi.experimentobjects.NewExperiment;
+import com.intuit.wasabi.experimentobjects.exception.ExperimentNotFoundException;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.RepositoryException;
 import org.junit.Before;
@@ -39,13 +43,19 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ExperimentsImplTest {
@@ -182,10 +192,10 @@ public class ExperimentsImplTest {
         // Test null case for single experiment
         when(cassandraRepository.getExperiment(experimentID)).thenReturn(null);
         Experiment experiment = expImpl.getExperiment(experimentID);
-        assert experiment == null;
+        assert Objects.isNull(experiment);
 
         experiment = expImpl.getExperiment(testApp, testLabel);
-        assert experiment == null;
+        assert Objects.isNull(experiment);
 
         // With ExperimentID
         when(cassandraRepository.getExperiment(experimentID)).thenReturn(testExp);
@@ -197,16 +207,16 @@ public class ExperimentsImplTest {
         experiment = expImpl.getExperiment(testApp, testLabel);
         assert experiment.getID() == experimentID;
 
-        List<Experiment> experiments = null;
+        List<Experiment> experiments;
 
         // Test null case for list of experiments
         when(cassandraRepository.getExperiments(testApp)).thenReturn(null);
         experiments = expImpl.getExperiments(testApp);
-        assert experiments == null;
+        assert Objects.isNull(experiments);
 
         when(cassandraRepository.getExperiments()).thenReturn(null);
         ExperimentList experimentIDs = expImpl.getExperiments();
-        assert experimentIDs == null;
+        assert Objects.isNull(experimentIDs);
     }
 
     @Test

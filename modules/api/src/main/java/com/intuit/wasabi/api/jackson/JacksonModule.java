@@ -17,14 +17,10 @@ package com.intuit.wasabi.api.jackson;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import com.google.inject.AbstractModule;
-import com.intuit.wasabi.experimentobjects.Experiment;
-
 import org.slf4j.Logger;
 
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 
@@ -50,22 +46,13 @@ public class JacksonModule extends AbstractModule {
 
         mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         mapper.setSerializationInclusion(ALWAYS);
-        mapper.registerModule(new SimpleModule() {
-            {
-                addSerializer(Double.class, new NaNSerializerDouble());
-                addSerializer(Float.class, new NaNSerializerFloat());
-                addDeserializer(Timestamp.class, new SQLTimestampDeserializer());
-                addDeserializer(Experiment.State.class, new ExperimentStateDeserializer());
-                addSerializer(new UpperCaseToStringSerializer<>(Experiment.State.class));
-            }
-        });
+        mapper.registerModule(new SimpleJacksonModule());
 
         SimpleDateFormat iso8601Formatter = new SimpleDateFormat(ISO8601_DATE_FORMAT);
         iso8601Formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
         mapper.setDateFormat(iso8601Formatter);
 
         JacksonJsonProvider provider = new WasabiJacksonJsonProvider();
-
         provider.setMapper(mapper);
 
         return provider;

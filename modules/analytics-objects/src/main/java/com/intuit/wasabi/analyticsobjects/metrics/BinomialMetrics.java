@@ -17,7 +17,7 @@ package com.intuit.wasabi.analyticsobjects.metrics;
 
 import com.intuit.wasabi.analyticsobjects.statistics.DistinguishableEffectSize;
 import com.intuit.wasabi.analyticsobjects.statistics.Estimate;
-import com.intuit.wasabi.exceptions.AnalyticsException;
+import com.intuit.wasabi.analyticsobjects.exceptions.AnalyticsException;
 
 import java.lang.reflect.InvocationTargetException;
 

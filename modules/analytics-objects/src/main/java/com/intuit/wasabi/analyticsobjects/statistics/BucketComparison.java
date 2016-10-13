@@ -18,7 +18,7 @@ package com.intuit.wasabi.analyticsobjects.statistics;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.intuit.wasabi.analyticsobjects.Event;
 import com.intuit.wasabi.analyticsobjects.Event.Name;
-import com.intuit.wasabi.exceptions.AnalyticsException;
+import com.intuit.wasabi.analyticsobjects.exceptions.AnalyticsException;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -28,12 +28,14 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * DTO to save the comparison of two buckets <br><br>
  * This object is always saved within a bucket statistics object, thus the "other label" refers <br>
  * to the other bucket that is compared to the bucket defined in the bucketStatistics Object
- *
+ * <p>
  * Fields:
  * <ul>
  * <li>Name of the other bucket this bucket is compared with</li>
@@ -73,25 +75,23 @@ public class BucketComparison implements Cloneable {
 
     @JsonIgnore
     public void addToActionComparisons(Event.Name actionName, ActionComparisonStatistics item) {
-        if (this.actionComparisons == null) {
-            this.actionComparisons = new HashMap<>();
-        }
+        this.actionComparisons = Optional.ofNullable(this.actionComparisons).orElse(new HashMap<>());
         this.actionComparisons.put(actionName, item);
     }
 
     @Override
     public String toString() {
-    	return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 
     @Override
     public int hashCode() {
-    	return HashCodeBuilder.reflectionHashCode(this);
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override
     public boolean equals(Object obj) {
-    	   return EqualsBuilder.reflectionEquals(this, obj);
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 
     @Override
@@ -106,11 +106,11 @@ public class BucketComparison implements Cloneable {
 
         }
 
-        if (jointActionComparison != null) {
+        if (Objects.nonNull(jointActionComparison)) {
             cloned.setJointActionComparison(jointActionComparison.clone());
         }
 
-        if (actionComparisons != null) {
+        if (Objects.nonNull(actionComparisons)) {
             Map<Event.Name, ActionComparisonStatistics> clonedActions = new HashMap<>();
             for (Entry<Name, ActionComparisonStatistics> entry : actionComparisons.entrySet()) {
                 clonedActions.put(entry.getKey(), entry.getValue().clone());

@@ -21,6 +21,7 @@ import com.sun.jersey.spi.container.ContainerResponseFilter;
 import org.slf4j.Logger;
 
 import javax.ws.rs.core.Response;
+import java.util.Objects;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -48,7 +49,7 @@ public class SimpleCORSResponseFilter implements ContainerResponseFilter {
 
             String requestHeader = containerRequest.getHeaderValue("Access-Control-Request-Headers");
 
-            if (requestHeader != null) {
+            if (Objects.nonNull(requestHeader)) {
                 response.header("Access-Control-Allow-Headers", requestHeader);
             }
         }

@@ -23,7 +23,7 @@ import com.intuit.wasabi.assignment.AssignmentsModule;
 import com.intuit.wasabi.eventobjects.EventEnvelopePayload;
 import com.intuit.wasabi.events.impl.EventsExportImpl;
 import com.intuit.wasabi.events.impl.EventsImpl;
-import com.intuit.wasabi.exceptions.EventException;
+import com.intuit.wasabi.eventobjects.exceptions.EventException;
 import com.intuit.wasabi.export.DatabaseExport;
 import com.intuit.wasabi.export.Envelope;
 import com.intuit.wasabi.repository.RepositoryModule;
@@ -81,10 +81,10 @@ public class EventsModule extends AbstractModule {
 
         LOGGER.debug("installed module: {}", EventsModule.class.getSimpleName());
     }
-    
+
     @Provides
     @Inject
     public Map<String, EventIngestionExecutor> ingestionExecutors() {
         return new HashMap<String, EventIngestionExecutor>();
-    }   
+    }
 }

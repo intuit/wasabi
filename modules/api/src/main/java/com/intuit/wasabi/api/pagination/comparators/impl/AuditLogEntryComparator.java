@@ -45,21 +45,21 @@ public class AuditLogEntryComparator extends PaginationComparator<AuditLogEntry>
      * @see PaginationComparatorProperty
      */
     private enum Property implements PaginationComparatorProperty<AuditLogEntry> {
-        firstname(auditLogEntry -> auditLogEntry.getUser().getFirstName(), String::compareToIgnoreCase),
-        lastname(auditLogEntry -> auditLogEntry.getUser().getLastName(), String::compareToIgnoreCase),
-        user(auditLogEntry -> auditLogEntry.getUser().getUsername().toString(), String::compareToIgnoreCase),
-        username(auditLogEntry -> auditLogEntry.getUser().getUsername().toString(), String::compareToIgnoreCase),
-        userid(auditLogEntry -> auditLogEntry.getUser().getUserId(), String::compareToIgnoreCase),
-        mail(auditLogEntry -> auditLogEntry.getUser().getEmail(), String::compareToIgnoreCase),
-        action(AuditLogAction::getDescription, String::compareToIgnoreCase),
-        experiment(auditLogEntry -> auditLogEntry.getExperimentLabel().toString(), String::compareToIgnoreCase),
-        bucket(auditLogEntry -> auditLogEntry.getBucketLabel().toString(), String::compareToIgnoreCase),
-        app(auditLogEntry -> auditLogEntry.getApplicationName().toString(), String::compareToIgnoreCase),
-        time(AuditLogEntry::getTime, Calendar::compareTo),
-        attribute(AuditLogEntry::getChangedProperty, String::compareToIgnoreCase),
-        before(AuditLogEntry::getBefore, String::compareToIgnoreCase),
-        after(AuditLogEntry::getAfter, String::compareToIgnoreCase),
-        description(AuditLogAction::getDescription, String::compareToIgnoreCase),
+        FIRSTNAME(auditLogEntry -> auditLogEntry.getUser().getFirstName(), String::compareToIgnoreCase),
+        LASTNAME(auditLogEntry -> auditLogEntry.getUser().getLastName(), String::compareToIgnoreCase),
+        USER(auditLogEntry -> auditLogEntry.getUser().getUsername().toString(), String::compareToIgnoreCase),
+        USERNAME(auditLogEntry -> auditLogEntry.getUser().getUsername().toString(), String::compareToIgnoreCase),
+        USERID(auditLogEntry -> auditLogEntry.getUser().getUserId(), String::compareToIgnoreCase),
+        MAIL(auditLogEntry -> auditLogEntry.getUser().getEmail(), String::compareToIgnoreCase),
+        ACTION(AuditLogAction::getDescription, String::compareToIgnoreCase),
+        EXPERIMENT(auditLogEntry -> auditLogEntry.getExperimentLabel().toString(), String::compareToIgnoreCase),
+        BUCKET(auditLogEntry -> auditLogEntry.getBucketLabel().toString(), String::compareToIgnoreCase),
+        APP(auditLogEntry -> auditLogEntry.getApplicationName().toString(), String::compareToIgnoreCase),
+        TIME(AuditLogEntry::getTime, Calendar::compareTo),
+        ATTRIBUTE(AuditLogEntry::getChangedProperty, String::compareToIgnoreCase),
+        BEFORE(AuditLogEntry::getBefore, String::compareToIgnoreCase),
+        AFTER(AuditLogEntry::getAfter, String::compareToIgnoreCase),
+        DESCRIPTION(AuditLogAction::getDescription, String::compareToIgnoreCase),
         ;
 
         private final Function<AuditLogEntry, ?> propertyExtractor;
