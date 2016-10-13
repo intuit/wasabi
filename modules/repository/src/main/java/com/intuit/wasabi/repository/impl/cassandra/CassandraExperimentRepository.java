@@ -243,7 +243,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
         // clobbered. In practice, this should never happen, but...
         // TODO: Implement a transactional recipe
         final String CQL = "insert into experiment " +
-                "(id, description, hypothesisiscorrect, results, rule, sample_percent, start_time, end_time, " +
+                "(id, description, hypothesis_is_correct, results, rule, sample_percent, start_time, end_time, " +
                 "   state, label, app_name, created, modified, is_personalized, model_name, model_version," +
                 " is_rapid_experiment, user_cap, creatorid) " +
                 "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -471,7 +471,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
         validator.validateExperiment(experiment);
 
         final String CQL = "update experiment " +
-                "set description = ?, hypothesisiscorrect = ?, results = ?, rule = ?, sample_percent = ?, " +
+                "set description = ?, hypothesis_is_correct = ?, results = ?, rule = ?, sample_percent = ?, " +
                 "start_time = ?, end_time = ?, " +
                 "state=?, label=?, app_name=?, modified=? , is_personalized=?, model_name=?, model_version=?," +
                 " is_rapid_experiment=?, user_cap=?" +

@@ -335,13 +335,12 @@ public class AssignmentsImpl implements Assignments {
      * assignment if the user is assignable to this experiment. Includes a Page.Name to identify the page through which
      * the assignment was delivered.
      */
-    @Override
-    public Assignment getAssignment(User.ID userID, Application.Name applicationName, Experiment.Label experimentLabel,
-                                    Context context, boolean createAssignment, boolean ignoreSamplingPercent,
-                                    SegmentationProfile segmentationProfile, HttpHeaders headers, Page.Name pageName,
-                                    Experiment experiment, BucketList bucketList,
-                                    Table<Experiment.ID, Experiment.Label, String> userAssignments,
-                                    Map<Experiment.ID, List<Experiment.ID>> exclusives) {
+    protected Assignment getAssignment(User.ID userID, Application.Name applicationName, Experiment.Label experimentLabel,
+                                       Context context, boolean createAssignment, boolean ignoreSamplingPercent,
+                                       SegmentationProfile segmentationProfile, HttpHeaders headers, Page.Name pageName,
+                                       Experiment experiment, BucketList bucketList,
+                                       Table<Experiment.ID, Experiment.Label, String> userAssignments,
+                                       Map<Experiment.ID, List<Experiment.ID>> exclusives) {
         final Date currentDate = new Date();
         final long currentTime = currentDate.getTime();
 
@@ -371,6 +370,7 @@ public class AssignmentsImpl implements Assignments {
                     Assignment.Status.EXPERIMENT_EXPIRED);
         }
 
+        // FIXME - Code duplication with getSingleAssignment
         Assignment assignment = getAssignment(experimentID, userID, context, userAssignments, bucketList);
         if (Objects.isNull(assignment)) {
             if (createAssignment) {

@@ -15,16 +15,18 @@
  *******************************************************************************/
 package com.intuit.wasabi.api;
 
-import com.intuit.wasabi.api.pagination.PaginationHelper;
-import com.intuit.wasabi.api.pagination.comparators.impl.ExperimentComparator;
-import com.intuit.wasabi.api.pagination.filters.impl.ExperimentFilter;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
-import com.intuit.wasabi.authorization.Authorization;
 import com.intuit.wasabi.authenticationobjects.exceptions.AuthenticationException;
+import com.intuit.wasabi.authorization.Authorization;
 import com.intuit.wasabi.experiment.Experiments;
 import com.intuit.wasabi.experiment.Pages;
 import com.intuit.wasabi.experiment.Priorities;
-import com.intuit.wasabi.experimentobjects.*;
+import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.experimentobjects.ExperimentIDList;
+import com.intuit.wasabi.experimentobjects.Page;
+import com.intuit.wasabi.experimentobjects.PageExperiment;
+import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,7 +49,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Matchers.anyCollection;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyObject;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ApplicationsResourceTest {
@@ -96,14 +102,10 @@ public class ApplicationsResourceTest {
     private ArgumentCaptor<Map<String, List<PageExperiment>>> pageExperimentsCaptor;
     private ApplicationsResource applicationsResource;
 
-    private PaginationHelper<Experiment> experimentPaginationHelper = new PaginationHelper<>(
-            new ExperimentFilter(),
-            new ExperimentComparator());
-
     @Before
     public void setup() {
         applicationsResource = new ApplicationsResource(authorizedExperimentGetter, experiments, authorization, priorities,
-                pages, httpHeader, experimentPaginationHelper);
+                pages, httpHeader);
     }
 
     @Test
@@ -172,7 +174,7 @@ public class ApplicationsResourceTest {
         doReturn(responseBuilder).when(responseBuilder).entity(anyCollection());
         doReturn(response).when(responseBuilder).build();
 
-        applicationsResource.getExperiments(applicationName, "foo", 0, -1, "", "", "");
+        applicationsResource.getExperiments(applicationName, "foo");
 
         verify(authorizedExperimentGetter).getAuthorizedExperimentsByName("foo", applicationName);
         verify(httpHeader).headers();
@@ -212,7 +214,6 @@ public class ApplicationsResourceTest {
     public void getPagesForApplication() throws Exception {
         when(authorization.getUser("foo")).thenReturn(username);
         when(pages.getPageList(applicationName)).thenReturn(pagesByName);
-//        whenHttpHeader(anyCollection());
         when(httpHeader.headers()).thenReturn(responseBuilder);
         when(responseBuilder.entity(anyCollection())).thenReturn(responseBuilder);
         when(responseBuilder.build()).thenReturn(response);
@@ -222,7 +223,6 @@ public class ApplicationsResourceTest {
         verify(authorization).getUser("foo");
         verify(authorization).checkUserPermissions(username, applicationName, READ);
         verify(pages).getPageList(applicationName);
-//        verifyHttpHeader(anyCollection());
         verify(responseBuilder).entity(pagesByNameCaptor.capture());
         assertThat(pagesByNameCaptor.getValue().size(), is(1));
         assertThat(pagesByNameCaptor.getValue(), hasEntry("pages", pagesByName));
@@ -232,7 +232,6 @@ public class ApplicationsResourceTest {
     public void getExperimentsByPages() throws Exception {
         when(authorization.getUser("foo")).thenReturn(username);
         when(pages.getExperiments(applicationName, pageName)).thenReturn(pageExperiments);
-//        whenHttpHeader(anyCollection());
         when(httpHeader.headers()).thenReturn(responseBuilder);
         when(responseBuilder.entity(anyCollection())).thenReturn(responseBuilder);
         when(responseBuilder.build()).thenReturn(response);
@@ -241,7 +240,6 @@ public class ApplicationsResourceTest {
 
         verify(authorization).getUser("foo");
         verify(authorization).checkUserPermissions(username, applicationName, READ);
-//        verifyHttpHeader(anyCollection());
         verify(httpHeader).headers();
         verify(responseBuilder).entity(pageExperimentsCaptor.capture());
         verify(responseBuilder).build();

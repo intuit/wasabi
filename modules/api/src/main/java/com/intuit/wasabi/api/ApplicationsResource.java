@@ -19,7 +19,6 @@ import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.intuit.wasabi.api.pagination.PaginationHelper;
 import com.intuit.wasabi.authenticationobjects.exceptions.AuthenticationException;
 import com.intuit.wasabi.authorization.Authorization;
 import com.intuit.wasabi.experiment.Experiments;
@@ -36,36 +35,25 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_FILTER;
 import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_MODEXP;
-import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_PAGE;
-import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_PER_PAGE;
-import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_SORT;
-import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_TIMEZONE;
-import static com.intuit.wasabi.api.APISwaggerResource.DOC_FILTER;
-import static com.intuit.wasabi.api.APISwaggerResource.DOC_PAGE;
-import static com.intuit.wasabi.api.APISwaggerResource.DOC_PER_PAGE;
-import static com.intuit.wasabi.api.APISwaggerResource.DOC_SORT;
-import static com.intuit.wasabi.api.APISwaggerResource.DOC_TIMEZONE;
 import static com.intuit.wasabi.api.APISwaggerResource.EXAMPLE_AUTHORIZATION_HEADER;
 import static com.intuit.wasabi.authorizationobjects.Permission.READ;
 import static com.intuit.wasabi.authorizationobjects.Permission.UPDATE;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
+
 
 /**
  * API endpoint for accessing & managing applications
@@ -82,19 +70,17 @@ public class ApplicationsResource {
     private Authorization authorization;
     private Pages pages;
     private Priorities priorities;
-    private PaginationHelper<Experiment> experimentPaginationHelper;
 
     @Inject
     ApplicationsResource(final AuthorizedExperimentGetter authorizedExperimentGetter, final Experiments experiments,
                          final Authorization authorization, final Priorities priorities, final Pages pages,
-                         final HttpHeader httpHeader, final PaginationHelper<Experiment> experimentPaginationHelper) {
+                         final HttpHeader httpHeader) {
         this.authorizedExperimentGetter = authorizedExperimentGetter;
         this.pages = pages;
         this.experiments = experiments;
         this.authorization = authorization;
         this.priorities = priorities;
         this.httpHeader = httpHeader;
-        this.experimentPaginationHelper = experimentPaginationHelper;
     }
 
     /**
@@ -156,18 +142,10 @@ public class ApplicationsResource {
      * Returns metadata for all experiments within an application.
      * <p>
      * Does not return metadata for a deleted or terminated experiment.
-     * <p>
-     * This endpoint is paginated.
      *
      * @param applicationName     the application name
      * @param authorizationHeader the authentication headers
-     * @param page                the page which should be returned, defaults to 1
-     * @param perPage             the number of log entries per page, defaults to 10. -1 to get all values.
-     * @param sort                the sorting rules
-     * @param filter              the filter rules
-     * @param timezoneOffset      the time zone offset from UTC
-     * @return a response containing a map with a list with {@code 0} to {@code perPage} experiments,
-     * if that many are on the page, and a count of how many experiments match the filter criteria.
+     * @return a response containing a list with experiments
      */
     @GET
     @Path("/{applicationName}/experiments")
@@ -181,38 +159,9 @@ public class ApplicationsResource {
 
                                    @HeaderParam(AUTHORIZATION)
                                    @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                   final String authorizationHeader,
-
-                                   @QueryParam("page")
-                                   @DefaultValue(DEFAULT_PAGE)
-                                   @ApiParam(name = "page", defaultValue = DEFAULT_PAGE, value = DOC_PAGE)
-                                   final int page,
-
-                                   @QueryParam("per_page")
-                                   @DefaultValue(DEFAULT_PER_PAGE)
-                                   @ApiParam(name = "per_page", defaultValue = DEFAULT_PER_PAGE, value = DOC_PER_PAGE)
-                                   final int perPage,
-
-                                   @QueryParam("filter")
-                                   @DefaultValue("")
-                                   @ApiParam(name = "filter", defaultValue = DEFAULT_FILTER, value = DOC_FILTER)
-                                   final String filter,
-
-                                   @QueryParam("sort")
-                                   @DefaultValue("")
-                                   @ApiParam(name = "sort", defaultValue = DEFAULT_SORT, value = DOC_SORT)
-                                   final String sort,
-
-                                   @QueryParam("timezone")
-                                   @DefaultValue(DEFAULT_TIMEZONE)
-                                   @ApiParam(name = "timezone", defaultValue = DEFAULT_TIMEZONE, value = DOC_TIMEZONE)
-                                   final String timezoneOffset) {
-        List<Experiment> experimentList = authorizedExperimentGetter.getAuthorizedExperimentsByName(authorizationHeader,
-                applicationName);
-
-        Map<String, Object> response = experimentPaginationHelper.paginate("experiments", experimentList, filter, timezoneOffset, sort, page, perPage);
-
-        return httpHeader.headers().entity(response).build();
+                                   final String authorizationHeader
+    ) {
+        return httpHeader.headers().entity(authorizedExperimentGetter.getAuthorizedExperimentsByName(authorizationHeader, applicationName)).build();
     }
 
     /**

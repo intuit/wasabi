@@ -70,7 +70,7 @@ beerMe() {
 
 start_docker() {
   docker ps >/dev/null 2>&1
-  [[ $? != 0 && "${WASABI_OS}" == "${wasabi_os_default}" ]] && open /Applications/Docker.app
+  [[ $? != 0 && "${WASABI_OS}" == "${WASABI_OSX}" ]] && open /Applications/Docker.app
 
   while :; do
     docker ps >/dev/null 2>&1
@@ -80,7 +80,7 @@ start_docker() {
 }
 
 stop_docker() {
-  if [ "${WASABI_OS}" == "${wasabi_os_default}" ]; then
+  if [ "${WASABI_OS}" == "${WASABI_OSX}" ]; then
     osascript -e 'quit app "Docker"'
   fi
 }

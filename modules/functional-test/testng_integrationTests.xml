@@ -43,6 +43,8 @@
     </test>
     <test name="AssignmentTests">
         <classes>
+            <class name="com.intuit.wasabi.tests.service.assignment.EmptyBucketGetUserAssignmentTest"/>
+            <class name="com.intuit.wasabi.tests.service.assignment.EmptyBucketGetUserAssignmentToEmptyBucketTest"/>
             <class name="com.intuit.wasabi.tests.service.assignment.BasicAssignmentTest"/>
             <class name="com.intuit.wasabi.tests.service.assignment.BatchAssignmentTest"/>
             <class name="com.intuit.wasabi.tests.service.assignment.PutAssignmentTest"/>
