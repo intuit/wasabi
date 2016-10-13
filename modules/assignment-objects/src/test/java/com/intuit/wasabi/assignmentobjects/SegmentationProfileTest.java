@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,7 +25,7 @@ import java.util.HashMap;
 import static org.junit.Assert.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SegmentationProfileTest{
+public class SegmentationProfileTest {
 
     private HashMap<String, Object> profile;
     private SegmentationProfile segProfile;
@@ -47,18 +47,15 @@ public class SegmentationProfileTest{
 
     @Test
     public void testSegmentationProfileFromOther() {
-        SegmentationProfile segProfile1 = SegmentationProfile.newInstance().build();
-        segProfile1.setProfile(profile);
-        SegmentationProfile segProfileOther = SegmentationProfile.from(segProfile1).build();
+        SegmentationProfile segProfileOther = SegmentationProfile.from(segProfile).build();
 
-        assertNotNull(segProfileOther.getProfile());
-        assertNotNull(segProfileOther.toString());
+        assertEquals(segProfileOther.getProfile(), segProfile.getProfile());
+        assertEquals(segProfileOther.toString(), segProfile.toString());
         assertEquals(segProfileOther.hashCode(), segProfileOther.hashCode());
 
-        assertEquals(segProfile1, segProfileOther);
-        assertEquals(segProfile1, segProfile1);
+        assertEquals(segProfile, segProfileOther);
+        assertEquals(segProfile.toJSONProfile(), segProfileOther.toJSONProfile());
 
-        assertNotNull(segProfile.toJSONProfile());
     }
 
 }

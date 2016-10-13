@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,8 +22,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
+/**
+ * Test for the {@link PersonalizationEngineResponse}
+ */
 public class PersonalizationEngineResponseTest {
 
     private String tid = "testTid";
@@ -45,13 +47,6 @@ public class PersonalizationEngineResponseTest {
     }
 
     @Test
-    public void testPersonalizationEngineResponse() {
-        assertNotNull(response.getTid());
-        assertNotNull(response.getData());
-        assertNotNull(response.getModel());
-    }
-
-    @Test
     public void testPersonalizationEngineResponseSet() {
         response.setTid(tid);
         response.setData(data);
@@ -66,10 +61,9 @@ public class PersonalizationEngineResponseTest {
     public void testPersonalizationEngineResponseFromOther() {
         PersonalizationEngineResponse other = PersonalizationEngineResponse.from(response).build();
 
-        assertEquals(response, response);
         assertEquals(response, other);
-        assertEquals(response.toString(), response.toString());
-        assertEquals(response.hashCode(), response.hashCode());
+        assertEquals(response.toString(), other.toString());
+        assertEquals(response.hashCode(), other.hashCode());
     }
 
 }

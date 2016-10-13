@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,8 +15,11 @@
  *******************************************************************************/
 package com.intuit.wasabi.assignmentobjects;
 
-import com.intuit.wasabi.experimentobjects.*;
-import org.junit.Before;
+import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.experimentobjects.Bucket;
+import com.intuit.wasabi.experimentobjects.Context;
+import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.experimentobjects.Page;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
@@ -26,10 +29,12 @@ import org.mockito.runners.MockitoJUnitRunner;
 import javax.ws.rs.core.HttpHeaders;
 import java.util.Date;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.eq;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
+/**
+ * Test for the {@link AssignmentEnvelopePayload}
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class AssignmentEnvelopePayloadTest {
 
@@ -49,46 +54,33 @@ public class AssignmentEnvelopePayloadTest {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private HttpHeaders httpHeaders;
 
-    private AssignmentEnvelopePayload payload;
-
-    @Before
-    public void setUp() throws Exception {
-        payload = createAssignmentEnvelopePayload1();
-    }
-
-    private AssignmentEnvelopePayload createAssignmentEnvelopePayload1() {
-        return new AssignmentEnvelopePayload(userID, context, createAssignment,
-                putAssignment, ignoreSamplingPercent, segmentationProfile, assignmentStatus,
-                bucketLabel, pageName, applicationName, experimentLabel, experimentID, date, null);
-    }
-
-//    private AssignmentEnvelopePayload createAssignmentEnvelopePayload2() {
-//        return new AssignmentEnvelopePayload(userID, context, segmentationProfile,
-//                bucketLabel, pageName, httpHeaders, applicationName, experimentLabel);
-//    }
+    private AssignmentEnvelopePayload payload = new AssignmentEnvelopePayload();
 
     @Test
-    public void testAssignmentEnvelopePayload() {
-        assertNotNull(payload.getUserID());
-        assertNotNull(payload.getContext());
-        assertTrue(payload.isCreateAssignment());
-        assertTrue(payload.isPutAssignment());
-        assertTrue(payload.isIgnoreSamplingPercent());
-        assertNotNull(payload.getSegmentationProfile());
-        assertNotNull(payload.getAssignmentStatus());
-        assertNotNull(payload.getBucketLabel());
-        assertNotNull(payload.getPageName());
-        assertNotNull(payload.getApplicationName());
-        assertNotNull(payload.getExperimentLabel());
-        assertNotNull(payload.getExperimentID());
-        assertNotNull(payload.getDate());
-        //assertNotNull(payload.getHttpHeaders());
-        assertNotNull(payload.toJson());
-        //assertNotNull(payload.toXml());
+    public void testJson() {
+        payload = new AssignmentEnvelopePayload(userID, context, createAssignment,
+                putAssignment, ignoreSamplingPercent, segmentationProfile, assignmentStatus,
+                bucketLabel, pageName, applicationName, experimentLabel, experimentID, date, httpHeaders);
+
+        String payloadJson = payload.toJson();
+        assertTrue(payloadJson.contains(userID.toString()));
+        assertTrue(payloadJson.contains(context.toString()));
+        assertTrue(payloadJson.contains(String.valueOf(createAssignment)));
+        assertTrue(payloadJson.contains(String.valueOf(putAssignment)));
+        assertTrue(payloadJson.contains(String.valueOf(ignoreSamplingPercent)));
+        assertTrue(payloadJson.contains(segmentationProfile.getProfile().toString()));
+        assertTrue(payloadJson.contains(assignmentStatus.toString()));
+        assertTrue(payloadJson.contains(bucketLabel.toString()));
+        assertTrue(payloadJson.contains(pageName.toString()));
+        assertTrue(payloadJson.contains(applicationName.toString()));
+        assertTrue(payloadJson.contains(experimentLabel.toString()));
+        assertTrue(payloadJson.contains(experimentID.toString()));
+        assertTrue(payloadJson.contains(String.valueOf(date.getTime())));
     }
 
     @Test
     public void testAssignmentEnvelopePayloadSet() {
+
         payload.setUserID(userID);
         payload.setContext(context);
         payload.setCreateAssignment(createAssignment);
@@ -103,21 +95,22 @@ public class AssignmentEnvelopePayloadTest {
         payload.setExperimentID(experimentID);
         payload.setDate(date);
         payload.setHttpHeaders(httpHeaders);
-        assertNotNull(payload.getUserID());
-        assertNotNull(payload.getContext());
+
+        assertEquals(payload.getUserID(), userID);
+        assertEquals(payload.getContext(), context);
         assertTrue(payload.isCreateAssignment());
         assertTrue(payload.isPutAssignment());
         assertTrue(payload.isIgnoreSamplingPercent());
-        assertNotNull(payload.getSegmentationProfile());
-        assertNotNull(payload.getAssignmentStatus());
-        assertNotNull(payload.getBucketLabel());
-        assertNotNull(payload.getPageName());
-        assertNotNull(payload.getApplicationName());
-        assertNotNull(payload.getExperimentLabel());
-        assertNotNull(payload.getExperimentID());
-        assertNotNull(payload.getDate());
-        assertNotNull(payload.getHttpHeaders());
-        assertNotNull(payload.toJson());
-        //assertNotNull(payload.toXml());
+        assertEquals(payload.getSegmentationProfile(), segmentationProfile);
+        assertEquals(payload.getAssignmentStatus(), assignmentStatus);
+        assertEquals(payload.getBucketLabel(), bucketLabel);
+        assertEquals(payload.getPageName(), pageName);
+        assertEquals(payload.getApplicationName(), applicationName);
+        assertEquals(payload.getExperimentLabel(), experimentLabel);
+        assertEquals(payload.getExperimentID(), experimentID);
+        assertEquals(payload.getDate(), date);
+        assertEquals(payload.getHttpHeaders(), httpHeaders);
     }
+
+
 }
