@@ -698,7 +698,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                         if (experiment.sortedBuckets[i].winnerSoFar) {
                             significance = 'winner so far';
                         } else if (experiment.sortedBuckets[i].loserSoFar) {
-                            return 'loser so far';
+                            significance = 'loser so far';
                         }
 
                         if (significance === 'winner so far') {
