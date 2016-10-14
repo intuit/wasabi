@@ -51,22 +51,27 @@ id=${name}-${version}-${profile}
 home=${home:-/usr/local/$id}
 log=${log:-/var/log/$id}
 email=`fromPom main ${profile} application.email`
+# FIXME: hack
+email=foo@bar.com
+
+echo "packaging service: $id, home: $home, log: $log, email: $email, pwd: `pwd`"
 
 common="-s dir --force --debug --architecture noarch --name ${name}-${profile} --version ${version}\
   --iteration ${timestamp} --license APLv2.0 --vendor tbd --category application --provides ${name}-${profile}\
   --description ${name}-${version}-${profile} --url https://github.com/intuit/wasabi\
-   --maintainer ${email}" #--directories ${home}"
+  --maintainer ${email}" #--directories ${home}"
 resources="dist/=${home}/content/ui/dist"
 #deb="-t deb --deb-no-default-config-files"
 deb="-t deb"
 rpm="-t rpm --rpm-os linux"
 scripts="--before-install build/[PKG]/before-install.sh\
- --after-install build/[PKG]/after-install.sh\
- --before-remove build/[PKG]/before-remove.sh\
- --after-remove build/[PKG]/after-remove.sh"
+  --after-install build/[PKG]/after-install.sh\
+  --before-remove build/[PKG]/before-remove.sh\
+  --after-remove build/[PKG]/after-remove.sh"
 
 for pkg in "deb" "rpm"; do
   fpm="${!pkg} $common `echo $scripts | sed -e "s/\[PKG\]/${pkg}/g"` $depends $resources"
+  echo ">>>FPM: $fpm"
   if [ "${WASABI_OS}" == "${WASABI_OSX}" ] || [ "${WASABI_OS}" == "${WASABI_LINUX}" ]; then
     docker run -it -v `pwd`:/build --rm liuedy/centos-fpm fpm ${fpm} || exitOnError "failed to build rpm: $module"
   else

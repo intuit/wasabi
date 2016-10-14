@@ -17,6 +17,9 @@ package com.intuit.wasabi.auditlog.impl;
 
 import com.intuit.wasabi.auditlogobjects.AuditLogEntry;
 import com.intuit.wasabi.repository.AuditLogRepository;
+import org.slf4j.Logger;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * The AuditLogEntryEnvelope wraps AuditLogEntry to be sent to cassandra.
@@ -28,6 +31,7 @@ import com.intuit.wasabi.repository.AuditLogRepository;
      */
     private final AuditLogEntry entry;
     private final AuditLogRepository repository;
+    private Logger LOGGER = getLogger(AuditLogEntryEnvelope.class);
 
     /**
      * Wraps {@code entry} into this envelope.
@@ -45,6 +49,10 @@ import com.intuit.wasabi.repository.AuditLogRepository;
      */
     @Override
     public void run() {
+        LOGGER.debug("storing auditLogEntry: {}", entry);
+
         repository.storeEntry(entry);
+
+        LOGGER.debug("stored auditLogEntry: {}", entry);
     }
 }
