@@ -102,13 +102,6 @@
     </logger>
     -->
 
-    <!--
-    <logger name="com.intuit.data.autumn.exemplary.server" level="DEBUG">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
-    </logger>
-    -->
-
     <root level="${log.level}">
         <appender-ref ref="FILE"/>
         <appender-ref ref="CONSOLE"/>
