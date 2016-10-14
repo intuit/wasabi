@@ -217,7 +217,6 @@ resource() {
       api) [[ ! -f ./modules/swagger-ui/target/swaggerui/index.html || \
         ! -f ./modules/api/target/generated/swagger-ui/swagger.json ]] && build
         ./bin/wasabi.sh status >/dev/null 2>&1 || ./bin/wasabi.sh start:docker
-#        jip=localhost
         ./bin/wasabi.sh remove:wasabi >/dev/null 2>&1
         module=main
         home=./modules/${module}/target
@@ -225,7 +224,6 @@ resource() {
         version=$(fromPom . ${profile} project.version)
         id=${artifact}-${version}-${profile}
         content=${home}/${id}/content/ui/dist
-#        sed -i '' "s/localhost/${jip}/g" ${content}/swagger/swaggerjson/swagger.json
         # FIXME: this can fail after 'package' given the profile = build
         sed -i '' "s/this.model.validatorUrl.*$/this.model.validatorUrl = null;/g" ${content}/swagger/swagger-ui.js
         ./bin/wasabi.sh start
