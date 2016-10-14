@@ -234,7 +234,6 @@ public class PaginationTest extends TestBase {
     }
 
     @Test(dependsOnGroups = {"pagination_pages"}, groups = {"auditlog_smoke"})
-    @RetryTest(warmup = 5000)
     public void t_AuditLogPaginationSmoke() {
         List<Map<String, Object>> auditLogEntryMaps = apiServerConnector
                 .doGet("logs?per_page=10&page=1&sort=time&filter=" + experimentPrefix + ",username=admin")

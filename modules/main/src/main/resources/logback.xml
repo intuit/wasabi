@@ -102,38 +102,6 @@
     </logger>
     -->
 
-    <!--
-    <logger name="com.intuit.data.autumn.exemplary.server" level="DEBUG">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
-    </logger>
-    -->
-
-    <logger name="com.intuit.wasabi.auditlog.impl.AuditLogEntryEnvelope" level="DEBUG">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
-    </logger>
-    <logger name="com.intuit.wasabi.auditlog.impl.AuditLogListenerImpl" level="DEBUG">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
-    </logger>
-    <logger name="com.intuit.wasabi.eventlog.impl.EventLogEventEnvelope" level="DEBUG">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
-    </logger>
-    <logger name="com.intuit.wasabi.eventlog.impl.EventLogImpl" level="DEBUG">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
-    </logger>
-    <logger name="com.intuit.wasabi.repository.impl.cassandra.CassandraAuditLogRepository" level="DEBUG">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
-    </logger>
-    <logger name="com.intuit.wasabi.repository.impl.database.DatabaseAnalytics" level="DEBUG">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
-    </logger>
-
     <root level="${log.level}">
         <appender-ref ref="FILE"/>
         <appender-ref ref="CONSOLE"/>

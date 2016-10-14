@@ -39,11 +39,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
+import static java.util.Optional.ofNullable;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -172,11 +170,11 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
                         ApplicationNameSerializer.get())
                 .withByteBufferValue(entry.getTime().getTime(), DateSerializer.get())
                 .withStringValue(entry.getAction().toString())
-                .withStringValue(emptyStringIfNull(entry.getUser().getFirstName()))
-                .withStringValue(emptyStringIfNull(entry.getUser().getLastName()))
-                .withStringValue(emptyStringIfNull(entry.getUser().getEmail()))
+                .withStringValue(ofNullable(entry.getUser().getFirstName()).orElse(""))
+                .withStringValue(ofNullable(entry.getUser().getLastName()).orElse(""))
+                .withStringValue(ofNullable(entry.getUser().getEmail()).orElse(""))
                 .withByteBufferValue(entry.getUser().getUsername(), UsernameSerializer.get())
-                .withStringValue(emptyStringIfNull(entry.getUser().getUserId()));
+                .withStringValue(ofNullable(entry.getUser().getUserId()).orElse(""));
 
         if (entry.getExperimentId() != null) {
             cqlQuery.withByteBufferValue(entry.getExperimentId(), ExperimentIDSerializer.get());
@@ -196,9 +194,9 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
             cqlQuery.withStringValue("");
         }
 
-        cqlQuery.withStringValue(emptyStringIfNull(entry.getChangedProperty()))
-                .withStringValue(emptyStringIfNull(entry.getBefore()))
-                .withStringValue(emptyStringIfNull(entry.getAfter()));
+        cqlQuery.withStringValue(ofNullable(entry.getChangedProperty()).orElse(""))
+                .withStringValue(ofNullable(entry.getBefore()).orElse(""))
+                .withStringValue(ofNullable(entry.getAfter()).orElse(""));
 
         boolean status = false;
 
@@ -217,10 +215,6 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
         LOGGER.debug("stored auditLogEntry: {}, status: {}", entry, status);
 
         return status;
-    }
-
-    private String emptyStringIfNull(final String object) {
-        return object != null ? object : "";
     }
 
     /**

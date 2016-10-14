@@ -388,7 +388,7 @@ http://www.w3.org/2001/XMLSchema-instance">
                     <aggregate>true</aggregate>
                     <instrumentation>
                         <excludes>
-                            <exclude>com/intuit/wasabi/**/*Test.class</exclude>
+                            <exclude>com/intuit/wasabi/tests/**/*.class</exclude>
                         </excludes>
                     </instrumentation>
                 </configuration>
@@ -399,7 +399,6 @@ http://www.w3.org/2001/XMLSchema-instance">
                 <version>3.0.4</version>
                 <configuration>
                     <xmlOutput>true</xmlOutput>
-                    <!--<findbugsXmlOutput>true</findbugsXmlOutput>-->
                     <failOnError>false</failOnError>
                 </configuration>
             </plugin>
