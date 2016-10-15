@@ -36,7 +36,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -119,16 +118,9 @@ public class EventsResource {
             @ApiParam(name = "eventList", required = true, value = "For impression", defaultValue = DEFAULT_EVENT)
             final EventList eventList)
             throws Exception {
-        final Date NOW = new Date();
         Set<Context> contextSet = new HashSet<>();
 
-        for (Event event : eventList.getEvents()) {
-            if (event.getTimestamp() == null) {
-                event.setTimestamp(NOW);
-            }
-
-            contextSet.add(event.getContext());
-        }
+        eventList.getEvents().forEach(event -> contextSet.add(event.getContext()));
 
         events.recordEvents(applicationName, experimentLabel, userID, eventList, contextSet);
 
