@@ -23,7 +23,6 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.google.common.base.Preconditions;
 import com.intuit.wasabi.exceptions.AnalyticsException;
 import com.intuit.wasabi.experimentobjects.Context;
 import io.swagger.annotations.ApiModelProperty;
@@ -68,7 +67,10 @@ public class Event implements Cloneable {
     }
 
     public void setTimestamp(Date value) {
-        timestamp = new Date(Preconditions.checkNotNull(value, "Event timestamp must not be null.").getTime());
+        if (Objects.isNull(value)) {
+            throw new IllegalArgumentException("Event timestamp must not be null.");
+        }
+        timestamp = new Date(value.getTime());
     }
 
     public Type getType() {
@@ -86,7 +88,6 @@ public class Event implements Cloneable {
         name = value;
         switch (name.toString()) {
             case IMPRESSION:
-            case "":
                 type = Type.IMPRESSION;
                 break;
             default:

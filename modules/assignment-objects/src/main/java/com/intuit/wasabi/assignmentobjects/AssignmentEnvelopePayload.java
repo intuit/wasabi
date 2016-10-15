@@ -15,7 +15,6 @@
  *******************************************************************************/
 package com.intuit.wasabi.assignmentobjects;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,22 +47,38 @@ import java.util.UUID;
  */
 public final class AssignmentEnvelopePayload implements EnvelopePayload {
     private static final Logger LOG = LoggerFactory.getLogger(AssignmentEnvelopePayload.class);
-    private final MessageType messageType = MessageType.ASSIGNMENT;
-    private final String version = "3.0";
-    private final User.ID userID;
-    private final Context context;
-    private final boolean createAssignment;
-    private final boolean putAssignment;
-    private final boolean ignoreSamplingPercent;
-    private final SegmentationProfile segmentationProfile;
-    private final Assignment.Status assignmentStatus;
-    private final Bucket.Label bucketLabel;
-    private final Page.Name pageName;
-    private final Application.Name applicationName;
-    private final Experiment.Label experimentLabel;
-    private final Experiment.ID experimentID;
-    private final Date assignmentTimestamp;
-    private final UUID timeUUID = UUIDGen.getTimeUUID();
+    @JsonProperty("messageType")
+    private MessageType messageType = MessageType.ASSIGNMENT;
+    @JsonProperty("version")
+    private String version = "3.0";
+    @JsonProperty("userID")
+    private User.ID userID;
+    @JsonProperty("context")
+    private Context context;
+    @JsonProperty("createAssignment")
+    private boolean createAssignment;
+    @JsonProperty("putAssignment")
+    private boolean putAssignment;
+    @JsonProperty("ignoreSamplingPercent")
+    private boolean ignoreSamplingPercent;
+    @JsonProperty("segmentationProfile")
+    private SegmentationProfile segmentationProfile;
+    @JsonProperty("assignmentStatus")
+    private Assignment.Status assignmentStatus;
+    @JsonProperty("bucketLabel")
+    private Bucket.Label bucketLabel;
+    @JsonProperty("pageName")
+    private Page.Name pageName;
+    @JsonProperty("applicationName")
+    private Application.Name applicationName;
+    @JsonProperty("experimentLabel")
+    private Experiment.Label experimentLabel;
+    @JsonProperty("experimentID")
+    private Experiment.ID experimentID;
+    @JsonProperty("assignmentTimestamp")
+    private Date assignmentTimestamp;
+    @JsonProperty("timeUUID")
+    private UUID timeUUID = UUIDGen.getTimeUUID();
 
     /**
      * @param userID                the user ID
@@ -80,21 +95,20 @@ public final class AssignmentEnvelopePayload implements EnvelopePayload {
      * @param experimentID          the experiment ID
      * @param assignmentTimestamp   the assignment's date
      */
-    @JsonCreator
     public AssignmentEnvelopePayload(
-            @JsonProperty("userID") ID userID,
-            @JsonProperty("context") Context context,
-            @JsonProperty("createAssignment") boolean createAssignment,
-            @JsonProperty("putAssignment") boolean putAssignment,
-            @JsonProperty("ignoreSamplingPercent") boolean ignoreSamplingPercent,
-            @JsonProperty("segmentationProfile") SegmentationProfile segmentationProfile,
-            @JsonProperty("assignmentStatus") Status assignmentStatus,
-            @JsonProperty("bucketLabel") Bucket.Label bucketLabel,
-            @JsonProperty("pageName") Page.Name pageName,
-            @JsonProperty("applicationName") Name applicationName,
-            @JsonProperty("experimentLabel") Label experimentLabel,
-            @JsonProperty("experimentID") Experiment.ID experimentID,
-            @JsonProperty("assignmentTimestamp") Date assignmentTimestamp) {
+            ID userID,
+            Context context,
+            boolean createAssignment,
+            boolean putAssignment,
+            boolean ignoreSamplingPercent,
+            SegmentationProfile segmentationProfile,
+            Status assignmentStatus,
+            Bucket.Label bucketLabel,
+            Page.Name pageName,
+            Name applicationName,
+            Label experimentLabel,
+            Experiment.ID experimentID,
+            Date assignmentTimestamp) {
         this.userID = userID;
         this.context = context;
         this.createAssignment = createAssignment;
@@ -110,116 +124,7 @@ public final class AssignmentEnvelopePayload implements EnvelopePayload {
         this.assignmentTimestamp = assignmentTimestamp;
     }
 
-    /**
-     * @return the userID
-     */
-    public User.ID getUserID() {
-        return userID;
-    }
-
-    /**
-     * @return the context
-     */
-    public Context getContext() {
-        return context;
-    }
-
-    /**
-     * @return the createAssignment
-     */
-    public boolean isCreateAssignment() {
-        return createAssignment;
-    }
-
-    /**
-     * @return the putAssignment
-     */
-    public boolean isPutAssignment() {
-        return putAssignment;
-    }
-
-    /**
-     * @return the ignoreSamplingPercent
-     */
-    public boolean isIgnoreSamplingPercent() {
-        return ignoreSamplingPercent;
-    }
-
-    /**
-     * @return the segmentationProfile
-     */
-    public SegmentationProfile getSegmentationProfile() {
-        return segmentationProfile;
-    }
-
-    /**
-     * @return the assignmentStatus
-     */
-    public Assignment.Status getAssignmentStatus() {
-        return assignmentStatus;
-    }
-
-    /**
-     * @return the bucketLabel
-     */
-    public Bucket.Label getBucketLabel() {
-        return bucketLabel;
-    }
-
-    /**
-     * @return the pageName
-     */
-    public Page.Name getPageName() {
-        return pageName;
-    }
-
-    /**
-     * @return the applicationName
-     */
-    public Application.Name getApplicationName() {
-        return applicationName;
-    }
-
-    /**
-     * @return the experimentLabel
-     */
-    public Experiment.Label getExperimentLabel() {
-        return experimentLabel;
-    }
-
-    /**
-     * @return the experimentID
-     */
-    public Experiment.ID getExperimentID() {
-        return experimentID;
-    }
-
-    /**
-     * @return the assignmentTimestamp
-     */
-    public Date getAssignmentTimestamp() {
-        return assignmentTimestamp;
-    }
-
-    /**
-     * @return the time UUID
-     */
-    public UUID getTimeUUID() {
-        return timeUUID;
-    }
-
-    /**
-     * @return the message type
-     */
-    public MessageType getMessageType() {
-        return messageType;
-    }
-
-    /**
-     * @return the version
-     */
-    public String getVersion() {
-        return version;
+    private AssignmentEnvelopePayload() {
     }
 
     @Override

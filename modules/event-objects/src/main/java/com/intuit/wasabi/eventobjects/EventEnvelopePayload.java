@@ -15,13 +15,11 @@
  *******************************************************************************/
 package com.intuit.wasabi.eventobjects;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intuit.wasabi.analyticsobjects.Event;
 import com.intuit.wasabi.assignmentobjects.Assignment;
-import com.intuit.wasabi.assignmentobjects.AssignmentEnvelopePayload;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Application.Name;
 import com.intuit.wasabi.experimentobjects.Experiment;
@@ -45,12 +43,19 @@ import java.util.UUID;
  */
 public class EventEnvelopePayload implements EnvelopePayload {
     private static final Logger LOG = LoggerFactory.getLogger(EventEnvelopePayload.class);
-    private final MessageType messageType = MessageType.EVENT;
-    private final String version = "3.0";
-    private final UUID timeUUID = UUIDGen.getTimeUUID();
+    @JsonProperty("messageType")
+    private MessageType messageType = MessageType.EVENT;
+    @JsonProperty("version")
+    private String version = "3.0";
+    @JsonProperty("timeUUID")
+    private UUID timeUUID = UUIDGen.getTimeUUID();
+    @JsonProperty("applicationName")
     private Name applicationName;
+    @JsonProperty("experimentLabel")
     private Label experimentLabel;
+    @JsonProperty("assignment")
     private Assignment assignment;
+    @JsonProperty("event")
     private Event event;
 
     /**
@@ -59,52 +64,17 @@ public class EventEnvelopePayload implements EnvelopePayload {
      * @param assignment      the assignment {@link Assignment}
      * @param event           the event {@link Event}
      */
-    @JsonCreator
-    public EventEnvelopePayload(@JsonProperty("applicationName") Application.Name applicationName,
-                                @JsonProperty("experimentLabel") Experiment.Label experimentLabel,
-                                @JsonProperty("assignment") Assignment assignment,
-                                @JsonProperty("event") Event event) {
+    public EventEnvelopePayload(Application.Name applicationName,
+                                Experiment.Label experimentLabel,
+                                Assignment assignment,
+                                Event event) {
         this.applicationName = applicationName;
         this.experimentLabel = experimentLabel;
         this.assignment = assignment;
         this.event = event;
     }
 
-    public Name getApplicationName() {
-        return applicationName;
-    }
-
-    public Label getExperimentLabel() {
-        return experimentLabel;
-    }
-
-    public Assignment getAssignment() {
-        return assignment;
-    }
-
-    public Event getEvent() {
-        return event;
-    }
-
-    /**
-     * @return the time UUID
-     */
-    public UUID getTimeUUID() {
-        return timeUUID;
-    }
-
-    /**
-     * @return the message type
-     */
-    public MessageType getMessageType() {
-        return messageType;
-    }
-
-    /**
-     * @return the version
-     */
-    public String getVersion() {
-        return version;
+    private EventEnvelopePayload() {
     }
 
     @Override
