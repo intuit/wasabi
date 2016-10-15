@@ -54,14 +54,6 @@ public class Event implements Cloneable {
     @ApiModelProperty(value = "payload for the event; defaults to an empty String.", dataType = "String")
     private Payload payload = Payload.valueOf("");
 
-    public Event() {
-        this(Event.Name.valueOf(IMPRESSION));
-    }
-
-    public Event(Event.Name name) {
-        setName(name);
-    }
-
     public Date getTimestamp() {
         return timestamp;
     }
