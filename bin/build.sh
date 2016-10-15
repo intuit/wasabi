@@ -37,7 +37,7 @@ EOF
 }
 
 fromPom() {
-  mvn -f $1/pom.xml -P$2 help:evaluate -Dexpression=$3 -B \
+  mvn ${WASABI_MAVEN} -f $1/pom.xml -P$2 help:evaluate -Dexpression=$3 -B \
     -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=error | \
     sed -n -e '/^\[.*\]/ !{ p; }'
 }
@@ -78,10 +78,10 @@ module=main
 if [[ "${build}" = true || "${test}" = true || "${build_jar}" = true ]]; then
   [ "${build}" = true ] && package=package
   [ ! -e ./modules/main/target/wasabi-main-*-SNAPSHOT-${profile}-all.jar ] && package=package
-  [ "${test}" = true ] && tests=test
+  [ "${test}" = true ] && tests="org.jacoco:jacoco-maven-plugin:prepare-agent findbugs:check test"
 
-  mvn -P${profile} ${mvn_settings} clean ${tests:--Dmaven.test.skip=true} ${package} javadoc:aggregate || \
-    usage "invalid: mvn ${tests} -P${profile} ${mvn_settings} clean ${package}" 1
+  mvn ${WASABI_MAVEN} -P${profile} clean ${tests:--Dmaven.test.skip=true} ${package} javadoc:aggregate || \
+    usage "invalid: mvn ${WASABI_MAVEN} -P${profile} clean ${tests:--Dmaven.test.skip=true} ${package} javadoc:aggregate" 1
 fi
 
 artifact=$(fromPom ./modules/${module} ${profile} project.artifactId)
@@ -118,7 +118,7 @@ cp ${home}/${id}-all.jar ${home}/${id}/lib
 chmod 755 ${home}/${id}/bin/run
 chmod 755 ${home}/${id}/entrypoint.sh
 sed -i '' -e "s/chpst -u [^:]*:[^ ]* //" ${home}/${id}/bin/run 2>/dev/null
-[ ! -e ./modules/ui/dist/scripts/wasabi.js ] && build_js=true
+[ ! -e ./modules/ui/target/dist/scripts/wasabi.js ] && build_js=true
 
 if [[ "${build}" = true || "${build_js}" = true ]]; then
   if [ "${WASABI_OS}" == "${WASABI_OSX}" ]; then

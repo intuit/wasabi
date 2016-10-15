@@ -17,6 +17,7 @@ package com.intuit.wasabi.tests.service;
 
 import com.intuit.wasabi.tests.library.TestBase;
 import com.intuit.wasabi.tests.library.util.ModelAssert;
+import com.intuit.wasabi.tests.library.util.RetryTest;
 import com.intuit.wasabi.tests.library.util.TestUtils;
 import com.intuit.wasabi.tests.model.Experiment;
 import com.intuit.wasabi.tests.model.analytics.AnalyticsParameters;

@@ -21,7 +21,7 @@ usage () {
 }
 
 fromPom() {
-  mvn -f modules/$1/pom.xml help:evaluate -Dexpression=$2 | sed -n -e '/^\[.*\]/ !{ p; }'
+  mvn ${WASABI_MAVEN} -f modules/$1/pom.xml help:evaluate -Dexpression=$2 | sed -n -e '/^\[.*\]/ !{ p; }'
 }
 
 exitOnError() {

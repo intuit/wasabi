@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -60,14 +60,14 @@ public class DatabaseAnalytics implements AnalyticsRepository {
         initialize(flyway, mutagenRootResourcePath);
     }
 
-    void initialize(Flyway flyway, String mutagenRootResourcePath) {
+    void initialize(final Flyway flyway, final String mutagenRootResourcePath) {
         flyway.setLocations(mutagenRootResourcePath);
         flyway.setDataSource(transactionFactory.getDataSource());
         flyway.migrate();
     }
 
-    /*
-     * @see com.intuit.wasabi.repository.AnalyticsRepository#getRollupRows(com.intuit.wasabi.experimentobjects.Experiment.ID, java.lang.String, com.intuit.wasabi.analyticsobjects.Parameters)
+    /**
+     * {@inheritDoc}
      */
     @Override
     public List<Map> getRollupRows(Experiment.ID experimentId, String rollupDate, Parameters parameters)
@@ -90,8 +90,8 @@ public class DatabaseAnalytics implements AnalyticsRepository {
         }
     }
 
-    /*
-     * @see com.intuit.wasabi.repository.AnalyticsRepository#getActionsRows(com.intuit.wasabi.experimentobjects.Experiment.ID, com.intuit.wasabi.analyticsobjects.Parameters)
+    /**
+     * {@inheritDoc}
      */
     @Override
     public List<Map> getActionsRows(Experiment.ID experimentID, Parameters parameters)
@@ -137,10 +137,7 @@ public class DatabaseAnalytics implements AnalyticsRepository {
     }
 
     /**
-     * @param experimentID experimentID
-     * @param parameters   parameters associated with this experiment
-     * @return actions joint actions
-     * @throws RepositoryException system exception
+     * {@inheritDoc}
      */
     @Override
     public List<Map> getJointActions(Experiment.ID experimentID, Parameters parameters)
@@ -204,8 +201,8 @@ public class DatabaseAnalytics implements AnalyticsRepository {
         }
     }
 
-    /*
-     * @see com.intuit.wasabi.repository.AnalyticsRepository#getImpressionRows(com.intuit.wasabi.experimentobjects.Experiment.ID, com.intuit.wasabi.analyticsobjects.Parameters)
+    /**
+     * {@inheritDoc}
      */
     @Override
     public List<Map> getImpressionRows(Experiment.ID experimentID, Parameters parameters)
@@ -247,8 +244,8 @@ public class DatabaseAnalytics implements AnalyticsRepository {
         }
     }
 
-    /*
-     * @see com.intuit.wasabi.repository.AnalyticsRepository#getEmptyBuckets(com.intuit.wasabi.experimentobjects.Experiment.ID)
+    /**
+     * {@inheritDoc}
      */
     @Override
     public Map<Bucket.Label, BucketCounts> getEmptyBuckets(Experiment.ID experimentID)
@@ -281,8 +278,8 @@ public class DatabaseAnalytics implements AnalyticsRepository {
         }
     }
 
-    /*
-     * @see com.intuit.wasabi.repository.AnalyticsRepository#getCountsFromRollups(com.intuit.wasabi.experimentobjects.Experiment.ID, com.intuit.wasabi.analyticsobjects.Parameters)
+    /**
+     * {@inheritDoc}
      */
     @Override
     public List<Map> getCountsFromRollups(Experiment.ID experimentID, Parameters parameters)
@@ -303,15 +300,9 @@ public class DatabaseAnalytics implements AnalyticsRepository {
         }
     }
 
+
     /**
-     * Get the date of the most recent rollup.  Check to make sure that the toTime specified is &gt;= last rollup
-     * Return true if the date of the most recent rollup is before the specified toTime
-     *
-     * @param experiment experiment object
-     * @param parameters parameter object
-     * @param to         date
-     * @return boolean
-     * @throws RepositoryException exception
+     * {@inheritDoc}
      */
     @Override
     public boolean checkMostRecentRollup(Experiment experiment, Parameters parameters, Date to)
@@ -341,5 +332,4 @@ public class DatabaseAnalytics implements AnalyticsRepository {
             throw new RepositoryException("error reading counts from MySQL rollups", e);
         }
     }
-
 }
