@@ -273,7 +273,7 @@ public class AssignmentsImpl implements Assignments {
                     segmentationProfile, assignment != null ? assignment.getStatus() : null,
                     assignment != null ? assignment.getBucketLabel() : null, pageName, applicationName,
                     experimentLabel, experimentID,
-                    currentDate, headers));
+                    currentDate));
 		}
 
 		return assignment;
@@ -415,9 +415,9 @@ public class AssignmentsImpl implements Assignments {
 			executors.get(name).execute(new AssignmentEnvelopePayload(userID, context, createAssignment, false,
                     ignoreSamplingPercent, segmentationProfile, assignment != null ? assignment.getStatus() : null,
                     assignment != null ? assignment.getBucketLabel() : null, pageName, applicationName, experimentLabel,
-                    experimentID, currentDate, headers));
-		}        
-        
+                    experimentID, currentDate));
+		}
+
         // Updating rule cache.  This will cause future assignment calls, on this server, to
         // use the new version of the rule, if it has recently been changed.
         ruleCacheExecutor.execute(new ExperimentRuleCacheUpdateEnvelope(experiment.getRule(),
@@ -587,9 +587,9 @@ public class AssignmentsImpl implements Assignments {
 			executors.get(name).execute(new AssignmentEnvelopePayload(userID, context, false, true, false, null,
                     Assignment.Status.NEW_ASSIGNMENT, assignment.getBucketLabel(), null, applicationName,
                     experimentLabel, experimentID,
-                    date, null));
-		}        
-        
+                    date));
+		}
+
         //write assignment after checking assignment in first step
         return assignmentsRepository.assignUser(assignment, experiment, date);
     }
@@ -1048,7 +1048,7 @@ public class AssignmentsImpl implements Assignments {
         queueLengthMap.put(RULE_CACHE, new Integer(this.ruleCacheExecutor.getQueue().size()));
         for (String name : executors.keySet()) {
             queueLengthMap.put(name.toLowerCase(), new Integer(executors.get(name).queueLength()));
-        }        
+        }
         return queueLengthMap;
     }
 

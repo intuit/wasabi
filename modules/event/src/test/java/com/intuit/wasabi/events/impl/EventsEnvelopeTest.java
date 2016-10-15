@@ -39,7 +39,9 @@ import java.util.Date;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -56,7 +58,7 @@ public class EventsEnvelopeTest {
     private Event event;
     @Mock
     private Logger logger;
-    
+
     @Before
     public void setup() {
         assignment = Mockito.mock(Assignment.class);
@@ -64,7 +66,6 @@ public class EventsEnvelopeTest {
         event = Mockito.mock(Event.class);
         event.setName(Event.Name.valueOf("someEventName"));
         event.setContext(Context.valueOf("PROD"));
-        event.setValue("someEventValue");
         event.setPayload(Event.Payload.valueOf("someEventPayload"));
 
         eventsEnvelope = new EventsEnvelope(assignment, event, transaction);
@@ -90,8 +91,8 @@ public class EventsEnvelopeTest {
 
     @Test
     public void testRecordEventThrowsWasabiClientException() throws Exception {
-    	mockStatic(LoggerFactory.class);
-    	
+        mockStatic(LoggerFactory.class);
+
         given(event.getName()).willReturn(Event.Name.valueOf("ASSIGNMENT"));
         given(event.getType()).willReturn(Event.Type.IMPRESSION);
         given(assignment.getUserID()).willReturn(User.ID.valueOf("user-a"));
@@ -103,14 +104,14 @@ public class EventsEnvelopeTest {
         given(getLogger(any(Class.class))).willReturn(logger);
         logger.warn(any(String.class));
         BDDMockito.willThrow(jce).given(transaction).
-        	insert(any(String.class), any(String.class), any(Experiment.ID.class), 
-        			any(Bucket.Label.class), any(String.class), any(Date.class), any(String.class));
+                insert(any(String.class), any(String.class), any(Experiment.ID.class),
+                        any(Bucket.Label.class), any(String.class), any(Date.class), any(String.class));
         eventsEnvelope.run();
 
         verify(event, times(1)).getName();
         verify(assignment, times(1)).getBucketLabel();
-        verify(transaction, times(1)).insert(any(String.class), any(String.class), any(Experiment.ID.class), 
-    			any(Bucket.Label.class), any(String.class), any(Date.class), any(String.class));
+        verify(transaction, times(1)).insert(any(String.class), any(String.class), any(Experiment.ID.class),
+                any(Bucket.Label.class), any(String.class), any(Date.class), any(String.class));
         // Find a way to validate log message
         verify(logger, times(1)).warn(any(String.class));
     }

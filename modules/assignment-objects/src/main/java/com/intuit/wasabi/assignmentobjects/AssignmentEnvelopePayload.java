@@ -15,58 +15,55 @@
  *******************************************************************************/
 package com.intuit.wasabi.assignmentobjects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intuit.wasabi.assignmentobjects.Assignment.Status;
 import com.intuit.wasabi.assignmentobjects.User.ID;
-import com.intuit.wasabi.experimentobjects.*;
+import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Application.Name;
+import com.intuit.wasabi.experimentobjects.Bucket;
+import com.intuit.wasabi.experimentobjects.Context;
+import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.Experiment.Label;
+import com.intuit.wasabi.experimentobjects.Page;
 import com.intuit.wasabi.export.EnvelopePayload;
 import com.intuit.wasabi.export.MessageType;
 import org.apache.cassandra.utils.UUIDGen;
-import org.json.simple.JSONObject;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.core.HttpHeaders;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Export envelope payload for assignments
  */
-public class AssignmentEnvelopePayload implements EnvelopePayload {
-
-    private User.ID userID;
-    private Context context;
-    private boolean createAssignment;
-    private boolean putAssignment;
-    private boolean ignoreSamplingPercent;
-    private SegmentationProfile segmentationProfile;
-    private Assignment.Status assignmentStatus;
-    private Bucket.Label bucketLabel;
-    private Page.Name pageName;
-    private Application.Name applicationName;
-    private Experiment.Label experimentLabel;
-    private Experiment.ID experimentID;
-    private Date date;
-    private HttpHeaders httpHeaders;
-
-
-    public AssignmentEnvelopePayload() {
-        super();
-    }
-
-    public AssignmentEnvelopePayload(User.ID userID,
-                                     Context context, SegmentationProfile segmentationProfile,
-                                     Bucket.Label bucketLabel, Page.Name pageName, HttpHeaders httpHeaders,
-                                     Application.Name applicationName, Experiment.Label experimentLabel) {
-        super();
-        this.userID = userID;
-        this.context = context;
-        this.segmentationProfile = segmentationProfile;
-        this.bucketLabel = bucketLabel;
-        this.pageName = pageName;
-        this.httpHeaders = httpHeaders;
-        this.applicationName = applicationName;
-        this.experimentLabel = experimentLabel;
-    }
+public final class AssignmentEnvelopePayload implements EnvelopePayload {
+    private static final Logger LOG = LoggerFactory.getLogger(AssignmentEnvelopePayload.class);
+    private final MessageType messageType = MessageType.ASSIGNMENT;
+    private final String version = "3.0";
+    private final User.ID userID;
+    private final Context context;
+    private final boolean createAssignment;
+    private final boolean putAssignment;
+    private final boolean ignoreSamplingPercent;
+    private final SegmentationProfile segmentationProfile;
+    private final Assignment.Status assignmentStatus;
+    private final Bucket.Label bucketLabel;
+    private final Page.Name pageName;
+    private final Application.Name applicationName;
+    private final Experiment.Label experimentLabel;
+    private final Experiment.ID experimentID;
+    private final Date assignmentTimestamp;
+    private final UUID timeUUID = UUIDGen.getTimeUUID();
 
     /**
      * @param userID                the user ID
@@ -74,31 +71,30 @@ public class AssignmentEnvelopePayload implements EnvelopePayload {
      * @param createAssignment      the flag create if not exists assignment
      * @param putAssignment         the flat to put assignment
      * @param ignoreSamplingPercent the flag to ignore sampling percentage
-     * @param segmentationProfile   the segmentation profile {@link SegmentationProfile}
-     * @param assignmentStatus      the assignment's status {@link Status}
+     * @param segmentationProfile   the segmentation profile
+     * @param assignmentStatus      the assignment's status
      * @param bucketLabel           the bucket's label
      * @param pageName              the page name
      * @param applicationName       the application name
      * @param experimentLabel       the experiment label
      * @param experimentID          the experiment ID
-     * @param date                  the date
+     * @param assignmentTimestamp   the assignment's date
      */
+    @JsonCreator
     public AssignmentEnvelopePayload(
-            ID userID,
-            Context context,
-            boolean createAssignment,
-            boolean putAssignment,
-            boolean ignoreSamplingPercent,
-            SegmentationProfile segmentationProfile,
-            Status assignmentStatus,
-            Bucket.Label bucketLabel,
-            Page.Name pageName,
-            Name applicationName,
-            Label experimentLabel,
-            Experiment.ID experimentID,
-            Date date,
-            HttpHeaders httpHeaders) {
-        super();
+            @JsonProperty("userID") ID userID,
+            @JsonProperty("context") Context context,
+            @JsonProperty("createAssignment") boolean createAssignment,
+            @JsonProperty("putAssignment") boolean putAssignment,
+            @JsonProperty("ignoreSamplingPercent") boolean ignoreSamplingPercent,
+            @JsonProperty("segmentationProfile") SegmentationProfile segmentationProfile,
+            @JsonProperty("assignmentStatus") Status assignmentStatus,
+            @JsonProperty("bucketLabel") Bucket.Label bucketLabel,
+            @JsonProperty("pageName") Page.Name pageName,
+            @JsonProperty("applicationName") Name applicationName,
+            @JsonProperty("experimentLabel") Label experimentLabel,
+            @JsonProperty("experimentID") Experiment.ID experimentID,
+            @JsonProperty("assignmentTimestamp") Date assignmentTimestamp) {
         this.userID = userID;
         this.context = context;
         this.createAssignment = createAssignment;
@@ -111,23 +107,14 @@ public class AssignmentEnvelopePayload implements EnvelopePayload {
         this.applicationName = applicationName;
         this.experimentLabel = experimentLabel;
         this.experimentID = experimentID;
-        this.date = date;
-        this.httpHeaders = httpHeaders;
+        this.assignmentTimestamp = assignmentTimestamp;
     }
-
 
     /**
      * @return the userID
      */
     public User.ID getUserID() {
         return userID;
-    }
-
-    /**
-     * @param userID the userID to set
-     */
-    public void setUserID(User.ID userID) {
-        this.userID = userID;
     }
 
     /**
@@ -138,24 +125,10 @@ public class AssignmentEnvelopePayload implements EnvelopePayload {
     }
 
     /**
-     * @param context the context to set
-     */
-    public void setContext(Context context) {
-        this.context = context;
-    }
-
-    /**
      * @return the createAssignment
      */
     public boolean isCreateAssignment() {
         return createAssignment;
-    }
-
-    /**
-     * @param createAssignment the createAssignment to set
-     */
-    public void setCreateAssignment(boolean createAssignment) {
-        this.createAssignment = createAssignment;
     }
 
     /**
@@ -166,24 +139,10 @@ public class AssignmentEnvelopePayload implements EnvelopePayload {
     }
 
     /**
-     * @param putAssignment the putAssignment to set
-     */
-    public void setPutAssignment(boolean putAssignment) {
-        this.putAssignment = putAssignment;
-    }
-
-    /**
      * @return the ignoreSamplingPercent
      */
     public boolean isIgnoreSamplingPercent() {
         return ignoreSamplingPercent;
-    }
-
-    /**
-     * @param ignoreSamplingPercent the ignoreSamplingPercent to set
-     */
-    public void setIgnoreSamplingPercent(boolean ignoreSamplingPercent) {
-        this.ignoreSamplingPercent = ignoreSamplingPercent;
     }
 
     /**
@@ -194,24 +153,10 @@ public class AssignmentEnvelopePayload implements EnvelopePayload {
     }
 
     /**
-     * @param segmentationProfile the segmentationProfile to set
-     */
-    public void setSegmentationProfile(SegmentationProfile segmentationProfile) {
-        this.segmentationProfile = segmentationProfile;
-    }
-
-    /**
      * @return the assignmentStatus
      */
     public Assignment.Status getAssignmentStatus() {
         return assignmentStatus;
-    }
-
-    /**
-     * @param assignmentStatus the assignmentStatus to set
-     */
-    public void setAssignmentStatus(Assignment.Status assignmentStatus) {
-        this.assignmentStatus = assignmentStatus;
     }
 
     /**
@@ -222,24 +167,10 @@ public class AssignmentEnvelopePayload implements EnvelopePayload {
     }
 
     /**
-     * @param bucketLabel the bucketLabel to set
-     */
-    public void setBucketLabel(Bucket.Label bucketLabel) {
-        this.bucketLabel = bucketLabel;
-    }
-
-    /**
      * @return the pageName
      */
     public Page.Name getPageName() {
         return pageName;
-    }
-
-    /**
-     * @param pageName the pageName to set
-     */
-    public void setPageName(Page.Name pageName) {
-        this.pageName = pageName;
     }
 
     /**
@@ -250,24 +181,10 @@ public class AssignmentEnvelopePayload implements EnvelopePayload {
     }
 
     /**
-     * @param applicationName the applicationName to set
-     */
-    public void setApplicationName(Application.Name applicationName) {
-        this.applicationName = applicationName;
-    }
-
-    /**
      * @return the experimentLabel
      */
     public Experiment.Label getExperimentLabel() {
         return experimentLabel;
-    }
-
-    /**
-     * @param experimentLabel the experimentLabel to set
-     */
-    public void setExperimentLabel(Experiment.Label experimentLabel) {
-        this.experimentLabel = experimentLabel;
     }
 
     /**
@@ -278,64 +195,65 @@ public class AssignmentEnvelopePayload implements EnvelopePayload {
     }
 
     /**
-     * @param experimentID the experimentID to set
+     * @return the assignmentTimestamp
      */
-    public void setExperimentID(Experiment.ID experimentID) {
-        this.experimentID = experimentID;
+    public Date getAssignmentTimestamp() {
+        return assignmentTimestamp;
     }
 
     /**
-     * @return the date
+     * @return the time UUID
      */
-    public Date getDate() {
-        return date;
+    public UUID getTimeUUID() {
+        return timeUUID;
     }
 
     /**
-     * @param date the date to set
+     * @return the message type
      */
-    public void setDate(Date date) {
-        this.date = date;
-    }
-
-
-    /**
-     * @return the httpHeaders
-     */
-    public HttpHeaders getHttpHeaders() {
-        return httpHeaders;
+    public MessageType getMessageType() {
+        return messageType;
     }
 
     /**
-     * @param httpHeaders the httpHeaders to set
+     * @return the version
      */
-    public void setHttpHeaders(HttpHeaders httpHeaders) {
-        this.httpHeaders = httpHeaders;
+    public String getVersion() {
+        return version;
     }
-
-    //TODO: the generation of json and xml is representation matter of the api, not the pojo
 
     @Override
     public String toJson() {
-        JSONObject assignmentJson = new JSONObject();
-        assignmentJson.put("userID", userID.toString());
-        assignmentJson.put("applicationName", applicationName != null ? applicationName.toString() : "");
-        assignmentJson.put("experimentLabel", experimentLabel != null ? experimentLabel.toString() : "");
-        assignmentJson.put("context", context != null ? context.toString() : "PROD");
-        assignmentJson.put("createAssignment", createAssignment);
-        assignmentJson.put("putAssignment", putAssignment);
-        assignmentJson.put("ignoreSamplingPercent", ignoreSamplingPercent);
-        assignmentJson.put("segmentationProfile", segmentationProfile != null ?
-                segmentationProfile.getProfile() != null ?
-                        segmentationProfile.getProfile().toString() : "" : "");
-        assignmentJson.put("experimentID", experimentID != null ? experimentID.toString() : "");
-        assignmentJson.put("pageName", pageName != null ? pageName.toString() : "");
-        assignmentJson.put("assignmentStatus", assignmentStatus != null ?
-                assignmentStatus.toString() : "");
-        assignmentJson.put("bucketLabel", bucketLabel != null ? bucketLabel.toString() : "NULL");
-        assignmentJson.put("time_uuid", UUIDGen.getTimeUUID());
-        assignmentJson.put("epochTimestamp", date != null ? date.getTime() : "");
-        assignmentJson.put("messageType", MessageType.ASSIGNMENT.toString());
-        return assignmentJson.toString();
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            LOG.warn("Can not serialize {} in AssignmentEnvelopePayload#toJson.", this);
+            Map<String, Object> error = new HashMap<>(2);
+            error.put("error", e.getMessage());
+            if (LOG.isDebugEnabled()) {
+                error.put("debug", Arrays.toString(e.getStackTrace()));
+            }
+            try {
+                return objectMapper.writeValueAsString(error);
+            } catch (JsonProcessingException e1) {
+                throw new RuntimeException("Can not serialize error handling in AssignmentEnvelopePayload#toJson.", e1);
+            }
+        }
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return other instanceof AssignmentEnvelopePayload && EqualsBuilder.reflectionEquals(this, other);
+    }
+
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
     }
 }
