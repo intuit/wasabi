@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,14 +18,16 @@ package com.intuit.wasabi.analyticsobjects.wrapper;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Experiment;
-import static org.junit.Assert.*;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 
 /**
@@ -33,24 +35,24 @@ import java.util.stream.DoubleStream;
  */
 public class ExperimentDetailTest {
 
-    Experiment.ID expId = Experiment.ID.newInstance();
-    Experiment.Label expLabel = Experiment.Label.valueOf("TestLabelForExperimentDetail");
-    Experiment.State expState = Experiment.State.RUNNING;
-    Application.Name appName = Application.Name.valueOf("TestApplicationLabelForExperimentDetail");
-    Calendar modTime = Calendar.getInstance();
-    Calendar startTime = Calendar.getInstance();
-    Calendar endTime = Calendar.getInstance();
+    private Experiment.ID expId = Experiment.ID.newInstance();
+    private Experiment.Label expLabel = Experiment.Label.valueOf("TestLabelForExperimentDetail");
+    private Experiment.State expState = Experiment.State.RUNNING;
+    private Application.Name appName = Application.Name.valueOf("TestApplicationLabelForExperimentDetail");
+    private static Calendar modTime = Calendar.getInstance();
+    private static Calendar startTime = Calendar.getInstance();
+    private static Calendar endTime = Calendar.getInstance();
 
-    {
+
+    private Experiment exp = Experiment.withID(expId).withApplicationName(appName).withModificationTime(modTime.getTime())
+            .withLabel(expLabel).withStartTime(startTime.getTime()).withState(Experiment.State.TERMINATED).build();
+
+    @BeforeClass
+    public static void setUp() {
         modTime.set(2016, 8, 16);
         startTime.set(2016, 8, 1);
         endTime.set(2017, 10, 12);
-
     }
-
-    Experiment exp = Experiment.withID(expId).withApplicationName(appName).withModificationTime(modTime.getTime())
-            .withLabel(expLabel).withStartTime(startTime.getTime()).withState(Experiment.State.TERMINATED).build();
-
 
     @Test
     public void testConstructor() {

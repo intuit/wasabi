@@ -58,10 +58,8 @@ abstract class ExceptionProvider<T extends Throwable> implements ExceptionMapper
 
     private String serialize(final Status status, final Throwable exception) {
         Throwable exceptionCause = exception;
-        int levels = 0;
         while (Objects.isNull(exceptionCause.getMessage()) && Objects.nonNull(exceptionCause.getCause())) {
             exceptionCause = exceptionCause.getCause();
-            levels++;
         }
         return exceptionJsonifier.serialize(status, exceptionCause.getMessage());
     }

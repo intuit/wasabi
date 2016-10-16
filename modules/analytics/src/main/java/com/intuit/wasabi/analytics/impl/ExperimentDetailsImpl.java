@@ -58,7 +58,6 @@ public class ExperimentDetailsImpl implements ExperimentDetails {
     @Inject
     public ExperimentDetailsImpl(@CassandraRepository ExperimentRepository cassandraRepository,
                                  Buckets buckets, Analytics analytics) {
-        super();
         this.cassandraRepository = cassandraRepository;
         this.buckets = buckets;
         this.analytics = analytics;
