@@ -30,7 +30,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
@@ -52,30 +56,6 @@ public class EventsResourceTest {
     @Before
     public void setUp() throws Exception {
         resource = new EventsResource(events, new HttpHeader("App-???"));
-    }
-
-    @Test
-    public void recordEventsNameNull() throws Exception {
-        List<Event> listOfEvents = new ArrayList<>();
-        listOfEvents.add(new Event());
-        eventList.setEvents(listOfEvents);
-
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("Event name cannot be null or an empty string");
-        resource.recordEvents(applicationName, experimentLabel, userID, eventList);
-    }
-
-    @Test
-    public void recordEventsNameEmpty() throws Exception {
-        List<Event> listOfEvents = new ArrayList<>();
-        Event e = new Event();
-        e.setName(Name.valueOf(""));
-        listOfEvents.add(e);
-        eventList.setEvents(listOfEvents);
-
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("Event name cannot be null or an empty string");
-        resource.recordEvents(applicationName, experimentLabel, userID, eventList);
     }
 
     @Test

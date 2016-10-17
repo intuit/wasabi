@@ -22,7 +22,11 @@ public interface EnvelopePayload {
 
     /**
      * Returns JSON representation of payload
+     *
      * @return String representation of the JSON Payload
+     * @deprecated Will be removed in future versions. Please use an external mapper to
+     * map POJOs.
      */
+    @Deprecated
     String toJson();
 }

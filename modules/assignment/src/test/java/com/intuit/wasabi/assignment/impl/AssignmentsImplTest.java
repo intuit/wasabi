@@ -18,27 +18,33 @@ package com.intuit.wasabi.assignment.impl;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.google.inject.Provider;
-import com.intuit.hyrule.Rule;
 import com.intuit.wasabi.assignment.AssignmentDecorator;
 import com.intuit.wasabi.assignment.AssignmentIngestionExecutor;
-import com.intuit.wasabi.assignment.Assignments;
-import com.intuit.wasabi.assignmentobjects.*;
-import com.intuit.wasabi.cassandra.CassandraDriver;
-import com.intuit.wasabi.eventlog.EventLog;
-import com.intuit.wasabi.experiment.Mutex;
+import com.intuit.wasabi.assignmentobjects.Assignment;
+import com.intuit.wasabi.assignmentobjects.AssignmentEnvelopePayload;
+import com.intuit.wasabi.assignmentobjects.PersonalizationEngineResponse;
+import com.intuit.wasabi.assignmentobjects.RuleCache;
+import com.intuit.wasabi.assignmentobjects.SegmentationProfile;
+import com.intuit.wasabi.assignmentobjects.User;
 import com.intuit.wasabi.experiment.Pages;
 import com.intuit.wasabi.experiment.Priorities;
-import com.intuit.wasabi.experimentobjects.*;
+import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.experimentobjects.Bucket;
+import com.intuit.wasabi.experimentobjects.BucketList;
+import com.intuit.wasabi.experimentobjects.Context;
+import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.experimentobjects.ExperimentBatch;
+import com.intuit.wasabi.experimentobjects.Page;
+import com.intuit.wasabi.experimentobjects.PageExperiment;
+import com.intuit.wasabi.experimentobjects.PrioritizedExperiment;
+import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
 import com.intuit.wasabi.export.DatabaseExport;
 import com.intuit.wasabi.export.Envelope;
 import com.intuit.wasabi.export.WebExport;
-import com.intuit.wasabi.export.rest.Driver;
-import com.intuit.wasabi.repository.AnalyticsRepository;
 import com.intuit.wasabi.repository.AssignmentsRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.MutexRepository;
 import com.intuit.wasabi.repository.impl.cassandra.ExperimentRuleCacheUpdateEnvelope;
-import com.intuit.wasabi.repository.impl.cassandra.ExperimentsKeyspace;
 import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,12 +54,22 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.ws.rs.core.HttpHeaders;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.RETURNS_DEEP_STUBS;
 import static org.mockito.BDDMockito.any;
 import static org.mockito.BDDMockito.doReturn;
@@ -72,45 +88,37 @@ public class AssignmentsImplTest {
     AssignmentsImpl cassandraAssignments = mock(AssignmentsImpl.class);
     private ExperimentRepository cassandraRepository = mock(ExperimentRepository.class);
     private ExperimentRepository experimentRepository = mock(ExperimentRepository.class);
-    private AnalyticsRepository analyticsRepository = mock(AnalyticsRepository.class);
     private MutexRepository mutexRepository = mock(MutexRepository.class);
-    private Mutex mutex = mock(Mutex.class);
     private Pages pages = mock(Pages.class);
     private Priorities priorities = mock(Priorities.class);
-    private CassandraDriver cassandraDriver = mock(CassandraDriver.class);
-    private ExperimentsKeyspace keyspace = mock(ExperimentsKeyspace.class);
     private RuleCache ruleCache = mock(RuleCache.class);
-    private Rule rule = mock(Rule.class);
-    private Assignments assignments = mock(Assignments.class);
-    private Driver restDriver = mock(Driver.class);
-    private EventLog eventLog = mock(EventLog.class);
     private AssignmentDecorator assignmentDecorator = mock(AssignmentDecorator.class);
     private ThreadPoolExecutor threadPoolExecutor = mock(ThreadPoolExecutor.class, RETURNS_DEEP_STUBS);
     private Provider<Envelope<AssignmentEnvelopePayload, DatabaseExport>> assignmentDBEnvelopeProvider =
             mock(Provider.class, RETURNS_DEEP_STUBS);
-    private Provider<Envelope<AssignmentEnvelopePayload, WebExport>> assignmentWebEnvelopeProvider=
+    private Provider<Envelope<AssignmentEnvelopePayload, WebExport>> assignmentWebEnvelopeProvider =
             mock(Provider.class, RETURNS_DEEP_STUBS);
     private AssignmentsRepository assignmentsRepository = mock(AssignmentsRepository.class, RETURNS_DEEP_STUBS);
     private AssignmentsImpl assignmentsImpl;
 
     @Before
     public void setup() throws IOException, ConnectionException {
-        this.assignmentsImpl = new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
+        this.assignmentsImpl = new AssignmentsImpl(new HashMap<>(),
                 experimentRepository, assignmentsRepository, mutexRepository,
                 ruleCache, pages, priorities, assignmentDBEnvelopeProvider, assignmentWebEnvelopeProvider,
-                assignmentDecorator, threadPoolExecutor, eventLog);
+                assignmentDecorator, threadPoolExecutor);
     }
 
     @Test
-    public void testQueueLength(){
+    public void testQueueLength() {
         when(threadPoolExecutor.getQueue().size()).thenReturn(0);
-        Map<String, Integer> queueLengthMap = new HashMap<String, Integer>();
-        queueLengthMap.put(AssignmentsImpl.RULE_CACHE, new Integer(0));
+        Map<String, Integer> queueLengthMap = new HashMap<>();
+        queueLengthMap.put(AssignmentsImpl.RULE_CACHE, 0);
         assertThat(assignmentsImpl.queuesLength(), is(queueLengthMap));
     }
 
     @Test
-    public void testGetSingleAssignmentNullAssignmentExperimentNotFound(){
+    public void testGetSingleAssignmentNullAssignmentExperimentNotFound() {
         Application.Name appName = Application.Name.valueOf("Test");
         Experiment.Label label = Experiment.Label.valueOf("label");
         User.ID user = User.ID.valueOf("testUser");
@@ -132,11 +140,10 @@ public class AssignmentsImplTest {
 
     @Test
     public void testGetSingleAssignmentNullAssignmentExperimentInDraftState() throws IOException, ConnectionException {
-        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
+        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<>(),
                 experimentRepository, assignmentsRepository,
                 mutexRepository, ruleCache, pages, priorities, assignmentDBEnvelopeProvider,
-                assignmentWebEnvelopeProvider, assignmentDecorator, threadPoolExecutor,
-                eventLog));
+                assignmentWebEnvelopeProvider, assignmentDecorator, threadPoolExecutor));
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class);
         when(experiment.getID()).thenReturn(id);
@@ -161,7 +168,7 @@ public class AssignmentsImplTest {
     }
 
     @Test
-    public void testGetSingleAssignmentNullAssignmentExperimentNotStarted(){
+    public void testGetSingleAssignmentNullAssignmentExperimentNotStarted() {
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         when(experiment.getID()).thenReturn(id);
@@ -186,7 +193,7 @@ public class AssignmentsImplTest {
     }
 
     @Test
-    public void testGetSingleAssignmentNullAssignmentExperimentExpired(){
+    public void testGetSingleAssignmentNullAssignmentExperimentExpired() {
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         when(experiment.getID()).thenReturn(id);
@@ -211,7 +218,7 @@ public class AssignmentsImplTest {
     }
 
     @Test
-    public void testGetSingleAssignmentNullAssignmentExperimentPaused(){
+    public void testGetSingleAssignmentNullAssignmentExperimentPaused() {
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         when(experiment.getID()).thenReturn(id);
@@ -242,7 +249,7 @@ public class AssignmentsImplTest {
         AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
                 experimentRepository, assignmentsRepository,
                 mutexRepository, ruleCache, pages, priorities, assignmentDBEnvelopeProvider,
-                assignmentWebEnvelopeProvider, assignmentDecorator, threadPoolExecutor, eventLog));
+                assignmentWebEnvelopeProvider, assignmentDecorator, threadPoolExecutor));
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         when(experiment.getID()).thenReturn(id);
@@ -272,7 +279,7 @@ public class AssignmentsImplTest {
     }
 
     @Test(expected = AssertionError.class)
-    public void testGetSingleAssignmentAssertExistingAssignment(){
+    public void testGetSingleAssignmentAssertExistingAssignment() {
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         when(experiment.getID()).thenReturn(id);
@@ -298,7 +305,7 @@ public class AssignmentsImplTest {
         AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
                 experimentRepository, assignmentsRepository,
                 mutexRepository, ruleCache, pages, priorities, assignmentDBEnvelopeProvider,
-                assignmentWebEnvelopeProvider, assignmentDecorator, threadPoolExecutor, eventLog));
+                assignmentWebEnvelopeProvider, assignmentDecorator, threadPoolExecutor));
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         Assignment assignment = mock(Assignment.class);
@@ -329,7 +336,7 @@ public class AssignmentsImplTest {
         AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
                 experimentRepository, assignmentsRepository,
                 mutexRepository, ruleCache, pages, priorities, assignmentDBEnvelopeProvider,
-                assignmentWebEnvelopeProvider, assignmentDecorator,  threadPoolExecutor, eventLog));
+                assignmentWebEnvelopeProvider, assignmentDecorator, threadPoolExecutor));
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         Assignment assignment = mock(Assignment.class);
@@ -345,7 +352,7 @@ public class AssignmentsImplTest {
         when(assignmentsRepository.getAssignment(eq(id), eq(user), any(Context.class))).thenReturn(assignment);
         when(assignment.getStatus()).thenReturn(Assignment.Status.EXISTING_ASSIGNMENT);
         Assignment result = assignmentsImpl.getSingleAssignment(user, appName, label, context, true, true,
-                    null, null, pageName);
+                null, null, pageName);
         verify(threadPoolExecutor, times(1)).execute(any(ExperimentRuleCacheUpdateEnvelope.class));
         assertThat(result, is(assignment));
     }
@@ -386,10 +393,10 @@ public class AssignmentsImplTest {
         HttpHeaders headers = mock(HttpHeaders.class);
         when(experimentRepository.getExperimentList(eq(appName))).thenReturn(table);
         Assignment assignment = mock(Assignment.class);
-        AssignmentsImpl assignmentsImpl = spy( new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
+        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
                 experimentRepository, assignmentsRepository,
                 mutexRepository, ruleCache, pages, priorities, assignmentDBEnvelopeProvider,
-                assignmentWebEnvelopeProvider, assignmentDecorator,  threadPoolExecutor, eventLog));
+                assignmentWebEnvelopeProvider, assignmentDecorator, threadPoolExecutor));
 
         doReturn(assignment).when(assignmentsImpl).getAssignment(eq(userID), eq(appName), eq(label),
                 eq(context), any(boolean.class), any(boolean.class), eq(segmentationProfile),
@@ -451,7 +458,7 @@ public class AssignmentsImplTest {
 ////                ruleCache, pages, priorities, assignmentDBEnvelopeProvider, assignmentWebEnvelopeProvider, null, // FIXME
 ////                decisionEngineScheme, decisionEngineHost, decisionEnginePath,
 ////                decisionEngineReadTimeOut, decisionEngineConnectionTimeOut, decisionEngineUseProxy,
-////                decisionEngineUseConnectionPooling, decisionEngineMaxConnectionsPerHost, proxyPort, proxyHost, eventLog);
+////                decisionEngineUseConnectionPooling, decisionEngineMaxConnectionsPerHost, proxyPort, proxyHost);
 //
 //        //Pass the segmentation profile to be modified within getAssignment to have context parameter as an additional attribute.
 //        cassandraAssignments.getAssignment(User.ID.valueOf("user-a"), testApp, experiment.getLabel(), context, true, false, segmentationProfile, null);
@@ -472,7 +479,7 @@ public class AssignmentsImplTest {
 ////                ruleCache, pages, priorities, assignmentDBEnvelopeProvider, assignmentWebEnvelopeProvider, null, // FIXME
 ////                decisionEngineScheme, decisionEngineHost, decisionEnginePath,
 ////                decisionEngineReadTimeOut, decisionEngineConnectionTimeOut, decisionEngineUseProxy,
-////                decisionEngineUseConnectionPooling, decisionEngineMaxConnectionsPerHost, proxyPort, proxyHost, eventLog);
+////                decisionEngineUseConnectionPooling, decisionEngineMaxConnectionsPerHost, proxyPort, proxyHost);
 //
 //
 //        Table<Experiment.ID, Experiment.Label, Experiment> allExperiments = HashBasedTable.create();
@@ -534,7 +541,7 @@ public class AssignmentsImplTest {
 ////                ruleCache, pages, priorities, assignmentDBEnvelopeProvider, assignmentWebEnvelopeProvider, null, // FIXME
 ////                decisionEngineScheme, decisionEngineHost, decisionEnginePath,
 ////                decisionEngineReadTimeOut, decisionEngineConnectionTimeOut, decisionEngineUseProxy,
-////                decisionEngineUseConnectionPooling, decisionEngineMaxConnectionsPerHost, proxyPort, proxyHost, eventLog) {
+////                decisionEngineUseConnectionPooling, decisionEngineMaxConnectionsPerHost, proxyPort, proxyHost) {
 ////
 ////            @Override
 ////            protected Experiment getExperimentFromTable(Table<Experiment.ID, Experiment.Label, Experiment> allExperiments,
@@ -704,9 +711,9 @@ public class AssignmentsImplTest {
 
     @Test
     public void checkMutexWithExperimentNullTrue() throws Exception {
-    	AssignmentsImpl impl = new AssignmentsImpl(assignmentsRepository, mutexRepository);
-    	boolean value = impl.checkMutex(null, null, Context.valueOf("dummystring"));
-    	then(value).isEqualTo(true);
+        AssignmentsImpl impl = new AssignmentsImpl(assignmentsRepository, mutexRepository);
+        boolean value = impl.checkMutex(null, null, Context.valueOf("dummystring"));
+        then(value).isEqualTo(true);
     }
 
     /* FIXME
@@ -1291,7 +1298,7 @@ public class AssignmentsImplTest {
 ////                ruleCache, pages, priorities, assignmentDBEnvelopeProvider, assignmentWebEnvelopeProvider, null, //FIXME
 ////                decisionEngineScheme, decisionEngineHost, decisionEnginePath,
 ////                decisionEngineReadTimeOut, decisionEngineConnectionTimeOut, decisionEngineUseProxy,
-////                decisionEngineUseConnectionPooling, decisionEngineMaxConnectionsPerHost, proxyPort, proxyHost, eventLog);
+////                decisionEngineUseConnectionPooling, decisionEngineMaxConnectionsPerHost, proxyPort, proxyHost);
 //
 //
 //        final Calendar c = Calendar.getInstance();

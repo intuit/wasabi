@@ -23,15 +23,17 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.google.common.base.Preconditions;
 import com.intuit.wasabi.exceptions.AnalyticsException;
 import com.intuit.wasabi.experimentobjects.Context;
 import io.swagger.annotations.ApiModelProperty;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * An event represents an users interaction with the experiment. When they are presented
@@ -40,26 +42,26 @@ import java.util.Date;
  */
 public class Event implements Cloneable {
 
-    public static final String IMPRESSION = "IMPRESSION";
-    String emptyString = "";
+    private static final String IMPRESSION = "IMPRESSION";
     @ApiModelProperty(value = "time at which the event occurred; defaults to the current time", hidden = true)
-    private Date timestamp;
+    private Date timestamp = new Date();
     @ApiModelProperty(value = "DO NOT USE", hidden = true)
-    private Type type;
-    @ApiModelProperty(example = "IMPRESSION OR myEventName", value = "Event ID; Use \"IMPRESSION\" for impressions", dataType = "String",  required = true)
-    private Event.Name name;
-    @ApiModelProperty(value = "context for the event, eg \"PROD\", \"QA\"", dataType = "String",  required = false, hidden = true)
+    private Type type = Type.IMPRESSION;
+    @ApiModelProperty(example = "IMPRESSION OR myEventName", value = "Event ID; Use \"IMPRESSION\" for impressions", dataType = "String", required = true)
+    private Event.Name name = Event.Name.valueOf(IMPRESSION);
+    @ApiModelProperty(value = "context for the event, e.g. \"PROD\", \"QA\"; Defaults to \"PROD\".", dataType = "String", required = false, hidden = true)
     private Context context = Context.valueOf("PROD");
-    @ApiModelProperty(value = "payload for the event; defaults to null", dataType = "String")
-    private Payload payload;
-    @ApiModelProperty(value = "not yet implemented", hidden = true)
-    private String value;
+    @ApiModelProperty(value = "payload for the event; defaults to an empty String.", dataType = "String")
+    private Payload payload = Payload.valueOf("");
 
     public Date getTimestamp() {
         return timestamp;
     }
 
     public void setTimestamp(Date value) {
+        if (Objects.isNull(value)) {
+            throw new IllegalArgumentException("Event timestamp must not be null.");
+        }
         timestamp = new Date(value.getTime());
     }
 
@@ -72,11 +74,16 @@ public class Event implements Cloneable {
     }
 
     public void setName(Event.Name value) {
+        if (Objects.isNull(value)) {
+            throw new IllegalArgumentException("Event.Name must not be null.");
+        }
         name = value;
-        if (name.toString().equals(IMPRESSION)) {
-            type = Type.IMPRESSION;
-        } else { //todo: for other event types, will need to check this.value
-            type = Type.BINARY_ACTION;
+        switch (name.toString()) {
+            case IMPRESSION:
+                type = Type.IMPRESSION;
+                break;
+            default:
+                type = Type.BINARY_ACTION;
         }
     }
 
@@ -93,32 +100,20 @@ public class Event implements Cloneable {
     }
 
     public void setPayload(Payload value) {
-        if (value == null || value.toString() == null) {
-            throw new IllegalArgumentException("Invalid value for payload. Payload should not be null.");
-        } else if (value.toString().length() > 4096) {
-            throw new IllegalArgumentException(
-                    String.format("Invalid value for payload \"%s\". Payload should be 4096 characters or less",
-                            value));
+        if (Objects.isNull(value)) {
+            throw new IllegalArgumentException("Invalid value for payload. Payload must not be null.");
         }
         payload = value;
     }
 
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
-    }
-
     @Override
     public int hashCode() {
-    	return HashCodeBuilder.reflectionHashCode(this);
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override
     public boolean equals(Object obj) {
-    	   return EqualsBuilder.reflectionEquals(this, obj);
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 
     @Override
@@ -132,12 +127,7 @@ public class Event implements Cloneable {
 
     @Override
     public String toString() {
-        return "Event={\"timestamp\":\"" + (timestamp != null ? timestamp : emptyString) + "\"" +
-                ",\"type\":\"" + (type != null ? type.toString() : emptyString) + "\"" +
-                ",\"name\":\"" + (name != null ? name.toString() : emptyString) + "\"" +
-                ",\"context\":\"" + (context != null ? context.toString() : emptyString) + "\"" +
-                ",\"payload\":\"" + (payload != null ? payload.toString() : emptyString) + "\"" +
-                ",\"value\":\"" + (value != null ? value : emptyString) + "\"}";
+        return ToStringBuilder.reflectionToString(this);
     }
 
     public enum Type {
@@ -155,11 +145,13 @@ public class Event implements Cloneable {
         private String name;
 
         private Name(String name) {
-            super();
-            this.name = Preconditions.checkNotNull(name);
+            this.name = name;
         }
 
         public static Name valueOf(String value) {
+            if (StringUtils.isBlank(value)) {
+                throw new IllegalArgumentException("Event name must not be null or empty.");
+            }
             return new Name(value);
         }
 
@@ -170,12 +162,12 @@ public class Event implements Cloneable {
 
         @Override
         public int hashCode() {
-        	return HashCodeBuilder.reflectionHashCode(this);
+            return HashCodeBuilder.reflectionHashCode(this);
         }
 
         @Override
         public boolean equals(Object obj) {
-        	   return EqualsBuilder.reflectionEquals(this, obj);
+            return EqualsBuilder.reflectionEquals(this, obj);
         }
 
         public static class Serializer extends JsonSerializer<Name> {
@@ -199,9 +191,6 @@ public class Event implements Cloneable {
     }
 
 
-    /**
-     * Encapsulates the payload for the event
-     */
     @JsonSerialize(using = Event.Payload.Serializer.class)
     @JsonDeserialize(using = Event.Payload.Deserializer.class)
     public static class Payload {
@@ -209,7 +198,14 @@ public class Event implements Cloneable {
         private String payload;
 
         private Payload(String payload) {
-            super();
+            if (Objects.isNull(payload)) {
+                throw new IllegalArgumentException("Payload must not be null.");
+            }
+            if (payload.length() > 4096) {
+                throw new IllegalArgumentException(
+                        String.format("Invalid value for payload \"%s\". Payload should be 4096 characters or less",
+                                this.payload));
+            }
             this.payload = payload;
         }
 
@@ -224,12 +220,12 @@ public class Event implements Cloneable {
 
         @Override
         public int hashCode() {
-        	return HashCodeBuilder.reflectionHashCode(this);
+            return HashCodeBuilder.reflectionHashCode(this);
         }
 
         @Override
         public boolean equals(Object obj) {
-        	   return EqualsBuilder.reflectionEquals(this, obj);
+            return EqualsBuilder.reflectionEquals(this, obj);
         }
 
         public static class Serializer extends JsonSerializer<Payload> {

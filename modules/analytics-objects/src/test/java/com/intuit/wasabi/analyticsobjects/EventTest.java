@@ -82,10 +82,6 @@ public class EventTest {
         event.setTimestamp(date);
         assertThat(event.getTimestamp(), is(date));
 
-        String value = "test value";
-        event.setValue(value);
-        assertThat(event.getValue(), is(value));
-
         name = Event.Name.valueOf("IMPRESSION");
         event.setName(name);
         assertThat(event.getName(), is(name));
@@ -106,10 +102,4 @@ public class EventTest {
         assertThat(e1, is(e2));
     }
 
-    @Test
-    public void testHashCode(){
-        Event event = new Event();
-        assertThat(event.hashCode(), is(-1985862199));
-        assertThat(event.toString(), containsString("Event"));
-    }
 }

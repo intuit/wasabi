@@ -1,103 +1,83 @@
 package com.intuit.wasabi.eventobjects;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
-
-import java.util.UUID;
-
-import org.apache.cassandra.utils.UUIDGen;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Answers;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intuit.wasabi.analyticsobjects.Event;
 import com.intuit.wasabi.assignmentobjects.Assignment;
+import com.intuit.wasabi.assignmentobjects.User;
 import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.experimentobjects.Bucket;
+import com.intuit.wasabi.experimentobjects.Context;
 import com.intuit.wasabi.experimentobjects.Experiment;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@RunWith(MockitoJUnitRunner.class)
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+
+@RunWith(Parameterized.class)
 public class EventEnvelopePayloadTest {
+    private static final Logger LOG = LoggerFactory.getLogger(EventEnvelopePayloadTest.class);
 
-	@Mock(answer=Answers.RETURNS_DEEP_STUBS)
-	Assignment assignment;
-	
-	@Mock(answer=Answers.RETURNS_DEEP_STUBS)
-	Event event;
-	
-	Application.Name name = Application.Name.valueOf("a1");
-	
-	Experiment.Label label = Experiment.Label.valueOf("l1");
-	
-	@Test
-	public void testCreatingInstance() {
-		final UUID uuid = UUIDGen.getTimeUUID();
-		EventEnvelopePayload payload = new EventEnvelopePayload(
-				name, label, 
-				assignment, event) {
+    private final EventEnvelopePayload testPayload;
 
-					@Override
-					protected UUID makeUUID() {
-						return uuid;
-					}
-			
-		};
-		
-		assertEquals(name, payload.getApplicationName());
-		assertEquals(label, payload.getExperimentLabel());
-		assertSame(event, payload.getEvent());
-		assertSame(assignment, payload.getAssignment());
-	
-	}
+    public EventEnvelopePayloadTest(EventEnvelopePayload testPayload) {
+        this.testPayload = testPayload;
+    }
 
-	@Test
-	public void testUUID() {
-		EventEnvelopePayload payload = new EventEnvelopePayload(
-				null, null, 
-				null, null);
+    @Parameterized.Parameters(name = "{index}: {0}")
+    public static Collection<Object[]> parameters() {
+        List<Object[]> testCases = new ArrayList<>();
 
-		assertTrue(payload.makeUUID() instanceof UUID);
-	}
+        Experiment experiment0 = Experiment.withID(Experiment.ID.newInstance())
+                .withLabel(Experiment.Label.valueOf("Experiment-0"))
+                .withApplicationName(Application.Name.valueOf("Application-0"))
+                .build();
+        Assignment assignment0 = Assignment.newInstance(experiment0.getID()).build();
+        Event event0 = new Event();
+        testCases.add(new Object[]{new EventEnvelopePayload(experiment0.getApplicationName(), experiment0.getLabel(),
+                assignment0, event0)});
 
-	@Test
-	public void testCreatingInstanceWithNull() {
-		final UUID uuid = UUIDGen.getTimeUUID();
-		EventEnvelopePayload payload = new EventEnvelopePayload(
-				null, null, 
-				null, null) {
+        Experiment experiment1 = Experiment.withID(Experiment.ID.newInstance())
+                .withLabel(Experiment.Label.valueOf("Experiment-1"))
+                .withApplicationName(Application.Name.valueOf("Application-1"))
+                .build();
+        Context context1 = Context.valueOf("PREPROD");
+        Assignment assignment1 = Assignment.newInstance(experiment1.getID())
+                .withApplicationName(experiment1.getApplicationName())
+                .withBucketEmpty(true)
+                .withCacheable(true)
+                .withContext(context1)
+                .withBucketLabel(Bucket.Label.valueOf("Bucket-1"))
+                .withCreated(new Date(Instant.now().minusSeconds(120).toEpochMilli()))
+                .withUserID(User.ID.valueOf("User-1"))
+                .withStatus(Assignment.Status.EXISTING_ASSIGNMENT)
+                .build();
+        Event event1 = new Event();
+        event1.setName(Event.Name.valueOf("CLICKED_BUTTON"));
+        event1.setContext(context1);
+        event1.setTimestamp(new Date());
+        event1.setPayload(Event.Payload.valueOf("{\"state\":\"CA\",\"visited\":[\"home\",\"about\"]}"));
+        testCases.add(new Object[]{new EventEnvelopePayload(experiment1.getApplicationName(), experiment1.getLabel(),
+                assignment1, event1)});
 
-					@Override
-					protected UUID makeUUID() {
-						return uuid;
-					}
-			
-		};
-		
-		payload.setApplicationName(name);
-		payload.setAssignment(assignment);
-		payload.setExperimentLabel(label);
-		payload.setEvent(event);
-		assertEquals(name, payload.getApplicationName());
-		assertEquals(label, payload.getExperimentLabel());
-		assertSame(event, payload.getEvent());
-		assertSame(assignment, payload.getAssignment());
-			
-	}
+        return testCases;
+    }
 
-	@Test
-	public void testToJsonMethod(){
-		EventEnvelopePayload payload = new EventEnvelopePayload(
-				name, label,
-				assignment, event) {
+    @Test
+    public void testDeAndSerialization() throws java.io.IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        String json = objectMapper.writeValueAsString(testPayload);
+        LOG.debug("Exported JSON: {}", json);
+        EventEnvelopePayload payloadRestored = objectMapper.readValue(json, EventEnvelopePayload.class);
+        Assert.assertEquals("Payload deserialization and serialization does not match.", payloadRestored, testPayload);
+        LOG.debug("Passed.");
+    }
 
-			@Override
-			protected UUID makeUUID() {
-				return UUID.fromString("d9f92dd0-05be-11e6-86e9-0bf850ef5299");
-			}
-
-		};
-		String jsonpayload = payload.toJson();
-		assertThat(jsonpayload, is("{\"experimentLabel\":\"l1\",\"eventPayload\":null,\"eventType\":\"null\",\"userID\":null,\"epochTimestamp\":0,\"messageType\":\"EVENT\",\"context\":null,\"eventName\":\"null\",\"experimentID\":null,\"time_uuid\":\"d9f92dd0-05be-11e6-86e9-0bf850ef5299\",\"value\":null,\"applicationName\":\"a1\",\"bucketLabel\":null}"));
-	}
 }

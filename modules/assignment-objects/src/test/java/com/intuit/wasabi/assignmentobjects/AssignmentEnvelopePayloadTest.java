@@ -15,109 +15,64 @@
  *******************************************************************************/
 package com.intuit.wasabi.assignmentobjects;
 
-import com.intuit.wasabi.experimentobjects.*;
-import org.junit.Before;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.experimentobjects.Bucket;
+import com.intuit.wasabi.experimentobjects.Context;
+import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.experimentobjects.Page;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Answers;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.junit.runners.Parameterized;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.core.HttpHeaders;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.eq;
-
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(Parameterized.class)
 public class AssignmentEnvelopePayloadTest {
+    private static final Logger LOG = LoggerFactory.getLogger(AssignmentEnvelopePayloadTest.class);
 
-    private User.ID userID = User.ID.valueOf("testUser");
-    private Context context = Context.valueOf("testContext");
-    private boolean createAssignment = true;
-    private boolean putAssignment = true;
-    private boolean ignoreSamplingPercent = true;
-    private SegmentationProfile segmentationProfile = new SegmentationProfile();
-    private Assignment.Status assignmentStatus = Assignment.Status.EXISTING_ASSIGNMENT;
-    private Bucket.Label bucketLabel = Bucket.Label.valueOf("testLabel");
-    private Page.Name pageName = Page.Name.valueOf("testPage");
-    private Application.Name applicationName = Application.Name.valueOf("testAppName");
-    private Experiment.Label experimentLabel = Experiment.Label.valueOf("testExperimentLabel");
-    private Experiment.ID experimentID = Experiment.ID.newInstance();
-    private Date date = new Date();
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private HttpHeaders httpHeaders;
+    private final AssignmentEnvelopePayload testPayload;
 
-    private AssignmentEnvelopePayload payload;
-
-    @Before
-    public void setUp() throws Exception {
-        payload = createAssignmentEnvelopePayload1();
+    public AssignmentEnvelopePayloadTest(AssignmentEnvelopePayload testPayload) {
+        this.testPayload = testPayload;
     }
 
-    private AssignmentEnvelopePayload createAssignmentEnvelopePayload1() {
-        return new AssignmentEnvelopePayload(userID, context, createAssignment,
-                putAssignment, ignoreSamplingPercent, segmentationProfile, assignmentStatus,
-                bucketLabel, pageName, applicationName, experimentLabel, experimentID, date, null);
-    }
+    @Parameterized.Parameters(name = "{index}: {0}")
+    public static Collection<Object[]> parameters() {
+        List<Object[]> testCases = new ArrayList<>();
 
-//    private AssignmentEnvelopePayload createAssignmentEnvelopePayload2() {
-//        return new AssignmentEnvelopePayload(userID, context, segmentationProfile,
-//                bucketLabel, pageName, httpHeaders, applicationName, experimentLabel);
-//    }
+        Map<String, Object> segmentationProfile = new HashMap<>(0);
+        testCases.add(new Object[]{new AssignmentEnvelopePayload(User.ID.valueOf("User 0"), Context.valueOf("PROD"),
+                true, true, true, SegmentationProfile.from(segmentationProfile).build(), Assignment.Status.EXISTING_ASSIGNMENT,
+                Bucket.Label.valueOf("Bucket-0"), Page.Name.valueOf("Page"), Application.Name.valueOf("Application-0"),
+                Experiment.Label.valueOf("Experiment-0"), Experiment.ID.newInstance(), new Date())});
 
-    @Test
-    public void testAssignmentEnvelopePayload() {
-        assertNotNull(payload.getUserID());
-        assertNotNull(payload.getContext());
-        assertTrue(payload.isCreateAssignment());
-        assertTrue(payload.isPutAssignment());
-        assertTrue(payload.isIgnoreSamplingPercent());
-        assertNotNull(payload.getSegmentationProfile());
-        assertNotNull(payload.getAssignmentStatus());
-        assertNotNull(payload.getBucketLabel());
-        assertNotNull(payload.getPageName());
-        assertNotNull(payload.getApplicationName());
-        assertNotNull(payload.getExperimentLabel());
-        assertNotNull(payload.getExperimentID());
-        assertNotNull(payload.getDate());
-        //assertNotNull(payload.getHttpHeaders());
-        assertNotNull(payload.toJson());
-        //assertNotNull(payload.toXml());
+        Map<String, Object> segmentationProfile1 = new HashMap<>(3);
+        segmentationProfile1.put("state", "CA");
+        segmentationProfile1.put("salary", 30000);
+        segmentationProfile1.put("visited", "home");
+        testCases.add(new Object[]{new AssignmentEnvelopePayload(User.ID.valueOf("User 1"), Context.valueOf("PROD"),
+                true, true, true, SegmentationProfile.from(segmentationProfile1).build(), Assignment.Status.EXISTING_ASSIGNMENT,
+                Bucket.Label.valueOf("Bucket-1"), Page.Name.valueOf("Page"), Application.Name.valueOf("Application-1"),
+                Experiment.Label.valueOf("Experiment-1"), Experiment.ID.newInstance(), new Date())});
+        return testCases;
     }
 
     @Test
-    public void testAssignmentEnvelopePayloadSet() {
-        payload.setUserID(userID);
-        payload.setContext(context);
-        payload.setCreateAssignment(createAssignment);
-        payload.setPutAssignment(putAssignment);
-        payload.setIgnoreSamplingPercent(ignoreSamplingPercent);
-        payload.setSegmentationProfile(segmentationProfile);
-        payload.setAssignmentStatus(assignmentStatus);
-        payload.setBucketLabel(bucketLabel);
-        payload.setPageName(pageName);
-        payload.setApplicationName(applicationName);
-        payload.setExperimentLabel(experimentLabel);
-        payload.setExperimentID(experimentID);
-        payload.setDate(date);
-        payload.setHttpHeaders(httpHeaders);
-        assertNotNull(payload.getUserID());
-        assertNotNull(payload.getContext());
-        assertTrue(payload.isCreateAssignment());
-        assertTrue(payload.isPutAssignment());
-        assertTrue(payload.isIgnoreSamplingPercent());
-        assertNotNull(payload.getSegmentationProfile());
-        assertNotNull(payload.getAssignmentStatus());
-        assertNotNull(payload.getBucketLabel());
-        assertNotNull(payload.getPageName());
-        assertNotNull(payload.getApplicationName());
-        assertNotNull(payload.getExperimentLabel());
-        assertNotNull(payload.getExperimentID());
-        assertNotNull(payload.getDate());
-        assertNotNull(payload.getHttpHeaders());
-        assertNotNull(payload.toJson());
-        //assertNotNull(payload.toXml());
+    public void testDeAndSerialization() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        String json = objectMapper.writeValueAsString(testPayload);
+        LOG.debug("Exported JSON: {}", json);
+        AssignmentEnvelopePayload payloadRestored = objectMapper.readValue(json, AssignmentEnvelopePayload.class);
+        Assert.assertEquals("Payload deserialization and serialization does not match.", payloadRestored, testPayload);
     }
+
 }
