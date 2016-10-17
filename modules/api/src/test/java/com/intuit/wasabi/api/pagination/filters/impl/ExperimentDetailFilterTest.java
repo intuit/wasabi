@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,21 +23,21 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.junit.runners.Parameterized;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.TimeZone;
 
 
 /**
  * Test class for {@link ExperimentDetailFilter}
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(Parameterized.class)
 public class ExperimentDetailFilterTest {
 
     private ExperimentDetail experimentDetail;
@@ -68,25 +68,28 @@ public class ExperimentDetailFilterTest {
         experimentDetail.addBuckets(buckets);
     }
 
+    @Parameterized.Parameters(name = "expDetailFilter({index})")
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][]{
+                {"experiment_label=ExperimentLabel", true}, {"bucket_label=Bucket2", true},
+                {"application_name=testApp", false}, {"mod_time=Summer", false}, {"Experiment", true}
+        });
+    }
+
+    private String filter;
+    private boolean allowed;
+
+    public ExperimentDetailFilterTest(String filter, boolean allowed) {
+        this.filter = filter;
+        this.allowed = allowed;
+    }
+
+
     @Test
-    public void testTest() throws Exception{
+    public void testTest() throws Exception {
         ExperimentDetailFilter experimentDetailFilter = new ExperimentDetailFilter();
-
-        HashMap<String, Boolean> testCases = new HashMap<>();
-
-        testCases.put("experiment_label=ExperimentLabel", true);
-        testCases.put("bucket_label=Bucket2", true);
-        testCases.put("application_name=testApp", false);
-        testCases.put("mod_time=Summer", false);
-        testCases.put("Experiment", true);
-
-        for (Map.Entry<String, Boolean> testCase : testCases.entrySet()) {
-            experimentDetailFilter.replaceFilter(testCase.getKey(), "+0000");
-
-            Assert.assertEquals("test case " + testCase.getKey() + " failed.",
-                    testCase.getValue(),
-                    experimentDetailFilter.test(experimentDetail));
-        }
-
+        experimentDetailFilter.replaceFilter(filter, null);
+        Assert.assertEquals("test case " + filter + " failed.", allowed,
+                experimentDetailFilter.test(experimentDetail));
     }
 }
