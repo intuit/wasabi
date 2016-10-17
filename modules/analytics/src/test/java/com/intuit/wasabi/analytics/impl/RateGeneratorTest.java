@@ -62,10 +62,6 @@ public class RateGeneratorTest {
     private Bucket.Label bucket2Label = Bucket.Label.valueOf("two");
     private Bucket.Label bucket3Label = Bucket.Label.valueOf("three");
 
-//    public RateGeneratorTest(AnalysisTools analysisTools) {
-//        this.analysisTools = analysisTools;
-//    }
-
     @Before
     public void before() {
         ActionCounts click1 = new ActionCounts.Builder().withActionName(clickName).withEventCount(7)
