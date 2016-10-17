@@ -34,7 +34,7 @@ public interface Events {
      *
      * @return Map of number of elements in each event queue
      */
-    public Map<String, Integer> queuesLength();
+    Map<String, Integer> queuesLength();
 
 
     /**

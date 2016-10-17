@@ -29,11 +29,18 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
-import java.util.*;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
-import static com.intuit.wasabi.api.APISwaggerResource.*;
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_EVENT;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.CREATED;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -59,9 +66,9 @@ public class EventsResource {
     /**
      * Submit events for the specified user within the context of a specific
      * application and experiment. Each event is an impression or action.
-     *
+     * <p>
      * Example events structure
-     *
+     * <p>
      * "events": [
      * {
      * "timestamp": "...",
@@ -81,8 +88,8 @@ public class EventsResource {
      * @param experimentLabel the experiment label
      * @param userID          the current user id
      * @param eventList       the {@link com.intuit.wasabi.analyticsobjects.EventList} event list
-     * @throws Exception generic exception
      * @return Response object
+     * @throws Exception generic exception
      */
     @POST
     @Path("applications/{applicationName}/experiments/{experimentLabel}/users/{userID}")
@@ -130,52 +137,6 @@ public class EventsResource {
         events.recordEvents(applicationName, experimentLabel, userID, eventList, contextSet);
 
         return httpHeader.headers(CREATED).build();
-    }
-
-    /**
-     * Submit events for users within the context of a specific application
-     * and experiment. Each event is an impression or action.
-     *
-     * @param applicationName the application name
-     * @param experimentLabel the experiment label
-     * @param eventList       the {@link com.intuit.wasabi.analyticsobjects.EventList} event list
-     * @throws UnsupportedOperationException UnsupportedOperationException
-     */
-    @POST
-    @Path("applications/{applicationName}/experiments/{experimentLabel}/users")
-    @Consumes(APPLICATION_JSON)
-    @Produces(APPLICATION_JSON)
-    @Timed
-    public Response recordUsersEvents(
-            @PathParam("applicationName")
-            final Application.Name applicationName,
-
-            @PathParam("experimentLabel")
-            final Experiment.Label experimentLabel,
-
-            final Map<User.ID, List<Event>> eventList) {
-        throw new UnsupportedOperationException("Not implemented");
-    }
-
-    /**
-     * Submit events for users and experiments within the context of a
-     * specific application. Each event is an impression or action.
-     *
-     * @param applicationName the application name
-     * @param userID          the user id
-     * @param eventList       the {@link com.intuit.wasabi.analyticsobjects.EventList} event list
-     * @throws UnsupportedOperationException always throws
-     */
-    @POST
-    @Path("applications/{applicationName}/experiments")
-    @Consumes(APPLICATION_JSON)
-    @Produces(APPLICATION_JSON)
-    @Timed
-    public Response recordExperimentsEvents(
-            @PathParam("applicationName") final Application.Name applicationName,
-            @PathParam("userID") final User.ID userID,
-            final Map<Experiment.Label, Map<User.ID, List<Event>>> eventList) {
-        throw new UnsupportedOperationException("Not implemented");
     }
 
     /**
