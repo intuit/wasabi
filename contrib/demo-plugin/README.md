@@ -47,7 +47,7 @@ a button when you select that tab.  If you click on that button, the UI defined 
 plugin is displayed in a modal dialog.
 
 For that to work, since we are using Angular JS, we need to have loaded the controller code
-so that the controller can be used by the template when the plugin dialog is displayed.  That is
+so that the controller can be used with the template when the plugin dialog is displayed.  That is
 done automatically when the UI starts up by the initialization code mentioned above.  The file
 specified by the ctrl property of the plugin definition (plugins/demo-plugin/ctrl.js in the example above)
 is loaded into the browser (basically by dynamically constructing a script tag and inserting it into the
@@ -72,6 +72,36 @@ experiments, the plugin definition in the plugins.js file will look like this:
   }
 ```
 
-This is used in exactly the same way as the Draft plugin definitions.  These plugins
-result in a button being added to the Plugins tab of the non-Draft dialog.  The
+This is used in exactly the same way as the Draft plugin definitions.  This plugin configuration
+results in a button being added to the Plugins tab of the non-Draft dialog.  The
 main difference is in how the plugin works, not in how the plugin is defined.
+
+When the user clicks on the button for a plugin, a modal dialog is created and
+the template is displayed and the defined code is used as the controller.  
+
+##The Demo Plugin
+
+The example plugins simply allow the user to adjust the priority of the experiment from
+the experiment dialog itself, which is otherwise only achievable by going to the
+Priority tab.  To do this, when the controller is loaded, it will use one of the
+factory objects that already exists in the UI to retrieve the priorities of all
+experiments in the same application as this experiment.  It will then save and
+display the priority of this experiment.
+
+In the case of the Draft dialog, if the user changes the priority and clicks on
+the Save button, the savePriority() function is called, which updates the priority
+of the experiment, and the dialog is dismissed.
+
+In the case of the non-Draft dialog, the paradigm for changing values on the dialog
+is different.  Rather than saving things when the dialog is saved, changes are saved
+each time an area of the dialog is edited.
+While it wouldn't have been necessary for the plugin UI to follow that paradigm,
+we have done so with this example to show how it might be done.  This consists of
+using the dynamic-edit directive to control when the widgets are editable.  See the
+detailsTemplate.html and the detailsCtrl.js for details.
+
+##Your Plugin
+These should give you an example of how you would be able to create and install
+your own plugin.  Basically, you have access to the experiment from whose
+dialog your UI was launched.  That would allow you to extract information or
+use the Wasabi APIs to implement your specific feature.
