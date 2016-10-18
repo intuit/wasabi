@@ -431,6 +431,8 @@ http://www.w3.org/2001/XMLSchema-instance">
                 <version>2.10.3</version>
                 <configuration>
                     <failOnError>false</failOnError>
+                    <!-- FIXME: fix javadoc -->
+                    <additionalparam>-Xdoclint:none</additionalparam>
                 </configuration>
                 <executions>
                     <execution>
