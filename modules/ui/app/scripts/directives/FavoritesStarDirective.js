@@ -8,8 +8,8 @@ angular.module('wasabi.directives').directive('favoritesStar', ['UtilitiesFactor
             restrict: 'A',
             scope: {
                 afterFavoriteFunc: '=afterFavoriteFunc',
-                favoritesStarApplicationName: '=favoritesStarApplicationName',
-                favoritesStarExperimentName: '=favoritesStarExperimentName'
+                favoritesStarExperimentId: '=favoritesStarExperimentId',
+                favoritesStarFavoritesObject: '=favoritesStarFavoritesObject'
             },
             link: function (scope, element, attrs) {
                 var tileWidth = $(element).closest('li').eq(0).width() + 10;
@@ -34,7 +34,7 @@ angular.module('wasabi.directives').directive('favoritesStar', ['UtilitiesFactor
 
                     if ($item.hasClass('favorite')) {
                         // Save that this is now a favorite.
-                        UtilitiesFactory.saveFavorite(scope.favoritesStarApplicationName, scope.favoritesStarExperimentName);
+                        UtilitiesFactory.saveFavorite(scope.favoritesStarExperimentId, scope.favoritesStarFavoritesObject);
                         if (scope.isFavoriteFlag != undefined) {
                             scope.isFavoriteFlag = true;
                         }
@@ -77,7 +77,7 @@ angular.module('wasabi.directives').directive('favoritesStar', ['UtilitiesFactor
                     }
                     else {
                         // Save that this is NO LONGER a favorite.
-                        UtilitiesFactory.removeFavorite(scope.favoritesStarApplicationName, scope.favoritesStarExperimentName);
+                        UtilitiesFactory.removeFavorite(scope.favoritesStarExperimentId, scope.favoritesStarFavoritesObject);
                         $link.attr('title', 'Mark as Favorite');
 
                         if (scope.afterFavoriteFunc) {

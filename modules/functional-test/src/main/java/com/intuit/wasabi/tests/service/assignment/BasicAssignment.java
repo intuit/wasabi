@@ -39,11 +39,11 @@ public class BasicAssignment extends TestBase {
     static final Logger LOGGER = LoggerFactory.getLogger(BasicAssignment.class);
     List<ExperimentMeta> experimentList = new ArrayList<>();
 
-    @Test(groups = {"setup"}, dataProvider = "ExperimentTimes", dataProviderClass = AssignmentDataProvider.class)
-    public void setupExperiments(String startTime, String endTime, String type, String experimentCount) {
-        String data = " {\"applicationName\": \"qbo\", \"label\": \"exp_" + AssignmentDataProvider.time + "_"
-                + experimentCount + "\"," + "\"samplingPercent\": 0.67, \"startTime\": \"" + startTime + "\"," +
-                "\"endTime\": \"" + endTime + "\"}";
+    @Test(groups={"setup"}, dataProvider = "ExperimentTimes", dataProviderClass = AssignmentDataProvider.class)
+    public void setupExperiments(String startTime, String endTime, String type, String experimentCount){
+        String data = " {\"applicationName\": \"qbo\", \"label\": \"exp_"+AssignmentDataProvider.time+"_"
+                +experimentCount+"\"," +"\"samplingPercent\": 0.67, \"startTime\": \""+startTime+"\"," +
+                "\"endTime\": \""+endTime+"\", \"description\": \"Some hypothesis\"}";
 
         response = apiServerConnector.doPost("/experiments", data);
         assertReturnCode(response, HttpStatus.SC_CREATED);

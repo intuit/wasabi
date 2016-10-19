@@ -44,29 +44,29 @@ public class PriorityDataProvider {
     public static Object[][] getExperiments() {
         return new Object[][]{
                 new Object[]{
-                        "{\"applicationName\": \"priority_" + time + "\", \"label\": \"exp_" + time + "_1_priority\"," +
-                                "\"samplingPercent\": 1, \"startTime\": \"" + dateParser.format(dateTime.minusDays(7).toDate()) + "\", " +
-                                "\"endTime\": \"" + dateParser.format(dateTime.plusDays(21).toDate()) + "\"}"
+                        "{\"applicationName\": \"priority_"+time+"\", \"label\": \"exp_"+time+"_1_priority\"," +
+                        "\"samplingPercent\": 1, \"startTime\": \""+dateParser.format(dateTime.minusDays(7).toDate())+"\", " +
+                        "\"endTime\": \""+dateParser.format(dateTime.plusDays(21).toDate())+"\", \"description\": \"Some description\"}"
                 },
                 new Object[]{
-                        "{\"applicationName\": \"priority_" + time + "\", \"label\": \"exp_" + time + "_2_priority\"," +
-                                "\"samplingPercent\": 1, \"startTime\": \"" + dateParser.format(dateTime.minusDays(7).toDate()) + "\", " +
-                                "\"endTime\": \"" + dateParser.format(dateTime.plusDays(21).toDate()) + "\"}"
+                        "{\"applicationName\": \"priority_"+time+"\", \"label\": \"exp_"+time+"_2_priority\"," +
+                        "\"samplingPercent\": 1, \"startTime\": \""+dateParser.format(dateTime.minusDays(7).toDate())+"\", " +
+                        "\"endTime\": \""+dateParser.format(dateTime.plusDays(21).toDate())+"\", \"description\": \"Some description\"}"
                 },
                 new Object[]{
-                        "{\"applicationName\": \"priority_" + time + "\", \"label\": \"exp_" + time + "_3_priority\"," +
-                                "\"samplingPercent\": 1, \"startTime\": \"" + dateParser.format(dateTime.minusDays(7).toDate()) + "\", " +
-                                "\"endTime\": \"" + dateParser.format(dateTime.plusDays(21).toDate()) + "\"}"
+                        "{\"applicationName\": \"priority_"+time+"\", \"label\": \"exp_"+time+"_3_priority\"," +
+                        "\"samplingPercent\": 1, \"startTime\": \""+dateParser.format(dateTime.minusDays(7).toDate())+"\", " +
+                        "\"endTime\": \""+dateParser.format(dateTime.plusDays(21).toDate())+"\", \"description\": \"Some description\"}"
                 },
                 new Object[]{
-                        "{\"applicationName\": \"priority_" + time + "\", \"label\": \"exp_" + time + "_4_priority\"," +
-                                "\"samplingPercent\": 1, \"startTime\": \"" + dateParser.format(dateTime.minusDays(7).toDate()) + "\", " +
-                                "\"endTime\": \"" + dateParser.format(dateTime.plusDays(21).toDate()) + "\"}"
+                        "{\"applicationName\": \"priority_"+time+"\", \"label\": \"exp_"+time+"_4_priority\"," +
+                        "\"samplingPercent\": 1, \"startTime\": \""+dateParser.format(dateTime.minusDays(7).toDate())+"\", " +
+                        "\"endTime\": \""+dateParser.format(dateTime.plusDays(21).toDate())+"\", \"description\": \"Some description\"}"
                 },
                 new Object[]{
-                        "{\"applicationName\": \"priority_" + time + "\", \"label\": \"exp_" + time + "_5_priority\"," +
-                                "\"samplingPercent\": 1, \"startTime\": \"" + dateParser.format(dateTime.minusDays(7).toDate()) + "\", " +
-                                "\"endTime\": \"" + dateParser.format(dateTime.plusDays(21).toDate()) + "\"}"
+                        "{\"applicationName\": \"priority_"+time+"\", \"label\": \"exp_"+time+"_5_priority\"," +
+                        "\"samplingPercent\": 1, \"startTime\": \""+dateParser.format(dateTime.minusDays(7).toDate())+"\", " +
+                        "\"endTime\": \""+dateParser.format(dateTime.plusDays(21).toDate())+"\", \"description\": \"Some description\"}"
                 }
         };
     }
@@ -75,9 +75,9 @@ public class PriorityDataProvider {
     public static Object[][] newExperiments() {
         return new Object[][]{
                 new Object[]{
-                        "{\"applicationName\": \"priority_" + time + "\", \"label\": \"exp_" + time + "_6_priority\"," +
-                                "\"samplingPercent\": 1, \"startTime\": \"" + dateParser.format(dateTime.minusDays(7).toDate()) + "\", " +
-                                "\"endTime\": \"" + dateParser.format(dateTime.plusDays(21).toDate()) + "\"}"
+                        "{\"applicationName\": \"priority_"+time+"\", \"label\": \"exp_"+time+"_6_priority\"," +
+                                "\"samplingPercent\": 1, \"startTime\": \""+dateParser.format(dateTime.minusDays(7).toDate())+"\", " +
+                                "\"endTime\": \""+dateParser.format(dateTime.plusDays(21).toDate())+"\", \"description\": \"Some description\"}"
                 }
         };
     }
@@ -86,9 +86,9 @@ public class PriorityDataProvider {
     public static Object[][] differentApp() {
         return new Object[][]{
                 new Object[]{
-                        "{\"applicationName\": \"different_priority_" + time + "\", \"label\": \"exp_" + time + "_6_priority\"," +
-                                "\"samplingPercent\": 1, \"startTime\": \"" + dateParser.format(dateTime.minusDays(7).toDate()) + "\", " +
-                                "\"endTime\": \"" + dateParser.format(dateTime.plusDays(21).toDate()) + "\"}"
+                        "{\"applicationName\": \"different_priority_"+time+"\", \"label\": \"exp_"+time+"_6_priority\"," +
+                                "\"samplingPercent\": 1, \"startTime\": \""+dateParser.format(dateTime.minusDays(7).toDate())+"\", " +
+                                "\"endTime\": \""+dateParser.format(dateTime.plusDays(21).toDate())+"\", \"description\": \"Some description\"}"
                 }
         };
     }
@@ -98,11 +98,11 @@ public class PriorityDataProvider {
     public static Object[][] terminatedExperiment() {
         return new Object[][]{
                 new Object[]{
-                        "{\"applicationName\": \"priority_" + time + "\", \"label\": \"terminated\"," +
-                                "\"samplingPercent\": 1, \"startTime\": \"" + dateParser.format(dateTime.minusDays(7).toDate()) + "\", " +
-                                "\"endTime\": \"" + dateParser.format(dateTime.plusDays(21).toDate()) + "\"}",
-                        "{\"label\": \"red\", \"allocationPercent\": 0.5, \"isControl\": false, \"description\": \"\"}",
-                        "{\"label\": \"blue\", \"allocationPercent\": 0.5, \"isControl\": false, \"description\": \"\"}"
+                        "{\"applicationName\": \"priority_"+time+"\", \"label\": \"terminated\"," +
+                                "\"samplingPercent\": 1, \"startTime\": \""+dateParser.format(dateTime.minusDays(7).toDate())+"\", " +
+                                "\"endTime\": \""+dateParser.format(dateTime.plusDays(21).toDate())+"\", \"description\": \"some description\"}",
+                        "{\"label\": \"red\", \"allocationPercent\": 0.5, \"isControl\": false, \"description\": \"some description\"}",
+                        "{\"label\": \"blue\", \"allocationPercent\": 0.5, \"isControl\": false, \"description\": \"some description\"}"
                 }
         };
     }
@@ -111,9 +111,9 @@ public class PriorityDataProvider {
     public static Object[][] deletedExperiment() {
         return new Object[][]{
                 new Object[]{
-                        "{\"applicationName\": \"priority_" + time + "\", \"label\": \"deleted\"," +
-                                "\"samplingPercent\": 1, \"startTime\": \"" + dateParser.format(dateTime.minusDays(7).toDate()) + "\", " +
-                                "\"endTime\": \"" + dateParser.format(dateTime.plusDays(21).toDate()) + "\"}"
+                        "{\"applicationName\": \"priority_"+time+"\", \"label\": \"deleted\"," +
+                                "\"samplingPercent\": 1, \"startTime\": \""+dateParser.format(dateTime.minusDays(7).toDate())+"\", " +
+                                "\"endTime\": \""+dateParser.format(dateTime.plusDays(21).toDate())+"\", \"description\": \"Some description\"}"
                 }
         };
     }
@@ -123,39 +123,39 @@ public class PriorityDataProvider {
     public static Object[][] batchExperiments() {
         return new Object[][]{
                 new Object[]{
-                        "{\"applicationName\": \"batch_priority_" + time + "\", \"label\": \"batch_exp_" + time + "_1_priority\"," +
-                                "\"samplingPercent\": 1, \"startTime\": \"" + dateParser.format(dateTime.minusDays(7).toDate()) + "\", " +
-                                "\"endTime\": \"" + dateParser.format(dateTime.plusDays(21).toDate()) + "\"}",
-                        "{\"label\": \"red\", \"allocationPercent\": 0.5, \"isControl\": false, \"description\": \"\"}",
-                        "{\"label\": \"blue\", \"allocationPercent\": 0.5, \"isControl\": false, \"description\": \"\"}"
+                        "{\"applicationName\": \"batch_priority_"+time+"\", \"label\": \"batch_exp_"+time+"_1_priority\"," +
+                                "\"samplingPercent\": 1, \"startTime\": \""+dateParser.format(dateTime.minusDays(7).toDate())+"\", " +
+                                "\"endTime\": \""+dateParser.format(dateTime.plusDays(21).toDate())+"\", \"description\": \"some description\"}",
+                        "{\"label\": \"red\", \"allocationPercent\": 0.5, \"isControl\": false, \"description\": \"some description\"}",
+                        "{\"label\": \"blue\", \"allocationPercent\": 0.5, \"isControl\": false, \"description\": \"some description\"}"
                 },
                 new Object[]{
-                        "{\"applicationName\": \"batch_priority_" + time + "\", \"label\": \"batch_exp_" + time + "_2_priority\"," +
-                                "\"samplingPercent\": 1, \"startTime\": \"" + dateParser.format(dateTime.minusDays(7).toDate()) + "\", " +
-                                "\"endTime\": \"" + dateParser.format(dateTime.plusDays(21).toDate()) + "\"}",
-                        "{\"label\": \"red\", \"allocationPercent\": 0.5, \"isControl\": false, \"description\": \"\"}",
-                        "{\"label\": \"blue\", \"allocationPercent\": 0.5, \"isControl\": false, \"description\": \"\"}"
+                        "{\"applicationName\": \"batch_priority_"+time+"\", \"label\": \"batch_exp_"+time+"_2_priority\"," +
+                                "\"samplingPercent\": 1, \"startTime\": \""+dateParser.format(dateTime.minusDays(7).toDate())+"\", " +
+                                "\"endTime\": \""+dateParser.format(dateTime.plusDays(21).toDate())+"\", \"description\": \"some description\"}",
+                        "{\"label\": \"red\", \"allocationPercent\": 0.5, \"isControl\": false, \"description\": \"some description\"}",
+                        "{\"label\": \"blue\", \"allocationPercent\": 0.5, \"isControl\": false, \"description\": \"some description\"}"
                 },
                 new Object[]{
-                        "{\"applicationName\": \"batch_priority_" + time + "\", \"label\": \"batch_exp_" + time + "_3_priority\"," +
-                                "\"samplingPercent\": 1, \"startTime\": \"" + dateParser.format(dateTime.minusDays(7).toDate()) + "\", " +
-                                "\"endTime\": \"" + dateParser.format(dateTime.plusDays(21).toDate()) + "\"}",
-                        "{\"label\": \"red\", \"allocationPercent\": 0.5, \"isControl\": false, \"description\": \"\"}",
-                        "{\"label\": \"blue\", \"allocationPercent\": 0.5, \"isControl\": false, \"description\": \"\"}"
+                        "{\"applicationName\": \"batch_priority_"+time+"\", \"label\": \"batch_exp_"+time+"_3_priority\"," +
+                                "\"samplingPercent\": 1, \"startTime\": \""+dateParser.format(dateTime.minusDays(7).toDate())+"\", " +
+                                "\"endTime\": \""+dateParser.format(dateTime.plusDays(21).toDate())+"\", \"description\": \"some description\"}",
+                        "{\"label\": \"red\", \"allocationPercent\": 0.5, \"isControl\": false, \"description\": \"some description\"}",
+                        "{\"label\": \"blue\", \"allocationPercent\": 0.5, \"isControl\": false, \"description\": \"some description\"}"
                 },
                 new Object[]{
-                        "{\"applicationName\": \"batch_priority_" + time + "\", \"label\": \"batch_exp_" + time + "_4_priority\"," +
-                                "\"samplingPercent\": 1, \"startTime\": \"" + dateParser.format(dateTime.minusDays(7).toDate()) + "\", " +
-                                "\"endTime\": \"" + dateParser.format(dateTime.plusDays(21).toDate()) + "\"}",
-                        "{\"label\": \"red\", \"allocationPercent\": 0.5, \"isControl\": false, \"description\": \"\"}",
-                        "{\"label\": \"blue\", \"allocationPercent\": 0.5, \"isControl\": false, \"description\": \"\"}"
+                        "{\"applicationName\": \"batch_priority_"+time+"\", \"label\": \"batch_exp_"+time+"_4_priority\"," +
+                                "\"samplingPercent\": 1, \"startTime\": \""+dateParser.format(dateTime.minusDays(7).toDate())+"\", " +
+                                "\"endTime\": \""+dateParser.format(dateTime.plusDays(21).toDate())+"\", \"description\": \"some description\"}",
+                        "{\"label\": \"red\", \"allocationPercent\": 0.5, \"isControl\": false, \"description\": \"some description\"}",
+                        "{\"label\": \"blue\", \"allocationPercent\": 0.5, \"isControl\": false, \"description\": \"some description\"}"
                 },
                 new Object[]{
-                        "{\"applicationName\": \"batch_priority_" + time + "\", \"label\": \"batch_exp_" + time + "_5_priority\"," +
-                                "\"samplingPercent\": 1, \"startTime\": \"" + dateParser.format(dateTime.minusDays(7).toDate()) + "\", " +
-                                "\"endTime\": \"" + dateParser.format(dateTime.plusDays(21).toDate()) + "\"}",
-                        "{\"label\": \"red\", \"allocationPercent\": 0.5, \"isControl\": false, \"description\": \"\"}",
-                        "{\"label\": \"blue\", \"allocationPercent\": 0.5, \"isControl\": false, \"description\": \"\"}"
+                        "{\"applicationName\": \"batch_priority_"+time+"\", \"label\": \"batch_exp_"+time+"_5_priority\"," +
+                                "\"samplingPercent\": 1, \"startTime\": \""+dateParser.format(dateTime.minusDays(7).toDate())+"\", " +
+                                "\"endTime\": \""+dateParser.format(dateTime.plusDays(21).toDate())+"\", \"description\": \"some description\"}",
+                        "{\"label\": \"red\", \"allocationPercent\": 0.5, \"isControl\": false, \"description\": \"some description\"}",
+                        "{\"label\": \"blue\", \"allocationPercent\": 0.5, \"isControl\": false, \"description\": \"some description\"}"
                 }
         };
     }

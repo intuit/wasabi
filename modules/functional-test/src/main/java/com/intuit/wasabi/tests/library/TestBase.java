@@ -17,25 +17,62 @@ package com.intuit.wasabi.tests.library;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.intuit.wasabi.tests.library.util.*;
+import com.intuit.wasabi.tests.library.util.Constants;
+import com.intuit.wasabi.tests.library.util.RetryAnalyzer;
+import com.intuit.wasabi.tests.library.util.RetryListener;
+import com.intuit.wasabi.tests.library.util.RetryTest;
+import com.intuit.wasabi.tests.library.util.TestUtils;
 import com.intuit.wasabi.tests.library.util.serialstrategies.DefaultNameExclusionStrategy;
 import com.intuit.wasabi.tests.library.util.serialstrategies.SerializationStrategy;
-import com.intuit.wasabi.tests.model.*;
-import com.intuit.wasabi.tests.model.analytics.*;
-import com.intuit.wasabi.tests.model.factory.*;
+import com.intuit.wasabi.tests.model.APIUser;
+import com.intuit.wasabi.tests.model.AccessToken;
+import com.intuit.wasabi.tests.model.Application;
+import com.intuit.wasabi.tests.model.Assignment;
+import com.intuit.wasabi.tests.model.Bucket;
+import com.intuit.wasabi.tests.model.Event;
+import com.intuit.wasabi.tests.model.Experiment;
+import com.intuit.wasabi.tests.model.Page;
+import com.intuit.wasabi.tests.model.User;
+import com.intuit.wasabi.tests.model.UserFeedback;
+import com.intuit.wasabi.tests.model.analytics.AnalyticsParameters;
+import com.intuit.wasabi.tests.model.analytics.ExperimentCounts;
+import com.intuit.wasabi.tests.model.analytics.ExperimentCumulativeCounts;
+import com.intuit.wasabi.tests.model.analytics.ExperimentCumulativeStatistics;
+import com.intuit.wasabi.tests.model.analytics.ExperimentStatistics;
+import com.intuit.wasabi.tests.model.factory.APIUserFactory;
+import com.intuit.wasabi.tests.model.factory.AccessTokenFactory;
+import com.intuit.wasabi.tests.model.factory.AssignmentFactory;
+import com.intuit.wasabi.tests.model.factory.BucketFactory;
+import com.intuit.wasabi.tests.model.factory.EventFactory;
+import com.intuit.wasabi.tests.model.factory.ExperimentFactory;
+import com.intuit.wasabi.tests.model.factory.PageFactory;
+import com.intuit.wasabi.tests.model.factory.UserFeedbackFactory;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.path.json.exception.JsonPathException;
 import com.jayway.restassured.response.Response;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.testng.Assert;
-import org.testng.annotations.*;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Optional;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -74,7 +111,7 @@ public class TestBase extends ServiceTestBase {
      * Will be called before any tests of a class are invoked.
      * Creates an APIServerConnector and tries to ping the service.
      *
-     * @param configFile    the configuration file
+     * @param configFile the configuration file
      * @throws IOException if the configfile can not be read.
      */
     @BeforeClass
@@ -141,7 +178,6 @@ public class TestBase extends ServiceTestBase {
 
     /**
      * Creates an APIServerConnector.
-     *
      */
     private void createAPIServerConnector() {
         LOGGER.info("Creating APIServerConnector");
@@ -165,7 +201,7 @@ public class TestBase extends ServiceTestBase {
      * {@code sysPropKey}.
      * If the system property is null or the empty string no action is done.
      *
-     * @param sysPropKey the system property key
+     * @param sysPropKey      the system property key
      * @param internalPropKey the appProperty key
      */
     protected void setPropertyFromSystemProperty(String sysPropKey, String internalPropKey) {
@@ -184,7 +220,7 @@ public class TestBase extends ServiceTestBase {
     /**
      * Pings the API server and asserts that all components in the received message
      * are healthy, thus the system running.
-     *
+     * <p>
      * This will be run as a test to be able to use this as a dependency.
      */
     @Test(sequential = true, retryAnalyzer = RetryAnalyzer.class, groups = {"ping"})
@@ -207,7 +243,7 @@ public class TestBase extends ServiceTestBase {
      * Pings the API server and asserts that all components in the received message
      * are healthy, thus the system running.
      *
-     * @param expectedStatus the expected HTTP status code
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      */
     public void assertPingAPIServer(int expectedStatus, APIServerConnector apiServerConnector) {
@@ -253,7 +289,7 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to ping the Server.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param expectedStatus the expected HTTP status code
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the response
      */
@@ -272,7 +308,7 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a POST request to create an experiment.
      * The response must contain {@link HttpStatus#SC_CREATED}.
-     *
+     * <p>
      * Sets createNewApplication to {@code true}.
      *
      * @param experiment the experiment to POST
@@ -285,10 +321,10 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a POST request to create an experiment.
      * The response must contain {@link HttpStatus#SC_CREATED}.
-     *
+     * <p>
      * Sets createNewApplication to {@code true}.
      *
-     * @param experiment the experiment to POST
+     * @param experiment           the experiment to POST
      * @param createNewApplication allow to create a new application
      * @return the new experiment
      */
@@ -299,10 +335,10 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a POST request to create an experiment.
      * The response must contain HTTP {@code expectedStatus}.
-     *
+     * <p>
      * Sets createNewApplication to {@code true}.
      *
-     * @param experiment the experiment to POST
+     * @param experiment     the experiment to POST
      * @param expectedStatus the expected HTTP status code
      * @return the new experiment
      */
@@ -314,9 +350,9 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to create an experiment.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment to POST
+     * @param experiment           the experiment to POST
      * @param createNewApplication allow to create a new application
-     * @param expectedStatus the expected HTTP status code
+     * @param expectedStatus       the expected HTTP status code
      * @return the new experiment
      */
     public Experiment postExperiment(Experiment experiment, boolean createNewApplication, int expectedStatus) {
@@ -326,11 +362,11 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a POST request to create an experiment.
      * The response must contain HTTP {@code expectedStatus}.
-     *
+     * <p>
      * Sets createNewApplication to {@code true}.
      *
-     * @param experiment the experiment to POST
-     * @param expectedStatus the expected HTTP status code
+     * @param experiment         the experiment to POST
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the new experiment
      */
@@ -342,10 +378,10 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to create an experiment.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment to POST
+     * @param experiment           the experiment to POST
      * @param createNewApplication allow to create a new application
-     * @param expectedStatus the expected HTTP status code
-     * @param apiServerConnector the server connector to use
+     * @param expectedStatus       the expected HTTP status code
+     * @param apiServerConnector   the server connector to use
      * @return the new experiment
      */
     public Experiment postExperiment(Experiment experiment, boolean createNewApplication, int expectedStatus, APIServerConnector apiServerConnector) {
@@ -358,9 +394,9 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a PUT request to update the experiment.
      * The response must contain {@link HttpStatus#SC_OK}.
-     *
+     * <p>
      * Excludes the experiment creation and modification times.
-     *
+     * <p>
      * If this call was used to delete an experiment (by changing the state to DELETED) it will return a new, empty
      * experiment.
      *
@@ -374,13 +410,13 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a PUT request to update the experiment.
      * The response must contain HTTP {@code expectedStatus}.
-     *
+     * <p>
      * Excludes the experiment creation and modification times.
-     *
+     * <p>
      * If this call was used to delete an experiment (by changing the state to DELETED) it will return a new, empty
      * experiment.
      *
-     * @param experiment the experiment to PUT
+     * @param experiment     the experiment to PUT
      * @param expectedStatus the expected HTTP status code
      * @return the new changed experiment
      */
@@ -391,14 +427,14 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a PUT request to update the experiment.
      * The response must contain HTTP {@code expectedStatus}.
-     *
+     * <p>
      * Always excludes the experiment creation and modification times.
-     *
+     * <p>
      * If this call was used to delete an experiment (by changing the state to DELETED) it will return a new, empty
      * experiment.
      *
-     * @param experiment the experiment to PUT
-     * @param expectedStatus the expected HTTP status code
+     * @param experiment         the experiment to PUT
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the new changed experiment
      */
@@ -474,12 +510,12 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to get all experiments.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param expectedStatus the expected HTTP status code
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return a list of experiments
      */
     public List<Experiment> getExperiments(int expectedStatus, APIServerConnector apiServerConnector) {
-        response = apiServerConnector.doGet("experiments");
+        response = apiServerConnector.doGet("experiments?per_page=-1");
         assertReturnCode(response, expectedStatus);
         List<Map<String, Object>> jsonStrings = response.jsonPath().getList("experiments");
         List<Experiment> expList = new ArrayList<>(jsonStrings.size());
@@ -493,7 +529,7 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a GET request to get an experiment with the supplied ID.
      * The response must contain {@link HttpStatus#SC_OK}.
-     *
+     * <p>
      * Asserts that the experiment has an ID.
      *
      * @param experiment an experiment with an ID
@@ -506,10 +542,10 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a GET request to get an experiment with the supplied ID.
      * The response must contain {@link HttpStatus#SC_OK}.
-     *
+     * <p>
      * Asserts that the experiment has an ID.
      *
-     * @param experiment an experiment with an ID
+     * @param experiment     an experiment with an ID
      * @param expectedStatus the expected HTTP status code
      * @return a new experiment instance constructed from the response
      */
@@ -520,11 +556,11 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a GET request to get an experiment with the supplied ID.
      * The response must contain {@link HttpStatus#SC_OK}.
-     *
+     * <p>
      * Asserts that the experiment has an ID.
      *
-     * @param experiment an experiment with an ID
-     * @param expectedStatus the expected HTTP status code
+     * @param experiment         an experiment with an ID
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return a new experiment instance constructed from the response
      */
@@ -538,7 +574,7 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a DELETE request for the experiment with the experiment's ID.
      * The response must contain {@link HttpStatus#SC_NO_CONTENT}.
-     *
+     * <p>
      * Asserts that the experiment has an ID.
      *
      * @param experiment an experiment with an ID
@@ -556,7 +592,7 @@ public class TestBase extends ServiceTestBase {
      * Sends a DELETE request for the experiment with the experiment's ID.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment an experiment with an ID
+     * @param experiment     an experiment with an ID
      * @param expectedStatus the expected HTTP status code
      * @return the response
      */
@@ -568,8 +604,8 @@ public class TestBase extends ServiceTestBase {
      * Sends a DELETE request for the experiment with the experiment's ID.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment an experiment with an ID
-     * @param expectedStatus the expected HTTP status code
+     * @param experiment         an experiment with an ID
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the response
      */
@@ -600,7 +636,7 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to create a bucket.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param bucket the new bucket
+     * @param bucket         the new bucket
      * @param expectedStatus the expected HTTP status code
      * @return the retrieved bucket
      */
@@ -612,8 +648,8 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to create a bucket.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param bucket the new bucket
-     * @param expectedStatus the expected HTTP status code
+     * @param bucket             the new bucket
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the retrieved bucket
      */
@@ -640,7 +676,7 @@ public class TestBase extends ServiceTestBase {
      * Sends multiple POST requests to create multiple buckets.
      * The responses must contain HTTP {@code expectedStatus}.
      *
-     * @param buckets a list of new buckets
+     * @param buckets        a list of new buckets
      * @param expectedStatus the expected HTTP status code
      * @return a list of retrieved buckets
      */
@@ -652,14 +688,16 @@ public class TestBase extends ServiceTestBase {
      * Sends multiple POST requests to create multiple buckets.
      * The responses must contain HTTP {@code expectedStatus}.
      *
-     * @param buckets a list of new buckets
-     * @param expectedStatus the expected HTTP status code
+     * @param buckets            a list of new buckets
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return a list of retrieved buckets
      */
     public List<Bucket> postBuckets(List<Bucket> buckets, int expectedStatus, APIServerConnector apiServerConnector) {
         List<Bucket> newBuckets = new ArrayList<>(buckets.size());
+
         newBuckets.addAll(buckets.stream().map(bucket -> postBucket(bucket, expectedStatus, apiServerConnector)).collect(Collectors.toList()));
+
         return newBuckets;
     }
 
@@ -678,7 +716,7 @@ public class TestBase extends ServiceTestBase {
      * Sends a PUT request to update a bucket.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param bucket the bucket to update
+     * @param bucket         the bucket to update
      * @param expectedStatus the expected HTTP status code
      * @return the retrieved bucket
      */
@@ -690,8 +728,8 @@ public class TestBase extends ServiceTestBase {
      * Sends a PUT request to update a bucket.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param bucket the bucket to update
-     * @param expectedStatus the expected HTTP status code
+     * @param bucket             the bucket to update
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the retrieved bucket
      */
@@ -719,7 +757,7 @@ public class TestBase extends ServiceTestBase {
      * Sends a PUT request to update a list of buckets.
      * The responses must contain HTTP {@code expectedStatus}.
      *
-     * @param buckets the buckets to update
+     * @param buckets        the buckets to update
      * @param expectedStatus the expected HTTP status code
      * @return the retrieved buckets
      */
@@ -731,8 +769,8 @@ public class TestBase extends ServiceTestBase {
      * Sends a PUT request to update a list of buckets.
      * The responses must contain HTTP {@code expectedStatus}.
      *
-     * @param buckets the buckets to update
-     * @param expectedStatus the expected HTTP status code
+     * @param buckets            the buckets to update
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the retrieved buckets
      */
@@ -745,7 +783,7 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a PUT request to update the state of a bucket.
      * The responses must contain {@link HttpStatus#SC_OK}.
-     *
+     * <p>
      * Uses the bucket's state.
      *
      * @param bucket the buckets to update
@@ -760,7 +798,7 @@ public class TestBase extends ServiceTestBase {
      * The responses must contain {@link HttpStatus#SC_OK}.
      *
      * @param bucket the buckets to update
-     * @param state the new state
+     * @param state  the new state
      * @return the bucket returned by the response
      */
     public Bucket putBucketState(Bucket bucket, String state) {
@@ -771,8 +809,8 @@ public class TestBase extends ServiceTestBase {
      * Sends a PUT request to update the state of a bucket.
      * The responses must contain HTTP {@code expectedStatus}.
      *
-     * @param bucket the buckets to update
-     * @param state the new state
+     * @param bucket         the buckets to update
+     * @param state          the new state
      * @param expectedStatus the expected HTTP status code
      * @return the bucket returned by the response
      */
@@ -784,9 +822,9 @@ public class TestBase extends ServiceTestBase {
      * Sends a PUT request to update the state of a bucket.
      * The responses must contain HTTP {@code expectedStatus}.
      *
-     * @param bucket the buckets to update
-     * @param state the new state
-     * @param expectedStatus the expected HTTP status code
+     * @param bucket             the buckets to update
+     * @param state              the new state
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the bucket returned by the response
      */
@@ -815,7 +853,7 @@ public class TestBase extends ServiceTestBase {
      * Sends a PUT request to update the states of a list of buckets.
      * The responses must contain HTTP {@code expectedStatus}.
      *
-     * @param buckets the buckets to update
+     * @param buckets        the buckets to update
      * @param expectedStatus the expected HTTP status code
      * @return a list retrieved buckets
      */
@@ -827,8 +865,8 @@ public class TestBase extends ServiceTestBase {
      * Sends a PUT request to update the states of a list of buckets.
      * The responses must contain HTTP {@code expectedStatus}.
      *
-     * @param buckets the buckets to update
-     * @param expectedStatus the expected HTTP status code
+     * @param buckets            the buckets to update
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return a list retrieved buckets
      */
@@ -844,7 +882,7 @@ public class TestBase extends ServiceTestBase {
      * All states are set to the same supplied value.
      *
      * @param buckets the buckets to update
-     * @param state the states to be set, one for all buckets
+     * @param state   the states to be set, one for all buckets
      * @return a list retrieved buckets
      */
     public List<Bucket> putBucketsState(List<Bucket> buckets, String state) {
@@ -856,9 +894,9 @@ public class TestBase extends ServiceTestBase {
      * The responses must contain HTTP {@code expectedStatus}.
      * All states are set to the same supplied value.
      *
-     * @param buckets the buckets to update
-     * @param state the states to be set, one for all buckets
-     * @param expectedStatus    the expected http status code
+     * @param buckets        the buckets to update
+     * @param state          the states to be set, one for all buckets
+     * @param expectedStatus the expected http status code
      * @return a list retrieved buckets
      */
     public List<Bucket> putBucketsState(List<Bucket> buckets, String state, int expectedStatus) {
@@ -871,7 +909,7 @@ public class TestBase extends ServiceTestBase {
      * Sends a PUT request to update the states of a list of buckets.
      * The responses must contain {@link HttpStatus#SC_OK}.
      *
-     * @param buckets the buckets to update
+     * @param buckets      the buckets to update
      * @param bucketStates the states to be set, one for each bucket
      * @return a list retrieved buckets
      */
@@ -884,8 +922,8 @@ public class TestBase extends ServiceTestBase {
      * The responses must contain HTTP {@code expectedStatus}.
      * All states are set to the same value.
      *
-     * @param buckets the buckets to update
-     * @param bucketStates the states to be set, one for each bucket
+     * @param buckets        the buckets to update
+     * @param bucketStates   the states to be set, one for each bucket
      * @param expectedStatus the expected HTTP status code
      * @return a list retrieved buckets
      */
@@ -898,9 +936,9 @@ public class TestBase extends ServiceTestBase {
      * The responses must contain HTTP {@code expectedStatus}.
      * All states are set to the same value.
      *
-     * @param buckets the buckets to update
-     * @param bucketStates the states to be set, one for each bucket
-     * @param expectedStatus the expected HTTP status code
+     * @param buckets            the buckets to update
+     * @param bucketStates       the states to be set, one for each bucket
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return a list retrieved buckets
      */
@@ -929,7 +967,7 @@ public class TestBase extends ServiceTestBase {
      * Sends a DELETE request for a bucket.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param bucket the bucket to delete
+     * @param bucket         the bucket to delete
      * @param expectedStatus the expected HTTP status code
      * @return the response
      */
@@ -941,8 +979,8 @@ public class TestBase extends ServiceTestBase {
      * Sends a DELETE request for a bucket.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param bucket the bucket to delete
-     * @param expectedStatus the expected HTTP status code
+     * @param bucket             the bucket to delete
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the response
      */
@@ -970,7 +1008,7 @@ public class TestBase extends ServiceTestBase {
      * Sends DELETE requests for a list of buckets.
      * The responses must contain HTTP {@code expectedStatus}.
      *
-     * @param buckets the buckets to delete
+     * @param buckets        the buckets to delete
      * @param expectedStatus the expected HTTP status code
      * @return the response
      */
@@ -982,8 +1020,8 @@ public class TestBase extends ServiceTestBase {
      * Sends DELETE requests for a list of buckets.
      * The responses must contain HTTP {@code expectedStatus}.
      *
-     * @param buckets the buckets to delete
-     * @param expectedStatus the expected HTTP status code
+     * @param buckets            the buckets to delete
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the response
      */
@@ -1009,7 +1047,7 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to retrieve the buckets of the specified experiment.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment providing the id
+     * @param experiment     the experiment providing the id
      * @param expectedStatus the expected HTTP status code
      * @return the response
      */
@@ -1021,8 +1059,8 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to retrieve the buckets of the specified experiment.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment providing the id
-     * @param expectedStatus the expected HTTP status code
+     * @param experiment         the experiment providing the id
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the response
      */
@@ -1054,7 +1092,7 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to retrieve the specified bucket.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param bucket the bucket providing a label and an experiment id
+     * @param bucket         the bucket providing a label and an experiment id
      * @param expectedStatus the expected HTTP status code
      * @return the bucket
      */
@@ -1066,8 +1104,8 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to retrieve the specified bucket.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param bucket the bucket providing a label and an experiment id
-     * @param expectedStatus the expected HTTP status code
+     * @param bucket             the bucket providing a label and an experiment id
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the bucket
      */
@@ -1095,7 +1133,7 @@ public class TestBase extends ServiceTestBase {
      * Sends GET requests to retrieve the specified buckets.
      * The responses must contain HTTP {@code expectedStatus}.
      *
-     * @param buckets the reference bucket list
+     * @param buckets        the reference bucket list
      * @param expectedStatus the expected HTTP status code
      * @return the new bucket list
      */
@@ -1107,8 +1145,8 @@ public class TestBase extends ServiceTestBase {
      * Sends GET requests to retrieve the specified buckets.
      * The responses must contain HTTP {@code expectedStatus}.
      *
-     * @param buckets the reference bucket list
-     * @param expectedStatus the expected HTTP status code
+     * @param buckets            the reference bucket list
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the new bucket list
      */
@@ -1142,7 +1180,7 @@ public class TestBase extends ServiceTestBase {
      * Note that the GET request is limited to the most recent 75 events.
      * For more events, see {@link #postEvents(Experiment, int)} which is more flexible.
      *
-     * @param experiment the reference experiment
+     * @param experiment     the reference experiment
      * @param expectedStatus the expected HTTP status code
      * @return the event list
      */
@@ -1156,8 +1194,8 @@ public class TestBase extends ServiceTestBase {
      * Note that the GET request is limited to the most recent 75 events.
      * For more events, see {@link #postEvents(Experiment, int, APIServerConnector)} which is more flexible.
      *
-     * @param experiment the reference experiment
-     * @param expectedStatus the expected HTTP status code
+     * @param experiment         the reference experiment
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the event list
      */
@@ -1191,7 +1229,7 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to retrieve the events of the specified experiment.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the reference experiment
+     * @param experiment     the reference experiment
      * @param expectedStatus the expected HTTP status code
      * @return the event list
      */
@@ -1204,8 +1242,8 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to retrieve the events of the specified experiment.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the reference experiment
-     * @param expectedStatus the expected HTTP status code
+     * @param experiment         the reference experiment
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the event list
      */
@@ -1216,17 +1254,17 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a POST request to retrieve the events of the specified experiment.
      * The response must contain HTTP {@code expectedStatus}.
-     *
+     * <p>
      * The parameter keys should be some of
      * {@code fromTime, toTime, confidenceLevel, effectSize, actions, singleShot, metric, mode} and
      * {@code context}. For more information see
      * {@link #postEvents(Experiment, String, String, double, double, ArrayList, boolean, String, String, String, int, APIServerConnector)}.
-     *
+     * <p>
      * Invalid keys are removed from the parameters map.
      *
-     * @param experiment the reference experiment
-     * @param parameters the parameters for the request body
-     * @param expectedStatus the expected HTTP status code
+     * @param experiment         the reference experiment
+     * @param parameters         the parameters for the request body
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the event list
      */
@@ -1237,16 +1275,16 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a POST request to retrieve the events of the specified experiment.
      * The response must contain HTTP {@code expectedStatus}.
-     *
+     * <p>
      * The parameter keys should be some of
      * {@code fromTime, toTime, confidenceLevel, effectSize, actions, singleShot, metric, mode} and
      * {@code context}. For more information see
      * {@link #postEvents(Experiment, String, String, double, double, ArrayList, boolean, String, String, String, int, APIServerConnector)}.
      *
-     * @param experiment the reference experiment
-     * @param parameters the parameters for the request body, can be null
-     * @param keepInvalidKeys if true, invalid keys are also transmitted; ignored if parameters == null
-     * @param expectedStatus the expected HTTP status code
+     * @param experiment         the reference experiment
+     * @param parameters         the parameters for the request body, can be null
+     * @param keepInvalidKeys    if true, invalid keys are also transmitted; ignored if parameters == null
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the event list
      */
@@ -1322,45 +1360,45 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a POST request to retrieve the events of the specified experiment.
      * The response must contain HTTP {@code expectedStatus}.
-     *
+     * <p>
      * The parameters {@code fromTime, toTime, confidenceLevel, effectSize, actions, singleShot, metric, mode} and
      * {@code context} are optional. If they are {@code null} (Strings) or {@link Double#NaN} (doubles),
      * they will be ignored (note that {@code singleShot} is {@code boolean}, it will be ignored if false).
-     *
+     * <p>
      * Legal values are:
-     *
+     * <p>
      * <dl>
-     *      <dt>{@code fromTime}</dt>
-     *          <dd>{@code null} or String, see {@link TestUtils#getTimeString(Calendar)}</dd>
-     *      <dt>{@code toTime}</dt>
-     *          <dd>{@code null} or String, see {@link TestUtils#getTimeString(Calendar)}</dd>
-     *      <dt>{@code confidenceLevel}</dt>
-     *          <dd>{@code 0 < confidenceLevel < 1}</dd>
-     *      <dt>{@code effectSize}</dt>
-     *          <dd>{@code -1 &le; effectSize &le; 1}</dd>
-     *      <dt>{@code actions}</dt>
-     *          <dd>{@code null} or an empty list or Action identifiers, will be ignored on {@code null} and empty</dd>
-     *      <dt>{@code singleShot}</dt>
-     *          <dd>{@code true/false}, ignored on {@code false}</dd>
-     *      <dt>{@code metric}</dt>
-     *          <dd>{@code NORMAL_APPROX} or {@code NORMAL_APPROX_SYM}</dd>
-     *      <dt>{@code mode}</dt>
-     *          <dd>{@code PRODUCTION} or {@code TEST}, should not be used according to swagger</dd>
-     *      <dt>{@code context}</dt>
-     *          <dd>any value, ignored on {@code null}</dd>
+     * <dt>{@code fromTime}</dt>
+     * <dd>{@code null} or String, see {@link TestUtils#getTimeString(Calendar)}</dd>
+     * <dt>{@code toTime}</dt>
+     * <dd>{@code null} or String, see {@link TestUtils#getTimeString(Calendar)}</dd>
+     * <dt>{@code confidenceLevel}</dt>
+     * <dd>{@code 0 < confidenceLevel < 1}</dd>
+     * <dt>{@code effectSize}</dt>
+     * <dd>{@code -1 &le; effectSize &le; 1}</dd>
+     * <dt>{@code actions}</dt>
+     * <dd>{@code null} or an empty list or Action identifiers, will be ignored on {@code null} and empty</dd>
+     * <dt>{@code singleShot}</dt>
+     * <dd>{@code true/false}, ignored on {@code false}</dd>
+     * <dt>{@code metric}</dt>
+     * <dd>{@code NORMAL_APPROX} or {@code NORMAL_APPROX_SYM}</dd>
+     * <dt>{@code mode}</dt>
+     * <dd>{@code PRODUCTION} or {@code TEST}, should not be used according to swagger</dd>
+     * <dt>{@code context}</dt>
+     * <dd>any value, ignored on {@code null}</dd>
      * </dl>
      *
-     * @param experiment the reference experiment
-     * @param fromTime the start time
-     * @param toTime the end time
-     * @param confidenceLevel the confidence level
-     * @param effectSize the effect size
-     * @param actions the actions to be fetched
-     * @param singleShot single shot value
-     * @param metric the metric to be used
-     * @param mode the mode
-     * @param context the context
-     * @param expectedStatus the expected HTTP status code
+     * @param experiment         the reference experiment
+     * @param fromTime           the start time
+     * @param toTime             the end time
+     * @param confidenceLevel    the confidence level
+     * @param effectSize         the effect size
+     * @param actions            the actions to be fetched
+     * @param singleShot         single shot value
+     * @param metric             the metric to be used
+     * @param mode               the mode
+     * @param context            the context
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the event list
      */
@@ -1387,7 +1425,7 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to mutually exclude experiments from each other.
      * The response must contain {@link HttpStatus#SC_CREATED}.
      *
-     * @param experiment the reference experiment
+     * @param experiment          the reference experiment
      * @param excludedExperiments the list of mutual exclusive elements
      * @return the response
      */
@@ -1399,9 +1437,9 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to mutually exclude experiments from each other.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the reference experiment
+     * @param experiment          the reference experiment
      * @param excludedExperiments the list of mutual exclusive elements
-     * @param expectedStatus the expected HTTP status code
+     * @param expectedStatus      the expected HTTP status code
      * @return the response
      */
     public Response postExclusions(Experiment experiment, List<Experiment> excludedExperiments, int expectedStatus) {
@@ -1411,16 +1449,16 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a POST request to mutually exclude experiments from the reference experiment.
      * The response must contain HTTP {@code expectedStatus}.
-     *
+     * <p>
      * Lets assume you would pass experiment 1 as the experiment and 2 and 3 as excluded experiments.
      * Then 1 and 2 would be mutually exclusive as well as 1 and 3, however 2 and 3 would not.
-     *
+     * <p>
      * To making all experiments mutual exclusive with each other please use {@link #postExclusions(List)}.
      *
-     * @param experiment the reference experiment
+     * @param experiment          the reference experiment
      * @param excludedExperiments the list of mutual exclusive elements
-     * @param expectedStatus the expected HTTP status code
-     * @param apiServerConnector the server connector to use
+     * @param expectedStatus      the expected HTTP status code
+     * @param apiServerConnector  the server connector to use
      * @return the response
      */
     public Response postExclusions(Experiment experiment, List<Experiment> excludedExperiments, int expectedStatus, APIServerConnector apiServerConnector) {
@@ -1436,7 +1474,7 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a POST request to mutually exclude experiments from each other.
      * The response must contain {@link HttpStatus#SC_CREATED}.
-     *
+     * <p>
      * Note that only the last response is returned, but all are checked.
      *
      * @param excludedExperiments the list of mutual exclusive elements
@@ -1449,11 +1487,11 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a POST request to mutually exclude experiments from each other.
      * The response must contain {@link HttpStatus#SC_CREATED}.
-     *
+     * <p>
      * Note that only the last response is returned, but all are checked.
      *
      * @param excludedExperiments the list of mutual exclusive elements
-     * @param expectedStatus the expected HTTP status code
+     * @param expectedStatus      the expected HTTP status code
      * @return the response
      */
     public Response postExclusions(List<Experiment> excludedExperiments, int expectedStatus) {
@@ -1463,12 +1501,12 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a POST request to mutually exclude experiments from each other.
      * The response must contain {@link HttpStatus#SC_CREATED}.
-     *
+     * <p>
      * Note that only the last response is returned, but all are checked.
      *
      * @param excludedExperiments the list of mutual exclusive elements
-     * @param expectedStatus the expected HTTP status code
-     * @param apiServerConnector the server connector to use
+     * @param expectedStatus      the expected HTTP status code
+     * @param apiServerConnector  the server connector to use
      * @return the response
      */
     public Response postExclusions(List<Experiment> excludedExperiments, int expectedStatus, APIServerConnector apiServerConnector) {
@@ -1495,7 +1533,7 @@ public class TestBase extends ServiceTestBase {
      * The response must contain {@link HttpStatus#SC_OK}.
      *
      * @param experiment the reference experiment
-     * @param showAll sets the showAll parameter, default: true
+     * @param showAll    sets the showAll parameter, default: true
      * @return a list of experiments mutually exclusive to the supplied one
      */
     public List<Experiment> getExclusions(Experiment experiment, boolean showAll) {
@@ -1507,8 +1545,8 @@ public class TestBase extends ServiceTestBase {
      * The response must contain {@link HttpStatus#SC_OK}.
      *
      * @param experiment the reference experiment
-     * @param showAll sets the showAll parameter, default: true
-     * @param exclusive sets the excluse parameter, default: true
+     * @param showAll    sets the showAll parameter, default: true
+     * @param exclusive  sets the excluse parameter, default: true
      * @return a list of experiments mutually exclusive to the supplied one
      */
     public List<Experiment> getExclusions(Experiment experiment, boolean showAll, boolean exclusive) {
@@ -1519,9 +1557,9 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to retrieve experiments mutually excluded from the supplied experiment.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the reference experiment
-     * @param showAll sets the showAll parameter, default: true
-     * @param exclusive sets the excluse parameter, default: true
+     * @param experiment     the reference experiment
+     * @param showAll        sets the showAll parameter, default: true
+     * @param exclusive      sets the excluse parameter, default: true
      * @param expectedStatus the expected HTTP status code
      * @return a list of experiments mutually exclusive to the supplied one
      */
@@ -1533,10 +1571,10 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to retrieve experiments mutually excluded from the supplied experiment.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the reference experiment
-     * @param showAll sets the showAll parameter, default: true
-     * @param exclusive sets the excluse parameter, default: true
-     * @param expectedStatus the expected HTTP status code
+     * @param experiment         the reference experiment
+     * @param showAll            sets the showAll parameter, default: true
+     * @param exclusive          sets the excluse parameter, default: true
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return a list of experiments mutually exclusive to the supplied one
      */
@@ -1562,7 +1600,7 @@ public class TestBase extends ServiceTestBase {
      * Sends a DELETE request to remove the mutual exclusion of two experiments.
      * The response must contain {@link HttpStatus#SC_NO_CONTENT}.
      *
-     * @param experiment one experiment
+     * @param experiment      one experiment
      * @param experimentOther another experiment
      * @return the response
      */
@@ -1574,9 +1612,9 @@ public class TestBase extends ServiceTestBase {
      * Sends a DELETE request to remove the mutual exclusion of two experiments.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment one experiment
+     * @param experiment      one experiment
      * @param experimentOther another experiment
-     * @param expectedStatus the expected HTTP status code
+     * @param expectedStatus  the expected HTTP status code
      * @return the response
      */
     public Response deleteExclusion(Experiment experiment, Experiment experimentOther, int expectedStatus) {
@@ -1587,9 +1625,9 @@ public class TestBase extends ServiceTestBase {
      * Sends a DELETE request to remove the mutual exclusion of two experiments.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment one experiment
-     * @param experimentOther another experiment
-     * @param expectedStatus the expected HTTP status code
+     * @param experiment         one experiment
+     * @param experimentOther    another experiment
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the response
      */
@@ -1610,7 +1648,7 @@ public class TestBase extends ServiceTestBase {
      * The response must contain {@link HttpStatus#SC_CREATED}.
      *
      * @param experiment the experiment
-     * @param priority the experiment priority
+     * @param priority   the experiment priority
      * @return the response
      */
     public Response postExperimentPriority(Experiment experiment, int priority) {
@@ -1621,8 +1659,8 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to set the experiment's priority.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment
-     * @param priority the experiment priority
+     * @param experiment     the experiment
+     * @param priority       the experiment priority
      * @param expectedStatus the expected HTTP status code
      * @return the response
      */
@@ -1634,9 +1672,9 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to set the experiment's priority.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment
-     * @param priority the experiment priority
-     * @param expectedStatus the expected HTTP status code
+     * @param experiment         the experiment
+     * @param priority           the experiment priority
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the response
      */
@@ -1667,7 +1705,7 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to retrieve the experiment's assignments.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment
+     * @param experiment     the experiment
      * @param expectedStatus the expected HTTP status code
      * @return a list of assignments
      */
@@ -1680,7 +1718,7 @@ public class TestBase extends ServiceTestBase {
      * The response must contain {@link HttpStatus#SC_OK}.
      *
      * @param experiment the experiment
-     * @param context the experiment context (can be null)
+     * @param context    the experiment context (can be null)
      * @return a list of assignments
      */
     public List<Assignment> getAssignments(Experiment experiment, String context) {
@@ -1691,8 +1729,8 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to retrieve the experiment's assignments.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment
-     * @param context the experiment context (can be null)
+     * @param experiment     the experiment
+     * @param context        the experiment context (can be null)
      * @param expectedStatus the expected HTTP status code
      * @return a list of assignments
      */
@@ -1704,9 +1742,9 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to retrieve the experiment's assignments.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment
-     * @param context the experiment context (can be null)
-     * @param expectedStatus the expected HTTP status code
+     * @param experiment         the experiment
+     * @param context            the experiment context (can be null)
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return a list of assignments
      */
@@ -1745,7 +1783,7 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to retrieve the pages the experiment is assigned to.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment
+     * @param experiment     the experiment
      * @param expectedStatus the expected HTTP status code
      * @return a list of pages
      */
@@ -1757,8 +1795,8 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to retrieve the pages the experiment is assigned to.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment
-     * @param expectedStatus the expected HTTP status code
+     * @param experiment         the experiment
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return a list of pages
      */
@@ -1780,7 +1818,7 @@ public class TestBase extends ServiceTestBase {
      * The response must contain {@link HttpStatus#SC_NO_CONTENT}.
      *
      * @param experiment the experiment
-     * @param page the page
+     * @param page       the page
      * @return the response
      */
     public Response postPages(Experiment experiment, Page page) {
@@ -1791,8 +1829,8 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to add an experiment to a page.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment
-     * @param page the page
+     * @param experiment     the experiment
+     * @param page           the page
      * @param expectedStatus the expected HTTP status code
      * @return the response
      */
@@ -1804,9 +1842,9 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to add an experiment to a page.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment
-     * @param page the page
-     * @param expectedStatus the expected HTTP status code
+     * @param experiment         the experiment
+     * @param page               the page
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the response
      */
@@ -1819,7 +1857,7 @@ public class TestBase extends ServiceTestBase {
      * The response must contain {@link HttpStatus#SC_NO_CONTENT}.
      *
      * @param experiment the experiment
-     * @param pages the pages
+     * @param pages      the pages
      * @return the response
      */
     public Response postPages(Experiment experiment, List<Page> pages) {
@@ -1830,8 +1868,8 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to add an experiment to several pages.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment
-     * @param pages the pages
+     * @param experiment     the experiment
+     * @param pages          the pages
      * @param expectedStatus the expected HTTP status code
      * @return the response
      */
@@ -1843,9 +1881,9 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to add an experiment to several pages.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment
-     * @param pages the pages
-     * @param expectedStatus the expected HTTP status code
+     * @param experiment         the experiment
+     * @param pages              the pages
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the response
      */
@@ -1861,7 +1899,7 @@ public class TestBase extends ServiceTestBase {
      * The response must contain {@link HttpStatus#SC_NO_CONTENT}.
      *
      * @param experiment the experiment
-     * @param page the page
+     * @param page       the page
      * @return the response
      */
     public Response deletePages(Experiment experiment, Page page) {
@@ -1872,8 +1910,8 @@ public class TestBase extends ServiceTestBase {
      * Sends a DELETE request to delete an experiment from a page.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment
-     * @param page the page
+     * @param experiment     the experiment
+     * @param page           the page
      * @param expectedStatus the expected HTTP status code
      * @return the response
      */
@@ -1885,9 +1923,9 @@ public class TestBase extends ServiceTestBase {
      * Sends a DELETE request to delete an experiment from a page.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment
-     * @param page the page
-     * @param expectedStatus the expected HTTP status code
+     * @param experiment         the experiment
+     * @param page               the page
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the response
      */
@@ -1908,7 +1946,7 @@ public class TestBase extends ServiceTestBase {
      * The response must contain HTTP {@link HttpStatus#SC_OK}.
      *
      * @param application the application
-     * @param page the page
+     * @param page        the page
      * @return a list of pages
      */
     public List<Page> getPages(Application application, Page page) {
@@ -1919,8 +1957,8 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to retrieve pages assigned to the experiments of this application.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param application the application
-     * @param page the page
+     * @param application    the application
+     * @param page           the page
      * @param expectedStatus the expected HTTP status code
      * @return a list of pages
      */
@@ -1932,9 +1970,9 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to retrieve pages assigned to the experiments of this application.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param application the application
-     * @param page the page
-     * @param expectedStatus the expected HTTP status code
+     * @param application        the application
+     * @param page               the page
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return a list of pages
      */
@@ -1961,7 +1999,7 @@ public class TestBase extends ServiceTestBase {
      * The response must contain {@link HttpStatus#SC_OK}.
      *
      * @param experiment the experiment
-     * @param user the user
+     * @param user       the user
      * @return an assignment
      */
     public Assignment getAssignment(Experiment experiment, User user) {
@@ -1973,8 +2011,8 @@ public class TestBase extends ServiceTestBase {
      * The response must contain {@link HttpStatus#SC_OK}.
      *
      * @param experiment the experiment
-     * @param user the user
-     * @param context the context
+     * @param user       the user
+     * @param context    the context
      * @return an assignment
      */
     public Assignment getAssignment(Experiment experiment, User user, String context) {
@@ -1985,9 +2023,9 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to get the assignment of the user for the experiment.
      * The response must contain {@link HttpStatus#SC_OK}.
      *
-     * @param experiment the experiment
-     * @param user the user
-     * @param context the context
+     * @param experiment       the experiment
+     * @param user             the user
+     * @param context          the context
      * @param createAssignment gets the new assignment allowance status
      * @return an assignment
      */
@@ -1999,10 +2037,10 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to get the assignment of the user for the experiment.
      * The response must contain {@link HttpStatus#SC_OK}.
      *
-     * @param experiment the experiment
-     * @param user the user
-     * @param context the context
-     * @param createAssignment gets the new assignment allowance status
+     * @param experiment            the experiment
+     * @param user                  the user
+     * @param context               the context
+     * @param createAssignment      gets the new assignment allowance status
      * @param ignoreSamplingPercent indicates whether sampling percentages shall be ignored
      * @return an assignment
      */
@@ -2014,12 +2052,12 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to get the assignment of the user for the experiment.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment
-     * @param user the user
-     * @param context the context
-     * @param createAssignment gets the new assignment allowance status
+     * @param experiment            the experiment
+     * @param user                  the user
+     * @param context               the context
+     * @param createAssignment      gets the new assignment allowance status
      * @param ignoreSamplingPercent indicates whether sampling percentages shall be ignored
-     * @param expectedStatus the expected HTTP status code
+     * @param expectedStatus        the expected HTTP status code
      * @return an assignment
      */
     public Assignment getAssignment(Experiment experiment, User user, String context, boolean createAssignment, boolean ignoreSamplingPercent, int expectedStatus) {
@@ -2030,13 +2068,13 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to get the assignment of the user for the experiment.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment
-     * @param user the user
-     * @param context the context
-     * @param createAssignment gets the new assignment allowance status
+     * @param experiment            the experiment
+     * @param user                  the user
+     * @param context               the context
+     * @param createAssignment      gets the new assignment allowance status
      * @param ignoreSamplingPercent indicates whether sampling percentages shall be ignored
-     * @param expectedStatus the expected HTTP status code
-     * @param apiServerConnector the server connector to use
+     * @param expectedStatus        the expected HTTP status code
+     * @param apiServerConnector    the server connector to use
      * @return an assignment
      */
     public Assignment getAssignment(Experiment experiment, User user, String context, boolean createAssignment, boolean ignoreSamplingPercent, int expectedStatus, APIServerConnector apiServerConnector) {
@@ -2065,7 +2103,7 @@ public class TestBase extends ServiceTestBase {
      * The response must contain {@link HttpStatus#SC_OK}.
      *
      * @param experiment the experiment
-     * @param user the user
+     * @param user       the user
      * @return an assignment
      */
     public Assignment postAssignment(Experiment experiment, User user) {
@@ -2077,8 +2115,8 @@ public class TestBase extends ServiceTestBase {
      * The response must contain {@link HttpStatus#SC_OK}.
      *
      * @param experiment the experiment
-     * @param user the user
-     * @param context the context
+     * @param user       the user
+     * @param context    the context
      * @return an assignment
      */
     public Assignment postAssignment(Experiment experiment, User user, String context) {
@@ -2089,9 +2127,9 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to get the assignment of the user for the experiment.
      * The response must contain {@link HttpStatus#SC_OK}.
      *
-     * @param experiment the experiment
-     * @param user the user
-     * @param context the context
+     * @param experiment       the experiment
+     * @param user             the user
+     * @param context          the context
      * @param createAssignment gets the new assignment allowance status, default: true
      * @return an assignment
      */
@@ -2103,10 +2141,10 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to get the assignment of the user for the experiment.
      * The response must contain {@link HttpStatus#SC_OK}.
      *
-     * @param experiment the experiment
-     * @param user the user
-     * @param context the context
-     * @param createAssignment gets the new assignment allowance status, default: true
+     * @param experiment            the experiment
+     * @param user                  the user
+     * @param context               the context
+     * @param createAssignment      gets the new assignment allowance status, default: true
      * @param ignoreSamplingPercent indicates whether sampling percentages shall be ignored, default: false
      * @return an assignment
      */
@@ -2118,12 +2156,12 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to get the assignment of the user for the experiment.
      * The response must contain {@link HttpStatus#SC_OK}.
      *
-     * @param experiment the experiment
-     * @param user the user
-     * @param context the context
-     * @param createAssignment gets the new assignment allowance status, default: true
+     * @param experiment            the experiment
+     * @param user                  the user
+     * @param context               the context
+     * @param createAssignment      gets the new assignment allowance status, default: true
      * @param ignoreSamplingPercent indicates whether sampling percentages shall be ignored, default: false
-     * @param profile a key-value map for the user profile
+     * @param profile               a key-value map for the user profile
      * @return an assignment
      */
     public Assignment postAssignment(Experiment experiment, User user, String context, boolean createAssignment, boolean ignoreSamplingPercent, Map<String, Object> profile) {
@@ -2134,13 +2172,13 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to get the assignment of the user for the experiment.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment
-     * @param user the user
-     * @param context the context
-     * @param createAssignment gets the new assignment allowance status, default: true
+     * @param experiment            the experiment
+     * @param user                  the user
+     * @param context               the context
+     * @param createAssignment      gets the new assignment allowance status, default: true
      * @param ignoreSamplingPercent indicates whether sampling percentages shall be ignored, default: false
-     * @param profile a key-value map for the user profile
-     * @param expectedStatus the expected HTTP status code
+     * @param profile               a key-value map for the user profile
+     * @param expectedStatus        the expected HTTP status code
      * @return an assignment
      */
     public Assignment postAssignment(Experiment experiment, User user, String context, boolean createAssignment, boolean ignoreSamplingPercent, Map<String, Object> profile, int expectedStatus) {
@@ -2151,14 +2189,14 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to get the assignment of the user for the experiment.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment
-     * @param user the user
-     * @param context the context
-     * @param createAssignment gets the new assignment allowance status, default: true
+     * @param experiment            the experiment
+     * @param user                  the user
+     * @param context               the context
+     * @param createAssignment      gets the new assignment allowance status, default: true
      * @param ignoreSamplingPercent indicates whether sampling percentages shall be ignored, default: false
-     * @param profile a key-value map for the user profile
-     * @param expectedStatus the expected HTTP status code
-     * @param apiServerConnector the server connector to use
+     * @param profile               a key-value map for the user profile
+     * @param expectedStatus        the expected HTTP status code
+     * @param apiServerConnector    the server connector to use
      * @return an assignment
      */
     public Assignment postAssignment(Experiment experiment, User user, String context, boolean createAssignment, boolean ignoreSamplingPercent, Map<String, Object> profile, int expectedStatus, APIServerConnector apiServerConnector) {
@@ -2187,18 +2225,18 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a PUT request to update an assignment of the user for the experiment.
      * The response must contain {@link HttpStatus#SC_OK}.
-     *
+     * <p>
      * Ignores {@link Assignment#payload}, {@link Assignment#context} (see below for notes), {@link Assignment#cache},
      * {@link Assignment#experimentLabel}, and {@link Assignment#status}. If the current
      * {@link Assignment#serializationStrategy} excludes {@link Assignment#assignment} and/or
      * {@link Assignment#overwrite} the respective field is excluded as well.
-     *
+     * <p>
      * Note on {@link Assignment#context}: To implicitly include the context as a parameter, set the boolean flag of
      * this method to true.
      *
-     * @param experiment the experiment
-     * @param assignment the assignment to be changed
-     * @param user the user
+     * @param experiment           the experiment
+     * @param assignment           the assignment to be changed
+     * @param user                 the user
      * @param useAssignmentContext determines whether the assignments context shall be used as a parameter for the
      *                             request
      * @return a new assignment reflecting the update
@@ -2210,21 +2248,21 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a PUT request to update an assignment of the user for the experiment.
      * The response must contain HTTP {@code expectedStatus}.
-     *
+     * <p>
      * Ignores {@link Assignment#payload}, {@link Assignment#context} (see below for notes), {@link Assignment#cache},
      * {@link Assignment#experimentLabel}, and {@link Assignment#status}. If the current
      * {@link Assignment#serializationStrategy} excludes {@link Assignment#assignment} and/or
      * {@link Assignment#overwrite} the respective field is excluded as well.
-     *
+     * <p>
      * Note on {@link Assignment#context}: To implicitly include the context as a parameter, set the boolean flag of
      * this method to true.
      *
-     * @param experiment the experiment
-     * @param assignment the assignment to be changed
-     * @param user the user
+     * @param experiment           the experiment
+     * @param assignment           the assignment to be changed
+     * @param user                 the user
      * @param useAssignmentContext determines whether the assignments context shall be used as a parameter for the
      *                             request
-     * @param expectedStatus the expected HTTP status code
+     * @param expectedStatus       the expected HTTP status code
      * @return a new assignment reflecting the update
      */
     public Assignment putAssignment(Experiment experiment, Assignment assignment, User user, boolean useAssignmentContext, int expectedStatus) {
@@ -2234,22 +2272,22 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a PUT request to update an assignment of the user for the experiment.
      * The response must contain HTTP {@code expectedStatus}.
-     *
+     * <p>
      * Ignores {@link Assignment#payload}, {@link Assignment#context} (see below for notes), {@link Assignment#cache},
      * {@link Assignment#experimentLabel}, and {@link Assignment#status}. If the current
      * {@link Assignment#serializationStrategy} excludes {@link Assignment#assignment} and/or
      * {@link Assignment#overwrite} the respective field is excluded as well.
-     *
+     * <p>
      * Note on {@link Assignment#context}: To implicitly include the context as a parameter, set the boolean flag of
      * this method to true.
      *
-     * @param experiment the experiment
-     * @param assignment the assignment to be changed
-     * @param user the user
+     * @param experiment           the experiment
+     * @param assignment           the assignment to be changed
+     * @param user                 the user
      * @param useAssignmentContext determines whether the assignments context shall be used as a parameter for the
      *                             request
-     * @param expectedStatus the expected HTTP status code
-     * @param apiServerConnector the server connector to use
+     * @param expectedStatus       the expected HTTP status code
+     * @param apiServerConnector   the server connector to use
      * @return a new assignment reflecting the update
      */
     public Assignment putAssignment(Experiment experiment, Assignment assignment, User user, boolean useAssignmentContext, int expectedStatus, APIServerConnector apiServerConnector) {
@@ -2259,19 +2297,19 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a PUT request to update an assignment of the user for the experiment.
      * The response must contain {@link HttpStatus#SC_OK}.
-     *
+     * <p>
      * Ignores {@link Assignment#payload}, {@link Assignment#context} (see below for notes), {@link Assignment#cache},
      * {@link Assignment#experimentLabel}, and {@link Assignment#status}. If the current
      * {@link Assignment#serializationStrategy} excludes {@link Assignment#assignment} and/or
      * {@link Assignment#overwrite} the respective field is excluded as well.
-     *
+     * <p>
      * Note on {@link Assignment#context}: To implicitly include the context as a parameter, use
      * {@link #putAssignment(Experiment, Assignment, User, boolean, int, APIServerConnector)} or any of its derivatives
      * with the fourth parameter set to {@code true}. Alternatively supply the context yourself.
      *
      * @param experiment the experiment
      * @param assignment the assignment to be changed
-     * @param user the user
+     * @param user       the user
      * @return a new assignment reflecting the update
      */
     public Assignment putAssignment(Experiment experiment, Assignment assignment, User user) {
@@ -2281,20 +2319,20 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a PUT request to update an assignment of the user for the experiment.
      * The response must contain {@link HttpStatus#SC_OK}.
-     *
+     * <p>
      * Ignores {@link Assignment#payload}, {@link Assignment#context} (see below for notes), {@link Assignment#cache},
      * {@link Assignment#experimentLabel}, and {@link Assignment#status}. If the current
      * {@link Assignment#serializationStrategy} excludes {@link Assignment#assignment} and/or
      * {@link Assignment#overwrite} the respective field is excluded as well.
-     *
+     * <p>
      * Note on {@link Assignment#context}: To implicitly include the context as a parameter, use
      * {@link #putAssignment(Experiment, Assignment, User, boolean, int, APIServerConnector)} or any of its derivatives
      * with the fourth parameter set to {@code true}. Alternatively supply the context yourself.
      *
      * @param experiment the experiment
      * @param assignment the assignment to be changed
-     * @param user the user
-     * @param context the context
+     * @param user       the user
+     * @param context    the context
      * @return a new assignment reflecting the update
      */
     public Assignment putAssignment(Experiment experiment, Assignment assignment, User user, String context) {
@@ -2304,20 +2342,20 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a PUT request to update an assignment of the user for the experiment.
      * The response must contain HTTP {@code expectedStatus}.
-     *
+     * <p>
      * Ignores {@link Assignment#payload}, {@link Assignment#context} (see below for notes), {@link Assignment#cache},
      * {@link Assignment#experimentLabel}, and {@link Assignment#status}. If the current
      * {@link Assignment#serializationStrategy} excludes {@link Assignment#assignment} and/or
      * {@link Assignment#overwrite} the respective field is excluded as well.
-     *
+     * <p>
      * Note on {@link Assignment#context}: To implicitly include the context as a parameter, use
      * {@link #putAssignment(Experiment, Assignment, User, boolean, int, APIServerConnector)} or any of its derivatives
      * with the fourth parameter set to {@code true}. Alternatively supply the context yourself.
      *
-     * @param experiment the experiment
-     * @param assignment the assignment to be changed
-     * @param user the user
-     * @param context the context
+     * @param experiment     the experiment
+     * @param assignment     the assignment to be changed
+     * @param user           the user
+     * @param context        the context
      * @param expectedStatus the expected HTTP status code
      * @return a new assignment reflecting the update
      */
@@ -2328,21 +2366,21 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a PUT request to update an assignment of the user for the experiment.
      * The response must contain HTTP {@code expectedStatus}.
-     *
+     * <p>
      * Ignores {@link Assignment#payload}, {@link Assignment#context} (see below for notes), {@link Assignment#cache},
      * {@link Assignment#experimentLabel}, and {@link Assignment#status}. If the current
      * {@link Assignment#serializationStrategy} excludes {@link Assignment#assignment} and/or
      * {@link Assignment#overwrite} the respective field is excluded as well.
-     *
+     * <p>
      * Note on {@link Assignment#context}: To implicitly include the context as a parameter, use
      * {@link #putAssignment(Experiment, Assignment, User, boolean, int, APIServerConnector)} or any of its derivatives
      * with the fourth parameter set to {@code true}. Alternatively supply the context yourself.
      *
-     * @param experiment the experiment
-     * @param assignment the assignment to be changed
-     * @param user the user
-     * @param context the context
-     * @param expectedStatus the expected HTTP status code
+     * @param experiment         the experiment
+     * @param assignment         the assignment to be changed
+     * @param user               the user
+     * @param context            the context
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return a new assignment reflecting the update
      */
@@ -2372,7 +2410,7 @@ public class TestBase extends ServiceTestBase {
      * The response must contain {@link HttpStatus#SC_OK}.
      *
      * @param application the application
-     * @param user the user
+     * @param user        the user
      * @param experiments the experiments to assign the user to
      * @return the created assignments, can be 0
      */
@@ -2385,9 +2423,9 @@ public class TestBase extends ServiceTestBase {
      * The response must contain {@link HttpStatus#SC_OK}.
      *
      * @param application the application
-     * @param user the user
+     * @param user        the user
      * @param experiments the experiments to assign the user to
-     * @param context the context for the assignments
+     * @param context     the context for the assignments
      * @return the created assignments, can be 0
      */
     public List<Assignment> postAssignments(Application application, User user, List<Experiment> experiments, String context) {
@@ -2399,10 +2437,10 @@ public class TestBase extends ServiceTestBase {
      * The response must contain {@link HttpStatus#SC_OK}.
      *
      * @param application the application
-     * @param user the user
+     * @param user        the user
      * @param experiments the experiments to assign the user to
-     * @param context the context for the assignments
-     * @param create if true the assignments are created
+     * @param context     the context for the assignments
+     * @param create      if true the assignments are created
      * @return the created assignments, can be 0
      */
     public List<Assignment> postAssignments(Application application, User user, List<Experiment> experiments, String context, boolean create) {
@@ -2413,11 +2451,11 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to assign the user to the experiments of the application if {@code create} is true.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param application the application
-     * @param user the user
-     * @param experiments the experiments to assign the user to
-     * @param context the context for the assignments
-     * @param create if true the assignments are created
+     * @param application    the application
+     * @param user           the user
+     * @param experiments    the experiments to assign the user to
+     * @param context        the context for the assignments
+     * @param create         if true the assignments are created
      * @param expectedStatus the exptected HTTP status code
      * @return the created assignments, can be 0
      */
@@ -2429,12 +2467,12 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to assign the user to the experiments of the application if {@code create} is true.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param application the application
-     * @param user the user
-     * @param experiments the experiments to assign the user to
-     * @param context the context for the assignments
-     * @param create if true the assignments are created
-     * @param expectedStatus the exptected HTTP status code
+     * @param application        the application
+     * @param user               the user
+     * @param experiments        the experiments to assign the user to
+     * @param context            the context for the assignments
+     * @param create             if true the assignments are created
+     * @param expectedStatus     the exptected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the created assignments, can be 0
      */
@@ -2459,9 +2497,11 @@ public class TestBase extends ServiceTestBase {
 
         List<Map<String, Object>> assignmentMappings = response.jsonPath().getList("assignments");
         List<Assignment> assignments = new ArrayList<>(assignmentMappings.size());
+
         assignments.addAll(assignmentMappings.stream().map(assignmentMapping -> AssignmentFactory.createFromJSONString(
                 simpleGson.toJson(assignmentMapping)
         )).collect(Collectors.toList()));
+
         return assignments;
     }
 
@@ -2471,8 +2511,8 @@ public class TestBase extends ServiceTestBase {
      * The response must contain HTTP {@code expectedStatus}.
      *
      * @param application the application
-     * @param user the user
-     * @param page the page
+     * @param user        the user
+     * @param page        the page
      * @return the created assignments, can be 0
      */
     public List<Assignment> getAssignments(Application application, Page page, User user) {
@@ -2485,9 +2525,9 @@ public class TestBase extends ServiceTestBase {
      * The response must contain HTTP {@code expectedStatus}.
      *
      * @param application the application
-     * @param user the user
-     * @param page the page
-     * @param context the context for the assignments, default: null
+     * @param user        the user
+     * @param page        the page
+     * @param context     the context for the assignments, default: null
      * @return the created assignments, can be 0
      */
     public List<Assignment> getAssignments(Application application, Page page, User user, String context) {
@@ -2499,10 +2539,10 @@ public class TestBase extends ServiceTestBase {
      * is true.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param application the application
-     * @param user the user
-     * @param page the page
-     * @param context the context for the assignments, default: null
+     * @param application      the application
+     * @param user             the user
+     * @param page             the page
+     * @param context          the context for the assignments, default: null
      * @param createAssignment if true the assignments are created, default: true
      * @return the created assignments, can be 0
      */
@@ -2515,11 +2555,11 @@ public class TestBase extends ServiceTestBase {
      * is true.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param application the application
-     * @param user the user
-     * @param page the page
-     * @param context the context for the assignments, default: null
-     * @param createAssignment if true the assignments are created, default: true
+     * @param application           the application
+     * @param user                  the user
+     * @param page                  the page
+     * @param context               the context for the assignments, default: null
+     * @param createAssignment      if true the assignments are created, default: true
      * @param ignoreSamplingPercent ignores the sampling percentage, default: false
      * @return the created assignments, can be 0
      */
@@ -2532,13 +2572,13 @@ public class TestBase extends ServiceTestBase {
      * is true.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param application the application
-     * @param user the user
-     * @param page the page
-     * @param context the context for the assignments, default: null
-     * @param createAssignment if true the assignments are created, default: true
+     * @param application           the application
+     * @param user                  the user
+     * @param page                  the page
+     * @param context               the context for the assignments, default: null
+     * @param createAssignment      if true the assignments are created, default: true
      * @param ignoreSamplingPercent ignores the sampling percentage, default: false
-     * @param expectedStatus the exptected HTTP status code
+     * @param expectedStatus        the exptected HTTP status code
      * @return the created assignments, can be 0
      */
     public List<Assignment> getAssignments(Application application, Page page, User user, String context, boolean createAssignment, boolean ignoreSamplingPercent, int expectedStatus) {
@@ -2550,14 +2590,14 @@ public class TestBase extends ServiceTestBase {
      * is true.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param application the application
-     * @param user the user
-     * @param page the page
-     * @param context the context for the assignments, default: null
-     * @param createAssignment if true the assignments are created, default: true
+     * @param application           the application
+     * @param user                  the user
+     * @param page                  the page
+     * @param context               the context for the assignments, default: null
+     * @param createAssignment      if true the assignments are created, default: true
      * @param ignoreSamplingPercent ignores the sampling percentage, default: false
-     * @param expectedStatus the exptected HTTP status code
-     * @param apiServerConnector the server connector to use
+     * @param expectedStatus        the exptected HTTP status code
+     * @param apiServerConnector    the server connector to use
      * @return the created assignments, can be 0
      */
     public List<Assignment> getAssignments(Application application, Page page, User user, String context, boolean createAssignment, boolean ignoreSamplingPercent, int expectedStatus, APIServerConnector apiServerConnector) {
@@ -2579,9 +2619,11 @@ public class TestBase extends ServiceTestBase {
         assertReturnCode(response, expectedStatus);
         List<Map<String, Object>> assignmentMappings = response.jsonPath().getList("assignments");
         List<Assignment> assignments = new ArrayList<>(assignmentMappings.size());
+
         assignments.addAll(assignmentMappings.stream().map(assignmentMapping -> AssignmentFactory.createFromJSONString(
                 simpleGson.toJson(assignmentMapping)
         )).collect(Collectors.toList()));
+
         return assignments;
     }
 
@@ -2590,8 +2632,8 @@ public class TestBase extends ServiceTestBase {
      * The response must contain {@link HttpStatus#SC_CREATED}.
      *
      * @param application the application
-     * @param user the user
-     * @param page the page
+     * @param user        the user
+     * @param page        the page
      * @return the created assignments, can be 0
      */
     public List<Assignment> postAssignments(Application application, Page page, User user) {
@@ -2603,9 +2645,9 @@ public class TestBase extends ServiceTestBase {
      * given in the {@code segmentationProfile}.
      * The response must contain {@link HttpStatus#SC_CREATED}.
      *
-     * @param application the application
-     * @param user the user
-     * @param page the page
+     * @param application         the application
+     * @param user                the user
+     * @param page                the page
      * @param segmentationProfile the segmantation profile, will be wrapped into the correct JSON object
      * @return the created assignments, can be 0
      */
@@ -2618,11 +2660,11 @@ public class TestBase extends ServiceTestBase {
      * given in the {@code segmentationProfile}.
      * The response must contain {@link HttpStatus#SC_CREATED}.
      *
-     * @param application the application
-     * @param user the user
-     * @param page the page
+     * @param application         the application
+     * @param user                the user
+     * @param page                the page
      * @param segmentationProfile the segmantation profile, will be wrapped into the correct JSON object
-     * @param context the context for the assignments, default: null
+     * @param context             the context for the assignments, default: null
      * @return the created assignments, can be 0
      */
     public List<Assignment> postAssignments(Application application, Page page, User user, Map<String, Object> segmentationProfile, String context) {
@@ -2634,12 +2676,12 @@ public class TestBase extends ServiceTestBase {
      * given in the {@code segmentationProfile}.
      * The response must contain {@link HttpStatus#SC_CREATED}.
      *
-     * @param application the application
-     * @param user the user
-     * @param page the page
+     * @param application         the application
+     * @param user                the user
+     * @param page                the page
      * @param segmentationProfile the segmantation profile, will be wrapped into the correct JSON object
-     * @param context the context for the assignments, default: null
-     * @param createAssignment if true the assignments are created, default: true
+     * @param context             the context for the assignments, default: null
+     * @param createAssignment    if true the assignments are created, default: true
      * @return the created assignments, can be 0
      */
     public List<Assignment> postAssignments(Application application, Page page, User user, Map<String, Object> segmentationProfile, String context, boolean createAssignment) {
@@ -2651,12 +2693,12 @@ public class TestBase extends ServiceTestBase {
      * given in the {@code segmentationProfile}.
      * The response must contain {@link HttpStatus#SC_CREATED}.
      *
-     * @param application the application
-     * @param user the user
-     * @param page the page
-     * @param segmentationProfile the segmantation profile, will be wrapped into the correct JSON object
-     * @param context the context for the assignments, default: null
-     * @param createAssignment if true the assignments are created, default: true
+     * @param application           the application
+     * @param user                  the user
+     * @param page                  the page
+     * @param segmentationProfile   the segmantation profile, will be wrapped into the correct JSON object
+     * @param context               the context for the assignments, default: null
+     * @param createAssignment      if true the assignments are created, default: true
      * @param ignoreSamplingPercent ignores the sampling percentage, default: false
      * @return the created assignments, can be 0
      */
@@ -2669,14 +2711,14 @@ public class TestBase extends ServiceTestBase {
      * given in the {@code segmentationProfile}.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param application the application
-     * @param user the user
-     * @param page the page
-     * @param segmentationProfile the segmantation profile, will be wrapped into the correct JSON object
-     * @param context the context for the assignments, default: null
-     * @param createAssignment if true the assignments are created, default: true
+     * @param application           the application
+     * @param user                  the user
+     * @param page                  the page
+     * @param segmentationProfile   the segmantation profile, will be wrapped into the correct JSON object
+     * @param context               the context for the assignments, default: null
+     * @param createAssignment      if true the assignments are created, default: true
      * @param ignoreSamplingPercent ignores the sampling percentage, default: false
-     * @param expectedStatus the exptected HTTP status code
+     * @param expectedStatus        the exptected HTTP status code
      * @return the created assignments, can be 0
      */
     public List<Assignment> postAssignments(Application application, Page page, User user, Map<String, Object> segmentationProfile, String context, boolean createAssignment, boolean ignoreSamplingPercent, int expectedStatus) {
@@ -2688,15 +2730,15 @@ public class TestBase extends ServiceTestBase {
      * given in the {@code segmentationProfile}.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param application the application
-     * @param user the user
-     * @param page the page
-     * @param segmentationProfile the segmantation profile, will be wrapped into the correct JSON object
-     * @param context the context for the assignments, default: null
-     * @param createAssignment if true the assignments are created, default: true
+     * @param application           the application
+     * @param user                  the user
+     * @param page                  the page
+     * @param segmentationProfile   the segmantation profile, will be wrapped into the correct JSON object
+     * @param context               the context for the assignments, default: null
+     * @param createAssignment      if true the assignments are created, default: true
      * @param ignoreSamplingPercent ignores the sampling percentage, default: false
-     * @param expectedStatus the exptected HTTP status code
-     * @param apiServerConnector the server connector to use
+     * @param expectedStatus        the exptected HTTP status code
+     * @param apiServerConnector    the server connector to use
      * @return the created assignments, can be 0
      */
     public List<Assignment> postAssignments(Application application, Page page, User user, Map<String, Object> segmentationProfile, String context, boolean createAssignment, boolean ignoreSamplingPercent, int expectedStatus, APIServerConnector apiServerConnector) {
@@ -2725,9 +2767,11 @@ public class TestBase extends ServiceTestBase {
 
         List<Map<String, Object>> assignmentMappings = response.jsonPath().getList("assignments");
         List<Assignment> assignments = new ArrayList<>(assignmentMappings.size());
+
         assignments.addAll(assignmentMappings.stream().map(assignmentMapping -> AssignmentFactory.createFromJSONString(
                 simpleGson.toJson(assignmentMapping)
         )).collect(Collectors.toList()));
+
         return assignments;
     }
 
@@ -2740,9 +2784,9 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to send a single event for a specific user for an experiment.
      * The response must contain {@link HttpStatus#SC_NO_CONTENT}.
      *
-     * @param event the event list to send
+     * @param event      the event list to send
      * @param experiment the experiment
-     * @param user the user
+     * @param user       the user
      * @return the response
      */
     public Response postEvent(Event event, Experiment experiment, User user) {
@@ -2753,9 +2797,9 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to send a single event for a specific user for an experiment.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param event the event list to send
-     * @param experiment the experiment
-     * @param user the user
+     * @param event          the event list to send
+     * @param experiment     the experiment
+     * @param user           the user
      * @param expectedStatus the expected HTTP status code
      * @return the response
      */
@@ -2767,9 +2811,9 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to send a list of events for a specific user for an experiment.
      * The response must contain {@link HttpStatus#SC_NO_CONTENT}.
      *
-     * @param events the event list to send
+     * @param events     the event list to send
      * @param experiment the experiment
-     * @param user the user
+     * @param user       the user
      * @return the response
      */
     public Response postEvents(List<Event> events, Experiment experiment, User user) {
@@ -2780,9 +2824,9 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to send a list of events for a specific user for an experiment.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param events the event list to send
-     * @param experiment the experiment
-     * @param user the user
+     * @param events         the event list to send
+     * @param experiment     the experiment
+     * @param user           the user
      * @param expectedStatus the expected HTTP status code
      * @return the response
      */
@@ -2794,10 +2838,10 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to send a list of events for a specific user for an experiment.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param events the event list to send
-     * @param experiment the experiment
-     * @param user the user
-     * @param expectedStatus the expected HTTP status code
+     * @param events             the event list to send
+     * @param experiment         the experiment
+     * @param user               the user
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the response
      */
@@ -2822,7 +2866,7 @@ public class TestBase extends ServiceTestBase {
      * The response must contain {@link HttpStatus#SC_OK}.
      *
      * @param application the application
-     * @param experiment the experiment to supply the id
+     * @param experiment  the experiment to supply the id
      * @return an experiment
      */
     public Experiment getApplicationExperiment(Application application, Experiment experiment) {
@@ -2833,8 +2877,8 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to retrieve an experiment for an application.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param application the application
-     * @param experiment the experiment to supply the id
+     * @param application    the application
+     * @param experiment     the experiment to supply the id
      * @param expectedStatus the expected HTTP status code
      * @return an experiment
      */
@@ -2846,9 +2890,9 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to retrieve an experiment for an application.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param application the application
-     * @param experiment the experiment to supply the id
-     * @param expectedStatus the expected HTTP status code
+     * @param application        the application
+     * @param experiment         the experiment to supply the id
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return an experiment
      */
@@ -2874,7 +2918,7 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to retrieve the experiments for an application.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param application the application for which the experiments are
+     * @param application    the application for which the experiments are
      * @param expectedStatus the expected HTTP status code
      * @return a list of experiments
      */
@@ -2886,8 +2930,8 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to retrieve the experiments for an application.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param application the application for which the experiments are
-     * @param expectedStatus the expected HTTP status code
+     * @param application        the application for which the experiments are
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return a list of experiments
      */
@@ -2895,7 +2939,7 @@ public class TestBase extends ServiceTestBase {
         String uri = "applications/" + application.name + "/experiments";
         response = apiServerConnector.doGet(uri);
         assertReturnCode(response, expectedStatus);
-        // according to swagger this should be "experiments" instead of "" but it's not
+        @SuppressWarnings("unchecked")
         List<Map<String, Object>> jsonStrings = response.jsonPath().getList("");
         List<Experiment> expList = new ArrayList<>(jsonStrings.size());
         for (Map jsonMap : jsonStrings) {
@@ -2921,8 +2965,8 @@ public class TestBase extends ServiceTestBase {
      * Sends a PUT request to change the priorities of experiments.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param application the application for which the experiments are
-     * @param experiments the experiments
+     * @param application    the application for which the experiments are
+     * @param experiments    the experiments
      * @param expectedStatus the expected HTTP status code
      * @return the response
      */
@@ -2934,9 +2978,9 @@ public class TestBase extends ServiceTestBase {
      * Sends a PUT request to change the priorities of experiments.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param application the application for which the experiments are
-     * @param experiments the experiments
-     * @param expectedStatus the expected HTTP status code
+     * @param application        the application for which the experiments are
+     * @param experiments        the experiments
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the response
      */
@@ -2965,7 +3009,7 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to receive a list of experiments ordered by their priority.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param application the application for which the experiments are
+     * @param application    the application for which the experiments are
      * @param expectedStatus the expected HTTP status code
      * @return a list of experiments, ordered by priority
      */
@@ -2977,8 +3021,8 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to receive a list of experiments ordered by their priority.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param application the application for which the experiments are
-     * @param expectedStatus the expected HTTP status code
+     * @param application        the application for which the experiments are
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return a list of experiments, ordered by priority
      */
@@ -3010,7 +3054,7 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to receive a list of pages associated with an application.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param application the application for which the experiments are
+     * @param application    the application for which the experiments are
      * @param expectedStatus the expected HTTP status code
      * @return a list of pages
      */
@@ -3022,8 +3066,8 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to receive a list of pages associated with an application.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param application the application for which the experiments are
-     * @param expectedStatus the expected HTTP status code
+     * @param application        the application for which the experiments are
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return a list of pages
      */
@@ -3046,7 +3090,7 @@ public class TestBase extends ServiceTestBase {
      * The response must contain HTTP {@link HttpStatus#SC_OK}.
      *
      * @param application the application for which the experiments are
-     * @param page the experiment page
+     * @param page        the experiment page
      * @return a list of experiments
      */
     public List<Experiment> getExperimentsByApplicationPage(Application application, Page page) {
@@ -3057,8 +3101,8 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to receive a list of experiments for an application and page.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param application the application for which the experiments are
-     * @param page the experiment page
+     * @param application    the application for which the experiments are
+     * @param page           the experiment page
      * @param expectedStatus the expected HTTP status code
      * @return a list of experiments
      */
@@ -3070,9 +3114,9 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to receive a list of experiments for an application and page.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param application the application for which the experiments are
-     * @param page the experiment page
-     * @param expectedStatus the expected HTTP status code
+     * @param application        the application for which the experiments are
+     * @param page               the experiment page
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return a list of experiments
      */
@@ -3110,8 +3154,8 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to receive counts for an experiment.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment
-     * @param parameters the parameters for the request body
+     * @param experiment     the experiment
+     * @param parameters     the parameters for the request body
      * @param expectedStatus the expected HTTP status code
      * @return the experiment counts
      */
@@ -3123,9 +3167,9 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to receive counts for an experiment.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment
-     * @param parameters the parameters for the request body
-     * @param expectedStatus the expected HTTP status code
+     * @param experiment         the experiment
+     * @param parameters         the parameters for the request body
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the experiment counts
      */
@@ -3154,7 +3198,7 @@ public class TestBase extends ServiceTestBase {
      * The response must contain {@link HttpStatus#SC_OK}.
      *
      * @param experiment the experiment
-     * @param context the context
+     * @param context    the context
      * @return the experiment counts
      */
     public ExperimentCounts getExperimentCounts(Experiment experiment, String context) {
@@ -3165,8 +3209,8 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to receive counts for an experiment.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment
-     * @param context the context
+     * @param experiment     the experiment
+     * @param context        the context
      * @param expectedStatus the expected HTTP status code
      * @return the experiment counts
      */
@@ -3178,9 +3222,9 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to receive counts for an experiment.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment
-     * @param context the context
-     * @param expectedStatus the expected HTTP status code
+     * @param experiment         the experiment
+     * @param context            the context
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the experiment counts
      */
@@ -3212,8 +3256,8 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to receive cumulative experiments counts for an experiment.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment
-     * @param parameters the parameters for the request body
+     * @param experiment     the experiment
+     * @param parameters     the parameters for the request body
      * @param expectedStatus the expected HTTP status code
      * @return the cumulative experiment counts
      */
@@ -3225,9 +3269,9 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to receive cumulative experiments counts for an experiment.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment
-     * @param parameters the parameters for the request body
-     * @param expectedStatus the expected HTTP status code
+     * @param experiment         the experiment
+     * @param parameters         the parameters for the request body
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the cumulative experiment counts
      */
@@ -3256,7 +3300,7 @@ public class TestBase extends ServiceTestBase {
      * The response must contain {@link HttpStatus#SC_OK}.
      *
      * @param experiment the experiment
-     * @param context the context
+     * @param context    the context
      * @return the cumulative experiment counts
      */
     public ExperimentCumulativeCounts getExperimentCumulativeCounts(Experiment experiment, String context) {
@@ -3267,8 +3311,8 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to receive cumulative experiments counts for an experiment.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment
-     * @param context the context
+     * @param experiment     the experiment
+     * @param context        the context
      * @param expectedStatus the expected HTTP status code
      * @return the cumulative experiment counts
      */
@@ -3280,9 +3324,9 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to receive cumulative experiments counts for an experiment.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment
-     * @param context the context
-     * @param expectedStatus the expected HTTP status code
+     * @param experiment         the experiment
+     * @param context            the context
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the cumulative experiment counts
      */
@@ -3314,8 +3358,8 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to receive statistics for an experiment.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment
-     * @param parameters the parameters for the request body
+     * @param experiment     the experiment
+     * @param parameters     the parameters for the request body
      * @param expectedStatus the expected HTTP status code
      * @return the cumulative experiment counts
      */
@@ -3327,9 +3371,9 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to receive statistics for an experiment.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment
-     * @param parameters the parameters for the request body
-     * @param expectedStatus the expected HTTP status code
+     * @param experiment         the experiment
+     * @param parameters         the parameters for the request body
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the cumulative experiment counts
      */
@@ -3358,7 +3402,7 @@ public class TestBase extends ServiceTestBase {
      * The response must contain {@link HttpStatus#SC_OK}.
      *
      * @param experiment the experiment
-     * @param context the context
+     * @param context    the context
      * @return the cumulative experiment counts
      */
     public ExperimentStatistics getStatistics(Experiment experiment, String context) {
@@ -3369,8 +3413,8 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to receive statistics for an experiment.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment
-     * @param context the context
+     * @param experiment     the experiment
+     * @param context        the context
      * @param expectedStatus the expected HTTP status code
      * @return the cumulative experiment counts
      */
@@ -3382,9 +3426,9 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to receive statistics for an experiment.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment
-     * @param context the context
-     * @param expectedStatus the expected HTTP status code
+     * @param experiment         the experiment
+     * @param context            the context
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the cumulative experiment counts
      */
@@ -3416,8 +3460,8 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to receive daily statistics for an experiment.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment
-     * @param parameters the parameters for the request body
+     * @param experiment     the experiment
+     * @param parameters     the parameters for the request body
      * @param expectedStatus the expected HTTP status code
      * @return the cumulative experiment counts
      */
@@ -3429,9 +3473,9 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to receive daily statistics for an experiment.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment
-     * @param parameters the parameters for the request body
-     * @param expectedStatus the expected HTTP status code
+     * @param experiment         the experiment
+     * @param parameters         the parameters for the request body
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the cumulative experiment counts
      */
@@ -3460,7 +3504,7 @@ public class TestBase extends ServiceTestBase {
      * The response must contain {@link HttpStatus#SC_OK}.
      *
      * @param experiment the experiment
-     * @param context the context
+     * @param context    the context
      * @return the cumulative experiment counts
      */
     public ExperimentCumulativeStatistics getDailyStatistics(Experiment experiment, String context) {
@@ -3471,8 +3515,8 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to receive daily statistics for an experiment.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment
-     * @param context the context
+     * @param experiment     the experiment
+     * @param context        the context
      * @param expectedStatus the expected HTTP status code
      * @return the cumulative experiment counts
      */
@@ -3484,9 +3528,9 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to receive daily statistics for an experiment.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param experiment the experiment
-     * @param context the context
-     * @param expectedStatus the expected HTTP status code
+     * @param experiment         the experiment
+     * @param context            the context
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the cumulative experiment counts
      */
@@ -3505,7 +3549,7 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a GET request to receive assignment statistics.
      * The response must contain {@link HttpStatus#SC_OK}.
-     *
+     * <p>
      * Uses the experiment's applicationName and experimentLabel.
      *
      * @param experiment the experiment
@@ -3518,11 +3562,11 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a GET request to receive assignment statistics.
      * The response must contain {@link HttpStatus#SC_OK}.
-     *
+     * <p>
      * Uses the experiment's applicationName and experimentLabel.
      *
      * @param experiment the experiment
-     * @param context the context
+     * @param context    the context
      * @return the cumulative experiment counts
      */
     public String getAssignmentSummary(Experiment experiment, String context) {
@@ -3532,11 +3576,11 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a GET request to receive assignment statistics.
      * The response must contain HTTP {@code expectedStatus}.
-     *
+     * <p>
      * Uses the experiment's applicationName and experimentLabel.
      *
-     * @param experiment the experiment
-     * @param context the context
+     * @param experiment     the experiment
+     * @param context        the context
      * @param expectedStatus the expected HTTP status code
      * @return the cumulative experiment counts
      */
@@ -3548,12 +3592,12 @@ public class TestBase extends ServiceTestBase {
      * TODO: just returns a JSON String as of now...
      * Sends a GET request to receive assignment statistics.
      * The response must contain HTTP {@code expectedStatus}.
-     *
+     * <p>
      * Uses the experiment's applicationName and experimentLabel.
      *
-     * @param experiment the experiment
-     * @param context the context
-     * @param expectedStatus the expected HTTP status code
+     * @param experiment         the experiment
+     * @param context            the context
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the cumulative experiment counts
      */
@@ -3578,10 +3622,10 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to receive a response.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param uri the endpoint uri (without the base path, for example without /api/v1/), starting without /
-     * @param uriParameters a map of uri parameters
-     * @param requestBody the request body, if json needed transform first.
-     * @param expectedStatus the expected HTTP status code
+     * @param uri                the endpoint uri (without the base path, for example without /api/v1/), starting without /
+     * @param uriParameters      a map of uri parameters
+     * @param requestBody        the request body, if json needed transform first.
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the response
      */
@@ -3603,10 +3647,10 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to receive a response.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param uri the endpoint uri (without the base path, for example without /api/v1/), starting without /
-     * @param uriParameters a map of uri parameters
-     * @param requestBody the request body, if json needed transform first.
-     * @param expectedStatus the expected HTTP status code
+     * @param uri                the endpoint uri (without the base path, for example without /api/v1/), starting without /
+     * @param uriParameters      a map of uri parameters
+     * @param requestBody        the request body, if json needed transform first.
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the response
      */
@@ -3628,10 +3672,10 @@ public class TestBase extends ServiceTestBase {
      * Sends a DELETE request to receive a response.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param uri the endpoint uri (without the base path, for example without /api/v1/), starting without /
-     * @param uriParameters a map of uri parameters
-     * @param requestBody the request body, if json needed transform first.
-     * @param expectedStatus the expected HTTP status code
+     * @param uri                the endpoint uri (without the base path, for example without /api/v1/), starting without /
+     * @param uriParameters      a map of uri parameters
+     * @param requestBody        the request body, if json needed transform first.
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the response
      */
@@ -3653,10 +3697,10 @@ public class TestBase extends ServiceTestBase {
      * Sends a PUT request to receive a response.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param uri the endpoint uri (without the base path, for example without /api/v1/), starting without /
-     * @param uriParameters a map of uri parameters
-     * @param requestBody the request body, if json needed transform first.
-     * @param expectedStatus the expected HTTP status code
+     * @param uri                the endpoint uri (without the base path, for example without /api/v1/), starting without /
+     * @param uriParameters      a map of uri parameters
+     * @param requestBody        the request body, if json needed transform first.
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return the response
      */
@@ -3682,8 +3726,8 @@ public class TestBase extends ServiceTestBase {
      * Sends a POST request to create an user feedback.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param userFeedback the userFeedback to POST
-     * @param expectedStatus the expected HTTP status code
+     * @param userFeedback       the userFeedback to POST
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return response The response of a request made by REST Assured
      */
@@ -3697,7 +3741,7 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to get all feedbacks.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param expectedStatus the expected HTTP status code
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return a list of user feedbacks
      */
@@ -3719,9 +3763,9 @@ public class TestBase extends ServiceTestBase {
      *
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param expectedStatus the expected HTTP status code
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
-     * @param username user name
+     * @param username           user name
      * @return a list of user feedbacks
      */
     public List<UserFeedback> getFeedbacksByUsername(int expectedStatus, APIServerConnector apiServerConnector, String username) {
@@ -3739,7 +3783,7 @@ public class TestBase extends ServiceTestBase {
 
     ///////////////////////////////
     // feedback endpoint ENDS //
-    //////////////////////////////   
+    //////////////////////////////
 
     /////////////////////////////
     // authentication endpoint //
@@ -3748,7 +3792,7 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a POST request to get a login token.
      * The response must contain HTTP {@link HttpStatus#SC_OK}.
-     *
+     * <p>
      * Uses the default APIServerConnector's user credentials and
      * requests a {@code grant_type} of "client_credentials".
      * It always copies the APIServerConnector before setting any additional fields.
@@ -3762,12 +3806,12 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a POST request to get a login token.
      * The response must contain {@link HttpStatus#SC_OK}.
-     *
+     * <p>
      * If the apiUser is null, it uses the default APIServerConnector's
      * user credentials and requests a {@code grant_type} of "client_credentials".
      * Otherwise it uses a copied APIServerConnector and sets the user credentials
      * according to apiUser.
-     *
+     * <p>
      * It always copies the APIServerConnector before setting any additional fields.
      *
      * @param apiUser the APIUser
@@ -3780,18 +3824,18 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a POST request to get a login token.
      * The response must contain {@link HttpStatus#SC_OK}.
-     *
+     * <p>
      * If the apiUser is null, it uses the default APIServerConnector's
      * user credentials.
      * Otherwise it uses a copied APIServerConnector and sets the user credentials
      * according to apiUser.
-     *
+     * <p>
      * Requests the specified {@code grant_type}. (Default is
      * "client_credentials"). If null, no grant_type is requested.
-     *
+     * <p>
      * It always copies the APIServerConnector before setting any additional fields.
      *
-     * @param apiUser the APIUser
+     * @param apiUser    the APIUser
      * @param grant_type the requested grant_type
      * @return the token
      */
@@ -3802,19 +3846,19 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a POST request to get a login token.
      * The response must contain HTTP {@code expectedStatus}.
-     *
+     * <p>
      * If the apiUser is null, it uses the default APIServerConnector's
      * user credentials.
      * Otherwise it uses a copied APIServerConnector and sets the user credentials
      * according to apiUser.
-     *
+     * <p>
      * Requests the specified {@code grant_type}. (Default is
      * "client_credentials"). If null, no grant_type is requested.
-     *
+     * <p>
      * It always copies the APIServerConnector before setting any additional fields.
      *
-     * @param apiUser the APIUser
-     * @param grant_type the requested grant_type
+     * @param apiUser        the APIUser
+     * @param grant_type     the requested grant_type
      * @param expectedStatus the expected status code
      * @return the token
      */
@@ -3825,20 +3869,20 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a POST request to get a login token.
      * The response must contain HTTP {@code expectedStatus}.
-     *
+     * <p>
      * If the apiUser is null, it uses the provided APIServerConnector's
      * user credentials.
      * Otherwise it copies the supplied APIServerConnector and sets the user credentials
      * according to apiUser.
-     *
+     * <p>
      * Requests the specified {@code grant_type}. (Default is
      * "client_credentials"). If null, no grant_type is requested.
-     *
+     * <p>
      * It always copies the APIServerConnector before setting any additional fields.
      *
-     * @param apiUser the APIUser
-     * @param grant_type the requested grant_type
-     * @param expectedStatus the expected status code
+     * @param apiUser            the APIUser
+     * @param grant_type         the requested grant_type
+     * @param expectedStatus     the expected status code
      * @param apiServerConnector the api server connector
      * @return the token
      */
@@ -3876,7 +3920,7 @@ public class TestBase extends ServiceTestBase {
      * given {@link APIUser#email}.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param apiUser the email provider
+     * @param apiUser        the email provider
      * @param expectedStatus the expected HTTP status code
      * @return the complete APIUser
      */
@@ -3889,8 +3933,8 @@ public class TestBase extends ServiceTestBase {
      * given {@link APIUser#email}.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param apiUser the email provider
-     * @param expectedStatus the expected HTTP status code
+     * @param apiUser            the email provider
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the api server connector
      * @return the complete APIUser
      */
@@ -3908,7 +3952,7 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a GET request to verify an access token.
      * The response must contain {@link HttpStatus#SC_OK}.
-     *
+     * <p>
      * It always copies the APIServerConnector before setting any additional fields.
      *
      * @param accessToken the access token to verify
@@ -3921,10 +3965,10 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a GET request to verify an access token.
      * The response must contain HTTP {@code expectedStatus}.
-     *
+     * <p>
      * It always copies the APIServerConnector before setting any additional fields.
      *
-     * @param accessToken the access token to verify
+     * @param accessToken    the access token to verify
      * @param expectedStatus the expected HTTP status
      * @return a copy of the token returned from the server
      */
@@ -3935,11 +3979,11 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a GET request to verify an access token.
      * The response must contain HTTP {@code expectedStatus}.
-     *
+     * <p>
      * It always copies the APIServerConnector before setting any additional fields.
      *
-     * @param accessToken the access token to verify
-     * @param expectedStatus the expected HTTP status
+     * @param accessToken        the access token to verify
+     * @param expectedStatus     the expected HTTP status
      * @param apiServerConnector the server connector
      * @return a copy of the token returned from the server
      */
@@ -3956,7 +4000,7 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a GET request to logout.
      * The response must contain {@link HttpStatus#SC_NO_CONTENT}.
-     *
+     * <p>
      * It always copies the APIServerConnector before setting any additional fields.
      *
      * @param token the access token to invalidate
@@ -3969,10 +4013,10 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a GET request to logout.
      * The response must contain HTTP {@code expectedStatus}.
-     *
+     * <p>
      * It always copies the APIServerConnector before setting any additional fields.
      *
-     * @param token the access token to invalidate
+     * @param token          the access token to invalidate
      * @param expectedStatus the expected status code
      * @return the response
      */
@@ -3983,11 +4027,11 @@ public class TestBase extends ServiceTestBase {
     /**
      * Sends a GET request to logout.
      * The response must contain HTTP {@code expectedStatus}.
-     *
+     * <p>
      * It always copies the APIServerConnector before setting any additional fields.
      *
-     * @param token the access token to invalidate
-     * @param expectedStatus the expected status code
+     * @param token              the access token to invalidate
+     * @param expectedStatus     the expected status code
      * @param apiServerConnector the api server connector
      * @return the response
      */
@@ -3999,6 +4043,52 @@ public class TestBase extends ServiceTestBase {
         response = asc.doGet(uri);
         assertReturnCode(response, expectedStatus);
         return response;
+    }
+
+
+    ////////////////////////
+    // favorites endpoint //
+    ////////////////////////
+
+
+    /**
+     * Sends a GET request to favorites.
+     * The response must contain {@link HttpStatus#SC_OK}.
+     *
+     * @return a list of all favorite IDs
+     */
+    public List<String> getFavorites() {
+        response = apiServerConnector.doGet("favorites");
+        assertReturnCode(response, HttpStatus.SC_OK);
+        return response.jsonPath().get("experimentIDs");
+    }
+
+    /**
+     * Sends a POST request to favorites.
+     * The response must contain {@link HttpStatus#SC_OK}.
+     *
+     * @param experimentID the experiment's ID to add.
+     * @return a list of all favorite IDs
+     */
+    public List<String> addFavorite(String experimentID) {
+        Map<String, String> favMap = new HashMap<>();
+        favMap.put("id", experimentID);
+        response = apiServerConnector.doPost("favorites", favMap);
+        assertReturnCode(response, HttpStatus.SC_OK);
+        return response.jsonPath().get("experimentIDs");
+    }
+
+    /**
+     * Sends a DELETE request to favorites.
+     * The response must contain {@link HttpStatus#SC_OK}.
+     *
+     * @param experimentID the experiment's ID to delete.
+     * @return a list of remaining favorite IDs
+     */
+    public List<String> deleteFavorite(String experimentID) {
+        response = apiServerConnector.doDelete("favorites/" + experimentID);
+        assertReturnCode(response, HttpStatus.SC_OK);
+        return response.jsonPath().get("experimentIDs");
     }
 
 

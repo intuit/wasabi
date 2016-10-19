@@ -26,6 +26,7 @@ import com.intuit.wasabi.repository.RepositoryException;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Matchers;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import javax.sql.DataSource;
@@ -41,23 +42,30 @@ import static org.mockito.Mockito.*;
  * Created on 3/7/16.
  */
 public class DatabaseAnalyticsTest {
-    TransactionFactory transactionFactory = Mockito.mock(TransactionFactory.class);
-    Transaction transaction = Mockito.mock(Transaction.class);
-    DataSource dataSource = Mockito.mock(DataSource.class);
-    Flyway flyway = Mockito.mock(Flyway.class);
+
+    @Mock
+    TransactionFactory transactionFactory = mock(TransactionFactory.class);
+    @Mock
+    Transaction transaction = mock(Transaction.class);
+    @Mock
+    DataSource dataSource = mock(DataSource.class);
+    @Mock
+    Flyway flyway = mock(Flyway.class);
     DatabaseAnalytics databaseAnalytics;
 
     @Before
     public void setup() throws SQLException {
         when(transactionFactory.newTransaction()).thenReturn(transaction);
         when(transactionFactory.getDataSource()).thenReturn(dataSource);
-        databaseAnalytics = spy(new DatabaseAnalytics(transactionFactory, flyway));
+
+        databaseAnalytics = spy(new DatabaseAnalytics(transactionFactory, flyway,
+                "com/intuit/wasabi/repository/impl/mysql/migration"));
     }
 
     @Test
-    public void initilizeTest() {
-        Flyway mockedFlyway = Mockito.mock(Flyway.class);
-        databaseAnalytics.initialize(mockedFlyway);
+    public void initilizeTest(){
+        databaseAnalytics.initialize(transactionFactory, flyway, "com/intuit/wasabi/repository/impl/mysql/migration");
+
         verify(transactionFactory, atLeastOnce()).getDataSource();
         verify(flyway, atLeastOnce()).setLocations("com/intuit/wasabi/repository/impl/mysql/migration");
         verify(flyway, atLeastOnce()).setDataSource(dataSource);
@@ -70,15 +78,19 @@ public class DatabaseAnalyticsTest {
         String rollupDate = "TEST";
         Parameters parameters = mock(Parameters.class, RETURNS_DEEP_STUBS);
         List<Map> expected = mock(List.class);
+
         when(parameters.getContext().getContext()).thenReturn("TEST");
         when(transaction.select(anyString(), eq(experimentId), eq(true), eq(rollupDate), anyString()))
                 .thenReturn(expected);
+
         List<Map> result = databaseAnalytics.getRollupRows(experimentId, rollupDate, parameters);
+
         assertThat(result, is(expected));
         //Exception is thrown in this case
         doThrow(new RuntimeException())
                 .when(transaction)
                 .select(anyString(), eq(experimentId), eq(true), eq(rollupDate), anyString());
+
         databaseAnalytics.getRollupRows(experimentId, rollupDate, parameters);
         fail();
     }
@@ -87,20 +99,31 @@ public class DatabaseAnalyticsTest {
     public void getActionsRowsTest() {
         Experiment.ID experimentId = Experiment.ID.newInstance();
         Parameters parameters = mock(Parameters.class, RETURNS_DEEP_STUBS);
+
         when(parameters.getContext().getContext()).thenReturn("TEST");
+
         Date from = mock(Date.class), to = mock(Date.class);
+
         when(parameters.getFromTime()).thenReturn(from);
         when(parameters.getToTime()).thenReturn(to);
-        List<String> actions = new ArrayList<>();
+
+        List<String> actions = new ArrayList<String>();
+
         actions.add("TEST_ACTION");
+
         when(parameters.getActions()).thenReturn(actions);
+
         List<Map> expected = mock(List.class);
+
         when(transaction.select(anyString(), Matchers.anyVararg())).thenReturn(expected);
+
         List<Map> result = databaseAnalytics.getActionsRows(experimentId, parameters);
+
         assertThat(result, is(expected));
+
         //exception while select
-        doThrow(new RuntimeException()).when(transaction)
-                .select(anyString(), Matchers.anyVararg());
+        doThrow(new RuntimeException()). when(transaction).select(anyString(), Matchers.anyVararg());
+
         databaseAnalytics.getActionsRows(experimentId, parameters);
         fail();
     }
@@ -109,20 +132,31 @@ public class DatabaseAnalyticsTest {
     public void getJointActionsTest() {
         Experiment.ID experimentId = Experiment.ID.newInstance();
         Parameters parameters = mock(Parameters.class, RETURNS_DEEP_STUBS);
+
         when(parameters.getContext().getContext()).thenReturn("TEST");
+
         Date from = mock(Date.class), to = mock(Date.class);
+
         when(parameters.getFromTime()).thenReturn(from);
         when(parameters.getToTime()).thenReturn(to);
-        List<String> actions = new ArrayList<>();
+
+        List<String> actions = new ArrayList<String>();
+
         actions.add("TEST_ACTION");
+
         when(parameters.getActions()).thenReturn(actions);
+
         List<Map> expected = mock(List.class);
+
         when(transaction.select(anyString(), Matchers.anyVararg())).thenReturn(expected);
+
         List<Map> result = databaseAnalytics.getJointActions(experimentId, parameters);
+
         assertThat(result, is(expected));
+
         //exception while select
-        doThrow(new RuntimeException()).when(transaction)
-                .select(anyString(), Matchers.anyVararg());
+        doThrow(new RuntimeException()). when(transaction).select(anyString(), Matchers.anyVararg());
+
         databaseAnalytics.getJointActions(experimentId, parameters);
         fail();
     }
@@ -132,17 +166,25 @@ public class DatabaseAnalyticsTest {
     public void getImpressionRowsTest() {
         Experiment.ID experimentId = Experiment.ID.newInstance();
         Parameters parameters = mock(Parameters.class, RETURNS_DEEP_STUBS);
+
         when(parameters.getContext().getContext()).thenReturn("TEST");
+
         Date from = mock(Date.class), to = mock(Date.class);
+
         when(parameters.getFromTime()).thenReturn(from);
         when(parameters.getToTime()).thenReturn(to);
+
         List<Map> expected = mock(List.class);
+
         when(transaction.select(anyString(), Matchers.anyVararg())).thenReturn(expected);
+
         List<Map> result = databaseAnalytics.getImpressionRows(experimentId, parameters);
+
         assertThat(result, is(expected));
+
         //exception while select
-        doThrow(new RuntimeException()).when(transaction)
-                .select(anyString(), Matchers.anyVararg());
+        doThrow(new RuntimeException()). when(transaction).select(anyString(), Matchers.anyVararg());
+
         databaseAnalytics.getImpressionRows(experimentId, parameters);
         fail();
     }
@@ -150,18 +192,23 @@ public class DatabaseAnalyticsTest {
     @Test(expected = RepositoryException.class)
     public void getEmptyBucketsTest() {
         Experiment.ID experimentId = Experiment.ID.newInstance();
-        List<Map> input = new ArrayList<>();
-        Map<String, String> map = new HashMap<>();
+        List<Map> input = new ArrayList<Map>();
+        Map<String, String> map = new HashMap<String, String>();
+
         map.put("label", "TEST_LABEL");
         input.add(map);
+
         when(transaction.select(anyString(), Matchers.anyVararg())).thenReturn(input);
+
         Map<Bucket.Label, BucketCounts> result = databaseAnalytics.getEmptyBuckets(experimentId);
+
         assertThat(result.size(), is(1));
         assertThat(result.get(Bucket.Label.valueOf("TEST_LABEL")).getLabel().toString(), is("TEST_LABEL"));
         assertThat(result.get(Bucket.Label.valueOf("TEST_LABEL")).getActionCounts().size(), is(0));
+
         //exception while select
-        doThrow(new RuntimeException()).when(transaction)
-                .select(anyString(), Matchers.anyVararg());
+        doThrow(new RuntimeException()). when(transaction).select(anyString(), Matchers.anyVararg());
+
         databaseAnalytics.getEmptyBuckets(experimentId);
         fail();
     }
@@ -171,13 +218,17 @@ public class DatabaseAnalyticsTest {
         List<Map> expected = mock(List.class);
         Experiment.ID experimentId = Experiment.ID.newInstance();
         Parameters parameters = mock(Parameters.class, RETURNS_DEEP_STUBS);
+
         when(parameters.getContext().getContext()).thenReturn("TEST");
         when(transaction.select(anyString(), Matchers.anyVararg())).thenReturn(expected);
+
         List<Map> result = databaseAnalytics.getCountsFromRollups(experimentId, parameters);
+
         assertThat(result, is(expected));
+
         //exception while select
-        doThrow(new RuntimeException()).when(transaction)
-                .select(anyString(), Matchers.anyVararg());
+        doThrow(new RuntimeException()). when(transaction).select(anyString(), Matchers.anyVararg());
+
         databaseAnalytics.getCountsFromRollups(experimentId, parameters);
         fail();
     }
@@ -186,61 +237,84 @@ public class DatabaseAnalyticsTest {
     public void checkMostRecentRollupTest() {
         Experiment.ID experimentId = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class);
+
         when(experiment.getID()).thenReturn(experimentId);
+
         List queryResult = mock(List.class);
         Parameters parameters = mock(Parameters.class, RETURNS_DEEP_STUBS);
+
         when(parameters.getContext().getContext()).thenReturn("TEST");
+
         Date to = mock(Date.class);
+
         when(to.getTime()).thenReturn(9999L);
         when(transaction.select(anyString(), eq(experimentId), eq("TEST"))).thenReturn(queryResult);
         when(queryResult.isEmpty()).thenReturn(true);
+
         boolean result = databaseAnalytics.checkMostRecentRollup(experiment, parameters, to);
+
         assertThat(result, is(true));
 
         when(queryResult.isEmpty()).thenReturn(false);
+
         Map map = mock(Map.class);
         Date maxDay = mock(Date.class);
+
         when(queryResult.get(0)).thenReturn(map);
         when(map.get("day")).thenReturn(maxDay);
         when(maxDay.getTime()).thenReturn(100000L);
+
         result = databaseAnalytics.checkMostRecentRollup(experiment, parameters, to);
+
         assertThat(result, is(true));
 
         when(maxDay.getTime()).thenReturn(1000L);
+
         result = databaseAnalytics.checkMostRecentRollup(experiment, parameters, to);
+
         assertThat(result, is(false));
 
-        doThrow(new RuntimeException()).when(transaction)
-                .select(anyString(), eq(experimentId), eq("TEST"));
+        doThrow(new RuntimeException()).when(transaction).select(anyString(), eq(experimentId), eq("TEST"));
+
         databaseAnalytics.checkMostRecentRollup(experiment, parameters, to);
         fail();
-
     }
 
     @Test
     public void testAddActionsToSql() {
         Parameters parameters = mock(Parameters.class);
+
         when(parameters.getActions()).thenReturn(null);
+
         StringBuilder stringBuilder = new StringBuilder();
         List param = new ArrayList<>();
+
         databaseAnalytics.addActionsToSql(parameters, stringBuilder, param);
+
         assertThat(stringBuilder.toString(), is(""));
         assertThat(param.size(), is(0));
+
         List<String> actions = new ArrayList<>();
+
         actions.add("a1");
+
         when(parameters.getActions()).thenReturn(actions);
+
         databaseAnalytics.addActionsToSql(parameters, stringBuilder, param);
+
         assertThat(actions.size(), is(1));
         assertThat(param.size(), is(1));
         assertThat(stringBuilder.toString(), is(" and action in (?) "));
+
         stringBuilder.setLength(0); //reset the builder
         param.clear();
+
         actions.add("a2");
+
         databaseAnalytics.addActionsToSql(parameters, stringBuilder, param);
+
         assertThat(actions.size(), is(2));
         assertThat(param.size(), is(2));
         assertThat(stringBuilder.toString(), is(" and action in (?,?) "));
     }
-
-
 }

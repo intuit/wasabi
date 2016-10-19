@@ -22,15 +22,35 @@ import com.intuit.wasabi.tests.library.util.RetryAnalyzer;
 import com.intuit.wasabi.tests.library.util.RetryTest;
 import com.intuit.wasabi.tests.library.util.serialstrategies.DefaultNameExclusionStrategy;
 import com.intuit.wasabi.tests.library.util.serialstrategies.DefaultNameInclusionStrategy;
-import com.intuit.wasabi.tests.model.*;
-import com.intuit.wasabi.tests.model.analytics.*;
-import com.intuit.wasabi.tests.model.factory.*;
+import com.intuit.wasabi.tests.model.Assignment;
+import com.intuit.wasabi.tests.model.Bucket;
+import com.intuit.wasabi.tests.model.Event;
+import com.intuit.wasabi.tests.model.Experiment;
+import com.intuit.wasabi.tests.model.Page;
+import com.intuit.wasabi.tests.model.User;
+import com.intuit.wasabi.tests.model.analytics.BucketStatistics;
+import com.intuit.wasabi.tests.model.analytics.Counts;
+import com.intuit.wasabi.tests.model.analytics.DailyStatistics;
+import com.intuit.wasabi.tests.model.analytics.ExperimentBasicStatistics;
+import com.intuit.wasabi.tests.model.analytics.ExperimentCumulativeStatistics;
+import com.intuit.wasabi.tests.model.analytics.ExperimentStatistics;
+import com.intuit.wasabi.tests.model.factory.ApplicationFactory;
+import com.intuit.wasabi.tests.model.factory.AssignmentFactory;
+import com.intuit.wasabi.tests.model.factory.BucketFactory;
+import com.intuit.wasabi.tests.model.factory.EventFactory;
+import com.intuit.wasabi.tests.model.factory.ExperimentFactory;
+import com.intuit.wasabi.tests.model.factory.UserFactory;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.intuit.wasabi.tests.library.util.ModelAssert.assertEqualModelItems;
 import static com.intuit.wasabi.tests.library.util.ModelAssert.assertEqualModelItemsNoOrder;
@@ -163,7 +183,7 @@ public class SmokeTest extends TestBase {
     /**
      * Assigns users to buckets.
      */
-    @Test(dependsOnMethods = {"t_startExperiment"})
+    @Test(dependsOnMethods = {"t_retrieveRunningExperiment"})
     @RetryTest(maxTries = 3, warmup = 1500)
     public void t_assignUsersToBuckets() {
         for (User user : users) {
@@ -296,7 +316,7 @@ public class SmokeTest extends TestBase {
      * Asserts the daily summaries. The same as t_dailySummaryOfDerivedStatistics, but for another endpoint.
      */
     @Test(dependsOnMethods = {"t_submitEvents"}, retryAnalyzer = RetryAnalyzer.class)
-    @RetryTest(maxTries = 3, warmup = 2000)
+    @RetryTest(maxTries = 3, warmup = 2500)
     public void t_dailySummary() {
         ExperimentCumulativeStatistics dailies = getDailyStatistics(experiment);
 

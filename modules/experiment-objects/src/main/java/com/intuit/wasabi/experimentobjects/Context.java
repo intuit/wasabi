@@ -31,8 +31,7 @@ public class Context {
     private String ctx = "PROD"; //default value for context
 
     private Context(String ctx) {
-        super();
-        this.ctx = Preconditions.checkNotNull(ctx);
+        this.ctx=Preconditions.checkNotNull(ctx);
 
         if (ctx.trim().isEmpty()) {
             throw new IllegalArgumentException("Context cannot be " +

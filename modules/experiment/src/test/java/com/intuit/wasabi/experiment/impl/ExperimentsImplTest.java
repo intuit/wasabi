@@ -75,6 +75,7 @@ public class ExperimentsImplTest {
     private Double samplingPercent;
     private Experiment.ID experimentID;
     private ExperimentsImpl expImpl;
+    private String description;
 
     @Before
     public void setup() {
@@ -82,7 +83,8 @@ public class ExperimentsImplTest {
         startTime = new Date();
         endTime = new Date(startTime.getTime() + 60000);
         samplingPercent = 0.5;
-        expImpl = new ExperimentsImpl(databaseRepository, cassandraRepository, experiments, buckets, pages, priorities, validator, ruleCache, eventLog);
+        expImpl = new ExperimentsImpl(databaseRepository,cassandraRepository,experiments,buckets,pages,priorities,validator,ruleCache,eventLog);
+        description = "Some description";
     }
 
     @Test(expected = InvalidIdentifierException.class)
@@ -92,7 +94,8 @@ public class ExperimentsImplTest {
                 .withLabel(testLabel)
                 .withSamplingPercent(samplingPercent)
                 .withStartTime(startTime)
-                .withEndTime(endTime).build();
+                .withEndTime(endTime)
+                .withDescription(description).build();
         testExp.setApplicationName(Application.Name.valueOf(""));
         assertThat(testExp.getApplicationName(), is(Application.Name.valueOf("")));
         expImpl.createExperiment(testExp, UserInfo.from(UserInfo.Username.valueOf("user")).build());
@@ -108,6 +111,7 @@ public class ExperimentsImplTest {
                 .withIsPersonalizationEnabled(true)
                 .withSamplingPercent(samplingPercent)
                 .withStartTime(startTime)
+                .withDescription(description)
                 .withEndTime(endTime).build();
         testExp.setApplicationName(Application.Name.valueOf(""));
         assertThat(testExp.getApplicationName(), is(Application.Name.valueOf("")));
@@ -121,7 +125,8 @@ public class ExperimentsImplTest {
                 .withLabel(testLabel)
                 .withSamplingPercent(samplingPercent)
                 .withStartTime(startTime)
-                .withEndTime(endTime).build();
+                .withEndTime(endTime)
+                .withDescription(description).build();
         doNothing().when(validator).validateNewExperiment(testExp);
         doNothing().when(validator).validateNewExperiment(testExp);
         when(cassandraRepository.createExperiment(testExp)).thenReturn(experimentID);
@@ -142,7 +147,8 @@ public class ExperimentsImplTest {
                 .withLabel(testLabel)
                 .withSamplingPercent(samplingPercent)
                 .withStartTime(startTime)
-                .withEndTime(endTime).build();
+                .withEndTime(endTime)
+                .withDescription(description).build();
         doNothing().when(validator).validateNewExperiment(testExp);
         doNothing().when(validator).validateNewExperiment(testExp);
         when(cassandraRepository.createExperiment(testExp)).thenReturn(experimentID);
@@ -164,7 +170,8 @@ public class ExperimentsImplTest {
                 .withLabel(testLabel)
                 .withSamplingPercent(samplingPercent)
                 .withStartTime(startTime)
-                .withEndTime(endTime).build();
+                .withEndTime(endTime)
+                .withDescription(description).build();
         doNothing().when(validator).validateNewExperiment(testExp);
         when(cassandraRepository.createExperiment(testExp)).thenReturn(experimentID);
         doNothing().when(priorities).appendToPriorityList(experimentID);
@@ -188,7 +195,8 @@ public class ExperimentsImplTest {
                 .withLabel(testLabel)
                 .withSamplingPercent(samplingPercent)
                 .withStartTime(startTime)
-                .withEndTime(endTime).build();
+                .withEndTime(endTime)
+                .withDescription(description).build();
         doNothing().when(validator).validateNewExperiment(testExp);
         when(cassandraRepository.createExperiment(testExp)).thenReturn(experimentID);
         doNothing().when(priorities).appendToPriorityList(experimentID);

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- * <p>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,7 +28,7 @@ import java.util.Date;
  * Specification of a new experiment
  */
 @ApiModel(description = "Subset of Experiment used to create a new experiment.")
-public final class NewExperiment implements ExperimentBase {
+public class NewExperiment implements ExperimentBase {
 
     // Note, if adding a member variable, be sure to update the builder's
     // copy contructor
@@ -44,8 +44,12 @@ public final class NewExperiment implements ExperimentBase {
     private Date endTime;
     @ApiModelProperty(required = true)
     private Double samplingPercent;
+    @ApiModelProperty(required = true)
+    private String description;
     @ApiModelProperty(required = false)
-    private String description = "";
+    private String hypothesisIsCorrect = "";
+    @ApiModelProperty(required = false)
+    private String results = "";
     @ApiModelProperty(required = false)
     private String rule = "";
     @ApiModelProperty(required = false)
@@ -70,10 +74,6 @@ public final class NewExperiment implements ExperimentBase {
         this.id = Experiment.ID.newInstance();
     }
 
-    public static NewExperiment.Builder withID(Experiment.ID id) {
-        return new NewExperiment.Builder(id);
-    }
-
     public Experiment.ID getId() {
         return id;
     }
@@ -82,13 +82,64 @@ public final class NewExperiment implements ExperimentBase {
         this.id = id;
     }
 
+    public void setLabel(Experiment.Label label) {
+        this.label = label;
+    }
+
+    public void setStartTime(Date startTime) {
+        this.startTime = startTime;
+    }
+
+    public void setEndTime(Date endTime) {
+        this.endTime = endTime;
+    }
+
+    public void setSamplingPercent(Double samplingPercent) {
+        this.samplingPercent = samplingPercent;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setHypothesisIsCorrect(String hypothesisIsCorrect) { this.hypothesisIsCorrect = hypothesisIsCorrect; }
+
+    public void setResults(String results) { this.results = results; }
+
+    public void setRule(String rule) {
+        this.rule = rule;
+    }
+
+    public void setIsPersonalizationEnabled(Boolean isPersonalizationEnabled) {
+        this.isPersonalizationEnabled = isPersonalizationEnabled;
+    }
+
+    public void setModelName(String modelName) {
+        this.modelName = modelName;
+    }
+
+    public void setModelVersion(String modelVersion) {
+        this.modelVersion = modelVersion;
+    }
+
+    public void setIsRapidExperiment(Boolean isRapidExperiment) {
+        this.isRapidExperiment = isRapidExperiment;
+    }
+
+    public void setUserCap(Integer userCap) {
+        this.userCap = userCap;
+    }
+
+    public static NewExperiment.Builder withID(Experiment.ID id) {
+        return new NewExperiment.Builder(id);
+    }
+
     /**
      * The ID for the new instance
      *
      * @return the experiment ID
      */
-    @Override
-    @JsonIgnore
+    @Override @JsonIgnore
     public Experiment.ID getID() {
         return id;
     }
@@ -97,16 +148,8 @@ public final class NewExperiment implements ExperimentBase {
         return isRapidExperiment;
     }
 
-    public void setIsRapidExperiment(Boolean isRapidExperiment) {
-        this.isRapidExperiment = isRapidExperiment;
-    }
-
     public Integer getUserCap() {
         return userCap;
-    }
-
-    public void setUserCap(Integer userCap) {
-        this.userCap = userCap;
     }
 
     @Override
@@ -114,24 +157,12 @@ public final class NewExperiment implements ExperimentBase {
         return isPersonalizationEnabled;
     }
 
-    public void setIsPersonalizationEnabled(Boolean isPersonalizationEnabled) {
-        this.isPersonalizationEnabled = isPersonalizationEnabled;
-    }
-
     public String getModelName() {
         return modelName;
     }
 
-    public void setModelName(String modelName) {
-        this.modelName = modelName;
-    }
-
     public String getModelVersion() {
         return modelVersion;
-    }
-
-    public void setModelVersion(String modelVersion) {
-        this.modelVersion = modelVersion;
     }
 
     @Override
@@ -139,18 +170,14 @@ public final class NewExperiment implements ExperimentBase {
         return description;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    public String getHypothesisIsCorrect() { return hypothesisIsCorrect; }
+
+    public String getResults() { return results;  }
 
     @Override
     public String getRule() {
 
         return rule;
-    }
-
-    public void setRule(String rule) {
-        this.rule = rule;
     }
 
     @Override
@@ -162,17 +189,9 @@ public final class NewExperiment implements ExperimentBase {
         return samplingPercent;
     }
 
-    public void setSamplingPercent(Double samplingPercent) {
-        this.samplingPercent = samplingPercent;
-    }
-
     @Override
     public Date getStartTime() {
         return startTime;
-    }
-
-    public void setStartTime(Date startTime) {
-        this.startTime = startTime;
     }
 
     @Override
@@ -180,17 +199,9 @@ public final class NewExperiment implements ExperimentBase {
         return endTime;
     }
 
-    public void setEndTime(Date endTime) {
-        this.endTime = endTime;
-    }
-
     @Override
     public Experiment.Label getLabel() {
         return label;
-    }
-
-    public void setLabel(Experiment.Label label) {
-        this.label = label;
     }
 
     @Override

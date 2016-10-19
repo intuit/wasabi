@@ -1,0 +1,43 @@
+<div ng-controller='StoreController as store'>
+    <div class="siteHeading">
+        <h1>Welcome to our {{store.store}}, {{store.username}} </h1>
+        <div class="logoutLink">
+            <a href="/#/logout">Logout</a>
+        </div>
+    </div>
+    <div class="storeMain">
+        <section>
+            <h2> Our Products </h2>
+            Search:     <input ng-model='query'>
+            <table style="width: 500px;">
+                <tr><th style="width: 260px;">Name</th><th style="width: 100px;">Price</th><th>Quantity</th><th>&nbsp;</th></tr>
+                <tr ng-repeat='nextProduct in store.products | filter:query' ng-class-odd="'oddRow'" ng-class-even="'evenRow'">
+                    <td class="storeProductName">{{nextProduct.name}}</td>
+                    <td class="storePriceCell">${{nextProduct.cost}}</td>
+                    <td style="text-align: center;"><input type="number" style="width: 20px;" ng-model="nextProduct.quantity"/></td>
+                    <td class="buttonCell"><button style="background-color: {{store.buttonColor}}; color: {{store.textColor}}" ng-click="store.addToCart(nextProduct)">Buy</button></td></tr>
+                </tr>
+            </table>
+        </section>
+        <br/>
+        <div class="newProductModal" ng-controller='ProductController as product' ng-init="product.setStore(store)">
+            <form class="productForm">
+                <label>Product Name: </label> <input ng-model='product.name'> <br />
+                <label>Cost : </label>        <input ng-model='product.cost'> <br />
+            </form>
+            <button ng-click='product.submit()'>Submit</button>
+            <p ng-show='product.errorMessage != ""'>Error: {{product.errorMessage}} </p>
+        </div>
+        <br/>
+        <section>
+            <h2>Cart</h2>
+            <span ng-if="store.cart.length === 0">Your cart is empty</span>
+            <table ng-if="store.cart.length > 0" style="width: 500px;">
+                <tr><th style="width: 260px;">Name</th><th style="width: 100px;">Price</th><th>Quantity</th><th>&nbsp;</th></tr>
+                <tr ng-repeat='nextProduct in store.cart' ng-class-odd="'oddRow'" ng-class-even="'evenRow'">
+                    <td class="storeProductName">{{nextProduct.name}}</td><td class="storePriceCell">${{nextProduct.cost}}</td><td style="text-align: center;">{{nextProduct.quantity}}</td><td class="buttonCell"><button ng-click="store.removeFromCart(nextProduct)">Remove</button></td></tr>
+                </tr>
+            </table>
+        </section>
+    </div>
+</div>

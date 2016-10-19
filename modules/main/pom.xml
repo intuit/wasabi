@@ -20,7 +20,7 @@
     <parent>
         <groupId>com.intuit.wasabi</groupId>
         <artifactId>wasabi</artifactId>
-        <version>20151215171929-SNAPSHOT</version>
+        <version>1.0.20161014052805-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -86,9 +86,7 @@
             <id>test</id>
             <properties>
                 <!-- NOTE: do not pretty-print format -->
-                <application.instrument>
-                    -javaagent:/usr/local/lib/org.jacoco.agent-${jacoco.version}-runtime.jar=destfile=${LOG_DIR}/jacoco-it.exec,append=false
-                </application.instrument>
+                <application.instrument>-javaagent:/usr/local/lib/org.jacoco.agent-0.7.2.201409121644-runtime.jar=destfile=${LOG_DIR}/jacoco-it.exec,append=false</application.instrument>
                 <metrics.jmx.enabled>true</metrics.jmx.enabled>
             </properties>
         </profile>
@@ -101,14 +99,14 @@
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.intuit.data.autumn</groupId>
-            <artifactId>autumn.service</artifactId>
-            <version>1.0.20160515205816</version>
+            <groupId>com.intuit.autumn</groupId>
+            <artifactId>autumn-service</artifactId>
+            <version>1.0.20160626031951</version>
         </dependency>
         <dependency>
-            <groupId>com.intuit.data.autumn</groupId>
-            <artifactId>autumn.metrics</artifactId>
-            <version>1.0.20160515205816</version>
+            <groupId>com.intuit.autumn</groupId>
+            <artifactId>autumn-metrics</artifactId>
+            <version>1.0.20160626031951</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>

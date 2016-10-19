@@ -51,7 +51,7 @@ public class EventsResourceTest {
 
     @Before
     public void setUp() throws Exception {
-        resource = new EventsResource(events, new HttpHeader("jaba-???"));
+        resource = new EventsResource(events, new HttpHeader("App-???"));
     }
 
     @Test

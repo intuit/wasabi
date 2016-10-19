@@ -17,6 +17,7 @@ package com.intuit.wasabi.experimentobjects;
 
 
 import io.swagger.annotations.ApiModelProperty;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -33,6 +34,23 @@ public class PageExperiment implements Cloneable {
 
     public static Builder withAttributes(Experiment.ID experimentID, Experiment.Label label, boolean allowNewAssignment) {
         return new Builder(experimentID, label, allowNewAssignment);
+    }
+
+    public static class Builder{
+        private PageExperiment instance;
+
+        public Builder(Experiment.ID experimentID, Experiment.Label label, boolean allowNewAssignment){
+            instance = new PageExperiment();
+            instance.id = experimentID;
+            instance.label = label;
+            instance.allowNewAssignment = allowNewAssignment;
+        }
+
+        public PageExperiment build(){
+            PageExperiment result = instance;
+            instance = null;
+            return result;
+        }
     }
 
     public Experiment.ID getId() {
@@ -78,31 +96,7 @@ public class PageExperiment implements Cloneable {
     }
 
     @Override
-    public PageExperiment clone() {
-        try {
+    public PageExperiment clone() throws CloneNotSupportedException {
             return (PageExperiment) super.clone();
-        } catch (CloneNotSupportedException e) {
-            // Should never happen
-            throw new RuntimeException(e);
-        }
     }
-
-    public static class Builder {
-        private PageExperiment instance;
-
-        public Builder(Experiment.ID experimentID, Experiment.Label label, boolean allowNewAssignment) {
-            super();
-            instance = new PageExperiment();
-            instance.id = experimentID;
-            instance.label = label;
-            instance.allowNewAssignment = allowNewAssignment;
-        }
-
-        public PageExperiment build() {
-            PageExperiment result = instance;
-            instance = null;
-            return result;
-        }
-    }
-
 }

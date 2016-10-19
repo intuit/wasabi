@@ -22,8 +22,8 @@ import org.slf4j.Logger;
 
 import java.util.Properties;
 
-import static com.intuit.data.autumn.utils.PropertyFactory.create;
-import static com.intuit.data.autumn.utils.PropertyFactory.getProperty;
+import static com.intuit.autumn.utils.PropertyFactory.create;
+import static com.intuit.autumn.utils.PropertyFactory.getProperty;
 import static java.lang.Integer.parseInt;
 import static org.slf4j.LoggerFactory.getLogger;
 

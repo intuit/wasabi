@@ -17,6 +17,7 @@ package com.intuit.wasabi.repository.impl.database;
 
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import com.googlecode.flyway.core.Flyway;
 import com.intuit.wasabi.analyticsobjects.counts.AssignmentCounts;
 import com.intuit.wasabi.database.Transaction;
@@ -26,6 +27,7 @@ import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
 import com.intuit.wasabi.experimentobjects.*;
 import com.intuit.wasabi.experimentobjects.Experiment.State;
 import com.intuit.wasabi.experimentobjects.exceptions.WasabiException;
+import com.intuit.wasabi.repository.DatabaseRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.RepositoryException;
 import com.netflix.astyanax.MutationBatch;
@@ -44,7 +46,7 @@ import static com.intuit.wasabi.experimentobjects.Experiment.State.DELETED;
  *
  * @see ExperimentRepository
  */
-class DatabaseExperimentRepository implements ExperimentRepository {
+public class DatabaseExperimentRepository implements ExperimentRepository {
 
 
     private final ExperimentValidator validator;
@@ -52,16 +54,16 @@ class DatabaseExperimentRepository implements ExperimentRepository {
 
     @Inject
     public DatabaseExperimentRepository(TransactionFactory transactionFactory, ExperimentValidator validator,
-                                        Flyway flyway) {
+            Flyway flyway, final @Named("mysql.mutagen.root.resource.path") String mutagenRootResourcePath) {
         super();
 
         this.transactionFactory = transactionFactory;
         this.validator = validator;
-        initialize(flyway);
+        initialize(flyway, mutagenRootResourcePath);
     }
 
-    private void initialize(Flyway flyway) {
-        flyway.setLocations("com/intuit/wasabi/repository/impl/mysql/migration");
+    private void initialize(Flyway flyway, String mutagenRootResourcePath) {
+        flyway.setLocations(mutagenRootResourcePath);
         flyway.setDataSource(transactionFactory.getDataSource());
         flyway.migrate();
     }

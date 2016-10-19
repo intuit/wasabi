@@ -7,8 +7,8 @@
 // page success message before the first one has faded out.
 var globalPageSuccessMessageFadeOutTimer = null;
 
-angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$state', 'AuthFactory', '$rootScope', 'AUTH_EVENTS', 'PERMISSIONS', 'USER_ROLES', '$filter', 'AuthzFactory', 'BucketsFactory', 'DialogsFactory', 'ExperimentsFactory', 'WasabiFactory', '$modal', '$injector',
-    function (Session, $state, AuthFactory, $rootScope, AUTH_EVENTS, PERMISSIONS, USER_ROLES, $filter, AuthzFactory, BucketsFactory, DialogsFactory, ExperimentsFactory, WasabiFactory, $modal, $injector) {
+angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$state', 'AuthFactory', '$rootScope', 'AUTH_EVENTS', 'PERMISSIONS', 'USER_ROLES', '$filter', 'AuthzFactory', 'BucketsFactory', 'DialogsFactory', 'ExperimentsFactory', 'WasabiFactory', '$modal', '$injector', 'FavoritesFactory', 'StateFactory',
+    function (Session, $state, AuthFactory, $rootScope, AUTH_EVENTS, PERMISSIONS, USER_ROLES, $filter, AuthzFactory, BucketsFactory, DialogsFactory, ExperimentsFactory, WasabiFactory, $modal, $injector, FavoritesFactory, StateFactory) {
         return {
             // generate state image url
             stateImgUrl: function (state) {
@@ -61,6 +61,9 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                 }
                 if (label.toLowerCase() !== 'experiments') {
                     localStorage.removeItem('wasabiLastSearch'); // Clear the remembered search value
+                    // Clear the remembered page value
+                    StateFactory.currentExperimentsPage = 1;
+                    StateFactory.currentCardViewPage = 1;
                 }
                 $('.main li').removeClass('sel');
                 $('.main li a:contains(' + label + ')').parent().addClass('sel');
@@ -501,33 +504,46 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                 }
             },
 
-            saveFavorite: function (newFavoriteApp, newFavoriteExperiment) {
-                var faves = localStorage.getItem('wasabiHomeFaves');
-                faves = (faves ? JSON.parse(faves) : []);
-                // Add the new one at the beginning.
-                faves.splice(0, 0, newFavoriteApp + '|' + newFavoriteExperiment);
-                localStorage.setItem('wasabiHomeFaves', JSON.stringify(faves));
+            saveFavorite: function (experimentID, favoritesObj) {
+                var that = this;
+                FavoritesFactory.create({
+                    'id': experimentID
+                }).$promise.then(function (results) {
+                    if (results && results.experimentIDs) {
+                        favoritesObj.favorites = results.experimentIDs;
+                    }
+                    that.trackEvent('saveItemSuccess',
+                        {key: 'dialog_name', value: 'createFavorite'},
+                        {key: 'experiment_id', value: experimentID}
+                    );
+                },
+                function(response) {
+                    that.handleGlobalError(response, 'The favorite could not be created.');
+                });
             },
 
-            removeFavorite: function (removeFavoriteApp, removeFavoriteExperiment) {
-                var faves = localStorage.getItem('wasabiHomeFaves');
-                if (!faves) {
-                    return;
-                }
-                else {
-                    faves = JSON.parse(faves);
-                }
-                var locInArray = faves.indexOf(removeFavoriteApp + '|' + removeFavoriteExperiment);
-                if (locInArray >= 0) {
-                    faves.splice(locInArray, 1); // Remove the item from the array.
-                    localStorage.setItem('wasabiHomeFaves', JSON.stringify(faves));
-                }
+            removeFavorite: function (experimentID, favoritesObj) {
+                var that = this;
+                FavoritesFactory.delete(
+                    {
+                        'id': experimentID
+                    }
+                ).$promise.then(function (results) {
+                    if (results && results.experimentIDs) {
+                        favoritesObj.favorites = results.experimentIDs;
+                    }
+                    that.trackEvent('saveItemSuccess',
+                        {key: 'dialog_name', value: 'deleteFavorite'},
+                        {key: 'experiment_id', value: experimentID}
+                    );
+                },
+                function(response) {
+                    that.handleGlobalError(response, 'The favorite could not be delete.');
+                });
             },
 
             retrieveFavorites: function () {
-                var faves = localStorage.getItem('wasabiHomeFaves');
-                faves = (faves ? JSON.parse(faves) : []);
-                return faves;
+                return FavoritesFactory.query();
             },
 
             getBucket: function (bucketLabel, experiment) {
@@ -566,18 +582,18 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
 
                     // We need the buckets to be an array so we can sort it.
                     theBuckets.push(experiment.statistics.buckets[bucketLabel]);
-                }
-
-                experiment.statistics.sortedBuckets = $filter('orderBy')(theBuckets, function(bucket) {
                     // Find the matching bucket in the experiment bucket list, which has the count from
                     // the application statistics call on it, and put the count in the sorted bucket so
                     // it will be available for the list.
                     for (var i = 0; i < experiment.buckets.length; i++) {
-                        if (experiment.buckets[i].label === bucket.label) {
-                            bucket.count = experiment.buckets[i].count;
+                        if (experiment.buckets[i].label === bucketLabel) {
+                            experiment.statistics.buckets[bucketLabel].count = experiment.buckets[i].count;
                         }
                     }
 
+                }
+
+                experiment.statistics.sortedBuckets = $filter('orderBy')(theBuckets, function(bucket) {
                     return that.actionRate(bucket.label, experiment.statistics.buckets);
                 }, true);
 
@@ -900,7 +916,19 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                                     {key: 'experiment_id', value: experiment.id},
                                     {key: 'item_id', value: state});
 
-                                afterUpdateFunction();
+                                if (afterUpdateFunction && afterUpdateFunction === Object(afterUpdateFunction) &&
+                                    typeof afterUpdateFunction !== 'function') {
+                                    // afterUpdateFunction is actually an object where the properties should be the
+                                    // name of a state.  We should call the function associated with that property
+                                    // only after we make a change to that state.
+                                    if (afterUpdateFunction.hasOwnProperty(state)) {
+                                        afterUpdateFunction[state](experiment);
+                                    }
+                                }
+                                else {
+                                    // Otherwise, it is a function to be called for all state changes.
+                                    afterUpdateFunction();
+                                }
                             }, function(response) {
                                 that.handleGlobalError(response, 'The state of your experiment could not be changed.');
                             });
@@ -983,6 +1011,29 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                 });
 
                 return false;
+            },
+
+            openResultsModal: function (experiment, readOnly, afterResultsFunc) {
+                var modalInstance = $modal.open({
+                    templateUrl: 'views/ResultsModal.html',
+                    controller: 'ResultsModalCtrl',
+                    windowClass: 'xxx-dialog',
+                    backdrop: 'static',
+                    resolve: {
+                        experiment: function () {
+                            return experiment;
+                        },
+                        readOnly: function() {
+                            return readOnly;
+                        }
+                    }
+                });
+
+                modalInstance.result.then(function () {
+                    if (afterResultsFunc) {
+                        afterResultsFunc();
+                    }
+                });
             }
 
         };

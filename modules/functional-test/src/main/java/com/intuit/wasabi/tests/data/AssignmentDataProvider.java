@@ -72,15 +72,15 @@ public class AssignmentDataProvider extends CombinableDataProvider {
     @DataProvider(name = "PutAssignmentExperimentData")
     public static Object[][] putAssignmentExperimentData() {
         return new Object[][]{
-                new Object[]{
-                        "testingApp",
-                        "PutAssignments_" + time,
-                        "{\"applicationName\": \"testingApp\", \"label\": \"PutAssignments_" +
-                                time + "\",\"samplingPercent\": 0.67, \"startTime\": \"" +
-                                dateParser.format(dateTime.minusDays(3).toDate()) + "\"," +
-                                "\"endTime\": \"" + dateParser.format(dateTime.plusDays(3).toDate()) + "\"}",
-                        "onlybucket",
-                        "{\"label\": \"onlybucket\", \"allocationPercent\": 1.0, \"isControl\": false, \"description\": \"the only bucket\",\"payload\": \"jklfew\"}"
+            new Object[]{
+                    "testingApp",
+                    "PutAssignments_"+time,
+                    "{\"applicationName\": \"testingApp\", \"label\": \"PutAssignments_"+
+                            time+"\",\"samplingPercent\": 0.67, \"startTime\": \""+
+                            dateParser.format(dateTime.minusDays(3).toDate())+"\"," +
+                            "\"endTime\": \""+dateParser.format(dateTime.plusDays(3).toDate())+"\", \"description\": \"Some hypothesis\"}",
+                    "onlybucket",
+                    "{\"label\": \"onlybucket\", \"allocationPercent\": 1.0, \"isControl\": false, \"description\": \"the only bucket\",\"payload\": \"jklfew\"}"
 
                 }
         };
@@ -100,44 +100,44 @@ public class AssignmentDataProvider extends CombinableDataProvider {
     @DataProvider(name = "BatchAssignmentExperimentData")
     public static Object[][] BatchAssignmentExperimentData() {
         return new Object[][]{
-                new Object[]{"{\"applicationName\": \"testBatch\", \"label\": \"batchAssign_" + 1 + "-" +
-                        time + "\",\"samplingPercent\": 1.0, \"startTime\": \"" +
-                        dateParser.format(dateTime.minusDays(3).toDate()) + "\"," +
-                        "\"endTime\": \"" + dateParser.format(dateTime.plusDays(3).toDate()) + "\"}"},
-                new Object[]{"{\"applicationName\": \"testBatch\", \"label\": \"batchAssign_" + 2 + "-" +
-                        time + "\",\"samplingPercent\": 1.0, \"startTime\": \"" +
-                        dateParser.format(dateTime.minusDays(3).toDate()) + "\"," +
-                        "\"endTime\": \"" + dateParser.format(dateTime.plusDays(3).toDate()) + "\"}"},
-                new Object[]{"{\"applicationName\": \"testBatch\", \"label\": \"batchAssign_" + 3 + "-" +
-                        time + "\",\"samplingPercent\": 1.0, \"startTime\": \"" +
-                        dateParser.format(dateTime.minusDays(3).toDate()) + "\"," +
-                        "\"endTime\": \"" + dateParser.format(dateTime.plusDays(3).toDate()) + "\"}"},
-                new Object[]{"{\"applicationName\": \"testBatch\", \"label\": \"batchAssign_" + 4 + "-" +
-                        time + "\",\"samplingPercent\": 1.0, \"startTime\": \"" +
-                        dateParser.format(dateTime.minusDays(3).toDate()) + "\"," +
-                        "\"endTime\": \"" + dateParser.format(dateTime.plusDays(3).toDate()) + "\"}"},
-                new Object[]{"{\"applicationName\": \"testBatch\", \"label\": \"batchAssign_" + 5 + "-" +
-                        time + "\",\"samplingPercent\": 1.0, \"startTime\": \"" +
-                        dateParser.format(dateTime.minusDays(3).toDate()) + "\"," +
-                        "\"endTime\": \"" + dateParser.format(dateTime.plusDays(3).toDate()) + "\"}"}
+                new Object[] {"{\"applicationName\": \"testBatch\", \"label\": \"batchAssign_"+1+"-"+
+                        time+"\",\"samplingPercent\": 1.0, \"startTime\": \""+
+                        dateParser.format(dateTime.minusDays(3).toDate())+"\"," +
+                        "\"endTime\": \""+dateParser.format(dateTime.plusDays(3).toDate())+"\", \"description\": \"Some hypothesis\"}" },
+                new Object[] {"{\"applicationName\": \"testBatch\", \"label\": \"batchAssign_"+2+"-"+
+                        time+"\",\"samplingPercent\": 1.0, \"startTime\": \""+
+                        dateParser.format(dateTime.minusDays(3).toDate())+"\"," +
+                        "\"endTime\": \""+dateParser.format(dateTime.plusDays(3).toDate())+"\", \"description\": \"Some hypothesis\"}" },
+                new Object[] {"{\"applicationName\": \"testBatch\", \"label\": \"batchAssign_"+3+"-"+
+                        time+"\",\"samplingPercent\": 1.0, \"startTime\": \""+
+                        dateParser.format(dateTime.minusDays(3).toDate())+"\"," +
+                        "\"endTime\": \""+dateParser.format(dateTime.plusDays(3).toDate())+"\", \"description\": \"Some hypothesis\"}"  },
+                new Object[] {"{\"applicationName\": \"testBatch\", \"label\": \"batchAssign_"+4+"-"+
+                        time+"\",\"samplingPercent\": 1.0, \"startTime\": \""+
+                        dateParser.format(dateTime.minusDays(3).toDate())+"\"," +
+                        "\"endTime\": \""+dateParser.format(dateTime.plusDays(3).toDate())+"\", \"description\": \"Some hypothesis\"}"  },
+                new Object[] {"{\"applicationName\": \"testBatch\", \"label\": \"batchAssign_"+5+"-"+
+                        time+"\",\"samplingPercent\": 1.0, \"startTime\": \""+
+                        dateParser.format(dateTime.minusDays(3).toDate())+"\"," +
+                        "\"endTime\": \""+dateParser.format(dateTime.plusDays(3).toDate())+"\", \"description\": \"Some hypothesis\"}" }
         };
     }
 
     @DataProvider(name = "BatchAssignmentBadExperimentData")
     public static Object[][] BatchAssignmentBadExperimentData() {
         return new Object[][]{
-                new Object[]{"{\"applicationName\": \"testBadBatch\", \"label\": \"batchBadAssign_" + 1 + "-" +
-                        time + "\",\"samplingPercent\": 1.0, \"startTime\": \"" +
-                        dateParser.format(dateTime.minusDays(3).toDate()) + "\"," +
-                        "\"endTime\": \"" + dateParser.format(dateTime.plusDays(3).toDate()) + "\"}"},
-                new Object[]{"{\"applicationName\": \"testBadBatch\", \"label\": \"batchBadAssign_" + 2 + "-" +
-                        time + "\",\"samplingPercent\": 1.0, \"startTime\": \"" +
-                        dateParser.format(dateTime.minusDays(3).toDate()) + "\"," +
-                        "\"endTime\": \"" + dateParser.format(dateTime.plusDays(3).toDate()) + "\"}"},
-                new Object[]{"{\"applicationName\": \"testBadBatch\", \"label\": \"batchBadAssign_" + 3 + "-" +
-                        time + "\",\"samplingPercent\": 1.0, \"startTime\": \"" +
-                        dateParser.format(dateTime.minusDays(3).toDate()) + "\"," +
-                        "\"endTime\": \"" + dateParser.format(dateTime.plusDays(3).toDate()) + "\"}"}
+                new Object[] {"{\"applicationName\": \"testBadBatch\", \"label\": \"batchBadAssign_"+1+"-"+
+                        time+"\",\"samplingPercent\": 1.0, \"startTime\": \""+
+                        dateParser.format(dateTime.minusDays(3).toDate())+"\"," +
+                        "\"endTime\": \""+dateParser.format(dateTime.plusDays(3).toDate())+"\", \"description\": \"Some hypothesis\"}" },
+                new Object[] {"{\"applicationName\": \"testBadBatch\", \"label\": \"batchBadAssign_"+2+"-"+
+                        time+"\",\"samplingPercent\": 1.0, \"startTime\": \""+
+                        dateParser.format(dateTime.minusDays(3).toDate())+"\"," +
+                        "\"endTime\": \""+dateParser.format(dateTime.plusDays(3).toDate())+"\", \"description\": \"Some hypothesis\"}" },
+                new Object[] {"{\"applicationName\": \"testBadBatch\", \"label\": \"batchBadAssign_"+3+"-"+
+                        time+"\",\"samplingPercent\": 1.0, \"startTime\": \""+
+                        dateParser.format(dateTime.minusDays(3).toDate())+"\"," +
+                        "\"endTime\": \""+dateParser.format(dateTime.plusDays(3).toDate())+"\", \"description\": \"Some hypothesis\"}" }
         };
     }
 
@@ -158,9 +158,9 @@ public class AssignmentDataProvider extends CombinableDataProvider {
     @DataProvider(name = "ExportAssignmentExperimentData")
     public static Object[][] ExportAssignmentExperimentData() {
         return new Object[][]{
-                new Object[]{"{\"applicationName\": \"testExportAssignment_" + time + "\", \"label\": \"assignments\"," +
-                        "\"samplingPercent\": 1.0, \"startTime\": \"" + dateParser.format(dateTime.minusDays(3).toDate())
-                        + "\"," + "\"endTime\": \"" + dateParser.format(dateTime.plusDays(3).toDate()) + "\"}"}
+                new Object[] {"{\"applicationName\": \"testExportAssignment_"+time+"\", \"label\": \"assignments\"," +
+                        "\"samplingPercent\": 1.0, \"startTime\": \""+ dateParser.format(dateTime.minusDays(3).toDate())
+                        +"\"," + "\"endTime\": \""+dateParser.format(dateTime.plusDays(3).toDate())+"\", \"description\": \"Some hypothesis\"}" }
         };
     }
 

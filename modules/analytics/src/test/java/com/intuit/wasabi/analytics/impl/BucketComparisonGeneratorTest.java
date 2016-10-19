@@ -68,9 +68,6 @@ public class BucketComparisonGeneratorTest {
     private Bucket.Label bucket2Label = Bucket.Label.valueOf("two");
     private Bucket.Label bucket3Label = Bucket.Label.valueOf("three");
 
-//    public BucketComparisonGeneratorTest(AnalysisTools analysisTools) {
-//        this.analysisTools = analysisTools;
-//    }
 
     @Before
     public void before() {

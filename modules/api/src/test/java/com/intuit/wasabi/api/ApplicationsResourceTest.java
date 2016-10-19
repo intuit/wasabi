@@ -21,7 +21,12 @@ import com.intuit.wasabi.exceptions.AuthenticationException;
 import com.intuit.wasabi.experiment.Experiments;
 import com.intuit.wasabi.experiment.Pages;
 import com.intuit.wasabi.experiment.Priorities;
-import com.intuit.wasabi.experimentobjects.*;
+import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.experimentobjects.ExperimentIDList;
+import com.intuit.wasabi.experimentobjects.Page;
+import com.intuit.wasabi.experimentobjects.PageExperiment;
+import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,7 +49,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Matchers.anyCollection;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyObject;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ApplicationsResourceTest {
@@ -161,14 +170,15 @@ public class ApplicationsResourceTest {
 
     @Test
     public void getExperiments() throws Exception {
-        when(authorizedExperimentGetter.getAuthorizedExperimentsByName("foo", applicationName))
-                .thenReturn(experimentsByName);
-        whenHttpHeader(experimentsByName);
+        doReturn(responseBuilder).when(httpHeader).headers();
+        doReturn(responseBuilder).when(responseBuilder).entity(anyCollection());
+        doReturn(response).when(responseBuilder).build();
 
         applicationsResource.getExperiments(applicationName, "foo");
 
         verify(authorizedExperimentGetter).getAuthorizedExperimentsByName("foo", applicationName);
-        verifyHttpHeader(experimentsByName);
+        verify(httpHeader).headers();
+        verify(responseBuilder).build();
     }
 
     @Test

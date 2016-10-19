@@ -17,6 +17,10 @@ package com.intuit.wasabi.eventlog.impl;
 
 import com.intuit.wasabi.eventlog.EventLogListener;
 import com.intuit.wasabi.eventlog.events.EventLogEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Wraps a {@link Runnable} around an {@link EventLogEvent} and an {@link EventLogListener} (the recipient) who is
@@ -26,9 +30,9 @@ import com.intuit.wasabi.eventlog.events.EventLogEvent;
 
     /** The recipient of the event. */
     private final EventLogListener recipient;
-
     /** The event. */
     private final EventLogEvent event;
+    private Logger LOGGER = getLogger(EventLogEventEnvelope.class);
 
     /**
      * Creates an envelope containing an event for the recipient.
@@ -49,7 +53,10 @@ import com.intuit.wasabi.eventlog.events.EventLogEvent;
      */
     @Override
     public void run() {
-        recipient.postEvent(event);
-    }
+        LOGGER.debug("posting event: {}", event);
 
+        recipient.postEvent(event);
+
+        LOGGER.debug("posted event: {}", event);
+    }
 }

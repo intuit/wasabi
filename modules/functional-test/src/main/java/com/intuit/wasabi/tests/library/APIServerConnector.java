@@ -205,13 +205,16 @@ public class APIServerConnector {
             }
         }
 
-        return "curl " +
-                "-X " + method + " " +
-                authString +
-                agentString +
-                contentTypeString +
-                dataString +
-                baseUri + basePath + url;
+        String curlCall =
+                "curl " +
+                        "-X " + method + " " +
+                        authString +
+                        agentString +
+                        contentTypeString +
+                        dataString +
+                        baseUri + basePath + url;
+
+        return curlCall;
     }
 
     private RequestSpecification constructRequestSpec() {

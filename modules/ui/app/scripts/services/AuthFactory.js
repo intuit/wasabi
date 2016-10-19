@@ -33,7 +33,7 @@ angular.module('wasabi.services').factory('AuthFactory', ['$resource', 'Session'
                     if (data) {
                         data = $.parseJSON(data);
                         //console.log(data);
-                        if (data.errors) {
+                        if (data.error) {
                             Session.destroy();
                         }
                     }

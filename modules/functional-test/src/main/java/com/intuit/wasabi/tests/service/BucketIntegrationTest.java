@@ -35,7 +35,6 @@ import java.util.UUID;
 
 import static com.intuit.wasabi.tests.library.util.Constants.*;
 import static org.testng.Assert.assertEquals;
-
 /**
  * Bucket integration tests
  */
@@ -556,11 +555,11 @@ public class BucketIntegrationTest extends TestBase {
         Bucket bucket = buckets.get(0);
         bucket.state = BUCKET_STATE_CLOSED;
         putBucketState(bucket);
-
-        List<Assignment> assignmentsAfrerclose = getAssignments(newExperiment);
-        assertEquals(assignmentsAfrerclose.size(), 1);
-        assertEquals(labels[0], assignmentsAfrerclose.get(0).bucket_label);
-
+        
+        List<Assignment> assignmentsAfterclose = getAssignments(newExperiment);
+        assertEquals(assignmentsAfterclose.size(), 1);
+        assertEquals(labels[0], assignmentsAfterclose.get(0).bucket_label);
+        
         User user2 = UserFactory.createUser("u2");
         Assignment assignment2 = getAssignment(newExperiment, user2);
         assertEquals(assignment2.status, NO_OPEN_BUCKETS);

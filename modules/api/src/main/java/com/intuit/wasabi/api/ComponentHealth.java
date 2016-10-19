@@ -22,8 +22,7 @@ import io.swagger.annotations.ApiModelProperty;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 // note: class/method scoping public required for json'ification
-@JsonInclude(NON_NULL)
-@JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY)
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ComponentHealth {
 
     @ApiModelProperty(required = true)

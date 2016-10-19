@@ -26,7 +26,7 @@ import static com.intuit.wasabi.experimentobjects.exceptions.ErrorCode.AUDIT_LOG
 public class AuditLogException extends WasabiClientException {
 
     /**
-     * Throws an {@link ErrorCode#EVENT_LOG_ERROR} exception.
+     * Throws an {@link ErrorCode#AUDIT_LOG_ERROR} exception.
      *
      * @param message a detailed error message
      */
@@ -35,7 +35,7 @@ public class AuditLogException extends WasabiClientException {
     }
 
     /**
-     * Throws an {@link ErrorCode#EVENT_LOG_ERROR} exception.
+     * Throws an {@link ErrorCode#AUDIT_LOG_ERROR} exception.
      *
      * @param message a detailed error message
      * @param cause the cause of this exception
@@ -45,7 +45,7 @@ public class AuditLogException extends WasabiClientException {
     }
 
     /**
-     * Throws an EventLogException.
+     * Throws an AuditLogException.
      *
      * @param errorCode the error code from {@link ErrorCode}
      * @param message a detailed error message
@@ -55,7 +55,7 @@ public class AuditLogException extends WasabiClientException {
     }
 
     /**
-     * Throws an EventLogException.
+     * Throws an AuditLogException.
      *
      * @param errorCode the error code from {@link ErrorCode}
      * @param message a detailed error message

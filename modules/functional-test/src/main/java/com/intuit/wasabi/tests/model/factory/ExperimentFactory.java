@@ -39,29 +39,20 @@ public class ExperimentFactory {
 
     /**
      * Creates a basic Experiment with the required default values but no ID.
-     * The values are a name, the default application, a start and end time and the sampling percentage (100%).
+     * The values are a name, the default application, a start and end time and the sampling percentage (100%), as
+     * well as a hypothesis/description.
      *
      * Sets the creatorID to admin email
      *
      * @return a default Experiment.
      */
     public static Experiment createExperiment() {
-        return new Experiment(Constants.DEFAULT_PREFIX_EXPERIMENT + System.currentTimeMillis() + internalId++, ApplicationFactory.defaultApplication(),
-                TestUtils.currentTimeString(), TestUtils.relativeTimeString(42), 1).setCreatorID(USER_ID);
-    }
-
-    /**
-     * Creates a basic Experiment with the required default values and the optional value
-     * description. (No ID!)
-     * The values are a name, the default application, a start and end time, the sampling percentage (100%) and a
-     * description.
-     *
-     * @return an extended Experiment.
-     */
-    public static Experiment createExperimentWithDescription() {
-        Experiment experiment = ExperimentFactory.createExperiment();
-        experiment.description = "A sample Experiment description.";
-        return experiment;
+        return new Experiment(Constants.DEFAULT_PREFIX_EXPERIMENT + System.currentTimeMillis() + internalId++,
+                ApplicationFactory.defaultApplication(),
+                TestUtils.currentTimeString(),
+                TestUtils.relativeTimeString(42), 1)
+                    .setCreatorID(USER_ID)
+                    .setDescription("A sample Experiment description.");
     }
 
     /**
@@ -89,6 +80,8 @@ public class ExperimentFactory {
     public static Experiment createCompleteExperiment() {
         Experiment experiment = ExperimentFactory.createExperimentWithRule();
         experiment.description = "A sample Experiment description.";
+        experiment.hypothesisIsCorrect = "Sample hypothesis check";
+        experiment.results = "Sample experiment results";
         return experiment;
     }
 
@@ -102,3 +95,4 @@ public class ExperimentFactory {
         return new GsonBuilder().create().fromJson(json, Experiment.class);
     }
 }
+

@@ -45,11 +45,6 @@ public class ExperimentCalculatorTest {
     private Bucket.Label bucket2Label = Bucket.Label.valueOf("two");
     private AnalysisTools analysisTools = new AnalysisToolsImpl();
 
-//    public ExperimentCalculatorTest(AnalysisTools analysisTools) {
-//        this.analysisTools = analysisTools;
-//    }
-
-
     @Before
     public void before() {
         buckets = new HashMap<>();

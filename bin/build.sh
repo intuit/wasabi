@@ -37,7 +37,7 @@ EOF
 }
 
 fromPom() {
-  mvn -f $1/pom.xml -P$2 help:evaluate -Dexpression=$3 -B \
+  mvn ${WASABI_MAVEN} -f $1/pom.xml -P$2 help:evaluate -Dexpression=$3 -B \
     -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=error | \
     sed -n -e '/^\[.*\]/ !{ p; }'
 }
@@ -73,18 +73,15 @@ module=main
 
 [[ "${build}" != "true" && "${build}" != "false" ]] && usage "invalid build parameter" 1
 [[ "${test}" != "true" && "${test}" != "false" ]] && usage "invalid test parameter" 1
+[ ! -e ./modules/main/target/wasabi-main-*-SNAPSHOT-${profile}-all.jar ] && build_jar=true
 
-if [[ "${build}" != false || "${test}" != false ]]; then
-  package=
-  tests=
-
-  [[ "${test}" = true ]] && package=test
-  [[ "${test}" = false ]] && tests="-Dmaven.test.skip=true"
+if [[ "${build}" = true || "${test}" = true || "${build_jar}" = true ]]; then
   [ "${build}" = true ] && package=package
-  [[ "${build}" = false ]] && package=test
+  [ ! -e ./modules/main/target/wasabi-main-*-SNAPSHOT-${profile}-all.jar ] && package=package
+  [ "${test}" = true ] && tests="org.jacoco:jacoco-maven-plugin:prepare-agent findbugs:check test"
 
-  mvn -P${profile} ${tests} clean ${package} javadoc:aggregate || \
-    usage "invalid: mvn ${tests} -P${profile} clean ${package}" 1
+  mvn ${WASABI_MAVEN} -P${profile} clean ${tests:--Dmaven.test.skip=true} ${package} javadoc:aggregate || \
+    usage "invalid: mvn ${WASABI_MAVEN} -P${profile} clean ${tests:--Dmaven.test.skip=true} ${package} javadoc:aggregate" 1
 fi
 
 artifact=$(fromPom ./modules/${module} ${profile} project.artifactId)
@@ -121,14 +118,17 @@ cp ${home}/${id}-all.jar ${home}/${id}/lib
 chmod 755 ${home}/${id}/bin/run
 chmod 755 ${home}/${id}/entrypoint.sh
 sed -i '' -e "s/chpst -u [^:]*:[^ ]* //" ${home}/${id}/bin/run 2>/dev/null
+[ ! -e ./modules/ui/target/dist/scripts/wasabi.js ] && build_js=true
 
-if [ "${build}" = true ]; then
-  brew list node
-  if [[ $? -eq 1 ]]; then
-  	echo "Node.js is not installed. Installing Node.js packages..."
-  	brew install node
-  	npm install -g yo grunt-cli bower grunt-contrib-compass
-  	sudo gem install compass
+if [[ "${build}" = true || "${build_js}" = true ]]; then
+  if [ "${WASABI_OS}" == "${WASABI_OSX}" ]; then
+    brew list node
+    if [[ $? -eq 1 ]]; then
+      echo "Node.js is not installed. Installing Node.js packages..."
+      brew install node
+      npm install -g yo grunt-cli bower grunt-contrib-compass
+      sudo gem install compass
+    fi
   fi
   (cd ./modules/ui && npm install && bower install && grunt build)
 fi

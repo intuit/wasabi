@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
     Copyright 2016 Intuit
-   
+
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
-   
+
         http://www.apache.org/licenses/LICENSE-2.0
-   
+
     Unless required by applicable law or agreed to in writing, software
     distributed under the License is distributed on an "AS IS" BASIS,
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,12 +34,20 @@
     </test>
     <test name="IntegrationBucketTests">
         <classes>
-            <class name="com.intuit.wasabi.tests.service.IntegrationBucket"/>
-            <class name="com.intuit.wasabi.tests.service.EmptyBucketUserAssignmentTest"/>
-            <class name="com.intuit.wasabi.tests.service.EmptyBucketUserAssignmentToEmptyBucket"/>
-            <class name="com.intuit.wasabi.tests.service.BucketIntegrationTest"/>
-            <class name="com.intuit.wasabi.tests.service.ContextIntegrationTest"/>
-            <class name="com.intuit.wasabi.tests.service.ContextMutexIntegrationTest"/>
+            <class name="com.intuit.wasabi.tests.service.IntegrationBucket" />
+            <class name="com.intuit.wasabi.tests.service.EmptyBucketUserAssignmentTest" />
+            <class name="com.intuit.wasabi.tests.service.EmptyBucketUserAssignmentToEmptyBucket" />
+            <class name="com.intuit.wasabi.tests.service.EmptyBucketGetUserAssignmentTest" />
+            <class name="com.intuit.wasabi.tests.service.EmptyBucketGetUserAssignmentToEmptyBucketTest" />
+            <class name="com.intuit.wasabi.tests.service.BucketIntegrationTest" />
+            <class name="com.intuit.wasabi.tests.service.ContextIntegrationTest" />
+            <class name="com.intuit.wasabi.tests.service.ContextMutexIntegrationTest" />
+        </classes>
+    </test>
+    <test name="IntegrationRollupTests">
+        <classes>
+            <class name="com.intuit.wasabi.tests.service.RollUpIntegrationTest" />
+            <class name="com.intuit.wasabi.tests.service.RollUpBadCallsIntegrationTest" />
         </classes>
     </test>
     <test name="IntegrationExperimentTests">
@@ -78,9 +86,20 @@
             <class name="com.intuit.wasabi.tests.service.segmentation.MutualExclusionBatchTest"/>
         </classes>
     </test>
+    <test name="IntegrationStatisticsTests">
+        <classes>
+            <class name="com.intuit.wasabi.tests.service.statistic.StatisticTest"/>
+        </classes>
+    </test>
     <test name="IntegrationPagesTests">
         <classes>
             <class name="com.intuit.wasabi.tests.service.IntegrationPages"/>
+        </classes>
+    </test>
+    <test name="IntegrationPaginationTests">
+        <classes>
+            <class name="com.intuit.wasabi.tests.service.PaginationTest" />
+            <class name="com.intuit.wasabi.tests.service.FavoritesTest" />
         </classes>
     </test>
 </suite>

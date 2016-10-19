@@ -90,14 +90,14 @@ public class TearDownTestExperiments extends TestBase {
                 + Arrays.toString(this.applicationPrefixes));
     }
 
-    /**
-     * Deletes the experiments belonging to the tests.
-     */
-    @Test(dependsOnGroups = {"ping"}, retryAnalyzer = RetryAnalyzer.class)
-    @RetryTest(maxTries = 5)
-    public void deleteExperimentsInTest_API_Functional_Apps() {
-        String url = "experiments";
-        response = apiServerConnector.doGet(url);
+	/**
+	 * Deletes the experiments belonging to the tests.
+	 */
+	@Test(dependsOnGroups = {"ping"}, retryAnalyzer = RetryAnalyzer.class)
+	@RetryTest(maxTries = 5)
+	public void deleteExperimentsInTest_API_Functional_Apps(){
+		String url = "experiments?per_page=-1";
+		response = apiServerConnector.doGet(url);
 
         List<Map<String, Object>> listOfExperiments = response.jsonPath().get(appNameRegex);
 
@@ -132,18 +132,18 @@ public class TearDownTestExperiments extends TestBase {
                     Assert.fail("ABORT - Filter failed! Selected application name not in " + Arrays.toString(this.applicationPrefixes) + "!");
                 }
             }
-        }
-    }
+		}
+	}
 
-    /**
-     * Checks if all experiments were deleted.
-     */
-    @Test(dependsOnMethods = {"deleteExperimentsInTest_API_Functional_Apps"})
-    public void getTest_API_Functional_AppExperimentsExpectNone() {
-        String url = "experiments";
-        response = apiServerConnector.doGet(url);
-        List<Map<String, Object>> listOfExperiments = response.jsonPath().get(appNameRegex);
-        Assert.assertEquals(listOfExperiments.size(), 0, "There are still integration test experiments left.");
-    }
+	/**
+	 * Checks if all experiments were deleted.
+	 */
+	@Test(dependsOnMethods = {"deleteExperimentsInTest_API_Functional_Apps"})
+	public void getTest_API_Functional_AppExperimentsExpectNone(){
+		String url = "experiments?per_page=-1";
+		response = apiServerConnector.doGet(url);
+		List<Map<String,Object>> listOfExperiments = response.jsonPath().get(appNameRegex);
+		Assert.assertEquals(listOfExperiments.size(), 0, "There are still integration test experiments left.");
+	}
 
 }

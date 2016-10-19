@@ -1,12 +1,12 @@
 <!--
     Copyright 2016 Intuit
-   
+
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
-   
+
         http://www.apache.org/licenses/LICENSE-2.0
-   
+
     Unless required by applicable law or agreed to in writing, software
     distributed under the License is distributed on an "AS IS" BASIS,
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,12 +17,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>com.intuit.wasabi</groupId>
-        <artifactId>wasabi</artifactId>
-        <version>20151215171929-SNAPSHOT</version>
-        <relativePath>../../pom.xml</relativePath>
-    </parent>
+	<parent>
+		<groupId>com.intuit.wasabi</groupId>
+		<artifactId>wasabi</artifactId>
+		<version>1.0.20161014052805-SNAPSHOT</version>
+		<relativePath>../../pom.xml</relativePath>
+	</parent>
 
     <artifactId>wasabi-functional-test</artifactId>
     <packaging>jar</packaging>
@@ -141,6 +141,21 @@
             <groupId>com.jakewharton.retrofit</groupId>
             <artifactId>retrofit1-okhttp3-client</artifactId>
             <version>1.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-core</artifactId>
+            <version>1.3</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>jsr311-api</artifactId>
+            <version>1.1.1</version>
         </dependency>
     </dependencies>
 </project>

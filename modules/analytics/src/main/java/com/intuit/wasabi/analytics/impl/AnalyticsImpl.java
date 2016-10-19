@@ -40,8 +40,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static com.intuit.data.autumn.utils.PropertyFactory.create;
-import static com.intuit.data.autumn.utils.PropertyFactory.getProperty;
+import static com.intuit.autumn.utils.PropertyFactory.create;
+import static com.intuit.autumn.utils.PropertyFactory.getProperty;
 import static com.intuit.wasabi.util.DateUtil.createCalendarMidnight;
 import static org.slf4j.LoggerFactory.getLogger;
 

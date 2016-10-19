@@ -17,7 +17,9 @@ package com.intuit.wasabi.experimentobjects;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
+
 import io.swagger.annotations.ApiModelProperty;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -290,13 +292,8 @@ public class PrioritizedExperiment implements Cloneable, ExperimentBase {
     }
 
     @Override
-    public PrioritizedExperiment clone() {
-        try {
+    public PrioritizedExperiment clone() throws CloneNotSupportedException {
             return (PrioritizedExperiment) super.clone();
-        } catch (CloneNotSupportedException e) {
-            // Should never happen
-            throw new RuntimeException(e);
-        }
     }
 
     /**

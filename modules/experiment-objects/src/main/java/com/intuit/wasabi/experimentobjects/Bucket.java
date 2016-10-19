@@ -28,16 +28,21 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Preconditions;
 import com.intuit.wasabi.experimentobjects.exceptions.InvalidIdentifierException;
 import com.netflix.astyanax.model.ColumnList;
+
 import io.swagger.annotations.ApiModelProperty;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.io.IOException;
-import java.util.*;
-
-import static java.util.Arrays.asList;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * An experiment bucket
@@ -182,9 +187,9 @@ public class Bucket {
     }
 
     public enum State {
-
         OPEN, CLOSED, EMPTY;
 
+        //TODO: this is a work in progress
         public enum BucketStateTransition {
 
             OPEN(State.OPEN, State.CLOSED, State.EMPTY),
@@ -202,12 +207,11 @@ public class Bucket {
                     }
                 }
             }
-
-            //TODO: remove state from enum
+            //TODO: remove state from enum - this is a work in progress
             private final transient List<State> allowedStateTransitions;
 
             BucketStateTransition(State... allowedTransitions) {
-                this.allowedStateTransitions = asList(allowedTransitions);
+                this.allowedStateTransitions = Arrays.asList(allowedTransitions);
             }
 
             private List<State> getAllowedStateTransitions() {
@@ -305,7 +309,6 @@ public class Bucket {
         private String label;
 
         private Label(String label) {
-            super();
             this.label = Preconditions.checkNotNull(label);
 
             if (label.trim().isEmpty()) {

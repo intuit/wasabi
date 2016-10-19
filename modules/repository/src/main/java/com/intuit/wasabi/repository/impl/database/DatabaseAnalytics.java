@@ -16,6 +16,7 @@
 package com.intuit.wasabi.repository.impl.database;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import com.googlecode.flyway.core.Flyway;
 import com.intuit.wasabi.analyticsobjects.Event;
 import com.intuit.wasabi.analyticsobjects.Parameters;
@@ -28,9 +29,12 @@ import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.repository.AnalyticsRepository;
 import com.intuit.wasabi.repository.RepositoryException;
+import org.slf4j.Logger;
 
 import java.sql.Timestamp;
 import java.util.*;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Database analytics impl of analytics repo
@@ -39,7 +43,7 @@ import java.util.*;
  */
 public class DatabaseAnalytics implements AnalyticsRepository {
 
-    private TransactionFactory transactionFactory;
+    private static Logger LOGGER = getLogger(DatabaseAnalytics.class);
     private Transaction transaction;
 
     /**
@@ -49,18 +53,28 @@ public class DatabaseAnalytics implements AnalyticsRepository {
      * @param flyway             Flyway
      */
     @Inject
-    public DatabaseAnalytics(TransactionFactory transactionFactory, Flyway flyway) {
+    public DatabaseAnalytics(final TransactionFactory transactionFactory, final Flyway flyway,
+                             final @Named("mysql.mutagen.root.resource.path") String mutagenRootResourcePath) {
         super();
 
-        this.transactionFactory = transactionFactory;
-        this.transaction = transactionFactory.newTransaction();
-        initialize(flyway);
+        LOGGER.debug("instantiating {}", DatabaseAnalytics.class.getCanonicalName());
+
+        transaction = transactionFactory.newTransaction();
+
+        initialize(transactionFactory, flyway, mutagenRootResourcePath);
+
+        LOGGER.debug("instantiated {}", DatabaseAnalytics.class.getCanonicalName());
     }
 
-    void initialize(Flyway flyway) {
-        flyway.setLocations("com/intuit/wasabi/repository/impl/mysql/migration");
+    void initialize(final TransactionFactory transactionFactory, final Flyway flyway,
+                    final String mutagenRootResourcePath) {
+        LOGGER.debug("initializing database with {}", mutagenRootResourcePath);
+
+        flyway.setLocations(mutagenRootResourcePath);
         flyway.setDataSource(transactionFactory.getDataSource());
         flyway.migrate();
+
+        LOGGER.debug("initialized database with {}", mutagenRootResourcePath);
     }
 
     /*

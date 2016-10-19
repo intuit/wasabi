@@ -8,7 +8,7 @@ angular.module('wasabi.services').factory('ApplicationsFactory', ['$resource', '
             'query': { method: 'GET',
                 transformResponse: function (data) {
                     var parsedData = $.parseJSON(data);
-                    if (parsedData && parsedData.errors) {
+                    if (parsedData && parsedData.error) {
                         return parsedData;
                     }
 

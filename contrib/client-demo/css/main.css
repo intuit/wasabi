@@ -1,0 +1,74 @@
+@import url(http://fonts.googleapis.com/css?family=Archivo+Narrow);
+body {
+   background-color: #393939;
+   font-family: "Helvetica Neue", Helvetica, Arial, "Microsoft Yahei", 微软雅黑, STXihei, 华文细黑, sans-serif;
+   font-size: 13px;
+   -webkit-font-smoothing: antialiased;
+   sx-font-smoothing: grayscale;
+   padding-left: 20px;
+   padding-right: 20px;
+}
+
+
+.banner {
+    background-color: #0074cd;
+    color: #FFF;
+    height: 100px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -khtml-border-radius: 5px;
+    border-radius: 5px;
+
+}
+
+.container{
+	/*background-image: url("/images/ab_logo.png");*/
+	background-position:center center;
+	background-repeat:no-repeat;
+	
+}
+
+
+h1 {
+    font-size: 30px;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+    padding-left: 20px;
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 21px;
+    margin-top: 1em;
+    border-top: 1px solid #ddd;
+    background-image: linear-gradient(to bottom, #eaf2f6, #f9f9f9);
+    color: #1e4164;
+}
+
+.main-frame {
+    background-color: #FFF;
+    padding: 20px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -khtml-border-radius: 5px;
+    border-radius: 5px;
+    margin-top: -30px;
+}
+.code-example {
+    line-height: 50px !important;
+    background-color: #333 !important;
+    color: #FFF !important;
+    margin-bottom: 10px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -khtml-border-radius: 5px;
+    border-radius: 5px;
+}
+
+.interaction {
+    padding-left: 60px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+.coderesponse {
+    padding: 20px 30px 20px 30px;
+    background-color: #EEEEEE
+}

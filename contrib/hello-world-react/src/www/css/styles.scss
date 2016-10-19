@@ -1,0 +1,83 @@
+$text-color: black;
+
+body {
+    color: $text-color;
+    margin: 0;
+}
+h1 {
+    margin: 0;
+}
+th {
+    background-color: #E4E0E0;
+}
+
+.loginDiv {
+    margin-bottom: 5px;
+}
+
+.loginTitle {
+    font-size: 24px;
+    font-weight: bold;
+}
+.loginPrompt {
+    font-size: 20px;
+    padding: 10px 0;
+}
+.loginBox {
+    background: white;
+    margin: 120px auto 0 auto;
+    width: 400px;
+    padding: 36px 40px 36px 190px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    -moz-box-sizing: content-box !important;
+    box-sizing: content-box !important;
+    color: #555;
+}
+.loginBox label {
+    display: inline-block;
+    width: 80px;
+}
+.loginBtn {
+    margin-top: 15px;
+    padding: 10px 18px;
+    font-family: "Helvetica Neue", Helvetica, Arial;
+    font-size: 14px;
+}
+.loginError {
+    margin-top: 15px;
+    font-weight: bold;
+    font-style: italic;
+}
+.logoutLink {
+    position: absolute;
+    top: 30px;
+    right: 20px;
+}
+.siteHeading {
+    background-color: #add8e6;
+    height: 80px;
+    text-align: center;
+}
+.siteHeading h1 {
+    padding-top: 20px;
+}
+.storeMain {
+    width: 600px;
+    margin: 0 auto;
+}
+.storeProductName {
+    padding-left: 10px;
+}
+.storePriceCell {
+    text-align: right;
+    padding-right: 10px;
+}
+.oddRow {
+    background-color: white;
+}
+
+.evenRow {
+    background-color: #F9F8F8;
+}

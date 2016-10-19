@@ -98,7 +98,6 @@ public class Page {
         private final String inner_name;
 
         private Name(String name) {
-            super();
             this.inner_name = Preconditions.checkNotNull(name);
 
             if (name.trim().isEmpty()) {

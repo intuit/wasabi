@@ -214,11 +214,11 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
         // being created with the same app name/label could result in one being 
         // clobbered. In practice, this should never happen, but...
         // TODO: Implement a transactional recipe
-        final String cql = "insert into experiment " +
-                "(id, description, rule, sample_percent, start_time, end_time, " +
+        final String CQL = "insert into experiment " +
+                "(id, description, hypothesis_is_correct, results, rule, sample_percent, start_time, end_time, " +
                 "   state, label, app_name, created, modified, is_personalized, model_name, model_version," +
                 " is_rapid_experiment, user_cap, creatorid) " +
-                "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try {
             final Experiment.ID experimentID = newExperiment.getID();
@@ -231,12 +231,14 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
 
             getDriver().getKeyspace()
                     .prepareQuery(getKeyspace().experimentCF())
-                    .withCql(cql)
+                    .withCql(CQL)
                     .asPreparedStatement()
                     .withByteBufferValue(experimentID, ExperimentIDSerializer.get())
                     .withStringValue(newExperiment.getDescription() != null
                             ? newExperiment.getDescription()
                             : "")
+                    .withStringValue(newExperiment.getHypothesisIsCorrect() != null ? newExperiment.getHypothesisIsCorrect() : "")
+                    .withStringValue(newExperiment.getResults() != null ? newExperiment.getResults() : "")
                     .withStringValue(newExperiment.getRule() != null
                             ? newExperiment.getRule()
                             : "")
@@ -438,8 +440,8 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
     public Experiment updateExperiment(Experiment experiment) {
         validator.validateExperiment(experiment);
 
-        final String cql = "update experiment " +
-                "set description = ?, rule = ?, sample_percent = ?, " +
+        final String CQL = "update experiment " +
+                "set description = ?, hypothesis_is_correct = ?, results = ?, rule = ?, sample_percent = ?, " +
                 "start_time = ?, end_time = ?, " +
                 "state=?, label=?, app_name=?, modified=? , is_personalized=?, model_name=?, model_version=?," +
                 " is_rapid_experiment=?, user_cap=?" +
@@ -452,11 +454,13 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
 
             getDriver().getKeyspace()
                     .prepareQuery(getKeyspace().experimentCF())
-                    .withCql(cql)
+                    .withCql(CQL)
                     .asPreparedStatement()
                     .withStringValue(experiment.getDescription() != null
                             ? experiment.getDescription()
                             : "")
+                    .withStringValue(experiment.getHypothesisIsCorrect() != null ? experiment.getHypothesisIsCorrect() : "")
+                    .withStringValue(experiment.getResults() != null ? experiment.getResults() : "")
                     .withStringValue(experiment.getRule() != null
                             ? experiment.getRule()
                             : "")

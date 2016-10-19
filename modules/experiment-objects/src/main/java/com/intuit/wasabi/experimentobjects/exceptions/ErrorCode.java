@@ -72,6 +72,11 @@ public enum ErrorCode {
     EMAIL_SERVICE_ERROR("6043", 500),
     EVENT_LOG_ERROR("6050", 500),
     AUDIT_LOG_ERROR("6051", 500),
+
+    // Pagination parameter errors
+    SORT_KEY_UNPROCESSABLE("7000", 400),
+    FILTER_KEY_UNPROCESSABLE("7001", 400),
+
     // Other errors
     APPLICATION_MISMATCH_ERROR("9997", 400),
     __TEST_ERROR("9998", 400), // TODO: This is lame

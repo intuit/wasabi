@@ -15,15 +15,19 @@
 # limitations under the License.
 ###############################################################################
 
-formulas=("bash" "cask" "git" "maven" "python" "ruby" "node" "docker" "docker-machine")
-casks=("java" "vagrant" "virtualbox")
-build_default=false
+formulas=("bash" "cask" "git" "git-flow-avh" "maven" "wget" "ruby" "node")
+taps=("caskroom/cask")
+casks=("java" "docker")
+profile_default=development
 endpoint_default=localhost:8080
 verify_default=false
 sleep_default=30
 red=`tput setaf 9`
 green=`tput setaf 10`
 reset=`tput sgr0`
+export WASABI_OS=${WASABI_OS:-`uname -s`}
+export WASABI_OSX="Darwin"
+export WASABI_LINUX="Linux"
 
 usage() {
   [ "${1}" ] && echo "${red}error: ${1}${reset}"
@@ -33,7 +37,7 @@ ${green}
 usage: `basename ${0}` [options] [commands]
 
 options:
-  -b | --build [ true | false ]          : build; default: ${build_default}
+  -p | --profile [ profile ]             : profile; default ${profile_default}
   -e | --endpoint [ host:port ]          : api endpoint; default: ${endpoint_default}
   -v | --verify [ true | false ]         : verify installation configuration; default: ${verify_default}
   -s | --sleep [ sleep-time ]            : sleep/wait time in seconds; default: ${sleep_default}
@@ -41,8 +45,11 @@ options:
 
 commands:
   bootstrap                              : install dependencies
+  build                                  : build project
+  clean                                  : clean build
   start[:cassandra,mysql,wasabi]         : start all, cassandra, mysql, wasabi
-  test                                   : test wasabi
+  test                                   : run the integration tests (needs a running wasabi)
+  test[:module-name,...]                 : run the unit tests for the specified module(s) only
   stop[:wasabi,cassandra,mysql]          : stop all, wasabi, cassandra, mysql
   resource[:ui,api,doc,cassandra,mysql]  : open resource api, javadoc, cassandra, mysql
   status                                 : display resource status
@@ -56,7 +63,7 @@ EOF
 }
 
 fromPom() {
-    mvn -f $1/pom.xml -P $2 help:evaluate -Dexpression=$3 | sed -n -e '/^\[.*\]/ !{ p; }'
+    mvn ${WASABI_MAVEN} -f $1/pom.xml -P $2 help:evaluate -Dexpression=$3 | sed -n -e '/^\[.*\]/ !{ p; }'
 }
 
 beerMe() {
@@ -75,66 +82,122 @@ beerMe() {
 }
 
 bootstrap() {
-  if ! hash brew 2>/dev/null; then
-    echo "${green}installing homebrew ...${reset}"
+  if [ "${WASABI_OS}" == "${WASABI_OSX}" ]; then
+    if ! hash brew 2>/dev/null; then
+      echo "${green}installing homebrew ...${reset}"
 
-    ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+      ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
-    echo "${green}installed homebrew${reset}"
+      echo "${green}installed homebrew${reset}"
+    fi
+
+    brew update
+    brew doctor
+    brew cleanup
+
+    echo "${green}installing dependencies: ${formulas[@]} ${taps[@]} ${casks[@]} ...${reset}"
+
+    for formula in "${formulas[@]}"; do
+      [[ ! $(brew list ${formula} 2>/dev/null) ]] && brew install ${formula} || brew upgrade ${formula} 2>/dev/null
+    done
+
+    for tap in "${taps[@]}"; do
+      brew tap ${tap}
+    done
+
+    for cask in "${casks[@]}"; do
+      [[ $(brew cask list ${cask} 2>/dev/null) ]] && brew cask uninstall --force ${cask} 2>/dev/null
+      brew cask install --force ${cask}
+    done
+
+    npm config set prefix $(brew --prefix)
+
+    echo "${green}installed dependencies: ${formulas[@]} ${taps[@]} ${casks[@]}${reset}"
+  elif [ "${WASABI_OS}" == "${WASABI_LINUX}" ]; then
+    echo "OS is Linux"
+    if [ -f /etc/lsb-release ]; then
+      . /etc/lsb-release
+      DISTRO=$DISTRIB_ID
+      DISTROVER=$DISTRIB_RELEASE
+      if [ $DISTRO == "Ubuntu" ] && [ $DISTROVER == "16.04" ]; then
+        echo "${green}Operating system Ubuntu 16.04${reset}"
+      else
+        echo "${red}Unsupported Linux distribution${reset}"
+        exit 1
+      fi
+    fi
+
+    #Install Maven
+    sudo apt-get update
+    sudo apt-get install -y maven
+
+    #Install JAVA
+    sudo apt-get install -y default-jdk
+    sudo cp /etc/environment /tmp/environment
+    sudo chmod 666 /tmp/environment
+    sudo echo "JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/" >> /tmp/environment
+    sudo cp /tmp/environment /etc/environment
+    sudo rm -rf /tmp/environment
+
+    #Install git-flow
+    sudo apt-get install -y git-flow
+
+    #Install Nodejs
+    curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+    sudo apt-get install -y nodejs
+    sudo npm install -g bower
+    sudo npm install -g grunt-cli
+    sudo npm install -g yo
+
+    #Install compass
+    sudo apt-get install -y ruby
+    sudo apt-get install -y ruby-compass
+
+    #Install docker
+    sudo apt-get install -y apt-transport-https ca-certificates
+    sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+    sudo echo "deb https://apt.dockerproject.org/repo ubuntu-xenial main" > /tmp/docker.list
+    sudo cp /tmp/docker.list /etc/apt/sources.list.d/docker.list
+    sudo rm -rf /tmp/docker.list
+    sudo apt-get purge lxc-docker
+    sudo apt-get update
+    sudo apt-get install -y linux-image-extra-$(uname -r) linux-image-extra-virtual
+    sudo apt-get install -y docker-engine
+
+    sudo groupadd docker
+    sudo usermod -aG docker $USER
+    sudo usermod -aG docker root
+    echo "${green}installed dependencies.${reset}"
+  else
+    echo "${green}FIXME: linux install of ( ${formulas[@]} ${taps[@]} ${casks[@]} ) not yet implemented${reset}"
   fi
-
-  brew update
-  brew doctor
-  brew cleanup
-
-  echo "${green}installing dependencies: ${formulas[@]} ${casks[@]} ...${reset}"
-
-  for formula in "${formulas[@]}"; do
-    [[ ! $(brew list ${formula} 2>/dev/null) ]] && brew install ${formula} || brew upgrade ${formula} 2>/dev/null
-  done
-
-  for cask in "${casks[@]}"; do
-    [[ $(brew cask list ${cask} 2>/dev/null) ]] && brew cask uninstall --force ${cask} 2>/dev/null
-    brew cask install --force ${cask}
-  done
-
-  npm config set prefix $(brew --prefix)
 
   for n in yo grunt-cli bower; do
     [[ ! $(npm -g list 2>/dev/null | grep ${n}) ]] && npm -g install ${n}
   done
 
   [[ ! $(gem list | grep compass) ]] && gem install compass
+}
 
-  echo "${green}installed dependencies: ${formulas[@]} ${casks[@]}${reset}"
+build() {
+  ./bin/build.sh -b ${1:-false} -t ${2:-false} -p ${3:-development}
+}
+
+clean() {
+  mvn ${WASABI_MAVEN} clean
+  (cd modules/ui; grunt clean)
 }
 
 start() {
-  [ ${build} = "true" ] && ./bin/build.sh -b ${build} -t ${verify}
-
   ./bin/container.sh -v ${verify} start${1:+:$1}
 }
 
-test() {
-  if [ ${endpoint} == ${endpoint_default} ]; then
-    endpoint=$(docker-machine ip wasabi):8080
-    [[ $? -ne 0 ]] && endpoint=${endpoint_default}
-  fi
-
-  sleepTime=${1:-sleep}
-  cntr=0
-
-  while (( cntr < ${sleepTime} )); do
-    echo "${endpoint}/api/v1/ping"
-    curl ${endpoint}/api/v1/ping >/dev/null 2>&1
-    [[ $? -eq 0 ]] && break
-    [[ ${cntr} < ${sleepTime} ]] && usage "unable to ping application: ${endpoint}/api/v1/ping" 1
-    cntr=$(($cntr + 3))
-    beerMe 3
-  done
+test_api() {
+  wget -q --spider --tries=20 --waitretry=3 http://${endpoint}/api/v1/ping
+  [ $? -ne 0 ] && usage "unable to start" 1
 
   [ ! -e ./modules/functional-test/target/wasabi-functional-test-*-SNAPSHOT-jar-with-dependencies.jar ] && \
-    ./bin/build.sh -b true -t ${verify}
+    build false ${verify}
 
   # FIXME: derive usr/pwd from env
   mkdir test.log >/dev/null 2>&1
@@ -147,27 +210,25 @@ test() {
 resource() {
   for resource in $1; do
     case "${1}" in
-      ui) [ ! -f ./modules/ui/dist/index.html ] && ./bin/build.sh
+      ui) [ ! -f ./modules/ui/dist/index.html ] && build
         ./bin/wasabi.sh status >/dev/null 2>&1 || ./bin/wasabi.sh start
-        open http://$(docker-machine ip wasabi):8080/index.html;;
+        open http://localhost:8080;;
       api) [[ ! -f ./modules/swagger-ui/target/swaggerui/index.html || \
-        ! -f ./modules/api/target/generated/swagger-ui/swagger.json ]] && ./bin/build.sh
+        ! -f ./modules/api/target/generated/swagger-ui/swagger.json ]] && build
         ./bin/wasabi.sh status >/dev/null 2>&1 || ./bin/wasabi.sh start:docker
-        jip=$(docker-machine ip wasabi)
         ./bin/wasabi.sh remove:wasabi >/dev/null 2>&1
-        profile=development
         module=main
         home=./modules/${module}/target
         artifact=$(fromPom ./modules/${module} ${profile} project.artifactId)
         version=$(fromPom . ${profile} project.version)
         id=${artifact}-${version}-${profile}
         content=${home}/${id}/content/ui/dist
-        sed -i '' "s/localhost/${jip}/g" ${content}/swagger/swaggerjson/swagger.json
+        # FIXME: this can fail after 'package' given the profile = build
         sed -i '' "s/this.model.validatorUrl.*$/this.model.validatorUrl = null;/g" ${content}/swagger/swagger-ui.js
         ./bin/wasabi.sh start
         beerMe 6
-        open http://$(docker-machine ip wasabi):8080/swagger/index.html;;
-      doc) [ ! -f ./target/site/apidocs/index.html ] && ./bin/build.sh
+        open http://localhost:8080/swagger/index.html;;
+      doc) [ ! -f ./target/site/apidocs/index.html ] && build
         open ./target/site/apidocs/index.html;;
       mysql|cassandra) ./bin/wasabi.sh status 2>/dev/null | grep wasabi-${1} 1>/dev/null || ./bin/wasabi.sh start
         ./bin/container.sh console:${1};;
@@ -185,40 +246,36 @@ status() {
 }
 
 package() {
-  profile=build
+  # FIXME: ?how to package profile=development?
+  [ "${profile}" == "${profile_default}" ] && profile=build
 
-  ./bin/build.sh -b true -p ${profile}
-
-  (export VAGRANT_CWD=./bin; vagrant up)
-  (export VAGRANT_CWD=./bin; vagrant ssh -c "cd wasabi; mvn dependency:resolve")
-  beerMe 10
-  (export VAGRANT_CWD=./bin; vagrant ssh -c "cd wasabi; ./bin/fpm.sh -p ${profile}")
+  build true ${verify} ${profile}
 
   # FIXME: move to modules/ui/build.sh
   version=$(fromPom . build project.version)
   # FIXME: server ip
   server="http://localhost:8080"
-  home=$(fromPom . build application.home)
+  home=$(fromPom ./modules/main build application.home)
   name=wasabi-ui #$(fromPom main build application.name)
-  api_name=$(fromPom . build application.name)
+  api_name=$(fromPom ./modules/main build application.name)
   user=$(fromPom ./modules/main build application.user)
   group=$(fromPom ./modules/main build application.group)
   content=$(fromPom ./modules/main build application.http.content.directory)
   ui_home=${home}/../${name}-${version}-${profile}
 
+  ./bin/fpm.sh -n ${name} -v ${version} -p ${profile}
+
+# FIXME: don't rebuild, cp dist/* target/*
   (cd modules/ui; \
     mkdir -p target; \
-    for f in app bower.json feedbackserver Gruntfile.js constants.json karma.conf.js karma-e2e.conf.js package.json test .bowerrc; do \
+    for f in app bower.json Gruntfile.js constants.json karma.conf.js karma-e2e.conf.js package.json test .bowerrc; do \
       cp -r ${f} target; \
     done; \
     sed -i '' -e "s|http://localhost:8080|${server}|g" target/constants.json 2>/dev/null; \
     sed -i '' -e "s|VERSIONLOC|${version}|g" target/app/index.html 2>/dev/null; \
-    (cd target; \
-      npm install; \
-      bower install; \
-      grunt clean; \
-      grunt build --target=develop --no-color); \
-#      grunt test); \
+    (cd target; npm install; bower install --no-optional; grunt clean); \
+    (cd target; grunt build --target=develop --no-color) \
+#    ; grunt test); \
     cp -r build target; \
     for pkg in deb rpm; do \
       sed -i '' -e "s|\${application.home}|${home}|g" target/build/${pkg}/before-install.sh 2>/dev/null; \
@@ -230,32 +287,43 @@ package() {
       sed -i '' -e "s|\${application.user}|${user}|g" target/build/${pkg}/after-install.sh 2>/dev/null; \
       sed -i '' -e "s|\${application.group}|${group}|g" target/build/${pkg}/after-install.sh 2>/dev/null; \
       sed -i '' -e "s|\${application.http.content.directory}|${content}|g" target/build/${pkg}/before-remove.sh 2>/dev/null; \
-    done)
+    done; \
+    (cd target; ../bin/fpm.sh -n ${name} -v ${version} -p ${profile}))
 
-  (export VAGRANT_CWD=./bin; vagrant ssh -c "cd wasabi/modules/ui; ./bin/fpm.sh -n ${name} -v ${version} -p ${profile}")
-  (export VAGRANT_CWD=./bin; vagrant halt)
+  find . -type f \( -name "*.rpm" -or -name "*.deb" \) -exec mv {} ./target 2>/dev/null \;
 
   echo "deployable build packages:"
 
-  find ./modules -type f \( -name "*.rpm" -or -name "*.deb" \)
+  find . -type f \( -name "*.rpm" -or -name "*.deb" \)
 }
 
 release() {
-  ./bin/release.sh ${1:+$1}
+  echo "./bin/release.sh ${1:+$1}"
 }
 
 remove() {
   ./bin/container.sh remove${1:+:$1}
 }
 
-optspec=":b:e:f:p:v:s:h-:"
+unit_test() {
+  command=$1
+  mvn "-Dtest=com.intuit.wasabi.${command/-/}.**" test -pl modules/${command} --also-make -DfailIfNoTests=false -q
+}
+
+exec_commands() {
+  prefix=$1
+  commands=$(echo $2 | cut -d ':' -f 2)
+  (IFS=','; for command in ${commands}; do ${prefix} ${command}; done)
+}
+
+optspec=":p:e:v:s:h-:"
 
 while getopts "${optspec}" opt; do
   case "${opt}" in
     -)
       case "${OPTARG}" in
-        build) build="${!OPTIND}"; OPTIND=$(( ${OPTIND} + 1 ));;
-        build=*) build="${OPTARG#*=}";;
+        profile) profile="${!OPTIND}"; OPTIND=$(( ${OPTIND} + 1 ));;
+        profile=*) profile="${OPTARG#*=}";;
         endpoint) endpoint="${!OPTIND}"; OPTIND=$(( ${OPTIND} + 1 ));;
         endpoint=*) endpoint="${OPTARG#*=}";;
         verify) verify="${!OPTIND}"; OPTIND=$(( ${OPTIND} + 1 ));;
@@ -265,7 +333,7 @@ while getopts "${optspec}" opt; do
         help) usage;;
         *) [ "${OPTERR}" = 1 ] && [ "${optspec:0:1}" != ":" ] && echo "unknown option --${OPTARG}";;
       esac;;
-    b) build=${OPTARG};;
+    p) profile=${OPTARG};;
     e) endpoint=${OPTARG};;
     v) verify=${OPTARG};;
     s) sleep=${OPTARG};;
@@ -277,36 +345,32 @@ done
 
 [ $# -eq 0 ] && usage "unspecified command" 1
 
-build=${build:=${build_default}}
+profile=${profile:=${profile_default}}
 endpoint=${endpoint:=${endpoint_default}}
 verify=${verify:=${verify_default}}
 sleep=${sleep:=${sleep_default}}
 
 [[ $# -eq 0 ]] && usage
 
-eval $(docker-machine env wasabi) 2>/dev/null
-
 for command in ${@:$OPTIND}; do
   case "${command}" in
     bootstrap) bootstrap;;
-    start) start;;
-    start:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for cmd in ${commands}; do start ${cmd}; done);;
-    test) test;;
-    stop) stop;;
-    stop:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for cmd in ${commands}; do stop ${cmd}; done);;
-    resource) command="resource:ui,api,doc,casssandra,mysql";&
-    resource:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for cmd in ${commands}; do resource ${cmd}; done);;
+    build) build true ${verify} ${profile};;
+    clean) clean;;
+    start) exec_commands start "cassandra,mysql,wasabi";;
+    start:*) exec_commands start ${command};;
+    test:*) exec_commands unit_test ${command};;
+    test) test_api;;
+    stop) exec_commands stop "wasabi,mysql,cassandra";;
+    stop:*) exec_commands stop ${command};;
+    resource) exec_commands resource "ui,api,doc,cassandra,mysql";;
+    resource:*) exec_commands resource ${command};;
     status) status;;
-    remove) remove;;
-    remove:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for cmd in ${commands}; do remove ${cmd}; done);;
+    remove) exec_commands remove "wasabi,cassandra,mysql";;
+    remove:*) exec_commands remove ${command};;
     package) package;;
     release) release;;
-    release:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for cmd in ${commands}; do release ${cmd}; done);;
+    release:*) exec_commands release ${command};;
     "") usage "unknown command: ${command}" 1;;
     *) usage "unknown command: ${command}" 1;;
   esac
