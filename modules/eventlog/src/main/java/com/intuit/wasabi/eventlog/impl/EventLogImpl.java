@@ -185,6 +185,7 @@ public class EventLogImpl implements EventLog {
 
             if (!eventDeque.isEmpty()) {
                 eventDeque.forEach(this::prepareEnvelope);
+                eventDeque.clear();
             }
         }
     }

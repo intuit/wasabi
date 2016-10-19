@@ -106,17 +106,21 @@ public class NewExperiment implements ExperimentBase {
 
     public void setResults(String results) { this.results = results; }
 
+    public void setHypothesisIsCorrect(String hypothesisIsCorrect) { this.hypothesisIsCorrect = hypothesisIsCorrect; }
+
+    public void setResults(String results) { this.results = results; }
+
     public void setRule(String rule) {
-        this.rule = rule;
-    }
+		this.rule = rule;
+	}
 
     public void setIsPersonalizationEnabled(Boolean isPersonalizationEnabled) {
         this.isPersonalizationEnabled = isPersonalizationEnabled;
     }
 
     public void setModelName(String modelName) {
-        this.modelName = modelName;
-    }
+		this.modelName = modelName;
+	}
 
     public void setModelVersion(String modelVersion) {
         this.modelVersion = modelVersion;

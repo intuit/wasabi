@@ -734,6 +734,36 @@ public class ExperimentsResourceTest {
     }
 
     @Test
+    public void exportAssignments_InvalidTimeZone() throws Exception {
+        ExperimentsResource experimentsResource = new ExperimentsResource(experiments, eventsExport, assignments,
+                authorization, buckets, mutex, pages, priorities, favorites, "US/New York", "YYYY-mm-DD",
+                new HttpHeader("MyApp-???"), paginationHelper);
+
+        thrown.expect(TimeZoneFormatException.class);
+        experimentsResource.exportAssignments(experiment.getID(), null, null, null, null, "noTimezoneString", null);
+    }
+
+    @Test
+    public void exportAssignment_InvalidStartDate() throws Exception {
+        ExperimentsResource experimentsResource = new ExperimentsResource(experiments, eventsExport, assignments,
+                authorization, buckets, mutex, pages, priorities, favorites, "US/New York", "YYYY-mm-DD",
+                new HttpHeader("MyApp-???"), paginationHelper);
+
+        thrown.expect(TimeFormatException.class);
+        experimentsResource.exportAssignments(experiment.getID(), null, null, "invalidStart", null, null, null);
+    }
+
+    @Test
+    public void exportAssignment_InvalidEndDate() throws Exception {
+        ExperimentsResource experimentsResource = new ExperimentsResource(experiments, eventsExport, assignments,
+                authorization, buckets, mutex, pages, priorities, favorites, "US/New York", "YYYY-mm-DD",
+                new HttpHeader("MyApp-???"), paginationHelper);
+
+        thrown.expect(TimeFormatException.class);
+        experimentsResource.exportAssignments(experiment.getID(), null, null, null, "invalidEnd", null, null);
+    }
+
+    @Test
     public void getPageExperiments() throws Exception {
         ExperimentsResource experimentsResource = new ExperimentsResource(experiments, eventsExport, assignments,
                 authorization, buckets, mutex, pages, priorities, favorites, "US/New York", "YYYY-mm-DD", new HttpHeader("MyApp-???"), paginationHelper);

@@ -213,7 +213,6 @@ public class APIServerConnector {
                         contentTypeString +
                         dataString +
                         baseUri + basePath + url;
-
         return curlCall;
     }
 
