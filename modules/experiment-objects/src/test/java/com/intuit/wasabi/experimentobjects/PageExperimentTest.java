@@ -80,7 +80,7 @@ public class PageExperimentTest {
     }
 
     @Test
-    public void testClone(){
+    public void testClone() throws Exception{
         PageExperiment pClone = pe.clone();
         assertEquals(pClone, pe);
     }
