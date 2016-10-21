@@ -192,8 +192,9 @@ public class ExperimentsResourceTest {
                 responseList = (List) ((HashMap) response.getEntity()).get("experiments");
             }
         }
-        assert experimentList.getExperiments().containsAll(responseList);
-        assert experimentList.getExperiments().size() == responseList.size();
+        Assert.assertEquals("The sizes are different", experimentList.getExperiments().size(), responseList.size());
+        Assert.assertTrue("Not all items of the response are in the expected list. (a)",
+                experimentList.getExperiments().containsAll(responseList));
 
         // fewer allowed experiments
         when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
@@ -210,9 +211,11 @@ public class ExperimentsResourceTest {
                 responseList = (List) ((HashMap) response.getEntity()).get("experiments");
             }
         }
-        assert experimentList.getExperiments().containsAll(responseList);
-        assert 2 == responseList.size();
-        assert !responseList.contains(experiment2);
+
+        Assert.assertEquals("The sizes is not two", 2, responseList.size());
+        Assert.assertTrue("Not all items of the response are in the expected list. (b)",
+                experimentList.getExperiments().containsAll(responseList));
+        Assert.assertFalse("Response list contains experiment 2!", responseList.contains(experiment2));
     }
 
     @Test
@@ -274,7 +277,7 @@ public class ExperimentsResourceTest {
 
         when(experiments.getExperiment(newExperiment.getID())).thenReturn(experiment1);
         Response response = experimentsResource.postExperiment(newExperiment, false, AUTHHEADER);
-        assert (experiment1.equals(response.getEntity()));
+        Assert.assertEquals(experiment1, response.getEntity());
 
         // When user(TESTUSER) doesn't have create permissions we throw an exception
         when(authorization.getUser(AUTHHEADER)).thenReturn(TESTUSER);
@@ -291,7 +294,7 @@ public class ExperimentsResourceTest {
         when(authorization.getUser(AUTHHEADER)).thenReturn(TESTUSER);
         when(experiments.getExperiment(newExperiment.getID())).thenReturn(experiment1);
         Response responseNewApp = experimentsResource.postExperiment(newExperiment, true, AUTHHEADER);
-        assert (experiment1.equals(responseNewApp.getEntity()));
+        Assert.assertEquals(experiment1, responseNewApp.getEntity());
 
         // When no AUTHHEADER is present
         doThrow(AuthenticationException.class).when(authorization)
@@ -314,11 +317,11 @@ public class ExperimentsResourceTest {
 
         when(experiments.getExperiment(experiment.getID())).thenReturn(experiment);
         Response response = experimentsResource.getExperiment(experiment.getID(), null);
-        assert (experiment.equals(response.getEntity()));
+        Assert.assertEquals("case 1", experiment, response.getEntity());
 
         when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
         response = experimentsResource.getExperiment(experiment.getID(), AUTHHEADER);
-        assert (experiment.equals(response.getEntity()));
+        Assert.assertEquals("case 2", experiment, response.getEntity());
 
         doThrow(AuthenticationException.class).when(authorization)
                 .checkUserPermissions(USER, TESTAPP, Permission.READ);
@@ -351,24 +354,24 @@ public class ExperimentsResourceTest {
         when(experiments.updateExperiment(experiment.getID(), experiment, USERINFO)).thenReturn(experiment);
         when(experiments.getExperiment(experiment.getID())).thenReturn(experiment);
         Response response = experimentsResource.putExperiment(experiment.getID(), experiment, false, AUTHHEADER);
-        assert (experiment.equals(response.getEntity()));
+        Assert.assertEquals("case 1", experiment, response.getEntity());
 
         // When a user wants to create a new App and update experiment with it
         experiment.setApplicationName(TESTAPP2);
         when(experiments.updateExperiment(experiment.getID(), experiment, USERINFO)).thenReturn(experiment);
         when(experiments.getExperiment(experiment.getID())).thenReturn(experiment);
         Response responseNewApp = experimentsResource.putExperiment(experiment.getID(), experiment, true, AUTHHEADER);
-        assert (experiment.equals(responseNewApp.getEntity()));
+        Assert.assertEquals("case 2", experiment, responseNewApp.getEntity());
 
         // When experiment is in deleted state don't allow updates in both cases
         // Old app and new app
         experiment.setState(Experiment.State.DELETED);
 
         response = experimentsResource.putExperiment(experiment.getID(), experiment, false, AUTHHEADER);
-        assert (response.getEntity() == null);
+        Assert.assertNull("case 3", response.getEntity());
 
         response = experimentsResource.putExperiment(experiment.getID(), experiment, true, AUTHHEADER);
-        assert (response.getEntity() == null);
+        Assert.assertNull("case 4", response.getEntity());
 
         // Set app name back to TESTAPP
         experiment.setApplicationName(TESTAPP);
@@ -446,12 +449,12 @@ public class ExperimentsResourceTest {
 
         when(buckets.getBuckets(experiment.getID())).thenReturn(bucketList);
         Response response = experimentsResource.getBuckets(experiment.getID(), null);
-        assert (bucketList.equals(response.getEntity()));
+        Assert.assertEquals("case 1", bucketList, response.getEntity());
 
         when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
         when(experiments.getExperiment(experiment.getID())).thenReturn(experiment);
         response = experimentsResource.getBuckets(experiment.getID(), AUTHHEADER);
-        assert (bucketList.equals(response.getEntity()));
+        Assert.assertEquals("case 2", bucketList, response.getEntity());
 
         doThrow(AuthenticationException.class).when(authorization)
                 .checkUserPermissions(USER, TESTAPP, Permission.READ);
@@ -467,11 +470,6 @@ public class ExperimentsResourceTest {
             fail();
         } catch (AuthenticationException ignored) {
         }
-    }
-
-    @Test
-    public void postBucket() throws Exception {
-        //todo: implement
     }
 
     @Test
@@ -495,7 +493,7 @@ public class ExperimentsResourceTest {
         when(buckets.getBucket(experiment.getID(), bucket.getLabel())).thenReturn(bucket);
         Response response = experimentsResource.getBucket(experiment.getID(), bucket.getLabel(), AUTHHEADER);
 
-        assert (bucket.equals(response.getEntity()));
+        Assert.assertEquals(bucket, response.getEntity());
 
 
         doThrow(AuthenticationException.class).when(authorization)
@@ -538,7 +536,7 @@ public class ExperimentsResourceTest {
 
         when(buckets.updateBucket(experiment.getID(), bucket.getLabel(), bucket, USERINFO)).thenReturn(bucket);
         Response response = experimentsResource.putBucket(experiment.getID(), bucket.getLabel(), bucket, AUTHHEADER);
-        assert (bucket.equals(response.getEntity()));
+        Assert.assertEquals(bucket, response.getEntity());
 
         doThrow(AuthenticationException.class).when(authorization)
                 .checkUserPermissions(USER, experiment.getApplicationName(), Permission.UPDATE);
@@ -581,7 +579,7 @@ public class ExperimentsResourceTest {
 
         Response response = experimentsResource.putBucketState(experiment.getID(), bucket.getLabel(), Bucket.State.valueOf("OPEN"),
                 AUTHHEADER);
-        assert (bucket.equals(response.getEntity()));
+        Assert.assertEquals(bucket, response.getEntity());
 
         doThrow(AuthenticationException.class).when(authorization)
                 .checkUserPermissions(USER, experiment.getApplicationName(), Permission.UPDATE);
@@ -720,7 +718,7 @@ public class ExperimentsResourceTest {
         HashMap<String, Object> result = new HashMap<>();
         result.put("exclusions", exclusionsList);
         Response response = experimentsResource.createExclusions(experiment.getID(), experimentIDList, AUTHHEADER);
-        assert (result.equals(response.getEntity()));
+        Assert.assertEquals(result, response.getEntity());
 
         doThrow(AuthenticationException.class).when(authorization)
                 .checkUserPermissions(USER, experiment.getApplicationName(), Permission.CREATE);
@@ -831,22 +829,22 @@ public class ExperimentsResourceTest {
         when(mutex.getNotExclusions(experiment.getID())).thenReturn(experimentList);
 
         Response response = experimentsResource.getExclusions(experiment.getID(), true, true, AUTHHEADER);
-        assert (experimentList.equals(response.getEntity()));
+        Assert.assertEquals("case 1", experimentList, response.getEntity());
         response = experimentsResource.getExclusions(experiment.getID(), true, false, AUTHHEADER);
-        assert (experimentList.equals(response.getEntity()));
+        Assert.assertEquals("case 2", experimentList, response.getEntity());
         response = experimentsResource.getExclusions(experiment.getID(), false, true, AUTHHEADER);
-        assert (experimentListResponse.equals(response.getEntity()));
+        Assert.assertEquals("case 3", experimentListResponse, response.getEntity());
         response = experimentsResource.getExclusions(experiment.getID(), false, false, AUTHHEADER);
-        assert (experimentListResponse.equals(response.getEntity()));
+        Assert.assertEquals("case 4", experimentListResponse, response.getEntity());
 
         response = experimentsResource.getExclusions(experiment.getID(), true, true, null);
-        assert (experimentList.equals(response.getEntity()));
+        Assert.assertEquals("case 5", experimentList, response.getEntity());
         response = experimentsResource.getExclusions(experiment.getID(), true, false, null);
-        assert (experimentList.equals(response.getEntity()));
+        Assert.assertEquals("case 6", experimentList, response.getEntity());
         response = experimentsResource.getExclusions(experiment.getID(), false, true, null);
-        assert (experimentListResponse.equals(response.getEntity()));
+        Assert.assertEquals("case 7", experimentListResponse, response.getEntity());
         response = experimentsResource.getExclusions(experiment.getID(), false, false, null);
-        assert (experimentListResponse.equals(response.getEntity()));
+        Assert.assertEquals("case 8", experimentListResponse, response.getEntity());
 
         doThrow(AuthenticationException.class).when(authorization)
                 .checkUserPermissions(USER, experiment.getApplicationName(), Permission.READ);
@@ -987,9 +985,9 @@ public class ExperimentsResourceTest {
         ExperimentPageList experimentPageList = new ExperimentPageList();
         when(pages.getExperimentPages(experiment.getID())).thenReturn(experimentPageList);
         Response response = experimentsResource.getExperimentPages(experiment.getID(), AUTHHEADER);
-        assert (experimentPageList.equals(response.getEntity()));
+        Assert.assertEquals("case ", experimentPageList, response.getEntity());
         response = experimentsResource.getExperimentPages(experiment.getID(), null);
-        assert (experimentPageList.equals(response.getEntity()));
+        Assert.assertEquals("case ", experimentPageList, response.getEntity());
 
         doThrow(AuthenticationException.class).when(authorization)
                 .checkUserPermissions(USER, experiment.getApplicationName(), Permission.READ);
@@ -1139,8 +1137,7 @@ public class ExperimentsResourceTest {
         try {
             experimentsResource.getAuthorizedExperimentOrThrow(experiment.getID(), USER);
             Assert.fail("Should throw AuthenticationException if user has no permission.");
-        } catch (AuthenticationException e) {
-            e.printStackTrace();
+        } catch (AuthenticationException ignored) {
         }
     }
 
