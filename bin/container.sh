@@ -146,17 +146,6 @@ start_wasabi() {
 
   remove_container ${project}-main
 
-  #Get the current location of the script
-  SOURCE="${BASH_SOURCE[0]}"
-  while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
-    DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-    SOURCE="$(readlink "$SOURCE")"
-    [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
-  done
-  DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
-  source $DIR/migration.sh
-
   if [ "${verify}" = true ] || ! [ docker inspect ${project}-main >/dev/null 2>&1 ]; then
     echo "${green}${project}: building${reset}"
 
@@ -183,6 +172,21 @@ start_cassandra() {
   start_container ${project}-cassandra ${cassandra} "--privileged=true -p 9042:9042 -p 9160:9160"
 
   [ "${verify}" = true ] && console_cassandra
+
+  CONTAINER_NAME=${CASSANDRA_CONTAINER:-${project}-cassandra}
+  IS_CONTAINER=`docker inspect -f {{.State.Running}} $CONTAINER_NAME`
+
+  if [ "$IS_CONTAINER" = true ] ; then
+    echo "${green}${project}: [Start] creating keyspace and migration schemas${reset}"
+    docker run -it --rm -e CASSANDRA_KEYSPACE_PREFIX=${project} -e CQLSH_HOST=${project}-cassandra -e CASSANDRA_PORT=9042 --net=${docker_network} --name wasabi_create_keyspace felixgao/wasabi_keyspace:1.0.0
+    docker run -it --rm -e CQLSH_HOST=${project}-cassandra -e CASSANDRA_PORT=9042 --net=${docker_network} --name wasabi_migration felixgao/wasabi-migration:1.0.0
+    echo "${green}${project}: [DONE] creating keyspace and migration schemas${reset}"
+  else
+    echo "[ERROR] Failed to start cassandra container, please check the logs"
+    exit 1;
+  fi
+
+
 }
 
 console_cassandra() {

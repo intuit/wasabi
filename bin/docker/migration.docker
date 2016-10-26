@@ -1,0 +1,8 @@
+FROM openjdk:jre-alpine
+
+
+ADD https://oss.sonatype.org/content/repositories/public/com/builtamont/cassandra-migration/0.9-SNAPSHOT/cassandra-migration-0.9-20161016.020953-32-jar-with-dependencies.jar /wasabi/cassandra-migration.jar
+ADD modules/repository-datastax/db/mutation /wasabi/mutation
+ADD bin/docker/migration.sh /wasabi/migration.sh
+
+ENTRYPOINT ["/wasabi/migration.sh"]
