@@ -75,7 +75,7 @@ public class DefaultCassandraDriver implements CassandraDriver {
                         .withRetryPolicy(DefaultRetryPolicy.INSTANCE);
 
                 if(getConfiguration().getTokenAwareLoadBalancingLocalDC().isPresent() &&
-                        getConfiguration().getTokenAwareLoadBalancingUsedHostsPerRemoteDc() >= 1) {
+                        getConfiguration().getTokenAwareLoadBalancingUsedHostsPerRemoteDc() >= 0) {
                     builder.withLoadBalancingPolicy(
                             new TokenAwarePolicy(
                                     new DCAwareRoundRobinPolicy.Builder()
