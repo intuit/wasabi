@@ -20,7 +20,7 @@ profile=${WASABI_PROFILE:-test}
 modules=${WASABI_MODULES:-main ui}
 execute_integration_tests=${WASABI_INTEGRATION_TEST:-true}
 deploy_host=${WASABI_DEPLOY_HOST:-deploy.host}
-deploy_host_user=${WASABI_DEPLOY_USER:-jenkins}
+deploy_host_user=${WASABI_DEPLOY_USER:-usr}
 sonar_host_url=${SONAR_HOST_URL:+-Dsonar.host.url=$SONAR_HOST_URL}
 sonar_auth_token=${SONAR_AUTH_TOKEN:+-Dsonar.login=$SONAR_AUTH_TOKEN}
 nexus_archive=${NEXUS_ARCHIVE:+true}
@@ -30,7 +30,7 @@ nexus_snapshot_repository_id=${nexus_repository_id}-snapshots
 nexus_deploy=${NEXUS_DEPLOY:-usr:pwd}
 deploy_resource=${deploy_host_user}@${deploy_host}
 file_repository=${FILE_REPOSITORY:-file.host:/data/dropbox}
-file_repository_user=${FILE_REPOSITORY_USER:-jenkins}
+file_repository_user=${FILE_REPOSITORY_USER:-usr}
 
 internal_project=${WASABI_INTERNAL_PROJECT}
 internal_repository=${WASABI_INTERNAL_REPOSITORY}
