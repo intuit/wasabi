@@ -8,15 +8,13 @@ import cats.data.Xor._
 import com.datastax.spark.connector.cql.CassandraConnector
 import com.google.inject.Inject
 import com.google.inject.name.Named
-import com.intuit.wasabi.data.exception.{RepositoryException, UnderlineRepositoryException, WasabiError}
-import com.intuit.wasabi.data.exception.WasabiError.RepositoryError
-import com.intuit.wasabi.data.launcher.SparkApplicationLauncher._
+import com.intuit.wasabi.data.exception.{RepositoryException, WasabiError}
+import com.intuit.wasabi.data.util.Constants._
 import com.intuit.wasabi.data.repository.{DataStoreConnectionProperties, SparkDataStoreRepository}
 import com.intuit.wasabi.data.udf.CurrentTimestampFunc
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.cassandra.CassandraSQLContext
 import org.apache.spark.sql.{DataFrame, SQLContext, SaveMode}
-import com.intuit.wasabi.data.util.Constants._
 
 /*
   * Errors:

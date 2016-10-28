@@ -2,10 +2,7 @@ package com.intuit.wasabi.data.repository
 
 import cats.data.Xor
 import cats.data.Xor._
-import com.intuit.wasabi.data.exception.WasabiError.RepositoryError
 import com.intuit.wasabi.data.exception.{RepositoryException, WasabiError}
-import com.intuit.wasabi.data.repository.cassandra.SparkCassandraRepository
-import com.intuit.wasabi.data.repository.mysql.SparkMySqlRepository
 import com.intuit.wasabi.data.util.Constants
 import org.apache.spark.{Logging, SparkContext}
 import org.slf4j.{Logger, LoggerFactory}

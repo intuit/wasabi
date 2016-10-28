@@ -1,4 +1,4 @@
-package test.com.intuit.wasabi.data;
+package com.intuit.wasabi.data
 
 /**
   * Created by nbarge on 9/25/16.

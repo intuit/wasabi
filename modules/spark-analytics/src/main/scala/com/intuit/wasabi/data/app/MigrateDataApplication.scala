@@ -47,17 +47,7 @@ class MigrateDataApplication(sc: SparkContext, appConfig: Config) extends BaseSp
       val pClass = mConfig.getString(s"${processorId}.class").trim
       if(log.isDebugEnabled()) log.debug(s"pClass => $pClass")
 
-      var processor: SparkProcessor = null
-
-      //@TODO add scala reflection code instead of CASEs
-      pClass match {
-        case copyTableMigrationProcessorClassName => {
-          processor = copyTableMigrationProcessor
-        }
-        //case whoa  => log.error(s"Unexpected case: ${whoa.toString}")
-      }
-
-      processor.process(processorId) match {
+      copyTableMigrationProcessor.process(processorId) match {
         case Left(error: WasabiError) => return Left(error)
         case Right(unit: Unit) => {
           if(log.isDebugEnabled) log.debug(s"process('$processorId') finished successfully...")

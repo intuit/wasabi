@@ -1,4 +1,4 @@
-package test.com.intuit.wasabi.data
+package com.intuit.wasabi.data
 
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.FlatSpec

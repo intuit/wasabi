@@ -4,10 +4,9 @@ import cats.data.Xor._
 import com.datastax.spark.connector.cql.CassandraConnector
 import com.google.inject.name.Names
 import com.intuit.wasabi.data.conf.guice.CommonSparkApplicationDI
-import com.intuit.wasabi.data.exception.{InvalidConfigurationError, WasabiError}
 import com.intuit.wasabi.data.repository.{DataStoreConnectionProperties, SparkDataStoreRepository}
-import com.intuit.wasabi.data.util.Constants._
 import com.intuit.wasabi.data.util.Utility
+import com.intuit.wasabi.data.util.Constants._
 import com.typesafe.config.Config
 import org.apache.spark.sql.cassandra.CassandraSQLContext
 

@@ -1,8 +1,8 @@
 package com.intuit.wasabi.data.conf.guice
 
 import com.google.inject.{Inject, Provider}
-import com.intuit.wasabi.data.util.Constants._
 import com.intuit.wasabi.data.util.Utility
+import com.intuit.wasabi.data.util.Constants._
 import com.typesafe.config.Config
 import org.apache.spark.{SparkConf, SparkContext}
 

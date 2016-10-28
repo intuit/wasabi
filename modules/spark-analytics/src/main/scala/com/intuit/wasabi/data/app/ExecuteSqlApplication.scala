@@ -4,8 +4,6 @@ import cats.data.Xor
 import cats.data.Xor._
 import com.google.inject.Inject
 import com.intuit.wasabi.data.exception.WasabiError
-import com.intuit.wasabi.data.processor.SparkProcessor
-import com.intuit.wasabi.data.processor.migratedata.CopyTableMigrationProcessor
 import com.intuit.wasabi.data.repository.SparkDataStoreRepository
 import com.typesafe.config.Config
 import org.apache.commons.lang3.ArrayUtils

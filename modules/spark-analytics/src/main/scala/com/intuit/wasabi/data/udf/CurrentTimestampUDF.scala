@@ -2,8 +2,8 @@ package com.intuit.wasabi.data.udf
 
 import java.sql.Timestamp
 import java.time.{Instant, ZoneId}
-
 import com.intuit.wasabi.data.util.Constants._
+
 
 class CurrentTimestampFunc extends Function1[String, Timestamp] with Serializable {
   def apply(iZoneId: String): Timestamp = {

@@ -1,4 +1,4 @@
-package test.com.intuit.wasabi.data
+package com.intuit.wasabi.data
 
 import com.datastax.spark.connector.cql.CassandraConnector
 import org.apache.spark.sql.{Row, SQLContext, SaveMode}

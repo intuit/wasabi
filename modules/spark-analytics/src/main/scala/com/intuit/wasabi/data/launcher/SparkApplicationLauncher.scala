@@ -1,15 +1,14 @@
 package com.intuit.wasabi.data.launcher
 
-import com.intuit.wasabi.data.app.{BaseSparkApplication, MigrateDataApplication}
-import com.intuit.wasabi.data.conf.AppConfig
-import com.intuit.wasabi.data.exception.{ApplicationException, WasabiError}
-import com.intuit.wasabi.data.util.Constants._
 import org.apache.commons.lang.ArrayUtils
 import cats.data.Xor
 import cats.data.Xor._
 import com.google.inject.Guice
+import com.intuit.wasabi.data.util.Constants._
+import com.intuit.wasabi.data.app.{BaseSparkApplication, MigrateDataApplication}
+import com.intuit.wasabi.data.conf.AppConfig
 import com.intuit.wasabi.data.conf.guice.migratedata.MigrateDataApplicationDI
-import com.intuit.wasabi.data.util.Utility
+import com.intuit.wasabi.data.exception.{ApplicationException, WasabiError}
 
 /**
   * This is the entry point for all the spark applications. This class looks for app_id argument and then

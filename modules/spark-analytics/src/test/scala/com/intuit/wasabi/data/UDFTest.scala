@@ -1,5 +1,4 @@
-package test.com.intuit.wasabi.data
-
+package com.intuit.wasabi.data
 
 import java.sql.Timestamp
 import java.time.{Instant, ZoneId}

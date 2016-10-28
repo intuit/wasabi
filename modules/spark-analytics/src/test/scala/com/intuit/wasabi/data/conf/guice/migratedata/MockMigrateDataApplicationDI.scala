@@ -1,4 +1,4 @@
-package test.com.intuit.wasabi.data.conf.guice.migratedata
+package com.intuit.wasabi.data.conf.guice.migratedata
 
 import com.datastax.spark.connector.cql.CassandraConnector
 import com.google.inject.name.{Named, Names}

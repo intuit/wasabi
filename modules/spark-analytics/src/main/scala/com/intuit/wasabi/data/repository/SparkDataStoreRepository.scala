@@ -3,7 +3,6 @@ package com.intuit.wasabi.data.repository
 import cats.data.Xor
 import com.intuit.wasabi.data.conf.AppConfig
 import com.intuit.wasabi.data.exception.WasabiError
-import com.intuit.wasabi.data.exception.WasabiError._
 import org.apache.spark.sql.{DataFrame, SQLContext, SaveMode}
 
 /**

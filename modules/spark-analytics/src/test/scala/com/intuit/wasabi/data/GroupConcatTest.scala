@@ -1,4 +1,4 @@
-package test.com.intuit.wasabi.data
+package com.intuit.wasabi.data
 
 import org.apache.spark.sql.types.{StringType, StructField, StructType}
 import org.apache.spark.sql.{Row, SQLContext}

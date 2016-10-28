@@ -2,8 +2,8 @@ package com.intuit.wasabi.data.conf
 
 import java.net.InetAddress
 
-import com.intuit.wasabi.data.util.Constants._
 import com.intuit.wasabi.data.util.Utility
+import com.intuit.wasabi.data.util.Constants._
 import com.typesafe.config.{Config, ConfigFactory}
 import org.apache.spark.Logging
 import org.slf4j.LoggerFactory
