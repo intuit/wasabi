@@ -24,18 +24,44 @@ deploy_host_user=${WASABI_DEPLOY_USER:-usr}
 sonar_host_url=${SONAR_HOST_URL:+-Dsonar.host.url=$SONAR_HOST_URL}
 sonar_auth_token=${SONAR_AUTH_TOKEN:+-Dsonar.login=$SONAR_AUTH_TOKEN}
 nexus_archive=${NEXUS_ARCHIVE:+true}
-nexus_resource="http://nexus.host/nexus/content/repositories"
-nexus_repository_id="repo"
-nexus_snapshot_repository_id=${nexus_repository_id}-snapshots
+nexus_repositories=${NEXUS_REPOSITORIES}
+nexus_repository_id=${NEXUS_REPOSITORY_ID}
+nexus_snapshot_repository_id=${NEXUS_SNAPSHOT_REPOSITORY_ID}
 nexus_deploy=${NEXUS_DEPLOY:-usr:pwd}
 deploy_resource=${deploy_host_user}@${deploy_host}
 file_repository=${FILE_REPOSITORY:-file.host:/data/dropbox}
 file_repository_user=${FILE_REPOSITORY_USER:-usr}
-
 internal_project=${WASABI_INTERNAL_PROJECT}
-internal_repository=${WASABI_INTERNAL_REPOSITORY}
-internal_repository_branch=${WASABI_INTERNAL_BRANCH:-develop}
+internal_project_repository=${WASABI_INTERNAL_REPOSITORY}
+internal_project_branch=${WASABI_INTERNAL_BRANCH}
+internal_project_user=${WASABI_INTERNAL_USER:-usr:pwd}
 wasabi_env="WASABI_OS=native WASABI_MAVEN=\"--settings ${internal_project}/settings.xml\""
+
+env
+
+echo "project:${project}"
+echo "profile:${profile}"
+echo "modules:${modules}"
+echo "execute_integration_tests:${execute_integration_tests}"
+echo "deploy_host:${deploy_host}"
+echo "deploy_host_user:${deploy_host_user}"
+echo "sonar_host_url:${sonar_host_url}"
+echo "sonar_auth_token:${sonar_auth_token}"
+echo "nexus_archive:${nexus_archive}"
+echo "nexus_repositories:${nexus_repositories}"
+echo "nexus_repository_id:${nexus_repository_id}"
+echo "nexus_snapshot_repository_id:${nexus_snapshot_repository_id}"
+echo "nexus_deploy:${nexus_deploy}"
+echo "deploy_resource:${deploy_resource}"
+echo "file_repository:${file_repository}"
+echo "file_repository_user:${file_repository_user}"
+echo "internal_project:${internal_project}"
+echo "internal_project_repository:${internal_project_repository}"
+echo "internal_project_branch:${internal_project_branch}"
+echo "internal_project_user:${internal_project_user}"
+echo "wasabi_env:${wasabi_env}"
+
+exit
 
 exitOnError() {
   echo "error cause: $1"
@@ -43,10 +69,12 @@ exitOnError() {
   exit 1
 }
 
-wget ${JENKINS_URL}jnlpJars/jenkins-cli.jar || exitOnError "unable to retrieve jenkins-cli.jar: wget ${JENKINS_URL}jnlpjars/jenkins-cli.jar"
+wget ${JENKINS_URL}jnlpJars/jenkins-cli.jar || \
+  exitOnError "unable to retrieve jenkins-cli.jar: wget ${JENKINS_URL}jnlpjars/jenkins-cli.jar"
 
-echo "cloning: ${internal_repository} / ${internal_repository_branch}"
-git clone -b ${internal_repository_branch} ${internal_repository} || exitOnError "unable to clone project: git clone -b ${internal_repository_branch} ${internal_repository}"
+echo "cloning: ${internal_project_repository} / ${internal_project_branch}"
+git clone -b ${internal_project_branch} https://${internal_project_user}@${internal_project_repository} || \
+  exitOnError "unable to clone project: git clone -b ${internal_project_branch} https://${internal_project_user}@${internal_project_repository}"
 
 (cd ${internal_project}; cat ~/.m2/settings.xml | sed "s|</profiles>|$(cat profile.xml | tr -d '\n')</profiles>|" | sed "s|\[PWD\]|$(pwd)|" > settings.xml)
 
@@ -106,8 +134,8 @@ for module in ${modules}; do
     fi
 
     if [ "${version/-SNAPSHOT}" == "${version}" ]; then
-      artifact=$(cd ${project}; mvn --settings ${internal_project}/settings.xml -f ./modules/main/pom.xml -P ${profile} help:evaluate -Dexpression=project.artifactId | sed -n -e '/^\[.*\]/ !{ p; }')
-      path=${nexus_resource}/${artifact_repository_id}/`echo ${group} | sed "s/\./\//g"`/${artifact}/${version}
+      artifact=$(mvn --settings ${internal_project}/settings.xml -f ./modules/main/pom.xml -P ${profile} help:evaluate -Dexpression=project.artifactId | sed -n -e '/^\[.*\]/ !{ p; }')
+      path=${nexus_repositories}/${artifact_repository_id}/`echo ${group} | sed "s/\./\//g"`/${artifact}/${version}
       rpm_path=${path}/${rpm}
 
       echo "archiving: ${rpm} ${rpm_path}"
@@ -116,7 +144,7 @@ for module in ${modules}; do
 
       if [ "${module}" == "ui" ]; then
         artifact=ui
-        path=${nexus_resource}/${artifact_repository_id}/`echo ${group} | sed "s/\./\//g"`/${artifact}/${version}
+        path=${nexus_repositories/${artifact_repository_id}/`echo ${group} | sed "s/\./\//g"`/${artifact}/${version}
         zip=${project}-${artifact}-${profile}-${version}.zip
         zip_path=${path}/${zip}
 
