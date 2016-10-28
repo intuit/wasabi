@@ -187,7 +187,7 @@ public class EventsIntegrationTest extends TestBase {
      * This experiment tests scenario where we are trying 
      * to GET all assignments of an Invalid Experiment
      */
-    @Test
+//    @Test
     public void t_InvalidExperimentAssignment()
     {
     	//create an experiment and assign with fake/invaid ID
