@@ -25,6 +25,7 @@ import com.intuit.wasabi.tests.library.util.serialstrategies.DefaultNameExclusio
 import com.intuit.wasabi.tests.model.Application;
 import com.intuit.wasabi.tests.model.Bucket;
 import com.intuit.wasabi.tests.model.Experiment;
+import com.intuit.wasabi.tests.model.Page;
 import com.intuit.wasabi.tests.model.factory.ApplicationFactory;
 import com.intuit.wasabi.tests.model.factory.BucketFactory;
 import com.intuit.wasabi.tests.model.factory.ExperimentFactory;
@@ -697,7 +698,20 @@ public class IntegrationExperiment extends TestBase {
     	List<Experiment> experimentsList = getExperimentsByApplication(new Application("junkapp"));
     	Assert.assertEquals(experimentsList.size(), 0);
     }
-       
+     
+    /**
+     * This test case covers a scenario where we
+     * try to get list of experiments of  
+     * non-existent application and non-existent page
+     * the name of the app I am using is junkapp
+     * the name of the page I am using is junkpage
+     */
+    @Test
+    public void getExperimentsOfNonExistentAppAndNonExistentPage()
+    {
+    	List<Experiment> experimentsList = getExperimentsByApplicationPage(new Application("junkapp"), new Page("junkpage", true));
+    	Assert.assertEquals(experimentsList.size(), 0);
+    }
 
     /**
      * Adds the remaining experiments to the list of experiments to clean up.
