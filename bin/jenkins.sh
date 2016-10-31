@@ -61,8 +61,6 @@ echo "internal_project_branch:${internal_project_branch}"
 echo "internal_project_user:${internal_project_user}"
 echo "wasabi_env:${wasabi_env}"
 
-exit
-
 exitOnError() {
   echo "error cause: $1"
   java -jar jenkins-cli.jar set-build-result unstable
