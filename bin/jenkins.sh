@@ -15,6 +15,29 @@
 # limitations under the License.
 ###############################################################################
 
+# configurables:
+#
+#   profile                      : project name
+#   build                        : build kill switch; default:false
+#   profile                      : maven profile; default:test
+#   modules                      : project modules to build; default:main ui
+#   execute_integration_tests    : execute integration test kill switch; default:true
+#   deploy_host                  : integration test host; default:deploy.host
+#   deploy_host_url              : integration test deploy user; default:deploy.user
+#   sonar_host_url               : sonar host; default:+-Dsonar.host.url=SONAR_HOST_URL
+#   sonar_auth_token             : sonar authorization token; default:-Dsonar.login=SONAR_AUTH_TOKEN
+#   nexus_archive                : nexus archive kill switch; default:false
+#   nexus_repositories           : nexus repositories
+#   nexus_repository_id          : nexus milestone repository id
+#   nexus_snapshot_repository_id : nexus snapshot repository id
+#   nexus_deploy                 : nexus deploy user; default:usr:pwd
+#   file_repository              : file repository; default:file.host:/data/dropbox
+#   file_repository_user         : file repository user; default:usr
+#   internal_project             : internal project name
+#   internal_project_repository  : internal project repository
+#   internal_project_branch      : internal project repository branch
+#   internal_project_user        : internal project user
+
 project=wasabi
 build=${PROJECT_BUILD:-false}
 profile=${PROJECT_PROFILE:-test}
@@ -38,51 +61,38 @@ internal_project_branch=${PROJECT_INTERNAL_BRANCH}
 internal_project_user=${PROJECT_INTERNAL_USER:-usr:pwd}
 project_env="WASABI_OS=native WASABI_MAVEN=\"--settings ${internal_project}/settings.xml\""
 
-env
-
-echo "project:${project}"
-echo "build:${build}"
-echo "profile:${profile}"
-echo "modules:${modules}"
-echo "execute_integration_tests:${execute_integration_tests}"
-echo "deploy_host:${deploy_host}"
-echo "deploy_host_user:${deploy_host_user}"
-echo "sonar_host_url:${sonar_host_url}"
-echo "sonar_auth_token:${sonar_auth_token}"
-echo "nexus_archive:${nexus_archive}"
-echo "nexus_repositories:${nexus_repositories}"
-echo "nexus_repository_id:${nexus_repository_id}"
-echo "nexus_snapshot_repository_id:${nexus_snapshot_repository_id}"
-echo "nexus_deploy:${nexus_deploy}"
-echo "deploy_resource:${deploy_resource}"
-echo "file_repository:${file_repository}"
-echo "file_repository_user:${file_repository_user}"
-echo "internal_project:${internal_project}"
-echo "internal_project_repository:${internal_project_repository}"
-echo "internal_project_branch:${internal_project_branch}"
-echo "internal_project_user:${internal_project_user}"
-echo "project_env:${project_env}"
-
 exitOnError() {
   echo "error cause: $1"
   java -jar jenkins-cli.jar set-build-result unstable
   exit 1
 }
 
+# fetch jenkins cli client
+
 wget ${JENKINS_URL}jnlpJars/jenkins-cli.jar || \
   exitOnError "unable to retrieve jenkins-cli.jar: wget ${JENKINS_URL}jnlpjars/jenkins-cli.jar"
 
+# exit build if not enabled
+
 [[ "${build}" == "false" ]] && exitOnError "project build: ${build}"
+
+# fetch internal project
 
 echo "cloning: ${internal_project_repository} / ${internal_project_branch}"
 git clone -b ${internal_project_branch} https://${internal_project_user}@${internal_project_repository} || \
   exitOnError "unable to clone project: git clone -b ${internal_project_branch} https://${internal_project_user}@${internal_project_repository}"
 
+# construct viable/complete settings.xml
+
 (cd ${internal_project}; cat ~/.m2/settings.xml | sed "s|</profiles>|$(cat profile.xml | tr -d '\n')</profiles>|" | sed "s|\[PWD\]|$(pwd)|" > settings.xml)
+
+# extract meta-data
 
 service=$(mvn --settings ${internal_project}/settings.xml -f ./modules/main/pom.xml -P ${profile} help:evaluate -Dexpression=application.name | sed -n -e '/^\[.*\]/ !{ p; }')
 group=$(mvn --settings ${internal_project}/settings.xml -f ./modules/main/pom.xml -P ${profile} help:evaluate -Dexpression=project.groupId | sed -n -e '/^\[.*\]/ !{ p; }')
 version=$(mvn --settings ${internal_project}/settings.xml -f ./modules/main/pom.xml -P ${profile} help:evaluate -Dexpression=project.version | sed -n -e '/^\[.*\]/ !{ p; }')
+
+# build
 
 echo "packaging: ${project} / ${profile}"
 (eval ${project_env} ./bin/${project}.sh --profile=${profile} --verify=true package) || \
@@ -90,6 +100,8 @@ echo "packaging: ${project} / ${profile}"
 
 for module in ${modules}; do
   if [[ ! -z "${module// }" ]]; then
+    # derive module rpm
+
     echo "prepare deploy: $(find ./${project}/target -name ${project}-${module}-${profile}-*.noarch.rpm -type f)"
     rpm=`basename $(find ./${project}/target -name ${project}-${module}-${profile}-*.noarch.rpm -type f)` || \
       exitOnError "failed to find ./${project}/target/${project}-${module}-${profile}-*.noarch.rpm"
@@ -97,6 +109,8 @@ for module in ${modules}; do
 
     if [[ "${execute_integration_tests}" == "true" ]]; then
       echo "deploying: ${rpm}"
+
+      # deploy module rpm, note: remote side daemon process will install
 
 # FIXME: if we rm the file, it needs to be chmod' such that user:deploy can read/scp the new file
 #      (ssh ${deploy_resource} "rm /tmp/${project}/jacoco-it.exec")
@@ -106,9 +120,13 @@ for module in ${modules}; do
       sleep 120
 
       if [ "${module}" == "main" ]; then
+        # test module
+
         echo "testing: ${rpm} http://${deploy_host}:8080"
         (eval ${project_env} ./bin/${project}.sh --profile=${profile} --endpoint=${deploy_host}:8080 test)
         status=$?
+
+        # stop application to flush the jacoco file to disk and fetch it
 
         (ssh ${deploy_resource} "/home/jenkins/bin/init-d ${service} stop") || \
           exitOnError "unable to stop project: (ssh ${deploy_resource} \"/home/jenkins/bin/init-d ${service} stop\")"
@@ -117,6 +135,8 @@ for module in ${modules}; do
       fi
     fi
 
+    # publish sonar report
+
     echo "publishing sonar report"
     (mvn --settings ${internal_project}/settings.xml ${sonar_host_url} ${sonar_auth_token} -P ${profile} package sonar:sonar) || \
       exitOnError "unable to report to sonar: (mvn --settings ${internal_project}/settings.xml [sonar_host_url] [sonar_auth_token] -P ${profile} package sonar:sonar)"
@@ -124,10 +144,14 @@ for module in ${modules}; do
     [ "${status}" -ne "0" ] && exitOnError "integration tests failed: (cd ${project}; eval ${project_env} ./bin/${project}.sh --profile=${profile} --endpoint=${deploy_host}:8080 test)"
 
     if [[ "${nexus_archive}" == "true" ]]; then
+      # publish artifacts to nexus
+
       echo "publishing nexus artifacts"
       (mvn --settings ${internal_project}/settings.xml -Dmaven.test.skip=true -P ${profile} deploy) || \
         exitOnError "unable to report to sonar: (mvn --settings ${internal_project}/settings.xml -Dmaven.test.skip=true -P ${profile} deploy)"
     fi
+
+    # determine MILESTONE or SNAPSHOT repository
 
     if [[ "${version/-SNAPSHOT}" == "${version}" ]]; then
       artifact_repository_id=${nexus_repository_id}
@@ -136,6 +160,8 @@ for module in ${modules}; do
     fi
 
     if [ "${version/-SNAPSHOT}" == "${version}" ]; then
+      # archive MILESTONE rpms
+
       artifact=$(mvn --settings ${internal_project}/settings.xml -f ./modules/main/pom.xml -P ${profile} help:evaluate -Dexpression=project.artifactId | sed -n -e '/^\[.*\]/ !{ p; }')
       path=${nexus_repositories}/${artifact_repository_id}/`echo ${group} | sed "s/\./\//g"`/${artifact}/${version}
       rpm_path=${path}/${rpm}
@@ -145,6 +171,7 @@ for module in ${modules}; do
         exitOnError "archive rpm failed: curl -v -u [nexus_deploy] --upload-file ./${project}/target/${rpm} ${rpm_path}"
 
       if [ "${module}" == "ui" ]; then
+        # archive MILESTONE ui.zip
         artifact=ui
         path=${nexus_repositories/${artifact_repository_id}/`echo ${group} | sed "s/\./\//g"`/${artifact}/${version}
         zip=${project}-${artifact}-${profile}-${version}.zip
