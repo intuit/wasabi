@@ -1918,6 +1918,57 @@ public class TestBase extends ServiceTestBase {
     }
 
 
+    //////////////////////////////////////////////////////////////////
+    // applications/<appName>/pages/ endpoint //
+    //////////////////////////////////////////////////////////////////
+    /**
+     * Sends a GET request to retrieve pages assigned to the application.
+     * The response must contain HTTP {@link HttpStatus#SC_OK}.
+     *
+     * @param application the application
+     * @return a list of pages
+     */
+     public List<Page> getPages(Application application){
+    	 return getPages(application,HttpStatus.SC_OK);
+     }
+    
+     /**
+      * Sends a GET request to retrieve pages assigned to the application.
+      * The response must contain HTTP {@code expectedStatus}.
+      *
+      * @param application the application
+      * @param expectedStatus the expected HTTP status code
+      * @return a list of pages
+      */
+     public List<Page> getPages(Application application,  int expectedStatus) {
+         return getPages(application, expectedStatus, apiServerConnector);
+     }
+    
+    
+     /**
+      * Sends a GET request to retrieve pages assigned to the application.
+      * The response must contain HTTP {@code expectedStatus}.
+      *
+      * @param application the application
+      * @param expectedStatus the expected HTTP status code
+      * @param apiServerConnector the server connector to use
+      * @return a list of pages
+      */
+     public List<Page> getPages(Application application, int expectedStatus, APIServerConnector apiServerConnector) {
+         String uri = "applications/" + application.name + "/pages/";
+         response = apiServerConnector.doGet(uri);
+         assertReturnCode(response, expectedStatus);
+         List<Map<String, Object>> jsonMapping = response.jsonPath().getList("pages");
+         List<Page> pageList = new ArrayList<>(jsonMapping.size());
+         for (Map jsonMap : jsonMapping) {
+             String jsonString = simpleGson.toJson(jsonMap);
+             pageList.add(PageFactory.createFromJSONString(jsonString));
+         }
+         return pageList;
+     }
+    
+    
+    
 
     //////////////////////////////////////////////////////////////////
     // experiments/applications/<appName>/pages/<pagename> endpoint //
