@@ -26,10 +26,12 @@ import com.intuit.wasabi.repository.RepositoryException;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
 import com.intuit.wasabi.repository.PrioritiesRepository;
 import com.intuit.wasabi.repository.cassandra.accessor.PrioritiesAccessor;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -78,15 +80,13 @@ public class CassandraPrioritiesRepository implements PrioritiesRepository {
 
 			if (priorityList != null) {
 
-				List<UUID> priorityUUIDs = priorityList.stream()
+				final List<UUID> priorityUUIDs = priorityList.stream()
 						.map(id -> id.getRawID()).collect(Collectors.toList());
 
-				Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment> experimentsResult = 
-						experimentAccessor.getExperiments(priorityUUIDs);
-
 				List<com.intuit.wasabi.repository.cassandra.pojo.Experiment> experimentPojos = 
-						experimentsResult.all();
-
+						priorityUUIDs.stream().map(uuid -> experimentAccessor.getExperimentById(uuid).one())
+							.collect(Collectors.toList());				
+				
 				LOGGER.debug("Received experimentPojos {} for priorityUUIDs {}",
 						new Object[] { experimentPojos, priorityUUIDs });
 

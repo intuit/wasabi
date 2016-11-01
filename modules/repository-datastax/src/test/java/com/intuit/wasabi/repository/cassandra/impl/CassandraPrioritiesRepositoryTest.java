@@ -109,12 +109,11 @@ public class CassandraPrioritiesRepositoryTest {
 		priorityUUIDs.add(experimentId);
 		application.setPriorities(priorityUUIDs);
 		
-		experiments.add(experiment);
-		
+//		experiments.add(experiment);
 		Mockito.when(accessor.getPriorities(applicationName.toString())).thenReturn(result);
 		Mockito.when(result.all()).thenReturn(applications);
-		Mockito.when(experimentAccessor.getExperiments(Mockito.anyList())).thenReturn(experimentResult);
-		Mockito.when(experimentResult.all()).thenReturn(experiments);
+		Mockito.when(experimentAccessor.getExperimentById(Mockito.any())).thenReturn(experimentResult);
+		Mockito.when(experimentResult.one()).thenReturn(experiment);
 		
 		PrioritizedExperimentList priorities = repository.getPriorities(applicationName);
 		
