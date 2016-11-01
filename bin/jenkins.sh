@@ -83,6 +83,7 @@ git clone -b ${internal_project_branch} https://${internal_project_user}@${inter
   exitOnError "unable to clone project: git clone -b ${internal_project_branch} https://${internal_project_user}@${internal_project_repository}"
 
 # construct viable/complete settings.xml
+# note: need to add distributionManagement/repository and server entries in settings.xml in order to mvn-deploy internally
 
 (cd ${internal_project}; cat ~/.m2/settings.xml | sed "s|</profiles>|$(cat profile.xml | tr -d '\n')</profiles>|" | sed "s|\[PWD\]|$(pwd)|" > settings.xml)
 
@@ -102,9 +103,9 @@ for module in ${modules}; do
   if [[ ! -z "${module// }" ]]; then
     # derive module rpm
 
-    echo "prepare deploy: $(find ./${project}/target -name ${project}-${module}-${profile}-*.noarch.rpm -type f)"
-    rpm=`basename $(find ./${project}/target -name ${project}-${module}-${profile}-*.noarch.rpm -type f)` || \
-      exitOnError "failed to find ./${project}/target/${project}-${module}-${profile}-*.noarch.rpm"
+    echo "prepare deploy: $(find ./target -name ${project}-${module}-${profile}-*.noarch.rpm -type f)"
+    rpm=`basename $(find ./target -name ${project}-${module}-${profile}-*.noarch.rpm -type f)` || \
+      exitOnError "failed to find ./target/${project}-${module}-${profile}-*.noarch.rpm"
     status=0
 
     if [[ "${execute_integration_tests}" == "true" ]]; then
@@ -112,10 +113,10 @@ for module in ${modules}; do
 
       # deploy module rpm, note: remote side daemon process will install
 
-# FIXME: if we rm the file, it needs to be chmod' such that user:deploy can read/scp the new file
+      # note: if we rm the file, it needs to be chmod' such that user:deploy can read/scp the new file
 #      (ssh ${deploy_resource} "rm /tmp/${project}/jacoco-it.exec")
-      (scp ./${project}/target/${rpm} ${deploy_host_user}@${deploy_host}:; ssh ${deploy_host_user}@${deploy_host} "mv ${rpm} inbox") || \
-        exitOnError "failed to deploy application: (scp ./${project}/target/${rpm} ${deploy_host_user}@${deploy_host}:; ssh ${deploy_host_user}@${deploy_host} \"mv ${rpm} inbox\")"
+      (scp ./target/${rpm} ${deploy_host_user}@${deploy_host}:; ssh ${deploy_host_user}@${deploy_host} "mv ${rpm} inbox") || \
+        exitOnError "failed to deploy application: (scp ./target/${rpm} ${deploy_host_user}@${deploy_host}:; ssh ${deploy_host_user}@${deploy_host} \"mv ${rpm} inbox\")"
 
       sleep 120
 
@@ -167,8 +168,8 @@ for module in ${modules}; do
       rpm_path=${path}/${rpm}
 
       echo "archiving: ${rpm} ${rpm_path}"
-      curl -v -u ${nexus_deploy} --upload-file ./${project}/target/${rpm} ${rpm_path} || \
-        exitOnError "archive rpm failed: curl -v -u [nexus_deploy] --upload-file ./${project}/target/${rpm} ${rpm_path}"
+      curl -v -u ${nexus_deploy} --upload-file ./target/${rpm} ${rpm_path} || \
+        exitOnError "archive rpm failed: curl -v -u [nexus_deploy] --upload-file ./target/${rpm} ${rpm_path}"
 
       if [ "${module}" == "ui" ]; then
         # archive MILESTONE ui.zip
@@ -178,8 +179,8 @@ for module in ${modules}; do
         zip_path=${path}/${zip}
 
         echo "archiving: ${zip} ${zip_path}"
-        curl -v -u ${nexus_deploy} --upload-file ./${project}/modules/ui/target/dist.zip ${zip_path} || \
-          exitOnError "archive failed: curl -v -u [nexus_deploy] --upload-file ./${project}/modules/ui/dist.zip ${zip_path}"
+        curl -v -u ${nexus_deploy} --upload-file ./modules/ui/target/dist.zip ${zip_path} || \
+          exitOnError "archive failed: curl -v -u [nexus_deploy] --upload-file ./modules/ui/dist.zip ${zip_path}"
       fi
     fi
   fi
