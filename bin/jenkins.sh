@@ -16,11 +16,12 @@
 ###############################################################################
 
 project=wasabi
-profile=${WASABI_PROFILE:-test}
-modules=${WASABI_MODULES:-main ui}
-execute_integration_tests=${WASABI_INTEGRATION_TEST:-true}
-deploy_host=${WASABI_DEPLOY_HOST:-deploy.host}
-deploy_host_user=${WASABI_DEPLOY_USER:-usr}
+build=${PROJECT_BUILD:-false}
+profile=${PROJECT_PROFILE:-test}
+modules=${PROJECT_MODULES:-main ui}
+execute_integration_tests=${PROJECT_INTEGRATION_TEST:-true}
+deploy_host=${PROJECT_DEPLOY_HOST:-deploy.host}
+deploy_host_user=${PROJECT_DEPLOY_USER:-usr}
 sonar_host_url=${SONAR_HOST_URL:+-Dsonar.host.url=$SONAR_HOST_URL}
 sonar_auth_token=${SONAR_AUTH_TOKEN:+-Dsonar.login=$SONAR_AUTH_TOKEN}
 nexus_archive=${NEXUS_ARCHIVE:+true}
@@ -31,15 +32,16 @@ nexus_deploy=${NEXUS_DEPLOY:-usr:pwd}
 deploy_resource=${deploy_host_user}@${deploy_host}
 file_repository=${FILE_REPOSITORY:-file.host:/data/dropbox}
 file_repository_user=${FILE_REPOSITORY_USER:-usr}
-internal_project=${WASABI_INTERNAL_PROJECT}
-internal_project_repository=${WASABI_INTERNAL_REPOSITORY}
-internal_project_branch=${WASABI_INTERNAL_BRANCH}
-internal_project_user=${WASABI_INTERNAL_USER:-usr:pwd}
-wasabi_env="WASABI_OS=native WASABI_MAVEN=\"--settings ${internal_project}/settings.xml\""
+internal_project=${PROJECT_INTERNAL_PROJECT}
+internal_project_repository=${PROJECT_INTERNAL_REPOSITORY}
+internal_project_branch=${PROJECT_INTERNAL_BRANCH}
+internal_project_user=${PROJECT_INTERNAL_USER:-usr:pwd}
+project_env="WASABI_OS=native WASABI_MAVEN=\"--settings ${internal_project}/settings.xml\""
 
 env
 
 echo "project:${project}"
+echo "build:${build}"
 echo "profile:${profile}"
 echo "modules:${modules}"
 echo "execute_integration_tests:${execute_integration_tests}"
@@ -59,7 +61,7 @@ echo "internal_project:${internal_project}"
 echo "internal_project_repository:${internal_project_repository}"
 echo "internal_project_branch:${internal_project_branch}"
 echo "internal_project_user:${internal_project_user}"
-echo "wasabi_env:${wasabi_env}"
+echo "project_env:${project_env}"
 
 exitOnError() {
   echo "error cause: $1"
@@ -69,6 +71,8 @@ exitOnError() {
 
 wget ${JENKINS_URL}jnlpJars/jenkins-cli.jar || \
   exitOnError "unable to retrieve jenkins-cli.jar: wget ${JENKINS_URL}jnlpjars/jenkins-cli.jar"
+
+[[ "${build}" == "false" ]] && exitOnError "project build: ${build}"
 
 echo "cloning: ${internal_project_repository} / ${internal_project_branch}"
 git clone -b ${internal_project_branch} https://${internal_project_user}@${internal_project_repository} || \
@@ -81,8 +85,8 @@ group=$(mvn --settings ${internal_project}/settings.xml -f ./modules/main/pom.xm
 version=$(mvn --settings ${internal_project}/settings.xml -f ./modules/main/pom.xml -P ${profile} help:evaluate -Dexpression=project.version | sed -n -e '/^\[.*\]/ !{ p; }')
 
 echo "packaging: ${project} / ${profile}"
-(eval ${wasabi_env} ./bin/${project}.sh --profile=${profile} --verify=true package) || \
-  exitOnError "unable to build project : (${wasabi_env} ./bin/${project}.sh --profile=${profile} --verify=true package)"
+(eval ${project_env} ./bin/${project}.sh --profile=${profile} --verify=true package) || \
+  exitOnError "unable to build project : (${project_env} ./bin/${project}.sh --profile=${profile} --verify=true package)"
 
 for module in ${modules}; do
   if [[ ! -z "${module// }" ]]; then
@@ -103,7 +107,7 @@ for module in ${modules}; do
 
       if [ "${module}" == "main" ]; then
         echo "testing: ${rpm} http://${deploy_host}:8080"
-        (eval ${wasabi_env} ./bin/${project}.sh --profile=${profile} --endpoint=${deploy_host}:8080 test)
+        (eval ${project_env} ./bin/${project}.sh --profile=${profile} --endpoint=${deploy_host}:8080 test)
         status=$?
 
         (ssh ${deploy_resource} "/home/jenkins/bin/init-d ${service} stop") || \
@@ -117,7 +121,7 @@ for module in ${modules}; do
     (mvn --settings ${internal_project}/settings.xml ${sonar_host_url} ${sonar_auth_token} -P ${profile} package sonar:sonar) || \
       exitOnError "unable to report to sonar: (mvn --settings ${internal_project}/settings.xml [sonar_host_url] [sonar_auth_token] -P ${profile} package sonar:sonar)"
 
-    [ "${status}" -ne "0" ] && exitOnError "integration tests failed: (cd ${project}; eval ${wasabi_env} ./bin/${project}.sh --profile=${profile} --endpoint=${deploy_host}:8080 test)"
+    [ "${status}" -ne "0" ] && exitOnError "integration tests failed: (cd ${project}; eval ${project_env} ./bin/${project}.sh --profile=${profile} --endpoint=${deploy_host}:8080 test)"
 
     if [[ ! -z "${nexus_archive}" ]]; then
       echo "publishing nexus artifacts"
