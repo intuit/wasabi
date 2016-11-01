@@ -24,7 +24,7 @@ deploy_host=${PROJECT_DEPLOY_HOST:-deploy.host}
 deploy_host_user=${PROJECT_DEPLOY_USER:-usr}
 sonar_host_url=${SONAR_HOST_URL:+-Dsonar.host.url=$SONAR_HOST_URL}
 sonar_auth_token=${SONAR_AUTH_TOKEN:+-Dsonar.login=$SONAR_AUTH_TOKEN}
-nexus_archive=${NEXUS_ARCHIVE:+true}
+nexus_archive=${NEXUS_ARCHIVE:-false}
 nexus_repositories=${NEXUS_REPOSITORIES}
 nexus_repository_id=${NEXUS_REPOSITORY_ID}
 nexus_snapshot_repository_id=${NEXUS_SNAPSHOT_REPOSITORY_ID}
@@ -123,7 +123,7 @@ for module in ${modules}; do
 
     [ "${status}" -ne "0" ] && exitOnError "integration tests failed: (cd ${project}; eval ${project_env} ./bin/${project}.sh --profile=${profile} --endpoint=${deploy_host}:8080 test)"
 
-    if [[ ! -z "${nexus_archive}" ]]; then
+    if [[ "${nexus_archive}" == "true" ]]; then
       echo "publishing nexus artifacts"
       (mvn --settings ${internal_project}/settings.xml -Dmaven.test.skip=true -P ${profile} deploy) || \
         exitOnError "unable to report to sonar: (mvn --settings ${internal_project}/settings.xml -Dmaven.test.skip=true -P ${profile} deploy)"
