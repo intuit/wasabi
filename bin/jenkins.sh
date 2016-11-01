@@ -83,7 +83,8 @@ git clone -b ${internal_project_branch} https://${internal_project_user}@${inter
   exitOnError "unable to clone project: git clone -b ${internal_project_branch} https://${internal_project_user}@${internal_project_repository}"
 
 # construct viable/complete settings.xml
-# note: need to add distributionManagement/repository and server entries in settings.xml in order to mvn-deploy internally
+# note: need to add distributionManagement/repository to [ws]/pom.xml to map to settings.xml in order to mvn-deploy internally
+# note: add internal repository to settings.xml; see: https://maven.apache.org/guides/mini/guide-multiple-repositories.html
 
 (cd ${internal_project}; cat ~/.m2/settings.xml | sed "s|</profiles>|$(cat profile.xml | tr -d '\n')</profiles>|" | sed "s|\[PWD\]|$(pwd)|" > settings.xml)
 
