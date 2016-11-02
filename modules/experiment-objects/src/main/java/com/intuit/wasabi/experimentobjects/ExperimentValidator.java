@@ -179,16 +179,4 @@ public class ExperimentValidator {
             throw new IllegalArgumentException("Description/Hypothesis must not be empty.");
         }
     }
-
-    /**
-     * Throws an exception if description is {@link StringUtils#isEmpty(CharSequence)}.
-     *
-     * @param description the description to test.
-     * @throws IllegalArgumentException on empty description
-     */
-    public void validateDescriptionNotEmpty(String description) {
-        if (StringUtils.isEmpty(description)) {
-            throw new IllegalArgumentException("Description/Hypothesis must not be empty.");
-        }
-    }
 }

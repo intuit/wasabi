@@ -535,7 +535,7 @@
          <type>jar</type>
          <licenses/>
          <downloadUrls>
-            <string>file:/Users/iizrailevsky/Git/wasabi/modules/experiment-objects/../../repository/Hyrule/Hyrule/0.0.1/Hyrule-0.0.1.jar</string>
+            <string>file:/Users/jtodd1/Documents/projects/wasabi/modules/experiment-objects/../../repository/Hyrule/Hyrule/0.0.1/Hyrule-0.0.1.jar</string>
          </downloadUrls>
       </dependency>
       <dependency>

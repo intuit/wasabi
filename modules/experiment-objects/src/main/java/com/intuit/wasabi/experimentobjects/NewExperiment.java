@@ -106,10 +106,6 @@ public class NewExperiment implements ExperimentBase {
 
     public void setResults(String results) { this.results = results; }
 
-    public void setHypothesisIsCorrect(String hypothesisIsCorrect) { this.hypothesisIsCorrect = hypothesisIsCorrect; }
-
-    public void setResults(String results) { this.results = results; }
-
     public void setRule(String rule) {
 		this.rule = rule;
 	}
