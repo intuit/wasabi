@@ -25,7 +25,7 @@ docker build -t felixgao/wasabi_keyspace:1.0.0 -f cqlsh.docker .
 
 For example, to run the cqlsh container using docker, assuming the Cassandra is running on a host called wasabi-cassandra and listens on port 9042.  You may omit --network option if the cassandra node is not managed by docker.
 ```
-docker run -it --rm -e CASSANDRA_KEYSPACE_PREFIX=jabba -e CQLSH_HOST=wasabi-cassandra -e CASSANDRA_PORT=9042 --network=wasabi_nw --name wasabi_create_keyspace felixgao/wasabi_keyspace:1.0.0
+docker run -it --rm -e CASSANDRA_KEYSPACE_PREFIX=wasabi -e CQLSH_HOST=wasabi-cassandra -e CASSANDRA_PORT=9042 --network=wasabi_nw --name wasabi_create_keyspace felixgao/wasabi_keyspace:1.0.0
 ```
 
 
@@ -50,8 +50,22 @@ docker run -it --rm -e CASSANDRA_KEYSPACE_PREFIX=jabba -e CQLSH_HOST=wasabi-cass
      * default: /wasabi/mutation
  - CASSANDRA_PORT
      * default: 9042
+ - CASSANDRA_MIGRATION
+     # default: /wasabi/cassandra-migration.jar
  
  For example, to run the wasabi-migration container using docker, assuming the Cassandra is running on a host called wasabi-cassandra and listens on port 9042.  You may omit --network option if the cassandra node is not managed by docker.
  ```
  docker run -it --rm -e CQLSH_HOST=wasabi-cassandra -e CASSANDRA_PORT=9042 --network=wasabi_nw --name wasabi_schema_migration felixgao/wasabi-migration:1.0.0
  ```
+ 
+## Local Cassandra
+
+if you are running the migration against local installation on the mac or your ip is not publicly reachable.  You will have to ran the script manually by providing the above environment variables using the ```migration.sh``` directly.
+
+for example, if your Mac OSx is running the cassandra locally, you will need the following command to migration.
+
+```
+export CASSANDRA_MIGRATION=/local_location_of_the_migration_tool.jar
+export MIGRATION_SCRIPT=/location_of_where_the_cql_scripts
+bin/docker/migration.sh
+```
