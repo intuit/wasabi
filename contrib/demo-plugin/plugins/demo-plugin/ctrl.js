@@ -46,7 +46,7 @@ angular.module('wasabi.controllers').
                         orderedIds.push($scope.experiment.id);
                     }
 
-                    // Otherwise, just add the next prioritized experiment to
+                    // Otherwise, just add the next prioritized experiment to the list
                     if ($scope.orderedExperiments[i].id !== $scope.experiment.id) {
                         orderedIds.push($scope.orderedExperiments[i].id);
                     }
