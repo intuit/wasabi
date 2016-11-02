@@ -86,10 +86,8 @@ git clone -b ${internal_project_branch} https://${internal_project_user}@${inter
 # note: need to add distributionManagement/repository to [ws]/pom.xml to map to settings.xml in order to mvn-deploy internally
 # note: add internal repository to settings.xml; see: https://maven.apache.org/guides/mini/guide-multiple-repositories.html
 
-#(cd ${internal_project}; cat ~/.m2/settings.xml | sed "s|</profiles>|$(cat profile.xml | tr -d '\n')</profiles>|" | sed "s|\[PWD\]|$(pwd)|" > settings.xml)
 cat ~/.m2/settings.xml | sed "s|</profiles>|$(cat ${internal_project}/profile.xml | tr -d '\n')</profiles>|" | sed "s|\[PWD\]|$(pwd)|" > settings.xml
 
-exit
 # extract meta-data
 
 service=$(mvn --settings ./settings.xml -f ./modules/main/pom.xml -P ${profile} help:evaluate -Dexpression=application.name | sed -n -e '/^\[.*\]/ !{ p; }')
