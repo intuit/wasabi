@@ -1735,6 +1735,10 @@ public class TestBase extends ServiceTestBase {
         }
         response = apiServerConnector.doGet(uri, context);
         assertReturnCode(response, expectedStatus);
+        
+        if ( expectedStatus == HttpStatus.SC_NOT_FOUND)
+        	return new ArrayList<Assignment>();
+        
         String jsonArray = TestUtils.csvToJsonArray(response.body().asString(), Constants.TAB);
         String[] elements = jsonArray.substring(2, jsonArray.length()-2).split("\\},\\{");
         List<Assignment> assignments = new ArrayList<>();
