@@ -59,7 +59,7 @@ internal_project=${PROJECT_INTERNAL_PROJECT}
 internal_project_repository=${PROJECT_INTERNAL_REPOSITORY}
 internal_project_branch=${PROJECT_INTERNAL_BRANCH}
 internal_project_user=${PROJECT_INTERNAL_USER:-usr:pwd}
-project_env="WASABI_OS=native WASABI_MAVEN=\"--settings ${internal_project}/settings.xml\""
+project_env="WASABI_OS=native WASABI_MAVEN=\"--settings ./settings.xml\""
 
 exitOnError() {
   echo "error cause: $1"
@@ -86,13 +86,15 @@ git clone -b ${internal_project_branch} https://${internal_project_user}@${inter
 # note: need to add distributionManagement/repository to [ws]/pom.xml to map to settings.xml in order to mvn-deploy internally
 # note: add internal repository to settings.xml; see: https://maven.apache.org/guides/mini/guide-multiple-repositories.html
 
-(cd ${internal_project}; cat ~/.m2/settings.xml | sed "s|</profiles>|$(cat profile.xml | tr -d '\n')</profiles>|" | sed "s|\[PWD\]|$(pwd)|" > settings.xml)
+#(cd ${internal_project}; cat ~/.m2/settings.xml | sed "s|</profiles>|$(cat profile.xml | tr -d '\n')</profiles>|" | sed "s|\[PWD\]|$(pwd)|" > settings.xml)
+cat ~/.m2/settings.xml | sed "s|</profiles>|$(cat ${internal_project}/profile.xml | tr -d '\n')</profiles>|" | sed "s|\[PWD\]|$(pwd)|" > settings.xml
 
+exit
 # extract meta-data
 
-service=$(mvn --settings ${internal_project}/settings.xml -f ./modules/main/pom.xml -P ${profile} help:evaluate -Dexpression=application.name | sed -n -e '/^\[.*\]/ !{ p; }')
-group=$(mvn --settings ${internal_project}/settings.xml -f ./modules/main/pom.xml -P ${profile} help:evaluate -Dexpression=project.groupId | sed -n -e '/^\[.*\]/ !{ p; }')
-version=$(mvn --settings ${internal_project}/settings.xml -f ./modules/main/pom.xml -P ${profile} help:evaluate -Dexpression=project.version | sed -n -e '/^\[.*\]/ !{ p; }')
+service=$(mvn --settings ./settings.xml -f ./modules/main/pom.xml -P ${profile} help:evaluate -Dexpression=application.name | sed -n -e '/^\[.*\]/ !{ p; }')
+group=$(mvn --settings ./settings.xml -f ./modules/main/pom.xml -P ${profile} help:evaluate -Dexpression=project.groupId | sed -n -e '/^\[.*\]/ !{ p; }')
+version=$(mvn --settings ./settings.xml -f ./modules/main/pom.xml -P ${profile} help:evaluate -Dexpression=project.version | sed -n -e '/^\[.*\]/ !{ p; }')
 
 # build
 
@@ -140,8 +142,8 @@ for module in ${modules}; do
     # publish sonar report
 
     echo "publishing sonar report"
-    (mvn --settings ${internal_project}/settings.xml ${sonar_host_url} ${sonar_auth_token} -P ${profile} package sonar:sonar) || \
-      exitOnError "unable to report to sonar: (mvn --settings ${internal_project}/settings.xml [sonar_host_url] [sonar_auth_token] -P ${profile} package sonar:sonar)"
+    (mvn --settings ./settings.xml ${sonar_host_url} ${sonar_auth_token} -P ${profile} package sonar:sonar) || \
+      exitOnError "unable to report to sonar: (mvn --settings ./settings.xml [sonar_host_url] [sonar_auth_token] -P ${profile} package sonar:sonar)"
 
     [ "${status}" -ne "0" ] && exitOnError "integration tests failed: (cd ${project}; eval ${project_env} ./bin/${project}.sh --profile=${profile} --endpoint=${deploy_host}:8080 test)"
 
@@ -149,8 +151,8 @@ for module in ${modules}; do
       # publish artifacts to nexus
 
       echo "publishing nexus artifacts"
-      (mvn --settings ${internal_project}/settings.xml -Dmaven.test.skip=true -P ${profile} deploy) || \
-        exitOnError "unable to report to sonar: (mvn --settings ${internal_project}/settings.xml -Dmaven.test.skip=true -P ${profile} deploy)"
+      (mvn --settings ./settings.xml -Dmaven.test.skip=true -P ${profile} deploy) || \
+        exitOnError "unable to report to sonar: (mvn --settings ./settings.xml -Dmaven.test.skip=true -P ${profile} deploy)"
     fi
 
     # determine MILESTONE or SNAPSHOT repository
@@ -164,7 +166,7 @@ for module in ${modules}; do
     if [ "${version/-SNAPSHOT}" == "${version}" ]; then
       # archive MILESTONE rpms
 
-      artifact=$(mvn --settings ${internal_project}/settings.xml -f ./modules/main/pom.xml -P ${profile} help:evaluate -Dexpression=project.artifactId | sed -n -e '/^\[.*\]/ !{ p; }')
+      artifact=$(mvn --settings ./settings.xml -f ./modules/main/pom.xml -P ${profile} help:evaluate -Dexpression=project.artifactId | sed -n -e '/^\[.*\]/ !{ p; }')
       path=${nexus_repositories}/${artifact_repository_id}/`echo ${group} | sed "s/\./\//g"`/${artifact}/${version}
       rpm_path=${path}/${rpm}
 
