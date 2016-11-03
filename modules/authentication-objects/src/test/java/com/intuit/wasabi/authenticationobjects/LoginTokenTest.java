@@ -21,6 +21,7 @@ import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -49,7 +50,7 @@ public class LoginTokenTest {
     public void testLoginToken() {
         assertEquals(token.getAccess_token(), access_token);
         assertEquals(token.getToken_type(), token_type);
-        assertTrue(token.toString().contains(access_token));
+        assertFalse(token.toString().contains(access_token));
         assertTrue(token.toString().contains(token_type));
     }
 
