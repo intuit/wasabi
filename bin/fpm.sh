@@ -134,7 +134,6 @@ for module in "$modules"; do
     if [ "${WASABI_OS}" == "${WASABI_OSX}" ] || [ "${WASABI_OS}" == "${WASABI_LINUX}" ]; then
       docker run -it -v `pwd`:/build --rm liuedy/centos-fpm fpm ${fpm} || exitOnError "failed to build rpm: $module"
     else
-      echo "FPM>>> eval fpm $fpm"
       eval fpm $fpm || exitOnError "failed to build rpm: $module"
     fi
   done
