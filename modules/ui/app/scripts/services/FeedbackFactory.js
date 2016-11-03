@@ -10,7 +10,7 @@ angular.module('wasabi.services').factory('FeedbackFactory', ['$resource', 'Conf
             },
             'getFeedback': { method: 'GET',
                 transformResponse: function (data) {
-                    var parsedData = $.parseJSON(data).feedbackList;
+                    var parsedData = $.parseJSON(data).feedback;
 
                     return parsedData;
                 },

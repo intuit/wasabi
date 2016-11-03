@@ -108,7 +108,7 @@ public class PrioritizedExperimentTest {
     }
 
     @Test
-    public void testClone(){
+    public void testClone() throws Exception{
         assertEquals(prioExp,prioExp.clone());
     }
 

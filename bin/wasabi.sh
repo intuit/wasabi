@@ -18,6 +18,7 @@
 formulas=("bash" "cask" "git" "git-flow-avh" "maven" "wget" "ruby" "node")
 taps=("caskroom/cask")
 casks=("java" "docker")
+profile_default=development
 endpoint_default=localhost:8080
 verify_default=false
 sleep_default=30
@@ -36,6 +37,7 @@ ${green}
 usage: `basename ${0}` [options] [commands]
 
 options:
+  -p | --profile [ profile ]             : profile; default ${profile_default}
   -e | --endpoint [ host:port ]          : api endpoint; default: ${endpoint_default}
   -v | --verify [ true | false ]         : verify installation configuration; default: ${verify_default}
   -s | --sleep [ sleep-time ]            : sleep/wait time in seconds; default: ${sleep_default}
@@ -61,7 +63,7 @@ EOF
 }
 
 fromPom() {
-    mvn -f $1/pom.xml -P $2 help:evaluate -Dexpression=$3 | sed -n -e '/^\[.*\]/ !{ p; }'
+    mvn ${WASABI_MAVEN} -f $1/pom.xml -P $2 help:evaluate -Dexpression=$3 | sed -n -e '/^\[.*\]/ !{ p; }'
 }
 
 beerMe() {
@@ -182,7 +184,7 @@ build() {
 }
 
 clean() {
-  mvn clean
+  mvn ${WASABI_MAVEN} clean
   (cd modules/ui; grunt clean)
 }
 
@@ -214,16 +216,13 @@ resource() {
       api) [[ ! -f ./modules/swagger-ui/target/swaggerui/index.html || \
         ! -f ./modules/api/target/generated/swagger-ui/swagger.json ]] && build
         ./bin/wasabi.sh status >/dev/null 2>&1 || ./bin/wasabi.sh start:docker
-#        jip=localhost
         ./bin/wasabi.sh remove:wasabi >/dev/null 2>&1
-        profile=development
         module=main
         home=./modules/${module}/target
         artifact=$(fromPom ./modules/${module} ${profile} project.artifactId)
         version=$(fromPom . ${profile} project.version)
         id=${artifact}-${version}-${profile}
         content=${home}/${id}/content/ui/dist
-#        sed -i '' "s/localhost/${jip}/g" ${content}/swagger/swaggerjson/swagger.json
         # FIXME: this can fail after 'package' given the profile = build
         sed -i '' "s/this.model.validatorUrl.*$/this.model.validatorUrl = null;/g" ${content}/swagger/swagger-ui.js
         ./bin/wasabi.sh start
@@ -247,7 +246,8 @@ status() {
 }
 
 package() {
-  profile=build
+  # FIXME: ?how to package profile=development?
+  [ "${profile}" == "${profile_default}" ] && profile=build
 
   build true ${verify} ${profile}
 
@@ -265,6 +265,7 @@ package() {
 
   ./bin/fpm.sh -n ${name} -v ${version} -p ${profile}
 
+# FIXME: don't rebuild, cp dist/* target/*
   (cd modules/ui; \
     mkdir -p target; \
     for f in app bower.json Gruntfile.js constants.json karma.conf.js karma-e2e.conf.js package.json test .bowerrc; do \
@@ -272,15 +273,9 @@ package() {
     done; \
     sed -i '' -e "s|http://localhost:8080|${server}|g" target/constants.json 2>/dev/null; \
     sed -i '' -e "s|VERSIONLOC|${version}|g" target/app/index.html 2>/dev/null; \
-    if [[ "${WASABI_OS}" == "${WASABI_OSX}" || "${WASABI_OS}" == "${WASABI_LINUX}" ]]; then \
-#      (cd target; npm install; bower install; grunt clean); \
-      (cd target; npm install; bower install --no-optional; grunt clean); \
-    fi \
-# fixme: shouldn't have to force or ignore tests \
-#    (cd target; grunt build --target=develop --no-color; \
-    (cd target; grunt build --force --target=develop --no-color; \
-#      grunt test); \
-    ); \
+    (cd target; npm install; bower install --no-optional; grunt clean); \
+    (cd target; grunt build --target=develop --no-color) \
+#    ; grunt test); \
     cp -r build target; \
     for pkg in deb rpm; do \
       sed -i '' -e "s|\${application.home}|${home}|g" target/build/${pkg}/before-install.sh 2>/dev/null; \
@@ -310,12 +305,25 @@ remove() {
   ./bin/container.sh remove${1:+:$1}
 }
 
-optspec=":b:e:f:p:v:s:h-:"
+unit_test() {
+  command=$1
+  mvn "-Dtest=com.intuit.wasabi.${command/-/}.**" test -pl modules/${command} --also-make -DfailIfNoTests=false -q
+}
+
+exec_commands() {
+  prefix=$1
+  commands=$(echo $2 | cut -d ':' -f 2)
+  (IFS=','; for command in ${commands}; do ${prefix} ${command}; done)
+}
+
+optspec=":p:e:v:s:h-:"
 
 while getopts "${optspec}" opt; do
   case "${opt}" in
     -)
       case "${OPTARG}" in
+        profile) profile="${!OPTIND}"; OPTIND=$(( ${OPTIND} + 1 ));;
+        profile=*) profile="${OPTARG#*=}";;
         endpoint) endpoint="${!OPTIND}"; OPTIND=$(( ${OPTIND} + 1 ));;
         endpoint=*) endpoint="${OPTARG#*=}";;
         verify) verify="${!OPTIND}"; OPTIND=$(( ${OPTIND} + 1 ));;
@@ -325,6 +333,7 @@ while getopts "${optspec}" opt; do
         help) usage;;
         *) [ "${OPTERR}" = 1 ] && [ "${optspec:0:1}" != ":" ] && echo "unknown option --${OPTARG}";;
       esac;;
+    p) profile=${OPTARG};;
     e) endpoint=${OPTARG};;
     v) verify=${OPTARG};;
     s) sleep=${OPTARG};;
@@ -336,6 +345,7 @@ done
 
 [ $# -eq 0 ] && usage "unspecified command" 1
 
+profile=${profile:=${profile_default}}
 endpoint=${endpoint:=${endpoint_default}}
 verify=${verify:=${verify_default}}
 sleep=${sleep:=${sleep_default}}
@@ -345,28 +355,22 @@ sleep=${sleep:=${sleep_default}}
 for command in ${@:$OPTIND}; do
   case "${command}" in
     bootstrap) bootstrap;;
-    build) build true;;
+    build) build true ${verify} ${profile};;
     clean) clean;;
-    start) command="start:cassandra,mysql,wasabi";&
-    start:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for command in ${commands}; do start ${command}; done);;
-    test:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for command in ${commands}; do mvn "-Dtest=com.intuit.wasabi.${command/-/}.**" test -pl modules/${command} --also-make -DfailIfNoTests=false -q ; done);;
+    start) exec_commands start "cassandra,mysql,wasabi";;
+    start:*) exec_commands start ${command};;
+    test:*) exec_commands unit_test ${command};;
     test) test_api;;
-    stop) command="stop:wasabi,mysql,cassandra";&
-    stop:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for command in ${commands}; do stop ${command}; done);;
-    resource) command="resource:ui,api,doc,casssandra,mysql";&
-    resource:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for command in ${commands}; do resource ${command}; done);;
+    stop) exec_commands stop "wasabi,mysql,cassandra";;
+    stop:*) exec_commands stop ${command};;
+    resource) exec_commands resource "ui,api,doc,cassandra,mysql";;
+    resource:*) exec_commands resource ${command};;
     status) status;;
-    remove) command="remove:wasabi,cassandra,mysql";&
-    remove:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for command in ${commands}; do remove ${command}; done);;
+    remove) exec_commands remove "wasabi,cassandra,mysql";;
+    remove:*) exec_commands remove ${command};;
     package) package;;
     release) release;;
-    release:*) commands=$(echo ${command} | cut -d ':' -f 2)
-      (IFS=','; for command in ${commands}; do release ${command}; done);;
+    release:*) exec_commands release ${command};;
     "") usage "unknown command: ${command}" 1;;
     *) usage "unknown command: ${command}" 1;;
   esac

@@ -18,7 +18,7 @@
                             <span class="info" help help-content="{{help.emptyBucket}}"></span>
                         </th>
                     </tr>
-                    <tr ng-repeat="bucket in buckets" ng-class="{closed: bucket.state === 'CLOSED', emptied: bucket.state === 'EMPTY'}">
+                    <tr ng-repeat="bucket in buckets" ng-class="{'closed notAllowed': bucket.state === 'CLOSED', 'emptied notAllowed': bucket.state === 'EMPTY'}">
 
                         <td class="bucketName">
                             <a onclick="return false;" ng-click="openBucketModal(experiment, bucket.label, bucket)" title="{{bucket.label}}">{{bucket.label}}</a>
@@ -27,12 +27,12 @@
                             <input type="text" class="text listField" ng-class="{changedAllocation: allocationsUpdated}" ng-readonly="bucketReadOnly(bucket)" digit-only convert-percent ng-model="bucket.allocationPercent" ng-change="changedAllocation()"><span class="unit">%</span>
                         </td>
                         <td class="icon" ng-class="{checked: bucket.isControl}"><span></span></td>
-                        <td>
+                        <td ng-class="{notAllowed: numActiveBuckets() === 1}">
                             <a ng-disabled="numActiveBuckets() === 1" ng-class="{disabled: numActiveBuckets() === 1}" class="command closeBucket" title="Close Bucket" onclick="return false;" ng-click="closeBucket(bucket.label)">Close</a>
                             <span class="bucketClosed">CLOSED</span>
                         </td>
-                        <td>
-                            <a ng-disabled="numActiveBuckets() === 1" ng-class="{disabled: numActiveBuckets() === 1}" class="command emptyBucket" title="Empty Bucket" onclick="return false;" ng-click="emptyBucket(bucket.label)">Empty</a>
+                        <td ng-class="{notAllowed: numActiveBuckets() === 1}">
+                            <a ng-disabled="numActiveBuckets() === 1" ng-class="{'notAllowed disabled': numActiveBuckets() === 1}" class="command emptyBucket" title="Empty Bucket" onclick="return false;" ng-click="emptyBucket(bucket.label)">Empty</a>
                             <span class="bucketEmptied">EMPTY</span>
                         </td>
                     </tr>

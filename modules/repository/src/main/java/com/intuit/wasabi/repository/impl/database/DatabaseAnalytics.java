@@ -29,9 +29,12 @@ import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.repository.AnalyticsRepository;
 import com.intuit.wasabi.repository.RepositoryException;
+import org.slf4j.Logger;
 
 import java.sql.Timestamp;
 import java.util.*;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Database analytics impl of analytics repo
@@ -40,7 +43,7 @@ import java.util.*;
  */
 public class DatabaseAnalytics implements AnalyticsRepository {
 
-    private TransactionFactory transactionFactory;
+    private static Logger LOGGER = getLogger(DatabaseAnalytics.class);
     private Transaction transaction;
 
     /**
@@ -50,19 +53,28 @@ public class DatabaseAnalytics implements AnalyticsRepository {
      * @param flyway             Flyway
      */
     @Inject
-    public DatabaseAnalytics(TransactionFactory transactionFactory, Flyway flyway,
-            final @Named("mysql.mutagen.root.resource.path") String mutagenRootResourcePath) {
+    public DatabaseAnalytics(final TransactionFactory transactionFactory, final Flyway flyway,
+                             final @Named("mysql.mutagen.root.resource.path") String mutagenRootResourcePath) {
         super();
 
-        this.transactionFactory = transactionFactory;
-        this.transaction = transactionFactory.newTransaction();
-        initialize(flyway, mutagenRootResourcePath);
+        LOGGER.debug("instantiating {}", DatabaseAnalytics.class.getCanonicalName());
+
+        transaction = transactionFactory.newTransaction();
+
+        initialize(transactionFactory, flyway, mutagenRootResourcePath);
+
+        LOGGER.debug("instantiated {}", DatabaseAnalytics.class.getCanonicalName());
     }
 
-    void initialize(Flyway flyway, String mutagenRootResourcePath) {
+    void initialize(final TransactionFactory transactionFactory, final Flyway flyway,
+                    final String mutagenRootResourcePath) {
+        LOGGER.debug("initializing database with {}", mutagenRootResourcePath);
+
         flyway.setLocations(mutagenRootResourcePath);
         flyway.setDataSource(transactionFactory.getDataSource());
         flyway.migrate();
+
+        LOGGER.debug("initialized database with {}", mutagenRootResourcePath);
     }
 
     /*
@@ -110,19 +122,19 @@ public class DatabaseAnalytics implements AnalyticsRepository {
 
             if (from_ts != null) {
                 params.add(from_ts);
-                sqlParams.append( " and timestamp >= ?" );
+                sqlParams.append(" and timestamp >= ?");
             }
 
             if (to_ts != null) {
                 params.add(to_ts);
-                sqlParams.append( " and timestamp <= ?");
+                sqlParams.append(" and timestamp <= ?");
             }
 
             addActionsToSql(parameters, sqlParams, params);
 
             Object[] bucketSqlData = new Object[params.size()];
             params.toArray(bucketSqlData);
-            
+
             String sqlActions = "select action, " + sqlBase + " from event_action" +
                     sqlParams.toString() + " group by bucket_label, action";
             List<Map> actionsRows = transaction.select(sqlActions, bucketSqlData);
@@ -189,15 +201,15 @@ public class DatabaseAnalytics implements AnalyticsRepository {
         List<String> actions = parameters.getActions();
         if (actions != null) {
             int num_actions = actions.size();
-            if( num_actions >= 1){
-                sqlParams.append( " and action in (?");
+            if (num_actions >= 1) {
+                sqlParams.append(" and action in (?");
                 params.add(actions.get(0));
             }
             for (int num = 1; num < num_actions; num++) {
-                sqlParams.append( ",?" );
+                sqlParams.append(",?");
                 params.add(actions.get(num));
             }
-            if( num_actions >= 1) {
+            if (num_actions >= 1) {
                 sqlParams.append(") ");
             }
         }
@@ -336,5 +348,4 @@ public class DatabaseAnalytics implements AnalyticsRepository {
             throw new RepositoryException("error reading counts from MySQL rollups", e);
         }
     }
-
 }
