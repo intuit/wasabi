@@ -51,6 +51,8 @@ id=${name}-${version}-${profile}
 home=${home:-/usr/local/$id}
 log=${log:-/var/log/$id}
 email=`fromPom main ${profile} application.email`
+# FIXME: hack
+email=foo@bar.com
 
 common="-s dir --force --debug --architecture noarch --name ${name}-${profile} --version ${version}\
   --iteration ${timestamp} --license APLv2.0 --vendor tbd --category application --provides ${name}-${profile}\
