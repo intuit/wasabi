@@ -357,7 +357,7 @@ public class ExperimentsImpl implements Experiments {
         if (updates.getHypothesisIsCorrect() != null && !updates.getHypothesisIsCorrect().equals(experiment.getHypothesisIsCorrect())) {
             builder.withHypothesisIsCorrect(updates.getHypothesisIsCorrect());
             requiresUpdate = true;
-            changeData = new ExperimentAuditInfo("hypothesisiscorrect", experiment.getHypothesisIsCorrect(), updates.getHypothesisIsCorrect());
+            changeData = new ExperimentAuditInfo("hypothesis_is_correct", experiment.getHypothesisIsCorrect(), updates.getHypothesisIsCorrect());
             changeList.add(changeData);
         }
         if (updates.getResults() != null && !updates.getResults().equals(experiment.getResults())) {

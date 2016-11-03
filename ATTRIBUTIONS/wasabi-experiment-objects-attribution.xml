@@ -8,7 +8,9 @@
          <projectUrl>http://www.antlr.org</projectUrl>
          <type>jar</type>
          <licenses/>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/org/antlr/antlr-runtime/3.2/antlr-runtime-3.2.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>ANTLR Grammar Tool</name>
@@ -18,7 +20,9 @@
          <projectUrl>http://antlr.org</projectUrl>
          <type>jar</type>
          <licenses/>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/org/antlr/antlr/3.2/antlr-3.2.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>AntLR Parser Generator</name>
@@ -33,7 +37,9 @@
                <url>http://www.antlr.org/license.html</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/antlr/antlr/2.7.7/antlr-2.7.7.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>ANTLR StringTemplate</name>
@@ -48,7 +54,9 @@
                <url>http://antlr.org/license.html</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/org/antlr/stringtemplate/3.2/stringtemplate-3.2.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>AOP alliance</name>
@@ -62,7 +70,9 @@
                <name>Public Domain</name>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/aopalliance/aopalliance/1.0/aopalliance-1.0.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>Apache Ant Core</name>
@@ -77,7 +87,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/org/apache/ant/ant/1.9.4/ant-1.9.4.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>Apache Ant Launcher</name>
@@ -92,7 +104,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/org/apache/ant/ant-launcher/1.9.4/ant-launcher-1.9.4.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>Apache Cassandra</name>
@@ -107,7 +121,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/org/apache/cassandra/cassandra-all/1.2.11/cassandra-all-1.2.11.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>Apache Cassandra</name>
@@ -122,7 +138,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/org/apache/cassandra/cassandra-thrift/1.2.11/cassandra-thrift-1.2.11.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>Apache Commons Lang</name>
@@ -137,7 +155,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.4/commons-lang3-3.4.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>Apache Log4j</name>
@@ -152,7 +172,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/log4j/log4j/1.2.17/log4j-1.2.17.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>Apache ServiceMix :: Bundles :: commons-csv</name>
@@ -167,7 +189,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/org/apache/servicemix/bundles/org.apache.servicemix.bundles.commons-csv/1.0-r706900_3/org.apache.servicemix.bundles.commons-csv-1.0-r706900_3.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>Apache Thrift</name>
@@ -182,7 +206,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt&quot;</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/org/apache/thrift/libthrift/0.7.0/libthrift-0.7.0.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>ASM Core</name>
@@ -197,7 +223,9 @@
                <url>http://asm.objectweb.org/license.html</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/org/ow2/asm/asm/5.0.3/asm-5.0.3.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>AssertJ fluent assertions</name>
@@ -212,7 +240,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/org/assertj/assertj-core/3.4.0/assertj-core-3.4.0.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>astyanax-cassandra</name>
@@ -227,7 +257,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/com/netflix/astyanax/astyanax-cassandra/2.0.1/astyanax-cassandra-2.0.1.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>astyanax-core</name>
@@ -242,7 +274,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/com/netflix/astyanax/astyanax-core/2.0.1/astyanax-core-2.0.1.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>avro</name>
@@ -251,7 +285,9 @@
          <version>1.4.0-cassandra-1</version>
          <type>jar</type>
          <licenses/>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/org/apache/cassandra/deps/avro/1.4.0-cassandra-1/avro-1.4.0-cassandra-1.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>Bean Validation API</name>
@@ -266,7 +302,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/javax/validation/validation-api/1.1.0.Final/validation-api-1.1.0.Final.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>catch-exception</name>
@@ -281,7 +319,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/eu/codearte/catch-exception/catch-exception/1.4.4/catch-exception-1.4.4.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>cglib</name>
@@ -296,7 +336,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/cglib/cglib/3.2.0/cglib-3.2.0.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>CLI</name>
@@ -311,7 +353,9 @@
                <url>/LICENSE.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/commons-cli/commons-cli/1.1/commons-cli-1.1.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>Code Generation Library</name>
@@ -326,7 +370,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/cglib/cglib-nodep/2.2.2/cglib-nodep-2.2.2.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>Commons Codec</name>
@@ -341,7 +387,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/commons-codec/commons-codec/1.5/commons-codec-1.5.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>ConcurrentLinkedHashMap</name>
@@ -356,7 +404,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/com/googlecode/concurrentlinkedhashmap/concurrentlinkedhashmap-lru/1.3/concurrentlinkedhashmap-lru-1.3.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>EasyMock</name>
@@ -371,7 +421,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/org/easymock/easymock/3.4/easymock-3.4.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>Google Guice - Core Library</name>
@@ -386,7 +438,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/com/google/inject/guice/4.0/guice-4.0.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>Google Guice - Extensions - MultiBindings</name>
@@ -401,7 +455,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/com/google/inject/extensions/guice-multibindings/4.0/guice-multibindings-4.0.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>Guava: Google Core Libraries for Java</name>
@@ -416,7 +472,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/com/google/guava/guava/14.0.1/guava-14.0.1.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>Hamcrest Core</name>
@@ -431,7 +489,9 @@
                <url>http://www.opensource.org/licenses/bsd-license.php</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>Hamcrest library</name>
@@ -446,7 +506,9 @@
                <url>http://www.opensource.org/licenses/bsd-license.php</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/org/hamcrest/hamcrest-library/1.3/hamcrest-library-1.3.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>Highly Scalable Java</name>
@@ -461,7 +523,9 @@
                <url>http://creativecommons.org/licenses/publicdomain</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/com/github/stephenc/high-scale-lib/high-scale-lib/1.1.2/high-scale-lib-1.1.2.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>Hyrule</name>
@@ -471,7 +535,7 @@
          <type>jar</type>
          <licenses/>
          <downloadUrls>
-            <string>TBD</string>
+            <string>file:/Users/iizrailevsky/Git/wasabi/modules/experiment-objects/../../repository/Hyrule/Hyrule/0.0.1/Hyrule-0.0.1.jar</string>
          </downloadUrls>
       </dependency>
       <dependency>
@@ -487,7 +551,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/com/fasterxml/jackson/core/jackson-annotations/2.7.2/jackson-annotations-2.7.2.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>Jackson-core</name>
@@ -502,7 +568,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/com/fasterxml/jackson/core/jackson-core/2.7.2/jackson-core-2.7.2.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>jackson-databind</name>
@@ -517,22 +585,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
-      </dependency>
-      <dependency>
-         <name>JaCoCo :: Agent</name>
-         <groupId>org.jacoco</groupId>
-         <artifactId>org.jacoco.agent</artifactId>
-         <version>0.7.2.201409121644</version>
-         <projectUrl>http://org.jacoco.agent</projectUrl>
-         <type>pom</type>
-         <licenses>
-            <license>
-               <name>Eclipse Public License v1.0</name>
-               <url>http://www.eclipse.org/legal/epl-v10.html</url>
-            </license>
-         </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/com/fasterxml/jackson/core/jackson-databind/2.7.2/jackson-databind-2.7.2.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>Java Agent for Memory Measurements</name>
@@ -547,7 +602,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/com/github/stephenc/jamm/0.2.5/jamm-0.2.5.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>Javassist</name>
@@ -570,7 +627,9 @@
                <url>http://www.apache.org/licenses/</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/org/javassist/javassist/3.20.0-GA/javassist-3.20.0-GA.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>javax.inject</name>
@@ -585,7 +644,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/javax/inject/javax.inject/1/javax.inject-1.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>jbcrypt</name>
@@ -599,7 +660,9 @@
                <name>ISC/BSD License</name>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/org/mindrot/jbcrypt/0.3m/jbcrypt-0.3m.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>JLine</name>
@@ -614,7 +677,9 @@
                <url>LICENSE.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/jline/jline/1.0/jline-1.0.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>Joda time</name>
@@ -629,7 +694,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/joda-time/joda-time/1.6.2/joda-time-1.6.2.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>JSON.simple</name>
@@ -644,7 +711,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/com/googlecode/json-simple/json-simple/1.1/json-simple-1.1.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>JUnit</name>
@@ -659,7 +728,9 @@
                <url>http://www.eclipse.org/legal/epl-v10.html</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/junit/junit/4.12/junit-4.12.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>Logback Classic Module</name>
@@ -678,7 +749,9 @@
                <url>http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/ch/qos/logback/logback-classic/1.1.3/logback-classic-1.1.3.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>Logback Core Module</name>
@@ -697,7 +770,9 @@
                <url>http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/ch/qos/logback/logback-core/1.1.3/logback-core-1.1.3.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>LZ4 and xxHash</name>
@@ -712,7 +787,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/net/jpountz/lz4/lz4/1.1.0/lz4-1.1.0.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>Metrics Core Library</name>
@@ -727,7 +804,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/com/yammer/metrics/metrics-core/2.2.0/metrics-core-2.2.0.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>Mockito</name>
@@ -742,7 +821,9 @@
                <url>http://github.com/mockito/mockito/blob/master/LICENSE</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/org/mockito/mockito-core/1.10.19/mockito-core-1.10.19.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>Ning-compress-LZF</name>
@@ -757,7 +838,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/com/ning/compress-lzf/0.8.4/compress-lzf-0.8.4.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>Objenesis</name>
@@ -772,7 +855,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/org/objenesis/objenesis/2.1/objenesis-2.1.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>powermock-api-easymock</name>
@@ -787,7 +872,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/org/powermock/powermock-api-easymock/1.6.4/powermock-api-easymock-1.6.4.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>powermock-api-mockito</name>
@@ -802,7 +889,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/org/powermock/powermock-api-mockito/1.6.4/powermock-api-mockito-1.6.4.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>powermock-api-support</name>
@@ -817,7 +906,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/org/powermock/powermock-api-support/1.6.4/powermock-api-support-1.6.4.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>powermock-core</name>
@@ -832,7 +923,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/org/powermock/powermock-core/1.6.4/powermock-core-1.6.4.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>powermock-module-junit4</name>
@@ -847,7 +940,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/org/powermock/powermock-module-junit4/1.6.4/powermock-module-junit4-1.6.4.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>powermock-module-junit4-common</name>
@@ -862,7 +957,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/org/powermock/powermock-module-junit4-common/1.6.4/powermock-module-junit4-common-1.6.4.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>powermock-reflect</name>
@@ -877,7 +974,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/org/powermock/powermock-reflect/1.6.4/powermock-reflect-1.6.4.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>SLF4J API Module</name>
@@ -892,7 +991,9 @@
                <url>http://www.opensource.org/licenses/mit-license.php</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/org/slf4j/slf4j-api/1.7.7/slf4j-api-1.7.7.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>SnakeYAML</name>
@@ -907,7 +1008,9 @@
                <url>LICENSE.txt</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/org/yaml/snakeyaml/1.6/snakeyaml-1.6.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>SnapTree RI</name>
@@ -922,7 +1025,9 @@
                <url>https://raw.github.com/nbronson/snaptree/b198f84b0c927f6b5cdef080552fc26aa004d3ee/doc/LICENSE</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/edu/stanford/ppl/snaptree/0.1/snaptree-0.1.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>swagger-annotations</name>
@@ -937,7 +1042,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/io/swagger/swagger-annotations/1.5.4/swagger-annotations-1.5.4.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>swagger-core</name>
@@ -952,7 +1059,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/io/swagger/swagger-core/1.5.4/swagger-core-1.5.4.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>swagger-models</name>
@@ -967,7 +1076,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/io/swagger/swagger-models/1.5.4/swagger-models-1.5.4.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>The Netty Project</name>
@@ -982,7 +1093,9 @@
                <url>http://www.apache.org/licenses/LICENSE-2.0</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/io/netty/netty/3.6.6.Final/netty-3.6.6.Final.jar</string>
+         </downloadUrls>
       </dependency>
       <dependency>
          <name>UUID</name>
@@ -997,7 +1110,9 @@
                <url>http://www.opensource.org/licenses/mit-license.php</url>
             </license>
          </licenses>
-         <downloadUrls/>
+         <downloadUrls>
+            <string>https://repo.maven.apache.org/maven2/com/eaio/uuid/uuid/3.2/uuid-3.2.jar</string>
+         </downloadUrls>
       </dependency>
    </dependencies>
 </attributionReport>

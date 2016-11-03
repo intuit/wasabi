@@ -1,12 +1,12 @@
 <!--
     Copyright 2016 Intuit
-   
+
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
-   
+
         http://www.apache.org/licenses/LICENSE-2.0
-   
+
     Unless required by applicable law or agreed to in writing, software
     distributed under the License is distributed on an "AS IS" BASIS,
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,7 +22,7 @@ http://www.w3.org/2001/XMLSchema-instance">
 
     <groupId>com.intuit.wasabi</groupId>
     <artifactId>wasabi</artifactId>
-    <version>1.0.20160902232623-SNAPSHOT</version>
+    <version>1.0.20161102190559-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
     <url>https://github.com/intuit/wasabi</url>
@@ -40,9 +40,6 @@ http://www.w3.org/2001/XMLSchema-instance">
         <application.name>${project.name}-${project.version}-${application.profile}</application.name>
         <application.version>1.0</application.version>
         <application.home>/usr/local/${application.name}</application.home>
-
-        <jacoco.version>0.7.2.201409121644</jacoco.version>
-        <jacoco.destFile>${basedir}/../target/jacoco.exec</jacoco.destFile>
 
         <http.proxy.host>http://insert.your.proxy.host.here</http.proxy.host>
         <http.proxy.port>80</http.proxy.port>
@@ -65,34 +62,28 @@ http://www.w3.org/2001/XMLSchema-instance">
         <cassandra.events.nodeHosts>localhost</cassandra.events.nodeHosts>
         <cassandra.events.port>9160</cassandra.events.port>
 
-        <export.rest.assignment.web.class.name>com.intuit.wasabi.assignment.impl.NoopWebAssignmentEnvelope
-        </export.rest.assignment.web.class.name>
-        <export.rest.assignment.db.class.name>com.intuit.wasabi.assignment.impl.NoopDatabaseAssignmentEnvelope
-        </export.rest.assignment.db.class.name>
-        <export.rest.event.db.class.name>com.intuit.wasabi.assignment.impl.NoopDatabaseAssignmentEnvelope
-        </export.rest.event.db.class.name>
+        <export.rest.assignment.web.class.name>com.intuit.wasabi.assignment.impl.NoopWebAssignmentEnvelope</export.rest.assignment.web.class.name>
+        <export.rest.assignment.db.class.name>com.intuit.wasabi.assignment.impl.NoopDatabaseAssignmentEnvelope</export.rest.assignment.db.class.name>
+        <export.rest.event.db.class.name>com.intuit.wasabi.assignment.impl.NoopDatabaseAssignmentEnvelope</export.rest.event.db.class.name>
         <export.rest.client.connectionTimeout>5000</export.rest.client.connectionTimeout>
         <export.rest.client.socketTimeout>10000</export.rest.client.socketTimeout>
         <user.lookup.class.name>com.intuit.wasabi.userdirectory.impl.DefaultUserDirectory</user.lookup.class.name>
-        <authorization.class.name>com.intuit.wasabi.authorization.impl.DefaultAuthorization
-        </authorization.class.name>
-        <authentication.class.name>com.intuit.wasabi.authentication.impl.DefaultAuthentication
-        </authentication.class.name>
+        <authorization.class.name>com.intuit.wasabi.authorization.impl.DefaultAuthorization</authorization.class.name>
+        <authentication.class.name>com.intuit.wasabi.authentication.impl.DefaultAuthentication</authentication.class.name>
 
         <assign.user.to.old>true</assign.user.to.old>
         <assign.user.to.new>false</assign.user.to.new>
         <assign.user.to.export>true</assign.user.to.export>
         <assign.bucket.count>true</assign.bucket.count>
         <assignment.decorator.enabled>false</assignment.decorator.enabled>
-        
+
         <!-- mutagen -->
         <cassandra.mutagen.root.resource.path>com/intuit/wasabi/repository/impl/cassandra/experiments/mutation</cassandra.mutagen.root.resource.path>
         <mysql.mutagen.root.resource.path>com/intuit/wasabi/repository/impl/mysql/migration</mysql.mutagen.root.resource.path>
-        
+
         <!-- FIXME: remove -->
         <assignment.decorator.service>http://decorator.example.com</assignment.decorator.service>
-        <assignment.decorator.class.name>com.intuit.wasabi.assignment.impl.DefaultAssignmentDecorator
-        </assignment.decorator.class.name>
+        <assignment.decorator.class.name>com.intuit.wasabi.assignment.impl.DefaultAssignmentDecorator</assignment.decorator.class.name>
         <assignments.class.name>com.intuit.wasabi.assignment.impl.AssignmentsImpl</assignments.class.name>
 
         <swaggerHost>localhost:8080</swaggerHost>
@@ -319,14 +310,6 @@ http://www.w3.org/2001/XMLSchema-instance">
             <version>3.2.0</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.jacoco</groupId>
-            <artifactId>org.jacoco.agent</artifactId>
-            <version>${jacoco.version}</version>
-            <type>pom</type>
-            <!-- FIXME: ?don't we want to scope this to test only? -->
-            <scope>test</scope>
-        </dependency>
     </dependencies>
     <distributionManagement>
         <snapshotRepository>
@@ -350,6 +333,29 @@ http://www.w3.org/2001/XMLSchema-instance">
                         <target>1.8</target>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>buildnumber-maven-plugin</artifactId>
+                    <version>1.4</version>
+                    <executions>
+                        <execution>
+                            <phase>validate</phase>
+                            <goals>
+                                <goal>create</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <doCheck>false</doCheck>
+                        <doUpdate>false</doUpdate>
+                        <shortRevisionLength>8</shortRevisionLength>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.sonarsource.scanner.maven</groupId>
+                    <artifactId>sonar-maven-plugin</artifactId>
+                    <version>3.1.1</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -363,6 +369,9 @@ http://www.w3.org/2001/XMLSchema-instance">
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                             <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                         </manifest>
+                        <manifestEntries>
+                            <Implementation-Build>${scmBranch}-${buildNumber}</Implementation-Build>
+                        </manifestEntries>
                     </archive>
                 </configuration>
             </plugin>
@@ -380,12 +389,7 @@ http://www.w3.org/2001/XMLSchema-instance">
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${jacoco.version}</version>
-                <configuration>
-                    <excludes>
-                        <exclude>com/intuit/wasabi/tests/**/*.class</exclude>
-                    </excludes>
-                </configuration>
+                <version>0.7.7.201606060606</version>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
@@ -397,17 +401,11 @@ http://www.w3.org/2001/XMLSchema-instance">
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
-                <artifactId>cobertura-maven-plugin</artifactId>
-                <version>2.7</version>
+                <artifactId>findbugs-maven-plugin</artifactId>
+                <version>3.0.4</version>
                 <configuration>
-                    <format>xml</format>
-                    <maxmem>256m</maxmem>
-                    <aggregate>true</aggregate>
-                    <instrumentation>
-                        <excludes>
-                            <exclude>com/intuit/wasabi/tests/**/*.class</exclude>
-                        </excludes>
-                    </instrumentation>
+                    <xmlOutput>true</xmlOutput>
+                    <failOnError>false</failOnError>
                 </configuration>
             </plugin>
             <plugin>
@@ -433,6 +431,8 @@ http://www.w3.org/2001/XMLSchema-instance">
                 <version>2.10.3</version>
                 <configuration>
                     <failOnError>false</failOnError>
+                    <!-- FIXME: fix javadoc -->
+                    <additionalparam>-Xdoclint:none</additionalparam>
                 </configuration>
                 <executions>
                     <execution>
