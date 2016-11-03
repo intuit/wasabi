@@ -35,7 +35,7 @@ rem FUNCTION: Runs the UI pointing to the docker network.
 :resource_ui
     call :info Opening UI pointing to docker network
     pushd modules\ui
-    for /f %%I in ('docker-machine ip wasabi') do start "" "%APPDATA%\npm\grunt.cmd" serve --apiHost=%%I
+    for /f %%I in ('docker-machine ip wasabi') do "%APPDATA%\npm\grunt.cmd" serve --apiHost=%%I
     popd
     goto :eof
 
@@ -44,7 +44,7 @@ rem FUNCTION: Runs the UI pointing to localhost.
 :resource_ui_dev
     call :info Opening UI pointing to localhost
     pushd modules\ui
-    start "" "%APPDATA%\npm\grunt.cmd" serve --apiHost=localhost
+    "%APPDATA%\npm\grunt.cmd" serve --apiHost=localhost
     popd
     goto :eof
 
