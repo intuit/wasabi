@@ -17,7 +17,7 @@
 
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 
-<suite name="IntegrationTestsMeta" parallel="false">
+<suite name="IntegrationTestsMeta" parallel="false" verbose="1">
     <suite-files>
         <!-- test preparation -->
         <suite-file path="testng_initialTeardown.xml" />
