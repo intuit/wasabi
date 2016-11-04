@@ -165,6 +165,7 @@ public class ServiceTestBase {
     @AfterClass
     protected void runAfterClassBase() {
         logger.info(passFailResults.getSummaryString());
+        System.out.println(passFailResults.getSummaryString());
     }
 
     /**
