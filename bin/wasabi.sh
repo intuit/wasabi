@@ -204,7 +204,7 @@ test_api() {
   (cd modules/functional-test/target;
     java -Dapi.server.name=${endpoint} -Duser.name=admin -Duser.password=admin \
       -classpath classes:`ls wasabi-functional-test-*-SNAPSHOT-jar-with-dependencies.jar` org.testng.TestNG \
-      -d ../../../test.log classes/testng.xml)
+      -d ../../../test.log classes/testng.xml 2>&1 >/dev/null)
 }
 
 resource() {
