@@ -3,7 +3,7 @@ jdk:
   - oraclejdk8
 services:
   - docker
-install: mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V 2>&1 >/dev/null
+install: mvn --quiet install -DskipTests=true -Dmaven.javadoc.skip=true -B -V 2>&1 >/dev/null
 cache:
   directories:
     - "~/.m2/repository"
@@ -15,7 +15,8 @@ branches:
 after_success:
   - "WASABI_OS=native ./bin/wasabi.sh --verify=true build"
   - "WASABI_OS=native ./bin/wasabi.sh start test stop"
-  - mvn clean test jacoco:report coveralls:report
+#  - mvn clean test jacoco:report coveralls:report
+  - mvn jacoco:report coveralls:report
   - "./.travis/before-deploy.sh"
   - "./.travis/deploy.sh"
 env:
