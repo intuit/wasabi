@@ -222,7 +222,8 @@ public class APIServerConnector {
         reqBuilder.setBaseUri(this.baseUri);
         reqBuilder.setBasePath(this.basePath);
         reqBuilder.setRelaxedHTTPSValidation();
-        reqBuilder.log(LogDetail.ALL); // NIT use setting to control this
+//        reqBuilder.log(LogDetail.ALL); // NIT use setting to control this
+        reqBuilder.log(LogDetail.PATH); // NIT use setting to control this
 
         if (userName != null) {
             reqBuilder.setAuth(preemptive().basic(this.userName, this.password));
