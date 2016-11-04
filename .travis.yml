@@ -12,8 +12,10 @@ branches:
     - "/^(?i:feature)/.*$/"
     - develop
     - master
-after_success:
+script:
   - "WASABI_OS=native ./bin/wasabi.sh --verify=true build"
+after_success:
+#  - "WASABI_OS=native ./bin/wasabi.sh --verify=true build"
   - "WASABI_OS=native ./bin/wasabi.sh start test stop"
 #  - mvn clean test jacoco:report coveralls:report
   - mvn jacoco:report coveralls:report
