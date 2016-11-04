@@ -150,7 +150,7 @@ start_wasabi() {
     echo "${green}${project}: building${reset}"
 
 #    sed -i -e "s|\(http://\)localhost\(:8080\)|\1${mip}\2|g" modules/main/target/${id}/content/ui/dist/scripts/config.js 2>/dev/null;
-    docker build -t ${project}-main:${USER}-$(date +%s) -t ${project}-main:latest modules/main/target/${id}
+    docker build -t ${project}-main:${USER}-$(date +%s) -t ${project}-main:latest modules/main/target/${id} 2>&1 >/dev/null
   fi
 
   echo "${green}${project}: starting${reset}"
