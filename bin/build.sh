@@ -118,25 +118,25 @@ cp ${home}/${id}-all.jar ${home}/${id}/lib
 chmod 755 ${home}/${id}/bin/run
 chmod 755 ${home}/${id}/entrypoint.sh
 sed -i '' -e "s/chpst -u [^:]*:[^ ]* //" ${home}/${id}/bin/run 2>/dev/null
-[ ! -e ./modules/ui/target/dist/scripts/wasabi.js ] && build_js=true
-
-if [[ "${build}" = true || "${build_js}" = true ]]; then
-  if [ "${WASABI_OS}" == "${WASABI_OSX}" ]; then
-    brew list node
-    if [[ $? -eq 1 ]]; then
-      echo "Node.js is not installed. Installing Node.js packages..."
-      brew install node
-      npm install -g yo grunt-cli bower grunt-contrib-compass
-      sudo gem install compass
-    fi
-  fi
-  (cd ./modules/ui && npm install && bower install && grunt build)
-fi
-
-content=${home}/${id}/content/ui/dist
-
-mkdir -p ${content}
-cp -R ./modules/ui/dist/ ${content}
-mkdir -p ${content}/swagger/swaggerjson
-cp -R ./modules/swagger-ui/target/swaggerui/ ${content}/swagger
-cp -R ./modules/api/target/generated/swagger-ui/swagger.json ${content}/swagger/swaggerjson
+#[ ! -e ./modules/ui/target/dist/scripts/wasabi.js ] && build_js=true
+#
+#if [[ "${build}" = true || "${build_js}" = true ]]; then
+#  if [ "${WASABI_OS}" == "${WASABI_OSX}" ]; then
+#    brew list node
+#    if [[ $? -eq 1 ]]; then
+#      echo "Node.js is not installed. Installing Node.js packages..."
+#      brew install node
+#      npm install -g yo grunt-cli bower grunt-contrib-compass
+#      sudo gem install compass
+#    fi
+#  fi
+#  (cd ./modules/ui && npm install && bower install && grunt build)
+#fi
+#
+#content=${home}/${id}/content/ui/dist
+#
+#mkdir -p ${content}
+#cp -R ./modules/ui/dist/ ${content}
+#mkdir -p ${content}/swagger/swaggerjson
+#cp -R ./modules/swagger-ui/target/swaggerui/ ${content}/swagger
+#cp -R ./modules/api/target/generated/swagger-ui/swagger.json ${content}/swagger/swaggerjson
