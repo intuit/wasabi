@@ -52,7 +52,7 @@
         <application.monitor/>
 
         <log.dir>/var/log/${application.name}</log.dir>
-        <log.level>INFO</log.level>
+        <log.level>ERROR</log.level>
         <log.email.to>${application.email}</log.email.to>
 
         <metrics.jmx.enabled>false</metrics.jmx.enabled>
