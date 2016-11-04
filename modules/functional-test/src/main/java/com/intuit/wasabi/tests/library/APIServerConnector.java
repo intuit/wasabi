@@ -257,10 +257,12 @@ public class APIServerConnector {
             response = given().
                     spec(this.requestSpec).
                     body(formJSON).
+                    log().ifValidationFails().
                     post(url);            
         } else {
             response = given().
                     spec(this.requestSpec).
+                    log().ifValidationFails().
                     post(url);
         }
 
@@ -298,10 +300,12 @@ public class APIServerConnector {
             response = given().
                     spec(this.requestSpec).
                     body(formJSON).
+                    log().ifValidationFails().
                     put(url);
         } else {
             response = given().
                     spec(this.requestSpec).
+                    log().ifValidationFails().
                     put(url);
         }
 
@@ -341,10 +345,12 @@ public class APIServerConnector {
             response = given().
                     spec(this.requestSpec).
                     body(formJSON).
+                    log().ifValidationFails().
                     get(url);            
         } else {
             response = given().
                     spec(this.requestSpec).
+                    log().ifValidationFails().
                     get(url);
         }
 
@@ -384,10 +390,12 @@ public class APIServerConnector {
             response = given().
                     spec(this.requestSpec).
                     body(formJSON).
+                    log().ifValidationFails().
                     delete(url);            
         } else {
             response = given().
                     spec(this.requestSpec).
+                    log().ifValidationFails().
                     delete(url);
         }
 
@@ -426,10 +434,12 @@ public class APIServerConnector {
                     spec(this.requestSpec).
                     body(formJSON).
                     contentType("application/json-patch+json").
+                    log().ifValidationFails().
                     patch(url);            
         } else {
             response = given().
                     spec(this.requestSpec).
+                    log().ifValidationFails().
                     patch(url);
         }
 
