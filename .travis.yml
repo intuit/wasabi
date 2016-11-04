@@ -13,7 +13,8 @@ branches:
     - develop
     - master
 after_success:
-  - "WASABI_OS=native ./bin/wasabi.sh build start test"
+  - "WASABI_OS=native ./bin/wasabi.sh --verify=true build"
+  - "WASABI_OS=native ./bin/wasabi.sh start test stop"
   - mvn clean test jacoco:report coveralls:report
   - "./.travis/before-deploy.sh"
   - "./.travis/deploy.sh"
