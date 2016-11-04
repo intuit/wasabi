@@ -3,7 +3,7 @@ jdk:
   - oraclejdk8
 services:
   - docker
-install: mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+install: mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V 2>&1 >/dev/null
 cache:
   directories:
     - "~/.m2/repository"
