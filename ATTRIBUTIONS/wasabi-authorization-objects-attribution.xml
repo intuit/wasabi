@@ -518,7 +518,7 @@
          <type>jar</type>
          <licenses/>
          <downloadUrls>
-            <string>TBD</string>
+            <string>file:/Users/iizrailevsky/Git/wasabi/modules/authorization-objects/../../repository/Hyrule/Hyrule/0.0.1/Hyrule-0.0.1.jar</string>
          </downloadUrls>
       </dependency>
       <dependency>
@@ -1101,7 +1101,7 @@
          <name>wasabi-authentication-objects</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-authentication-objects</artifactId>
-         <version>1.0.20161011211936-SNAPSHOT</version>
+         <version>1.0.20161014052805-SNAPSHOT</version>
          <projectUrl>https://github.com/intuit/wasabi/modules/wasabi-authentication-objects</projectUrl>
          <type>jar</type>
          <licenses>
@@ -1116,7 +1116,7 @@
          <name>wasabi-experiment-objects</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-experiment-objects</artifactId>
-         <version>1.0.20161011211936-SNAPSHOT</version>
+         <version>1.0.20161014052805-SNAPSHOT</version>
          <projectUrl>https://github.com/intuit/wasabi/modules/wasabi-experiment-objects</projectUrl>
          <type>jar</type>
          <licenses>
