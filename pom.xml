@@ -22,7 +22,7 @@ http://www.w3.org/2001/XMLSchema-instance">
 
     <groupId>com.intuit.wasabi</groupId>
     <artifactId>wasabi</artifactId>
-    <version>1.0.20161102190559</version>
+    <version>1.0.20161107232436</version>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
     <url>https://github.com/intuit/wasabi</url>
@@ -390,11 +390,30 @@ http://www.w3.org/2001/XMLSchema-instance">
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.7.7.201606060606</version>
+                <configuration>
+                    <excludes>
+                        <exclude>com/intuit/wasabi/tests/**</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
                         <goals>
                             <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>post-unit-test</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
                         </goals>
                     </execution>
                 </executions>
