@@ -84,6 +84,10 @@ angular.module('wasabi.controllers').
                 return UtilitiesFactory.actionDiff(bucketLabel, buckets);
             };
 
+            $scope.actionDiffForCardView = function(bucket) {
+                return UtilitiesFactory.actionDiffForCardView(bucket);
+            };
+
             /*
              The experiment is assumed to either have a control, marked in the buckets list, or we use the first bucket
              as the control (baseline).  That has already been marked in the buckets list in the experiment by saving
@@ -260,7 +264,7 @@ angular.module('wasabi.controllers').
             flag to decide if we are doing simple or advanced filtering and so which parameters need to
             be used.
              */
-            $scope.doLoadExperiments = function(pageSize, currentPage, afterLoadFunction) {
+            $scope.doLoadExperiments = function(cardViewFlag, pageSize, currentPage, afterLoadFunction) {
                 function addAdvParam(existingFilter, newFilterValue) {
                     if (existingFilter.length > 0) {
                         existingFilter += ',';
@@ -301,16 +305,34 @@ angular.module('wasabi.controllers').
                                 ($scope.data.adv1stDateSearchType === 'isBetween' ? ':' + $scope.data.advTxtSearchDateTwo : ''));
                     }
                 }
-                ExperimentsFactory.query(queryParams).$promise
-                .then(afterLoadFunction,
-                    function(response) {
-                        UtilitiesFactory.handleGlobalError(response, 'The list of experiments could not be retrieved.');
-                });
+                if (!cardViewFlag) {
+                    ExperimentsFactory.query(queryParams).$promise
+                    .then(afterLoadFunction,
+                        function(response) {
+                            UtilitiesFactory.handleGlobalError(response, 'The list of experiments could not be retrieved.');
+                    });
+                }
+                else {
+                    ExperimentStatisticsFactory.cardViewData(queryParams).$promise
+                    .then(afterLoadFunction,
+                        function(response) {
+                            UtilitiesFactory.handleGlobalError(response, 'The list of experiments could not be retrieved.');
+                    });
+                }
+            };
+
+            $scope.loadExperiments = function() {
+                if ($scope.data.showGrid) {
+                    $scope.loadCardViewExperiments();
+                }
+                else {
+                    $scope.loadTableExperiments();
+                }
             };
 
             // load experiments from server
-            $scope.loadExperiments = function () {
-                $scope.doLoadExperiments($scope.itemsPerPage, $scope.currentPage, function (data) {
+            $scope.loadTableExperiments = function () {
+                $scope.doLoadExperiments(false, $scope.itemsPerPage, $scope.currentPage, function (data) {
                     var experiments = data.experiments;
                     if (experiments) {
                         // Initialize all the experiments selected values to false so the checkboxes (when list used in selection dialog) will be unchecked.
@@ -400,8 +422,8 @@ angular.module('wasabi.controllers').
             };
 
             $scope.loadCardViewExperiments = function() {
-                $scope.doLoadExperiments($scope.cardViewItemsPerPage, $scope.cardViewData.cardViewCurrentPage, function(data) {
-                    var experiments = data.experiments;
+                $scope.doLoadExperiments(true, $scope.cardViewItemsPerPage, $scope.cardViewData.cardViewCurrentPage, function(data) {
+                    var experiments = data.experimentDetails;
                     if (experiments) {
                         // Initialize all the experiments selected values to false so the checkboxes (when list used in selection dialog) will be unchecked.
                         for (var i = 0; i < experiments.length; i++) {
@@ -422,6 +444,46 @@ angular.module('wasabi.controllers').
                                     s += '<div style="width:360px">' + experiments[i].description + '</div>';
                                 }
                                 experiments[i].homePageTooltip = s;
+
+                                if (experiments[i].buckets && experiments[i].buckets.length > 0) {
+                                    // set baseline bucket (if no control bucket)
+                                    experiments[i].controlBucketLabel = experiments[i].buckets[0].label;
+                                    // get the label of the one control bucket (if any)
+                                    var bucketsToRemove = [];
+                                    for (var j = 0; j < experiments[i].buckets.length; j++) {
+                                        if (experiments[i].buckets[j].state && experiments[i].buckets[j].state == 'OPEN') {
+                                            // Ignore anything but Open buckets for the Card View.
+                                            if (experiments[i].buckets[j].isControl) {
+                                                experiments[i].hasControlBucket = true;
+                                                experiments[i].controlBucketLabel = experiments[i].buckets[j].label;
+                                            }
+
+                                            var s = '<div style="font-weight:normal; font-size:15px; padding-bottom:5px">' + experiments[i].buckets[j].label + '</div>';
+
+                                            if (experiments[i].buckets[j].description && experiments[i].buckets[j].description.length > 0) {
+                                                s += '<div style="width:360px">' + experiments[i].buckets[j].description + '</div>';
+                                            }
+                                            experiments[i].buckets[j].homePageTooltip = s;
+                                        }
+                                        else {
+                                            bucketsToRemove.push(j);
+                                        }
+                                    }
+                                    if (bucketsToRemove.length > 0) {
+                                        for (var j = bucketsToRemove.length - 1; j >= 0; j--) {
+                                            experiments[i].buckets.splice(bucketsToRemove[j], 1);
+                                        }
+                                    }
+
+                                    // set baseline bucket (if no control bucket)
+                                    if (!experiments[i].hasControlBucket) {
+                                        experiments[i].buckets[0].isBaseLine = true;
+                                    }
+
+                                    if (experiments[i].state !== 'DRAFT') {
+                                        UtilitiesFactory.determineCardViewBucketImprovementClass(experiments[i]);
+                                    }
+                                }
                             } else {
                                 delete experiments[i];
                             }
@@ -438,7 +500,7 @@ angular.module('wasabi.controllers').
                         $scope.doFavorites($scope.cardViewExperiments, false);
                     }
 
-                    $scope.loadGridDataIfNecessary()
+                    //$scope.loadGridDataIfNecessary()
                 });
             };
 
@@ -446,18 +508,18 @@ angular.module('wasabi.controllers').
             if (Session && Session.switches) {
                 $scope.data.enableCardView = Session.switches.ShowCardView;
             }
-            $scope.loadExperiments();
+            $scope.loadTableExperiments();
 
             var tmpSearchSettings = localStorage.getItem('wasabiLastSearch');
             if (tmpSearchSettings) {
                 $scope.data = JSON.parse(tmpSearchSettings);
             }
-            if (!$scope.data.lastSearchWasSimple) {
-                $scope.showMoreLessSearch(true);
-            }
-
             if ($scope.data.enableCardView && $scope.data.showGrid) {
                 $scope.loadCardViewExperiments();
+            }
+
+            if (!$scope.data.lastSearchWasSimple) {
+                $scope.showMoreLessSearch(true);
             }
 
             UtilitiesFactory.hideHeading(false);
@@ -473,7 +535,7 @@ angular.module('wasabi.controllers').
                     // executed.
                     $scope.data.showGrid = false;
                     localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
-                    $scope.loadExperiments();
+                    $scope.loadTableExperiments();
                 }
                 else {
                     // Record that we are showing the Card View in the localStorage
@@ -623,12 +685,7 @@ angular.module('wasabi.controllers').
             };
 
             $scope.doSearch = function() {
-                if ($scope.data.showGrid) {
-                    $scope.loadCardViewExperiments();
-                }
-                else {
-                    $scope.loadExperiments();
-                }
+                $scope.loadExperiments();
 
                 UtilitiesFactory.doTrackingInit();
             };
@@ -655,12 +712,7 @@ angular.module('wasabi.controllers').
                     $scope.data.advApplicationName = '';
                 }
 
-                if ($scope.data.showGrid) {
-                    $scope.loadCardViewExperiments();
-                }
-                else {
-                    $scope.loadExperiments();
-                }
+                $scope.loadExperiments();
 
                 var searchParms = 'advStatus=' + $scope.data.advStatus +
                         '&advExperimentName=' + $scope.data.advExperimentName +
@@ -687,7 +739,7 @@ angular.module('wasabi.controllers').
 
                 // The widget has updated the currentPage member.  By simply triggering the code to get the
                 // list, we should update the page.
-                $scope.loadExperiments();
+                $scope.loadTableExperiments();
             };
 
             $scope.cardViewPageChanged = function() {
@@ -837,12 +889,7 @@ angular.module('wasabi.controllers').
                     // Update the list of permissions with any newly created ones.
                     UtilitiesFactory.updatePermissionsAndAppList(function(applicationsList) {
                         $scope.applications = applicationsList;
-                        if ($scope.data.showGrid) {
-                            $scope.loadCardViewExperiments();
-                        }
-                        else {
-                            $scope.loadExperiments();
-                        }
+                        $scope.loadExperiments();
                     });
 
 

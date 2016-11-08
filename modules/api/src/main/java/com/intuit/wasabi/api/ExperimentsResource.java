@@ -34,12 +34,14 @@ import com.intuit.wasabi.exceptions.BucketNotFoundException;
 import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
 import com.intuit.wasabi.exceptions.TimeFormatException;
 import com.intuit.wasabi.exceptions.TimeZoneFormatException;
+
 import com.intuit.wasabi.experiment.Buckets;
 import com.intuit.wasabi.experiment.Experiments;
 import com.intuit.wasabi.experiment.Favorites;
 import com.intuit.wasabi.experiment.Mutex;
 import com.intuit.wasabi.experiment.Pages;
 import com.intuit.wasabi.experiment.Priorities;
+
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.BucketList;
@@ -50,6 +52,7 @@ import com.intuit.wasabi.experimentobjects.ExperimentList;
 import com.intuit.wasabi.experimentobjects.ExperimentPageList;
 import com.intuit.wasabi.experimentobjects.NewExperiment;
 import com.intuit.wasabi.experimentobjects.Page;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -122,7 +125,7 @@ public class ExperimentsResource {
     private final String defaultTimezone;
     private final String defaultTimeFormat;
     private final HttpHeader httpHeader;
-    private final PaginationHelper<Experiment> paginationHelper;
+    private final PaginationHelper<Experiment> experimentPaginationHelper;
     private Experiments experiments;
     private EventsExport export;
     private Assignments assignments;
@@ -139,7 +142,8 @@ public class ExperimentsResource {
                         final Pages pages, final Priorities priorities, final Favorites favorites,
                         final @Named("default.time.zone") String defaultTimezone,
                         final @Named("default.time.format") String defaultTimeFormat,
-                        final HttpHeader httpHeader, final PaginationHelper<Experiment> paginationHelper) {
+                        final HttpHeader httpHeader, final PaginationHelper<Experiment> experimentPaginationHelper
+                        ) {
         this.experiments = experiments;
         this.export = export;
         this.assignments = assignments;
@@ -151,7 +155,7 @@ public class ExperimentsResource {
         this.defaultTimezone = defaultTimezone;
         this.defaultTimeFormat = defaultTimeFormat;
         this.httpHeader = httpHeader;
-        this.paginationHelper = paginationHelper;
+        this.experimentPaginationHelper = experimentPaginationHelper;
         this.favorites = favorites;
     }
 
@@ -164,7 +168,7 @@ public class ExperimentsResource {
      *
      * @param authorizationHeader the authentication headers
      * @param page the page which should be returned, defaults to 1
-     * @param perPage the number of log entries per page, defaults to 10. -1 to get all values.
+     * @param perPage the number of experiments entries per page, defaults to 10. -1 to get all values.
      * @param sort the sorting rules
      * @param filter the filter rules
      * @param timezoneOffset the time zone offset from UTC
@@ -204,6 +208,7 @@ public class ExperimentsResource {
                                    @DefaultValue(DEFAULT_TIMEZONE)
                                    @ApiParam(name = "timezone", defaultValue = DEFAULT_TIMEZONE, value = DOC_TIMEZONE)
                                    final String timezoneOffset) {
+
         ExperimentList experimentList = experiments.getExperiments();
         ExperimentList authorizedExperiments;
 
@@ -242,12 +247,14 @@ public class ExperimentsResource {
                     .forEach(experiment -> experiment.setFavorite(true));
         }
 
-        Map<String, Object> experimentResponse = paginationHelper.paginate("experiments",
+        Map<String, Object> experimentResponse = experimentPaginationHelper.paginate("experiments",
                 authorizedExperiments.getExperiments(), filter, timezoneOffset,
                 (perPage != -1 ? "-favorite," : "") + sort, page, perPage);
 
         return httpHeader.headers().entity(experimentResponse).build();
     }
+
+
 
     @POST
     @Consumes(APPLICATION_JSON)

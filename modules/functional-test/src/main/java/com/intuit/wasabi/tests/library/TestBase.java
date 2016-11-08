@@ -4074,7 +4074,6 @@ public class TestBase extends ServiceTestBase {
     // favorites endpoint //
     ////////////////////////
 
-
     /**
      * Sends a GET request to favorites.
      * The response must contain {@link HttpStatus#SC_OK}.

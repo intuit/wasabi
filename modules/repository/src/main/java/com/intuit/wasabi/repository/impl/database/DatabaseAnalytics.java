@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,16 +25,18 @@ import com.intuit.wasabi.analyticsobjects.counts.BucketCounts;
 import com.intuit.wasabi.analyticsobjects.counts.Counts;
 import com.intuit.wasabi.database.Transaction;
 import com.intuit.wasabi.database.TransactionFactory;
+import com.intuit.wasabi.exceptions.DatabaseException;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.repository.AnalyticsRepository;
 import com.intuit.wasabi.repository.RepositoryException;
-import org.slf4j.Logger;
 
 import java.sql.Timestamp;
-import java.util.*;
-
-import static org.slf4j.LoggerFactory.getLogger;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Database analytics impl of analytics repo
@@ -43,8 +45,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 public class DatabaseAnalytics implements AnalyticsRepository {
 
-    private static Logger LOGGER = getLogger(DatabaseAnalytics.class);
-    private Transaction transaction;
+    private TransactionFactory transactionFactory;
 
     /**
      * Constructor
@@ -53,37 +54,25 @@ public class DatabaseAnalytics implements AnalyticsRepository {
      * @param flyway             Flyway
      */
     @Inject
-    public DatabaseAnalytics(final TransactionFactory transactionFactory, final Flyway flyway,
+    public DatabaseAnalytics(TransactionFactory transactionFactory, Flyway flyway,
                              final @Named("mysql.mutagen.root.resource.path") String mutagenRootResourcePath) {
-        super();
-
-        LOGGER.debug("instantiating {}", DatabaseAnalytics.class.getCanonicalName());
-
-        transaction = transactionFactory.newTransaction();
-
-        initialize(transactionFactory, flyway, mutagenRootResourcePath);
-
-        LOGGER.debug("instantiated {}", DatabaseAnalytics.class.getCanonicalName());
+        this.transactionFactory = transactionFactory;
+        initialize(flyway, mutagenRootResourcePath);
     }
 
-    void initialize(final TransactionFactory transactionFactory, final Flyway flyway,
-                    final String mutagenRootResourcePath) {
-        LOGGER.debug("initializing database with {}", mutagenRootResourcePath);
-
+    void initialize(final Flyway flyway, final String mutagenRootResourcePath) {
         flyway.setLocations(mutagenRootResourcePath);
         flyway.setDataSource(transactionFactory.getDataSource());
         flyway.migrate();
-
-        LOGGER.debug("initialized database with {}", mutagenRootResourcePath);
     }
 
-    /*
-     * @see com.intuit.wasabi.repository.AnalyticsRepository#getRollupRows(com.intuit.wasabi.experimentobjects.Experiment.ID, java.lang.String, com.intuit.wasabi.analyticsobjects.Parameters)
+    /**
+     * {@inheritDoc}
      */
     @Override
     public List<Map> getRollupRows(Experiment.ID experimentId, String rollupDate, Parameters parameters)
             throws RepositoryException {
-
+        Transaction transaction = transactionFactory.newTransaction();
         // TODO enable direct mapping of DateMidnight
         List rollupRows;
         try {
@@ -99,16 +88,16 @@ public class DatabaseAnalytics implements AnalyticsRepository {
         } catch (Exception e) {
             throw new RepositoryException("error reading rollup rows from MySQL", e);
         }
-
     }
 
-    /*
-     * @see com.intuit.wasabi.repository.AnalyticsRepository#getActionsRows(com.intuit.wasabi.experimentobjects.Experiment.ID, com.intuit.wasabi.analyticsobjects.Parameters)
+    /**
+     * {@inheritDoc}
      */
     @Override
     public List<Map> getActionsRows(Experiment.ID experimentID, Parameters parameters)
             throws RepositoryException {
 
+        Transaction transaction = transactionFactory.newTransaction();
         try {
             //build and execute SQL queries for counts
             Date from_ts = parameters.getFromTime();
@@ -148,18 +137,13 @@ public class DatabaseAnalytics implements AnalyticsRepository {
     }
 
     /**
-     * @param experimentID experimentID
-     * @param parameters   parameters associated with this experiment
-     * @return actions joint actions
-     * @throws RepositoryException system exception
-     */
-    /*
-     * @see com.intuit.wasabi.repository.AnalyticsRepository#getJointActions(com.intuit.wasabi.experimentobjects.Experiment.ID, com.intuit.wasabi.analyticsobjects.Parameters)
+     * {@inheritDoc}
      */
     @Override
     public List<Map> getJointActions(Experiment.ID experimentID, Parameters parameters)
             throws RepositoryException {
 
+        Transaction transaction = transactionFactory.newTransaction();
         try {
 
             //build and execute SQL queries for counts
@@ -192,6 +176,8 @@ public class DatabaseAnalytics implements AnalyticsRepository {
             List<Map> jointActionsRows = transaction.select(sqlJointActions, bucketSqlData);
             return jointActionsRows;
 
+        } catch (DatabaseException dbException) {
+            throw new RepositoryException("MySQL Exception! " + dbException.getMessage(), dbException);
         } catch (Exception e) {
             throw new RepositoryException("error reading actions rows from MySQL", e);
         }
@@ -215,13 +201,14 @@ public class DatabaseAnalytics implements AnalyticsRepository {
         }
     }
 
-    /*
-     * @see com.intuit.wasabi.repository.AnalyticsRepository#getImpressionRows(com.intuit.wasabi.experimentobjects.Experiment.ID, com.intuit.wasabi.analyticsobjects.Parameters)
+    /**
+     * {@inheritDoc}
      */
     @Override
     public List<Map> getImpressionRows(Experiment.ID experimentID, Parameters parameters)
             throws RepositoryException {
 
+        Transaction transaction = transactionFactory.newTransaction();
         try {
 
             //build and execute SQL queries for counts
@@ -257,13 +244,14 @@ public class DatabaseAnalytics implements AnalyticsRepository {
         }
     }
 
-    /*
-     * @see com.intuit.wasabi.repository.AnalyticsRepository#getEmptyBuckets(com.intuit.wasabi.experimentobjects.Experiment.ID)
+    /**
+     * {@inheritDoc}
      */
     @Override
     public Map<Bucket.Label, BucketCounts> getEmptyBuckets(Experiment.ID experimentID)
             throws RepositoryException {
 
+        Transaction transaction = transactionFactory.newTransaction();
         try {
             List<Map> bucketRows = transaction.select("select label from bucket where experiment_id=?", experimentID);
 
@@ -290,13 +278,14 @@ public class DatabaseAnalytics implements AnalyticsRepository {
         }
     }
 
-    /*
-     * @see com.intuit.wasabi.repository.AnalyticsRepository#getCountsFromRollups(com.intuit.wasabi.experimentobjects.Experiment.ID, com.intuit.wasabi.analyticsobjects.Parameters)
+    /**
+     * {@inheritDoc}
      */
     @Override
     public List<Map> getCountsFromRollups(Experiment.ID experimentID, Parameters parameters)
             throws RepositoryException {
 
+        Transaction transaction = transactionFactory.newTransaction();
         try {
 
             //build and execute SQL queries for counts from rollups
@@ -311,20 +300,15 @@ public class DatabaseAnalytics implements AnalyticsRepository {
         }
     }
 
+
     /**
-     * Get the date of the most recent rollup.  Check to make sure that the toTime specified is &gt;= last rollup
-     * Return true if the date of the most recent rollup is before the specified toTime
-     *
-     * @param experiment experiment object
-     * @param parameters parameter object
-     * @param to         date
-     * @return boolean
-     * @throws RepositoryException exception
+     * {@inheritDoc}
      */
     @Override
     public boolean checkMostRecentRollup(Experiment experiment, Parameters parameters, Date to)
             throws RepositoryException {
 
+        Transaction transaction = transactionFactory.newTransaction();
         try {
             Timestamp toTime = new Timestamp(to.getTime());
 
