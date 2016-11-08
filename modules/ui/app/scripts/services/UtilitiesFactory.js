@@ -584,18 +584,18 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
 
                     // We need the buckets to be an array so we can sort it.
                     theBuckets.push(experiment.statistics.buckets[bucketLabel]);
-                }
-
-                experiment.statistics.sortedBuckets = $filter('orderBy')(theBuckets, function(bucket) {
                     // Find the matching bucket in the experiment bucket list, which has the count from
                     // the application statistics call on it, and put the count in the sorted bucket so
                     // it will be available for the list.
                     for (var i = 0; i < experiment.buckets.length; i++) {
-                        if (experiment.buckets[i].label === bucket.label) {
-                            bucket.count = experiment.buckets[i].count;
+                        if (experiment.buckets[i].label === bucketLabel) {
+                            experiment.statistics.buckets[bucketLabel].count = experiment.buckets[i].count;
                         }
                     }
 
+                }
+
+                experiment.statistics.sortedBuckets = $filter('orderBy')(theBuckets, function(bucket) {
                     return that.actionRate(bucket.label, experiment.statistics.buckets);
                 }, true);
 

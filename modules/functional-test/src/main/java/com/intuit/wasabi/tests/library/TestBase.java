@@ -1889,7 +1889,6 @@ public class TestBase extends ServiceTestBase {
         return resultMap;
     }
 
-
     /////////////////////////////////////
     // experiments/<id>/pages Endpoint //
     /////////////////////////////////////
@@ -3071,7 +3070,7 @@ public class TestBase extends ServiceTestBase {
         response = apiServerConnector.doGet(uri);
         assertReturnCode(response, expectedStatus);
         @SuppressWarnings("unchecked")
-        List<Map<String, Object>> jsonStrings = (List<Map<String, Object>>) response.jsonPath().getMap("").get("experiments");
+        List<Map<String, Object>> jsonStrings = response.jsonPath().getList("");
         List<Experiment> expList = new ArrayList<>(jsonStrings.size());
         for (Map jsonMap : jsonStrings) {
             String jsonString = simpleGson.toJson(jsonMap);

@@ -1,6 +1,7 @@
 *~
 target
 *.log
+*.log.zip
 *.idea
 *.iml
 *.ipr

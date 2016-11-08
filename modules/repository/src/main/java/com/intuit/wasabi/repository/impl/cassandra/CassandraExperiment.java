@@ -46,7 +46,7 @@ import java.util.Date;
         super.setDescription(
                 columns.getStringValue("description", null));
         super.setHypothesisIsCorrect(
-                columns.getStringValue("hypothesisiscorrect", null));
+                columns.getStringValue("hypothesis_is_correct", null));
         super.setResults(
                 columns.getStringValue("results", null));
         super.setRule(

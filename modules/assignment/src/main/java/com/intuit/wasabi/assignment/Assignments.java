@@ -86,32 +86,6 @@ public interface Assignments {
                              SegmentationProfile segmentationProfile, HttpHeaders headers);
 
     /**
-     * Return an existing assignment for a user, or potentially create a new
-     * assignment if the user is assignable to this experiment. Includes a Page.Name to identify the page through which
-     * the assignment was delivered.
-     *
-     * @param userID                the {@link com.intuit.wasabi.assignmentobjects.User.ID} of the person we want the assignment for
-     * @param applicationName       the {@link com.intuit.wasabi.experimentobjects.Application.Name} the app we want the assignment for
-     * @param label                 the {@link com.intuit.wasabi.experimentobjects.Experiment.Label} the experiment
-     * @param context               the {@link Context} of the assignment call
-     * @param createAssignment      <code>true</code> when a new Assignment should be created
-     * @param ignoreSamplingPercent <code>true</code> if we want to have an assignment independent of the sampling rate
-     * @param segmentationProfile   the {@link SegmentationProfile} to be used for the assignment
-     * @param headers               the {@link HttpHeaders} that can be used by the segmentation
-     * @param pageName              the {@link com.intuit.wasabi.experimentobjects.Page.Name} the page name for the assignment
-     * @param experiment            the {@link Experiment} we want the assignment for
-     * @param bucketList            list of Buckets of this Experiment
-     * @param userAssignments       the already existing assignments
-     * @param exclusives            the experiments that are excluded from the assignment
-     * @return a brand new or old {@link Assignment}
-     */
-    Assignment getAssignment(User.ID userID, Application.Name applicationName, Experiment.Label label, Context context,
-                             boolean createAssignment, boolean ignoreSamplingPercent, SegmentationProfile segmentationProfile,
-                             HttpHeaders headers, Page.Name pageName, Experiment experiment, BucketList bucketList,
-                             Table<Experiment.ID, Experiment.Label, String> userAssignments,
-                             Map<Experiment.ID, List<Experiment.ID>> exclusives);
-
-    /**
      * Insert/update a user assignment for this experiment.
      *
      * @param userID             the {@link com.intuit.wasabi.assignmentobjects.User.ID} of the person we want the assignment for

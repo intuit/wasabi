@@ -28,7 +28,7 @@ import java.util.Date;
  * Specification of a new experiment
  */
 @ApiModel(description = "Subset of Experiment used to create a new experiment.")
-public final class NewExperiment implements ExperimentBase {
+public class NewExperiment implements ExperimentBase {
 
     // Note, if adding a member variable, be sure to update the builder's
     // copy contructor

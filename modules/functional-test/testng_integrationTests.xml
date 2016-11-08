@@ -38,6 +38,8 @@
             <class name="com.intuit.wasabi.tests.service.IntegrationBucket" />
             <class name="com.intuit.wasabi.tests.service.EmptyBucketUserAssignmentTest" />
             <class name="com.intuit.wasabi.tests.service.EmptyBucketUserAssignmentToEmptyBucket" />
+            <class name="com.intuit.wasabi.tests.service.EmptyBucketGetUserAssignmentTest" />
+            <class name="com.intuit.wasabi.tests.service.EmptyBucketGetUserAssignmentToEmptyBucketTest" />
             <class name="com.intuit.wasabi.tests.service.BucketIntegrationTest" />
             <class name="com.intuit.wasabi.tests.service.ContextIntegrationTest" />
             <class name="com.intuit.wasabi.tests.service.ContextMutexIntegrationTest" />
