@@ -54,7 +54,7 @@ angular.module('wasabi.services').factory('ApplicationsFactory', ['$resource', '
                 transformResponse: function (data) {
                     var parsedData = $.parseJSON(data);
 
-                    return parsedData.experiments;
+                    return parsedData;
                 },
                 isArray: true
             },
