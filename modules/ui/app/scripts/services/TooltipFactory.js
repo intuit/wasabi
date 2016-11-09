@@ -1,5 +1,4 @@
 /*global $:false */
-/*global moment:false */
 
 'use strict';
 

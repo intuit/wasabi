@@ -17,7 +17,9 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
 
             // This allows us to change the name of the state versus what it is called in the backend.
             stateName: function (state) {
-                if (!state) return '';
+                if (!state) {
+                    return '';
+                }
                 var stateLabel = state.toLowerCase();
                 if (stateLabel === 'paused') {
                     stateLabel = 'stopped';
@@ -34,7 +36,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
             },
 
             hideAdminTabs: function(flag) {
-                var hideThem = (flag != undefined ? flag : true);
+                var hideThem = (flag !== undefined ? flag : true);
                 if (!hideThem) {
                     this.hideTopLevelTab('Users', false);
                     this.hideTopLevelTab('Applications', false);
@@ -132,7 +134,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                     });
                 }
                 $('pageSuccess').stop(); // If it happens to be fading out, stop it.
-                if (globalPageSuccessMessageFadeOutTimer != null) {
+                if (globalPageSuccessMessageFadeOutTimer !== null) {
                     clearTimeout(globalPageSuccessMessageFadeOutTimer);
                 }
                 $('.pageSuccess h2').text(title);
@@ -266,11 +268,11 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
 
             getTrackingPlugin: function(plugins) {
                 if (plugins) {
-                    var filtered = plugins.filter(function(e, i, arr) {
+                    var filtered = plugins.filter(function(e) {
                         return (e.hasOwnProperty('pluginType') && e.pluginType === 'contributeClickTracking');
                     });
                     if (filtered && filtered.length > 0) {
-                        return tracking;
+                        return filtered[0];
                     }
                 }
                 return null;
@@ -579,7 +581,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                 return (!experiment.isRapidExperiment ? 'N/A' : experiment.userCap);
             },
 
-            determineBucketImprovementClass: function(experiment, controlBucketLabel) {
+            determineBucketImprovementClass: function(experiment) {
                 var that = this;
                 // Set up so we know whether a given bucket is a winner, loser or not sure.
                 var theBuckets = [];
@@ -661,8 +663,8 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                     }
                     if (!foundAWinner) {
                         // There was no winner.  Need to set improvement class so we can left shift the buckets.
-                        for (var i = 0; i < experiment.statistics.sortedBuckets.length; i++) {
-                            experiment.statistics.buckets[experiment.statistics.sortedBuckets[i].label].improvementClass = 'no-winner';
+                        for (var j = 0; j < experiment.statistics.sortedBuckets.length; j++) {
+                            experiment.statistics.buckets[experiment.statistics.sortedBuckets[j].label].improvementClass = 'no-winner';
                         }
                     }
                 }
@@ -776,7 +778,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                         // Do a simple quoted string validation
                         if (ruleValue.length >= 3 &&
                             (ruleValue[0] === ruleValue[ruleValue.length-1]) &&
-                            (ruleValue[0] === "'" || ruleValue[0] === '"')) {
+                            (ruleValue[0] === '\'' || ruleValue[0] === '"')) {
                             // Validate that any of the same quotes within the string are escaped.
                             var foundBadQuote = false;
                             for (var i = 1; i < ruleValue.length - 1; i++) {
@@ -790,7 +792,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                             isValid = !foundBadQuote;
                         }
                         else if (ruleValue.length === 2 &&
-                            (ruleValue === '""' || ruleValue === "''")) {
+                            (ruleValue === '""' || ruleValue === '\'\'')) {
                             // We can allow empty string checks.
                             isValid = true;
                         }
@@ -961,12 +963,19 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                 $.browser.msie = /msie/.test(navigator.userAgent.toLowerCase());
                 $.browser.mozilla = /firefox/.test(navigator.userAgent.toLowerCase());
                 $.browser.webkit = /webkit/.test(navigator.userAgent.toLowerCase()) || /chrome/.test(navigator.userAgent.toLowerCase());
-                if($.browser.webkit)
-                    ce.find("div").replaceWith(function() { return "\n" + this.innerHTML; });
-                if($.browser.msie)
-                    ce.find("p").replaceWith(function() { return this.innerHTML  +  "<br>"; });
-                if($.browser.mozilla || $.browser.opera ||$.browser.msie )
-                    ce.find("br").replaceWith("\n");
+                if($.browser.webkit) {
+                    ce.find('div').replaceWith(function() {
+                        return '\n' + this.innerHTML;
+                    });
+                }
+                if($.browser.msie) {
+                    ce.find('p').replaceWith(function() {
+                        return this.innerHTML  +  '<br>';
+                    });
+                }
+                if($.browser.mozilla || $.browser.opera ||$.browser.msie ) {
+                    ce.find('br').replaceWith('\n');
+                }
 
                 return $.trim(ce.text());
             },
@@ -1070,6 +1079,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
             },
 
             openPluginModal: function (plugin, experiment) {
+                var exp = (experiment !== undefined ? experiment : null);
                 var modalInstance = $modal.open({
                     templateUrl: plugin.templateUrl,
                     controller: plugin.ctrlName,
@@ -1077,7 +1087,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                     backdrop: 'static',
                     resolve: {
                         experiment: function () {
-                            return experiment;
+                            return exp;
                         }
                     }
                 });

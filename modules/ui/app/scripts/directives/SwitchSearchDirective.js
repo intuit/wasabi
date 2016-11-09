@@ -1,10 +1,9 @@
 /*global $:false */
-/*global moment:false */
 
 'use strict';
 
-angular.module('wasabi.directives').directive('switchSearch', ['$compile',
-    function ($compile) {
+angular.module('wasabi.directives').directive('switchSearch',
+    function () {
         return {
             restrict: 'A',
             link: function (scope, element, attrs) {
@@ -43,4 +42,4 @@ angular.module('wasabi.directives').directive('switchSearch', ['$compile',
                 });
             }
         };
-    }]);
+    });

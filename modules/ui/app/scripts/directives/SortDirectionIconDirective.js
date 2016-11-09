@@ -1,13 +1,12 @@
 /*global $:false */
-/*global moment:false */
 
 'use strict';
 
-angular.module('wasabi.directives').directive('sortDirectionIcon', ['$compile',
-    function ($compile) {
+angular.module('wasabi.directives').directive('sortDirectionIcon',
+    function () {
         return {
             restrict: 'A',
-            link: function (scope, element, attrs) {
+            link: function (scope, element) {
                 scope.$watch(function() {
                     return scope.orderByField + '|' + scope.reverseSort;
                 },
@@ -32,4 +31,4 @@ angular.module('wasabi.directives').directive('sortDirectionIcon', ['$compile',
                 });
             }
         };
-    }]);
+    });

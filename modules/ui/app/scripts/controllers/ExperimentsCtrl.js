@@ -8,7 +8,7 @@ angular.module('wasabi.controllers').
     controller('ExperimentsCtrl', ['$scope', '$filter', '$http', '$timeout', 'ExperimentsFactory', '$modal', 'UtilitiesFactory', '$rootScope', 'StateFactory', 'DialogsFactory', 'AUTH_EVENTS', 'Session', 'PERMISSIONS', 'ConfigFactory', 'AuthzFactory', 'USER_ROLES', 'ApplicationsFactory', 'BucketsFactory', 'ExperimentStatisticsFactory', 'ApplicationStatisticsFactory', 'FavoritesFactory',
         function ($scope, $filter, $http, $timeout, ExperimentsFactory, $modal, UtilitiesFactory, $rootScope, StateFactory, DialogsFactory, AUTH_EVENTS, Session, PERMISSIONS, ConfigFactory, AuthzFactory, USER_ROLES, ApplicationsFactory, BucketsFactory, ExperimentStatisticsFactory, ApplicationStatisticsFactory, FavoritesFactory) {
 
-             var today = moment().format('MM/DD/YYYY');
+            var today = moment().format('MM/DD/YYYY');
 
             // The data object is where values are stored that need to be data bound to the fields in the form.
             // I believe there was a scope problem and I found this solution on the Googles.  Basically, by
@@ -136,14 +136,15 @@ angular.module('wasabi.controllers').
 
                         $scope.startDataLoadForNextExperiment();
                     },
-                    function(response) {
+                    function() {
                         console.log('Error loading user count for ' + experiment.id);
                         $scope.startDataLoadForNextExperiment();
-                });
+                    }
+                );
             };
 
             $scope.loadBuckets = function (experiment, loadStatisticsFlag) {
-                var loadStatisticsNext = (loadStatisticsFlag != undefined ? loadStatisticsFlag : true);
+                var loadStatisticsNext = (loadStatisticsFlag !== undefined ? loadStatisticsFlag : true);
                 BucketsFactory.query({
                     experimentId: experiment.id
                 }).$promise.then(function (buckets) {
@@ -184,10 +185,11 @@ angular.module('wasabi.controllers').
                             $scope.startDataLoadForNextExperiment();
                         }
                     },
-                    function(response) {
+                    function() {
                         console.log('Error loading buckets for ' + experiment.id);
                         $scope.startDataLoadForNextExperiment();
-                });
+                    }
+                );
             };
 
             $scope.getBucket = function (bucketLabel, experiment) {
@@ -201,12 +203,13 @@ angular.module('wasabi.controllers').
 
                         $scope.loadApplicationStatistics(experiment);
 
-                        UtilitiesFactory.determineBucketImprovementClass(experiment, experiment.controlBucketLabel);
+                        UtilitiesFactory.determineBucketImprovementClass(experiment);
 
-                    }, function(response) {
+                    }, function() {
                         console.log('Error retrieving experiment statistics for ' + experiment.id);
                         $scope.startDataLoadForNextExperiment();
-                });
+                    }
+                );
             };
 
             // *** END Home page code
@@ -560,7 +563,7 @@ angular.module('wasabi.controllers').
                 $scope.applySearchSortFilters(true);
             };
 
-            $scope.handleCardStarAnimation = function($item, tileWidth) {
+            $scope.handleCardStarAnimation = function($item) {
                 if ($item) {
                     $item.animate({opacity: 0}, 1000, 'swing', function() {
                         $scope.redoSearchAndSort();
@@ -885,7 +888,7 @@ angular.module('wasabi.controllers').
                     modalInstance.close();
                 });
 
-                modalInstance.result.then(function (started) {
+                modalInstance.result.then(function () {
                     // Update the list of permissions with any newly created ones.
                     UtilitiesFactory.updatePermissionsAndAppList(function(applicationsList) {
                         $scope.applications = applicationsList;

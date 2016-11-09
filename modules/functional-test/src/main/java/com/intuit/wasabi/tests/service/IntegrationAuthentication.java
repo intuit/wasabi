@@ -135,7 +135,7 @@ public class IntegrationAuthentication extends TestBase {
         Assert.assertNull(apiUserNew.email);
 
         invalidApiUser = APIUserFactory.createAPIUser().setEmail(null);
-        apiUserNew = getUserExists(invalidApiUser, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        apiUserNew = getUserExists(invalidApiUser, HttpStatus.SC_NOT_FOUND);
         Assert.assertNull(apiUserNew.email);
     }
 

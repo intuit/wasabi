@@ -31,3 +31,5 @@ node_modules
 modules/ui/app/bower_components
 modules/ui/app/scripts/config.js
 modules/ui/dist.zip
+*.log.zip
+

@@ -13,9 +13,9 @@ angular.module('wasabi.directives').directive('experimentProgress', function () 
                     return 'Finished';
                 }
                 var days = attrs.progressDaysLeft,
-                    progressInUsers = attrs.progressIsAssignedUsers == "true";
+                    progressInUsers = attrs.progressIsAssignedUsers === 'true';
                 if (days <= 1) {
-                    if (progressInUsers && days == 0) {
+                    if (progressInUsers && days === 0) {
                         return '0 users';
                     }
                     return (progressInUsers ? '1 user' : '1 day');

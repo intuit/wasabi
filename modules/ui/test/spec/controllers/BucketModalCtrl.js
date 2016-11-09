@@ -13,7 +13,9 @@ describe('BucketModalCtrl', function () {
             close: sinon.stub(),
             dismiss: sinon.stub()
         };
-        bucket = 'something';
+        bucket = {
+            name: 'something'
+        };
         buckets = [];
         
         createController = function (isCreateBucket, isEditInDetails, isNoControl, bucketStatistics) {
@@ -48,12 +50,13 @@ describe('BucketModalCtrl', function () {
 
         it('should not throw on false input', function () {
             createController();
+            scope.bucketFormSubmitted = false;
             var testFn = function () {
                 return scope.saveBucket(false);
             };
             expect(testFn).to.not.throw();
         });
-        
+
         it('should not throw on true input', function () {
             createController(true);
             var testFn = function () {
