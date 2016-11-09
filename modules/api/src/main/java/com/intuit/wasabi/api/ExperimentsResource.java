@@ -131,7 +131,7 @@ public class ExperimentsResource {
     private final String defaultTimezone;
     private final String defaultTimeFormat;
     private final HttpHeader httpHeader;
-    private final PaginationHelper<Experiment> paginationHelper;
+    private final PaginationHelper<Experiment> experimentPaginationHelper;
     private Experiments experiments;
     private EventsExport export;
     private Assignments assignments;
@@ -148,7 +148,8 @@ public class ExperimentsResource {
                         final Pages pages, final Priorities priorities, final Favorites favorites,
                         final @Named("default.time.zone") String defaultTimezone,
                         final @Named("default.time.format") String defaultTimeFormat,
-                        final HttpHeader httpHeader, final PaginationHelper<Experiment> paginationHelper) {
+                        final HttpHeader httpHeader, final PaginationHelper<Experiment> experimentPaginationHelper
+    ) {
         this.experiments = experiments;
         this.export = export;
         this.assignments = assignments;
@@ -160,7 +161,7 @@ public class ExperimentsResource {
         this.defaultTimezone = defaultTimezone;
         this.defaultTimeFormat = defaultTimeFormat;
         this.httpHeader = httpHeader;
-        this.paginationHelper = paginationHelper;
+        this.experimentPaginationHelper = experimentPaginationHelper;
         this.favorites = favorites;
     }
 
@@ -213,6 +214,7 @@ public class ExperimentsResource {
                                    @DefaultValue(DEFAULT_TIMEZONE)
                                    @ApiParam(name = "timezone", defaultValue = DEFAULT_TIMEZONE, value = DOC_TIMEZONE)
                                    final String timezoneOffset) {
+
         ExperimentList experimentList = experiments.getExperiments();
         ExperimentList authorizedExperiments;
 
@@ -251,12 +253,13 @@ public class ExperimentsResource {
                     .forEach(experiment -> experiment.setFavorite(true));
         }
 
-        Map<String, Object> experimentResponse = paginationHelper.paginate("experiments",
+        Map<String, Object> experimentResponse = experimentPaginationHelper.paginate("experiments",
                 authorizedExperiments.getExperiments(), filter, timezoneOffset,
                 (perPage != -1 ? "-favorite," : "") + sort, page, perPage);
 
         return httpHeader.headers().entity(experimentResponse).build();
     }
+
 
     @POST
     @Consumes(APPLICATION_JSON)

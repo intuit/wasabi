@@ -16,15 +16,20 @@
 package com.intuit.wasabi.api;
 
 import com.intuit.wasabi.analytics.Analytics;
+import com.intuit.wasabi.analytics.ExperimentDetails;
 import com.intuit.wasabi.analyticsobjects.Parameters;
 import com.intuit.wasabi.analyticsobjects.counts.AssignmentCounts;
 import com.intuit.wasabi.analyticsobjects.counts.ExperimentCounts;
 import com.intuit.wasabi.analyticsobjects.counts.ExperimentCumulativeCounts;
 import com.intuit.wasabi.analyticsobjects.statistics.ExperimentCumulativeStatistics;
 import com.intuit.wasabi.analyticsobjects.statistics.ExperimentStatistics;
+import com.intuit.wasabi.api.pagination.PaginationHelper;
+import com.intuit.wasabi.authorization.Authorization;
+import com.intuit.wasabi.experiment.Favorites;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Context;
 import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.analyticsobjects.wrapper.ExperimentDetail;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -75,9 +80,19 @@ public class AnalyticsResourceTest {
     private Application.Name applicationName;
     private AnalyticsResource analyticsResource;
 
+    @Mock
+    private PaginationHelper<ExperimentDetail> experimentDetailPaginationHelper;
+    @Mock
+    private ExperimentDetails experimentDetails;
+    @Mock
+    private Favorites favorites;
+    @Mock
+    private Authorization authorization;
+
     @Before
     public void setup() {
-        analyticsResource = new AnalyticsResource(analytics, authorizedExperimentGetter, httpHeader);
+        analyticsResource = new AnalyticsResource(analytics, authorizedExperimentGetter, httpHeader,
+                experimentDetailPaginationHelper, experimentDetails, favorites, authorization);
     }
 
     @Test

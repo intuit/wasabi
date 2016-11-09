@@ -13,7 +13,6 @@ angular.module('wasabi.directives').directive('switchSearch',
                 var showAdvanced = function(doShowAdvanced) {
                     if (doShowAdvanced) {
                         $('#experimentsList').css('marginTop', 40);
-                        $('#gridView').css('marginTop', 40);
                         $('#btnNewExperiment').css('top', 33);
                         $('#checkToggleListSpan').css('top', 33);
 
@@ -21,7 +20,6 @@ angular.module('wasabi.directives').directive('switchSearch',
                     }
                     else {
                         $('#experimentsList').css('marginTop', '');
-                        $('#gridView').css('marginTop', '');
                         $('#btnNewExperiment').css('top', 0);
                         $('#checkToggleListSpan').css('top', 0);
 

@@ -2768,6 +2768,14 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
                             left: 130px !important;
                         }
                     }
+                    &.nonWinner {
+                        background: url(/images/noResult.png) no-repeat 0 0;
+                        background-size: 15px;
+                        background-position-y: 17px;
+                        .bucketAssignments {
+                            left: 130px !important;
+                        }
+                    }
                     &.winning {
                         background: url(/images/hardUp.png) no-repeat 0 0;
                         background-size: 20px;
@@ -4352,4 +4360,8 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
 
 .notAllowed {
     cursor: no-drop !important;
+}
+
+.gridWithAdvanced {
+    margin-top: 40px;
 }

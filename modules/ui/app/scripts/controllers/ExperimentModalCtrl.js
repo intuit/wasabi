@@ -150,6 +150,30 @@ angular.module('wasabi.controllers')
                     }
                 };
 
+                $scope.init = function() {
+                    $scope.processRule();
+                    $scope.loadAllApplications();
+                };
+
+                $scope.loadExperiment = function () {
+                    ExperimentsFactory.show({id: $scope.experiment.id}).$promise.then(function (experiment) {
+                        // Need to just fill in the experiment object with the fields it doesn't have due to being
+                        // provided by the Card View API.
+                        for (var prop in experiment) {
+                            if (experiment.hasOwnProperty(prop) && !$scope.experiment.hasOwnProperty(prop)) {
+                                $scope.experiment[prop] = experiment[prop];
+                            }
+                        }
+                        if ($scope.experiment.hypothesisIsCorrect === null) {
+                            $scope.experiment.hypothesisIsCorrect = '';
+                        }
+
+                        $scope.init();
+                    }, function(response) {
+                        UtilitiesFactory.handleGlobalError(response, 'Your experiment could not be retrieved.');
+                    });
+                };
+
                 $scope.loadAllApplications = function () {
                     ApplicationsFactory.query().$promise.then(function (applications) {
                         if (applications) {
@@ -237,8 +261,15 @@ angular.module('wasabi.controllers')
                     return UtilitiesFactory.firstPageEncoded($scope.experiment);
                 };
 
-                $scope.processRule();
-                $scope.loadAllApplications();
+                if ($scope.experiment.id && $scope.experiment.id.length > 0 && !$scope.experiment.hasOwnProperty('samplingPercent')) {
+                    // We know we are being called from the Card View, as that API doesn't include samplingPercent
+                    $scope.loadExperiment();
+                }
+                else {
+                    // We are being called with a complete experiment object being passed in, e.g., from the
+                    // Experiments list, so we can just get the stuff we don't have, like all applications.
+                    $scope.init();
+                }
 
                 $scope.doSaveOrCreateExperiment = function(experimentId, afterSaveFunc) {
                     var handleCreateSuccess = function(experiment, dialogName) {
