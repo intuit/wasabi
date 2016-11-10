@@ -102,6 +102,11 @@ angular.module('wasabi.controllers').
                     endTime = endTimeObj.format('MM/DD/YYYY'),
                     timeZone = startTimeObj.format('ZZ');
 
+                if (endTimeObj.isBefore(startTimeObj)) {
+                    UtilitiesFactory.displayPageError('Dates Out of Order', 'The Start Date must be before the End Date.');
+                    return;
+                }
+
                 $scope.relatedExperiments = [];
                 $scope.meDoneNames = [];
                 $scope.mutualExclusions = {};
