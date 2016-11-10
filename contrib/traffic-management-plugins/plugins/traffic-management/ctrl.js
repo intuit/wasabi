@@ -128,6 +128,17 @@ angular.module('wasabi.controllers').
                 return true;
             };
 
+            $scope.resetOnError = function() {
+                $scope.noSave = true;
+                if ($scope.relatedExperiments && $scope.relatedExperiments.length > 0) {
+                    // Reset the sampling percentages to the original values, but leave the targets whatever they currently are.
+                    for (var m = 0; m < $scope.relatedExperiments.length; m++) {
+                        $scope.relatedExperiments[m].oldSamplingPercent = '';
+                        $scope.relatedExperiments[m].samplingPercent = $scope.relatedExperiments[m].originalSamplingPercent;
+                    }
+                }
+            };
+
             $scope.calculate = function() {
                 // Note that the experiments are listed in priority order.
 
@@ -135,13 +146,14 @@ angular.module('wasabi.controllers').
                 var cannotCalc = false;
                 for (var i = 0; i < $scope.relatedExperiments.length; i++) {
                     if ($scope.relatedExperiments[i].targetSamplingPercent.length === 0 ||
-                        parseFloat($scope.relatedExperiments[i].targetSamplingPercent) === 0.0) {
-                        UtilitiesFactory.displayPageError('Missing Target Sampling Percentage', 'Unable to calculate Experiment Sampling Percentages unless all Target Sampling Percentages have non-zero values.');
+                        parseFloat($scope.relatedExperiments[i].targetSamplingPercent) <= 0.0) {
+                        UtilitiesFactory.displayPageError('Missing Target Sampling Percentage', 'Unable to calculate Experiment Sampling Percentages unless all Target Sampling Percentages have greater than zero values.');
                         cannotCalc = true;
                         break;
                     }
                 }
                 if (cannotCalc) {
+                    $scope.resetOnError();
                     return;
                 }
 
@@ -191,11 +203,13 @@ angular.module('wasabi.controllers').
                         }
                         if (targetSamplingPercentages >= 1) {
                             UtilitiesFactory.displayPageError('Sampling Percentage Too High', 'You have set the sampling percentage of some of your higher priority experiments too high.  No traffic will be left for the later experiments.');
+                            $scope.resetOnError();
                             return;
                         }
                         var newSamp = parseFloat(currentExp.targetSamplingPercent) / (1 - targetSamplingPercentages);
                         if (newSamp >= 1) {
                             UtilitiesFactory.displayPageError('Sampling Percentage Too High', 'You have set the sampling percentage of some of your higher priority experiments too high.  No traffic will be left for the later experiments.');
+                            $scope.resetOnError();
                             return;
                         }
                         if (parseFloat(currentExp.samplingPercent) !== parseFloat(newSamp.toFixed(4))) {
@@ -219,7 +233,6 @@ angular.module('wasabi.controllers').
                         $scope.relatedExperiments[m].oldSamplingPercent = '';
                     }
                 }
-                var x = 5;
             };
 
             $scope.save = function() {
