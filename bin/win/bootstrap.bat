@@ -72,6 +72,8 @@ set remaining_packages=%npm_packages%
 
 
 call :info Installing/Upgrading Ruby dependencies
+rem this is a fall back due to https://stackoverflow.com/questions/15305350/gem-install-fails-with-openssl-failure
+cmd /c C:\Tools\ruby23\bin\gem.cmd source -a http://rubygems.org/
 set remaining_packages=%gem_packages%
 :inst_gem_deps
     for /f "tokens=1* delims=," %%P in ("%remaining_packages%") do (
