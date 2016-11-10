@@ -433,6 +433,7 @@ http://www.w3.org/2001/XMLSchema-instance">
                     <failOnError>false</failOnError>
                     <!-- FIXME: fix javadoc -->
                     <additionalparam>-Xdoclint:none</additionalparam>
+                    <!-- FIXME: rm INFO -->
                     <quiet/>
                 </configuration>
                 <executions>
