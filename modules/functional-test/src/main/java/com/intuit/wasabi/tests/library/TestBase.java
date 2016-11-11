@@ -1922,6 +1922,57 @@ public class TestBase extends ServiceTestBase {
     }
 
 
+    //////////////////////////////////////////////////////////////////
+    // applications/<appName>/pages/ endpoint //
+    //////////////////////////////////////////////////////////////////
+    /**
+     * Sends a GET request to retrieve pages assigned to the application.
+     * The response must contain HTTP {@link HttpStatus#SC_OK}.
+     *
+     * @param application the application
+     * @return a list of pages
+     */
+     public List<Page> getPages(Application application){
+    	 return getPages(application,HttpStatus.SC_OK);
+     }
+    
+     /**
+      * Sends a GET request to retrieve pages assigned to the application.
+      * The response must contain HTTP {@code expectedStatus}.
+      *
+      * @param application the application
+      * @param expectedStatus the expected HTTP status code
+      * @return a list of pages
+      */
+     public List<Page> getPages(Application application,  int expectedStatus) {
+         return getPages(application, expectedStatus, apiServerConnector);
+     }
+    
+    
+     /**
+      * Sends a GET request to retrieve pages assigned to the application.
+      * The response must contain HTTP {@code expectedStatus}.
+      *
+      * @param application the application
+      * @param expectedStatus the expected HTTP status code
+      * @param apiServerConnector the server connector to use
+      * @return a list of pages
+      */
+     public List<Page> getPages(Application application, int expectedStatus, APIServerConnector apiServerConnector) {
+         String uri = "applications/" + application.name + "/pages/";
+         response = apiServerConnector.doGet(uri);
+         assertReturnCode(response, expectedStatus);
+         List<Map<String, Object>> jsonMapping = response.jsonPath().getList("pages");
+         List<Page> pageList = new ArrayList<>(jsonMapping.size());
+         for (Map jsonMap : jsonMapping) {
+             String jsonString = simpleGson.toJson(jsonMap);
+             pageList.add(PageFactory.createFromJSONString(jsonString));
+         }
+         return pageList;
+     }
+    
+    
+    
 
     //////////////////////////////////////////////////////////////////
     // experiments/applications/<appName>/pages/<pagename> endpoint //
@@ -3078,6 +3129,60 @@ public class TestBase extends ServiceTestBase {
         }
         return pageList;
 
+    }
+    
+    
+    /**
+     * 
+     * Sends a GET request to receive a list of experiments for an application
+     * The response must contain HTTP {@link HttpStatus#SC_OK}
+     * 
+     * @param application the application for which the experiments are
+     * @return a list of experiments
+     */
+    public List<Experiment> getExperimentsByApplication(Application application)
+    {
+    	return getExperimentsByApplication(application,HttpStatus.SC_OK);
+    }
+    
+    
+    /**
+     * 
+     * Sends a GET request to receive a list of experiments for an application
+     * The response must contain HTTP {@link HttpStatus#SC_OK}
+     * 
+     * @param application the application for which the experiments are
+     * @param expectedStatus the expected HTTP status code
+     * @return a list of experiments
+     */
+    public List<Experiment> getExperimentsByApplication(Application application, int expectedStatus)
+    {
+    	return getExperimentsByApplication(application,expectedStatus,apiServerConnector);
+    }
+    
+    
+    /**
+     * 
+     * Sends a GET request to receive a list of experiments for an application
+     * The response must contain HTTP {@link HttpStatus#SC_OK}
+     * 
+     * @param application the application for which the experiments are
+     * @param expectedStatus the expected HTTP status code
+     * @param apiServerConnector the server connector to use
+     * @return a list of experiments
+     */
+    public List<Experiment> getExperimentsByApplication(Application application, int expectedStatus,APIServerConnector apiServerConnector)
+    {
+    	 String uri = "applications/" + application.name+ "/experiments";
+         response = apiServerConnector.doGet(uri);
+         assertReturnCode(response, expectedStatus);
+         List<Map<String, Object>> jsonStrings = response.jsonPath().getList("experiments");
+         List<Experiment> expList = new ArrayList<>(jsonStrings.size());
+         for (Map jsonMap : jsonStrings) {
+             String jsonString = simpleGson.toJson(jsonMap);
+             expList.add(ExperimentFactory.createFromJSONString(jsonString));
+         }
+         return expList;
     }
 
     /**

@@ -22,11 +22,15 @@ import com.intuit.wasabi.tests.library.util.RetryAnalyzer;
 import com.intuit.wasabi.tests.library.util.RetryTest;
 import com.intuit.wasabi.tests.library.util.TestUtils;
 import com.intuit.wasabi.tests.library.util.serialstrategies.DefaultNameExclusionStrategy;
+import com.intuit.wasabi.tests.model.Application;
 import com.intuit.wasabi.tests.model.Bucket;
 import com.intuit.wasabi.tests.model.Experiment;
+import com.intuit.wasabi.tests.model.Page;
 import com.intuit.wasabi.tests.model.factory.ApplicationFactory;
 import com.intuit.wasabi.tests.model.factory.BucketFactory;
 import com.intuit.wasabi.tests.model.factory.ExperimentFactory;
+import com.jayway.restassured.response.Response;
+
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.testng.Assert;
@@ -680,6 +684,33 @@ public class IntegrationExperiment extends TestBase {
         // FIXME: jwtodd
 //        putExperiment(successfulPersonalizationChange, HttpStatus.SC_BAD_REQUEST);
         putExperiment(successfulPersonalizationChange, HttpStatus.SC_BAD_REQUEST);
+    }
+    
+    /**
+     * This test case covers a scenario where we
+     * try to get list of experiments of an 
+     * application that is non-existent or invalid
+     * the name of the app I am using is junkapp
+     */
+    @Test
+    public void getExperimentsOfNonExistentApp()
+    {
+    	List<Experiment> experimentsList = getExperimentsByApplication(new Application("junkapp"));
+    	Assert.assertEquals(experimentsList.size(), 0);
+    }
+     
+    /**
+     * This test case covers a scenario where we
+     * try to get list of experiments of  
+     * non-existent application and non-existent page
+     * the name of the app I am using is junkapp
+     * the name of the page I am using is junkpage
+     */
+    @Test
+    public void getExperimentsOfNonExistentAppAndNonExistentPage()
+    {
+    	List<Experiment> experimentsList = getExperimentsByApplicationPage(new Application("junkapp"), new Page("junkpage", true));
+    	Assert.assertEquals(experimentsList.size(), 0);
     }
 
     /**
