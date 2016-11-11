@@ -73,6 +73,7 @@ public class DefaultCassandraDriver implements CassandraDriver {
                 List<String> nodes = getConfiguration().getNodeHosts();
                 builder.addContactPoints(nodes.toArray(new String[nodes.size()]))
                         .withRetryPolicy(DefaultRetryPolicy.INSTANCE);
+                builder.withPort(getConfiguration().getPort());
 
                 if(getConfiguration().getTokenAwareLoadBalancingLocalDC().isPresent() &&
                         getConfiguration().getTokenAwareLoadBalancingUsedHostsPerRemoteDc() >= 0) {
@@ -125,6 +126,7 @@ public class DefaultCassandraDriver implements CassandraDriver {
                     }
                 }
 
+                LOGGER.info("Connecting to nodes {}, on port {}", nodes, getConfiguration().getPort());
                 this.cluster = builder.build();
                 cluster.getConfiguration()
                         .getProtocolOptions()
