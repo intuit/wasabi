@@ -3153,7 +3153,7 @@ public class TestBase extends ServiceTestBase {
      */
     public List<Experiment> getExperimentsByApplication(Application application, int expectedStatus)
     {
-    	return getExperimentsByApplication(application,HttpStatus.SC_OK,apiServerConnector);
+    	return getExperimentsByApplication(application,expectedStatus,apiServerConnector);
     }
     
     
