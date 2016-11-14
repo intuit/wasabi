@@ -119,7 +119,7 @@ header {
               a {
                 background: url(/images/sortDwn_white.png) no-repeat right center;
               }
-              &.sel a {
+              &.sel a.toolsChoice {
                 background: url(/images/sortDwn.png) no-repeat right center;
                 background-position-x: 95%;
                 background-position-y: 36%;
