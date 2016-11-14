@@ -21,10 +21,13 @@ object Constants {
   val APP_ARG_MASTER = "master"
 
   val SPARK_SQL_CASSANDRA_FORMAT = "org.apache.spark.sql.cassandra"
+  val SPARK_SQL_CSV_FORMAT = "com.databricks.spark.csv"
+
+  val SQL_RESULT_OUTPUT_DIR = "cfs:/user/cassandra/wasabi/out"
 
   val APP_ID_MIGRATE_DATA = "migrate-data"
-  val APP_ID_DAILY_AGGREGATION = "migrate-data"
-  val APP_ID_REAL_TIME = "migrate-data"
+  val APP_ID_POPULATE_DATE = "populate-data"
+  val APP_ID_EXECUTE_SQL = "execute-sql"
 
   val DEFAULT_CLUSTER_NAME = "default"
   val DEFAULT_ZONE = ZoneId.of("America/Los_Angeles")

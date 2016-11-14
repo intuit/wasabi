@@ -19,7 +19,7 @@ class SparkMySqlRepository extends SparkDataStoreRepository  {
     this()
   }
 
-  override def read(sql: String): WasabiError Xor DataFrame = {
+  override def read(sql: String, isNativeSql: Boolean = false): WasabiError Xor DataFrame = {
     left(WasabiError.RepositoryError(SparkMySqlRepositoryNotYetSupported()))
   }
 

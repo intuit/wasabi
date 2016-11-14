@@ -17,7 +17,7 @@
 
     <contextName>analytics</contextName>
     <jmxConfigurator/>
-    <property name="LOG" value="/var/log/wasabi/spark-analytics"/>
+    <property name="LOG" value="${SPARK_WORKER_LOG_DIR}/spark-analytics"/>
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>

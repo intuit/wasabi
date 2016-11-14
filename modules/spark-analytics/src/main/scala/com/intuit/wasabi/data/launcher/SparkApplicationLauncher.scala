@@ -5,9 +5,11 @@ import cats.data.Xor
 import cats.data.Xor._
 import com.google.inject.Guice
 import com.intuit.wasabi.data.util.Constants._
-import com.intuit.wasabi.data.app.{BaseSparkApplication, MigrateDataApplication}
+import com.intuit.wasabi.data.app.{BaseSparkApplication, ExecuteSqlApplication, MigrateDataApplication, PopulateDataApplication}
 import com.intuit.wasabi.data.conf.AppConfig
+import com.intuit.wasabi.data.conf.guice.executesql.ExecuteSqlApplicationDI
 import com.intuit.wasabi.data.conf.guice.migratedata.MigrateDataApplicationDI
+import com.intuit.wasabi.data.conf.guice.populatedata.PopulateDataApplicationDI
 import com.intuit.wasabi.data.exception.{ApplicationException, WasabiError}
 
 /**
@@ -32,12 +34,18 @@ object SparkApplicationLauncher extends AppConfig {
     if(log.isDebugEnabled) log.debug(s"appConfig.appId => ${appConfig.getString("app_id")}" )
 
     appId match {
-      case APP_ID_MIGRATE_DATA => {
+      case git add => {
         val injector = Guice.createInjector(new MigrateDataApplicationDI(appConfig))
         app = injector.getInstance(classOf[MigrateDataApplication])
       }
-      //case APP_ID_DAILY_AGGREGATION => {}
-      //case APP_ID_REAL_TIME => {}
+      case APP_ID_POPULATE_DATE => {
+        val injector = Guice.createInjector(new PopulateDataApplicationDI(appConfig))
+        app = injector.getInstance(classOf[PopulateDataApplication])
+      }
+      case APP_ID_EXECUTE_SQL => {
+        val injector = Guice.createInjector(new ExecuteSqlApplicationDI(appConfig))
+        app = injector.getInstance(classOf[ExecuteSqlApplication])
+      }
       case not_matching =>   {
         log.error("Couldn't find spark application for given app_id...")
         System.exit(1)

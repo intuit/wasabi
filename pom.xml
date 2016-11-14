@@ -434,7 +434,8 @@ http://www.w3.org/2001/XMLSchema-instance">
                     </execution>
                 </executions>
                 <configuration>
-                    <sourceDir>src/main/scala</sourceDir>
+                    <sourceDir>src</sourceDir>
+                    <!-- <sourceDir>src/main/scala</sourceDir> -->
                     <!-- <sourceDir>src/test/scala</sourceDir> -->
                     <jvmArgs>
                         <jvmArg>-Xms64m</jvmArg>

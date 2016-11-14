@@ -1,4 +1,4 @@
-package com.intuit.wasabi.data.conf.guice.migratedata
+package com.intuit.wasabi.data.conf.guice
 
 import com.google.inject.{Inject, Provider}
 import org.apache.spark.SparkContext

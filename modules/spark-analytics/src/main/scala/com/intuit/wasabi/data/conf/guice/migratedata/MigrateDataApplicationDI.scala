@@ -3,7 +3,7 @@ package com.intuit.wasabi.data.conf.guice.migratedata
 import cats.data.Xor._
 import com.datastax.spark.connector.cql.CassandraConnector
 import com.google.inject.name.Names
-import com.intuit.wasabi.data.conf.guice.CommonSparkApplicationDI
+import com.intuit.wasabi.data.conf.guice.{CassandraSQLContextProvider, CommonSparkApplicationDI}
 import com.intuit.wasabi.data.repository.{DataStoreConnectionProperties, SparkDataStoreRepository}
 import com.intuit.wasabi.data.util.Utility
 import com.intuit.wasabi.data.util.Constants._
@@ -25,11 +25,11 @@ class MigrateDataApplicationDI(appConfig: Config) extends CommonSparkApplication
 
     //------------ Source DataStore ------------
     //Read DataStore connection configs - source
-    val sDataStoreType = mConfig.get("DataStores.src.datastoreType").get
-    val sCluster = mConfig.get("DataStores.src.cluster").get
-    val sHost = mConfig.get("DataStores.src.host").get
-    val sPort = mConfig.get("DataStores.src.port").get
-    val sKeyspace = mConfig.get("DataStores.src.keyspace").get
+    val sDataStoreType = mConfig.get("datastores.src.type").get
+    val sCluster = mConfig.get("datastores.src.cluster").get
+    val sHost = mConfig.get("datastores.src.host").get
+    val sPort = mConfig.get("datastores.src.port").get
+    val sKeyspace = mConfig.get("datastores.src.keyspace").get
 
     sDataStoreType match {
       case DATASTORE_CASSANDRA => {
@@ -53,11 +53,11 @@ class MigrateDataApplicationDI(appConfig: Config) extends CommonSparkApplication
 
     //------------ Destination DataStore ------------
     //Read DataStore connection configs - destination
-    val dDataStoreType = mConfig.get("DataStores.dest.datastoreType").get
-    val dCluster = mConfig.get("DataStores.dest.cluster").get
-    val dHost = mConfig.get("DataStores.dest.host").get
-    val dPort = mConfig.get("DataStores.dest.port").get
-    val dKeyspace = mConfig.get("DataStores.dest.keyspace").get
+    val dDataStoreType = mConfig.get("datastores.dest.type").get
+    val dCluster = mConfig.get("datastores.dest.cluster").get
+    val dHost = mConfig.get("datastores.dest.host").get
+    val dPort = mConfig.get("datastores.dest.port").get
+    val dKeyspace = mConfig.get("datastores.dest.keyspace").get
 
     dDataStoreType match {
       case DATASTORE_CASSANDRA => {

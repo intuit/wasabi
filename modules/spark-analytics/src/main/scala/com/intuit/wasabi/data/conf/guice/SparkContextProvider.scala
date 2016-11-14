@@ -4,13 +4,13 @@ import com.google.inject.{Inject, Provider}
 import com.intuit.wasabi.data.util.Utility
 import com.intuit.wasabi.data.util.Constants._
 import com.typesafe.config.Config
-import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.{Logging, SparkConf, SparkContext}
 
 /**
   *     Reads spark configurations for the specific application and then create SparkConfig and
   *     then SparkContext which is then used across application.
   */
-class SparkContextProvider extends Provider[SparkContext] {
+class SparkContextProvider extends Provider[SparkContext] with Logging {
   var appConfig: Config = null
 
   @Inject
@@ -21,6 +21,7 @@ class SparkContextProvider extends Provider[SparkContext] {
 
   override def get(): SparkContext = {
     val appSparkConfigMap = Utility.configToMap(appConfig.getConfig("spark"))
+    if(log.isDebugEnabled) log.debug(s"appSparkConfigMap=> $appSparkConfigMap")
 
     val conf = new SparkConf()
     conf.setAll(appSparkConfigMap)

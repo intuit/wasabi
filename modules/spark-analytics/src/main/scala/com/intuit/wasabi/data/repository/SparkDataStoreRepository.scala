@@ -17,7 +17,7 @@ trait SparkDataStoreRepository extends AppConfig {
     * @return result of sql query in the form of DataFrame
     *
     */
-  def read(sql:String) : WasabiError Xor DataFrame
+  def read(sql:String, isNativeSql: Boolean = false) : WasabiError Xor DataFrame
 
   /**
     * Write/Insert given data in a given mode to given table.

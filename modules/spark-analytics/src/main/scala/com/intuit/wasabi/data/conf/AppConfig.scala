@@ -28,8 +28,6 @@ class AppConfig(conf: Option[Config] = None) extends Serializable with Logging {
   }
 
   val defaultConfig = rootConfig.getConfig("default").withFallback(rootConfig)
-  val migrateDataAppConfig = rootConfig.getConfig("migrate-data").withFallback(defaultConfig)
-  val dailyAggAppConfig = rootConfig.getConfig("daily-aggregation").withFallback(defaultConfig)
   val perfLog = LoggerFactory.getLogger(PERFORMANCE_LOGGER)
 
   /** attempts to acquire from environment, then java system properties */

@@ -34,6 +34,8 @@ abstract class BaseSparkApplication (iSparkContext: SparkContext, appConfig: Con
     appId = appConfig.getString(APP_ARG_APP_ID)
     if(log.isDebugEnabled) log.debug("appId => "+appId)
 
+    if(log.isDebugEnabled) log.debug("sc.getConf.getAll => "+sc.getConf.getAll)
+
     //appConfig = getConfigForApp(appId)
     if(log.isDebugEnabled) log.debug("migrateDataAppConfig => "+appConfig.toString())
 

@@ -51,7 +51,8 @@ class SparkCassandraRepository extends SparkDataStoreRepository {
     *                spark.cassandra.connection.port,spark.cassandra.connection.keyspace]
     */
 
-  def this(sc: SparkContext, dbProperties: DataStoreConnectionProperties, connection: CassandraConnector, sqlContext: CassandraSQLContext, currentTimestampFunc: CurrentTimestampFunc) {
+  @Inject
+  def this(sc: SparkContext, @Named("DataStoreConnectionProperties") dbProperties: DataStoreConnectionProperties, @Named("DataStoreCassandraConnector") connection: CassandraConnector, @Named("DataStoreCassandraSQLContext") sqlContext: CassandraSQLContext, currentTimestampFunc: CurrentTimestampFunc) {
     this()
     if(log.isInfoEnabled) log.info("this() - STARTED")
     val sTime = System.currentTimeMillis
@@ -82,7 +83,7 @@ class SparkCassandraRepository extends SparkDataStoreRepository {
     * @return result of sql query in the form of DataFrame
     *
     */
-  override def read(sql: String): WasabiError Xor DataFrame = {
+  override def read(sql: String, isNativeSql: Boolean = false): WasabiError Xor DataFrame = {
     val sTime = System.currentTimeMillis
     if(log.isDebugEnabled) log.debug(s"read() - STARTED - sql=$sql")
     var result: DataFrame =null
@@ -93,7 +94,11 @@ class SparkCassandraRepository extends SparkDataStoreRepository {
     //This statement set current cassandra connection
     implicit val c = connection
     //Execute spark sql query
-    result = sqlContext.sql(sql)
+    isNativeSql match {
+      case true => result = sqlContext.cassandraSql(sql)
+      case false => result = sqlContext.sql(sql)
+    }
+
     if(log.isDebugEnabled) {
       log.debug("Read result: ")
       result.show(10)
