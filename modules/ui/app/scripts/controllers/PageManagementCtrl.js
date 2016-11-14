@@ -5,8 +5,8 @@
 'use strict';
 
 angular.module('wasabi.controllers').
-    controller('PageManagementCtrl', ['$scope', '$filter', '$http', '$stateParams', '$timeout', 'PagesFactory', 'ApplicationsFactory', 'DialogsFactory', 'ExperimentsFactory', '$modal', 'UtilitiesFactory', '$rootScope', 'AUTH_EVENTS', '$state', 'PERMISSIONS', 'ConfigFactory',
-        function ($scope, $filter, $http, $stateParams, $timeout, PagesFactory, ApplicationsFactory, DialogsFactory, ExperimentsFactory, $modal, UtilitiesFactory, $rootScope, AUTH_EVENTS, $state, PERMISSIONS, ConfigFactory) {
+    controller('PageManagementCtrl', ['$scope', '$filter', '$http', '$stateParams', '$timeout', '$cookies', 'PagesFactory', 'ApplicationsFactory', 'DialogsFactory', 'ExperimentsFactory', '$modal', 'UtilitiesFactory', '$rootScope', 'AUTH_EVENTS', '$state', 'PERMISSIONS', 'ConfigFactory',
+        function ($scope, $filter, $http, $stateParams, $timeout, $cookies, PagesFactory, ApplicationsFactory, DialogsFactory, ExperimentsFactory, $modal, UtilitiesFactory, $rootScope, AUTH_EVENTS, $state, PERMISSIONS, ConfigFactory) {
 
             $scope.data = {
                 query: '',
@@ -35,12 +35,13 @@ angular.module('wasabi.controllers').
             UtilitiesFactory.selectTopLevelTab('Tools');
 
             $scope.changePage = function() {
+                $cookies.wasabiDefaultApplication = $scope.data.applicationName;
                 $state.go('pages', {'appname': $scope.data.applicationName});
             };
 
             $scope.onSelectAppName = function(selectedApp) {
                 if (selectedApp) {
-                    $scope.applicationName = selectedApp;
+                    $scope.applicationName = $cookies.wasabiDefaultApplication = selectedApp;
                     var options =
                         {
                             applicationName: selectedApp
@@ -86,6 +87,12 @@ angular.module('wasabi.controllers').
                 }
             };
             $scope.init();
+
+            // If we are on a version of this page for a specific application, this will cause the $watch below
+            // to populate the table with the correct data for the correct application.
+            if (!$scope.applicationName && $cookies.wasabiDefaultApplication) {
+                $scope.applicationName = $cookies.wasabiDefaultApplication;
+            }
 
             // If we are on a version of this page for a specific application, this will cause the $watch below
             // to populate the table with the correct data for the correct application.

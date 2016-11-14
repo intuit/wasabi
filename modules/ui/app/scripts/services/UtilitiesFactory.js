@@ -40,6 +40,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                 if (!hideThem) {
                     this.hideTopLevelTab('Users', false);
                     this.hideTopLevelTab('Applications', false);
+                    this.hideTopLevelTab('Plugins', false);
                     this.hideTopLevelTabMenuChoice('Logs', false);
                     this.hideTopLevelTabMenuChoice('Feedback', !Session.isSuperadmin);
                     this.hideTopLevelTab('Tools', false);
@@ -47,6 +48,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                 else {
                     this.hideTopLevelTab('Users');
                     this.hideTopLevelTab('Applications');
+                    this.hideTopLevelTab('Plugins');
                     this.hideTopLevelTabMenuChoice('Logs');
                     this.hideTopLevelTabMenuChoice('Feedback', true);
                     this.hideTopLevelTab('Tools', true);
