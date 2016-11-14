@@ -87,13 +87,22 @@ angular.module('wasabi', [
                    data: {
                        authorizedRoles: [USER_ROLES.admin]
                    }
-                }).state('feedbackReader', {
+                })
+               .state('pages', {
+                   url: '/pages/{appname}',
+                   templateUrl: 'views/PageManagementTable.html',
+                   data: {
+                       authorizedRoles: [USER_ROLES.user, USER_ROLES.admin]
+                   }
+                })
+                .state('feedbackReader', {
                     url: '/feedbackReader',
                     templateUrl: 'views/FeedbackTable.html',
                     data: {
                         authorizedRoles: [USER_ROLES.admin]
                     }
-               }).state('userAccess', {
+               })
+               .state('userAccess', {
                    url: '/userAccess/{username}/{appname}/{access}',
                    templateUrl: 'views/UserPage.html',
                    controller: 'UserCtrl',

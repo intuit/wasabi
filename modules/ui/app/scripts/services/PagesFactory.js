@@ -4,8 +4,8 @@
 
 angular.module('wasabi.services').factory('PagesFactory', ['$resource', 'ConfigFactory',
     function ($resource, ConfigFactory) {
-        return $resource(ConfigFactory.baseUrl() + '/pages/:id', {}, {
-            'query': { method: 'GET',
+        return $resource(ConfigFactory.baseUrl() + '/applications/:applicationName/pages', {}, {
+            'query': { method: 'GET', params: {applicationName: '@applicationName'},
                 transformResponse: function (data) {
                     var parsedData = $.parseJSON(data).pages;
 
@@ -13,22 +13,14 @@ angular.module('wasabi.services').factory('PagesFactory', ['$resource', 'ConfigF
                 },
                 isArray: true
             },
-            'create': { method: 'POST',
-                transformRequest: function (data) {
-                    return typeof(data) === 'string' ? data : JSON.stringify(data);
-                }
-            },
-            'show': { method: 'GET',
+            'getExperimentsWithPage': { method: 'GET', params: {applicationName: '@applicationName', id: '@id'},
+                url: ConfigFactory.baseUrl() + '/applications/:applicationName/pages/:id/experiments',
                 transformResponse: function (data) {
-                    return $.parseJSON(data);
-                }
-            },
-            'update': { method: 'PUT', params: {id: '@id'},
-                transformRequest: function (data) {
-                    delete data.id;
-                    return typeof(data) === 'string' ? data : JSON.stringify(data);
-                }
-            },
-            'delete': { method: 'DELETE', params: {id: '@id'} }
+                    var parsedData = $.parseJSON(data).experiments;
+
+                    return parsedData;
+                },
+                isArray: true
+            }
         });
     }]);

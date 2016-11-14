@@ -48,6 +48,16 @@ angular.module('wasabi.services').factory('ApplicationsFactory', ['$resource', '
                 },
                 isArray: true
             },
+            'getExperiments': { method: 'GET',
+                params: {appName: '@appName'},
+                url: ConfigFactory.baseUrl() + '/applications/:appName/experiments',
+                transformResponse: function (data) {
+                    var parsedData = $.parseJSON(data);
+
+                    return parsedData;
+                },
+                isArray: true
+            },
             'testRule': { method: 'POST',
                 params: {appName: '@appName', expName: '@expName'},
                 url: ConfigFactory.baseUrl() + '/assignments/applications/:appName/experiments/:expName/ruletest',

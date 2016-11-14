@@ -85,7 +85,7 @@ header {
         position: relative;
         display: block;
         height: 36px;
-        li {
+        li.navLink {
           display: inline-block;
           height: 36px;
           line-height: 36px;
@@ -107,6 +107,24 @@ header {
               }
             }
           }
+          &.navDropdown {
+              .dropdown-menu {
+                position: absolute;
+                display: none;
+                height: inherit;
+              }
+              .open > .dropdown-menu {
+                display: block;
+              }
+              a {
+                background: url(/images/sortDwn_white.png) no-repeat right center;
+              }
+              &.sel a {
+                background: url(/images/sortDwn.png) no-repeat right center;
+                background-position-x: 95%;
+                background-position-y: 36%;
+              }
+          }
           a {
             padding: 0 12px; // 3px 15px;
             display: block;
@@ -117,6 +135,9 @@ header {
             &:hover {
               text-decoration: underline;
             }
+          }
+          li.toolsMenuChoices a {
+            color: #373737;
           }
         }
         &.user {
@@ -1291,7 +1312,7 @@ td.checked span {
 	background: url(/images/glyphicons-halflings.png) no-repeat -288px 1px;
 }
 
-#exclusionPickList {
+#exclusionPickList, #addExperimentsPickList {
   width: 900px;
   #exclusionList {
     height: 280px;
@@ -4321,4 +4342,27 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
 
 .notAllowed {
     cursor: no-drop !important;
+}
+
+#pageManagementList, #pageSelectionList {
+    select {
+        background: white;
+        margin-top: 10px;
+    }
+}
+
+.buttonTable {
+    width: 100%;
+    background: white;
+    td {
+        border: 1px solid rgb(200, 200, 200);
+        text-align: center;
+        padding: 8px;
+    }
+}
+
+.pageManagementColumn {
+    width: 316px;
+    margin-top: 20px;
+    float: left;
 }
