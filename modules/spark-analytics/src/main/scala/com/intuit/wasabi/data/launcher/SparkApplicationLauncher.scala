@@ -34,7 +34,7 @@ object SparkApplicationLauncher extends AppConfig {
     if(log.isDebugEnabled) log.debug(s"appConfig.appId => ${appConfig.getString("app_id")}" )
 
     appId match {
-      case git add => {
+      case APP_ID_MIGRATE_DATA => {
         val injector = Guice.createInjector(new MigrateDataApplicationDI(appConfig))
         app = injector.getInstance(classOf[MigrateDataApplication])
       }
