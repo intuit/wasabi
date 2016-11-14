@@ -2789,6 +2789,14 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
                             left: 130px !important;
                         }
                     }
+                    &.nonWinner {
+                        background: url(/images/noResult.png) no-repeat 0 0;
+                        background-size: 15px;
+                        background-position-y: 17px;
+                        .bucketAssignments {
+                            left: 130px !important;
+                        }
+                    }
                     &.winning {
                         background: url(/images/hardUp.png) no-repeat 0 0;
                         background-size: 20px;
@@ -4340,6 +4348,37 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
     font-weight: bold;
 }
 
+.pluginDescription {
+    float: left;
+    width: 90%;
+    min-height: 50px;
+    padding: 10px;
+    border: 1px solid rgb(203, 204, 206);
+    @include border-radius(3px);
+    overflow: hidden;
+    @include box-shadow(0 0 1px white);
+    background: rgb(246, 247, 248);
+}
+
+.hoverPopup {
+    width: 250px;
+    height: 150px;
+    padding: 10px;
+    position: absolute;
+    top: 180px;
+    right: 100px;
+    z-index: 100000;
+    display: none;
+    background-color: white;
+    border: 1px solid #aaa;
+    border-radius: 3px;
+    ul {
+        list-style: disc outside none;
+        display: list-item;
+        margin-left: 1em;
+    }
+}
+
 .notAllowed {
     cursor: no-drop !important;
 }
@@ -4365,4 +4404,8 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
     width: 316px;
     margin-top: 20px;
     float: left;
+}
+
+.gridWithAdvanced {
+    margin-top: 40px;
 }

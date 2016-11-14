@@ -19,7 +19,7 @@ Install Yo, Grunt, Bower, and Compass
 
 ```
 % cd modules/ui
-# install tool dependencies, e.g. grunt plungins
+# install tool dependencies, e.g. grunt plugins
 % npm install
 # install js-dependencies, as angular.js, highcharts.js and such
 % bower install

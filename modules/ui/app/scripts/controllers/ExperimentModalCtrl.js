@@ -18,7 +18,7 @@ angular.module('wasabi.controllers')
                 $scope.experiment = experiment;
                 $scope.experiment.applicationName2 = (applications.length === 1 ? '' : 'novalue');
                 $scope.readOnly = (readOnly ? readOnly : false);
-                $scope.simpleRuleEditing = $cookies['showAdvancedSegmentationEditor'] == undefined || $cookies['showAdvancedSegmentationEditor'] !== 'true';
+                $scope.simpleRuleEditing = $cookies.showAdvancedSegmentationEditor === undefined || $cookies.showAdvancedSegmentationEditor !== 'true';
                 $scope.experimentFormSubmitted = $scope.readOnly;
                 // needed to check uniqueness of name+label combination with directive
                 $scope.experiments = experiments;
@@ -150,6 +150,30 @@ angular.module('wasabi.controllers')
                     }
                 };
 
+                $scope.init = function() {
+                    $scope.processRule();
+                    $scope.loadAllApplications();
+                };
+
+                $scope.loadExperiment = function () {
+                    ExperimentsFactory.show({id: $scope.experiment.id}).$promise.then(function (experiment) {
+                        // Need to just fill in the experiment object with the fields it doesn't have due to being
+                        // provided by the Card View API.
+                        for (var prop in experiment) {
+                            if (experiment.hasOwnProperty(prop) && !$scope.experiment.hasOwnProperty(prop)) {
+                                $scope.experiment[prop] = experiment[prop];
+                            }
+                        }
+                        if ($scope.experiment.hypothesisIsCorrect === null) {
+                            $scope.experiment.hypothesisIsCorrect = '';
+                        }
+
+                        $scope.init();
+                    }, function(response) {
+                        UtilitiesFactory.handleGlobalError(response, 'Your experiment could not be retrieved.');
+                    });
+                };
+
                 $scope.loadAllApplications = function () {
                     ApplicationsFactory.query().$promise.then(function (applications) {
                         if (applications) {
@@ -180,7 +204,7 @@ angular.module('wasabi.controllers')
                     $scope.rulesChangedNotSaved = true;
                 };
 
-                $scope.ruleChanged = function(rule, subForm) {
+                $scope.ruleChanged = function() {
                     $scope.rulesChangedNotSaved = true;
                 };
 
@@ -237,8 +261,15 @@ angular.module('wasabi.controllers')
                     return UtilitiesFactory.firstPageEncoded($scope.experiment);
                 };
 
-                $scope.processRule();
-                $scope.loadAllApplications();
+                if ($scope.experiment.id && $scope.experiment.id.length > 0 && !$scope.experiment.hasOwnProperty('samplingPercent')) {
+                    // We know we are being called from the Card View, as that API doesn't include samplingPercent
+                    $scope.loadExperiment();
+                }
+                else {
+                    // We are being called with a complete experiment object being passed in, e.g., from the
+                    // Experiments list, so we can just get the stuff we don't have, like all applications.
+                    $scope.init();
+                }
 
                 $scope.doSaveOrCreateExperiment = function(experimentId, afterSaveFunc) {
                     var handleCreateSuccess = function(experiment, dialogName) {
@@ -330,14 +361,14 @@ angular.module('wasabi.controllers')
                             if (!creatingNewApplication) {
                                 ExperimentsFactory.create(newExperiment).$promise.then(
                                         function (experiment) {
-                                            handleCreateSuccess(experiment, 'createExperiment')
+                                            handleCreateSuccess(experiment, 'createExperiment');
                                         },
                                         handleCreateError);
                             }
                             else {
                                 ExperimentsFactory.createWithNewApplication(newExperiment).$promise.then(
                                     function (experiment) {
-                                        handleCreateSuccess(experiment, 'createExperimentNewApplication')
+                                        handleCreateSuccess(experiment, 'createExperimentNewApplication');
                                     },
                                     handleCreateError);
                             }
@@ -422,7 +453,8 @@ angular.module('wasabi.controllers')
                             }
                         }, function(response) {
                                 UtilitiesFactory.handleGlobalError(response, 'The list of unauthorized applications could not be retrieved.');
-                        });
+                            }
+                        );
                     };
 
                     var creatingNewApplication = (experiment.applicationName === ConfigFactory.newApplicationNamePrompt);
@@ -430,7 +462,7 @@ angular.module('wasabi.controllers')
                     if (creatingNewApplication) {
                         // We need to check for and prevent the user from creating an experiment in an existing
                         // application for which they don't have permission.
-                        preventUnauthorizedApplicationCreation(continueWithCreation)
+                        preventUnauthorizedApplicationCreation(continueWithCreation);
                     }
                     else {
                         // Don't need to do the validation because they are just creating an experiment in an
@@ -480,7 +512,7 @@ angular.module('wasabi.controllers')
                     }
                 };
 
-                $scope.saveExperiment = function (experimentId, isFormInvalid, form) {
+                $scope.saveExperiment = function (experimentId, isFormInvalid) {
                     if (!isFormInvalid) {
                         // Submit as normal
 

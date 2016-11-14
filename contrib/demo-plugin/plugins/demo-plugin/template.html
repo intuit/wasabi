@@ -1,0 +1,24 @@
+<div id="priorityModal" class="modalDialog" style="width: 700px; left: 0;">
+    <h1>Priority</h1>
+    <form name="priorityForm" novalidate ng-submit="savePriority();">
+        <div class="dialogContent">
+             <div>
+                <ul class="formLayout" ng-show="!readOnly">
+                    <li class="layout8020">
+                        <div style="width: 320px;">
+                            <label>Priority</label>
+                            <input id="priority" name="priority" ng-model="experimentPriority" class="form-control text"/>&nbsp;&nbsp;
+                        </div>
+                    </li>
+                </ul>
+                <div ng-show="readOnly">
+                    <label>Priority is {{experimentPriority}}</label>
+                </div>
+            </div>
+            <div class="buttonBar">
+                <button id="btnSavePriority" class="blue cancel">Save</button>
+                <button id="btnSavePriorityCancel" class="cancel" onclick="return false;" ng-click="cancel();">Cancel</button>
+            </div>
+        </div>
+    </form>
+</div>

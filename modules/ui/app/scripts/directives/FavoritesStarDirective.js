@@ -15,7 +15,7 @@ angular.module('wasabi.directives').directive('favoritesStar', ['UtilitiesFactor
                 var tileWidth = $(element).closest('li').eq(0).width() + 10;
                 var parentTag = (attrs.favoritesStarParentTag ? attrs.favoritesStarParentTag : 'li');
 
-                if ((typeof(attrs.isFavorite) === 'string' && attrs.isFavorite == 'true') ||
+                if ((typeof(attrs.isFavorite) === 'string' && attrs.isFavorite === 'true') ||
                     (typeof(attrs.isFavorite) === 'boolean' && attrs.isFavorite)) {
                     $(element).closest(parentTag).toggleClass('favorite');
                     $(element).attr('title', 'Undo Mark as Favorite');

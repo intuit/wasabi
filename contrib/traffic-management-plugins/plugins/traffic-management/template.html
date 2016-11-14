@@ -1,0 +1,42 @@
+<div id="trafficManagementModal" class="modalDialog" style="width: 900px; left: -300px; margin-left: 0;">
+    <h1>Traffic Estimator</h1>
+    <form name="trafficManagementForm" novalidate>
+        <div class="dialogContent" style="height: 600px;">
+            <div class="toolbar">
+                <div>
+                    <select id="applicationNameChoice" ng-model="data.applicationName" ng-options="applicationName for applicationName in appNames" ng-change="onSelectAppName()" ng-if="appNames.length > 1">
+                        <option value="">Select an Application</option>
+                    </select>
+                    <span style="font-weight: bold; top: 2px; position: relative;" ng-if="appNames.length === 1">{{appNames[0]}}</span>
+                </div>
+            </div>
+            <div style="height: 460px;">
+                <div ng-show="data.applicationName !== null && data.applicationName !== ''">
+                    <select id="experimentNameChoice" ng-model="data.selectedExperiment" ng-options="experimentName for experimentName in experimentNames" ng-change="initialExperimentSelected()">
+                        <option value="">Select an Experiment</option>
+                    </select>
+                    <div class="tableContainer" style="margin-top: 10px; overflow: auto; height: 420px;">
+                        <table>
+                            <thead>
+                                <tr><th style="width: 70px;">Priority</th><th style="width: 440px;">Experiment Name</th><th>Target Sampling %</th><th>Experiment Sampling %</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="nextExperiment in relatedExperiments">
+                                    <td>{{nextExperiment.priority}}</td><td>{{nextExperiment.label}}</td>
+                                    <td><input type="number" class="samplingInput" convert-percent ng-model="nextExperiment.targetSamplingPercent"/></td>
+                                    <td><span style="text-decoration: line-through">{{nextExperiment.oldSamplingPercent}}</span> {{multiply100(nextExperiment.samplingPercent)}} <span hover-popup hover-content-source="nextExperiment.hoverContent" style="position: relative; top: -10px;" ng-show="nextExperiment.oldSamplingPercent !== ''"><img style="width: 14px; height: 14px;" src="../../images/sidebar_icon_faq.png"></span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="buttonBar" style="text-align: left;">
+                <button id="btnTrafficManagementCalculate" ng-class="{disabled: noCalc}" ng-disabled="noCalc" class="blue cancel" onclick="return false;" ng-click="calculate();">Calculate Sampling Percentages</button>
+                <button id="btnTrafficManagementSave" ng-class="{disabled: noSave}" ng-disabled="noSave" class="blue" onclick="return false;" ng-click="save();">Save New Sampling Percentages</button>
+                <button id="btnTrafficManagementClose" style="left: 254px" class="blue cancel" onclick="return false;" ng-click="cancel();">Close</button>
+            </div>
+        </div>
+    </form>
+</div>

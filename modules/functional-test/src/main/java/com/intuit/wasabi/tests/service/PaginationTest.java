@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,7 +17,6 @@ package com.intuit.wasabi.tests.service;
 
 import com.intuit.wasabi.tests.library.TestBase;
 import com.intuit.wasabi.tests.library.util.ModelAssert;
-import com.intuit.wasabi.tests.library.util.RetryTest;
 import com.intuit.wasabi.tests.library.util.TestUtils;
 import com.intuit.wasabi.tests.model.Experiment;
 import com.intuit.wasabi.tests.model.factory.ExperimentFactory;
@@ -29,7 +28,11 @@ import org.testng.annotations.Test;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 public class PaginationTest extends TestBase {
@@ -52,8 +55,8 @@ public class PaginationTest extends TestBase {
         for (int i = 0; i < 12; i++) {
             experimentList.add(postExperiment(
                     ExperimentFactory.createCompleteExperiment()
-                                     .setLabel(String.format(experimentPrefix + "Exp%02d", i))
-                                     .setSamplingPercent((100-i)/100.0d)));
+                            .setLabel(String.format(experimentPrefix + "Exp%02d", i))
+                            .setSamplingPercent((100 - i) / 100.0d)));
         }
     }
 
@@ -89,20 +92,20 @@ public class PaginationTest extends TestBase {
     public void t_ExperimentPaginationNonExistingLatePage() {
         List<Experiment> results = getPaginatedExperiments(4, 10, "experiment_name", null);
 
-        ModelAssert.assertEqualModelItems(results, Collections.<Experiment> emptyList());
+        ModelAssert.assertEqualModelItems(results, Collections.<Experiment>emptyList());
     }
 
     @Test(dependsOnGroups = {"pagination_smoke"}, groups = {"pagination_pages"})
     public void t_ExperimentPaginationNonExistingNegativePage() {
         List<Experiment> results = getPaginatedExperiments(-4, 10, "experiment_name", null);
 
-        ModelAssert.assertEqualModelItems(results, Collections.<Experiment> emptyList());
+        ModelAssert.assertEqualModelItems(results, Collections.<Experiment>emptyList());
     }
 
     @Test(dependsOnGroups = {"pagination_smoke"}, groups = {"pagination_pages"})
     public void t_ExperimentPaginationEmptyPage() {
         List<Experiment> results = getPaginatedExperiments(1, 0, "experiment_name", null);
-        ModelAssert.assertEqualModelItems(results, Collections.<Experiment> emptyList());
+        ModelAssert.assertEqualModelItems(results, Collections.<Experiment>emptyList());
     }
 
     @Test(dependsOnGroups = {"pagination_smoke"}, groups = {"pagination_pages"})
@@ -209,14 +212,14 @@ public class PaginationTest extends TestBase {
     public void t_ExperimentPaginationFilterByStateTerminated() {
         List<Experiment> results = getPaginatedExperiments(1, 5, "experiment_name", "state_exact=terminated");
 
-        ModelAssert.assertEqualModelItems(results, Collections.<Experiment> emptyList());
+        ModelAssert.assertEqualModelItems(results, Collections.<Experiment>emptyList());
     }
 
     @Test(dependsOnGroups = {"pagination_pages"}, groups = {"pagination_experiment_state"})
     public void t_ExperimentPaginationFilterByStateRunning() {
         List<Experiment> results = getPaginatedExperiments(1, 5, "experiment_name", "state_exact=running");
 
-        ModelAssert.assertEqualModelItems(results, Collections.<Experiment> emptyList());
+        ModelAssert.assertEqualModelItems(results, Collections.<Experiment>emptyList());
     }
 
     @Test(dependsOnGroups = {"pagination_pages"}, groups = {"pagination_experiment_state"})
@@ -230,7 +233,7 @@ public class PaginationTest extends TestBase {
     public void t_ExperimentPaginationFilterByStatePaused() {
         List<Experiment> results = getPaginatedExperiments(1, 5, "experiment_name", "state_exact=paused");
 
-        ModelAssert.assertEqualModelItems(results, Collections.<Experiment> emptyList());
+        ModelAssert.assertEqualModelItems(results, Collections.<Experiment>emptyList());
     }
 
     @Test(dependsOnGroups = {"pagination_pages"}, groups = {"auditlog_smoke"})
@@ -241,6 +244,17 @@ public class PaginationTest extends TestBase {
                 .getList("logEntries");
 
         Assert.assertEquals(auditLogEntryMaps.size(), 10, "There is not the correct number of audit log entries.");
+    }
+
+    @Test(dependsOnGroups = {"pagination_pages"}, groups = {"experiment_details"})
+    public void t_ExperimentDetailsPaginationSmoke() {
+
+        List<Map<String, Object>> experimentDetails = apiServerConnector
+                .doGet("analytics/experiments?per_page=10&page=1&filter=" + experimentPrefix + ",state=DRAFT")
+                .jsonPath()
+                .getList("experimentDetails");
+        Assert.assertNotNull(experimentDetails);
+        Assert.assertEquals(experimentDetails.size(), 10, "There is not the correct number of ExperimentDetail entries.");
     }
 
     private List<Experiment> getPaginatedExperiments(int page, int perPage, String sort, String filter) {
@@ -257,9 +271,9 @@ public class PaginationTest extends TestBase {
 
     private JsonPath getExperimentJsonPath(int page, int perPage, String sort, String filter) {
         return apiServerConnector.doGet("experiments?per_page=" + perPage
-                        + "&page=" + page
-                        + "&sort=" + (sort != null ? sort : "")
-                        + "&filter=" + experimentPrefix + (filter != null ? "," + filter : "")
-                        + "&timezone=+0000").jsonPath();
+                + "&page=" + page
+                + "&sort=" + (sort != null ? sort : "")
+                + "&filter=" + experimentPrefix + (filter != null ? "," + filter : "")
+                + "&timezone=+0000").jsonPath();
     }
 }

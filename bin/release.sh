@@ -28,6 +28,7 @@ options:
 commands:
   start        : start release
   finish       : finish release
+  feature      : feature branch release
 
 EOF
 
@@ -55,6 +56,14 @@ finish() {
   git flow release finish -m "milestone: $version" -p -D $version
 }
 
+feature() {
+  from_version=$(fromPom . project.version)
+  to_version=$(fromPom . application.version).`date -u "+%Y%m%d%H%M%S"`-SNAPSHOT
+
+  find . -name pom.xml -type f -not -path "*target*" \
+    -exec sed -i '' -e "s#<version>${from_version}</version>#<version>${to_version}</version>#g" {} \; 2>/dev/null
+}
+
 optspec=":h-:"
 
 while getopts "${optspec}" opt; do
@@ -79,6 +88,7 @@ for command in ${@:$OPTIND}; do
   case "${command}" in
     "start") start;;
     "finish") finish;;
+    "feature") feature;;
     "") usage "unknown command: ${command}" 1;;
     *) usage "unknown command: ${command}" 1;;
   esac

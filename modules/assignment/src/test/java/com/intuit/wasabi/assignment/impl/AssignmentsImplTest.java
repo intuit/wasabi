@@ -16,19 +16,34 @@
 package com.intuit.wasabi.assignment.impl;
 
 import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Table;
 import com.google.inject.Provider;
 import com.intuit.hyrule.Rule;
 import com.intuit.wasabi.assignment.AssignmentDecorator;
 import com.intuit.wasabi.assignment.AssignmentIngestionExecutor;
 import com.intuit.wasabi.assignment.Assignments;
-import com.intuit.wasabi.assignmentobjects.*;
+import com.intuit.wasabi.assignmentobjects.Assignment;
+import com.intuit.wasabi.assignmentobjects.AssignmentEnvelopePayload;
+import com.intuit.wasabi.assignmentobjects.PersonalizationEngineResponse;
+import com.intuit.wasabi.assignmentobjects.RuleCache;
+import com.intuit.wasabi.assignmentobjects.SegmentationProfile;
+import com.intuit.wasabi.assignmentobjects.User;
 import com.intuit.wasabi.cassandra.CassandraDriver;
 import com.intuit.wasabi.eventlog.EventLog;
 import com.intuit.wasabi.experiment.Mutex;
 import com.intuit.wasabi.experiment.Pages;
 import com.intuit.wasabi.experiment.Priorities;
-import com.intuit.wasabi.experimentobjects.*;
+import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.experimentobjects.Bucket;
+import com.intuit.wasabi.experimentobjects.BucketList;
+import com.intuit.wasabi.experimentobjects.Context;
+import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.experimentobjects.ExperimentBatch;
+import com.intuit.wasabi.experimentobjects.Page;
+import com.intuit.wasabi.experimentobjects.PageExperiment;
+import com.intuit.wasabi.experimentobjects.PrioritizedExperiment;
+import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
 import com.intuit.wasabi.export.DatabaseExport;
 import com.intuit.wasabi.export.Envelope;
 import com.intuit.wasabi.export.WebExport;
@@ -40,6 +55,7 @@ import com.intuit.wasabi.repository.MutexRepository;
 import com.intuit.wasabi.repository.impl.cassandra.ExperimentRuleCacheUpdateEnvelope;
 import com.intuit.wasabi.repository.impl.cassandra.ExperimentsKeyspace;
 import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,12 +64,26 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.ws.rs.core.HttpHeaders;
 import java.io.IOException;
-import java.util.*;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.RETURNS_DEEP_STUBS;
 import static org.mockito.BDDMockito.any;
 import static org.mockito.BDDMockito.doReturn;
@@ -88,7 +118,7 @@ public class AssignmentsImplTest {
     private ThreadPoolExecutor threadPoolExecutor = mock(ThreadPoolExecutor.class, RETURNS_DEEP_STUBS);
     private Provider<Envelope<AssignmentEnvelopePayload, DatabaseExport>> assignmentDBEnvelopeProvider =
             mock(Provider.class, RETURNS_DEEP_STUBS);
-    private Provider<Envelope<AssignmentEnvelopePayload, WebExport>> assignmentWebEnvelopeProvider=
+    private Provider<Envelope<AssignmentEnvelopePayload, WebExport>> assignmentWebEnvelopeProvider =
             mock(Provider.class, RETURNS_DEEP_STUBS);
     private AssignmentsRepository assignmentsRepository = mock(AssignmentsRepository.class, RETURNS_DEEP_STUBS);
     private AssignmentsImpl assignmentsImpl;
@@ -102,7 +132,7 @@ public class AssignmentsImplTest {
     }
 
     @Test
-    public void testQueueLength(){
+    public void testQueueLength() {
         when(threadPoolExecutor.getQueue().size()).thenReturn(0);
         Map<String, Integer> queueLengthMap = new HashMap<String, Integer>();
         queueLengthMap.put(AssignmentsImpl.RULE_CACHE, new Integer(0));
@@ -110,7 +140,7 @@ public class AssignmentsImplTest {
     }
 
     @Test
-    public void testGetSingleAssignmentNullAssignmentExperimentNotFound(){
+    public void testGetSingleAssignmentNullAssignmentExperimentNotFound() {
         Application.Name appName = Application.Name.valueOf("Test");
         Experiment.Label label = Experiment.Label.valueOf("label");
         User.ID user = User.ID.valueOf("testUser");
@@ -161,7 +191,7 @@ public class AssignmentsImplTest {
     }
 
     @Test
-    public void testGetSingleAssignmentNullAssignmentExperimentNotStarted(){
+    public void testGetSingleAssignmentNullAssignmentExperimentNotStarted() {
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         when(experiment.getID()).thenReturn(id);
@@ -186,7 +216,7 @@ public class AssignmentsImplTest {
     }
 
     @Test
-    public void testGetSingleAssignmentNullAssignmentExperimentExpired(){
+    public void testGetSingleAssignmentNullAssignmentExperimentExpired() {
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         when(experiment.getID()).thenReturn(id);
@@ -211,7 +241,7 @@ public class AssignmentsImplTest {
     }
 
     @Test
-    public void testGetSingleAssignmentNullAssignmentExperimentPaused(){
+    public void testGetSingleAssignmentNullAssignmentExperimentPaused() {
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         when(experiment.getID()).thenReturn(id);
@@ -272,7 +302,7 @@ public class AssignmentsImplTest {
     }
 
     @Test(expected = AssertionError.class)
-    public void testGetSingleAssignmentAssertExistingAssignment(){
+    public void testGetSingleAssignmentAssertExistingAssignment() {
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         when(experiment.getID()).thenReturn(id);
@@ -329,7 +359,7 @@ public class AssignmentsImplTest {
         AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
                 experimentRepository, assignmentsRepository,
                 mutexRepository, ruleCache, pages, priorities, assignmentDBEnvelopeProvider,
-                assignmentWebEnvelopeProvider, assignmentDecorator,  threadPoolExecutor, eventLog));
+                assignmentWebEnvelopeProvider, assignmentDecorator, threadPoolExecutor, eventLog));
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         Assignment assignment = mock(Assignment.class);
@@ -345,7 +375,7 @@ public class AssignmentsImplTest {
         when(assignmentsRepository.getAssignment(eq(id), eq(user), any(Context.class))).thenReturn(assignment);
         when(assignment.getStatus()).thenReturn(Assignment.Status.EXISTING_ASSIGNMENT);
         Assignment result = assignmentsImpl.getSingleAssignment(user, appName, label, context, true, true,
-                    null, null, pageName);
+                null, null, pageName);
         verify(threadPoolExecutor, times(1)).execute(any(ExperimentRuleCacheUpdateEnvelope.class));
         assertThat(result, is(assignment));
     }
@@ -386,10 +416,10 @@ public class AssignmentsImplTest {
         HttpHeaders headers = mock(HttpHeaders.class);
         when(experimentRepository.getExperimentList(eq(appName))).thenReturn(table);
         Assignment assignment = mock(Assignment.class);
-        AssignmentsImpl assignmentsImpl = spy( new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
+        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
                 experimentRepository, assignmentsRepository,
                 mutexRepository, ruleCache, pages, priorities, assignmentDBEnvelopeProvider,
-                assignmentWebEnvelopeProvider, assignmentDecorator,  threadPoolExecutor, eventLog));
+                assignmentWebEnvelopeProvider, assignmentDecorator, threadPoolExecutor, eventLog));
 
         doReturn(assignment).when(assignmentsImpl).getAssignment(eq(userID), eq(appName), eq(label),
                 eq(context), any(boolean.class), any(boolean.class), eq(segmentationProfile),
@@ -704,9 +734,9 @@ public class AssignmentsImplTest {
 
     @Test
     public void checkMutexWithExperimentNullTrue() throws Exception {
-    	AssignmentsImpl impl = new AssignmentsImpl(assignmentsRepository, mutexRepository);
-    	boolean value = impl.checkMutex(null, null, Context.valueOf("dummystring"));
-    	then(value).isEqualTo(true);
+        AssignmentsImpl impl = new AssignmentsImpl(assignmentsRepository, mutexRepository);
+        boolean value = impl.checkMutex(null, null, Context.valueOf("dummystring"));
+        then(value).isEqualTo(true);
     }
 
     /* FIXME
@@ -1367,4 +1397,120 @@ public class AssignmentsImplTest {
 //        assertEquals(segmentationProfile.getAttribute("data"), testData);
 //        assertEquals(segmentationProfile.getAttribute("model"), "model");
 //    }
+    @Test
+    public void testGetExperimentAssignmentRatioPerDay() {
+        Experiment experiment1 = Experiment.withID(Experiment.ID.newInstance()).build();
+        Map<OffsetDateTime, Double> map1 = new HashMap<>();
+        map1.put(OffsetDateTime.now(), 1d);
+
+        Experiment experiment2 = Experiment.withID(Experiment.ID.newInstance()).build();
+        Map<OffsetDateTime, Double> map2 = new HashMap<>();
+        map2.put(OffsetDateTime.now(), 2d);
+
+        Experiment experiment3 = Experiment.withID(Experiment.ID.newInstance()).build();
+        Map<OffsetDateTime, Double> map3 = new HashMap<>();
+        map3.put(OffsetDateTime.now(), 3d);
+
+        doReturn(map1).when(assignmentsRepository).getExperimentBucketAssignmentRatioPerDay(experiment1.getID(), OffsetDateTime.MIN, OffsetDateTime.MAX);
+        doReturn(map2).when(assignmentsRepository).getExperimentBucketAssignmentRatioPerDay(experiment2.getID(), OffsetDateTime.MIN, OffsetDateTime.MAX);
+        doReturn(map3).when(assignmentsRepository).getExperimentBucketAssignmentRatioPerDay(experiment3.getID(), OffsetDateTime.MIN, OffsetDateTime.MAX);
+
+        List<Experiment> experiments = new ArrayList<>();
+        experiments.add(experiment1);
+        experiments.add(experiment2);
+
+        Map<Experiment.ID, Map<OffsetDateTime, Double>> actual = assignmentsImpl.getExperimentAssignmentRatioPerDay(experiments, OffsetDateTime.MIN, OffsetDateTime.MAX);
+        Assert.assertEquals("T1 Should exactly return two items.", 2, actual.size());
+        Assert.assertEquals("T1 EntrySet for ID 1 should contain 1 element", 1, actual.get(experiment1.getID()).size());
+        Assert.assertEquals("T1 EntrySet for ID 1 should contain map1", map1, actual.get(experiment1.getID()));
+        Assert.assertEquals("T1 EntrySet for ID 2 should contain 1 element", 1, actual.get(experiment2.getID()).size());
+        Assert.assertEquals("T1 EntrySet for ID 2 should contain map2", map2, actual.get(experiment2.getID()));
+
+        experiments.add(experiment3);
+        actual = assignmentsImpl.getExperimentAssignmentRatioPerDay(experiments, OffsetDateTime.MIN, OffsetDateTime.MAX);
+        Assert.assertEquals("T2 Should exactly return three items.", 3, actual.size());
+        Assert.assertEquals("T2 EntrySet for ID 1 should contain 1 element", 1, actual.get(experiment1.getID()).size());
+        Assert.assertEquals("T2 EntrySet for ID 1 should contain map1", map1, actual.get(experiment1.getID()));
+        Assert.assertEquals("T2 EntrySet for ID 2 should contain 1 element", 1, actual.get(experiment2.getID()).size());
+        Assert.assertEquals("T2 EntrySet for ID 2 should contain map2", map2, actual.get(experiment2.getID()));
+        Assert.assertEquals("T2 EntrySet for ID 3 should contain 1 element", 1, actual.get(experiment3.getID()).size());
+        Assert.assertEquals("T2 EntrySet for ID 3 should contain map3", map3, actual.get(experiment3.getID()));
+    }
+
+    @Test
+    public void testGetExperimentAssignmentRatioPerDayTable() {
+        // Prepare return values for assignmentsRepository mock
+        Map<OffsetDateTime, Double> assignmentRatios = new HashMap<>(10);
+        Map<OffsetDateTime, Double> assignmentRatiosPart = new HashMap<>(4);
+        List<OffsetDateTime> offsetDateTimes = new ArrayList<>(10);
+        List<String> dateStrings = new ArrayList<>(10);
+        for (int i = 1; i <= 10; ++i) {
+            OffsetDateTime odt = OffsetDateTime.of(2000, 1, i, 0, 0, 0, 0, ZoneOffset.UTC);
+            offsetDateTimes.add(odt);
+            dateStrings.add(DateTimeFormatter.ofPattern("M/d/y").format(odt));
+
+            assignmentRatios.put(odt, i * 0.1);
+            if (i <= 7 && i >= 4) {
+                assignmentRatiosPart.put(odt, i * 0.1);
+            }
+        }
+
+        // Prepare list of experiments and their priorities, and set up assignmentsRepository to return the right maps
+        List<Experiment> experiments = new ArrayList<>();
+        Map<Experiment.ID, Integer> priorities = new HashMap<>();
+        for (int i = 1; i <= 5; ++i) {
+            Experiment experiment = Experiment.withID(Experiment.ID.newInstance())
+                    .withLabel(Experiment.Label.valueOf(String.format("Exp%s", i)))
+                    .withSamplingPercent(i * 0.1)
+                    .build();
+            experiments.add(experiment);
+            priorities.put(experiment.getID(), (i + 1) % 5 + 1); // results in priorities: 3, 4, 5, 1, 2
+            doReturn(assignmentRatios).when(assignmentsRepository).getExperimentBucketAssignmentRatioPerDay(experiment.getID(), offsetDateTimes.get(0), offsetDateTimes.get(9));
+            doReturn(assignmentRatiosPart).when(assignmentsRepository).getExperimentBucketAssignmentRatioPerDay(experiment.getID(), offsetDateTimes.get(3), offsetDateTimes.get(6));
+        }
+
+        // query and check results: with all data
+        List<ImmutableMap<String, ?>> results = new ArrayList<>(2);
+        results.add(assignmentsImpl.getExperimentAssignmentRatioPerDayTable(experiments, priorities, offsetDateTimes.get(0), offsetDateTimes.get(9)));
+        results.add(assignmentsImpl.getExperimentAssignmentRatioPerDayTable(experiments, priorities, offsetDateTimes.get(3), offsetDateTimes.get(6)));
+        for (int i = 0; i < results.size(); ++i) {
+            ImmutableMap result = results.get(i);
+            Assert.assertTrue("Result must contain key 'experiments'", result.containsKey("experiments"));
+            Assert.assertTrue("Result must contain a list for key 'experiments'", result.get("experiments") instanceof List);
+
+            Assert.assertTrue("Result must contain key 'priorities'", result.containsKey("priorities"));
+            Assert.assertTrue("Result must contain a list for key 'priorities'", result.get("priorities") instanceof List);
+
+            Assert.assertTrue("Result must contain key 'samplingPercentages'", result.containsKey("samplingPercentages"));
+            Assert.assertTrue("Result must contain a list for key 'samplingPercentages'", result.get("samplingPercentages") instanceof List);
+
+            Assert.assertTrue("Result must contain key 'assignmentRatios'", result.containsKey("assignmentRatios"));
+            Assert.assertTrue("Result must contain a list for key 'assignmentRatios'", result.get("assignmentRatios") instanceof List);
+
+            Assert.assertEquals("List 'experiments' must contain 5 items.", 5, ((List) result.get("experiments")).size());
+            Assert.assertEquals("List 'priorities' must contain 5 items.", 5, ((List) result.get("priorities")).size());
+            Assert.assertEquals("List 'samplingPercentages' must contain 5 items.", 5, ((List) result.get("samplingPercentages")).size());
+            Assert.assertEquals(String.format("List 'assignmentRatios' must contain %d items.", i == 0 ? 10 : 4), i == 0 ? 10 : 4, ((List) result.get("assignmentRatios")).size());
+
+            @SuppressWarnings("unchecked")
+            List<Map<String, ?>> assignmentRatiosResult = (List<Map<String, ?>>) result.get("assignmentRatios");
+            
+            Assert.assertTrue(String.format("ratios do not contain 'date' keys (i == %d)", i),
+                    assignmentRatiosResult.stream()
+                            .allMatch(m -> m.containsKey("date")));
+            Assert.assertTrue(String.format("ratios do not contain all dates (i == %d)", i),
+                    assignmentRatiosResult.stream()
+                            .map(m -> m.get("date"))
+                            .collect(Collectors.toList())
+                            .containsAll(i == 0 ? dateStrings : dateStrings.subList(3, 7)));
+
+            Assert.assertTrue(String.format("ratios do not contain 'values' keys (i == %d)", i),
+                    assignmentRatiosResult.stream()
+                            .allMatch(m -> m.containsKey("values")));
+            Assert.assertTrue(String.format("ratios should always have 5 values (i == %d)", i),
+                    assignmentRatiosResult.stream()
+                            .map(m -> ((List) m.get("values")).size())
+                            .allMatch(val -> val == 5));
+        }
+    }
 }

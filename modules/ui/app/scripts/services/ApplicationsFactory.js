@@ -19,7 +19,7 @@ angular.module('wasabi.services').factory('ApplicationsFactory', ['$resource', '
                         }
                         else {
                             transformed.push({
-                                "applicationName": parsedData[i]
+                                'applicationName': parsedData[i]
                             });
                         }
                     }

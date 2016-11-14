@@ -68,7 +68,11 @@ public class Parameters implements Cloneable {
     private Mode mode = Mode.PRODUCTION;
     @ApiModelProperty(value = "context of the experiment, eg \"QA\", \"PROD\"", dataType = "String")
     private Context context = Context.valueOf("PROD");
+
     //derived parameters
+    /**
+     * This field is set by calling the {@link #parse()} method that calculates the concrete instance.
+     */
     @JsonIgnore
     private BinomialMetric metricImpl;
     @ApiModelProperty(value = "time zone")
@@ -163,7 +167,7 @@ public class Parameters implements Cloneable {
     }
 
     /**
-     * Calculates derived parameters.
+     * Calculates the derived instance of a {@link BinomialMetric} from the other parameters.
      */
     public void parse() {
         if (singleShot) {
