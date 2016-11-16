@@ -15,24 +15,35 @@
  *******************************************************************************/
 package com.intuit.wasabi.assignmentobjects;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intuit.wasabi.assignmentobjects.Assignment.Status;
 import com.intuit.wasabi.assignmentobjects.User.ID;
-import com.intuit.wasabi.experimentobjects.*;
+import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Application.Name;
+import com.intuit.wasabi.experimentobjects.Bucket;
+import com.intuit.wasabi.experimentobjects.Context;
+import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.Experiment.Label;
+import com.intuit.wasabi.experimentobjects.Page;
 import com.intuit.wasabi.export.EnvelopePayload;
-import com.intuit.wasabi.export.MessageType;
 import org.apache.cassandra.utils.UUIDGen;
-import org.json.simple.JSONObject;
 
 import javax.ws.rs.core.HttpHeaders;
 import java.util.Date;
+import java.util.UUID;
 
 /**
- * Export envelope payload for assignments
+ * Export envelope payload for assignments.
+ * <p>
+ * Warning: This class does not provide proper deserialization again, as some information
+ * is NOT stored inside the JSON Strings, as such serializing and deserializing results
+ * in data loss. Therefore it can (and should) only be used for exports!
  */
 public class AssignmentEnvelopePayload implements EnvelopePayload {
 
+    private static final String VERSION = "3.0";
+    private static final String MESSAGE_TYPE = "ASSIGNMENT";
     private User.ID userID;
     private Context context;
     private boolean createAssignment;
@@ -46,27 +57,7 @@ public class AssignmentEnvelopePayload implements EnvelopePayload {
     private Experiment.Label experimentLabel;
     private Experiment.ID experimentID;
     private Date date;
-    private HttpHeaders httpHeaders;
-
-
-    public AssignmentEnvelopePayload() {
-        super();
-    }
-
-    public AssignmentEnvelopePayload(User.ID userID,
-                                     Context context, SegmentationProfile segmentationProfile,
-                                     Bucket.Label bucketLabel, Page.Name pageName, HttpHeaders httpHeaders,
-                                     Application.Name applicationName, Experiment.Label experimentLabel) {
-        super();
-        this.userID = userID;
-        this.context = context;
-        this.segmentationProfile = segmentationProfile;
-        this.bucketLabel = bucketLabel;
-        this.pageName = pageName;
-        this.httpHeaders = httpHeaders;
-        this.applicationName = applicationName;
-        this.experimentLabel = experimentLabel;
-    }
+    private UUID timeUUID;
 
     /**
      * @param userID                the user ID
@@ -97,8 +88,7 @@ public class AssignmentEnvelopePayload implements EnvelopePayload {
             Label experimentLabel,
             Experiment.ID experimentID,
             Date date,
-            HttpHeaders httpHeaders) {
-        super();
+            HttpHeaders ignored) {
         this.userID = userID;
         this.context = context;
         this.createAssignment = createAssignment;
@@ -112,7 +102,7 @@ public class AssignmentEnvelopePayload implements EnvelopePayload {
         this.experimentLabel = experimentLabel;
         this.experimentID = experimentID;
         this.date = date;
-        this.httpHeaders = httpHeaders;
+        this.timeUUID = UUIDGen.getTimeUUID();
     }
 
 
@@ -124,24 +114,10 @@ public class AssignmentEnvelopePayload implements EnvelopePayload {
     }
 
     /**
-     * @param userID the userID to set
-     */
-    public void setUserID(User.ID userID) {
-        this.userID = userID;
-    }
-
-    /**
      * @return the context
      */
-    public Context getContext() {
-        return context;
-    }
-
-    /**
-     * @param context the context to set
-     */
-    public void setContext(Context context) {
-        this.context = context;
+    public String getContext() {
+        return context.getContext();
     }
 
     /**
@@ -152,24 +128,10 @@ public class AssignmentEnvelopePayload implements EnvelopePayload {
     }
 
     /**
-     * @param createAssignment the createAssignment to set
-     */
-    public void setCreateAssignment(boolean createAssignment) {
-        this.createAssignment = createAssignment;
-    }
-
-    /**
      * @return the putAssignment
      */
     public boolean isPutAssignment() {
         return putAssignment;
-    }
-
-    /**
-     * @param putAssignment the putAssignment to set
-     */
-    public void setPutAssignment(boolean putAssignment) {
-        this.putAssignment = putAssignment;
     }
 
     /**
@@ -180,38 +142,23 @@ public class AssignmentEnvelopePayload implements EnvelopePayload {
     }
 
     /**
-     * @param ignoreSamplingPercent the ignoreSamplingPercent to set
-     */
-    public void setIgnoreSamplingPercent(boolean ignoreSamplingPercent) {
-        this.ignoreSamplingPercent = ignoreSamplingPercent;
-    }
-
-    /**
      * @return the segmentationProfile
      */
-    public SegmentationProfile getSegmentationProfile() {
-        return segmentationProfile;
+    public String getSegmentationProfile() throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper
+                .writer()
+                .writeValueAsString(segmentationProfile.getProfile());
     }
-
-    /**
-     * @param segmentationProfile the segmentationProfile to set
-     */
-    public void setSegmentationProfile(SegmentationProfile segmentationProfile) {
-        this.segmentationProfile = segmentationProfile;
-    }
+//    public Map<String, Object> getSegmentationProfile() {
+//        return segmentationProfile.getProfile();
+//    }
 
     /**
      * @return the assignmentStatus
      */
     public Assignment.Status getAssignmentStatus() {
         return assignmentStatus;
-    }
-
-    /**
-     * @param assignmentStatus the assignmentStatus to set
-     */
-    public void setAssignmentStatus(Assignment.Status assignmentStatus) {
-        this.assignmentStatus = assignmentStatus;
     }
 
     /**
@@ -222,24 +169,10 @@ public class AssignmentEnvelopePayload implements EnvelopePayload {
     }
 
     /**
-     * @param bucketLabel the bucketLabel to set
-     */
-    public void setBucketLabel(Bucket.Label bucketLabel) {
-        this.bucketLabel = bucketLabel;
-    }
-
-    /**
      * @return the pageName
      */
     public Page.Name getPageName() {
         return pageName;
-    }
-
-    /**
-     * @param pageName the pageName to set
-     */
-    public void setPageName(Page.Name pageName) {
-        this.pageName = pageName;
     }
 
     /**
@@ -250,24 +183,10 @@ public class AssignmentEnvelopePayload implements EnvelopePayload {
     }
 
     /**
-     * @param applicationName the applicationName to set
-     */
-    public void setApplicationName(Application.Name applicationName) {
-        this.applicationName = applicationName;
-    }
-
-    /**
      * @return the experimentLabel
      */
     public Experiment.Label getExperimentLabel() {
         return experimentLabel;
-    }
-
-    /**
-     * @param experimentLabel the experimentLabel to set
-     */
-    public void setExperimentLabel(Experiment.Label experimentLabel) {
-        this.experimentLabel = experimentLabel;
     }
 
     /**
@@ -278,64 +197,37 @@ public class AssignmentEnvelopePayload implements EnvelopePayload {
     }
 
     /**
-     * @param experimentID the experimentID to set
-     */
-    public void setExperimentID(Experiment.ID experimentID) {
-        this.experimentID = experimentID;
-    }
-
-    /**
      * @return the date
      */
-    public Date getDate() {
+    public Date getAssignmentTimestamp() {
         return date;
     }
 
     /**
-     * @param date the date to set
+     * @return the version
      */
-    public void setDate(Date date) {
-        this.date = date;
-    }
-
-
-    /**
-     * @return the httpHeaders
-     */
-    public HttpHeaders getHttpHeaders() {
-        return httpHeaders;
+    public String getVersion() {
+        return VERSION;
     }
 
     /**
-     * @param httpHeaders the httpHeaders to set
+     * @return the message type
      */
-    public void setHttpHeaders(HttpHeaders httpHeaders) {
-        this.httpHeaders = httpHeaders;
+    public String getMessageType() {
+        return MESSAGE_TYPE;
     }
 
-    //TODO: the generation of json and xml is representation matter of the api, not the pojo
+    public UUID getTimeUUID() {
+        return timeUUID;
+    }
 
     @Override
     public String toJson() {
-        JSONObject assignmentJson = new JSONObject();
-        assignmentJson.put("userID", userID.toString());
-        assignmentJson.put("applicationName", applicationName != null ? applicationName.toString() : "");
-        assignmentJson.put("experimentLabel", experimentLabel != null ? experimentLabel.toString() : "");
-        assignmentJson.put("context", context != null ? context.toString() : "PROD");
-        assignmentJson.put("createAssignment", createAssignment);
-        assignmentJson.put("putAssignment", putAssignment);
-        assignmentJson.put("ignoreSamplingPercent", ignoreSamplingPercent);
-        assignmentJson.put("segmentationProfile", segmentationProfile != null ?
-                segmentationProfile.getProfile() != null ?
-                        segmentationProfile.getProfile().toString() : "" : "");
-        assignmentJson.put("experimentID", experimentID != null ? experimentID.toString() : "");
-        assignmentJson.put("pageName", pageName != null ? pageName.toString() : "");
-        assignmentJson.put("assignmentStatus", assignmentStatus != null ?
-                assignmentStatus.toString() : "");
-        assignmentJson.put("bucketLabel", bucketLabel != null ? bucketLabel.toString() : "NULL");
-        assignmentJson.put("time_uuid", UUIDGen.getTimeUUID());
-        assignmentJson.put("epochTimestamp", date != null ? date.getTime() : "");
-        assignmentJson.put("messageType", MessageType.ASSIGNMENT.toString());
-        return assignmentJson.toString();
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.writer().writeValueAsString(this);
+        } catch (JsonProcessingException jsonProcExc) {
+            throw new RuntimeException("Can not serialize assignment for export.", jsonProcExc);
+        }
     }
 }
