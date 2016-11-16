@@ -63,7 +63,7 @@ public class ExperimentFilter extends PaginationFilter<Experiment> {
     public enum Property implements PaginationFilterProperty<Experiment> {
         application_name(experiment -> experiment.getApplicationName().toString(), StringUtils::containsIgnoreCase),
         application_name_exact(experiment -> experiment.getApplicationName().toString(), StringUtils::equalsIgnoreCase),
-        experiment_name(experiment -> experiment.getLabel().toString(), StringUtils::containsIgnoreCase),
+        experiment_label(experiment -> experiment.getLabel().toString(), StringUtils::containsIgnoreCase),
         created_by(Experiment::getCreatorID, StringUtils::containsIgnoreCase),
         creation_time(Experiment::getCreationTime, FilterUtil::extractTimeZoneAndTestDate),
         start_time(Experiment::getStartTime, FilterUtil::extractTimeZoneAndTestDate),

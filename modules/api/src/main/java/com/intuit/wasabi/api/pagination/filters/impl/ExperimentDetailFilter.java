@@ -37,7 +37,8 @@ public class ExperimentDetailFilter extends PaginationFilter<ExperimentDetail> {
      */
     public ExperimentDetailFilter() {
         super.registerFilterModifierForProperties(FilterUtil.FilterModifier.APPEND_TIMEZONEOFFSET, Property.mod_time,
-                Property.start_time, Property.end_time);
+                Property.start_time, Property.end_time, ExperimentFilter.Property.date_constraint_start,
+                ExperimentFilter.Property.date_constraint_end);
         super.excludeFromFulltext(Property.application_name_exact, Property.mod_time,
                 Property.end_time, Property.start_time, Property.favorite, Property.isControl,
                 Property.date_constraint_start, Property.date_constraint_end);
