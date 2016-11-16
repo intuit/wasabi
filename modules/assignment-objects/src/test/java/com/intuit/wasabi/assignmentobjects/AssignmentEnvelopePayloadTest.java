@@ -52,14 +52,14 @@ public class AssignmentEnvelopePayloadTest {
     private AssignmentEnvelopePayload payload;
 
     @Before
-    public void createAssignmendEnvelopePayload() {
+    public void setupPayloadEnvelope() {
         payload = new AssignmentEnvelopePayload(userID, context, createAssignment,
                 putAssignment, ignoreSamplingPercent, segmentationProfile, assignmentStatus,
                 bucketLabel, pageName, applicationName, experimentLabel, experimentID, date, null);
     }
 
     @Test
-    @Ignore("Only produces output.")
+    @Ignore("Just creates debug output.")
     public void output() {
         System.out.println(payload.toJson());
         HashMap<String, Object> segMap = new HashMap<>();
