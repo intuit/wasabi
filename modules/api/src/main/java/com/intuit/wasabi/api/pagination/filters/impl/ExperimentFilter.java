@@ -52,7 +52,7 @@ public class ExperimentFilter extends PaginationFilter<Experiment> {
                 Property.creation_time, Property.start_time, Property.end_time, Property.modification_time,
                 Property.date_constraint_start, Property.date_constraint_end);
         super.excludeFromFulltext(Property.application_name_exact, Property.state_exact, Property.date_constraint_start,
-                Property.date_constraint_end, Property.favorite);
+                Property.date_constraint_end, Property.favorite, Property.modification_time, Property.creation_time);
     }
 
     /**
