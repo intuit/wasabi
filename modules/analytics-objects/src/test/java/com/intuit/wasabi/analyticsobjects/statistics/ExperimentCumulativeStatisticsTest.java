@@ -8,8 +8,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * Tests the {@link ExperimentCumulativeStatistics}.
@@ -20,7 +20,7 @@ public class ExperimentCumulativeStatisticsTest {
     List<DailyStatistics> dailyStatisticsList = new ArrayList<>();
 
     @Before
-    public void setup(){
+    public void setup() {
         experimentCumulativeStatistics = new ExperimentCumulativeStatistics.Builder()
                 .withDays(dailyStatisticsList).build();
     }

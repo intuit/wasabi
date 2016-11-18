@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,15 +18,14 @@ package com.intuit.wasabi.analyticsobjects.counts;
 import com.intuit.wasabi.analyticsobjects.Event;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import org.joda.time.DateTime;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.HashMap;
 
-import static junit.framework.Assert.assertTrue;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
 
 /**
  * This class tests the {@link DailyCounts}.
@@ -40,7 +39,7 @@ public class DailyCountsTest {
     private DailyCounts counter;
 
     @Before
-    public void setup(){
+    public void setup() {
         Counts impressionCounts = new Counts.Builder().withEventCount(100).withUniqueUserCount(100).build();
         Counts jointActionCounts = new Counts.Builder().withEventCount(200).withUniqueUserCount(200).build();
         HashMap<Event.Name, ActionCounts> actionCounts = new HashMap<Event.Name, ActionCounts>();
@@ -55,33 +54,30 @@ public class DailyCountsTest {
         date = new DateTime().toString();
 
         counter = new DailyCounts.Builder().setDate(date).withCumulative(cumulative)
-                    .withPerDay(perDay).build();
+                .withPerDay(perDay).build();
     }
 
     @Test
-    public void testBuilder(){
-        assertEquals(counter.getDate(), date);
-        assertEquals(counter.getCumulative(), cumulative);
-        assertEquals(counter.getPerDay(), perDay);
+    public void testBuilder() {
+        assertThat(counter.getDate(), equalTo(date));
+        assertThat(counter.getCumulative(), equalTo(cumulative));
+        assertThat(counter.getPerDay(), equalTo(perDay));
 
         String counterString = counter.toString();
-        assertTrue(counterString.contains(date));
-        assertTrue(counterString.contains(perDay.toString()));
-        assertTrue(counterString.contains(cumulative.toString()));
+        assertThat(counterString, containsString(date));
+        assertThat(counterString, containsString(perDay.toString()));
+        assertThat(counterString, containsString(cumulative.toString()));
     }
 
     @Test
-    public void testClone(){
+    public void testClone() {
         DailyCounts clonedCounter = counter.clone();
-        assertEquals(clonedCounter.getDate(), date);
 
-        assertEquals(clonedCounter.getDate(), date);
-        assertEquals(clonedCounter.getCumulative(), cumulative);
-        assertEquals(clonedCounter.getPerDay(), perDay);
-
-        assertTrue(counter.equals(clonedCounter));
-
-        assertEquals(clonedCounter.hashCode(), counter.hashCode());
+        assertThat(clonedCounter.getDate(), equalTo(date));
+        assertThat(clonedCounter.getCumulative(), equalTo(cumulative));
+        assertThat(clonedCounter.getPerDay(), equalTo(perDay));
+        assertThat(counter, equalTo(clonedCounter));
+        assertThat(clonedCounter.hashCode(), equalTo(counter.hashCode()));
     }
 
 }

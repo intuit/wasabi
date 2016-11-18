@@ -37,7 +37,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 
@@ -115,6 +116,6 @@ public class EventsResourceTest {
 
     @Test
     public void getEventsQueueLength() throws Exception {
-        assertTrue(resource.getEventsQueueLength().getStatus() == HttpStatus.SC_OK);
+        assertThat(resource.getEventsQueueLength().getStatus(), is(HttpStatus.SC_OK));
     }
 }

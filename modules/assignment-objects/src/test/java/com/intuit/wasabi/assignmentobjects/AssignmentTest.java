@@ -28,9 +28,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Date;
 
-import static junit.framework.TestCase.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * Test for {@link Assignment}.
@@ -83,44 +84,44 @@ public class AssignmentTest {
     @Test
     public void testAssignment() {
         String assigString = assignment.toString();
-        assertTrue(assigString.contains(applicationName.toString()));
-        assertTrue(assigString.contains(bucketLabel.toString()));
-        assertTrue(assigString.contains(context.toString()));
-        assertTrue(assigString.contains(created.toString()));
-        assertTrue(assigString.contains(experimentID.toString()));
-        assertTrue(assigString.contains(status.toString()));
-        assertTrue(assigString.contains(userID.toString()));
+        assertThat(assigString, containsString(applicationName.toString()));
+        assertThat(assigString, containsString(bucketLabel.toString()));
+        assertThat(assigString, containsString(context.toString()));
+        assertThat(assigString, containsString(created.toString()));
+        assertThat(assigString, containsString(experimentID.toString()));
+        assertThat(assigString, containsString(status.toString()));
+        assertThat(assigString, containsString(userID.toString()));
 
-        assertEquals(assignment.getApplicationName(), applicationName);
-        assertEquals(assignment.getBucketLabel(), bucketLabel);
-        assertEquals(assignment.getContext(), context);
-        assertEquals(assignment.getCreated(), created);
-        assertEquals(assignment.getExperimentID(), experimentID);
-        assertEquals(assignment.getStatus(), status);
-        assertEquals(assignment.getUserID(), userID);
-        assertTrue(assignment.isCacheable());
-        assertTrue(assignment.getStatus().isCacheable());
-        assertFalse(assignment.isBucketEmpty());
+        assertThat(assignment.getApplicationName(), is(applicationName));
+        assertThat(assignment.getBucketLabel(), is(bucketLabel));
+        assertThat(assignment.getContext(), is(context));
+        assertThat(assignment.getCreated(), is(created));
+        assertThat(assignment.getExperimentID(), is(experimentID));
+        assertThat(assignment.getStatus(), is(status));
+        assertThat(assignment.getUserID(), is(userID));
+        assertThat(assignment.isCacheable(), is(true));
+        assertThat(assignment.getStatus().isCacheable(), is(true));
+        assertThat(assignment.isBucketEmpty(), is(false));
     }
 
     @Test
     public void testAssignmentWithEmptyBucket() {
         Assignment assignment = createAssignmentWithEmptyBucket();
-        assertTrue(assignment.isBucketEmpty());
+        assertThat(assignment.isBucketEmpty(), is(true));
     }
 
     @Test
     public void testAssignmentWithEmptyBucketEqualsAndHash() {
         Assignment assignment1 = createAssignmentWithEmptyBucket();
         Assignment assignment2 = createAssignmentWithEmptyBucket();
-        assertEquals(assignment1, assignment2);
-        assertEquals(assignment2, assignment1);
-        assertEquals(assignment1, assignment1);
-        assertEquals(assignment2, assignment2);
-        assertEquals(assignment1.hashCode(), assignment2.hashCode());
-        assertEquals(assignment2.hashCode(), assignment1.hashCode());
-        assertEquals(assignment1.hashCode(), assignment1.hashCode());
-        assertEquals(assignment2.hashCode(), assignment2.hashCode());
+        assertThat(assignment1, is(assignment2));
+        assertThat(assignment2, is(assignment1));
+        assertThat(assignment1, is(assignment1));
+        assertThat(assignment2, is(assignment2));
+        assertThat(assignment1.hashCode(), is(assignment2.hashCode()));
+        assertThat(assignment2.hashCode(), is(assignment1.hashCode()));
+        assertThat(assignment1.hashCode(), is(assignment1.hashCode()));
+        assertThat(assignment2.hashCode(), is(assignment2.hashCode()));
     }
 
     @Test
@@ -128,32 +129,28 @@ public class AssignmentTest {
         Assignment assignment1 = createAssignmentWithEmptyBucket();
         Assignment assignment2 = createAssignmentWithEmptyBucket();
         assignment2.setBucketEmpty(false);
-        assertFalse(assignment1.equals(assignment2));
-        assertFalse(assignment2.equals(assignment1));
-        assertFalse(assignment1.toString().equals(assignment2.toString()));
-        assertFalse(assignment2.toString().equals(assignment1.toString()));
-        assertEquals(assignment1, assignment1);
-        assertEquals(assignment2, assignment2);
-        assertFalse(assignment1.hashCode() == assignment2.hashCode());
-        assertFalse(assignment2.hashCode() == assignment1.hashCode());
-        assertTrue(assignment1.hashCode() == assignment1.hashCode());
-        assertTrue(assignment2.hashCode() == assignment2.hashCode());
+        assertThat(assignment1, not(assignment2));
+        assertThat(assignment2, not(assignment1));
+        assertThat(assignment1.toString(), not(assignment2.toString()));
+        assertThat(assignment2.toString(), not(assignment1.toString()));
+        assertThat(assignment1, is(assignment1));
+        assertThat(assignment2, is(assignment2));
+        assertThat(assignment1.hashCode(), not(assignment2.hashCode()));
+        assertThat(assignment1.hashCode(), is(assignment1.hashCode()));
     }
 
     @Test
     public void testAssignmentWithEmptyBucketAndDefaultNotEqualsAndHash() {
         Assignment assignment1 = createAssignment();
         Assignment assignment2 = createAssignmentWithEmptyBucket();
-        assertFalse(assignment1.equals(assignment2));
-        assertFalse(assignment2.equals(assignment1));
-        assertFalse(assignment1.toString().equals(assignment2.toString()));
-        assertFalse(assignment2.toString().equals(assignment1.toString()));
-        assertEquals(assignment1, assignment1);
-        assertEquals(assignment2, assignment2);
-        assertFalse(assignment1.hashCode() == assignment2.hashCode());
-        assertFalse(assignment2.hashCode() == assignment1.hashCode());
-        assertTrue(assignment1.hashCode() == assignment1.hashCode());
-        assertTrue(assignment2.hashCode() == assignment2.hashCode());
+        assertThat(assignment1, not(assignment2));
+        assertThat(assignment2, not(assignment1));
+        assertThat(assignment1.toString(), not(assignment2.toString()));
+        assertThat(assignment2.toString(), not(assignment1.toString()));
+        assertThat(assignment1, is(assignment1));
+        assertThat(assignment2, is(assignment2));
+        assertThat(assignment1.hashCode(), not(assignment2.hashCode()));
+        assertThat(assignment1.hashCode(), is(assignment1.hashCode()));
     }
 
     @Test
@@ -167,30 +164,30 @@ public class AssignmentTest {
         assignment.setStatus(status);
         assignment.setUserID(userID);
 
-        assertEquals(applicationName, assignment.getApplicationName());
-        assertEquals(bucketLabel, assignment.getBucketLabel());
-        assertTrue(assignment.isCacheable());
-        assertEquals(context, assignment.getContext());
-        assertEquals(created, assignment.getCreated());
-        assertEquals(experimentID, assignment.getExperimentID());
-        assertEquals(status, assignment.getStatus());
-        assertEquals(userID, assignment.getUserID());
+        assertThat(assignment.getApplicationName(), is(applicationName));
+        assertThat(assignment.getBucketLabel(), is(bucketLabel));
+        assertThat(assignment.isCacheable(), is(true));
+        assertThat(assignment.getContext(), is(context));
+        assertThat(assignment.getCreated(), is(created));
+        assertThat(assignment.getExperimentID(), is(experimentID));
+        assertThat(assignment.getStatus(), is(status));
+        assertThat(assignment.getUserID(), is(userID));
     }
 
     @Test
     public void testAssignmentFromOther() {
         Assignment newAssignment = Assignment.from(assignment).build();
 
-        assertEquals(newAssignment.toString(), assignment.toString());
-        assertEquals(newAssignment.getApplicationName(), assignment.getApplicationName());
-        assertEquals(newAssignment.getBucketLabel(), assignment.getBucketLabel());
-        assertEquals(newAssignment.getContext(), assignment.getContext());
-        assertEquals(newAssignment.getCreated(), assignment.getCreated());
-        assertEquals(newAssignment.getExperimentID(), assignment.getExperimentID());
-        assertEquals(newAssignment.getStatus(), assignment.getStatus());
-        assertEquals(newAssignment.getUserID(), assignment.getUserID());
+        assertThat(newAssignment.toString(), is(assignment.toString()));
+        assertThat(newAssignment.getApplicationName(), is(assignment.getApplicationName()));
+        assertThat(newAssignment.getBucketLabel(), is(assignment.getBucketLabel()));
+        assertThat(newAssignment.getContext(), is(assignment.getContext()));
+        assertThat(newAssignment.getCreated(), is(assignment.getCreated()));
+        assertThat(newAssignment.getExperimentID(), is(assignment.getExperimentID()));
+        assertThat(newAssignment.getStatus(), is(assignment.getStatus()));
+        assertThat(newAssignment.getUserID(), is(assignment.getUserID()));
 
-        assertEquals(assignment, newAssignment);
+        assertThat(assignment, is(newAssignment));
     }
 
 

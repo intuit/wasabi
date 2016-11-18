@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,9 +20,11 @@ import com.intuit.wasabi.experimentobjects.Bucket;
 import org.junit.Before;
 import org.junit.Test;
 
-import static junit.framework.Assert.assertFalse;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.nullValue;
 
 /**
  * Tests the {@link ActionComparisonStatistics}.
@@ -38,7 +40,7 @@ public class ActionComparisonStatisticsTest {
     private ActionComparisonStatistics actionComparisonStatistics;
 
     @Before
-    public void setup(){
+    public void setup() {
         actionName = Event.Name.valueOf("TestAction");
         clearComparisonWinner = Bucket.Label.valueOf("TestWinner");
         sufficientData = true;
@@ -46,14 +48,14 @@ public class ActionComparisonStatisticsTest {
         actionRateDifference = new Estimate();
         smallestDistinguishableEffectSize = new DistinguishableEffectSize();
         actionComparisonStatistics = new ActionComparisonStatistics.Builder().withActionName(actionName)
-                                    .withActionRateDifference(actionRateDifference)
-                                    .withClearComparisonWinner(clearComparisonWinner).withFractionDataCollected(fractionDataCollected)
-                                    .withSmallestDistinguishableEffectSize(smallestDistinguishableEffectSize).withSufficientData(sufficientData).build();
+                .withActionRateDifference(actionRateDifference)
+                .withClearComparisonWinner(clearComparisonWinner).withFractionDataCollected(fractionDataCollected)
+                .withSmallestDistinguishableEffectSize(smallestDistinguishableEffectSize).withSufficientData(sufficientData).build();
     }
 
     @Test
-    public void testBuilder(){
-        assertEquals(actionComparisonStatistics.getActionName(), actionName);
+    public void testBuilder() {
+        assertThat(actionComparisonStatistics.getActionName(), equalTo(actionName));
 
 
         ComparisonStatistics statistics = new ComparisonStatistics.Builder()
@@ -67,25 +69,25 @@ public class ActionComparisonStatisticsTest {
                 .withComparisonStatistic(statistics).build();
 
         String actionCompare = actionComparisonStatistics.toString();
-        assertTrue(actionCompare.contains(clearComparisonWinner.toString()));
-        assertTrue(actionCompare.contains(actionName.toString()));
-        assertTrue(actionCompare.contains(actionRateDifference.toString()));
-        assertTrue(actionCompare.contains(fractionDataCollected.toString()));
-        assertTrue(actionCompare.contains(smallestDistinguishableEffectSize.toString()));
-        assertTrue(actionCompare.contains(actionComparisonStatistics.toString()));
+        assertThat(actionCompare, containsString(clearComparisonWinner.toString()));
+        assertThat(actionCompare, containsString(actionName.toString()));
+        assertThat(actionCompare, containsString(actionRateDifference.toString()));
+        assertThat(actionCompare, containsString(fractionDataCollected.toString()));
+        assertThat(actionCompare, containsString(smallestDistinguishableEffectSize.toString()));
+        assertThat(actionCompare, containsString(actionComparisonStatistics.toString()));
 
-        assertEquals(actionComparisonStatistics.hashCode(), actionComparisonStatistics.clone().hashCode());
-        assertTrue(actionComparisonStatistics.equals(otherActionComparisonStatistics));
-        assertTrue(actionComparisonStatistics.equals(actionComparisonStatistics));
-        assertFalse(actionComparisonStatistics.equals(statistics));
+        assertThat(actionComparisonStatistics.hashCode(), equalTo(actionComparisonStatistics.clone().hashCode()));
+        assertThat(actionComparisonStatistics, equalTo(otherActionComparisonStatistics));
+        assertThat(actionComparisonStatistics, equalTo(actionComparisonStatistics));
+        assertThat(actionComparisonStatistics, not(equalTo(statistics)));
     }
 
     @Test
-    public void testSettersAndGetters(){
+    public void testSettersAndGetters() {
         actionComparisonStatistics.setActionName(null);
-        assertEquals(actionComparisonStatistics.getActionName(), null);
+        assertThat(actionComparisonStatistics.getActionName(), nullValue());
 
         actionComparisonStatistics.setActionRateDifference(null);
-        assertEquals(actionComparisonStatistics.getActionRateDifference(), null);
+        assertThat(actionComparisonStatistics.getActionRateDifference(), nullValue());
     }
 }

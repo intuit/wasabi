@@ -29,8 +29,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 import javax.ws.rs.core.HttpHeaders;
 import java.util.Date;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * Test for the {@link AssignmentEnvelopePayload}
@@ -63,19 +64,19 @@ public class AssignmentEnvelopePayloadTest {
                 bucketLabel, pageName, applicationName, experimentLabel, experimentID, date, httpHeaders);
 
         String payloadJson = payload.toJson();
-        assertTrue(payloadJson.contains(userID.toString()));
-        assertTrue(payloadJson.contains(context.toString()));
-        assertTrue(payloadJson.contains(String.valueOf(createAssignment)));
-        assertTrue(payloadJson.contains(String.valueOf(putAssignment)));
-        assertTrue(payloadJson.contains(String.valueOf(ignoreSamplingPercent)));
-        assertTrue(payloadJson.contains(segmentationProfile.getProfile().toString()));
-        assertTrue(payloadJson.contains(assignmentStatus.toString()));
-        assertTrue(payloadJson.contains(bucketLabel.toString()));
-        assertTrue(payloadJson.contains(pageName.toString()));
-        assertTrue(payloadJson.contains(applicationName.toString()));
-        assertTrue(payloadJson.contains(experimentLabel.toString()));
-        assertTrue(payloadJson.contains(experimentID.toString()));
-        assertTrue(payloadJson.contains(String.valueOf(date.getTime())));
+        assertThat(payloadJson, containsString(userID.toString()));
+        assertThat(payloadJson, containsString(context.toString()));
+        assertThat(payloadJson, containsString(String.valueOf(createAssignment)));
+        assertThat(payloadJson, containsString(String.valueOf(putAssignment)));
+        assertThat(payloadJson, containsString(String.valueOf(ignoreSamplingPercent)));
+        assertThat(payloadJson, containsString(segmentationProfile.getProfile().toString()));
+        assertThat(payloadJson, containsString(assignmentStatus.toString()));
+        assertThat(payloadJson, containsString(bucketLabel.toString()));
+        assertThat(payloadJson, containsString(pageName.toString()));
+        assertThat(payloadJson, containsString(applicationName.toString()));
+        assertThat(payloadJson, containsString(experimentLabel.toString()));
+        assertThat(payloadJson, containsString(experimentID.toString()));
+        assertThat(payloadJson, containsString(String.valueOf(date.getTime())));
     }
 
     @Test
@@ -96,20 +97,20 @@ public class AssignmentEnvelopePayloadTest {
         payload.setDate(date);
         payload.setHttpHeaders(httpHeaders);
 
-        assertEquals(payload.getUserID(), userID);
-        assertEquals(payload.getContext(), context);
-        assertTrue(payload.isCreateAssignment());
-        assertTrue(payload.isPutAssignment());
-        assertTrue(payload.isIgnoreSamplingPercent());
-        assertEquals(payload.getSegmentationProfile(), segmentationProfile);
-        assertEquals(payload.getAssignmentStatus(), assignmentStatus);
-        assertEquals(payload.getBucketLabel(), bucketLabel);
-        assertEquals(payload.getPageName(), pageName);
-        assertEquals(payload.getApplicationName(), applicationName);
-        assertEquals(payload.getExperimentLabel(), experimentLabel);
-        assertEquals(payload.getExperimentID(), experimentID);
-        assertEquals(payload.getDate(), date);
-        assertEquals(payload.getHttpHeaders(), httpHeaders);
+        assertThat(payload.getUserID(), is(userID));
+        assertThat(payload.getContext(), is(context));
+        assertThat(payload.isCreateAssignment(), is(true));
+        assertThat(payload.isPutAssignment(), is(true));
+        assertThat(payload.isIgnoreSamplingPercent(), is(true));
+        assertThat(payload.getSegmentationProfile(), is(segmentationProfile));
+        assertThat(payload.getAssignmentStatus(), is(assignmentStatus));
+        assertThat(payload.getBucketLabel(), is(bucketLabel));
+        assertThat(payload.getPageName(), is(pageName));
+        assertThat(payload.getApplicationName(), is(applicationName));
+        assertThat(payload.getExperimentLabel(), is(experimentLabel));
+        assertThat(payload.getExperimentID(), is(experimentID));
+        assertThat(payload.getDate(), is(date));
+        assertThat(payload.getHttpHeaders(), is(httpHeaders));
     }
 
 
