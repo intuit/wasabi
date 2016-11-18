@@ -71,9 +71,8 @@ public class AssignmentsResourceTest {
     @Mock
     private ExperimentBatch experimentBatch;
     @Mock
-    private
     @javax.ws.rs.core.Context
-    HttpHeaders headers;
+    private HttpHeaders headers;
     @Mock
     private Map<String, Object> submittedData;
     @Mock
