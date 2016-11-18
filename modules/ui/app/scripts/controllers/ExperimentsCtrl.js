@@ -297,7 +297,7 @@ angular.module('wasabi.controllers').
                         queryParams.filter = addAdvParam(queryParams.filter, 'state_exact=' + $scope.data.advStatus);
                     }
                     if ($scope.data.advExperimentName && $.trim($scope.data.advExperimentName).length > 0) {
-                        queryParams.filter = addAdvParam(queryParams.filter, 'experiment_name=' + $.trim($scope.data.advExperimentName));
+                        queryParams.filter = addAdvParam(queryParams.filter, 'experiment_label=' + $.trim($scope.data.advExperimentName));
                     }
                     if ($scope.data.adv1stDateSearchType !== 'isAny') {
                         queryParams.filter = addAdvParam(queryParams.filter, 'date_constraint_' +
