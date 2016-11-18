@@ -21,7 +21,6 @@ import com.intuit.wasabi.api.pagination.filters.PaginationFilter;
 import com.intuit.wasabi.api.pagination.filters.PaginationFilterProperty;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.ws.rs.HEAD;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 
@@ -38,9 +37,11 @@ public class ExperimentDetailFilter extends PaginationFilter<ExperimentDetail> {
      */
     public ExperimentDetailFilter() {
         super.registerFilterModifierForProperties(FilterUtil.FilterModifier.APPEND_TIMEZONEOFFSET, Property.mod_time,
-                Property.start_time, Property.end_time);
+                Property.start_time, Property.end_time, ExperimentFilter.Property.date_constraint_start,
+                ExperimentFilter.Property.date_constraint_end);
         super.excludeFromFulltext(Property.application_name_exact, Property.mod_time,
-                Property.end_time, Property.start_time, Property.favorite, Property.isControl);
+                Property.end_time, Property.start_time, Property.favorite, Property.isControl,
+                Property.date_constraint_start, Property.date_constraint_end);
     }
 
     /**
@@ -65,7 +66,9 @@ public class ExperimentDetailFilter extends PaginationFilter<ExperimentDetail> {
                 bucketDetails.stream().anyMatch(bucketDetail -> bucketDetail.isControl() == Boolean.valueOf(filter)))),
         mod_time(ExperimentDetail::getModificationTime, FilterUtil::extractTimeZoneAndTestDate),
         start_time(ExperimentDetail::getStartTime, FilterUtil::extractTimeZoneAndTestDate),
-        end_time(ExperimentDetail::getEndTime, FilterUtil::extractTimeZoneAndTestDate);
+        end_time(ExperimentDetail::getEndTime, FilterUtil::extractTimeZoneAndTestDate),
+        date_constraint_start(ExperimentDetail::getStartTime, ExperimentFilter::constraintTest),
+        date_constraint_end(ExperimentDetail::getEndTime, ExperimentFilter::constraintTest);
 
         private final Function<ExperimentDetail, ?> propertyExtractor;
         private final BiPredicate<?, String> filterPredicate;
