@@ -264,7 +264,7 @@ package() {
   content=$(fromPom ./modules/main build application.http.content.directory)
   ui_home=${home}/../${name}-${version}-${profile}
 
-  #./bin/fpm.sh -n ${name} -v ${version} -p ${profile}
+  ./bin/fpm.sh -n ${name} -v ${version} -p ${profile}
 
 # FIXME: don't rebuild, cp dist/* target/*
   (for contrib_dir in $CONTRIB_PLUGINS_TO_INSTALL; do
@@ -274,11 +274,10 @@ package() {
            cp -R contrib/$contrib_dir/plugins modules/ui/dist
          fi
          if [ -f contrib/$contrib_dir/scripts/plugins.js ]; then
-             cat modules/ui/dist/scripts/plugins.js | wc -l
-             if [ -f modules/ui/dist/scripts/plugins.js ] && [ `cat modules/ui/dist/scripts/plugins.js | wc -l` -gt 2 ]; then
+             if [ -f modules/ui/dist/scripts/plugins.js ] && [ `cat modules/ui/dist/scripts/plugins.js | wc -l` -gt 3 ]; then
                echo Need to merge
                # Get all but the last line of the current plugins.js file
-               sed -e "1,$(($(cat modules/ui/dist/scripts/plugins.js | wc -l) - 1))p;d" modules/ui/dist/scripts/plugins.js > tmp.txt
+               sed -e "1,$(($(cat modules/ui/dist/scripts/plugins.js | wc -l) - 2))p;d" modules/ui/dist/scripts/plugins.js > tmp.txt
                # Since this should end in a } we want to add a comma
                echo ',' >> tmp.txt
                # Copy all but the first and last lines of this plugins's config.  This assumes first line defines var and array, last line ends array.
@@ -291,6 +290,7 @@ package() {
                cp contrib/$contrib_dir/scripts/plugins.js modules/ui/dist/scripts
              fi
          fi
+         echo Merged in $contrib_dir
        fi;
    done)
   (cd modules/ui; \
@@ -298,6 +298,9 @@ package() {
     for f in app node_modules bower.json Gruntfile.js constants.json karma.conf.js karma-e2e.conf.js package.json test .bowerrc; do \
       cp -r ${f} target; \
     done; \
+    echo Getting merged plugins.js file and plugins directory; \
+    cp dist/scripts/plugins.js target/app/scripts/plugins.js; \
+    cp -R dist/plugins target/app; \
     sed -i '' -e "s|http://localhost:8080|${server}|g" target/constants.json 2>/dev/null; \
     sed -i '' -e "s|VERSIONLOC|${version}|g" target/app/index.html 2>/dev/null; \
     #(cd target; npm install; bower install --no-optional; grunt clean); \
