@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,16 +19,16 @@ import com.intuit.wasabi.experimentobjects.Bucket;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-import static junit.framework.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static junit.framework.TestCase.fail;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
 
 /**
  * Tests the {@link Progress}.
@@ -42,7 +42,7 @@ public class ProgressTest {
     private Progress progress;
 
     @Before
-    public void setup(){
+    public void setup() {
         winnersSoFar = new HashSet<>();
         losersSoFar = new HashSet<>();
         Bucket.Label winner = Bucket.Label.valueOf("TestWinner");
@@ -58,40 +58,40 @@ public class ProgressTest {
     }
 
     @Test
-    public void testBuilder(){
-        assertEquals(progress.getFractionDataCollected(), fractionDataCollected);
-        assertEquals(progress.getLosersSoFar(), losersSoFar);
-        assertEquals(progress.getWinnersSoFar(), winnersSoFar);
-        assertEquals(progress.isHasSufficientData(), hasSufficientData);
+    public void testBuilder() {
+        assertThat(progress.getFractionDataCollected(), is(fractionDataCollected));
+        assertThat(progress.getLosersSoFar(), is(losersSoFar));
+        assertThat(progress.getWinnersSoFar(), is(winnersSoFar));
+        assertThat(progress.isHasSufficientData(), is(hasSufficientData));
 
-        assertEquals(progress.hashCode(), progress.clone().hashCode());
+        assertThat(progress.hashCode(), is(progress.clone().hashCode()));
 
         String prog = progress.toString();
-        assertTrue(prog.contains(String.valueOf(fractionDataCollected)));
-        assertTrue(prog.contains(losersSoFar.toString()));
-        assertTrue(prog.contains(winnersSoFar.toString()));
-        assertTrue(prog.contains(String.valueOf(hasSufficientData)));
+        assertThat(prog, containsString(String.valueOf(fractionDataCollected)));
+        assertThat(prog, containsString(losersSoFar.toString()));
+        assertThat(prog, containsString(winnersSoFar.toString()));
+        assertThat(prog, containsString(String.valueOf(hasSufficientData)));
 
-        assertTrue(progress.equals(progress.clone()));
-        assertTrue(progress.equals(progress));
-        assertFalse(progress.equals(null));
-        assertFalse(progress.equals(fractionDataCollected));
+        assertThat(progress, equalTo(progress.clone()));
+        assertThat(progress, equalTo(progress));
+        assertThat(progress, not(equalTo(null)));
+        assertThat(progress, not(equalTo(fractionDataCollected)));
     }
 
     @Test
-    public void testAddWinners(){
+    public void testAddWinners() {
         progress.setWinnersSoFar(null);
         Bucket.Label bucketLabel = Bucket.Label.valueOf("TestWinner");
         progress.addToWinnersSoFarList(bucketLabel);
-        assertTrue(progress.getWinnersSoFar().contains(bucketLabel));
-        try{
+        assertThat(progress.getWinnersSoFar(), contains(bucketLabel));
+        try {
             progress.addToWinnersSoFarList(null);
             fail();
-        }catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             //expected this exception
         }
         progress.addToWinnersSoFarList(Bucket.Label.valueOf("TestWinner"));
-        assertEquals(progress.getWinnersSoFar(), winnersSoFar);
+        assertThat(progress.getWinnersSoFar(), is(winnersSoFar));
     }
 
     @Test
@@ -99,7 +99,7 @@ public class ProgressTest {
         progress.setLosersSoFar(null);
         Bucket.Label bucketLabel = Bucket.Label.valueOf("TestLoser");
         progress.addToLosersSoFarList(bucketLabel);
-        assertTrue(progress.getLosersSoFar().contains(bucketLabel));
+        assertThat(progress.getLosersSoFar(), contains(bucketLabel));
         try {
             progress.addToLosersSoFarList(null);
             fail();
@@ -107,18 +107,15 @@ public class ProgressTest {
             //expected this exception
         }
         progress.addToLosersSoFarList(Bucket.Label.valueOf("TestLoser"));
-        assertEquals(progress.getLosersSoFar(), losersSoFar);
+        assertThat(progress.getLosersSoFar(), is(losersSoFar));
     }
 
     @Test
-    public void testSettersAndGetters(){
+    public void testSettersAndGetters() {
         fractionDataCollected = 0.0;
         progress.setFractionDataCollected(fractionDataCollected);
         progress.setHasSufficientData(!hasSufficientData);
-        assertEquals(progress.isHasSufficientData(), !hasSufficientData);
-        assertEquals(progress.getFractionDataCollected(), fractionDataCollected);
-
-        fractionDataCollected = 0.5;
-        progress.setHasSufficientData(hasSufficientData);
+        assertThat(progress.isHasSufficientData(), not(hasSufficientData));
+        assertThat(progress.getFractionDataCollected(), is(fractionDataCollected));
     }
 }

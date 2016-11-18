@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,9 +19,10 @@ import com.intuit.wasabi.analyticsobjects.Event;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.not;
 
 /**
  * This class tests the {@link ActionCounts}.
@@ -35,54 +36,57 @@ public class ActionCountsTest {
     private ActionCounts actionCounter;
 
     @Before
-    public void setup(){
+    public void setup() {
         testEvent = Event.Name.valueOf("Test Event");
         eventCount = 500000;
-        uniqueUserCount  = 500000;
+        uniqueUserCount = 500000;
         actionCounter = new ActionCounts.Builder().withActionName(testEvent)
-                        .withEventCount(eventCount).withUniqueUserCount(uniqueUserCount).build();
+                .withEventCount(eventCount).withUniqueUserCount(uniqueUserCount).build();
     }
 
     @Test
-    public void testBuilder(){
-        assertEquals(actionCounter.getActionName(), testEvent);
-        assertEquals(actionCounter.getEventCount(), eventCount);
-        assertEquals(actionCounter.getUniqueUserCount(), uniqueUserCount);
-        assertTrue(actionCounter.toString().contains("eventCount=500000"));
-        assertTrue(actionCounter.toString().contains("uniqueUserCount=500000"));
+    public void testBuilder() {
+        assertThat(actionCounter.getActionName(), equalTo(testEvent));
+        assertThat(actionCounter.getEventCount(), equalTo(eventCount));
+        assertThat(actionCounter.getUniqueUserCount(), equalTo(uniqueUserCount));
+        assertThat(actionCounter.toString(), containsString("eventCount=500000"));
+        assertThat(actionCounter.toString(), containsString("uniqueUserCount=500000"));
     }
 
     @Test
-    public void testHashCode(){
+    public void testHashCode() {
         ActionCounts actionCountsOther = actionCounter.clone();
-        assertEquals(actionCountsOther.hashCode(), actionCounter.hashCode());
+        assertThat(actionCountsOther.hashCode(), equalTo(actionCounter.hashCode()));
         actionCountsOther.setEventCount(42l);
-        assertNotEquals(actionCountsOther.hashCode(), actionCounter.hashCode());
+        assertThat(actionCountsOther.hashCode(), not(actionCounter.hashCode()));
     }
 
     @Test
-    public  void testBuildWithCountObject(){
+    public void testBuildWithCountObject() {
         counter = new Counts.Builder().withEventCount(eventCount).withUniqueUserCount(uniqueUserCount).build();
         actionCounter = new ActionCounts.Builder().withCountObject(counter).build();
         actionCounter.setActionName(testEvent);
-        assertEquals(actionCounter.getActionName(), testEvent);
-        assertEquals(actionCounter.getEventCount(), eventCount);
-        assertEquals(actionCounter.getUniqueUserCount(), uniqueUserCount);
+
+        assertThat(actionCounter.getActionName(), equalTo(testEvent));
+        assertThat(actionCounter.getEventCount(), equalTo(eventCount));
+        assertThat(actionCounter.getUniqueUserCount(), equalTo(uniqueUserCount));
     }
 
     @Test
-    public  void testBuildWithNew(){
+    public void testBuildWithNew() {
         ActionCounts newActionCounter = new ActionCounts(testEvent, eventCount, uniqueUserCount);
-        assertEquals(newActionCounter.getActionName(), testEvent);
-        assertEquals(newActionCounter.getEventCount(), eventCount);
-        assertEquals(newActionCounter.getUniqueUserCount(), uniqueUserCount);
-        assertTrue(actionCounter.equals(newActionCounter));
+
+        assertThat(newActionCounter.getActionName(), equalTo(testEvent));
+        assertThat(newActionCounter.getEventCount(), equalTo(eventCount));
+        assertThat(newActionCounter.getUniqueUserCount(), equalTo(uniqueUserCount));
+        assertThat(actionCounter, equalTo(newActionCounter));
 
         ActionCounts actionCounterClone = actionCounter.clone();
-        assertTrue(actionCounterClone.equals(actionCounter));
-        assertEquals(actionCounterClone.getActionName(), actionCounter.getActionName());
-        assertEquals(actionCounterClone.getEventCount(), actionCounter.getEventCount());
-        assertEquals(actionCounterClone.getUniqueUserCount(), actionCounter.getUniqueUserCount());
+
+        assertThat(actionCounterClone, equalTo(actionCounter));
+        assertThat(actionCounterClone.getActionName(), equalTo(actionCounter.getActionName()));
+        assertThat(actionCounterClone.getEventCount(), equalTo(actionCounter.getEventCount()));
+        assertThat(actionCounterClone.getUniqueUserCount(), equalTo(actionCounter.getUniqueUserCount()));
     }
 
 }

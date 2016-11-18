@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,18 +23,18 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
- * Created on 2/29/16.
+ * Test for the {@link BucketComparison}
  */
 public class BucketComparisonTest {
 
     BucketComparison bucketComparison;
 
     @Before
-    public void setup(){
+    public void setup() {
         Bucket.Label label = Bucket.Label.valueOf("TestLabel");
         Map<Event.Name, ActionComparisonStatistics> map = new HashMap<Event.Name, ActionComparisonStatistics>();
         ComparisonStatistics comparisonStatistics = new ComparisonStatistics();
@@ -43,7 +43,7 @@ public class BucketComparisonTest {
     }
 
     @Test
-    public void gettersAndSetters(){
+    public void gettersAndSetters() {
         Bucket.Label label = Bucket.Label.valueOf("NewTestLabel");
         Map<Event.Name, ActionComparisonStatistics> map = new HashMap<Event.Name, ActionComparisonStatistics>();
         ComparisonStatistics comparisonStatistics = new ComparisonStatistics();
@@ -57,10 +57,10 @@ public class BucketComparisonTest {
     }
 
     @Test
-    public void addToActionComparisonsTest(){
+    public void addToActionComparisonsTest() {
         Bucket.Label label = Bucket.Label.valueOf("TestLabel");
         ComparisonStatistics comparisonStatistics = new ComparisonStatistics();
-        BucketComparison bucketComparison =  new BucketComparison.Builder().withOtherLabel(label)
+        BucketComparison bucketComparison = new BucketComparison.Builder().withOtherLabel(label)
                 .withJointActionComparison(comparisonStatistics).withActionComparisons(null).build();
         bucketComparison.addToActionComparisons(Event.Name.valueOf("TestName"), new ActionComparisonStatistics());
 
@@ -68,21 +68,21 @@ public class BucketComparisonTest {
     }
 
     @Test
-    public void toStringTest(){
+    public void toStringTest() {
         assertThat(bucketComparison.toString(), is("BucketComparison"
-        		+ "[otherLabel=TestLabel,jointActionComparison="
-        		+ "ComparisonStatistics[sufficientData=false,fractionDataCollected=<null>,"
-        		+ "clearComparisonWinner=<null>,actionRateDifference=<null>,"
-        		+ "smallestDistinguishableEffectSize=<null>],actionComparisons={}]"));
+                + "[otherLabel=TestLabel,jointActionComparison="
+                + "ComparisonStatistics[sufficientData=false,fractionDataCollected=<null>,"
+                + "clearComparisonWinner=<null>,actionRateDifference=<null>,"
+                + "smallestDistinguishableEffectSize=<null>],actionComparisons={}]"));
     }
 
     @Test
-    public void hashcodeTest(){
+    public void hashcodeTest() {
         assertThat(bucketComparison.hashCode(), is(-214943778));
     }
 
     @Test
-    public void cloneAndEqual(){
+    public void cloneAndEqual() {
         BucketComparison bucketComparison1 = bucketComparison.clone();
         assertThat(bucketComparison1, is(bucketComparison1));
     }

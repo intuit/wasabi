@@ -42,8 +42,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.when;
@@ -198,7 +199,8 @@ public class AssignmentsResourceTest {
         when(assignments.doPageAssignments(applicationName, pageName, userID, context,
                 createAssignment, ignoreSamplingPercent, headers, null)).thenReturn(assignmentsFromPage);
 
-        assertNotNull(resource.getBatchAssignmentForPage(applicationName, pageName, userID, createAssignment, ignoreSamplingPercent, context, headers));
+        assertNotNull(resource.getBatchAssignmentForPage(applicationName, pageName, userID, createAssignment,
+                ignoreSamplingPercent, context, headers));
     }
 
     @Test
@@ -207,11 +209,13 @@ public class AssignmentsResourceTest {
 
         when(assignments.doPageAssignments(applicationName, pageName, userID, context,
                 createAssignment, ignoreSamplingPercent, headers, segmentationProfile)).thenReturn(assignmentsFromPage);
-        assertNotNull(resource.postBatchAssignmentForPage(applicationName, pageName, userID, createAssignment, ignoreSamplingPercent, context, segmentationProfile, headers));
+
+        assertNotNull(resource.postBatchAssignmentForPage(applicationName, pageName, userID, createAssignment,
+                ignoreSamplingPercent, context, segmentationProfile, headers));
     }
 
     @Test
     public void getAssignmentsQueueLength() throws Exception {
-        assertTrue(resource.getAssignmentsQueueLength().getStatus() == HttpStatus.SC_OK);
+        assertThat(resource.getAssignmentsQueueLength().getStatus(), is(HttpStatus.SC_OK));
     }
 }
