@@ -176,7 +176,7 @@ public class ApplicationsResourceTest {
 
         applicationsResource.getExperiments(applicationName, "foo");
 
-        verify(authorizedExperimentGetter).getAuthorizedExperimentsByName("foo", applicationName);
+        verify(authorizedExperimentGetter).getExperimentsByName(false, "foo", applicationName);
         verify(httpHeader).headers();
         verify(responseBuilder).build();
     }

@@ -1,15 +1,22 @@
+/* global wasabiUIPlugins:false */
 'use strict';
 
 /*
  * create sub modules (with [] in the end)
  */
 var ctrlModule = angular.module('wasabi.controllers', ['config']);
-angular.module('wasabi.services', ['ngResource']);
+var svcModule = angular.module('wasabi.services', ['ngResource']);
 angular.module('wasabi.directives', ['ngCookies']);
 
 ctrlModule.config(['$controllerProvider',
         function ($controllerProvider) {
             ctrlModule.controllerProvider = $controllerProvider;
+        }
+]);
+
+svcModule.config(['$provide',
+        function ($provide) {
+            svcModule.provide = $provide;
         }
 ]);
 
@@ -80,26 +87,33 @@ angular.module('wasabi', [
                     data: {
                         authorizedRoles: [USER_ROLES.admin]
                     }
-               })
-               .state('logs', {
-                   url: '/logs/{appname}',
-                   templateUrl: 'views/LogsTable.html',
-                   data: {
-                       authorizedRoles: [USER_ROLES.admin]
-                   }
+                })
+                .state('plugins', {
+                    url: '/plugins',
+                    templateUrl: 'views/PluginsTable.html',
+                    data: {
+                        authorizedRoles: [USER_ROLES.admin]
+                    }
+                })
+                .state('logs', {
+                    url: '/logs/{appname}',
+                    templateUrl: 'views/LogsTable.html',
+                    data: {
+                        authorizedRoles: [USER_ROLES.admin]
+                    }
                 }).state('feedbackReader', {
                     url: '/feedbackReader',
                     templateUrl: 'views/FeedbackTable.html',
                     data: {
                         authorizedRoles: [USER_ROLES.admin]
                     }
-               }).state('userAccess', {
-                   url: '/userAccess/{username}/{appname}/{access}',
-                   templateUrl: 'views/UserPage.html',
-                   controller: 'UserCtrl',
-                   data: {
-                       authorizedRoles: [USER_ROLES.admin]
-                   }
+                }).state('userAccess', {
+                    url: '/userAccess/{username}/{appname}/{access}',
+                    templateUrl: 'views/UserPage.html',
+                    controller: 'UserCtrl',
+                    data: {
+                        authorizedRoles: [USER_ROLES.admin]
+                    }
                 });
         }])
 

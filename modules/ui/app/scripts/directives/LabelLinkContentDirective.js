@@ -14,9 +14,9 @@ angular.module('wasabi.directives').directive('labelLinkContent', ['$compile',
              */
             link: function (scope, element, attrs) {
                 scope.customHref = '#';
-                if (attrs.state.toUpperCase() != 'DRAFT') {
+                if (attrs.state.toUpperCase() !== 'DRAFT') {
                     if (attrs.hasUpdate === 'true' || attrs.readOnly === 'true') {
-                        scope.customHref = '#/experiments/' + attrs.expId + '/' + (attrs.readOnly.toLowerCase() == 'true') + '/';
+                        scope.customHref = '#/experiments/' + attrs.expId + '/' + (attrs.readOnly.toLowerCase() === 'true') + '/';
                     }
                 }
 

@@ -18,6 +18,7 @@ package com.intuit.wasabi.analytics;
 import com.google.inject.AbstractModule;
 import com.intuit.wasabi.analytics.impl.AnalysisToolsImpl;
 import com.intuit.wasabi.analytics.impl.AnalyticsImpl;
+import com.intuit.wasabi.analytics.impl.ExperimentDetailsImpl;
 import com.intuit.wasabi.experiment.ExperimentsModule;
 import com.intuit.wasabi.repository.RepositoryModule;
 import org.slf4j.Logger;
@@ -44,6 +45,7 @@ public class AnalyticsModule extends AbstractModule {
 
         bind(Analytics.class).to(AnalyticsImpl.class).in(SINGLETON);
         bind(AnalysisTools.class).to(AnalysisToolsImpl.class).in(SINGLETON);
+        bind(ExperimentDetails.class).to(ExperimentDetailsImpl.class).in(SINGLETON);
 
         LOGGER.debug("installed module: {}", AnalyticsModule.class.getSimpleName());
     }

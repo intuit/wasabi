@@ -1,2 +1,1 @@
-var wasabiUIPlugins = [
-];
+var wasabiUIPlugins = [];

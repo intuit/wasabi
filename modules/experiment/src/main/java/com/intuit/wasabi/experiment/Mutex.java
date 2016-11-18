@@ -25,7 +25,6 @@ import java.util.Map;
 
 /**
  * Interface to manipulate mutual exclusion object for experiments.
- *
  */
 public interface Mutex {
 
@@ -49,22 +48,30 @@ public interface Mutex {
 
     /**
      * Creates a new mutual exclusion rule and adds it to the database
-     * 
-     * @param experimentID experimentID object containing experiment uuid
+     *
+     * @param experimentID     experimentID object containing experiment uuid
      * @param experimentIDList experimentList object containing list of experiment uuid's
-     * @param user the {@link UserInfo} who triggered the creation of an exclusion
+     * @param user             the {@link UserInfo} who triggered the creation of an exclusion
      * @return List of Map
      */
     List<Map> createExclusions(Experiment.ID experimentID, ExperimentIDList experimentIDList, UserInfo user);
 
     /**
      * Deletes a mutual exclusion relation between 2 experiments by removing it from the database.
-     * 
+     *
      * @param expID1 ID of experiment 1
      * @param expID2 ID of experiment 2
-     * @param user the {@link UserInfo} who deleted the exclusion
-     *
+     * @param user   the {@link UserInfo} who deleted the exclusion
      * @throws com.intuit.wasabi.exceptions.ExperimentNotFoundException if expID_1 or expID_2 is null.
      */
     void deleteExclusion(Experiment.ID expID1, Experiment.ID expID2, UserInfo user);
+
+
+    /**
+     * Performs a BFS on the mutual exclusions of the given Experiment.
+     *
+     * @param experiment the experiment to search mutual exclusions for
+     * @return the list of recursively mutually exclusive experiments
+     */
+    List<Experiment> getRecursiveMutualExclusions(Experiment experiment);
 }

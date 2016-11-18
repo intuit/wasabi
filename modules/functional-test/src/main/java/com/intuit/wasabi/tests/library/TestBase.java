@@ -47,6 +47,7 @@ import com.intuit.wasabi.tests.model.factory.EventFactory;
 import com.intuit.wasabi.tests.model.factory.ExperimentFactory;
 import com.intuit.wasabi.tests.model.factory.PageFactory;
 import com.intuit.wasabi.tests.model.factory.UserFeedbackFactory;
+import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.path.json.exception.JsonPathException;
 import com.jayway.restassured.response.Response;
@@ -64,6 +65,9 @@ import org.testng.annotations.Test;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -73,6 +77,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -1475,9 +1480,7 @@ public class TestBase extends ServiceTestBase {
     public Response postExclusions(Experiment experiment, List<Experiment> excludedExperiments, int expectedStatus, APIServerConnector apiServerConnector) {
         String uri = "experiments/" + experiment.id + "/exclusions";
         List<String> excludeIds = new ArrayList<>(excludedExperiments.size());
-        for (Experiment exp : excludedExperiments) {
-            excludeIds.add(exp.id);
-        }
+        excludeIds.addAll(excludedExperiments.stream().map(exp -> exp.id).collect(Collectors.toList()));
         response = apiServerConnector.doPost(uri,
                 TestUtils.wrapJsonIntoObject(simpleGson.toJson(excludeIds), "experimentIDs"));
         assertReturnCode(response, expectedStatus);
@@ -1781,13 +1784,118 @@ public class TestBase extends ServiceTestBase {
         return assignments;
     }
 
+    /**
+     * Sends a GET request to retrieve the experiment's assignment traffic.
+     * The response must contain {@link HttpStatus#SC_OK}.
+     * <p>
+     * URLEncodes the generated Strings generated from the dates which are passed as the URL.
+     *
+     * @param experiment the experiment
+     * @param from       the first day to retrieve
+     * @param to         the last day to retrieve
+     * @return a map of lists (= table) containing meta and assignment traffic data
+     */
+    protected Map<String, List<?>> getTraffic(Experiment experiment, LocalDateTime from, LocalDateTime to) {
+        return getTraffic(experiment, from, to, HttpStatus.SC_OK);
+    }
+
+    /**
+     * Sends a GET request to retrieve the experiment's assignment traffic.
+     * The response must contain HTTP {@code expectedStatus}.
+     * <p>
+     * URLEncodes the generated Strings generated from the dates which are passed as the URL.
+     *
+     * @param experiment the experiment
+     * @param from       the first day to retrieve
+     * @param to         the last day to retrieve
+     * @return a map of lists (= table) containing meta and assignment traffic data
+     */
+    protected Map<String, List<?>> getTraffic(Experiment experiment, LocalDateTime from, LocalDateTime to, int expectedStatus) {
+        RestAssured.urlEncodingEnabled = false;
+        APIServerConnector apiServerConnectorNoURLEncoding = apiServerConnector.clone();
+        RestAssured.urlEncodingEnabled = true;
+        return getTraffic(experiment, from, to, expectedStatus, apiServerConnectorNoURLEncoding);
+    }
+
+    /**
+     * Sends a GET request to retrieve the experiment's assignment traffic.
+     * The response must contain HTTP {@code expectedStatus}.
+     * <p>
+     * URLEncodes the generated Strings generated from the dates which are passed as the URL.
+     *
+     * @param experiment the experiment
+     * @param from       the first day to retrieve
+     * @param to         the last day to retrieve
+     * @return a map of lists (= table) containing meta and assignment traffic data
+     */
+    protected Map<String, List<?>> getTraffic(Experiment experiment, LocalDateTime from, LocalDateTime to, int expectedStatus, APIServerConnector apiServerConnector) {
+        try {
+            return getTraffic(experiment, URLEncoder.encode(TestUtils.formatDateForUI(from), "utf8"),
+                    URLEncoder.encode(TestUtils.formatDateForUI(to), "utf8"), expectedStatus, apiServerConnector);
+        } catch (UnsupportedEncodingException e) {
+            Assert.fail("Failed to urlencode the date in TestBase. Should not have happened! " + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Sends a GET request to retrieve the experiment's assignment traffic.
+     * The response must contain {@link HttpStatus#SC_OK}.
+     *
+     * @param experiment the experiment
+     * @param from       the first day to retrieve
+     * @param to         the last day to retrieve
+     * @return a map of lists (= table) containing meta and assignment traffic data
+     */
+    protected Map<String, List<?>> getTraffic(Experiment experiment, String from, String to) {
+        return getTraffic(experiment, from, to, HttpStatus.SC_OK);
+    }
+
+    /**
+     * Sends a GET request to retrieve the experiment's assignment traffic.
+     * The response must contain HTTP {@code expectedStatus}.
+     *
+     * @param experiment     the experiment
+     * @param from           the first day to retrieve
+     * @param to             the last day to retrieve
+     * @param expectedStatus the expected HTTP status code
+     * @return a map of lists (= table) containing meta and assignment traffic data
+     */
+    protected Map<String, List<?>> getTraffic(Experiment experiment, String from, String to, int expectedStatus) {
+        return getTraffic(experiment, from, to, expectedStatus, apiServerConnector);
+
+    }
+
+    /**
+     * Sends a GET request to retrieve the experiment's assignment traffic.
+     * The response must contain HTTP {@code expectedStatus}.
+     *
+     * @param experiment         the experiment
+     * @param from               the first day to retrieve
+     * @param to                 the last day to retrieve
+     * @param expectedStatus     the expected HTTP status code
+     * @param apiServerConnector the server connector to use
+     * @return a map of lists (= table) containing meta and assignment traffic data
+     */
+    protected Map<String, List<?>> getTraffic(Experiment experiment, String from, String to, int expectedStatus, APIServerConnector apiServerConnector) {
+        String uri = "experiments/" + experiment.id + "/assignments/traffic/" + from + "/" + to;
+        response = apiServerConnector.doGet(uri);
+        assertReturnCode(response, expectedStatus);
+        Map<String, List<?>> resultMap = new HashMap<>(4);
+        resultMap.put("priorities", response.jsonPath().<Integer>getList("priorities"));
+        resultMap.put("assignmentRatios", response.jsonPath().<Map<String, Object>>getList("assignmentRatios"));
+        resultMap.put("experiments", response.jsonPath().<String>getList("experiments"));
+        resultMap.put("samplingPercentages", response.jsonPath().<Float>getList("samplingPercentages"));
+        return resultMap;
+    }
 
     /////////////////////////////////////
     // experiments/<id>/pages Endpoint //
     /////////////////////////////////////
 
     /**
-     * Sends a GET request to retrieve the pages the experiment is as{@link HttpStatus#SC_OK}. HTTP {@code expectedStatus}.
+     * Sends a GET request to retrieve the pages the experiment is assigned to.
+     * The response must contain {@link HttpStatus#SC_OK}.
      *
      * @param experiment the experiment
      * @return a list of pages
@@ -4073,7 +4181,6 @@ public class TestBase extends ServiceTestBase {
     ////////////////////////
     // favorites endpoint //
     ////////////////////////
-
 
     /**
      * Sends a GET request to favorites.

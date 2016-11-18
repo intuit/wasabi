@@ -1,5 +1,5 @@
 /*global $:false */
-/*global moment:false */
+/*global jQuery:false */
 
 'use strict';
 
@@ -7,7 +7,7 @@ angular.module('wasabi.services').factory('RuleEditFactory', ['UtilitiesFactory'
     function (UtilitiesFactory) {
         return {
             types: ['boolean', 'number', 'string'],
-            
+
             placeholders: {
                 boolean: 'e.g., true or false',
                 number: 'e.g., 10000',
@@ -70,6 +70,15 @@ angular.module('wasabi.services').factory('RuleEditFactory', ['UtilitiesFactory'
             // rest of the function converts the rule expressions to their string form.
             convertRuleControlsToRuleString: function(rules, tabs) {
                 var ruleString = '';
+                function getOpStringForm(opToTest, opsArray) {
+                    var search = $.grep(opsArray, function(element) {
+                        return element.menuLabel === opToTest;
+                    });
+                    if (search && search.length > 0) {
+                        return search[0].stringForm;
+                    }
+                    return '';
+                }
                 for (var i = 0; i < rules.length; i++) {
                     // Create the string in order by going through the rules.
                     var nextRule = rules[i];
@@ -101,7 +110,7 @@ angular.module('wasabi.services').factory('RuleEditFactory', ['UtilitiesFactory'
                     if (nextRule.booleanOperator.length > 0) {
                         // There is an AND or OR between two rule expressions (between the previous one and this one).
                         // Insert the '&' or '|' in the string.
-                        ruleString += ' ' + $.grep(this.booleanOperators, function(element) {return element.menuLabel === nextRule.booleanOperator;})[0].stringForm;
+                        ruleString += ' ' + getOpStringForm(nextRule.booleanOperator, this.booleanOperators);
                     }
                     var operatorArray = this.stringTypeOperators;
                     switch (nextRule.type) {
@@ -286,7 +295,7 @@ angular.module('wasabi.services').factory('RuleEditFactory', ['UtilitiesFactory'
                         // If the right op is a boolean expression, they must have used parens, because otherwise
                         // you can't have this form, so we throw an exception that will result in only the "advanced"
                         // rule editor (a textfield) is available.
-                        throw "Bad rule JSON";
+                        throw 'Bad rule JSON';
                     }
                     if (leftOp.toLowerCase() === 'or' || leftOp.toLowerCase() === 'and') {
                         // It turns out that the case we need to watch out for is when the left side is another boolean expression.

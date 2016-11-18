@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,7 +39,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
 /**
- * Created on 3/7/16.
+ * Test for the {@link DatabaseAnalytics}
  */
 public class DatabaseAnalyticsTest {
 
@@ -63,8 +63,8 @@ public class DatabaseAnalyticsTest {
     }
 
     @Test
-    public void initilizeTest(){
-        databaseAnalytics.initialize(transactionFactory, flyway, "com/intuit/wasabi/repository/impl/mysql/migration");
+    public void initilizeTest() {
+        databaseAnalytics.initialize(flyway, "com/intuit/wasabi/repository/impl/mysql/migration");
 
         verify(transactionFactory, atLeastOnce()).getDataSource();
         verify(flyway, atLeastOnce()).setLocations("com/intuit/wasabi/repository/impl/mysql/migration");
@@ -73,7 +73,7 @@ public class DatabaseAnalyticsTest {
     }
 
     @Test(expected = RepositoryException.class)
-    public void getRollupRowsTest(){
+    public void getRollupRowsTest() {
         Experiment.ID experimentId = Experiment.ID.newInstance();
         String rollupDate = "TEST";
         Parameters parameters = mock(Parameters.class, RETURNS_DEEP_STUBS);
@@ -96,7 +96,7 @@ public class DatabaseAnalyticsTest {
     }
 
     @Test(expected = RepositoryException.class)
-    public void getActionsRowsTest(){
+    public void getActionsRowsTest() {
         Experiment.ID experimentId = Experiment.ID.newInstance();
         Parameters parameters = mock(Parameters.class, RETURNS_DEEP_STUBS);
 
@@ -122,14 +122,14 @@ public class DatabaseAnalyticsTest {
         assertThat(result, is(expected));
 
         //exception while select
-        doThrow(new RuntimeException()). when(transaction).select(anyString(), Matchers.anyVararg());
+        doThrow(new RuntimeException()).when(transaction).select(anyString(), Matchers.anyVararg());
 
         databaseAnalytics.getActionsRows(experimentId, parameters);
         fail();
     }
 
     @Test(expected = RepositoryException.class)
-    public void getJointActionsTest(){
+    public void getJointActionsTest() {
         Experiment.ID experimentId = Experiment.ID.newInstance();
         Parameters parameters = mock(Parameters.class, RETURNS_DEEP_STUBS);
 
@@ -155,7 +155,7 @@ public class DatabaseAnalyticsTest {
         assertThat(result, is(expected));
 
         //exception while select
-        doThrow(new RuntimeException()). when(transaction).select(anyString(), Matchers.anyVararg());
+        doThrow(new RuntimeException()).when(transaction).select(anyString(), Matchers.anyVararg());
 
         databaseAnalytics.getJointActions(experimentId, parameters);
         fail();
@@ -163,7 +163,7 @@ public class DatabaseAnalyticsTest {
 
 
     @Test(expected = RepositoryException.class)
-    public void getImpressionRowsTest(){
+    public void getImpressionRowsTest() {
         Experiment.ID experimentId = Experiment.ID.newInstance();
         Parameters parameters = mock(Parameters.class, RETURNS_DEEP_STUBS);
 
@@ -183,14 +183,14 @@ public class DatabaseAnalyticsTest {
         assertThat(result, is(expected));
 
         //exception while select
-        doThrow(new RuntimeException()). when(transaction).select(anyString(), Matchers.anyVararg());
+        doThrow(new RuntimeException()).when(transaction).select(anyString(), Matchers.anyVararg());
 
         databaseAnalytics.getImpressionRows(experimentId, parameters);
         fail();
     }
 
     @Test(expected = RepositoryException.class)
-    public void getEmptyBucketsTest(){
+    public void getEmptyBucketsTest() {
         Experiment.ID experimentId = Experiment.ID.newInstance();
         List<Map> input = new ArrayList<Map>();
         Map<String, String> map = new HashMap<String, String>();
@@ -207,14 +207,14 @@ public class DatabaseAnalyticsTest {
         assertThat(result.get(Bucket.Label.valueOf("TEST_LABEL")).getActionCounts().size(), is(0));
 
         //exception while select
-        doThrow(new RuntimeException()). when(transaction).select(anyString(), Matchers.anyVararg());
+        doThrow(new RuntimeException()).when(transaction).select(anyString(), Matchers.anyVararg());
 
         databaseAnalytics.getEmptyBuckets(experimentId);
         fail();
     }
 
     @Test(expected = RepositoryException.class)
-    public void getCountsFromRollupsTest(){
+    public void getCountsFromRollupsTest() {
         List<Map> expected = mock(List.class);
         Experiment.ID experimentId = Experiment.ID.newInstance();
         Parameters parameters = mock(Parameters.class, RETURNS_DEEP_STUBS);
@@ -227,14 +227,14 @@ public class DatabaseAnalyticsTest {
         assertThat(result, is(expected));
 
         //exception while select
-        doThrow(new RuntimeException()). when(transaction).select(anyString(), Matchers.anyVararg());
+        doThrow(new RuntimeException()).when(transaction).select(anyString(), Matchers.anyVararg());
 
         databaseAnalytics.getCountsFromRollups(experimentId, parameters);
         fail();
     }
 
     @Test(expected = RepositoryException.class)
-    public void checkMostRecentRollupTest(){
+    public void checkMostRecentRollupTest() {
         Experiment.ID experimentId = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class);
 
@@ -281,7 +281,7 @@ public class DatabaseAnalyticsTest {
     }
 
     @Test
-    public void testAddActionsToSql(){
+    public void testAddActionsToSql() {
         Parameters parameters = mock(Parameters.class);
 
         when(parameters.getActions()).thenReturn(null);

@@ -21,7 +21,7 @@ angular.module('wasabi.controllers').
                 isRapidExperiment: false
             };
             $scope.experimentFormSubmitted = false;
-            $scope.simpleRuleEditing = $cookies['showAdvancedSegmentationEditor'] == undefined || $cookies['showAdvancedSegmentationEditor'] !== 'true';
+            $scope.simpleRuleEditing = $cookies.showAdvancedSegmentationEditor === undefined || $cookies.showAdvancedSegmentationEditor !== 'true';
             $scope.downloadUrl = ConfigFactory.baseUrl() + '/experiments/' + $scope.experiment.id + '/assignments';
             $scope.rulesChangedNotSaved = true;
             $scope.resultsChangedNotSaved = true;
@@ -160,7 +160,7 @@ angular.module('wasabi.controllers').
                 $scope.rulesChangedNotSaved = true;
             };
 
-            $scope.ruleChanged = function(rule, subForm) {
+            $scope.ruleChanged = function() {
                 $scope.rulesChangedNotSaved = true;
             };
 
@@ -204,8 +204,7 @@ angular.module('wasabi.controllers').
             };
 
             $scope.disableRule = function(flag) {
-                var doit = (flag !== undefined ? flag : true);
-                $scope.data.ruleWidgetsDisabled = flag;
+                $scope.data.ruleWidgetsDisabled = (flag !== undefined ? flag : true);
             };
 
             $scope.firstPageEncoded = function() {
@@ -310,7 +309,7 @@ angular.module('wasabi.controllers').
                         $scope.experiment.statistics = statistics;
 
                         // Note: this also puts the bucket assignment counts in the sortedBuckets objects.
-                        UtilitiesFactory.determineBucketImprovementClass($scope.experiment, $scope.experiment.controlBucketLabel);
+                        UtilitiesFactory.determineBucketImprovementClass($scope.experiment);
 
                         // Populate the Actions table, which involves analysis of the statistics data.
                         $scope.buildActionsTable();
@@ -424,6 +423,8 @@ angular.module('wasabi.controllers').
             };
 
             $scope.buildActionsTable = function() {
+                var bucket = null;
+
                 $scope.dataRows = {
                     'Overall':
                     [
@@ -437,7 +438,7 @@ angular.module('wasabi.controllers').
                     ]
                 };
 
-                $scope.orderedDataRows = [$scope.dataRows['Overall']];
+                $scope.orderedDataRows = [$scope.dataRows.Overall];
 
                 var bucketColumnPositions = {'Metric': 0},
                     actionNames = [],
@@ -454,7 +455,7 @@ angular.module('wasabi.controllers').
                 for (var bucketName in $scope.experiment.statistics.buckets) {
                     if ($scope.experiment.statistics.buckets.hasOwnProperty(bucketName)) {
                         // This is actually a bucket
-                        var bucket = $scope.experiment.statistics.buckets[bucketName];
+                        bucket = $scope.experiment.statistics.buckets[bucketName];
                         if (bucket.label === $scope.experiment.controlBucketLabel) {
                             // Add the control (or baseline) bucket to the first position (after Metric)
                             var bucketLabel = bucket.label,
@@ -539,11 +540,11 @@ angular.module('wasabi.controllers').
                 for (var bucketName2 in $scope.experiment.statistics.buckets) {
                     if ($scope.experiment.statistics.buckets.hasOwnProperty(bucketName2)) {
                         // This is actually a bucket
-                        var bucket = $scope.experiment.statistics.buckets[bucketName2];
+                        bucket = $scope.experiment.statistics.buckets[bucketName2];
 
                         // Handle Overall action rate
                         var colNum = bucketColumnPositions[bucket.label];
-                        $scope.dataRows['Overall'].splice(colNum, 0,
+                        $scope.dataRows.Overall.splice(colNum, 0,
                             {
                                 'value': $scope.actionRate(bucket.label, $scope.experiment.statistics.buckets),
                                 'marginOfError': $scope.actionDiff(bucket.label, $scope.experiment.statistics.buckets),
@@ -551,7 +552,8 @@ angular.module('wasabi.controllers').
                                 'impressionCountValue': 'impressions: ' + $scope.bucketImpressionCount(bucket.label, $scope.experiment.statistics.buckets),
                                 'bucketCell': true,
                                 'overallValue': true,
-                                'actionName': false});
+                                'actionName': false
+                            });
 
                         for (var i = 0; i < actionNames.length; i++) {
                             var nextActionName = actionNames[i];
@@ -562,12 +564,12 @@ angular.module('wasabi.controllers').
                                         'actionCountValue': nextActionName,
                                         'impressionCountValue': '',
                                         'actionName': true
-                                    }];
+                                    }
+                                ];
                                 $scope.orderedDataRows.push($scope.dataRows[nextActionName]);
                             }
                             if (bucket.actionRates.hasOwnProperty(nextActionName)) {
                                 // This bucket has a value for this action name
-                                var action = bucket.actionRates[nextActionName];
                                 colNum = bucketColumnPositions[bucket.label];
                                 $scope.dataRows[nextActionName].splice(colNum, 0,
                                     {
@@ -941,7 +943,7 @@ angular.module('wasabi.controllers').
                     });
             };
 
-            $scope.openGetAssignmentsModal = function (endTime) {
+            $scope.openGetAssignmentsModal = function () {
                 $modal.open({
                     templateUrl: 'views/GetAssignmentsModal.html',
                     controller: 'GetAssignmentsModalCtrl',
@@ -952,9 +954,9 @@ angular.module('wasabi.controllers').
                         }
                     }
                 })
-                    .result.then(function (experiment) {
+                    .result.then(function () {
                         // Nothing to do.
-                    });
+                });
             };
 
             $scope.openChangeRapidExperiment = function () {

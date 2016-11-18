@@ -2,13 +2,10 @@
 
 'use strict';
 
-angular.module('wasabi.directives').directive('whenScrollEnds', function (TooltipFactory) {
+angular.module('wasabi.directives').directive('whenScrollEnds', function () {
     return {
         restrict: 'A',
         link: function (scope, element, attrs) {
-            var visibleHeight = element.height();
-            var threshold = 100;
-
             $(window).scroll(function()
             {
                 if (!$(element).is(':visible')) {

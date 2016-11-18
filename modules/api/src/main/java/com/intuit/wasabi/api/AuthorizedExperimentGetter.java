@@ -67,10 +67,10 @@ class AuthorizedExperimentGetter {
         return experiment;
     }
 
-    List<Experiment> getAuthorizedExperimentsByName(final String authorizationHeader,
-                                                    final Application.Name applicationName) {
-        authorization.checkUserPermissions(authorization.getUser(authorizationHeader), applicationName, READ);
-
+    List<Experiment> getExperimentsByName(final boolean checkAuthHeader, final String authorizationHeader, final Application.Name applicationName) {
+        if (checkAuthHeader || authorizationHeader != null) {
+            authorization.checkUserPermissions(authorization.getUser(authorizationHeader), applicationName, READ);
+        }
         List<Experiment> experimentList = this.experiments.getExperiments(applicationName);
 
         if (experimentList == null) {
@@ -78,5 +78,10 @@ class AuthorizedExperimentGetter {
         }
 
         return experimentList;
+    }
+    
+    List<Experiment> getAuthorizedExperimentsByName(final String authorizationHeader,
+                                                    final Application.Name applicationName) {
+        return getExperimentsByName(true, authorizationHeader, applicationName);
     }
 }
