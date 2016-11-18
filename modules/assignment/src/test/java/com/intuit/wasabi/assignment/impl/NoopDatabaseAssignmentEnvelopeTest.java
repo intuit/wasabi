@@ -15,10 +15,22 @@
  *******************************************************************************/
 package com.intuit.wasabi.assignment.impl;
 
+import com.intuit.wasabi.assignmentobjects.Assignment;
+import com.intuit.wasabi.assignmentobjects.AssignmentEnvelopePayload;
+import com.intuit.wasabi.assignmentobjects.SegmentationProfile;
+import com.intuit.wasabi.assignmentobjects.User;
+import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.experimentobjects.Bucket;
+import com.intuit.wasabi.experimentobjects.Context;
+import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.experimentobjects.Page;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
-import com.intuit.wasabi.assignmentobjects.AssignmentEnvelopePayload;
+import javax.ws.rs.core.HttpHeaders;
+import java.util.Date;
+import java.util.HashMap;
 
 import static org.junit.Assert.assertEquals;
 
@@ -33,7 +45,12 @@ public class NoopDatabaseAssignmentEnvelopeTest {
 
     @Test
     public void test() {
-        assertEquals(envelope, envelope.withPayload(new AssignmentEnvelopePayload()));
+        assertEquals(envelope, envelope.withPayload(new AssignmentEnvelopePayload(User.ID.valueOf("user"),
+                Context.valueOf("PROD"), true, true, true, SegmentationProfile.from(new HashMap<>()).build(),
+                Assignment.Status.EXISTING_ASSIGNMENT, Bucket.Label.valueOf("A"), Page.Name.valueOf("Page"),
+                Application.Name.valueOf("Application"), Experiment.Label.valueOf("Experiment"),
+                Experiment.ID.newInstance(), new Date(), Mockito.mock(HttpHeaders.class))));
+
         envelope.run();
     }
 
