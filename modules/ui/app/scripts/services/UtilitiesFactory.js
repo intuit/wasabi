@@ -40,14 +40,18 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                 if (!hideThem) {
                     this.hideTopLevelTab('Users', false);
                     this.hideTopLevelTab('Applications', false);
-                    this.hideTopLevelTab('Logs', false);
-                    this.hideTopLevelTab('Feedback', !Session.isSuperadmin);
+                    this.hideTopLevelTab('Plugins', false);
+                    this.hideTopLevelTabMenuChoice('Logs', false);
+                    this.hideTopLevelTabMenuChoice('Feedback', !Session.isSuperadmin);
+                    this.hideTopLevelTab('Tools', false);
                 }
                 else {
                     this.hideTopLevelTab('Users');
                     this.hideTopLevelTab('Applications');
-                    this.hideTopLevelTab('Logs');
-                    this.hideTopLevelTab('Feedback', true);
+                    this.hideTopLevelTab('Plugins');
+                    this.hideTopLevelTabMenuChoice('Logs');
+                    this.hideTopLevelTabMenuChoice('Feedback', true);
+                    this.hideTopLevelTab('Tools', true);
                 }
             },
 
@@ -68,17 +72,27 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                     StateFactory.currentCardViewPage = 1;
                 }
                 $('.main li').removeClass('sel');
-                $('.main li a:contains(' + label + ')').parent().addClass('sel');
+                $('.main li.navLink a:contains(' + label + ')').closest('li.navLink').addClass('sel');
                 $('#welcomeMsg').text('Welcome, ' + Session.userID).css('display', 'inline');
             },
 
             hideTopLevelTab: function(label, hideIt) {
                 var hideTheTab = (hideIt !== undefined ? hideIt : true);
                 if (hideTheTab) {
-                    $('.main li a:contains(' + label + ')').parent().hide();
+                    $('.main li.navLink a:contains(' + label + ')').closest('li.navLink').hide();
                 }
                 else {
-                    $('.main li a:contains(' + label + ')').parent().show();
+                    $('.main li.navLink a:contains(' + label + ')').closest('li.navLink').show();
+                }
+            },
+
+            hideTopLevelTabMenuChoice: function(label, hideIt) {
+                var hideTheMenuChoice = (hideIt !== undefined ? hideIt : true);
+                if (hideTheMenuChoice) {
+                    $('.main li.navLink a:contains(' + label + ')').closest('li').hide();
+                }
+                else {
+                    $('.main li.navLink a:contains(' + label + ')').closest('li').show();
                 }
             },
 
@@ -236,7 +250,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                     $state.go('signin');
                 });
             },
-            
+
             trackEvent: function(eventName, parm1, parm2, parm3, parm4) {
                 // If you have implemented a contributeClickTracking plugin, this will call the trackEvent() function
                 // on it, if it exists.
@@ -1119,6 +1133,22 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                         afterResultsFunc();
                     }
                 });
+            },
+
+            createNameList: function(objectsList, nameAttrName) {
+                var nameList = objectsList[0][nameAttrName];
+                if (objectsList.length > 1) {
+                    for (var j = 1; j < objectsList.length; j++) {
+                        if (j === objectsList.length - 1) {
+                            nameList += ' and ';
+                        }
+                        else {
+                            nameList += ', ';
+                        }
+                        nameList += objectsList[j][nameAttrName];
+                    }
+                }
+                return nameList;
             }
 
         };

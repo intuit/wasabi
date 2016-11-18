@@ -27,7 +27,7 @@ angular.module('wasabi.controllers').
             $scope.help = ConfigFactory.help;
 
             UtilitiesFactory.hideHeading(false);
-            UtilitiesFactory.selectTopLevelTab('Logs');
+            UtilitiesFactory.selectTopLevelTab('Tools');
 
             $scope.changePage = function(destinationApp) {
                 if (destinationApp !== undefined) {

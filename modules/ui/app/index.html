@@ -37,18 +37,32 @@
         <div class="navBanner">
             <nav>
                 <ul class="main">
-                    <li class="sel"><a href="#/experiments">Experiments</a></li>
-                    <li><a href="#/priorities/">Priority</a></li>
-                    <li><a href="#/users">Users</a></li>
-                    <li><a href="#/applications">Applications</a></li>
-                    <li><a href="#/plugins">Plugins</a></li>
-                    <li><a href="#/logs/">Logs</a></li>
-                    <li><a href="#/feedbackReader">Feedback</a></li>
+                    <li class="sel navLink"><a class="tabName" href="#/experiments">Experiments</a></li>
+                    <li class="navLink"><a class="tabName" href="#/priorities/">Priority</a></li>
+                    <li class="navLink"><a class="tabName" href="#/users">Users</a></li>
+                    <li class="navLink"><a class="tabName" href="#/applications">Applications</a></li>
+                    <li class="navLink"><a class="tabName" href="#/plugins">Plugins</a></li>
+                    <li class="navLink navDropdown">
+                        <span class="dropdown" dropdown>
+                            <a href class="tabName dropdown-toggle toolsChoice" dropdown-toggle>Tools</a>
+                            <ul class="dropdown-menu" role="menu">
+                              <li class="toolsMenuChoices">
+                                <a href="#/pages/">Page Management</a>
+                              </li>
+                              <li class="toolsMenuChoices">
+                                <a href="#/logs/">Logs</a>
+                              </li>
+                              <li class="toolsMenuChoices">
+                                <a href="#/feedbackReader">Feedback Reader</a>
+                              </li>
+                            </ul>
+                        </span>
+                    </li>
                 </ul>
                 <ul class="user">
-                    <li id="welcomeMsg">Welcome</li>
-                    <li ng-controller="SignOutCtrl"><a href="#" onclick="return false;" ng-click="signOut()">Sign out</a></li>
-                    <li ng-controller="FeedbackCtrl"><a href="#" onclick="return false;" ng-click="openFeedbackModal()">Feedback</a></li>
+                    <li class="navLink" id="welcomeMsg">Welcome</li>
+                    <li class="navLink" ng-controller="SignOutCtrl"><a href="#" onclick="return false;" ng-click="signOut()">Sign out</a></li>
+                    <li class="navLink" ng-controller="FeedbackCtrl"><a href="#" onclick="return false;" ng-click="openFeedbackModal()">Feedback</a></li>
                 </ul>
             </nav>
             <div class="ab"></div>
@@ -138,6 +152,7 @@
     <script src="scripts/services/EmailFactory.js"></script>
     <script src="scripts/services/WasabiFactory.js"></script>
     <script src="scripts/services/FavoritesFactory.js"></script>
+    <script src="scripts/services/PagesFactory.js"></script>
     <script src="scripts/services/Session.js"></script>
     <script src="scripts/controllers/ExperimentsCtrl.js"></script>
     <script src="scripts/controllers/ExperimentModalCtrl.js"></script>
@@ -181,6 +196,8 @@
     <script src="scripts/controllers/AnalysisGraphModal.js"></script>
     <script src="scripts/controllers/UserCtrl.js"></script>
     <script src="scripts/controllers/PluginsCtrl.js"></script>
+    <script src="scripts/controllers/PageManagementCtrl.js"></script>
+    <script src="scripts/controllers/AddExperimentsToPageModalCtrl.js"></script>
     <script src="scripts/directives/ConvertPercentDirective.js"></script>
     <script src="scripts/directives/CustomTooltip.js"></script>
     <script src="scripts/directives/EnsureNumber.js"></script>
