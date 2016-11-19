@@ -219,7 +219,7 @@ angular.module('wasabi.controllers').
                     case 'applicationName':
                         return 'application_name';
                     case 'label':
-                        return 'experiment_name';
+                        return 'experiment_label';
                     case 'creatorID':
                         return 'created_by';
                     case 'samplingPercent':

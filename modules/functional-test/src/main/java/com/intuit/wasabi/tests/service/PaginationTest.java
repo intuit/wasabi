@@ -45,7 +45,7 @@ public class PaginationTest extends TestBase {
 
     /**
      * Sets up 12 experiments to test pagination properly.
-     *
+     * <p>
      * The experiments can easily be ordered from first to last ascending by their name (ending in Exp00...11)
      * or descending by their sampling percentage (100...89).
      */
@@ -73,7 +73,7 @@ public class PaginationTest extends TestBase {
 
     @Test(dependsOnGroups = {"ping"}, groups = {"pagination_smoke"})
     public void t_ExperimentPaginationSmokeByName() {
-        List<Experiment> results = getPaginatedExperiments(2, 4, "experiment_name", null);
+        List<Experiment> results = getPaginatedExperiments(2, 4, "experiment_label", null);
 
         ModelAssert.assertEqualModelItems(results, experimentList.subList(4, 8));
     }
@@ -90,34 +90,34 @@ public class PaginationTest extends TestBase {
 
     @Test(dependsOnGroups = {"pagination_smoke"}, groups = {"pagination_pages"})
     public void t_ExperimentPaginationNonExistingLatePage() {
-        List<Experiment> results = getPaginatedExperiments(4, 10, "experiment_name", null);
+        List<Experiment> results = getPaginatedExperiments(4, 10, "experiment_label", null);
 
         ModelAssert.assertEqualModelItems(results, Collections.<Experiment>emptyList());
     }
 
     @Test(dependsOnGroups = {"pagination_smoke"}, groups = {"pagination_pages"})
     public void t_ExperimentPaginationNonExistingNegativePage() {
-        List<Experiment> results = getPaginatedExperiments(-4, 10, "experiment_name", null);
+        List<Experiment> results = getPaginatedExperiments(-4, 10, "experiment_label", null);
 
         ModelAssert.assertEqualModelItems(results, Collections.<Experiment>emptyList());
     }
 
     @Test(dependsOnGroups = {"pagination_smoke"}, groups = {"pagination_pages"})
     public void t_ExperimentPaginationEmptyPage() {
-        List<Experiment> results = getPaginatedExperiments(1, 0, "experiment_name", null);
+        List<Experiment> results = getPaginatedExperiments(1, 0, "experiment_label", null);
         ModelAssert.assertEqualModelItems(results, Collections.<Experiment>emptyList());
     }
 
     @Test(dependsOnGroups = {"pagination_smoke"}, groups = {"pagination_pages"})
     public void t_ExperimentPaginationFilterByName() {
-        List<Experiment> results = getPaginatedExperiments(1, 10, "experiment_name", "experiment_name=5");
+        List<Experiment> results = getPaginatedExperiments(1, 10, "experiment_label", "experiment_label=5");
 
         ModelAssert.assertEqualModelItems(results, experimentList.subList(5, 6));
     }
 
     @Test(dependsOnGroups = {"pagination_smoke"}, groups = {"pagination_pages"})
     public void t_ExperimentPaginationFilterByIllegalKey() {
-        String exception = getPaginationException(1, 10, "experiment_name", "illegal_key=some_value");
+        String exception = getPaginationException(1, 10, "experiment_label", "illegal_key=some_value");
 
         Assert.assertTrue(exception.contains("illegal_key"));
     }
@@ -131,14 +131,14 @@ public class PaginationTest extends TestBase {
 
     @Test(dependsOnGroups = {"pagination_pages"}, groups = {"pagination_date_constraints"})
     public void t_ExperimentPaginationFilterByDateConstraintAfter() {
-        List<Experiment> results = getPaginatedExperiments(1, 10, "experiment_name", "date_constraint_start=isafter:03/15/2000");
+        List<Experiment> results = getPaginatedExperiments(1, 10, "experiment_label", "date_constraint_start=isafter:03/15/2000");
 
         ModelAssert.assertEqualModelItems(results, experimentList.subList(0, 10));
     }
 
     @Test(dependsOnGroups = {"pagination_pages"}, groups = {"pagination_date_constraints"})
     public void t_ExperimentPaginationFilterByDateConstraintBefore() {
-        List<Experiment> results = getPaginatedExperiments(1, 10, "experiment_name", "date_constraint_start=isbefore:03/15/3000");
+        List<Experiment> results = getPaginatedExperiments(1, 10, "experiment_label", "date_constraint_start=isbefore:03/15/3000");
 
         ModelAssert.assertEqualModelItems(results, experimentList.subList(0, 10));
     }
@@ -153,7 +153,7 @@ public class PaginationTest extends TestBase {
         } catch (ParseException exception) {
             Assert.fail("Parsing of date failed!");
         }
-        List<Experiment> results = getPaginatedExperiments(2, 10, "experiment_name",
+        List<Experiment> results = getPaginatedExperiments(2, 10, "experiment_label",
                 "date_constraint_start=ison:" + date);
 
         ModelAssert.assertEqualModelItems(results, experimentList.subList(10, 12));
@@ -169,7 +169,7 @@ public class PaginationTest extends TestBase {
         } catch (ParseException exception) {
             Assert.fail("Parsing of date failed!");
         }
-        List<Experiment> results = getPaginatedExperiments(2, 10, "experiment_name", "date_constraint_start=isbetween:"
+        List<Experiment> results = getPaginatedExperiments(2, 10, "experiment_label", "date_constraint_start=isbetween:"
                 + date + ":10/05/3000");
 
         ModelAssert.assertEqualModelItems(results, experimentList.subList(10, 12));
@@ -177,25 +177,25 @@ public class PaginationTest extends TestBase {
 
     @Test(dependsOnGroups = {"pagination_pages"}, groups = {"pagination_date_constraints"})
     public void t_ExperimentPaginationFilterByIllegalDateConstraints() {
-        String exception = getPaginationException(1, 10, "experiment_name", "date_constraint_start=isafter:15/3/2000");
+        String exception = getPaginationException(1, 10, "experiment_label", "date_constraint_start=isafter:15/3/2000");
         Assert.assertTrue(exception.contains("Wrong format"), "Format day/month");
 
-        exception = getPaginationException(1, 10, "experiment_name", "date_constraint_start=isbetween:5/5/2014");
+        exception = getPaginationException(1, 10, "experiment_label", "date_constraint_start=isbetween:5/5/2014");
         Assert.assertTrue(exception.contains("Wrong format"), "Format isBetween one arg");
 
-        exception = getPaginationException(1, 10, "experiment_name", "date_constraint_start=isbetween:5/5/2014:5");
+        exception = getPaginationException(1, 10, "experiment_label", "date_constraint_start=isbetween:5/5/2014:5");
         Assert.assertTrue(exception.contains("Wrong format"), "Format isBetween partial");
 
-        exception = getPaginationException(1, 10, "experiment_name", "date_constraint_start=ison:");
+        exception = getPaginationException(1, 10, "experiment_label", "date_constraint_start=ison:");
         Assert.assertTrue(exception.contains("Wrong format"), "Format isOn no arg");
 
-        exception = getPaginationException(1, 10, "experiment_name", "date_constraint_end=isbefore:1");
+        exception = getPaginationException(1, 10, "experiment_label", "date_constraint_end=isbefore:1");
         Assert.assertTrue(exception.contains("Wrong format"), "Format isBefore partial");
     }
 
     @Test(dependsOnGroups = {"pagination_pages"}, groups = {"pagination_experiment_state"})
     public void t_ExperimentPaginationFilterByStateNotTerminated() {
-        List<Experiment> results = getPaginatedExperiments(1, 5, "experiment_name", "state_exact=notterminated");
+        List<Experiment> results = getPaginatedExperiments(1, 5, "experiment_label", "state_exact=notterminated");
 
         ModelAssert.assertEqualModelItems(results, experimentList.subList(0, 5));
     }
@@ -203,35 +203,35 @@ public class PaginationTest extends TestBase {
 
     @Test(dependsOnGroups = {"pagination_pages"}, groups = {"pagination_experiment_state"})
     public void t_ExperimentPaginationFilterByStateAny() {
-        List<Experiment> results = getPaginatedExperiments(1, 5, "experiment_name", "state_exact=any");
+        List<Experiment> results = getPaginatedExperiments(1, 5, "experiment_label", "state_exact=any");
 
         ModelAssert.assertEqualModelItems(results, experimentList.subList(0, 5));
     }
 
     @Test(dependsOnGroups = {"pagination_pages"}, groups = {"pagination_experiment_state"})
     public void t_ExperimentPaginationFilterByStateTerminated() {
-        List<Experiment> results = getPaginatedExperiments(1, 5, "experiment_name", "state_exact=terminated");
+        List<Experiment> results = getPaginatedExperiments(1, 5, "experiment_label", "state_exact=terminated");
 
         ModelAssert.assertEqualModelItems(results, Collections.<Experiment>emptyList());
     }
 
     @Test(dependsOnGroups = {"pagination_pages"}, groups = {"pagination_experiment_state"})
     public void t_ExperimentPaginationFilterByStateRunning() {
-        List<Experiment> results = getPaginatedExperiments(1, 5, "experiment_name", "state_exact=running");
+        List<Experiment> results = getPaginatedExperiments(1, 5, "experiment_label", "state_exact=running");
 
         ModelAssert.assertEqualModelItems(results, Collections.<Experiment>emptyList());
     }
 
     @Test(dependsOnGroups = {"pagination_pages"}, groups = {"pagination_experiment_state"})
     public void t_ExperimentPaginationFilterByStateDraft() {
-        List<Experiment> results = getPaginatedExperiments(1, 5, "experiment_name", "state_exact=draft");
+        List<Experiment> results = getPaginatedExperiments(1, 5, "experiment_label", "state_exact=draft");
 
         ModelAssert.assertEqualModelItems(results, experimentList.subList(0, 5));
     }
 
     @Test(dependsOnGroups = {"pagination_pages"}, groups = {"pagination_experiment_state"})
     public void t_ExperimentPaginationFilterByStatePaused() {
-        List<Experiment> results = getPaginatedExperiments(1, 5, "experiment_name", "state_exact=paused");
+        List<Experiment> results = getPaginatedExperiments(1, 5, "experiment_label", "state_exact=paused");
 
         ModelAssert.assertEqualModelItems(results, Collections.<Experiment>emptyList());
     }

@@ -45,7 +45,7 @@ public class ExperimentComparator extends PaginationComparator<Experiment> {
      */
     private enum Property implements PaginationComparatorProperty<Experiment> {
         application_name(experiment -> experiment.getApplicationName().toString(), String::compareToIgnoreCase),
-        experiment_name(experiment -> experiment.getLabel().toString(), String::compareToIgnoreCase),
+        experiment_label(experiment -> experiment.getLabel().toString(), String::compareToIgnoreCase),
         created_by(Experiment::getCreatorID, String::compareToIgnoreCase),
         creation_time(Experiment::getCreationTime, Date::compareTo),
         start_time(Experiment::getStartTime, Date::compareTo),
