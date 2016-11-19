@@ -45,7 +45,7 @@ public class ExperimentDetailComparator extends PaginationComparator<ExperimentD
      */
     private enum Property implements PaginationComparatorProperty<ExperimentDetail> {
         application_name(experimentDetail -> experimentDetail.getApplicationName().toString(), String::compareToIgnoreCase),
-        experiment_name(experimentDetail -> experimentDetail.getLabel().toString(), String::compareToIgnoreCase),
+        experiment_label(experimentDetail -> experimentDetail.getLabel().toString(), String::compareToIgnoreCase),
         state(experimentDetail -> experimentDetail.getState().name(), String::compareToIgnoreCase),
         modification_time(ExperimentDetail::getModificationTime, Date::compareTo),
         favorite(ExperimentDetail::isFavorite, Boolean::compareTo);
