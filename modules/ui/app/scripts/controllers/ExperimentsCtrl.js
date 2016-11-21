@@ -507,23 +507,21 @@ angular.module('wasabi.controllers').
                 });
             };
 
-            // init controller
-            if (Session && Session.switches) {
-                $scope.data.enableCardView = Session.switches.ShowCardView;
-            }
-            $scope.loadTableExperiments();
-
+            // Init controller
+            // Load local storage object that saves info about the last search we did.
             var tmpSearchSettings = localStorage.getItem('wasabiLastSearch');
             if (tmpSearchSettings) {
                 $scope.data = JSON.parse(tmpSearchSettings);
+            }
+            // If this user has card view enabled, turn it on.
+            if (Session && Session.switches) {
+                $scope.data.enableCardView = Session.switches.ShowCardView;
             }
             if ($scope.data.enableCardView && $scope.data.showGrid) {
                 $scope.loadCardViewExperiments();
             }
 
-            if (!$scope.data.lastSearchWasSimple) {
-                $scope.showMoreLessSearch(true);
-            }
+            $scope.loadTableExperiments();
 
             UtilitiesFactory.hideHeading(false);
             UtilitiesFactory.selectTopLevelTab('Experiments');
@@ -698,12 +696,10 @@ angular.module('wasabi.controllers').
                     hideTerminatedChanged = (changingHideTerminated !== undefined ? changingHideTerminated : false);
                 $scope.data.lastSearchWasSimple = true;
                 localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
-                if (switchingFromAdvanced || hideTerminatedChanged || $.trim($scope.data.query).length > 0) {
-                    if ($scope.searchTimer) {
-                        $timeout.cancel($scope.searchTimer);
-                    }
-                    $scope.searchTimer = $timeout($scope.doSearch, 400);
+                if ($scope.searchTimer) {
+                    $timeout.cancel($scope.searchTimer);
                 }
+                $scope.searchTimer = $timeout($scope.doSearch, 400);
             };
 
             $scope.advSearch = function() {
