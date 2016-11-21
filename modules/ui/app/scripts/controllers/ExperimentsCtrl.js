@@ -282,7 +282,7 @@ angular.module('wasabi.controllers').
                 };
                 if ($scope.data.lastSearchWasSimple) {
                     // Add simple filter info, if available
-                    queryParams.filter = $scope.data.query;
+                    queryParams.filter = encodeURIComponent($scope.data.query);
                     if ($scope.data.hideTerminated) {
                         queryParams.filter += ',state_exact=notTerminated';
                     }
@@ -300,6 +300,11 @@ angular.module('wasabi.controllers').
                         queryParams.filter = addAdvParam(queryParams.filter, 'experiment_label=' + $.trim($scope.data.advExperimentName));
                     }
                     if ($scope.data.adv1stDateSearchType !== 'isAny') {
+                        if ($scope.data.advTxtSearchDateOne.length === 0 ||
+                            ($scope.data.adv1stDateSearchType === 'isBetween' && $scope.data.advTxtSearchDateTwo.length === 0)) {
+                            UtilitiesFactory.displayPageError('Missing Date', 'You must provide a value for the search date.');
+                            return false;
+                        }
                         queryParams.filter = addAdvParam(queryParams.filter, 'date_constraint_' +
                                 ($scope.data.advStartOrEndDate === 'startDate' ? 'start' : 'end') +
                                 '=' +
