@@ -9,7 +9,6 @@ import cats.data.Xor._
 import com.datastax.spark.connector.cql.CassandraConnector
 import com.google.inject.Guice
 import com.holdenkarau.spark.testing.SharedSparkContext
-import com.intuit.wasabi.tests.data.GroupConcatTest._
 import com.intuit.wasabi.data.app.MigrateDataApplication
 import com.intuit.wasabi.data.conf.AppConfig
 import com.intuit.wasabi.data.conf.guice.migratedata.MockCassandraSQLContext
@@ -134,7 +133,7 @@ final case class TestUUIDSchema(id: String, name1: String, name2: String) extend
 
 object UUIDTestDataStaxExample {
   def main(args: Array[String]): Unit = {
-  /*  val conf = new SparkConf(true).setAppName(getClass.getSimpleName) //.setMaster("local")
+    val conf = new SparkConf(true).setAppName(getClass.getSimpleName) //.setMaster("local")
 
     val sc = new SparkContext(conf)
     val sqlContext = new CassandraSQLContext(sc)
@@ -171,16 +170,6 @@ object UUIDTestDataStaxExample {
     println(filteredDF2.queryExecution)
     filteredDF2.show
 
-    sc.stop()*/
-
-    val list = Seq("Hi","Hello")
-    var i=0
-    val list2:scala.collection.mutable.ArraySeq[String] = new scala.collection.mutable.ArraySeq(2)
-    for(r <- list) {
-      list2(i) = r + " Nilesh"
-      i = i + 1
-    }
-
-    for(r <- list2.iterator) println(r)
+    sc.stop()
   }
 }

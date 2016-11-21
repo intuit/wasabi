@@ -7,12 +7,13 @@ import com.intuit.wasabi.data.repository.cassandra.SparkCassandraRepository
 import com.intuit.wasabi.data.util.Constants._
 import com.intuit.wasabi.data.util.Utility
 import com.typesafe.config.Config
+import org.apache.spark.SparkContext
 import org.apache.spark.sql.cassandra.CassandraSQLContext
 
 /**
   * Created by nbarge on 11/3/16.
   */
-class DefaultCassandraRepositoryDI(appConfig: Config) extends CommonSparkApplicationDI(appConfig) {
+class DefaultCassandraRepositoryDI(appConfig: Config, sc: Option[SparkContext] = None) extends CommonSparkApplicationDI(appConfig, sc) {
 
   override def configure(): Unit = {
     super.configure()

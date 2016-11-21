@@ -3,6 +3,7 @@ package com.intuit.wasabi.tests.data
 import cats.data.Xor.{Left, Right}
 import com.holdenkarau.spark.testing.SharedSparkContext
 import com.intuit.wasabi.data.exception.WasabiError
+import com.intuit.wasabi.data.util.Utility
 import org.scalatest.FunSuite
 
 /**

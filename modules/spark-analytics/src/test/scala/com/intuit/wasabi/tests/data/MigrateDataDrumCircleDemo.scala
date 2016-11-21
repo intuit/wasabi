@@ -10,7 +10,7 @@ import org.apache.spark.{SparkConf, SparkContext}
 /**
   * Created by nbarge on 9/27/16.
   */
-object MigrateData {
+object MigrateDataDrumCircleDemo {
 
   def prepareSparkConfig() :  SparkConf = {
     println("prepareSparkConfig - started")

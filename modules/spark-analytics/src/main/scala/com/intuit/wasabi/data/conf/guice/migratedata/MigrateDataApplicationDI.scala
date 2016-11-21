@@ -8,11 +8,12 @@ import com.intuit.wasabi.data.repository.{DataStoreConnectionProperties, SparkDa
 import com.intuit.wasabi.data.util.Utility
 import com.intuit.wasabi.data.util.Constants._
 import com.typesafe.config.Config
+import org.apache.spark.SparkContext
 import org.apache.spark.sql.cassandra.CassandraSQLContext
 
 
 
-class MigrateDataApplicationDI(appConfig: Config) extends CommonSparkApplicationDI(appConfig) {
+class MigrateDataApplicationDI(appConfig: Config, sc: Option[SparkContext] = None) extends CommonSparkApplicationDI(appConfig, sc) {
 
   override def configure(): Unit = {
     super.configure()

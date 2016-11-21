@@ -8,7 +8,6 @@ import com.google.inject.Guice
 import com.holdenkarau.spark.testing.SharedSparkContext
 import com.intuit.wasabi.data.app.MigrateDataApplication
 import com.intuit.wasabi.data.conf.AppConfig
-import com.intuit.wasabi.data.conf.guice.migratedata.MockCassandraSQLContext
 import com.intuit.wasabi.data.exception.{ProcessorException, WasabiError}
 import com.intuit.wasabi.data.processor.migratedata.CopyTableMigrationProcessor
 import com.intuit.wasabi.tests.data.conf.guice.migratedata.{MockCassandraSQLContext, MockMigrateDataApplicationDI}
@@ -34,6 +33,7 @@ class MigrateDataApplicationTests extends FunSuite with SharedSparkContext with 
     val jMap: java.util.Map[String,String] = new java.util.HashMap[String,String]()
     jMap.put("app_id", "migrate-data")
     jMap.put("master","local[2]")
+    jMap.put("default.spark.spark.driver.allowMultipleContexts","true")
 
     setting = new AppConfig(Option.apply(ConfigFactory.parseMap(jMap)))
   }

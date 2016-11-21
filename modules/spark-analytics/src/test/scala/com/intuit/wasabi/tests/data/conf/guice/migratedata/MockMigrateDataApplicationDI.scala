@@ -4,11 +4,12 @@ import com.datastax.spark.connector.cql.CassandraConnector
 import com.google.inject.name.{Named, Names}
 import com.google.inject.{Inject, Provider}
 import com.intuit.wasabi.data.conf.guice.CommonSparkApplicationDI
-import com.intuit.wasabi.data.conf.guice.migratedata.SourceSparkCassandraRepository
+import com.intuit.wasabi.data.conf.guice.migratedata.{DestinationCassandraConnectorProvider, SourceSparkCassandraRepository}
 import com.intuit.wasabi.data.repository.cassandra.SparkCassandraRepository
 import com.intuit.wasabi.data.repository.{DataStoreConnectionProperties, SparkDataStoreRepository}
 import com.intuit.wasabi.data.udf.CurrentTimestampFunc
 import com.intuit.wasabi.data.util.Constants._
+import com.intuit.wasabi.data.util.Utility
 import com.typesafe.config.Config
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.cassandra.CassandraSQLContext

@@ -19,7 +19,6 @@ object BasicReadWriteDemo {
     // Tell Spark the address of one Cassandra node:
     val conf = new SparkConf(true)
       .set("spark.cassandra.connection.host", CassandraHost)
-      .set("spark.cleaner.ttl", "3600")
       .setMaster("local")
       .setAppName(getClass.getSimpleName)
 
