@@ -9,13 +9,10 @@ import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.intuit.wasabi.data.exception.WasabiError
 import com.intuit.wasabi.data.repository.SparkDataStoreRepository
-import com.intuit.wasabi.data.udf.{StringToUUIDFunc, UUIDToStringFunc}
 import com.intuit.wasabi.data.util.Constants
 import com.typesafe.config.Config
-import org.apache.commons.lang3.ArrayUtils
 import org.apache.spark.SparkContext
-import org.apache.spark.broadcast.Broadcast
-import org.apache.spark.sql.{DataFrame, Row, SQLContext}
+import org.apache.spark.sql.{DataFrame, SQLContext}
 import org.apache.spark.storage.StorageLevel
 
 /**
