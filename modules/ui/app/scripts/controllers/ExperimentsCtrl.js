@@ -282,7 +282,7 @@ angular.module('wasabi.controllers').
                 };
                 if ($scope.data.lastSearchWasSimple) {
                     // Add simple filter info, if available
-                    queryParams.filter = $scope.data.query;
+                    queryParams.filter = encodeURIComponent($scope.data.query);
                     if ($scope.data.hideTerminated) {
                         queryParams.filter += ',state_exact=notTerminated';
                     }
@@ -300,6 +300,11 @@ angular.module('wasabi.controllers').
                         queryParams.filter = addAdvParam(queryParams.filter, 'experiment_label=' + $.trim($scope.data.advExperimentName));
                     }
                     if ($scope.data.adv1stDateSearchType !== 'isAny') {
+                        if ($scope.data.advTxtSearchDateOne.length === 0 ||
+                            ($scope.data.adv1stDateSearchType === 'isBetween' && $scope.data.advTxtSearchDateTwo.length === 0)) {
+                            UtilitiesFactory.displayPageError('Missing Date', 'You must provide a value for the search date.');
+                            return false;
+                        }
                         queryParams.filter = addAdvParam(queryParams.filter, 'date_constraint_' +
                                 ($scope.data.advStartOrEndDate === 'startDate' ? 'start' : 'end') +
                                 '=' +
@@ -507,23 +512,21 @@ angular.module('wasabi.controllers').
                 });
             };
 
-            // init controller
-            if (Session && Session.switches) {
-                $scope.data.enableCardView = Session.switches.ShowCardView;
-            }
-            $scope.loadTableExperiments();
-
+            // Init controller
+            // Load local storage object that saves info about the last search we did.
             var tmpSearchSettings = localStorage.getItem('wasabiLastSearch');
             if (tmpSearchSettings) {
                 $scope.data = JSON.parse(tmpSearchSettings);
+            }
+            // If this user has card view enabled, turn it on.
+            if (Session && Session.switches) {
+                $scope.data.enableCardView = Session.switches.ShowCardView;
             }
             if ($scope.data.enableCardView && $scope.data.showGrid) {
                 $scope.loadCardViewExperiments();
             }
 
-            if (!$scope.data.lastSearchWasSimple) {
-                $scope.showMoreLessSearch(true);
-            }
+            $scope.loadTableExperiments();
 
             UtilitiesFactory.hideHeading(false);
             UtilitiesFactory.selectTopLevelTab('Experiments');
@@ -698,12 +701,10 @@ angular.module('wasabi.controllers').
                     hideTerminatedChanged = (changingHideTerminated !== undefined ? changingHideTerminated : false);
                 $scope.data.lastSearchWasSimple = true;
                 localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
-                if (switchingFromAdvanced || hideTerminatedChanged || $.trim($scope.data.query).length > 0) {
-                    if ($scope.searchTimer) {
-                        $timeout.cancel($scope.searchTimer);
-                    }
-                    $scope.searchTimer = $timeout($scope.doSearch, 400);
+                if ($scope.searchTimer) {
+                    $timeout.cancel($scope.searchTimer);
                 }
+                $scope.searchTimer = $timeout($scope.doSearch, 400);
             };
 
             $scope.advSearch = function() {
