@@ -118,7 +118,10 @@ public class TestBase extends ServiceTestBase {
         // TODO It appears that the build system has user.name and pwd set to something different from what it should be for the environment. Commented next two lines out for now.
         //	setPropertyFromSystemProperty ("user.name","user-name");
         //	setPropertyFromSystemProperty ("user.password","password");
-
+        setPropertyFromSystemProperty("database-url","database.url");
+        setPropertyFromSystemProperty("database-username","database.username");
+        setPropertyFromSystemProperty("database-password","database.password");
+		
         setPropertyFromSystemProperty ("user-name","user-name");
         setPropertyFromSystemProperty ("password","password");
         setPropertyFromSystemProperty ("user-lastname","user-lastname");
