@@ -1,4 +1,4 @@
-package com.intuit.wasabi.data.processor
+package com.intuit.wasabi.tests.data.processor
 
 import cats.data.Xor
 import com.intuit.wasabi.data.conf.AppConfig

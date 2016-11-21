@@ -1,4 +1,4 @@
-package com.intuit.wasabi.data.udf
+package com.intuit.wasabi.tests.data.udf
 
 import java.sql.Timestamp
 import java.time.{Instant, ZoneId}

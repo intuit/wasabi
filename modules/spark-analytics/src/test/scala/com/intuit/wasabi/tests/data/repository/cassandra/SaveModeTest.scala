@@ -1,4 +1,4 @@
-package com.intuit.wasabi.data.repository.cassandra
+package com.intuit.wasabi.tests.data.repository.cassandra
 
 import com.datastax.spark.connector.cql.CassandraConnector
 import com.holdenkarau.spark.testing.SharedSparkContext

@@ -1,13 +1,11 @@
-package com.intuit.wasabi.data
+package com.intuit.wasabi.tests.data
 
 import java.sql.Timestamp
 import java.time.{Instant, ZoneId}
 
 import com.holdenkarau.spark.testing.SharedSparkContext
-import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{Row, SQLContext}
-import org.apache.spark.{SparkConf, SparkContext}
 import org.scalatest.FunSuite
 
 
@@ -57,7 +55,6 @@ object test{
   }
   def v1(c:c1) ={
     import java.time.Duration
-    import c.i1
     def v2() ={
       val i = Duration.ofDays(1)
     }

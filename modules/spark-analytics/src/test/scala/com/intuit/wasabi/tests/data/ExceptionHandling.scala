@@ -1,10 +1,8 @@
-package com.intuit.wasabi.data
+package com.intuit.wasabi.tests.data
 
-import cats.data.Xor
-import cats.data.Xor.{Left, Right, left, right}
+import cats.data.Xor.{Left, Right}
 import com.holdenkarau.spark.testing.SharedSparkContext
-import com.intuit.wasabi.data.exception.{ApplicationException, WasabiError}
-import com.intuit.wasabi.data.util.Utility
+import com.intuit.wasabi.data.exception.WasabiError
 import org.scalatest.FunSuite
 
 /**
@@ -82,7 +80,7 @@ class ExceptionHandling extends FunSuite with SharedSparkContext {
 
   test("Test cas Xor: valid input as a function on rdd") {
 
-    val iList = Seq("123","345","567","bad input 1","bad input 2","667","888");
+    val iList = Seq("123", "345", "567", "bad input 1", "bad input 2", "667", "888");
     val strRdd = sc.parallelize(iList)
 
     val intRdd = strRdd.map(Utility.parse)
@@ -90,5 +88,6 @@ class ExceptionHandling extends FunSuite with SharedSparkContext {
     println("Print Left values")
 
     println("Print Right values")
-    intRdd.map(x => println(x))  }
+    intRdd.map(x => println(x))
+  }
 }

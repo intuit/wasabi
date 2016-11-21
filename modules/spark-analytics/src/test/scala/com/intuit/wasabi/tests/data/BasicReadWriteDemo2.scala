@@ -1,4 +1,4 @@
-package com.intuit.wasabi.data
+package com.intuit.wasabi.tests.data
 
 import org.apache.spark.sql.{Row, SQLContext}
 import org.apache.spark.sql.cassandra.CassandraSQLContext

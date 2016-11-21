@@ -1,9 +1,9 @@
-package com.intuit.wasabi.data
+package com.intuit.wasabi.tests.data
 
 import com.datastax.spark.connector.cql.CassandraConnector
-import org.apache.spark.sql.{Row, SQLContext, SaveMode}
 import org.apache.spark.sql.cassandra.CassandraSQLContext
 import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
+import org.apache.spark.sql.{Row, SQLContext, SaveMode}
 import org.apache.spark.{SparkConf, SparkContext}
 ;
 

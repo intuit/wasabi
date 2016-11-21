@@ -1,12 +1,10 @@
-package com.intuit.wasabi.data
+package com.intuit.wasabi.tests.data
 
 import java.io.FileInputStream
 import java.util.Properties
 
 import com.typesafe.config.ConfigFactory
-import org.apache.spark.sql.{Row, SQLContext}
-import org.apache.spark.sql.cassandra.CassandraSQLContext
-import org.apache.spark.sql.types.{IntegerType, StructField, StructType}
+import org.apache.spark.sql.SQLContext
 import org.apache.spark.{SparkConf, SparkContext}
 
 /**

@@ -1,4 +1,4 @@
-package com.intuit.wasabi.data.app
+package com.intuit.wasabi.tests.data.app
 
 import java.sql.Timestamp
 
@@ -8,16 +8,16 @@ import com.google.inject.Guice
 import com.holdenkarau.spark.testing.SharedSparkContext
 import com.intuit.wasabi.data.app.MigrateDataApplication
 import com.intuit.wasabi.data.conf.AppConfig
-import com.intuit.wasabi.data.conf.guice.migratedata.{MockCassandraSQLContext, MockMigrateDataApplicationDI}
+import com.intuit.wasabi.data.conf.guice.migratedata.MockCassandraSQLContext
 import com.intuit.wasabi.data.exception.{ProcessorException, WasabiError}
 import com.intuit.wasabi.data.processor.migratedata.CopyTableMigrationProcessor
+import com.intuit.wasabi.tests.data.conf.guice.migratedata.{MockCassandraSQLContext, MockMigrateDataApplicationDI}
 import com.typesafe.config.ConfigFactory
 import org.apache.spark.Logging
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.types.{StringType, StructField, StructType, TimestampType}
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.FunSuite
-import com.intuit.wasabi.data.conf.guice.migratedata.{MockCassandraSQLContext, MockMigrateDataApplicationDI}
 
 /**
   * Created by nbarge on 10/21/16.

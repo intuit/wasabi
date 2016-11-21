@@ -1,4 +1,4 @@
-package com.intuit.wasabi.data.util
+package com.intuit.wasabi.tests.data.util
 
 import java.util.Map.Entry
 import java.util.Properties

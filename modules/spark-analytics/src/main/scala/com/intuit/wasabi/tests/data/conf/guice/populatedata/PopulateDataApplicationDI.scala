@@ -1,4 +1,4 @@
-package com.intuit.wasabi.data.conf.guice.populatedata
+package com.intuit.wasabi.tests.data.conf.guice.populatedata
 
 import com.intuit.wasabi.data.conf.guice.DefaultCassandraRepositoryDI
 import com.typesafe.config.Config
