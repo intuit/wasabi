@@ -147,6 +147,7 @@ public class CassandraAuditLogRepositoryTest {
         Assert.assertEquals(1, calr.getAuditLogEntryList(appName).size());
     }
 
+    @Test
     public void testGetAuditLogEntryListLimit() throws Exception {
         OperationResult<CqlResult<Application.Name, String>> opResult = Mockito.mock(OperationResult.class);
         Mockito.when(prepQuery.execute()).thenReturn(opResult);

@@ -3,8 +3,8 @@
 /*jshint -W106*/ // disable jshint warning about camel case
 
 angular.module('wasabi.controllers')
-    .controller('SignInCtrl', ['$scope', '$rootScope', '$state', 'AuthFactory', 'AuthzFactory', 'AUTH_EVENTS', 'Session', 'UtilitiesFactory', '$cookies', 'USER_ROLES', 'WasabiFactory',
-            function ($scope, $rootScope, $state, AuthFactory, AuthzFactory, AUTH_EVENTS, Session, UtilitiesFactory, $cookies, USER_ROLES, WasabiFactory) {
+    .controller('SignInCtrl', ['$scope', '$rootScope', '$state', 'AuthFactory', 'AuthzFactory', 'AUTH_EVENTS', 'Session', 'UtilitiesFactory', '$cookies', 'USER_ROLES', 'WasabiFactory', 'StateFactory',
+            function ($scope, $rootScope, $state, AuthFactory, AuthzFactory, AUTH_EVENTS, Session, UtilitiesFactory, $cookies, USER_ROLES, WasabiFactory, StateFactory) {
 
                 $scope.credentials = {
                     username: '',
@@ -99,6 +99,8 @@ angular.module('wasabi.controllers')
                                 UtilitiesFactory.hideAdminTabs();
                             }
                             Session.create(sessionInfo);
+                            StateFactory.currentExperimentsPage = 1;
+                            StateFactory.currentCardViewPage = 1;
 
                             /*
                             Note: the following code is used to control the new Card View feature.  This requires a
@@ -136,7 +138,7 @@ angular.module('wasabi.controllers')
                         });
                     }, function(reason) {
                         //console.log(reason);
-                        if (reason.data.error & reason.data.error.code !== 401) {
+                        if (reason.data.error && reason.data.error.code !== 401) {
                             $scope.serverDown = true;
                         }
                         else {

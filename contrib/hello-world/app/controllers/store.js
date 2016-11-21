@@ -97,7 +97,7 @@
             'applicationName': 'MyStore',
             'experimentName': 'TestBuyButtonColor',
             'protocol': 'http',
-            'host': '192.168.99.100:8080'
+            'host': 'localhost:8080'
         });
 
         store.username = session.login.name;

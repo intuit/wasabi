@@ -40,6 +40,9 @@ angular.module('wasabi.controllers')
 
                 $scope.doSegmentationTest = function () {
                     var profileValues = {'profile':{}}, val = null;
+                    function doNothing() {
+                        return false;
+                    }
                     for (var i = 0; i < $scope.ruleElements.length; i++) {
                         var currentRuleElement = $scope.ruleElements[i];
                         if (currentRuleElement.name.length === 0) {
@@ -53,7 +56,7 @@ angular.module('wasabi.controllers')
                         if (currentRuleElement.type === 'number') {
                             val = parseInt($scope.ruleElements[i].value);
                             if (isNaN(val)) {
-                                DialogsFactory.alertDialog('The value for the profile parameter, ' + $scope.ruleElements[i].name + ', must be a number.', 'Invalid Number Value', function() {/* nothing to do */});
+                                DialogsFactory.alertDialog('The value for the profile parameter, ' + $scope.ruleElements[i].name + ', must be a number.', 'Invalid Number Value', doNothing);
                                 return;
                             }
                             profileValues.profile[$scope.ruleElements[i].name] = val;
@@ -61,10 +64,10 @@ angular.module('wasabi.controllers')
                         else if (currentRuleElement.type === 'boolean') {
                             val = $.trim($scope.ruleElements[i].value).toLowerCase();
                             if (val !== 'true' && val !== 'false') {
-                                DialogsFactory.alertDialog('The value for the profile parameter, ' + $scope.ruleElements[i].name + ', must be true or false.', 'Invalid Boolean Value', function() {/* nothing to do */});
+                                DialogsFactory.alertDialog('The value for the profile parameter, ' + $scope.ruleElements[i].name + ', must be true or false.', 'Invalid Boolean Value', doNothing);
                                 return;
                             }
-                            profileValues.profile[$scope.ruleElements[i].name] = (val == 'true');
+                            profileValues.profile[$scope.ruleElements[i].name] = ((typeof(val) === 'string' && val === 'true') || (typeof(val) === 'boolean' && val));
                         }
                         else {
                             profileValues.profile[$scope.ruleElements[i].name] = $.trim($scope.ruleElements[i].value);

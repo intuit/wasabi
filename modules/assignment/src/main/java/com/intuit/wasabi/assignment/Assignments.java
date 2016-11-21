@@ -15,6 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.assignment;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Table;
 import com.intuit.wasabi.analyticsobjects.Parameters;
 import com.intuit.wasabi.assignmentobjects.Assignment;
@@ -30,6 +31,7 @@ import com.intuit.wasabi.experimentobjects.Page;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.StreamingOutput;
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +47,7 @@ public interface Assignments {
      *
      * @return Map of number of elements each queue
      */
-    Map <String, Integer>queuesLength();
+    Map<String, Integer> queuesLength();
 
     /**
      * Gets the Assignment for one user for an specific experiment.
@@ -84,32 +86,6 @@ public interface Assignments {
                              SegmentationProfile segmentationProfile, HttpHeaders headers);
 
     /**
-     * Return an existing assignment for a user, or potentially create a new
-     * assignment if the user is assignable to this experiment. Includes a Page.Name to identify the page through which
-     * the assignment was delivered.
-     *
-     * @param userID                the {@link com.intuit.wasabi.assignmentobjects.User.ID} of the person we want the assignment for
-     * @param applicationName       the {@link com.intuit.wasabi.experimentobjects.Application.Name} the app we want the assignment for
-     * @param label                 the {@link com.intuit.wasabi.experimentobjects.Experiment.Label} the experiment
-     * @param context               the {@link Context} of the assignment call
-     * @param createAssignment      <code>true</code> when a new Assignment should be created
-     * @param ignoreSamplingPercent <code>true</code> if we want to have an assignment independent of the sampling rate
-     * @param segmentationProfile   the {@link SegmentationProfile} to be used for the assignment
-     * @param headers               the {@link HttpHeaders} that can be used by the segmentation
-     * @param pageName              the {@link com.intuit.wasabi.experimentobjects.Page.Name} the page name for the assignment
-     * @param experiment            the {@link Experiment} we want the assignment for
-     * @param bucketList            list of Buckets of this Experiment
-     * @param userAssignments       the already existing assignments
-     * @param exclusives            the experiments that are excluded from the assignment
-     * @return a brand new or old {@link Assignment}
-     */
-    Assignment getAssignment(User.ID userID, Application.Name applicationName, Experiment.Label label, Context context,
-                             boolean createAssignment, boolean ignoreSamplingPercent, SegmentationProfile segmentationProfile,
-                             HttpHeaders headers, Page.Name pageName, Experiment experiment, BucketList bucketList,
-                             Table<Experiment.ID, Experiment.Label, String> userAssignments,
-                             Map<Experiment.ID, List<Experiment.ID>> exclusives);
-
-    /**
      * Insert/update a user assignment for this experiment.
      *
      * @param userID             the {@link com.intuit.wasabi.assignmentobjects.User.ID} of the person we want the assignment for
@@ -138,9 +114,9 @@ public interface Assignments {
      * @return a brand new or old {@link Assignment}
      */
     List<Map> doBatchAssignments(User.ID userID, Application.Name applicationName, Context context,
-                                     boolean createAssignment, boolean overwrite, HttpHeaders headers,
-                                     ExperimentBatch experimentBatch, Page.Name pageName,
-                                     Map<Experiment.ID, Boolean> allowAssignments);
+                                 boolean createAssignment, boolean overwrite, HttpHeaders headers,
+                                 ExperimentBatch experimentBatch, Page.Name pageName,
+                                 Map<Experiment.ID, Boolean> allowAssignments);
 
     /**
      * Check if a user is in an experiment which is mutually exclusive with the given experiment
@@ -155,10 +131,10 @@ public interface Assignments {
     /**
      * Export assignments data for a given experiment ID.
      *
-     * @param experimentID the {@link com.intuit.wasabi.experimentobjects.Experiment.ID}
-     * @param context      the {@link Context}
-     * @param parameters          the parameters {@link Parameters}
-     * @param ignoreNullBucket   the boolean flag of whether to ignroe null bucket
+     * @param experimentID     the {@link com.intuit.wasabi.experimentobjects.Experiment.ID}
+     * @param context          the {@link Context}
+     * @param parameters       the parameters {@link Parameters}
+     * @param ignoreNullBucket the boolean flag of whether to ignroe null bucket
      * @return a {@link StreamingOutput} for the Assignment Data
      */
     StreamingOutput getAssignmentStream(Experiment.ID experimentID, Context context, Parameters parameters, Boolean ignoreNullBucket);
@@ -177,8 +153,8 @@ public interface Assignments {
      * @return a {@link List} of {@link HashMap}s for the generated assignments
      */
     List<Map> doPageAssignments(Application.Name applicationName, Page.Name pageName, User.ID userID,
-                                    Context context, boolean createAssignment, boolean ignoreSamplingPercent,
-                                    HttpHeaders headers, SegmentationProfile segmentationProfile);
+                                Context context, boolean createAssignment, boolean ignoreSamplingPercent,
+                                HttpHeaders headers, SegmentationProfile segmentationProfile);
 
     /**
      * This method returns the {@link Bucket} for a given experiment ID and bucketLabel.
@@ -202,4 +178,17 @@ public interface Assignments {
     boolean doSegmentTest(Application.Name applicationName, Experiment.Label experimentLabel,
                           Context context, SegmentationProfile segmentationProfile,
                           HttpHeaders headers);
+
+    /**
+     * Gets bucket assignment ratios per day for a list of experiments. Also contains meta information about the
+     * experiments such as sampling percentages and priorities. The data is in rows by date and ordered by priority
+     * per row.
+     *
+     * @param experiments          the list of experiments
+     * @param experimentPriorities a look up map of priorities
+     * @param fromDate             the date to start reporting from
+     * @param toDate               the date to report to
+     * @return bucket assignment ratios per day and meta
+     */
+    ImmutableMap<String, ?> getExperimentAssignmentRatioPerDayTable(List<Experiment> experiments, Map<Experiment.ID, Integer> experimentPriorities, OffsetDateTime fromDate, OffsetDateTime toDate);
 }

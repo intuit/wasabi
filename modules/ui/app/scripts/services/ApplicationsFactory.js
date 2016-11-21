@@ -8,7 +8,7 @@ angular.module('wasabi.services').factory('ApplicationsFactory', ['$resource', '
             'query': { method: 'GET',
                 transformResponse: function (data) {
                     var parsedData = $.parseJSON(data);
-                    if (parsedData && parsedData.errors) {
+                    if (parsedData && parsedData.error) {
                         return parsedData;
                     }
 
@@ -19,7 +19,7 @@ angular.module('wasabi.services').factory('ApplicationsFactory', ['$resource', '
                         }
                         else {
                             transformed.push({
-                                "applicationName": parsedData[i]
+                                'applicationName': parsedData[i]
                             });
                         }
                     }
@@ -43,6 +43,16 @@ angular.module('wasabi.services').factory('ApplicationsFactory', ['$resource', '
                 url: ConfigFactory.baseUrl() + '/applications/:appName/pages',
                 transformResponse: function (data) {
                     var parsedData = $.parseJSON(data).pages;
+
+                    return parsedData;
+                },
+                isArray: true
+            },
+            'getExperiments': { method: 'GET',
+                params: {appName: '@appName'},
+                url: ConfigFactory.baseUrl() + '/applications/:appName/experiments',
+                transformResponse: function (data) {
+                    var parsedData = $.parseJSON(data);
 
                     return parsedData;
                 },

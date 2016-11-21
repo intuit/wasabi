@@ -26,6 +26,7 @@ import com.intuit.wasabi.assignmentobjects.User;
 import com.intuit.wasabi.exceptions.AssignmentNotFoundException;
 import com.intuit.wasabi.experimentobjects.*;
 import com.intuit.wasabi.experimentobjects.Bucket.Label;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -33,6 +34,9 @@ import io.swagger.annotations.ApiParam;
 import javax.ws.rs.*;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+
+import org.slf4j.Logger;
+
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +45,7 @@ import static com.intuit.wasabi.api.APISwaggerResource.*;
 import static com.intuit.wasabi.assignmentobjects.Assignment.Status.EXPERIMENT_EXPIRED;
 import static java.lang.Boolean.FALSE;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * API endpoint for managing assignments
@@ -51,6 +56,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Api(value = "Assignments (Submit-Generate user(customer) bucket assignments)")
 public class AssignmentsResource {
 
+    private static final Logger LOGGER = getLogger(AssignmentsResource.class);
     private final HttpHeader httpHeader;
     private final Assignments assignments;
 
@@ -118,7 +124,13 @@ public class AssignmentsResource {
 
                                     @javax.ws.rs.core.Context
                                     final HttpHeaders headers) {
-        Assignment assignment = getAssignment(userID, applicationName, experimentLabel, context, createAssignment,
+    	if ( LOGGER.isDebugEnabled()) {
+    		LOGGER.debug("getAssignment userID={}, applicationName={}, experimentLabel={}, context={}, createAssignment={}" +
+                                    ", ignoreSamplingPercent={}, headers={}", userID, applicationName, experimentLabel, context, createAssignment,
+                                    ignoreSamplingPercent, headers);
+    	}
+    	
+    	Assignment assignment = getAssignment(userID, applicationName, experimentLabel, context, createAssignment,
                 ignoreSamplingPercent, null, headers);
 
         return httpHeader.headers().entity(toMap(assignment)).build();
@@ -198,7 +210,14 @@ public class AssignmentsResource {
 
                                     @javax.ws.rs.core.Context
                                     final HttpHeaders headers) {
-        Assignment assignment = getAssignment(userID, applicationName, experimentLabel, context, createAssignment,
+    	if ( LOGGER.isDebugEnabled()) {
+    		LOGGER.debug("postAssignment userID={}, applicationName={}, experimentLabel={}, context={}, createAssignment={}" +
+                                    ", ignoreSamplingPercent={}, segmentationProfile={}, headers={}", userID, applicationName, 
+                                    experimentLabel, context, createAssignment,
+                                    ignoreSamplingPercent, segmentationProfile, headers);
+    	}
+
+    	Assignment assignment = getAssignment(userID, applicationName, experimentLabel, context, createAssignment,
                 ignoreSamplingPercent, segmentationProfile, headers);
 
         return httpHeader.headers().entity(toMap(assignment)).build();
@@ -246,6 +265,12 @@ public class AssignmentsResource {
 
                                         @javax.ws.rs.core.Context
                                         final HttpHeaders headers) {
+    	if ( LOGGER.isDebugEnabled()) {
+    		LOGGER.debug("getBatchAssignment userID={}, applicationName={}, context={}, createAssignment={}" +
+                                    ", headers={}, experimentBatch={}", userID, applicationName, context, createAssignment,
+                                    headers, experimentBatch);
+    	}
+    	
         List<Map> myAssignments = assignments.doBatchAssignments(userID, applicationName, context, createAssignment, FALSE,
                 headers, experimentBatch, null, null);
 
@@ -293,6 +318,11 @@ public class AssignmentsResource {
                                     @DefaultValue("PROD")
                                     @ApiParam(value = "context for the experiment, eg \"QA\", \"PROD\"")
                                     final Context context) {
+    	if ( LOGGER.isDebugEnabled()) {
+    		LOGGER.debug("udpateAssignment userID={}, applicationName={}, experimentLabel={}, context={}, "
+    				+ "submittedDatat={}", userID, applicationName, experimentLabel, context, submittedData);
+    	}
+    	
         if (submittedData == null) {
             throw new IllegalArgumentException("Assignment JSON not found in request body");
         }
@@ -369,7 +399,13 @@ public class AssignmentsResource {
 
                                             @javax.ws.rs.core.Context
                                             HttpHeaders headers) {
-        List<Map> assignmentsFromPage = assignments.doPageAssignments(applicationName, pageName, userID, context,
+    	if ( LOGGER.isDebugEnabled()) {
+    		LOGGER.debug("getBatchAssignmentsForPage applicationName={}, pageName={}, userID={}, context={}, createAssignment={}" +
+                                    ", ignoreSamplingPercent={}, headers={}", applicationName, pageName, userID, context, createAssignment,
+                                    ignoreSamplingPercent, headers);
+    	}
+
+    	List<Map> assignmentsFromPage = assignments.doPageAssignments(applicationName, pageName, userID, context,
                 createAssignment, ignoreSamplingPercent, headers, null);
 
         return httpHeader.headers()
@@ -430,6 +466,13 @@ public class AssignmentsResource {
                                             final SegmentationProfile segmentationProfile,
 
                                             @javax.ws.rs.core.Context final HttpHeaders headers) {
+    	
+    	if ( LOGGER.isDebugEnabled()) {
+    		LOGGER.debug("postBatchAssignmentForPage applicationName={}, pageName={}, userID={}, context={}, createAssignment={}" +
+                                    ", ignoreSamplingPercent={}, headers={}, segmentationProfile={}", applicationName, 
+                                    pageName, userID, context, createAssignment, ignoreSamplingPercent, headers, segmentationProfile);
+    	}
+
         List<Map> assignmentsFromPage = assignments.doPageAssignments(applicationName, pageName, userID, context,
                 createAssignment, ignoreSamplingPercent, headers, segmentationProfile);
 

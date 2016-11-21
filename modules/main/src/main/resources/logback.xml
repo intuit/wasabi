@@ -30,15 +30,14 @@
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG}.log</file>
-        <append>true</append>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>%d{yyyy-MM-dd}.%i.log.zip</fileNamePattern>
-            <maxHistory>30</maxHistory>
-            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-                <maxFileSize>100MB</maxFileSize>
-            </timeBasedFileNamingAndTriggeringPolicy>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>${LOG}.%i.log.zip</fileNamePattern>
+            <minIndex>1</minIndex>
+            <maxIndex>6</maxIndex>
         </rollingPolicy>
-
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+           <maxFileSize>500MB</maxFileSize>
+        </triggeringPolicy>
         <encoder>
             <pattern>%date %level [%thread] %logger{10} [%file:%line] %msg%n</pattern>
         </encoder>
@@ -100,13 +99,6 @@
     <!--
     <logger name="audit" level="INFO" additivity="false">
         <appender-ref ref="AUDIT"/>
-    </logger>
-    -->
-
-    <!--
-    <logger name="com.intuit.data.autumn.exemplary.server" level="DEBUG">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
     </logger>
     -->
 

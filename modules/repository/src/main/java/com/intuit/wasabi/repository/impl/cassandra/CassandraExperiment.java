@@ -45,6 +45,10 @@ import java.util.Date;
                                 ExperimentIDSerializer.get(), null)));
         super.setDescription(
                 columns.getStringValue("description", null));
+        super.setHypothesisIsCorrect(
+                columns.getStringValue("hypothesis_is_correct", null));
+        super.setResults(
+                columns.getStringValue("results", null));
         super.setRule(
                 columns.getStringValue("rule", null));
         super.setRuleJson(convertRuleToJson(columns.getStringValue("rule", null)));
@@ -95,6 +99,16 @@ import java.util.Date;
 
     @Override
     public void setDescription(String description) {
+        throwNotMutableException();
+    }
+
+    @Override
+    public void setHypothesisIsCorrect(String hypothesisIsCorrect) {
+        throwNotMutableException();
+    }
+
+    @Override
+    public void setResults(String results) {
         throwNotMutableException();
     }
 

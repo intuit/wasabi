@@ -16,7 +16,7 @@
                     <input search type="text" autocorrect="off" autocapitalize="off" placeholder="Search"
                            ng-model="data.query"
                            ng-change="search()"/>
-                    <a href="#" class="clear">Clear Search</a>
+                    <a href="#" class="clear" ng-click="clearSearch()">Clear Search</a>
                 </div>
             </form>
         </div>
@@ -59,12 +59,13 @@
         </div>
     </div>
 
-    <div ng-if="data.enableCardView" when-scroll-ends="loadMoreExperimentData()" id="gridView" class="leftCol" ng-show="data.showGrid">
-        <div ng-if="filteredItems.length === 0" id="emptyHomeList">You have no running experiments.</div>
-        <ul ng-if="filteredItems.length > 0" id="exprSummary">
-            <li ng-repeat="experiment in gridItems" ng-class="{favorite: experiment.isFavorite}">
+    <div ng-if="data.enableCardView" id="gridView" ng-class="{gridWithAdvanced: data.showAdvancedSearch}" class="leftCol" ng-show="data.showGrid">
+        <div ng-if="experiments.length === 0" id="emptyHomeList">You have no running experiments.</div>
+        <div>
+        <ul ng-if="experiments.length > 0" id="exprSummary">
+            <li ng-repeat="experiment in cardViewExperiments" ng-class="{favorite: experiment.isFavorite}">
                 <div class="summaryHead">
-                    <a href="#" favorites-star favorites-star-application-name="experiment.applicationName" favorites-star-experiment-name="experiment.label" ng-attr-is-favorite="{{experiment.isFavorite}}" after-favorite-func="handleCardStarAnimation" class="star" title="Mark as Favorite"></a>
+                    <a href="#" favorites-star favorites-star-experiment-id="experiment.id" favorites-star-favorites-object="favoritesObj" ng-attr-is-favorite="{{experiment.isFavorite}}" after-favorite-func="handleCardStarAnimation" class="star" title="Mark as Favorite"></a>
                     <label-link-content state="{{experiment.state}}" href="{{customHref}}" ng-click="hasUpdatePermission(experiment) && experiment.state === 'DRAFT' && openExperimentModal(experiment)" class="exprWrapper" exp-id="{{experiment.id}}" custom-tooltip="{{experiment.homePageTooltip}}" has-update="{{hasUpdatePermission(experiment)}}" read-only="{{!hasUpdatePermission(experiment)}}">
                         <h3>{{experiment.applicationName}}</h3>
                         <h2>{{experiment.label}}</h2>
@@ -98,21 +99,21 @@
                     </div>
                 </div>
                 <div class="summaryBody">
-                    <ul class="buckets" ng-if="experiment.statistics && experiment.statistics.sortedBucketsActiveOnly && experiment.statistics.sortedBucketsActiveOnly.length > 0">
-                        <li ng-repeat="bucket in experiment.statistics.sortedBucketsActiveOnly" custom-tooltip="{{bucket.homePageTooltip}}" ng-class="{closed: getBucket(bucket.label, experiment).state === 'CLOSED', indeterminate: improvementClass(bucket.label, experiment) === 'indeterminate', winner: improvementClass(bucket.label, experiment) === 'winner', indeterminate: improvementClass(bucket.label, experiment) === 'loser', noWinner: improvementClass(bucket.label, experiment) === 'no-winner'}">
-                            <label>{{bucket.label}} <span ng-if="getBucket(bucket.label, experiment).isControl">(control)</span><span ng-if="getBucket(bucket.label, experiment).isBaseLine">(baseline)</span></label>
-                            <div>{{actionRate(bucket.label, experiment.statistics.buckets) | number:1}} <span>&plusmn;{{actionDiff(bucket.label, experiment.statistics.buckets) | number:1}}%</span></div>
-                            <div title="Bucket assignments" class="bucketAssignments" ng-if="getBucket(bucket.label, experiment).count >= 0">{{getBucket(bucket.label, experiment).count}}</div>
+                    <ul class="buckets" ng-if="experiment.sortedBuckets && experiment.sortedBuckets.length > 0">
+                        <li ng-repeat="bucket in experiment.sortedBuckets" custom-tooltip="{{bucket.homePageTooltip}}" ng-class="{closed: bucket.state === 'CLOSED', indeterminate: bucket.improvementClass === 'indeterminate', winner: bucket.improvementClass === 'winner', nonWinner: bucket.improvementClass === 'loser', noWinner: bucket.improvementClass === 'no-winner'}">
+                            <label>{{bucket.label}} <span ng-if="bucket.isControl">(control)</span><span ng-if="bucket.isBaseLine">(baseline)</span></label>
+                            <div>{{multiply100(bucket.actionRate) | number:1}} <span>&plusmn;{{actionDiffForCardView(bucket) | number:1}}%</span></div>
+                            <div title="Bucket assignments" class="bucketAssignments" ng-if="bucket.count >= 0">{{bucket.count}}</div>
                         </li>
                     </ul>
-                    <ul class="buckets" ng-if="(!experiment.statistics || !experiment.statistics.sortedBucketsActiveOnly) && (experiment.buckets && experiment.buckets.length > 0)">
+                    <ul class="buckets" ng-if="(!experiment.sortedBuckets) && (experiment.buckets && experiment.buckets.length > 0)">
                         <li ng-repeat="bucket in experiment.buckets" custom-tooltip="{{bucket.homePageTooltip}}" class="noWinnerNotRunning">
                             <label>{{bucket.label}} <span ng-if="getBucket(bucket.label, experiment).isControl">(control)</span><span ng-if="getBucket(bucket.label, experiment).isBaseLine">(baseline)</span></label>
                             <div>-- <span>&plusmn;--%</span></div>
                             <div title="Bucket assignments" class="bucketAssignments">--</div>
                         </li>
                     </ul>
-                    <ul class="buckets" ng-if="(!experiment.statistics || !experiment.statistics.sortedBucketsActiveOnly) && (!experiment.buckets || experiment.buckets.length === 0)">
+                    <ul class="buckets" ng-if="(!experiment.sortedBuckets) && (!experiment.buckets || experiment.buckets.length === 0)">
                         <li style="padding-bottom: 8px;">
                             <label ng-if="!experiment.buckets">Loading...</label>
                             <label ng-if="experiment.buckets && experiment.buckets.length === 0">No buckets defined</label>
@@ -123,6 +124,14 @@
                 </div>
             </li>
         </ul>
+            </div>
+        <div style="text-align:right; clear: both; margin-right: 70px;" ng-show="cardViewTotalItems > 0">
+            <span style="font-size:13px; color:#888; position: relative; top: -20px; left: -5px;">{{cardViewPageRangeStart()}} - {{cardViewPageRangeEnd()}} of {{cardViewTotalItems}}</span>
+
+            <div style="display: inline;">
+                <pagination total-items="cardViewTotalItems" items-per-page="8" ng-model="cardViewData.cardViewCurrentPage" ng-change="cardViewPageChanged()" max-size="5" rotate="false"></pagination>
+            </div>
+        </div>
     </div>
 
     <div id="experimentsList" ng-show="!noExperiments && !data.showGrid">
@@ -149,9 +158,9 @@
                     </th>
                     <th style="width:8%" class="icon">Actions</th>
                 </tr>
-                <tr ng-repeat="experiment in pagedData.pagedItems[currentPage - 1]">
+                <tr ng-repeat="experiment in experiments">
                     <td ng-class="{favorite: experiment.isFavorite}">
-                        <a href="#" favorites-star favorites-star-application-name="experiment.applicationName" favorites-star-experiment-name="experiment.label" ng-attr-is-favorite="{{experiment.isFavorite}}" favorites-star-parent-tag="td" after-favorite-func="handleListStarAnimation" class="star"></a>
+                        <a href="#" favorites-star favorites-star-experiment-id="experiment.id" favorites-star-favorites-object="favoritesObj" ng-attr-is-favorite="{{experiment.isFavorite}}" favorites-star-parent-tag="td" after-favorite-func="handleListStarAnimation" class="star"></a>
                     </td>
                     <td class="app">
                         <span title="{{experiment.applicationName}}">{{experiment.applicationName}}</span>
@@ -202,7 +211,7 @@
             <span style="font-size:13px; color:#888; position: relative; top: -20px; left: -5px;">{{pageRangeStart()}} - {{pageRangeEnd()}} of {{totalItems}}</span>
 
             <div style="display: inline;" ng-show="totalItems > 0">
-                <pagination total-items="totalItems" ng-model="currentPage" ng-change="pageChanged()" max-size="5" rotate="false"></pagination>
+                <pagination total-items="totalItems" items-per-page="10" ng-model="currentPage" ng-change="pageChanged()" max-size="5" rotate="false"></pagination>
             </div>
         </div>
     </div>

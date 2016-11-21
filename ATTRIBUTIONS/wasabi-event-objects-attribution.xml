@@ -923,23 +923,6 @@
          </downloadUrls>
       </dependency>
       <dependency>
-         <name>JaCoCo :: Agent</name>
-         <groupId>org.jacoco</groupId>
-         <artifactId>org.jacoco.agent</artifactId>
-         <version>0.7.2.201409121644</version>
-         <projectUrl>http://org.jacoco.agent</projectUrl>
-         <type>pom</type>
-         <licenses>
-            <license>
-               <name>Eclipse Public License v1.0</name>
-               <url>http://www.eclipse.org/legal/epl-v10.html</url>
-            </license>
-         </licenses>
-         <downloadUrls>
-            <string>https://repo.maven.apache.org/maven2/org/jacoco/org.jacoco.agent/0.7.2.201409121644/org.jacoco.agent-0.7.2.201409121644.pom</string>
-         </downloadUrls>
-      </dependency>
-      <dependency>
          <name>Java Agent for Memory Measurements</name>
          <groupId>com.github.stephenc</groupId>
          <artifactId>jamm</artifactId>
@@ -1517,7 +1500,7 @@
          <name>wasabi-analytics-objects</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-analytics-objects</artifactId>
-         <version>1.0.20160801220857-SNAPSHOT</version>
+         <version>1.0.20161102190559-SNAPSHOT</version>
          <projectUrl>https://github.com/intuit/wasabi/modules/wasabi-analytics-objects</projectUrl>
          <type>jar</type>
          <licenses>
@@ -1532,7 +1515,7 @@
          <name>wasabi-assignment-objects</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-assignment-objects</artifactId>
-         <version>1.0.20160801220857-SNAPSHOT</version>
+         <version>1.0.20161102190559-SNAPSHOT</version>
          <projectUrl>https://github.com/intuit/wasabi/modules/wasabi-assignment-objects</projectUrl>
          <type>jar</type>
          <licenses>
@@ -1547,7 +1530,7 @@
          <name>wasabi-exceptions</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-exceptions</artifactId>
-         <version>1.0.20160801220857-SNAPSHOT</version>
+         <version>1.0.20161102190559-SNAPSHOT</version>
          <projectUrl>https://github.com/intuit/wasabi/modules/wasabi-exceptions</projectUrl>
          <type>jar</type>
          <licenses>
@@ -1562,7 +1545,7 @@
          <name>wasabi-experiment-objects</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-experiment-objects</artifactId>
-         <version>1.0.20160801220857-SNAPSHOT</version>
+         <version>1.0.20161102190559-SNAPSHOT</version>
          <projectUrl>https://github.com/intuit/wasabi/modules/wasabi-experiment-objects</projectUrl>
          <type>jar</type>
          <licenses>
@@ -1577,7 +1560,7 @@
          <name>wasabi-export</name>
          <groupId>com.intuit.wasabi</groupId>
          <artifactId>wasabi-export</artifactId>
-         <version>1.0.20160801220857-SNAPSHOT</version>
+         <version>1.0.20161102190559-SNAPSHOT</version>
          <projectUrl>https://github.com/intuit/wasabi/modules/wasabi-export</projectUrl>
          <type>jar</type>
          <licenses>

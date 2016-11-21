@@ -5,10 +5,10 @@
 'use strict';
 
 angular.module('wasabi.controllers').
-    controller('ExperimentsCtrl', ['$scope', '$filter', '$http', '$timeout', 'ExperimentsFactory', '$modal', 'UtilitiesFactory', '$rootScope', 'StateFactory', 'DialogsFactory', 'AUTH_EVENTS', 'Session', 'PERMISSIONS', 'ConfigFactory', 'AuthzFactory', 'USER_ROLES', 'ApplicationsFactory', 'BucketsFactory', 'ExperimentStatisticsFactory', 'ApplicationStatisticsFactory',
-        function ($scope, $filter, $http, $timeout, ExperimentsFactory, $modal, UtilitiesFactory, $rootScope, StateFactory, DialogsFactory, AUTH_EVENTS, Session, PERMISSIONS, ConfigFactory, AuthzFactory, USER_ROLES, ApplicationsFactory, BucketsFactory, ExperimentStatisticsFactory, ApplicationStatisticsFactory) {
+    controller('ExperimentsCtrl', ['$scope', '$filter', '$http', '$timeout', 'ExperimentsFactory', '$modal', 'UtilitiesFactory', '$rootScope', 'StateFactory', 'DialogsFactory', 'AUTH_EVENTS', 'Session', 'PERMISSIONS', 'ConfigFactory', 'AuthzFactory', 'USER_ROLES', 'ApplicationsFactory', 'BucketsFactory', 'ExperimentStatisticsFactory', 'ApplicationStatisticsFactory', 'FavoritesFactory',
+        function ($scope, $filter, $http, $timeout, ExperimentsFactory, $modal, UtilitiesFactory, $rootScope, StateFactory, DialogsFactory, AUTH_EVENTS, Session, PERMISSIONS, ConfigFactory, AuthzFactory, USER_ROLES, ApplicationsFactory, BucketsFactory, ExperimentStatisticsFactory, ApplicationStatisticsFactory, FavoritesFactory) {
 
-             var today = moment().format('MM/DD/YYYY');
+            var today = moment().format('MM/DD/YYYY');
 
             // The data object is where values are stored that need to be data bound to the fields in the form.
             // I believe there was a scope problem and I found this solution on the Googles.  Basically, by
@@ -44,15 +44,28 @@ angular.module('wasabi.controllers').
             $scope.groupedItems = [];
             $scope.filteredItems = [];
             $scope.currentPage = StateFactory.currentExperimentsPage;
-            $scope.totalItems = $scope.filteredItems.length;
+            $scope.initialPage = StateFactory.currentExperimentsPage;
+            $scope.totalItems = 0;
             $scope.hasAnyCreatePermissions = false;
             $scope.noExperiments = false;
             $scope.applicationsLoaded = false;
+            $scope.favoritesObj = {
+                favorites: null
+            };
 
-            $scope.experiment = [];
+            $scope.experiments = [];
             $scope.applications = [];
+
+            $scope.cardViewExperiments = [];
+            $scope.cardViewTotalItems = 0;
+            $scope.cardViewItemsPerPage = 8;
+
+            $scope.initialCardViewPage = StateFactory.currentCardViewPage;
+            $scope.cardViewData = {
+                cardViewCurrentPage: StateFactory.currentCardViewPage
+            };
+
             $scope.applicationsWithReadOrBetterAccess = [];
-            $scope.allApplications = [];
             $scope.needDataForThese = [];
             $scope.disableShowAsGrid = false;
             $scope.initialGridsShown = 12;
@@ -61,42 +74,7 @@ angular.module('wasabi.controllers').
 
             $scope.help = ConfigFactory.help;
 
-            $scope.loadAllApplications = function () {
-                ApplicationsFactory.query().$promise.then(function (applications) {
-                    if (applications) {
-                        $scope.allApplications = [];
-                        // Make a list of only the applications for which this user doesn't have access.
-                        for (var i = 0; i < applications.length; i++) {
-                            var hasAccessForApp = false;
-                            for (var j = 0; j < $scope.applications.length; j++) {
-                                // Check if this application is one of the ones they already have access for.
-                                if (applications[i].applicationName === $scope.applications[j]) {
-                                    hasAccessForApp = true;
-                                    break;
-                                }
-                            }
-                            if (!hasAccessForApp) {
-                                $scope.allApplications.push(applications[i].applicationName);
-                            }
-                        }
-                    }
-                }, function(response) {
-                        UtilitiesFactory.handleGlobalError(response, 'The list of applications could not be retrieved.');
-                });
-            };
-
             // *** Home page code
-
-            $scope.moveExperiment = function(nextFave, tmpExperiments, experiments) {
-                // Find this one in tmpExperiments
-                var pos = tmpExperiments.map(function(e) { return e.applicationName + '|' + e.label; }).indexOf(nextFave);
-                if (pos >= 0) {
-                    // The item in the favorites cookie exists in the experiments list,
-                    // remove the matching item from tmpExperiments and add it to $scope.experiments
-                    experiments.push(tmpExperiments.splice(pos, 1)[0]);
-                }
-                return experiments;
-            };
 
             $scope.actionRate = function(bucketLabel, buckets) {
                 return UtilitiesFactory.actionRate(bucketLabel, buckets);
@@ -104,6 +82,10 @@ angular.module('wasabi.controllers').
 
             $scope.actionDiff = function(bucketLabel, buckets) {
                 return UtilitiesFactory.actionDiff(bucketLabel, buckets);
+            };
+
+            $scope.actionDiffForCardView = function(bucket) {
+                return UtilitiesFactory.actionDiffForCardView(bucket);
             };
 
             /*
@@ -119,77 +101,19 @@ angular.module('wasabi.controllers').
                 return experiment.statistics.buckets[bucketLabel].improvementClass;
             };
 
-            $scope.doneLoading = false; // Used so we don't keep calling this function once we've loaded everything.
-            // This function is called by the WhenScrollEndsDirective when it detects we are near the bottom of scrolling
-            // the grid view.  It adds more experiments from the filteredItems list to the gridItems list and they are
-            // then displayed by Angular JS.  We will also call a method to start the process of loading the data for
-            // the newly added experiments.
-            $scope.loadMoreExperimentData = function() {
-                if (!$scope.doneLoading) {
-                    $scope.gridsShown = ($scope.filteredItems.length < $scope.gridsShown + 4 ? $scope.filteredItems.length : $scope.gridsShown + 4);
-                    $scope.doneLoading = ($scope.gridsShown === $scope.filteredItems.length);
-                    $scope.gridItems = $scope.filteredItems.slice(0,$scope.gridsShown);
-                    $scope.startDataLoadForNextExperiment();
-                }
-            };
-
-            // This method loads the extra data needed for each of the experiments in order to render
-            // the Grid View (formerly, Home Page).  RUNNING, DRAFT, PAUSED, TERMINATED
-            $scope.loadGridViewData = function (experiments) {
-                if (experiments) {
-                    $scope.needDataForThese = []; // This contains experiments we need to get supplementary data for.
-                    experiments.forEach(function(experiment) {
-                        experiment.dataRetrieved = false;
-                        $scope.needDataForThese.push({
-                            experiment: experiment,
-                            // This flag lets us know we only need the data for a DRAFT experiment, which is a little less than for RUNNING, etc.
-                            onlyBucketData: (experiment.state.toLowerCase() === 'draft')
-                        });
-
-                        UtilitiesFactory.getFormattedStartAndEndDates(experiment);
-                        if (!experiment.isRapidExperiment) {
-                            experiment.progressRollover = experiment.progressDaysLeft + ' days left in experiment';
-                        }
-
-                        var start = experiment.formattedStart;
-                        var end = experiment.formattedEnd;
-
-                        // Create experiment description tooltip
-                        experiment.homePageTooltip = '';
-
-                        var s = '<div style="font-weight:normal; font-size:15px;">' + experiment.label + '</div>';
-                        s += '<div style="position:relative; padding-bottom:9px; font-size: 90%; color:rgb(92,92,92)">';
-                        s += start.format('MMM DD YYYY') + ' - ' + end.format('MMM DD YYYY') + '</div>';
-                        if (experiment.description && experiment.description.length > 0) {
-                            s += '<div style="width:360px">' + experiment.description + '</div>';
-                        }
-                        experiment.homePageTooltip = s;
-
-                        experiment.numUsers = 0;
-                    });
-
-                    if ($scope.data.showGrid) {
-                        // Probably just refreshed when grid was showing, need to load data.
-                        $scope.startDataLoadForNextExperiment();
-                    }
-                }
-
-            };
-
             $scope.startDataLoadForNextExperiment = function() {
                 // If there are any more experiments to get data for, get the next one.
-                if ($scope.gridDataLoaded < $scope.gridsShown && $scope.needDataForThese.length > 0) {
+                if ($scope.needDataForThese.length > 0) {
                     // Start the process of getting extra data for the next experiment, unless it has the flag set
                     // that we have already gotten the data.
                     var foundExperimentInNeedOfLoading = false;
                     do {
                         var nextExperiment = $scope.needDataForThese.splice(0,1)[0];
-                        $scope.gridDataLoaded += 1;
                         if (!nextExperiment.experiment.dataRetrieved) {
                             foundExperimentInNeedOfLoading = true;
                             $scope.loadBuckets(nextExperiment.experiment, !nextExperiment.onlyBucketData);
                         }
-                    } while (!foundExperimentInNeedOfLoading && $scope.gridDataLoaded < $scope.gridsShown && $scope.needDataForThese.length > 0);
+                    } while (!foundExperimentInNeedOfLoading && $scope.needDataForThese.length > 0);
                 }
                 else {
                     // We are done loading the extra data for the grid view, so enable the Show grid checkbox.
@@ -204,9 +128,6 @@ angular.module('wasabi.controllers').
                         if (appInfo && appInfo.totalUsers && appInfo.totalUsers.bucketAssignments) {
                             experiment.numUsers = appInfo.totalUsers.bucketAssignments;
                         }
-                        if (experiment.isRapidExperiment) {
-                            experiment.progressRollover = (experiment.userCap - experiment.progressDaysLeft) + ' user assignments still needed';
-                        }
                         if (appInfo && appInfo.assignments && appInfo.assignments.length > 0) {
                             // Get bucket-level assignment counts.
                             UtilitiesFactory.transferMatchingValues(experiment.buckets,
@@ -215,14 +136,15 @@ angular.module('wasabi.controllers').
 
                         $scope.startDataLoadForNextExperiment();
                     },
-                    function(response) {
+                    function() {
                         console.log('Error loading user count for ' + experiment.id);
                         $scope.startDataLoadForNextExperiment();
-                });
+                    }
+                );
             };
 
             $scope.loadBuckets = function (experiment, loadStatisticsFlag) {
-                var loadStatisticsNext = (loadStatisticsFlag != undefined ? loadStatisticsFlag : true);
+                var loadStatisticsNext = (loadStatisticsFlag !== undefined ? loadStatisticsFlag : true);
                 BucketsFactory.query({
                     experimentId: experiment.id
                 }).$promise.then(function (buckets) {
@@ -263,10 +185,11 @@ angular.module('wasabi.controllers').
                             $scope.startDataLoadForNextExperiment();
                         }
                     },
-                    function(response) {
+                    function() {
                         console.log('Error loading buckets for ' + experiment.id);
                         $scope.startDataLoadForNextExperiment();
-                });
+                    }
+                );
             };
 
             $scope.getBucket = function (bucketLabel, experiment) {
@@ -280,19 +203,140 @@ angular.module('wasabi.controllers').
 
                         $scope.loadApplicationStatistics(experiment);
 
-                        UtilitiesFactory.determineBucketImprovementClass(experiment, experiment.controlBucketLabel);
+                        UtilitiesFactory.determineBucketImprovementClass(experiment);
 
-                    }, function(response) {
+                    }, function() {
                         console.log('Error retrieving experiment statistics for ' + experiment.id);
                         $scope.startDataLoadForNextExperiment();
-                });
+                    }
+                );
             };
 
             // *** END Home page code
 
+            $scope.convertOrderByField = function() {
+                switch ($scope.orderByField) {
+                    case 'applicationName':
+                        return 'application_name';
+                    case 'label':
+                        return 'experiment_label';
+                    case 'creatorID':
+                        return 'created_by';
+                    case 'samplingPercent':
+                        return 'sampling_percent';
+                    case 'startTime':
+                        return 'start_time';
+                    case 'endTime':
+                        return 'end_time';
+                    case 'modificationTime':
+                        return 'modification_time';
+                    case 'state':
+                        return 'state';
+                    default:
+                        return 'application_name';
+                }
+            };
+
+            $scope.doFavorites = function(experimentsList, forceGet) {
+                function applyFavorites(experimentsList) {
+                    if ($scope.favoritesObj.favorites && $scope.favoritesObj.favorites.length && experimentsList) {
+                        for (var i = 0; i < experimentsList.length; i++) {
+                            experimentsList[i].isFavorite = ($scope.favoritesObj.favorites.indexOf(experimentsList[i].id) >= 0);
+                        }
+                    }
+                }
+
+                if (forceGet) {
+                    FavoritesFactory.query().$promise
+                    .then(function(faves) {
+                        $scope.favoritesObj.favorites = (faves && faves.experimentIDs ? faves.experimentIDs : []);
+                        applyFavorites(experimentsList);
+                    },
+                        function(response) {
+                            UtilitiesFactory.handleGlobalError(response, 'The list of favorites could not be retrieved.');
+                    });
+                }
+                else {
+                    applyFavorites(experimentsList);
+                }
+            };
+
+            /*
+            This function sets up the call to get the list of experiments.  It sets up the query
+            parameters to do the sorting, filtering and pagination.  It uses the lastSearchWasSimple
+            flag to decide if we are doing simple or advanced filtering and so which parameters need to
+            be used.
+             */
+            $scope.doLoadExperiments = function(cardViewFlag, pageSize, currentPage, afterLoadFunction) {
+                function addAdvParam(existingFilter, newFilterValue) {
+                    if (existingFilter.length > 0) {
+                        existingFilter += ',';
+                    }
+                    return existingFilter += newFilterValue;
+                }
+
+                var queryParams = {
+                    per_page: pageSize,
+                    page: currentPage,
+                    sort: ($scope.reverseSort ? '-' : '') + $scope.convertOrderByField()
+                };
+                if ($scope.data.lastSearchWasSimple) {
+                    // Add simple filter info, if available
+                    queryParams.filter = $scope.data.query;
+                    if ($scope.data.hideTerminated) {
+                        queryParams.filter += ',state_exact=notTerminated';
+                    }
+                }
+                else {
+                    // Add advanced filter info, if available
+                    queryParams.filter = '';
+                    if ($scope.data.advApplicationName && $scope.data.advApplicationName.length > 0) {
+                        queryParams.filter += 'application_name_exact=' + $scope.data.advApplicationName;
+                    }
+                    if ($scope.data.advStatus !== 'any') {
+                        queryParams.filter = addAdvParam(queryParams.filter, 'state_exact=' + $scope.data.advStatus);
+                    }
+                    if ($scope.data.advExperimentName && $.trim($scope.data.advExperimentName).length > 0) {
+                        queryParams.filter = addAdvParam(queryParams.filter, 'experiment_label=' + $.trim($scope.data.advExperimentName));
+                    }
+                    if ($scope.data.adv1stDateSearchType !== 'isAny') {
+                        queryParams.filter = addAdvParam(queryParams.filter, 'date_constraint_' +
+                                ($scope.data.advStartOrEndDate === 'startDate' ? 'start' : 'end') +
+                                '=' +
+                                $scope.data.adv1stDateSearchType + ':' +
+                                $scope.data.advTxtSearchDateOne +
+                                ($scope.data.adv1stDateSearchType === 'isBetween' ? ':' + $scope.data.advTxtSearchDateTwo : ''));
+                    }
+                }
+                if (!cardViewFlag) {
+                    ExperimentsFactory.query(queryParams).$promise
+                    .then(afterLoadFunction,
+                        function(response) {
+                            UtilitiesFactory.handleGlobalError(response, 'The list of experiments could not be retrieved.');
+                    });
+                }
+                else {
+                    ExperimentStatisticsFactory.cardViewData(queryParams).$promise
+                    .then(afterLoadFunction,
+                        function(response) {
+                            UtilitiesFactory.handleGlobalError(response, 'The list of experiments could not be retrieved.');
+                    });
+                }
+            };
+
+            $scope.loadExperiments = function() {
+                if ($scope.data.showGrid) {
+                    $scope.loadCardViewExperiments();
+                }
+                else {
+                    $scope.loadTableExperiments();
+                }
+            };
+
             // load experiments from server
-            $scope.loadExperiments = function (orderByField) {
-                ExperimentsFactory.query().$promise.then(function (experiments) {
+            $scope.loadTableExperiments = function () {
+                $scope.doLoadExperiments(false, $scope.itemsPerPage, $scope.currentPage, function (data) {
+                    var experiments = data.experiments;
                     if (experiments) {
                         // Initialize all the experiments selected values to false so the checkboxes (when list used in selection dialog) will be unchecked.
                         for (var i = 0; i < experiments.length; i++) {
@@ -302,10 +346,9 @@ angular.module('wasabi.controllers').
                                 delete experiments[i];
                             }
                         }
+                        $scope.totalItems = data.totalEntries;
                     }
                     $scope.experiments = experiments;
-
-                    $scope.applySearchSortFilters((orderByField !== undefined));
 
                     $scope.experiments.forEach(function(item) {
                         if ($rootScope.applicationNames.indexOf(item.applicationName) < 0) {
@@ -317,10 +360,19 @@ angular.module('wasabi.controllers').
                         }
                     });
 
+                    if (!$scope.favoritesObj.favorites || $scope.favoritesObj.favorites.length === 0) {
+                        $scope.favoritesObj.favorites = [];
+                        $scope.doFavorites($scope.experiments, true);
+                    }
+                    else {
+                        $scope.doFavorites($scope.experiments, false);
+                    }
+
                     // Get the list of applications for passing down to the create/edit experiment dialog.
                     // We also need the list of all applications they have any (specifically, read) access to, so
                     // we can use that in the advanced search menu of the experiments list.
                     $scope.applications = [];
+                    $scope.applicationsWithReadOrBetterAccess = [];
                     Session.permissions.forEach(function(nextPermissions) {
                         if (UtilitiesFactory.hasPermission(nextPermissions.applicationName, PERMISSIONS.createPerm)) {
                             $scope.applications.push(nextPermissions.applicationName);
@@ -341,17 +393,10 @@ angular.module('wasabi.controllers').
                             return a.toLowerCase().localeCompare(b.toLowerCase());
                         });
                     }
+                    $scope.noExperiments = ($scope.totalItems === 0 &&
+                            $scope.applicationsWithReadOrBetterAccess.length === 0);
 
                     $scope.applicationsLoaded = true;
-
-                    $scope.loadAllApplications();
-
-                    if ($scope.experiments.length > 0) {
-                        $scope.loadGridViewData($scope.filteredItems);
-                    }
-
-                }, function(response) {
-                    UtilitiesFactory.handleGlobalError(response, 'The list of experiments could not be retrieved.');
                 });
             };
 
@@ -379,16 +424,103 @@ angular.module('wasabi.controllers').
                 return false;
             };
 
+            $scope.loadCardViewExperiments = function() {
+                $scope.doLoadExperiments(true, $scope.cardViewItemsPerPage, $scope.cardViewData.cardViewCurrentPage, function(data) {
+                    var experiments = data.experimentDetails;
+                    if (experiments) {
+                        // Initialize all the experiments selected values to false so the checkboxes (when list used in selection dialog) will be unchecked.
+                        for (var i = 0; i < experiments.length; i++) {
+                            if (experiments[i]) {
+                                experiments[i].selected = false;
+
+                                UtilitiesFactory.getFormattedStartAndEndDates(experiments[i]);
+                                var start = experiments[i].formattedStart;
+                                var end = experiments[i].formattedEnd;
+
+                                // Create experiment description tooltip
+                                experiments[i].homePageTooltip = '';
+
+                                var s = '<div style="font-weight:normal; font-size:15px;">' + experiments[i].label + '</div>';
+                                s += '<div style="position:relative; padding-bottom:9px; font-size: 90%; color:rgb(92,92,92)">';
+                                s += start.format('MMM DD YYYY') + ' - ' + end.format('MMM DD YYYY') + '</div>';
+                                if (experiments[i].description && experiments[i].description.length > 0) {
+                                    s += '<div style="width:360px">' + experiments[i].description + '</div>';
+                                }
+                                experiments[i].homePageTooltip = s;
+
+                                if (experiments[i].buckets && experiments[i].buckets.length > 0) {
+                                    // set baseline bucket (if no control bucket)
+                                    experiments[i].controlBucketLabel = experiments[i].buckets[0].label;
+                                    // get the label of the one control bucket (if any)
+                                    var bucketsToRemove = [];
+                                    for (var j = 0; j < experiments[i].buckets.length; j++) {
+                                        if (experiments[i].buckets[j].state && experiments[i].buckets[j].state == 'OPEN') {
+                                            // Ignore anything but Open buckets for the Card View.
+                                            if (experiments[i].buckets[j].isControl) {
+                                                experiments[i].hasControlBucket = true;
+                                                experiments[i].controlBucketLabel = experiments[i].buckets[j].label;
+                                            }
+
+                                            var s = '<div style="font-weight:normal; font-size:15px; padding-bottom:5px">' + experiments[i].buckets[j].label + '</div>';
+
+                                            if (experiments[i].buckets[j].description && experiments[i].buckets[j].description.length > 0) {
+                                                s += '<div style="width:360px">' + experiments[i].buckets[j].description + '</div>';
+                                            }
+                                            experiments[i].buckets[j].homePageTooltip = s;
+                                        }
+                                        else {
+                                            bucketsToRemove.push(j);
+                                        }
+                                    }
+                                    if (bucketsToRemove.length > 0) {
+                                        for (var j = bucketsToRemove.length - 1; j >= 0; j--) {
+                                            experiments[i].buckets.splice(bucketsToRemove[j], 1);
+                                        }
+                                    }
+
+                                    // set baseline bucket (if no control bucket)
+                                    if (!experiments[i].hasControlBucket) {
+                                        experiments[i].buckets[0].isBaseLine = true;
+                                    }
+
+                                    if (experiments[i].state !== 'DRAFT') {
+                                        UtilitiesFactory.determineCardViewBucketImprovementClass(experiments[i]);
+                                    }
+                                }
+                            } else {
+                                delete experiments[i];
+                            }
+                        }
+                        $scope.cardViewTotalItems = data.totalEntries;
+                    }
+                    $scope.cardViewExperiments = experiments;
+
+                    if (!$scope.favoritesObj.favorites || $scope.favoritesObj.favorites.length === 0) {
+                        $scope.favoritesObj.favorites = [];
+                        $scope.doFavorites($scope.cardViewExperiments, true);
+                    }
+                    else {
+                        $scope.doFavorites($scope.cardViewExperiments, false);
+                    }
+
+                    //$scope.loadGridDataIfNecessary()
+                });
+            };
+
             // init controller
             if (Session && Session.switches) {
                 $scope.data.enableCardView = Session.switches.ShowCardView;
             }
-            $scope.loadExperiments($scope.orderByField);
+            $scope.loadTableExperiments();
 
             var tmpSearchSettings = localStorage.getItem('wasabiLastSearch');
             if (tmpSearchSettings) {
                 $scope.data = JSON.parse(tmpSearchSettings);
             }
+            if ($scope.data.enableCardView && $scope.data.showGrid) {
+                $scope.loadCardViewExperiments();
+            }
+
             if (!$scope.data.lastSearchWasSimple) {
                 $scope.showMoreLessSearch(true);
             }
@@ -400,12 +532,13 @@ angular.module('wasabi.controllers').
 
             $scope.switchToGrid = function() {
                 if ($scope.data.showGrid) {
-                    // Switching back to list, do a filter in case a favorite has changed.
+                    // Switching back to list.
                     // So that it gets changed correctly in the localStorage that saves the search state,
                     // we need to actually toggle this one because it doesn't get updated until after this has
                     // executed.
                     $scope.data.showGrid = false;
-                    $scope.applySearchSortFilters(false);
+                    localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
+                    $scope.loadTableExperiments();
                 }
                 else {
                     // Record that we are showing the Card View in the localStorage
@@ -413,25 +546,16 @@ angular.module('wasabi.controllers').
                     localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
                     // Switched to card view.  Since we're not pre-loading the data for the cards, we need to
                     // load (or check if we need to load) the data now.
-                    $scope.loadGridDataIfNecessary();
+                    $scope.loadCardViewExperiments();
                 }
             };
 
             $scope.applySearchSortFilters = function(doSorting) {
-                var faves = UtilitiesFactory.retrieveFavorites();
-                $scope.experiments.forEach(function(item) {
-                    item.isFavorite = (faves.indexOf(item.applicationName + '|' + item.label) >= 0);
-                });
-
-                if (doSorting) {
-                    $scope.sortBy($scope.orderByField, $scope.reverseSort);
-                } else {
-                    if ($scope.data.showAdvancedSearch) {
-                        $scope.advSearch($scope.currentPage);
-                    }
-                    else {
-                        $scope.search($scope.currentPage);
-                    }
+                if ($scope.data.showAdvancedSearch) {
+                    $scope.advSearch(true);
+                }
+                else {
+                    $scope.search(true);
                 }
             };
 
@@ -439,7 +563,7 @@ angular.module('wasabi.controllers').
                 $scope.applySearchSortFilters(true);
             };
 
-            $scope.handleCardStarAnimation = function($item, tileWidth) {
+            $scope.handleCardStarAnimation = function($item) {
                 if ($item) {
                     $item.animate({opacity: 0}, 1000, 'swing', function() {
                         $scope.redoSearchAndSort();
@@ -472,8 +596,19 @@ angular.module('wasabi.controllers').
                 UtilitiesFactory.deleteExperiment(experiment, $scope.loadExperiments);
             };
 
+            $scope.openResultsModal = function (experiment) {
+                UtilitiesFactory.openResultsModal(experiment, false, $scope.loadExperiments);
+            };
+
             $scope.changeState = function (experiment, state) {
-                UtilitiesFactory.changeState(experiment, state, $scope.loadExperiments);
+                var afterChangeActions = {
+                    // Transitioning to PAUSED, that is, stopping the experiment.  Prompt the user to enter their results.
+                    'PAUSED': $scope.openResultsModal,
+                    // In other cases, just load the experiment.
+                    'RUNNING': $scope.loadExperiments,
+                    'TERMINATED': $scope.loadExperiments
+                };
+                UtilitiesFactory.changeState(experiment, state, afterChangeActions);
             };
 
             $scope.stateImgUrl = function(state) {
@@ -492,32 +627,23 @@ angular.module('wasabi.controllers').
                 return UtilitiesFactory.hasPermission(applicationName, permission);
             };
 
-            // change sorting order if 2nd argument undefined
-            $scope.sortBy = function (orderByField, reverseSort) {
+            $scope.sortBy = function (orderByField) {
                 if ($scope.orderByField === orderByField) {
                     $scope.reverseSort = !$scope.reverseSort;
                 }
-                if (reverseSort !== undefined) {
-                    $scope.reverseSort = reverseSort;
+                else {
+                    $scope.reverseSort = true;
                 }
 
                 $scope.orderByField = orderByField;
 
-                if ($scope.data.showAdvancedSearch) {
-                    $scope.advSearch($scope.currentPage);
-                }
-                else {
-                    $scope.search($scope.currentPage);
+                if ($scope.orderByField !== '') {
+                    $scope.loadExperiments();
                 }
             };
 
-            var searchMatch = function (haystack, needle) {
-                if (!needle) {
-                    return true;
-                }
-                return haystack.toLowerCase().indexOf(needle.toLowerCase()) !== -1;
-            };
-
+            // TODO: not currently being used, but not removing until we have solved the Favorites problem,
+            // that is, that favorites don't work with the new paginated API.
             var bubbleFavoritesToTop = function() {
                 // We want to pull the favorites to the top and have a secondary sort by the column we are
                 // sorting by.
@@ -543,11 +669,8 @@ angular.module('wasabi.controllers').
             $scope.loadGridDataIfNecessary = function() {
                 if ($scope.data.showGrid) {
                     // Handle the list used for lazy loading of the grid.
-                    $scope.gridsShown = ($scope.filteredItems.length < $scope.initialGridsShown ? $scope.filteredItems.length : $scope.initialGridsShown);
-                    $scope.gridItems = $scope.filteredItems.slice(0,$scope.gridsShown);
                     $scope.needDataForThese = []; // Reset list of experiments to get data for.
-                    $scope.gridDataLoaded = 0;
-                    $scope.filteredItems.forEach(function(experiment) {
+                    $scope.cardViewExperiments.forEach(function(experiment) {
                         // We may have already retrieved the extra data for this experiment because this might
                         // be a filtering.
                         $scope.needDataForThese.push({
@@ -555,68 +678,35 @@ angular.module('wasabi.controllers').
                             onlyBucketData: (experiment.state.toLowerCase() === 'draft')
                         });
                     });
-                    $scope.doneLoading = false;
                     $scope.startDataLoadForNextExperiment();
                 }
             };
 
-            // init the filtered items
-            $scope.search = function (currentPage) {
-                $scope.data.lastSearchWasSimple = true;
-                localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
-                $scope.filteredItems = $filter('filter')($scope.experiments, function (item) {
-                    // Filter out based on toggle switches, such as Hide Terminated.
-                    if ($scope.data.query !== undefined && $.trim($scope.data.query).length === 0) {
-                        return $scope.filterList(item);
-                    }
-                    for (var attr in item) {
-                        if (item[attr] &&
-                            item.hasOwnProperty(attr) &&
-                            typeof item[attr] !== 'function' &&
-                            attr !== '$$hashKey' &&
-                            attr !== 'id' &&
-                            attr.toLowerCase().indexOf('time') < 0) {
-                            //console.log('Searching attr ' + attr + ' with value [' + item[attr] + '] for [' + $scope.data.query + ']');
-                            var itemToSearch = item[attr].toString();
-                            if (attr.toLowerCase().indexOf('percent') >= 0) {
-                                // Convert this to the actual displayed value.
-                                itemToSearch = $scope.multiply100(itemToSearch).toString();
-                            }
-                            if (searchMatch(itemToSearch, $scope.data.query)) {
-                                // This item should be in the list based on search.  Should it be hidden due to filter controls?
-                                //console.log('Attr ' + attr + ' with value [' + item[attr] + '] contains [' + $scope.data.query + ']');
-                                return $scope.filterList(item);
-                            }
-                        }
-                    }
-                    return false;
-                });
-                // take care of the sorting order
-                if ($scope.orderByField !== '') {
-                    $scope.filteredItems = $filter('orderBy')($scope.filteredItems, $scope.orderByField, $scope.reverseSort);
-                }
-                bubbleFavoritesToTop();
+            $scope.clearSearch = function() {
+                $scope.data.query = '';
+                $scope.doSearch();
+            };
 
-                // Handle the list used for lazy loading of the grid.
-                $scope.loadGridDataIfNecessary();
-
-                if (currentPage) {
-                    $scope.currentPage = StateFactory.currentExperimentsPage = currentPage;
-                } else {
-                    $scope.currentPage = StateFactory.currentExperimentsPage = 1;
-                }
-                // now group by pages
-                $scope.groupToPages();
-                $scope.totalItems = $scope.filteredItems.length;
-                $scope.noExperiments = ((!$scope.experiments || $scope.experiments.length === 0) && $scope.totalItems === 0);
+            $scope.doSearch = function() {
+                $scope.loadExperiments();
 
                 UtilitiesFactory.doTrackingInit();
             };
 
-            $scope.advSearch = function(currentPage) {
-                if (!$scope.experiments || $scope.experiments.length === 0) {
-                    return false;
+            $scope.search = function (changingHideTerminated) {
+                var switchingFromAdvanced = !$scope.data.lastSearchWasSimple,
+                    hideTerminatedChanged = (changingHideTerminated !== undefined ? changingHideTerminated : false);
+                $scope.data.lastSearchWasSimple = true;
+                localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
+                if (switchingFromAdvanced || hideTerminatedChanged || $.trim($scope.data.query).length > 0) {
+                    if ($scope.searchTimer) {
+                        $timeout.cancel($scope.searchTimer);
+                    }
+                    $scope.searchTimer = $timeout($scope.doSearch, 400);
                 }
+            };
+
+            $scope.advSearch = function() {
                 // Save the advanced search settings
                 $scope.data.lastSearchWasSimple = false;
                 localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
@@ -624,53 +714,8 @@ angular.module('wasabi.controllers').
                 if ($scope.data.advApplicationName === null) {
                     $scope.data.advApplicationName = '';
                 }
-                // Filter out by the status
-                $scope.filteredItems = $filter('filter')($scope.experiments, function(item) {
-                    return $scope.advancedFilterList(item, $scope.data.advStatus) &&
-                           searchMatch(item.applicationName.toString(), $scope.data.advApplicationName);
-                });
 
-                // Filter out by the experiment partial input field
-                $scope.filteredItems = $filter('filter')($scope.filteredItems, function (item) {
-                    return searchMatch(item.label.toString(), $scope.data.advExperimentName);
-                });
-
-                // Filter out by the dates
-                $scope.filteredItems = $filter('filter')($scope.filteredItems, function (item) {
-                    var filterDate = ($scope.data.advStartOrEndDate === 'startDate' ? moment(item.startTime, ['YYYY-MM-DDTHH:mm:ssZ', 'ddd MMM DD YYYY HH:mm:ss ZZ']) : moment(item.endTime, ['YYYY-MM-DDTHH:mm:ssZ', 'ddd MMM DD YYYY HH:mm:ss ZZ']));
-                    var testDate = moment($scope.data.advTxtSearchDateOne, 'M/D/YYYY');
-                    var testDate2 = moment($scope.data.advTxtSearchDateTwo, 'M/D/YYYY');
-                    switch ($scope.data.adv1stDateSearchType) {
-                        case 'isBefore':
-                            return filterDate.isBefore(testDate, 'day');
-                        case 'isOn':
-                            return filterDate.isSame(testDate, 'day');
-                        case 'isAfter':
-                            return filterDate.isAfter(testDate, 'day');
-                        case 'isBetween':
-                            // The add and subtract make this an inclusive test, e.g., if range is between 7/2 and 7/5, both 7/2 and 7/5 will be true.
-                            return filterDate.isAfter(testDate.subtract(1, 'days'), 'day') && filterDate.isBefore(testDate2.add(1, 'days'), 'day');
-                    }
-                    // Handles isAny
-                    return true;
-                });
-
-                // take care of the sorting order
-                if ($scope.orderByField !== '') {
-                    $scope.filteredItems = $filter('orderBy')($scope.filteredItems, $scope.orderByField, $scope.reverseSort);
-                }
-                bubbleFavoritesToTop();
-
-                $scope.loadGridDataIfNecessary();
-
-                if (currentPage) {
-                    $scope.currentPage = StateFactory.currentExperimentsPage = currentPage;
-                } else {
-                    $scope.currentPage = StateFactory.currentExperimentsPage = 1;
-                }
-                // now group by pages
-                $scope.groupToPages();
-                $scope.totalItems = $scope.filteredItems.length;
+                $scope.loadExperiments();
 
                 var searchParms = 'advStatus=' + $scope.data.advStatus +
                         '&advExperimentName=' + $scope.data.advExperimentName +
@@ -685,59 +730,84 @@ angular.module('wasabi.controllers').
                 UtilitiesFactory.doTrackingInit();
             };
 
-            // calculate page in place
-            $scope.groupToPages = function () {
-                var tmpArray = [];
-
-                $scope.pagedData = {
-                    pagedItems: []
-                };
-                if ($scope.filteredItems.length === 0) {
-                    $scope.pagedData.pagedItems[0] = [];
-                    return;
-                }
-
-                for (var i = 0; i < $scope.filteredItems.length; i++) {
-                    if (i % $scope.itemsPerPage === 0) {
-                        tmpArray[Math.floor(i / $scope.itemsPerPage)] = [ $scope.filteredItems[i] ];
-                    } else {
-                        tmpArray[Math.floor(i / $scope.itemsPerPage)].push($scope.filteredItems[i]);
-                    }
-                }
-                $timeout(function() {
-                    $scope.pagedData.pagedItems = tmpArray;
-                    tmpArray = null;
-                });
-            };
-
             $scope.pageChanged = function() {
-                StateFactory.currentExperimentsPage = $scope.currentPage;
+                if ($scope.initialPage > 1) {
+                    $scope.currentPage = $scope.initialPage;
+                    $scope.initialPage = 0;
+                    return false;
+                }
+                else {
+                    StateFactory.currentExperimentsPage = $scope.currentPage;
+                }
+
+                // The widget has updated the currentPage member.  By simply triggering the code to get the
+                // list, we should update the page.
+                $scope.loadTableExperiments();
             };
 
-            $scope.pageRangeStart = function () {
+            $scope.cardViewPageChanged = function() {
+                if ($scope.initialCardViewPage > 1) {
+                    $scope.cardViewData.cardViewCurrentPage = $scope.initialCardViewPage;
+                    $scope.initialCardViewPage = 0;
+                    return false;
+                }
+                else {
+                    StateFactory.currentCardViewPage = $scope.cardViewData.cardViewCurrentPage;
+                }
+
+                // The widget has updated the currentPage member.  By simply triggering the code to get the
+                // logs list, we should update the page.
+                $scope.loadCardViewExperiments();
+            };
+
+            $scope.doPageRangeStart = function (currentPage, totalItems, itemsPerPage) {
                 try {
-                    if ($scope.currentPage === 1) {
-                        if ($scope.pagedData.pagedItems[$scope.currentPage - 1].length === 0) {
+                    if (currentPage === 1) {
+                        if (totalItems === 0) {
                             return 0;
                         } else {
                             return 1;
                         }
                     } else {
-                        return ($scope.currentPage - 1) * $scope.itemsPerPage + 1;
+                        return (currentPage - 1) * itemsPerPage + 1;
                     }
                 } catch (err) {
                     return 0;
                 }
             };
 
-            $scope.pageRangeEnd = function () {
+            $scope.doPageRangeEnd = function (currentPage, totalItems, itemsPerPage) {
                 try {
-                    return $scope.pageRangeStart() + $scope.pagedData.pagedItems[$scope.currentPage - 1].length - 1;
+                    var start = 1;
+                    if (currentPage === 1) {
+                        if (totalItems === 0) {
+                            start = 0;
+                        } else {
+                            start = 1;
+                        }
+                    } else {
+                        start = (currentPage - 1) * itemsPerPage + 1;
+                    }
+
+                    var ret =  (totalItems >= (start + itemsPerPage) ? start + itemsPerPage - 1 : totalItems);
+                    return ret;
                 } catch (err) {
                     return 0;
                 }
             };
 
+            $scope.pageRangeStart = function() {
+                return $scope.doPageRangeStart($scope.currentPage, $scope.totalItems, $scope.itemsPerPage);
+            };
+            $scope.pageRangeEnd = function() {
+                return $scope.doPageRangeEnd($scope.currentPage, $scope.totalItems, $scope.itemsPerPage);
+            };
+            $scope.cardViewPageRangeStart = function() {
+                return $scope.doPageRangeStart($scope.cardViewData.cardViewCurrentPage, $scope.cardViewTotalItems, $scope.cardViewItemsPerPage);
+            };
+            $scope.cardViewPageRangeEnd = function() {
+                return $scope.doPageRangeEnd($scope.cardViewData.cardViewCurrentPage, $scope.cardViewTotalItems, $scope.cardViewItemsPerPage);
+            };
 
             $scope.filterList = function(item) {
                 if ($scope.data.hideTerminated) {
@@ -792,6 +862,9 @@ angular.module('wasabi.controllers').
                         experiments: function () {
                             return $scope.experiments;
                         },
+                        favoritesObj: function () {
+                            return $scope.favoritesObj;
+                        },
                         readOnly: function() {
                             return false;
                         },
@@ -803,9 +876,6 @@ angular.module('wasabi.controllers').
                             // Add ability for user to create a new application while creating an experiment.
                             clone.push(ConfigFactory.newApplicationNamePrompt);
                             return clone;
-                        },
-                        allApplications: function() {
-                            return $scope.allApplications;
                         }
                     }
                 });
@@ -818,7 +888,7 @@ angular.module('wasabi.controllers').
                     modalInstance.close();
                 });
 
-                modalInstance.result.then(function (started) {
+                modalInstance.result.then(function () {
                     // Update the list of permissions with any newly created ones.
                     UtilitiesFactory.updatePermissionsAndAppList(function(applicationsList) {
                         $scope.applications = applicationsList;

@@ -15,15 +15,6 @@
  *******************************************************************************/
 package com.intuit.wasabi.tests.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import org.apache.http.HttpStatus;
-import org.testng.Assert;
-import static org.testng.Assert.*;
-import org.testng.annotations.Test;
-
 import com.intuit.wasabi.tests.library.TestBase;
 import com.intuit.wasabi.tests.library.util.serialstrategies.DefaultNameExclusionStrategy;
 import com.intuit.wasabi.tests.model.Assignment;
@@ -34,7 +25,16 @@ import com.intuit.wasabi.tests.model.factory.BucketFactory;
 import com.intuit.wasabi.tests.model.factory.ExperimentFactory;
 import com.intuit.wasabi.tests.model.factory.UserFactory;
 import com.jayway.restassured.response.Response;
+import org.apache.http.HttpStatus;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
 import static com.intuit.wasabi.tests.library.util.Constants.*;
+import static org.testng.Assert.assertEquals;
 /**
  * Bucket integration tests
  */
@@ -556,9 +556,9 @@ public class BucketIntegrationTest extends TestBase {
         bucket.state = BUCKET_STATE_CLOSED;
         putBucketState(bucket);
         
-        List<Assignment> assignmentsAfrerclose = getAssignments(newExperiment);
-        assertEquals(assignmentsAfrerclose.size(), 1);
-        assertEquals(labels[0], assignmentsAfrerclose.get(0).bucket_label);
+        List<Assignment> assignmentsAfterclose = getAssignments(newExperiment);
+        assertEquals(assignmentsAfterclose.size(), 1);
+        assertEquals(labels[0], assignmentsAfterclose.get(0).bucket_label);
         
         User user2 = UserFactory.createUser("u2");
         Assignment assignment2 = getAssignment(newExperiment, user2);

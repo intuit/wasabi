@@ -20,13 +20,17 @@
     <parent>
         <groupId>com.intuit.wasabi</groupId>
         <artifactId>wasabi</artifactId>
-        <version>1.0.20160801220857-SNAPSHOT</version>
+        <version>1.0.20161107232436-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <artifactId>wasabi-swagger-ui</artifactId>
     <packaging>jar</packaging>
     <name>${project.artifactId}</name>
+
+    <properties>
+        <sonar.skip>true</sonar.skip>
+    </properties>
 
     <build>
         <plugins>

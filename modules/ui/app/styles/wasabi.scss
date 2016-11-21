@@ -85,7 +85,7 @@ header {
         position: relative;
         display: block;
         height: 36px;
-        li {
+        li.navLink {
           display: inline-block;
           height: 36px;
           line-height: 36px;
@@ -107,6 +107,24 @@ header {
               }
             }
           }
+          &.navDropdown {
+              .dropdown-menu {
+                position: absolute;
+                display: none;
+                height: inherit;
+              }
+              .open > .dropdown-menu {
+                display: block;
+              }
+              a {
+                background: url(/images/sortDwn_white.png) no-repeat right center;
+              }
+              &.sel a.toolsChoice {
+                background: url(/images/sortDwn.png) no-repeat right center;
+                background-position-x: 95%;
+                background-position-y: 36%;
+              }
+          }
           a {
             padding: 0 12px; // 3px 15px;
             display: block;
@@ -117,6 +135,9 @@ header {
             &:hover {
               text-decoration: underline;
             }
+          }
+          li.toolsMenuChoices a {
+            color: #373737;
           }
         }
         &.user {
@@ -167,6 +188,14 @@ header {
 #mainContent {
   width: 1000px;
   margin: 0 auto 20px auto;
+}
+
+.truncateDiv {
+    width: 790px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
 }
 
 .pageError {
@@ -1102,6 +1131,10 @@ header {
     right: 44px;
     top: 4px;
 }
+#resultsToolbar {
+    right: 4px;
+    top: 4px;
+}
 .descriptionLabel {
     padding-bottom: 3px;
     font-size: 12px;
@@ -1279,7 +1312,7 @@ td.checked span {
 	background: url(/images/glyphicons-halflings.png) no-repeat -288px 1px;
 }
 
-#exclusionPickList {
+#exclusionPickList, #addExperimentsPickList {
   width: 900px;
   #exclusionList {
     height: 280px;
@@ -2756,6 +2789,14 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
                             left: 130px !important;
                         }
                     }
+                    &.nonWinner {
+                        background: url(/images/noResult.png) no-repeat 0 0;
+                        background-size: 15px;
+                        background-position-y: 17px;
+                        .bucketAssignments {
+                            left: 130px !important;
+                        }
+                    }
                     &.winning {
                         background: url(/images/hardUp.png) no-repeat 0 0;
                         background-size: 20px;
@@ -2992,6 +3033,11 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
 #segmentationTestModal {
     width: 800px;
     left: -50px;
+}
+
+#resultsModal {
+    width: 700px;
+    left: 0;
 }
 
 #bucketAssignmentModal {
@@ -4210,6 +4256,7 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
     ul {
         list-style-position: inside;
         list-style-type: disc;
+        margin-left: 10px;
     }
     ol {
         list-style-position: inside;
@@ -4231,6 +4278,10 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
     height: 85%;
     position: absolute;
     padding-right: 15px;
+    li span {
+        position: relative;
+        left: -17px;
+    }
 }
 
 /* end help */
@@ -4295,4 +4346,66 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
 
 .selectedLink {
     font-weight: bold;
+}
+
+.pluginDescription {
+    float: left;
+    width: 90%;
+    min-height: 50px;
+    padding: 10px;
+    border: 1px solid rgb(203, 204, 206);
+    @include border-radius(3px);
+    overflow: hidden;
+    @include box-shadow(0 0 1px white);
+    background: rgb(246, 247, 248);
+}
+
+.hoverPopup {
+    width: 250px;
+    height: 150px;
+    padding: 10px;
+    position: absolute;
+    top: 180px;
+    right: 100px;
+    z-index: 100000;
+    display: none;
+    background-color: white;
+    border: 1px solid #aaa;
+    border-radius: 3px;
+    ul {
+        list-style: disc outside none;
+        display: list-item;
+        margin-left: 1em;
+    }
+}
+
+.notAllowed {
+    cursor: no-drop !important;
+}
+
+#pageManagementList, #pageSelectionList {
+    select {
+        background: white;
+        margin-top: 10px;
+    }
+}
+
+.buttonTable {
+    width: 100%;
+    background: white;
+    td {
+        border: 1px solid rgb(200, 200, 200);
+        text-align: center;
+        padding: 8px;
+    }
+}
+
+.pageManagementColumn {
+    width: 316px;
+    margin-top: 20px;
+    float: left;
+}
+
+.gridWithAdvanced {
+    margin-top: 40px;
 }

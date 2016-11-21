@@ -22,10 +22,21 @@ import com.intuit.wasabi.eventlog.EventLogListener;
 import com.intuit.wasabi.eventlog.events.EventLogEvent;
 import org.slf4j.Logger;
 
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import static java.lang.Class.forName;
+import static java.lang.Thread.currentThread;
+import static java.lang.Thread.sleep;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.slf4j.LoggerFactory.getLogger;
 
 
@@ -37,17 +48,17 @@ public class EventLogImpl implements EventLog {
 
     private static final Logger LOGGER = getLogger(EventLogImpl.class);
     /**
-     * Executes the {@link EventLogEventEnvelope}s.
-     */
-    private final ThreadPoolExecutor eventPostThreadPoolExecutor;
-    /**
      * The listener subscriptions.
      */
-    private final Map<EventLogListener, List<Class<? extends EventLogEvent>>> listeners;
+    /*test*/ final Map<EventLogListener, List<Class<? extends EventLogEvent>>> listeners;
     /**
      * the event Deque
      */
-    private final Deque<EventLogEvent> eventDeque;
+    /*test*/ final Deque<EventLogEvent> eventDeque;
+    /**
+     * Executes the {@link EventLogEventEnvelope}s.
+     */
+    private final ThreadPoolExecutor eventPostThreadPoolExecutor;
 
     /**
      * Creates the event pool executor. Should be called by Guice.
@@ -61,7 +72,8 @@ public class EventLogImpl implements EventLog {
         listeners = new ConcurrentHashMap<>();
         eventDeque = new ConcurrentLinkedDeque<>();
 
-        eventPostThreadPoolExecutor = new ThreadPoolExecutor(threadPoolSizeCore, threadPoolSizeMax, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
+        eventPostThreadPoolExecutor = new ThreadPoolExecutor(threadPoolSizeCore, threadPoolSizeMax, 0L, MILLISECONDS,
+                new LinkedBlockingQueue<Runnable>());
     }
 
     /**
@@ -69,7 +81,7 @@ public class EventLogImpl implements EventLog {
      */
     @Override
     public void register(EventLogListener listener) {
-        this.register(listener, Collections.<Class<? extends EventLogEvent>>emptyList());
+        register(listener, emptyList());
     }
 
     /**
@@ -77,10 +89,7 @@ public class EventLogImpl implements EventLog {
      */
     @Override
     public void register(EventLogListener listener, List<Class<? extends EventLogEvent>> events) {
-        if (events.isEmpty()) {
-            events = Collections.<Class<? extends EventLogEvent>>singletonList(EventLogEvent.class);
-        }
-        listeners.put(listener, events);
+        listeners.put(listener, events.isEmpty() ? singletonList(EventLogEvent.class) : events);
     }
 
     /**
@@ -91,20 +100,23 @@ public class EventLogImpl implements EventLog {
     public void register(EventLogListener listener, String... events)
             throws ClassNotFoundException {
         String packagePrefix = "com.intuit.wasabi.eventlog.events.";
-
         List<Class<? extends EventLogEvent>> eventList = new ArrayList<>(events.length);
+
         for (String event : events) {
             Class<? extends EventLogEvent> eventLogClass;
 
             try {
                 eventLogClass = (Class<? extends EventLogEvent>) forName(event);
             } catch (ClassNotFoundException e) {
-                LOGGER.debug("Event class " + event + " not found, trying " + packagePrefix + event + " !", e);
+                LOGGER.debug("Event class: {} not found, trying: {} ", event, packagePrefix + event, e);
+
                 eventLogClass = (Class<? extends EventLogEvent>) forName(packagePrefix + event);
             }
+
             eventList.add(eventLogClass);
         }
-        this.register(listener, eventList);
+
+        register(listener, eventList);
     }
 
     /**
@@ -113,9 +125,11 @@ public class EventLogImpl implements EventLog {
     @Override
     public void postEvent(EventLogEvent event) {
         if (event == null) {
-            LOGGER.warn("null-Event skipped.");
+            LOGGER.warn("skipping null EventLogEvent");
+
             return;
         }
+
         eventDeque.offerLast(event);
     }
 
@@ -128,9 +142,9 @@ public class EventLogImpl implements EventLog {
      */
     private boolean isSubscribed(EventLogListener listener, EventLogEvent event) {
         List<Class<? extends EventLogEvent>> subscriptions = listeners.get(listener);
-
         // class and super classes
         Class<?> eventClass = event.getClass();
+
         while (!eventClass.equals(Object.class)) {
             if (subscriptions.contains(eventClass)) {
                 return true;
@@ -142,6 +156,7 @@ public class EventLogImpl implements EventLog {
                     return true;
                 }
             }
+
             eventClass = eventClass.getSuperclass();
         }
 
@@ -154,23 +169,23 @@ public class EventLogImpl implements EventLog {
     @Override
     public void run() {
         try {
-            while (!Thread.currentThread().isInterrupted() && Thread.currentThread().isAlive()) {
+            while (!currentThread().isInterrupted() && currentThread().isAlive()) {
                 if (!eventDeque.isEmpty()) {
                     prepareEnvelope(eventDeque.pollFirst());
                 } else {
                     try {
-                        Thread.sleep(500);
+                        sleep(500);
                     } catch (InterruptedException e) {
                         LOGGER.warn("Interrupted while sleeping.", e);
                     }
                 }
             }
         } finally {
-            LOGGER.info("Shutting down event system, posting remaining events -- incoming events are no longer accepted.");
+            LOGGER.info("Shutting down event system, posting remaining events -- new events will not be processed.");
+
             if (!eventDeque.isEmpty()) {
-                for (EventLogEvent eventLogEvent : eventDeque) {
-                    prepareEnvelope(eventLogEvent);
-                }
+                eventDeque.forEach(this::prepareEnvelope);
+                eventDeque.clear();
             }
         }
     }
@@ -181,13 +196,27 @@ public class EventLogImpl implements EventLog {
      * @param event the vent to prepare
      */
     /*test*/ void prepareEnvelope(final EventLogEvent event) {
-        if (event == null) {
-            return;
-        }
-        for (EventLogListener eventLogListener : listeners.keySet()) {
-            if (isSubscribed(eventLogListener, event)) {
-                eventPostThreadPoolExecutor.submit(new EventLogEventEnvelope(event, eventLogListener));
+        LOGGER.debug("preparing event: {}", event);
+
+        if (event != null) {
+            LOGGER.debug("preparing event is not null");
+
+            for (EventLogListener eventLogListener : listeners.keySet()) {
+                boolean isEventSubscribed = isSubscribed(eventLogListener, event);
+
+                LOGGER.debug("preparing event {}, is subscribed: {}, with eventLogListener: {}", isEventSubscribed,
+                        event, eventLogListener);
+
+                if (isEventSubscribed) {
+                    LOGGER.debug("preparing subscribed event {}, with eventLogListener", event, eventLogListener);
+
+                    eventPostThreadPoolExecutor.submit(new EventLogEventEnvelope(event, eventLogListener));
+
+                    LOGGER.debug("prepared subscribed event {}, with eventLogListener", event, eventLogListener);
+                }
             }
         }
+
+        LOGGER.debug("prepared event: {}", event);
     }
 }

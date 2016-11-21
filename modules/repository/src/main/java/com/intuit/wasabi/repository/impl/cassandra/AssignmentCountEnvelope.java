@@ -86,6 +86,10 @@ public class AssignmentCountEnvelope implements Runnable {
 
     @Override
     public void run() {
+        if (countUp) {
+            assignmentsRepository.insertExperimentBucketAssignment(experiment.getID(), date.toInstant(), null != assignment.getBucketLabel());
+        }
+
         try {
             // Updates the bucket assignment counts
             if (assignBucketCount) {
@@ -106,7 +110,6 @@ public class AssignmentCountEnvelope implements Runnable {
             LOGGER.error("Error updating the assignment to the user export for experiment: ", experiment.getID() +
                     " bucket label: " + assignment.getBucketLabel() + " with exception: ", e);
         }
-
 
         // For rapid experiments; checks if a set userCap is attained.
         // If so, changes the state of the experiment to PAUSED.

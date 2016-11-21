@@ -15,7 +15,7 @@
 # limitations under the License.
 ###############################################################################
 
-endpoint_default=192.168.99.100:8080 
+endpoint_default=localhost:8080
 
 usage() {
   [ "${1}" ] && echo "error: ${1}"
@@ -40,7 +40,7 @@ EOF
 create() {
   #CREATE EXPERIMENT AND SAVE UUID TO BE PASSED INTO FUTURE CALLS
   uuid=`curl -s -u admin:admin -H'Content-Type: application/json' \
-    -d '{"applicationName": "Demo_App", "samplingPercent": 1.0,  "label": "BuyButton", "startTime": "2016-06-10T00:00:00-0000", "endTime": "2018-12-25T00:00:00-0000"}' $endpoint/api/v1/experiments | \
+    -d '{"applicationName": "Demo_App", "samplingPercent": 1.0,  "label": "BuyButton", "description": "BuyButton experiment", "startTime": "2016-06-10T00:00:00-0000", "endTime": "2018-12-25T00:00:00-0000"}' $endpoint/api/v1/experiments | \
 
     python -mjson.tool | \
 

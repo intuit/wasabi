@@ -42,6 +42,7 @@ public class IntegrationMetadata extends TestBase {
      */
     private Experiment createExperiment() {
         return ExperimentFactory.createExperiment()
+                .setDescription("Sample Description.")
                 .setStartTime(startTime)
                 .setEndTime(endTime)
                 .setLabel(PREFIX_EXPERIMENT + System.currentTimeMillis() + count++)
@@ -55,7 +56,7 @@ public class IntegrationMetadata extends TestBase {
      * from the json input.
      */
     @Test(dependsOnGroups = {"ping"})
-    public void t_defaultDesciptionPayLoadEmpty() {
+    public void t_defaultDescriptionPayLoadEmpty() {
         // create experiment with description missing
         Experiment exp = postExperiment(createExperiment());
 
@@ -63,8 +64,6 @@ public class IntegrationMetadata extends TestBase {
         Assert.assertNotNull(exp.id, "Experiment creation failed (No id).");
         Assert.assertNotNull(exp.applicationName, "Experiment creation failed (No applicationName).");
         Assert.assertNotNull(exp.label, "Experiment creation failed (No label).");
-        LOGGER.info("Testing non-null default experiment description...");
-        Assert.assertNull(exp.description, "Default experiment description should be null");
 
         // create a bucket, 100% allocation, description and payload missing
         Bucket bucket = postBucket(BucketFactory.createBucket(exp));
@@ -82,7 +81,7 @@ public class IntegrationMetadata extends TestBase {
      * consistent with supplied strings for these fields
      */
     @Test(dependsOnGroups = {"ping"})
-    public void t_desciptionPayLoadProvided() {
+    public void t_descriptionPayLoadProvided() {
         // create Experiment with given description
         String description = "Non-null metadata";
         Experiment exp = postExperiment(createExperiment().setDescription(description));
@@ -107,11 +106,9 @@ public class IntegrationMetadata extends TestBase {
      * explicitly set to empty string
      */
     @Test(dependsOnGroups = {"ping"})
-    public void t_defaultDesciptionPayLoadNull() {
+    public void t_defaultDescriptionPayLoadNull() {
         // create an experiment with {"description":""}
-        Experiment exp = postExperiment(createExperiment().setDescription(""));
-        LOGGER.info("Testing experiment description with empty string supplied...");
-        Assert.assertEquals(exp.description, null, "Default experiment description is not an empty string");
+        Experiment exp = postExperiment(createExperiment());
 
         // create a bucket with empty description and payload
         Bucket bucket = postBucket(BucketFactory.createBucket(exp).setDescription("").setPayload(""));

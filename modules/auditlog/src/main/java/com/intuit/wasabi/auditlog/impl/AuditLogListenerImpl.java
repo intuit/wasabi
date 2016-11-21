@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright 2016 Intuit
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package com.intuit.wasabi.auditlog.impl;
 
 import com.google.inject.Inject;
@@ -8,10 +23,16 @@ import com.intuit.wasabi.eventlog.EventLog;
 import com.intuit.wasabi.eventlog.EventLogListener;
 import com.intuit.wasabi.eventlog.events.EventLogEvent;
 import com.intuit.wasabi.repository.AuditLogRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
+import static com.intuit.wasabi.auditlogobjects.AuditLogEntryFactory.createFromEvent;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * The AuditLogListener subscribes to events which should be logged for the user interface.
@@ -21,6 +42,7 @@ public class AuditLogListenerImpl implements EventLogListener {
     /** Executes the {@link AuditLogEntryEnvelope}s. */
     private final ThreadPoolExecutor threadPoolExecutor;
     private final AuditLogRepository repository;
+    private Logger LOGGER = getLogger(AuditLogListenerImpl.class);
 
     /**
      * Initializes the audit log.
@@ -38,7 +60,8 @@ public class AuditLogListenerImpl implements EventLogListener {
         this.repository = repository;
         eventLog.register(this);
 
-        threadPoolExecutor = new ThreadPoolExecutor(threadPoolSizeCore, threadPoolSizeMax, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
+        threadPoolExecutor = new ThreadPoolExecutor(threadPoolSizeCore, threadPoolSizeMax, 0L, MILLISECONDS,
+                new LinkedBlockingQueue<Runnable>());
     }
 
     /**
@@ -48,16 +71,12 @@ public class AuditLogListenerImpl implements EventLogListener {
      */
     @Override
     public void postEvent(EventLogEvent event) {
-        threadPoolExecutor.submit(createAuditLogEntryEnvelope(event));
-    }
+        AuditLogEntryEnvelope auditLogEntryEnvelope = new AuditLogEntryEnvelope(createFromEvent(event), repository);
 
-    /**
-     * Creates an {@link AuditLogEntryEnvelope} for the specified event.
-     * @param event the event
-     * @return an {@link AuditLogEntry} wrapped into an envelope
-     */
-    private AuditLogEntryEnvelope createAuditLogEntryEnvelope(EventLogEvent event) {
-        return new AuditLogEntryEnvelope(AuditLogEntryFactory.createFromEvent(event), repository);
-    }
+        LOGGER.debug("posting auditLogEntryEnvelope: {}", auditLogEntryEnvelope);
 
+        threadPoolExecutor.submit(auditLogEntryEnvelope);
+
+        LOGGER.debug("posted auditLogEntryEnvelope: {}", auditLogEntryEnvelope);
+    }
 }

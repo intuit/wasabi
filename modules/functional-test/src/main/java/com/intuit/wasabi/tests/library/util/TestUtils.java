@@ -21,7 +21,16 @@ import com.google.gson.JsonElement;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * Provides several static methods useful for the test classes.
@@ -63,12 +72,12 @@ public class TestUtils {
 
     /**
      * Wraps a JSON String into a JSON object.
-     *
+     * <p>
      * If the JSON String where {@code str} and the JSON object {@code obj} the resulting
      * JSON String would be: {@code {"obj":str}}.
      *
      * @param jsonString the JSON String to wrap
-     * @param object the object to wrap into
+     * @param object     the object to wrap into
      * @return the new JSON string
      */
     public static String wrapJsonIntoObject(String jsonString, String object) {
@@ -78,7 +87,7 @@ public class TestUtils {
     /**
      * Turns a csv with a header row into a JSON array.
      *
-     * @param csv the csv string
+     * @param csv            the csv string
      * @param fieldSeparator the column separators
      * @return a String representing a JSON array
      */
@@ -116,13 +125,25 @@ public class TestUtils {
      * @throws ParseException if the time string is not correctly formatted.
      */
     public static Calendar parseTime(String timestring) throws java.text.ParseException {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-        Date date = sdf.parse(timestring);
         Calendar cal = Calendar.getInstance();
-        cal.setTime(date);
-        cal.setTimeZone(TimeZone.getTimeZone("UTC"));
+        cal.setTimeInMillis(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(timestring)).toEpochMilli());
         return cal;
+    }
+
+    /**
+     * Returns a UI formatted date string (M/d/y).
+     *
+     * @param datetime datetime to format
+     */
+    public static String formatDateForUI(LocalDateTime datetime) {
+        return DateTimeFormatter.ofPattern("M/d/y").format(datetime);
+    }
+
+    /**
+     * Parse UI formatted date string (m/d/Y).
+     */
+    public static LocalDateTime parseDateFromUI(String datetime) {
+        return LocalDateTime.from(DateTimeFormatter.ofPattern("M/d/y").parse(datetime));
     }
 
 }

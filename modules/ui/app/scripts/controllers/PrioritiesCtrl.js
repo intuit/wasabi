@@ -1,12 +1,11 @@
 /* global $:false */
-/* global moment:false */
 /*jshint devel:true */
 
 'use strict';
 
 angular.module('wasabi.controllers').
-    controller('PrioritiesCtrl', ['$scope', '$filter', '$http', '$stateParams', 'PrioritiesFactory', '$modal', 'UtilitiesFactory', '$rootScope', 'DialogsFactory', 'AUTH_EVENTS', '$state', 'PERMISSIONS', 'ConfigFactory', 'ApplicationsFactory', 'ExperimentsFactory',
-        function ($scope, $filter, $http, $stateParams, PrioritiesFactory, $modal, UtilitiesFactory, $rootScope, DialogsFactory, AUTH_EVENTS, $state, PERMISSIONS, ConfigFactory, ApplicationsFactory, ExperimentsFactory) {
+    controller('PrioritiesCtrl', ['$scope', '$filter', '$http', '$stateParams', 'PrioritiesFactory', '$modal', 'UtilitiesFactory', '$rootScope', 'DialogsFactory', 'AUTH_EVENTS', '$state', 'PERMISSIONS', 'ConfigFactory', 'ApplicationsFactory', 'ExperimentsFactory', '$cookies',
+        function ($scope, $filter, $http, $stateParams, PrioritiesFactory, $modal, UtilitiesFactory, $rootScope, DialogsFactory, AUTH_EVENTS, $state, PERMISSIONS, ConfigFactory, ApplicationsFactory, ExperimentsFactory, $cookies) {
 
             $scope.data = {
                 applicationName: '', // This is bound to the selection in the application name drop down menu.
@@ -18,7 +17,6 @@ angular.module('wasabi.controllers').
             // This is passed in as a parameter on the URL. The selection in the drop down will cause an URL
             // with this parameter to be hit. This is necessary so that going "back" from the details page will
             // come back to the correct form of the Priorities table.
-            // TODO: Reconcile this with code below.
             $scope.applicationName = $stateParams.appname;
             $scope.allApplications = [];
             $scope.noDrag = false;
@@ -32,7 +30,15 @@ angular.module('wasabi.controllers').
             UtilitiesFactory.hideHeading(false);
             UtilitiesFactory.selectTopLevelTab('Priority');
 
-            $scope.changePage = function() {
+            $scope.changePage = function(destinationApp) {
+                if (destinationApp !== undefined) {
+                    $scope.data.applicationName = destinationApp;
+                }
+                if ($scope.data.applicationName && $scope.data.applicationName === $stateParams.appname) {
+                    // The URL already matches the applicationName, so we don't need to do anything.
+                    return;
+                }
+                $cookies.wasabiDefaultApplication = $scope.data.applicationName;
                 $state.go('priorities', {'appname': $scope.data.applicationName});
             };
 
@@ -44,8 +50,19 @@ angular.module('wasabi.controllers').
                 return UtilitiesFactory.hasPermission(appName, PERMISSIONS.updatePerm);
             };
 
+            $scope.openResultsModal = function (experiment) {
+                UtilitiesFactory.openResultsModal(experiment, false, $scope.loadPrioritiesAfterAction);
+            };
+
             $scope.changeState = function (experiment, state) {
-                UtilitiesFactory.changeState(experiment, state, $scope.loadPrioritiesAfterAction);
+                var afterChangeActions = {
+                    // Transitioning to PAUSED, that is, stopping the experiment.  Prompt the user to enter their results.
+                    'PAUSED': $scope.openResultsModal,
+                    // In other cases, just load the experiment.
+                    'RUNNING': $scope.loadPrioritiesAfterAction,
+                    'TERMINATED': $scope.loadPrioritiesAfterAction
+                };
+                UtilitiesFactory.changeState(experiment, state, afterChangeActions);
             };
 
             $scope.deleteExperiment = function (experiment) {
@@ -72,7 +89,7 @@ angular.module('wasabi.controllers').
                         }
                     }
                 }, function(response) {
-                        UtilitiesFactory.handleGlobalError(response, 'The list of applications could not be retrieved.');
+                    UtilitiesFactory.handleGlobalError(response, 'The list of applications could not be retrieved.');
                 });
             };
 
@@ -82,7 +99,7 @@ angular.module('wasabi.controllers').
 
             $scope.onSelectAppName = function(selectedApp) {
                 if (selectedApp) {
-                    $scope.applicationName = selectedApp;
+                    $scope.applicationName = $cookies.wasabiDefaultApplication = selectedApp;
                     $scope.noDrag = $scope.readOnly = !$scope.hasUpdatePermission(selectedApp);
                     PrioritiesFactory.query({applicationName: selectedApp}).$promise.then(function (priorities) {
                         $scope.experiments = priorities;
@@ -99,13 +116,18 @@ angular.module('wasabi.controllers').
             };
 
             if ($scope.appNames.length === 1) {
-                $scope.onSelectAppName($scope.appNames[0]);
+                $scope.changePage($scope.appNames[0]);
             }
 
             // If we are on a version of this page for a specific application, this will cause the $watch below
             // to populate the table with the correct data for the correct application.
-            // TODO: Reconcile this with code above.
+            if (!$scope.applicationName && $cookies.wasabiDefaultApplication) {
+                $scope.applicationName = $cookies.wasabiDefaultApplication;
+            }
             $scope.data.applicationName = $scope.applicationName;
+            if ($scope.data.applicationName) {
+                $scope.changePage();
+            }
             $scope.$watch(function() {
                     return $scope.appNames.length;
                 },
@@ -116,14 +138,23 @@ angular.module('wasabi.controllers').
                     $scope.$evalAsync(function() {
                         // As a workaround of the fact that modifying the model *DOES NOT* seem to cause the menu to be set
                         // to reflect it, we are using jQuery to move the menu to the correct value.
-                        var choiceIndex = 0;
+                        var choiceIndex = 0, foundIt = false;
                         for (var i = 0; i < $scope.appNames.length; i++) {
                             if ($scope.appNames[i] === $scope.applicationName) {
+                                foundIt = true;
                                 choiceIndex = i + 1;
                             }
                         }
-                        $('#applicationNameChoice').prop('selectedIndex', choiceIndex);
-                        $scope.onSelectAppName($scope.applicationName);
+                        if (foundIt) {
+                            $('#applicationNameChoice').prop('selectedIndex', choiceIndex);
+                            $scope.onSelectAppName($scope.applicationName);
+                        }
+                        else {
+                            // Possible that they went to a URL that had an application they don't have access to,
+                            // or the cookie on the browser has an application they don't have access to.
+                            $cookies.wasabiDefaultApplication = '';
+                            $scope.data.applicationName = '';
+                        }
                     });
                 }
             );
@@ -153,6 +184,16 @@ angular.module('wasabi.controllers').
                         function() {
                             $scope.data.editingSampling = false;
 
+                            function experimentUpdateSuccess(result) {
+                                UtilitiesFactory.trackEvent('saveItemSuccess',
+                                    {key: 'dialog_name', value: 'prioritiesSamplingPercentageChanges'},
+                                    {key: 'application_name', value: result.applicationName},
+                                    {key: 'item_id', value: result.id},
+                                    {key: 'item_label', value: result.samplingPercent});
+                            }
+                            function experimentUpdateError(response) {
+                                UtilitiesFactory.handleGlobalError(response, 'Your experiment sampling percentage could not be changed.');
+                            }
                             // Find changed percentages and save the changes
                             for (var i = 0; i < $scope.experiments.length; i++) {
                                 for (var j = 0; j < $scope.originalPercentages.length; j++) {
@@ -162,16 +203,9 @@ angular.module('wasabi.controllers').
                                         ExperimentsFactory.update({
                                             id: $scope.experiments[j].id,
                                             samplingPercent: $scope.experiments[j].samplingPercent
-                                        }).$promise.then(function (result) {
-                                                UtilitiesFactory.trackEvent('saveItemSuccess',
-                                                    {key: 'dialog_name', value: 'prioritiesSamplingPercentageChanges'},
-                                                    {key: 'application_name', value: result.applicationName},
-                                                    {key: 'item_id', value: result.id},
-                                                    {key: 'item_label', value: result.samplingPercent});
-                                            },
-                                            function(response) {
-                                                UtilitiesFactory.handleGlobalError(response, 'Your experiment sampling percentage could not be changed.');
-                                            }
+                                        }).$promise.then(
+                                            experimentUpdateSuccess,
+                                            experimentUpdateError
                                         );
                                     }
                                 }

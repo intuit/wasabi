@@ -17,53 +17,37 @@ package com.intuit.wasabi.tests.model.factory;
 
 import com.google.gson.GsonBuilder;
 import com.intuit.wasabi.tests.library.util.Constants;
-import com.intuit.wasabi.tests.model.Experiment;
 import com.intuit.wasabi.tests.library.util.TestUtils;
+import com.intuit.wasabi.tests.model.Experiment;
 
 /**
  * A factory for Experiments.
  */
 public class ExperimentFactory {
 
-    public static String USER_ID = "admin";
-    
     /**
      * Only used to create unique Experiment labels.
      */
     private static int internalId = 0;
-    
-    static {
-        if (System.getProperty("user-name") != null)
-            USER_ID = System.getProperty("user-name");
-    }
 
     /**
      * Creates a basic Experiment with the required default values but no ID.
-     * The values are a name, the default application, a start and end time and the sampling percentage (100%).
-     *
+     * The values are a name, the default application, a start and end time and the sampling percentage (100%), as
+     * well as a hypothesis/description.
+     * <p>
      * Sets the creatorID to admin email
      *
      * @return a default Experiment.
      */
     public static Experiment createExperiment() {
-        return new Experiment(Constants.DEFAULT_PREFIX_EXPERIMENT + System.currentTimeMillis() + internalId++, ApplicationFactory.defaultApplication(),
-                TestUtils.currentTimeString(), TestUtils.relativeTimeString(42), 1).setCreatorID(USER_ID);
+        return new Experiment(Constants.DEFAULT_PREFIX_EXPERIMENT + System.currentTimeMillis() + internalId++,
+                ApplicationFactory.defaultApplication(),
+                TestUtils.currentTimeString(),
+                TestUtils.relativeTimeString(42), 1)
+                .setCreatorID(System.getProperty("user-name") != null ? System.getProperty("user-name") : "admin")
+                .setDescription("A sample Experiment description.");
     }
 
-    /**
-     * Creates a basic Experiment with the required default values and the optional value
-     * description. (No ID!)
-     * The values are a name, the default application, a start and end time, the sampling percentage (100%) and a
-     * description.
-     *
-     * @return an extended Experiment.
-     */
-    public static Experiment createExperimentWithDescription() {
-        Experiment experiment = ExperimentFactory.createExperiment();
-        experiment.description = "A sample Experiment description.";
-        return experiment;
-    }
-    
     /**
      * Creates a basic Experiment with the required default values and the optional value
      * rule. (No ID!)
@@ -89,6 +73,8 @@ public class ExperimentFactory {
     public static Experiment createCompleteExperiment() {
         Experiment experiment = ExperimentFactory.createExperimentWithRule();
         experiment.description = "A sample Experiment description.";
+        experiment.hypothesisIsCorrect = "Sample hypothesis check";
+        experiment.results = "Sample experiment results";
         return experiment;
     }
 
@@ -102,3 +88,4 @@ public class ExperimentFactory {
         return new GsonBuilder().create().fromJson(json, Experiment.class);
     }
 }
+

@@ -61,7 +61,7 @@ public class DatabaseExperimentRepositoryTest {
     public void setup() {
         when(transactionFactory.newTransaction()).thenReturn(transaction);
         when(transactionFactory.getDataSource()).thenReturn(dataSource);
-        repository = new DatabaseExperimentRepository(transactionFactory, experimentValidator, flyway);
+        repository = new DatabaseExperimentRepository(transactionFactory, experimentValidator, flyway, "com/intuit/wasabi/repository/impl/mysql/migration");
     }
 
     @Test
@@ -208,7 +208,7 @@ public class DatabaseExperimentRepositoryTest {
     @Test
     public void testGetExperimentsWithListOfExperimentIDs() {
         DatabaseExperimentRepository repository = spy(new DatabaseExperimentRepository(transactionFactory,
-                experimentValidator, flyway));
+                experimentValidator, flyway, "com/intuit/wasabi/repository/impl/mysql/migration"));
         List<Experiment.ID> list = Arrays.asList(Experiment.ID.newInstance());
         Experiment experiment = mock(Experiment.class);
         doReturn(experiment).when(repository).getExperiment(any(Experiment.ID.class));
@@ -245,7 +245,9 @@ public class DatabaseExperimentRepositoryTest {
 
         BDDCatchException.when(repository).createIndicesForNewExperiment(
                 NewExperiment.withID(Experiment.ID.newInstance())
-                        .withSamplingPercent(0.5).build());
+                        .withSamplingPercent(0.5)
+                        .withDescription("Some description")
+                        .build());
         BDDCatchException.then(caughtException())
                 .isInstanceOf(UnsupportedOperationException.class)
                 .hasMessage("No support for sql - indices are only created in Cassandra")
@@ -289,7 +291,9 @@ public class DatabaseExperimentRepositoryTest {
                 .withLabel(Experiment.Label.valueOf("testLabel"))
                 .withStartTime(new Date())
                 .withEndTime(new Date())
-                .withAppName(Application.Name.valueOf("TestApp")).build();
+                .withDescription("Some description")
+                .withAppName(Application.Name.valueOf("TestApp"))
+                .build();
 
         doNothing().when(transaction).insert(anyString(), Matchers.anyVararg());
         Experiment.ID result = repository.createExperiment(mockedNewExperiment);
@@ -452,7 +456,9 @@ public class DatabaseExperimentRepositoryTest {
     public void testDeleteExperiment() {
         when(transaction.update(anyString(), Matchers.anyVararg())).thenReturn(0);
         BDDCatchException.when(repository).deleteExperiment(NewExperiment.withID(Experiment.ID.newInstance())
-                .withSamplingPercent(0.5).build());
+                .withSamplingPercent(0.5)
+                .withDescription("Some description")
+                .build());
         BDDCatchException.then(caughtException())
                 .isInstanceOf(ExperimentNotFoundException.class)
                 .hasMessageContaining("Experiment")

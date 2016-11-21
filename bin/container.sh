@@ -50,7 +50,7 @@ EOF
 }
 
 fromPom() {
-    mvn -f $1/pom.xml -P $2 help:evaluate -Dexpression=$3 | sed -n -e '/^\[.*\]/ !{ p; }'
+    mvn ${WASABI_MAVEN} -f $1/pom.xml -P $2 help:evaluate -Dexpression=$3 | sed -n -e '/^\[.*\]/ !{ p; }'
 }
 
 beerMe() {
@@ -69,11 +69,20 @@ beerMe() {
 }
 
 start_docker() {
-  docker ps ${project} >/dev/null 2>&1 || (open /Applications/Docker.app; beerMe 10)
+  docker ps >/dev/null 2>&1
+  [[ $? != 0 && "${WASABI_OS}" == "${WASABI_OSX}" ]] && open /Applications/Docker.app
+
+  while :; do
+    docker ps >/dev/null 2>&1
+    [[ $? = 0 ]] && break
+    beerMe 3
+  done
 }
 
 stop_docker() {
-  osascript -e 'quit app "Docker"'
+  if [ "${WASABI_OS}" == "${WASABI_OSX}" ]; then
+    osascript -e 'quit app "Docker"'
+  fi
 }
 
 start_container() {
@@ -155,19 +164,7 @@ start_wasabi() {
 
   echo -ne "${green}chill'ax ${reset}"
 
-  wget -q --spider --tries=20 --waitretry=3 http://localhost:8080/api/v1/ping
-  [ $? -ne 0 ] && usage "unable to start" 1
-
-  cat << EOF
-
-${green}
-wasabi is operational:
-
-  ui: % open http://localhost:8080     note: sign in as admin/admin
-  ping: % curl -i http://localhost:8080/api/v1/ping
-  debug: attach to localhost:8180
-${reset}
-EOF
+  status
 }
 
 start_cassandra() {
@@ -214,8 +211,35 @@ console_mysql() {
 }
 
 status() {
+  wget -q --spider --tries=20 --waitretry=3 http://localhost:8080/api/v1/ping
+  [ $? -ne 0 ] && usage "not started" 1
+
+  cat << EOF
+
+${green}
+wasabi is operational:
+
+  ui: % open http://localhost:8080     note: sign in as admin/admin
+  ping: % curl -i http://localhost:8080/api/v1/ping
+  debug: attach to localhost:8180
+${reset}
+EOF
+
   docker ps 2>/dev/null
 }
+
+exec_commands_simple() {
+  prefix=$1
+  commands=$(echo $2 | cut -d ':' -f 2)
+  (IFS=','; for command in ${commands}; do ${prefix}${command}; done)
+}
+
+exec_commands_project() {
+  prefix=$1
+  commands=$(echo $2 | cut -d ':' -f 2)
+  (IFS=','; for command in ${commands}; do ${prefix} ${project}-${command/${project}/main}; done)
+}
+
 
 optspec=":f:p:v:s:h-:"
 
@@ -245,19 +269,15 @@ sleep=${sleep:=${sleep_default}}
 
 for command in ${@:$OPTIND}; do
   case "${command}" in
-    start) command="start:cassandra,mysql,wasabi";&
-    start:*) commands=$(echo ${command} | cut -d':' -f 2)
-      (IFS=','; for command in ${commands}; do start_${command}; done);;
-    stop) command="stop:main,cassandra,mysql";&
-    stop:*) commands=$(echo ${command} | cut -d':' -f 2)
-      (IFS=','; for command in ${commands}; do stop_container ${project}-${command/${project}/main}; done);;
-    console) command="console:cassandra,mysql";&
-    console:*) commands=$(echo ${command} | cut -d':' -f 2)
-      (IFS=','; for command in ${commands}; do console_${command}; done);;
+    start) exec_commands_simple start_ cassandra,mysql,wasabi;;
+    start:*) exec_commands_simple start_ ${command};;
+    stop) exec_commands_project stop_container main,cassandra,mysql;;
+    stop:*) exec_commands_project stop_container ${command};;
+    console) exec_commands_simple console_ cassandra,mysql;;
+    console:*) exec_commands_simple console_ ${command};;
     status) status;;
-    remove) command="remove:wasabi,cassandra,mysql";&
-    remove:*) commands=$(echo ${command} | cut -d':' -f 2)
-      (IFS=','; for command in ${commands}; do remove_container ${project}-${command/${project}/main}; done);;
+    remove) exec_commands_project remove_container wasabi,cassandra,mysql;;
+    remove:*) exec_commands_project remove_container ${command};;
     "") usage "unknown command: ${command}" 1;;
     *) usage "unknown command: ${command}" 1;;
   esac

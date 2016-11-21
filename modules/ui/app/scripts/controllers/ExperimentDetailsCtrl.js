@@ -12,6 +12,7 @@ angular.module('wasabi.controllers').
                 disableSimple: false,
                 disableAdvanced: false,
                 ruleWidgetsDisabled: false,
+                resultsWidgetsDisabled: true,
                 descriptionLength: 0
             };
 
@@ -20,12 +21,16 @@ angular.module('wasabi.controllers').
                 isRapidExperiment: false
             };
             $scope.experimentFormSubmitted = false;
-            $scope.simpleRuleEditing = $cookies['showAdvancedSegmentationEditor'] == undefined || $cookies['showAdvancedSegmentationEditor'] !== 'true';
+            $scope.simpleRuleEditing = $cookies.showAdvancedSegmentationEditor === undefined || $cookies.showAdvancedSegmentationEditor !== 'true';
             $scope.downloadUrl = ConfigFactory.baseUrl() + '/experiments/' + $scope.experiment.id + '/assignments';
             $scope.rulesChangedNotSaved = true;
+            $scope.resultsChangedNotSaved = true;
             $scope.showingActionRates = true;
             $scope.plugins = $rootScope.plugins;
             $scope.supportEmail = supportEmail;
+            $scope.favoritesObj = {
+                favorites: null
+            };
 
             $scope.headers = [];
 
@@ -101,8 +106,20 @@ angular.module('wasabi.controllers').
                 return UtilitiesFactory.hasPermission(experiment.applicationName, PERMISSIONS.updatePerm);
             };
 
+            $scope.afterPause = function() {
+                // Prompt the user for results then load the experiment after they have provided them.
+                UtilitiesFactory.openResultsModal($scope.experiment, $scope.readOnly, $scope.loadExperiment);
+            };
+
             $scope.changeState = function (experiment, state) {
-                UtilitiesFactory.changeState(experiment, state, $scope.loadExperiment);
+                var afterChangeActions = {
+                    // Transitioning to PAUSED, that is, stopping the experiment.  Prompt the user to enter their results.
+                    'PAUSED': $scope.afterPause,
+                    // In other cases, just load the experiment.
+                    'RUNNING': $scope.loadExperiment,
+                    'TERMINATED': $scope.loadExperiment
+                };
+                UtilitiesFactory.changeState(experiment, state, afterChangeActions);
             };
 
             $scope.deleteExperiment = function (experiment) {
@@ -143,7 +160,7 @@ angular.module('wasabi.controllers').
                 $scope.rulesChangedNotSaved = true;
             };
 
-            $scope.ruleChanged = function(rule, subForm) {
+            $scope.ruleChanged = function() {
                 $scope.rulesChangedNotSaved = true;
             };
 
@@ -187,8 +204,7 @@ angular.module('wasabi.controllers').
             };
 
             $scope.disableRule = function(flag) {
-                var doit = (flag !== undefined ? flag : true);
-                $scope.data.ruleWidgetsDisabled = flag;
+                $scope.data.ruleWidgetsDisabled = (flag !== undefined ? flag : true);
             };
 
             $scope.firstPageEncoded = function() {
@@ -207,14 +223,23 @@ angular.module('wasabi.controllers').
             $scope.loadExperiment = function () {
                 ExperimentsFactory.show({id: $stateParams.experimentId}).$promise.then(function (experiment) {
                     $scope.experiment = experiment;
+                    if ($scope.experiment.hypothesisIsCorrect === null) {
+                        $scope.experiment.hypothesisIsCorrect = '';
+                    }
 
                     $scope.rulesChangedNotSaved = $scope.checkForRule();
 
                     $scope.readOnly = ($scope.readOnly || experiment.state.toLowerCase() === 'terminated');
 
-                    // Retrieve whether or not this is a favorite from local storage.
-                    var faves = UtilitiesFactory.retrieveFavorites();
-                    $scope.experiment.isFavorite = (faves.indexOf($scope.experiment.applicationName + '|' + $scope.experiment.label) >= 0);
+                    // Retrieve whether or not this is a favorite.
+                    UtilitiesFactory.retrieveFavorites().$promise
+                    .then(function(faves) {
+                        $scope.favoritesObj.favorites = (faves && faves.experimentIDs ? faves.experimentIDs : []);
+                        $scope.experiment.isFavorite = ($scope.favoritesObj.favorites.indexOf($scope.experiment.id) >= 0);
+                    },
+                        function(response) {
+                            UtilitiesFactory.handleGlobalError(response, 'The list of favorites could not be retrieved.');
+                    });
 
                     $scope.data.descriptionLength = (experiment.description ? experiment.description.length : 0);
 
@@ -284,7 +309,7 @@ angular.module('wasabi.controllers').
                         $scope.experiment.statistics = statistics;
 
                         // Note: this also puts the bucket assignment counts in the sortedBuckets objects.
-                        UtilitiesFactory.determineBucketImprovementClass($scope.experiment, $scope.experiment.controlBucketLabel);
+                        UtilitiesFactory.determineBucketImprovementClass($scope.experiment);
 
                         // Populate the Actions table, which involves analysis of the statistics data.
                         $scope.buildActionsTable();
@@ -398,6 +423,8 @@ angular.module('wasabi.controllers').
             };
 
             $scope.buildActionsTable = function() {
+                var bucket = null;
+
                 $scope.dataRows = {
                     'Overall':
                     [
@@ -411,7 +438,7 @@ angular.module('wasabi.controllers').
                     ]
                 };
 
-                $scope.orderedDataRows = [$scope.dataRows['Overall']];
+                $scope.orderedDataRows = [$scope.dataRows.Overall];
 
                 var bucketColumnPositions = {'Metric': 0},
                     actionNames = [],
@@ -428,7 +455,7 @@ angular.module('wasabi.controllers').
                 for (var bucketName in $scope.experiment.statistics.buckets) {
                     if ($scope.experiment.statistics.buckets.hasOwnProperty(bucketName)) {
                         // This is actually a bucket
-                        var bucket = $scope.experiment.statistics.buckets[bucketName];
+                        bucket = $scope.experiment.statistics.buckets[bucketName];
                         if (bucket.label === $scope.experiment.controlBucketLabel) {
                             // Add the control (or baseline) bucket to the first position (after Metric)
                             var bucketLabel = bucket.label,
@@ -513,11 +540,11 @@ angular.module('wasabi.controllers').
                 for (var bucketName2 in $scope.experiment.statistics.buckets) {
                     if ($scope.experiment.statistics.buckets.hasOwnProperty(bucketName2)) {
                         // This is actually a bucket
-                        var bucket = $scope.experiment.statistics.buckets[bucketName2];
+                        bucket = $scope.experiment.statistics.buckets[bucketName2];
 
                         // Handle Overall action rate
                         var colNum = bucketColumnPositions[bucket.label];
-                        $scope.dataRows['Overall'].splice(colNum, 0,
+                        $scope.dataRows.Overall.splice(colNum, 0,
                             {
                                 'value': $scope.actionRate(bucket.label, $scope.experiment.statistics.buckets),
                                 'marginOfError': $scope.actionDiff(bucket.label, $scope.experiment.statistics.buckets),
@@ -525,7 +552,8 @@ angular.module('wasabi.controllers').
                                 'impressionCountValue': 'impressions: ' + $scope.bucketImpressionCount(bucket.label, $scope.experiment.statistics.buckets),
                                 'bucketCell': true,
                                 'overallValue': true,
-                                'actionName': false});
+                                'actionName': false
+                            });
 
                         for (var i = 0; i < actionNames.length; i++) {
                             var nextActionName = actionNames[i];
@@ -536,12 +564,12 @@ angular.module('wasabi.controllers').
                                         'actionCountValue': nextActionName,
                                         'impressionCountValue': '',
                                         'actionName': true
-                                    }];
+                                    }
+                                ];
                                 $scope.orderedDataRows.push($scope.dataRows[nextActionName]);
                             }
                             if (bucket.actionRates.hasOwnProperty(nextActionName)) {
                                 // This bucket has a value for this action name
-                                var action = bucket.actionRates[nextActionName];
                                 colNum = bucketColumnPositions[bucket.label];
                                 $scope.dataRows[nextActionName].splice(colNum, 0,
                                     {
@@ -790,6 +818,46 @@ angular.module('wasabi.controllers').
                 );
             };
 
+            $scope.editResults = function() {
+                $scope.resultsChangedNotSaved = true;
+                $scope.data.resultsWidgetsDisabled = false;
+                $scope.$digest();
+                return {
+                    results: $scope.experiment.results,
+                    hypothesisIsCorrect: $scope.experiment.hypothesisIsCorrect
+                };
+            };
+
+            $scope.cancelResults = function(tempValue) {
+                $scope.resultsChangedNotSaved = false;
+                $scope.data.resultsWidgetsDisabled = true;
+                $scope.experiment.results = tempValue.results;
+                $scope.experiment.hypothesisIsCorrect = tempValue.hypothesisIsCorrect;
+                $scope.$digest();
+            };
+
+            $scope.saveResults = function(newValue) {
+                var experiment = $scope.experiment;
+                $scope.data.resultsWidgetsDisabled = true;
+                $scope.$digest();
+
+                ExperimentsFactory.update({
+                    id: experiment.id,
+                    results: experiment.results,
+                    hypothesisIsCorrect: experiment.hypothesisIsCorrect
+                }).$promise.then(function () {
+                        UtilitiesFactory.trackEvent('saveItemSuccess',
+                            {key: 'dialog_name', value: 'saveResultsFromDetails'},
+                            {key: 'application_name', value: experiment.applicationName},
+                            {key: 'item_id', value: experiment.id},
+                            {key: 'item_label', value: experiment.label});
+                    },
+                    function(response) {
+                        UtilitiesFactory.handleGlobalError(response);
+                    }
+                );
+            };
+
             $scope.onDescriptionChange = function() {
                 $scope.data.descriptionLength = $('#experimentDescription').text().length;
                 $scope.$digest();
@@ -810,8 +878,19 @@ angular.module('wasabi.controllers').
 
             $scope.saveDescription = function(newValue) {
                 var newDesc = $.trim(newValue);
-                if (newDesc.length > 256) {
-                    DialogsFactory.alertDialog('The description must be 256 characters or less.', 'Description Too Long', function() {});
+                if (newDesc.length > 256 || newDesc.length <= 0) {
+                    if (newDesc.length <= 0) {
+                        DialogsFactory.alertDialog('You must provide a hypothesis/description.', 'Missing Hypothesis/Description', function() {});
+                    }
+                    else {
+                        DialogsFactory.alertDialog('The hypothesis/description must be 256 characters or less.', 'Hypothesis/Description Too Long', function() {});
+                    }
+                    // This will cause the dynamicEdit widget to go back into Edit mode.
+                    $('#descriptionToolbar .dynamicEdit').click();
+                    return false;
+                }
+                if (newDesc.length <= 0) {
+                    DialogsFactory.alertDialog('You must provide a hypothesis/description.', 'Missing Hypothesis/Description', function() {});
                     // This will cause the dynamicEdit widget to go back into Edit mode.
                     $('#descriptionToolbar .dynamicEdit').click();
                     return false;
@@ -864,7 +943,7 @@ angular.module('wasabi.controllers').
                     });
             };
 
-            $scope.openGetAssignmentsModal = function (endTime) {
+            $scope.openGetAssignmentsModal = function () {
                 $modal.open({
                     templateUrl: 'views/GetAssignmentsModal.html',
                     controller: 'GetAssignmentsModalCtrl',
@@ -875,9 +954,9 @@ angular.module('wasabi.controllers').
                         }
                     }
                 })
-                    .result.then(function (experiment) {
+                    .result.then(function () {
                         // Nothing to do.
-                    });
+                });
             };
 
             $scope.openChangeRapidExperiment = function () {
@@ -1041,6 +1120,10 @@ angular.module('wasabi.controllers').
                 });
             };
 
+
+            $scope.openResultsModal = function () {
+                UtilitiesFactory.openResultsModal($scope.experiment, $scope.readOnly, $scope.loadExperiment);
+            };
 
             $scope.openPluginModal = function(plugin) {
                 UtilitiesFactory.openPluginModal(plugin, $scope.experiment);

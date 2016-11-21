@@ -1,16 +1,15 @@
 /*global $:false */
-/*global moment:false */
+/*global jQuery:false */
 
 'use strict';
 
 angular.module('wasabi.services').factory('RuleEditFactory', ['UtilitiesFactory',
     function (UtilitiesFactory) {
         return {
-            types: ['boolean', 'date', 'number', 'string'],
-            
+            types: ['boolean', 'number', 'string'],
+
             placeholders: {
                 boolean: 'e.g., true or false',
-                date: 'e.g., 2015-03-30',
                 number: 'e.g., 10000',
                 string: 'e.g., "iphone6"'
             },
@@ -20,9 +19,7 @@ angular.module('wasabi.services').factory('RuleEditFactory', ['UtilitiesFactory'
                 { menuLabel: 'does not equal', stringForm: '!=', jsonForm: 'notEquals' },
                 { menuLabel: 'equals (same case)', stringForm: '^=', jsonForm: 'stringEqualsExact' },
                 { menuLabel: 'matches (regexp)', stringForm: '=~', jsonForm: 'stringMatchesRegEx' },
-                { menuLabel: 'does not match', stringForm: '!~', jsonForm: 'stringNotMatchesRegEx' },
-                { menuLabel: 'contains', stringForm: 'contains', jsonForm: 'contains' },
-                { menuLabel: 'does not contain', stringForm: 'not contains', jsonForm: 'notContains' }
+                { menuLabel: 'does not match', stringForm: '!~', jsonForm: 'stringNotMatchesRegEx' }
             ],
 
             numberTypeOperators: [
@@ -35,23 +32,12 @@ angular.module('wasabi.services').factory('RuleEditFactory', ['UtilitiesFactory'
             ],
 
             booleanTypeOperators: [
-                { menuLabel: 'is', stringForm: '=', jsonForm: 'equals' },
-                { menuLabel: 'is not', stringForm: '!=', jsonForm: 'notEquals' }
-            ],
-
-            dateTypeOperators: [
-                { menuLabel: 'is on', stringForm: '=', jsonForm: 'on' },
-                { menuLabel: 'is not on', stringForm: '!=', jsonForm: 'notOn' },
-                { menuLabel: 'is before', stringForm: '<', jsonForm: 'before' },
-                { menuLabel: 'is after', stringForm: '>', jsonForm: 'after' },
-                { menuLabel: 'equals', stringForm: '=', jsonForm: 'equals' },
-                { menuLabel: 'does not equal', stringForm: '!=', jsonForm: 'notEquals' }
+                { menuLabel: 'is', stringForm: '=', jsonForm: 'equals' }
             ],
 
             operators: function() {
                 return {
                     'boolean': this.booleanTypeOperators,
-                    'date': this.dateTypeOperators,
                     'number': this.numberTypeOperators,
                     'string': this.stringTypeOperators
                 };
@@ -81,10 +67,18 @@ angular.module('wasabi.services').factory('RuleEditFactory', ['UtilitiesFactory'
             // widgets.  This will ignore an empty rule expression (no subject or value).  If one of those has been
             // added, but the other hasn't, we have an incomplete rule, which will display an error.  If we try
             // to validate the value in the expression versus the type and it fails, that is also an error.  The
-            // rest of the function converts the rule expressions to their string form.  Note that the date
-            // value is quoted as that is required by the rule language form.
+            // rest of the function converts the rule expressions to their string form.
             convertRuleControlsToRuleString: function(rules, tabs) {
                 var ruleString = '';
+                function getOpStringForm(opToTest, opsArray) {
+                    var search = $.grep(opsArray, function(element) {
+                        return element.menuLabel === opToTest;
+                    });
+                    if (search && search.length > 0) {
+                        return search[0].stringForm;
+                    }
+                    return '';
+                }
                 for (var i = 0; i < rules.length; i++) {
                     // Create the string in order by going through the rules.
                     var nextRule = rules[i];
@@ -116,7 +110,7 @@ angular.module('wasabi.services').factory('RuleEditFactory', ['UtilitiesFactory'
                     if (nextRule.booleanOperator.length > 0) {
                         // There is an AND or OR between two rule expressions (between the previous one and this one).
                         // Insert the '&' or '|' in the string.
-                        ruleString += ' ' + $.grep(this.booleanOperators, function(element) {return element.menuLabel === nextRule.booleanOperator;})[0].stringForm;
+                        ruleString += ' ' + getOpStringForm(nextRule.booleanOperator, this.booleanOperators);
                     }
                     var operatorArray = this.stringTypeOperators;
                     switch (nextRule.type) {
@@ -126,22 +120,13 @@ angular.module('wasabi.services').factory('RuleEditFactory', ['UtilitiesFactory'
                         case 'boolean':
                             operatorArray = this.booleanTypeOperators;
                             break;
-                        case 'date':
-                            operatorArray = this.dateTypeOperators;
-                            break;
                     }
                     if (ruleString.length > 0) {
                         ruleString += ' ';
                     }
                     // Insert the rest of the expression, converting to the operators in the string.
                     ruleString += nextRule.subject + ' ' + $.grep(operatorArray, function(element) {return element.menuLabel === nextRule.operator;})[0].stringForm + ' ';
-                    if (nextRule.type === 'date') {
-                        // Need to save dates as a string, but don't want to show it that way in the UI.
-                        ruleString += '"' + nextRule.value + '"';
-                    }
-                    else {
-                        ruleString += nextRule.value;
-                    }
+                    ruleString += nextRule.value;
                 }
                 return ruleString;
             },
@@ -214,9 +199,6 @@ angular.module('wasabi.services').factory('RuleEditFactory', ['UtilitiesFactory'
                     else if ((typeof operand.constant).toLowerCase() === 'number') {
                         returnObj.type = 'number';
                     }
-                    else if (/[0-9]{4}-..-../.test(operand.constant)) {
-                        returnObj.type = 'date';
-                    }
                     else {
                         returnObj.type = 'string'; // Not one of the other types, assume string.
                     }
@@ -250,9 +232,6 @@ angular.module('wasabi.services').factory('RuleEditFactory', ['UtilitiesFactory'
                     if (newExpression.type === 'boolean') {
                         operatorArray = this.booleanTypeOperators;
                     }
-                    else if (newExpression.type === 'date') {
-                        operatorArray = this.dateTypeOperators;
-                    }
                     else if (newExpression.type === 'string') {
                         operatorArray = this.stringTypeOperators;
                     }
@@ -271,13 +250,6 @@ angular.module('wasabi.services').factory('RuleEditFactory', ['UtilitiesFactory'
                     // These operators are only used with string type expressions.
                     newExpression.type = 'string';
                     newExpression.operator = $.grep(this.stringTypeOperators, function(element) {
-                        return element.jsonForm === operator;
-                    })[0].menuLabel;
-                }
-                else if (['on', 'notOn', 'before', 'after'].indexOf(operator) >= 0) {
-                    // These operators are only used with date type expressions.
-                    newExpression.type = 'date';
-                    newExpression.operator = $.grep(this.dateTypeOperators, function(element) {
                         return element.jsonForm === operator;
                     })[0].menuLabel;
                 }
@@ -323,7 +295,7 @@ angular.module('wasabi.services').factory('RuleEditFactory', ['UtilitiesFactory'
                         // If the right op is a boolean expression, they must have used parens, because otherwise
                         // you can't have this form, so we throw an exception that will result in only the "advanced"
                         // rule editor (a textfield) is available.
-                        throw "Bad rule JSON";
+                        throw 'Bad rule JSON';
                     }
                     if (leftOp.toLowerCase() === 'or' || leftOp.toLowerCase() === 'and') {
                         // It turns out that the case we need to watch out for is when the left side is another boolean expression.
