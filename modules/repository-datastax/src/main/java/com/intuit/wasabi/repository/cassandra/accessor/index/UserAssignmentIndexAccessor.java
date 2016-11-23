@@ -39,7 +39,7 @@ public interface UserAssignmentIndexAccessor {
 	 * @param bucketLabel
 	 * @return resultSet
 	 */
-    @Query("insert into user_assignment_by_userId_context_experimentId (experiment_id, user_id, context, created, bucket_label)" +
+    @Query("insert into user_assignment_by_userid (experiment_id, user_id, context, created, bucket_label)" +
             " values (?, ?, ?, ?, ?)")
     ResultSet insertBy(UUID uuid, String userId, String context, Date created, String bucketLabel);
 
@@ -51,7 +51,7 @@ public interface UserAssignmentIndexAccessor {
      * @param created
      * @return resultSet
      */
-    @Query("insert into user_assignment_by_userId_context_experimentId (experiment_id, user_id, context, created)" +
+    @Query("insert into user_assignment_by_userid (experiment_id, user_id, context, created)" +
             " values (?, ?, ?, ?)")
     ResultSet insertBy(UUID uuid, String userId, String context, Date created);
 
@@ -62,7 +62,7 @@ public interface UserAssignmentIndexAccessor {
 	 * @param context
 	 * @return result
 	 */
-    @Query("select * from user_assignment_by_userId_context_experimentId where experiment_id = ? and user_id = ? and context = ?")
+    @Query("select * from user_assignment_by_userid where experiment_id = ? and user_id = ? and context = ?")
     Result<UserAssignmentByUserIdContextExperimentId> selectBy(UUID experimentId, String userId, String context);
 
 
@@ -73,7 +73,7 @@ public interface UserAssignmentIndexAccessor {
 	 * @param experimentId
 	 * @return resultSet
 	 */
-	@Query("delete from user_assignment_by_userId_context_experimentId where user_id = ? and context = ? and experiment_id = ?")
+	@Query("delete from user_assignment_by_userid where user_id = ? and context = ? and experiment_id = ?")
 	ResultSet deleteBy(String userId, String context, UUID experimentId);
 
 }
