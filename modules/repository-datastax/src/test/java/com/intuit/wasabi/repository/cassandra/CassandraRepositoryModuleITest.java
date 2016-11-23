@@ -68,7 +68,6 @@ public class CassandraRepositoryModuleITest {
         assertThat(injector.getInstance(StagingAccessor.class), is(not(nullValue())));
         assertThat(injector.getInstance(ExperimentUserIndexAccessor.class), is(not(nullValue())));
         assertThat(injector.getInstance(UserAssignmentIndexAccessor.class), is(not(nullValue())));
-//        assertThat(injector.getInstance(UserExperimentIndexAccessor.class), is(not(nullValue())));
         assertThat(injector.getInstance(AuditLogAccessor.class), is(not(nullValue())));
         assertThat(injector.getInstance(BucketAssignmentCountAccessor.class), is(not(nullValue())));
         assertThat(injector.getInstance(UserAssignmentExportAccessor.class), is(not(nullValue())));

@@ -876,35 +876,6 @@ public class CassandraAssignmentsRepositoryTest {
                 eq(true));
     }
 
-//    @Test
-//    public void testRemoveIndexUserToExperimentWriteException(){
-//        User.ID userId = User.ID.valueOf("testuser1");
-//        Experiment.ID experimentId = Experiment.ID.valueOf(this.experimentId);
-//        Context context = Context.valueOf("test");
-//        doThrow(WriteTimeoutException.class)
-//                .when(userExperimentIndexAccessor)
-//                .deleteBy(eq(userId.toString()),
-//                        eq(experimentId.getRawID()),
-//                        eq(context.getContext()),
-//                        eq(APPLICATION_NAME.toString()));
-//        thrown.expect(RepositoryException.class);
-//        thrown.expectMessage("Could not remove from user_experiment_index for user: testuser1 to experiment: 4d4d8f3b-3b81-44f3-968d-d1c1a48b4ac8");
-//        repository.removeIndexUserToExperiment(userId, experimentId, context, APPLICATION_NAME);
-//    }
-
-//    @Test
-//    public void testRemoveIndexUserToExperiment(){
-//        User.ID userId = User.ID.valueOf("testuser1");
-//        Experiment.ID experimentId = Experiment.ID.valueOf(this.experimentId);
-//        Context context = Context.valueOf("test");
-//        repository.removeIndexUserToExperiment(userId, experimentId, context, APPLICATION_NAME);
-//        verify(userExperimentIndexAccessor, times(1)).deleteBy(
-//                eq(userId.toString()),
-//                eq(experimentId.getRawID()),
-//                eq(context.getContext()),
-//                eq(APPLICATION_NAME.toString()));
-//    }
-
     @Test
     public void testRemoveIndexUserToBucketWriteException(){
         User.ID userId = User.ID.valueOf("testuser1");
