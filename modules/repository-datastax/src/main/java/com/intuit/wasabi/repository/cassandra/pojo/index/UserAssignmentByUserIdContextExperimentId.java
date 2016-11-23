@@ -28,7 +28,7 @@ import java.util.UUID;
 
 
 //TODO: this seems redundent since UserAssignment contains the same data with same primary key but different order, do we make queries that are order specific?
-@Table(name="user_assignment_look_up")
+@Table(name="user_assignment_by_userId_context_experimentId")
 @Data
 @Builder(toBuilder = true)
 @NoArgsConstructor

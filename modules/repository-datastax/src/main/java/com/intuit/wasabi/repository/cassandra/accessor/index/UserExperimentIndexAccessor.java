@@ -24,44 +24,44 @@ import java.util.UUID;
 /**
  * Accessor for user experiment index table
  */
-@Accessor
-public interface UserExperimentIndexAccessor {
-	
-	/**
-	 * Insert row into table
-	 * @param userId
-	 * @param context
-	 * @param appName
-	 * @param experimentId
-	 * @param bucketLabel
-	 * @return result set
-	 */
-    @Query("insert into user_experiment_index (user_id, context, app_name, experiment_id, bucket_label)" +
-            " values (?, ?, ?, ?, ?)")
-    ResultSet insertBy(String userId, String context, String appName, UUID experimentId, String bucketLabel);
-
-    /**
-     * Insert row into table based on attributes
-     * @param userId
-     * @param context
-     * @param appName
-     * @param experimentId
-     * @return result set
-     */
-    @Query("insert into user_experiment_index (user_id, context, app_name, experiment_id)" +
-            " values (?, ?, ?, ?)")
-    ResultSet insertBy(String userId, String context, String appName, UUID experimentId);
-
-    
-    /**
-     * Delete row from table
-     * @param userId
-     * @param experimentId
-     * @param context
-     * @param appName
-     * @return result set
-     */
-    @Query("delete from user_experiment_index where user_id = ? and experiment_id = ? and context = ? and app_name = ?")
-    ResultSet deleteBy(String userId, UUID experimentId, String context, String appName);
-
-}
+//@Accessor
+//public interface UserExperimentIndexAccessor {
+//	
+//	/**
+//	 * Insert row into table
+//	 * @param userId
+//	 * @param context
+//	 * @param appName
+//	 * @param experimentId
+//	 * @param bucketLabel
+//	 * @return result set
+//	 */
+//    @Query("insert into user_experiment_index (user_id, context, app_name, experiment_id, bucket_label)" +
+//            " values (?, ?, ?, ?, ?)")
+//    ResultSet insertBy(String userId, String context, String appName, UUID experimentId, String bucketLabel);
+//
+//    /**
+//     * Insert row into table based on attributes
+//     * @param userId
+//     * @param context
+//     * @param appName
+//     * @param experimentId
+//     * @return result set
+//     */
+//    @Query("insert into user_experiment_index (user_id, context, app_name, experiment_id)" +
+//            " values (?, ?, ?, ?)")
+//    ResultSet insertBy(String userId, String context, String appName, UUID experimentId);
+//
+//    
+//    /**
+//     * Delete row from table
+//     * @param userId
+//     * @param experimentId
+//     * @param context
+//     * @param appName
+//     * @return result set
+//     */
+//    @Query("delete from user_experiment_index where user_id = ? and experiment_id = ? and context = ? and app_name = ?")
+//    ResultSet deleteBy(String userId, UUID experimentId, String context, String appName);
+//
+//}

@@ -19,22 +19,22 @@ import com.datastax.driver.core.Session;
 import com.datastax.driver.mapping.MappingManager;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
-import com.intuit.wasabi.repository.cassandra.accessor.index.UserExperimentIndexAccessor;
-
-public class UserExperimentIndexAccessorProvider implements Provider<UserExperimentIndexAccessor> {
-    private final Session session;
-    private final MappingManager manager;
-
-    @Inject
-    public UserExperimentIndexAccessorProvider(CassandraDriver driver) {
-        this.session = driver.getSession();
-        this.manager = new MappingManager(session);
-    }
-
-
-    @Override
-    public UserExperimentIndexAccessor get() {
-        return manager.createAccessor(UserExperimentIndexAccessor.class);
-    }
-}
+//import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
+//import com.intuit.wasabi.repository.cassandra.accessor.index.UserExperimentIndexAccessor;
+//
+//public class UserExperimentIndexAccessorProvider implements Provider<UserExperimentIndexAccessor> {
+//    private final Session session;
+//    private final MappingManager manager;
+//
+//    @Inject
+//    public UserExperimentIndexAccessorProvider(CassandraDriver driver) {
+//        this.session = driver.getSession();
+//        this.manager = new MappingManager(session);
+//    }
+//
+//
+//    @Override
+//    public UserExperimentIndexAccessor get() {
+//        return manager.createAccessor(UserExperimentIndexAccessor.class);
+//    }
+//}
