@@ -35,7 +35,7 @@ angular.module('wasabi.directives').directive('favoritesStar', ['UtilitiesFactor
                     if ($item.hasClass('favorite')) {
                         // Save that this is now a favorite.
                         UtilitiesFactory.saveFavorite(scope.favoritesStarExperimentId, scope.favoritesStarFavoritesObject);
-                        if (scope.isFavoriteFlag != undefined) {
+                        if (scope.isFavoriteFlag !== undefined) {
                             scope.isFavoriteFlag = true;
                         }
 

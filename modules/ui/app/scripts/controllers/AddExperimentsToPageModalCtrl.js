@@ -1,4 +1,3 @@
-/*global $:false */
 'use strict';
 
 angular.module('wasabi.controllers')
@@ -127,8 +126,8 @@ angular.module('wasabi.controllers')
 
                     numExperimentsToAdd = selectedExperiments.length;
                     if (selectedExperiments.length) {
-                        for (var i = 0; i < selectedExperiments.length; i++) {
-                            addExperiment(selectedExperiments[i], $scope.selectedPage.name);
+                        for (var j = 0; j < selectedExperiments.length; j++) {
+                            addExperiment(selectedExperiments[j], $scope.selectedPage.name);
                         }
                     }
                 };

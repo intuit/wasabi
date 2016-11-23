@@ -1,5 +1,4 @@
 /* global $:false */
-/* global moment:false */
 /*jshint devel:true */
 
 'use strict';
@@ -73,7 +72,7 @@ angular.module('wasabi.controllers').
 
             $scope.onSelectPage = function() {
                 $scope.getExperiments($scope.data.applicationName, $scope.data.selectedPage.name);
-            }
+            };
 
             // init controller
             $scope.init = function() {
@@ -150,8 +149,7 @@ angular.module('wasabi.controllers').
             };
 
             $scope.removeExperimentsFromPage = function() {
-                var removedExperimentNames = '',
-                    numExperimentsToAdd;
+                var numExperimentsToAdd;
 
                 function removeExperiment(experiment, page) {
                     ExperimentsFactory.removePage({
