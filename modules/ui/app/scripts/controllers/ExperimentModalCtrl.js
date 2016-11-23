@@ -196,7 +196,8 @@ angular.module('wasabi.controllers')
                         }
                     }, function(response) {
                             UtilitiesFactory.handleGlobalError(response, 'The list of applications could not be retrieved.');
-                    });
+                        }
+                    );
                 };
 
                 $scope.typeChanged = function(rule, subForm) {

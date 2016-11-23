@@ -79,6 +79,18 @@ angular.module('wasabi.services').factory('RuleEditFactory', ['UtilitiesFactory'
                     }
                     return '';
                 }
+                // The virtue of using the function, rather than something like $.grep(), is that this
+                // will kick out once a matching operator is found.  $.grep() and .filter() both test *all*
+                // the operator objects and then return *all* the matches, which should only be one.
+                function getOperator(operatorList, operatorString) {
+                    for (var i = 0; i < operatorList.length; i++) {
+                        if (operatorList[i].menuLabel === operatorString) {
+                            return operatorList[i].stringForm;
+                        }
+                    }
+                    return '';
+                }
+
                 for (var i = 0; i < rules.length; i++) {
                     // Create the string in order by going through the rules.
                     var nextRule = rules[i];
@@ -125,7 +137,7 @@ angular.module('wasabi.services').factory('RuleEditFactory', ['UtilitiesFactory'
                         ruleString += ' ';
                     }
                     // Insert the rest of the expression, converting to the operators in the string.
-                    ruleString += nextRule.subject + ' ' + $.grep(operatorArray, function(element) {return element.menuLabel === nextRule.operator;})[0].stringForm + ' ';
+                    ruleString += nextRule.subject + ' ' + getOperator(operatorArray, nextRule.operator) + ' ';
                     ruleString += nextRule.value;
                 }
                 return ruleString;

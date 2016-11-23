@@ -239,7 +239,8 @@ angular.module('wasabi.controllers').
                     },
                         function(response) {
                             UtilitiesFactory.handleGlobalError(response, 'The list of favorites could not be retrieved.');
-                    });
+                        }
+                    );
 
                     $scope.data.descriptionLength = (experiment.description ? experiment.description.length : 0);
 
@@ -836,7 +837,7 @@ angular.module('wasabi.controllers').
                 $scope.$digest();
             };
 
-            $scope.saveResults = function(newValue) {
+            $scope.saveResults = function() {
                 var experiment = $scope.experiment;
                 $scope.data.resultsWidgetsDisabled = true;
                 $scope.$digest();

@@ -554,18 +554,20 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                     {
                         'id': experimentID
                     }
-                ).$promise.then(function (results) {
-                    if (results && results.experimentIDs) {
-                        favoritesObj.favorites = results.experimentIDs;
+                ).$promise.then(
+                    function (results) {
+                        if (results && results.experimentIDs) {
+                            favoritesObj.favorites = results.experimentIDs;
+                        }
+                        that.trackEvent('saveItemSuccess',
+                            {key: 'dialog_name', value: 'deleteFavorite'},
+                            {key: 'experiment_id', value: experimentID}
+                        );
+                    },
+                    function(response) {
+                        that.handleGlobalError(response, 'The favorite could not be delete.');
                     }
-                    that.trackEvent('saveItemSuccess',
-                        {key: 'dialog_name', value: 'deleteFavorite'},
-                        {key: 'experiment_id', value: experimentID}
-                    );
-                },
-                function(response) {
-                    that.handleGlobalError(response, 'The favorite could not be delete.');
-                });
+                );
             },
 
             retrieveFavorites: function () {
@@ -638,55 +640,53 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                 experiment.statistics.sortedBucketsActiveOnly = []; // Will be used for Card View, only OPEN state buckets.
                 if (experiment.statistics.sortedBuckets && experiment.statistics.sortedBuckets.length > 0) {
                     var foundAWinner = false;
-                    for (var i = 0; i < experiment.statistics.sortedBuckets.length; i++) {
-                        if (this.getBucket(experiment.statistics.sortedBuckets[i].label, experiment).state === 'OPEN') {
+                    for (var j = 0; j < experiment.statistics.sortedBuckets.length; j++) {
+                        if (this.getBucket(experiment.statistics.sortedBuckets[j].label, experiment).state === 'OPEN') {
                             // Save in another array that is used to build the Card View, as we don't want closed or emptied
                             // buckets there.  Both arrays will point to the same objects, so all the stuff we do below
                             // will be there for the Card View, too.
-                            experiment.statistics.sortedBucketsActiveOnly.push(experiment.statistics.sortedBuckets[i]);
+                            experiment.statistics.sortedBucketsActiveOnly.push(experiment.statistics.sortedBuckets[j]);
                         }
                         if (!moment().subtract(7, 'days').isAfter(moment(experiment.startTime, ['YYYY-MM-DDTHH:mm:ssZ', 'ddd MMM DD YYYY HH:mm:ss ZZ']))) {
                             // If the start time of the experiment is less than 7 days ago, don't check for winners or losers, yet.
-                            experiment.statistics.buckets[experiment.statistics.sortedBuckets[i].label].toolTip = 'There is an insufficient number of users to identify a winning variation.';
+                            experiment.statistics.buckets[experiment.statistics.sortedBuckets[j].label].toolTip = 'There is an insufficient number of users to identify a winning variation.';
                             continue;
                         }
-                        var significance = this.significance(experiment.statistics.sortedBuckets[i].label, experiment.statistics);
+                        var significance = this.significance(experiment.statistics.sortedBuckets[j].label, experiment.statistics);
 
                         if (significance === 'winner so far') {
                             foundAWinner = true;
                             // This bucket is a winner against at least one other bucket.
-                            experiment.statistics.buckets[experiment.statistics.sortedBuckets[i].label].improvementClass = 'winner';
-                            experiment.statistics.buckets[experiment.statistics.sortedBuckets[i].label].toolTip = 'This bucket has shown the best performance of all variations.  Consider switching to this experience.';
+                            experiment.statistics.buckets[experiment.statistics.sortedBuckets[j].label].improvementClass = 'winner';
+                            experiment.statistics.buckets[experiment.statistics.sortedBuckets[j].label].toolTip = 'This bucket has shown the best performance of all variations.  Consider switching to this experience.';
                             numWinningBuckets += 1;
                             if (numWinningBuckets > 1) {
                                 // Multiple buckets are winners.  Different tooltip for both this one and the others.
-                                experiment.statistics.buckets[experiment.statistics.sortedBuckets[i].label].toolTip =
+                                experiment.statistics.buckets[experiment.statistics.sortedBuckets[j].label].toolTip =
                                     experiment.statistics.buckets[experiment.statistics.sortedBuckets[lastWinningBucketIndex].label].toolTip =
                                     'You have multiple buckets that performed best.  Consider a deeper analysis prior to switching to an experience.';
                             }
-                            lastWinningBucketIndex = i;
+                            lastWinningBucketIndex = j;
                         }
                         else if (significance === 'loser so far') {
-                            experiment.statistics.buckets[experiment.statistics.sortedBuckets[i].label].improvementClass = 'loser';
-                            experiment.statistics.buckets[experiment.statistics.sortedBuckets[i].label].toolTip = 'This bucket has not shown the best performance of all variations.';
+                            experiment.statistics.buckets[experiment.statistics.sortedBuckets[j].label].improvementClass = 'loser';
+                            experiment.statistics.buckets[experiment.statistics.sortedBuckets[j].label].toolTip = 'This bucket has not shown the best performance of all variations.';
                         }
                         else {
-                            experiment.statistics.buckets[experiment.statistics.sortedBuckets[i].label].improvementClass = 'indeterminate';
-                            experiment.statistics.buckets[experiment.statistics.sortedBuckets[i].label].toolTip = 'This bucket\'s performance is not statistically distinguishable from other variations.';
+                            experiment.statistics.buckets[experiment.statistics.sortedBuckets[j].label].improvementClass = 'indeterminate';
+                            experiment.statistics.buckets[experiment.statistics.sortedBuckets[j].label].toolTip = 'This bucket\'s performance is not statistically distinguishable from other variations.';
                         }
                     }
                     if (!foundAWinner) {
                         // There was no winner.  Need to set improvement class so we can left shift the buckets.
-                        for (var j = 0; j < experiment.statistics.sortedBuckets.length; j++) {
-                            experiment.statistics.buckets[experiment.statistics.sortedBuckets[j].label].improvementClass = 'no-winner';
+                        for (var k = 0; k < experiment.statistics.sortedBuckets.length; k++) {
+                            experiment.statistics.buckets[experiment.statistics.sortedBuckets[k].label].improvementClass = 'no-winner';
                         }
                     }
                 }
             },
 
             determineCardViewBucketImprovementClass: function(experiment) {
-                var that = this;
-
                 experiment.sortedBuckets = $filter('orderBy')(experiment.buckets, function(bucket) {
                     return bucket.actionRate;
                 }, true);
@@ -742,8 +742,8 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                     }
                     if (!foundAWinner) {
                         // There was no winner.  Need to set improvement class so we can left shift the buckets.
-                        for (var i = 0; i < experiment.sortedBuckets.length; i++) {
-                            experiment.sortedBuckets[i].improvementClass = 'no-winner';
+                        for (var j = 0; j < experiment.sortedBuckets.length; j++) {
+                            experiment.sortedBuckets[j].improvementClass = 'no-winner';
                         }
                     }
                 }

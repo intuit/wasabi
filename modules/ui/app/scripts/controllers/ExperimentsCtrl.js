@@ -254,7 +254,8 @@ angular.module('wasabi.controllers').
                     },
                         function(response) {
                             UtilitiesFactory.handleGlobalError(response, 'The list of favorites could not be retrieved.');
-                    });
+                        }
+                    );
                 }
                 else {
                     applyFavorites(experimentsList);
@@ -276,7 +277,7 @@ angular.module('wasabi.controllers').
                 }
 
                 var queryParams = {
-                    per_page: pageSize,
+                    perPage: pageSize,
                     page: currentPage,
                     sort: ($scope.reverseSort ? '-' : '') + $scope.convertOrderByField()
                 };
@@ -318,14 +319,16 @@ angular.module('wasabi.controllers').
                     .then(afterLoadFunction,
                         function(response) {
                             UtilitiesFactory.handleGlobalError(response, 'The list of experiments could not be retrieved.');
-                    });
+                        }
+                    );
                 }
                 else {
                     ExperimentStatisticsFactory.cardViewData(queryParams).$promise
                     .then(afterLoadFunction,
                         function(response) {
                             UtilitiesFactory.handleGlobalError(response, 'The list of experiments could not be retrieved.');
-                    });
+                        }
+                    );
                 }
             };
 
@@ -459,7 +462,7 @@ angular.module('wasabi.controllers').
                                     // get the label of the one control bucket (if any)
                                     var bucketsToRemove = [];
                                     for (var j = 0; j < experiments[i].buckets.length; j++) {
-                                        if (experiments[i].buckets[j].state && experiments[i].buckets[j].state == 'OPEN') {
+                                        if (experiments[i].buckets[j].state && experiments[i].buckets[j].state === 'OPEN') {
                                             // Ignore anything but Open buckets for the Card View.
                                             if (experiments[i].buckets[j].isControl) {
                                                 experiments[i].hasControlBucket = true;
@@ -478,8 +481,8 @@ angular.module('wasabi.controllers').
                                         }
                                     }
                                     if (bucketsToRemove.length > 0) {
-                                        for (var j = bucketsToRemove.length - 1; j >= 0; j--) {
-                                            experiments[i].buckets.splice(bucketsToRemove[j], 1);
+                                        for (var k = bucketsToRemove.length - 1; k >= 0; k--) {
+                                            experiments[i].buckets.splice(bucketsToRemove[k], 1);
                                         }
                                     }
 
@@ -553,7 +556,7 @@ angular.module('wasabi.controllers').
                 }
             };
 
-            $scope.applySearchSortFilters = function(doSorting) {
+            $scope.applySearchSortFilters = function() {
                 if ($scope.data.showAdvancedSearch) {
                     $scope.advSearch(true);
                 }
@@ -645,30 +648,6 @@ angular.module('wasabi.controllers').
                 }
             };
 
-            // TODO: not currently being used, but not removing until we have solved the Favorites problem,
-            // that is, that favorites don't work with the new paginated API.
-            var bubbleFavoritesToTop = function() {
-                // We want to pull the favorites to the top and have a secondary sort by the column we are
-                // sorting by.
-                var tmpArray = [],
-                    indexesToRemove = [];
-                for (var i = 0; i < $scope.filteredItems.length; i++) {
-                    var item = $scope.filteredItems[i];
-                    if (item.hasOwnProperty('isFavorite') && item.isFavorite) {
-                        tmpArray.push($scope.filteredItems[i]);
-                        indexesToRemove.push(i);
-                    }
-                }
-                for (var k = indexesToRemove.length - 1; k >= 0 ; k--) {
-                    $scope.filteredItems.splice(indexesToRemove[k], 1);
-                }
-
-                // Now add them to the beginning of the array.  They should already be in the correct order.
-                for (var j = tmpArray.length - 1; j >= 0; j--) {
-                    $scope.filteredItems.unshift(tmpArray[j]);
-                }
-            };
-
             $scope.loadGridDataIfNecessary = function() {
                 if ($scope.data.showGrid) {
                     // Handle the list used for lazy loading of the grid.
@@ -696,9 +675,7 @@ angular.module('wasabi.controllers').
                 UtilitiesFactory.doTrackingInit();
             };
 
-            $scope.search = function (changingHideTerminated) {
-                var switchingFromAdvanced = !$scope.data.lastSearchWasSimple,
-                    hideTerminatedChanged = (changingHideTerminated !== undefined ? changingHideTerminated : false);
+            $scope.search = function () {
                 $scope.data.lastSearchWasSimple = true;
                 localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
                 if ($scope.searchTimer) {
