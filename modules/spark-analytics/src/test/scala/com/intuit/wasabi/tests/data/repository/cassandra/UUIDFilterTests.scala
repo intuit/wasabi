@@ -1,25 +1,14 @@
 package com.intuit.wasabi.tests.data.repository.cassandra
 
-import java.sql.{Date, Timestamp}
-import java.util
 import java.util.UUID
 
-import cats.data.Xor
-import cats.data.Xor._
 import com.datastax.spark.connector.cql.CassandraConnector
-import com.google.inject.Guice
 import com.holdenkarau.spark.testing.SharedSparkContext
-import com.intuit.wasabi.data.app.MigrateDataApplication
 import com.intuit.wasabi.data.conf.AppConfig
-import com.intuit.wasabi.data.conf.guice.migratedata.MockCassandraSQLContext
-import com.intuit.wasabi.data.exception.{ProcessorException, WasabiError}
-import com.intuit.wasabi.data.processor.migratedata.CopyTableMigrationProcessor
-import com.intuit.wasabi.data.util.Constants._
 import com.typesafe.config.ConfigFactory
-import org.apache.spark.{Logging, SparkConf, SparkContext}
-import org.apache.spark.sql.{Row, SQLContext}
+import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.cassandra.CassandraSQLContext
-import org.apache.spark.sql.types.{StringType, StructField, StructType, TimestampType}
+import org.apache.spark.{Logging, SparkConf, SparkContext}
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.FunSuite
 
@@ -74,9 +63,6 @@ class UUIDFilterTests extends FunSuite with SharedSparkContext with MockFactory 
   test("Filter with existing UUID - DataStax Example") {
 
     val sqlCtx = new SQLContext(sc)
-
-    import sqlCtx.implicits._
-    import org.apache.spark.sql._
 
     val testUUID = UUID.fromString("b574a408-4402-4335-a082-a4e35dc7b026")
 
