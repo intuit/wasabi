@@ -39,6 +39,7 @@ public class ExperimentDetailTest {
     private Experiment.Label expLabel = Experiment.Label.valueOf("TestLabelForExperimentDetail");
     private Experiment.State expState = Experiment.State.RUNNING;
     private Application.Name appName = Application.Name.valueOf("TestApplicationLabelForExperimentDetail");
+    private String description = "This is a test description";
     private static Calendar modTime = Calendar.getInstance();
     private static Calendar startTime = Calendar.getInstance();
     private static Calendar endTime = Calendar.getInstance();
@@ -57,37 +58,38 @@ public class ExperimentDetailTest {
     @Test
     public void testConstructor() {
         ExperimentDetail expDetail = new ExperimentDetail(expId, expState, expLabel, appName, modTime.getTime(),
-                startTime.getTime(), endTime.getTime());
+                startTime.getTime(), endTime.getTime(), description);
         assertEquals(expDetail.getApplicationName(), appName);
         assertEquals(expDetail.getId(), expId);
         assertEquals(expDetail.getLabel(), expLabel);
         assertEquals(expDetail.getState(), expState);
         assertEquals(expDetail.getModificationTime(), modTime.getTime());
         assertEquals(expDetail.getEndTime(), endTime.getTime());
+        assertEquals(expDetail.getDescription(), description);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstraintsId() {
         new ExperimentDetail(null, expState, expLabel, appName, modTime.getTime(),
-                startTime.getTime(), endTime.getTime());
+                startTime.getTime(), endTime.getTime(), description);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstraintsState() {
         new ExperimentDetail(expId, null, expLabel, appName, modTime.getTime(),
-                startTime.getTime(), endTime.getTime());
+                startTime.getTime(), endTime.getTime(), description);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstraintsLabel() {
         new ExperimentDetail(expId, expState, null, appName, modTime.getTime(),
-                startTime.getTime(), endTime.getTime());
+                startTime.getTime(), endTime.getTime(), description);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstraintsAppName() {
         new ExperimentDetail(expId, expState, expLabel, null, modTime.getTime(),
-                startTime.getTime(), endTime.getTime());
+                startTime.getTime(), endTime.getTime(), description);
     }
 
     @Test
@@ -112,11 +114,11 @@ public class ExperimentDetailTest {
 
         List<Bucket> buckets = new ArrayList<>();
         Bucket bucketA = Bucket.newInstance(expId, labelA)
-                .withAllocationPercent(0.8).withControl(true).build();
+                .withAllocationPercent(0.8).withControl(true).withDescription("bucketA").build();
         Bucket bucketB = Bucket.newInstance(expId, labelB)
-                .withAllocationPercent(0.1).withControl(false).build();
+                .withAllocationPercent(0.1).withControl(false).withDescription("bucketB").build();
         Bucket bucketC = Bucket.newInstance(expId, labelC)
-                .withAllocationPercent(0.1).withControl(false).build();
+                .withAllocationPercent(0.1).withControl(false).withDescription("bucketC").build();
         buckets.add(bucketA);
         buckets.add(bucketB);
         buckets.add(bucketC);
@@ -143,6 +145,12 @@ public class ExperimentDetailTest {
         List<Boolean> controls = buckets.stream().map(Bucket::isControl).collect(Collectors.toList());
         assertEquals(controls, expDetail.getBuckets().stream().
                 map(ExperimentDetail.BucketDetail::isControl).
+                collect(Collectors.toList()));
+
+        // check description
+        List<String> descriptions = buckets.stream().map(Bucket::getDescription).collect(Collectors.toList());
+        assertEquals(descriptions, expDetail.getBuckets().stream().
+                map(ExperimentDetail.BucketDetail::getDescription).
                 collect(Collectors.toList()));
     }
 
