@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,19 +15,18 @@
  *******************************************************************************/
 package com.intuit.wasabi.analyticsobjects.wrapper;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import static org.apache.commons.lang3.StringUtils.isEmpty;
-
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * An ExperimentDetail is a wrapper class which holds additional information
@@ -55,12 +54,14 @@ public class ExperimentDetail {
 
     private long totalNumberUsers;
 
+    private String description;
+
 
     /**
      * This class holds the details for the Buckets. This is especially interesting for
      * running experiments that already have assigned users and corresponding action rates.
      */
-    public class BucketDetail{
+    public class BucketDetail {
 
         @JsonProperty("isControl")
         private boolean control;
@@ -84,19 +85,24 @@ public class ExperimentDetail {
         private Boolean winnerSoFar = null;
         private Boolean loserSoFar = null;
 
+        private String description;
+
         /**
          * Creates a BucketDetail with the basic information that are available for all buckets.
-         * @param label the label of the bucket
-         * @param control flag whether this bucket is control
-         * @param allocationPercent the allocation percentage for this bucket
          *
+         * @param label             the label of the bucket
+         * @param control           flag whether this bucket is control
+         * @param allocationPercent the allocation percentage for this bucket
+         * @param description       the description of the bucket
          * @see Bucket for further information
          */
-        public BucketDetail(Bucket.Label label, boolean control, double allocationPercent, Bucket.State state){
+        public BucketDetail(Bucket.Label label, boolean control, double allocationPercent, Bucket.State state,
+                            String description) {
             setLabel(label);
             setControl(control);
             setAllocationPercent(allocationPercent);
             setState(state);
+            setDescription(description);
         }
 
         public boolean isControl() {
@@ -112,7 +118,7 @@ public class ExperimentDetail {
         }
 
         public void setLabel(Bucket.Label label) {
-            if(label != null && !isEmpty(label.toString()))
+            if (label != null && !isEmpty(label.toString()))
                 this.label = label;
             else throw new IllegalArgumentException("The label of a bucket can not be empty");
         }
@@ -122,7 +128,7 @@ public class ExperimentDetail {
         }
 
         public void setAllocationPercent(double allocationPercent) {
-            if(allocationPercent >= 0.0 && allocationPercent <= 1.0)
+            if (allocationPercent >= 0.0 && allocationPercent <= 1.0)
                 this.allocationPercent = allocationPercent;
             else throw new IllegalArgumentException("AllocationPercent must be between 0.0 and 1.0 for a bucket");
         }
@@ -132,7 +138,7 @@ public class ExperimentDetail {
         }
 
         public void setActionRate(double actionRate) {
-            if(!Double.isNaN(actionRate)){
+            if (!Double.isNaN(actionRate)) {
                 this.actionRate = actionRate;
             }
         }
@@ -158,7 +164,7 @@ public class ExperimentDetail {
         }
 
         public void setCount(long count) {
-            if(count >= 0)
+            if (count >= 0)
                 this.count = count;
             else throw new IllegalArgumentException("User count can not be smaller than 0");
         }
@@ -186,6 +192,14 @@ public class ExperimentDetail {
         public void setState(Bucket.State state) {
             this.state = state;
         }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
     }
 
     /**
@@ -193,24 +207,26 @@ public class ExperimentDetail {
      *
      * @param exp the experiment that provides the basic information
      */
-    public ExperimentDetail(Experiment exp){
+    public ExperimentDetail(Experiment exp) {
         this(exp.getID(), exp.getState(), exp.getLabel(), exp.getApplicationName(),
-                exp.getModificationTime(), exp.getStartTime(), exp.getEndTime());
+                exp.getModificationTime(), exp.getStartTime(), exp.getEndTime(), exp.getDescription());
     }
 
     /**
      * Creates the ExperimentDetail with explicit values for the necessary fields.
      *
-     * @param id the id of the Experiment
-     * @param state the state of the Experiment
-     * @param label the Experiment label (name)
-     * @param appName the name of the Application this Experiment belongs to
+     * @param id               the id of the Experiment
+     * @param state            the state of the Experiment
+     * @param label            the Experiment label (name)
+     * @param appName          the name of the Application this Experiment belongs to
      * @param modificationTime the last time the experiment was modified
-     * @param startTime the startTime of the experiment to determine the winner so far
+     * @param startTime        the startTime of the experiment to determine the winner so far
+     * @param endTime          the endtime of the experiment
+     * @param description      the description of the experiment
      */
     public ExperimentDetail(Experiment.ID id, Experiment.State state, Experiment.Label label,
                             Application.Name appName, Date modificationTime, Date startTime,
-                            Date endTime){
+                            Date endTime, String description) {
         setId(id);
         setState(state);
         setLabel(label);
@@ -218,6 +234,7 @@ public class ExperimentDetail {
         setModificationTime(modificationTime);
         setStartTime(startTime);
         setEndTime(endTime);
+        setDescription(description);
     }
 
     public Experiment.ID getId() {
@@ -225,7 +242,7 @@ public class ExperimentDetail {
     }
 
     private void setId(Experiment.ID id) {
-        if(id != null && !isEmpty(id.toString()))
+        if (id != null && !isEmpty(id.toString()))
             this.id = id;
         else
             throw new IllegalArgumentException("Can not create ExperimentDetail without an Experiment.ID");
@@ -236,7 +253,7 @@ public class ExperimentDetail {
     }
 
     private void setState(Experiment.State state) {
-        if(state != null)
+        if (state != null)
             this.state = state;
         else throw new IllegalArgumentException("Experiment.State is not allowed to be null for ExperimentDetail");
     }
@@ -246,7 +263,7 @@ public class ExperimentDetail {
     }
 
     private void setLabel(Experiment.Label label) {
-        if(label != null)
+        if (label != null)
             this.label = label;
         else throw new IllegalArgumentException("Experiment.Label is not allowed to be null for ExperimentDetail");
     }
@@ -256,7 +273,7 @@ public class ExperimentDetail {
     }
 
     private void setApplicationName(Application.Name applicationName) {
-        if(applicationName != null && !isEmpty(applicationName.toString()))
+        if (applicationName != null && !isEmpty(applicationName.toString()))
             this.applicationName = applicationName;
         else throw new IllegalArgumentException("Application Name can not be empty for ExperimentDetail");
     }
@@ -282,7 +299,7 @@ public class ExperimentDetail {
     }
 
     public void setTotalNumberUsers(long totalNumberUsers) {
-        if(totalNumberUsers > -1)
+        if (totalNumberUsers > -1)
             this.totalNumberUsers = totalNumberUsers;
         else throw new IllegalArgumentException("Total number of users has to be equal or greater than zero");
     }
@@ -311,16 +328,25 @@ public class ExperimentDetail {
         this.endTime = endTime;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     /**
      * This method takes a list of buckets and transforms it to the {@link BucketDetail}s that are needed
      * for later extension.
      *
      * @param buckets a list of {@link Bucket}s
      */
-    public void addBuckets(List<Bucket> buckets){
+    public void addBuckets(List<Bucket> buckets) {
 
         List<BucketDetail> details = buckets.stream()
-                .map(b -> new BucketDetail(b.getLabel(), b.isControl(), b.getAllocationPercent(), b.getState()))
+                .map(b -> new BucketDetail(b.getLabel(), b.isControl(), b.getAllocationPercent(), b.getState(),
+                        b.getDescription()))
                 .collect(Collectors.toList());
 
         setBuckets(details);
@@ -328,7 +354,7 @@ public class ExperimentDetail {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 
