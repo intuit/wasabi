@@ -132,7 +132,7 @@ angular.module('wasabi.controllers').
                             }
                         }
                         if (foundIt) {
-                        $('#applicationNameChoice').prop('selectedIndex', choiceIndex);
+                            $('#applicationNameChoice').prop('selectedIndex', choiceIndex);
                             $scope.onSelectAppName($scope.applicationName);
                         }
                         else {
