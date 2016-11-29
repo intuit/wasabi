@@ -207,6 +207,8 @@
                                     <include>junit:junit:*</include>
                                     <include>ch.qos.logback:logback-classic:*</include>
                                     <include>org.typelevel:cats-core_2.10:*</include>
+                                    <include>org.typelevel:cats-macros_2.10:*</include>
+                                    <include>org.typelevel:cats-kernel_2.10:*</include>
                                     <include>com.databricks:spark-csv_2.10:*</include>
                                 </includes>
                             </artifactSet>

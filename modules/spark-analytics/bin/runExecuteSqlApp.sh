@@ -26,7 +26,7 @@ java_options="\
 -D$app_id.spark.spark.cassandra.connection.timeout_ms=300000 \
 -D$app_id.spark.spark.cassandra.connection.keep_alive_ms=300000 \
 -D$app_id.spark.spark.cassandra.input.fetch.size_in_rows=2000000 \
--D$app_id.spark.spark.cassandra.input.split.size_in_mb=209715200 \
+-D$app_id.spark.spark.cassandra.input.split.size_in_mb=200 \
 "
 
 ./runApp.sh "$java_options"

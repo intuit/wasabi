@@ -293,6 +293,12 @@ package() {
     done; \
     (cd target; ../bin/fpm.sh -n ${name} -v ${version} -p ${profile}))
 
+ (cd modules/spark-analytics; \
+    mkdir -p target; \
+    cp -r bin target; \
+    cp -r build target; \
+    (cd target; ../build/fpm.sh -n "wasabi-spark-analytics" -v ${version} -p ${profile}))
+
   find . -type f \( -name "*.rpm" -or -name "*.deb" \) -exec mv {} ./target 2>/dev/null \;
 
   echo "deployable build packages:"
