@@ -19,7 +19,7 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.mapping.Result;
 import com.datastax.driver.mapping.annotations.Accessor;
 import com.datastax.driver.mapping.annotations.Query;
-import com.intuit.wasabi.repository.cassandra.pojo.index.UserAssignmentByUserIdContextExperimentId;
+import com.intuit.wasabi.repository.cassandra.pojo.index.UserAssignmentByUserId;
 
 import java.util.Date;
 import java.util.UUID;
@@ -63,7 +63,7 @@ public interface UserAssignmentIndexAccessor {
 	 * @return result
 	 */
     @Query("select * from user_assignment_by_userid where experiment_id = ? and user_id = ? and context = ?")
-    Result<UserAssignmentByUserIdContextExperimentId> selectBy(UUID experimentId, String userId, String context);
+    Result<UserAssignmentByUserId> selectBy(UUID experimentId, String userId, String context);
 
 
 	/**

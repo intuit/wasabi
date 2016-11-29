@@ -37,7 +37,7 @@ import com.intuit.wasabi.repository.cassandra.accessor.index.UserBucketIndexAcce
 import com.intuit.wasabi.repository.cassandra.pojo.UserAssignment;
 import com.intuit.wasabi.repository.cassandra.pojo.export.UserAssignmentExport;
 import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentUserByUserIdContextAppNameExperimentId;
-import com.intuit.wasabi.repository.cassandra.pojo.index.UserAssignmentByUserIdContextExperimentId;
+import com.intuit.wasabi.repository.cassandra.pojo.index.UserAssignmentByUserId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -209,9 +209,9 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
 
     @Timed
     Optional<Assignment> getAssignmentFromLookUp(Experiment.ID experimentID, User.ID userID, Context context) {
-        Stream<UserAssignmentByUserIdContextExperimentId> resultStream;
+        Stream<UserAssignmentByUserId> resultStream;
         try {
-            final Result<UserAssignmentByUserIdContextExperimentId> result =
+            final Result<UserAssignmentByUserId> result =
                     this.userAssignmentIndexAccessor.selectBy(
                             experimentID.getRawID(),
                             userID.toString(),

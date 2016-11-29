@@ -30,7 +30,7 @@ import com.intuit.wasabi.repository.cassandra.accessor.index.UserBucketIndexAcce
 import com.intuit.wasabi.repository.cassandra.pojo.UserAssignment;
 import com.intuit.wasabi.repository.cassandra.pojo.count.BucketAssignmentCount;
 import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentUserByUserIdContextAppNameExperimentId;
-import com.intuit.wasabi.repository.cassandra.pojo.index.UserAssignmentByUserIdContextExperimentId;
+import com.intuit.wasabi.repository.cassandra.pojo.index.UserAssignmentByUserId;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -365,8 +365,8 @@ public class CassandraAssignmentsRepositoryTest {
 
     @Test
     public void testGetAssignmentFromLookUp(){
-        List<UserAssignmentByUserIdContextExperimentId> mockedResult = new ArrayList<>();
-        mockedResult.add(UserAssignmentByUserIdContextExperimentId.builder()
+        List<UserAssignmentByUserId> mockedResult = new ArrayList<>();
+        mockedResult.add(UserAssignmentByUserId.builder()
                 .experimentId(experimentId)
                 .context("test")
                 .bucketLabel("bucket-1")
@@ -412,8 +412,8 @@ public class CassandraAssignmentsRepositoryTest {
 
     @Test
     public void testGetAssignmentFromLookUpBucketIsNull(){
-        List<UserAssignmentByUserIdContextExperimentId> mockedResult = new ArrayList<>();
-        mockedResult.add(UserAssignmentByUserIdContextExperimentId.builder()
+        List<UserAssignmentByUserId> mockedResult = new ArrayList<>();
+        mockedResult.add(UserAssignmentByUserId.builder()
                 .experimentId(experimentId)
                 .context("test")
                 .bucketLabel(null)
