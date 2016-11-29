@@ -74,145 +74,9 @@ angular.module('wasabi.controllers').
 
             $scope.help = ConfigFactory.help;
 
-            // *** Home page code
-
-            $scope.actionRate = function(bucketLabel, buckets) {
-                return UtilitiesFactory.actionRate(bucketLabel, buckets);
-            };
-
-            $scope.actionDiff = function(bucketLabel, buckets) {
-                return UtilitiesFactory.actionDiff(bucketLabel, buckets);
-            };
-
             $scope.actionDiffForCardView = function(bucket) {
                 return UtilitiesFactory.actionDiffForCardView(bucket);
             };
-
-            /*
-             The experiment is assumed to either have a control, marked in the buckets list, or we use the first bucket
-             as the control (baseline).  That has already been marked in the buckets list in the experiment by saving
-             controlBucketLabel. All concept of improvement is relative to this control/baseline bucket and it's action rate value.
-             If the action rate of a bucket is greater than the action rate of the control/baseline, then it will have a
-             class of "winning", and the control/baseline will have a class of "losing", as will any other buckets who
-             have an action rate at or below the control/baseline.  If the control/baseline is
-             the highest action rate, it will have a class of 'winning' and the other buckets will have a class of 'losing'.
-             */
-            $scope.improvementClass = function(bucketLabel, experiment) {
-                return experiment.statistics.buckets[bucketLabel].improvementClass;
-            };
-
-            $scope.startDataLoadForNextExperiment = function() {
-                // If there are any more experiments to get data for, get the next one.
-                if ($scope.needDataForThese.length > 0) {
-                    // Start the process of getting extra data for the next experiment, unless it has the flag set
-                    // that we have already gotten the data.
-                    var foundExperimentInNeedOfLoading = false;
-                    do {
-                        var nextExperiment = $scope.needDataForThese.splice(0,1)[0];
-                        if (!nextExperiment.experiment.dataRetrieved) {
-                            foundExperimentInNeedOfLoading = true;
-                            $scope.loadBuckets(nextExperiment.experiment, !nextExperiment.onlyBucketData);
-                        }
-                    } while (!foundExperimentInNeedOfLoading && $scope.needDataForThese.length > 0);
-                }
-                else {
-                    // We are done loading the extra data for the grid view, so enable the Show grid checkbox.
-                    $scope.disableShowAsGrid = false;
-                }
-            };
-
-            $scope.loadApplicationStatistics = function(experiment) {
-                ApplicationStatisticsFactory.query({
-                    experimentId: experiment.id
-                }).$promise.then(function (appInfo) {
-                        if (appInfo && appInfo.totalUsers && appInfo.totalUsers.bucketAssignments) {
-                            experiment.numUsers = appInfo.totalUsers.bucketAssignments;
-                        }
-                        if (appInfo && appInfo.assignments && appInfo.assignments.length > 0) {
-                            // Get bucket-level assignment counts.
-                            UtilitiesFactory.transferMatchingValues(experiment.buckets,
-                                appInfo.assignments, 'count', 'label', 'bucket');
-                        }
-
-                        $scope.startDataLoadForNextExperiment();
-                    },
-                    function() {
-                        console.log('Error loading user count for ' + experiment.id);
-                        $scope.startDataLoadForNextExperiment();
-                    }
-                );
-            };
-
-            $scope.loadBuckets = function (experiment, loadStatisticsFlag) {
-                var loadStatisticsNext = (loadStatisticsFlag !== undefined ? loadStatisticsFlag : true);
-                BucketsFactory.query({
-                    experimentId: experiment.id
-                }).$promise.then(function (buckets) {
-                        experiment.dataRetrieved = true;
-                        if (buckets && buckets.length > 0) {
-                            experiment.buckets = buckets;
-
-                            // set baseline bucket (if no control bucket)
-                            experiment.controlBucketLabel = buckets[0].label;
-                            // get the label of the one control bucket (if any)
-                            for (var i = 0; i < experiment.buckets.length; i++) {
-                                if (experiment.buckets[i].isControl) {
-                                    experiment.hasControlBucket = true;
-                                    experiment.controlBucketLabel = experiment.buckets[i].label;
-                                }
-
-                                var s = '<div style="font-weight:normal; font-size:15px; padding-bottom:5px">' + experiment.buckets[i].label + '</div>';
-
-                                if (experiment.buckets[i].description && experiment.buckets[i].description.length > 0) {
-                                    s += '<div style="width:360px">' + experiment.buckets[i].description + '</div>';
-                                }
-                                experiment.buckets[i].homePageTooltip = s;
-                            }
-
-                            // set baseline bucket (if no control bucket)
-                            if (!experiment.hasControlBucket) {
-                                buckets[0].isBaseLine = true;
-                            }
-                        }
-                        else {
-                            experiment.buckets = [];
-                        }
-
-                        if (loadStatisticsNext) {
-                            $scope.loadStatistics(experiment);
-                        }
-                        else {
-                            $scope.startDataLoadForNextExperiment();
-                        }
-                    },
-                    function() {
-                        console.log('Error loading buckets for ' + experiment.id);
-                        $scope.startDataLoadForNextExperiment();
-                    }
-                );
-            };
-
-            $scope.getBucket = function (bucketLabel, experiment) {
-                return UtilitiesFactory.getBucket(bucketLabel, experiment);
-            };
-
-            $scope.loadStatistics = function (experiment) {
-                ExperimentStatisticsFactory.query({experimentId: experiment.id}).$promise.
-                    then(function (statistics) {
-                        experiment.statistics = statistics;
-
-                        $scope.loadApplicationStatistics(experiment);
-
-                        UtilitiesFactory.determineBucketImprovementClass(experiment);
-
-                    }, function() {
-                        console.log('Error retrieving experiment statistics for ' + experiment.id);
-                        $scope.startDataLoadForNextExperiment();
-                    }
-                );
-            };
-
-            // *** END Home page code
 
             $scope.convertOrderByField = function() {
                 switch ($scope.orderByField) {
@@ -265,7 +129,7 @@ angular.module('wasabi.controllers').
             This function sets up the call to get the list of experiments.  It sets up the query
             parameters to do the sorting, filtering and pagination.  It uses the lastSearchWasSimple
             flag to decide if we are doing simple or advanced filtering and so which parameters need to
-            be used.
+            be used.  This sets up the call whether it is for the table view or the card view (different APIs).
              */
             $scope.doLoadExperiments = function(cardViewFlag, pageSize, currentPage, afterLoadFunction) {
                 function addAdvParam(existingFilter, newFilterValue) {
@@ -430,6 +294,18 @@ angular.module('wasabi.controllers').
             };
 
             $scope.loadCardViewExperiments = function() {
+                function buildTooltip(bucket) {
+                    var s = '<div style="font-weight:normal; font-size:15px; padding-bottom:5px">' +
+                            bucket.label +
+                            (bucket.isControl ? ' (control)' : (bucket.isBaseLine ? ' (baseline)' : '')) +
+                            '</div>';
+
+                    if (bucket.description && bucket.description.length > 0) {
+                        s += '<div style="width:360px">' + bucket.description + '</div>';
+                    }
+                    return s;
+                }
+
                 $scope.doLoadExperiments(true, $scope.cardViewItemsPerPage, $scope.cardViewData.cardViewCurrentPage, function(data) {
                     var experiments = data.experimentDetails;
                     if (experiments) {
@@ -466,12 +342,7 @@ angular.module('wasabi.controllers').
                                                 experiments[i].controlBucketLabel = experiments[i].buckets[j].label;
                                             }
 
-                                            var s = '<div style="font-weight:normal; font-size:15px; padding-bottom:5px">' + experiments[i].buckets[j].label + '</div>';
-
-                                            if (experiments[i].buckets[j].description && experiments[i].buckets[j].description.length > 0) {
-                                                s += '<div style="width:360px">' + experiments[i].buckets[j].description + '</div>';
-                                            }
-                                            experiments[i].buckets[j].homePageTooltip = s;
+                                            experiments[i].buckets[j].homePageTooltip = buildTooltip(experiments[i].buckets[j]);
                                         }
                                         else {
                                             bucketsToRemove.push(j);
@@ -486,6 +357,7 @@ angular.module('wasabi.controllers').
                                     // set baseline bucket (if no control bucket)
                                     if (!experiments[i].hasControlBucket) {
                                         experiments[i].buckets[0].isBaseLine = true;
+                                        experiments[i].buckets[0].homePageTooltip = buildTooltip(experiments[i].buckets[0]);
                                     }
 
                                     if (experiments[i].state !== 'DRAFT') {

@@ -684,6 +684,8 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                 }
             },
 
+            // With the card view API, we receive all the information needed to determine whether we think a bucket is a
+            // "winner" or "loser" in the one set of data, so the code to determine that is significantly different.
             determineCardViewBucketImprovementClass: function(experiment) {
                 var that = this;
 
