@@ -4330,8 +4330,9 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
         margin-left: 10px;
     }
     ol {
-        list-style-position: inside;
+        list-style-position: outside;
         list-style-type: decimal;
+        margin-left: 20px;
     }
 }
 #help.shown {
