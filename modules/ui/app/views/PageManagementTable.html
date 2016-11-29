@@ -1,6 +1,6 @@
 <div ng-controller="PageManagementCtrl">
     <div class="toolbar">
-        Page Management <span class="info newHelp" help help-content="{{help.pageManagement}}"></span>
+        Page Manager <span class="info newHelp" help help-content="{{help.pageManagement}}"></span>
         <div>
             <select id="applicationNameChoice" ng-model="data.applicationName" ng-options="applicationName for applicationName in appNames" ng-change="changePage()" ng-if="appNames.length > 1">
                 <option value="">Select an Application</option>
