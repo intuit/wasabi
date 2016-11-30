@@ -5,8 +5,8 @@
 'use strict';
 
 angular.module('wasabi.controllers').
-    controller('ExperimentsCtrl', ['$scope', '$filter', '$http', '$timeout', 'ExperimentsFactory', '$modal', 'UtilitiesFactory', '$rootScope', 'StateFactory', 'DialogsFactory', 'AUTH_EVENTS', 'Session', 'PERMISSIONS', 'ConfigFactory', 'AuthzFactory', 'USER_ROLES', 'ApplicationsFactory', 'BucketsFactory', 'ExperimentStatisticsFactory', 'ApplicationStatisticsFactory', 'FavoritesFactory',
-        function ($scope, $filter, $http, $timeout, ExperimentsFactory, $modal, UtilitiesFactory, $rootScope, StateFactory, DialogsFactory, AUTH_EVENTS, Session, PERMISSIONS, ConfigFactory, AuthzFactory, USER_ROLES, ApplicationsFactory, BucketsFactory, ExperimentStatisticsFactory, ApplicationStatisticsFactory, FavoritesFactory) {
+    controller('ExperimentsCtrl', ['$scope', '$filter', '$http', '$timeout', 'ExperimentsFactory', '$modal', 'UtilitiesFactory', '$rootScope', 'StateFactory', 'DialogsFactory', 'AUTH_EVENTS', 'Session', 'PERMISSIONS', 'ConfigFactory', 'AuthzFactory', 'USER_ROLES', 'ApplicationsFactory', 'BucketsFactory', 'ExperimentStatisticsFactory', 'ApplicationStatisticsFactory', 'FavoritesFactory', '$cookies',
+        function ($scope, $filter, $http, $timeout, ExperimentsFactory, $modal, UtilitiesFactory, $rootScope, StateFactory, DialogsFactory, AUTH_EVENTS, Session, PERMISSIONS, ConfigFactory, AuthzFactory, USER_ROLES, ApplicationsFactory, BucketsFactory, ExperimentStatisticsFactory, ApplicationStatisticsFactory, FavoritesFactory, $cookies) {
 
             var today = moment().format('MM/DD/YYYY');
 
@@ -397,8 +397,19 @@ angular.module('wasabi.controllers').
             if (Session && Session.switches) {
                 $scope.data.enableCardView = Session.switches.ShowCardView;
             }
-            if ($scope.data.enableCardView && $scope.data.showGrid) {
-                $scope.loadCardViewExperiments();
+            // If this user has turned on Card View and we've saved it in a cookie, enable it (or use the saved value).
+            if ($scope.data.enableCardView) {
+                if ($cookies.wasabiCardViewSetting) {
+                    $scope.data.showGrid = ((typeof($cookies.wasabiCardViewSetting) === 'boolean' && $cookies.wasabiCardViewSetting) ||
+                                            (typeof($cookies.wasabiCardViewSetting) === 'string' && $cookies.wasabiCardViewSetting === 'true'));
+                }
+                else {
+                    // Start saving it.
+                    $cookies.wasabiCardViewSetting = $scope.data.showGrid;
+                }
+                if ($scope.data.showGrid) {
+                    $scope.loadCardViewExperiments();
+                }
             }
 
             $scope.loadTableExperiments();
@@ -414,13 +425,13 @@ angular.module('wasabi.controllers').
                     // So that it gets changed correctly in the localStorage that saves the search state,
                     // we need to actually toggle this one because it doesn't get updated until after this has
                     // executed.
-                    $scope.data.showGrid = false;
+                    $scope.data.showGrid = $cookies.wasabiCardViewSetting = false;
                     localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
                     $scope.loadTableExperiments();
                 }
                 else {
                     // Record that we are showing the Card View in the localStorage
-                    $scope.data.showGrid = true;
+                    $scope.data.showGrid = $cookies.wasabiCardViewSetting = true;
                     localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
                     // Switched to card view.  Since we're not pre-loading the data for the cards, we need to
                     // load (or check if we need to load) the data now.
