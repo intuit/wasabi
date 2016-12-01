@@ -214,7 +214,6 @@ public class ApplicationsResourceTest {
     public void getPagesForApplication() throws Exception {
         when(authorization.getUser("foo")).thenReturn(username);
         when(pages.getPageList(applicationName)).thenReturn(pagesByName);
-//        whenHttpHeader(anyCollection());
         when(httpHeader.headers()).thenReturn(responseBuilder);
         when(responseBuilder.entity(anyCollection())).thenReturn(responseBuilder);
         when(responseBuilder.build()).thenReturn(response);
@@ -224,7 +223,6 @@ public class ApplicationsResourceTest {
         verify(authorization).getUser("foo");
         verify(authorization).checkUserPermissions(username, applicationName, READ);
         verify(pages).getPageList(applicationName);
-//        verifyHttpHeader(anyCollection());
         verify(responseBuilder).entity(pagesByNameCaptor.capture());
         assertThat(pagesByNameCaptor.getValue().size(), is(1));
         assertThat(pagesByNameCaptor.getValue(), hasEntry("pages", pagesByName));
@@ -234,7 +232,6 @@ public class ApplicationsResourceTest {
     public void getExperimentsByPages() throws Exception {
         when(authorization.getUser("foo")).thenReturn(username);
         when(pages.getExperiments(applicationName, pageName)).thenReturn(pageExperiments);
-//        whenHttpHeader(anyCollection());
         when(httpHeader.headers()).thenReturn(responseBuilder);
         when(responseBuilder.entity(anyCollection())).thenReturn(responseBuilder);
         when(responseBuilder.build()).thenReturn(response);
@@ -243,7 +240,6 @@ public class ApplicationsResourceTest {
 
         verify(authorization).getUser("foo");
         verify(authorization).checkUserPermissions(username, applicationName, READ);
-//        verifyHttpHeader(anyCollection());
         verify(httpHeader).headers();
         verify(responseBuilder).entity(pageExperimentsCaptor.capture());
         verify(responseBuilder).build();

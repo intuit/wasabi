@@ -18,7 +18,6 @@ package com.intuit.wasabi.analytics.impl;
 import com.intuit.wasabi.analytics.Analytics;
 import com.intuit.wasabi.analyticsobjects.Parameters;
 import com.intuit.wasabi.analyticsobjects.counts.AssignmentCounts;
-import com.intuit.wasabi.analyticsobjects.counts.BucketAssignmentCount;
 import com.intuit.wasabi.analyticsobjects.counts.Counts;
 import com.intuit.wasabi.analyticsobjects.counts.TotalUsers;
 import com.intuit.wasabi.analyticsobjects.statistics.BucketStatistics;
@@ -44,12 +43,14 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -127,9 +128,9 @@ public class ExperimentDetailsTest {
 
         ExperimentDetail.BucketDetail bucketDetail = expDetail.get(0).getBuckets().get(0);
 
-        assertEquals(Bucket.State.OPEN, bucketDetail.getState());
-        assertTrue(0.5 == bucketDetail.getAllocationPercent());
-        assertEquals(Bucket.Label.valueOf("Bucket1"), bucketDetail.getLabel());
+        assertThat(bucketDetail.getState(), is(Bucket.State.OPEN));
+        assertThat(bucketDetail.getAllocationPercent(), is(0.5));
+        assertThat(bucketDetail.getLabel(), is(Bucket.Label.valueOf("Bucket1")));
     }
 
     @Test
@@ -192,7 +193,7 @@ public class ExperimentDetailsTest {
         when(expDetail.getBuckets()).thenReturn(bucketDetails);
         when(expStats.getBuckets()).thenReturn(bucketAnalytics);
         when(expStats.getJointProgress()).thenReturn(mock(Progress.class));
-        List<Bucket.Label> winnerSoFar = new ArrayList<>();
+        Set<Bucket.Label> winnerSoFar = new HashSet<>();
         winnerSoFar.add(b1Label);
 
         when(expStats.getJointProgress().getWinnersSoFar()).thenReturn(winnerSoFar);
