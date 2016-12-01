@@ -176,10 +176,6 @@
                                     <directory>src/main/env</directory>
                                     <filtering>true</filtering>
                                 </resource>
-                                <resource>
-                                    <directory>src/test/integration</directory>
-                                    <filtering>true</filtering>
-                                </resource>
                             </resources>
                             <includeEmptyDirs>true</includeEmptyDirs>
                         </configuration>
