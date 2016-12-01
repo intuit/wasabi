@@ -85,7 +85,7 @@ header {
         position: relative;
         display: block;
         height: 36px;
-        li {
+        li.navLink {
           display: inline-block;
           height: 36px;
           line-height: 36px;
@@ -107,6 +107,24 @@ header {
               }
             }
           }
+          &.navDropdown {
+              .dropdown-menu {
+                position: absolute;
+                display: none;
+                height: inherit;
+              }
+              .open > .dropdown-menu {
+                display: block;
+              }
+              a {
+                background: url(/images/sortDwn_white.png) no-repeat right center;
+              }
+              &.sel a.toolsChoice {
+                background: url(/images/sortDwn.png) no-repeat right center;
+                background-position-x: 95%;
+                background-position-y: 36%;
+              }
+          }
           a {
             padding: 0 12px; // 3px 15px;
             display: block;
@@ -117,6 +135,9 @@ header {
             &:hover {
               text-decoration: underline;
             }
+          }
+          li.toolsMenuChoices a {
+            color: #373737;
           }
         }
         &.user {
@@ -1291,7 +1312,7 @@ td.checked span {
 	background: url(/images/glyphicons-halflings.png) no-repeat -288px 1px;
 }
 
-#exclusionPickList {
+#exclusionPickList, #addExperimentsPickList {
   width: 900px;
   #exclusionList {
     height: 280px;
@@ -2709,13 +2730,84 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
                 text-align: right;
                 padding-right: 12px;
                 span {
-                    background: url(/images/user_40.png) no-repeat 0 center;
-                    background-size: 16px;
                     padding-left: 20px;
                     padding-top: 4px;
                     height: 16px;
                     line-height: 16px;
                     font-size: 90%;
+                }
+            }
+            .bucketsTable {
+                font-size: 90%;
+                position: relative;
+                display: block;
+                color: #777;
+                span {
+                    font-size: 90%;
+                    color: #999;
+                    &.red {
+                        color: #E68078;
+                    }
+                }
+                tbody {
+                    td {
+                        padding: 5px 0 5px 0;
+                        .bucketLabel {
+                            width : 160px;
+                            overflow: hidden;
+                            display: inline-block;
+                            text-overflow: ellipsis;
+                            white-space: nowrap;
+                            padding-right: 10px;
+                        }
+                        &.userCounts {
+                            width: 40px;
+                            vertical-align: bottom;
+                            text-align: right;
+                        }
+                        &.winner {
+                            background: url(/images/Check_mark.png) no-repeat 0 0;
+                            background-size: 15px;
+                            background-position-y: 17px;
+                            padding-left: 20px;
+                            .bucketLabel {
+                                width: 130px;
+                            }
+                        }
+                        &.indeterminate {
+                            background: url(/images/noResult.png) no-repeat 0 0;
+                            background-size: 20px;
+                            padding-left: 20px;
+                            .bucketLabel {
+                                width: 130px;
+                            }
+                        }
+                        &.nonWinner {
+                            background: url(/images/noResult.png) no-repeat 0 0;
+                            background-size: 15px;
+                            background-position-y: 17px;
+                            padding-left: 20px;
+                            .bucketLabel {
+                                width: 130px;
+                            }
+                        }
+                    }
+                    &:first-child {
+                        border-top: 1px solid #ebebeb;
+                    }
+                    .lastRow {
+                        border-bottom: 1px solid #ebebeb;
+                    }
+                }
+                .bucketAssignments {
+                    background: url(/images/user_40.png) no-repeat 0 center;
+                    background-size: 16px;
+                    padding-left: 20px;
+                    height: 16px;
+                    line-height: 16px;
+                    color: black;
+                    font-size: 90%;
+                    opacity: .5;
                 }
             }
             .buckets {
@@ -4238,8 +4330,9 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
         margin-left: 10px;
     }
     ol {
-        list-style-position: inside;
+        list-style-position: outside;
         list-style-type: decimal;
+        margin-left: 20px;
     }
 }
 #help.shown {
@@ -4360,6 +4453,29 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
 
 .notAllowed {
     cursor: no-drop !important;
+}
+
+#pageManagementList, #pageSelectionList {
+    select {
+        background: white;
+        margin-top: 10px;
+    }
+}
+
+.buttonTable {
+    width: 100%;
+    background: white;
+    td {
+        border: 1px solid rgb(200, 200, 200);
+        text-align: center;
+        padding: 8px;
+    }
+}
+
+.pageManagementColumn {
+    width: 316px;
+    margin-top: 20px;
+    float: left;
 }
 
 .gridWithAdvanced {
