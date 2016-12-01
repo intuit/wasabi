@@ -63,6 +63,7 @@ public class Constants {
     public static final String BUCKET_STATE_CLOSED = "CLOSED";
     public static final String BUCKET_STATE_EMPTY = "EMPTY";
 
+    public static final String ASSIGNMENT_NO_OPEN_BUCKETS = "NO_OPEN_BUCKETS";
     public static final String ASSIGNMENT_NO_PROFILE_MATCH = "NO_PROFILE_MATCH";
     public static final String ASSIGNMENT_NEW_ASSIGNMENT = "NEW_ASSIGNMENT";
     public static final String ASSIGNMENT_EXISTING_ASSIGNMENT = "EXISTING_ASSIGNMENT";

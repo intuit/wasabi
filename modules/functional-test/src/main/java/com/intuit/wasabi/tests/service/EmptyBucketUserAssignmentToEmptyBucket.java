@@ -105,4 +105,45 @@ public class EmptyBucketUserAssignmentToEmptyBucket extends TestBase {
        Assignment putAssignmentAfterEmpty = putAssignment(experiment, assignmentAfterEmpty, specialUser, null, HttpStatus.SC_NOT_FOUND);
        
     }
+
+    @Test(dependsOnGroups = {"ping"})
+    public void t_AddUserToExperimentAndEmptyBucketAndReassignToAnotherEmptyBucketGetAssginment() {
+        experiment = ExperimentFactory.createExperiment();
+
+        DefaultNameExclusionStrategy experimentComparisonStrategy = new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson");
+        experiment.setSerializationStrategy(experimentComparisonStrategy);
+        Experiment exp = postExperiment(experiment);
+        Assert.assertNotNull(exp.creationTime, "Experiment creation failed (No creationTime).");
+        Assert.assertNotNull(exp.modificationTime, "Experiment creation failed (No modificationTime).");
+        Assert.assertNotNull(exp.state, "Experiment creation failed (No state).");
+        experiment.update(exp);
+        buckets = BucketFactory.createBuckets(experiment, 3);
+        postBuckets(buckets);
+        
+        // Start experiment
+        experiment.state = Constants.EXPERIMENT_STATE_RUNNING;
+        Experiment exp2 = putExperiment(experiment);
+        assertEqualModelItems(exp2, experiment);
+        experiment.update(exp);
+        
+        // Assign special user to bucket 0
+        Assignment assignment = AssignmentFactory.createAssignment()
+                .setAssignment(buckets.get(0).label)
+                .setExperimentLabel(experiment.label)
+                .setOverwrite(true);
+        Assignment putAssignment = putAssignment(experiment, assignment, specialUser);
+        assertEqualModelItems(putAssignment, assignment, new DefaultNameInclusionStrategy("assignment"));
+        assignments.put(specialUser, putAssignment);
+        
+       // Empty 2 buckets
+       List<Bucket> emptyBucket = new ArrayList<>();
+       emptyBucket.add(buckets.get(0));
+       emptyBucket.add(buckets.get(1));
+       emptyBucket.add(buckets.get(2));
+       emptyBucket = putBucketsState(emptyBucket, Constants.BUCKET_STATE_EMPTY);
+       
+       Assignment putAssignmentAfterEmpty = getAssignment(experiment, specialUser);
+       Assert.assertEquals(Constants.ASSIGNMENT_NO_OPEN_BUCKETS,putAssignmentAfterEmpty.status );
+       
+    }
 }
