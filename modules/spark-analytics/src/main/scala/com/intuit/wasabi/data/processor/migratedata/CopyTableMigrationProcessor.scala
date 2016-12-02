@@ -9,7 +9,7 @@ import com.intuit.wasabi.data.processor.SparkProcessor
 import com.intuit.wasabi.data.repository.SparkDataStoreRepository
 import com.typesafe.config.Config
 import org.apache.spark.SparkContext
-import org.apache.spark.sql.{DataFrame, SaveMode}
+import org.apache.spark.sql.{DataFrame, SQLContext, SaveMode}
 
 /**
   * This processor is created to copy data from source table to destination.

@@ -120,6 +120,13 @@
             <version>1.5.0</version>
         </dependency>
 
+        <!-- TestNG for functional tests -->
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>6.5.2</version>
+        </dependency>
+
     </dependencies>
     <build>
         <pluginManagement>

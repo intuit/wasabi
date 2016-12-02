@@ -11,7 +11,7 @@ import com.google.inject.name.Named
 import com.intuit.wasabi.data.exception.{RepositoryException, WasabiError}
 import com.intuit.wasabi.data.util.Constants._
 import com.intuit.wasabi.data.repository.{DataStoreConnectionProperties, SparkDataStoreRepository}
-import com.intuit.wasabi.data.udf.CurrentTimestampFunc
+import com.intuit.wasabi.data.udf.{CurrentTimestampFunc, TextConcatFunc}
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.cassandra.CassandraSQLContext
 import org.apache.spark.sql.{DataFrame, SQLContext, SaveMode}
@@ -71,6 +71,7 @@ class SparkCassandraRepository extends SparkDataStoreRepository {
     this.sqlContext.setKeyspace(keySpaceName)
 
     this.sqlContext.udf.register("wasabi_current_timestamp", currentTimestampFunc)
+    this.sqlContext.udf.register("text_concat", new TextConcatFunc)
 
     if(perfLog.isInfoEnabled()) perfLog.info(s"Time taken by SparkCassandraRepository.this = ${System.currentTimeMillis-sTime} ms")
     if(log.isInfoEnabled) log.info("this() - FINISHED")
