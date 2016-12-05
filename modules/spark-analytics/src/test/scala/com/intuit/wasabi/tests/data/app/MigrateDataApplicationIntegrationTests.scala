@@ -14,17 +14,12 @@ import com.intuit.wasabi.data.repository.SparkDataStoreRepository
 import com.typesafe.config.ConfigFactory
 import org.apache.spark.Logging
 import org.apache.spark.sql.DataFrame
-import org.scalatest.FunSuite
 import org.scalatest.testng.TestNGSuite
-import org.testng.annotations.{BeforeTest, Configuration, Test}
-
-import scala.collection.mutable.ListBuffer
+import org.testng.annotations.{AfterTest, BeforeTest, Test}
 
 /**
-  * Created by nbarge on 10/21/16.
+  * Created by nbarge on 12/5/16.
   */
-
-
 class MigrateDataApplicationIntegrationTests extends TestNGSuite with SharedSparkContext with Logging  {
   var session:Session = null
   var NUM_OF_RECORDS: Int = 0
@@ -81,6 +76,12 @@ class MigrateDataApplicationIntegrationTests extends TestNGSuite with SharedSpar
 
   }
 
+  @AfterTest
+  override def afterAll() {
+    super.afterAll()
+    session.execute("DROP KEYSPACE IF EXISTS test_ks")
+    log.info("Keyspace is dropped...")
+  }
 
   @Test
   def copyEmptyTable() {
@@ -323,6 +324,4 @@ class MigrateDataApplicationIntegrationTests extends TestNGSuite with SharedSpar
 
     assert(srcCount==destCount && srcCount==NUM_OF_RECORDS, s"Both source & destination table should have $NUM_OF_RECORDS records...")
   }
-
-
 }

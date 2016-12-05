@@ -206,6 +206,11 @@ test_api() {
     java -Dapi.server.name=${endpoint} -Duser.name=admin -Duser.password=admin \
       -classpath classes:`ls wasabi-functional-test-*-SNAPSHOT-jar-with-dependencies.jar` org.testng.TestNG \
       -d ../../../test.log classes/testng.xml)
+
+  (cd modules/spark-analytics/target;
+    java -classpath classes:`ls wasabi-spark-analytics-*-SNAPSHOT-development-test.jar` org.testng.TestNG \
+      -d ../../../test.log test-classes/testng.xml)
+
 }
 
 resource() {

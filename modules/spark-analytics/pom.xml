@@ -21,6 +21,7 @@
         <log.level>INFO</log.level>
         <spark.version>1.4.0</spark.version>
         <LOG_DIR>${application.home}/logs</LOG_DIR>
+        <scala_library_version>2.10</scala_library_version>
     </properties>
 
     <profiles>
@@ -66,43 +67,43 @@
         <!-- spark-cassandra-connector -->
         <dependency>
             <groupId>com.datastax.spark</groupId>
-            <artifactId>spark-cassandra-connector-java_2.10</artifactId>
+            <artifactId>spark-cassandra-connector-java_${scala_library_version}</artifactId>
             <version>${spark.version}-M1</version>
         </dependency>
 
         <!--Spark -->
         <dependency>
             <groupId>org.apache.spark</groupId>
-            <artifactId>spark-core_2.10</artifactId>
+            <artifactId>spark-core_${scala_library_version}</artifactId>
             <version>${spark.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
-            <artifactId>spark-sql_2.10</artifactId>
+            <artifactId>spark-sql_${scala_library_version}</artifactId>
             <version>${spark.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
-            <artifactId>spark-streaming_2.10</artifactId>
+            <artifactId>spark-streaming_${scala_library_version}</artifactId>
             <version>${spark.version}</version>
         </dependency>
 
         <!-- Unit Tests -->
         <dependency>
             <groupId>org.scalamock</groupId>
-            <artifactId>scalamock-scalatest-support_2.10</artifactId>
+            <artifactId>scalamock-scalatest-support_${scala_library_version}</artifactId>
             <version>3.2</version>
         </dependency>
         <dependency>
             <groupId>com.holdenkarau</groupId>
-            <artifactId>spark-testing-base_2.10</artifactId>
-            <version>1.6.1_0.3.3</version>
+            <artifactId>spark-testing-base_${scala_library_version}</artifactId>
+            <version>1.4.1_0.3.3</version>
         </dependency>
 
         <!-- Mainly for exception handling -->
         <dependency>
             <groupId>org.typelevel</groupId>
-            <artifactId>cats-core_2.10</artifactId>
+            <artifactId>cats-core_${scala_library_version}</artifactId>
             <version>0.7.2</version>
         </dependency>
 
@@ -113,10 +114,10 @@
             <version>4.1.0</version>
         </dependency>
 
-        <!-- Spark package fto interact with CSV DataSource -->
+        <!-- Spark package to interact with CSV DataSource -->
         <dependency>
             <groupId>com.databricks</groupId>
-            <artifactId>spark-csv_2.10</artifactId>
+            <artifactId>spark-csv_${scala_library_version}</artifactId>
             <version>1.5.0</version>
         </dependency>
 
@@ -195,6 +196,7 @@
                 <version>2.4.3</version>
                 <executions>
                     <execution>
+                        <id>main-jar-generation</id>
                         <phase>package</phase>
                         <goals>
                             <goal>shade</goal>
@@ -210,10 +212,10 @@
                                     <include>junit:junit:*</include>
                                     <include>ch.qos.logback:logback-classic:*</include>
                                     <include>ch.qos.logback:logback-core:*</include>
-                                    <include>org.typelevel:cats-core_2.10:*</include>
-                                    <include>org.typelevel:cats-macros_2.10:*</include>
-                                    <include>org.typelevel:cats-kernel_2.10:*</include>
-                                    <include>com.databricks:spark-csv_2.10:*</include>
+                                    <include>org.typelevel:cats-core_${scala_library_version}:*</include>
+                                    <include>org.typelevel:cats-macros_${scala_library_version}:*</include>
+                                    <include>org.typelevel:cats-kernel_${scala_library_version}:*</include>
+                                    <include>com.databricks:spark-csv_${scala_library_version}:*</include>
                                     <include>org.apache.commons:commons-csv:*</include>
                                 </includes>
                             </artifactSet>
@@ -233,6 +235,48 @@
                             </transformers>
                         </configuration>
                     </execution>
+
+                    <execution>
+                        <id>test-jar-generation</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <createSourcesJar>false</createSourcesJar>
+                            <shadedClassifierName>${application.profile}-test</shadedClassifierName>
+                            <createDependencyReducedPom>true</createDependencyReducedPom>
+                            <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
+                            <artifactSet>
+                                <includes>
+                                    <include>*:*:*</include>
+                                </includes>
+                            </artifactSet>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+
+                            <transformers>
+                                <!-- <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/> -->
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>reference.conf</resource>
+                                </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>myMainClass</mainClass>
+                                </transformer>
+                            </transformers>
+
+                        </configuration>
+                    </execution>
+
                 </executions>
             </plugin>
         </plugins>
