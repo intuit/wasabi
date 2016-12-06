@@ -1,4 +1,4 @@
-package com.intuit.wasabi.tests.data.conf.guice
+package com.intuit.wasabi.sparkanalytics.data.conf.guice
 
 import com.datastax.spark.connector.cql.CassandraConnector
 import com.google.inject.name.Names
@@ -14,12 +14,16 @@ import com.intuit.wasabi.data.repository.{DataStoreConnectionProperties, SparkDa
 import com.typesafe.config.ConfigFactory
 import org.apache.spark.Logging
 import org.apache.spark.sql.cassandra.CassandraSQLContext
+import org.junit.runner.RunWith
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
 
 /**
   * Created by nbarge on 11/21/16.
   */
+
+@RunWith(classOf[JUnitRunner])
 class ApplicationInjectors extends FunSuite with SharedSparkContext with MockFactory with Logging {
   var setting: AppConfig = null
 

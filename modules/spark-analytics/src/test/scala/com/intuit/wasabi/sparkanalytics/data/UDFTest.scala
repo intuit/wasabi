@@ -1,4 +1,4 @@
-package com.intuit.wasabi.tests.data
+package com.intuit.wasabi.sparkanalytics.data
 
 import java.sql.Timestamp
 import java.time.{Instant, ZoneId}
@@ -7,12 +7,15 @@ import com.holdenkarau.spark.testing.SharedSparkContext
 import com.intuit.wasabi.data.udf.CurrentTimestampFunc
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{Row, SQLContext}
+import org.junit.runner.RunWith
 import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
 
 
 /**
   * Created by nbarge on 9/27/16.
   */
+@RunWith(classOf[JUnitRunner])
 class UDFTest extends FunSuite with SharedSparkContext {
 
   test("CurrentTimestampFunc: create and use  UDF - success") {

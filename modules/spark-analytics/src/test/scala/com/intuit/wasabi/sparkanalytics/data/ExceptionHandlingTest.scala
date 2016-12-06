@@ -1,15 +1,25 @@
-package com.intuit.wasabi.tests.data
+package com.intuit.wasabi.sparkanalytics.data
 
 import cats.data.Xor.{Left, Right}
 import com.holdenkarau.spark.testing.SharedSparkContext
 import com.intuit.wasabi.data.exception.WasabiError
 import com.intuit.wasabi.data.util.Utility
-import org.scalatest.FunSuite
+import org.apache.spark.Logging
+import org.junit.runner.RunWith
+import org.scalatest.{BeforeAndAfterAll, FunSuite}
+import org.scalatest.junit.JUnitRunner
+import org.slf4j.Logger
 
 /**
   * Created by nbarge on 10/14/16.
   */
-class ExceptionHandling extends FunSuite with SharedSparkContext {
+@RunWith(classOf[JUnitRunner])
+class ExceptionHandlingTest extends FunSuite with SharedSparkContext with BeforeAndAfterAll with Logging {
+
+  override def beforeAll() {
+    super.beforeAll()
+    sc.setLogLevel("INFO")
+  }
 
   test("Test cas Xor: null input") {
     val result = Utility.parse(null)
@@ -18,17 +28,25 @@ class ExceptionHandling extends FunSuite with SharedSparkContext {
       case Right(num:Integer)  => println(s"Integer => $num")
     }
 
-
     assert(result.isLeft, true)
     //assert(result.isRight, false)
   }
 
   test("Test Either: null input") {
     val result2 = Utility.parse2(null)
+    var wasThereError=false
     result2 match {
-      case scala.util.Left(error:WasabiError.ApplicationError)  => println(s"#2 Error Message => ${error.detail}, Error Exception => ${error.detail.getStackTraceString}")
-      case scala.util.Right(num:Integer)  => println(s"#2 Integer => $num")
+      case scala.util.Left(error:WasabiError.ApplicationError)  => {
+        println(s"#2 Error Message => ${error.detail}, Error Exception => ${error.detail.getStackTraceString}")
+        wasThereError=true
+      }
+      case scala.util.Right(num:Integer)  => {
+        println(s"#2 Integer => $num")
+        wasThereError=false
+      }
     }
+
+    assert(wasThereError==true, "There should be error as null is not a valid number")
   }
 
   test("Test Either: valid input") {

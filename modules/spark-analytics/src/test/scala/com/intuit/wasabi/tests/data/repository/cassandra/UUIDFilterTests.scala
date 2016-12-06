@@ -9,12 +9,16 @@ import com.typesafe.config.ConfigFactory
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.cassandra.CassandraSQLContext
 import org.apache.spark.{Logging, SparkConf, SparkContext}
+import org.junit.runner.RunWith
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
 
 /**
   * Created by nbarge on 10/21/16.
   */
+
+@RunWith(classOf[JUnitRunner])
 class UUIDFilterTests extends FunSuite with SharedSparkContext with MockFactory with Logging {
 
   var setting: AppConfig = null
@@ -46,7 +50,7 @@ class UUIDFilterTests extends FunSuite with SharedSparkContext with MockFactory 
     val uuidTestDF = sqlCtx.read.format("org.apache.spark.sql.cassandra").options(Map("keyspace"->"test_ks","table"->"test_uuid_tbl1")).load
     uuidTestDF.map(r => r.toString()).foreach(s => println(s))
 
-    uuidTestDF.filter("id = 'ea830e07-baff-40f3-b322-7c6d8742df7f'").show()
+    //uuidTestDF.filter("id = 'ea830e07-baff-40f3-b322-7c6d8742df7f'").show()
 
 /*
     uuidTestDF.registerTempTable("UUIDTestTbl")
@@ -78,7 +82,7 @@ class UUIDFilterTests extends FunSuite with SharedSparkContext with MockFactory 
     val uuidTestDF = sqlCtx.read.format("org.apache.spark.sql.cassandra").options(Map("keyspace"->"t29242","table"->"tester")).load
     uuidTestDF.map(r => r.toString()).foreach(s => println(s))
 
-    uuidTestDF.filter("id = 'b574a408-4402-4335-a082-a4e35dc7b026'").show()
+    //uuidTestDF.filter("id = 'b574a408-4402-4335-a082-a4e35dc7b026'").show()
 
   }
 

@@ -6,16 +6,19 @@ import com.intuit.wasabi.data.conf.AppConfig
 import com.intuit.wasabi.data.util.Constants
 import com.typesafe.config.ConfigFactory
 import org.apache.spark.Logging
-import org.apache.spark.sql.{Row, SQLContext, SaveMode}
-import org.apache.spark.sql.cassandra.CassandraSQLContext
 import org.apache.spark.sql.types._
+import org.apache.spark.sql.{Row, SQLContext, SaveMode}
+import org.junit.runner.RunWith
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
 
 /**
   * Created by nbarge on 10/21/16.
   */
-class SaveModeTests extends FunSuite with SharedSparkContext with MockFactory with Logging {
+
+@RunWith(classOf[JUnitRunner])
+class SaveModeTest extends FunSuite with SharedSparkContext with MockFactory with Logging {
 
   var setting: AppConfig = null
 

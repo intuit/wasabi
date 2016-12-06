@@ -207,9 +207,9 @@ test_api() {
       -classpath classes:`ls wasabi-functional-test-*-SNAPSHOT-jar-with-dependencies.jar` org.testng.TestNG \
       -d ../../../test.log classes/testng.xml)
 
-  (cd modules/spark-analytics/target;
-    java -classpath classes:`ls wasabi-spark-analytics-*-SNAPSHOT-development-test.jar` org.testng.TestNG \
-      -d ../../../test.log test-classes/testng.xml)
+  #Note that spark-analytics module assumes that cassandra is running on a local machine... if not then modify
+  # spark-analytics/resources/application.conf file property default.datastore.host
+  mvn "-Dtest=com.intuit.wasabi.tests.**.*" test -pl modules/spark-analytics --also-make -DfailIfNoTests=false -q
 
 }
 
@@ -345,7 +345,7 @@ remove() {
 
 unit_test() {
   command=$1
-  mvn "-Dtest=com.intuit.wasabi.${command/-/}.**" test -pl modules/${command} --also-make -DfailIfNoTests=false -q
+  mvn "-Dtest=com.intuit.wasabi.${command/-/}.**.*" test -pl modules/${command} --also-make -DfailIfNoTests=false -q
 }
 
 exec_commands() {
