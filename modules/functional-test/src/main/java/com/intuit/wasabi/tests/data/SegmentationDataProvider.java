@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package com.intuit.wasabi.sparkanalytics.data;
+package com.intuit.wasabi.tests.data;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

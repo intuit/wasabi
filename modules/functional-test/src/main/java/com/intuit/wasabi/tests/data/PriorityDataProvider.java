@@ -15,7 +15,7 @@
  *  * limitations under the License.
  *  ******************************************************************************
  */
-package com.intuit.wasabi.sparkanalytics.data;
+package com.intuit.wasabi.tests.data;
 
 import org.joda.time.DateTime;
 import org.testng.annotations.DataProvider;
