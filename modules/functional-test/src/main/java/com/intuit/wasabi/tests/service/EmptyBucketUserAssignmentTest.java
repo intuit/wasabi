@@ -106,4 +106,47 @@ public class EmptyBucketUserAssignmentTest extends TestBase {
        assertEqualModelItems(assignmentForSpecialAfterReassignment, putAssignmentAfterEmpty, new DefaultNameInclusionStrategy("assignment"));
            }
 
+    @Test(dependsOnGroups = {"ping"})
+    public void t_AddUserToExperimentAndEmptyBucketAndGetAssignment() {
+        experiment = ExperimentFactory.createExperiment();
+
+        DefaultNameExclusionStrategy experimentComparisonStrategy = new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson");
+        experiment.setSerializationStrategy(experimentComparisonStrategy);
+
+        Experiment exp = postExperiment(experiment);
+        Assert.assertNotNull(exp.creationTime, "Experiment creation failed (No creationTime).");
+        Assert.assertNotNull(exp.modificationTime, "Experiment creation failed (No modificationTime).");
+        Assert.assertNotNull(exp.state, "Experiment creation failed (No state).");
+        experiment.update(exp);
+        buckets = BucketFactory.createBuckets(experiment, 3);
+        postBuckets(buckets);
+        
+        // Start experiment
+        experiment.state = Constants.EXPERIMENT_STATE_RUNNING;
+        Experiment exp2 = putExperiment(experiment);
+        assertEqualModelItems(exp2, experiment);
+        experiment.update(exp);
+        
+        // Assign special user to bucket 0
+        Assignment assignment = AssignmentFactory.createAssignment()
+                .setAssignment(buckets.get(0).label)
+                .setExperimentLabel(experiment.label)
+                .setOverwrite(true);
+        Assignment putAssignment = putAssignment(experiment, assignment, specialUser);
+        assertEqualModelItems(putAssignment, assignment, new DefaultNameInclusionStrategy("assignment"));
+        assignments.put(specialUser, putAssignment);
+        
+       List<Bucket> emptyBucket = new ArrayList<>();
+       emptyBucket.add(buckets.get(0));
+       emptyBucket = putBucketsState(emptyBucket, Constants.BUCKET_STATE_EMPTY);
+       
+       Assignment assignmentForSpecialAfterReassignment = getAssignment(experiment, specialUser);
+       Assert.assertEquals(assignmentForSpecialAfterReassignment.status,Constants.NEW_ASSIGNMENT);
+       Assignment assignmentForSpecialAfterReassignment2ndCall = getAssignment(experiment, specialUser);
+       
+       Assert.assertEquals(assignmentForSpecialAfterReassignment2ndCall.status,
+    		   Constants.ASSIGNMENT_EXISTING_ASSIGNMENT);
+       Assert.assertEquals(assignmentForSpecialAfterReassignment.bucket_label,
+    		   assignmentForSpecialAfterReassignment2ndCall.bucket_label);
+    }
 }
