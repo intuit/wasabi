@@ -209,7 +209,7 @@ test_api() {
 
   #Note that spark-analytics module assumes that cassandra is running on a local machine... if not then modify
   # spark-analytics/resources/application.conf file property default.datastore.host
-  mvn "-Dtest=com.intuit.wasabi.tests.**.*" test -pl modules/spark-analytics --also-make -DfailIfNoTests=false -q
+  mvn "-Dtest=com.intuit.wasabi.tests.**" test -pl modules/spark-analytics --also-make -DfailIfNoTests=false -q
 
 }
 
