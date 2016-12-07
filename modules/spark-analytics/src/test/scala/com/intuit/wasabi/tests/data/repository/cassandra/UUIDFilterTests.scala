@@ -18,7 +18,6 @@ import org.scalatest.junit.JUnitRunner
   * Created by nbarge on 10/21/16.
   */
 
-@RunWith(classOf[JUnitRunner])
 class UUIDFilterTests extends FunSuite with SharedSparkContext with MockFactory with Logging {
 
   var setting: AppConfig = null

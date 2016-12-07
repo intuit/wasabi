@@ -23,7 +23,6 @@ import org.testng.annotations.{AfterTest, BeforeTest, Test}
   * Created by nbarge on 12/5/16.
   */
 
-@RunWith(classOf[JUnitRunner])
 class MigrateDataApplicationIntegrationTests extends TestNGSuite with SharedSparkContext with Logging  {
   var session:Session = null
   var NUM_OF_RECORDS: Int = 0
