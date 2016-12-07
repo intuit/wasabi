@@ -19,7 +19,7 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.mapping.Result;
 import com.datastax.driver.mapping.annotations.Accessor;
 import com.datastax.driver.mapping.annotations.Query;
-import com.intuit.wasabi.repository.cassandra.pojo.index.UserAssignmentByUserIdContextExperimentId;
+import com.intuit.wasabi.repository.cassandra.pojo.index.UserAssignmentByUserId;
 
 import java.util.Date;
 import java.util.UUID;
@@ -39,7 +39,7 @@ public interface UserAssignmentIndexAccessor {
 	 * @param bucketLabel
 	 * @return resultSet
 	 */
-    @Query("insert into user_assignment_look_up (experiment_id, user_id, context, created, bucket_label)" +
+    @Query("insert into user_assignment_by_userid (experiment_id, user_id, context, created, bucket_label)" +
             " values (?, ?, ?, ?, ?)")
     ResultSet insertBy(UUID uuid, String userId, String context, Date created, String bucketLabel);
 
@@ -51,7 +51,7 @@ public interface UserAssignmentIndexAccessor {
      * @param created
      * @return resultSet
      */
-    @Query("insert into user_assignment_look_up (experiment_id, user_id, context, created)" +
+    @Query("insert into user_assignment_by_userid (experiment_id, user_id, context, created)" +
             " values (?, ?, ?, ?)")
     ResultSet insertBy(UUID uuid, String userId, String context, Date created);
 
@@ -62,8 +62,8 @@ public interface UserAssignmentIndexAccessor {
 	 * @param context
 	 * @return result
 	 */
-    @Query("select * from user_assignment_look_up where experiment_id = ? and user_id = ? and context = ?")
-    Result<UserAssignmentByUserIdContextExperimentId> selectBy(UUID experimentId, String userId, String context);
+    @Query("select * from user_assignment_by_userid where experiment_id = ? and user_id = ? and context = ?")
+    Result<UserAssignmentByUserId> selectBy(UUID experimentId, String userId, String context);
 
 
 	/**
@@ -73,7 +73,7 @@ public interface UserAssignmentIndexAccessor {
 	 * @param experimentId
 	 * @return resultSet
 	 */
-	@Query("delete from user_assignment_look_up where user_id = ? and context = ? and experiment_id = ?")
+	@Query("delete from user_assignment_by_userid where user_id = ? and context = ? and experiment_id = ?")
 	ResultSet deleteBy(String userId, String context, UUID experimentId);
 
 }
