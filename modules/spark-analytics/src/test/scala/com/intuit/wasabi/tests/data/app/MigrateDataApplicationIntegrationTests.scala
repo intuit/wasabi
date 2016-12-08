@@ -11,8 +11,10 @@ import com.intuit.wasabi.data.conf.AppConfig
 import com.intuit.wasabi.data.conf.guice.migratedata.MigrateDataApplicationDI
 import com.intuit.wasabi.data.exception.WasabiError
 import com.intuit.wasabi.data.repository.SparkDataStoreRepository
+import com.intuit.wasabi.data.util.Constants._
+import com.intuit.wasabi.data.util.Utility
 import com.typesafe.config.ConfigFactory
-import org.apache.spark.Logging
+import org.apache.spark.{Logging, SparkConf}
 import org.apache.spark.sql.DataFrame
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -31,7 +33,21 @@ class MigrateDataApplicationIntegrationTests extends TestNGSuite with SharedSpar
   override def beforeAll() {
     super.beforeAll()
 
-    session = CassandraConnector(sc.getConf).openSession()
+    val appId="migrate-data"
+    val jMap: java.util.Map[String,String] = new java.util.HashMap[String,String]()
+    jMap.put("app_id", appId)
+
+    val setting = new AppConfig(Option.apply(ConfigFactory.parseMap(jMap)))
+    val appConfig = setting.getConfigForApp(appId)
+    val mConfig = Utility.configToMap(appConfig.getConfig("migration"))
+    val sHost = mConfig.get("datastores.src.host").get
+    val sPort = mConfig.get("datastores.src.port").get
+    val conf = new SparkConf()
+    conf.setAll(sc.getConf.getAll)
+    conf.set(KEY_SPARK_CASSANDRA_CONN_HOST, sHost)
+    conf.set(KEY_SPARK_CASSANDRA_CONN_PORT, sPort)
+    session =CassandraConnector(conf).openSession()
+
     session.execute("CREATE KEYSPACE IF NOT EXISTS test_ks WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '3'}  AND durable_writes = true")
     log.info("Keyspace is created...")
 
