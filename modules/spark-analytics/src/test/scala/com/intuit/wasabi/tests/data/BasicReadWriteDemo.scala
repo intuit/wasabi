@@ -14,7 +14,7 @@ object BasicReadWriteDemo {
 
   def main(args: Array[String]) {
 
-    val CassandraHost = "10.137.87.119"
+    val CassandraHost = "localhost"
 
     // Tell Spark the address of one Cassandra node:
     val conf = new SparkConf(true)
