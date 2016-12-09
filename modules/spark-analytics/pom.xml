@@ -159,8 +159,6 @@
                 </executions>
                 <configuration>
                     <sourceDir>src</sourceDir>
-                    <!-- <sourceDir>src/main/scala</sourceDir> -->
-                    <!-- <sourceDir>src/test/scala</sourceDir> -->
                     <jvmArgs>
                         <jvmArg>-Xms64m</jvmArg>
                         <jvmArg>-Xmx1024m</jvmArg>
@@ -208,7 +206,7 @@
                         </goals>
                         <configuration>
                             <shadedArtifactAttached>true</shadedArtifactAttached>
-                            <createSourcesJar>true</createSourcesJar>
+                            <createSourcesJar>false</createSourcesJar>
                             <shadedClassifierName>${application.profile}-all</shadedClassifierName>
                             <createDependencyReducedPom>true</createDependencyReducedPom>
                             <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
