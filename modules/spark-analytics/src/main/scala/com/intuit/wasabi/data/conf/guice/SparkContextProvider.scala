@@ -23,6 +23,9 @@ class SparkContextProvider extends Provider[SparkContext] with Logging {
     val appSparkConfigMap = Utility.configToMap(appConfig.getConfig("spark"))
     if(log.isDebugEnabled) log.debug(s"appSparkConfigMap=> $appSparkConfigMap")
 
+    val cassandraConnHost = appSparkConfigMap.getOrElse("spark.cassandra.connection.host","None")
+    if(log.isInfoEnabled) log.info(s"Default Cassandra Connection Host=$cassandraConnHost")
+
     val conf = new SparkConf()
     conf.setAll(appSparkConfigMap)
 

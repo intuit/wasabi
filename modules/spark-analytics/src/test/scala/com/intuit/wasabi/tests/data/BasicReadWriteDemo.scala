@@ -14,11 +14,12 @@ object BasicReadWriteDemo {
 
   def main(args: Array[String]) {
 
-    val CassandraHost = "127.0.0.1"
+    val CassandraHost = "10.137.87.119"
 
     // Tell Spark the address of one Cassandra node:
     val conf = new SparkConf(true)
       .set("spark.cassandra.connection.host", CassandraHost)
+      .set("spark.cassandra.connection.port", "9160")
       .setMaster("local")
       .setAppName(getClass.getSimpleName)
 

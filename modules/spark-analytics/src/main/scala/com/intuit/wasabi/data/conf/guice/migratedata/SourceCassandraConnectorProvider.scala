@@ -3,6 +3,7 @@ package com.intuit.wasabi.data.conf.guice.migratedata
 import com.datastax.spark.connector.cql.CassandraConnector
 import com.google.inject.name.Named
 import com.google.inject.{Inject, Provider}
+import com.intuit.wasabi.data.conf.guice.CassandraConnectorProvider
 import com.intuit.wasabi.data.repository.DataStoreConnectionProperties
 import com.intuit.wasabi.data.util.Constants._
 import org.apache.spark.{SparkConf, SparkContext}
@@ -22,11 +23,6 @@ class SourceCassandraConnectorProvider extends Provider[CassandraConnector] {
     this.connectionProperties = connectionProperties
   }
 
-  override def get(): CassandraConnector = {
-    val conf = new SparkConf()
-    conf.setAll(sc.getConf.getAll)
-    conf.set(KEY_SPARK_CASSANDRA_CONN_HOST, connectionProperties.vals.get(KEY_SPARK_CASSANDRA_CONN_HOST).get)
-    conf.set(KEY_SPARK_CASSANDRA_CONN_PORT, connectionProperties.vals.get(KEY_SPARK_CASSANDRA_CONN_PORT).get)
-    CassandraConnector(conf)
-  }
+  override def get(): CassandraConnector = new CassandraConnectorProvider(sc, connectionProperties).get
+
 }

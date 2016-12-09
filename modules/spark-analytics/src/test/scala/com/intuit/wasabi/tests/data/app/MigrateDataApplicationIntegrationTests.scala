@@ -19,6 +19,7 @@ import org.apache.spark.sql.DataFrame
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.testng.TestNGSuite
+import org.testng.Reporter
 import org.testng.annotations.{AfterTest, BeforeTest, Test}
 
 /**
@@ -42,6 +43,15 @@ class MigrateDataApplicationIntegrationTests extends TestNGSuite with SharedSpar
     val mConfig = Utility.configToMap(appConfig.getConfig("migration"))
     val sHost = mConfig.get("datastores.src.host").get
     val sPort = mConfig.get("datastores.src.port").get
+
+    val sConfig = Utility.configToMap(appConfig.getConfig("spark"))
+    val sLocalDC= sConfig.getOrElse("spark.cassandra.connection.local_dc", "None")
+
+    Reporter.log(s"+++ sLocalDC $sLocalDC", 10, true)
+    Reporter.log(s"+++ Will try to connect to $sHost:$sPort", 10, true)
+    log.info(s"+++ sLocalDC $sLocalDC")
+    log.info(s"+++ Will try to connect to $sHost:$sPort")
+
     val conf = new SparkConf()
     conf.setAll(sc.getConf.getAll)
     conf.set(KEY_SPARK_CASSANDRA_CONN_HOST, sHost)
@@ -99,6 +109,7 @@ class MigrateDataApplicationIntegrationTests extends TestNGSuite with SharedSpar
   override def afterAll() {
     super.afterAll()
     session.execute("DROP KEYSPACE IF EXISTS test_ks")
+    session.close()
     log.info("Keyspace is dropped...")
   }
 

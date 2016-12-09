@@ -93,7 +93,7 @@ class SparkCassandraRepository extends SparkDataStoreRepository {
     }
 
     //This statement set current cassandra connection
-    implicit val c = connection
+    //implicit val c = connection
     //Execute spark sql query
     isNativeSql match {
       case true => result = sqlContext.cassandraSql(sql)
@@ -120,15 +120,15 @@ class SparkCassandraRepository extends SparkDataStoreRepository {
   override def write(tableName: String, saveMode: SaveMode, data: DataFrame): WasabiError Xor Unit = {
     val sTime = System.currentTimeMillis
     if(log.isDebugEnabled) log.debug("write() - STARTED - tableName="+tableName+", saveMode="+saveMode)
-    val saveOptions = Map(
+    val connectionProperties = Map(
       "table" -> tableName,
       "keyspace" -> keySpaceName,
       "cluster" -> clusterName)
 
     //This statement set current cassandra connection
-    implicit val c = connection
+    //implicit val c = connection
 
-    writeDataFrame(data, saveMode, saveOptions)
+    writeDataFrame(data, saveMode, connectionProperties)
 
     if (perfLog.isInfoEnabled()) perfLog.info(s"Time taken by SparkCassandraRepository.write = ${System.currentTimeMillis - sTime} ms")
     if (log.isDebugEnabled) log.debug("write() - FINISHED")

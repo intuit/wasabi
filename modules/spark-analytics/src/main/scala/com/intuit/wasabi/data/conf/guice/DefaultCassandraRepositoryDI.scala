@@ -26,6 +26,7 @@ class DefaultCassandraRepositoryDI(appConfig: Config, sc: Option[SparkContext] =
     val dHost = mConfig.get("host").get
     val dPort = mConfig.get("port").get
     val dKeyspace = mConfig.get("keyspace").get
+    if(log.isInfoEnabled) log.info(s"dType=$dType, dCluster=$dCluster, dHost=$dHost, dPort=$dPort, dKeyspace=$dKeyspace")
 
     //Create & bind destination DataStoreConnectionProperties
     bind(classOf[DataStoreConnectionProperties]).annotatedWith(Names.named("DataStoreConnectionProperties")).toInstance(new DataStoreConnectionProperties(Map(KEY_SPARK_CASSANDRA_CONN_CLUSTER -> dCluster, KEY_SPARK_CASSANDRA_CONN_HOST -> dHost, KEY_SPARK_CASSANDRA_CONN_PORT -> dPort, KEY_SPARK_CASSANDRA_CONN_KEYSPACE -> dKeyspace)))

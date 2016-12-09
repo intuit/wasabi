@@ -243,5 +243,23 @@
                 </executions>
             </plugin>
         </plugins>
+
+        <resources>
+            <resource>
+                <directory>${basedir}/src/main/resources</directory>
+                <targetPath>${basedir}/target/classes</targetPath>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>${basedir}/src/test/resources</directory>
+                <targetPath>${basedir}/target/classes</targetPath>
+                <includes>
+                    <include>testng.xml</include>
+                    <include>testng_integrationTests.xml</include>
+                </includes>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+
     </build>
 </project>

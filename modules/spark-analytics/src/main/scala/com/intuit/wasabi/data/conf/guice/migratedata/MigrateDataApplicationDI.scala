@@ -31,6 +31,7 @@ class MigrateDataApplicationDI(appConfig: Config, sc: Option[SparkContext] = Non
     val sHost = mConfig.get("datastores.src.host").get
     val sPort = mConfig.get("datastores.src.port").get
     val sKeyspace = mConfig.get("datastores.src.keyspace").get
+    if(log.isInfoEnabled) log.info(s"sDataStoreType=$sDataStoreType, sCluster=$sCluster, sHost=$sHost, sPort=$sPort, sKeyspace=$sKeyspace")
 
     sDataStoreType match {
       case DATASTORE_CASSANDRA => {
@@ -41,7 +42,7 @@ class MigrateDataApplicationDI(appConfig: Config, sc: Option[SparkContext] = Non
         bind(classOf[CassandraConnector]).annotatedWith(Names.named("SourceDataStoreCassandraConnector")).toProvider(classOf[DestinationCassandraConnectorProvider])
 
         //-- Bind destination CassandraSQLContext provider
-        bind(classOf[CassandraSQLContext]).annotatedWith(Names.named("SourceDataStoreCassandraSQLContext")).toProvider(classOf[CassandraSQLContextProvider])
+        bind(classOf[CassandraSQLContext]).annotatedWith(Names.named("SourceDataStoreCassandraSQLContext")).toProvider(classOf[SourceCassandraSQLContextProvider])
 
         //-- Bind source SparkCassandraRepository
         bind(classOf[SparkDataStoreRepository]).annotatedWith(Names.named("SourceDataStoreRepository")).to(classOf[SourceSparkCassandraRepository])
@@ -59,6 +60,7 @@ class MigrateDataApplicationDI(appConfig: Config, sc: Option[SparkContext] = Non
     val dHost = mConfig.get("datastores.dest.host").get
     val dPort = mConfig.get("datastores.dest.port").get
     val dKeyspace = mConfig.get("datastores.dest.keyspace").get
+    if(log.isInfoEnabled) log.info(s"dDataStoreType=$dDataStoreType, dCluster=$dCluster, dHost=$dHost, dPort=$dPort, dKeyspace=$dKeyspace")
 
     dDataStoreType match {
       case DATASTORE_CASSANDRA => {
@@ -69,7 +71,7 @@ class MigrateDataApplicationDI(appConfig: Config, sc: Option[SparkContext] = Non
         bind(classOf[CassandraConnector]).annotatedWith(Names.named("DestinationDataStoreCassandraConnector")).toProvider(classOf[DestinationCassandraConnectorProvider])
 
         //-- Bind destination CassandraSQLContext provider
-        bind(classOf[CassandraSQLContext]).annotatedWith(Names.named("DestinationDataStoreCassandraSQLContext")).toProvider(classOf[CassandraSQLContextProvider])
+        bind(classOf[CassandraSQLContext]).annotatedWith(Names.named("DestinationDataStoreCassandraSQLContext")).toProvider(classOf[DestinationCassandraSQLContextProvider])
 
         //-- Bind destination SparkCassandraRepository
         bind(classOf[SparkDataStoreRepository]).annotatedWith(Names.named("DestinationDataStoreRepository")).to(classOf[DestinationSparkCassandraRepository])
@@ -80,7 +82,6 @@ class MigrateDataApplicationDI(appConfig: Config, sc: Option[SparkContext] = Non
       }
     }
 
-    //right()
   }
 }
 
