@@ -1,6 +1,6 @@
 package com.intuit.wasabi.data.conf.guice
 
-import com.datastax.spark.connector.cql.CassandraConnector
+import com.datastax.spark.connector.cql.{CassandraConnector, CassandraConnectorConf}
 import com.google.inject.name.Named
 import com.google.inject.{Inject, Provider}
 import com.intuit.wasabi.data.repository.DataStoreConnectionProperties
@@ -26,11 +26,9 @@ class CassandraConnectorProvider extends Provider[CassandraConnector] with Loggi
     val host=connectionProperties.vals.get(KEY_SPARK_CASSANDRA_CONN_HOST).get
     val port=connectionProperties.vals.get(KEY_SPARK_CASSANDRA_CONN_PORT).get
 
-    val conf = new SparkConf()
-    conf.setAll(sc.getConf.getAll)
-    conf.set(KEY_SPARK_CASSANDRA_CONN_HOST, host)
-    conf.set(KEY_SPARK_CASSANDRA_CONN_PORT, port)
-    val conn = CassandraConnector(conf)
+    sc.getConf.set(CassandraConnectorConf.CassandraConnectionHostProperty, host)
+    sc.getConf.set(CassandraConnectorConf.CassandraConnectionPortProperty, port)
+    val conn = CassandraConnector(sc.getConf)
 
     //Test connection
     if(log.isInfoEnabled) log.info(s"Testing connection for $host:$port")

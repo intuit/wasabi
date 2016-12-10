@@ -2,7 +2,7 @@ package com.intuit.wasabi.tests.data.app
 
 import cats.data.Xor._
 import com.datastax.driver.core.Session
-import com.datastax.spark.connector.cql.CassandraConnector
+import com.datastax.spark.connector.cql.{CassandraConnector, CassandraConnectorConf}
 import com.google.inject.name.Names
 import com.google.inject.{Guice, Key}
 import com.holdenkarau.spark.testing.SharedSparkContext
@@ -27,7 +27,6 @@ import org.testng.annotations.{AfterTest, BeforeTest, Test}
   */
 
 class MigrateDataApplicationIntegrationTests extends TestNGSuite with SharedSparkContext with Logging  {
-  var session:Session = null
   var NUM_OF_RECORDS: Int = 0
 
   @BeforeTest
@@ -40,34 +39,20 @@ class MigrateDataApplicationIntegrationTests extends TestNGSuite with SharedSpar
 
     val setting = new AppConfig(Option.apply(ConfigFactory.parseMap(jMap)))
     val appConfig = setting.getConfigForApp(appId)
-    val mConfig = Utility.configToMap(appConfig.getConfig("migration"))
-    val sHost = mConfig.get("datastores.src.host").get
-    val sPort = mConfig.get("datastores.src.port").get
 
-    val sConfig = Utility.configToMap(appConfig.getConfig("spark"))
-    val sLocalDC= sConfig.getOrElse("spark.cassandra.connection.local_dc", "None")
+    val injector = Guice.createInjector(new MigrateDataApplicationDI(appConfig, Option(sc)))
+    val sRepository = injector.getInstance(Key.get(classOf[SparkDataStoreRepository], Names.named("SourceDataStoreRepository")))
 
-    Reporter.log(s"+++ sLocalDC $sLocalDC", 10, true)
-    Reporter.log(s"+++ Will try to connect to $sHost:$sPort", 10, true)
-    log.info(s"+++ sLocalDC $sLocalDC")
-    log.info(s"+++ Will try to connect to $sHost:$sPort")
-
-    val conf = new SparkConf()
-    conf.setAll(sc.getConf.getAll)
-    conf.set(KEY_SPARK_CASSANDRA_CONN_HOST, sHost)
-    conf.set(KEY_SPARK_CASSANDRA_CONN_PORT, sPort)
-    session =CassandraConnector(conf).openSession()
-
-    session.execute("CREATE KEYSPACE IF NOT EXISTS test_ks WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '3'}  AND durable_writes = true")
+    sRepository.execDDL("CREATE KEYSPACE IF NOT EXISTS test_ks WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '3'}  AND durable_writes = true")
     log.info("Keyspace is created...")
 
-    session.execute("DROP TABLE IF EXISTS test_ks.empty_user_assignment ")
-    session.execute("DROP TABLE IF EXISTS test_ks.empty_user_assignment_by_userid ")
-    session.execute("DROP TABLE IF EXISTS test_ks.user_assignment ")
-    session.execute("DROP TABLE IF EXISTS test_ks.user_assignment_by_userid ")
-    session.execute("DROP TABLE IF EXISTS test_ks.red_button_bucket_user_assignments")
-    session.execute("DROP TABLE IF EXISTS test_ks.user_assignments_without_context")
-    session.execute("DROP TABLE IF EXISTS test_ks.user_assignments_transformed")
+    sRepository.execDDL("DROP TABLE IF EXISTS test_ks.empty_user_assignment ")
+    sRepository.execDDL("DROP TABLE IF EXISTS test_ks.empty_user_assignment_by_userid ")
+    sRepository.execDDL("DROP TABLE IF EXISTS test_ks.user_assignment ")
+    sRepository.execDDL("DROP TABLE IF EXISTS test_ks.user_assignment_by_userid ")
+    sRepository.execDDL("DROP TABLE IF EXISTS test_ks.red_button_bucket_user_assignments")
+    sRepository.execDDL("DROP TABLE IF EXISTS test_ks.user_assignments_without_context")
+    sRepository.execDDL("DROP TABLE IF EXISTS test_ks.user_assignments_transformed")
 
     log.info("Tables are dropped...")
 
@@ -79,26 +64,26 @@ class MigrateDataApplicationIntegrationTests extends TestNGSuite with SharedSpar
     val userAssignmentWithoutContextDDL = "create table test_ks.user_assignments_without_context (experiment_id uuid, user_id varchar, bucket_label varchar, created timestamp, PRIMARY KEY ((user_id), experiment_id));"
     val transformedUserAssignmentDDL = "create table test_ks.user_assignments_transformed (experiment_id uuid, user_id varchar, context varchar, bucket_label varchar, created timestamp, PRIMARY KEY ((user_id), context, experiment_id));"
 
-    session.execute(emptyUserAssignmentDDL)
-    session.execute(emptyUserAssignmentByUserIdDDL)
-    session.execute(userAssignmentDDL)
-    session.execute(userAssignmentByUserIdDDL)
-    session.execute(redButtonUserAssignmentDDL)
-    session.execute(userAssignmentWithoutContextDDL)
-    session.execute(transformedUserAssignmentDDL)
+    sRepository.execDDL(emptyUserAssignmentDDL)
+    sRepository.execDDL(emptyUserAssignmentByUserIdDDL)
+    sRepository.execDDL(userAssignmentDDL)
+    sRepository.execDDL(userAssignmentByUserIdDDL)
+    sRepository.execDDL(redButtonUserAssignmentDDL)
+    sRepository.execDDL(userAssignmentWithoutContextDDL)
+    sRepository.execDDL(transformedUserAssignmentDDL)
     log.info("Tables are created...")
 
-    session.execute(s"INSERT INTO test_ks.user_assignment (experiment_id,user_id,context,bucket_label,created) " +
+    sRepository.execDDL(s"INSERT INTO test_ks.user_assignment (experiment_id,user_id,context,bucket_label,created) " +
       s"VALUES(ea830e07-baff-40f3-b322-7c6d8742df7f,'test_user_1','TEST','red_button_bucket',dateof(now()))")
-    session.execute(s"INSERT INTO test_ks.user_assignment (experiment_id,user_id,context,bucket_label,created) " +
+    sRepository.execDDL(s"INSERT INTO test_ks.user_assignment (experiment_id,user_id,context,bucket_label,created) " +
       s"VALUES(ea830e07-baff-40f3-b322-7c6d8742df7f,'test_user_2','TEST','blue_button_bucket',dateof(now()))")
-    session.execute(s"INSERT INTO test_ks.user_assignment (experiment_id,user_id,context,bucket_label,created) " +
+    sRepository.execDDL(s"INSERT INTO test_ks.user_assignment (experiment_id,user_id,context,bucket_label,created) " +
       s"VALUES(ea830e07-baff-40f3-b322-7c6d8742df7f,'test_user_3','TEST','red_button_bucket',dateof(now()))")
-    session.execute(s"INSERT INTO test_ks.user_assignment (experiment_id,user_id,context,bucket_label,created) " +
+    sRepository.execDDL(s"INSERT INTO test_ks.user_assignment (experiment_id,user_id,context,bucket_label,created) " +
       s"VALUES(ea830e07-baff-40f3-b322-7c6d8742df5f,'test_user_1','TEST','red_button_bucket',dateof(now()))")
-    session.execute(s"INSERT INTO test_ks.user_assignment (experiment_id,user_id,context,bucket_label,created) " +
+    sRepository.execDDL(s"INSERT INTO test_ks.user_assignment (experiment_id,user_id,context,bucket_label,created) " +
       s"VALUES(ea830e07-baff-40f3-b322-7c6d8742df5f,'test_user_2','TEST','blue_button_bucket',dateof(now()))")
-    session.execute(s"INSERT INTO test_ks.user_assignment (experiment_id,user_id,context,bucket_label,created) " +
+    sRepository.execDDL(s"INSERT INTO test_ks.user_assignment (experiment_id,user_id,context,bucket_label,created) " +
       s"VALUES(ea830e07-baff-40f3-b322-7c6d8742df5f,'test_user_3','TEST','red_button_bucket',dateof(now()))")
     log.info("Test data for user_assignment table is generated...")
     NUM_OF_RECORDS=6
@@ -108,8 +93,17 @@ class MigrateDataApplicationIntegrationTests extends TestNGSuite with SharedSpar
   @AfterTest
   override def afterAll() {
     super.afterAll()
-    session.execute("DROP KEYSPACE IF EXISTS test_ks")
-    session.close()
+    val appId="migrate-data"
+    val jMap: java.util.Map[String,String] = new java.util.HashMap[String,String]()
+    jMap.put("app_id", appId)
+
+    val setting = new AppConfig(Option.apply(ConfigFactory.parseMap(jMap)))
+    val appConfig = setting.getConfigForApp(appId)
+
+    val injector = Guice.createInjector(new MigrateDataApplicationDI(appConfig, Option(sc)))
+    val sRepository = injector.getInstance(Key.get(classOf[SparkDataStoreRepository], Names.named("SourceDataStoreRepository")))
+
+    sRepository.execDDL("DROP KEYSPACE IF EXISTS test_ks")
     log.info("Keyspace is dropped...")
   }
 
