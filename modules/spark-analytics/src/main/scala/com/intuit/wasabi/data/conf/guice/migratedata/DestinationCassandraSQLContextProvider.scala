@@ -29,7 +29,7 @@ class DestinationCassandraSQLContextProvider extends Provider[CassandraSQLContex
     val dPort=connectionProperties.vals.get(KEY_SPARK_CASSANDRA_CONN_PORT).get
     if(log.isInfoEnabled) log.info(s"dCluster=$dCluster, dHost=$dHost, dPort=$dPort")
 
-    sqlContext.setConf(s"$dCluster/spark.cassandra.connection.host", dHost)
+    //sqlContext.setConf(s"$dCluster/spark.cassandra.connection.host", dHost)
 
     sqlContext
   }
