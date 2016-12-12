@@ -70,7 +70,11 @@ object FunctionalTestRW {
     val jMap: java.util.Map[String,String] = new java.util.HashMap[String,String]()
     jMap.put("app_id", appId)
     jMap.put("master", "local[*]")
-    //jMap.put("migrate-data.spark.spark.cassandra.connection.host", host)
+    jMap.put("default.spark.spark.cassandra.connection.host", host)
+    //jMap.put("default.datastore.host", host)
+    jMap.put("migrate-data.migration.datastores.src.host", host)
+    jMap.put("migrate-data.migration.datastores.dest.host", host)
+
     //jMap.put("migrate-data.spark.spark.cassandra.connection.port", port)
 
     val setting = new AppConfig(Option.apply(ConfigFactory.parseMap(jMap)))

@@ -26,12 +26,12 @@ class CassandraConnectorProvider extends Provider[CassandraConnector] with Loggi
     val host=connectionProperties.vals.get(KEY_SPARK_CASSANDRA_CONN_HOST).get
     val port=connectionProperties.vals.get(KEY_SPARK_CASSANDRA_CONN_PORT).get
 
-    sc.getConf.set(CassandraConnectorConf.CassandraConnectionHostProperty, host)
-    sc.getConf.set(CassandraConnectorConf.CassandraConnectionPortProperty, port)
+    //sc.getConf.set(CassandraConnectorConf.CassandraConnectionHostProperty, host)
+    //sc.getConf.set(CassandraConnectorConf.CassandraConnectionPortProperty, port)
     val conn = CassandraConnector(sc.getConf)
 
     //Test connection
-    if(log.isInfoEnabled) log.info(s"Testing connection for $host:$port")
+    //if(log.isInfoEnabled) log.info(s"Testing connection for $host:$port")
 
     val session = conn.openSession()
     val cluster = session.getCluster
