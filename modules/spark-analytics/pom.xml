@@ -35,6 +35,13 @@
                 <log.dir>${application.home}/logs</log.dir>
                 <log.level>DEBUG</log.level>
                 <metrics.jmx.enabled>true</metrics.jmx.enabled>
+
+                <cassandra.experiments.nodeHosts>localhost</cassandra.experiments.nodeHosts>
+                <cassandra.experiments.port>9042</cassandra.experiments.port>
+                <cassandra.experiments.keyspaceName>wasabi_experiments</cassandra.experiments.keyspaceName>
+                <cassandra.experiments.clusterName>default</cassandra.experiments.clusterName>
+                <cassandra.experiments.dataStoreType>cassandra</cassandra.experiments.dataStoreType>
+
             </properties>
         </profile>
         <profile>
