@@ -239,6 +239,7 @@
                         </configuration>
                     </execution>
 
+                    <!--
                     <execution>
                         <id>test-jar-generation</id>
                         <phase>package</phase>
@@ -268,7 +269,6 @@
                             </filters>
 
                             <transformers>
-                                <!-- <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/> -->
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
                                     <resource>reference.conf</resource>
                                 </transformer>
@@ -279,6 +279,7 @@
 
                         </configuration>
                     </execution>
+                    -->
 
                 </executions>
             </plugin>
