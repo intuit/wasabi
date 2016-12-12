@@ -92,7 +92,6 @@ class MigrateDataApplicationIntegrationTests extends TestNGSuite with SharedSpar
 
   @AfterTest
   override def afterAll() {
-    super.afterAll()
     val appId="migrate-data"
     val jMap: java.util.Map[String,String] = new java.util.HashMap[String,String]()
     jMap.put("app_id", appId)
@@ -105,6 +104,8 @@ class MigrateDataApplicationIntegrationTests extends TestNGSuite with SharedSpar
 
     sRepository.execDDL("DROP KEYSPACE IF EXISTS test_ks")
     log.info("Keyspace is dropped...")
+
+    super.afterAll()
   }
 
   @Test

@@ -69,7 +69,7 @@
 
     <logger name="com.intuit.wasabi.data.launcher" level="WARN" />
 
-    <root level="DEBUG">
+    <root level="WARN">
         <appender-ref ref="FILE"/>
         <appender-ref ref="CONSOLE"/>
     </root>

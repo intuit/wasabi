@@ -73,6 +73,8 @@ class SparkCassandraRepository extends SparkDataStoreRepository {
     this.sqlContext.udf.register("wasabi_current_timestamp", currentTimestampFunc)
     this.sqlContext.udf.register("text_concat", new TextConcatFunc)
 
+    this.connection=connection
+
     if(perfLog.isInfoEnabled()) perfLog.info(s"Time taken by SparkCassandraRepository.this = ${System.currentTimeMillis-sTime} ms")
     if(log.isInfoEnabled) log.info("this() - FINISHED")
   }
@@ -155,6 +157,7 @@ class SparkCassandraRepository extends SparkDataStoreRepository {
   override def execDDL(statements: String): WasabiError Xor Unit = {
     val sTime = System.currentTimeMillis
     if(log.isDebugEnabled) log.debug(s"execDDL() - STARTED - statements=$statements")
+
     if(connection==null) left(WasabiError.RepositoryError(CassandraConnectionNotInitialized()))
     if(statements==null) left(WasabiError.RepositoryError(RequiredStatements()))
     val session = connection.openSession()
