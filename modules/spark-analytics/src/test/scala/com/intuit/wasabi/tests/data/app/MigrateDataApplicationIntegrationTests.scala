@@ -26,22 +26,24 @@ import org.testng.annotations.{AfterTest, BeforeTest, Test}
   * Created by nbarge on 12/5/16.
   */
 
-class MigrateDataApplicationIntegrationTests extends TestNGSuite with SharedSparkContext with Logging  {
+class MigrateDataApplicationIntegrationTests extends TestNGSuite with Logging  {
   var NUM_OF_RECORDS: Int = 0
 
   @BeforeTest
-  override def beforeAll() {
-    super.beforeAll()
+  def beforeAll() {
+    //super.beforeAll()
 
     val appId="migrate-data"
     val jMap: java.util.Map[String,String] = new java.util.HashMap[String,String]()
     jMap.put("app_id", appId)
+    jMap.put("master", "local")
 
     val setting = new AppConfig(Option.apply(ConfigFactory.parseMap(jMap)))
     val appConfig = setting.getConfigForApp(appId)
 
-    val injector = Guice.createInjector(new MigrateDataApplicationDI(appConfig, Option(sc)))
+    val injector = Guice.createInjector(new MigrateDataApplicationDI(appConfig))
     val sRepository = injector.getInstance(Key.get(classOf[SparkDataStoreRepository], Names.named("SourceDataStoreRepository")))
+    val mApp = injector.getInstance(classOf[MigrateDataApplication])
 
     sRepository.execDDL("CREATE KEYSPACE IF NOT EXISTS test_ks WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '3'}  AND durable_writes = true")
     log.info("Keyspace is created...")
@@ -88,24 +90,30 @@ class MigrateDataApplicationIntegrationTests extends TestNGSuite with SharedSpar
     log.info("Test data for user_assignment table is generated...")
     NUM_OF_RECORDS=6
 
+    mApp.stop()
+
+
   }
 
   @AfterTest
-  override def afterAll() {
+  def afterAll() {
     val appId="migrate-data"
     val jMap: java.util.Map[String,String] = new java.util.HashMap[String,String]()
     jMap.put("app_id", appId)
+    jMap.put("master", "local")
 
     val setting = new AppConfig(Option.apply(ConfigFactory.parseMap(jMap)))
     val appConfig = setting.getConfigForApp(appId)
 
-    val injector = Guice.createInjector(new MigrateDataApplicationDI(appConfig, Option(sc)))
+    val injector = Guice.createInjector(new MigrateDataApplicationDI(appConfig))
+    val mApp = injector.getInstance(classOf[MigrateDataApplication])
     val sRepository = injector.getInstance(Key.get(classOf[SparkDataStoreRepository], Names.named("SourceDataStoreRepository")))
 
     sRepository.execDDL("DROP KEYSPACE IF EXISTS test_ks")
     log.info("Keyspace is dropped...")
 
-    super.afterAll()
+    mApp.stop()
+    //super.afterAll()
   }
 
   @Test
@@ -113,7 +121,7 @@ class MigrateDataApplicationIntegrationTests extends TestNGSuite with SharedSpar
     val appId="migrate-data"
     val jMap: java.util.Map[String,String] = new java.util.HashMap[String,String]()
     jMap.put("app_id", appId)
-    jMap.put("master","local[2]")
+    jMap.put("master","local")
     jMap.put("migrate-data.migration.datastores.src.keyspace","test_ks")
     jMap.put("migrate-data.migration.datastores.dest.keyspace","test_ks")
     jMap.put("migrate-data.migration.CopyUserAssignmentTblProcessor.src.table","empty_user_assignment")
@@ -123,7 +131,7 @@ class MigrateDataApplicationIntegrationTests extends TestNGSuite with SharedSpar
     val setting = new AppConfig(Option.apply(ConfigFactory.parseMap(jMap)))
     val appConfig = setting.getConfigForApp(appId)
 
-    val injector = Guice.createInjector(new MigrateDataApplicationDI(appConfig, Option(sc)))
+    val injector = Guice.createInjector(new MigrateDataApplicationDI(appConfig))
     val mApp = injector.getInstance(classOf[MigrateDataApplication])
 
     var isSuccess = false
@@ -156,6 +164,8 @@ class MigrateDataApplicationIntegrationTests extends TestNGSuite with SharedSpar
     }
 
     assert(srcCount==destCount && srcCount==0, "Both source & destination table should not have any data...")
+
+    mApp.stop()
   }
 
   @Test
@@ -163,7 +173,7 @@ class MigrateDataApplicationIntegrationTests extends TestNGSuite with SharedSpar
     val appId="migrate-data"
     val jMap: java.util.Map[String,String] = new java.util.HashMap[String,String]()
     jMap.put("app_id", appId)
-    jMap.put("master","local[2]")
+    jMap.put("master","local")
     jMap.put("migrate-data.migration.datastores.src.keyspace","test_ks")
     jMap.put("migrate-data.migration.datastores.dest.keyspace","test_ks")
     jMap.put("migrate-data.migration.CopyUserAssignmentTblProcessor.src.table","user_assignment")
@@ -173,7 +183,7 @@ class MigrateDataApplicationIntegrationTests extends TestNGSuite with SharedSpar
     val setting = new AppConfig(Option.apply(ConfigFactory.parseMap(jMap)))
     val appConfig = setting.getConfigForApp(appId)
 
-    val injector = Guice.createInjector(new MigrateDataApplicationDI(appConfig, Option(sc)))
+    val injector = Guice.createInjector(new MigrateDataApplicationDI(appConfig))
     val mApp = injector.getInstance(classOf[MigrateDataApplication])
 
     var isSuccess = false
@@ -206,6 +216,8 @@ class MigrateDataApplicationIntegrationTests extends TestNGSuite with SharedSpar
     }
 
     assert(srcCount==destCount && srcCount==NUM_OF_RECORDS, s"Both source & destination table should have $NUM_OF_RECORDS records...")
+
+    mApp.stop()
   }
 
   @Test
@@ -213,7 +225,7 @@ class MigrateDataApplicationIntegrationTests extends TestNGSuite with SharedSpar
     val appId="migrate-data"
     val jMap: java.util.Map[String,String] = new java.util.HashMap[String,String]()
     jMap.put("app_id", appId)
-    jMap.put("master","local[2]")
+    jMap.put("master","local")
     jMap.put("migrate-data.migration.datastores.src.keyspace","test_ks")
     jMap.put("migrate-data.migration.datastores.dest.keyspace","test_ks")
     jMap.put("migrate-data.migration.CopyUserAssignmentTblProcessor.src.table","user_assignment")
@@ -224,7 +236,7 @@ class MigrateDataApplicationIntegrationTests extends TestNGSuite with SharedSpar
     val setting = new AppConfig(Option.apply(ConfigFactory.parseMap(jMap)))
     val appConfig = setting.getConfigForApp(appId)
 
-    val injector = Guice.createInjector(new MigrateDataApplicationDI(appConfig, Option(sc)))
+    val injector = Guice.createInjector(new MigrateDataApplicationDI(appConfig))
     val mApp = injector.getInstance(classOf[MigrateDataApplication])
 
     var isSuccess = false
@@ -250,6 +262,8 @@ class MigrateDataApplicationIntegrationTests extends TestNGSuite with SharedSpar
     }
 
     assert(destCount==4, s"Destination (red_button_bucket_user_assignments) table should have 4 records...")
+
+    mApp.stop()
   }
 
   @Test
@@ -257,7 +271,7 @@ class MigrateDataApplicationIntegrationTests extends TestNGSuite with SharedSpar
     val appId="migrate-data"
     val jMap: java.util.Map[String,String] = new java.util.HashMap[String,String]()
     jMap.put("app_id", appId)
-    jMap.put("master","local[2]")
+    jMap.put("master","local")
     jMap.put("migrate-data.migration.datastores.src.keyspace","test_ks")
     jMap.put("migrate-data.migration.datastores.dest.keyspace","test_ks")
     jMap.put("migrate-data.migration.CopyUserAssignmentTblProcessor.src.table","user_assignment")
@@ -267,7 +281,7 @@ class MigrateDataApplicationIntegrationTests extends TestNGSuite with SharedSpar
     val setting = new AppConfig(Option.apply(ConfigFactory.parseMap(jMap)))
     val appConfig = setting.getConfigForApp(appId)
 
-    val injector = Guice.createInjector(new MigrateDataApplicationDI(appConfig, Option(sc)))
+    val injector = Guice.createInjector(new MigrateDataApplicationDI(appConfig))
     val mApp = injector.getInstance(classOf[MigrateDataApplication])
 
     var isSuccess = false
@@ -299,6 +313,7 @@ class MigrateDataApplicationIntegrationTests extends TestNGSuite with SharedSpar
     }
 
     assert(srcCount==destCount && srcCount==NUM_OF_RECORDS, s"Both source & destination table should have $NUM_OF_RECORDS records...")
+    mApp.stop()
   }
 
   @Test
@@ -306,7 +321,7 @@ class MigrateDataApplicationIntegrationTests extends TestNGSuite with SharedSpar
     val appId="migrate-data"
     val jMap: java.util.Map[String,String] = new java.util.HashMap[String,String]()
     jMap.put("app_id", appId)
-    jMap.put("master","local[2]")
+    jMap.put("master","local")
     jMap.put("migrate-data.migration.datastores.src.keyspace","test_ks")
     jMap.put("migrate-data.migration.datastores.dest.keyspace","test_ks")
     jMap.put("migrate-data.migration.CopyUserAssignmentTblProcessor.src.table","user_assignment")
@@ -316,7 +331,7 @@ class MigrateDataApplicationIntegrationTests extends TestNGSuite with SharedSpar
     val setting = new AppConfig(Option.apply(ConfigFactory.parseMap(jMap)))
     val appConfig = setting.getConfigForApp(appId)
 
-    val injector = Guice.createInjector(new MigrateDataApplicationDI(appConfig, Option(sc)))
+    val injector = Guice.createInjector(new MigrateDataApplicationDI(appConfig))
     val mApp = injector.getInstance(classOf[MigrateDataApplication])
 
     var isSuccess = false
@@ -348,5 +363,6 @@ class MigrateDataApplicationIntegrationTests extends TestNGSuite with SharedSpar
     }
 
     assert(srcCount==destCount && srcCount==NUM_OF_RECORDS, s"Both source & destination table should have $NUM_OF_RECORDS records...")
+    mApp.stop()
   }
 }
