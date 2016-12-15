@@ -419,7 +419,7 @@ public class CassandraAuthorizationRepository  implements AuthorizationRepositor
 		 
 		List<UserRoleList> superadmins = roles.stream().filter(
 				  userRole-> Role.SUPERADMIN.toString().equalsIgnoreCase(
-						  userRole.getRole().toString())).map(userRole -> convertToUserRoleList(userRole)).collect(Collectors.toList());
+						  userRole.getRole().toString()) && ALL_APPLICATIONS.equals(userRole.getAppName())).map(userRole -> convertToUserRoleList(userRole)).collect(Collectors.toList());
 		 
 		LOGGER.debug("Received super admin roles list {}", superadmins);
 		
