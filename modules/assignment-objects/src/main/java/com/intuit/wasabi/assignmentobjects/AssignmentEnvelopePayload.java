@@ -19,6 +19,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intuit.wasabi.assignmentobjects.Assignment.Status;
 import com.intuit.wasabi.assignmentobjects.User.ID;
+import com.intuit.wasabi.exceptions.JsonExportException;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Application.Name;
 import com.intuit.wasabi.experimentobjects.Bucket;
@@ -150,9 +151,6 @@ public class AssignmentEnvelopePayload implements EnvelopePayload {
                 .writer()
                 .writeValueAsString(segmentationProfile.getProfile());
     }
-//    public Map<String, Object> getSegmentationProfile() {
-//        return segmentationProfile.getProfile();
-//    }
 
     /**
      * @return the assignmentStatus
@@ -227,7 +225,7 @@ public class AssignmentEnvelopePayload implements EnvelopePayload {
         try {
             return objectMapper.writer().writeValueAsString(this);
         } catch (JsonProcessingException jsonProcExc) {
-            throw new RuntimeException("Can not serialize assignment for export.", jsonProcExc);
+            throw new JsonExportException("Can not serialize assignment for export.", jsonProcExc);
         }
     }
 }

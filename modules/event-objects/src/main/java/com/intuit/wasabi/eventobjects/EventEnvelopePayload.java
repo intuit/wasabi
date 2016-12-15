@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intuit.wasabi.analyticsobjects.Event;
 import com.intuit.wasabi.assignmentobjects.Assignment;
 import com.intuit.wasabi.assignmentobjects.User;
+import com.intuit.wasabi.exceptions.JsonExportException;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Application.Name;
 import com.intuit.wasabi.experimentobjects.Bucket;
@@ -40,6 +41,7 @@ import java.util.UUID;
  * in data loss. Therefore it can (and should) only be used for exports!
  */
 public class EventEnvelopePayload implements EnvelopePayload {
+
     private static final String VERSION = "3.0";
     private static final String MESSAGE_TYPE = "EVENT";
     private Name applicationName;
@@ -118,7 +120,7 @@ public class EventEnvelopePayload implements EnvelopePayload {
         try {
             return objectMapper.writeValueAsString(this);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Can not serialize event for export.", e);
+            throw new JsonExportException("Can not serialize event for export.", e);
         }
     }
 
