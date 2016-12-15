@@ -27,15 +27,18 @@ import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.repository.AuthorizationRepository;
 import com.intuit.wasabi.repository.RepositoryException;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.intuit.wasabi.authorizationobjects.Permission.SUPERADMIN;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -212,4 +215,24 @@ public class DefaultAuthorization implements Authorization {
 
         return UserInfo.Username.valueOf(fields[0]);
     }
+
+	@Override
+	public void assignUserToSuperAdminRole(UserInfo candidateUser, UserInfo assigningUser) {
+        authorizationRepository.assignUserToSuperAdminRole(candidateUser);
+        eventLog.postEvent(new AuthorizationChangeEvent(assigningUser,
+        		null, candidateUser, null, Role.SUPERADMIN.toString()));
+	}
+
+	@Override
+	public void removeUserFromSuperAdminRole(UserInfo candidateUser, UserInfo assigningUser) {
+        authorizationRepository.removeUserFromSuperAdminRole(candidateUser);
+        eventLog.postEvent(new AuthorizationChangeEvent(assigningUser,
+        		null, candidateUser, Role.SUPERADMIN.toString(), null));
+	}
+
+	@Override
+	public List<UserRole> getSuperAdminRoleList() {
+        return authorizationRepository.getSuperAdminRoleList();	
+	}
+
 }

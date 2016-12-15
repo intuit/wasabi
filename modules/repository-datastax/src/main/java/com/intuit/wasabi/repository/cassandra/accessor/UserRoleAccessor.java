@@ -28,6 +28,9 @@ import com.intuit.wasabi.repository.cassandra.pojo.UserRole;
 @Accessor
 public interface UserRoleAccessor {
 
+    @Query("select * from user_roles")
+    Result<UserRole> getAllUserRoles();
+
     @Query("select * from user_roles where user_id = ? and app_name = ?")
     Result<UserRole> getUserRolesBy(String userId, String appName);
 
