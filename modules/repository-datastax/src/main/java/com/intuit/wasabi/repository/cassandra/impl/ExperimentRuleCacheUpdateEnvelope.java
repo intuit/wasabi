@@ -66,7 +66,7 @@ public class ExperimentRuleCacheUpdateEnvelope implements Runnable {
                         oldRule.getExpressionRepresentation() + " to null");
             }
         } catch (Exception e) {
-            LOGGER.warn("RuleCache update error: " + e);
+            LOGGER.warn("RuleCache update error on ["+cassandraRuleString+"] : ", e);
         }
 
     }
