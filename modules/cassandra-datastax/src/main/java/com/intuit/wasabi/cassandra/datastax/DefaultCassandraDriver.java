@@ -266,6 +266,7 @@ public class DefaultCassandraDriver implements CassandraDriver {
         TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
         tmf.init(ts);
 
+        tsf = new FileInputStream(truststorePath);
         KeyStore ks = KeyStore.getInstance("JKS");
         ks.load(tsf, truststorePassword.toCharArray());
         KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
