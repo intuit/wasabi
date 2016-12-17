@@ -25,6 +25,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -49,7 +50,7 @@ public class ExperimentRuleCacheUpdateEnvelope implements Runnable {
     public void run() {
 
         try {
-            if (cassandraRuleString != null) {
+            if ( !isEmpty(cassandraRuleString) ) {
                 Rule cassandraRule = getExperimentRule(cassandraRuleString);
                 if (!ruleCache.containsRule(experimentID) ||
                         !cassandraRule.equals(ruleCache.getRule(experimentID))) {
@@ -59,7 +60,7 @@ public class ExperimentRuleCacheUpdateEnvelope implements Runnable {
                             (oldRule != null ? oldRule.getExpressionRepresentation() : null) + " to " +
                             cassandraRule.getExpressionRepresentation());
                 }
-            } else if (cassandraRuleString == null && ruleCache.getRule(experimentID) != null) {
+            } else if ( isEmpty(cassandraRuleString) && ruleCache.getRule(experimentID) != null) {
                 Rule oldRule = ruleCache.getRule(experimentID);
                 ruleCache.setRule(experimentID, null);
                 LOGGER.info(getUTCTime() + " Segmentation rule of " + experimentID + " updated from " +
