@@ -16,14 +16,12 @@
 package com.intuit.wasabi.authorization;
 
 import com.intuit.wasabi.authenticationobjects.UserInfo;
-import com.intuit.wasabi.authenticationobjects.UserInfo.Username;
 import com.intuit.wasabi.authorizationobjects.*;
 import com.intuit.wasabi.exceptions.AuthenticationException;
 import com.intuit.wasabi.experimentobjects.Application;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Repository for authorization-related data access methods
@@ -125,10 +123,24 @@ public interface Authorization {
      */
     UserInfo getUserInfo(UserInfo.Username userID);
 
-	void assignUserToSuperAdminRole(UserInfo candidateUser, UserInfo assigninUserInfo);
+    /**
+     * Assign user to be a superadmin
+     * @param candidateUserInfo the superadmin candidate
+     * @param assigninUserInfo the assigning user
+     */
+	void assignUserToSuperAdminRole(UserInfo candidateUserInfo, UserInfo assigninUserInfo);
 	
-	void removeUserFromSuperAdminRole(UserInfo candidateUser, UserInfo assigninUserInfo);
+    /**
+     * Remove user from superadmin role
+     * @param candidateUserInfo the candidate
+     * @param assigninUserInfo the assigning user
+     */
+	void removeUserFromSuperAdminRole(UserInfo candidateUserInfo, UserInfo assigninUserInfo);
 
+	/**
+	 * Get all superadmin roles
+	 * @return list of super admin roles
+	 */
 	List<UserRole> getSuperAdminRoleList();
 
 }

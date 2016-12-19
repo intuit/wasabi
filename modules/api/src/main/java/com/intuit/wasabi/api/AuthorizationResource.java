@@ -22,7 +22,6 @@ import com.google.inject.Singleton;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authenticationobjects.UserInfo.Username;
 import com.intuit.wasabi.authorization.Authorization;
-import com.intuit.wasabi.authorizationobjects.Role;
 import com.intuit.wasabi.authorizationobjects.UserPermissions;
 import com.intuit.wasabi.authorizationobjects.UserPermissionsList;
 import com.intuit.wasabi.authorizationobjects.UserRole;
@@ -194,7 +193,7 @@ public class AuthorizationResource {
     }
 
     @POST
-    @Path("/roles/superadmins/{userID}")
+    @Path("/superadmins/{userID}")
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Assign superadmin priveleges to user")
     @Timed
@@ -214,27 +213,17 @@ public class AuthorizationResource {
         
         authorization.checkSuperAdmin(assigningUser);
                 
-        UserInfo candidateUser = authorization.getUserInfo(userID);
-        if (candidateUser == null || StringUtils.isBlank(candidateUser.getUsername() + ""))
+        UserInfo candidateUserInfo = authorization.getUserInfo(userID);
+        if (candidateUserInfo == null || StringUtils.isBlank(candidateUserInfo.getUsername() + ""))
         	throw new IllegalArgumentException("User " + userID + " not valid");
         
-        UserRoleList userRoleList = authorization.getUserRoleList(candidateUser.getUsername());
-        
-        LOGGER.debug("User role list {}", userRoleList);
-        
-        boolean isSuperAdmin =  userRoleList.getRoleList().stream().anyMatch((UserRole ur) -> ur.getRole().equals(Role.SUPERADMIN));
-        
-        if ( isSuperAdmin ) {
-        	throw new IllegalArgumentException("User " + userID + " already a superadmin");
-        }
-        
-        authorization.assignUserToSuperAdminRole(candidateUser, assigningUserInfo);
+        authorization.assignUserToSuperAdminRole(candidateUserInfo, assigningUserInfo);
         
         return httpHeader.headers(Status.NO_CONTENT).build();
     }
 
     @DELETE
-    @Path("/roles/superadmins/{userID}")
+    @Path("/superadmins/{userID}")
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Remove superadmin priveleges to user")
     @Timed
@@ -251,26 +240,16 @@ public class AuthorizationResource {
         UserInfo assigninUserInfo = authorization.getUserInfo(assigningUser);
         
         authorization.checkSuperAdmin(assigningUser);
-                
         UserInfo candidateUser = authorization.getUserInfo(userID);
         if (candidateUser == null)
         	throw new IllegalArgumentException("User " + userID + " not valid");
 
-        UserRoleList userRole = authorization.getUserRoleList(candidateUser.getUsername());
-        
-        boolean isSuperAdmin = userRole.getRoleList().stream().anyMatch((UserRole ur) -> ur.getRole().equals(Role.SUPERADMIN));
-        
-        if ( ! isSuperAdmin ) {
-        	throw new IllegalArgumentException("User " + userID + " not a superadmin");
-        }
-        
         authorization.removeUserFromSuperAdminRole(candidateUser, assigninUserInfo);
-        
         return httpHeader.headers(Status.NO_CONTENT).build();
     }
 
     @GET
-    @Path("/roles/superadmins")
+    @Path("/superadmins")
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Get all superadmins Ids")
     @Timed
@@ -286,7 +265,7 @@ public class AuthorizationResource {
         
         authorization.checkSuperAdmin(requestingUser);
                 
-        List<UserRole> userRoles =  authorization.getSuperAdminRoleList();
+        List<UserRole> userRoles = authorization.getSuperAdminRoleList();
 
         LOGGER.debug("Super admin user roles received {}", userRoles);
         
