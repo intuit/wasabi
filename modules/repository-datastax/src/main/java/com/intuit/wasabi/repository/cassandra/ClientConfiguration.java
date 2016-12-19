@@ -94,9 +94,55 @@ public class ClientConfiguration implements CassandraDriver.Configuration {
         return getProperty("keyspaceStrategyClass", properties);
     }
 
+    // These are options used by the PoolingOptions for cassandra
     @Override
     public int getMaxConnectionsPerHost() {
         return parseInt(getProperty("maxConnectionsPerHost", properties, "10"));
+    }
+
+    @Override
+    public int getMaxConnectionsPerHostLocal(){
+        return parseInt(getProperty("maxConnectionsPerHostLocal", properties, "32"));
+    }
+
+    @Override
+    public int getCoreConnectionsPerHostLocal(){
+        return parseInt(getProperty("coreConnectionsPerHostLocal", properties, "8"));
+    }
+
+    @Override
+    public int getMaxRequestPerConnectionLocal(){
+        return parseInt(getProperty("maxRequestPerConnectionLocal", properties, "32768"));
+    }
+
+    @Override
+    public int getNewConnectionThresholdLocal(){
+        return parseInt(getProperty("newConnectionThresholdLocal", properties, "50"));
+    }
+
+    @Override
+    public int getPoolTimeoutMillis(){
+        return parseInt(getProperty("poolTimeoutMillis", properties, "0"));
+    }
+
+    @Override
+    public int getMaxConnectionsPerHostRemote(){
+        return parseInt(getProperty("maxConnectionsPerHostRemote", properties, "32"));
+    }
+
+    @Override
+    public int getCoreConnectionsPerHostRemote(){
+        return parseInt(getProperty("coreConnectionsPerHostRemote", properties, "8"));
+    }
+
+    @Override
+    public int getMaxRequestPerConnectionRemote(){
+        return parseInt(getProperty("maxRequestPerConnectionRemote", properties, "2000"));
+    }
+
+    @Override
+    public int getNewConnectionThresholdRemote(){
+        return parseInt(getProperty("newConnectionThresholdRemote", properties, "50"));
     }
 
     @Override

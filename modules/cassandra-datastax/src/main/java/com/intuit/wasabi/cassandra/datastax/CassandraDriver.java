@@ -111,7 +111,62 @@ public interface CassandraDriver extends Closeable {
          * Returns max connections per host
          * @return Max connections per host
          */
+        @Deprecated
         int getMaxConnectionsPerHost();
+
+        /**
+         * Returns max connections per local host
+         * @return Max connections per local host
+         */
+        int getMaxConnectionsPerHostLocal();
+
+        /**
+         * Returns core/min connections per local host
+         * @return core/min connections per local host
+         */
+        int getCoreConnectionsPerHostLocal();
+
+        /**
+         * Returns max requests per local host
+         * @return Max requests per local host
+         */
+        int getMaxRequestPerConnectionLocal();
+
+        /**
+         * Returns new connection threshold per local host
+         * @return New connection threshold per local host
+         */
+        int getNewConnectionThresholdLocal();
+
+        /**
+         * Returns pool timeouts in milliseconds
+         * @return Pool timeouts in milliseconds
+         */
+        int getPoolTimeoutMillis();
+
+        /**
+         * Returns max connections per remote host
+         * @return max connections per remote host
+         */
+        int getMaxConnectionsPerHostRemote();
+
+        /**
+         * Returns core/min connections per remote host
+         * @return core/min connections per remote host
+         */
+        int getCoreConnectionsPerHostRemote();
+
+        /**
+         * Returns max requests per remote host
+         * @return Max requests per remote host
+         */
+        int getMaxRequestPerConnectionRemote();
+
+        /**
+         * Returns new connection threshold per remote host
+         * @return New connection threshold per remote host
+         */
+        int getNewConnectionThresholdRemote();
 
 //        /**
 //         * The target version of Cassandra

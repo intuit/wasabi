@@ -104,11 +104,21 @@ public class DefaultCassandraDriver implements CassandraDriver {
 
                 //Configure the connection pool's options
                 PoolingOptions poolingOptions = new PoolingOptions()
-                        .setPoolTimeoutMillis(20_000)
-                        .setMaxRequestsPerConnection(HostDistance.LOCAL, 1_000) //range  (0, 32768)
-                        .setMaxConnectionsPerHost(HostDistance.LOCAL, getConfiguration().getMaxConnectionsPerHost())
-                        .setMaxRequestsPerConnection(HostDistance.REMOTE, 1_000) //range  (0, 32768)
-                        .setMaxConnectionsPerHost(HostDistance.REMOTE, getConfiguration().getMaxConnectionsPerHost());
+                        .setPoolTimeoutMillis(getConfiguration().getPoolTimeoutMillis())
+                        .setConnectionsPerHost(HostDistance.LOCAL,
+                                getConfiguration().getCoreConnectionsPerHostLocal(),
+                                getConfiguration().getMaxConnectionsPerHostLocal())
+                        .setConnectionsPerHost(HostDistance.REMOTE,
+                                getConfiguration().getCoreConnectionsPerHostRemote(),
+                                getConfiguration().getMaxConnectionsPerHostRemote())
+                        .setMaxRequestsPerConnection(HostDistance.LOCAL,
+                                getConfiguration().getMaxRequestPerConnectionLocal()) //range  (0, 32768)
+                        .setMaxRequestsPerConnection(HostDistance.REMOTE,
+                                getConfiguration().getMaxRequestPerConnectionRemote())
+                        .setNewConnectionThreshold(HostDistance.LOCAL,
+                                getConfiguration().getNewConnectionThresholdLocal())
+                        .setNewConnectionThreshold(HostDistance.REMOTE,
+                                getConfiguration().getNewConnectionThresholdRemote());
                 builder.withPoolingOptions(poolingOptions);
 
                 // SSL connection
