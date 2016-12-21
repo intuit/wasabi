@@ -97,15 +97,8 @@ If you have git, just run:
 ```
 
 If you don't have git the easiest way is to [download][url_develop_zip] the
-latest code:
+latest code and unzip it. You will then only have to run
 ```dos
-% set wasabipath=%HOMEDRIVE%%HOMEPATH%\projects
-% mkdir %wasabipath%
-% powershell -Command "Invoke-WebRequest -Uri https://github.com/intuit/wasabi/archive/develop.zip -OutFile %wasabipath%\wasabi.zip"
-% powershell -Command "(New-Object -COM Shell.Application).NameSpace('%wasabipath%').CopyHere((New-Object -COM Shell.Application).NameSpace('%wasabipath%\wasabi.zip').Items(), 16)"
-% del %wasabipath%\wasabi.zip
-% ren %wasabipath%\wasabi-develop wasabi
-% cd %wasabipath%\wasabi
 % bin\wasabi.bat bootstrap
 ```
 
