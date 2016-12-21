@@ -7,6 +7,7 @@ import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Context;
 import com.intuit.wasabi.experimentobjects.Experiment;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Date;
@@ -32,6 +33,7 @@ public class EventEnvelopePayloadTest {
     }
 
     @Test
+    @Ignore("Just creates debug output.")
     public void output() {
         System.out.println(new EventEnvelopePayload(name, label, assignment, event).toJson());
     }

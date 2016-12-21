@@ -59,7 +59,7 @@ public class AssignmentEnvelopePayloadTest {
     }
 
     @Test
-    @Ignore("Just creates debug output.")
+    @Ignore("AssignmentEnvelopePayloads creates only output.")
     public void output() {
         System.out.println(payload.toJson());
         HashMap<String, Object> segMap = new HashMap<>();

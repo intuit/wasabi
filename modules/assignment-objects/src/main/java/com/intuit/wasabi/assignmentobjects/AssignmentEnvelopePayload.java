@@ -19,7 +19,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intuit.wasabi.assignmentobjects.Assignment.Status;
 import com.intuit.wasabi.assignmentobjects.User.ID;
-import com.intuit.wasabi.exceptions.JsonExportException;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Application.Name;
 import com.intuit.wasabi.experimentobjects.Bucket;
@@ -43,7 +42,7 @@ import java.util.UUID;
  */
 public class AssignmentEnvelopePayload implements EnvelopePayload {
 
-    private static final String VERSION = "3.0";
+    private static final String VERSION = "4.0";
     private static final String MESSAGE_TYPE = "ASSIGNMENT";
     private User.ID userID;
     private Context context;
@@ -89,6 +88,7 @@ public class AssignmentEnvelopePayload implements EnvelopePayload {
             Label experimentLabel,
             Experiment.ID experimentID,
             Date date,
+            // FIXME: The HttpHeaders were never exported. Needs refactor.
             HttpHeaders ignored) {
         this.userID = userID;
         this.context = context;
@@ -225,7 +225,8 @@ public class AssignmentEnvelopePayload implements EnvelopePayload {
         try {
             return objectMapper.writer().writeValueAsString(this);
         } catch (JsonProcessingException jsonProcExc) {
-            throw new JsonExportException("Can not serialize assignment for export.", jsonProcExc);
+            // FIXME: Using JsonExportException introduces a circular reference, hence for now a RuntimeException.
+            throw new RuntimeException("Can not serialize assignment for export.", jsonProcExc);
         }
     }
 }
