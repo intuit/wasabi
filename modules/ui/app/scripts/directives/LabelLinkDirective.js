@@ -24,8 +24,8 @@ angular.module('wasabi.directives').directive('labelLink', ['$compile',
                 } else {
                     if (!attrs.openedFromModal || attrs.openedFromModal !== 'true' && (attrs.hasUpdate === 'true' || attrs.readOnly === 'true')) {
                         var linkStr = '<a href="#/experiments/' + attrs.expId + '/';
-                        if (attrs.inModal != undefined && attrs.inModal === 'true') {
-                            linkStr += 'true/true'
+                        if (attrs.inModal !== undefined && attrs.inModal === 'true') {
+                            linkStr += 'true/true';
                         }
                         else {
                             linkStr += (attrs.readOnly.toLowerCase() === 'true') + '/';

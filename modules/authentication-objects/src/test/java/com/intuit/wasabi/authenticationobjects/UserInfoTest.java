@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,8 +22,13 @@ import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
+/**
+ * Test for the {@link UserInfo}
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class UserInfoTest {
 
@@ -41,9 +46,6 @@ public class UserInfoTest {
         userInfo = getUserInfo();
     }
 
-    /**
-     * @return
-     */
     private UserInfo getUserInfo() {
         return UserInfo.from(username)
                 .withEmail(email)
@@ -56,13 +58,19 @@ public class UserInfoTest {
 
     @Test
     public void testUserInfo() {
-        assertNotNull(userInfo.getEmail());
-        assertNotNull(userInfo.getFirstName());
-        assertNotNull(userInfo.getLastName());
-        assertNotNull(userInfo.getUserId());
-        assertNotNull(userInfo.getUsername());
-        assertNotNull(userInfo.toString());
-        assertNotNull(userInfo.getPassword());
+        assertEquals(userInfo.getEmail(), email);
+        assertEquals(userInfo.getFirstName(), firstName);
+        assertEquals(userInfo.getLastName(), lastName);
+        assertEquals(userInfo.getUserId(), userId);
+        assertEquals(userInfo.getUsername(), username);
+        assertEquals(userInfo.getPassword(), password);
+
+        assertTrue(userInfo.toString().contains(email));
+        assertTrue(userInfo.toString().contains(firstName));
+        assertTrue(userInfo.toString().contains(lastName));
+        assertTrue(userInfo.toString().contains(userId));
+        assertTrue(userInfo.toString().contains(username.toString()));
+        assertFalse(userInfo.toString().contains(password));
     }
 
     @Test
@@ -90,7 +98,7 @@ public class UserInfoTest {
 
         assertEquals(userInfo, otherUserInfo);
         assertEquals(userInfo, otherUserInfo);
-        assertEquals(userInfo.hashCode(), userInfo.hashCode());
+        assertEquals(userInfo.hashCode(), otherUserInfo.hashCode());
     }
 
     @Test

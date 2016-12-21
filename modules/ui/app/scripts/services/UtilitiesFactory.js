@@ -17,7 +17,9 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
 
             // This allows us to change the name of the state versus what it is called in the backend.
             stateName: function (state) {
-                if (!state) return '';
+                if (!state) {
+                    return '';
+                }
                 var stateLabel = state.toLowerCase();
                 if (stateLabel === 'paused') {
                     stateLabel = 'stopped';
@@ -34,18 +36,22 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
             },
 
             hideAdminTabs: function(flag) {
-                var hideThem = (flag != undefined ? flag : true);
+                var hideThem = (flag !== undefined ? flag : true);
                 if (!hideThem) {
                     this.hideTopLevelTab('Users', false);
                     this.hideTopLevelTab('Applications', false);
-                    this.hideTopLevelTab('Logs', false);
-                    this.hideTopLevelTab('Feedback', !Session.isSuperadmin);
+                    this.hideTopLevelTab('Plugins', false);
+                    this.hideTopLevelTabMenuChoice('Logs', false);
+                    this.hideTopLevelTabMenuChoice('Feedback', !Session.isSuperadmin);
+                    this.hideTopLevelTab('Tools', false);
                 }
                 else {
                     this.hideTopLevelTab('Users');
                     this.hideTopLevelTab('Applications');
-                    this.hideTopLevelTab('Logs');
-                    this.hideTopLevelTab('Feedback', true);
+                    this.hideTopLevelTab('Plugins');
+                    this.hideTopLevelTabMenuChoice('Logs');
+                    this.hideTopLevelTabMenuChoice('Feedback', true);
+                    this.hideTopLevelTab('Tools', true);
                 }
             },
 
@@ -66,17 +72,27 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                     StateFactory.currentCardViewPage = 1;
                 }
                 $('.main li').removeClass('sel');
-                $('.main li a:contains(' + label + ')').parent().addClass('sel');
+                $('.main li.navLink a:contains(' + label + ')').closest('li.navLink').addClass('sel');
                 $('#welcomeMsg').text('Welcome, ' + Session.userID).css('display', 'inline');
             },
 
             hideTopLevelTab: function(label, hideIt) {
                 var hideTheTab = (hideIt !== undefined ? hideIt : true);
                 if (hideTheTab) {
-                    $('.main li a:contains(' + label + ')').parent().hide();
+                    $('.main li.navLink a:contains(' + label + ')').closest('li.navLink').hide();
                 }
                 else {
-                    $('.main li a:contains(' + label + ')').parent().show();
+                    $('.main li.navLink a:contains(' + label + ')').closest('li.navLink').show();
+                }
+            },
+
+            hideTopLevelTabMenuChoice: function(label, hideIt) {
+                var hideTheMenuChoice = (hideIt !== undefined ? hideIt : true);
+                if (hideTheMenuChoice) {
+                    $('.main li.navLink a:contains(' + label + ')').closest('li').hide();
+                }
+                else {
+                    $('.main li.navLink a:contains(' + label + ')').closest('li').show();
                 }
             },
 
@@ -132,7 +148,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                     });
                 }
                 $('pageSuccess').stop(); // If it happens to be fading out, stop it.
-                if (globalPageSuccessMessageFadeOutTimer != null) {
+                if (globalPageSuccessMessageFadeOutTimer !== null) {
                     clearTimeout(globalPageSuccessMessageFadeOutTimer);
                 }
                 $('.pageSuccess h2').text(title);
@@ -234,7 +250,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                     $state.go('signin');
                 });
             },
-            
+
             trackEvent: function(eventName, parm1, parm2, parm3, parm4) {
                 // If you have implemented a contributeClickTracking plugin, this will call the trackEvent() function
                 // on it, if it exists.
@@ -266,11 +282,11 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
 
             getTrackingPlugin: function(plugins) {
                 if (plugins) {
-                    var filtered = plugins.filter(function(e, i, arr) {
+                    var filtered = plugins.filter(function(e) {
                         return (e.hasOwnProperty('pluginType') && e.pluginType === 'contributeClickTracking');
                     });
                     if (filtered && filtered.length > 0) {
-                        return tracking;
+                        return filtered[0];
                     }
                 }
                 return null;
@@ -457,6 +473,16 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                 }
             },
 
+            actionDiffForCardView: function (bucket) {
+                if (isNaN(bucket.actionRate)) {
+                    return 0;
+                } else {
+                    var diff = (((bucket.upperBound -
+                        bucket.lowerBound) / 2) * 100);
+                    return (Math.round(diff * 10) / 10);
+                }
+            },
+
             improvement: function (bucketLabel, experiment) {
                 if (experiment.controlBucketLabel === bucketLabel) {
                     // for baseline bucket or control bucket, the UI shows 'N/A'
@@ -528,18 +554,20 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                     {
                         'id': experimentID
                     }
-                ).$promise.then(function (results) {
-                    if (results && results.experimentIDs) {
-                        favoritesObj.favorites = results.experimentIDs;
+                ).$promise.then(
+                    function (results) {
+                        if (results && results.experimentIDs) {
+                            favoritesObj.favorites = results.experimentIDs;
+                        }
+                        that.trackEvent('saveItemSuccess',
+                            {key: 'dialog_name', value: 'deleteFavorite'},
+                            {key: 'experiment_id', value: experimentID}
+                        );
+                    },
+                    function(response) {
+                        that.handleGlobalError(response, 'The favorite could not be delete.');
                     }
-                    that.trackEvent('saveItemSuccess',
-                        {key: 'dialog_name', value: 'deleteFavorite'},
-                        {key: 'experiment_id', value: experimentID}
-                    );
-                },
-                function(response) {
-                    that.handleGlobalError(response, 'The favorite could not be delete.');
-                });
+                );
             },
 
             retrieveFavorites: function () {
@@ -569,7 +597,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                 return (!experiment.isRapidExperiment ? 'N/A' : experiment.userCap);
             },
 
-            determineBucketImprovementClass: function(experiment, controlBucketLabel) {
+            determineBucketImprovementClass: function(experiment) {
                 var that = this;
                 // Set up so we know whether a given bucket is a winner, loser or not sure.
                 var theBuckets = [];
@@ -612,47 +640,112 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                 experiment.statistics.sortedBucketsActiveOnly = []; // Will be used for Card View, only OPEN state buckets.
                 if (experiment.statistics.sortedBuckets && experiment.statistics.sortedBuckets.length > 0) {
                     var foundAWinner = false;
-                    for (var i = 0; i < experiment.statistics.sortedBuckets.length; i++) {
-                        if (this.getBucket(experiment.statistics.sortedBuckets[i].label, experiment).state === 'OPEN') {
+                    for (var j = 0; j < experiment.statistics.sortedBuckets.length; j++) {
+                        if (this.getBucket(experiment.statistics.sortedBuckets[j].label, experiment).state === 'OPEN') {
                             // Save in another array that is used to build the Card View, as we don't want closed or emptied
                             // buckets there.  Both arrays will point to the same objects, so all the stuff we do below
                             // will be there for the Card View, too.
-                            experiment.statistics.sortedBucketsActiveOnly.push(experiment.statistics.sortedBuckets[i]);
+                            experiment.statistics.sortedBucketsActiveOnly.push(experiment.statistics.sortedBuckets[j]);
                         }
                         if (!moment().subtract(7, 'days').isAfter(moment(experiment.startTime, ['YYYY-MM-DDTHH:mm:ssZ', 'ddd MMM DD YYYY HH:mm:ss ZZ']))) {
                             // If the start time of the experiment is less than 7 days ago, don't check for winners or losers, yet.
-                            experiment.statistics.buckets[experiment.statistics.sortedBuckets[i].label].toolTip = 'There is an insufficient number of users to identify a winning variation.';
+                            experiment.statistics.buckets[experiment.statistics.sortedBuckets[j].label].toolTip = 'There is an insufficient number of users to identify a winning variation.';
                             continue;
                         }
-                        var significance = this.significance(experiment.statistics.sortedBuckets[i].label, experiment.statistics);
+                        var significance = this.significance(experiment.statistics.sortedBuckets[j].label, experiment.statistics);
 
                         if (significance === 'winner so far') {
                             foundAWinner = true;
                             // This bucket is a winner against at least one other bucket.
-                            experiment.statistics.buckets[experiment.statistics.sortedBuckets[i].label].improvementClass = 'winner';
-                            experiment.statistics.buckets[experiment.statistics.sortedBuckets[i].label].toolTip = 'This bucket has shown the best performance of all variations.  Consider switching to this experience.';
+                            experiment.statistics.buckets[experiment.statistics.sortedBuckets[j].label].improvementClass = 'winner';
+                            experiment.statistics.buckets[experiment.statistics.sortedBuckets[j].label].toolTip = 'This bucket has shown the best performance of all variations.  Consider switching to this experience.';
                             numWinningBuckets += 1;
                             if (numWinningBuckets > 1) {
                                 // Multiple buckets are winners.  Different tooltip for both this one and the others.
-                                experiment.statistics.buckets[experiment.statistics.sortedBuckets[i].label].toolTip =
+                                experiment.statistics.buckets[experiment.statistics.sortedBuckets[j].label].toolTip =
                                     experiment.statistics.buckets[experiment.statistics.sortedBuckets[lastWinningBucketIndex].label].toolTip =
+                                    'You have multiple buckets that performed best.  Consider a deeper analysis prior to switching to an experience.';
+                            }
+                            lastWinningBucketIndex = j;
+                        }
+                        else if (significance === 'loser so far') {
+                            experiment.statistics.buckets[experiment.statistics.sortedBuckets[j].label].improvementClass = 'loser';
+                            experiment.statistics.buckets[experiment.statistics.sortedBuckets[j].label].toolTip = 'This bucket has not shown the best performance of all variations.';
+                        }
+                        else {
+                            experiment.statistics.buckets[experiment.statistics.sortedBuckets[j].label].improvementClass = 'indeterminate';
+                            experiment.statistics.buckets[experiment.statistics.sortedBuckets[j].label].toolTip = 'This bucket\'s performance is not statistically distinguishable from other variations.';
+                        }
+                    }
+                    if (!foundAWinner) {
+                        // There was no winner.  Need to set improvement class so we can left shift the buckets.
+                        for (var k = 0; k < experiment.statistics.sortedBuckets.length; k++) {
+                            experiment.statistics.buckets[experiment.statistics.sortedBuckets[k].label].improvementClass = 'no-winner';
+                        }
+                    }
+                }
+            },
+
+            // With the card view API, we receive all the information needed to determine whether we think a bucket is a
+            // "winner" or "loser" in the one set of data, so the code to determine that is significantly different.
+            determineCardViewBucketImprovementClass: function(experiment) {
+                experiment.sortedBuckets = $filter('orderBy')(experiment.buckets, function(bucket) {
+                    return bucket.actionRate;
+                }, true);
+
+                // We now have, in experiment.sortedBuckets, the buckets sorted by the actionRate.
+
+                // Now we need to go through the sorted list of buckets and look for winnersSoFar and losersSoFar
+                // so we can set the icons displayed in the bucket list. We use the jointProgress section of the
+                // statistics results and look for bucket names in the winnersSoFar and losersSoFar.  If a bucket
+                // is in winnersSoFar, we mark it with a trophy.  If it is in losersSoFar, we mark it as a loser.
+                // Otherwise, we mark it as indeterminate.
+                // NOTE: We won't do any of this until 7 days after the experiment start date.
+                var numWinningBuckets = 0,
+                    lastWinningBucketIndex = -1;
+
+                if (experiment.sortedBuckets && experiment.sortedBuckets.length > 0) {
+                    var foundAWinner = false;
+                    for (var i = 0; i < experiment.sortedBuckets.length; i++) {
+                        if (!moment().subtract(7, 'days').isAfter(moment(experiment.startTime, ['YYYY-MM-DDTHH:mm:ssZ', 'ddd MMM DD YYYY HH:mm:ss ZZ']))) {
+                            // If the start time of the experiment is less than 7 days ago, don't check for winners or losers, yet.
+                            experiment.sortedBuckets[i].toolTip = 'There is an insufficient number of users to identify a winning variation.';
+                            continue;
+                        }
+                        var significance = 'undetermined';
+                        if (experiment.sortedBuckets[i].winnerSoFar) {
+                            significance = 'winner so far';
+                        } else if (experiment.sortedBuckets[i].loserSoFar) {
+                            significance = 'loser so far';
+                        }
+
+                        if (significance === 'winner so far') {
+                            foundAWinner = true;
+                            // This bucket is a winner against at least one other bucket.
+                            experiment.sortedBuckets[i].improvementClass = 'winner';
+                            experiment.sortedBuckets[i].toolTip = 'This bucket has shown the best performance of all variations.  Consider switching to this experience.';
+                            numWinningBuckets += 1;
+                            if (numWinningBuckets > 1) {
+                                // Multiple buckets are winners.  Different tooltip for both this one and the others.
+                                experiment.sortedBuckets[i].toolTip =
+                                    experiment.sortedBuckets[lastWinningBucketIndex].toolTip =
                                     'You have multiple buckets that performed best.  Consider a deeper analysis prior to switching to an experience.';
                             }
                             lastWinningBucketIndex = i;
                         }
                         else if (significance === 'loser so far') {
-                            experiment.statistics.buckets[experiment.statistics.sortedBuckets[i].label].improvementClass = 'loser';
-                            experiment.statistics.buckets[experiment.statistics.sortedBuckets[i].label].toolTip = 'This bucket has not shown the best performance of all variations.';
+                            experiment.sortedBuckets[i].improvementClass = 'loser';
+                            experiment.sortedBuckets[i].toolTip = 'This bucket has not shown the best performance of all variations.';
                         }
                         else {
-                            experiment.statistics.buckets[experiment.statistics.sortedBuckets[i].label].improvementClass = 'indeterminate';
-                            experiment.statistics.buckets[experiment.statistics.sortedBuckets[i].label].toolTip = 'This bucket\'s performance is not statistically distinguishable from other variations.';
+                            experiment.sortedBuckets[i].improvementClass = 'indeterminate';
+                            experiment.sortedBuckets[i].toolTip = 'This bucket\'s performance is not statistically distinguishable from other variations.';
                         }
                     }
                     if (!foundAWinner) {
                         // There was no winner.  Need to set improvement class so we can left shift the buckets.
-                        for (var i = 0; i < experiment.statistics.sortedBuckets.length; i++) {
-                            experiment.statistics.buckets[experiment.statistics.sortedBuckets[i].label].improvementClass = 'no-winner';
+                        for (var j = 0; j < experiment.sortedBuckets.length; j++) {
+                            experiment.sortedBuckets[j].improvementClass = 'no-winner';
                         }
                     }
                 }
@@ -701,7 +794,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                         // Do a simple quoted string validation
                         if (ruleValue.length >= 3 &&
                             (ruleValue[0] === ruleValue[ruleValue.length-1]) &&
-                            (ruleValue[0] === "'" || ruleValue[0] === '"')) {
+                            (ruleValue[0] === '\'' || ruleValue[0] === '"')) {
                             // Validate that any of the same quotes within the string are escaped.
                             var foundBadQuote = false;
                             for (var i = 1; i < ruleValue.length - 1; i++) {
@@ -715,7 +808,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                             isValid = !foundBadQuote;
                         }
                         else if (ruleValue.length === 2 &&
-                            (ruleValue === '""' || ruleValue === "''")) {
+                            (ruleValue === '""' || ruleValue === '\'\'')) {
                             // We can allow empty string checks.
                             isValid = true;
                         }
@@ -886,12 +979,19 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                 $.browser.msie = /msie/.test(navigator.userAgent.toLowerCase());
                 $.browser.mozilla = /firefox/.test(navigator.userAgent.toLowerCase());
                 $.browser.webkit = /webkit/.test(navigator.userAgent.toLowerCase()) || /chrome/.test(navigator.userAgent.toLowerCase());
-                if($.browser.webkit)
-                    ce.find("div").replaceWith(function() { return "\n" + this.innerHTML; });
-                if($.browser.msie)
-                    ce.find("p").replaceWith(function() { return this.innerHTML  +  "<br>"; });
-                if($.browser.mozilla || $.browser.opera ||$.browser.msie )
-                    ce.find("br").replaceWith("\n");
+                if($.browser.webkit) {
+                    ce.find('div').replaceWith(function() {
+                        return '\n' + this.innerHTML;
+                    });
+                }
+                if($.browser.msie) {
+                    ce.find('p').replaceWith(function() {
+                        return this.innerHTML  +  '<br>';
+                    });
+                }
+                if($.browser.mozilla || $.browser.opera ||$.browser.msie ) {
+                    ce.find('br').replaceWith('\n');
+                }
 
                 return $.trim(ce.text());
             },
@@ -995,6 +1095,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
             },
 
             openPluginModal: function (plugin, experiment) {
+                var exp = (experiment !== undefined ? experiment : null);
                 var modalInstance = $modal.open({
                     templateUrl: plugin.templateUrl,
                     controller: plugin.ctrlName,
@@ -1002,7 +1103,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                     backdrop: 'static',
                     resolve: {
                         experiment: function () {
-                            return experiment;
+                            return exp;
                         }
                     }
                 });
@@ -1034,6 +1135,22 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                         afterResultsFunc();
                     }
                 });
+            },
+
+            createNameList: function(objectsList, nameAttrName) {
+                var nameList = objectsList[0][nameAttrName];
+                if (objectsList.length > 1) {
+                    for (var j = 1; j < objectsList.length; j++) {
+                        if (j === objectsList.length - 1) {
+                            nameList += ' and ';
+                        }
+                        else {
+                            nameList += ', ';
+                        }
+                        nameList += objectsList[j][nameAttrName];
+                    }
+                }
+                return nameList;
             }
 
         };

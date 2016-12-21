@@ -14,7 +14,7 @@ angular.module('wasabi.controllers').
             };
 
             UtilitiesFactory.hideHeading(false);
-            UtilitiesFactory.selectTopLevelTab('Feedback');
+            UtilitiesFactory.selectTopLevelTab('Tools');
 
             $scope.capitalizeFirstLetter = function(string) {
                 return UtilitiesFactory.capitalizeFirstLetter(string);

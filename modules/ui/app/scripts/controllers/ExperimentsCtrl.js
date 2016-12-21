@@ -5,10 +5,10 @@
 'use strict';
 
 angular.module('wasabi.controllers').
-    controller('ExperimentsCtrl', ['$scope', '$filter', '$http', '$timeout', 'ExperimentsFactory', '$modal', 'UtilitiesFactory', '$rootScope', 'StateFactory', 'DialogsFactory', 'AUTH_EVENTS', 'Session', 'PERMISSIONS', 'ConfigFactory', 'AuthzFactory', 'USER_ROLES', 'ApplicationsFactory', 'BucketsFactory', 'ExperimentStatisticsFactory', 'ApplicationStatisticsFactory', 'FavoritesFactory',
-        function ($scope, $filter, $http, $timeout, ExperimentsFactory, $modal, UtilitiesFactory, $rootScope, StateFactory, DialogsFactory, AUTH_EVENTS, Session, PERMISSIONS, ConfigFactory, AuthzFactory, USER_ROLES, ApplicationsFactory, BucketsFactory, ExperimentStatisticsFactory, ApplicationStatisticsFactory, FavoritesFactory) {
+    controller('ExperimentsCtrl', ['$scope', '$filter', '$http', '$timeout', 'ExperimentsFactory', '$modal', 'UtilitiesFactory', '$rootScope', 'StateFactory', 'DialogsFactory', 'AUTH_EVENTS', 'Session', 'PERMISSIONS', 'ConfigFactory', 'AuthzFactory', 'USER_ROLES', 'ApplicationsFactory', 'BucketsFactory', 'ExperimentStatisticsFactory', 'ApplicationStatisticsFactory', 'FavoritesFactory', '$cookies',
+        function ($scope, $filter, $http, $timeout, ExperimentsFactory, $modal, UtilitiesFactory, $rootScope, StateFactory, DialogsFactory, AUTH_EVENTS, Session, PERMISSIONS, ConfigFactory, AuthzFactory, USER_ROLES, ApplicationsFactory, BucketsFactory, ExperimentStatisticsFactory, ApplicationStatisticsFactory, FavoritesFactory, $cookies) {
 
-             var today = moment().format('MM/DD/YYYY');
+            var today = moment().format('MM/DD/YYYY');
 
             // The data object is where values are stored that need to be data bound to the fields in the form.
             // I believe there was a scope problem and I found this solution on the Googles.  Basically, by
@@ -74,145 +74,16 @@ angular.module('wasabi.controllers').
 
             $scope.help = ConfigFactory.help;
 
-            // *** Home page code
-
-            $scope.actionRate = function(bucketLabel, buckets) {
-                return UtilitiesFactory.actionRate(bucketLabel, buckets);
+            $scope.actionDiffForCardView = function(bucket) {
+                return UtilitiesFactory.actionDiffForCardView(bucket);
             };
-
-            $scope.actionDiff = function(bucketLabel, buckets) {
-                return UtilitiesFactory.actionDiff(bucketLabel, buckets);
-            };
-
-            /*
-             The experiment is assumed to either have a control, marked in the buckets list, or we use the first bucket
-             as the control (baseline).  That has already been marked in the buckets list in the experiment by saving
-             controlBucketLabel. All concept of improvement is relative to this control/baseline bucket and it's action rate value.
-             If the action rate of a bucket is greater than the action rate of the control/baseline, then it will have a
-             class of "winning", and the control/baseline will have a class of "losing", as will any other buckets who
-             have an action rate at or below the control/baseline.  If the control/baseline is
-             the highest action rate, it will have a class of 'winning' and the other buckets will have a class of 'losing'.
-             */
-            $scope.improvementClass = function(bucketLabel, experiment) {
-                return experiment.statistics.buckets[bucketLabel].improvementClass;
-            };
-
-            $scope.startDataLoadForNextExperiment = function() {
-                // If there are any more experiments to get data for, get the next one.
-                if ($scope.needDataForThese.length > 0) {
-                    // Start the process of getting extra data for the next experiment, unless it has the flag set
-                    // that we have already gotten the data.
-                    var foundExperimentInNeedOfLoading = false;
-                    do {
-                        var nextExperiment = $scope.needDataForThese.splice(0,1)[0];
-                        if (!nextExperiment.experiment.dataRetrieved) {
-                            foundExperimentInNeedOfLoading = true;
-                            $scope.loadBuckets(nextExperiment.experiment, !nextExperiment.onlyBucketData);
-                        }
-                    } while (!foundExperimentInNeedOfLoading && $scope.needDataForThese.length > 0);
-                }
-                else {
-                    // We are done loading the extra data for the grid view, so enable the Show grid checkbox.
-                    $scope.disableShowAsGrid = false;
-                }
-            };
-
-            $scope.loadApplicationStatistics = function(experiment) {
-                ApplicationStatisticsFactory.query({
-                    experimentId: experiment.id
-                }).$promise.then(function (appInfo) {
-                        if (appInfo && appInfo.totalUsers && appInfo.totalUsers.bucketAssignments) {
-                            experiment.numUsers = appInfo.totalUsers.bucketAssignments;
-                        }
-                        if (appInfo && appInfo.assignments && appInfo.assignments.length > 0) {
-                            // Get bucket-level assignment counts.
-                            UtilitiesFactory.transferMatchingValues(experiment.buckets,
-                                appInfo.assignments, 'count', 'label', 'bucket');
-                        }
-
-                        $scope.startDataLoadForNextExperiment();
-                    },
-                    function(response) {
-                        console.log('Error loading user count for ' + experiment.id);
-                        $scope.startDataLoadForNextExperiment();
-                });
-            };
-
-            $scope.loadBuckets = function (experiment, loadStatisticsFlag) {
-                var loadStatisticsNext = (loadStatisticsFlag != undefined ? loadStatisticsFlag : true);
-                BucketsFactory.query({
-                    experimentId: experiment.id
-                }).$promise.then(function (buckets) {
-                        experiment.dataRetrieved = true;
-                        if (buckets && buckets.length > 0) {
-                            experiment.buckets = buckets;
-
-                            // set baseline bucket (if no control bucket)
-                            experiment.controlBucketLabel = buckets[0].label;
-                            // get the label of the one control bucket (if any)
-                            for (var i = 0; i < experiment.buckets.length; i++) {
-                                if (experiment.buckets[i].isControl) {
-                                    experiment.hasControlBucket = true;
-                                    experiment.controlBucketLabel = experiment.buckets[i].label;
-                                }
-
-                                var s = '<div style="font-weight:normal; font-size:15px; padding-bottom:5px">' + experiment.buckets[i].label + '</div>';
-
-                                if (experiment.buckets[i].description && experiment.buckets[i].description.length > 0) {
-                                    s += '<div style="width:360px">' + experiment.buckets[i].description + '</div>';
-                                }
-                                experiment.buckets[i].homePageTooltip = s;
-                            }
-
-                            // set baseline bucket (if no control bucket)
-                            if (!experiment.hasControlBucket) {
-                                buckets[0].isBaseLine = true;
-                            }
-                        }
-                        else {
-                            experiment.buckets = [];
-                        }
-
-                        if (loadStatisticsNext) {
-                            $scope.loadStatistics(experiment);
-                        }
-                        else {
-                            $scope.startDataLoadForNextExperiment();
-                        }
-                    },
-                    function(response) {
-                        console.log('Error loading buckets for ' + experiment.id);
-                        $scope.startDataLoadForNextExperiment();
-                });
-            };
-
-            $scope.getBucket = function (bucketLabel, experiment) {
-                return UtilitiesFactory.getBucket(bucketLabel, experiment);
-            };
-
-            $scope.loadStatistics = function (experiment) {
-                ExperimentStatisticsFactory.query({experimentId: experiment.id}).$promise.
-                    then(function (statistics) {
-                        experiment.statistics = statistics;
-
-                        $scope.loadApplicationStatistics(experiment);
-
-                        UtilitiesFactory.determineBucketImprovementClass(experiment, experiment.controlBucketLabel);
-
-                    }, function(response) {
-                        console.log('Error retrieving experiment statistics for ' + experiment.id);
-                        $scope.startDataLoadForNextExperiment();
-                });
-            };
-
-            // *** END Home page code
 
             $scope.convertOrderByField = function() {
                 switch ($scope.orderByField) {
                     case 'applicationName':
                         return 'application_name';
                     case 'label':
-                        return 'experiment_name';
+                        return 'experiment_label';
                     case 'creatorID':
                         return 'created_by';
                     case 'samplingPercent':
@@ -247,7 +118,8 @@ angular.module('wasabi.controllers').
                     },
                         function(response) {
                             UtilitiesFactory.handleGlobalError(response, 'The list of favorites could not be retrieved.');
-                    });
+                        }
+                    );
                 }
                 else {
                     applyFavorites(experimentsList);
@@ -258,9 +130,9 @@ angular.module('wasabi.controllers').
             This function sets up the call to get the list of experiments.  It sets up the query
             parameters to do the sorting, filtering and pagination.  It uses the lastSearchWasSimple
             flag to decide if we are doing simple or advanced filtering and so which parameters need to
-            be used.
+            be used.  This sets up the call whether it is for the table view or the card view (different APIs).
              */
-            $scope.doLoadExperiments = function(pageSize, currentPage, afterLoadFunction) {
+            $scope.doLoadExperiments = function(cardViewFlag, pageSize, currentPage, afterLoadFunction) {
                 function addAdvParam(existingFilter, newFilterValue) {
                     if (existingFilter.length > 0) {
                         existingFilter += ',';
@@ -269,13 +141,13 @@ angular.module('wasabi.controllers').
                 }
 
                 var queryParams = {
-                    per_page: pageSize,
+                    perPage: pageSize,
                     page: currentPage,
                     sort: ($scope.reverseSort ? '-' : '') + $scope.convertOrderByField()
                 };
                 if ($scope.data.lastSearchWasSimple) {
                     // Add simple filter info, if available
-                    queryParams.filter = $scope.data.query;
+                    queryParams.filter = encodeURIComponent($scope.data.query);
                     if ($scope.data.hideTerminated) {
                         queryParams.filter += ',state_exact=notTerminated';
                     }
@@ -290,9 +162,14 @@ angular.module('wasabi.controllers').
                         queryParams.filter = addAdvParam(queryParams.filter, 'state_exact=' + $scope.data.advStatus);
                     }
                     if ($scope.data.advExperimentName && $.trim($scope.data.advExperimentName).length > 0) {
-                        queryParams.filter = addAdvParam(queryParams.filter, 'experiment_name=' + $.trim($scope.data.advExperimentName));
+                        queryParams.filter = addAdvParam(queryParams.filter, 'experiment_label=' + $.trim($scope.data.advExperimentName));
                     }
                     if ($scope.data.adv1stDateSearchType !== 'isAny') {
+                        if ($scope.data.advTxtSearchDateOne.length === 0 ||
+                            ($scope.data.adv1stDateSearchType === 'isBetween' && $scope.data.advTxtSearchDateTwo.length === 0)) {
+                            UtilitiesFactory.displayPageError('Missing Date', 'You must provide a value for the search date.');
+                            return false;
+                        }
                         queryParams.filter = addAdvParam(queryParams.filter, 'date_constraint_' +
                                 ($scope.data.advStartOrEndDate === 'startDate' ? 'start' : 'end') +
                                 '=' +
@@ -301,16 +178,36 @@ angular.module('wasabi.controllers').
                                 ($scope.data.adv1stDateSearchType === 'isBetween' ? ':' + $scope.data.advTxtSearchDateTwo : ''));
                     }
                 }
-                ExperimentsFactory.query(queryParams).$promise
-                .then(afterLoadFunction,
-                    function(response) {
-                        UtilitiesFactory.handleGlobalError(response, 'The list of experiments could not be retrieved.');
-                });
+                if (!cardViewFlag) {
+                    ExperimentsFactory.query(queryParams).$promise
+                    .then(afterLoadFunction,
+                        function(response) {
+                            UtilitiesFactory.handleGlobalError(response, 'The list of experiments could not be retrieved.');
+                        }
+                    );
+                }
+                else {
+                    ExperimentStatisticsFactory.cardViewData(queryParams).$promise
+                    .then(afterLoadFunction,
+                        function(response) {
+                            UtilitiesFactory.handleGlobalError(response, 'The list of experiments could not be retrieved.');
+                        }
+                    );
+                }
+            };
+
+            $scope.loadExperiments = function() {
+                if ($scope.data.showGrid) {
+                    $scope.loadCardViewExperiments();
+                }
+                else {
+                    $scope.loadTableExperiments();
+                }
             };
 
             // load experiments from server
-            $scope.loadExperiments = function () {
-                $scope.doLoadExperiments($scope.itemsPerPage, $scope.currentPage, function (data) {
+            $scope.loadTableExperiments = function () {
+                $scope.doLoadExperiments(false, $scope.itemsPerPage, $scope.currentPage, function (data) {
                     var experiments = data.experiments;
                     if (experiments) {
                         // Initialize all the experiments selected values to false so the checkboxes (when list used in selection dialog) will be unchecked.
@@ -400,8 +297,20 @@ angular.module('wasabi.controllers').
             };
 
             $scope.loadCardViewExperiments = function() {
-                $scope.doLoadExperiments($scope.cardViewItemsPerPage, $scope.cardViewData.cardViewCurrentPage, function(data) {
-                    var experiments = data.experiments;
+                function buildTooltip(bucket) {
+                    var s = '<div style="font-weight:normal; font-size:15px; padding-bottom:5px">' +
+                            bucket.label +
+                            (bucket.isControl ? ' (control)' : (bucket.isBaseLine ? ' (baseline)' : '')) +
+                            '</div>';
+
+                    if (bucket.description && bucket.description.length > 0) {
+                        s += '<div style="width:360px">' + bucket.description + '</div>';
+                    }
+                    return s;
+                }
+
+                $scope.doLoadExperiments(true, $scope.cardViewItemsPerPage, $scope.cardViewData.cardViewCurrentPage, function(data) {
+                    var experiments = data.experimentDetails;
                     if (experiments) {
                         // Initialize all the experiments selected values to false so the checkboxes (when list used in selection dialog) will be unchecked.
                         for (var i = 0; i < experiments.length; i++) {
@@ -422,6 +331,42 @@ angular.module('wasabi.controllers').
                                     s += '<div style="width:360px">' + experiments[i].description + '</div>';
                                 }
                                 experiments[i].homePageTooltip = s;
+
+                                if (experiments[i].buckets && experiments[i].buckets.length > 0) {
+                                    // set baseline bucket (if no control bucket)
+                                    experiments[i].controlBucketLabel = experiments[i].buckets[0].label;
+                                    // get the label of the one control bucket (if any)
+                                    var bucketsToRemove = [];
+                                    for (var j = 0; j < experiments[i].buckets.length; j++) {
+                                        if (experiments[i].buckets[j].state && experiments[i].buckets[j].state === 'OPEN') {
+                                            // Ignore anything but Open buckets for the Card View.
+                                            if (experiments[i].buckets[j].isControl) {
+                                                experiments[i].hasControlBucket = true;
+                                                experiments[i].controlBucketLabel = experiments[i].buckets[j].label;
+                                            }
+
+                                            experiments[i].buckets[j].homePageTooltip = buildTooltip(experiments[i].buckets[j]);
+                                        }
+                                        else {
+                                            bucketsToRemove.push(j);
+                                        }
+                                    }
+                                    if (bucketsToRemove.length > 0) {
+                                        for (var k = bucketsToRemove.length - 1; k >= 0; k--) {
+                                            experiments[i].buckets.splice(bucketsToRemove[k], 1);
+                                        }
+                                    }
+
+                                    // set baseline bucket (if no control bucket)
+                                    if (!experiments[i].hasControlBucket) {
+                                        experiments[i].buckets[0].isBaseLine = true;
+                                        experiments[i].buckets[0].homePageTooltip = buildTooltip(experiments[i].buckets[0]);
+                                    }
+
+                                    if (experiments[i].state !== 'DRAFT') {
+                                        UtilitiesFactory.determineCardViewBucketImprovementClass(experiments[i]);
+                                    }
+                                }
                             } else {
                                 delete experiments[i];
                             }
@@ -438,27 +383,36 @@ angular.module('wasabi.controllers').
                         $scope.doFavorites($scope.cardViewExperiments, false);
                     }
 
-                    $scope.loadGridDataIfNecessary()
+                    //$scope.loadGridDataIfNecessary()
                 });
             };
 
-            // init controller
-            if (Session && Session.switches) {
-                $scope.data.enableCardView = Session.switches.ShowCardView;
-            }
-            $scope.loadExperiments();
-
+            // Init controller
+            // Load local storage object that saves info about the last search we did.
             var tmpSearchSettings = localStorage.getItem('wasabiLastSearch');
             if (tmpSearchSettings) {
                 $scope.data = JSON.parse(tmpSearchSettings);
             }
-            if (!$scope.data.lastSearchWasSimple) {
-                $scope.showMoreLessSearch(true);
+            // If this user has card view enabled, turn it on.
+            if (Session && Session.switches) {
+                $scope.data.enableCardView = Session.switches.ShowCardView;
+            }
+            // If this user has turned on Card View and we've saved it in a cookie, enable it (or use the saved value).
+            if ($scope.data.enableCardView) {
+                if ($cookies.wasabiCardViewSetting) {
+                    $scope.data.showGrid = ((typeof($cookies.wasabiCardViewSetting) === 'boolean' && $cookies.wasabiCardViewSetting) ||
+                                            (typeof($cookies.wasabiCardViewSetting) === 'string' && $cookies.wasabiCardViewSetting === 'true'));
+                }
+                else {
+                    // Start saving it.
+                    $cookies.wasabiCardViewSetting = $scope.data.showGrid;
+                }
+                if ($scope.data.showGrid) {
+                    $scope.loadCardViewExperiments();
+                }
             }
 
-            if ($scope.data.enableCardView && $scope.data.showGrid) {
-                $scope.loadCardViewExperiments();
-            }
+            $scope.loadTableExperiments();
 
             UtilitiesFactory.hideHeading(false);
             UtilitiesFactory.selectTopLevelTab('Experiments');
@@ -471,13 +425,13 @@ angular.module('wasabi.controllers').
                     // So that it gets changed correctly in the localStorage that saves the search state,
                     // we need to actually toggle this one because it doesn't get updated until after this has
                     // executed.
-                    $scope.data.showGrid = false;
+                    $scope.data.showGrid = $cookies.wasabiCardViewSetting = false;
                     localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
-                    $scope.loadExperiments();
+                    $scope.loadTableExperiments();
                 }
                 else {
                     // Record that we are showing the Card View in the localStorage
-                    $scope.data.showGrid = true;
+                    $scope.data.showGrid = $cookies.wasabiCardViewSetting = true;
                     localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
                     // Switched to card view.  Since we're not pre-loading the data for the cards, we need to
                     // load (or check if we need to load) the data now.
@@ -485,7 +439,7 @@ angular.module('wasabi.controllers').
                 }
             };
 
-            $scope.applySearchSortFilters = function(doSorting) {
+            $scope.applySearchSortFilters = function() {
                 if ($scope.data.showAdvancedSearch) {
                     $scope.advSearch(true);
                 }
@@ -498,7 +452,7 @@ angular.module('wasabi.controllers').
                 $scope.applySearchSortFilters(true);
             };
 
-            $scope.handleCardStarAnimation = function($item, tileWidth) {
+            $scope.handleCardStarAnimation = function($item) {
                 if ($item) {
                     $item.animate({opacity: 0}, 1000, 'swing', function() {
                         $scope.redoSearchAndSort();
@@ -577,30 +531,6 @@ angular.module('wasabi.controllers').
                 }
             };
 
-            // TODO: not currently being used, but not removing until we have solved the Favorites problem,
-            // that is, that favorites don't work with the new paginated API.
-            var bubbleFavoritesToTop = function() {
-                // We want to pull the favorites to the top and have a secondary sort by the column we are
-                // sorting by.
-                var tmpArray = [],
-                    indexesToRemove = [];
-                for (var i = 0; i < $scope.filteredItems.length; i++) {
-                    var item = $scope.filteredItems[i];
-                    if (item.hasOwnProperty('isFavorite') && item.isFavorite) {
-                        tmpArray.push($scope.filteredItems[i]);
-                        indexesToRemove.push(i);
-                    }
-                }
-                for (var k = indexesToRemove.length - 1; k >= 0 ; k--) {
-                    $scope.filteredItems.splice(indexesToRemove[k], 1);
-                }
-
-                // Now add them to the beginning of the array.  They should already be in the correct order.
-                for (var j = tmpArray.length - 1; j >= 0; j--) {
-                    $scope.filteredItems.unshift(tmpArray[j]);
-                }
-            };
-
             $scope.loadGridDataIfNecessary = function() {
                 if ($scope.data.showGrid) {
                     // Handle the list used for lazy loading of the grid.
@@ -623,27 +553,18 @@ angular.module('wasabi.controllers').
             };
 
             $scope.doSearch = function() {
-                if ($scope.data.showGrid) {
-                    $scope.loadCardViewExperiments();
-                }
-                else {
-                    $scope.loadExperiments();
-                }
+                $scope.loadExperiments();
 
                 UtilitiesFactory.doTrackingInit();
             };
 
-            $scope.search = function (changingHideTerminated) {
-                var switchingFromAdvanced = !$scope.data.lastSearchWasSimple,
-                    hideTerminatedChanged = (changingHideTerminated !== undefined ? changingHideTerminated : false);
+            $scope.search = function () {
                 $scope.data.lastSearchWasSimple = true;
                 localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
-                if (switchingFromAdvanced || hideTerminatedChanged || $.trim($scope.data.query).length > 0) {
-                    if ($scope.searchTimer) {
-                        $timeout.cancel($scope.searchTimer);
-                    }
-                    $scope.searchTimer = $timeout($scope.doSearch, 400);
+                if ($scope.searchTimer) {
+                    $timeout.cancel($scope.searchTimer);
                 }
+                $scope.searchTimer = $timeout($scope.doSearch, 400);
             };
 
             $scope.advSearch = function() {
@@ -655,12 +576,7 @@ angular.module('wasabi.controllers').
                     $scope.data.advApplicationName = '';
                 }
 
-                if ($scope.data.showGrid) {
-                    $scope.loadCardViewExperiments();
-                }
-                else {
-                    $scope.loadExperiments();
-                }
+                $scope.loadExperiments();
 
                 var searchParms = 'advStatus=' + $scope.data.advStatus +
                         '&advExperimentName=' + $scope.data.advExperimentName +
@@ -687,7 +603,7 @@ angular.module('wasabi.controllers').
 
                 // The widget has updated the currentPage member.  By simply triggering the code to get the
                 // list, we should update the page.
-                $scope.loadExperiments();
+                $scope.loadTableExperiments();
             };
 
             $scope.cardViewPageChanged = function() {
@@ -833,16 +749,11 @@ angular.module('wasabi.controllers').
                     modalInstance.close();
                 });
 
-                modalInstance.result.then(function (started) {
+                modalInstance.result.then(function () {
                     // Update the list of permissions with any newly created ones.
                     UtilitiesFactory.updatePermissionsAndAppList(function(applicationsList) {
                         $scope.applications = applicationsList;
-                        if ($scope.data.showGrid) {
-                            $scope.loadCardViewExperiments();
-                        }
-                        else {
-                            $scope.loadExperiments();
-                        }
+                        $scope.loadExperiments();
                     });
 
 

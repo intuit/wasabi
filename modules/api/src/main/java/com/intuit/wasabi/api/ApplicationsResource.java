@@ -157,10 +157,10 @@ public class ApplicationsResource {
                                    final Application.Name applicationName,
 
                                    @HeaderParam(AUTHORIZATION)
-                                   @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+                                   @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = false)
                                    final String authorizationHeader
     ) {
-        return httpHeader.headers().entity(authorizedExperimentGetter.getAuthorizedExperimentsByName(authorizationHeader, applicationName)).build();
+        return httpHeader.headers().entity(authorizedExperimentGetter.getExperimentsByName(false, authorizationHeader, applicationName)).build();
     }
 
     /**

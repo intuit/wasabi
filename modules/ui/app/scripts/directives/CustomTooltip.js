@@ -1,5 +1,3 @@
-/* global $:false */
-
 'use strict';
 
 angular.module('wasabi.directives').directive('customTooltip', ['TooltipFactory', '$timeout',

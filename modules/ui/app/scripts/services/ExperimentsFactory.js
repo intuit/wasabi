@@ -6,8 +6,8 @@ angular.module('wasabi.services').factory('ExperimentsFactory', ['$resource', 'C
     function ($resource, ConfigFactory) {
         return $resource(ConfigFactory.baseUrl() + '/experiments/:id', {}, {
             'query': { method: 'GET',
-                params: {per_page: '@per_page', page: '@page', filter: '@filter', sort: '@sort', prefix: '@prefix'},
-                url: ConfigFactory.baseUrl() + '/experiments?page=:page&per_page=:per_page&filter=:filter&sort=:sort&timezone=' + (new Date().toString().match(/([-\+][0-9]+)\s/)[1]).replace('+', '%2B'),
+                params: {perPage: '@perPage', page: '@page', filter: '@filter', sort: '@sort', prefix: '@prefix'},
+                url: ConfigFactory.baseUrl() + '/experiments?page=:page&per_page=:perPage&filter=:filter&sort=:sort&timezone=' + (new Date().toString().match(/([-\+][0-9]+)\s/)[1]).replace('+', '%2B'),
                 transformResponse: function (data) {
                     var parsedData = $.parseJSON(data);
                     if (parsedData && parsedData.error) {
@@ -31,6 +31,14 @@ angular.module('wasabi.services').factory('ExperimentsFactory', ['$resource', 'C
                     return parsedData;
                 },
                 isArray: true
+            },
+            'getTraffic': { method: 'GET', params: {id: '@id',start: '@start',end: '@end'},
+                url: ConfigFactory.baseUrl() + '/experiments/:id/assignments/traffic/:start/:end?per_page=-1&timezone=' + (new Date().toString().match(/([-\+][0-9]+)\s/)[1]).replace('+', '%2B'),
+                transformResponse: function (data) {
+                    var parsedData = $.parseJSON(data);
+
+                    return parsedData;
+                }
             },
             'create': { method: 'POST',
                 transformRequest: function (data) {

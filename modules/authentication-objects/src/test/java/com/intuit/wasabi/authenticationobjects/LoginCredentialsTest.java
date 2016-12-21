@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,9 +22,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
+/**
+ * Test for the {@link LoginCredentials}
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class LoginCredentialsTest {
 
@@ -39,22 +43,22 @@ public class LoginCredentialsTest {
         creds = getLoginCredentials();
     }
 
-    /**
-     * @return
-     */
     private LoginCredentials getLoginCredentials() {
         return LoginCredentials.withUsername(username)
-                                .withNamespaceId(namespaceId)
-                                .withPassword(password)
-                                .build();
+                .withNamespaceId(namespaceId)
+                .withPassword(password)
+                .build();
     }
 
     @Test
     public void testLoginCredentials() {
-        assertNotNull(creds.getNamespaceId());
-        assertNotNull(creds.getPassword());
-        assertNotNull(creds.getUsername());
-        assertNotNull(creds.toString());
+        assertEquals(creds.getNamespaceId(), namespaceId);
+        assertEquals(creds.getPassword(), password);
+        assertEquals(creds.getUsername(), username);
+
+        assertTrue(creds.toString().contains(namespaceId));
+        assertFalse(creds.toString().contains(password));
+        assertTrue(creds.toString().contains(username.toString()));
     }
 
     @Test
@@ -68,7 +72,7 @@ public class LoginCredentialsTest {
     }
 
     @Test
-    public void testHashCodeAndEquals(){
+    public void testHashCodeAndEquals() {
         LoginCredentials cred1 = getLoginCredentials();
         LoginCredentials cred2 = getLoginCredentials();
         assertThat(cred1.equals(cred2), is(true));

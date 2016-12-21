@@ -52,7 +52,7 @@ public class ExperimentFilter extends PaginationFilter<Experiment> {
                 Property.creation_time, Property.start_time, Property.end_time, Property.modification_time,
                 Property.date_constraint_start, Property.date_constraint_end);
         super.excludeFromFulltext(Property.application_name_exact, Property.state_exact, Property.date_constraint_start,
-                Property.date_constraint_end);
+                Property.date_constraint_end, Property.favorite, Property.modification_time, Property.creation_time);
     }
 
     /**
@@ -63,7 +63,7 @@ public class ExperimentFilter extends PaginationFilter<Experiment> {
     public enum Property implements PaginationFilterProperty<Experiment> {
         application_name(experiment -> experiment.getApplicationName().toString(), StringUtils::containsIgnoreCase),
         application_name_exact(experiment -> experiment.getApplicationName().toString(), StringUtils::equalsIgnoreCase),
-        experiment_name(experiment -> experiment.getLabel().toString(), StringUtils::containsIgnoreCase),
+        experiment_label(experiment -> experiment.getLabel().toString(), StringUtils::containsIgnoreCase),
         created_by(Experiment::getCreatorID, StringUtils::containsIgnoreCase),
         creation_time(Experiment::getCreationTime, FilterUtil::extractTimeZoneAndTestDate),
         start_time(Experiment::getStartTime, FilterUtil::extractTimeZoneAndTestDate),
