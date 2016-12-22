@@ -240,13 +240,13 @@ public class DefaultAuthorization implements Authorization {
         List<UserRole> allSuperAdmins = getSuperAdminRoleList();
 
         if ( allSuperAdmins.size() == 1 )
-        	throw new IllegalArgumentException("Cannot delete last admin " + candidateUserInfo);
+        	throw new IllegalArgumentException("Cannot delete last superadmin " + candidateUserInfo.getUsername());
         
         boolean isSuperAdmin = allSuperAdmins.stream().anyMatch((UserRole ur) -> ur.getRole().equals(Role.SUPERADMIN) 
         		&& ur.getUserID().equals(candidateUserInfo.getUsername()));
         
         if ( ! isSuperAdmin ) {
-        	throw new IllegalArgumentException("User " + candidateUserInfo + " not a superadmin");
+        	throw new IllegalArgumentException("User " + candidateUserInfo.getUsername() + " not a superadmin");
         }
         
         authorizationRepository.removeUserFromSuperAdminRole(candidateUserInfo);
