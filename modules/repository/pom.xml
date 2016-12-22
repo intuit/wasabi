@@ -76,6 +76,11 @@
         </dependency>
         <dependency>
             <groupId>${project.parent.groupId}</groupId>
+            <artifactId>wasabi-assignment-objects</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.parent.groupId}</groupId>
             <artifactId>wasabi-feedback-objects</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
@@ -105,14 +110,14 @@
             <version>3.1.2</version>
         </dependency>
         <dependency>
-          <groupId>Hyrule</groupId>
-          <artifactId>Hyrule</artifactId>
-          <version>0.0.1</version>
+            <groupId>Hyrule</groupId>
+            <artifactId>Hyrule</artifactId>
+            <version>0.0.1</version>
         </dependency>
         <dependency>
-        	<groupId>log4j</groupId>
-        	<artifactId>log4j</artifactId>
-        	<version>1.2.17</version>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.17</version>
         </dependency>
     </dependencies>
 </project>

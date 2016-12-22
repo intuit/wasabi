@@ -19,6 +19,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intuit.wasabi.assignmentobjects.Assignment.Status;
 import com.intuit.wasabi.assignmentobjects.User.ID;
+import com.intuit.wasabi.exceptions.JsonExportException;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Application.Name;
 import com.intuit.wasabi.experimentobjects.Bucket;
@@ -224,9 +225,8 @@ public class AssignmentEnvelopePayload implements EnvelopePayload {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             return objectMapper.writer().writeValueAsString(this);
-        } catch (JsonProcessingException jsonProcExc) {
-            // FIXME: Using JsonExportException introduces a circular reference, hence for now a RuntimeException.
-            throw new RuntimeException("Can not serialize assignment for export.", jsonProcExc);
+        } catch (JsonProcessingException e) {
+            throw new JsonExportException("Can not serialize assignment for export.", e);
         }
     }
 }
