@@ -29,7 +29,6 @@ import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.ws.rs.core.Response;
@@ -292,30 +291,6 @@ public class AuthorizationResourceTest {
         
         assertThat(response.getStatus(), CoreMatchers.<Object>equalTo(204));
     }
-
-//    @Test(expected=IllegalArgumentException.class)
-//    public void removeLastUserFromSuperadminRoleThrowsException() throws Exception {
-//
-//        UserRole superAdmin = UserRole.newInstance(TESTAPP,Role.SUPERADMIN).withUserID(USER).build();
-//        List<UserRole> superAdmins = new ArrayList<>();
-//        superAdmins.add(superAdmin);
-//        AuthorizationResource authorizationResource = 
-//        		new AuthorizationResource(authorization, new HttpHeader("jaba-???"));
-//
-//        when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
-//        when(authorization.getUserInfo(USER)).thenReturn(UserInfo.from(USER).build());
-//        
-//        when(authorization.getUserInfo(USER)).thenReturn(UserInfo.from(USER).build());
-//        
-//        when(authorization.getSuperAdminRoleList()).thenReturn(superAdmins);
-//
-//        doThrow(IllegalArgumentException.class).when(authorization).removeUserFromSuperAdminRole(
-//        		Mockito.eq(UserInfo.from(TESTUSER).build()),
-//        		Mockito.eq(UserInfo.from(USER).build()));
-//
-//        Response response = authorizationResource.removeUserToSuperAdmin(TESTUSER, AUTHHEADER);
-//        
-//    }
 
     @Test
     public void getAllSuperadminRoleSuccess() throws Exception {

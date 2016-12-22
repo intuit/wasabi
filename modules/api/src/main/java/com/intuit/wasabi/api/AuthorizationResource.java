@@ -192,6 +192,12 @@ public class AuthorizationResource {
                 .entity(ImmutableMap.<String, Object>builder().put("assignmentStatuses", status).build()).build();
     }
 
+    /**
+     * Add user to super admin role
+     * @param userID - user to be added to super admin role
+     * @param authorizationHeader
+     * @return empty response body
+     */
     @POST
     @Path("/superadmins/{userID}")
     @Produces(APPLICATION_JSON)
@@ -222,6 +228,12 @@ public class AuthorizationResource {
         return httpHeader.headers(Status.NO_CONTENT).build();
     }
 
+    /**
+     * Delete user from superadmin roles
+     * @param userID
+     * @param authorizationHeader
+     * @return empty response body
+     */
     @DELETE
     @Path("/superadmins/{userID}")
     @Produces(APPLICATION_JSON)
@@ -248,6 +260,11 @@ public class AuthorizationResource {
         return httpHeader.headers(Status.NO_CONTENT).build();
     }
 
+    /**
+     * Get all super admins
+     * @param authorizationHeader
+     * @return array of super admins information
+     */
     @GET
     @Path("/superadmins")
     @Produces(APPLICATION_JSON)
