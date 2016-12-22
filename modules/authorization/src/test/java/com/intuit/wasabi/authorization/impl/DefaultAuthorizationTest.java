@@ -258,27 +258,6 @@ public class DefaultAuthorizationTest {
         verify(eventLog,times(1)).postEvent(any(AuthorizationChangeEvent.class));
     }
 
-//    @Test
-//    public void testAssignUserToSuperadminFail ure() throws Exception {
-//		UserInfo candidate = UserInfo.newInstance(Username.valueOf("candidate1")).build();
-////        UserRole userRole1 = UserRole.newInstance(TESTAPP,Role.ADMIN)
-////        		.withUserID(candidate.getUsername()).build();
-////        UserRole userRole2 = UserRole.newInstance(TESTAPP,Role.SUPERADMIN)
-////        		.withUserID(USER).build();
-//        UserRoleList userRoleList = new UserRoleList();
-////        userRoleList.addRole(userRole1);
-////        userRoleList.addRole(userRole2);
-////        when(authorizationRepository.getSuperAdminRoleList()).thenReturn(
-////        		userRoleList.getRoleList());
-//        when(authorizationRepository.getUserRoleList(candidate.getUsername())).thenReturn(userRoleList);
-//        
-//        defaultAuthorization.assignUserToSuperAdminRole(candidate,
-//        		UserInfo.newInstance(USER).build());
-//        
-//        verify(authorizationRepository,times(1)).assignUserToSuperAdminRole(candidate);
-//        verify(eventLog,times(1)).postEvent(any(AuthorizationChangeEvent.class));
-//    }
-
     @Test(expected=RepositoryException.class)
     public void testAssignToSuperAdminThrowsException() throws Exception {
 		UserInfo candidate = UserInfo.newInstance(USER).build();
