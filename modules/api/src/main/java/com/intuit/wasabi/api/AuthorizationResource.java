@@ -239,7 +239,7 @@ public class AuthorizationResource {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Remove superadmin priveleges to user")
     @Timed
-    public Response removeUserToSuperAdmin(
+    public Response removeUserFromSuperAdmin(
     		@PathParam("userID")
             @ApiParam(value = "User ID")
             final Username userID,

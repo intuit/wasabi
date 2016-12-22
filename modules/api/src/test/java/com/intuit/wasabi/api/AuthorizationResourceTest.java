@@ -287,7 +287,7 @@ public class AuthorizationResourceTest {
         
         when(authorization.getSuperAdminRoleList()).thenReturn(superAdmins);
         
-        Response response = authorizationResource.removeUserToSuperAdmin(TESTUSER, AUTHHEADER);
+        Response response = authorizationResource.removeUserFromSuperAdmin(TESTUSER, AUTHHEADER);
         
         assertThat(response.getStatus(), CoreMatchers.<Object>equalTo(204));
     }
@@ -344,7 +344,7 @@ public class AuthorizationResourceTest {
         when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
         when(authorization.getUserInfo(USER)).thenReturn(UserInfo.from(USER).build());
         
-        Response response = authorizationResource.removeUserToSuperAdmin(TESTUSER, AUTHHEADER);
+        Response response = authorizationResource.removeUserFromSuperAdmin(TESTUSER, AUTHHEADER);
         
         assertThat(response.getStatus(), CoreMatchers.<Object>equalTo(204));
     }
@@ -395,7 +395,7 @@ public class AuthorizationResourceTest {
         doThrow(AuthenticationException.class)
         	.when(authorization).checkSuperAdmin(USER);
        
-        Response response = authorizationResource.removeUserToSuperAdmin(TESTUSER, AUTHHEADER);
+        Response response = authorizationResource.removeUserFromSuperAdmin(TESTUSER, AUTHHEADER);
     }
 
     @Test
