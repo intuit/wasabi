@@ -466,15 +466,15 @@ public class AuthorizationResource {
         }
 
         UserPermissionsList userPermissionsList = authorization.getUserPermissionsList(subject);
-        List<UserRoleList> userRoleListList = new ArrayList<>();
+        List<UserRoleList> userRoleList = new ArrayList<>();
         for (UserPermissions userPermissions : userPermissionsList.getPermissionsList()) {
             UserRoleList list = authorization.getApplicationUsers(userPermissions.getApplicationName());
             if (!list.getRoleList().isEmpty()) {
-                userRoleListList.add(list);
+                userRoleList.add(list);
             }
         }
 
-        return httpHeader.headers().entity(userRoleListList).build();
+        return httpHeader.headers().entity(userRoleList).build();
     }
     
     

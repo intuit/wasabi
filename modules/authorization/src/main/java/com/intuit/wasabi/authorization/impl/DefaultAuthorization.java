@@ -17,7 +17,6 @@ package com.intuit.wasabi.authorization.impl;
 
 import com.google.common.base.Optional;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
-import com.intuit.wasabi.authenticationobjects.UserInfo.Username;
 import com.intuit.wasabi.authorization.Authorization;
 import com.intuit.wasabi.authorizationobjects.*;
 import com.intuit.wasabi.eventlog.EventLog;
@@ -219,6 +218,8 @@ public class DefaultAuthorization implements Authorization {
 	@Override
 	public void assignUserToSuperAdminRole(UserInfo candidateUserInfo, UserInfo assigningUserInfo) {
         
+        LOGGER.debug("Assigning super admin role to {} by {} ", candidateUserInfo, assigningUserInfo);
+
         UserRoleList userRoleList = getUserRoleList(candidateUserInfo.getUsername());
         
         LOGGER.debug("User role list {}", userRoleList);
@@ -237,9 +238,13 @@ public class DefaultAuthorization implements Authorization {
 	@Override
 	public void removeUserFromSuperAdminRole(UserInfo candidateUserInfo, UserInfo assigningUserInfo) {
         
+		LOGGER.debug("Removing user {} from superadmin by {}", candidateUserInfo, assigningUserInfo);
+		
         List<UserRole> allSuperAdmins = getSuperAdminRoleList();
 
-        if ( allSuperAdmins.size() == 1 )
+		LOGGER.debug("Current superadmins {}", allSuperAdmins);
+
+		if ( allSuperAdmins.size() == 1 )
         	throw new IllegalArgumentException("Cannot delete last superadmin " + candidateUserInfo.getUsername());
         
         boolean isSuperAdmin = allSuperAdmins.stream().anyMatch((UserRole ur) -> ur.getRole().equals(Role.SUPERADMIN) 
@@ -256,6 +261,8 @@ public class DefaultAuthorization implements Authorization {
 
 	@Override
 	public List<UserRole> getSuperAdminRoleList() {
+		LOGGER.debug("Getting all super admins");
+		
         return authorizationRepository.getSuperAdminRoleList();	
 	}
 
