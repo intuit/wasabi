@@ -26,6 +26,7 @@ import com.intuit.wasabi.tests.model.factory.*;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.path.json.exception.JsonPathException;
 import com.jayway.restassured.response.Response;
+
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.testng.Assert;
@@ -445,6 +446,32 @@ public class TestBase extends ServiceTestBase {
         return ExperimentFactory.createFromJSONString(response.jsonPath().prettify());
     }
 
+    public void postSuperAdmin(String userId, int expectedStatus, APIServerConnector apiServerConnector) {
+
+        response = apiServerConnector.doPost("authorization/superadmins/" + userId);
+        assertReturnCode(response, expectedStatus);
+    }
+
+    public void deleteSuperAdmin(String userId, int expectedStatus, APIServerConnector apiServerConnector) {
+
+        response = apiServerConnector.doDelete("authorization/superadmins/" + userId);
+        assertReturnCode(response, expectedStatus);
+    }
+
+    public List<Map<String, Object>> getSuperAdmins(int expectedStatus, APIServerConnector apiServerConnector) {
+        response = apiServerConnector.doGet("authorization/superadmins");
+        
+        LOGGER.debug("Response body: " + response.print());
+        
+        List<Map<String,Object>> superadmins = response.jsonPath().getList("");
+        
+        System.out.println(superadmins.size());
+        
+        assertReturnCode(response, expectedStatus);
+        
+        return superadmins;
+    }
+    
     /**
      * Sends a GET request to get all experiments.
      * The response must contain {@link HttpStatus#SC_OK}.

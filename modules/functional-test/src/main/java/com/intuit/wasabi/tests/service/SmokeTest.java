@@ -16,6 +16,8 @@
 package com.intuit.wasabi.tests.service;
 
 import com.intuit.wasabi.tests.library.TestBase;
+
+import static com.intuit.wasabi.tests.library.util.Constants.*;
 import com.intuit.wasabi.tests.library.util.Constants;
 import com.intuit.wasabi.tests.library.util.ModelUtil;
 import com.intuit.wasabi.tests.library.util.RetryAnalyzer;
@@ -25,6 +27,7 @@ import com.intuit.wasabi.tests.library.util.serialstrategies.DefaultNameInclusio
 import com.intuit.wasabi.tests.model.*;
 import com.intuit.wasabi.tests.model.analytics.*;
 import com.intuit.wasabi.tests.model.factory.*;
+
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.testng.Assert;
@@ -42,7 +45,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 public class SmokeTest extends TestBase {
 
-    private static final Logger LOGGER = getLogger(SmokeTest.class);
+	private static final Logger LOGGER = getLogger(SmokeTest.class);
     private Experiment experiment;
     private List<Bucket> buckets = new ArrayList<>();
     private List<User> users = new ArrayList<>();

@@ -20,7 +20,17 @@ import org.apache.commons.codec.binary.Base64;
 
 public class Constants {
 
-    public static final String DEFAULT_CONFIG_FILE = "config.properties";
+	public static final String USER_USER_ID = "userID";
+	public static final String WASABI_EMAIL = "wasabi_reader@example.com";
+	public static final String WASABI_LAST_NAME = "Reader";
+	public static final String WASABI_FIRST_NAME = "Wasabi";
+	public static final String USER_EMAIL = "userEmail";
+	public static final String USER_ROLE = "role";
+	public static final String USER_LAST_NAME = "lastName";
+	public static final String USER_FIRST_NAME = "firstName";
+	public static final String USER_READER = "wasabi_reader";
+
+	public static final String DEFAULT_CONFIG_FILE = "config.properties";
     public static final String DEFAULT_CONFIG_SERVER_PROTOCOL = "http";
     public static final String DEFAULT_CONFIG_SERVER_NAME = "localhost:8080";
     public static final String DEFAULT_CONFIG_API_VERSION_STRING = "v1";
