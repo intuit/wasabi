@@ -247,6 +247,8 @@ public class AuthorizationResource {
             @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
             final String authorizationHeader) {
     	
+    	LOGGER.debug("Removing user {} from superadmin ", userID);
+    	
     	// Check for assigning user is superadmin
         Username assigningUser = authorization.getUser(authorizationHeader);
         UserInfo assigninUserInfo = authorization.getUserInfo(assigningUser);
