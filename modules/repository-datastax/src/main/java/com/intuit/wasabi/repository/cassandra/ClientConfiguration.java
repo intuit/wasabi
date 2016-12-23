@@ -175,4 +175,14 @@ public class ClientConfiguration implements CassandraDriver.Configuration {
     public Integer getTokenAwareLoadBalancingUsedHostsPerRemoteDc() {
         return Integer.valueOf(getProperty("tokenAwareLoadBalancingUsedHostsPerRemoteDc", properties, "1"));
     }
+
+    @Override
+    public boolean isSlowQueryLoggingEnabled(){
+        return Boolean.valueOf(getProperty("isSlowQueryLoggingEnabled", properties, "False"));
+    }
+
+    @Override
+    public long getSlowQueryLoggingThresholdMilli(){
+        return Long.valueOf(getProperty("slowQueryLoggingThresholdMilli", properties, "100"));
+    }
 }

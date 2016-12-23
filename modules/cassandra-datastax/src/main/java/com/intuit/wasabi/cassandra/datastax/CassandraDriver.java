@@ -218,5 +218,17 @@ public interface CassandraDriver extends Closeable {
 
         Integer getTokenAwareLoadBalancingUsedHostsPerRemoteDc();
 
+        /**
+         *
+         * @return boolean true if slow query logging is enabled
+         */
+        boolean isSlowQueryLoggingEnabled();
+
+        /**
+         * This option is only usable when isSlowQueryLoggingEnabled is true
+         * @return a long to indicate the number of milliseconds to consider the query to be slow.
+         */
+        long getSlowQueryLoggingThresholdMilli();
+
     }
 }

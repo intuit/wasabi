@@ -19,10 +19,7 @@ import com.codahale.metrics.health.HealthCheckRegistry;
 import com.datastax.driver.core.*;
 import com.datastax.driver.core.exceptions.DriverException;
 import com.datastax.driver.core.exceptions.InvalidQueryException;
-import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
-import com.datastax.driver.core.policies.DefaultRetryPolicy;
-import com.datastax.driver.core.policies.RoundRobinPolicy;
-import com.datastax.driver.core.policies.TokenAwarePolicy;
+import com.datastax.driver.core.policies.*;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.intuit.wasabi.cassandra.datastax.health.DefaultCassandraHealthCheck;
@@ -36,6 +33,9 @@ import java.io.IOException;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -142,14 +142,6 @@ public class DefaultCassandraDriver implements CassandraDriver {
                         .getProtocolOptions()
                         .setCompression(ProtocolOptions.Compression.LZ4);
 
-                Metadata metadata = cluster.getMetadata();
-                LOGGER.info("Connected to cluster: {}\n", metadata.getClusterName());
-                for (Host host : metadata.getAllHosts()) {
-                    LOGGER.info("Datatacenter: {}; Host: {}; Rack: {}\n",
-                            host.getDatacenter(),
-                            host.getAddress(),
-                            host.getRack());
-                }
                 synchronized (this) {
                     try {
                         session = cluster.connect(getConfiguration().getKeyspaceName());
@@ -173,6 +165,33 @@ public class DefaultCassandraDriver implements CassandraDriver {
                         keyspaceInitialized = false;
                     }
                 }
+
+                try {
+                    Metadata metadata = cluster.getMetadata();
+                    LOGGER.info("Connected to cluster: {}\n", metadata.getClusterName());
+                    for (Host host : metadata.getAllHosts()) {
+                        LOGGER.info("Datatacenter: {}; Host: {}; Rack: {}\n",
+                                host.getDatacenter(),
+                                host.getAddress(),
+                                host.getRack());
+                    }
+                } catch (Exception e){
+                    LOGGER.error("Failed to connect to cluster\n", e);
+                }
+
+                if(getConfiguration().isSlowQueryLoggingEnabled()){
+
+                    LOGGER.warn("Enabling slow query logging could have performance impact!!");
+                    QueryLogger queryLogger = QueryLogger.builder()
+                            .withConstantThreshold(getConfiguration().getSlowQueryLoggingThresholdMilli())
+                            .build();
+                    cluster.register(queryLogger);
+                    LOGGER.warn("Slow query logging threshold is set to be {} milliseconds",
+                            getConfiguration().getSlowQueryLoggingThresholdMilli());
+
+                    poolingMonitoring(poolingOptions);
+                }
+
                 LOGGER.info("Connected to the {} keyspace", getConfiguration().getKeyspaceName());
             }
         }
@@ -219,8 +238,8 @@ public class DefaultCassandraDriver implements CassandraDriver {
                 // Send all output to the Appendable object sb
                 Formatter formatter = new Formatter(sb, Locale.US);
 
-                Map<String, Object> keyspaceConfig = new HashMap<String, Object>();
-                Map<String, Object> strategyOptions = new HashMap<String, Object>();
+                Map<String, Object> keyspaceConfig = new HashMap<>();
+                Map<String, Object> strategyOptions = new HashMap<>();
 
                 String keyspaceReplicationStrategy = config.getKeyspaceStrategyClass();
                 // Get the keyspaceReplicationStrategy and default it to SimpleStrategy
@@ -237,7 +256,10 @@ public class DefaultCassandraDriver implements CassandraDriver {
                     for (String replicationValue : replicationValues) {
                         String[] datacenterReplicationValues = replicationValue.split(":");
                         strategyOptions.put(datacenterReplicationValues[0], datacenterReplicationValues[1]);
-                        sb.append(", '"+datacenterReplicationValues[0]+"' : "+ datacenterReplicationValues[1]);
+                        sb.append(", '")
+                                .append(datacenterReplicationValues[0])
+                                .append("' : ").
+                                append(datacenterReplicationValues[1]);
                     }
                     sb.append(" }");
                 } else if ("SimpleStrategy".equals(keyspaceReplicationStrategy)) {
@@ -247,7 +269,7 @@ public class DefaultCassandraDriver implements CassandraDriver {
                         keyspaceReplicationFactor = 1;
                     }
                     strategyOptions.put("replication_factor", "" + keyspaceReplicationFactor);
-                    sb.append("'SimpleStrategy', 'replication_factor' : "+keyspaceReplicationFactor)
+                    sb.append("'SimpleStrategy', 'replication_factor' : ").append(keyspaceReplicationFactor)
                             .append(" }");
                 }
 
@@ -291,5 +313,23 @@ public class DefaultCassandraDriver implements CassandraDriver {
     public void close() {
         this.session.close();
         this.cluster.close();
+    }
+
+    private void poolingMonitoring(PoolingOptions poolingOptions){
+        final LoadBalancingPolicy loadBalancingPolicy =
+                cluster.getConfiguration().getPolicies().getLoadBalancingPolicy();
+        ScheduledExecutorService scheduled =
+                Executors.newScheduledThreadPool(1);
+        scheduled.scheduleAtFixedRate((Runnable) () -> {
+            Session.State state = session.getState();
+            for (Host host : state.getConnectedHosts()) {
+                HostDistance distance = loadBalancingPolicy.distance(host);
+                int connections = state.getOpenConnections(host);
+                int inFlightQueries = state.getInFlightQueries(host);
+                LOGGER.info("{} connections={}, current load={}, max load={}",
+                        host, connections, inFlightQueries,
+                        connections * poolingOptions.getMaxRequestsPerConnection(distance));
+            }
+        }, 5, 5, TimeUnit.SECONDS);
     }
 }
