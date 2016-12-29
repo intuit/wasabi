@@ -203,6 +203,10 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
 
     /**
      *
+     * This method is used to fetch experiments associated with the given application and page.
+     * Experiment details includes experiment id and is_assign flag.
+     * Note: Experiment details does not include experiment label.
+     *
      * @param applicationName
      * @param pageName
      * @return PageExperiment list having only ExperimentIDs and isAssign flag (No label)
@@ -235,16 +239,17 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
      * experimentIds is NULL when called from AssignmentsResource.getBatchAssignments()
      * experimentBatch.labels are NULL when called from AssignmentsImpl.doPageAssignments()
      *
-     * @param userID
-     * @param appName
-     * @param context
-     * @param experimentBatch
-     * @param experimentIds
-     * @param prioritizedExperimentList
-     * @param experimentMap
-     * @param existingUserAssignments
-     * @param bucketMap
-     * @param exclusionMap
+     * @param userID Given user id
+     * @param appName Given application name
+     * @param context Given context
+     * @param experimentBatch Given experiment batch. This object will be modified and become one of the output; in the case of AssignmentsImpl.doPageAssignments()
+     * @param experimentIds Given experiment ids.
+     * @param prioritizedExperimentList Output: prioritized experiment list of ALL the experiments for the given application.
+     * @param experimentMap Output: Map of 'experiment id TO experiment' of ALL the experiments for the given application.
+     * @param existingUserAssignments Output: ALL the existing user assignments of given user_id, application name and context.
+     * @param bucketMap Output: Map of 'experiment id TO BucketList' of ONLY experiments which are associated to the given application and page.
+     * @param exclusionMap Output: Map of 'experiment id TO to its mutual experiment ids' of ONLY experiments which are associated to the given application and page.
+     *
      */
     @Override
     @Timed
@@ -255,7 +260,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                                             Map<Experiment.ID, BucketList> bucketMap,
                                             Map<Experiment.ID, List<Experiment.ID>> exclusionMap
                                             ) {
-        if(logger.isDebugEnabled()) logger.debug("populateExperimentMetadata - STARTED: userID="+userID+", appName="+appName+", context="+context+", experimentBatch="+experimentBatch+", experimentIds="+experimentIds);
+        if(logger.isDebugEnabled()) logger.debug("populateExperimentMetadata - STARTED: userID={}, appName={}, context={}, experimentBatch={}, experimentIds={}", userID, appName, context, experimentBatch, experimentIds);
 
         ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Application>> applicationFuture = null;
         ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment>> experimentsFuture = null;
@@ -264,13 +269,13 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         Map<Experiment.ID, ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Exclusion>>> exclusionFutureMap = new HashMap<>();
 
         experimentsFuture = experimentAccessor.asyncGetExperimentByAppName(appName.toString());
-        if(logger.isDebugEnabled()) logger.debug("Sent experimentAccessor.asyncGetExperimentByAppName("+appName.toString()+")");
+        if(logger.isDebugEnabled()) logger.debug("Sent experimentAccessor.asyncGetExperimentByAppName({})", appName);
 
         applicationFuture = prioritiesAccessor.asyncGetPriorities(appName.toString());
-        if(logger.isDebugEnabled()) logger.debug("Sent prioritiesAccessor.asyncGetPriorities("+appName.toString()+")");
+        if(logger.isDebugEnabled()) logger.debug("Sent prioritiesAccessor.asyncGetPriorities({})", appName);
 
         userAssignmentsFuture = experimentUserIndexAccessor.asyncSelectBy(userID.toString(), appName.toString(), context.toString());
-        if(logger.isDebugEnabled()) logger.debug("Sent experimentUserIndexAccessor.asyncSelectBy("+userID.toString()+", "+appName.toString()+", "+context.toString()+")");
+        if(logger.isDebugEnabled()) logger.debug("Sent experimentUserIndexAccessor.asyncSelectBy({}, {}, {})", userID, appName, context);
 
         //Process the Futures in the order that are expected to arrive earlier
         try {
@@ -279,7 +284,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                 Experiment exp = ExperimentHelper.makeExperiment(expPojo);
                 experimentMap.put(exp.getID(), exp);
             });
-            if(logger.isDebugEnabled()) logger.debug("experimentMap=> "+experimentMap);
+            if(logger.isDebugEnabled()) logger.debug("experimentMap=> {}", experimentMap);
 
             int priorityValue=1;
             for (com.intuit.wasabi.repository.cassandra.pojo.Application priority : applicationFuture.get().all()) {
@@ -291,7 +296,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
             }
             if(logger.isDebugEnabled()) {
                 for(PrioritizedExperiment exp:prioritizedExperimentList.getPrioritizedExperiments()) {
-                    logger.debug("prioritizedExperiment=> " + exp);
+                    logger.debug("prioritizedExperiment=> {} ", exp);
                 }
             }
 
@@ -306,7 +311,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                     );
                 }
             });
-            if(logger.isDebugEnabled()) logger.debug("existingUserAssignments=> "+existingUserAssignments);
+            if(logger.isDebugEnabled()) logger.debug("existingUserAssignments=> {} ", existingUserAssignments);
 
         } catch(InterruptedException | ExecutionException e) {
             logger.error("Exception occurred while populateExperimentMetadata section#1...", e);
@@ -336,10 +341,10 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
 
         experimentIds.stream().forEach(experimentId -> {
             bucketFutureMap.put(experimentId, bucketAccessor.asyncGetBucketByExperimentId(experimentId.getRawID()));
-            if(logger.isDebugEnabled()) logger.debug("Sent bucketAccessor.asyncGetBucketByExperimentId ("+experimentId.getRawID()+")");
+            if(logger.isDebugEnabled()) logger.debug("Sent bucketAccessor.asyncGetBucketByExperimentId ({})", experimentId.getRawID());
 
             exclusionFutureMap.put(experimentId, exclusionAccessor.asyncGetExclusions(experimentId.getRawID()));
-            if(logger.isDebugEnabled()) logger.debug("Sent exclusionAccessor.asyncGetExclusions ("+experimentId.getRawID()+")");
+            if(logger.isDebugEnabled()) logger.debug("Sent exclusionAccessor.asyncGetExclusions ({})", experimentId.getRawID());
         });
 
         try {
@@ -352,7 +357,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                         }
                 );
             }
-            if(logger.isDebugEnabled()) logger.debug("bucketMap=> "+bucketMap);
+            if(logger.isDebugEnabled()) logger.debug("bucketMap=> {} ", bucketMap);
 
             for (Experiment.ID expId : exclusionFutureMap.keySet()) {
                 ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Exclusion>> exclusionFuture = exclusionFutureMap.get(expId);
@@ -362,7 +367,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                         }
                 );
             }
-            if(logger.isDebugEnabled()) logger.debug("exclusionMap=> "+exclusionMap);
+            if(logger.isDebugEnabled()) logger.debug("exclusionMap=> {} ", exclusionMap);
 
         } catch(InterruptedException | ExecutionException e) {
             logger.error("Exception occurred while populateExperimentMetadata section#2...", e);

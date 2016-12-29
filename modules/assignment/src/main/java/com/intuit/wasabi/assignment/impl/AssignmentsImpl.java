@@ -433,14 +433,6 @@ public class AssignmentsImpl implements Assignments {
         return assignment;
     }
 
-    private static List<ResultSetFuture> sendQueries(Session session, String query, Object[] partitionKeys) {
-        List<ResultSetFuture> futures = Lists.newArrayListWithExpectedSize(partitionKeys.length);
-        for (Object partitionKey : partitionKeys) {
-            futures.add(session.executeAsync(query, partitionKey));
-        }
-        return futures;
-    }
-
     /**
      *
      * Create/Retrieve assignments for a given user, application, context and for
