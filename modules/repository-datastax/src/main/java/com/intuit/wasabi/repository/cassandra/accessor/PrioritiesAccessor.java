@@ -15,9 +15,11 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.cassandra.accessor;
 
+import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.mapping.Result;
 import com.datastax.driver.mapping.annotations.Accessor;
 import com.datastax.driver.mapping.annotations.Query;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.intuit.wasabi.repository.cassandra.pojo.Application;
 
 import java.util.List;
@@ -37,6 +39,9 @@ public interface PrioritiesAccessor {
      */
     @Query("select * from application where app_name = ?")
     Result<Application> getPriorities(String applicationName);
+
+    @Query("select * from application where app_name = ?")
+    ListenableFuture<Result<Application>> asyncGetPriorities(String applicationName);
 
     /**
      * Update the priority list for an application

@@ -40,7 +40,7 @@ public interface PageExperimentIndexAccessor {
             "values(?,?,?,?)")
     Statement insertBy(String appName, String page, UUID experimentId, boolean assign);
 
-    /**
+    /**experi
      * Delete by using attributes
      * @param appName
      * @param page

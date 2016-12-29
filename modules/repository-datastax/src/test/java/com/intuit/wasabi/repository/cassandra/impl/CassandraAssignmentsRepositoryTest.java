@@ -10,6 +10,7 @@ import com.intuit.wasabi.analyticsobjects.Parameters;
 import com.intuit.wasabi.analyticsobjects.counts.AssignmentCounts;
 import com.intuit.wasabi.assignmentobjects.Assignment;
 import com.intuit.wasabi.assignmentobjects.User;
+import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.eventlog.EventLog;
 import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
 import com.intuit.wasabi.experimentobjects.Application;
@@ -18,13 +19,11 @@ import com.intuit.wasabi.experimentobjects.Context;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.RepositoryException;
-import com.intuit.wasabi.repository.cassandra.accessor.BucketAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.StagingAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.UserAssignmentAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.*;
 import com.intuit.wasabi.repository.cassandra.accessor.count.BucketAssignmentCountAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.export.UserAssignmentExportAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentUserIndexAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.index.PageExperimentIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.UserAssignmentIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.UserBucketIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.pojo.UserAssignment;
@@ -75,6 +74,11 @@ public class CassandraAssignmentsRepositoryTest {
     @Mock BucketAssignmentCountAccessor bucketAssignmentCountAccessor;
 
     @Mock StagingAccessor stagingAccessor;
+    @Mock PrioritiesAccessor prioritiesAccessor;
+    @Mock ExclusionAccessor exclusionAccessor;
+    @Mock PageExperimentIndexAccessor pageExperimentIndexAccessor;
+
+    @Mock CassandraDriver driver;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS) MappingManager mappingManager;
     @Mock Result mockedResultMapping;
@@ -99,6 +103,10 @@ public class CassandraAssignmentsRepositoryTest {
                 userBucketIndexAccessor,
                 bucketAssignmentCountAccessor,
                 stagingAccessor,
+                prioritiesAccessor,
+                exclusionAccessor,
+                pageExperimentIndexAccessor,
+                driver,
                 mappingManager,
                 5,
                 true,
@@ -537,6 +545,10 @@ public class CassandraAssignmentsRepositoryTest {
                 userBucketIndexAccessor,
                 bucketAssignmentCountAccessor,
                 stagingAccessor,
+                prioritiesAccessor,
+                exclusionAccessor,
+                pageExperimentIndexAccessor,
+                driver,
                 mappingManager,
                 5,
                 false,
@@ -573,6 +585,10 @@ public class CassandraAssignmentsRepositoryTest {
                 userBucketIndexAccessor,
                 bucketAssignmentCountAccessor,
                 stagingAccessor,
+                prioritiesAccessor,
+                exclusionAccessor,
+                pageExperimentIndexAccessor,
+                driver,
                 mappingManager,
                 5,
                 false,
@@ -613,6 +629,10 @@ public class CassandraAssignmentsRepositoryTest {
                 userBucketIndexAccessor,
                 bucketAssignmentCountAccessor,
                 stagingAccessor,
+                prioritiesAccessor,
+                exclusionAccessor,
+                pageExperimentIndexAccessor,
+                driver,
                 mappingManager,
                 5,
                 true,
@@ -1303,6 +1323,10 @@ public class CassandraAssignmentsRepositoryTest {
                 userBucketIndexAccessor,
                 bucketAssignmentCountAccessor,
                 stagingAccessor,
+                prioritiesAccessor,
+                exclusionAccessor,
+                pageExperimentIndexAccessor,
+                driver,
                 mappingManager,
                 5,
                 false,

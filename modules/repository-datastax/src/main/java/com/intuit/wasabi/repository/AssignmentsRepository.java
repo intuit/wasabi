@@ -20,13 +20,12 @@ import com.intuit.wasabi.analyticsobjects.Parameters;
 import com.intuit.wasabi.analyticsobjects.counts.AssignmentCounts;
 import com.intuit.wasabi.assignmentobjects.Assignment;
 import com.intuit.wasabi.assignmentobjects.User;
-import com.intuit.wasabi.experimentobjects.Application;
-import com.intuit.wasabi.experimentobjects.Bucket;
-import com.intuit.wasabi.experimentobjects.Context;
-import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.experimentobjects.*;
 
 import javax.ws.rs.core.StreamingOutput;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -164,5 +163,33 @@ public interface AssignmentsRepository {
      * @return AssignmentCounts
      */
     AssignmentCounts getBucketAssignmentCount(Experiment experiment);
+
+    /**
+     * Populate experiment metadata asynchronously...
+     *
+     * @param userID
+     * @param appName
+     * @param context
+     * @param experimentIds
+     * @param prioritizedExperimentList
+     * @param experimentMap
+     * @param existingUserAssignments
+     * @param bucketMap
+     * @param exclusionMap
+     */
+    void populateExperimentMetadata(User.ID userID, Application.Name appName, Context context, ExperimentBatch experimentBatch, Set<Experiment.ID> experimentIds,
+                                    PrioritizedExperimentList prioritizedExperimentList,
+                                    Map<Experiment.ID, Experiment> experimentMap,
+                                    Table<Experiment.ID, Experiment.Label, String> existingUserAssignments,
+                                    Map<Experiment.ID, BucketList> bucketMap,
+                                    Map<Experiment.ID, List<Experiment.ID>> exclusionMap
+    );
+
+    /**
+     * @param applicationName
+     * @param pageName
+     * @return PageExperiment list having only ExperimentIDs and isAssign flag (No label)
+     */
+    List<PageExperiment> getExperiments(Application.Name applicationName, Page.Name pageName);
 
 }

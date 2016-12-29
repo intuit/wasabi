@@ -18,6 +18,7 @@ package com.intuit.wasabi.repository.cassandra.accessor;
 import com.datastax.driver.mapping.Result;
 import com.datastax.driver.mapping.annotations.Accessor;
 import com.datastax.driver.mapping.annotations.Query;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.intuit.wasabi.repository.cassandra.pojo.Bucket;
 
 import java.util.List;
@@ -44,6 +45,9 @@ public interface BucketAccessor {
      */
     @Query("select * from bucket where experiment_id = ?")
     Result<Bucket> getBucketByExperimentId(UUID experimentId);
+
+    @Query("select * from bucket where experiment_id = ?")
+    ListenableFuture<Result<Bucket>> asyncGetBucketByExperimentId(UUID experimentId);
 
     /**
      * Insert a bucket

@@ -15,6 +15,10 @@
  *******************************************************************************/
 package com.intuit.wasabi.assignment.impl;
 
+import com.datastax.driver.core.ResultSetFuture;
+import com.datastax.driver.core.Session;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -57,7 +61,8 @@ import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.*;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.LongAdder;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -109,6 +114,7 @@ public class AssignmentsImpl implements Assignments {
 
     private EventLog eventLog;
 
+    private PerformanceTimeLogger perfLogger;
     /**
      * Helper for unit tests
      * @param assignmentRepository
@@ -171,6 +177,7 @@ public class AssignmentsImpl implements Assignments {
         this.assignmentsRepository = assignmentsRepository;
         this.mutexRepository = mutexRepository;
         this.eventLog = eventLog;
+        this.perfLogger=new PerformanceTimeLogger(LOGGER);
     }
 
     /**
@@ -426,29 +433,80 @@ public class AssignmentsImpl implements Assignments {
         return assignment;
     }
 
+    private static List<ResultSetFuture> sendQueries(Session session, String query, Object[] partitionKeys) {
+        List<ResultSetFuture> futures = Lists.newArrayListWithExpectedSize(partitionKeys.length);
+        for (Object partitionKey : partitionKeys) {
+            futures.add(session.executeAsync(query, partitionKey));
+        }
+        return futures;
+    }
+
+    /**
+     *
+     * Create/Retrieve assignments for a given user, application, context and for
+     * given experiments (experimentBatch/allowAssignments) associated to a given page.
+     *
+     * This method is called from two places:
+     * 1. First directly through API call AssignmentsResource.getBatchAssignments()
+     *    In this case pageName and allowAssignments are NULL
+     *
+     * 2. Second from AssignmentsImpl.doPageAssignments()
+     *    In this case pageName and allowAssignments are provided.
+     *    To avoid performance degradation (duplicate calls to )
+     *
+     *
+     * @param userID           the {@link com.intuit.wasabi.assignmentobjects.User.ID} of the person we want the assignment for
+     * @param applicationName  the {@link com.intuit.wasabi.experimentobjects.Application.Name} the app we want the assignment for
+     * @param context          the {@link Context} of the assignment call
+     * @param createAssignment <code>true</code> when a new Assignment should be created
+     * @param forceInExperiment
+     * @param headers          the {@link HttpHeaders} that can be used by the segmentation
+     * @param experimentBatch  the {@link ExperimentBatch} experiment batch for batch assignments
+     *                         Experiment labels are NOT PRESENT when called from AssignmentsImpl.doPageAssignments()
+     *
+     * @param pageName         the {@link com.intuit.wasabi.experimentobjects.Page.Name} the page name for the assignment
+     *                         NULL when called from AssignmentsResource.getBatchAssignments()
+     *                         PRESENT when called from AssignmentsImpl.doPageAssignments()
+     *
+     * @param allowAssignments {@link HashMap} for each experiment whether the assignment is allowed
+     *                         NULL when called from AssignmentsResource.getBatchAssignments()
+     *                         PRESENT when called from AssignmentsImpl.doPageAssignments()
+     *
+     * @return
+     */
     @Override
     public List<Map> doBatchAssignments(User.ID userID, Application.Name applicationName, Context context,
                                             boolean createAssignment, boolean forceInExperiment, HttpHeaders headers,
                                             ExperimentBatch experimentBatch, Page.Name pageName,
                                             Map<Experiment.ID, Boolean> allowAssignments) {
 
-        // Get the metadata of all the experiments for this application
-        Table<Experiment.ID, Experiment.Label, Experiment> allExperiments = repository.getExperimentList(applicationName);
+        long sTime,totalSTime;
+        totalSTime=System.currentTimeMillis();
+        sTime=System.currentTimeMillis();
+
+        //allowAssignments is NULL when called from AssignmentsResource.getBatchAssignments()
+        Set<Experiment.ID> experimentIds = allowAssignments==null?null:allowAssignments.keySet();
+
+        PrioritizedExperimentList appPriorities = new PrioritizedExperimentList();
+        Map<Experiment.ID, com.intuit.wasabi.experimentobjects.Experiment> experimentMap = new HashMap<>();
+        Table<Experiment.ID, Experiment.Label, String> userAssignments = HashBasedTable.create();
+        Map<Experiment.ID, BucketList> bucketMap = new HashMap<>();
+        Map<Experiment.ID, List<Experiment.ID>> exclusionMap = new HashMap<>();
+
+        sTime=System.currentTimeMillis();
+        assignmentsRepository.populateExperimentMetadata(userID, applicationName, context, experimentBatch, experimentIds, appPriorities, experimentMap, userAssignments, bucketMap, exclusionMap);
+        perfLogger.log(PerformanceTimeLogger.OperationKey.POPULATE_EXPERIMENT_METADATA, System.currentTimeMillis()-sTime);
 
         List<Map> allAssignments = new ArrayList<>();
-
-        // Get the assignments for userID across all experiments in applicationName for the context
-        Table<Experiment.ID, Experiment.Label, String> userAssignments =
-                assignmentsRepository.getAssignments(userID, applicationName, context, allExperiments);
-        PrioritizedExperimentList appPriorities = priorities.getPriorities(applicationName, false);
-        Set<Experiment.ID> experimentSet = allExperiments.rowKeySet();
-        Map<Experiment.ID, BucketList> bucketList = getBucketList(experimentSet);
-        Map<Experiment.ID, List<Experiment.ID>> exclusives = getExclusivesList(experimentSet);
-
+        long getCreateAssignmentTotalTime=0;
         // iterate over all experiments in the application in priority order
         for (PrioritizedExperiment experiment : appPriorities.getPrioritizedExperiments()) {
+            if(LOGGER.isDebugEnabled()) LOGGER.debug("Now processing: {}", experiment);
+
             //check if the experiment was given in experimentBatch
             if (experimentBatch.getLabels().contains(experiment.getLabel())) {
+                if(LOGGER.isDebugEnabled()) LOGGER.debug("Experiment ({}) has given batch assignment....", experiment.getLabel());
+
                 String labelStr = experiment.getLabel().toString();
                 Map<String, Object> tempResult = new HashMap<>();
                 // get the assignment for user in this experiment
@@ -458,12 +516,16 @@ public class AssignmentsImpl implements Assignments {
                         .build();
 
                 try {
-                    Assignment assignment = getAssignment(userID, applicationName, label,
+                    sTime=System.currentTimeMillis();
+
+                      Assignment assignment = getAssignment(userID, applicationName, label,
                             context, allowAssignments != null ? allowAssignments.get(experiment.getID()) : createAssignment,
                             forceInExperiment, segmentationProfile,
-                            headers, pageName, allExperiments.get(experiment.getID(), experiment.getLabel()),
-                            bucketList.get(experiment.getID()), userAssignments, exclusives);
-
+                            headers, pageName, experimentMap.get(experiment.getID()),
+                              bucketMap.get(experiment.getID()), userAssignments, exclusionMap);
+                    if(LOGGER.isDebugEnabled()) LOGGER.debug("getAssignment: {} ", assignment);
+                    getCreateAssignmentTotalTime+=(System.currentTimeMillis()-sTime);
+                    perfLogger.log(PerformanceTimeLogger.OperationKey.Get_Create_Assignment, System.currentTimeMillis()-sTime);
 
                     // This wouldn't normally happen because we specified CREATE=true
                     if (assignment == null) {
@@ -481,7 +543,8 @@ public class AssignmentsImpl implements Assignments {
                                         : null);
 
                         if (assignment.getBucketLabel() != null) {
-                            Bucket bucket = repository.getBucket(experiment.getID(), assignment.getBucketLabel());
+                            Bucket bucket = getBucketByLabel(bucketMap.get(experiment.getID()), assignment.getBucketLabel());
+
                             tempResult.put("payload",
                                     bucket.getPayload() != null
                                             ? bucket.getPayload()
@@ -490,10 +553,12 @@ public class AssignmentsImpl implements Assignments {
                     }
 
                     tempResult.put("status", assignment.getStatus());
+                    if(LOGGER.isDebugEnabled()) LOGGER.debug("tempResult: "+tempResult);
+
 
                 } catch (WasabiException ex) {
                     //FIXME: should not use exception as part of the flow control.
-                    LOGGER.info("Using exception as flow control", ex);
+                    if(LOGGER.isDebugEnabled()) LOGGER.debug("Using exception as flow control", ex);
                     tempResult.put("status", "assignment failed");
                     tempResult.put("exception", ex.toString());
                     tempResult.put("assignment", null);
@@ -503,7 +568,22 @@ public class AssignmentsImpl implements Assignments {
                 experimentBatch.getLabels().remove(experiment.getLabel());
             }
         }
+
+        perfLogger.log(PerformanceTimeLogger.OperationKey.Get_Create_Assignment_total, getCreateAssignmentTotalTime);
+        perfLogger.log(PerformanceTimeLogger.OperationKey.doBatchAssignments, System.currentTimeMillis()-totalSTime);
+        if(LOGGER.isDebugEnabled()) LOGGER.debug("allAssignments: {} ", allAssignments);
+
         return allAssignments;
+    }
+
+    private Bucket getBucketByLabel(BucketList bucketList, Bucket.Label bucketLabel) {
+        if(bucketList==null) return null;
+        for(Bucket bucket:bucketList.getBuckets()) {
+            if(bucket.getLabel().equals(bucketLabel)) {
+                return bucket;
+            }
+        }
+        return null;
     }
 
     private Map<Experiment.ID, BucketList> getBucketList(Set<Experiment.ID> experimentIDSet) {
@@ -680,16 +760,20 @@ public class AssignmentsImpl implements Assignments {
     public List<Map> doPageAssignments(Application.Name applicationName, Page.Name pageName, User.ID userID,
                                            Context context, boolean createAssignment, boolean ignoreSamplingPercent,
                                            HttpHeaders headers, SegmentationProfile segmentationProfile) {
+        long sTime,eTime;
+        sTime=System.currentTimeMillis();
+        List<PageExperiment> pageExperimentList = assignmentsRepository.getExperiments(applicationName, pageName);
+        perfLogger.log(PerformanceTimeLogger.OperationKey.GET_PageExperiments, System.currentTimeMillis()-sTime);
+        //if(LOGGER.isDebugEnabled()) LOGGER.debug("Time taken to get PageExperiments = {}", (System.currentTimeMillis()-sTime));
 
-        List<PageExperiment> pageExperimentList = pages.getExperiments(applicationName, pageName);
-        Set<Experiment.Label> experimentLabels = new HashSet<>(pageExperimentList.size());
+        //Set<Experiment.Label> experimentLabels = new HashSet<>(pageExperimentList.size());
         Map<Experiment.ID, Boolean> allowAssignments = new HashMap<>(pageExperimentList.size());
         for (PageExperiment pageExperiment : pageExperimentList) {
             allowAssignments.put(pageExperiment.getId(), pageExperiment.getAllowNewAssignment());
-            experimentLabels.add(pageExperiment.getLabel());
+            //experimentLabels.add(pageExperiment.getLabel());
         }
         ExperimentBatch.Builder experimentBatchBuilder = ExperimentBatch.newInstance();
-        experimentBatchBuilder.withLabels(experimentLabels);
+        //experimentBatchBuilder.withLabels(experimentLabels);
         if (segmentationProfile != null) {
             experimentBatchBuilder.withProfile(segmentationProfile.getProfile());
         }
@@ -1052,4 +1136,69 @@ public class AssignmentsImpl implements Assignments {
         return queueLengthMap;
     }
 
+    class GetMakeAssignmentTask implements Runnable {
+        GetMakeAssignmentTask() {
+
+
+        }
+
+        public void run() {
+
+        }
+    }
+
 }
+
+class PerformanceTimeLogger {
+    private Map<OperationKey, LongAdder> timeTakenMap = new ConcurrentHashMap<>();
+    private Map<OperationKey, LongAdder> samplesMap = new ConcurrentHashMap<>();
+    private Logger logger;
+
+    public PerformanceTimeLogger(Logger logger ) {
+        this.logger=logger;
+        for(OperationKey key: OperationKey.values()) {
+            timeTakenMap.put(key, new LongAdder());
+            samplesMap.put(key, new LongAdder());
+        }
+
+        final PerformanceTimeLogger obj = this;
+        Executors.newScheduledThreadPool(1).scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                obj.logAndReset();
+            }
+        }, 30, 30, TimeUnit.SECONDS);
+    }
+
+    public void log(OperationKey operationKey, Long timeTaken) {
+        timeTakenMap.get(operationKey).add(timeTaken);
+        samplesMap.get(operationKey).increment();
+    }
+
+    public void logAndReset() {
+        StringBuffer sb = new StringBuffer();
+        for(OperationKey key: OperationKey.values()) {
+
+            sb.append(key)
+                    .append("=")
+                    .append(samplesMap.get(key).sum())
+                    .append(" / ")
+                    .append(divide(timeTakenMap.get(key).sumThenReset(), samplesMap.get(key).sumThenReset()))
+                    .append(", ");
+        }
+        if(sb.lastIndexOf(",")!=-1) {
+            sb.substring(0, sb.lastIndexOf(","));
+        }
+        if(logger.isInfoEnabled()) logger.info(sb.toString());
+    }
+
+    private long divide(long n1, long n2) {
+        if(n2==0) return 0;
+        return n1/n2;
+    }
+
+    enum OperationKey {
+        GET_PageExperiments, POPULATE_EXPERIMENT_METADATA, Get_Create_Assignment, Get_Create_Assignment_total, doBatchAssignments
+    }
+}
+
