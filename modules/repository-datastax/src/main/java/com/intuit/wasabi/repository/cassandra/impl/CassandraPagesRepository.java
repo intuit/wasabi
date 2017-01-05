@@ -226,6 +226,27 @@ public class CassandraPagesRepository implements PagesRepository{
     }
 
     @Override
+    public List<PageExperiment> getExperimentsWithoutLabels(Application.Name applicationName, Page.Name pageName) {
+        Stream<PageExperimentByAppNamePage> resultList = Stream.empty();
+        try {
+            Result<PageExperimentByAppNamePage> result = pageExperimentIndexAccessor.selectBy(applicationName.toString(), pageName.toString());
+            resultList = StreamSupport.stream(Spliterators.spliteratorUnknownSize(result.iterator(), Spliterator.ORDERED), false);
+        } catch (ReadTimeoutException | UnavailableException | NoHostAvailableException e) {
+            throw new RepositoryException("Could not retrieve the experiments for applicationName:\"" + applicationName + "\", page:\"" + pageName, e);
+        }
+
+        return resultList.map(t -> {
+                    PageExperiment.Builder builder = new PageExperiment.Builder(
+                            Experiment.ID.valueOf(t.getExperimentId()),
+                            null,
+                            t.isAssign()
+                    );
+                    return builder.build();
+                }
+        ).collect(Collectors.toList());
+    }
+
+    @Override
     public void erasePageData(Application.Name applicationName, Experiment.ID experimentID) {
         ExperimentPageList experimentPageList = getExperimentPages(experimentID);
         for (ExperimentPage experimentPage : experimentPageList.getPages()) {

@@ -185,11 +185,4 @@ public interface AssignmentsRepository {
                                     Map<Experiment.ID, List<Experiment.ID>> exclusionMap
     );
 
-    /**
-     * @param applicationName
-     * @param pageName
-     * @return PageExperiment list having only ExperimentIDs and isAssign flag (No label)
-     */
-    List<PageExperiment> getExperiments(Application.Name applicationName, Page.Name pageName);
-
 }

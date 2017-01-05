@@ -16,6 +16,10 @@
 
 package com.intuit.wasabi.experiment.impl;
 
+import com.datastax.driver.core.exceptions.NoHostAvailableException;
+import com.datastax.driver.core.exceptions.ReadTimeoutException;
+import com.datastax.driver.core.exceptions.UnavailableException;
+import com.datastax.driver.mapping.Result;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.eventlog.EventLog;
 import com.intuit.wasabi.eventlog.events.ExperimentChangeEvent;
@@ -34,13 +38,15 @@ import com.intuit.wasabi.experimentobjects.exceptions.InvalidExperimentStateExce
 import com.intuit.wasabi.repository.CassandraRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.PagesRepository;
+import com.intuit.wasabi.repository.RepositoryException;
+import com.intuit.wasabi.repository.cassandra.pojo.index.PageExperimentByAppNamePage;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static com.intuit.wasabi.experimentobjects.Experiment.State.TERMINATED;
 
@@ -206,4 +212,16 @@ public class PagesImpl implements Pages {
         }
         return pagesRepository.getPageExperimentList(applicationName);
     }
+
+    @Override
+    public List<PageExperiment> getExperimentsWithoutLabels(Application.Name applicationName, Page.Name pageName) {
+        // Throw an exception if application name is invalid
+        if (applicationName == null || StringUtils.isBlank(applicationName.toString())){
+            throw new ApplicationNotFoundException("The Application name can not be null or empty");
+        }
+
+        return pagesRepository.getExperimentsWithoutLabels(applicationName, pageName);
+    }
+
+
 }

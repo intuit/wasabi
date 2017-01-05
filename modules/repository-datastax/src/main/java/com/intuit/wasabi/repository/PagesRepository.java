@@ -91,4 +91,15 @@ public interface PagesRepository {
      * @param experimentID  page name
      */
     void erasePageData(Application.Name applicationName, Experiment.ID experimentID);
+
+    /**
+     * Get the experiment information (id and allowNewAssignment - No labels) for the associated experiments for a page
+     *
+     * @param applicationName    name of the application
+     * @param pageName  page name
+     *
+     * @return list of PageExperiment (id and allowNewAssignment - No labels)
+     */
+    List<PageExperiment> getExperimentsWithoutLabels(Application.Name applicationName, Page.Name pageName);
+
 }
