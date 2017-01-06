@@ -85,7 +85,7 @@ public interface AssignmentsRepository {
      * @param context      Environment context
      * @return Assignment
      */
-    Assignment getAssignment(Experiment.ID experimentID, User.ID userID, Context context);
+    Assignment getAssignment(Experiment.ID experimentID, Application.Name appName, User.ID userID, Context context);
 
     /**
      * Delete assignment for experiment, user and application
@@ -107,6 +107,7 @@ public interface AssignmentsRepository {
      * @param date       Date of assignment
      * @return Assignment
      */
+    @Deprecated
     Assignment assignUserToOld(Assignment assignment, Date date);
 
     /**

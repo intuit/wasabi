@@ -28,16 +28,13 @@ import com.intuit.wasabi.repository.*;
 import com.intuit.wasabi.repository.cassandra.accessor.BucketAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.StagingAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.UserAssignmentAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.count.BucketAssignmentCountAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.export.UserAssignmentExportAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentUserIndexAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.index.UserAssignmentIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.UserBucketIndexAccessor;
-import com.intuit.wasabi.repository.cassandra.pojo.UserAssignment;
 import com.intuit.wasabi.repository.cassandra.pojo.export.UserAssignmentExport;
 import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentUserByUserIdContextAppNameExperimentId;
-import com.intuit.wasabi.repository.cassandra.pojo.index.UserAssignmentByUserId;
+import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,9 +69,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     private final ExperimentRepository dbRepository;
     private final EventLog eventLog;
     private final MappingManager mappingManager;
-    private final int assignmentsCountThreadPoolSize;
-    private final boolean assignUserToOld;
-    private final boolean assignUserToNew;
     private final boolean assignUserToExport;
     private final boolean assignBucketCount;
     private final String defaultTimeFormat;
@@ -86,8 +80,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     private ExperimentAccessor experimentAccessor;
     private ExperimentUserIndexAccessor experimentUserIndexAccessor;
 
-    private UserAssignmentAccessor userAssignmentAccessor;
-    private UserAssignmentIndexAccessor userAssignmentIndexAccessor;
     private UserAssignmentExportAccessor userAssignmentExportAccessor;
 
     private BucketAccessor bucketAccessor;
@@ -105,8 +97,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
             ExperimentAccessor experimentAccessor,
             ExperimentUserIndexAccessor experimentUserIndexAccessor,
 
-            UserAssignmentAccessor userAssignmentAccessor,
-            UserAssignmentIndexAccessor userAssignmentIndexAccessor,
             UserAssignmentExportAccessor userAssignmentExportAccessor,
 
             BucketAccessor bucketAccessor,
@@ -116,8 +106,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
             StagingAccessor stagingAccessor,
             MappingManager mappingManager,
             final @Named("export.pool.size") int assignmentsCountThreadPoolSize,
-            final @Named("assign.user.to.old") boolean assignUserToOld,
-            final @Named("assign.user.to.new") boolean assignUserToNew,
             final @Named("assign.user.to.export") boolean assignUserToExport,
             final @Named("assign.bucket.count") boolean assignBucketCount,
             final @Named("default.time.format") String defaultTimeFormat ){
@@ -126,9 +114,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         this.dbRepository = dbRepository;
         this.eventLog = eventLog;
         this.mappingManager = mappingManager;
-        this.assignmentsCountThreadPoolSize = assignmentsCountThreadPoolSize;
-        this.assignUserToOld = assignUserToOld;
-        this.assignUserToNew = assignUserToNew;
         this.assignUserToExport = assignUserToExport;
         this.assignBucketCount = assignBucketCount;
         this.defaultTimeFormat = defaultTimeFormat;
@@ -136,8 +121,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         this.experimentAccessor = experimentAccessor;
         this.experimentUserIndexAccessor = experimentUserIndexAccessor;
         //UserAssignment related accessors
-        this.userAssignmentAccessor = userAssignmentAccessor;
-        this.userAssignmentIndexAccessor = userAssignmentIndexAccessor;
         this.userAssignmentExportAccessor = userAssignmentExportAccessor;
         //Bucket related accessors
         this.bucketAccessor = bucketAccessor;
@@ -208,14 +191,15 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     }
 
     @Timed
-    Optional<Assignment> getAssignmentFromLookUp(Experiment.ID experimentID, User.ID userID, Context context) {
-        Stream<UserAssignmentByUserId> resultStream;
+    Optional<Assignment> getAssignmentFromLookUp(Experiment.ID experimentID, Application.Name appName, User.ID userID, Context context) {
+        Stream<ExperimentUserByUserIdContextAppNameExperimentId> resultStream;
         try {
-            final Result<UserAssignmentByUserId> result =
-                    this.userAssignmentIndexAccessor.selectBy(
-                            experimentID.getRawID(),
+            final Result<ExperimentUserByUserIdContextAppNameExperimentId> result =
+                    this.experimentUserIndexAccessor.selectBy(
                             userID.toString(),
-                            context.getContext()
+                            appName.toString(),
+                            context.getContext(),
+                            experimentID.getRawID()
                     );
             resultStream = StreamSupport.stream(
                     Spliterators.spliteratorUnknownSize(result.iterator(), Spliterator.ORDERED), false);
@@ -226,40 +210,9 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         final Stream<Assignment.Builder> builderStream = resultStream.map(t ->{
             Assignment.Builder builder = Assignment.newInstance(Experiment.ID.valueOf(t.getExperimentId()))
                     .withUserID(User.ID.valueOf(t.getUserId()))
-                    .withContext(Context.valueOf(t.getContext()))
-                    .withCreated(t.getCreated());
-            if(Objects.nonNull(t.getBucketLabel())) {
-                builder.withBucketLabel(Bucket.Label.valueOf(t.getBucketLabel()));
-            }
-            return builder;
-        });
-        return getAssignmentFromStream(experimentID, userID, context, builderStream);
-    }
-
-    @Timed
-    Optional<Assignment> getAssignmentOld(Experiment.ID experimentID, User.ID userID, Context context) {
-        Stream<UserAssignment> resultStream;
-        try {
-            final Result<UserAssignment> result =
-                    this.userAssignmentAccessor.selectBy(
-                            experimentID.getRawID(),
-                            userID.toString(),
-                            context.getContext()
-                    );
-            
-            resultStream = StreamSupport.stream(
-                    Spliterators.spliteratorUnknownSize(result.iterator(), Spliterator.ORDERED), false);
-        } catch (ReadTimeoutException | UnavailableException | NoHostAvailableException e) {
-            throw new RepositoryException("Could not retrieve assignment for " +
-                    "experimentID = \"" + experimentID + "\" userID = \"" + userID + "\"", e);
-        }
-        final Stream<Assignment.Builder> builderStream = resultStream.map(t ->{
-            Assignment.Builder builder = Assignment.newInstance(Experiment.ID.valueOf(t.getExperimentId()))
-                    .withUserID(User.ID.valueOf(t.getUserId()))
-                    .withContext(Context.valueOf(t.getContext()))
-                    .withCreated(t.getCreated());
-            if(Objects.nonNull(t.getBucketLabel())) {
-                builder.withBucketLabel(Bucket.Label.valueOf(t.getBucketLabel()));
+                    .withContext(Context.valueOf(t.getContext()));
+            if(Objects.nonNull(t.getBucket())) {
+                builder.withBucketLabel(Bucket.Label.valueOf(t.getBucket()));
             }
             return builder;
         });
@@ -308,15 +261,8 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
 
     @Override
     @Timed
-    public Assignment getAssignment(Experiment.ID experimentID, User.ID userID, Context context) {
-        Assignment result = null;
-        if (assignUserToNew) {
-            result = getAssignmentFromLookUp(experimentID, userID, context).orElseGet(() -> null);
-        }
-        //if it is not present in the user_assignment_look_up table and old flag is set to tru, then check for the data in user_assignment table
-        if (assignUserToOld && (result == null)) {
-            result = getAssignmentOld(experimentID, userID, context).orElseGet(() -> null);
-        }
+    public Assignment getAssignment(Experiment.ID experimentID, Application.Name appName, User.ID userID, Context context) {
+        Assignment result = getAssignmentFromLookUp(experimentID, appName, userID, context).orElseGet(() -> null);
         return result;
     }
 
@@ -324,16 +270,9 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     @Override
     @Timed
     public Assignment assignUser(Assignment assignment, Experiment experiment, Date date) {
-        Assignment new_assignment = null;
+        //Writing assignment to the new table - experiment_user_index
+        Assignment new_assignment = assignUserToLookUp(assignment, experiment.getApplicationName());
 
-        if (assignUserToOld) {
-            //Writing assignment to the old table - user_assignment
-            new_assignment = assignUserToOld(assignment, date);
-        }
-        if (assignUserToNew) {
-            //Writing assignment to the new table - user_assignment_look_up
-            new_assignment = assignUserToLookUp(assignment, date);
-        }
         //Updating the assignment bucket counts, user_assignment_export
         // in a asynchronous AssignmentCountEnvelope thread
         boolean countUp = true;
@@ -398,23 +337,25 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
      * Adds an assignment associated with a new user
      *
      * @param assignment assignment of the new user
-     * @param date       date
+     * @param appName       application Name
      * @return user's assignment
      */
     @Timed
-    protected Assignment assignUserToLookUp(Assignment assignment, Date date) {
-        final Date paramDate = Optional.ofNullable(date).orElseGet(Date::new);
+    protected Assignment assignUserToLookUp(Assignment assignment, Application.Name appName) {
         try {
             if (Objects.isNull(assignment.getBucketLabel())) {
-                userAssignmentIndexAccessor.insertBy(assignment.getExperimentID().getRawID(),
+                experimentUserIndexAccessor.insertBy(
                         assignment.getUserID().toString(),
                         assignment.getContext().getContext(),
-                        paramDate);
+                        appName.toString(),
+                        assignment.getExperimentID().getRawID()
+                        );
             } else {
-                userAssignmentIndexAccessor.insertBy(assignment.getExperimentID().getRawID(),
+                experimentUserIndexAccessor.insertBy(
                         assignment.getUserID().toString(),
                         assignment.getContext().getContext(),
-                        paramDate,
+                        appName.toString(),
+                        assignment.getExperimentID().getRawID(),
                         assignment.getBucketLabel().toString());
             }
         } catch (WriteTimeoutException | UnavailableException | NoHostAvailableException e) {
@@ -426,39 +367,14 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                 .withUserID(assignment.getUserID())
                 .withContext(assignment.getContext())
                 .withStatus(Assignment.Status.NEW_ASSIGNMENT)
-                .withCreated(paramDate)
                 .withCacheable(false)
                 .build());
     }
 
+    @Deprecated
     @Override
     public Assignment assignUserToOld(Assignment assignment, Date date) {
-        final Date paramDate = Optional.ofNullable(date).orElseGet(Date::new);
-        try {
-            if (Objects.isNull(assignment.getBucketLabel())) {
-                userAssignmentAccessor.insertBy(assignment.getExperimentID().getRawID(),
-                        assignment.getUserID().toString(),
-                        assignment.getContext().getContext(),
-                        paramDate);
-            } else {
-                userAssignmentAccessor.insertBy(assignment.getExperimentID().getRawID(),
-                        assignment.getUserID().toString(),
-                        assignment.getContext().getContext(),
-                        paramDate,
-                        assignment.getBucketLabel().toString());
-            }
-        } catch (WriteTimeoutException | UnavailableException | NoHostAvailableException e) {
-            throw new RepositoryException("Could not save user to the old table user assignment  \"" +
-                    assignment + "\"", e);
-        }
-        return  (Assignment.newInstance(assignment.getExperimentID())
-                .withBucketLabel(assignment.getBucketLabel())
-                .withUserID(assignment.getUserID())
-                .withContext(assignment.getContext())
-                .withStatus(Assignment.Status.NEW_ASSIGNMENT)
-                .withCreated(paramDate)
-                .withCacheable(false)
-                .build());
+        throw new NotImplementedException("Method is deprecated");
     }
 
     @Override
@@ -496,8 +412,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     public void deleteAssignment(Experiment experiment, User.ID userID, Context context, Application.Name appName, Assignment currentAssignment) {
         // Deletes the assignment data across all the relevant tables in a consistent manner
         //TODO: make all assignment/delete part of batchstatement
-        deleteUserFromLookUp(experiment.getID(), userID, context);
-        deleteAssignmentOld(experiment.getID(), userID, context, appName, currentAssignment.getBucketLabel());
+        deleteUserFromLookUp(experiment.getID(), userID, context, appName);
 
         //Updating the assignment bucket counts by -1 in a asynchronous AssignmentCountEnvelope thread
         // false to subtract 1 from the count for the bucket
@@ -517,22 +432,16 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
      * @param userID       user id
      * @param context      context
      * @param appName      application name
-     * @param bucketLabel  bucket label
      */
-    //TODO: After migration deleteAssignment should be deleted
-    void deleteAssignmentOld(Experiment.ID experimentID, User.ID userID, Context context, Application.Name appName,
-                             Bucket.Label bucketLabel) {
-        try{
-            userAssignmentAccessor.deleteBy(experimentID.getRawID(), userID.toString(), context.getContext());
-        } catch (WriteTimeoutException | UnavailableException | NoHostAvailableException e) {
-            throw new RepositoryException("Could not delete user assignment for Experiment:" + experimentID +
-                    " and User " + userID, e);
-        }
-    }
 
-    void deleteUserFromLookUp(Experiment.ID experimentID, User.ID userID, Context context) {
+    void deleteUserFromLookUp(Experiment.ID experimentID, User.ID userID, Context context, Application.Name appName) {
         try{
-            userAssignmentIndexAccessor.deleteBy(userID.toString(), context.getContext(), experimentID.getRawID());
+            experimentUserIndexAccessor.deleteBy(
+                    userID.toString(),
+                    experimentID.getRawID(),
+                    context.getContext(),
+                    appName.toString()
+            );
         } catch (WriteTimeoutException | UnavailableException | NoHostAvailableException e) {
             throw new RepositoryException("Could not delete user assignment for Experiment:" + experimentID +
                     " and User " + userID, e);

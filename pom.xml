@@ -77,8 +77,6 @@ http://www.w3.org/2001/XMLSchema-instance">
         <authentication.class.name>com.intuit.wasabi.authentication.impl.DefaultAuthentication
         </authentication.class.name>
 
-        <assign.user.to.old>true</assign.user.to.old>
-        <assign.user.to.new>false</assign.user.to.new>
         <assign.user.to.export>true</assign.user.to.export>
         <assign.bucket.count>true</assign.bucket.count>
         <assignment.decorator.enabled>false</assignment.decorator.enabled>
