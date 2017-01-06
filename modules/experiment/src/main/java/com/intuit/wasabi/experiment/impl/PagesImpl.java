@@ -43,7 +43,10 @@ import com.intuit.wasabi.repository.cassandra.pojo.index.PageExperimentByAppName
 import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -219,9 +222,6 @@ public class PagesImpl implements Pages {
         if (applicationName == null || StringUtils.isBlank(applicationName.toString())){
             throw new ApplicationNotFoundException("The Application name can not be null or empty");
         }
-
         return pagesRepository.getExperimentsWithoutLabels(applicationName, pageName);
     }
-
-
 }

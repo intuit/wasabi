@@ -433,14 +433,14 @@ public class AssignmentsImpl implements Assignments {
 
     /**
      *
-     * Create/Retrieve assignments for a given user, application, context and for
-     * given experiments (experimentBatch/allowAssignments) associated to a given page.
+     * Create/Retrieve assignments for a given user, application, context and
+     * given experiments (experimentBatch/allowAssignments).
      *
      * This method is called from two places:
-     * 1. First directly through API call AssignmentsResource.getBatchAssignments()
+     * 1. First directly through API call AssignmentsResource.getBatchAssignments() => api:/v1/assignments/applications/{applicationName}/users/{userID}
      *    In this case pageName and allowAssignments are NULL
      *
-     * 2. Second from AssignmentsImpl.doPageAssignments()
+     * 2. Second from AssignmentsImpl.doPageAssignments() => api:/v1/assignments/applications/{applicationName}/pages/{pageName}/users/{userID}
      *    In this case pageName and allowAssignments are provided.
      *    To avoid performance degradation (duplicate calls to )
      *
@@ -486,7 +486,6 @@ public class AssignmentsImpl implements Assignments {
         assignmentsRepository.populateExperimentMetadata(userID, applicationName, context, experimentBatch, experimentIds, appPriorities, experimentMap, userAssignments, bucketMap, exclusionMap);
 
         List<Map> allAssignments = new ArrayList<>();
-        long getCreateAssignmentTotalTime=0;
         // iterate over all experiments in the application in priority order
         for (PrioritizedExperiment experiment : appPriorities.getPrioritizedExperiments()) {
             if(LOGGER.isDebugEnabled()) LOGGER.debug("Now processing: {}", experiment);
@@ -541,7 +540,7 @@ public class AssignmentsImpl implements Assignments {
 
                 } catch (WasabiException ex) {
                     //FIXME: should not use exception as part of the flow control.
-                    if(LOGGER.isDebugEnabled()) LOGGER.debug("Using exception as flow control", ex);
+                    LOGGER.info("Using exception as flow control", ex);
                     tempResult.put("status", "assignment failed");
                     tempResult.put("exception", ex.toString());
                     tempResult.put("assignment", null);
@@ -1110,19 +1109,7 @@ public class AssignmentsImpl implements Assignments {
         queueLengthMap.put(RULE_CACHE, new Integer(this.ruleCacheExecutor.getQueue().size()));
         for (String name : executors.keySet()) {
             queueLengthMap.put(name.toLowerCase(), new Integer(executors.get(name).queueLength()));
-        }        
+        }
         return queueLengthMap;
     }
-
-    class GetMakeAssignmentTask implements Runnable {
-        GetMakeAssignmentTask() {
-
-
-        }
-
-        public void run() {
-
-        }
-    }
-
 }

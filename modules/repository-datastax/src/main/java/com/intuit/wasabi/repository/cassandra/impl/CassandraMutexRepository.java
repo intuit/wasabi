@@ -225,11 +225,8 @@ public class CassandraMutexRepository implements MutexRepository {
         Map<Experiment.ID, List<Experiment.ID>> result = new HashMap<>(experimentIDCollection.size());
 
         try {
-            long sTime;
         	for (Experiment.ID experimentId : experimentIDCollection) {
-                sTime = System.currentTimeMillis();
         		result.put(experimentId, getExclusionList(experimentId));
-                LOGGER.info("Time taken to get Single Exclusives For {} = {}", experimentId, (System.currentTimeMillis()-sTime));
             }
         } catch (Exception e) {
         	LOGGER.error("Error while getting exclusions for {}", experimentIDCollection, e);
