@@ -1035,8 +1035,6 @@ public class AssignmentsImplTest {
         Mockito.when(cassandraAssignments.doBatchAssignments(User.ID.valueOf("user-a"), testApp,
                 context, true, false, null, experimentBatch, null, null)).thenReturn(batchAssignments);
 
-        System.out.println(batchAssignments);
-        
         assert batchAssignments.size() == 2;
         assert batchAssignments.get(0).get("assignment").toString().equals(redBucket.getLabel().toString());
         assert batchAssignments.get(0).get("status").toString().equals(Assignment.Status.EXISTING_ASSIGNMENT.toString());
