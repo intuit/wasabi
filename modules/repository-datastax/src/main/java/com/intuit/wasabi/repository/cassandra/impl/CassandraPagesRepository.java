@@ -35,6 +35,7 @@ import com.intuit.wasabi.repository.cassandra.accessor.index.AppPageIndexAccesso
 import com.intuit.wasabi.repository.cassandra.accessor.index.PageExperimentIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.pojo.AppPage;
 import com.intuit.wasabi.repository.cassandra.pojo.index.PageExperimentByAppNamePage;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -203,8 +204,7 @@ public class CassandraPagesRepository implements PagesRepository{
             resultList = StreamSupport.stream(
                     Spliterators.spliteratorUnknownSize(result.iterator(), Spliterator.ORDERED), false);
         } catch (ReadTimeoutException | UnavailableException | NoHostAvailableException e) {
-            throw new RepositoryException("Could not retrieve the experiments for applicationName:\"" +
-                    applicationName + "\", page:\"" + pageName, e);
+            throw new RepositoryException(new StringBuilder("Could not retrieve the experiments for applicationName:\"").append(applicationName).append("\", page:\"").append(pageName).append("\"").toString(),  e);
         }
         //TODO: make the experiment label part of the pageExperimentIndex to save a query per page
         return resultList

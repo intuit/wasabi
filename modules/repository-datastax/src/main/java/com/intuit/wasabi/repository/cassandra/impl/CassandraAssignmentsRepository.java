@@ -1,9 +1,6 @@
 package com.intuit.wasabi.repository.cassandra.impl;
 
 import com.codahale.metrics.annotation.Timed;
-import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.ResultSetFuture;
-import com.datastax.driver.core.Session;
 import com.datastax.driver.core.exceptions.NoHostAvailableException;
 import com.datastax.driver.core.exceptions.ReadTimeoutException;
 import com.datastax.driver.core.exceptions.UnavailableException;
@@ -11,11 +8,8 @@ import com.datastax.driver.core.exceptions.WriteTimeoutException;
 import com.datastax.driver.mapping.MappingManager;
 import com.datastax.driver.mapping.Result;
 import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
-import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.Uninterruptibles;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.intuit.wasabi.analyticsobjects.Parameters;
@@ -38,13 +32,10 @@ import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentUserIndex
 import com.intuit.wasabi.repository.cassandra.accessor.index.PageExperimentIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.UserAssignmentIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.UserBucketIndexAccessor;
-import com.intuit.wasabi.repository.cassandra.pojo.Exclusion;
 import com.intuit.wasabi.repository.cassandra.pojo.UserAssignment;
 import com.intuit.wasabi.repository.cassandra.pojo.export.UserAssignmentExport;
 import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentUserByUserIdContextAppNameExperimentId;
-import com.intuit.wasabi.repository.cassandra.pojo.index.PageExperimentByAppNamePage;
 import com.intuit.wasabi.repository.cassandra.pojo.index.UserAssignmentByUserId;
-import com.netflix.astyanax.Execution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,15 +52,14 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static java.util.Objects.isNull;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 //TODO: rewrite this class to use BatchStatement after moving to datastax
@@ -213,7 +203,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
      * @param appName Input: Given application name
      * @param context Input: Given context
      * @param experimentBatch Input/Output: Given experiment batch. This object will be modified and become one of the output; in the case of AssignmentsImpl.doPageAssignments()
-     * @param experimentIds Input: Given experiment ids.
+     * @param allowAssignments Input: Given batch experiment ids with allow assignment flag.
      * @param prioritizedExperimentList Output: prioritized experiment list of ALL the experiments for the given application.
      * @param experimentMap Output: Map of 'experiment id TO experiment' of ALL the experiments for the given application.
      * @param existingUserAssignments Output: ALL the existing user assignments of given user_id, application name and context.
@@ -223,24 +213,49 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
      */
     @Override
     @Timed
-    public void populateExperimentMetadata( User.ID userID, Application.Name appName, Context context, ExperimentBatch experimentBatch, Set<Experiment.ID> experimentIds,
+    public void populateExperimentMetadata( User.ID userID, Application.Name appName, Context context, ExperimentBatch experimentBatch, Optional<Map<Experiment.ID, Boolean>> allowAssignments,
                                             PrioritizedExperimentList prioritizedExperimentList,
                                             Map<Experiment.ID, com.intuit.wasabi.experimentobjects.Experiment> experimentMap,
                                             Table<Experiment.ID, Experiment.Label, String> existingUserAssignments,
                                             Map<Experiment.ID, BucketList> bucketMap,
                                             Map<Experiment.ID, List<Experiment.ID>> exclusionMap
                                             ) {
-        if(logger.isDebugEnabled()) logger.debug("populateExperimentMetadata - STARTED: userID={}, appName={}, context={}, experimentBatch={}, experimentIds={}", userID, appName, context, experimentBatch, experimentIds);
-        if(userID==null || appName==null || context==null || experimentBatch==null || (experimentBatch.getLabels()==null && (experimentIds==null || experimentIds.isEmpty())) ) {
-            logger.error("Invalid input to CassandraAssignmentsRepository.populateExperimentMetadata(): Given input: userID={}, appName={}, context={}, experimentBatch={}, experimentIds={}", userID, appName, context, experimentBatch, experimentIds);
+        if(logger.isDebugEnabled()) logger.debug("populateExperimentMetadata - STARTED: userID={}, appName={}, context={}, experimentBatch={}, experimentIds={}", userID, appName, context, experimentBatch, allowAssignments);
+        if(experimentBatch.getLabels()==null && !allowAssignments.isPresent() ) {
+            logger.error("Invalid input to CassandraAssignmentsRepository.populateExperimentMetadata(): Given input: userID={}, appName={}, context={}, experimentBatch={}, allowAssignments={}", userID, appName, context, experimentBatch, allowAssignments);
             return;
         }
 
+        //Populate experiments map, prioritized experiments list and existing user assignments.
+        populateExperimentApplicationAndUserAssignments(userID, appName, context, prioritizedExperimentList, experimentMap, existingUserAssignments);
+
+        //Populate experiments ids of given batch
+        Set<Experiment.ID> experimentIds = allowAssignments.orElseGet(HashMap<Experiment.ID, Boolean>::new).keySet();
+        populateExperimentIdsAndExperimentBatch(allowAssignments, experimentMap, experimentBatch, experimentIds);
+
+        //Based on given experiment ids, populate experiment buckets and exclusions..
+        populateBucketsAndExclusions(experimentIds, bucketMap, exclusionMap);
+
+
+        if(logger.isDebugEnabled()) logger.debug("populateExperimentMetadata - FINISHED...");
+    }
+
+    /**
+     *
+     * @param userID Input: Given user id
+     * @param appName Input: Given application name
+     * @param context Input: Given context
+     * @param prioritizedExperimentList Output: prioritized experiment list of ALL the experiments for the given application.
+     * @param experimentMap Output: Map of 'experiment id TO experiment' of ALL the experiments for the given application.
+     * @param existingUserAssignments Output: ALL the existing user assignments of given user_id, application name and context.
+     */
+    private void populateExperimentApplicationAndUserAssignments(User.ID userID, Application.Name appName, Context context,
+                                                                 PrioritizedExperimentList prioritizedExperimentList,
+                                                                 Map<Experiment.ID, com.intuit.wasabi.experimentobjects.Experiment> experimentMap,
+                                                                 Table<Experiment.ID, Experiment.Label, String> existingUserAssignments) {
         ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Application>> applicationFuture = null;
         ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment>> experimentsFuture = null;
         ListenableFuture<Result<ExperimentUserByUserIdContextAppNameExperimentId>> userAssignmentsFuture = null;
-        Map<Experiment.ID, ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Bucket>>> bucketFutureMap = new HashMap<>();
-        Map<Experiment.ID, ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Exclusion>>> exclusionFutureMap = new HashMap<>();
 
         //Send calls asynchronously
         experimentsFuture = experimentAccessor.asyncGetExperimentByAppName(appName.toString());
@@ -276,7 +291,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         UninterruptibleUtil.getUninterruptibly(userAssignmentsFuture).all().stream().forEach((ExperimentUserByUserIdContextAppNameExperimentId uaPojo) -> {
             Experiment.ID experimentID = Experiment.ID.valueOf(uaPojo.getExperimentId());
             Experiment exp = experimentMap.get(experimentID);
-            if(exp!=null) {
+            if(!isNull(exp)) {
                 existingUserAssignments.put(
                         exp.getID(),
                         exp.getLabel(), //expects this to be non-null
@@ -285,30 +300,17 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
             }
         });
         if(logger.isDebugEnabled()) logger.debug("existingUserAssignments=> {} ", existingUserAssignments);
+    }
 
-        //experimentIds is NULL means experimentBatch.labels are present.
-        //Use experimentBatch.labels to populate experimentIds
-        if(experimentIds==null) {
-            experimentIds = new HashSet<>();
-            for(Experiment exp:experimentMap.values()) {
-                if(experimentBatch.getLabels().contains(exp.getLabel())) {
-                    experimentIds.add(exp.getID());
-                }
-            }
-            if(logger.isDebugEnabled()) logger.debug("experimentIds for given experiment labels ({})", experimentIds);
-        } else {
-        //If experimentIds IS NOT NULL means experimentBatch.labels are NOT provided.
-        //Use experimentIds to populate experimentBatch.labels
-            Set<Experiment.Label> expLabels = new HashSet<>();
-            for(Experiment.ID expId:experimentIds) {
-                Experiment exp = experimentMap.get(expId);
-                if(exp!=null) {
-                    expLabels.add(exp.getLabel());
-                }
-            }
-            experimentBatch.setLabels(expLabels);
-            if(logger.isDebugEnabled()) logger.debug("experimentBatch after updating labels ({})", experimentBatch);
-        }
+    /**
+     *
+     * @param experimentIds INPUT: Given batch experiment ids
+     * @param bucketMap Output: Map of 'experiment id TO BucketList' of ONLY experiments which are associated to the given application and page.
+     * @param exclusionMap Output: Map of 'experiment id TO to its mutual experiment ids' of ONLY experiments which are associated to the given application and page.
+     */
+    private void populateBucketsAndExclusions(Set<Experiment.ID> experimentIds, Map<Experiment.ID, BucketList> bucketMap, Map<Experiment.ID, List<Experiment.ID>> exclusionMap) {
+        Map<Experiment.ID, ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Bucket>>> bucketFutureMap = new HashMap<>();
+        Map<Experiment.ID, ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Exclusion>>> exclusionFutureMap = new HashMap<>();
 
         //Send calls asynchronously
         experimentIds.stream().forEach(experimentId -> {
@@ -339,8 +341,41 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
             );
         }
         if(logger.isDebugEnabled()) logger.debug("exclusionMap=> {} ", exclusionMap);
+    }
 
-        if(logger.isDebugEnabled()) logger.debug("populateExperimentMetadata - FINISHED...");
+    /**
+     * This method is used to :
+     * 1.   Populate experimentIds of the given batch only based on experiment labels (experimentBatch).
+     * 2.   Populate experiment labels based on given batch experiment ids (allowAssignments).
+     *
+     * @param allowAssignments - INPUT: if present then it contains given batch experiment ids.
+     * @param experimentMap - INPUT:  Map of all the experiments of the given application.
+     * @param experimentBatch - INPUT/OUTPUT:  if allowAssignments is empty then this contains given batch experiment labels.
+     * @param experimentIds - OUTPUT: Final given batch experiment ids.
+     */
+    private void populateExperimentIdsAndExperimentBatch(Optional<Map<Experiment.ID, Boolean>> allowAssignments, Map<Experiment.ID, com.intuit.wasabi.experimentobjects.Experiment> experimentMap, ExperimentBatch experimentBatch, Set<Experiment.ID> experimentIds ) {
+        //allowAssignments is EMPTY means experimentBatch.labels are present.
+        //Use experimentBatch.labels to populate experimentIds
+        if(!allowAssignments.isPresent()) {
+            for(Experiment exp:experimentMap.values()) {
+                if(experimentBatch.getLabels().contains(exp.getLabel())) {
+                    experimentIds.add(exp.getID());
+                }
+            }
+            if(logger.isDebugEnabled()) logger.debug("experimentIds for given experiment labels ({})", experimentIds);
+        } else {
+            //If allowAssignments IS NOT EMPTY means experimentBatch.labels are NOT provided.
+            //Use allowAssignments.experimentIds to populate experimentBatch.labels
+            Set<Experiment.Label> expLabels = new HashSet<>();
+            for(Experiment.ID expId:experimentIds) {
+                Experiment exp = experimentMap.get(expId);
+                if(exp!=null) {
+                    expLabels.add(exp.getLabel());
+                }
+            }
+            experimentBatch.setLabels(expLabels);
+            if(logger.isDebugEnabled()) logger.debug("experimentBatch after updating labels ({})", experimentBatch);
+        }
     }
 
     //TODO: why return the last field as String instead of Bucket.Lable?
@@ -509,7 +544,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
 
     void indexExperimentsToUser(Assignment assignment) {
         try {
-            if (Objects.isNull(assignment.getBucketLabel())) {
+            if (isNull(assignment.getBucketLabel())) {
                 experimentUserIndexAccessor.insertBy(
                         assignment.getUserID().toString(),
                         assignment.getContext().getContext(),
@@ -532,7 +567,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
 
     void indexUserToBucket(Assignment assignment) {
         try{
-            if(Objects.isNull(assignment.getBucketLabel())) {
+            if(isNull(assignment.getBucketLabel())) {
                 userBucketIndexAccessor.insertBy(
                         assignment.getExperimentID().getRawID(),
                         assignment.getUserID().toString(),
@@ -565,7 +600,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     protected Assignment assignUserToLookUp(Assignment assignment, Date date) {
         final Date paramDate = Optional.ofNullable(date).orElseGet(Date::new);
         try {
-            if (Objects.isNull(assignment.getBucketLabel())) {
+            if (isNull(assignment.getBucketLabel())) {
                 userAssignmentIndexAccessor.insertBy(assignment.getExperimentID().getRawID(),
                         assignment.getUserID().toString(),
                         assignment.getContext().getContext(),
@@ -595,7 +630,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     public Assignment assignUserToOld(Assignment assignment, Date date) {
         final Date paramDate = Optional.ofNullable(date).orElseGet(Date::new);
         try {
-            if (Objects.isNull(assignment.getBucketLabel())) {
+            if (isNull(assignment.getBucketLabel())) {
                 userAssignmentAccessor.insertBy(assignment.getExperimentID().getRawID(),
                         assignment.getUserID().toString(),
                         assignment.getContext().getContext(),
@@ -627,7 +662,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         dateHour.setDateHour(date); //TODO: why is this not derived from assignment.getCreated() instead?
         final Date day_hour = dateHour.getDayHour();
         try {
-            if (Objects.isNull(assignment.getBucketLabel())) {
+            if (isNull(assignment.getBucketLabel())) {
                 userAssignmentExportAccessor.insertBy(assignment.getExperimentID().getRawID(),
                         assignment.getUserID().toString(),
                         assignment.getContext().getContext(),
@@ -789,7 +824,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
 
     List<Date> getDateHourRangeList(Experiment.ID experimentID, Parameters parameters) {
         final Experiment id = experimentRepository.getExperiment(experimentID);
-        if (Objects.isNull(id)) {
+        if (isNull(id)) {
             throw new ExperimentNotFoundException(experimentID);
         }
         final Optional<Date> from_ts = Optional.ofNullable(parameters.getFromTime());
@@ -844,7 +879,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                 .withBucketAssignmentCount(bucketAssignmentCountList)
                 .withExperimentID(experiment.getID());
 
-        if(Objects.isNull(result)) {
+        if(isNull(result)) {
             bucketAssignmentCountList.add(new com.intuit.wasabi.analyticsobjects.counts.BucketAssignmentCount.Builder()
                     .withBucket(null)
                     .withCount(0)
@@ -859,7 +894,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
             long totalAssignments = 0;
             long totalNullAssignments = 0;
             for(com.intuit.wasabi.repository.cassandra.pojo.count.BucketAssignmentCount bucketAssignmentCount : result){
-                final Bucket.Label label = Objects.isNull(bucketAssignmentCount.getBucketLabel()) ?
+                final Bucket.Label label = isNull(bucketAssignmentCount.getBucketLabel()) ?
                         NULL_LABEL : Bucket.Label.valueOf(bucketAssignmentCount.getBucketLabel());
                 totalAssignments += bucketAssignmentCount.getCount();
                 final BucketAssignmentCount.Builder builder = new BucketAssignmentCount.Builder()

@@ -52,6 +52,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static com.intuit.wasabi.experimentobjects.Experiment.State.TERMINATED;
+import static java.util.Objects.isNull;
 
 public class PagesImpl implements Pages {
 
@@ -219,7 +220,7 @@ public class PagesImpl implements Pages {
     @Override
     public List<PageExperiment> getExperimentsWithoutLabels(Application.Name applicationName, Page.Name pageName) {
         // Throw an exception if application name is invalid
-        if (applicationName == null || StringUtils.isBlank(applicationName.toString())){
+        if (isNull(applicationName) || StringUtils.isBlank(applicationName.toString())){
             throw new ApplicationNotFoundException("The Application name can not be null or empty");
         }
         return pagesRepository.getExperimentsWithoutLabels(applicationName, pageName);

@@ -64,6 +64,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.LongAdder;
 
+import static java.util.Objects.isNull;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -470,12 +471,8 @@ public class AssignmentsImpl implements Assignments {
                                             ExperimentBatch experimentBatch, Page.Name pageName,
                                             Map<Experiment.ID, Boolean> allowAssignments) {
 
-        long sTime,totalSTime;
-        totalSTime=System.currentTimeMillis();
-        sTime=System.currentTimeMillis();
-
         //allowAssignments is NULL when called from AssignmentsResource.getBatchAssignments()
-        Set<Experiment.ID> experimentIds = allowAssignments==null?null:allowAssignments.keySet();
+        Optional<Map<Experiment.ID, Boolean>> allowAssignmentsOptional = Optional.ofNullable(allowAssignments);
         PrioritizedExperimentList appPriorities = new PrioritizedExperimentList();
         Map<Experiment.ID, com.intuit.wasabi.experimentobjects.Experiment> experimentMap = new HashMap<>();
         Table<Experiment.ID, Experiment.Label, String> userAssignments = HashBasedTable.create();
@@ -483,9 +480,9 @@ public class AssignmentsImpl implements Assignments {
         Map<Experiment.ID, List<Experiment.ID>> exclusionMap = new HashMap<>();
 
         //Populate required experiment metadata along with all the existing user assignments for the given application
-        assignmentsRepository.populateExperimentMetadata(userID, applicationName, context, experimentBatch, experimentIds, appPriorities, experimentMap, userAssignments, bucketMap, exclusionMap);
+        assignmentsRepository.populateExperimentMetadata(userID, applicationName, context, experimentBatch, allowAssignmentsOptional, appPriorities, experimentMap, userAssignments, bucketMap, exclusionMap);
 
-        List<Map> allAssignments = new ArrayList<>();
+        List<Map> allAssignments = new LinkedList<>();
         // iterate over all experiments in the application in priority order
         for (PrioritizedExperiment experiment : appPriorities.getPrioritizedExperiments()) {
             if(LOGGER.isDebugEnabled()) LOGGER.debug("Now processing: {}", experiment);
@@ -504,13 +501,13 @@ public class AssignmentsImpl implements Assignments {
 
                 try {
                       Assignment assignment = getAssignment(userID, applicationName, label,
-                            context, allowAssignments != null ? allowAssignments.get(experiment.getID()) : createAssignment,
+                            context, allowAssignmentsOptional.isPresent()?(allowAssignmentsOptional.get().get(experiment.getID())):createAssignment,
                             forceInExperiment, segmentationProfile,
                             headers, pageName, experimentMap.get(experiment.getID()),
                               bucketMap.get(experiment.getID()), userAssignments, exclusionMap);
 
                     // This wouldn't normally happen because we specified CREATE=true
-                    if (assignment == null) {
+                    if (isNull(assignment)) {
                         continue;
                     }
                     // Only include `assignment` property if there is a definitive
@@ -524,18 +521,19 @@ public class AssignmentsImpl implements Assignments {
                                         ? assignment.getBucketLabel().toString()
                                         : null);
 
-                        if (assignment.getBucketLabel() != null) {
-                            Bucket bucket = getBucketByLabel(bucketMap.get(experiment.getID()), assignment.getBucketLabel());
-
-                            tempResult.put("payload",
-                                    bucket.getPayload() != null
-                                            ? bucket.getPayload()
-                                            : null);
+                        if (isNull(assignment.getBucketLabel())) {
+                            Optional<Bucket> bucket = getBucketByLabel(bucketMap.get(experiment.getID()), assignment.getBucketLabel());
+                            if(bucket.isPresent()) {
+                                tempResult.put("payload",
+                                        bucket.get().getPayload() != null
+                                                ? bucket.get().getPayload()
+                                                : null);
+                            }
                         }
                     }
 
                     tempResult.put("status", assignment.getStatus());
-                    if(LOGGER.isDebugEnabled()) LOGGER.debug("tempResult: "+tempResult);
+                    if(LOGGER.isDebugEnabled()) LOGGER.debug("tempResult: {}", tempResult);
 
 
                 } catch (WasabiException ex) {
@@ -555,14 +553,15 @@ public class AssignmentsImpl implements Assignments {
         return allAssignments;
     }
 
-    private Bucket getBucketByLabel(BucketList bucketList, Bucket.Label bucketLabel) {
-        if(bucketList==null) return null;
+    private Optional<Bucket> getBucketByLabel(BucketList bucketList, Bucket.Label bucketLabel) {
+        Optional<Bucket> rBucket = Optional.empty();
+        if(isNull(bucketList)) return rBucket;
         for(Bucket bucket:bucketList.getBuckets()) {
             if(bucket.getLabel().equals(bucketLabel)) {
-                return bucket;
+                return Optional.of(bucket);
             }
         }
-        return null;
+        return rBucket;
     }
 
     private Map<Experiment.ID, BucketList> getBucketList(Set<Experiment.ID> experimentIDSet) {

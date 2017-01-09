@@ -29,10 +29,7 @@ import com.intuit.wasabi.experimentobjects.BucketList;
 import com.intuit.wasabi.experimentobjects.ExperimentBatch;
 
 import javax.ws.rs.core.StreamingOutput;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Interface to support assignment requests
@@ -176,14 +173,14 @@ public interface AssignmentsRepository {
      * @param userID
      * @param appName
      * @param context
-     * @param experimentIds
+     * @param allowAssignments
      * @param prioritizedExperimentList
      * @param experimentMap
      * @param existingUserAssignments
      * @param bucketMap
      * @param exclusionMap
      */
-    void populateExperimentMetadata(User.ID userID, Application.Name appName, Context context, ExperimentBatch experimentBatch, Set<Experiment.ID> experimentIds,
+    void populateExperimentMetadata(User.ID userID, Application.Name appName, Context context, ExperimentBatch experimentBatch, Optional<Map<Experiment.ID, Boolean>> allowAssignments,
                                     PrioritizedExperimentList prioritizedExperimentList,
                                     Map<Experiment.ID, Experiment> experimentMap,
                                     Table<Experiment.ID, Experiment.Label, String> existingUserAssignments,
