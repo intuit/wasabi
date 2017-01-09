@@ -35,7 +35,6 @@ import com.intuit.wasabi.repository.cassandra.accessor.index.AppPageIndexAccesso
 import com.intuit.wasabi.repository.cassandra.accessor.index.PageExperimentIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.pojo.AppPage;
 import com.intuit.wasabi.repository.cassandra.pojo.index.PageExperimentByAppNamePage;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -61,10 +61,10 @@ import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.*;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.LongAdder;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -521,7 +521,7 @@ public class AssignmentsImpl implements Assignments {
                                         ? assignment.getBucketLabel().toString()
                                         : null);
 
-                        if (isNull(assignment.getBucketLabel())) {
+                        if (nonNull(assignment.getBucketLabel())) {
                             Optional<Bucket> bucket = getBucketByLabel(bucketMap.get(experiment.getID()), assignment.getBucketLabel());
                             if(bucket.isPresent()) {
                                 tempResult.put("payload",
