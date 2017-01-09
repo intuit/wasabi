@@ -77,7 +77,6 @@ public class CassandraRepositoryModule extends AbstractModule {
         bind(ExperimentPageAccessor.class).toProvider(ExperimentPageAccessorProvider.class).in(Singleton.class);
         bind(PrioritiesAccessor.class).toProvider(PrioritiesAccessorProvider.class).in(Singleton.class);
         bind(StagingAccessor.class).toProvider(StagingAccessorProvider.class).in(Singleton.class);
-        bind(UserAssignmentAccessor.class).toProvider(UserAssignmentAccessorProvider.class).in(Singleton.class);
         bind(UserFeedbackAccessor.class).toProvider(UserFeedbackAccessorProvider.class).in(Singleton.class);
         bind(UserInfoAccessor.class).toProvider(UserInfoAccessorProvider.class).in(Singleton.class);
         bind(UserRoleAccessor.class).toProvider(UserRoleAccessorProvider.class).in(Singleton.class);
@@ -88,7 +87,6 @@ public class CassandraRepositoryModule extends AbstractModule {
         bind(ExperimentUserIndexAccessor.class).toProvider(ExperimentUserIndexAccessorProvider.class).in(Singleton.class);
         bind(PageExperimentIndexAccessor.class).toProvider(PageExperimentIndexAccessorProvider.class).in(Singleton.class);
         bind(StateExperimentIndexAccessor.class).toProvider(StateExperimentIndexAccessorProvider.class).in(Singleton.class);
-        bind(UserAssignmentIndexAccessor.class).toProvider(UserAssignmentIndexAccessorProvider.class).in(Singleton.class);
         bind(UserBucketIndexAccessor.class).toProvider(UserBucketIndexAccessorProvider.class).in(Singleton.class);
         //Bind those audit
         bind(AuditLogAccessor.class).toProvider(AuditLogAccessorProvider.class).in(Singleton.class);
