@@ -89,24 +89,36 @@ public class ApiModule extends AbstractModule {
 
     }
     
-    protected void installModules() {
-        LOGGER.debug("installing module: {}", ApiModule.class.getSimpleName());
+    protected void installUserModule() {
+        install(new UserDirectoryModule());
+    }
+    
+    protected void installAuthModule() {
+        install(new AuthorizationModule());
+    }
+
+    protected void installEventModule() {
+        install(new EventsModule());
+    }
+    
+    private void installModules() {
+        LOGGER.debug("installing module: {}", ApiModule.class.getCanonicalName());
 
         //these modules are either free of other dependencies or they are required by later modules
         install(new com.intuit.autumn.api.ApiModule());
-        install(new UserDirectoryModule());
+        installUserModule();
         install(new DatabaseExperimentRepositoryModule());
         install(new DatabaseModule());
         install(new JacksonModule());
         install(new AuditLogModule());
-        install(new AuthorizationModule());
+        installAuthModule();
 
         install(new EmailModule());
-        install(new EventsModule());
+        installEventModule();
         install(new ExperimentsModule());
         install(new FeedbackModule());
         install(new AnalyticsModule());
 
-        LOGGER.debug("installed module: {}", ApiModule.class.getSimpleName());
+        LOGGER.debug("installed module: {}", ApiModule.class.getCanonicalName());
     }
 }
