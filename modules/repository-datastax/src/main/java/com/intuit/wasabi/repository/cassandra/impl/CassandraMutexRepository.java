@@ -227,7 +227,7 @@ public class CassandraMutexRepository implements MutexRepository {
         try {
         	for (Experiment.ID experimentId : experimentIDCollection) {
         		result.put(experimentId, getExclusionList(experimentId));
-        	}
+            }
         } catch (Exception e) {
         	LOGGER.error("Error while getting exclusions for {}", experimentIDCollection, e);
             throw new RepositoryException("Could not fetch mutually exclusive experiments for the list of experiments"

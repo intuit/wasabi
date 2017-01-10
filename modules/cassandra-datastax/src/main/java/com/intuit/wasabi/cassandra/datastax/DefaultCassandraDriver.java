@@ -121,6 +121,9 @@ public class DefaultCassandraDriver implements CassandraDriver {
                                 getConfiguration().getNewConnectionThresholdRemote());
                 builder.withPoolingOptions(poolingOptions);
 
+                //Configure to use compression
+                builder.withCompression(ProtocolOptions.Compression.LZ4);
+
                 // SSL connection
                 if (getConfiguration().useSSL()) {
                     try {
@@ -138,9 +141,6 @@ public class DefaultCassandraDriver implements CassandraDriver {
 
                 LOGGER.info("Connecting to nodes {}, on port {}", nodes, getConfiguration().getPort());
                 this.cluster = builder.build();
-                cluster.getConfiguration()
-                        .getProtocolOptions()
-                        .setCompression(ProtocolOptions.Compression.LZ4);
 
                 synchronized (this) {
                     try {

@@ -6,28 +6,30 @@ import com.datastax.driver.mapping.MappingManager;
 import com.datastax.driver.mapping.Result;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.intuit.wasabi.analyticsobjects.Parameters;
 import com.intuit.wasabi.analyticsobjects.counts.AssignmentCounts;
 import com.intuit.wasabi.assignmentobjects.Assignment;
+import com.intuit.wasabi.assignmentobjects.SegmentationProfile;
 import com.intuit.wasabi.assignmentobjects.User;
+import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.eventlog.EventLog;
 import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
+import com.intuit.wasabi.experimentobjects.*;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
-import com.intuit.wasabi.experimentobjects.Context;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.RepositoryException;
-import com.intuit.wasabi.repository.cassandra.accessor.BucketAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.StagingAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.UserAssignmentAccessor;
+import com.intuit.wasabi.repository.cassandra.UninterruptibleUtil;
+import com.intuit.wasabi.repository.cassandra.accessor.*;
 import com.intuit.wasabi.repository.cassandra.accessor.count.BucketAssignmentCountAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.export.UserAssignmentExportAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentUserIndexAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.index.PageExperimentIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.UserAssignmentIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.UserBucketIndexAccessor;
-import com.intuit.wasabi.repository.cassandra.pojo.UserAssignment;
+import com.intuit.wasabi.repository.cassandra.pojo.*;
 import com.intuit.wasabi.repository.cassandra.pojo.count.BucketAssignmentCount;
 import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentUserByUserIdContextAppNameExperimentId;
 import com.intuit.wasabi.repository.cassandra.pojo.index.UserAssignmentByUserId;
@@ -39,11 +41,15 @@ import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.StreamingOutput;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -75,6 +81,11 @@ public class CassandraAssignmentsRepositoryTest {
     @Mock BucketAssignmentCountAccessor bucketAssignmentCountAccessor;
 
     @Mock StagingAccessor stagingAccessor;
+    @Mock PrioritiesAccessor prioritiesAccessor;
+    @Mock ExclusionAccessor exclusionAccessor;
+    @Mock PageExperimentIndexAccessor pageExperimentIndexAccessor;
+
+    @Mock CassandraDriver driver;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS) MappingManager mappingManager;
     @Mock Result mockedResultMapping;
@@ -99,6 +110,10 @@ public class CassandraAssignmentsRepositoryTest {
                 userBucketIndexAccessor,
                 bucketAssignmentCountAccessor,
                 stagingAccessor,
+                prioritiesAccessor,
+                exclusionAccessor,
+                pageExperimentIndexAccessor,
+                driver,
                 mappingManager,
                 5,
                 true,
@@ -537,6 +552,10 @@ public class CassandraAssignmentsRepositoryTest {
                 userBucketIndexAccessor,
                 bucketAssignmentCountAccessor,
                 stagingAccessor,
+                prioritiesAccessor,
+                exclusionAccessor,
+                pageExperimentIndexAccessor,
+                driver,
                 mappingManager,
                 5,
                 false,
@@ -573,6 +592,10 @@ public class CassandraAssignmentsRepositoryTest {
                 userBucketIndexAccessor,
                 bucketAssignmentCountAccessor,
                 stagingAccessor,
+                prioritiesAccessor,
+                exclusionAccessor,
+                pageExperimentIndexAccessor,
+                driver,
                 mappingManager,
                 5,
                 false,
@@ -613,6 +636,10 @@ public class CassandraAssignmentsRepositoryTest {
                 userBucketIndexAccessor,
                 bucketAssignmentCountAccessor,
                 stagingAccessor,
+                prioritiesAccessor,
+                exclusionAccessor,
+                pageExperimentIndexAccessor,
+                driver,
                 mappingManager,
                 5,
                 true,
@@ -1303,6 +1330,10 @@ public class CassandraAssignmentsRepositoryTest {
                 userBucketIndexAccessor,
                 bucketAssignmentCountAccessor,
                 stagingAccessor,
+                prioritiesAccessor,
+                exclusionAccessor,
+                pageExperimentIndexAccessor,
+                driver,
                 mappingManager,
                 5,
                 false,
@@ -1399,6 +1430,141 @@ public class CassandraAssignmentsRepositoryTest {
         assertThat(assignmentCounts.getTotalUsers().getBucketAssignments(), is(500L));
         assertThat(assignmentCounts.getTotalUsers().getNullAssignments(), is(500L));
         assertThat(assignmentCounts.getTotalUsers().getTotal(), is(1000L));
+    }
+
+    @Test
+    public void testPopulateExperimentMetadataSuccessCase() throws ExecutionException, InterruptedException {
+
+        //------ Input --------
+        Experiment.ID expId1 = Experiment.ID.newInstance();
+        Application.Name appName = Application.Name.valueOf("testApp1");
+        User.ID userID = User.ID.valueOf("testUser1");
+        Context context = Context.valueOf("TEST");
+        SegmentationProfile segmentationProfile = mock(SegmentationProfile.class);
+        ExperimentBatch experimentBatch = ExperimentBatch.newInstance().withProfile(segmentationProfile.getProfile()).build();
+        Map<Experiment.ID, Boolean> allowAssignments = new HashMap<>();
+        allowAssignments.put(expId1, true);
+        Optional<Map<Experiment.ID, Boolean>> allowAssignmentsOptional = Optional.of(allowAssignments);
+
+        //----- Output -----------
+        PrioritizedExperimentList appPriorities = new PrioritizedExperimentList();
+        Map<Experiment.ID, com.intuit.wasabi.experimentobjects.Experiment> experimentMap = new HashMap<>();
+        Table<Experiment.ID, Experiment.Label, String> userAssignments = HashBasedTable.create();
+        Map<Experiment.ID, BucketList> bucketMap = new HashMap<>();
+        Map<Experiment.ID, List<Experiment.ID>> exclusionMap = new HashMap<>();
+
+        //------ Mocking interacting calls
+
+        ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment>> experimentsFuture = mock(ListenableFuture.class);
+        when(experimentAccessor.asyncGetExperimentByAppName(appName.toString())).thenReturn(experimentsFuture);
+        List<com.intuit.wasabi.repository.cassandra.pojo.Experiment> expList = new ArrayList<>();
+        com.intuit.wasabi.repository.cassandra.pojo.Experiment exp1 = com.intuit.wasabi.repository.cassandra.pojo.Experiment.builder()
+                .id(expId1.getRawID())
+                .appName(appName.toString())
+                .startTime(new Date())
+                .created(new Date())
+                .endTime(new Date())
+                .state(Experiment.State.RUNNING.toString())
+                .label("testExp1")
+                .modified(new Date())
+                .samplePercent(90.00)
+                .build();
+        expList.add(exp1);
+        Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment> expResult = mock(Result.class);
+        when(expResult.all()).thenReturn(expList);
+        when(experimentsFuture.get()).thenReturn(expResult);
+
+        ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Application>> applicationFuture = mock(ListenableFuture.class);
+        when(prioritiesAccessor.asyncGetPriorities(appName.toString())).thenReturn(applicationFuture);
+        List<com.intuit.wasabi.repository.cassandra.pojo.Application> applicationList = new ArrayList<>();
+        com.intuit.wasabi.repository.cassandra.pojo.Application app1 = com.intuit.wasabi.repository.cassandra.pojo.Application.builder()
+                .appName(appName.toString())
+                .priority(expId1.getRawID())
+                .build();
+        applicationList.add(app1);
+        Result<com.intuit.wasabi.repository.cassandra.pojo.Application> applicationResult = mock(Result.class);
+        when(applicationResult.all()).thenReturn(applicationList);
+        when(applicationFuture.get()).thenReturn(applicationResult);
+
+        ListenableFuture<Result<ExperimentUserByUserIdContextAppNameExperimentId>> userAssignmentFuture = mock(ListenableFuture.class);
+        Bucket.Label bucketLabel = Bucket.Label.valueOf("testBucket1");
+        when(experimentUserIndexAccessor.asyncSelectBy(userID.toString(), appName.toString(), context.toString())).thenReturn(userAssignmentFuture);
+        List<ExperimentUserByUserIdContextAppNameExperimentId> userAssignmentList = new ArrayList<>();
+        ExperimentUserByUserIdContextAppNameExperimentId ua1 = ExperimentUserByUserIdContextAppNameExperimentId.builder()
+                .experimentId(expId1.getRawID())
+                .appName(appName.toString())
+                .context(context.toString())
+                .bucket(bucketLabel.toString()).build();
+        userAssignmentList.add(ua1);
+        Result<ExperimentUserByUserIdContextAppNameExperimentId> uaResult = mock(Result.class);
+        when(uaResult.all()).thenReturn(userAssignmentList);
+        when(userAssignmentFuture.get()).thenReturn(uaResult);
+
+        ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Bucket>> bucketFuture = mock(ListenableFuture.class);
+        when(bucketAccessor.asyncGetBucketByExperimentId(expId1.getRawID())).thenReturn(bucketFuture);
+        List<com.intuit.wasabi.repository.cassandra.pojo.Bucket> bucketList = new ArrayList<>();
+        com.intuit.wasabi.repository.cassandra.pojo.Bucket bucket1 = com.intuit.wasabi.repository.cassandra.pojo.Bucket.builder()
+                .label(bucketLabel.toString())
+                .state(Bucket.State.OPEN.toString())
+                .experimentId(expId1.getRawID())
+                .build();
+        bucketList.add(bucket1);
+        Result<com.intuit.wasabi.repository.cassandra.pojo.Bucket> bucketResult = mock(Result.class);
+        when(bucketResult.all()).thenReturn(bucketList);
+        when(bucketFuture.get()).thenReturn(bucketResult);
+
+        ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Exclusion>> exclusionFuture = mock(ListenableFuture.class);
+        when(exclusionAccessor.asyncGetExclusions(expId1.getRawID())).thenReturn(exclusionFuture);
+        List<com.intuit.wasabi.repository.cassandra.pojo.Exclusion> exclusionList = new ArrayList<>();
+        Experiment.ID exclusionExpId1 = Experiment.ID.newInstance();
+        com.intuit.wasabi.repository.cassandra.pojo.Exclusion exclusion1 = com.intuit.wasabi.repository.cassandra.pojo.Exclusion.builder().base(expId1.getRawID()).pair(exclusionExpId1.getRawID()).build();
+        exclusionList.add(exclusion1);
+        Result<com.intuit.wasabi.repository.cassandra.pojo.Exclusion> exclusionResult = mock(Result.class);
+        when(exclusionResult.all()).thenReturn(exclusionList);
+        when(exclusionFuture.get()).thenReturn(exclusionResult);
+
+        //------ Actual call ---------
+        repository.populateExperimentMetadata(userID, appName, context, experimentBatch, allowAssignmentsOptional, appPriorities, experimentMap, userAssignments, bucketMap, exclusionMap);
+
+        //------ Assert response output ---------
+        assertThat(appPriorities.getPrioritizedExperiments().size(), is(1));
+        assertThat(appPriorities.getPrioritizedExperiments().get(0).getID(), is(expId1));
+        assertThat(experimentMap.get(expId1)!=null, is(true));
+        assertThat(userAssignments.size(), is(1));
+        assertThat(bucketMap.size(), is(1));
+        assertThat(exclusionMap.size(), is(1));
+        assertThat(exclusionMap.get(expId1).get(0).getRawID(), is(exclusion1.getPair()));
+
+    }
+
+    @Test
+    public void testPopulateExperimentMetadataInvalidInputCase() throws ExecutionException, InterruptedException {
+
+        //------ Input --------
+        Experiment.ID expId1 = Experiment.ID.newInstance();
+        Application.Name appName = Application.Name.valueOf("testApp1");
+        User.ID userID = User.ID.valueOf("testUser1");
+        Context context = Context.valueOf("TEST");
+        SegmentationProfile segmentationProfile = mock(SegmentationProfile.class);
+        ExperimentBatch experimentBatch = ExperimentBatch.newInstance().withProfile(segmentationProfile.getProfile()).build();
+        Optional<Map<Experiment.ID, Boolean>> allowAssignmentsOptional = Optional.empty();
+
+        //----- Output -----------
+        PrioritizedExperimentList appPriorities = new PrioritizedExperimentList();
+        Map<Experiment.ID, com.intuit.wasabi.experimentobjects.Experiment> experimentMap = new HashMap<>();
+        Table<Experiment.ID, Experiment.Label, String> userAssignments = HashBasedTable.create();
+        Map<Experiment.ID, BucketList> bucketMap = new HashMap<>();
+        Map<Experiment.ID, List<Experiment.ID>> exclusionMap = new HashMap<>();
+
+        //------ Actual call ---------
+        repository.populateExperimentMetadata(userID, appName, context, experimentBatch, allowAssignmentsOptional, appPriorities, experimentMap, userAssignments, bucketMap, exclusionMap);
+
+        //------ Assert response output ---------
+        assertThat(appPriorities.getPrioritizedExperiments().size(), is(0));
+        assertThat(experimentMap.get(expId1)!=null, is(false));
+        assertThat(userAssignments.size(), is(0));
+        assertThat(bucketMap.size(), is(0));
+        assertThat(exclusionMap.size(), is(0));
     }
 
 }

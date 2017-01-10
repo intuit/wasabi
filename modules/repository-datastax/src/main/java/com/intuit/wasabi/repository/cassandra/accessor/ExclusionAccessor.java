@@ -19,6 +19,7 @@ import com.datastax.driver.core.Statement;
 import com.datastax.driver.mapping.Result;
 import com.datastax.driver.mapping.annotations.Accessor;
 import com.datastax.driver.mapping.annotations.Query;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.intuit.wasabi.repository.cassandra.pojo.Exclusion;
 
 import java.util.UUID;
@@ -36,6 +37,9 @@ public interface ExclusionAccessor {
 	 */
     @Query("select * from exclusion where base = ?")
     Result<Exclusion> getExclusions(UUID base);
+
+    @Query("select * from exclusion where base = ?")
+    ListenableFuture<Result<Exclusion>> asyncGetExclusions(UUID base);
 
     /**
      * Delete exclusion pair

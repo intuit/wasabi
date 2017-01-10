@@ -19,6 +19,7 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.mapping.Result;
 import com.datastax.driver.mapping.annotations.Accessor;
 import com.datastax.driver.mapping.annotations.Query;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.intuit.wasabi.repository.cassandra.pojo.Experiment;
 
 import java.util.Date;
@@ -60,6 +61,9 @@ public interface ExperimentAccessor {
     
     @Query("select * from experiment where app_name = ?")
     Result<Experiment> getExperimentByAppName(String appName);
+
+    @Query("select * from experiment where app_name = ?")
+    ListenableFuture<Result<Experiment>> asyncGetExperimentByAppName(String appName);
 
     @Query("select * from experiment where id = ?")
     Result<Experiment> selectBy(UUID experimentId);

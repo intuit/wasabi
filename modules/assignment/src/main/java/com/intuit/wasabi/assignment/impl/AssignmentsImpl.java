@@ -15,6 +15,10 @@
  *******************************************************************************/
 package com.intuit.wasabi.assignment.impl;
 
+import com.datastax.driver.core.ResultSetFuture;
+import com.datastax.driver.core.Session;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -59,6 +63,8 @@ import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -426,29 +432,65 @@ public class AssignmentsImpl implements Assignments {
         return assignment;
     }
 
+    /**
+     *
+     * Create/Retrieve assignments for a given user, application, context and
+     * given experiments (experimentBatch/allowAssignments).
+     *
+     * This method is called from two places:
+     * 1. First directly through API call AssignmentsResource.getBatchAssignments() => api:/v1/assignments/applications/{applicationName}/users/{userID}
+     *    In this case pageName and allowAssignments are NULL
+     *
+     * 2. Second from AssignmentsImpl.doPageAssignments() => api:/v1/assignments/applications/{applicationName}/pages/{pageName}/users/{userID}
+     *    In this case pageName and allowAssignments are provided.
+     *    To avoid performance degradation (duplicate calls to )
+     *
+     *
+     * @param userID           the {@link com.intuit.wasabi.assignmentobjects.User.ID} of the person we want the assignment for
+     * @param applicationName  the {@link com.intuit.wasabi.experimentobjects.Application.Name} the app we want the assignment for
+     * @param context          the {@link Context} of the assignment call
+     * @param createAssignment <code>true</code> when a new Assignment should be created
+     * @param forceInExperiment
+     * @param headers          the {@link HttpHeaders} that can be used by the segmentation
+     * @param experimentBatch  the {@link ExperimentBatch} experiment batch for batch assignments
+     *                         Experiment labels are NOT PRESENT when called from AssignmentsImpl.doPageAssignments()
+     *
+     * @param pageName         the {@link com.intuit.wasabi.experimentobjects.Page.Name} the page name for the assignment
+     *                         NULL when called from AssignmentsResource.getBatchAssignments()
+     *                         PRESENT when called from AssignmentsImpl.doPageAssignments()
+     *
+     * @param allowAssignments {@link HashMap} for each experiment whether the assignment is allowed
+     *                         NULL when called from AssignmentsResource.getBatchAssignments()
+     *                         PRESENT when called from AssignmentsImpl.doPageAssignments()
+     *
+     * @return
+     */
     @Override
     public List<Map> doBatchAssignments(User.ID userID, Application.Name applicationName, Context context,
                                             boolean createAssignment, boolean forceInExperiment, HttpHeaders headers,
                                             ExperimentBatch experimentBatch, Page.Name pageName,
                                             Map<Experiment.ID, Boolean> allowAssignments) {
 
-        // Get the metadata of all the experiments for this application
-        Table<Experiment.ID, Experiment.Label, Experiment> allExperiments = repository.getExperimentList(applicationName);
+        //allowAssignments is NULL when called from AssignmentsResource.getBatchAssignments()
+        Optional<Map<Experiment.ID, Boolean>> allowAssignmentsOptional = Optional.ofNullable(allowAssignments);
+        PrioritizedExperimentList appPriorities = new PrioritizedExperimentList();
+        Map<Experiment.ID, com.intuit.wasabi.experimentobjects.Experiment> experimentMap = new HashMap<>();
+        Table<Experiment.ID, Experiment.Label, String> userAssignments = HashBasedTable.create();
+        Map<Experiment.ID, BucketList> bucketMap = new HashMap<>();
+        Map<Experiment.ID, List<Experiment.ID>> exclusionMap = new HashMap<>();
 
-        List<Map> allAssignments = new ArrayList<>();
+        //Populate required experiment metadata along with all the existing user assignments for the given application
+        assignmentsRepository.populateExperimentMetadata(userID, applicationName, context, experimentBatch, allowAssignmentsOptional, appPriorities, experimentMap, userAssignments, bucketMap, exclusionMap);
 
-        // Get the assignments for userID across all experiments in applicationName for the context
-        Table<Experiment.ID, Experiment.Label, String> userAssignments =
-                assignmentsRepository.getAssignments(userID, applicationName, context, allExperiments);
-        PrioritizedExperimentList appPriorities = priorities.getPriorities(applicationName, false);
-        Set<Experiment.ID> experimentSet = allExperiments.rowKeySet();
-        Map<Experiment.ID, BucketList> bucketList = getBucketList(experimentSet);
-        Map<Experiment.ID, List<Experiment.ID>> exclusives = getExclusivesList(experimentSet);
-
+        List<Map> allAssignments = new LinkedList<>();
         // iterate over all experiments in the application in priority order
         for (PrioritizedExperiment experiment : appPriorities.getPrioritizedExperiments()) {
+            if(LOGGER.isDebugEnabled()) LOGGER.debug("Now processing: {}", experiment);
+
             //check if the experiment was given in experimentBatch
             if (experimentBatch.getLabels().contains(experiment.getLabel())) {
+                if(LOGGER.isDebugEnabled()) LOGGER.debug("Experiment ({}) has given batch assignment....", experiment.getLabel());
+
                 String labelStr = experiment.getLabel().toString();
                 Map<String, Object> tempResult = new HashMap<>();
                 // get the assignment for user in this experiment
@@ -458,15 +500,14 @@ public class AssignmentsImpl implements Assignments {
                         .build();
 
                 try {
-                    Assignment assignment = getAssignment(userID, applicationName, label,
-                            context, allowAssignments != null ? allowAssignments.get(experiment.getID()) : createAssignment,
+                      Assignment assignment = getAssignment(userID, applicationName, label,
+                            context, allowAssignmentsOptional.isPresent()?(allowAssignmentsOptional.get().get(experiment.getID())):createAssignment,
                             forceInExperiment, segmentationProfile,
-                            headers, pageName, allExperiments.get(experiment.getID(), experiment.getLabel()),
-                            bucketList.get(experiment.getID()), userAssignments, exclusives);
-
+                            headers, pageName, experimentMap.get(experiment.getID()),
+                              bucketMap.get(experiment.getID()), userAssignments, exclusionMap);
 
                     // This wouldn't normally happen because we specified CREATE=true
-                    if (assignment == null) {
+                    if (isNull(assignment)) {
                         continue;
                     }
                     // Only include `assignment` property if there is a definitive
@@ -480,16 +521,20 @@ public class AssignmentsImpl implements Assignments {
                                         ? assignment.getBucketLabel().toString()
                                         : null);
 
-                        if (assignment.getBucketLabel() != null) {
-                            Bucket bucket = repository.getBucket(experiment.getID(), assignment.getBucketLabel());
-                            tempResult.put("payload",
-                                    bucket.getPayload() != null
-                                            ? bucket.getPayload()
-                                            : null);
+                        if (nonNull(assignment.getBucketLabel())) {
+                            Optional<Bucket> bucket = getBucketByLabel(bucketMap.get(experiment.getID()), assignment.getBucketLabel());
+                            if(bucket.isPresent()) {
+                                tempResult.put("payload",
+                                        bucket.get().getPayload() != null
+                                                ? bucket.get().getPayload()
+                                                : null);
+                            }
                         }
                     }
 
                     tempResult.put("status", assignment.getStatus());
+                    if(LOGGER.isDebugEnabled()) LOGGER.debug("tempResult: {}", tempResult);
+
 
                 } catch (WasabiException ex) {
                     //FIXME: should not use exception as part of the flow control.
@@ -503,7 +548,20 @@ public class AssignmentsImpl implements Assignments {
                 experimentBatch.getLabels().remove(experiment.getLabel());
             }
         }
+        if(LOGGER.isDebugEnabled()) LOGGER.debug("allAssignments: {} ", allAssignments);
+
         return allAssignments;
+    }
+
+    private Optional<Bucket> getBucketByLabel(BucketList bucketList, Bucket.Label bucketLabel) {
+        Optional<Bucket> rBucket = Optional.empty();
+        if(isNull(bucketList)) return rBucket;
+        for(Bucket bucket:bucketList.getBuckets()) {
+            if(bucket.getLabel().equals(bucketLabel)) {
+                return Optional.of(bucket);
+            }
+        }
+        return rBucket;
     }
 
     private Map<Experiment.ID, BucketList> getBucketList(Set<Experiment.ID> experimentIDSet) {
@@ -681,15 +739,17 @@ public class AssignmentsImpl implements Assignments {
                                            Context context, boolean createAssignment, boolean ignoreSamplingPercent,
                                            HttpHeaders headers, SegmentationProfile segmentationProfile) {
 
-        List<PageExperiment> pageExperimentList = pages.getExperiments(applicationName, pageName);
-        Set<Experiment.Label> experimentLabels = new HashSet<>(pageExperimentList.size());
+        //Get the experiments (id & allowNewAssignment only) associated to the given application and page.
+        List<PageExperiment> pageExperimentList = pages.getExperimentsWithoutLabels(applicationName, pageName);
+
+        //Prepare allowAssignments map
         Map<Experiment.ID, Boolean> allowAssignments = new HashMap<>(pageExperimentList.size());
         for (PageExperiment pageExperiment : pageExperimentList) {
             allowAssignments.put(pageExperiment.getId(), pageExperiment.getAllowNewAssignment());
-            experimentLabels.add(pageExperiment.getLabel());
         }
+
+        //Prepare experiment batch
         ExperimentBatch.Builder experimentBatchBuilder = ExperimentBatch.newInstance();
-        experimentBatchBuilder.withLabels(experimentLabels);
         if (segmentationProfile != null) {
             experimentBatchBuilder.withProfile(segmentationProfile.getProfile());
         }
@@ -1048,8 +1108,7 @@ public class AssignmentsImpl implements Assignments {
         queueLengthMap.put(RULE_CACHE, new Integer(this.ruleCacheExecutor.getQueue().size()));
         for (String name : executors.keySet()) {
             queueLengthMap.put(name.toLowerCase(), new Integer(executors.get(name).queueLength()));
-        }        
+        }
         return queueLengthMap;
     }
-
 }
