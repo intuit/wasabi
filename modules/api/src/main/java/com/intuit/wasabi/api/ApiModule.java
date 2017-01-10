@@ -55,22 +55,8 @@ public class ApiModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        LOGGER.debug("installing module: {}", ApiModule.class.getSimpleName());
-        //these modules are either free of other dependencies or they are required by later modules
-        install(new com.intuit.autumn.api.ApiModule());
-        install(new UserDirectoryModule());
-        install(new DatabaseExperimentRepositoryModule());
-        install(new DatabaseModule());
-        install(new JacksonModule());
-        install(new AuditLogModule());
-        install(new AuthorizationModule());
 
-        install(new EmailModule());
-        install(new EventsModule());
-        install(new ExperimentsModule());
-        install(new FeedbackModule());
-        install(new AnalyticsModule());
-
+        installModules();
 
         Properties properties = create(PROPERTY_NAME, ApiModule.class);
 
@@ -101,6 +87,38 @@ public class ApiModule extends AbstractModule {
 //            e.printStackTrace();
 //        }
 
-        LOGGER.debug("installed module: {}", ApiModule.class.getSimpleName());
+    }
+    
+    protected void installUserModule() {
+        install(new UserDirectoryModule());
+    }
+    
+    protected void installAuthModule() {
+        install(new AuthorizationModule());
+    }
+
+    protected void installEventModule() {
+        install(new EventsModule());
+    }
+    
+    private void installModules() {
+        LOGGER.debug("installing module: {}", ApiModule.class.getCanonicalName());
+
+        //these modules are either free of other dependencies or they are required by later modules
+        install(new com.intuit.autumn.api.ApiModule());
+        installUserModule();
+        install(new DatabaseExperimentRepositoryModule());
+        install(new DatabaseModule());
+        install(new JacksonModule());
+        install(new AuditLogModule());
+        installAuthModule();
+
+        install(new EmailModule());
+        installEventModule();
+        install(new ExperimentsModule());
+        install(new FeedbackModule());
+        install(new AnalyticsModule());
+
+        LOGGER.debug("installed module: {}", ApiModule.class.getCanonicalName());
     }
 }
