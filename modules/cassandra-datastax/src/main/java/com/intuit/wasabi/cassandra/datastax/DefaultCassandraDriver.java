@@ -169,6 +169,7 @@ public class DefaultCassandraDriver implements CassandraDriver {
                         initializeKeyspace();
                     } catch (Exception e) {
                         LOGGER.error("Exception occurred while connecting to the cluster...", e);
+                        throw e;
                     }
 
                     // Try to get the definition to test if the keyspace exists
