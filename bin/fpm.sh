@@ -86,6 +86,7 @@ for module in "$modules"; do
     modules/${module}/target/extra-resources/service/run=${home}/bin/run\
     modules/${module}/target/classes/logback-access.xml=${home}/conf/logback-access.xml\
     modules/${module}/target/classes/logback.xml=${home}/conf/logback.xml\
+    modules/${module}/target/classes/logging.properties=${home}/conf/logging.properties\
     modules/${module}/target/classes/metrics.properties=${home}/conf/metrics.properties\
     modules/${module}/target/classes/web.properties=${home}/conf/web.properties\
     modules/analytics/target/classes/analytics.properties=${home}/conf/analytics.properties\
