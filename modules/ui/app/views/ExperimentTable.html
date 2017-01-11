@@ -59,7 +59,7 @@
         </div>
     </div>
 
-    <div ng-if="data.enableCardView" id="gridView" class="leftCol" ng-show="data.showGrid">
+    <div ng-if="data.enableCardView" id="gridView" ng-class="{gridWithAdvanced: data.showAdvancedSearch}" class="leftCol" ng-show="data.showGrid">
         <div ng-if="experiments.length === 0" id="emptyHomeList">You have no running experiments.</div>
         <div>
         <ul ng-if="experiments.length > 0" id="exprSummary">
@@ -99,26 +99,33 @@
                     </div>
                 </div>
                 <div class="summaryBody">
-                    <ul class="buckets" ng-if="experiment.statistics && experiment.statistics.sortedBucketsActiveOnly && experiment.statistics.sortedBucketsActiveOnly.length > 0">
-                        <li ng-repeat="bucket in experiment.statistics.sortedBucketsActiveOnly" custom-tooltip="{{bucket.homePageTooltip}}" ng-class="{closed: getBucket(bucket.label, experiment).state === 'CLOSED', indeterminate: improvementClass(bucket.label, experiment) === 'indeterminate', winner: improvementClass(bucket.label, experiment) === 'winner', indeterminate: improvementClass(bucket.label, experiment) === 'loser', noWinner: improvementClass(bucket.label, experiment) === 'no-winner'}">
-                            <label>{{bucket.label}} <span ng-if="getBucket(bucket.label, experiment).isControl">(control)</span><span ng-if="getBucket(bucket.label, experiment).isBaseLine">(baseline)</span></label>
-                            <div>{{actionRate(bucket.label, experiment.statistics.buckets) | number:1}} <span>&plusmn;{{actionDiff(bucket.label, experiment.statistics.buckets) | number:1}}%</span></div>
-                            <div title="Bucket assignments" class="bucketAssignments" ng-if="getBucket(bucket.label, experiment).count >= 0">{{getBucket(bucket.label, experiment).count}}</div>
-                        </li>
-                    </ul>
-                    <ul class="buckets" ng-if="(!experiment.statistics || !experiment.statistics.sortedBucketsActiveOnly) && (experiment.buckets && experiment.buckets.length > 0)">
-                        <li ng-repeat="bucket in experiment.buckets" custom-tooltip="{{bucket.homePageTooltip}}" class="noWinnerNotRunning">
-                            <label>{{bucket.label}} <span ng-if="getBucket(bucket.label, experiment).isControl">(control)</span><span ng-if="getBucket(bucket.label, experiment).isBaseLine">(baseline)</span></label>
-                            <div>{{multiply100(bucket.allocationPercent)}}%</div>
-                        </li>
-                    </ul>
-                    <ul class="buckets" ng-if="(!experiment.statistics || !experiment.statistics.sortedBucketsActiveOnly) && (!experiment.buckets || experiment.buckets.length === 0)">
-                        <li style="padding-bottom: 8px;">
-                            <label ng-if="!experiment.buckets">Loading...</label>
-                            <label ng-if="experiment.buckets && experiment.buckets.length === 0">No buckets defined</label>
-                        </li>
-                    </ul>
-                    <div class="total" ng-if="experiment.state != 'DRAFT'">Total users:&nbsp;&nbsp;<span title="Total users assigned to the experiment">{{experiment.numUsers | number:0}}</span></div>
+                    <!-- This is a non-Draft experiment, we can tell that because it has sortedBuckets which is only necessary if we needed to detect winners, etc. -->
+                    <table class="bucketsTable" ng-if="experiment.sortedBuckets && experiment.sortedBuckets.length > 0">
+                        <tr ng-repeat="bucket in experiment.sortedBuckets" ng-class="{'lastRow':$last}">
+                            <td custom-tooltip="{{bucket.homePageTooltip}}" ng-class="{indeterminate: bucket.improvementClass === 'indeterminate', winner: bucket.improvementClass === 'winner', nonWinner: bucket.improvementClass === 'loser'}"><label class="bucketLabel" title="{{ bucket.label + (bucket.isControl ? ' (control)' : (bucket.isBaseLine ? ' (baseline)' : '')) }}">{{bucket.label}} <span ng-if="bucket.isControl">(control)</span><span ng-if="bucket.isBaseLine">(baseline)</span></label><br/>
+                                {{multiply100(bucket.actionRate) | number:1}} <span>&plusmn;{{actionDiffForCardView(bucket) | number:1}}%</span></td>
+                            <td class="userCounts" title="Number of users assigned to this bucket">{{bucket.count}}</td>
+                        </tr>
+                        <tr><td style="text-align: right;">Total users:&nbsp;&nbsp;</td><td class="userCounts" title="Total users assigned to the experiment">{{experiment.totalNumberUsers | number:0}}</td></tr>
+                    </table>
+                    <!-- This is a Draft experiment that has some buckets defined, so we will display them -->
+                    <table class="bucketsTable" ng-if="(!experiment.sortedBuckets) && (experiment.buckets && experiment.buckets.length > 0)">
+                        <tr ng-repeat="bucket in experiment.buckets" ng-class="{'lastRow':$last}">
+                            <td custom-tooltip="{{bucket.homePageTooltip}}"><label class="bucketLabel" title="{{ bucket.label + (bucket.isControl ? ' (control)' : (bucket.isBaseLine ? ' (baseline)' : '')) }}">{{bucket.label}} <span>{{(bucket.isControl ? ' (control)' : (bucket.isBaseLine ? ' (baseline)' : '')) }}</span></label><br/>
+                                -- <span>&plusmn;--%</span></td>
+                            <td class="userCounts" title="Number of users assigned to this bucket">--</td>
+                        </tr>
+                        <tr><td style="text-align: right;">Total users:&nbsp;&nbsp;</td><td class="userCounts" title="Total users assigned to the experiment">--</td></tr>
+                    </table>
+                    <!-- This is a Draft experiment that has NO buckets defined, so we will display a message to that effect -->
+                    <table class="bucketsTable" ng-if="(!experiment.sortedBuckets) && (!experiment.buckets || experiment.buckets.length === 0)">
+                        <tr>
+                            <td class="lastRow" width="200px">
+                                <label ng-if="!experiment.buckets">Loading...</label>
+                                <label ng-if="experiment.buckets && experiment.buckets.length === 0">No buckets defined</label>
+                            </td>
+                        </tr>
+                    </table>
                 </div>
             </li>
         </ul>

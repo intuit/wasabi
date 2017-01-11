@@ -1,5 +1,3 @@
-/*global $:false */
-/*global moment:false */
 'use strict';
 
 angular.module('wasabi.controllers')
@@ -22,7 +20,8 @@ angular.module('wasabi.controllers')
                             }
                         }, function(response) {
                             UtilitiesFactory.handleGlobalError(response, 'The users for the application could not be retrieved.');
-                    });
+                        }
+                    );
 
                 };
 

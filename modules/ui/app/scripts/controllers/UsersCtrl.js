@@ -1,4 +1,3 @@
-/* global $:false */
 /*jshint devel:true */
 
 'use strict';

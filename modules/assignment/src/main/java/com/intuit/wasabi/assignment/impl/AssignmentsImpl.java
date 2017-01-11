@@ -15,10 +15,8 @@
  *******************************************************************************/
 package com.intuit.wasabi.assignment.impl;
 
-import com.datastax.driver.core.ResultSetFuture;
-import com.datastax.driver.core.Session;
 import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -60,8 +58,14 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.security.SecureRandom;
+import java.time.Duration;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -226,7 +230,7 @@ public class AssignmentsImpl implements Assignments {
         }
 
         Assignment assignment = assignmentsRepository.getAssignment(experimentID, userID, context);
-        if (assignment == null) {
+        if (assignment == null || assignment.isBucketEmpty()) {
             if (createAssignment) {
                 if (experiment.getState() == Experiment.State.PAUSED) {
                     return nullAssignment(userID, applicationName, experimentID,
@@ -327,8 +331,7 @@ public class AssignmentsImpl implements Assignments {
      * assignment if the user is assignable to this experiment. Includes a Page.Name to identify the page through which
      * the assignment was delivered.
      */
-    @Override
-    public Assignment getAssignment(User.ID userID, Application.Name applicationName, Experiment.Label experimentLabel,
+    protected Assignment getAssignment(User.ID userID, Application.Name applicationName, Experiment.Label experimentLabel,
                                     Context context, boolean createAssignment, boolean ignoreSamplingPercent,
                                     SegmentationProfile segmentationProfile, HttpHeaders headers, Page.Name pageName,
                                     Experiment experiment, BucketList bucketList,
@@ -364,7 +367,7 @@ public class AssignmentsImpl implements Assignments {
         }
 
         Assignment assignment = getAssignment(experimentID, userID, context, userAssignments, bucketList);
-        if (assignment == null) {
+        if (assignment == null || assignment.isBucketEmpty()) {
             if (createAssignment) {
                 if (experiment.getState() == Experiment.State.PAUSED) {
                     return nullAssignment(userID, applicationName, experimentID, Assignment.Status.EXPERIMENT_PAUSED);
@@ -1111,4 +1114,74 @@ public class AssignmentsImpl implements Assignments {
         }
         return queueLengthMap;
     }
+
+
+    /**
+     * Gets the experiment assignment ratios per day per experiment.
+     *
+     * @param experiments the list of experiments
+     * @param fromDate    the first day to include
+     * @param toDate      the last day to include
+     * @return a map mapping experiment IDs to their daily values for each of the given days
+     */
+    /*test*/
+    /*
+    FIXME: Traffic Analyzer change commented for Datastax-driver-migration release...
+
+    Map<Experiment.ID, Map<OffsetDateTime, Double>> getExperimentAssignmentRatioPerDay(List<Experiment> experiments, OffsetDateTime fromDate, OffsetDateTime toDate) {
+        return experiments.parallelStream()
+                .collect(Collectors.toMap(Experiment::getID,
+                        experiment -> assignmentsRepository.getExperimentBucketAssignmentRatioPerDay(experiment.getID(), fromDate, toDate)));
+    }
+    */
+
+    /**
+     * {@inheritDoc}
+     */
+    /*
+    FIXME: Traffic Analyzer change commented for Datastax-driver-migration release...
+
+    @Override
+    public ImmutableMap<String, ?> getExperimentAssignmentRatioPerDayTable(List<Experiment> experiments, Map<Experiment.ID, Integer> experimentPriorities, OffsetDateTime fromDate, OffsetDateTime toDate) {
+        Map<Experiment.ID, Map<OffsetDateTime, Double>> assignmentRatios = getExperimentAssignmentRatioPerDay(experiments, fromDate, toDate);
+
+        // Prepare table: fill with labels, priorities, and sampling percentages
+        List<Experiment.Label> experimentLabelsList = new ArrayList<>(experiments.size());
+        List<Integer> prioritiesList = new ArrayList<>(experiments.size());
+        List<Double> samplingPercentagesList = new ArrayList<>(experiments.size());
+        for (Experiment tempExperiment : experiments) {
+            experimentLabelsList.add(tempExperiment.getLabel());
+            prioritiesList.add(experimentPriorities.get(tempExperiment.getID()));
+            samplingPercentagesList.add(tempExperiment.getSamplingPercent());
+        }
+
+        ImmutableMap.Builder<String, List<?>> assignmentRatioTableBuilder = ImmutableMap.builder();
+        assignmentRatioTableBuilder.put("experiments", experimentLabelsList);
+        assignmentRatioTableBuilder.put("priorities", prioritiesList);
+        assignmentRatioTableBuilder.put("samplingPercentages", samplingPercentagesList);
+
+        // fill table with data
+        DateTimeFormatter uiFormat = DateTimeFormatter.ofPattern("M/d/y");
+        int days = (int) Duration.between(fromDate, toDate.plusDays(1)).toDays();
+
+        List<Map<String, Object>> assignmentRatioCells = new ArrayList<>(days);
+
+        IntStream.range(0, days)
+                .mapToObj(fromDate::plusDays)
+                .forEach(date -> {
+                            OffsetDateTime dateKey = date.equals(fromDate) ? date : date.truncatedTo(ChronoUnit.DAYS);
+                            Map<String, Object> cell = new HashMap<>();
+                            cell.put("date", uiFormat.format(date));
+                            cell.put("values", experiments.stream()
+                                    .map(e -> assignmentRatios.getOrDefault(e.getID(), Collections.emptyMap())
+                                            .getOrDefault(dateKey, 0.0))
+                                    .collect(Collectors.toList()));
+                            assignmentRatioCells.add(cell);
+                        }
+                );
+        assignmentRatioTableBuilder.put("assignmentRatios", assignmentRatioCells);
+        return assignmentRatioTableBuilder.build();
+    }
+    */
 }
+

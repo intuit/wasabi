@@ -181,9 +181,9 @@ public class Bucket {
     }
 
     public enum State {
-
         OPEN, CLOSED, EMPTY;
 
+        //TODO: this is a work in progress
         public enum BucketStateTransition {
 
             OPEN(State.OPEN, State.CLOSED, State.EMPTY),
@@ -201,7 +201,7 @@ public class Bucket {
                     }
                 }
             }
-            //TODO: remove state from enum
+            //TODO: remove state from enum - this is a work in progress
             private final transient List<State> allowedStateTransitions;
 
             BucketStateTransition(State... allowedTransitions) {
@@ -290,7 +290,6 @@ public class Bucket {
         private String label;
 
         private Label(String label) {
-            super();
             this.label = Preconditions.checkNotNull(label);
 
             if (label.trim().isEmpty()) {

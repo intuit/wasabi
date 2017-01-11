@@ -1,4 +1,8 @@
 language: java
+addons:
+  apt:
+    packages:
+      - oracle-java8-installer # FIXME @travis-ci: https://github.com/travis-ci/travis-ci/issues/3259#issuecomment-243534696
 jdk:
   - oraclejdk8
 install: mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
@@ -11,7 +15,7 @@ branches:
     - develop
     - master
 after_success:
-  - mvn clean test jacoco:report cobertura:cobertura coveralls:report
+  - mvn clean test jacoco:report coveralls:report
   - "./.travis/before-deploy.sh"
   - "./.travis/deploy.sh"
 env:

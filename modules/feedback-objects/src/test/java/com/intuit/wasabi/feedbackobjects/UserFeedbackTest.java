@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,19 +15,20 @@
  *******************************************************************************/
 package com.intuit.wasabi.feedbackobjects;
 
-import java.util.Date;
-
+import com.intuit.wasabi.authenticationobjects.UserInfo;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.intuit.wasabi.authenticationobjects.UserInfo;
+import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
+/**
+ * Test class for the {@link UserFeedback}
+ */
 public class UserFeedbackTest {
 
-    private UserInfo.Username username =  UserInfo.Username.valueOf("testUsername");
+    private UserInfo.Username username = UserInfo.Username.valueOf("testUsername");
     private Date submitted = new Date();
     private int score = 1;
     private String comments = "test comments";
@@ -53,12 +54,12 @@ public class UserFeedbackTest {
 
     @Test
     public void testUserFeedback() {
-        assertNotNull(userFeedback.getUsername());
-        assertNotNull(userFeedback.getSubmitted());
-        assertNotNull(userFeedback.getScore());
-        assertNotNull(userFeedback.getComments());
-        assertNotNull(userFeedback.isContactOkay());
-        assertNotNull(userFeedback.getEmail());
+        assertEquals(userFeedback.getUsername(), username);
+        assertEquals(userFeedback.getSubmitted(), submitted);
+        assertEquals(userFeedback.getScore(), score);
+        assertEquals(userFeedback.getComments(), comments);
+        assertEquals(userFeedback.isContactOkay(), contactOkay);
+        assertEquals(userFeedback.getEmail(), email);
     }
 
     @Test
@@ -82,9 +83,8 @@ public class UserFeedbackTest {
     public void testUserFeedbackFromOther() {
         UserFeedback other = UserFeedback.from(userFeedback).build();
 
-        assertEquals(userFeedback, userFeedback);
         assertEquals(userFeedback, other);
-        assertEquals(userFeedback.toString(), userFeedback.toString());
-        assertEquals(userFeedback.hashCode(), userFeedback.hashCode());
+        assertEquals(userFeedback.toString(), other.toString());
+        assertEquals(userFeedback.hashCode(), other.hashCode());
     }
 }

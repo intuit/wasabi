@@ -56,6 +56,15 @@ import javax.ws.rs.core.StreamingOutput;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.DateTimeException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -108,7 +117,7 @@ public class ExperimentsResource {
     private final String defaultTimezone;
     private final String defaultTimeFormat;
     private final HttpHeader httpHeader;
-    private final PaginationHelper<Experiment> paginationHelper;
+    private final PaginationHelper<Experiment> experimentPaginationHelper;
     private Experiments experiments;
     private EventsExport export;
     private Assignments assignments;
@@ -125,7 +134,8 @@ public class ExperimentsResource {
                         final Pages pages, final Priorities priorities, final Favorites favorites,
                         final @Named("default.time.zone") String defaultTimezone,
                         final @Named("default.time.format") String defaultTimeFormat,
-                        final HttpHeader httpHeader, final PaginationHelper<Experiment> paginationHelper) {
+                        final HttpHeader httpHeader, final PaginationHelper<Experiment> experimentPaginationHelper
+    ) {
         this.experiments = experiments;
         this.export = export;
         this.assignments = assignments;
@@ -137,23 +147,23 @@ public class ExperimentsResource {
         this.defaultTimezone = defaultTimezone;
         this.defaultTimeFormat = defaultTimeFormat;
         this.httpHeader = httpHeader;
-        this.paginationHelper = paginationHelper;
+        this.experimentPaginationHelper = experimentPaginationHelper;
         this.favorites = favorites;
     }
 
     /**
      * Returns a list of all experiments, with metadata. Does not return
      * metadata for deleted experiments.
-     *
+     * <p>
      * This endpoint is paginated. Favorites are sorted to the front.
      * If {@code per_page == -1}, favorites are ignored and all experiments are returned.
      *
      * @param authorizationHeader the authentication headers
-     * @param page the page which should be returned, defaults to 1
-     * @param perPage the number of log entries per page, defaults to 10. -1 to get all values.
-     * @param sort the sorting rules
-     * @param filter the filter rules
-     * @param timezoneOffset the time zone offset from UTC
+     * @param page                the page which should be returned, defaults to 1
+     * @param perPage             the number of log entries per page, defaults to 10. -1 to get all values.
+     * @param sort                the sorting rules
+     * @param filter              the filter rules
+     * @param timezoneOffset      the time zone offset from UTC
      * @return a response containing a map with a list with {@code 0} to {@code perPage} experiments,
      * if that many are on the page, and a count of how many experiments match the filter criteria.
      */
@@ -190,6 +200,7 @@ public class ExperimentsResource {
                                    @DefaultValue(DEFAULT_TIMEZONE)
                                    @ApiParam(name = "timezone", defaultValue = DEFAULT_TIMEZONE, value = DOC_TIMEZONE)
                                    final String timezoneOffset) {
+
         ExperimentList experimentList = experiments.getExperiments();
         ExperimentList authorizedExperiments;
 
@@ -228,12 +239,13 @@ public class ExperimentsResource {
                     .forEach(experiment -> experiment.setFavorite(true));
         }
 
-        Map<String, Object> experimentResponse = paginationHelper.paginate("experiments",
+        Map<String, Object> experimentResponse = experimentPaginationHelper.paginate("experiments",
                 authorizedExperiments.getExperiments(), filter, timezoneOffset,
                 (perPage != -1 ? "-favorite," : "") + sort, page, perPage);
 
         return httpHeader.headers().entity(experimentResponse).build();
     }
+
 
     @POST
     @Consumes(APPLICATION_JSON)
@@ -1257,4 +1269,122 @@ public class ExperimentsResource {
                                        final Page.Name pageName) {
         return httpHeader.headers().entity(pages.getPageExperiments(applicationName, pageName)).build();
     }
+
+
+    /**
+     *
+     * FIXME: Traffic Analyzer change commented for Datastax-driver-migration release...
+     *
+     * Returns a summary of assignment ratios per day, containing several meta information like sampling
+     * percentages and priorities.
+     *
+     * @param experimentID        the experiment ID
+     * @param from                report start date, can be "START" to use the experiment's
+     * @param to                  report end date, can be "END" to use the experiment's
+     * @param authorizationHeader authorization
+     * @param timezone            the timezone offset, +/-0000 or parsable by Java
+     * @return a summary of assignment ratios per day.
+     */
+
+
+    /*
+
+    @GET
+    @Path("/{experimentID}/assignments/traffic/{from}/{to}")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "Return a summary of assignments delivered for an experiment")
+    @Timed
+    public Response getExperimentAssignmentRatioPerDay(
+            @PathParam("experimentID")
+            @ApiParam(value = "Experiment ID", required = true)
+            final Experiment.ID experimentID,
+
+            @PathParam("from")
+            @DefaultValue("")
+            @ApiParam(value = "Start date of the format \"MM/DD/YYYY\" to use the experiment's start date, e.g. 8/23/1997. Must be URL encoded!",
+                    required = true)
+            final String from,
+
+            @PathParam("to")
+            @DefaultValue("")
+            @ApiParam(value = "End date of the format \"MM/DD/YYYY\" to use the experiment's start date, e.g. 8/23/1997. Must be URL encoded!",
+                    required = true)
+            final String to,
+
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader,
+
+            @QueryParam("timezone")
+            @DefaultValue(APISwaggerResource.DEFAULT_TIMEZONE)
+            @ApiParam(value = "timezone offset, as parsable by https://docs.oracle.com/javase/8/docs/api/java/time/ZoneId.html#of-java.lang.String-",
+                    defaultValue = APISwaggerResource.DEFAULT_TIMEZONE)
+            final String timezone
+    ) {
+        // Check authorization.
+        Username username = authorization.getUser(authorizationHeader);
+        Experiment experiment = getAuthorizedExperimentOrThrow(experimentID, username);
+
+        // Parse from and to
+        OffsetDateTime fromDate = parseUIDate(from, timezone, "from");
+        OffsetDateTime toDate = parseUIDate(to, timezone, "to");
+
+        List<Experiment> mutexExperiments = mutex.getRecursiveMutualExclusions(experiment);
+
+        // Sort experiments by their priorities
+        Map<Experiment.ID, Integer> experimentPriorities = priorities.getPriorityPerID(experiment.getApplicationName());
+        Collections.sort(mutexExperiments, (e1, e2) -> experimentPriorities.get(e1.getID()) - experimentPriorities.get(e2.getID()));
+
+        // Retrieve daily ratios
+        ImmutableMap<String, ?> assignmentRatios = assignments.getExperimentAssignmentRatioPerDayTable(mutexExperiments, experimentPriorities, fromDate, toDate);
+
+        // build table and dispatch it
+        return httpHeader.headers().entity(assignmentRatios).build();
+    }
+    */
+
+    /**
+     * Gets the experiment for a given ID and checks if the user has permission.
+     * If the user has READ permissions, the experiment is returned. Otherwise the authorization throws an exception.
+     * <p>
+     * Throws an exception if the experiment is not found.
+     *
+     * @param experimentID the experiment ID
+     * @param username     the username
+     * @return the experiment
+     */
+    /*test*/ Experiment getAuthorizedExperimentOrThrow(Experiment.ID experimentID, Username username) {
+        Experiment experiment;
+        if ((experiment = experiments.getExperiment(experimentID)) == null) {
+            throw new ExperimentNotFoundException(experimentID);
+        }
+        authorization.checkUserPermissions(username, experiment.getApplicationName(), READ);
+        // Hack: We need to make experiments compatible, converting CassandraExperiment
+        experiment = Experiment.from(experiment).build();
+        return experiment;
+    }
+
+    /**
+     * Parses a UI-formatted date of the format M/d/y with a timezone offset.
+     * If the date matches the key (case-insensitive), the onKeyMatch date is returned, otherwise
+     * the parsed date is returned, taking the timezone offset into account.
+     * <p>
+     * Throws an IllegalArgumentException if the string can not be parsed.
+     *
+     * @param uiDate          the UI formatted date
+     * @param timezoneOffset  the timezone offset of the user to take into account
+     * @param debugIdentifier the debug identifier to identify problems in the exception
+     * @return a parsed instant of the ui date
+     */
+    /*test*/ OffsetDateTime parseUIDate(String uiDate, String timezoneOffset, String debugIdentifier) {
+        try {
+            return OffsetDateTime.of(LocalDateTime.of(LocalDate.from(DateTimeFormatter.ofPattern("M/d/y").parse(uiDate)), LocalTime.MIDNIGHT), ZoneOffset.of(timezoneOffset));
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException(String.format("Can not parse \"%s\" date \"%s\", expecting format M/d/y, e.g. 05/24/2014.", debugIdentifier, uiDate), e);
+        } catch (DateTimeException e) {
+            throw new IllegalArgumentException(String.format("No proper timezoneOffset given (\"%s\"), expecting format -0000 or +0000.", timezoneOffset));
+        }
+    }
+
+
 }

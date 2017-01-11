@@ -741,7 +741,6 @@ public class Experiment implements Cloneable, ExperimentBase {
         private String label;
 
         private Label(String label) {
-            super();
             this.label = Preconditions.checkNotNull(label);
             if (!label.matches("^[_\\-$A-Za-z][_\\-$A-Za-z0-9]*")) {
                 throw new InvalidIdentifierException("Experiment label \"" +

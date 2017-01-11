@@ -102,22 +102,8 @@
     </logger>
     -->
 
-    <!--
-    <logger name="com.intuit.data.autumn.exemplary.server" level="DEBUG">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
-    </logger>
-    -->
-
-    <!-- use AsyncAppender for lower latencies -->
-    <appender name="async" class="ch.qos.logback.classic.AsyncAppender">
-        <appender-ref ref="CONSOLE" />
-        <appender-ref ref="FILE" />
-    </appender>
-
-    <logger name="com.datastax.driver.core.QueryLogger.SLOW" level="DEBUG" />
-
     <root level="${log.level}">
-        <appender-ref ref="async" />
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="CONSOLE"/>
     </root>
 </configuration>

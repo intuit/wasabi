@@ -1,3 +1,6 @@
+/*global Promise:false*/
+/*global jQuery:false*/
+'use strict';
 // Wasabi module
 // Supports easy use of the Wasabi A/B Testing service from JavaScript.
 
@@ -17,13 +20,6 @@ var WASABI = (function(wasabi, $) {
       These can also be set and retrieved using setOptions() and getOptions().
      */
     wasabi.wasabiOptions = (typeof wasabi.getOptions === 'function' ? wasabi.getOptions() : {});
-
-    var subValuesInString = function(strTemplate, substitutionValues) {
-        return strTemplate.replace(/%\w+%/g, function(all) {
-            var replaceStr = all.replace(/%/g, '');
-            return (replaceStr in substitutionValues ? substitutionValues[replaceStr] : replaceStr);
-        });
-    };
 
     var buildURL = function(path, options) {
         var url = '',
@@ -46,9 +42,9 @@ var WASABI = (function(wasabi, $) {
         var opts = (options || {});
         $.extend(opts, wasabi.wasabiOptions);
         for (var i=0; i < requiredOptions.length; i++) {
-          if (!opts.hasOwnProperty(requiredOptions[i])) {
-              throw new Error('Missing parameter ' + requiredOptions[i] + ' for ' + funcName);
-          }
+            if (!opts.hasOwnProperty(requiredOptions[i])) {
+                throw new Error('Missing parameter ' + requiredOptions[i] + ' for ' + funcName);
+            }
         }
 
         var url = buildURL(urlTemplate, opts);
@@ -69,7 +65,7 @@ var WASABI = (function(wasabi, $) {
         // empty content as an error, we check for that and if we get it, we call the success result.
         return new Promise(function(resolve, reject) {
             $.ajax(url, ajaxParams)
-            .done(function(data, textStatus, jqXHR) {
+            .done(function(data) {
                 resolve(data);
             })
             .fail(function(jqXHR, textStatus, errorThrown) {
@@ -230,14 +226,14 @@ var WASABI = (function(wasabi, $) {
      */
     wasabi.postAction = function(eventName, eventPayload, options) {
         var eventObject = {
-            "events": [
+            'events': [
                 {
-                    "name": eventName
+                    'name': eventName
                 }
             ]
         };
         if (eventPayload) {
-            eventObject.events[0]["payload"] = eventPayload;
+            eventObject.events[0].payload = eventPayload;
         }
 
         return doWasabiOperation('/api/v1/events/applications/%applicationName%/experiments/%experimentName%/users/%userID%',

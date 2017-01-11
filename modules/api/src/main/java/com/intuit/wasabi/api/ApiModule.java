@@ -19,13 +19,16 @@ import com.codahale.metrics.health.HealthCheckRegistry;
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 import com.intuit.wasabi.analytics.AnalyticsModule;
+import com.intuit.wasabi.analyticsobjects.wrapper.ExperimentDetail;
 import com.intuit.wasabi.api.error.ExceptionJsonifier;
 import com.intuit.wasabi.api.jackson.JacksonModule;
 import com.intuit.wasabi.api.pagination.comparators.PaginationComparator;
 import com.intuit.wasabi.api.pagination.comparators.impl.AuditLogEntryComparator;
 import com.intuit.wasabi.api.pagination.comparators.impl.ExperimentComparator;
+import com.intuit.wasabi.api.pagination.comparators.impl.ExperimentDetailComparator;
 import com.intuit.wasabi.api.pagination.filters.PaginationFilter;
 import com.intuit.wasabi.api.pagination.filters.impl.AuditLogEntryFilter;
+import com.intuit.wasabi.api.pagination.filters.impl.ExperimentDetailFilter;
 import com.intuit.wasabi.api.pagination.filters.impl.ExperimentFilter;
 import com.intuit.wasabi.auditlog.AuditLogModule;
 import com.intuit.wasabi.auditlogobjects.AuditLogEntry;
@@ -77,15 +80,8 @@ public class ApiModule extends AbstractModule {
         bind(new TypeLiteral<PaginationFilter<AuditLogEntry>>(){}).to(new TypeLiteral<AuditLogEntryFilter>(){});
         bind(new TypeLiteral<PaginationComparator<Experiment>>(){}).to(new TypeLiteral<ExperimentComparator>(){});
         bind(new TypeLiteral<PaginationFilter<Experiment>>(){}).to(new TypeLiteral<ExperimentFilter>(){});
-
-        // FIXME: might need to run against jersey 1.18.1 to get this to work
-//        try {
-//            bind(InstrumentedResourceMethodDispatchAdapter.class)
-//                    .toConstructor(InstrumentedResourceMethodDispatchAdapter.class.getConstructor(MetricRegistry.class))
-//                    .in(SINGLETON);
-//        } catch (NoSuchMethodException e) {
-//            e.printStackTrace();
-//        }
+        bind(new TypeLiteral<PaginationFilter<ExperimentDetail>>(){}).to(new TypeLiteral<ExperimentDetailFilter>(){});
+        bind(new TypeLiteral<PaginationComparator<ExperimentDetail>>(){}).to(new TypeLiteral<ExperimentDetailComparator>(){});
 
     }
     

@@ -39,7 +39,7 @@
     "karma-mocha": "^0.1.10",
     "karma-ng-html2js-preprocessor": "^0.1.0",
     "karma-ng-scenario": "^0.1.0",
-    "karma-phantomjs-launcher": "~0.1.4",
+    "karma-phantomjs-launcher": "~1.0.2",
     "karma-sinon": "^1.0.4",
     "load-grunt-tasks": "~0.4.0",
     "mocha": "^2.5.2",
