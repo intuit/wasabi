@@ -16,10 +16,24 @@
 package com.intuit.wasabi.cassandra.datastax;
 
 import com.codahale.metrics.health.HealthCheckRegistry;
-import com.datastax.driver.core.*;
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.ConsistencyLevel;
+import com.datastax.driver.core.Host;
+import com.datastax.driver.core.HostDistance;
+import com.datastax.driver.core.JdkSSLOptions;
+import com.datastax.driver.core.Metadata;
+import com.datastax.driver.core.PoolingOptions;
+import com.datastax.driver.core.ProtocolOptions;
+import com.datastax.driver.core.QueryLogger;
+import com.datastax.driver.core.QueryOptions;
+import com.datastax.driver.core.Session;
 import com.datastax.driver.core.exceptions.DriverException;
 import com.datastax.driver.core.exceptions.InvalidQueryException;
-import com.datastax.driver.core.policies.*;
+import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
+import com.datastax.driver.core.policies.DefaultRetryPolicy;
+import com.datastax.driver.core.policies.LoadBalancingPolicy;
+import com.datastax.driver.core.policies.RoundRobinPolicy;
+import com.datastax.driver.core.policies.TokenAwarePolicy;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.intuit.wasabi.cassandra.datastax.health.DefaultCassandraHealthCheck;
@@ -32,7 +46,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.SecureRandom;
-import java.util.*;
+import java.util.Formatter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -148,6 +167,8 @@ public class DefaultCassandraDriver implements CassandraDriver {
                     } catch (InvalidQueryException ex){ //This exception occurs when namesapce does not exists
                         session = cluster.connect(); // have to attach to the root keyspace first
                         initializeKeyspace();
+                    } catch (Exception e) {
+                        LOGGER.error("Exception occurred while connecting to the cluster...", e);
                     }
 
                     // Try to get the definition to test if the keyspace exists

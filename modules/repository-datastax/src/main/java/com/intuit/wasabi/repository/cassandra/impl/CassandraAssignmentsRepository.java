@@ -221,7 +221,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                                             Map<Experiment.ID, List<Experiment.ID>> exclusionMap
                                             ) {
         if(logger.isDebugEnabled()) logger.debug("populateExperimentMetadata - STARTED: userID={}, appName={}, context={}, experimentBatch={}, experimentIds={}", userID, appName, context, experimentBatch, allowAssignments);
-        if(experimentBatch.getLabels()==null && !allowAssignments.isPresent() ) {
+        if(isNull(experimentBatch.getLabels()) && !allowAssignments.isPresent() ) {
             logger.error("Invalid input to CassandraAssignmentsRepository.populateExperimentMetadata(): Given input: userID={}, appName={}, context={}, experimentBatch={}, allowAssignments={}", userID, appName, context, experimentBatch, allowAssignments);
             return;
         }
@@ -230,12 +230,11 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         populateExperimentApplicationAndUserAssignments(userID, appName, context, prioritizedExperimentList, experimentMap, existingUserAssignments);
 
         //Populate experiments ids of given batch
-        Set<Experiment.ID> experimentIds = allowAssignments.orElseGet(HashMap<Experiment.ID, Boolean>::new).keySet();
+        Set<Experiment.ID> experimentIds = allowAssignments.isPresent()?allowAssignments.get().keySet():new HashSet<>();
         populateExperimentIdsAndExperimentBatch(allowAssignments, experimentMap, experimentBatch, experimentIds);
 
         //Based on given experiment ids, populate experiment buckets and exclusions..
         populateBucketsAndExclusions(experimentIds, bucketMap, exclusionMap);
-
 
         if(logger.isDebugEnabled()) logger.debug("populateExperimentMetadata - FINISHED...");
     }
