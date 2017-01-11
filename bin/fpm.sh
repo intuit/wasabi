@@ -101,8 +101,8 @@ for module in "$modules"; do
     modules/event/target/classes/event.properties=${home}/conf/event.properties\
     modules/eventlog/target/classes/eventlog.properties=${home}/conf/eventlog.properties\
     modules/export/target/classes/export.properties=${home}/conf/export.properties\
-    modules/repository/target/classes/cassandra_experiments.properties=${home}/conf/cassandra_experiments.properties\
-    modules/repository/target/classes/repository.properties=${home}/conf/repository.properties\
+    modules/repository-datastax/target/classes/cassandra_client_config.properties=${home}/conf/cassandra_client_config.properties\
+    modules/repository-datastax/target/classes/repository.properties=${home}/conf/repository.properties\
     modules/swagger-ui/target/swaggerui/=${home}/content/ui/dist/swagger\
     modules/user-directory/target/classes/userDirectory.properties=${home}/conf/userDirectory.properties\
     modules/${module}/target/${id}-all.jar=${home}/lib/${id}-all.jar"

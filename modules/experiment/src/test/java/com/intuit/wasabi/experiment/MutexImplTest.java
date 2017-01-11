@@ -27,7 +27,7 @@ import com.intuit.wasabi.experimentobjects.ExperimentIDList;
 import com.intuit.wasabi.experimentobjects.ExperimentList;
 import com.intuit.wasabi.experimentobjects.exceptions.InvalidExperimentStateException;
 import com.intuit.wasabi.repository.RepositoryException;
-import com.intuit.wasabi.repository.impl.cassandra.CassandraMutexRepository;
+import com.intuit.wasabi.repository.cassandra.impl.CassandraMutexRepository;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;

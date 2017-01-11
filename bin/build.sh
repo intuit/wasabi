@@ -110,8 +110,8 @@ cp ./modules/email/target/classes/email.properties ${home}/${id}/conf
 cp ./modules/event/target/classes/event.properties ${home}/${id}/conf
 cp ./modules/eventlog/target/classes/eventlog.properties ${home}/${id}/conf
 cp ./modules/export/target/classes/export.properties ${home}/${id}/conf
-cp ./modules/repository/target/classes/cassandra_experiments.properties ${home}/${id}/conf
-cp ./modules/repository/target/classes/repository.properties ${home}/${id}/conf
+cp ./modules/repository-datastax/target/classes/cassandra_client_config.properties ${home}/${id}/conf
+cp ./modules/repository-datastax/target/classes/repository.properties ${home}/${id}/conf
 cp ./modules/user-directory/target/classes/userDirectory.properties ${home}/${id}/conf
 cp ${home}/${id}-all.jar ${home}/${id}/lib
 

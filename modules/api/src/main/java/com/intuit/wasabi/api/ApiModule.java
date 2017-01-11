@@ -39,7 +39,7 @@ import com.intuit.wasabi.events.EventsModule;
 import com.intuit.wasabi.experiment.ExperimentsModule;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.feedback.FeedbackModule;
-import com.intuit.wasabi.repository.impl.cassandra.CassandraExperimentRepositoryModule;
+import com.intuit.wasabi.repository.database.DatabaseExperimentRepositoryModule;
 import com.intuit.wasabi.userdirectory.UserDirectoryModule;
 import org.slf4j.Logger;
 
@@ -58,20 +58,8 @@ public class ApiModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        LOGGER.debug("installing module: {}", ApiModule.class.getSimpleName());
 
-        install(new com.intuit.autumn.api.ApiModule());
-        install(new AnalyticsModule());
-        install(new AuditLogModule());
-        install(new AuthorizationModule());
-        install(new CassandraExperimentRepositoryModule());
-        install(new DatabaseModule());
-        install(new EmailModule());
-        install(new EventsModule());
-        install(new ExperimentsModule());
-        install(new FeedbackModule());
-        install(new JacksonModule());
-        install(new UserDirectoryModule());
+        installModules();
 
         Properties properties = create(PROPERTY_NAME, ApiModule.class);
 
@@ -95,6 +83,38 @@ public class ApiModule extends AbstractModule {
         bind(new TypeLiteral<PaginationFilter<ExperimentDetail>>(){}).to(new TypeLiteral<ExperimentDetailFilter>(){});
         bind(new TypeLiteral<PaginationComparator<ExperimentDetail>>(){}).to(new TypeLiteral<ExperimentDetailComparator>(){});
 
-        LOGGER.debug("installed module: {}", ApiModule.class.getSimpleName());
+    }
+    
+    protected void installUserModule() {
+        install(new UserDirectoryModule());
+    }
+    
+    protected void installAuthModule() {
+        install(new AuthorizationModule());
+    }
+
+    protected void installEventModule() {
+        install(new EventsModule());
+    }
+    
+    private void installModules() {
+        LOGGER.debug("installing module: {}", ApiModule.class.getCanonicalName());
+
+        //these modules are either free of other dependencies or they are required by later modules
+        install(new com.intuit.autumn.api.ApiModule());
+        installUserModule();
+        install(new DatabaseExperimentRepositoryModule());
+        install(new DatabaseModule());
+        install(new JacksonModule());
+        install(new AuditLogModule());
+        installAuthModule();
+
+        install(new EmailModule());
+        installEventModule();
+        install(new ExperimentsModule());
+        install(new FeedbackModule());
+        install(new AnalyticsModule());
+
+        LOGGER.debug("installed module: {}", ApiModule.class.getCanonicalName());
     }
 }

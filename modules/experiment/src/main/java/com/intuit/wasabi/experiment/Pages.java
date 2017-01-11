@@ -99,4 +99,13 @@ public interface Pages {
      */
     Map<Page.Name, List<PageExperiment>> getPageAndExperimentList(Application.Name applicationName);
 
+    /**
+     * @param applicationName
+     * @param pageName
+     *
+     * @return PageExperiment list having only ExperimentIDs and isAssign flag (No labels)
+     */
+    List<PageExperiment> getExperimentsWithoutLabels(Application.Name applicationName, Page.Name pageName);
+
+
 }

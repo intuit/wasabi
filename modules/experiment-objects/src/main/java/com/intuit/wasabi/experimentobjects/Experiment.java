@@ -186,6 +186,7 @@ public class Experiment implements Cloneable, ExperimentBase {
     }
 
     public void setStartTime(Date startTime) {
+        Preconditions.checkNotNull(startTime);
         this.startTime = startTime;
     }
 
@@ -195,6 +196,7 @@ public class Experiment implements Cloneable, ExperimentBase {
     }
 
     public void setEndTime(Date endTime) {
+        Preconditions.checkNotNull(endTime);
         this.endTime = endTime;
     }
 
@@ -213,6 +215,7 @@ public class Experiment implements Cloneable, ExperimentBase {
     }
 
     public void setLabel(Experiment.Label label) {
+        Preconditions.checkNotNull(label);
         this.label = label;
     }
 
@@ -222,6 +225,7 @@ public class Experiment implements Cloneable, ExperimentBase {
     }
 
     public void setApplicationName(Application.Name applicationName) {
+        Preconditions.checkNotNull(applicationName);
         this.applicationName = applicationName;
     }
 

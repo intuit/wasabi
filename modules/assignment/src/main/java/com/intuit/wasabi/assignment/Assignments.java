@@ -190,5 +190,8 @@ public interface Assignments {
      * @param toDate               the date to report to
      * @return bucket assignment ratios per day and meta
      */
+    /*
+    FIXME: Traffic Analyzer change commented for Datastax-driver-migration release...
     ImmutableMap<String, ?> getExperimentAssignmentRatioPerDayTable(List<Experiment> experiments, Map<Experiment.ID, Integer> experimentPriorities, OffsetDateTime fromDate, OffsetDateTime toDate);
+    */
 }

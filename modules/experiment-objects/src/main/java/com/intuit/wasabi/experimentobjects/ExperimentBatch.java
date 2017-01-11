@@ -97,6 +97,9 @@ public class ExperimentBatch {
     public void setProfile(Map<String, Object> profile) {
         this.profile = profile;
     }
+    public void setLabels(Set<Experiment.Label> labels) {
+        this.labels = labels;
+    }
 
     @Override
     public String toString() {

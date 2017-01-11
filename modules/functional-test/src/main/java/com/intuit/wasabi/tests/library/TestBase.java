@@ -160,10 +160,13 @@ public class TestBase extends ServiceTestBase {
         // TODO It appears that the build system has user.name and pwd set to something different from what it should be for the environment. Commented next two lines out for now.
         //	setPropertyFromSystemProperty ("user.name","user-name");
         //	setPropertyFromSystemProperty ("user.password","password");
+        setPropertyFromSystemProperty("database-url","database.url");
+        setPropertyFromSystemProperty("database-username","database.username");
+        setPropertyFromSystemProperty("database-password","database.password");
 
-        setPropertyFromSystemProperty("user-name", "user-name");
-        setPropertyFromSystemProperty("password", "password");
-        setPropertyFromSystemProperty("user-lastname", "user-lastname");
+        setPropertyFromSystemProperty ("user-name","user-name");
+        setPropertyFromSystemProperty ("password","password");
+        setPropertyFromSystemProperty ("user-lastname","user-lastname");
         setPropertyFromSystemProperty("validTokenPattern", "validTokenPattern");
         setPropertyFromSystemProperty("user-email", "user-email");
 
@@ -182,6 +185,7 @@ public class TestBase extends ServiceTestBase {
 
     /**
      * Creates an APIServerConnector.
+     *
      */
     private void createAPIServerConnector() {
         LOGGER.info("Creating APIServerConnector");
@@ -1775,6 +1779,10 @@ public class TestBase extends ServiceTestBase {
         }
         response = apiServerConnector.doGet(uri, context);
         assertReturnCode(response, expectedStatus);
+
+        if ( expectedStatus == HttpStatus.SC_NOT_FOUND)
+        	return new ArrayList<Assignment>();
+
         String jsonArray = TestUtils.csvToJsonArray(response.body().asString(), Constants.TAB);
         String[] elements = jsonArray.substring(2, jsonArray.length() - 2).split("\\},\\{");
         List<Assignment> assignments = new ArrayList<>();
@@ -2060,6 +2068,58 @@ public class TestBase extends ServiceTestBase {
         assertReturnCode(response, expectedStatus);
         return response;
     }
+
+
+    //////////////////////////////////////////////////////////////////
+    // applications/<appName>/pages/ endpoint //
+    //////////////////////////////////////////////////////////////////
+    /**
+     * Sends a GET request to retrieve pages assigned to the application.
+     * The response must contain HTTP {@link HttpStatus#SC_OK}.
+     *
+     * @param application the application
+     * @return a list of pages
+     */
+     public List<Page> getPages(Application application){
+    	 return getPages(application,HttpStatus.SC_OK);
+     }
+
+     /**
+      * Sends a GET request to retrieve pages assigned to the application.
+      * The response must contain HTTP {@code expectedStatus}.
+      *
+      * @param application the application
+      * @param expectedStatus the expected HTTP status code
+      * @return a list of pages
+      */
+     public List<Page> getPages(Application application,  int expectedStatus) {
+         return getPages(application, expectedStatus, apiServerConnector);
+     }
+
+
+     /**
+      * Sends a GET request to retrieve pages assigned to the application.
+      * The response must contain HTTP {@code expectedStatus}.
+      *
+      * @param application the application
+      * @param expectedStatus the expected HTTP status code
+      * @param apiServerConnector the server connector to use
+      * @return a list of pages
+      */
+     public List<Page> getPages(Application application, int expectedStatus, APIServerConnector apiServerConnector) {
+         String uri = "applications/" + application.name + "/pages/";
+         response = apiServerConnector.doGet(uri);
+         assertReturnCode(response, expectedStatus);
+         List<Map<String, Object>> jsonMapping = response.jsonPath().getList("pages");
+         List<Page> pageList = new ArrayList<>(jsonMapping.size());
+         for (Map jsonMap : jsonMapping) {
+             String jsonString = simpleGson.toJson(jsonMap);
+             pageList.add(PageFactory.createFromJSONString(jsonString));
+         }
+         return pageList;
+     }
+
+
 
 
     //////////////////////////////////////////////////////////////////
@@ -2761,8 +2821,8 @@ public class TestBase extends ServiceTestBase {
      * The response must contain {@link HttpStatus#SC_CREATED}.
      *
      * @param application the application
-     * @param user        the user
-     * @param page        the page
+     * @param user the user
+     * @param page the page
      * @return the created assignments, can be 0
      */
     public List<Assignment> postAssignments(Application application, Page page, User user) {
@@ -2774,9 +2834,9 @@ public class TestBase extends ServiceTestBase {
      * given in the {@code segmentationProfile}.
      * The response must contain {@link HttpStatus#SC_CREATED}.
      *
-     * @param application         the application
-     * @param user                the user
-     * @param page                the page
+     * @param application the application
+     * @param user the user
+     * @param page the page
      * @param segmentationProfile the segmantation profile, will be wrapped into the correct JSON object
      * @return the created assignments, can be 0
      */
@@ -3215,6 +3275,60 @@ public class TestBase extends ServiceTestBase {
         }
         return pageList;
 
+    }
+
+
+    /**
+     *
+     * Sends a GET request to receive a list of experiments for an application
+     * The response must contain HTTP {@link HttpStatus#SC_OK}
+     *
+     * @param application the application for which the experiments are
+     * @return a list of experiments
+     */
+    public List<Experiment> getExperimentsByApplication(Application application)
+    {
+    	return getExperimentsByApplication(application,HttpStatus.SC_OK);
+    }
+
+
+    /**
+     *
+     * Sends a GET request to receive a list of experiments for an application
+     * The response must contain HTTP {@link HttpStatus#SC_OK}
+     *
+     * @param application the application for which the experiments are
+     * @param expectedStatus the expected HTTP status code
+     * @return a list of experiments
+     */
+    public List<Experiment> getExperimentsByApplication(Application application, int expectedStatus)
+    {
+    	return getExperimentsByApplication(application,expectedStatus,apiServerConnector);
+    }
+
+
+    /**
+     *
+     * Sends a GET request to receive a list of experiments for an application
+     * The response must contain HTTP {@link HttpStatus#SC_OK}
+     *
+     * @param application the application for which the experiments are
+     * @param expectedStatus the expected HTTP status code
+     * @param apiServerConnector the server connector to use
+     * @return a list of experiments
+     */
+    public List<Experiment> getExperimentsByApplication(Application application, int expectedStatus,APIServerConnector apiServerConnector)
+    {
+    	 String uri = "applications/" + application.name+ "/experiments";
+         response = apiServerConnector.doGet(uri);
+         assertReturnCode(response, expectedStatus);
+         List<Map<String, Object>> jsonStrings = response.jsonPath().getList("experiments");
+         List<Experiment> expList = new ArrayList<>(jsonStrings.size());
+         for (Map jsonMap : jsonStrings) {
+             String jsonString = simpleGson.toJson(jsonMap);
+             expList.add(ExperimentFactory.createFromJSONString(jsonString));
+         }
+         return expList;
     }
 
     /**

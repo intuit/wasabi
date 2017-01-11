@@ -79,18 +79,22 @@ public class NewExperiment implements ExperimentBase {
 	}
 
 	public void setId(Experiment.ID id) {
+        Preconditions.checkNotNull(id);
 		this.id = id;
 	}
 
 	public void setLabel(Experiment.Label label) {
+        Preconditions.checkNotNull(label);
 		this.label = label;
 	}
 
 	public void setStartTime(Date startTime) {
+        Preconditions.checkNotNull(startTime);
 		this.startTime = startTime;
 	}
 
 	public void setEndTime(Date endTime) {
+        Preconditions.checkNotNull(endTime);
 		this.endTime = endTime;
 	}
 
@@ -210,6 +214,7 @@ public class NewExperiment implements ExperimentBase {
     }
 
     public void setApplicationName(Application.Name value) {
+//        Preconditions.checkNotNull(value);
         applicationName = value;
     }
 
@@ -218,6 +223,7 @@ public class NewExperiment implements ExperimentBase {
     }
 
     public void setCreatorID(String value) {
+//        Preconditions.checkNotNull(value);
         creatorID = value;
     }
 

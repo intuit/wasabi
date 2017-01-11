@@ -64,58 +64,38 @@ public class Assignment {
 		return bucketEmpty;
 	}
 
-	public void setBucketEmpty(boolean bucketEmpty) {
-		this.bucketEmpty = bucketEmpty;
-	}
-
 	public User.ID getUserID() {
         return userID;
     }
-    public void setUserID(User.ID userID) {
-        this.userID = userID;
-    }
+
     public Experiment.ID getExperimentID() {
         return experimentID;
     }
-    public void setExperimentID(Experiment.ID experimentID) {
-        this.experimentID = experimentID;
-    }
+
     public Date getCreated() {
         return created;
     }
-    public void setCreated(Date created) {
-        this.created = created;
-    }
+
     public Bucket.Label getBucketLabel() {
         return bucketLabel;
     }
-    public void setBucketLabel(Bucket.Label value) {
-        this.bucketLabel = value;
-    }
+
     public Context getContext() {
         return context;
     }
-    public void setContext(Context value) {
-        this.context = value;
-    }
+
     public Assignment.Status getStatus() {
         return status;
     }
-    public void setStatus(Assignment.Status value) {
-        this.status = value;
-    }
+
     public Boolean isCacheable() {
         return cacheable;
     }
-    public void setCacheable(Boolean value) {
-        this.cacheable = value;
-    }
+
     public Application.Name getApplicationName() {
         return applicationName;
     }
-    public void setApplicationName(Application.Name applicationName) {
-        this.applicationName = applicationName;
-    }
+
 
     public static Builder newInstance(Experiment.ID experimentID) {
         return new Builder(experimentID);
@@ -177,6 +157,38 @@ public class Assignment {
         public Builder withBucketEmpty(boolean bucketEmpty) {
             instance.bucketEmpty = bucketEmpty;
             return this;
+        }
+
+        public User.ID getUserID() {
+            return instance.userID;
+        }
+
+        public Experiment.ID getExperimentID() {
+            return instance.experimentID;
+        }
+
+        public Date getCreated() {
+            return instance.created;
+        }
+
+        public Bucket.Label getBucketLabel() {
+            return instance.bucketLabel;
+        }
+
+        public Context getContext() {
+            return instance.context;
+        }
+
+        public Assignment.Status getStatus() {
+            return instance.status;
+        }
+
+        public Boolean isCacheable() {
+            return instance.cacheable;
+        }
+
+        public Application.Name getApplicationName() {
+            return instance.applicationName;
         }
 
         public Assignment build() {

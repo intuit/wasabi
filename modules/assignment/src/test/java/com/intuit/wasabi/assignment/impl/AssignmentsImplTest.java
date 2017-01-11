@@ -16,34 +16,19 @@
 package com.intuit.wasabi.assignment.impl;
 
 import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Table;
 import com.google.inject.Provider;
 import com.intuit.hyrule.Rule;
 import com.intuit.wasabi.assignment.AssignmentDecorator;
 import com.intuit.wasabi.assignment.AssignmentIngestionExecutor;
 import com.intuit.wasabi.assignment.Assignments;
-import com.intuit.wasabi.assignmentobjects.Assignment;
-import com.intuit.wasabi.assignmentobjects.AssignmentEnvelopePayload;
-import com.intuit.wasabi.assignmentobjects.PersonalizationEngineResponse;
-import com.intuit.wasabi.assignmentobjects.RuleCache;
-import com.intuit.wasabi.assignmentobjects.SegmentationProfile;
-import com.intuit.wasabi.assignmentobjects.User;
-import com.intuit.wasabi.cassandra.CassandraDriver;
+import com.intuit.wasabi.assignmentobjects.*;
+import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.eventlog.EventLog;
 import com.intuit.wasabi.experiment.Mutex;
 import com.intuit.wasabi.experiment.Pages;
 import com.intuit.wasabi.experiment.Priorities;
-import com.intuit.wasabi.experimentobjects.Application;
-import com.intuit.wasabi.experimentobjects.Bucket;
-import com.intuit.wasabi.experimentobjects.BucketList;
-import com.intuit.wasabi.experimentobjects.Context;
-import com.intuit.wasabi.experimentobjects.Experiment;
-import com.intuit.wasabi.experimentobjects.ExperimentBatch;
-import com.intuit.wasabi.experimentobjects.Page;
-import com.intuit.wasabi.experimentobjects.PageExperiment;
-import com.intuit.wasabi.experimentobjects.PrioritizedExperiment;
-import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
+import com.intuit.wasabi.experimentobjects.*;
 import com.intuit.wasabi.export.DatabaseExport;
 import com.intuit.wasabi.export.Envelope;
 import com.intuit.wasabi.export.WebExport;
@@ -52,8 +37,7 @@ import com.intuit.wasabi.repository.AnalyticsRepository;
 import com.intuit.wasabi.repository.AssignmentsRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.MutexRepository;
-import com.intuit.wasabi.repository.impl.cassandra.ExperimentRuleCacheUpdateEnvelope;
-import com.intuit.wasabi.repository.impl.cassandra.ExperimentsKeyspace;
+import com.intuit.wasabi.repository.cassandra.impl.ExperimentRuleCacheUpdateEnvelope;
 import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
 import org.junit.Assert;
 import org.junit.Before;
@@ -64,26 +48,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.ws.rs.core.HttpHeaders;
 import java.io.IOException;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.RETURNS_DEEP_STUBS;
 import static org.mockito.BDDMockito.any;
 import static org.mockito.BDDMockito.doReturn;
@@ -108,7 +79,7 @@ public class AssignmentsImplTest {
     private Pages pages = mock(Pages.class);
     private Priorities priorities = mock(Priorities.class);
     private CassandraDriver cassandraDriver = mock(CassandraDriver.class);
-    private ExperimentsKeyspace keyspace = mock(ExperimentsKeyspace.class);
+    //private ExperimentsKeyspace keyspace = mock(ExperimentsKeyspace.class);
     private RuleCache ruleCache = mock(RuleCache.class);
     private Rule rule = mock(Rule.class);
     private Assignments assignments = mock(Assignments.class);
@@ -1397,6 +1368,9 @@ public class AssignmentsImplTest {
 //        assertEquals(segmentationProfile.getAttribute("data"), testData);
 //        assertEquals(segmentationProfile.getAttribute("model"), "model");
 //    }
+        /*
+    FIXME: Traffic Analyzer change commented for Datastax-driver-migration release...
+
     @Test
     public void testGetExperimentAssignmentRatioPerDay() {
         Experiment experiment1 = Experiment.withID(Experiment.ID.newInstance()).build();
@@ -1436,6 +1410,8 @@ public class AssignmentsImplTest {
         Assert.assertEquals("T2 EntrySet for ID 3 should contain 1 element", 1, actual.get(experiment3.getID()).size());
         Assert.assertEquals("T2 EntrySet for ID 3 should contain map3", map3, actual.get(experiment3.getID()));
     }
+
+    FIXME: Traffic Analyzer change commented for Datastax-driver-migration release...
 
     @Test
     public void testGetExperimentAssignmentRatioPerDayTable() {
@@ -1494,7 +1470,7 @@ public class AssignmentsImplTest {
 
             @SuppressWarnings("unchecked")
             List<Map<String, ?>> assignmentRatiosResult = (List<Map<String, ?>>) result.get("assignmentRatios");
-            
+
             Assert.assertTrue(String.format("ratios do not contain 'date' keys (i == %d)", i),
                     assignmentRatiosResult.stream()
                             .allMatch(m -> m.containsKey("date")));
@@ -1513,4 +1489,5 @@ public class AssignmentsImplTest {
                             .allMatch(val -> val == 5));
         }
     }
+    */
 }

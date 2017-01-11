@@ -297,6 +297,7 @@ class CassandraExperimentRepository extends AbstractCassandraRepository<Experime
      * 
      * TODO: Need more clarification
      */
+    // TODO - Why is this on the interface - if not called by the service it leaves the indices out of sync
     @Override
     public void createIndicesForNewExperiment(NewExperiment newExperiment) {
         // Point the experiment index to this experiment

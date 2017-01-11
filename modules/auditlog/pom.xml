@@ -54,7 +54,7 @@
         </dependency>
         <dependency>
             <groupId>${project.parent.groupId}</groupId>
-            <artifactId>wasabi-repository</artifactId>
+            <artifactId>wasabi-repository-datastax</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
     </dependencies>

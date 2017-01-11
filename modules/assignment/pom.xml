@@ -51,18 +51,18 @@
         </dependency>
         <dependency>
             <groupId>${project.parent.groupId}</groupId>
-            <artifactId>wasabi-repository</artifactId>
+            <artifactId>wasabi-repository-datastax</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intuit.autumn</groupId>
             <artifactId>autumn-client</artifactId>
-            <version>1.0.20160626031951</version>
+            <version>1.0.20160714060618</version>
         </dependency>
         <dependency>
             <groupId>com.intuit.autumn</groupId>
             <artifactId>autumn-utils</artifactId>
-            <version>1.0.20160626031951</version>
+            <version>1.0.20160714060618</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
