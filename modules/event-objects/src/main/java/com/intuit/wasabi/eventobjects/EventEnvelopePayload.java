@@ -15,101 +15,114 @@
  *******************************************************************************/
 package com.intuit.wasabi.eventobjects;
 
-import java.util.UUID;
-
-import org.apache.cassandra.utils.UUIDGen;
-import org.json.simple.JSONObject;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intuit.wasabi.analyticsobjects.Event;
 import com.intuit.wasabi.assignmentobjects.Assignment;
+import com.intuit.wasabi.assignmentobjects.User;
+import com.intuit.wasabi.exceptions.JsonExportException;
+import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Application.Name;
+import com.intuit.wasabi.experimentobjects.Bucket;
+import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.Experiment.Label;
 import com.intuit.wasabi.export.EnvelopePayload;
-import com.intuit.wasabi.export.MessageType;
+import org.apache.cassandra.utils.UUIDGen;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Export envelope payload for events
- *
+ * <p>
+ * Warning: This class does not provide proper deserialization again, as some information
+ * is NOT stored inside the JSON Strings, as such serializing and deserializing results
+ * in data loss. Therefore it can (and should) only be used for exports!
  */
 public class EventEnvelopePayload implements EnvelopePayload {
+
+    private static final String VERSION = "3.0";
+    private static final String MESSAGE_TYPE = "EVENT";
     private Name applicationName;
     private Label experimentLabel;
     private Assignment assignment;
     private Event event;
+    private UUID timeUUID;
 
     /**
      * @param applicationName the application name
      * @param experimentLabel the experiment label
-     * @param assignment   the assignment {@link Assignment}
-     * @param event     the event {@link Event}
+     * @param assignment      the assignment {@link Assignment}
+     * @param event           the event {@link Event}
      */
     public EventEnvelopePayload(Name applicationName, Label experimentLabel,
-            Assignment assignment, Event event) {
-        super();
+                                Assignment assignment, Event event) {
         this.applicationName = applicationName;
         this.experimentLabel = experimentLabel;
         this.assignment = assignment;
         this.event = event;
+        this.timeUUID = UUIDGen.getTimeUUID();
     }
 
-    public Name getApplicationName() {
+    public Application.Name getApplicationName() {
         return applicationName;
     }
 
-    public void setApplicationName(Name applicationName) {
-        this.applicationName = applicationName;
-    }
-
-    public Label getExperimentLabel() {
+    public Experiment.Label getExperimentLabel() {
         return experimentLabel;
     }
 
-    public void setExperimentLabel(Label experimentLabel) {
-        this.experimentLabel = experimentLabel;
+    public String getVersion() {
+        return VERSION;
     }
 
-    public Assignment getAssignment() {
-        return assignment;
+    public String getMessageType() {
+        return MESSAGE_TYPE;
     }
 
-    public void setAssignment(Assignment assignment) {
-        this.assignment = assignment;
+    public UUID getTimeUUID() {
+        return timeUUID;
     }
 
-    public Event getEvent() {
-        return event;
+    public Map<String, Object> getEvent() {
+        HashMap<String, Object> eventMap = new HashMap<>(4);
+        eventMap.put("timestamp", event.getTimestamp());
+        eventMap.put("name", event.getName());
+        eventMap.put("payload", event.getPayload());
+        eventMap.put("type", event.getType());
+        return eventMap;
     }
 
-    public void setEvent(Event event) {
-        this.event = event;
+    public User.ID getUserID() {
+        return assignment.getUserID();
+    }
+
+    public String getValue() {
+        return event.getValue();
+    }
+
+    public Experiment.ID getExperimentID() {
+        return assignment.getExperimentID();
+    }
+
+    public Bucket.Label getBucketLabel() {
+        return assignment.getBucketLabel();
+    }
+
+    public String getContext() {
+        return assignment.getContext().getContext();
     }
 
     @Override
     public String toJson() {
-        JSONObject eventJson = new JSONObject();
-
-        eventJson.put("messageType", MessageType.EVENT.toString());
-        eventJson.put("applicationName",applicationName.toString());
-        eventJson.put("experimentLabel",experimentLabel.toString());
-        eventJson.put("userID",assignment.getUserID().toString());
-        eventJson.put("bucketLabel",assignment.getBucketLabel().toString());
-        eventJson.put("time_uuid",makeUUID().toString());
-        eventJson.put("experimentID",assignment.getExperimentID().toString());
-        eventJson.put("context",assignment.getContext().toString());
-        eventJson.put("epochTimestamp", event.getTimestamp().getTime());
-        eventJson.put("eventType",event.getType() + "");
-        eventJson.put("eventName",event.getName() + "");
-        eventJson.put("eventPayload",event.getPayload());
-        eventJson.put("value",event.getValue());
-
-        return eventJson.toString();
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            throw new JsonExportException("Can not serialize event for export.", e);
+        }
     }
 
-    /**
-     * Helper method for creating uuid
-     * @return UUID
-     */
-	protected UUID makeUUID() {
-		 return UUIDGen.getTimeUUID();
-    }
+
 }

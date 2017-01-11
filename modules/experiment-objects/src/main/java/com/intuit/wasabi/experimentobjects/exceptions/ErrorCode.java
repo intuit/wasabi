@@ -61,6 +61,7 @@ public enum ErrorCode {
     // Database errors
     DATABASE_ERROR("5001",500),
     REPOSITORY_ERROR("5101",500),
+    EXPORT_ERROR("5201", 500),
 
     // State errors
     INVALID_EXPERIMENT_STATE("6001",400),

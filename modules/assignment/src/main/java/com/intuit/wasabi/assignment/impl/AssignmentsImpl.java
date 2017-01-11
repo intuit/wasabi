@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -354,11 +354,11 @@ public class AssignmentsImpl implements Assignments {
      * the assignment was delivered.
      */
     protected Assignment getAssignment(User.ID userID, Application.Name applicationName, Experiment.Label experimentLabel,
-                                    Context context, boolean createAssignment, boolean ignoreSamplingPercent,
-                                    SegmentationProfile segmentationProfile, HttpHeaders headers, Page.Name pageName,
-                                    Experiment experiment, BucketList bucketList,
-                                    Table<Experiment.ID, Experiment.Label, String> userAssignments,
-                                    Map<Experiment.ID, List<Experiment.ID>> exclusives) {
+                                       Context context, boolean createAssignment, boolean ignoreSamplingPercent,
+                                       SegmentationProfile segmentationProfile, HttpHeaders headers, Page.Name pageName,
+                                       Experiment experiment, BucketList bucketList,
+                                       Table<Experiment.ID, Experiment.Label, String> userAssignments,
+                                       Map<Experiment.ID, List<Experiment.ID>> exclusives) {
         final Date currentDate = new Date();
         final long currentTime = currentDate.getTime();
 
@@ -570,7 +570,7 @@ public class AssignmentsImpl implements Assignments {
         //throw exception if assignment already exists for user unless overwrite == true
         Assignment currentAssignment = assignmentsRepository.getAssignment(experimentID, userID, context);
         if (!overwrite && currentAssignment != null && !currentAssignment.isBucketEmpty()) {
-            throw new AssignmentExistsException(userID, applicationName, experimentLabel);
+            throw new AssignmentExistsException(userID.toString(), applicationName, experimentLabel);
         }
 
         //check that the desired bucket is valid

@@ -20,18 +20,14 @@ import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Context;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.Page;
+import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Answers;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import javax.ws.rs.core.HttpHeaders;
 import java.util.Date;
-
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import java.util.HashMap;
 
 /**
  * Test for the {@link AssignmentEnvelopePayload}
@@ -52,66 +48,27 @@ public class AssignmentEnvelopePayloadTest {
     private Experiment.Label experimentLabel = Experiment.Label.valueOf("testExperimentLabel");
     private Experiment.ID experimentID = Experiment.ID.newInstance();
     private Date date = new Date();
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private HttpHeaders httpHeaders;
 
-    private AssignmentEnvelopePayload payload = new AssignmentEnvelopePayload();
+    private AssignmentEnvelopePayload payload;
 
-    @Test
-    public void testJson() {
+    @Before
+    public void setupPayloadEnvelope() {
         payload = new AssignmentEnvelopePayload(userID, context, createAssignment,
                 putAssignment, ignoreSamplingPercent, segmentationProfile, assignmentStatus,
-                bucketLabel, pageName, applicationName, experimentLabel, experimentID, date, httpHeaders);
-
-        String payloadJson = payload.toJson();
-        assertThat(payloadJson, containsString(userID.toString()));
-        assertThat(payloadJson, containsString(context.toString()));
-        assertThat(payloadJson, containsString(String.valueOf(createAssignment)));
-        assertThat(payloadJson, containsString(String.valueOf(putAssignment)));
-        assertThat(payloadJson, containsString(String.valueOf(ignoreSamplingPercent)));
-        assertThat(payloadJson, containsString(segmentationProfile.getProfile().toString()));
-        assertThat(payloadJson, containsString(assignmentStatus.toString()));
-        assertThat(payloadJson, containsString(bucketLabel.toString()));
-        assertThat(payloadJson, containsString(pageName.toString()));
-        assertThat(payloadJson, containsString(applicationName.toString()));
-        assertThat(payloadJson, containsString(experimentLabel.toString()));
-        assertThat(payloadJson, containsString(experimentID.toString()));
-        assertThat(payloadJson, containsString(String.valueOf(date.getTime())));
+                bucketLabel, pageName, applicationName, experimentLabel, experimentID, date, null);
     }
 
     @Test
-    public void testAssignmentEnvelopePayloadSet() {
-
-        payload.setUserID(userID);
-        payload.setContext(context);
-        payload.setCreateAssignment(createAssignment);
-        payload.setPutAssignment(putAssignment);
-        payload.setIgnoreSamplingPercent(ignoreSamplingPercent);
-        payload.setSegmentationProfile(segmentationProfile);
-        payload.setAssignmentStatus(assignmentStatus);
-        payload.setBucketLabel(bucketLabel);
-        payload.setPageName(pageName);
-        payload.setApplicationName(applicationName);
-        payload.setExperimentLabel(experimentLabel);
-        payload.setExperimentID(experimentID);
-        payload.setDate(date);
-        payload.setHttpHeaders(httpHeaders);
-
-        assertThat(payload.getUserID(), is(userID));
-        assertThat(payload.getContext(), is(context));
-        assertThat(payload.isCreateAssignment(), is(true));
-        assertThat(payload.isPutAssignment(), is(true));
-        assertThat(payload.isIgnoreSamplingPercent(), is(true));
-        assertThat(payload.getSegmentationProfile(), is(segmentationProfile));
-        assertThat(payload.getAssignmentStatus(), is(assignmentStatus));
-        assertThat(payload.getBucketLabel(), is(bucketLabel));
-        assertThat(payload.getPageName(), is(pageName));
-        assertThat(payload.getApplicationName(), is(applicationName));
-        assertThat(payload.getExperimentLabel(), is(experimentLabel));
-        assertThat(payload.getExperimentID(), is(experimentID));
-        assertThat(payload.getDate(), is(date));
-        assertThat(payload.getHttpHeaders(), is(httpHeaders));
+    @Ignore("AssignmentEnvelopePayloads creates only output.")
+    public void output() {
+        System.out.println(payload.toJson());
+        HashMap<String, Object> segMap = new HashMap<>();
+        segMap.put("salary", 30000);
+        segMap.put("state", "CA");
+        segMap.put("visited", "home");
+        SegmentationProfile segProfile = SegmentationProfile.from(segMap).build();
+        System.out.println(new AssignmentEnvelopePayload(userID, context, createAssignment, false,
+                ignoreSamplingPercent, segProfile, assignmentStatus, bucketLabel, pageName, applicationName,
+                experimentLabel, experimentID, date, null).toJson());
     }
-
-
 }
