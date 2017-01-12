@@ -1,3 +1,4 @@
+/*global moment:false*/
 'use strict';
 
 angular.module('wasabi.controllers')
@@ -27,9 +28,7 @@ angular.module('wasabi.controllers')
 
                 $scope.loadDailies = function () {
                     // Get the data for the graph from the start date through today, to reduce the load to get the data.
-                    var today = new Date(),
-                        todayUTC = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()),
-                        requestBody = {
+                    var requestBody = {
                             experimentId: $scope.experiment.id,
                             fromTime: $scope.experiment.startTime,
                             toTime: moment().format('YYYY-MM-DDTHH:mm:ss') + 'Z'

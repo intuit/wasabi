@@ -22,7 +22,10 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * DTO to save the progress of an action
@@ -80,12 +83,16 @@ public class ActionProgress extends Progress {
             this.item.actionName = value;
             return this;
         }
-        public Builder withWinnersSoFarList(List<Bucket.Label> value) {
-            this.item.winnersSoFar = value;
+        public Builder withWinnersSoFarList(Collection<Bucket.Label> value) {
+            Set<Bucket.Label> winnerSoFar = new HashSet<>();
+            winnerSoFar.addAll(value);
+            this.item.winnersSoFar = winnerSoFar;
             return this;
         }
-        public Builder withLosersSoFarList(List<Bucket.Label> value) {
-            this.item.losersSoFar = value;
+        public Builder withLosersSoFarList(Collection<Bucket.Label> value) {
+            Set<Bucket.Label> loserSoFar = new HashSet<>();
+            loserSoFar.addAll(value);
+            this.item.losersSoFar = loserSoFar;
             return this;
         }
         public Builder withSufficientData(Boolean value) {

@@ -75,7 +75,31 @@ angular.module('wasabi.services').factory('ConfigFactory', ['apiHostBaseUrlValue
                     'The simplest way to use actions and impressions are to have one impression and one action and to record them for both the test experience(s) and for the control experience.  If you do that, then the overall bucket action rate is a good measure of the success of a given experience.<br/><br/>' +
                     'However, if it is interesting to your test, you can record multiple actions for each bucket while the user is interacting with a given experience.  The event name that you pass to the action API call is completely defined by you.  If you record actions with the same names for each of your test and control buckets, then you perform a comparison of each of the actions for each of the test experiences as compared to your control experience.  This comparison is expressed as the improvement of the action rate for a given action and bucket versus the same action and the control bucket.<br/><br/>' +
                     'The performance of each action for each bucket, as compared to the same action for the control bucket, is shown in the table.  If the improvement of one of your buckets is statistically significant, as compared to the performance of the same action for the control bucket, the action rate and improvement for that action will be highlighted in green.  If the control bucket is performing better for that action, then the test buckets will be highlighted in red.<br/><br/>' +
-                    'One thing to note about actions and this table are that actions only appear in the table once they have been recorded by a user.  That is, until your code has actually called the API to record a given action for a user in a given bucket, nothing will show in the row for that action and for that bucket.  And if that action has not been recorded for any bucket, there will not even be a row for that action.  Don\'t be surprised if some of your actions are missing from the table immediately after you start your experiment.</div>'
+                    'One thing to note about actions and this table are that actions only appear in the table once they have been recorded by a user.  That is, until your code has actually called the API to record a given action for a user in a given bucket, nothing will show in the row for that action and for that bucket.  And if that action has not been recorded for any bucket, there will not even be a row for that action.  Don\'t be surprised if some of your actions are missing from the table immediately after you start your experiment.</div>',
+            'pageManagement': '<h1>What does the Page Management tool do?</h1><div>The "pages" feature of Wasabi allows you to assign a user to a group of experiments in one ' +
+                    'call.  The Page Management tool allows you to easily determine which experiments are associated with a given page and to easily add or remove ' +
+                    'experiments from a page.<br/><br/>A page does not exist without being associated with at least one experiment, so the first step toward managing a page ' +
+                    ' is to create the page by associating it with the first experiment.<br/><br/>' +
+                    'The next step is to select which application\'s pages you will be managing, since pages are managed within the context of an application. ' +
+                    'So the next step is to select the application whose pages you want to manage. If you are authorized to administer more than one application within Wasabi, ' +
+                    'you must select the application in which you are interested from a menu of all those applications.  If you are only authorized to administer one application, ' +
+                    'you will see that application displayed at the top of the Page Management screen.</div>',
+            'pageManagementSelectPage': '<h1>Select the page to manage</h1><div>Once you have selected the application in which you are interested, the Step 1 list will populate ' +
+                    'with a list of the pages associated with any experiments within that application.  You can manage the experiments associated with that page by ' +
+                    'selecting the page in the list.  This will populate the Step 2 list.</div>',
+            'pageManagementManagePage': '<h1>Manage your page</h1><div>Once you have selected the page that you wish to manage in Step 1, the Step 2 list will populate with ' +
+                    'the names of the experiments that are currently associated with that page.  These are the experiments that a user will be assigned to if you call the ' +
+                    'pages API (sometimes called the "batch API") for that page.  You can add experiments to the page or remove them from the page:<br/><br/>' +
+                    'In order to add an experiment to a page:<br/><br/> ' +
+                    '<ol><li>Click on the "plus" button below the Step 2 list</li>' +
+                    '<li>You will be presented with a dialog containing the list of experiments in this application that are not currently associated with this page</li>' +
+                    '<li>Select the experiment(s) that you want to add to the page and click Add</li></ol><br/>' +
+                    'In order to remove an experiment from a page:<br/><br/> ' +
+                    '<ol><li>Click on the experiment(s) that you want to remove from the page</li>' +
+                    '<li>Click on the "minus" button below the Step 2 list</li>' +
+                    '<li>You will be prompted to confirm that you want to remove those experiments from the page</li>' +
+                    '<li>Click on Remove Experiments to remove them from the page</li></ol>' +
+                    '</div>'
         }
     };
 }]);

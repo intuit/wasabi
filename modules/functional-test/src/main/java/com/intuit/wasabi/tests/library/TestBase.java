@@ -47,6 +47,7 @@ import com.intuit.wasabi.tests.model.factory.EventFactory;
 import com.intuit.wasabi.tests.model.factory.ExperimentFactory;
 import com.intuit.wasabi.tests.model.factory.PageFactory;
 import com.intuit.wasabi.tests.model.factory.UserFeedbackFactory;
+import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.path.json.exception.JsonPathException;
 import com.jayway.restassured.response.Response;
@@ -64,6 +65,9 @@ import org.testng.annotations.Test;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -73,6 +77,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -155,10 +160,13 @@ public class TestBase extends ServiceTestBase {
         // TODO It appears that the build system has user.name and pwd set to something different from what it should be for the environment. Commented next two lines out for now.
         //	setPropertyFromSystemProperty ("user.name","user-name");
         //	setPropertyFromSystemProperty ("user.password","password");
+        setPropertyFromSystemProperty("database-url","database.url");
+        setPropertyFromSystemProperty("database-username","database.username");
+        setPropertyFromSystemProperty("database-password","database.password");
 
-        setPropertyFromSystemProperty("user-name", "user-name");
-        setPropertyFromSystemProperty("password", "password");
-        setPropertyFromSystemProperty("user-lastname", "user-lastname");
+        setPropertyFromSystemProperty ("user-name","user-name");
+        setPropertyFromSystemProperty ("password","password");
+        setPropertyFromSystemProperty ("user-lastname","user-lastname");
         setPropertyFromSystemProperty("validTokenPattern", "validTokenPattern");
         setPropertyFromSystemProperty("user-email", "user-email");
 
@@ -177,6 +185,7 @@ public class TestBase extends ServiceTestBase {
 
     /**
      * Creates an APIServerConnector.
+     *
      */
     private void createAPIServerConnector() {
         LOGGER.info("Creating APIServerConnector");
@@ -1475,9 +1484,7 @@ public class TestBase extends ServiceTestBase {
     public Response postExclusions(Experiment experiment, List<Experiment> excludedExperiments, int expectedStatus, APIServerConnector apiServerConnector) {
         String uri = "experiments/" + experiment.id + "/exclusions";
         List<String> excludeIds = new ArrayList<>(excludedExperiments.size());
-        for (Experiment exp : excludedExperiments) {
-            excludeIds.add(exp.id);
-        }
+        excludeIds.addAll(excludedExperiments.stream().map(exp -> exp.id).collect(Collectors.toList()));
         response = apiServerConnector.doPost(uri,
                 TestUtils.wrapJsonIntoObject(simpleGson.toJson(excludeIds), "experimentIDs"));
         assertReturnCode(response, expectedStatus);
@@ -1772,6 +1779,10 @@ public class TestBase extends ServiceTestBase {
         }
         response = apiServerConnector.doGet(uri, context);
         assertReturnCode(response, expectedStatus);
+
+        if ( expectedStatus == HttpStatus.SC_NOT_FOUND)
+        	return new ArrayList<Assignment>();
+
         String jsonArray = TestUtils.csvToJsonArray(response.body().asString(), Constants.TAB);
         String[] elements = jsonArray.substring(2, jsonArray.length() - 2).split("\\},\\{");
         List<Assignment> assignments = new ArrayList<>();
@@ -1781,13 +1792,118 @@ public class TestBase extends ServiceTestBase {
         return assignments;
     }
 
+    /**
+     * Sends a GET request to retrieve the experiment's assignment traffic.
+     * The response must contain {@link HttpStatus#SC_OK}.
+     * <p>
+     * URLEncodes the generated Strings generated from the dates which are passed as the URL.
+     *
+     * @param experiment the experiment
+     * @param from       the first day to retrieve
+     * @param to         the last day to retrieve
+     * @return a map of lists (= table) containing meta and assignment traffic data
+     */
+    protected Map<String, List<?>> getTraffic(Experiment experiment, LocalDateTime from, LocalDateTime to) {
+        return getTraffic(experiment, from, to, HttpStatus.SC_OK);
+    }
+
+    /**
+     * Sends a GET request to retrieve the experiment's assignment traffic.
+     * The response must contain HTTP {@code expectedStatus}.
+     * <p>
+     * URLEncodes the generated Strings generated from the dates which are passed as the URL.
+     *
+     * @param experiment the experiment
+     * @param from       the first day to retrieve
+     * @param to         the last day to retrieve
+     * @return a map of lists (= table) containing meta and assignment traffic data
+     */
+    protected Map<String, List<?>> getTraffic(Experiment experiment, LocalDateTime from, LocalDateTime to, int expectedStatus) {
+        RestAssured.urlEncodingEnabled = false;
+        APIServerConnector apiServerConnectorNoURLEncoding = apiServerConnector.clone();
+        RestAssured.urlEncodingEnabled = true;
+        return getTraffic(experiment, from, to, expectedStatus, apiServerConnectorNoURLEncoding);
+    }
+
+    /**
+     * Sends a GET request to retrieve the experiment's assignment traffic.
+     * The response must contain HTTP {@code expectedStatus}.
+     * <p>
+     * URLEncodes the generated Strings generated from the dates which are passed as the URL.
+     *
+     * @param experiment the experiment
+     * @param from       the first day to retrieve
+     * @param to         the last day to retrieve
+     * @return a map of lists (= table) containing meta and assignment traffic data
+     */
+    protected Map<String, List<?>> getTraffic(Experiment experiment, LocalDateTime from, LocalDateTime to, int expectedStatus, APIServerConnector apiServerConnector) {
+        try {
+            return getTraffic(experiment, URLEncoder.encode(TestUtils.formatDateForUI(from), "utf8"),
+                    URLEncoder.encode(TestUtils.formatDateForUI(to), "utf8"), expectedStatus, apiServerConnector);
+        } catch (UnsupportedEncodingException e) {
+            Assert.fail("Failed to urlencode the date in TestBase. Should not have happened! " + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Sends a GET request to retrieve the experiment's assignment traffic.
+     * The response must contain {@link HttpStatus#SC_OK}.
+     *
+     * @param experiment the experiment
+     * @param from       the first day to retrieve
+     * @param to         the last day to retrieve
+     * @return a map of lists (= table) containing meta and assignment traffic data
+     */
+    protected Map<String, List<?>> getTraffic(Experiment experiment, String from, String to) {
+        return getTraffic(experiment, from, to, HttpStatus.SC_OK);
+    }
+
+    /**
+     * Sends a GET request to retrieve the experiment's assignment traffic.
+     * The response must contain HTTP {@code expectedStatus}.
+     *
+     * @param experiment     the experiment
+     * @param from           the first day to retrieve
+     * @param to             the last day to retrieve
+     * @param expectedStatus the expected HTTP status code
+     * @return a map of lists (= table) containing meta and assignment traffic data
+     */
+    protected Map<String, List<?>> getTraffic(Experiment experiment, String from, String to, int expectedStatus) {
+        return getTraffic(experiment, from, to, expectedStatus, apiServerConnector);
+
+    }
+
+    /**
+     * Sends a GET request to retrieve the experiment's assignment traffic.
+     * The response must contain HTTP {@code expectedStatus}.
+     *
+     * @param experiment         the experiment
+     * @param from               the first day to retrieve
+     * @param to                 the last day to retrieve
+     * @param expectedStatus     the expected HTTP status code
+     * @param apiServerConnector the server connector to use
+     * @return a map of lists (= table) containing meta and assignment traffic data
+     */
+    protected Map<String, List<?>> getTraffic(Experiment experiment, String from, String to, int expectedStatus, APIServerConnector apiServerConnector) {
+        String uri = "experiments/" + experiment.id + "/assignments/traffic/" + from + "/" + to;
+        response = apiServerConnector.doGet(uri);
+        assertReturnCode(response, expectedStatus);
+        Map<String, List<?>> resultMap = new HashMap<>(4);
+        resultMap.put("priorities", response.jsonPath().<Integer>getList("priorities"));
+        resultMap.put("assignmentRatios", response.jsonPath().<Map<String, Object>>getList("assignmentRatios"));
+        resultMap.put("experiments", response.jsonPath().<String>getList("experiments"));
+        resultMap.put("samplingPercentages", response.jsonPath().<Float>getList("samplingPercentages"));
+        return resultMap;
+    }
 
     /////////////////////////////////////
     // experiments/<id>/pages Endpoint //
     /////////////////////////////////////
 
     /**
-     * Sends a GET request to retrieve the pages the experiment is as{@link HttpStatus#SC_OK}. HTTP {@code expectedStatus}.
+     * Sends a GET request to retrieve the pages the experiment is assigned to.
+     * The response must contain {@link HttpStatus#SC_OK}.
      *
      * @param experiment the experiment
      * @return a list of pages
@@ -1952,6 +2068,58 @@ public class TestBase extends ServiceTestBase {
         assertReturnCode(response, expectedStatus);
         return response;
     }
+
+
+    //////////////////////////////////////////////////////////////////
+    // applications/<appName>/pages/ endpoint //
+    //////////////////////////////////////////////////////////////////
+    /**
+     * Sends a GET request to retrieve pages assigned to the application.
+     * The response must contain HTTP {@link HttpStatus#SC_OK}.
+     *
+     * @param application the application
+     * @return a list of pages
+     */
+     public List<Page> getPages(Application application){
+    	 return getPages(application,HttpStatus.SC_OK);
+     }
+
+     /**
+      * Sends a GET request to retrieve pages assigned to the application.
+      * The response must contain HTTP {@code expectedStatus}.
+      *
+      * @param application the application
+      * @param expectedStatus the expected HTTP status code
+      * @return a list of pages
+      */
+     public List<Page> getPages(Application application,  int expectedStatus) {
+         return getPages(application, expectedStatus, apiServerConnector);
+     }
+
+
+     /**
+      * Sends a GET request to retrieve pages assigned to the application.
+      * The response must contain HTTP {@code expectedStatus}.
+      *
+      * @param application the application
+      * @param expectedStatus the expected HTTP status code
+      * @param apiServerConnector the server connector to use
+      * @return a list of pages
+      */
+     public List<Page> getPages(Application application, int expectedStatus, APIServerConnector apiServerConnector) {
+         String uri = "applications/" + application.name + "/pages/";
+         response = apiServerConnector.doGet(uri);
+         assertReturnCode(response, expectedStatus);
+         List<Map<String, Object>> jsonMapping = response.jsonPath().getList("pages");
+         List<Page> pageList = new ArrayList<>(jsonMapping.size());
+         for (Map jsonMap : jsonMapping) {
+             String jsonString = simpleGson.toJson(jsonMap);
+             pageList.add(PageFactory.createFromJSONString(jsonString));
+         }
+         return pageList;
+     }
+
+
 
 
     //////////////////////////////////////////////////////////////////
@@ -2653,8 +2821,8 @@ public class TestBase extends ServiceTestBase {
      * The response must contain {@link HttpStatus#SC_CREATED}.
      *
      * @param application the application
-     * @param user        the user
-     * @param page        the page
+     * @param user the user
+     * @param page the page
      * @return the created assignments, can be 0
      */
     public List<Assignment> postAssignments(Application application, Page page, User user) {
@@ -2666,9 +2834,9 @@ public class TestBase extends ServiceTestBase {
      * given in the {@code segmentationProfile}.
      * The response must contain {@link HttpStatus#SC_CREATED}.
      *
-     * @param application         the application
-     * @param user                the user
-     * @param page                the page
+     * @param application the application
+     * @param user the user
+     * @param page the page
      * @param segmentationProfile the segmantation profile, will be wrapped into the correct JSON object
      * @return the created assignments, can be 0
      */
@@ -3107,6 +3275,60 @@ public class TestBase extends ServiceTestBase {
         }
         return pageList;
 
+    }
+
+
+    /**
+     *
+     * Sends a GET request to receive a list of experiments for an application
+     * The response must contain HTTP {@link HttpStatus#SC_OK}
+     *
+     * @param application the application for which the experiments are
+     * @return a list of experiments
+     */
+    public List<Experiment> getExperimentsByApplication(Application application)
+    {
+    	return getExperimentsByApplication(application,HttpStatus.SC_OK);
+    }
+
+
+    /**
+     *
+     * Sends a GET request to receive a list of experiments for an application
+     * The response must contain HTTP {@link HttpStatus#SC_OK}
+     *
+     * @param application the application for which the experiments are
+     * @param expectedStatus the expected HTTP status code
+     * @return a list of experiments
+     */
+    public List<Experiment> getExperimentsByApplication(Application application, int expectedStatus)
+    {
+    	return getExperimentsByApplication(application,expectedStatus,apiServerConnector);
+    }
+
+
+    /**
+     *
+     * Sends a GET request to receive a list of experiments for an application
+     * The response must contain HTTP {@link HttpStatus#SC_OK}
+     *
+     * @param application the application for which the experiments are
+     * @param expectedStatus the expected HTTP status code
+     * @param apiServerConnector the server connector to use
+     * @return a list of experiments
+     */
+    public List<Experiment> getExperimentsByApplication(Application application, int expectedStatus,APIServerConnector apiServerConnector)
+    {
+    	 String uri = "applications/" + application.name+ "/experiments";
+         response = apiServerConnector.doGet(uri);
+         assertReturnCode(response, expectedStatus);
+         List<Map<String, Object>> jsonStrings = response.jsonPath().getList("experiments");
+         List<Experiment> expList = new ArrayList<>(jsonStrings.size());
+         for (Map jsonMap : jsonStrings) {
+             String jsonString = simpleGson.toJson(jsonMap);
+             expList.add(ExperimentFactory.createFromJSONString(jsonString));
+         }
+         return expList;
     }
 
     /**
@@ -4073,7 +4295,6 @@ public class TestBase extends ServiceTestBase {
     ////////////////////////
     // favorites endpoint //
     ////////////////////////
-
 
     /**
      * Sends a GET request to favorites.

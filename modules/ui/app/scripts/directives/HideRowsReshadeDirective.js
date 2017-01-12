@@ -1,10 +1,9 @@
 /*global $:false */
-/*global moment:false */
 
 'use strict';
 
-angular.module('wasabi.directives').directive('hideRowsReshade', ['$compile',
-    function ($compile) {
+angular.module('wasabi.directives').directive('hideRowsReshade',
+    function () {
         return {
             restrict: 'A',
             link: function (scope, element, attrs) {
@@ -32,4 +31,4 @@ angular.module('wasabi.directives').directive('hideRowsReshade', ['$compile',
                 });
             }
         };
-    }]);
+    });

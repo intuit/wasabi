@@ -25,7 +25,10 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * DTO to save the progress of a bucket or an action. <br>
@@ -41,11 +44,9 @@ import java.util.List;
 public class Progress implements Cloneable {
 
     @ApiModelProperty(value = "list of winning buckets", required = true)
-    //todo: this should really be a set
-    protected List<Bucket.Label> winnersSoFar;
+    protected Set<Bucket.Label> winnersSoFar;
     @ApiModelProperty(value = "list of losing buckets", required = true)
-    //todo: this should really be a set
-    protected List<Bucket.Label> losersSoFar;
+    protected Set<Bucket.Label> losersSoFar;
     @ApiModelProperty(value = "if sufficient data has been collected to observe the effect size of interest",
                       required = true)
     protected boolean hasSufficientData;
@@ -53,19 +54,19 @@ public class Progress implements Cloneable {
                       required = true)
     protected Double fractionDataCollected;
 
-    public List<Bucket.Label> getWinnersSoFar() {
+    public Set<Bucket.Label> getWinnersSoFar() {
         return winnersSoFar;
     }
 
-    public void setWinnersSoFar(List<Bucket.Label> value) {
+    public void setWinnersSoFar(Set<Bucket.Label> value) {
         this.winnersSoFar = value;
     }
 
-    public List<Bucket.Label> getLosersSoFar() {
+    public Set<Bucket.Label> getLosersSoFar() {
         return losersSoFar;
     }
 
-    public void setLosersSoFar(List<Bucket.Label> value) {
+    public void setLosersSoFar(Set<Bucket.Label> value) {
         this.losersSoFar = value;
     }
 
@@ -88,23 +89,21 @@ public class Progress implements Cloneable {
     @JsonIgnore
     public void addToWinnersSoFarList(Bucket.Label winner) {
         if (this.winnersSoFar == null) {
-            this.winnersSoFar = new ArrayList<>();
+            this.winnersSoFar = new HashSet<>();
         } else if (winner == null) {
             throw new IllegalArgumentException();
-        } else {
-            this.winnersSoFar.add(winner);
         }
+        this.winnersSoFar.add(winner);
     }
 
     @JsonIgnore
     public void addToLosersSoFarList(Bucket.Label loser) {
         if (this.losersSoFar == null) {
-            this.losersSoFar = new ArrayList<>();
+            this.losersSoFar = new HashSet<>();
         } else if (loser == null) {
             throw new IllegalArgumentException();
-        } else {
-            this.losersSoFar.add(loser);
         }
+        this.losersSoFar.add(loser);
     }
 
     @Override
@@ -140,13 +139,17 @@ public class Progress implements Cloneable {
             this.item = new Progress();
         }
 
-        public Builder withWinnersSoFar(List<Bucket.Label> value) {
-            this.item.winnersSoFar = value;
+        public Builder withWinnersSoFar(Collection<Bucket.Label> value) {
+            Set<Bucket.Label> winnerSoFar = new HashSet<>();
+            winnerSoFar.addAll(value);
+            this.item.winnersSoFar = winnerSoFar;
             return this;
         }
 
-        public Builder withLosersSoFar(List<Bucket.Label> value) {
-            this.item.losersSoFar = value;
+        public Builder withLosersSoFar(Collection<Bucket.Label> value) {
+            Set<Bucket.Label> losersSoFar = new HashSet<>();
+            losersSoFar.addAll(value);
+            this.item.losersSoFar = losersSoFar;
             return this;
         }
 

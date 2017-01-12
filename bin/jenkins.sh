@@ -145,6 +145,7 @@ for module in ${modules}; do
 
     [ "${status}" -ne "0" ] && exitOnError "integration tests failed: (cd ${project}; eval ${project_env} ./bin/${project}.sh --profile=${profile} --endpoint=${deploy_host}:8080 test)"
 
+    # fixme: conflicts with distributionManagement in base pom; fallback: use jenkins:publish-to-maven post-build action
     if [[ "${nexus_archive}" == "true" ]]; then
       # publish artifacts to nexus
 

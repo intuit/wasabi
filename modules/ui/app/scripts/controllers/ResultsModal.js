@@ -2,8 +2,8 @@
 
 angular.module('wasabi.controllers')
     .controller('ResultsModalCtrl',
-        ['$scope', '$filter', '$modalInstance', 'ExperimentsFactory', 'experiment', 'readOnly', 'UtilitiesFactory', '$modal', 'ConfigFactory', 'DialogsFactory',
-            function ($scope, $filter, $modalInstance, ExperimentsFactory, experiment, readOnly, UtilitiesFactory, $modal, ConfigFactory, DialogsFactory) {
+        ['$scope', '$filter', '$modalInstance', 'ExperimentsFactory', 'experiment', 'readOnly', 'UtilitiesFactory', '$modal', 'ConfigFactory',
+            function ($scope, $filter, $modalInstance, ExperimentsFactory, experiment, readOnly, UtilitiesFactory, $modal, ConfigFactory) {
 
                 $scope.experiment = experiment;
 

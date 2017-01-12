@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,66 +21,75 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
 
+/**
+ * This class tests the {@link ExperimentCumulativeCounts}.
+ */
 public class ExperimentCumulativeCountsTest {
-    List<DailyCounts> days;
-    ExperimentCumulativeCounts counter;
+
+    private List<DailyCounts> days;
+    private ExperimentCumulativeCounts counter;
 
     @Before
-    public void setup(){
-        days = new ArrayList<DailyCounts>();
+    public void setup() {
+        days = new ArrayList<>();
         counter = new ExperimentCumulativeCounts.Builder().withDays(days).build();
     }
 
     @Test
-    public void testBuilder(){
-        assertEquals(counter.getDays(), days);
+    public void testBuilder() {
+        assertThat(counter.getDays(), equalTo(days));
+        assertThat(counter.toString(), containsString(days.toString()));
 
-        assertNotNull(counter.toString());
-        assertNotNull(counter.hashCode());
+        ExperimentCumulativeCounts countClone = counter.clone();
+        assertThat(counter.hashCode(), is(countClone.hashCode()));
+        countClone.addDays(new DailyCounts.Builder().build());
+        assertThat(counter.hashCode(), not(countClone.hashCode()));
     }
 
     @Test
-    public void testAddSetDays(){
+    public void testAddSetDays() {
         DailyCounts day = new DailyCounts.Builder().build();
         List<DailyCounts> otherDays = new ArrayList<DailyCounts>();
         otherDays.add(day);
         counter.addDays(day);
-        assertEquals(counter.getDays(), otherDays);
+        assertThat(counter.getDays(), equalTo(otherDays));
         counter.setDays(days);
-        assertEquals(counter.getDays(), days);
+        assertThat(counter.getDays(), equalTo(days));
     }
 
     @Test
-    public void testClone(){
+    public void testClone() {
         ExperimentCumulativeCounts clonedCounter = counter.clone();
-        assertEquals(clonedCounter.getDays(), days);
+        assertThat(clonedCounter.getDays(), equalTo(days));
     }
 
     @Test
-    public void testCloneEquals(){
+    public void testCloneEquals() {
         ExperimentCumulativeCounts clonedCounter = counter.clone();
-        assertEquals(clonedCounter, counter);
+        assertThat(clonedCounter, equalTo(counter));
     }
 
     @Test
-    public void testEquals(){
+    public void testEquals() {
         ExperimentCumulativeCounts counter1 = new ExperimentCumulativeCounts.Builder().withDays(days).build();
         ExperimentCumulativeCounts counter2 = new ExperimentCumulativeCounts.Builder().withDays(days).build();
-        
-        assertEquals(counter1, counter2);
+
+        assertThat(counter1, equalTo(counter2));
     }
 
     @Test
-    public void testNotEquals(){
+    public void testNotEquals() {
         ExperimentCumulativeCounts counter1 = new ExperimentCumulativeCounts.Builder().withDays(days).build();
-        ArrayList<DailyCounts> days2 = new ArrayList<DailyCounts>();
+        ArrayList<DailyCounts> days2 = new ArrayList<>();
         days.add(new DailyCounts.Builder().setDate("2016-03-01 12:12:12z").build());
         ExperimentCumulativeCounts counter2 = new ExperimentCumulativeCounts.Builder().withDays(days2).build();
-        
-        assertFalse(counter1.equals(counter2));
+
+        assertThat(counter1, not(equalTo(counter2)));
     }
 }

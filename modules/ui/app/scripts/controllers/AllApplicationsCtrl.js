@@ -1,4 +1,3 @@
-/* global $:false */
 /*jshint devel:true */
 
 'use strict';
@@ -26,7 +25,8 @@ angular.module('wasabi.controllers').
                     }
                 }, function(response) {
                         UtilitiesFactory.handleGlobalError(response, 'The list of applications could not be retrieved.');
-                });
+                    }
+                );
             };
 
             $scope.capitalizeFirstLetter = function(string) {

@@ -138,7 +138,7 @@ angular.module('wasabi.controllers')
                         });
                     }, function(reason) {
                         //console.log(reason);
-                        if (reason.data.error & reason.data.error.code !== 401) {
+                        if (reason.data.error && reason.data.error.code !== 401) {
                             $scope.serverDown = true;
                         }
                         else {

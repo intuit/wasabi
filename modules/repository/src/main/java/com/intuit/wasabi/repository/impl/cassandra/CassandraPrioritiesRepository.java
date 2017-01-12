@@ -93,6 +93,7 @@ public class CassandraPrioritiesRepository implements PrioritiesRepository {
 
         if (experimentPriorityList.isEmpty()) {
 
+            // TODO - Can we have a separate delete method rather than createPriorities with delete ?
             final String CQL = "delete from application where app_name = ?";
 
             try {
@@ -165,6 +166,7 @@ public class CassandraPrioritiesRepository implements PrioritiesRepository {
      * @param base  base experiment id
      * @return experiment list
      */
+    // TODO - Is this copy and paste from CassandraMutexRepository class ?
     public ExperimentList getNotExclusions(Experiment.ID base) {
         try {
 

@@ -19,13 +19,16 @@ import com.codahale.metrics.health.HealthCheckRegistry;
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 import com.intuit.wasabi.analytics.AnalyticsModule;
+import com.intuit.wasabi.analyticsobjects.wrapper.ExperimentDetail;
 import com.intuit.wasabi.api.error.ExceptionJsonifier;
 import com.intuit.wasabi.api.jackson.JacksonModule;
 import com.intuit.wasabi.api.pagination.comparators.PaginationComparator;
 import com.intuit.wasabi.api.pagination.comparators.impl.AuditLogEntryComparator;
 import com.intuit.wasabi.api.pagination.comparators.impl.ExperimentComparator;
+import com.intuit.wasabi.api.pagination.comparators.impl.ExperimentDetailComparator;
 import com.intuit.wasabi.api.pagination.filters.PaginationFilter;
 import com.intuit.wasabi.api.pagination.filters.impl.AuditLogEntryFilter;
+import com.intuit.wasabi.api.pagination.filters.impl.ExperimentDetailFilter;
 import com.intuit.wasabi.api.pagination.filters.impl.ExperimentFilter;
 import com.intuit.wasabi.auditlog.AuditLogModule;
 import com.intuit.wasabi.auditlogobjects.AuditLogEntry;
@@ -36,7 +39,7 @@ import com.intuit.wasabi.events.EventsModule;
 import com.intuit.wasabi.experiment.ExperimentsModule;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.feedback.FeedbackModule;
-import com.intuit.wasabi.repository.impl.cassandra.CassandraExperimentRepositoryModule;
+import com.intuit.wasabi.repository.database.DatabaseExperimentRepositoryModule;
 import com.intuit.wasabi.userdirectory.UserDirectoryModule;
 import org.slf4j.Logger;
 
@@ -55,20 +58,8 @@ public class ApiModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        LOGGER.debug("installing module: {}", ApiModule.class.getSimpleName());
 
-        install(new com.intuit.autumn.api.ApiModule());
-        install(new AnalyticsModule());
-        install(new AuditLogModule());
-        install(new AuthorizationModule());
-        install(new CassandraExperimentRepositoryModule());
-        install(new DatabaseModule());
-        install(new EmailModule());
-        install(new EventsModule());
-        install(new ExperimentsModule());
-        install(new FeedbackModule());
-        install(new JacksonModule());
-        install(new UserDirectoryModule());
+        installModules();
 
         Properties properties = create(PROPERTY_NAME, ApiModule.class);
 
@@ -89,16 +80,41 @@ public class ApiModule extends AbstractModule {
         bind(new TypeLiteral<PaginationFilter<AuditLogEntry>>(){}).to(new TypeLiteral<AuditLogEntryFilter>(){});
         bind(new TypeLiteral<PaginationComparator<Experiment>>(){}).to(new TypeLiteral<ExperimentComparator>(){});
         bind(new TypeLiteral<PaginationFilter<Experiment>>(){}).to(new TypeLiteral<ExperimentFilter>(){});
+        bind(new TypeLiteral<PaginationFilter<ExperimentDetail>>(){}).to(new TypeLiteral<ExperimentDetailFilter>(){});
+        bind(new TypeLiteral<PaginationComparator<ExperimentDetail>>(){}).to(new TypeLiteral<ExperimentDetailComparator>(){});
 
-        // FIXME: might need to run against jersey 1.18.1 to get this to work
-//        try {
-//            bind(InstrumentedResourceMethodDispatchAdapter.class)
-//                    .toConstructor(InstrumentedResourceMethodDispatchAdapter.class.getConstructor(MetricRegistry.class))
-//                    .in(SINGLETON);
-//        } catch (NoSuchMethodException e) {
-//            e.printStackTrace();
-//        }
+    }
+    
+    protected void installUserModule() {
+        install(new UserDirectoryModule());
+    }
+    
+    protected void installAuthModule() {
+        install(new AuthorizationModule());
+    }
 
-        LOGGER.debug("installed module: {}", ApiModule.class.getSimpleName());
+    protected void installEventModule() {
+        install(new EventsModule());
+    }
+    
+    private void installModules() {
+        LOGGER.debug("installing module: {}", ApiModule.class.getCanonicalName());
+
+        //these modules are either free of other dependencies or they are required by later modules
+        install(new com.intuit.autumn.api.ApiModule());
+        installUserModule();
+        install(new DatabaseExperimentRepositoryModule());
+        install(new DatabaseModule());
+        install(new JacksonModule());
+        install(new AuditLogModule());
+        installAuthModule();
+
+        install(new EmailModule());
+        installEventModule();
+        install(new ExperimentsModule());
+        install(new FeedbackModule());
+        install(new AnalyticsModule());
+
+        LOGGER.debug("installed module: {}", ApiModule.class.getCanonicalName());
     }
 }

@@ -21,6 +21,7 @@ import com.intuit.wasabi.experiment.Priorities;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.ExperimentIDList;
+import com.intuit.wasabi.experimentobjects.PrioritizedExperiment;
 import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
 import com.intuit.wasabi.repository.PrioritiesRepository;
 
@@ -28,7 +29,9 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.intuit.wasabi.experimentobjects.Experiment.State.TERMINATED;
 
@@ -43,7 +46,7 @@ public class PrioritiesImpl implements Priorities {
         this.prioritiesRepository = prioritiesRepository;
         this.experiments = experiments;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -127,7 +130,7 @@ public class PrioritiesImpl implements Priorities {
 
         // Throw an exception if application name is invalid
         if (applicationName == null) {
-            throw new ApplicationNotFoundException((Application.Name)null);
+            throw new ApplicationNotFoundException((Application.Name) null);
         }
 
         if (verifyPriorityList) {
@@ -184,5 +187,16 @@ public class PrioritiesImpl implements Priorities {
             }
         }
         return prioritiesRepository.getPriorities(applicationName);
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    public Map<Experiment.ID, Integer> getPriorityPerID(Application.Name applicationName) {
+        return getPriorities(applicationName, false)
+                .getPrioritizedExperiments()
+                .parallelStream()
+                .collect(Collectors.toMap(PrioritizedExperiment::getID, PrioritizedExperiment::getPriority));
     }
 }

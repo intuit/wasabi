@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,6 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.api;
 
+import com.intuit.wasabi.api.pagination.PaginationHelper;
 import com.intuit.wasabi.api.pagination.comparators.impl.AuditLogEntryComparator;
 import com.intuit.wasabi.api.pagination.filters.impl.AuditLogEntryFilter;
 import com.intuit.wasabi.auditlog.AuditLog;
@@ -24,7 +25,6 @@ import com.intuit.wasabi.auditlogobjects.AuditLogEntryFactory;
 import com.intuit.wasabi.authorization.Authorization;
 import com.intuit.wasabi.eventlog.events.SimpleEvent;
 import com.intuit.wasabi.experimentobjects.Application;
-import com.intuit.wasabi.api.pagination.PaginationHelper;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -34,7 +34,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -52,7 +53,7 @@ public class AuditLogResourceTest {
 
         Mockito.when(al.getAuditLogs()).thenReturn(list);
         Response r = lr.getCompleteLogs("", 1, 10, "", "", null);
-        assertEquals("{logEntries=[], totalEntries=0}", r.getEntity().toString());
+        assertThat("{logEntries=[], totalEntries=0}", is(r.getEntity().toString()));
 
         for (int i = 0; i < 5; i++) {
             list.add(AuditLogEntryFactory.createFromEvent(new SimpleEvent("Event")));
@@ -81,24 +82,24 @@ public class AuditLogResourceTest {
 
         Mockito.when(al.getAuditLogs(appName)).thenReturn(list);
         Response r = lr.getLogs("", appName, 1, 10, "", "", null);
-        assertEquals(0, ((List) ((Map<String, Object>) r.getEntity()).get("logEntries")).size());
-        assertEquals(0, ((Map<String, Object>) r.getEntity()).get("totalEntries"));
+        assertThat(((List) ((Map<String, Object>) r.getEntity()).get("logEntries")).size(), is(0));
+        assertThat(((Map<String, Object>) r.getEntity()).get("totalEntries"), is(0));
 
         for (int i = 0; i < 5; i++) {
             list.add(AuditLogEntryFactory.createFromEvent(new SimpleEvent("Event")));
         }
         Mockito.when(al.getAuditLogs(appName)).thenReturn(list);
         r = lr.getLogs("", appName, 1, 10, "", "", null);
-        assertEquals(5, ((List) ((Map<String, Object>) r.getEntity()).get("logEntries")).size());
-        assertEquals(5, ((Map<String, Object>) r.getEntity()).get("totalEntries"));
+        assertThat(((List) ((Map<String, Object>) r.getEntity()).get("logEntries")).size(), is(5));
+        assertThat(((Map<String, Object>) r.getEntity()).get("totalEntries"), is(5));
 
         for (int i = 0; i < 6; i++) {
             list.add(AuditLogEntryFactory.createFromEvent(new SimpleEvent("Event")));
         }
         Mockito.when(al.getAuditLogs(appName)).thenReturn(list);
         r = lr.getLogs("", appName, 1, 10, "", "", null);
-        assertEquals(10, ((List) ((Map<String, Object>) r.getEntity()).get("logEntries")).size());
-        assertEquals(11, ((Map<String, Object>) r.getEntity()).get("totalEntries"));
+        assertThat(((List) ((Map<String, Object>) r.getEntity()).get("logEntries")).size(), is(10));
+        assertThat(((Map<String, Object>) r.getEntity()).get("totalEntries"), is(11));
     }
 
 }

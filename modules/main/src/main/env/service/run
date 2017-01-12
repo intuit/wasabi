@@ -39,6 +39,7 @@ JAVA_OPTIONS="-server\
   -Dcom.sun.management.jmxremote.ssl=false\
   -Dcom.sun.management.jmxremote.authenticate=false\
   -Dlogback.configurationFile=\${HOME_DIR}/conf/logback.xml\
+  -Djava.util.logging.config.file=\${HOME_DIR}/conf/logging.properties\
   ${WASABI_CONFIGURATION}"
 
 # if JAVA_HOME is not set, set it based on OS

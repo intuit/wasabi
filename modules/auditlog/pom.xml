@@ -20,7 +20,7 @@
     <parent>
         <groupId>com.intuit.wasabi</groupId>
         <artifactId>wasabi</artifactId>
-        <version>1.0.20161107232436</version>
+        <version>1.0.20170112014341</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -54,7 +54,7 @@
         </dependency>
         <dependency>
             <groupId>${project.parent.groupId}</groupId>
-            <artifactId>wasabi-repository</artifactId>
+            <artifactId>wasabi-repository-datastax</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
     </dependencies>

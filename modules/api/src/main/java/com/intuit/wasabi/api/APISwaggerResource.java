@@ -46,6 +46,7 @@ interface APISwaggerResource {
 
     String DEFAULT_PAGE = "1";
     String DEFAULT_PER_PAGE = "10";
+    String DEFAULT_PER_PAGE_CARDVIEW = "8";
     String DEFAULT_FILTER = "";
     String DEFAULT_SORT = "";
     String DEFAULT_TIMEZONE = "+0000";

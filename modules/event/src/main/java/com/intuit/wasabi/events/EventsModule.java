@@ -26,7 +26,7 @@ import com.intuit.wasabi.events.impl.EventsImpl;
 import com.intuit.wasabi.exceptions.EventException;
 import com.intuit.wasabi.export.DatabaseExport;
 import com.intuit.wasabi.export.Envelope;
-import com.intuit.wasabi.repository.RepositoryModule;
+import com.intuit.wasabi.repository.cassandra.CassandraRepositoryModule;
 import org.slf4j.Logger;
 
 import java.util.HashMap;
@@ -54,7 +54,7 @@ public class EventsModule extends AbstractModule {
         LOGGER.debug("installing module: {}", EventsModule.class.getSimpleName());
 
         install(new AssignmentsModule());
-        install(new RepositoryModule());
+        install(new CassandraRepositoryModule());
 
         Properties properties = create(PROPERTY_NAME, EventsModule.class);
 

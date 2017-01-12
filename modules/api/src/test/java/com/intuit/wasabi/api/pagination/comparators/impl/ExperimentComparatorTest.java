@@ -80,7 +80,7 @@ public class ExperimentComparatorTest {
 
         HashMap<String, Integer> testCases = new HashMap<>();
         testCases.put("-application_name", 1);
-        testCases.put("experiment_name", -1);
+        testCases.put("experiment_label", -1);
         testCases.put("created_by", -1);
         testCases.put("creation_time", 0);
         testCases.put("-start_time", 1);

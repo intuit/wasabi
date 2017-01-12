@@ -173,6 +173,17 @@ public class IntegrationPages extends TestBase {
                 .setSamplingPercent(SAMPLING_PERCENT)
                 .setApplication(ApplicationFactory.createApplication().setName(PREFIX_APPLICATION+TIMESTAMP_STR));
     }
+    
+    /**
+     * This test case covers a scenario where we are
+     * trying to get all the pages of an invalid app
+     */
+    @Test(dependsOnGroups = {"ping"})
+    public void testInvalidAppPages()
+    {
+    	List<Page> pagelist = getPages(new Application("junkapp"));
+    	Assert.assertEquals(pagelist.size(), 0);
+    }
 
     /**
      * Tests posting page for expired experiment with past start and end times

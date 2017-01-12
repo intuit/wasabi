@@ -179,8 +179,24 @@ public class EventsIntegrationTest extends TestBase {
         		parameters, true, 
         		HttpStatus.SC_OK, apiServerConnector);
         assertEquals(events.size(), 0);
-        System.out.println("Eents size" + events);
+        System.out.println("Evnts size" + events);
 
+    }
+    
+    /**
+     * This experiment tests scenario where we are trying 
+     * to GET all assignments of an Invalid Experiment
+     */
+    @Test
+    public void t_InvalidExperimentAssignment()
+    {
+    	//create an experiment and assign with fake/invaid ID
+    	Experiment experiment = ExperimentFactory.createCompleteExperiment();
+    	experiment.setId("00000a00-0a0a-0a00-aa00-a00a0a000000");
+    	
+    	//this should be a failure 404
+    	getAssignments(experiment, HttpStatus.SC_NOT_FOUND);
+    	
     }
 
     @Test(dependsOnMethods = {"t_CheckBasicCounts"})

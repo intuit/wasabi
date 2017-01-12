@@ -19,7 +19,7 @@ import com.google.inject.AbstractModule;
 import com.intuit.wasabi.eventlog.EventLogModule;
 import com.intuit.wasabi.experiment.impl.*;
 import com.intuit.wasabi.experimentobjects.ExperimentValidator;
-import com.intuit.wasabi.repository.RepositoryModule;
+import com.intuit.wasabi.repository.cassandra.CassandraRepositoryModule;
 import org.slf4j.Logger;
 
 import static com.google.inject.Scopes.SINGLETON;
@@ -37,7 +37,7 @@ public class ExperimentsModule extends AbstractModule {
         LOGGER.debug("installing module: {}", ExperimentsModule.class.getSimpleName());
 
         install(new EventLogModule());
-        install(new RepositoryModule());
+        install(new CassandraRepositoryModule());
 
         bind(Experiments.class).to(ExperimentsImpl.class).in(SINGLETON);
         bind(Buckets.class).to(BucketsImpl.class).in(SINGLETON);
