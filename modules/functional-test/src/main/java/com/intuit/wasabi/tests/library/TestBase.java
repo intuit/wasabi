@@ -173,6 +173,10 @@ public class TestBase extends ServiceTestBase {
         setPropertyFromSystemProperty("application.name", "application-name");
         setPropertyFromSystemProperty("experiment.prefix", "experiment-prefix");
         setPropertyFromSystemProperty("bucket.prefix", "bucket-prefix");
+
+        setPropertyFromSystemProperty("database.url", "database.url");
+        setPropertyFromSystemProperty("database.username", "database.username");
+        setPropertyFromSystemProperty("database.password", "database.password");
     }
 
     /**

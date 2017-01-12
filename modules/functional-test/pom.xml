@@ -17,12 +17,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>com.intuit.wasabi</groupId>
-		<artifactId>wasabi</artifactId>
-		<version>1.0.20161107232436-SNAPSHOT</version>
-		<relativePath>../../pom.xml</relativePath>
-	</parent>
+    <parent>
+        <groupId>com.intuit.wasabi</groupId>
+        <artifactId>wasabi</artifactId>
+        <version>1.0.20161107232436-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
 
     <artifactId>wasabi-functional-test</artifactId>
     <packaging>jar</packaging>

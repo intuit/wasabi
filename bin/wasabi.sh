@@ -232,7 +232,7 @@ resource() {
         open http://localhost:8080/swagger/index.html;;
       doc) [ ! -f ./target/site/apidocs/index.html ] && build
         open ./target/site/apidocs/index.html;;
-      mysql|cassandra) ./bin/wasabi.sh status 2>/dev/null | grep wasabi-${1} 1>/dev/null || ./bin/wasabi.sh start
+      mysql|cassandra) ./bin/wasabi.sh status 2>/dev/null | grep wasabi-${1} 1>/dev/null || ./bin/wasabi.sh start:${1}
         ./bin/container.sh console:${1};;
       *) usage "unknown command: ${command}" 1;;
     esac

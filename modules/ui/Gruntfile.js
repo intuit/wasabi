@@ -1,4 +1,5 @@
 // Generated on 2014-03-30 using generator-angular 0.8.0
+// Modified on 2016-09-05 manually by shoeffner: added fromArgs(0)
 'use strict';
 
 // # Globbing
@@ -6,6 +7,15 @@
 // 'test/spec/{,*/}*.js'
 // use this if you want to recursively match all subfolders:
 // 'test/spec/**/*.js'
+
+
+// Allows to read a parameter from the command line argument list.
+// If a user wants to set 'key' she should call `grunt [commands...] --key=value`.
+// If the key is not supplied, the default value is used.
+function fromArgs( key, defaultValue ) {
+    const index = process.argv.findIndex(arg => arg.startsWith('--' + key + '='));
+    return index !== -1 ? process.argv[index].split(/(=)/).slice(2).join('') : defaultValue;
+}
 
 module.exports = function (grunt) {
 
@@ -392,8 +402,9 @@ module.exports = function (grunt) {
             },
             development: {
                 constants: {
-                    supportEmail: 'you@example.com',
-                    apiHostBaseUrlValue: 'http://localhost:8080/api/v1'
+                    supportEmail: fromArgs('supportEmail', 'you@example.com'),
+                    apiHostBaseUrlValue: fromArgs('apiHostBaseUrlValue',
+						'http://' + fromArgs('apiHost', 'localhost') + ':' + fromArgs('apiPort', 8080) + '/api/v1')
                 }
             }
         },

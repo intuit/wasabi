@@ -42,7 +42,7 @@ Learn more about how Wasabi can empower your team to move from hunches to action
 
 ## Get Started
 
-The following steps will help you install the needed tools, then build and run a complete Wasabi stack. Note, at this time, only Mac OS X is supported.
+The following steps will help you install the needed tools, then build and run a complete Wasabi stack.
 
 #### Bootstrap Your Environment
 
@@ -60,7 +60,7 @@ The following steps will help you install the needed tools, then build and run a
 
 Installed tools include: [homebrew 0.9](http://brew.sh), [git 2](https://git-scm.com),
 [maven 3](https://maven.apache.org), [java 1.8](http://www.oracle.com/technetwork/java/javase/overview/index.html),
-[docker 1.12](https://docker.com), [node 6](https://nodejs.org/en) and [python 2.7](https://www.python.org).
+[docker 1.12](https://docker.com), [node 6](https://nodejs.org/en).
 
 
 ##### Ubuntu
@@ -77,13 +77,65 @@ Bootstrapping on Ubuntu requires sudo privileges to install all the required dep
 
 NOTE: A reboot is required after running the bootstrap command on Ubuntu.
 
-For all other processes (build, start etc.) the commands are same for Ubuntu and Mac OS.
+For all other processes (build, start etc.) the commands are the same for Ubuntu and Mac OS.
 
 Installed tools include: [git 2](https://git-scm.com),
 [maven 3](https://maven.apache.org), [OpenJdk 8](http://openjdk.java.net/projects/jdk8/),
 [docker 1.12](https://docker.com), [node 6](https://nodejs.org/en) and [python 2.7](https://www.python.org)
 
-Similar tooling will work for Windows. Contribute a patch :)
+
+##### Windows (7+)
+
+To install Wasabi's dependencies on Windows we use [Chocolatey][win_choco] which
+needs administrator rights in your [cmd.exe][win_cmd_admin].
+
+If you have git, just run:
+```dos
+% git clone https://github.com/intuit/wasabi.git
+% cd wasabi
+% bin\wasabi.bat bootstrap
+```
+
+If you don't have git the easiest way is to [download][url_develop_zip] the
+latest code and unzip it. You will then only have to run
+```dos
+% bin\wasabi.bat bootstrap
+```
+
+For all other processes (build, start etc.) the commands are almost the same as
+for the other operating systems: just make sure to replace `bin/wasabi.sh` 
+with `bin\wasabi.bat`. Note that the UI needs to be started with a separate server, so
+`bin\wasabi.bat resource:ui` is a must on Windows.
+
+If you run into problems, please consult the [FAQ](#FAQ+Windows) and create
+an issue if it doesn't help you.
+
+Installed tools include: [Chocolatey][win_choco], [git][choco_git],
+[Docker][choco_docker], [Maven 3][choco_maven], [jdk 1.8][choco_jdk],
+[docker-machine][choco_docker-machine], [VirtualBox][choco_virtualbox], 
+[node.js][choco_nodejs] (+ [bower][npm_bower], [grunt-cli][npm_grunt-cli],
+[yo][npm_yo]), and [ruby][choco_ruby] (+ [compass][gem_compass],
+[fpm][gem_fpm]).
+
+[win_choco]: https://chocolatey.org/
+[win_cmd_admin]: https://technet.microsoft.com/en-us/library/cc947813(v=ws.10).aspx)
+[url_develop_zip]: https://github.com/intuit/wasabi/archive/develop.zip
+[win_hyperv]: https://msdn.microsoft.com/virtualization/hyperv_on_windows/quick_start/walkthrough_compatibility
+[choco_docker]: https://chocolatey.org/packages/docker
+[choco_git]: https://chocolatey.org/packages/git.install
+[choco_docker-machine]: https://chocolatey.org/packages/docker-machine
+[choco_jdk]: https://chocolatey.org/packages/jdk8
+[choco_maven]: https://chocolatey.org/packages/maven
+[choco_nodejs]: https://chocolatey.org/packages/nodejs.install
+[choco_virtualbox]: https://chocolatey.org/packages/virtualbox
+[choco_ruby]: https://chocolatey.org/packages/ruby
+[npm_bower]: https://www.npmjs.com/package/bower
+[npm_grunt-cli]: https://www.npmjs.com/package/grunt-cli
+[npm_yo]: https://www.npmjs.com/package/yo
+[gem_compass]: https://rubygems.org/gems/compass/versions/1.0.3
+[gem_fpm]: https://rubygems.org/gems/fpm/versions/1.4.0
+
+
 
 #### Start Wasabi
 
@@ -123,33 +175,6 @@ Server: Jetty(9.3.z-SNAPSHOT)
 ```
 
 Congratulations! You are the proud owner of a newly minted Wasabi instance. :)
-
-#### Troubleshooting
-
-* While starting Wasabi, if you see an error when the docker containers are starting up, you could do the following:
-
-  * Look at the current docker containers that have been successfully started.
-
-```bash
-% ./bin/wasabi.sh status
-
-CONTAINER ID        IMAGE                    COMMAND                  CREATED             STATUS              PORTS                                                                     NAMES
-8c12458057ef        wasabi-main              "entrypoint.sh wasabi"   25 minutes ago      Up 25 minutes       0.0.0.0:8080->8080/tcp, 0.0.0.0:8090->8090/tcp, 0.0.0.0:8180->8180/tcp    wasabi-main
-979ecc885239        mysql:5.6                "docker-entrypoint.sh"   26 minutes ago      Up 26 minutes       0.0.0.0:3306->3306/tcp                                                    wasabi-mysql
-2d33a96abdcb        cassandra:2.1            "/docker-entrypoint.s"   27 minutes ago      Up 27 minutes       7000-7001/tcp, 0.0.0.0:9042->9042/tcp, 7199/tcp, 0.0.0.0:9160->9160/tcp   wasabi-cassandra
-```
-
-  * The above shell output shows a successful start of 3 docker containers needed by Wasabi: wasabi-main (the Wasabi server),
-wasabi-mysql, and wasabi-cassandra. If any of these are not running, try starting them individually. For example, if the
-MySQL container is running, but Cassandra and Wasabi containers failed to start (perhaps due to a network timeout docker
-could not download the Cassandra image), do the following:
-
-```bash
-% ./bin/wasabi.sh start:cassandra
-
-% ./bin/wasabi.sh start:wasabi
-```
-
 
 
 #### Call Wasabi
@@ -329,9 +354,7 @@ development: {
 ```
 
 Now while that was fun, in all likelihood you will be using an IDE to work on Wasabi. In doing so, you need only
-add the configuration information above to the JVM commandline prior to startup:
-
-> Wasabi runtime configuration:
+add the configuration information below to the JVM commandline prior to startup:
 
 ```bash
 -DnodeHosts=localhost -Ddatabase.url.host=localhost
@@ -390,3 +413,73 @@ Steps to contribute:
 8. Obtain 2 approval _squirrels_ before your changes can be merged
 
 Thank you for your contribution!
+
+
+## Troubleshooting &amp; FAQ
+
+#### General
+
+##### I see errors when starting up docker containers.
+If you see an error when the docker containers are starting up, check which docker containers that have been successfully started.
+
+```bash
+% ./bin/wasabi.sh status
+
+CONTAINER ID        IMAGE                    COMMAND                  CREATED             STATUS              PORTS                                                                     NAMES
+8c12458057ef        wasabi-main              "entrypoint.sh wasabi"   25 minutes ago      Up 25 minutes       0.0.0.0:8080->8080/tcp, 0.0.0.0:8090->8090/tcp, 0.0.0.0:8180->8180/tcp    wasabi-main
+979ecc885239        mysql:5.6                "docker-entrypoint.sh"   26 minutes ago      Up 26 minutes       0.0.0.0:3306->3306/tcp                                                    wasabi-mysql
+2d33a96abdcb        cassandra:2.1            "/docker-entrypoint.s"   27 minutes ago      Up 27 minutes       7000-7001/tcp, 0.0.0.0:9042->9042/tcp, 7199/tcp, 0.0.0.0:9160->9160/tcp   wasabi-cassandra
+```
+The above shell output shows a successful start of 3 docker containers needed by Wasabi: wasabi-main (the Wasabi server),
+wasabi-mysql, and wasabi-cassandra. If any of these are not running, try starting them individually. For example, if the
+MySQL container is running, but Cassandra and Wasabi containers failed to start (perhaps due to a network timeout docker
+could not download the Cassandra image), do the following:
+
+```bash
+% ./bin/wasabi.sh start:cassandra
+% ./bin/wasabi.sh start:wasabi
+```
+
+#### FAQ Windows
+
+##### I can't run VirtualMachine properly.
+Check if your computer has virtualization enabled. For this you need to enter your BIOS (or UEFI)
+and in general search for Intel VT or AMD-V and enable them. 
+
+##### How to connect an IDE's wasabi-process to the containers?
+One important difference: Since Docker native only supports very specific
+[Windows 10 distributions][win_hyperv], we have to user docker-machine. 
+This means you can not reach the service at `http://localhost:8080/` but 
+at `http://192.168.99.100:8080/` (by default - see `docker-machine ip wasabi`).
+For development this also means to supply the Java VM arguments
+`-DnodeHosts=192.168.99.100 -Ddatabase.url.host=192.168.99.100` when running 
+Wasabi to connect to Cassandra and MySQL inside the docker network.
+
+##### How to connect the UI to IDE's wasabi-process?
+You will also need to redirect the UI. By default `bin\wasabi.bat resource:ui`
+points to `docker-machine ip wasabi`. You can use the Windows exclusive
+`bin\wasabi.bat resource:dev_ui` to use `localhost` as your UI's target.
+
+##### When I open 127.0.0.1:9000 in my browser, I don't see the UI.
+For Windows, you have to first start a little server. Just run `bin\wasabi.bat resource:ui`
+to use the development grunt server. The UI should start automatically.
+
+##### Wasabi has incorrect times! My IDE-run integration tests fail! Help!
+It is a known problem with docker-machine that its time server stops while
+the host machine sleeps. If your system behaves weird, check if 
+`docker-machine ssh wasabi date` gives you the expected UTC time. If not, run
+`for /f %I in ('ruby -e "puts Time.now.utc.strftime(%Q{%Y%m%d%H%M.%S})"') do @docker-machine ssh wasabi "sudo date --set %I"`.
+Wasabi does this time correction whenever you start the integration tests via
+`bin\wasabi.bat test`.
+
+##### Swagger mentions `curl`, how do I get it?
+To use the `curl` commands consider `choco install curl`.
+
+##### I want to test a specific branch, but when I download the zip I end up on develop.
+If you chose to use the zip file over git you can checkout the branch after you bootstrapped wasabi 
+(i.e. installed git). For example if the branch is `feature/new-auth-mechanism` you would run the 
+following command: 
+```dos
+git checkout feature/new-auth-mechanism
+```
+Note that the `git checkout` is usually enough, if not, try `git reset --hard origin/feature/new-auth-mechanism` before.

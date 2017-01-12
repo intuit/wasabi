@@ -49,7 +49,10 @@ if [ "$JAVA_HOME" = "" ]; then
     export JAVA_HOME=$(/usr/libexec/java_home -v 1.8)
   elif [ -d /usr/java/latest ]; then
     # Linux
-    export JAVA_HOME=/usr/java/latest  
+    export JAVA_HOME=/usr/java/latest
+  elif [ -f /usr/bin/java ]; then
+    # alpine/Docker
+    export JAVA_HOME=/usr
   else
     echo "Error: JAVA_HOME could not be identified"
     exit 1

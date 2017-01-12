@@ -529,6 +529,24 @@ public class BucketIntegrationTest extends TestBase {
         putExperiment(newExperiment, HttpStatus.SC_BAD_REQUEST);        
     }
 
+    /**
+     * Waits for tries many 500ms phases for the experiment to run, otherwise throws a runtime exception.
+     *
+     * @param experiment the experiment to query for
+     * @param tries the number of tries with 500ms breaks
+     */
+    private boolean waitForExperimentToRun(Experiment experiment, int tries) {
+        /* FIXME shoeffner: split test using this into proper dependsOnMethods/@Retry tests. */
+        while (!getExperiment(experiment).state.equals(EXPERIMENT_STATE_RUNNING) && --tries > 0) {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        return tries == 0;
+    }
+
     @Test(dependsOnGroups = {"ping"})
     public void t_CreateExperimentWithSingleBucketAndCloseState() {
     	Experiment newExperiment = ExperimentFactory.createExperiment();
@@ -544,8 +562,11 @@ public class BucketIntegrationTest extends TestBase {
         assertEquals(resultBuckets.size(), 1);
         
         newExperiment.state = EXPERIMENT_STATE_RUNNING;
-        putExperiment(newExperiment, HttpStatus.SC_OK);        
-        
+        putExperiment(newExperiment, HttpStatus.SC_OK);
+
+        // FIXME shoeffner: split up into several methods
+        waitForExperimentToRun(newExperiment, 10);
+
         User user = UserFactory.createUser("u1");
         Assignment assignment = getAssignment(newExperiment, user);
         
@@ -581,7 +602,11 @@ public class BucketIntegrationTest extends TestBase {
         assertEquals(buckets.size(), resultBuckets.size());
         assertEquals(resultBuckets.size(), 1);
         newExperiment.state = EXPERIMENT_STATE_RUNNING;
-        putExperiment(newExperiment, HttpStatus.SC_OK);        
+        putExperiment(newExperiment, HttpStatus.SC_OK);
+
+        // FIXME shoeffner: split up into several methods
+        waitForExperimentToRun(newExperiment, 10);
+
         User user = UserFactory.createUser("u1");
         Assignment assignment = getAssignment(newExperiment, user);
         
@@ -671,7 +696,10 @@ public class BucketIntegrationTest extends TestBase {
         assertEquals(resultBuckets.size(), 3);
         newExperiment.state = EXPERIMENT_STATE_RUNNING;
         putExperiment(newExperiment, HttpStatus.SC_OK);
-        
+
+        // FIXME shoeffner: split up into several methods
+        waitForExperimentToRun(newExperiment, 10);
+
         User user = UserFactory.createUser();
         Assignment assignment = getAssignment(newExperiment, user);
         assertEquals(assignment.status, NEW_ASSIGNMENT);

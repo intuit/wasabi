@@ -13,34 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ###############################################################################
-from centos
+FROM openjdk:8-jre-alpine
 
-ENV WASABI_MODULE wasabi-main
-ENV WASABI_UI_MODULE wasabi-ui-main
-ENV WASABI_PORT 8080
-ENV WASABI_JMX_PORT 8090
-ENV WASABI_DEBUG_PORT 8180
+COPY ./ /usr/local/${application.name}
+RUN sed -i -e $'s/1>>.*2>&1//' /usr/local/${application.name}/bin/run 2>/dev/null;
 
-ENV WASABI_SRC_DIR ${application.name}
-ENV WASABI_HOME /usr/local/${application.name}
+EXPOSE 8080 8090 8180
 
-ENV WASABI_JAVA_OPTIONS ""
-ENV JDK_MAJOR_VERSION 8u92
-ENV JDK_MINOR_VERSION b14
-ENV JDK_VERSION ${JDK_MAJOR_VERSION}-${JDK_MINOR_VERSION}
-
-RUN yum -y update && yum install -y wget
-
-RUN wget --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/${JDK_VERSION}/jdk-${JDK_MAJOR_VERSION}-linux-x64.rpm \
-	&& rpm -ivh jdk-${JDK_MAJOR_VERSION}-linux-x64.rpm && rm jdk-${JDK_MAJOR_VERSION}-linux-x64.rpm
-
-COPY ./ ${WASABI_HOME}/
-COPY entrypoint.sh /usr/local/bin/
-RUN sed -i -e $'s/1>>.*2>&1//' ${WASABI_HOME}/bin/run 2>/dev/null;
-
-EXPOSE ${WASABI_PORT}
-EXPOSE ${WASABI_JMX_PORT}
-EXPOSE ${WASABI_DEBUG_PORT}
-
-ENTRYPOINT ["entrypoint.sh"]
+ENTRYPOINT ["/usr/local/${application.name}/entrypoint.sh"]
 CMD ["wasabi"]

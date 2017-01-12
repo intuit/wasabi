@@ -91,7 +91,7 @@ public class EventLogImplTest {
     }
 
     @Test
-    @Ignore
+    @Ignore("Race condition still not fixed.")
     public void testPostEvent() throws Exception {
         // FIXME: this test still relies on threads, we need to polish it
         EventLogListener eventLogListener = Mockito.mock(EventLogListener.class);
@@ -136,9 +136,10 @@ public class EventLogImplTest {
         Assert.assertFalse("Deque contains null.", eventLog.eventDeque.contains(null));
     }
 
-    @Ignore
     @Test
+    @Ignore("Race condition still not fixed.")
     public void testRunFinally() throws Exception {
+
         // FIXME: this test still relies on threads, we need to polish it
         EventLogImpl eventLog = new EventLogImpl(1, 1);
         EventLogEvent eventLogEvent = Mockito.mock(EventLogEvent.class);
