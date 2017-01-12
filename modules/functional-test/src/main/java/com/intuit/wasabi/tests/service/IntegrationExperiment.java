@@ -179,7 +179,7 @@ public class IntegrationExperiment extends TestBase {
                 // FIXME: jwtodd
 //                new Object[]{"0", "Invalid identifier", HttpStatus.SC_INTERNAL_SERVER_ERROR},
                 new Object[]{"0", "com.intuit.wasabi.experimentobjects.exceptions.InvalidIdentifierException: Invalid experiment identifier \"0\"", HttpStatus.SC_INTERNAL_SERVER_ERROR},
-                new Object[]{"../applications", "The server was unable to process the request", HttpStatus.SC_INTERNAL_SERVER_ERROR},
+                new Object[]{"../applications", "The server was unable to process the request", HttpStatus.SC_NOT_FOUND},
         };
     }
 
