@@ -152,7 +152,7 @@ public class CassandraAuthorizationRepository  implements AuthorizationRepositor
             Result<AppRole> result  = appRoleAccessor.getAppRoleByAppName(applicationName.toString());
             resultList = StreamSupport.stream(
                     Spliterators.spliteratorUnknownSize(result.iterator(), Spliterator.ORDERED), false)
-                    .limit(2).collect(Collectors.toList());
+                    .collect(Collectors.toList());
         }catch (ReadTimeoutException | UnavailableException | NoHostAvailableException e){
             throw new RepositoryException("Could not retrieve info for app \"" + applicationName + "\"", e);
         }
@@ -304,7 +304,7 @@ public class CassandraAuthorizationRepository  implements AuthorizationRepositor
                     userInfoAccessor.getUserInfoBy(userID.getUsername());
             resultList = StreamSupport.stream(
                     Spliterators.spliteratorUnknownSize(result.iterator(), Spliterator.ORDERED), false)
-                    .limit(2).collect(Collectors.toList());
+                    .collect(Collectors.toList());
         }catch (ReadTimeoutException | UnavailableException | NoHostAvailableException e){
             throw new RepositoryException("Could not retrieve info for user \"" + userID + "\"", e);
         }
@@ -353,7 +353,7 @@ public class CassandraAuthorizationRepository  implements AuthorizationRepositor
             }
             resultList = StreamSupport.stream(
                     Spliterators.spliteratorUnknownSize(result.iterator(), Spliterator.ORDERED), false)
-                    .limit(2).collect(Collectors.toList());
+                    .collect(Collectors.toList());
         }catch (ReadTimeoutException | UnavailableException | NoHostAvailableException e){
             throw new RepositoryException("Could not retrieve info for user \"" + userID + "\"", e);
         }

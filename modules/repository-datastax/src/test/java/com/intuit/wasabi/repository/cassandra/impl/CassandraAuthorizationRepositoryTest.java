@@ -214,7 +214,7 @@ public class CassandraAuthorizationRepositoryTest {
         );
 
         logger.info(result.toString());
-        assertThat(result.size(), is(2));
+        assertThat(result.size(), is(3));
     }
 
     @Test
@@ -287,7 +287,7 @@ public class CassandraAuthorizationRepositoryTest {
         List<com.intuit.wasabi.repository.cassandra.pojo.UserRole> result =
                 repository.getUserRoleList(com.intuit.wasabi.authenticationobjects.UserInfo.Username.valueOf("test"),
                         Optional.empty());
-        assertThat(result.size(), is(2));
+        assertThat(result.size(), is(3));
     }
 
     @Test
@@ -360,7 +360,7 @@ public class CassandraAuthorizationRepositoryTest {
                 repository.getUserRoleList(
                         com.intuit.wasabi.authenticationobjects.UserInfo.Username.valueOf("test"),
                         Optional.ofNullable(Application.Name.valueOf("testApp")));
-        assertThat(result.size(), is(2));
+        assertThat(result.size(), is(3));
     }
 
     @Test
@@ -693,9 +693,10 @@ public class CassandraAuthorizationRepositoryTest {
         when(appRoleResult.iterator()).thenReturn(appRoleList.iterator());
         List<com.intuit.wasabi.repository.cassandra.pojo.AppRole> result =
                 repository.getAppRoleList(Application.Name.valueOf("testApp"));
-        assertThat(result.size(), is(2));
+        assertThat(result.size(), is(3));
         assertThat(result.get(0), is(appRoleList.get(0)));
         assertThat(result.get(1), is(appRoleList.get(1)));
+        assertThat(result.get(2), is(appRoleList.get(2)));
     }
 
     @Test
