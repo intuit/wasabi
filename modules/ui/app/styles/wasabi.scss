@@ -186,8 +186,7 @@ header {
 }
 
 #mainContent {
-  width: 1000px;
-  margin: 0 auto 20px auto;
+  margin: 0 20px 20px 20px;
 }
 
 .truncateDiv {
@@ -4480,4 +4479,110 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
 
 .gridWithAdvanced {
     margin-top: 40px;
+}
+
+/* Changes to support mobile version */
+
+nav.hamburger-nav {
+    display: block;
+    height: 56px;
+    min-height: 56px;
+    width: 56px;
+    min-width: 56px;
+    cursor: pointer;
+    background-color: transparent;
+    background-image: url(/images/hamburger_sprites.svg);
+    background-position: 20px 20px;
+    background-repeat: no-repeat;
+    background-size: 20px auto;
+}
+
+.logout-button-container {
+    text-align: center;
+    display: block;
+    height: 56px;
+    min-height: 56px;
+    width: 56px;
+    min-width: 56px;
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.logout-button {
+    display: inline-block;
+    margin-top: 20px;
+    width: 20px;
+    height: 20px;
+    background-image: url(/images/logout-icon.svg);
+    background-size: 20px auto;
+    background-repeat: no-repeat;
+    position: relative;
+}
+
+.sticky-nav-bar {
+    display: none;
+    position: fixed;
+    background-color: white;
+    left: 0px;
+    right: 0px;
+    z-index: 19;
+}
+
+.sticky-nav-bar-logged-off {
+    display: none !important;
+}
+
+.mobile-spacer {
+    height: 0;
+}
+
+@media (max-width: 768px) {
+    #mainContent {
+        margin: 0 auto 20px auto;
+    }
+
+    #exprSummary > li {
+        height: 600px;
+        width: 355px;
+        margin-left: 10px;
+        .summaryBody .bucketsTable {
+            td {
+                width: 100%;
+            }
+        }
+    }
+
+    .signinBox {
+        width: 275px;
+    }
+
+    .sticky-nav-bar {
+        display: block;
+    }
+
+    .mobile-spacer {
+        height: 60px;
+    }
+
+    header {
+        display: none !important;
+    }
+
+    .toolbar {
+        display: none !important;
+    }
+}
+
+@media (max-width: 414px) {
+    #exprSummary > li {
+        margin-left: 30px;
+    }
+}
+
+@media (max-width: 375px) {
+    #exprSummary > li {
+        margin-left: 10px;
+    }
 }

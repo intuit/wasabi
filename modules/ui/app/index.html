@@ -8,7 +8,7 @@
     <meta charset="utf-8">
     <title>Experiment Admin</title>
     <meta name="description" content="">
-    <meta name="viewport" content="width=device-width">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="cache-control" content="max-age=0" />
     <meta http-equiv="cache-control" content="no-cache" />
     <meta http-equiv="expires" content="0" />
@@ -69,6 +69,13 @@
             <div class="idea"></div>
         </div>
     </header>
+    <div class="sticky-nav-bar">
+        <nav class="hamburger-nav"> </nav>
+        <a href="/" class="clickable-area"></a>
+        <a href="#" class="logout-button-container" ng-controller="SignOutCtrl" onclick="return false;" ng-click="signOut()">
+          <div class="image-button logout-button" data-qty=""></div>
+        </a>
+    </div>
 
     <div id="mainContent">
         <!-- MAIN CONTENT AND INJECTED VIEWS  -->

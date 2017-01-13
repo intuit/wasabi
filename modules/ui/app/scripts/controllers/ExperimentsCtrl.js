@@ -30,6 +30,8 @@ angular.module('wasabi.controllers').
                 enableCardView: false
             };
 
+            $scope.msg = 'nothing';
+
             // We save the $scope.data object above after a search so we have it when we come back to the list
             // from a Details dialog.  We don't want to save the pagedItems list, so putting it in a separate attribute.
             $scope.pagedData = {
@@ -312,6 +314,7 @@ angular.module('wasabi.controllers').
                 $scope.doLoadExperiments(true, $scope.cardViewItemsPerPage, $scope.cardViewData.cardViewCurrentPage, function(data) {
                     var experiments = data.experimentDetails;
                     if (experiments) {
+                    $scope.msg = 'Num: ' + experiments.length;
                         // Initialize all the experiments selected values to false so the checkboxes (when list used in selection dialog) will be unchecked.
                         for (var i = 0; i < experiments.length; i++) {
                             if (experiments[i]) {
@@ -397,6 +400,13 @@ angular.module('wasabi.controllers').
             if (Session && Session.switches) {
                 $scope.data.enableCardView = Session.switches.ShowCardView;
             }
+
+            if (window.mobilecheck()) {
+                // Force card view
+                $scope.data.enableCardView = true;
+                $scope.data.showGrid = true;
+            }
+
             // If this user has turned on Card View and we've saved it in a cookie, enable it (or use the saved value).
             if ($scope.data.enableCardView) {
                 if ($cookies.wasabiCardViewSetting) {

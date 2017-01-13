@@ -1,4 +1,5 @@
 <div ng-controller="ExperimentsCtrl">
+    <div class="mobile-spacer">&nbsp;</div>
     <div class="toolbar">
         <a href="" onclick="return false;" id="searchMoreLess" title="More Search Options" ng-show="!noExperiments" ng-click="showMoreLessSearch();"><span></span></a>
         <button id="btnNewExperiment" class="blue" ng-click="openExperimentModal()" ng-class="{disabled: !applicationsLoaded}" ng-disabled="!applicationsLoaded">Create Experiment</button>

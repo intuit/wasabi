@@ -171,9 +171,11 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
             hideHeading: function(flag) {
                 if (flag) {
                     $('header').hide();
+                    $('.sticky-nav-bar').addClass('sticky-nav-bar-logged-off');
                 }
                 else {
                     $('header').show();
+                    $('.sticky-nav-bar').removeClass('sticky-nav-bar-logged-off');
                 }
             },
 
