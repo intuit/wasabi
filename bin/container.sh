@@ -25,6 +25,8 @@ red=`tput setaf 9`
 green=`tput setaf 10`
 reset=`tput sgr0`
 
+USER=${USER:=`whoami`}
+
 usage() {
   [ "${1}" ] && echo "${red}error: ${1}${reset}"
 
@@ -40,6 +42,7 @@ options:
 commands:
   start[:wasabi,cassandra,mysql,docker]  : start all, wasabi, cassandra, mysql, docker
   stop[:wasabi,cassandra,mysql,docker]   : stop all, wasabi, cassandra, mysql, docker
+  build                                  : build the wasabi main container
   console[:cassandra,mysql]              : console all, cassandra, mysql
   status                                 : status
   remove[:wasabi,cassandra,mysql]]       : remove all, wasabi, cassandra, mysql
@@ -137,7 +140,7 @@ remove_container() {
   fi
 }
 
-start_wasabi() {
+build() {
   start_docker
 
   id=$(fromPom modules/main development application.name)
@@ -152,6 +155,10 @@ start_wasabi() {
 #    sed -i -e "s|\(http://\)localhost\(:8080\)|\1${mip}\2|g" modules/main/target/${id}/content/ui/dist/scripts/config.js 2>/dev/null;
     docker build -t ${project}-main:${USER}-$(date +%s) -t ${project}-main:latest modules/main/target/${id}
   fi
+}
+
+start_wasabi() {
+  build
 
   echo "${green}${project}: starting${reset}"
 
@@ -291,6 +298,7 @@ for command in ${@:$OPTIND}; do
     console) exec_commands_simple console_ cassandra,mysql;;
     console:*) exec_commands_simple console_ ${command};;
     status) status;;
+    build) build;;
     remove) exec_commands_project remove_container wasabi,cassandra,mysql;;
     remove:*) exec_commands_project remove_container ${command};;
     "") usage "unknown command: ${command}" 1;;

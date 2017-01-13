@@ -31,6 +31,8 @@ export WASABI_LINUX="Linux"
 export WASABI_MAVEN=${WASABI_MAVEN}
 export CONTRIB_PLUGINS_TO_INSTALL=${CONTRIB_PLUGINS_TO_INSTALL:-}
 
+USER=${USER:=`whoami`}
+
 usage() {
   [ "${1}" ] && echo "${red}error: ${1}${reset}"
 
@@ -49,6 +51,7 @@ commands:
   bootstrap                              : install dependencies
   build                                  : build project
   clean                                  : clean build
+  docker-build                           : build inside a docker container
   start[:cassandra,mysql,wasabi]         : start all, cassandra, mysql, wasabi
   test                                   : run the integration tests (needs a running wasabi)
   test[:module-name,...]                 : run the unit tests for the specified module(s) only
@@ -129,49 +132,59 @@ bootstrap() {
       fi
     fi
 
+    sudo=
+    sudoE=
+    if [[ `id -u` -ne 0 ]] ; then sudo=sudo; sudoE='sudo -E'; fi
+
     #Install Maven
-    sudo apt-get update
-    sudo apt-get install -y maven
+    $sudo apt-get update
+    $sudo apt-get install -y maven
 
     #Install JAVA
-    sudo apt-get install -y default-jdk
-    sudo cp /etc/environment /tmp/environment
-    sudo chmod 666 /tmp/environment
-    sudo echo "JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/" >> /tmp/environment
-    sudo cp /tmp/environment /etc/environment
-    sudo rm -rf /tmp/environment
+    $sudo apt-get install -y default-jdk
+    $sudo cp /etc/environment /tmp/environment
+    $sudo chmod 666 /tmp/environment
+    $sudo echo "JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/" >> /tmp/environment
+    $sudo cp /tmp/environment /etc/environment
+    $sudo rm -rf /tmp/environment
 
-    #Install git-flow
-    sudo apt-get install -y git-flow
+    #Install git-flow, curl and bzip2
+    $sudo apt-get install -y git-flow curl bzip2
 
     #Install Nodejs
-    curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
-    sudo apt-get install -y nodejs
-    sudo npm install -g bower
-    sudo npm install -g grunt-cli
-    sudo npm install -g yo
+    curl -sL https://deb.nodesource.com/setup_6.x | $sudoE bash -
+    $sudo apt-get install -y nodejs
+    $sudo npm install -g bower
+    $sudo npm install -g grunt-cli
+    $sudo npm install -g yo
 
     #Install compass
-    sudo apt-get install -y ruby
-    sudo apt-get install -y ruby-compass
+    $sudo apt-get install -y ruby
+    $sudo apt-get install -y ruby-compass
 
     #Install docker
-    sudo apt-get install -y apt-transport-https ca-certificates
-    sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
-    sudo echo "deb https://apt.dockerproject.org/repo ubuntu-xenial main" > /tmp/docker.list
-    sudo cp /tmp/docker.list /etc/apt/sources.list.d/docker.list
-    sudo rm -rf /tmp/docker.list
-    sudo apt-get purge lxc-docker
-    sudo apt-get update
-    sudo apt-get install -y linux-image-extra-$(uname -r) linux-image-extra-virtual
-    sudo apt-get install -y docker-engine
+    $sudo apt-get install -y apt-transport-https ca-certificates
+    $sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+    $sudo echo "deb https://apt.dockerproject.org/repo ubuntu-xenial main" > /tmp/docker.list
+    $sudo cp /tmp/docker.list /etc/apt/sources.list.d/docker.list
+    $sudo rm -rf /tmp/docker.list
+    $sudo apt-get purge lxc-docker
+    $sudo apt-get update
+    $sudo apt-get install -y linux-image-extra-$(uname -r) linux-image-extra-virtual
+    $sudo apt-get install -y docker-engine
 
-    sudo groupadd docker
-    sudo usermod -aG docker $USER
-    sudo usermod -aG docker root
+    getent group docker || $sudo groupadd docker
+    if [[ `id -u` -ne 0 ]]
+      then sudo usermod -aG docker $USER
+    fi
+    $sudo usermod -aG docker root
     echo "${green}installed dependencies.${reset}"
   else
     echo "${green}FIXME: linux install of ( ${formulas[@]} ${taps[@]} ${casks[@]} ) not yet implemented${reset}"
+  fi
+
+  if [[ `id -u` -eq 0 ]]
+    then echo '{ "allow_root": true }' > .bowerrc
   fi
 
   for n in yo grunt-cli bower; do
@@ -179,6 +192,8 @@ bootstrap() {
   done
 
   [[ ! $(gem list | grep compass) ]] && gem install compass
+
+  return 0;
 }
 
 build() {
@@ -245,6 +260,11 @@ stop() {
 
 status() {
   ./bin/container.sh status
+}
+
+docker_build() {
+  docker build -t wasabi-build-${USER} . && \
+    docker run -it --rm --privileged -v /var/run/docker.sock:/var/run/docker.sock wasabi-build-${USER}
 }
 
 package() {
@@ -389,6 +409,7 @@ for command in ${@:$OPTIND}; do
     bootstrap) bootstrap;;
     build) build true ${verify} ${profile};;
     clean) clean;;
+    docker-build) docker_build;;
     start) exec_commands start "cassandra,mysql,wasabi";;
     start:*) exec_commands start ${command};;
     test:*) exec_commands unit_test ${command};;
