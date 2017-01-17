@@ -1,0 +1,1 @@
+drop table user_assignment_look_up;
