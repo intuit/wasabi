@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -73,8 +73,7 @@ public class ExperimentFilter extends PaginationFilter<Experiment> {
         state_exact(Experiment::getState, ExperimentFilter::stateTest),
         date_constraint_start(Experiment::getStartTime, ExperimentFilter::constraintTest),
         date_constraint_end(Experiment::getEndTime, ExperimentFilter::constraintTest),
-        favorite(Experiment::isFavorite, (isFavorite, filter) -> Boolean.parseBoolean(filter) == isFavorite)
-        ;
+        favorite(Experiment::isFavorite, (isFavorite, filter) -> Boolean.parseBoolean(filter) == isFavorite);
 
         private final Function<Experiment, ?> propertyExtractor;
         private final BiPredicate<?, String> filterPredicate;
@@ -135,7 +134,8 @@ public class ExperimentFilter extends PaginationFilter<Experiment> {
      * @param filter the filter value to check, see above for details.
      * @return true/false depending on the state check, see above for details.
      */
-    /*test*/ static boolean stateTest(Experiment.State state, String filter) {
+    /*test*/
+    static boolean stateTest(Experiment.State state, String filter) {
         if (state == Experiment.State.DELETED) {
             return false;
         }
@@ -178,7 +178,8 @@ public class ExperimentFilter extends PaginationFilter<Experiment> {
      * @param filter the filter
      * @return true if the constraint is fulfilled
      */
-    /*test*/ static boolean constraintTest(Date experimentDate, String filter) {
+    /*test*/
+    static boolean constraintTest(Date experimentDate, String filter) {
         String[] extracted = FilterUtil.extractTimeZone(filter);
         String originalFilter = extracted[0];
         String timeZoneOffset = "+0000";
@@ -231,6 +232,6 @@ public class ExperimentFilter extends PaginationFilter<Experiment> {
                 return experimentLocalDate.isEqual(filterDate);
         }
         throw new PaginationException(ErrorCode.FILTER_KEY_UNPROCESSABLE,
-                        "Wrong format: not processable filter format ( " + filter + " ).");
+                "Wrong format: not processable filter format ( " + filter + " ).");
     }
 }

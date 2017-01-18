@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -128,18 +128,18 @@ public class DefaultCassandraDriver implements CassandraDriver {
 //                  .forCluster("ClusterName") // Not sure why this is helpful
                         .forKeyspace(getConfiguration().getKeyspaceName())
                         .withAstyanaxConfiguration(new AstyanaxConfigurationImpl()
-                                        .setTargetCassandraVersion(cassandraVersion)
-                                        .setCqlVersion(cqlVersion)
-                                        .setDefaultReadConsistencyLevel(readConsistency)
-                                        .setDefaultWriteConsistencyLevel(writeConsistency)
-                                        .setDiscoveryType(configuration.getNodeDiscoveryType())
-                                        .setConnectionPoolType(configuration.getConnectionPoolType())
+                                .setTargetCassandraVersion(cassandraVersion)
+                                .setCqlVersion(cqlVersion)
+                                .setDefaultReadConsistencyLevel(readConsistency)
+                                .setDefaultWriteConsistencyLevel(writeConsistency)
+                                .setDiscoveryType(configuration.getNodeDiscoveryType())
+                                .setConnectionPoolType(configuration.getConnectionPoolType())
                         )
                         .withConnectionPoolConfiguration(conf)
-                                // TODO: Does this need to be externalized?
+                        // TODO: Does this need to be externalized?
 //                    .withConnectionPoolMonitor(
 //                        new CountingConnectionPoolMonitor())
-                                // This is useful for development
+                        // This is useful for development
                         .withConnectionPoolMonitor(new Slf4jConnectionPoolMonitorImpl())
                         .buildKeyspace(ThriftFamilyFactory.getInstance());
 

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -46,9 +46,9 @@ public class Event implements Cloneable {
     private Date timestamp;
     @ApiModelProperty(value = "DO NOT USE", hidden = true)
     private Type type;
-    @ApiModelProperty(example = "IMPRESSION OR myEventName", value = "Event ID; Use \"IMPRESSION\" for impressions", dataType = "String",  required = true)
+    @ApiModelProperty(example = "IMPRESSION OR myEventName", value = "Event ID; Use \"IMPRESSION\" for impressions", dataType = "String", required = true)
     private Event.Name name;
-    @ApiModelProperty(value = "context for the event, eg \"PROD\", \"QA\"", dataType = "String",  required = false, hidden = true)
+    @ApiModelProperty(value = "context for the event, eg \"PROD\", \"QA\"", dataType = "String", required = false, hidden = true)
     private Context context = Context.valueOf("PROD");
     @ApiModelProperty(value = "payload for the event; defaults to null", dataType = "String")
     private Payload payload;
@@ -113,12 +113,12 @@ public class Event implements Cloneable {
 
     @Override
     public int hashCode() {
-    	return HashCodeBuilder.reflectionHashCode(this);
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override
     public boolean equals(Object obj) {
-    	   return EqualsBuilder.reflectionEquals(this, obj);
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 
     @Override
@@ -170,12 +170,12 @@ public class Event implements Cloneable {
 
         @Override
         public int hashCode() {
-        	return HashCodeBuilder.reflectionHashCode(this);
+            return HashCodeBuilder.reflectionHashCode(this);
         }
 
         @Override
         public boolean equals(Object obj) {
-        	   return EqualsBuilder.reflectionEquals(this, obj);
+            return EqualsBuilder.reflectionEquals(this, obj);
         }
 
         public static class Serializer extends JsonSerializer<Name> {
@@ -224,12 +224,12 @@ public class Event implements Cloneable {
 
         @Override
         public int hashCode() {
-        	return HashCodeBuilder.reflectionHashCode(this);
+            return HashCodeBuilder.reflectionHashCode(this);
         }
 
         @Override
         public boolean equals(Object obj) {
-        	   return EqualsBuilder.reflectionEquals(this, obj);
+            return EqualsBuilder.reflectionEquals(this, obj);
         }
 
         public static class Serializer extends JsonSerializer<Payload> {

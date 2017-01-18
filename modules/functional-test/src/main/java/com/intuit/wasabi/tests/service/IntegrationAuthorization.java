@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -40,12 +40,12 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 public class IntegrationAuthorization extends TestBase {
 
-	private static final Logger LOGGER = getLogger(IntegrationAuthorization.class);
+    private static final Logger LOGGER = getLogger(IntegrationAuthorization.class);
     private String userName;
     private String password;
     private String userEmail;
     private String userLastName;
-    
+
     private Experiment experiment;
 
 
@@ -65,19 +65,19 @@ public class IntegrationAuthorization extends TestBase {
      * @param password the password, default: passwordXYZ123456
      * @param email the email address, default: mail@example.org
      */
-    @Parameters({"username","password","email","firstName","lastName","validTokenPattern"})
+    @Parameters({"username", "password", "email", "firstName", "lastName", "validTokenPattern"})
     public IntegrationAuthorization(@Optional("usernameXYZ123456") String username,
-                                     @Optional("passwordXYZ123456") String password,
-                                     @Optional("mail@example.org") String email,
-                                     @Optional("John") String firstName,
-                                     @Optional("Doe") String lastName,
-                                     @Optional String validTokenPattern) {
+                                    @Optional("passwordXYZ123456") String password,
+                                    @Optional("mail@example.org") String email,
+                                    @Optional("John") String firstName,
+                                    @Optional("Doe") String lastName,
+                                    @Optional String validTokenPattern) {
         this.userName = username;
         this.password = password;
         this.userEmail = email;
         this.userLastName = lastName;
     }
-    
+
     /**
      * Sets up the user information and create application and experiment.
      */
@@ -106,14 +106,14 @@ public class IntegrationAuthorization extends TestBase {
         Assert.assertNotNull(exp.modificationTime, "Experiment creation failed (No modificationTime).");
         Assert.assertNotNull(exp.state, "Experiment creation failed (No state).");
         experiment.update(exp);
-    }    
-    
+    }
+
     /**
      * Test getting user permission
      */
     @Test(dependsOnMethods = {"t_createExperiments"})
     public void t_getUserPermissions() {
-        String uri = "authorization/users/"+userName+"/permissions";
+        String uri = "authorization/users/" + userName + "/permissions";
         response = apiServerConnector.doGet(uri);
         assertReturnCode(response, HttpStatus.SC_OK);
         List<Map<String, Object>> jsonStrings = response.jsonPath().getList("permissionsList");
@@ -121,22 +121,21 @@ public class IntegrationAuthorization extends TestBase {
         boolean foundApp = false;
         for (@SuppressWarnings("rawtypes") Map jsonMap : jsonStrings) {
             String permissionJStr = simpleGson.toJson(jsonMap);
-    		JsonElement jElement = new JsonParser().parse(permissionJStr);
-    		JsonObject jobject = jElement.getAsJsonObject();
+            JsonElement jElement = new JsonParser().parse(permissionJStr);
+            JsonObject jobject = jElement.getAsJsonObject();
 
-    		JsonElement jElement2 = jobject.get("permissions");
-    		Assert.assertTrue(jElement2.toString().contains("SUPERADMIN"));  
-    		
-    		JsonElement jsonElement = jobject.get("applicationName");
-    		String applicationName = jsonElement.getAsString();
-    		if (applicationName.equals(experiment.applicationName))
-    		{
-    	        LOGGER.info("Found application="+experiment.applicationName);
-    			foundApp = true;
-    			break;
-    		}
+            JsonElement jElement2 = jobject.get("permissions");
+            Assert.assertTrue(jElement2.toString().contains("SUPERADMIN"));
+
+            JsonElement jsonElement = jobject.get("applicationName");
+            String applicationName = jsonElement.getAsString();
+            if (applicationName.equals(experiment.applicationName)) {
+                LOGGER.info("Found application=" + experiment.applicationName);
+                foundApp = true;
+                break;
+            }
         }
-		Assert.assertTrue(foundApp);
+        Assert.assertTrue(foundApp);
     }
 
     /**
@@ -144,74 +143,75 @@ public class IntegrationAuthorization extends TestBase {
      */
     @Test(dependsOnMethods = {"t_createExperiments"})
     public void t_getUserAppPermissions() {
-        String uri = "authorization/users/"+userName+"/applications/"+experiment.applicationName+"/permissions";
+        String uri = "authorization/users/" + userName + "/applications/" + experiment.applicationName + "/permissions";
         response = apiServerConnector.doGet(uri);
         assertReturnCode(response, HttpStatus.SC_OK);
         @SuppressWarnings("rawtypes")
-		HashMap jsonMap = (HashMap)response.jsonPath().get();
+        HashMap jsonMap = (HashMap) response.jsonPath().get();
         Assert.assertNotNull(jsonMap);
         @SuppressWarnings("unchecked")
-		List<String> permissions = (List<String>)jsonMap.get("permissions");
-		Assert.assertTrue(permissions.toString().contains("CREATE"));
-		Assert.assertTrue(permissions.toString().contains("READ"));
-		Assert.assertTrue(permissions.toString().contains("UPDATE"));
-		Assert.assertTrue(permissions.toString().contains("DELETE"));
-		Assert.assertTrue(permissions.toString().contains("ADMIN"));
-		Assert.assertTrue(permissions.toString().contains("SUPERADMIN"));
+        List<String> permissions = (List<String>) jsonMap.get("permissions");
+        Assert.assertTrue(permissions.toString().contains("CREATE"));
+        Assert.assertTrue(permissions.toString().contains("READ"));
+        Assert.assertTrue(permissions.toString().contains("UPDATE"));
+        Assert.assertTrue(permissions.toString().contains("DELETE"));
+        Assert.assertTrue(permissions.toString().contains("ADMIN"));
+        Assert.assertTrue(permissions.toString().contains("SUPERADMIN"));
 
-		Assert.assertEquals(jsonMap.get("applicationName"), experiment.applicationName);
-    }    
+        Assert.assertEquals(jsonMap.get("applicationName"), experiment.applicationName);
+    }
+
     /**
      * Test getting user roles
      */
     @Test(dependsOnMethods = {"t_getUserPermissions"})
     public void t_getUserRoles() {
-    	
-    	String testRole = "superadmin";
-        String uri = "authorization/roles/"+testRole+"/permissions";
+
+        String testRole = "superadmin";
+        String uri = "authorization/roles/" + testRole + "/permissions";
         response = apiServerConnector.doGet(uri);
-        
+
         assertReturnCode(response, HttpStatus.SC_OK);
         @SuppressWarnings("rawtypes")
-		HashMap jsonMap = (HashMap)response.jsonPath().get();
+        HashMap jsonMap = (HashMap) response.jsonPath().get();
         Assert.assertNotNull(jsonMap);
-		Assert.assertTrue(jsonMap.toString().contains("SUPERADMIN"));  
+        Assert.assertTrue(jsonMap.toString().contains("SUPERADMIN"));
     }
-    
+
     /**
      * Test getting application user roles
      */
     @Test(dependsOnMethods = {"t_getUserRoles"})
     public void t_getApplicationUsersByRole() {
-    	
-        String uri = "authorization/applications/"+experiment.applicationName;
+
+        String uri = "authorization/applications/" + experiment.applicationName;
         response = apiServerConnector.doGet(uri);
-        
+
         assertReturnCode(response, HttpStatus.SC_OK);
         List<Map<String, Object>> jsonStrings = response.jsonPath().getList("roleList");
         Assert.assertTrue(!jsonStrings.isEmpty());
-        Assert.assertTrue(jsonStrings.size()==1);
+        Assert.assertTrue(jsonStrings.size() == 1);
         // UserRoleList
         for (@SuppressWarnings("rawtypes") Map jsonMap : jsonStrings) {
             String userRoleListJStr = simpleGson.toJson(jsonMap);
-    		JsonElement jElement = new JsonParser().parse(userRoleListJStr);
-    		JsonObject jobject = jElement.getAsJsonObject();
+            JsonElement jElement = new JsonParser().parse(userRoleListJStr);
+            JsonObject jobject = jElement.getAsJsonObject();
 
-    		JsonElement jsonElement = jobject.get("firstName");
-    		Assert.assertEquals(jsonElement.getAsString(), "Wasabi");
-    		jsonElement = jobject.get("lastName");
-    		Assert.assertEquals(jsonElement.getAsString(), userLastName);
-    		jsonElement = jobject.get("role");
-    		Assert.assertEquals(jsonElement.getAsString(), "ADMIN");
-    		jsonElement = jobject.get("userEmail");
-    		Assert.assertEquals(jsonElement.getAsString(), userEmail);
-    		jsonElement = jobject.get("userID");
-    		Assert.assertEquals(jsonElement.getAsString(), userName);
-    		jsonElement = jobject.get("applicationName");
-    		Assert.assertEquals(jsonElement.getAsString(), experiment.applicationName);
+            JsonElement jsonElement = jobject.get("firstName");
+            Assert.assertEquals(jsonElement.getAsString(), "Wasabi");
+            jsonElement = jobject.get("lastName");
+            Assert.assertEquals(jsonElement.getAsString(), userLastName);
+            jsonElement = jobject.get("role");
+            Assert.assertEquals(jsonElement.getAsString(), "ADMIN");
+            jsonElement = jobject.get("userEmail");
+            Assert.assertEquals(jsonElement.getAsString(), userEmail);
+            jsonElement = jobject.get("userID");
+            Assert.assertEquals(jsonElement.getAsString(), userName);
+            jsonElement = jobject.get("applicationName");
+            Assert.assertEquals(jsonElement.getAsString(), experiment.applicationName);
         }
-    }    
-    
+    }
+
 //    /**
 //     * Test deleting user role. This includes deleting of app_role as well.
 //     */
@@ -226,26 +226,26 @@ public class IntegrationAuthorization extends TestBase {
     /**
      * Testing getting application user role again but this time it will return nothing because user role is deleted.
      */
-    @Test(dependsOnMethods = { "t_getUserRoles"})
+    @Test(dependsOnMethods = {"t_getUserRoles"})
     public void t_getApplicationUsersByRoleAgain() {
-    	
-    	// delete the user role
-    	String uri = "authorization/applications/"+experiment.applicationName+"/users/"+userName+"/roles";
+
+        // delete the user role
+        String uri = "authorization/applications/" + experiment.applicationName + "/users/" + userName + "/roles";
         response = apiServerConnector.doDelete(uri);
-    	
-        uri = "authorization/applications/"+experiment.applicationName;
+
+        uri = "authorization/applications/" + experiment.applicationName;
         response = apiServerConnector.doGet(uri);
-        
+
         assertReturnCode(response, HttpStatus.SC_OK);
         List<Map<String, Object>> jsonStrings = response.jsonPath().getList("roleList");
         Assert.assertTrue(jsonStrings.isEmpty());
-    }    
-    
+    }
+
     /**
      * Deletes experiments.
      */
     @Test(dependsOnMethods = {"t_getApplicationUsersByRoleAgain"})
     public void t_deleteExperiments() {
         deleteExperiment(experiment);
-    }    
+    }
 }

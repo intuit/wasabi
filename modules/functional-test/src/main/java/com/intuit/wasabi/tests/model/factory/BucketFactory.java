@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,7 +20,9 @@ import com.intuit.wasabi.tests.library.util.Constants;
 import com.intuit.wasabi.tests.model.Bucket;
 import com.intuit.wasabi.tests.model.Experiment;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * A factory for buckets.
@@ -63,7 +65,7 @@ public class BucketFactory {
      * @return the new bucket
      */
     public static Bucket createBucket(Experiment experiment, boolean isControl) {
-        return new Bucket(bucketNameColors()[internalId++%bucketNameColors().length] + internalId, experiment.id, 1.0d/3.0d, isControl);
+        return new Bucket(bucketNameColors()[internalId++ % bucketNameColors().length] + internalId, experiment.id, 1.0d / 3.0d, isControl);
     }
 
     /**
@@ -201,8 +203,8 @@ public class BucketFactory {
         return buckets;
     }
 
-    public static List<Bucket> createCompleteBuckets(Experiment experiment, 
-    		double[] allocationPercentages, String[] labels, boolean [] control) {
+    public static List<Bucket> createCompleteBuckets(Experiment experiment,
+                                                     double[] allocationPercentages, String[] labels, boolean[] control) {
         List<Bucket> buckets = createCompleteBuckets(experiment, allocationPercentages);
         for (int i = 0; i < buckets.size(); ++i) {
             buckets.get(i).setLabel(labels[i]);
@@ -218,7 +220,7 @@ public class BucketFactory {
      * @return bucket labels
      */
     public static String[] bucketNameColors() {
-        return new String[] {
+        return new String[]{
                 "red", "green", "blue", "yellow", "white",
                 "magenta", "black", "navy", "gray", "orange",
                 "silver", "gold", "pink", "violet", "brown",
@@ -236,7 +238,7 @@ public class BucketFactory {
      */
     public static String[] bucketNameColors(int number) {
         String[] colors = bucketNameColors();
-        String[] modifiers = new String[] {
+        String[] modifiers = new String[]{
                 "", "dark ", "bright ", "metallic ", "shy ",
         };
 

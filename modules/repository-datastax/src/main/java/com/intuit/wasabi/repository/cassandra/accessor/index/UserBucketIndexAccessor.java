@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,15 +28,15 @@ import java.util.UUID;
 @Accessor
 public interface UserBucketIndexAccessor {
 
-	/**
-	 * Get count by params
-	 * @param experimentId
-	 * @param context
-	 * @param bucketLable
-	 * @return result set
-	 */
+    /**
+     * Get count by params
+     * @param experimentId
+     * @param context
+     * @param bucketLable
+     * @return result set
+     */
     @Query("select count(*) from user_bucket_index where experiment_id = ? and context = ? and "
-    		+ "bucket_label = ? ")
+            + "bucket_label = ? ")
     ResultSet countUserBy(UUID experimentId, String context, String bucketLable);
 
     /**

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,14 +35,14 @@ public enum WasabiEmailFields {
 
     private final String emailValue;
 
-    /*enum private*/ WasabiEmailFields(String value){
+    /*enum private*/ WasabiEmailFields(String value) {
         this.emailValue = value;
     }
 
-    public static WasabiEmailFields getByEmailValue(String emailValue){
+    public static WasabiEmailFields getByEmailValue(String emailValue) {
         WasabiEmailFields result = NO_SUCH_VALUE;
-        for(WasabiEmailFields val : WasabiEmailFields.values()){
-            if(val.emailValue.equalsIgnoreCase(emailValue)){
+        for (WasabiEmailFields val : WasabiEmailFields.values()) {
+            if (val.emailValue.equalsIgnoreCase(emailValue)) {
                 result = val;
                 break;
             }
@@ -50,7 +50,7 @@ public enum WasabiEmailFields {
         return result;
     }
 
-    public String getEmailValue(){
+    public String getEmailValue() {
         return emailValue;
     }
 

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,11 +31,10 @@ import com.netflix.astyanax.model.Row;
 import com.netflix.astyanax.query.PreparedCqlQuery;
 
 import java.io.IOException;
-import java.util.*;
 
 /**
  * Mutax repo cassandra implementation
- * 
+ *
  * @see MutexRepository
  */
 public class CassandraMutexRepository implements MutexRepository {
@@ -88,22 +87,22 @@ public class CassandraMutexRepository implements MutexRepository {
     @Override
     public void deleteExclusion(Experiment.ID base, Experiment.ID pair) throws RepositoryException {
         final String CQL = "begin batch " +
-                            "delete from exclusion where base = ? and pair = ?; " +
-                            "delete from exclusion where base = ? and pair = ?; " +
-                            "apply batch;";
+                "delete from exclusion where base = ? and pair = ?; " +
+                "delete from exclusion where base = ? and pair = ?; " +
+                "apply batch;";
 
         try {
             driver.getKeyspace()
                     .prepareQuery(keyspace.exclusion_CF())
                     .withCql(CQL)
                     .asPreparedStatement()
-                            // baseID for exclusion-1
+                    // baseID for exclusion-1
                     .withByteBufferValue(base, ExperimentIDSerializer.get())
-                            // pairID for exclusion-1
+                    // pairID for exclusion-1
                     .withByteBufferValue(pair, ExperimentIDSerializer.get())
-                            // baseID for exclusion-2
+                    // baseID for exclusion-2
                     .withByteBufferValue(pair, ExperimentIDSerializer.get())
-                            // pairID for exclusion-2
+                    // pairID for exclusion-2
                     .withByteBufferValue(base, ExperimentIDSerializer.get())
                     .execute();
         } catch (ConnectionException e) {

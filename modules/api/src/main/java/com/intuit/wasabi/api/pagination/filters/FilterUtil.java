@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -43,8 +43,7 @@ public class FilterUtil {
      * {@link PaginationFilter#registerFilterModifierForProperties(FilterModifier, PaginationFilterProperty[])}.
      */
     public enum FilterModifier {
-        APPEND_TIMEZONEOFFSET((fs, fi) -> fs + TIMEZONE_SEPARATOR + fi.getTimeZoneOffset()),
-        ;
+        APPEND_TIMEZONEOFFSET((fs, fi) -> fs + TIMEZONE_SEPARATOR + fi.getTimeZoneOffset()),;
 
         private BiFunction<String, PaginationFilter, String> modifier;
 
@@ -98,7 +97,8 @@ public class FilterUtil {
      * @param timeZoneOffset the timezone offset to UTC
      * @return a timezone offset adjusted string of the UI pattern {@code MMM d, YYYY HH:mm:ss a}.
      */
-    /*test*/ static String formatDateTimeAsUI(OffsetDateTime date, String timeZoneOffset) {
+    /*test*/
+    static String formatDateTimeAsUI(OffsetDateTime date, String timeZoneOffset) {
         try {
             return date.format(DateTimeFormatter.ofPattern("MMM d, YYYY HH:mm:ss a")
                     .withZone(ZoneId.ofOffset("UTC", ZoneOffset.of(timeZoneOffset))));

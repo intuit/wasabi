@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -73,7 +73,7 @@ public class IntegrationMutualExclusion extends TestBase {
 
             Experiment created = postExperiment(experiment);
             experiment.setState(Constants.EXPERIMENT_STATE_DRAFT);
-            assertEqualModelItems(created, experiment, new DefaultNameExclusionStrategy("id", "creationTime", "modificationTime", "ruleJson","description", "rule"));
+            assertEqualModelItems(created, experiment, new DefaultNameExclusionStrategy("id", "creationTime", "modificationTime", "ruleJson", "description", "rule"));
             experiment.update(created);
 
             // Make this experiment mutually exclusive with all previous experiment added in this loop.
@@ -293,8 +293,8 @@ public class IntegrationMutualExclusion extends TestBase {
         for (int i = 0; i < 5; ++i) {
             Experiment exp = ExperimentFactory.createExperiment();
             Experiment created = postExperiment(exp);
-            assertEqualModelItems(created, exp.setState(Constants.EXPERIMENT_STATE_DRAFT), 
-            		new DefaultNameExclusionStrategy("id", "creationTime", "modificationTime", "ruleJson","description", "rule"));
+            assertEqualModelItems(created, exp.setState(Constants.EXPERIMENT_STATE_DRAFT),
+                    new DefaultNameExclusionStrategy("id", "creationTime", "modificationTime", "ruleJson", "description", "rule"));
             exp.update(created);
             batchMutExExperiments.add(exp);
         }
@@ -306,7 +306,7 @@ public class IntegrationMutualExclusion extends TestBase {
      */
     @Test(dependsOnMethods = {"t_prepBatchAssignmentMutEx"})
     public void t_startBatchExperiments() {
-        for(Experiment exp : batchMutExExperiments) {
+        for (Experiment exp : batchMutExExperiments) {
             postBuckets(BucketFactory.createBuckets(exp, 1));
             Experiment update = putExperiment(exp.setState(Constants.EXPERIMENT_STATE_RUNNING));
             assertEqualModelItems(update, exp, new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson"));
@@ -322,7 +322,7 @@ public class IntegrationMutualExclusion extends TestBase {
         Assert.assertEquals(assignments.size(), 5, "Exactly 5 assignments should be returned for mutual exclusive experiments.");
         int nonNullAssignments = 0;
         for (Assignment assignment : assignments) {
-            nonNullAssignments += assignment.assignment != null? 1 : 0;
+            nonNullAssignments += assignment.assignment != null ? 1 : 0;
         }
         Assert.assertEquals(nonNullAssignments, 1, "Exactly one assignment should not be null.");
     }
@@ -344,7 +344,7 @@ public class IntegrationMutualExclusion extends TestBase {
         Assert.assertEquals(assignments.size(), 5, "Five assignments should be returned for mutual exclusive experiments.");
         int nonNullAssignments = 0;
         for (Assignment assignment : assignments) {
-            nonNullAssignments += assignment.assignment != null? 1 : 0;
+            nonNullAssignments += assignment.assignment != null ? 1 : 0;
         }
         Assert.assertEquals(nonNullAssignments, 2, "Exactly two assignment should not be null.");
     }
@@ -357,11 +357,11 @@ public class IntegrationMutualExclusion extends TestBase {
         experimentDefApp = ExperimentFactory.createExperiment();
         experimentOtherApp = ExperimentFactory.createExperiment().setApplication(ApplicationFactory.createApplication());
         Experiment created = postExperiment(experimentDefApp);
-        assertEqualModelItems(created, experimentDefApp.setState(Constants.EXPERIMENT_STATE_DRAFT), new DefaultNameExclusionStrategy("id", "creationTime", "modificationTime", "ruleJson","description","rule"));
+        assertEqualModelItems(created, experimentDefApp.setState(Constants.EXPERIMENT_STATE_DRAFT), new DefaultNameExclusionStrategy("id", "creationTime", "modificationTime", "ruleJson", "description", "rule"));
         experimentDefApp.update(created);
         toCleanUp.add(experimentDefApp);
         created = postExperiment(experimentOtherApp);
-        assertEqualModelItems(created, experimentOtherApp.setState(Constants.EXPERIMENT_STATE_DRAFT), new DefaultNameExclusionStrategy("id", "creationTime", "modificationTime", "ruleJson","description","rule"));
+        assertEqualModelItems(created, experimentOtherApp.setState(Constants.EXPERIMENT_STATE_DRAFT), new DefaultNameExclusionStrategy("id", "creationTime", "modificationTime", "ruleJson", "description", "rule"));
         experimentOtherApp.update(created);
         toCleanUp.add(experimentOtherApp);
     }
@@ -400,8 +400,8 @@ public class IntegrationMutualExclusion extends TestBase {
         // passed End time
         Experiment endTimePassedExperiment = postExperiment(
                 ExperimentFactory.createExperiment()
-                    .setEndTime(TestUtils.relativeTimeString(-3))
-                    .setStartTime(TestUtils.relativeTimeString(-4)));
+                        .setEndTime(TestUtils.relativeTimeString(-3))
+                        .setStartTime(TestUtils.relativeTimeString(-4)));
         toCleanUp.add(endTimePassedExperiment);
         postBuckets(BucketFactory.createBuckets(endTimePassedExperiment, 2));
         putExperiment(endTimePassedExperiment.setState(Constants.EXPERIMENT_STATE_RUNNING));

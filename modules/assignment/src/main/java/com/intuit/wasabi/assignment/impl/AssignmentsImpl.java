@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,7 +16,6 @@
 package com.intuit.wasabi.assignment.impl;
 
 import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -32,14 +31,29 @@ import com.intuit.wasabi.analyticsobjects.Parameters;
 import com.intuit.wasabi.assignment.AssignmentDecorator;
 import com.intuit.wasabi.assignment.AssignmentIngestionExecutor;
 import com.intuit.wasabi.assignment.Assignments;
-import com.intuit.wasabi.assignmentobjects.*;
+import com.intuit.wasabi.assignmentobjects.Assignment;
+import com.intuit.wasabi.assignmentobjects.AssignmentEnvelopePayload;
+import com.intuit.wasabi.assignmentobjects.PersonalizationEngineResponse;
+import com.intuit.wasabi.assignmentobjects.RuleCache;
+import com.intuit.wasabi.assignmentobjects.SegmentationProfile;
+import com.intuit.wasabi.assignmentobjects.User;
 import com.intuit.wasabi.eventlog.EventLog;
 import com.intuit.wasabi.exceptions.AssignmentExistsException;
 import com.intuit.wasabi.exceptions.BucketNotFoundException;
 import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
 import com.intuit.wasabi.experiment.Pages;
 import com.intuit.wasabi.experiment.Priorities;
-import com.intuit.wasabi.experimentobjects.*;
+import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.experimentobjects.Bucket;
+import com.intuit.wasabi.experimentobjects.BucketList;
+import com.intuit.wasabi.experimentobjects.Context;
+import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.experimentobjects.ExperimentBatch;
+import com.intuit.wasabi.experimentobjects.ExperimentList;
+import com.intuit.wasabi.experimentobjects.Page;
+import com.intuit.wasabi.experimentobjects.PageExperiment;
+import com.intuit.wasabi.experimentobjects.PrioritizedExperiment;
+import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
 import com.intuit.wasabi.experimentobjects.exceptions.InvalidExperimentStateException;
 import com.intuit.wasabi.experimentobjects.exceptions.WasabiException;
 import com.intuit.wasabi.export.DatabaseExport;
@@ -58,14 +72,20 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.security.SecureRandom;
-import java.time.Duration;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -278,15 +298,15 @@ public class AssignmentsImpl implements Assignments {
                 experimentID));
 
         // Ingest data to real time data ingestion systems if executors exist
-		for (String name : executors.keySet()) {
-			executors.get(name).execute(new AssignmentEnvelopePayload(userID, context, createAssignment, false, ignoreSamplingPercent,
+        for (String name : executors.keySet()) {
+            executors.get(name).execute(new AssignmentEnvelopePayload(userID, context, createAssignment, false, ignoreSamplingPercent,
                     segmentationProfile, assignment != null ? assignment.getStatus() : null,
                     assignment != null ? assignment.getBucketLabel() : null, pageName, applicationName,
                     experimentLabel, experimentID,
                     currentDate, headers));
-		}
+        }
 
-		return assignment;
+        return assignment;
     }
 
     @Override
@@ -332,11 +352,11 @@ public class AssignmentsImpl implements Assignments {
      * the assignment was delivered.
      */
     protected Assignment getAssignment(User.ID userID, Application.Name applicationName, Experiment.Label experimentLabel,
-                                    Context context, boolean createAssignment, boolean ignoreSamplingPercent,
-                                    SegmentationProfile segmentationProfile, HttpHeaders headers, Page.Name pageName,
-                                    Experiment experiment, BucketList bucketList,
-                                    Table<Experiment.ID, Experiment.Label, String> userAssignments,
-                                    Map<Experiment.ID, List<Experiment.ID>> exclusives) {
+                                       Context context, boolean createAssignment, boolean ignoreSamplingPercent,
+                                       SegmentationProfile segmentationProfile, HttpHeaders headers, Page.Name pageName,
+                                       Experiment experiment, BucketList bucketList,
+                                       Table<Experiment.ID, Experiment.Label, String> userAssignments,
+                                       Map<Experiment.ID, List<Experiment.ID>> exclusives) {
         final Date currentDate = new Date();
         final long currentTime = currentDate.getTime();
 
@@ -420,13 +440,13 @@ public class AssignmentsImpl implements Assignments {
         }
 
         // Ingest data to real time data ingestion systems if executors exist
-		for (String name : executors.keySet()) {
-			executors.get(name).execute(new AssignmentEnvelopePayload(userID, context, createAssignment, false,
+        for (String name : executors.keySet()) {
+            executors.get(name).execute(new AssignmentEnvelopePayload(userID, context, createAssignment, false,
                     ignoreSamplingPercent, segmentationProfile, assignment != null ? assignment.getStatus() : null,
                     assignment != null ? assignment.getBucketLabel() : null, pageName, applicationName, experimentLabel,
                     experimentID, currentDate, headers));
-		}        
-        
+        }
+
         // Updating rule cache.  This will cause future assignment calls, on this server, to
         // use the new version of the rule, if it has recently been changed.
         ruleCacheExecutor.execute(new ExperimentRuleCacheUpdateEnvelope(experiment.getRule(),
@@ -470,9 +490,9 @@ public class AssignmentsImpl implements Assignments {
      */
     @Override
     public List<Map> doBatchAssignments(User.ID userID, Application.Name applicationName, Context context,
-                                            boolean createAssignment, boolean forceInExperiment, HttpHeaders headers,
-                                            ExperimentBatch experimentBatch, Page.Name pageName,
-                                            Map<Experiment.ID, Boolean> allowAssignments) {
+                                        boolean createAssignment, boolean forceInExperiment, HttpHeaders headers,
+                                        ExperimentBatch experimentBatch, Page.Name pageName,
+                                        Map<Experiment.ID, Boolean> allowAssignments) {
 
         //allowAssignments is NULL when called from AssignmentsResource.getBatchAssignments()
         Optional<Map<Experiment.ID, Boolean>> allowAssignmentsOptional = Optional.ofNullable(allowAssignments);
@@ -488,11 +508,12 @@ public class AssignmentsImpl implements Assignments {
         List<Map> allAssignments = new LinkedList<>();
         // iterate over all experiments in the application in priority order
         for (PrioritizedExperiment experiment : appPriorities.getPrioritizedExperiments()) {
-            if(LOGGER.isDebugEnabled()) LOGGER.debug("Now processing: {}", experiment);
+            if (LOGGER.isDebugEnabled()) LOGGER.debug("Now processing: {}", experiment);
 
             //check if the experiment was given in experimentBatch
             if (experimentBatch.getLabels().contains(experiment.getLabel())) {
-                if(LOGGER.isDebugEnabled()) LOGGER.debug("Experiment ({}) has given batch assignment....", experiment.getLabel());
+                if (LOGGER.isDebugEnabled())
+                    LOGGER.debug("Experiment ({}) has given batch assignment....", experiment.getLabel());
 
                 String labelStr = experiment.getLabel().toString();
                 Map<String, Object> tempResult = new HashMap<>();
@@ -503,11 +524,11 @@ public class AssignmentsImpl implements Assignments {
                         .build();
 
                 try {
-                      Assignment assignment = getAssignment(userID, applicationName, label,
-                            context, allowAssignmentsOptional.isPresent()?(allowAssignmentsOptional.get().get(experiment.getID())):createAssignment,
+                    Assignment assignment = getAssignment(userID, applicationName, label,
+                            context, allowAssignmentsOptional.isPresent() ? (allowAssignmentsOptional.get().get(experiment.getID())) : createAssignment,
                             forceInExperiment, segmentationProfile,
                             headers, pageName, experimentMap.get(experiment.getID()),
-                              bucketMap.get(experiment.getID()), userAssignments, exclusionMap);
+                            bucketMap.get(experiment.getID()), userAssignments, exclusionMap);
 
                     // This wouldn't normally happen because we specified CREATE=true
                     if (isNull(assignment)) {
@@ -526,7 +547,7 @@ public class AssignmentsImpl implements Assignments {
 
                         if (nonNull(assignment.getBucketLabel())) {
                             Optional<Bucket> bucket = getBucketByLabel(bucketMap.get(experiment.getID()), assignment.getBucketLabel());
-                            if(bucket.isPresent()) {
+                            if (bucket.isPresent()) {
                                 tempResult.put("payload",
                                         bucket.get().getPayload() != null
                                                 ? bucket.get().getPayload()
@@ -536,7 +557,7 @@ public class AssignmentsImpl implements Assignments {
                     }
 
                     tempResult.put("status", assignment.getStatus());
-                    if(LOGGER.isDebugEnabled()) LOGGER.debug("tempResult: {}", tempResult);
+                    if (LOGGER.isDebugEnabled()) LOGGER.debug("tempResult: {}", tempResult);
 
 
                 } catch (WasabiException ex) {
@@ -551,16 +572,16 @@ public class AssignmentsImpl implements Assignments {
                 experimentBatch.getLabels().remove(experiment.getLabel());
             }
         }
-        if(LOGGER.isDebugEnabled()) LOGGER.debug("allAssignments: {} ", allAssignments);
+        if (LOGGER.isDebugEnabled()) LOGGER.debug("allAssignments: {} ", allAssignments);
 
         return allAssignments;
     }
 
     private Optional<Bucket> getBucketByLabel(BucketList bucketList, Bucket.Label bucketLabel) {
         Optional<Bucket> rBucket = Optional.empty();
-        if(isNull(bucketList)) return rBucket;
-        for(Bucket bucket:bucketList.getBuckets()) {
-            if(bucket.getLabel().equals(bucketLabel)) {
+        if (isNull(bucketList)) return rBucket;
+        for (Bucket bucket : bucketList.getBuckets()) {
+            if (bucket.getLabel().equals(bucketLabel)) {
                 return Optional.of(bucket);
             }
         }
@@ -599,7 +620,7 @@ public class AssignmentsImpl implements Assignments {
         //throw exception if assignment already exists for user unless overwrite == true
         Assignment currentAssignment = assignmentsRepository.getAssignment(experimentID, userID, context);
         if (!overwrite && currentAssignment != null && !currentAssignment.isBucketEmpty()) {
-                throw new AssignmentExistsException(userID, applicationName, experimentLabel);
+            throw new AssignmentExistsException(userID, applicationName, experimentLabel);
         }
 
         //check that the desired bucket is valid
@@ -644,13 +665,13 @@ public class AssignmentsImpl implements Assignments {
         Date date = new Date();
 
         // Ingest data to real time data ingestion systems if executors exist
-		for (String name : executors.keySet()) {
-			executors.get(name).execute(new AssignmentEnvelopePayload(userID, context, false, true, false, null,
+        for (String name : executors.keySet()) {
+            executors.get(name).execute(new AssignmentEnvelopePayload(userID, context, false, true, false, null,
                     Assignment.Status.NEW_ASSIGNMENT, assignment.getBucketLabel(), null, applicationName,
                     experimentLabel, experimentID,
                     date, null));
-		}        
-        
+        }
+
         //write assignment after checking assignment in first step
         return assignmentsRepository.assignUser(assignment, experiment, date);
     }
@@ -689,9 +710,9 @@ public class AssignmentsImpl implements Assignments {
         return true;
     }
 
-	protected boolean checkMutex(Experiment experiment,
-                               Table<Experiment.ID, Experiment.Label, String> userAssignments,
-                               Map<Experiment.ID, List<Experiment.ID>> exclusivesList) {
+    protected boolean checkMutex(Experiment experiment,
+                                 Table<Experiment.ID, Experiment.Label, String> userAssignments,
+                                 Map<Experiment.ID, List<Experiment.ID>> exclusivesList) {
 
         //if the experiment exists in the database and is in a valid MUTEX state
         if (experiment != null && (experiment.getState() == Experiment.State.RUNNING ||
@@ -716,7 +737,7 @@ public class AssignmentsImpl implements Assignments {
     }
 
     private Set<Experiment.ID> getNonNullUserAssignments(List<Experiment.ID> experimentIDList,
-                              Table<Experiment.ID, Experiment.Label, String> userAssignments) {
+                                                         Table<Experiment.ID, Experiment.Label, String> userAssignments) {
         Set<Experiment.ID> result = new HashSet<>();
         for (Experiment.ID experimentID : experimentIDList) {
             if (!userAssignments.row(experimentID).values().isEmpty() &&
@@ -739,8 +760,8 @@ public class AssignmentsImpl implements Assignments {
 
     @Override
     public List<Map> doPageAssignments(Application.Name applicationName, Page.Name pageName, User.ID userID,
-                                           Context context, boolean createAssignment, boolean ignoreSamplingPercent,
-                                           HttpHeaders headers, SegmentationProfile segmentationProfile) {
+                                       Context context, boolean createAssignment, boolean ignoreSamplingPercent,
+                                       HttpHeaders headers, SegmentationProfile segmentationProfile) {
 
         //Get the experiments (id & allowNewAssignment only) associated to the given application and page.
         List<PageExperiment> pageExperimentList = pages.getExperimentsWithoutLabels(applicationName, pageName);
@@ -764,7 +785,7 @@ public class AssignmentsImpl implements Assignments {
     }
 
     protected Assignment nullAssignment(User.ID userID, Application.Name appName, Experiment.ID experimentID,
-                                      Assignment.Status status) {
+                                        Assignment.Status status) {
 
         return Assignment.newInstance(experimentID)
                 .withApplicationName(appName)
@@ -789,7 +810,7 @@ public class AssignmentsImpl implements Assignments {
      * @return boolean true if the current user is selected by the experiment segmentation rule
      */
     boolean doesProfileMatch(Experiment experiment, SegmentationProfile segmentationProfile,
-                                     HttpHeaders headers, Context context) {
+                             HttpHeaders headers, Context context) {
         return doesProfileMatch(experiment, segmentationProfile, headers, context, false);
     }
 
@@ -854,9 +875,9 @@ public class AssignmentsImpl implements Assignments {
     }
 
     protected Assignment getAssignment(final Experiment.ID experimentID,
-                                     final User.ID userID, final Context context,
-                                     final Table<Experiment.ID, Experiment.Label, String> userAssignments,
-                                     final BucketList bucketList) {
+                                       final User.ID userID, final Context context,
+                                       final Table<Experiment.ID, Experiment.Label, String> userAssignments,
+                                       final BucketList bucketList) {
 
         if (userAssignments != null && userAssignments.row(experimentID).isEmpty()) {
             return null;
@@ -884,7 +905,7 @@ public class AssignmentsImpl implements Assignments {
     }
 
     Assignment generateAssignment(Experiment experiment, User.ID userID, Context context,
-                                          boolean selectBucket, Date date) {
+                                  boolean selectBucket, Date date) {
 
         Assignment.Builder builder = Assignment.newInstance(experiment.getID())
                 .withApplicationName(experiment.getApplicationName())

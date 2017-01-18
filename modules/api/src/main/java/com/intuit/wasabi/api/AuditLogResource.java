@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,13 +28,28 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
-import javax.ws.rs.*;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.intuit.wasabi.api.APISwaggerResource.*;
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_FILTER;
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_PAGE;
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_PER_PAGE;
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_SORT;
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_TIMEZONE;
+import static com.intuit.wasabi.api.APISwaggerResource.DOC_FILTER;
+import static com.intuit.wasabi.api.APISwaggerResource.DOC_PAGE;
+import static com.intuit.wasabi.api.APISwaggerResource.DOC_PER_PAGE;
+import static com.intuit.wasabi.api.APISwaggerResource.DOC_SORT;
+import static com.intuit.wasabi.api.APISwaggerResource.DOC_TIMEZONE;
+import static com.intuit.wasabi.api.APISwaggerResource.EXAMPLE_AUTHORIZATION_HEADER;
 import static com.intuit.wasabi.authorizationobjects.Permission.ADMIN;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -67,7 +82,7 @@ public class AuditLogResource {
      */
     @Inject
     AuditLogResource(final AuditLog auditLog, final Authorization authorization,
-                 final HttpHeader httpHeader, final PaginationHelper<AuditLogEntry> paginationHelper) {
+                     final HttpHeader httpHeader, final PaginationHelper<AuditLogEntry> paginationHelper) {
         this.auditLog = auditLog;
         this.authorization = authorization;
         this.httpHeader = httpHeader;

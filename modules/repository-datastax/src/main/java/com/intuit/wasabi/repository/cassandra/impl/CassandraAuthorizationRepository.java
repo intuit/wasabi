@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,8 +24,11 @@ import com.datastax.driver.mapping.MappingManager;
 import com.datastax.driver.mapping.Result;
 import com.google.inject.Inject;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
-import com.intuit.wasabi.authorizationobjects.*;
+import com.intuit.wasabi.authorizationobjects.Role;
+import com.intuit.wasabi.authorizationobjects.UserPermissions;
+import com.intuit.wasabi.authorizationobjects.UserPermissionsList;
 import com.intuit.wasabi.authorizationobjects.UserRole;
+import com.intuit.wasabi.authorizationobjects.UserRoleList;
 import com.intuit.wasabi.exceptions.AuthenticationException;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.repository.AuthorizationRepository;
@@ -34,17 +37,23 @@ import com.intuit.wasabi.repository.cassandra.accessor.AppRoleAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.ApplicationListAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.UserInfoAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.UserRoleAccessor;
-import com.intuit.wasabi.repository.cassandra.pojo.*;
+import com.intuit.wasabi.repository.cassandra.pojo.AppRole;
+import com.intuit.wasabi.repository.cassandra.pojo.ApplicationList;
 import com.intuit.wasabi.userdirectory.UserDirectory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-public class CassandraAuthorizationRepository  implements AuthorizationRepository {
+public class CassandraAuthorizationRepository implements AuthorizationRepository {
     private static final Logger LOGGER = LoggerFactory.getLogger(CassandraAuthorizationRepository.class);
     static final String SUPERADMIN = "superadmin";
     static final Application.Name WILDCARD = Application.Name.valueOf("wildcard");
@@ -62,7 +71,7 @@ public class CassandraAuthorizationRepository  implements AuthorizationRepositor
                                             UserRoleAccessor userRoleAccessor,
                                             UserInfoAccessor userInfoAccessor,
                                             UserDirectory userDirectory,
-                                            MappingManager mappingManager){
+                                            MappingManager mappingManager) {
         this.applicationListAccessor = applicationListAccessor;
         this.appRoleAccessor = appRoleAccessor;
         this.userRoleAccessor = userRoleAccessor;
@@ -71,7 +80,7 @@ public class CassandraAuthorizationRepository  implements AuthorizationRepositor
         this.manager = mappingManager;
     }
 
-    UserInfo retrieveOrDefaultUser(UserInfo.Username userID){
+    UserInfo retrieveOrDefaultUser(UserInfo.Username userID) {
         UserInfo userInfo = lookupUser(userID);
         setUserInfo(userInfo);
         return userInfo;
@@ -97,24 +106,24 @@ public class CassandraAuthorizationRepository  implements AuthorizationRepositor
     public UserPermissionsList getUserPermissionsList(UserInfo.Username userID) {
         UserPermissionsList userPermissionsList = new UserPermissionsList();
         Optional<UserPermissions> superAdminUserPermissions = getSuperAdminUserPermissions(userID, WILDCARD);
-        if (superAdminUserPermissions.isPresent() ){
+        if (superAdminUserPermissions.isPresent()) {
             List<String> allAppNames = getAllApplicationNameFromApplicationList();
             allAppNames.stream()
                     .map(t ->
                             UserPermissions.newInstance(
                                     Application.Name.valueOf(t),
                                     superAdminUserPermissions.get().getPermissions()
-                             ).build())
+                            ).build())
                     .forEach(userPermissionsList::addPermissions);
         } else {
             List<com.intuit.wasabi.repository.cassandra.pojo.UserRole> resultList = getUserRoleList(userID,
                     Optional.empty());
             resultList.stream()
                     .filter(t -> t.getRole() != null)
-                    .map( t ->
+                    .map(t ->
                             UserPermissions.newInstance(
                                     Application.Name.valueOf(t.getAppName())
-                                    ,Role.valueOf(t.getRole()).getRolePermissions()).build()
+                                    , Role.valueOf(t.getRole()).getRolePermissions()).build()
                     )
                     .forEach(userPermissionsList::addPermissions);
         }
@@ -146,14 +155,14 @@ public class CassandraAuthorizationRepository  implements AuthorizationRepositor
                 .build();
     }
 
-    List<AppRole> getAppRoleList(Application.Name applicationName){
+    List<AppRole> getAppRoleList(Application.Name applicationName) {
         List<AppRole> resultList = Collections.EMPTY_LIST;
         try {
-            Result<AppRole> result  = appRoleAccessor.getAppRoleByAppName(applicationName.toString());
+            Result<AppRole> result = appRoleAccessor.getAppRoleByAppName(applicationName.toString());
             resultList = StreamSupport.stream(
                     Spliterators.spliteratorUnknownSize(result.iterator(), Spliterator.ORDERED), false)
                     .collect(Collectors.toList());
-        }catch (ReadTimeoutException | UnavailableException | NoHostAvailableException e){
+        } catch (ReadTimeoutException | UnavailableException | NoHostAvailableException e) {
             throw new RepositoryException("Could not retrieve info for app \"" + applicationName + "\"", e);
         }
         return resultList;
@@ -174,8 +183,8 @@ public class CassandraAuthorizationRepository  implements AuthorizationRepositor
         );
 
         return resultList.stream()
-                .filter(t -> SUPERADMIN.equalsIgnoreCase(t.getRole()) )
-                .map( m ->
+                .filter(t -> SUPERADMIN.equalsIgnoreCase(t.getRole()))
+                .map(m ->
                         UserPermissions.newInstance(applicationName,
                                 Role.SUPERADMIN.getRolePermissions())
                                 .build()
@@ -222,7 +231,7 @@ public class CassandraAuthorizationRepository  implements AuthorizationRepositor
                 userRole.getApplicationName().toString(),
                 userRole.getUserID().toString(),
                 userRole.getRole().toString()
-                ));
+        ));
         manager.getSession().execute(batch);
     }
 
@@ -232,23 +241,23 @@ public class CassandraAuthorizationRepository  implements AuthorizationRepositor
                 getUserRolesWithWildcardAppName(userID, WILDCARD);
         UserInfo userInfo = retrieveOrDefaultUser(userID);
         List<com.intuit.wasabi.repository.cassandra.pojo.UserRole> superAdmins = possibleSuperAdmin.stream()
-                .filter( v -> SUPERADMIN.equalsIgnoreCase(v.getRole()) )
+                .filter(v -> SUPERADMIN.equalsIgnoreCase(v.getRole()))
                 .collect(Collectors.toList());
         UserRoleList userRoleList = new UserRoleList();
         //If the userID is in the superadmin list
-        if(superAdmins.size() > 0){
+        if (superAdmins.size() > 0) {
             List<String> allAppNamesList = getAllApplicationNameFromApplicationList();
             superAdmins.stream()
-                    .map( t ->
+                    .map(t ->
                             allAppNamesList.stream()
-                            .map( appName ->
-                                    UserRole.newInstance(Application.Name.valueOf(appName), Role.SUPERADMIN)
-                                    .withUserID(userID)
-                                    .withUserEmail(userInfo.getEmail())
-                                    .withFirstName(userInfo.getFirstName())
-                                    .withLastName(userInfo.getLastName())
-                                    .build()
-                            ).collect(Collectors.toList())
+                                    .map(appName ->
+                                            UserRole.newInstance(Application.Name.valueOf(appName), Role.SUPERADMIN)
+                                                    .withUserID(userID)
+                                                    .withUserEmail(userInfo.getEmail())
+                                                    .withFirstName(userInfo.getFirstName())
+                                                    .withLastName(userInfo.getLastName())
+                                                    .build()
+                                    ).collect(Collectors.toList())
                     )
                     .flatMap(Collection::stream)
                     .forEach(userRoleList::addRole);
@@ -259,15 +268,15 @@ public class CassandraAuthorizationRepository  implements AuthorizationRepositor
                 Optional.empty());
         resultList.stream()
                 .map(
-                    r -> UserRole.newInstance(
-                            Application.Name.valueOf(r.getAppName()),
-                            Role.toRole(r.getRole())
+                        r -> UserRole.newInstance(
+                                Application.Name.valueOf(r.getAppName()),
+                                Role.toRole(r.getRole())
                         )
-                        .withFirstName(userInfo.getFirstName())
-                        .withLastName(userInfo.getLastName())
-                        .withUserEmail(userInfo.getEmail())
-                        .withUserID(userID)
-                        .build()
+                                .withFirstName(userInfo.getFirstName())
+                                .withLastName(userInfo.getLastName())
+                                .withUserEmail(userInfo.getEmail())
+                                .withUserID(userID)
+                                .build()
                 ).forEach(userRoleList::addRole);
 
         return userRoleList;
@@ -285,7 +294,7 @@ public class CassandraAuthorizationRepository  implements AuthorizationRepositor
     public UserInfo getUserInfo(UserInfo.Username userID) {
         List<com.intuit.wasabi.repository.cassandra.pojo.UserInfo> resultList = getUserInfoList(userID);
 
-        if (resultList.size() > 1){
+        if (resultList.size() > 1) {
             throw new AuthenticationException("error, more than one user with the userID " + userID.toString());
         }
 
@@ -305,7 +314,7 @@ public class CassandraAuthorizationRepository  implements AuthorizationRepositor
             resultList = StreamSupport.stream(
                     Spliterators.spliteratorUnknownSize(result.iterator(), Spliterator.ORDERED), false)
                     .collect(Collectors.toList());
-        }catch (ReadTimeoutException | UnavailableException | NoHostAvailableException e){
+        } catch (ReadTimeoutException | UnavailableException | NoHostAvailableException e) {
             throw new RepositoryException("Could not retrieve info for user \"" + userID + "\"", e);
         }
         return resultList;
@@ -320,7 +329,7 @@ public class CassandraAuthorizationRepository  implements AuthorizationRepositor
                     userInfo.getEmail(),
                     userInfo.getFirstName(),
                     userInfo.getLastName());
-        } catch (WriteTimeoutException | UnavailableException | NoHostAvailableException  e){
+        } catch (WriteTimeoutException | UnavailableException | NoHostAvailableException e) {
             throw new RepositoryException("Could not set info for user \"" + userInfo.getUsername() + "\"", e);
         }
     }
@@ -330,10 +339,10 @@ public class CassandraAuthorizationRepository  implements AuthorizationRepositor
         List<com.intuit.wasabi.repository.cassandra.pojo.UserRole> resultList = getUserRolesWithWildcardAppName(userID, applicationName);
         Optional<com.intuit.wasabi.repository.cassandra.pojo.UserRole> adminRole = resultList
                 .stream()
-                .filter( t -> SUPERADMIN.equalsIgnoreCase(t.getRole()))
+                .filter(t -> SUPERADMIN.equalsIgnoreCase(t.getRole()))
                 .findAny();
 
-        if ( !adminRole.isPresent() )
+        if (!adminRole.isPresent())
             return null;
         else
             return UserPermissions.newInstance(applicationName, Role.SUPERADMIN.getRolePermissions())
@@ -346,7 +355,7 @@ public class CassandraAuthorizationRepository  implements AuthorizationRepositor
         List<com.intuit.wasabi.repository.cassandra.pojo.UserRole> resultList = Collections.EMPTY_LIST;
         try {
             Result<com.intuit.wasabi.repository.cassandra.pojo.UserRole> result;
-            if(applicationName.isPresent()) {
+            if (applicationName.isPresent()) {
                 result = userRoleAccessor.getUserRolesBy(userID.getUsername(), applicationName.get().toString());
             } else {
                 result = userRoleAccessor.getUserRolesByUserId(userID.getUsername());
@@ -354,7 +363,7 @@ public class CassandraAuthorizationRepository  implements AuthorizationRepositor
             resultList = StreamSupport.stream(
                     Spliterators.spliteratorUnknownSize(result.iterator(), Spliterator.ORDERED), false)
                     .collect(Collectors.toList());
-        }catch (ReadTimeoutException | UnavailableException | NoHostAvailableException e){
+        } catch (ReadTimeoutException | UnavailableException | NoHostAvailableException e) {
             throw new RepositoryException("Could not retrieve info for user \"" + userID + "\"", e);
         }
         return resultList;

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,7 +39,10 @@ import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static java.lang.Double.NaN;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.closeTo;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 
 public class ProgressGeneratorTest {
 
@@ -112,8 +115,8 @@ public class ProgressGeneratorTest {
         BucketCounts bucket4Counts = new BucketCounts.Builder().withLabel(bucket4Label)
                 .withImpressionCounts(new Counts.Builder().withEventCount(15)
                         .withUniqueUserCount(11).build())
-                        // not a valid jointActionCounts, given the individual actions
-                        // however we do this just to test a specific case for generateProgress
+                // not a valid jointActionCounts, given the individual actions
+                // however we do this just to test a specific case for generateProgress
                 .withJointActionCounts(new Counts.Builder().withEventCount(12)
                         .withUniqueUserCount(10).build())
                 .withActionCounts(actions4).build();

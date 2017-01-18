@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,8 +16,12 @@
 package com.intuit.wasabi.tests.service;
 
 
+import com.intuit.wasabi.tests.library.APIServerConnector;
 import com.intuit.wasabi.tests.library.TestBase;
-import com.intuit.wasabi.tests.library.util.*;
+import com.intuit.wasabi.tests.library.util.Constants;
+import com.intuit.wasabi.tests.library.util.ModelUtil;
+import com.intuit.wasabi.tests.library.util.RetryAnalyzer;
+import com.intuit.wasabi.tests.library.util.RetryTest;
 import com.intuit.wasabi.tests.library.util.serialstrategies.DefaultNameExclusionStrategy;
 import com.intuit.wasabi.tests.library.util.serialstrategies.DefaultNameInclusionStrategy;
 import com.intuit.wasabi.tests.library.util.serialstrategies.SerializationStrategy;
@@ -29,10 +33,11 @@ import com.intuit.wasabi.tests.model.factory.BucketFactory;
 import com.intuit.wasabi.tests.model.factory.EventFactory;
 import com.intuit.wasabi.tests.model.factory.ExperimentFactory;
 import com.intuit.wasabi.tests.model.factory.UserFactory;
-import com.intuit.wasabi.tests.library.APIServerConnector;
 import org.apache.http.HttpStatus;
 import org.testng.Assert;
-import org.testng.annotations.*;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -82,8 +87,8 @@ public class SegmentationRuleCacheFixTest extends TestBase {
         ruleFirst = "User-Agent = \"Agent001\"";
         ruleSecond = "User-Agent = \"Agent002\"";
         ruleNonHeader = "subscriber = true";
-        experimentSerializationStrategy = 
-        		new DefaultNameExclusionStrategy("creationTime", "modificationTime", "id", "ruleJson", "rule", "description");
+        experimentSerializationStrategy =
+                new DefaultNameExclusionStrategy("creationTime", "modificationTime", "id", "ruleJson", "rule", "description");
     }
 
     /**
@@ -93,6 +98,7 @@ public class SegmentationRuleCacheFixTest extends TestBase {
     public void assertRepeatCount() {
         Assert.assertTrue(2 * nodeCount < repeatCount, "Repeat count not big enough.");
     }
+
     /**
      * Creates an experiment with only one control bucket and the first rule.
      * After that the experiment is started.
@@ -120,7 +126,7 @@ public class SegmentationRuleCacheFixTest extends TestBase {
      * Retrieves a running experiment.
      */
     @Test(dependsOnMethods = {"createExperiment"}, retryAnalyzer = RetryAnalyzer.class)
-    @RetryTest(maxTries = 3, warmup =500)
+    @RetryTest(maxTries = 3, warmup = 500)
     public void retrieveRunningExperiment() {
         experiment = getExperiment(experiment);
         Assert.assertEquals(experiment.state, Constants.EXPERIMENT_STATE_RUNNING);
@@ -134,9 +140,9 @@ public class SegmentationRuleCacheFixTest extends TestBase {
     @DataProvider
     public Object[][] assignmentDataProvider() {
         return new Object[][]{
-            new Object[]{user, "NoMatchForThisAgentValue", Constants.ASSIGNMENT_NO_PROFILE_MATCH},
-            new Object[]{user, "Agent001", Constants.ASSIGNMENT_NEW_ASSIGNMENT},
-            new Object[]{user, "Agent001", Constants.ASSIGNMENT_EXISTING_ASSIGNMENT},
+                new Object[]{user, "NoMatchForThisAgentValue", Constants.ASSIGNMENT_NO_PROFILE_MATCH},
+                new Object[]{user, "Agent001", Constants.ASSIGNMENT_NEW_ASSIGNMENT},
+                new Object[]{user, "Agent001", Constants.ASSIGNMENT_EXISTING_ASSIGNMENT},
         };
     }
 
@@ -211,7 +217,7 @@ public class SegmentationRuleCacheFixTest extends TestBase {
      * Retrieves the assignments and checks if the count is as expected.
      */
     @Test(dependsOnMethods = {"verifyResultsOfAssignments"}, retryAnalyzer = RetryAnalyzer.class)
-    @RetryTest(maxTries = 5, warmup =2500)
+    @RetryTest(maxTries = 5, warmup = 2500)
     public void getAssignmentsAfterVerification() {
         List<Assignment> assignments = getAssignments(experiment);
         // +1 for user 0
@@ -263,7 +269,7 @@ public class SegmentationRuleCacheFixTest extends TestBase {
     /**
      * Assigns a user without a User-Agent (POST). Should result in NO_PROFILE_MATCH.
      */
-    @Test(dependsOnMethods = { "assignUsersToBuckets_no_key_get" })
+    @Test(dependsOnMethods = {"assignUsersToBuckets_no_key_get"})
     public void assignUsersToBuckets_no_key_post() {
         Assignment assignment = postAssignment(experiment, UserFactory.createUser(user.userID + "_no_key"));
         Assert.assertEquals(assignment.status, Constants.ASSIGNMENT_NO_PROFILE_MATCH);
@@ -272,7 +278,7 @@ public class SegmentationRuleCacheFixTest extends TestBase {
     /**
      * Assigns a user with a profile which does not match.
      */
-    @Test(dependsOnMethods = { "assignUsersToBuckets_no_key_post" })
+    @Test(dependsOnMethods = {"assignUsersToBuckets_no_key_post"})
     public void assignUsersToBuckets_key_post_no_match() {
         Map<String, Object> profile = new HashMap<>();
         profile.put("subscriber", false);
@@ -283,7 +289,7 @@ public class SegmentationRuleCacheFixTest extends TestBase {
     /**
      * Assigns a user with a profile which does not match.
      */
-    @Test(dependsOnMethods = { "assignUsersToBuckets_key_post_no_match" }, invocationCount = repeatCount)
+    @Test(dependsOnMethods = {"assignUsersToBuckets_key_post_no_match"}, invocationCount = repeatCount)
     public void assignUsersToBuckets_key_post_match() {
         User user = UserFactory.createUser();
         userList2.add(user);
@@ -305,7 +311,7 @@ public class SegmentationRuleCacheFixTest extends TestBase {
     /**
      * Verifies the results from {@link #assignUsersToBuckets_key_post_match()}. Resets the counters.
      */
-    @Test(dependsOnMethods = { "assignUsersToBuckets_key_post_match" }, retryAnalyzer = RetryAnalyzer.class)
+    @Test(dependsOnMethods = {"assignUsersToBuckets_key_post_match"}, retryAnalyzer = RetryAnalyzer.class)
     @RetryTest(maxTries = 5, warmup = 2500)
     public void verifyResultsOfNoHeaderAssignments() {
         List<Assignment> assignments = getAssignments(experiment);

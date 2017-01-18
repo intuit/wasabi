@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -42,7 +42,7 @@ public interface ExperimentDetails {
      * rate per bucket etc.
      *
      * @param details a list of ExperimentDetails as it can be retrieved with {@link #getExperimentDetailsBase()}
-     * @param params the parameters necessary for the analytics calls {@link Parameters}
+     * @param params  the parameters necessary for the analytics calls {@link Parameters}
      * @return a completed list of ExperimentDetail
      */
     List<ExperimentDetail> getAnalyticData(List<ExperimentDetail> details, Parameters params);

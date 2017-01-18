@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,11 +30,11 @@ import java.util.UUID;
 @Accessor
 public interface BucketAccessor {
 
-	/**
-	 * Get buckets for the experiments
-	 * @param experimentIds
-	 * @return buckets
-	 */
+    /**
+     * Get buckets for the experiments
+     * @param experimentIds
+     * @return buckets
+     */
     @Query("select * from bucket where experiment_id IN ?")
     Result<Bucket> getBucketByExperimentIds(List<UUID> experimentIds);
 
@@ -60,18 +60,18 @@ public interface BucketAccessor {
      * @param state
      */
     @Query("insert into bucket (experiment_id, label, description, "
-    		+ "allocation, is_control, payload, state) " +
-                "values (?, ?, ?, ?, ?, ?, ?)")
-    void insert(UUID experimentId, String label, String description, 
-    		double allocation, boolean isControl, String payload, String state);
-    
+            + "allocation, is_control, payload, state) " +
+            "values (?, ?, ?, ?, ?, ?, ?)")
+    void insert(UUID experimentId, String label, String description,
+                double allocation, boolean isControl, String payload, String state);
+
     /**
      * Delete bucket for experiment
      * @param experimentId
      */
     @Query("delete from bucket where experiment_id = ?")
     void deleteByExperimentId(UUID experimentId);
-    
+
     /**
      * Delete bucket for experiment id and label
      * @param experimentId
@@ -87,7 +87,7 @@ public interface BucketAccessor {
      * @param label
      */
     @Query("update bucket set state = ? where experiment_id = ? and label = ?")
-	void updateState(String name, UUID rawID, String label);
+    void updateState(String name, UUID rawID, String label);
 
     /**
      * Get bucket for experiment id and label
@@ -96,7 +96,7 @@ public interface BucketAccessor {
      * @return bucket result
      */
     @Query("select * from bucket where experiment_id = ? and label = ?")
-	Result<Bucket> getBucketByExperimentIdAndBucket(UUID rawID, String label);
+    Result<Bucket> getBucketByExperimentIdAndBucket(UUID rawID, String label);
 
     /**
      * Update control status of bucket
@@ -104,8 +104,8 @@ public interface BucketAccessor {
      * @param experimentId
      * @param label
      */
-    @Query( "update bucket set is_control= ? where experiment_id =? and label =?")
-	void updateControl(boolean isControl, UUID experimentId, String label);
+    @Query("update bucket set is_control= ? where experiment_id =? and label =?")
+    void updateControl(boolean isControl, UUID experimentId, String label);
 
     /**
      * Update bucket based on params
@@ -117,15 +117,15 @@ public interface BucketAccessor {
      * @param label
      */
     @Query("update bucket " +
-                "set description = ?, allocation = ?, is_control = ?, payload = ? " +
-                "where experiment_id = ? and label = ?")
-	void updateBucket(String description, Double allocationPercent, Boolean control,
-			String payload, UUID experimentId, String label);
+            "set description = ?, allocation = ?, is_control = ?, payload = ? " +
+            "where experiment_id = ? and label = ?")
+    void updateBucket(String description, Double allocationPercent, Boolean control,
+                      String payload, UUID experimentId, String label);
 
     @Query("update bucket " +
-                "set allocation = ? " +
-                "where experiment_id = ? and label = ?")
-	void updateAllocation(Double allocation, UUID experimentId,
-			String label);
-    
+            "set allocation = ? " +
+            "where experiment_id = ? and label = ?")
+    void updateAllocation(Double allocation, UUID experimentId,
+                          String label);
+
 }

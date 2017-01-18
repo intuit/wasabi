@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,15 +33,23 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.intuit.wasabi.api.APISwaggerResource.EXAMPLE_ALL_ROLES;
 import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_ROLE;
+import static com.intuit.wasabi.api.APISwaggerResource.EXAMPLE_ALL_ROLES;
 import static com.intuit.wasabi.api.APISwaggerResource.EXAMPLE_AUTHORIZATION_HEADER;
 import static com.intuit.wasabi.authorizationobjects.Permission.ADMIN;
 import static com.intuit.wasabi.authorizationobjects.Role.toRole;
@@ -146,7 +154,7 @@ public class AuthorizationResource {
                                           final Username userID,
 
                                           @PathParam("applicationName")
-                                          @ApiParam(value="Application Name")
+                                          @ApiParam(value = "Application Name")
                                           final Application.Name applicationName,
 
                                           @HeaderParam(AUTHORIZATION)
@@ -192,7 +200,7 @@ public class AuthorizationResource {
      * @param userID
      * @param authorizationHeader
      * @return Response object
-    */
+     */
     @GET
     @Path("/users/{userID}/roles")
     @Produces(APPLICATION_JSON)
@@ -252,11 +260,11 @@ public class AuthorizationResource {
     }
 
     private List<Map> updateUserRole(@ApiParam(required = true)
-                                     UserRoleList userRoleList,
+                                             UserRoleList userRoleList,
 
                                      @HeaderParam(AUTHORIZATION)
                                      @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                     String authorizationHeader) {
+                                             String authorizationHeader) {
         Username subject = authorization.getUser(authorizationHeader);
         UserInfo admin = authorization.getUserInfo(subject);
         List<Map> status = newArrayList();
@@ -355,7 +363,7 @@ public class AuthorizationResource {
     @Timed
     public Response getUserList(@HeaderParam(AUTHORIZATION)
                                 @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                String authHeader) {
+                                        String authHeader) {
 
         UserInfo.Username subject = authorization.getUser(authHeader);
 

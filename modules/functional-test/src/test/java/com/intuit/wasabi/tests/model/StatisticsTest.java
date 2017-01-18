@@ -19,8 +19,6 @@
 package com.intuit.wasabi.tests.model;
 
 import com.google.common.base.Joiner;
-import com.google.gson.JsonObject;
-import com.intuit.wasabi.tests.data.SharedExperimentDataProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -34,13 +32,13 @@ public class StatisticsTest {
     private OutputBucketStatistics currentStatistics;
 
     @Before
-    public void setup(){
+    public void setup() {
         currentStatistics = new OutputBucketStatistics("test");
     }
 
 
     @Test
-    public void increaseActionCountTest(){
+    public void increaseActionCountTest() {
         Map<String, Integer> jsonObject1 = new HashMap<>();
         jsonObject1.put("click", 2);
         jsonObject1.put("impression", 2);

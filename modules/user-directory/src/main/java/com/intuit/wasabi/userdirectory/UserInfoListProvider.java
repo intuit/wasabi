@@ -20,7 +20,7 @@ public class UserInfoListProvider implements Provider<List<UserInfo>> {
     private final List<UserInfo> users = new ArrayList<>();
 
     @Inject
-    public UserInfoListProvider(@Named("userDirectoryPath") String userDirectoryPath){
+    public UserInfoListProvider(@Named("userDirectoryPath") String userDirectoryPath) {
         Properties properties = create(userDirectoryPath, UserDirectoryModule.class);
         String userIds = getProperty("user.ids", properties);
         for (String userId : userIds.split(":")) {

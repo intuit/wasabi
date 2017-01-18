@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,8 +27,13 @@ import com.intuit.wasabi.experiment.Buckets;
 import com.intuit.wasabi.experiment.Experiments;
 import com.intuit.wasabi.experiment.Pages;
 import com.intuit.wasabi.experiment.Priorities;
-import com.intuit.wasabi.experimentobjects.*;
+import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.experimentobjects.BucketList;
+import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.Experiment.ExperimentAuditInfo;
+import com.intuit.wasabi.experimentobjects.ExperimentList;
+import com.intuit.wasabi.experimentobjects.ExperimentValidator;
+import com.intuit.wasabi.experimentobjects.NewExperiment;
 import com.intuit.wasabi.repository.CassandraRepository;
 import com.intuit.wasabi.repository.DatabaseRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
@@ -40,7 +45,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static com.intuit.wasabi.experimentobjects.Experiment.State.*;
+import static com.intuit.wasabi.experimentobjects.Experiment.State.DELETED;
+import static com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT;
+import static com.intuit.wasabi.experimentobjects.Experiment.State.PAUSED;
+import static com.intuit.wasabi.experimentobjects.Experiment.State.RUNNING;
+import static com.intuit.wasabi.experimentobjects.Experiment.State.TERMINATED;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**

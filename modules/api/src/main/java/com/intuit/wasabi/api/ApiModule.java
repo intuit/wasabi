@@ -76,19 +76,31 @@ public class ApiModule extends AbstractModule {
         bind(ExceptionJsonifier.class).in(SINGLETON);
 
         // Bind comparators and filters for pagination
-        bind(new TypeLiteral<PaginationComparator<AuditLogEntry>>(){}).to(new TypeLiteral<AuditLogEntryComparator>(){});
-        bind(new TypeLiteral<PaginationFilter<AuditLogEntry>>(){}).to(new TypeLiteral<AuditLogEntryFilter>(){});
-        bind(new TypeLiteral<PaginationComparator<Experiment>>(){}).to(new TypeLiteral<ExperimentComparator>(){});
-        bind(new TypeLiteral<PaginationFilter<Experiment>>(){}).to(new TypeLiteral<ExperimentFilter>(){});
-        bind(new TypeLiteral<PaginationFilter<ExperimentDetail>>(){}).to(new TypeLiteral<ExperimentDetailFilter>(){});
-        bind(new TypeLiteral<PaginationComparator<ExperimentDetail>>(){}).to(new TypeLiteral<ExperimentDetailComparator>(){});
+        bind(new TypeLiteral<PaginationComparator<AuditLogEntry>>() {
+        }).to(new TypeLiteral<AuditLogEntryComparator>() {
+        });
+        bind(new TypeLiteral<PaginationFilter<AuditLogEntry>>() {
+        }).to(new TypeLiteral<AuditLogEntryFilter>() {
+        });
+        bind(new TypeLiteral<PaginationComparator<Experiment>>() {
+        }).to(new TypeLiteral<ExperimentComparator>() {
+        });
+        bind(new TypeLiteral<PaginationFilter<Experiment>>() {
+        }).to(new TypeLiteral<ExperimentFilter>() {
+        });
+        bind(new TypeLiteral<PaginationFilter<ExperimentDetail>>() {
+        }).to(new TypeLiteral<ExperimentDetailFilter>() {
+        });
+        bind(new TypeLiteral<PaginationComparator<ExperimentDetail>>() {
+        }).to(new TypeLiteral<ExperimentDetailComparator>() {
+        });
 
     }
-    
+
     protected void installUserModule() {
         install(new UserDirectoryModule());
     }
-    
+
     protected void installAuthModule() {
         install(new AuthorizationModule());
     }
@@ -96,7 +108,7 @@ public class ApiModule extends AbstractModule {
     protected void installEventModule() {
         install(new EventsModule());
     }
-    
+
     private void installModules() {
         LOGGER.debug("installing module: {}", ApiModule.class.getCanonicalName());
 

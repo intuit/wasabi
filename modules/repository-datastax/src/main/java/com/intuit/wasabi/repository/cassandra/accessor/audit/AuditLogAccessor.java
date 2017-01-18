@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,8 +34,8 @@ public interface AuditLogAccessor {
      *
      * @return a list of auditlog entries
      */
-	@Query("SELECT * FROM auditlog")
-	Result<AuditLog> getCompleteAuditLogEntryList();
+    @Query("SELECT * FROM auditlog")
+    Result<AuditLog> getCompleteAuditLogEntryList();
 
     /**
      * Retrieves a limited list of AuditLogEntries for all application and global events.
@@ -43,8 +43,8 @@ public interface AuditLogAccessor {
      * @param limit the items retrieved limit
      * @return a list of auditlog AuditLogEntries
      */
-	@Query("SELECT * FROM auditlog limit ?")
-	Result<AuditLog> getCompleteAuditLogEntryList(int limit);
+    @Query("SELECT * FROM auditlog limit ?")
+    Result<AuditLog> getCompleteAuditLogEntryList(int limit);
 
     /**
      * Retrieves the complete list of AuditLogEntries for a specified application.
@@ -84,12 +84,12 @@ public interface AuditLogAccessor {
      * @param propertyAfter property after change
      */
     @Query("INSERT INTO auditlog ( event_id, application_name, time, action, "
-                + "user_firstname, user_lastname, user_email, user_username, user_userid, "
-                + "experiment_id, experiment_label, bucket_label, "
-                + "changed_property, property_before, property_after )"
-                + " VALUES ( uuid(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )")
+            + "user_firstname, user_lastname, user_email, user_username, user_userid, "
+            + "experiment_id, experiment_label, bucket_label, "
+            + "changed_property, property_before, property_after )"
+            + " VALUES ( uuid(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )")
     void storeEntry(String applicationName, Date time, String action,
-    		String firstName, String lastName, String email, String userName, String userId,
-    		UUID experimentId, String experimentLabel, String bucketLabel,
-    		String changedProperty, String propertyBefore, String propertyAfter);
+                    String firstName, String lastName, String email, String userName, String userId,
+                    UUID experimentId, String experimentLabel, String bucketLabel,
+                    String changedProperty, String propertyBefore, String propertyAfter);
 }

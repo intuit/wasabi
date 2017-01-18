@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -204,7 +204,8 @@ public abstract class PaginationFilter<T> implements Predicate<T> {
      * @param <V> the property enum type
      * @return the test result
      */
-    /*test*/ final <V extends Enum<V> & PaginationFilterProperty> boolean testFields(T object, Class<V> enumType) {
+    /*test*/
+    final <V extends Enum<V> & PaginationFilterProperty> boolean testFields(T object, Class<V> enumType) {
         try (Scanner filterScanner = new Scanner(getKeyValuePartOfFilter(filter))) {
             filterScanner.useDelimiter(DELIMITER);
 
@@ -239,7 +240,8 @@ public abstract class PaginationFilter<T> implements Predicate<T> {
      * @param <V> the property value enum type
      * @return the test result
      */
-    /*test*/ final <V extends Enum<V> & PaginationFilterProperty> boolean testFulltext(T object, Class<V> enumType) {
+    /*test*/
+    final <V extends Enum<V> & PaginationFilterProperty> boolean testFulltext(T object, Class<V> enumType) {
         return Arrays.asList(enumType.getEnumConstants()).parallelStream()
                 .filter(field -> !excludeFromFulltext.contains(field))
                 .anyMatch(field -> filterByProperty(object,
@@ -262,7 +264,8 @@ public abstract class PaginationFilter<T> implements Predicate<T> {
      * @param <V> the type of the object's property
      * @return false for failures and null-properties, otherwise the return value of the {@code filterFunction}
      */
-    /*test*/ final <V> boolean filterByProperty(T object, String filterValue, Function<T, V> propertyExtractor, BiPredicate<V, String> filterFunction) {
+    /*test*/
+    final <V> boolean filterByProperty(T object, String filterValue, Function<T, V> propertyExtractor, BiPredicate<V, String> filterFunction) {
         V property;
         try {
             property = propertyExtractor.apply(object);
@@ -281,7 +284,8 @@ public abstract class PaginationFilter<T> implements Predicate<T> {
      * @param <V> the property enum type
      * @return the modified or untouched value
      */
-    /*test*/ final <V extends Enum<V> & PaginationFilterProperty> String modifyFilterForKey(V key, String value) {
+    /*test*/
+    final <V extends Enum<V> & PaginationFilterProperty> String modifyFilterForKey(V key, String value) {
         return filterModifiers.containsKey(key) ? filterModifiers.get(key).apply(value, this) : value;
     }
 
@@ -299,7 +303,8 @@ public abstract class PaginationFilter<T> implements Predicate<T> {
      * @param filter the filter
      * @return the key-value part of the filter
      */
-    /*test*/ final String getKeyValuePartOfFilter(String filter) {
+    /*test*/
+    final String getKeyValuePartOfFilter(String filter) {
         if (filter == null) {
             return "";
         }
@@ -330,7 +335,8 @@ public abstract class PaginationFilter<T> implements Predicate<T> {
      * @param filter the filter
      * @return the fulltext part of the filter
      */
-    /*test*/ final String getFulltextPartOfFilter(String filter) {
+    /*test*/
+    final String getFulltextPartOfFilter(String filter) {
         if (filter == null) {
             return "";
         }

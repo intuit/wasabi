@@ -27,15 +27,16 @@ import java.util.List;
 
 public class CombinableDataProvider {
     private final Logger logger = LoggerFactory.getLogger(CombinableDataProvider.class);
+
     /**
      * Returns the list of combination of color and shape codes.
      *
      * @return the collection of combined color and shape codes.
      */
-    public static Object[][] combine(Object[][] a1, Object[][] a2){
+    public static Object[][] combine(Object[][] a1, Object[][] a2) {
         List<Object[]> combined = new LinkedList<>();
-        for(Object[] o : a1){
-            for(Object[] o2 : a2){
+        for (Object[] o : a1) {
+            for (Object[] o2 : a2) {
                 combined.add(concatAll(o, o2));
             }
         }

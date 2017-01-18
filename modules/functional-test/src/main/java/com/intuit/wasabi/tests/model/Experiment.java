@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,9 +16,9 @@
 package com.intuit.wasabi.tests.model;
 
 import com.intuit.wasabi.tests.library.util.Constants;
+import com.intuit.wasabi.tests.library.util.TestUtils;
 import com.intuit.wasabi.tests.library.util.serialstrategies.DefaultNameExclusionStrategy;
 import com.intuit.wasabi.tests.library.util.serialstrategies.SerializationStrategy;
-import com.intuit.wasabi.tests.library.util.TestUtils;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -133,7 +133,7 @@ public class Experiment extends ModelItem {
      */
     public Experiment(String label, Application application, String startTime, String endTime,
                       double samplingPercent) {
-        this(label, application, startTime, endTime, samplingPercent, null, null, false , "", "", false, 0, null);
+        this(label, application, startTime, endTime, samplingPercent, null, null, false, "", "", false, 0, null);
     }
 
     /**
@@ -419,7 +419,7 @@ public class Experiment extends ModelItem {
      * @param isPersonalizationEnabled enable the personalization
      * @return this
      */
-    public Experiment setIsPersonalizationEnabled (Boolean isPersonalizationEnabled) {
+    public Experiment setIsPersonalizationEnabled(Boolean isPersonalizationEnabled) {
         this.isPersonalizationEnabled = isPersonalizationEnabled;
         return this;
     }
@@ -430,7 +430,7 @@ public class Experiment extends ModelItem {
      * @param modelName the model name
      * @return this
      */
-    public Experiment setModelName (String modelName) {
+    public Experiment setModelName(String modelName) {
         this.modelName = modelName;
         return this;
     }
@@ -441,7 +441,7 @@ public class Experiment extends ModelItem {
      * @param modelVersion the model version
      * @return this
      */
-    public Experiment setModelVersion (String modelVersion) {
+    public Experiment setModelVersion(String modelVersion) {
         this.modelVersion = modelVersion;
         return this;
     }

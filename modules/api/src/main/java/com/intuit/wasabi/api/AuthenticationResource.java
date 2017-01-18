@@ -24,7 +24,15 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
 import static com.intuit.wasabi.api.APISwaggerResource.EXAMPLE_AUTHORIZATION_HEADER;
@@ -53,6 +61,7 @@ public class AuthenticationResource {
 
     /**
      * Log in user
+     *
      * @param authorizationHeader
      * @param grantType
      * @return Response object
@@ -82,6 +91,7 @@ public class AuthenticationResource {
 
     /**
      * Verify token
+     *
      * @param tokenHeader
      * @return Response object
      */
@@ -98,6 +108,7 @@ public class AuthenticationResource {
 
     /**
      * Log out user
+     *
      * @param tokenHeader
      * @return Response object
      */
@@ -115,9 +126,10 @@ public class AuthenticationResource {
 
     /**
      * Check if user exists
+     *
      * @param userEmail Email of the user
-      * @return Response object
-    */
+     * @return Response object
+     */
     @GET
     @Path("/users/{userEmail}")
     @Produces(APPLICATION_JSON)

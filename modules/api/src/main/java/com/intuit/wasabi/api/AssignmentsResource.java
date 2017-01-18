@@ -24,24 +24,34 @@ import com.intuit.wasabi.assignmentobjects.Assignment;
 import com.intuit.wasabi.assignmentobjects.SegmentationProfile;
 import com.intuit.wasabi.assignmentobjects.User;
 import com.intuit.wasabi.exceptions.AssignmentNotFoundException;
-import com.intuit.wasabi.experimentobjects.*;
+import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Bucket.Label;
-
+import com.intuit.wasabi.experimentobjects.Context;
+import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.experimentobjects.ExperimentBatch;
+import com.intuit.wasabi.experimentobjects.Page;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-
-import javax.ws.rs.*;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-
 import org.slf4j.Logger;
 
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newHashMap;
-import static com.intuit.wasabi.api.APISwaggerResource.*;
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_LABELLIST;
 import static com.intuit.wasabi.assignmentobjects.Assignment.Status.EXPERIMENT_EXPIRED;
 import static java.lang.Boolean.FALSE;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -70,7 +80,7 @@ public class AssignmentsResource {
      * Returns a bucket assignment (bucket label) for the specified user within the context of
      * a specific application and experiment, if the user is chosen to be assigned to the experiment based on the
      * probability of sampling percent. Otherwise returns a null assignment for the specified user.
-     *
+     * <p>
      * By default, creates the bucket assignment if one does not exist. Otherwise set {@code createAssignment} to false.
      *
      * @param applicationName       the unique application id
@@ -92,45 +102,45 @@ public class AssignmentsResource {
                     "for this experiment.  Return null if the user is not in the experiment.")
     @Timed
     public Response getAssignment(
-                                    @PathParam("applicationName")
-                                    @ApiParam(value = "Application Name")
-                                    final Application.Name applicationName,
+            @PathParam("applicationName")
+            @ApiParam(value = "Application Name")
+            final Application.Name applicationName,
 
-                                    @PathParam("experimentLabel")
-                                    @ApiParam(value = "Experiment Label")
-                                    final Experiment.Label experimentLabel,
+            @PathParam("experimentLabel")
+            @ApiParam(value = "Experiment Label")
+            final Experiment.Label experimentLabel,
 
-                                    @PathParam("userID")
-                                    @ApiParam(value = "User(customer) ID")
-                                    final User.ID userID,
+            @PathParam("userID")
+            @ApiParam(value = "User(customer) ID")
+            final User.ID userID,
 
-                                    @QueryParam("context")
-                                    @DefaultValue("PROD")
-                                    @ApiParam(value = "context for the experiment, e.g. PROD, QA")
-                                    final Context context,
+            @QueryParam("context")
+            @DefaultValue("PROD")
+            @ApiParam(value = "context for the experiment, e.g. PROD, QA")
+            final Context context,
 
-                                    @QueryParam("createAssignment")
-                                    @DefaultValue("true")
-                                    @ApiParam(value = "whether an assignment should be generated if one doesn't exist",
-                                            defaultValue = "true")
-                                    final Boolean createAssignment,
+            @QueryParam("createAssignment")
+            @DefaultValue("true")
+            @ApiParam(value = "whether an assignment should be generated if one doesn't exist",
+                    defaultValue = "true")
+            final Boolean createAssignment,
 
-                                    @QueryParam("ignoreSamplingPercent")
-                                    @DefaultValue("false")
-                                    @ApiParam(value = "whether the sampling percent for the experiment should be ignored, " +
-                                            "forcing the user into the experiment (if eligible)",
-                                            defaultValue = "false")
-                                    final Boolean ignoreSamplingPercent,
+            @QueryParam("ignoreSamplingPercent")
+            @DefaultValue("false")
+            @ApiParam(value = "whether the sampling percent for the experiment should be ignored, " +
+                    "forcing the user into the experiment (if eligible)",
+                    defaultValue = "false")
+            final Boolean ignoreSamplingPercent,
 
-                                    @javax.ws.rs.core.Context
-                                    final HttpHeaders headers) {
-    	if ( LOGGER.isDebugEnabled()) {
-    		LOGGER.debug("getAssignment userID={}, applicationName={}, experimentLabel={}, context={}, createAssignment={}" +
-                                    ", ignoreSamplingPercent={}, headers={}", userID, applicationName, experimentLabel, context, createAssignment,
-                                    ignoreSamplingPercent, headers);
-    	}
-    	
-    	Assignment assignment = getAssignment(userID, applicationName, experimentLabel, context, createAssignment,
+            @javax.ws.rs.core.Context
+            final HttpHeaders headers) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("getAssignment userID={}, applicationName={}, experimentLabel={}, context={}, createAssignment={}" +
+                            ", ignoreSamplingPercent={}, headers={}", userID, applicationName, experimentLabel, context, createAssignment,
+                    ignoreSamplingPercent, headers);
+        }
+
+        Assignment assignment = getAssignment(userID, applicationName, experimentLabel, context, createAssignment,
                 ignoreSamplingPercent, null, headers);
 
         return httpHeader.headers().entity(toMap(assignment)).build();
@@ -175,49 +185,49 @@ public class AssignmentsResource {
                     "Forces the user to be in the experiment (if eligible based on profile).")
     @Timed
     public Response postAssignment(
-                                    @PathParam("applicationName")
-                                    @ApiParam(value = "Application Name")
-                                    final Application.Name applicationName,
+            @PathParam("applicationName")
+            @ApiParam(value = "Application Name")
+            final Application.Name applicationName,
 
-                                    @PathParam("experimentLabel")
-                                    @ApiParam(value = "Experiment Label")
-                                    final Experiment.Label experimentLabel,
+            @PathParam("experimentLabel")
+            @ApiParam(value = "Experiment Label")
+            final Experiment.Label experimentLabel,
 
-                                    @PathParam("userID")
-                                    @ApiParam(value = "User(customer) ID")
-                                    final User.ID userID,
+            @PathParam("userID")
+            @ApiParam(value = "User(customer) ID")
+            final User.ID userID,
 
-                                    @QueryParam("createAssignment")
-                                    @DefaultValue("true")
-                                    @ApiParam(value = "whether an assignment should be generated if one doesn't exist",
-                                            defaultValue = "true")
-                                    final Boolean createAssignment,
+            @QueryParam("createAssignment")
+            @DefaultValue("true")
+            @ApiParam(value = "whether an assignment should be generated if one doesn't exist",
+                    defaultValue = "true")
+            final Boolean createAssignment,
 
-                                    @QueryParam("ignoreSamplingPercent")
-                                    @DefaultValue("false")
-                                    @ApiParam(value = "whether the sampling percent for the experiment should be ignored, " +
-                                            "forcing the user into the experiment (if eligible)",
-                                            defaultValue = "false")
-                                    final Boolean ignoreSamplingPercent,
+            @QueryParam("ignoreSamplingPercent")
+            @DefaultValue("false")
+            @ApiParam(value = "whether the sampling percent for the experiment should be ignored, " +
+                    "forcing the user into the experiment (if eligible)",
+                    defaultValue = "false")
+            final Boolean ignoreSamplingPercent,
 
-                                    @QueryParam("context")
-                                    @DefaultValue("PROD")
-                                    @ApiParam(value = "context for the experiment, e.g. PROD, QA")
-                                    final Context context,
+            @QueryParam("context")
+            @DefaultValue("PROD")
+            @ApiParam(value = "context for the experiment, e.g. PROD, QA")
+            final Context context,
 
-                                    @ApiParam(name = "segmentationProfile", value = "Segmentation Profile")
-                                    final SegmentationProfile segmentationProfile,
+            @ApiParam(name = "segmentationProfile", value = "Segmentation Profile")
+            final SegmentationProfile segmentationProfile,
 
-                                    @javax.ws.rs.core.Context
-                                    final HttpHeaders headers) {
-    	if ( LOGGER.isDebugEnabled()) {
-    		LOGGER.debug("postAssignment userID={}, applicationName={}, experimentLabel={}, context={}, createAssignment={}" +
-                                    ", ignoreSamplingPercent={}, segmentationProfile={}, headers={}", userID, applicationName, 
-                                    experimentLabel, context, createAssignment,
-                                    ignoreSamplingPercent, segmentationProfile, headers);
-    	}
+            @javax.ws.rs.core.Context
+            final HttpHeaders headers) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("postAssignment userID={}, applicationName={}, experimentLabel={}, context={}, createAssignment={}" +
+                            ", ignoreSamplingPercent={}, segmentationProfile={}, headers={}", userID, applicationName,
+                    experimentLabel, context, createAssignment,
+                    ignoreSamplingPercent, segmentationProfile, headers);
+        }
 
-    	Assignment assignment = getAssignment(userID, applicationName, experimentLabel, context, createAssignment,
+        Assignment assignment = getAssignment(userID, applicationName, experimentLabel, context, createAssignment,
                 ignoreSamplingPercent, segmentationProfile, headers);
 
         return httpHeader.headers().entity(toMap(assignment)).build();
@@ -227,12 +237,12 @@ public class AssignmentsResource {
      * Returns a bucket assignment for the specified user within the context of
      * one application and several experiments of an application
      *
-     * @param applicationName the application name
-     * @param userID          the current user id
-     * @param context         the context string
-     * @param createAssignment          the boolean flag to create
-     * @param experimentBatch the experiment batch expone, exptwo
-     * @param headers         the authorization headers
+     * @param applicationName  the application name
+     * @param userID           the current user id
+     * @param context          the context string
+     * @param createAssignment the boolean flag to create
+     * @param experimentBatch  the experiment batch expone, exptwo
+     * @param headers          the authorization headers
      * @return Response object
      */
     @POST
@@ -265,12 +275,12 @@ public class AssignmentsResource {
 
                                         @javax.ws.rs.core.Context
                                         final HttpHeaders headers) {
-    	if ( LOGGER.isDebugEnabled()) {
-    		LOGGER.debug("getBatchAssignment userID={}, applicationName={}, context={}, createAssignment={}" +
-                                    ", headers={}, experimentBatch={}", userID, applicationName, context, createAssignment,
-                                    headers, experimentBatch);
-    	}
-    	
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("getBatchAssignment userID={}, applicationName={}, context={}, createAssignment={}" +
+                            ", headers={}, experimentBatch={}", userID, applicationName, context, createAssignment,
+                    headers, experimentBatch);
+        }
+
         List<Map> myAssignments = assignments.doBatchAssignments(userID, applicationName, context, createAssignment, FALSE,
                 headers, experimentBatch, null, null);
 
@@ -280,7 +290,7 @@ public class AssignmentsResource {
     /**
      * Specify a bucket assignment for the specified user within the context of
      * a specific application and experiment.
-     *
+     * <p>
      * Cannot use when the experiment is in DRAFT state because the buckets may change.
      *
      * @param applicationName the unique application id
@@ -299,30 +309,30 @@ public class AssignmentsResource {
             notes = "Set assignment to null if the user is not in the experiment.")*/
     @Timed
     public Response updateAssignment(
-                                    @PathParam("applicationName")
-                                    @ApiParam(value = "Application Name")
-                                    final Application.Name applicationName,
+            @PathParam("applicationName")
+            @ApiParam(value = "Application Name")
+            final Application.Name applicationName,
 
-                                    @PathParam("experimentLabel")
-                                    @ApiParam(value = "Experiment Label")
-                                    final Experiment.Label experimentLabel,
+            @PathParam("experimentLabel")
+            @ApiParam(value = "Experiment Label")
+            final Experiment.Label experimentLabel,
 
-                                    @PathParam("userID")
-                                    @ApiParam(value = "User ID")
-                                    final User.ID userID,
+            @PathParam("userID")
+            @ApiParam(value = "User ID")
+            final User.ID userID,
 
-                                    @ApiParam(value = "Submitted Data")
-                                    final Map<String, Object> submittedData,
+            @ApiParam(value = "Submitted Data")
+            final Map<String, Object> submittedData,
 
-                                    @QueryParam("context")
-                                    @DefaultValue("PROD")
-                                    @ApiParam(value = "context for the experiment, eg \"QA\", \"PROD\"")
-                                    final Context context) {
-    	if ( LOGGER.isDebugEnabled()) {
-    		LOGGER.debug("udpateAssignment userID={}, applicationName={}, experimentLabel={}, context={}, "
-    				+ "submittedDatat={}", userID, applicationName, experimentLabel, context, submittedData);
-    	}
-    	
+            @QueryParam("context")
+            @DefaultValue("PROD")
+            @ApiParam(value = "context for the experiment, eg \"QA\", \"PROD\"")
+            final Context context) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("udpateAssignment userID={}, applicationName={}, experimentLabel={}, context={}, "
+                    + "submittedDatat={}", userID, applicationName, experimentLabel, context, submittedData);
+        }
+
         if (submittedData == null) {
             throw new IllegalArgumentException("Assignment JSON not found in request body");
         }
@@ -367,45 +377,45 @@ public class AssignmentsResource {
             notes = "If you want to pass segmentation information, use the POST-Call for this method")
     @Timed
     public Response getBatchAssignmentForPage(
-                                            @PathParam("applicationName")
-                                            @ApiParam(value = "Application Name")
-                                            final Application.Name applicationName,
+            @PathParam("applicationName")
+            @ApiParam(value = "Application Name")
+            final Application.Name applicationName,
 
-                                            @PathParam("pageName")
-                                            @ApiParam(value = "Page Name")
-                                            final Page.Name pageName,
+            @PathParam("pageName")
+            @ApiParam(value = "Page Name")
+            final Page.Name pageName,
 
-                                            @PathParam("userID")
-                                            @ApiParam(value = "User(customer) ID")
-                                            final User.ID userID,
+            @PathParam("userID")
+            @ApiParam(value = "User(customer) ID")
+            final User.ID userID,
 
-                                            @QueryParam("createAssignment")
-                                            @DefaultValue("true")
-                                            @ApiParam(value = "conditional to generate an assignment if one doesn't exist",
-                                                    defaultValue = "true")
-                                            final boolean createAssignment,
+            @QueryParam("createAssignment")
+            @DefaultValue("true")
+            @ApiParam(value = "conditional to generate an assignment if one doesn't exist",
+                    defaultValue = "true")
+            final boolean createAssignment,
 
-                                            @QueryParam("ignoreSamplingPercent")
-                                            @DefaultValue("false")
-                                            @ApiParam(value = "whether the sampling percent for the experiment should be ignored, " +
-                                                    "forcing the user into the experiment (if eligible)",
-                                                    defaultValue = "false")
-                                            final boolean ignoreSamplingPercent,
+            @QueryParam("ignoreSamplingPercent")
+            @DefaultValue("false")
+            @ApiParam(value = "whether the sampling percent for the experiment should be ignored, " +
+                    "forcing the user into the experiment (if eligible)",
+                    defaultValue = "false")
+            final boolean ignoreSamplingPercent,
 
-                                            @QueryParam("context")
-                                            @DefaultValue("PROD")
-                                            @ApiParam(value = "context for the experiment, eg QA, PROD")
-                                            final Context context,
+            @QueryParam("context")
+            @DefaultValue("PROD")
+            @ApiParam(value = "context for the experiment, eg QA, PROD")
+            final Context context,
 
-                                            @javax.ws.rs.core.Context
-                                            HttpHeaders headers) {
-    	if ( LOGGER.isDebugEnabled()) {
-    		LOGGER.debug("getBatchAssignmentsForPage applicationName={}, pageName={}, userID={}, context={}, createAssignment={}" +
-                                    ", ignoreSamplingPercent={}, headers={}", applicationName, pageName, userID, context, createAssignment,
-                                    ignoreSamplingPercent, headers);
-    	}
+            @javax.ws.rs.core.Context
+                    HttpHeaders headers) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("getBatchAssignmentsForPage applicationName={}, pageName={}, userID={}, context={}, createAssignment={}" +
+                            ", ignoreSamplingPercent={}, headers={}", applicationName, pageName, userID, context, createAssignment,
+                    ignoreSamplingPercent, headers);
+        }
 
-    	List<Map> assignmentsFromPage = assignments.doPageAssignments(applicationName, pageName, userID, context,
+        List<Map> assignmentsFromPage = assignments.doPageAssignments(applicationName, pageName, userID, context,
                 createAssignment, ignoreSamplingPercent, headers, null);
 
         return httpHeader.headers()
@@ -432,46 +442,46 @@ public class AssignmentsResource {
             notes = "The mutual exclusion and segmentation rules apply")
     @Timed
     public Response postBatchAssignmentForPage(
-                                            @PathParam("applicationName")
-                                            @ApiParam(value = "Application Name")
-                                            final Application.Name applicationName,
+            @PathParam("applicationName")
+            @ApiParam(value = "Application Name")
+            final Application.Name applicationName,
 
-                                            @PathParam("pageName")
-                                            @ApiParam("Page Name")
-                                            Page.Name pageName,
+            @PathParam("pageName")
+            @ApiParam("Page Name")
+                    Page.Name pageName,
 
-                                            @PathParam("userID")
-                                            @ApiParam(value = "User(customer) ID")
-                                            final User.ID userID,
+            @PathParam("userID")
+            @ApiParam(value = "User(customer) ID")
+            final User.ID userID,
 
-                                            @QueryParam("createAssignment")
-                                            @DefaultValue("true")
-                                            @ApiParam(value = "conditional to generate an assignment if one doesn't exist",
-                                                    defaultValue = "true")
-                                            final boolean createAssignment,
+            @QueryParam("createAssignment")
+            @DefaultValue("true")
+            @ApiParam(value = "conditional to generate an assignment if one doesn't exist",
+                    defaultValue = "true")
+            final boolean createAssignment,
 
-                                            @QueryParam("ignoreSamplingPercent")
-                                            @DefaultValue("false")
-                                            @ApiParam(value = "whether the sampling percent for the experiment should be ignored, " +
-                                                    "forcing the user into the experiment (if eligible)",
-                                                    defaultValue = "false")
-                                            final boolean ignoreSamplingPercent,
+            @QueryParam("ignoreSamplingPercent")
+            @DefaultValue("false")
+            @ApiParam(value = "whether the sampling percent for the experiment should be ignored, " +
+                    "forcing the user into the experiment (if eligible)",
+                    defaultValue = "false")
+            final boolean ignoreSamplingPercent,
 
-                                            @QueryParam("context")
-                                            @DefaultValue("PROD")
-                                            @ApiParam(value = "context for the experiment, eg QA, PROD")
-                                            final Context context,
+            @QueryParam("context")
+            @DefaultValue("PROD")
+            @ApiParam(value = "context for the experiment, eg QA, PROD")
+            final Context context,
 
-                                            @ApiParam(value = "Segmentation Profile")
-                                            final SegmentationProfile segmentationProfile,
+            @ApiParam(value = "Segmentation Profile")
+            final SegmentationProfile segmentationProfile,
 
-                                            @javax.ws.rs.core.Context final HttpHeaders headers) {
-    	
-    	if ( LOGGER.isDebugEnabled()) {
-    		LOGGER.debug("postBatchAssignmentForPage applicationName={}, pageName={}, userID={}, context={}, createAssignment={}" +
-                                    ", ignoreSamplingPercent={}, headers={}, segmentationProfile={}", applicationName, 
-                                    pageName, userID, context, createAssignment, ignoreSamplingPercent, headers, segmentationProfile);
-    	}
+            @javax.ws.rs.core.Context final HttpHeaders headers) {
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("postBatchAssignmentForPage applicationName={}, pageName={}, userID={}, context={}, createAssignment={}" +
+                            ", ignoreSamplingPercent={}, headers={}, segmentationProfile={}", applicationName,
+                    pageName, userID, context, createAssignment, ignoreSamplingPercent, headers, segmentationProfile);
+        }
 
         List<Map> assignmentsFromPage = assignments.doPageAssignments(applicationName, pageName, userID, context,
                 createAssignment, ignoreSamplingPercent, headers, segmentationProfile);
@@ -497,24 +507,24 @@ public class AssignmentsResource {
     @ApiOperation(value = "Test the segmentation rule of an experiment")
     @Timed
     public Response postAssignmentRuleTest(
-                                            @PathParam("applicationName")
-                                            @ApiParam(value = "Application Name")
-                                            final Application.Name applicationName,
+            @PathParam("applicationName")
+            @ApiParam(value = "Application Name")
+            final Application.Name applicationName,
 
-                                            @PathParam("experimentLabel")
-                                            @ApiParam(value = "Experiment Label")
-                                            final Experiment.Label experimentLabel,
+            @PathParam("experimentLabel")
+            @ApiParam(value = "Experiment Label")
+            final Experiment.Label experimentLabel,
 
-                                            @QueryParam("context")
-                                            @DefaultValue("PROD")
-                                            @ApiParam(value = "context for the experiment, eg QA, PROD")
-                                            final Context context,
+            @QueryParam("context")
+            @DefaultValue("PROD")
+            @ApiParam(value = "context for the experiment, eg QA, PROD")
+            final Context context,
 
-                                            @ApiParam(name = "segmentationProfile", value = "Segmentation Profile")
-                                            final SegmentationProfile segmentationProfile,
+            @ApiParam(name = "segmentationProfile", value = "Segmentation Profile")
+            final SegmentationProfile segmentationProfile,
 
-                                            @javax.ws.rs.core.Context
-                                            final HttpHeaders headers) {
+            @javax.ws.rs.core.Context
+            final HttpHeaders headers) {
         boolean ruleResult = assignments.doSegmentTest(applicationName, experimentLabel, context, segmentationProfile,
                 headers);
 

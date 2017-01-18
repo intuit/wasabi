@@ -23,7 +23,7 @@ public class UninterruptibleUtil {
         }
     }
 
-    public static <T> Result<T> getUninterruptibly(ListenableFuture<Result<T>> aFuture)  {
+    public static <T> Result<T> getUninterruptibly(ListenableFuture<Result<T>> aFuture) {
         try {
             return Uninterruptibles.getUninterruptibly(aFuture);
         } catch (ExecutionException e) {

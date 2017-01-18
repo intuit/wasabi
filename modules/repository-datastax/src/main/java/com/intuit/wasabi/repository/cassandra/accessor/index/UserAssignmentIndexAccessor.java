@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,16 +29,16 @@ import java.util.UUID;
  */
 @Accessor
 public interface UserAssignmentIndexAccessor {
-	
-	/**
-	 * Insert record into table based on attributes
-	 * @param uuid
-	 * @param userId
-	 * @param context
-	 * @param created
-	 * @param bucketLabel
-	 * @return resultSet
-	 */
+
+    /**
+     * Insert record into table based on attributes
+     * @param uuid
+     * @param userId
+     * @param context
+     * @param created
+     * @param bucketLabel
+     * @return resultSet
+     */
     @Query("insert into user_assignment_by_userid (experiment_id, user_id, context, created, bucket_label)" +
             " values (?, ?, ?, ?, ?)")
     ResultSet insertBy(UUID uuid, String userId, String context, Date created, String bucketLabel);
@@ -55,25 +55,25 @@ public interface UserAssignmentIndexAccessor {
             " values (?, ?, ?, ?)")
     ResultSet insertBy(UUID uuid, String userId, String context, Date created);
 
-	/**
-	 * Get rows by parameters
-	 * @param experimentId
-	 * @param userId
-	 * @param context
-	 * @return result
-	 */
+    /**
+     * Get rows by parameters
+     * @param experimentId
+     * @param userId
+     * @param context
+     * @return result
+     */
     @Query("select * from user_assignment_by_userid where experiment_id = ? and user_id = ? and context = ?")
     Result<UserAssignmentByUserId> selectBy(UUID experimentId, String userId, String context);
 
 
-	/**
-	 * delete rows by parameters
-	 * @param userId
-	 * @param context
-	 * @param experimentId
-	 * @return resultSet
-	 */
-	@Query("delete from user_assignment_by_userid where user_id = ? and context = ? and experiment_id = ?")
-	ResultSet deleteBy(String userId, String context, UUID experimentId);
+    /**
+     * delete rows by parameters
+     * @param userId
+     * @param context
+     * @param experimentId
+     * @return resultSet
+     */
+    @Query("delete from user_assignment_by_userid where user_id = ? and context = ? and experiment_id = ?")
+    ResultSet deleteBy(String userId, String context, UUID experimentId);
 
 }

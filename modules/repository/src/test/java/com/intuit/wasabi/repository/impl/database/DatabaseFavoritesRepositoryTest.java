@@ -15,8 +15,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.*;
-
 /**
  * Tests for {@link DatabaseFavoritesRepository}.
  */
@@ -110,7 +108,7 @@ public class DatabaseFavoritesRepositoryTest {
             Map<String, byte[]> row = new HashMap<>();
             byte[] id = new byte[16];
             new Random().nextBytes(id);
-            id[0] = (byte)i;
+            id[0] = (byte) i;
             row.put("experiment_id", id);
             queryResult.add(row);
         }

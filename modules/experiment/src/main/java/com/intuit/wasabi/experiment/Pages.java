@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,19 +31,19 @@ import java.util.Map;
  */
 public interface Pages {
 
-	/**
+    /**
      * Generic Search api: Currently for just pages - Get the experiment information for the chosen pages for an experiment
-	 * 
-	 * @param applicationName Name of application
-	 * @param pageName Name of page
-	 * 
-	 * @return The experiment information for the chosen pages for an experiment
-	 */
+     *
+     * @param applicationName Name of application
+     * @param pageName Name of page
+     *
+     * @return The experiment information for the chosen pages for an experiment
+     */
     ExperimentList getPageExperiments(Application.Name applicationName, Page.Name pageName);
 
     /**
      * Add a list of pages to an experiment
-     * 
+     *
      * @param experimentID ID of an experiment
      * @param experimentPageList List of experiment pages
      * @param user the user who added the page(s)
@@ -52,7 +52,7 @@ public interface Pages {
 
     /**
      * Delete the page from an experiment
-     * 
+     *
      * @param experimentID ID of an experiment
      * @param pageName Name of a page
      * @param user the user who triggered the page deletion
@@ -61,16 +61,16 @@ public interface Pages {
 
     /**
      * Get the page information(name and allowNewAssignment) for the associated pages for an experiment
-     * 
+     *
      * @param experimentID ID of an experiment
-     * 
+     *
      * @return The page information(name and allowNewAssignment) for the associated pages for an experiment
      */
     ExperimentPageList getExperimentPages(Experiment.ID experimentID);
 
     /**
      * Erase the page related data associated to an experiment
-     * 
+     *
      * @param applicationName Name of application
      * @param experimentID ID of an experiment
      * @param user the user who triggered
@@ -79,7 +79,7 @@ public interface Pages {
 
     /**
      * @param applicationName Name of application
-     * 
+     *
      * @return The set of pages associated with the requested application.
      */
     List<Page> getPageList(Application.Name applicationName);
@@ -87,7 +87,7 @@ public interface Pages {
     /**
      * @param applicationName Name of application
      * @param pageName Name of page
-     * 
+     *
      * @return A list of experiment information(id and allowNewAssignment) associated with the requested application and page name.
      */
     List<PageExperiment> getExperiments(Application.Name applicationName, Page.Name pageName);
