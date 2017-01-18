@@ -15,17 +15,20 @@
  *******************************************************************************/
 package com.intuit.wasabi.assignment.impl;
 
-import com.intuit.wasabi.experimentobjects.Experiment;
-import org.junit.Test;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+
+import java.io.UnsupportedEncodingException;
+
+import org.junit.Test;
+
+import com.intuit.wasabi.assignmentobjects.SegmentationProfile;
+import com.intuit.wasabi.assignmentobjects.User;
+import com.intuit.wasabi.experimentobjects.BucketList;
+import com.intuit.wasabi.experimentobjects.Experiment;
 
 /**
  * Created on 3/2/16.
@@ -37,11 +40,12 @@ public class DefaultAssignmentDecoratorTest {
         assertThat(defaultAssignmentDecorator, is(not(nullValue())));
     }
 
-    @Test public void materializeUriTest() throws UnsupportedEncodingException {
+    @Test public void getBucketListTest() throws UnsupportedEncodingException {
         Experiment experiment = mock(Experiment.class);
+        
         DefaultAssignmentDecorator defaultAssignmentDecorator = new DefaultAssignmentDecorator();
-        URI uri = defaultAssignmentDecorator.materializeUri(experiment);
-        assertThat(uri, is(nullValue()));
+        BucketList bucketList = defaultAssignmentDecorator.getBucketList(experiment, mock(User.ID.class), mock(SegmentationProfile.class));
+        
+        assertThat(bucketList, is(nullValue()));
     }
-
 }
