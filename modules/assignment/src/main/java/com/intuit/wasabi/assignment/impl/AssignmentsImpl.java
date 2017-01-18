@@ -170,7 +170,7 @@ public class AssignmentsImpl implements Assignments {
                            final MutexRepository mutexRepository,
                            final RuleCache ruleCache, final Pages pages,
                            final Priorities priorities,
-                           final @Nullable AssignmentDecorator assignmentDecorator,
+                           final AssignmentDecorator assignmentDecorator,
                            final @Named("ruleCache.threadPool") ThreadPoolExecutor ruleCacheExecutor,
                            final EventLog eventLog)
             throws IOException, ConnectionException {
@@ -955,13 +955,12 @@ public class AssignmentsImpl implements Assignments {
         
         BucketList bucketList = null;
         Boolean isPersonalizationEnabled = experiment.getIsPersonalizationEnabled();
-        if (isPersonalizationEnabled && !Objects.isNull(assignmentDecorator)) {
+        if (isPersonalizationEnabled) {
             try {
                 bucketList = assignmentDecorator.getBucketList(experiment, userID, segmentationProfile);
-            } catch (BucketDistributionNotFetchableException | IOException e) {
-                LOGGER.error(new StringBuilder("Error obtaining the Bucket List from ").append(assignmentDecorator.getClass().getSimpleName())
-                        .append(" for user_id )").append(userID).append(", for experiment: ").append(experiment.getLabel().toString())
-                        .append(" due to ").append(e).toString());
+            } catch (BucketDistributionNotFetchableException e) {
+                LOGGER.error("Error obtaining the Bucket List from {} for user_id {}, for experiment: {} due to {}",
+                        assignmentDecorator.getClass().getSimpleName(), userID, experiment.getLabel().toString(), e);
             } finally {
                 //TODO: add some metrics on how often this fails
                 // Logic behind the below step is to ensure the following:

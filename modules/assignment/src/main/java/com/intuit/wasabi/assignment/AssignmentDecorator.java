@@ -48,5 +48,5 @@ public interface AssignmentDecorator {
      *             not able to fetch bucket distribution
      */    
     BucketList getBucketList(Experiment experiment, User.ID userID, SegmentationProfile segmentationProfile)
-            throws BucketDistributionNotFetchableException, IOException;
+            throws BucketDistributionNotFetchableException;
 }
