@@ -114,6 +114,9 @@ public class SetupPerformanceTest extends TestBase {
 		setPropertyFromSystemProperty("buckets.prefix","buckets-prefix");
 		setPropertyFromSystemProperty("buckets.in.experiment","buckets-in-experiment");
 		setPropertyFromSystemProperty("mutualexclusions","mutualexclusions");
+		setPropertyFromSystemProperty("database.url","database-url");
+		setPropertyFromSystemProperty("database.username","database-username");
+		setPropertyFromSystemProperty("database.password","database-password");
 
 		applicationName = appProperties.getProperty("application-name", applicationName);
 		experimentPrefix = appProperties.getProperty("experiment-prefix", experimentPrefix);

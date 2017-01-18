@@ -27,10 +27,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Preconditions;
 import com.intuit.wasabi.experimentobjects.exceptions.InvalidIdentifierException;
-import com.netflix.astyanax.model.ColumnList;
-
 import io.swagger.annotations.ApiModelProperty;
-
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -38,11 +35,12 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+import static java.util.Arrays.asList;
 
 /**
  * An experiment bucket
@@ -78,10 +76,6 @@ public class Bucket {
 
     public static Builder from(Bucket bucket) {
         return new Builder(bucket);
-    }
-
-    public static Builder from(ColumnList<String> columns) {
-        return new Builder(columns);
     }
 
     public Experiment.ID getExperimentID() {
@@ -211,7 +205,7 @@ public class Bucket {
             private final transient List<State> allowedStateTransitions;
 
             BucketStateTransition(State... allowedTransitions) {
-                this.allowedStateTransitions = Arrays.asList(allowedTransitions);
+                this.allowedStateTransitions = asList(allowedTransitions);
             }
 
             private List<State> getAllowedStateTransitions() {
@@ -242,19 +236,6 @@ public class Bucket {
             instance.description = other.getDescription();
             instance.payload = other.getPayload();
             instance.state = other.getState();
-        }
-
-        private Builder(ColumnList<String> columns) {
-            instance = new Bucket();
-            instance.experimentID =
-                    Experiment.ID.valueOf(columns.getUUIDValue("experiment_id", null));
-            instance.description = columns.getStringValue("description", null);
-            instance.label =
-                    Bucket.Label.valueOf(columns.getStringValue("label", null));
-            instance.control = columns.getBooleanValue("is_control", false);
-            instance.allocationPercent = columns.getDoubleValue("allocation", 0d);
-            instance.payload = columns.getStringValue("payload", null);
-            instance.state = State.valueOf(columns.getStringValue("state", null));
         }
 
         public Builder withExperimentID(final Experiment.ID experimentID) {

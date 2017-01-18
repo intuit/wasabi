@@ -82,7 +82,8 @@ public class SegmentationRuleCacheFixTest extends TestBase {
         ruleFirst = "User-Agent = \"Agent001\"";
         ruleSecond = "User-Agent = \"Agent002\"";
         ruleNonHeader = "subscriber = true";
-        experimentSerializationStrategy = new DefaultNameExclusionStrategy("creationTime", "modificationTime", "id", "ruleJson");
+        experimentSerializationStrategy = 
+        		new DefaultNameExclusionStrategy("creationTime", "modificationTime", "id", "ruleJson", "rule", "description");
     }
 
     /**

@@ -22,8 +22,10 @@ import com.intuit.wasabi.tests.library.util.RetryAnalyzer;
 import com.intuit.wasabi.tests.library.util.RetryTest;
 import com.intuit.wasabi.tests.library.util.TestUtils;
 import com.intuit.wasabi.tests.library.util.serialstrategies.DefaultNameExclusionStrategy;
+import com.intuit.wasabi.tests.model.Application;
 import com.intuit.wasabi.tests.model.Bucket;
 import com.intuit.wasabi.tests.model.Experiment;
+import com.intuit.wasabi.tests.model.Page;
 import com.intuit.wasabi.tests.model.factory.ApplicationFactory;
 import com.intuit.wasabi.tests.model.factory.BucketFactory;
 import com.intuit.wasabi.tests.model.factory.ExperimentFactory;
@@ -37,26 +39,20 @@ import org.testng.annotations.Test;
 
 import java.lang.reflect.Field;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 
 import static com.intuit.wasabi.tests.library.util.ModelAssert.assertEqualModelItems;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Tests the experiment functionality.
- * <p>
+ *
  * Known Issues:
  * - The python test checked for the number of experiments, but since this could be run on production environments
- * it does not feel right to check those numbers, as they might change by other accessors.
- * <p>
+ *   it does not feel right to check those numbers, as they might change by other accessors.
+ *
  * These transitions are tested:
- * <p>
+ *
  * <small>(row transitions to column)</small>
  * <pre>
  * DR = DRAFT, R = RUNNING, P = PAUSED, DEL = DELETED, T = TERMINATED, I = INVALID
@@ -71,15 +67,16 @@ import static org.slf4j.LoggerFactory.getLogger;
  * T  | b | b | b | b | b | b |
  * I  | x | x | x | x | x | x |
  * </pre>
- * <p>
+ *
  * Table legend:
  * <ul>
- * <li>x: not possible</li>
- * <li>o: not covered</li>
- * <li>b: covered by {@link #t_basicStateTransitions(String, int)}</li>
- * <li>c: covered by {@link #t_complexStateTransitions()}</li>
- * <li>r: covered by {@link #t_remainingTransitionTests()}</li>
+ *   <li>x: not possible</li>
+ *   <li>o: not covered</li>
+ *   <li>b: covered by {@link #t_basicStateTransitions(String, int)}</li>
+ *   <li>c: covered by {@link #t_complexStateTransitions()}</li>
+ *   <li>r: covered by {@link #t_remainingTransitionTests()}</li>
  * </ul>
+ *
  */
 public class IntegrationExperiment extends TestBase {
 
@@ -189,8 +186,8 @@ public class IntegrationExperiment extends TestBase {
     /**
      * Checks invalid experiment IDs for their error message and HTTP Status codes.
      *
-     * @param id         the ID
-     * @param status     the error message/status
+     * @param id the ID
+     * @param status the error message/status
      * @param httpStatus the HTTP status code
      */
     @Test(dependsOnGroups = {"ping"}, dataProvider = "invalidIdProvider")
@@ -222,7 +219,7 @@ public class IntegrationExperiment extends TestBase {
         latest.add(Calendar.SECOND, 15);
         Experiment created = postExperiment(completeExperiment);
         completeExperiment.setState(Constants.EXPERIMENT_STATE_DRAFT);
-        assertEqualModelItems(created, completeExperiment, new DefaultNameExclusionStrategy("id", "creationTime", "modificationTime", "ruleJson"));
+        assertEqualModelItems(created, completeExperiment, new DefaultNameExclusionStrategy("id", "creationTime", "modificationTime", "results", "ruleJson", "hypothesisIsCorrect"));
 
         String nowStr = TestUtils.getTimeString(now);
         String latestStr = TestUtils.getTimeString(latest);
@@ -246,29 +243,19 @@ public class IntegrationExperiment extends TestBase {
     public Object[][] badExperimentsPOST() {
         Experiment experiment = new Experiment().setDescription("Sample hypothesis.");
         return new Object[][]{
-                // FIXME: jwtodd
-//                new Object[] { new Experiment(experiment.setSamplingPercent(completeExperiment.samplingPercent)), "Invalid input", HttpStatus.SC_BAD_REQUEST },
-                new Object[]{new Experiment(experiment.setSamplingPercent(completeExperiment.samplingPercent)), "Experiment application name cannot be null or an empty string", HttpStatus.SC_BAD_REQUEST},
-                // FIXME: jwtodd
-//                new Object[] { new Experiment(experiment.setStartTime(completeExperiment.startTime)), "Invalid input", HttpStatus.SC_BAD_REQUEST },
-                new Object[]{new Experiment(experiment.setStartTime(completeExperiment.startTime)), "Experiment application name cannot be null or an empty string", HttpStatus.SC_BAD_REQUEST},
-//                new Object[] { new Experiment(experiment.setEndTime(completeExperiment.endTime)), "Invalid input", HttpStatus.SC_BAD_REQUEST },
-                new Object[]{new Experiment(experiment.setEndTime(completeExperiment.endTime)), "Experiment application name cannot be null or an empty string", HttpStatus.SC_BAD_REQUEST},
-//                new Object[] { new Experiment(experiment.setLabel(completeExperiment.label)), "Invalid input", HttpStatus.SC_BAD_REQUEST },
+                new Object[]{new Experiment(experiment.setSamplingPercent(completeExperiment.samplingPercent)),
+                		"Experiment application name cannot be null or an empty string", HttpStatus.SC_BAD_REQUEST},
+                new Object[]{new Experiment(experiment.setStartTime(completeExperiment.startTime)),
+                		"Experiment application name cannot be null or an empty string", HttpStatus.SC_BAD_REQUEST},
+                new Object[]{new Experiment(experiment.setEndTime(completeExperiment.endTime)),
+                		"Experiment application name cannot be null or an empty string", HttpStatus.SC_BAD_REQUEST},
                 new Object[]{new Experiment(experiment.setLabel(completeExperiment.label)), "Experiment application name cannot be null or an empty string", HttpStatus.SC_BAD_REQUEST},
-                // FIXME: jwtodd
-//                new Object[] { new Experiment(experiment.setApplication(ApplicationFactory.defaultApplication())), "Uniqueness constraint violated", HttpStatus.SC_BAD_REQUEST },
                 new Object[]{new Experiment(experiment.setApplication(ApplicationFactory.defaultApplication())), "An unique constraint was violated: An active experiment with label \"SW50ZWdyVGVzdA_1461232889078App_PRIMARY\".\"SW50ZWdyVGVzdA_Experiment_14612328892453\" already exists (id = 70139a10-489b-49bd-ac4c-c7c92ec79917) (null)", HttpStatus.SC_BAD_REQUEST},
-
-                // FIXME: jwtodd
-//                new Object[] { ExperimentFactory.createExperiment().setState(Constants.EXPERIMENT_STATE_DRAFT), "Invalid input", HttpStatus.SC_BAD_REQUEST },
                 new Object[]{ExperimentFactory.createExperiment().setState(Constants.EXPERIMENT_STATE_DRAFT), "Unrecognized property \"state\"", HttpStatus.SC_BAD_REQUEST},
-                // FIXME: jwtodd
-//                new Object[] { ExperimentFactory.createCompleteExperiment().setStartTime((String) null), "Repository error", HttpStatus.SC_INTERNAL_SERVER_ERROR },
-                new Object[]{ExperimentFactory.createCompleteExperiment().setStartTime((String) null), "Could not create experiment \"NewExperiment[id=20533222-2a3f-459d-b6b6-5e05ad1104e3,label=SW50ZWdyVGVzdA_Experiment_146123290282853,applicationName=SW50ZWdyVGVzdA_1461232889078App_PRIMARY,startTime=<null>,endTime=Thu Jun 02 10:01:42 UTC 2016,samplingPercent=1.0,description=A sample Experiment description.,rule=(salary < 10000) && (state = 'VA'),isPersonalizationEnabled=false,modelName=,modelVersion=,isRapidExperiment=false,userCap=0,creatorID=" + userName + "]\"", HttpStatus.SC_INTERNAL_SERVER_ERROR},
-                // FIXME: jwtodd
-//                new Object[] { ExperimentFactory.createCompleteExperiment().setEndTime((String) null), "Repository error", HttpStatus.SC_INTERNAL_SERVER_ERROR },
-                new Object[]{ExperimentFactory.createCompleteExperiment().setEndTime((String) null), "Could not create experiment \"NewExperiment[id=97daea3b-1523-43e7-8d7c-d7eba2c18ff5,label=SW50ZWdyVGVzdA_Experiment_146123290282954,applicationName=SW50ZWdyVGVzdA_1461232889078App_PRIMARY,startTime=Thu Apr 21 10:01:42 UTC 2016,endTime=<null>,samplingPercent=1.0,description=A sample Experiment description.,rule=(salary < 10000) && (state = 'VA'),isPersonalizationEnabled=false,modelName=,modelVersion=,isRapidExperiment=false,userCap=0,creatorID=" + userName + "]\"", HttpStatus.SC_INTERNAL_SERVER_ERROR},
+                new Object[]{ExperimentFactory.createCompleteExperiment().setStartTime((String) null),
+                		"Invalid date range - Could not create experiment \"NewExperiment[id=20533222-2a3f-459d-b6b6-5e05ad1104e3,label=SW50ZWdyVGVzdA_Experiment_146123290282853,applicationName=SW50ZWdyVGVzdA_1461232889078App_PRIMARY,startTime=<null>,endTime=Thu Jun 02 10:01:42 UTC 2016,samplingPercent=1.0,description=A sample Experiment description.,rule=(salary < 10000) && (state = 'VA'),isPersonalizationEnabled=false,modelName=,modelVersion=,isRapidExperiment=false,userCap=0,creatorID="+userName+"]\"", HttpStatus.SC_BAD_REQUEST},
+                new Object[]{ExperimentFactory.createCompleteExperiment().setEndTime((String) null),
+                		"Invalid date range - Could not create experiment \"NewExperiment[id=97daea3b-1523-43e7-8d7c-d7eba2c18ff5,label=SW50ZWdyVGVzdA_Experiment_146123290282954,applicationName=SW50ZWdyVGVzdA_1461232889078App_PRIMARY,startTime=Thu Apr 21 10:01:42 UTC 2016,endTime=<null>,samplingPercent=1.0,description=A sample Experiment description.,rule=(salary < 10000) && (state = 'VA'),isPersonalizationEnabled=false,modelName=,modelVersion=,isRapidExperiment=false,userCap=0,creatorID="+userName+"]\"", HttpStatus.SC_BAD_REQUEST},
                 // FIXME: jwtodd
 //                new Object[] { null, "The server was unable to process the request", HttpStatus.SC_INTERNAL_SERVER_ERROR },
                 new Object[]{null, "null", HttpStatus.SC_INTERNAL_SERVER_ERROR},
@@ -279,8 +266,8 @@ public class IntegrationExperiment extends TestBase {
     /**
      * Tries to POST invalid experiments.
      *
-     * @param experiment         the experiment
-     * @param expectedError      the expected error
+     * @param experiment the experiment
+     * @param expectedError the expected error
      * @param expectedStatusCode the expected HTTP status code
      */
     @Test(dependsOnMethods = {"t_createAndValidateExperiment"}, dataProvider = "badExperimentsPOST")
@@ -291,6 +278,8 @@ public class IntegrationExperiment extends TestBase {
             Assert.assertTrue(lastError().startsWith("An unique constraint"), "Error message not as expected.");
         } else if (expectedError.startsWith("Could not create experiment")) {
             Assert.assertTrue(lastError().startsWith("Could not create"), "Error message not as expected.");
+        } else if (expectedError.startsWith("Invalid date range")) {
+            Assert.assertTrue(lastError().startsWith("Invalid date range"), "Error message not as expected.");
         } else if (expectedError.equals("null")) {
             // noop
         } else {
@@ -692,6 +681,33 @@ public class IntegrationExperiment extends TestBase {
         // FIXME: jwtodd
 //        putExperiment(successfulPersonalizationChange, HttpStatus.SC_BAD_REQUEST);
         putExperiment(successfulPersonalizationChange, HttpStatus.SC_BAD_REQUEST);
+    }
+
+    /**
+     * This test case covers a scenario where we
+     * try to get list of experiments of an
+     * application that is non-existent or invalid
+     * the name of the app I am using is junkapp
+     */
+    @Test
+    public void getExperimentsOfNonExistentApp()
+    {
+    	List<Experiment> experimentsList = getExperimentsByApplication(new Application("junkapp"));
+    	Assert.assertEquals(experimentsList.size(), 0);
+    }
+
+    /**
+     * This test case covers a scenario where we
+     * try to get list of experiments of
+     * non-existent application and non-existent page
+     * the name of the app I am using is junkapp
+     * the name of the page I am using is junkpage
+     */
+    @Test
+    public void getExperimentsOfNonExistentAppAndNonExistentPage()
+    {
+    	List<Experiment> experimentsList = getExperimentsByApplicationPage(new Application("junkapp"), new Page("junkpage", true));
+    	Assert.assertEquals(experimentsList.size(), 0);
     }
 
     /**

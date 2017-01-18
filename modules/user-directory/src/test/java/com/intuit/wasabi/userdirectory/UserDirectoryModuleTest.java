@@ -17,6 +17,9 @@ package com.intuit.wasabi.userdirectory;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.TypeLiteral;
+import com.google.inject.name.Names;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.exceptions.UserToolsException;
 import org.junit.Test;
@@ -41,8 +44,11 @@ public class UserDirectoryModuleTest {
 
     @Test
     public void testProvidesUsers() throws Exception {
-    	UserDirectoryModule module = new UserDirectoryModule();
-    	List<UserInfo> users = module.provideUsers();
+		System.getProperties().put("user.lookup.class.name",
+				"com.intuit.wasabi.userdirectory.impl.DefaultUserDirectory");
+		Injector injector = Guice.createInjector(new UserDirectoryModule());
+    	List<UserInfo> users = injector.getInstance(Key.get(new TypeLiteral<List<UserInfo>>(){},
+				Names.named("authentication.users")));
     	assertEquals(4, users.size());
    }
 

@@ -25,7 +25,7 @@ import com.intuit.wasabi.export.DatabaseExport;
 import com.intuit.wasabi.export.Envelope;
 import com.intuit.wasabi.export.WebExport;
 import com.intuit.wasabi.export.rest.impl.ExportModule;
-import com.intuit.wasabi.repository.RepositoryModule;
+import com.intuit.wasabi.repository.cassandra.CassandraRepositoryModule;
 import org.slf4j.Logger;
 
 import java.net.URI;
@@ -59,7 +59,7 @@ public class AssignmentsModule extends AbstractModule {
         LOGGER.debug("installing module: {}", AssignmentsModule.class.getSimpleName());
 
         install(new ExportModule());
-        install(new RepositoryModule());
+        install(new CassandraRepositoryModule());
 
         Properties properties = create(PROPERTY_NAME, AssignmentsModule.class);
 

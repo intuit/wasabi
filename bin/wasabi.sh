@@ -28,6 +28,7 @@ reset=`tput sgr0`
 export WASABI_OS=${WASABI_OS:-`uname -s`}
 export WASABI_OSX="Darwin"
 export WASABI_LINUX="Linux"
+export WASABI_MAVEN=${WASABI_MAVEN}
 export CONTRIB_PLUGINS_TO_INSTALL=${CONTRIB_PLUGINS_TO_INSTALL:-}
 
 usage() {

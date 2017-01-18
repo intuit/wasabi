@@ -51,7 +51,7 @@ public class StateInconsistencyTest extends TestBase {
     public StateInconsistencyTest(Experiment experiment) {
         this.experiment = experiment;
         comparisonStrategy = new DefaultNameExclusionStrategy(
-                "creationTime", "modificationTime", "ruleJson", "id"
+                "creationTime", "modificationTime", "ruleJson", "id", "description", "rule"
         );
         putStateStrategy = new DefaultNameInclusionStrategy(
                 "state"

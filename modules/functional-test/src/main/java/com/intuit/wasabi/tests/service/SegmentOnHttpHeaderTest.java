@@ -52,7 +52,8 @@ public class SegmentOnHttpHeaderTest extends TestBase {
     private User user;
     private User user2;
     private List<Bucket> buckets;
-    private SerializationStrategy defExpStrategy = new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson", "id");
+    private SerializationStrategy defExpStrategy = 
+    		new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson", "id", "description", "rule");
     private String matchAgentValue = "MatchAgentValue";
 
     @BeforeTest

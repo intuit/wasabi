@@ -14,7 +14,6 @@ Wasabi A/B Testing Service is a real-time, enterprise-grade, 100% API driven pro
 
 Learn more about how Wasabi can empower your team to move from hunches to actionable, data-driven user insights with our simple, flexible, and scalable experimentation platform.
 
-
 ### Features
 
 * **Own your own data** - Wasabi runs on your servers, in the cloud or on-premise, where you have complete control over your data.

@@ -73,7 +73,7 @@ public class IntegrationMutualExclusion extends TestBase {
 
             Experiment created = postExperiment(experiment);
             experiment.setState(Constants.EXPERIMENT_STATE_DRAFT);
-            assertEqualModelItems(created, experiment, new DefaultNameExclusionStrategy("id", "creationTime", "modificationTime", "ruleJson"));
+            assertEqualModelItems(created, experiment, new DefaultNameExclusionStrategy("id", "creationTime", "modificationTime", "ruleJson","description", "rule"));
             experiment.update(created);
 
             // Make this experiment mutually exclusive with all previous experiment added in this loop.
@@ -293,7 +293,8 @@ public class IntegrationMutualExclusion extends TestBase {
         for (int i = 0; i < 5; ++i) {
             Experiment exp = ExperimentFactory.createExperiment();
             Experiment created = postExperiment(exp);
-            assertEqualModelItems(created, exp.setState(Constants.EXPERIMENT_STATE_DRAFT), new DefaultNameExclusionStrategy("id", "creationTime", "modificationTime", "ruleJson"));
+            assertEqualModelItems(created, exp.setState(Constants.EXPERIMENT_STATE_DRAFT), 
+            		new DefaultNameExclusionStrategy("id", "creationTime", "modificationTime", "ruleJson","description", "rule"));
             exp.update(created);
             batchMutExExperiments.add(exp);
         }
@@ -356,11 +357,11 @@ public class IntegrationMutualExclusion extends TestBase {
         experimentDefApp = ExperimentFactory.createExperiment();
         experimentOtherApp = ExperimentFactory.createExperiment().setApplication(ApplicationFactory.createApplication());
         Experiment created = postExperiment(experimentDefApp);
-        assertEqualModelItems(created, experimentDefApp.setState(Constants.EXPERIMENT_STATE_DRAFT), new DefaultNameExclusionStrategy("id", "creationTime", "modificationTime", "ruleJson"));
+        assertEqualModelItems(created, experimentDefApp.setState(Constants.EXPERIMENT_STATE_DRAFT), new DefaultNameExclusionStrategy("id", "creationTime", "modificationTime", "ruleJson","description","rule"));
         experimentDefApp.update(created);
         toCleanUp.add(experimentDefApp);
         created = postExperiment(experimentOtherApp);
-        assertEqualModelItems(created, experimentOtherApp.setState(Constants.EXPERIMENT_STATE_DRAFT), new DefaultNameExclusionStrategy("id", "creationTime", "modificationTime", "ruleJson"));
+        assertEqualModelItems(created, experimentOtherApp.setState(Constants.EXPERIMENT_STATE_DRAFT), new DefaultNameExclusionStrategy("id", "creationTime", "modificationTime", "ruleJson","description","rule"));
         experimentOtherApp.update(created);
         toCleanUp.add(experimentOtherApp);
     }

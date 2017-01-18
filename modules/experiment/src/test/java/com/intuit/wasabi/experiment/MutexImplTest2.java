@@ -23,7 +23,7 @@ import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.Experiment.Label;
 import com.intuit.wasabi.experimentobjects.ExperimentList;
-import com.intuit.wasabi.repository.impl.cassandra.CassandraMutexRepository;
+import com.intuit.wasabi.repository.cassandra.impl.CassandraMutexRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -37,7 +37,7 @@ import static org.mockito.BDDMockito.*;
 public class MutexImplTest2 {
     
 	@Mock
-	CassandraMutexRepository mutexRepository;
+    CassandraMutexRepository mutexRepository;
 	
 	@Mock	
     private ExperimentsImpl experiments;
