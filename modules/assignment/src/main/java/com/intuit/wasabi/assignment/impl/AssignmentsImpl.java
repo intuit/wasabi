@@ -18,6 +18,7 @@ package com.intuit.wasabi.assignment.impl;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Table;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
@@ -49,6 +50,9 @@ import com.intuit.wasabi.repository.AssignmentsRepository;
 import com.intuit.wasabi.repository.CassandraRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.MutexRepository;
+import com.intuit.wasabi.repository.PagesRepository;
+import com.intuit.wasabi.repository.PrioritiesRepository;
+import com.intuit.wasabi.repository.cassandra.UninterruptibleUtil;
 import com.intuit.wasabi.repository.cassandra.impl.ExperimentRuleCacheUpdateEnvelope;
 import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
 import org.slf4j.Logger;
@@ -63,12 +67,22 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static com.intuit.autumn.utils.PropertyFactory.getProperty;
+import static java.lang.Integer.parseInt;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -119,6 +133,8 @@ public class AssignmentsImpl implements Assignments {
 
     private EventLog eventLog;
 
+    private ExecutorService doAssignmentExecutorService = null;
+
     /**
      * Helper for unit tests
      * @param assignmentRepository
@@ -162,6 +178,7 @@ public class AssignmentsImpl implements Assignments {
                            final Provider<Envelope<AssignmentEnvelopePayload, WebExport>> assignmentWebEnvelopeProvider,
                            final @Nullable AssignmentDecorator assignmentDecorator,
                            final @Named("ruleCache.threadPool") ThreadPoolExecutor ruleCacheExecutor,
+                           final @Named("doAssignment.threadPoolService") ExecutorService doAssignmentExecutorService,
                            final EventLog eventLog)
             throws IOException, ConnectionException {
         super();
@@ -181,6 +198,7 @@ public class AssignmentsImpl implements Assignments {
         this.assignmentsRepository = assignmentsRepository;
         this.mutexRepository = mutexRepository;
         this.eventLog = eventLog;
+        this.doAssignmentExecutorService=doAssignmentExecutorService;
     }
 
     /**
@@ -483,77 +501,117 @@ public class AssignmentsImpl implements Assignments {
         Map<Experiment.ID, List<Experiment.ID>> exclusionMap = new HashMap<>();
 
         //Populate required experiment metadata along with all the existing user assignments for the given application
-        assignmentsRepository.populateExperimentMetadata(userID, applicationName, context, experimentBatch, allowAssignmentsOptional, appPriorities, experimentMap, userAssignments, bucketMap, exclusionMap);
+        assignmentsRepository.populateExperimentMetadataV2(userID, applicationName, context, experimentBatch, allowAssignmentsOptional, appPriorities, experimentMap, userAssignments, bucketMap, exclusionMap);
 
         List<Map> allAssignments = new LinkedList<>();
+        List<Future<Map<String, Object>>> futures = new LinkedList<>();
+
         // iterate over all experiments in the application in priority order
         for (PrioritizedExperiment experiment : appPriorities.getPrioritizedExperiments()) {
             if(LOGGER.isDebugEnabled()) LOGGER.debug("Now processing: {}", experiment);
-
             //check if the experiment was given in experimentBatch
             if (experimentBatch.getLabels().contains(experiment.getLabel())) {
-                if(LOGGER.isDebugEnabled()) LOGGER.debug("Experiment ({}) has given batch assignment....", experiment.getLabel());
-
-                String labelStr = experiment.getLabel().toString();
-                Map<String, Object> tempResult = new HashMap<>();
-                // get the assignment for user in this experiment
-                Experiment.Label label = Experiment.Label.valueOf(labelStr);
-                tempResult.put("experimentLabel", label);
-                SegmentationProfile segmentationProfile = SegmentationProfile.from(experimentBatch.getProfile())
-                        .build();
-
-                try {
-                      Assignment assignment = getAssignment(userID, applicationName, label,
-                            context, allowAssignmentsOptional.isPresent()?(allowAssignmentsOptional.get().get(experiment.getID())):createAssignment,
-                            forceInExperiment, segmentationProfile,
-                            headers, pageName, experimentMap.get(experiment.getID()),
-                              bucketMap.get(experiment.getID()), userAssignments, exclusionMap);
-
-                    // This wouldn't normally happen because we specified CREATE=true
-                    if (isNull(assignment)) {
-                        continue;
-                    }
-                    // Only include `assignment` property if there is a definitive
-                    // assignment, either to a bucket or not
-                    if (assignment.getStatus() != Assignment.Status.EXPERIMENT_EXPIRED) {
-                        // Add the assignment to the global list of userAssignments of the user
-                        userAssignments.put(experiment.getID(), experiment.getLabel(),
-                                assignment.getBucketLabel() != null ? assignment.getBucketLabel().toString() : "null");
-                        tempResult.put("assignment",
-                                assignment.getBucketLabel() != null
-                                        ? assignment.getBucketLabel().toString()
-                                        : null);
-
-                        if (nonNull(assignment.getBucketLabel())) {
-                            Optional<Bucket> bucket = getBucketByLabel(bucketMap.get(experiment.getID()), assignment.getBucketLabel());
-                            if(bucket.isPresent()) {
-                                tempResult.put("payload",
-                                        bucket.get().getPayload() != null
-                                                ? bucket.get().getPayload()
-                                                : null);
-                            }
-                        }
-                    }
-
-                    tempResult.put("status", assignment.getStatus());
-                    if(LOGGER.isDebugEnabled()) LOGGER.debug("tempResult: {}", tempResult);
-
-
-                } catch (WasabiException ex) {
-                    //FIXME: should not use exception as part of the flow control.
-                    LOGGER.info("Using exception as flow control", ex);
-                    tempResult.put("status", "assignment failed");
-                    tempResult.put("exception", ex.toString());
-                    tempResult.put("assignment", null);
-                }
-
-                allAssignments.add(tempResult);
+                futures.add(doAssignmentExecutorService.submit(new DoAssignmentTask()));
                 experimentBatch.getLabels().remove(experiment.getLabel());
             }
         }
+
+        for(Future<Map<String, Object>> future:futures) {
+            try {
+                allAssignments.add(future.get());
+            } catch (InterruptedException | ExecutionException e) {
+                LOGGER.error("Exception happened while doing assignments...", e);
+            }
+        }
+
         if(LOGGER.isDebugEnabled()) LOGGER.debug("allAssignments: {} ", allAssignments);
 
         return allAssignments;
+    }
+
+    class DoAssignmentTask implements Callable<Map<String, Object>> {
+
+        Experiment experiment;
+        User.ID userID;
+        Application.Name applicationName;
+        Experiment.Label experimentLabel;
+
+        Context context;
+        boolean createAssignment;
+        boolean ignoreSamplingPercent;
+        SegmentationProfile segmentationProfile;
+        HttpHeaders headers;
+        Page.Name pageName;
+        BucketList bucketList;
+
+        Table<Experiment.ID, Experiment.Label, String> userAssignments;
+        Map<Experiment.ID, List<Experiment.ID>> exclusionMap;
+
+        @Override
+        public Map<String, Object> call() throws Exception {
+
+            if(LOGGER.isDebugEnabled()) LOGGER.debug("Experiment ({}) has given batch assignment....", experiment.getLabel());
+
+            String labelStr = experiment.getLabel().toString();
+            Map<String, Object> tempResult = new HashMap<>();
+            // get the assignment for user in this experiment
+            Experiment.Label label = Experiment.Label.valueOf(labelStr);
+            tempResult.put("experimentLabel", label);
+            //SegmentationProfile segmentationProfile = SegmentationProfile.from(experimentBatch.getProfile()).build();
+
+            try {
+                /*Assignment assignment = getAssignment(userID, applicationName, label,
+                        context, allowAssignmentsOptional.isPresent()?(allowAssignmentsOptional.get().get(experiment.getID())):createAssignment,
+                        forceInExperiment, segmentationProfile,
+                        headers, pageName, experimentMap.get(experiment.getID()),
+                        bucketMap.get(experiment.getID()), userAssignments, exclusionMap);*/
+
+                Assignment assignment = getAssignment(userID, applicationName, label,
+                        context, createAssignment,
+                        ignoreSamplingPercent, segmentationProfile,
+                        headers, pageName, experiment,
+                        bucketList, userAssignments, exclusionMap);
+
+                // This wouldn't normally happen because we specified CREATE=true
+                if (isNull(assignment)) {
+                    return tempResult;
+                }
+
+                // Only include `assignment` property if there is a definitive
+                // assignment, either to a bucket or not
+                if (assignment.getStatus() != Assignment.Status.EXPERIMENT_EXPIRED) {
+                    // Add the assignment to the global list of userAssignments of the user
+                    userAssignments.put(experiment.getID(), experiment.getLabel(),
+                            assignment.getBucketLabel() != null ? assignment.getBucketLabel().toString() : "null");
+                    tempResult.put("assignment",
+                            assignment.getBucketLabel() != null
+                                    ? assignment.getBucketLabel().toString()
+                                    : null);
+
+                    if (nonNull(assignment.getBucketLabel())) {
+                        Optional<Bucket> bucket = getBucketByLabel(bucketList, assignment.getBucketLabel());
+                        if(bucket.isPresent()) {
+                            tempResult.put("payload",
+                                    bucket.get().getPayload() != null
+                                            ? bucket.get().getPayload()
+                                            : null);
+                        }
+                    }
+                }
+
+                tempResult.put("status", assignment.getStatus());
+                if(LOGGER.isDebugEnabled()) LOGGER.debug("tempResult: {}", tempResult);
+
+            } catch (WasabiException ex) {
+                //FIXME: should not use exception as part of the flow control.
+                LOGGER.info("Using exception as flow control", ex);
+                tempResult.put("status", "assignment failed");
+                tempResult.put("exception", ex.toString());
+                tempResult.put("assignment", null);
+            }
+
+            return tempResult;
+        }
     }
 
     private Optional<Bucket> getBucketByLabel(BucketList bucketList, Bucket.Label bucketLabel) {
@@ -743,7 +801,7 @@ public class AssignmentsImpl implements Assignments {
                                            HttpHeaders headers, SegmentationProfile segmentationProfile) {
 
         //Get the experiments (id & allowNewAssignment only) associated to the given application and page.
-        List<PageExperiment> pageExperimentList = pages.getExperimentsWithoutLabels(applicationName, pageName);
+        List<PageExperiment> pageExperimentList = assignmentsRepository.getExperiments(applicationName, pageName);
 
         //Prepare allowAssignments map
         Map<Experiment.ID, Boolean> allowAssignments = new HashMap<>(pageExperimentList.size());
@@ -756,6 +814,11 @@ public class AssignmentsImpl implements Assignments {
         if (segmentationProfile != null) {
             experimentBatchBuilder.withProfile(segmentationProfile.getProfile());
         }
+        Set<Experiment.Label> expLabels = new HashSet<>();
+        for (PageExperiment pageExperiment : pageExperimentList) {
+            expLabels.add(pageExperiment.getLabel());
+        }
+        experimentBatchBuilder.withLabels(expLabels);
         ExperimentBatch experimentBatch = experimentBatchBuilder.build();
 
         return doBatchAssignments(userID, applicationName, context,
@@ -1184,4 +1247,5 @@ public class AssignmentsImpl implements Assignments {
     }
     */
 }
+
 

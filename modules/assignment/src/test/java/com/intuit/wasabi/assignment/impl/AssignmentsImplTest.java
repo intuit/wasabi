@@ -49,6 +49,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import javax.ws.rs.core.HttpHeaders;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
@@ -87,6 +88,7 @@ public class AssignmentsImplTest {
     private EventLog eventLog = mock(EventLog.class);
     private AssignmentDecorator assignmentDecorator = mock(AssignmentDecorator.class);
     private ThreadPoolExecutor threadPoolExecutor = mock(ThreadPoolExecutor.class, RETURNS_DEEP_STUBS);
+    private ExecutorService executorService = mock(ExecutorService.class, RETURNS_DEEP_STUBS);
     private Provider<Envelope<AssignmentEnvelopePayload, DatabaseExport>> assignmentDBEnvelopeProvider =
             mock(Provider.class, RETURNS_DEEP_STUBS);
     private Provider<Envelope<AssignmentEnvelopePayload, WebExport>> assignmentWebEnvelopeProvider =
@@ -99,7 +101,7 @@ public class AssignmentsImplTest {
         this.assignmentsImpl = new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
                 experimentRepository, assignmentsRepository, mutexRepository,
                 ruleCache, pages, priorities, assignmentDBEnvelopeProvider, assignmentWebEnvelopeProvider,
-                assignmentDecorator, threadPoolExecutor, eventLog);
+                assignmentDecorator, threadPoolExecutor, executorService, eventLog);
     }
 
     @Test
@@ -136,7 +138,7 @@ public class AssignmentsImplTest {
         AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
                 experimentRepository, assignmentsRepository,
                 mutexRepository, ruleCache, pages, priorities, assignmentDBEnvelopeProvider,
-                assignmentWebEnvelopeProvider, assignmentDecorator, threadPoolExecutor,
+                assignmentWebEnvelopeProvider, assignmentDecorator, threadPoolExecutor, executorService,
                 eventLog));
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class);
@@ -243,7 +245,7 @@ public class AssignmentsImplTest {
         AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
                 experimentRepository, assignmentsRepository,
                 mutexRepository, ruleCache, pages, priorities, assignmentDBEnvelopeProvider,
-                assignmentWebEnvelopeProvider, assignmentDecorator, threadPoolExecutor, eventLog));
+                assignmentWebEnvelopeProvider, assignmentDecorator, threadPoolExecutor, executorService, eventLog));
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         when(experiment.getID()).thenReturn(id);
@@ -299,7 +301,7 @@ public class AssignmentsImplTest {
         AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
                 experimentRepository, assignmentsRepository,
                 mutexRepository, ruleCache, pages, priorities, assignmentDBEnvelopeProvider,
-                assignmentWebEnvelopeProvider, assignmentDecorator, threadPoolExecutor, eventLog));
+                assignmentWebEnvelopeProvider, assignmentDecorator, threadPoolExecutor, executorService, eventLog));
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         Assignment assignment = mock(Assignment.class);
@@ -330,7 +332,7 @@ public class AssignmentsImplTest {
         AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
                 experimentRepository, assignmentsRepository,
                 mutexRepository, ruleCache, pages, priorities, assignmentDBEnvelopeProvider,
-                assignmentWebEnvelopeProvider, assignmentDecorator, threadPoolExecutor, eventLog));
+                assignmentWebEnvelopeProvider, assignmentDecorator, threadPoolExecutor, executorService, eventLog));
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         Assignment assignment = mock(Assignment.class);
@@ -390,7 +392,7 @@ public class AssignmentsImplTest {
         AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
                 experimentRepository, assignmentsRepository,
                 mutexRepository, ruleCache, pages, priorities, assignmentDBEnvelopeProvider,
-                assignmentWebEnvelopeProvider, assignmentDecorator, threadPoolExecutor, eventLog));
+                assignmentWebEnvelopeProvider, assignmentDecorator, threadPoolExecutor, executorService, eventLog));
 
         doReturn(assignment).when(assignmentsImpl).getAssignment(eq(userID), eq(appName), eq(label),
                 eq(context), any(boolean.class), any(boolean.class), eq(segmentationProfile),

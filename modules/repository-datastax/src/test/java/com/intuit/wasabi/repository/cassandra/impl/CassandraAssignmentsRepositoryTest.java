@@ -20,6 +20,9 @@ import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.repository.ExperimentRepository;
+import com.intuit.wasabi.repository.MutexRepository;
+import com.intuit.wasabi.repository.PagesRepository;
+import com.intuit.wasabi.repository.PrioritiesRepository;
 import com.intuit.wasabi.repository.RepositoryException;
 import com.intuit.wasabi.repository.cassandra.UninterruptibleUtil;
 import com.intuit.wasabi.repository.cassandra.accessor.*;
@@ -85,6 +88,10 @@ public class CassandraAssignmentsRepositoryTest {
     @Mock ExclusionAccessor exclusionAccessor;
     @Mock PageExperimentIndexAccessor pageExperimentIndexAccessor;
 
+    @Mock CassandraPrioritiesRepository prioritiesRepository;
+    @Mock CassandraMutexRepository mutexRepository;
+    @Mock CassandraPagesRepository pagesRepository;
+
     @Mock CassandraDriver driver;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS) MappingManager mappingManager;
@@ -113,6 +120,11 @@ public class CassandraAssignmentsRepositoryTest {
                 prioritiesAccessor,
                 exclusionAccessor,
                 pageExperimentIndexAccessor,
+
+                prioritiesRepository,
+                mutexRepository,
+                pagesRepository,
+
                 driver,
                 mappingManager,
                 5,
@@ -555,6 +567,11 @@ public class CassandraAssignmentsRepositoryTest {
                 prioritiesAccessor,
                 exclusionAccessor,
                 pageExperimentIndexAccessor,
+
+                prioritiesRepository,
+                mutexRepository,
+                pagesRepository,
+
                 driver,
                 mappingManager,
                 5,
@@ -595,6 +612,11 @@ public class CassandraAssignmentsRepositoryTest {
                 prioritiesAccessor,
                 exclusionAccessor,
                 pageExperimentIndexAccessor,
+
+                prioritiesRepository,
+                mutexRepository,
+                pagesRepository,
+
                 driver,
                 mappingManager,
                 5,
@@ -639,6 +661,11 @@ public class CassandraAssignmentsRepositoryTest {
                 prioritiesAccessor,
                 exclusionAccessor,
                 pageExperimentIndexAccessor,
+
+                prioritiesRepository,
+                mutexRepository,
+                pagesRepository,
+
                 driver,
                 mappingManager,
                 5,
@@ -1333,6 +1360,11 @@ public class CassandraAssignmentsRepositoryTest {
                 prioritiesAccessor,
                 exclusionAccessor,
                 pageExperimentIndexAccessor,
+
+                prioritiesRepository,
+                mutexRepository,
+                pagesRepository,
+
                 driver,
                 mappingManager,
                 5,

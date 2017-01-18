@@ -26,6 +26,8 @@ import com.intuit.wasabi.experimentobjects.BucketList;
 import com.intuit.wasabi.experimentobjects.Context;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.ExperimentBatch;
+import com.intuit.wasabi.experimentobjects.Page;
+import com.intuit.wasabi.experimentobjects.PageExperiment;
 import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
 
 import javax.ws.rs.core.StreamingOutput;
@@ -193,4 +195,33 @@ public interface AssignmentsRepository {
                                     Map<Experiment.ID, List<Experiment.ID>> exclusionMap
     );
 
+    /**
+     * Populate experiment metadata using assignment cache service...
+     *
+     * @param userID
+     * @param appName
+     * @param context
+     * @param allowAssignments
+     * @param prioritizedExperimentList
+     * @param experimentMap
+     * @param existingUserAssignments
+     * @param bucketMap
+     * @param exclusionMap
+     */
+    void populateExperimentMetadataV2(User.ID userID, Application.Name appName, Context context, ExperimentBatch experimentBatch, Optional<Map<Experiment.ID, Boolean>> allowAssignments,
+                                    PrioritizedExperimentList prioritizedExperimentList,
+                                    Map<Experiment.ID, Experiment> experimentMap,
+                                    Table<Experiment.ID, Experiment.Label, String> existingUserAssignments,
+                                    Map<Experiment.ID, BucketList> bucketMap,
+                                    Map<Experiment.ID, List<Experiment.ID>> exclusionMap
+    );
+
+    /**
+     * Get experiments associated with the given application & page.
+     *
+     * @param applicationName
+     * @param pageName
+     * @return
+     */
+    List<PageExperiment> getExperiments(Application.Name applicationName, Page.Name pageName);
 }

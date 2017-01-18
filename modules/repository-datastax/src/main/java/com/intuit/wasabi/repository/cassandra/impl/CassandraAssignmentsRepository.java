@@ -52,6 +52,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
@@ -99,6 +100,12 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     private PageExperimentIndexAccessor pageExperimentIndexAccessor;
     private CassandraDriver driver;
 
+    private AssignmentsServiceCache assignmentsServiceCache;
+    private PrioritiesRepository prioritiesRepository = null;
+    private MutexRepository mutexRepository = null;
+    private PagesRepository pagesRepository = null;
+
+
     @Inject
     public CassandraAssignmentsRepository(
             @CassandraRepository ExperimentRepository experimentRepository,
@@ -119,6 +126,11 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
             PrioritiesAccessor prioritiesAccessor,
             ExclusionAccessor exclusionAccessor,
             PageExperimentIndexAccessor pageExperimentIndexAccessor,
+
+            PrioritiesRepository prioritiesRepository,
+            MutexRepository mutexRepository,
+            PagesRepository pagesRepository,
+
             CassandraDriver driver,
             MappingManager mappingManager,
             final @Named("export.pool.size") int assignmentsCountThreadPoolSize,
@@ -161,6 +173,8 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                 0L,
                 MILLISECONDS,
                 assignmentsCountQueue);
+
+        this.assignmentsServiceCache = new AssignmentsServiceCache(experimentRepository, prioritiesRepository, mutexRepository, pagesRepository);
     }
 
     Stream<ExperimentUserByUserIdContextAppNameExperimentId> getUserIndexStream(String userId,
@@ -237,6 +251,40 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         populateBucketsAndExclusions(experimentIds, bucketMap, exclusionMap);
 
         if(logger.isDebugEnabled()) logger.debug("populateExperimentMetadata - FINISHED...");
+    }
+
+    @Override
+    @Timed
+    public void populateExperimentMetadataV2( User.ID userID, Application.Name appName, Context context, ExperimentBatch experimentBatch, Optional<Map<Experiment.ID, Boolean>> allowAssignments,
+                                            PrioritizedExperimentList prioritizedExperimentList,
+                                            Map<Experiment.ID, com.intuit.wasabi.experimentobjects.Experiment> experimentMap,
+                                            Table<Experiment.ID, Experiment.Label, String> existingUserAssignments,
+                                            Map<Experiment.ID, BucketList> bucketMap,
+                                            Map<Experiment.ID, List<Experiment.ID>> exclusionMap
+    ) {
+        if(logger.isDebugEnabled()) logger.debug("populateExperimentMetadata - STARTED: userID={}, appName={}, context={}, experimentBatch={}, experimentIds={}", userID, appName, context, experimentBatch, allowAssignments);
+        if(isNull(experimentBatch.getLabels()) && !allowAssignments.isPresent() ) {
+            logger.error("Invalid input to CassandraAssignmentsRepository.populateExperimentMetadata(): Given input: userID={}, appName={}, context={}, experimentBatch={}, allowAssignments={}", userID, appName, context, experimentBatch, allowAssignments);
+            return;
+        }
+
+        //Populate experiments map, prioritized experiments list and existing user assignments.
+        populateExperimentApplicationAndUserAssignmentsV2(userID, appName, context, prioritizedExperimentList, experimentMap, existingUserAssignments);
+
+        //Populate experiments ids of given batch
+        Set<Experiment.ID> experimentIds = allowAssignments.isPresent()?allowAssignments.get().keySet():new HashSet<>();
+        populateExperimentIdsAndExperimentBatchV2(allowAssignments, experimentMap, experimentBatch, experimentIds);
+
+        //Based on given experiment ids, populate experiment buckets and exclusions..
+        populateBucketsAndExclusionsV2(experimentIds, bucketMap, exclusionMap);
+
+        if(logger.isDebugEnabled()) logger.debug("populateExperimentMetadata - FINISHED...");
+    }
+
+    @Override
+    @Timed
+    public List<PageExperiment> getExperiments(Application.Name appName, Page.Name pageName) {
+        return assignmentsServiceCache.getPageExperiments(appName, pageName);
     }
 
     /**
@@ -376,6 +424,103 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
             if(logger.isDebugEnabled()) logger.debug("experimentBatch after updating labels ({})", experimentBatch);
         }
     }
+
+
+    /**
+     *
+     * @param userID Input: Given user id
+     * @param appName Input: Given application name
+     * @param context Input: Given context
+     * @param prioritizedExperimentList Output: prioritized experiment list of ALL the experiments for the given application.
+     * @param experimentMap Output: Map of 'experiment id TO experiment' of ALL the experiments for the given application.
+     * @param existingUserAssignments Output: ALL the existing user assignments of given user_id, application name and context.
+     */
+    private void populateExperimentApplicationAndUserAssignmentsV2(User.ID userID, Application.Name appName, Context context,
+                                                                 PrioritizedExperimentList prioritizedExperimentList,
+                                                                 Map<Experiment.ID, Experiment> experimentMap,
+                                                                 Table<Experiment.ID, Experiment.Label, String> existingUserAssignments) {
+        ListenableFuture<Result<ExperimentUserByUserIdContextAppNameExperimentId>> userAssignmentsFuture = null;
+
+        userAssignmentsFuture = experimentUserIndexAccessor.asyncSelectBy(userID.toString(), appName.toString(), context.toString());
+        if(logger.isDebugEnabled()) logger.debug("Sent experimentUserIndexAccessor.asyncSelectBy({}, {}, {})", userID, appName, context);
+
+        assignmentsServiceCache.getExprimentsByAppName(appName).stream().forEach(exp -> {
+            experimentMap.put(exp.getID(), exp);
+        });
+        if(logger.isDebugEnabled()) logger.debug("experimentMap=> {}", experimentMap);
+
+        assignmentsServiceCache.getPrioritizedExperimentListMap(appName).getPrioritizedExperiments().stream().forEach(pExp -> {
+            prioritizedExperimentList.addPrioritizedExperiment(pExp);
+        });
+        if(logger.isDebugEnabled()) {
+            for(PrioritizedExperiment exp:prioritizedExperimentList.getPrioritizedExperiments()) {
+                logger.debug("prioritizedExperiment=> {} ", exp);
+            }
+        }
+
+        UninterruptibleUtil.getUninterruptibly(userAssignmentsFuture).all().stream().forEach((ExperimentUserByUserIdContextAppNameExperimentId uaPojo) -> {
+            Experiment.ID experimentID = Experiment.ID.valueOf(uaPojo.getExperimentId());
+            Experiment exp = experimentMap.get(experimentID);
+            if(!isNull(exp)) {
+                existingUserAssignments.put(
+                        exp.getID(),
+                        exp.getLabel(), //expects this to be non-null
+                        Optional.ofNullable(uaPojo.getBucket()).orElseGet(() ->"null")
+                );
+            }
+        });
+        if(logger.isDebugEnabled()) logger.debug("existingUserAssignments=> {} ", existingUserAssignments);
+    }
+
+    /**
+     *
+     * @param experimentIds INPUT: Given batch experiment ids
+     * @param bucketMap Output: Map of 'experiment id TO BucketList' of ONLY experiments which are associated to the given application and page.
+     * @param exclusionMap Output: Map of 'experiment id TO to its mutual experiment ids' of ONLY experiments which are associated to the given application and page.
+     */
+    private void populateBucketsAndExclusionsV2(Set<Experiment.ID> experimentIds, Map<Experiment.ID, BucketList> bucketMap, Map<Experiment.ID, List<Experiment.ID>> exclusionMap) {
+        Map<Experiment.ID, ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Bucket>>> bucketFutureMap = new HashMap<>();
+        Map<Experiment.ID, ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Exclusion>>> exclusionFutureMap = new HashMap<>();
+
+        experimentIds.stream().forEach(expId -> {
+            bucketMap.put(expId, new BucketList());
+            assignmentsServiceCache.getBucketList(expId).getBuckets().stream().forEach(bucket -> {
+                bucketMap.get(expId).addBucket(bucket);
+            });
+
+            exclusionMap.put(expId, new ArrayList<>());
+            assignmentsServiceCache.getExclusionList(expId).stream().forEach(excludedExp -> {
+                exclusionMap.get(expId).add(excludedExp);
+            });
+        });
+
+        if(logger.isDebugEnabled()) logger.debug("bucketMap=> {} ", bucketMap);
+        if(logger.isDebugEnabled()) logger.debug("exclusionMap=> {} ", exclusionMap);
+    }
+
+    /**
+     * This method is used to :
+     * 1.   Populate experimentIds of the given batch only based on experiment labels (experimentBatch).
+     * 2.   Populate experiment labels based on given batch experiment ids (allowAssignments).
+     *
+     * @param allowAssignments - INPUT: if present then it contains given batch experiment ids.
+     * @param experimentMap - INPUT:  Map of all the experiments of the given application.
+     * @param experimentBatch - INPUT/OUTPUT:  if allowAssignments is empty then this contains given batch experiment labels.
+     * @param experimentIds - OUTPUT: Final given batch experiment ids.
+     */
+    private void populateExperimentIdsAndExperimentBatchV2(Optional<Map<Experiment.ID, Boolean>> allowAssignments, Map<Experiment.ID, com.intuit.wasabi.experimentobjects.Experiment> experimentMap, ExperimentBatch experimentBatch, Set<Experiment.ID> experimentIds ) {
+        //allowAssignments is EMPTY means experimentBatch.labels are present.
+        //Use experimentBatch.labels to populate experimentIds
+        if(!allowAssignments.isPresent()) {
+            for(Experiment exp:experimentMap.values()) {
+                if(experimentBatch.getLabels().contains(exp.getLabel())) {
+                    experimentIds.add(exp.getID());
+                }
+            }
+            if(logger.isDebugEnabled()) logger.debug("experimentIds for given experiment labels ({})", experimentIds);
+        }
+    }
+
 
     //TODO: why return the last field as String instead of Bucket.Lable?
     @Override
@@ -914,4 +1059,106 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         }
         return assignmentCountsBuilder.build();
     }
+
+    class AssignmentsServiceCache {
+
+        ExperimentRepository experimentRepository = null;
+        PrioritiesRepository prioritiesRepository = null;
+        MutexRepository mutexRepository = null;
+        PagesRepository pagesRepository = null;
+
+        public AssignmentsServiceCache(ExperimentRepository experimentRepository, PrioritiesRepository prioritiesRepository, MutexRepository mutexRepository, PagesRepository pagesRepository) {
+            this.experimentRepository=experimentRepository;
+            this.prioritiesRepository=prioritiesRepository;
+            this.mutexRepository=mutexRepository;
+            this.pagesRepository=pagesRepository;
+        }
+        Map<Application.Name, List<Experiment>> applicationExperimentsCache = new ConcurrentHashMap<>();
+        Map<Experiment.ID, Experiment> experimentIdCache = new ConcurrentHashMap<>();
+        Map<String, Experiment> experimentLabelCache = new ConcurrentHashMap<>();
+        Map<Application.Name, PrioritizedExperimentList> prioritizedExperimentListMap = new ConcurrentHashMap<>();
+        Map<Experiment.ID, List<Experiment.ID>> exclusionMap = new ConcurrentHashMap<>();
+        Map<Experiment.ID, BucketList> bucketMap = new ConcurrentHashMap<>();
+        Map<String, List<PageExperiment>> applicationPageToExperimentMap = new ConcurrentHashMap<>();
+
+        public void refresh() {
+
+        }
+
+        public List<Experiment> getExprimentsByAppName(Application.Name appName) {
+            List<Experiment> expList = applicationExperimentsCache.get(appName);
+            if(expList==null) {
+
+                ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment>> experimentsFuture = experimentAccessor.asyncGetExperimentByAppName(appName.toString());
+                if(logger.isDebugEnabled()) logger.debug("Sent experimentAccessor.asyncGetExperimentByAppName({})", appName);
+
+                //Process the Futures in the order that are expected to arrive earlier
+                UninterruptibleUtil.getUninterruptibly(experimentsFuture).all().stream().forEach(expPojo -> {
+                    expList.add(ExperimentHelper.makeExperiment(expPojo));
+                });
+                if(logger.isDebugEnabled()) logger.debug("expList=> {}", expList);
+
+                applicationExperimentsCache.put(appName, expList);
+            }
+            return expList;
+        }
+
+        public Experiment getExperimentById(Experiment.ID expId) {
+            Experiment exp = experimentIdCache.get(expId);
+            if(exp==null) {
+                exp = experimentRepository.getExperiment(expId);
+                experimentIdCache.put(expId, exp);
+            }
+            return exp;
+        }
+
+        public Experiment getExperimentByAppNameAndExpLabel(Application.Name appName, Experiment.Label expLabel) {
+            String key = appName.toString()+expLabel.toString();
+            Experiment exp = experimentLabelCache.get(key);
+            if(exp==null) {
+                exp = experimentRepository.getExperiment(appName, expLabel);
+                experimentLabelCache.put(key, exp);
+            }
+            return exp;
+        }
+
+        public PrioritizedExperimentList getPrioritizedExperimentListMap(Application.Name appName) {
+            PrioritizedExperimentList val = prioritizedExperimentListMap.get(appName);
+            if(val==null) {
+                val = prioritiesRepository.getPriorities(appName);
+                prioritizedExperimentListMap.put(appName, val);
+            }
+            return val;
+        }
+
+        public List<Experiment.ID> getExclusionList(Experiment.ID expId) {
+            List<Experiment.ID> exclusionList = exclusionMap.get(expId);
+            if(exclusionList==null) {
+                exclusionList = mutexRepository.getExclusionList(expId);
+                exclusionMap.put(expId, exclusionList);
+            }
+            return exclusionList;
+        }
+
+        public BucketList getBucketList(Experiment.ID expId) {
+            BucketList bucketList = bucketMap.get(expId);
+            if(bucketList==null) {
+                bucketList = experimentRepository.getBucketList(expId);
+                bucketMap.put(expId, bucketList);
+            }
+            return bucketList;
+        }
+
+        public List<PageExperiment> getPageExperiments(Application.Name appName, Page.Name pageName) {
+            String key = appName.toString()+pageName.toString();
+            List<PageExperiment> pageExperiments = applicationPageToExperimentMap.get(key);
+            if(pageExperiments==null) {
+                pageExperiments = pagesRepository.getExperiments(appName, pageName);
+                applicationPageToExperimentMap.put(key, pageExperiments);
+            }
+            return pageExperiments;
+        }
+
+    }
 }
+

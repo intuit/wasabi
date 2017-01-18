@@ -30,6 +30,8 @@ import org.slf4j.Logger;
 
 import java.net.URI;
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -65,6 +67,7 @@ public class AssignmentsModule extends AbstractModule {
 
         bindAssignmentAndDecorator(properties);
         bindRuleCacheThreadPool(properties);
+
 
         String databaseAssignmentClassName = getProperty("export.rest.assignment.db.class.name", properties,
                 "com.intuit.wasabi.assignment.impl.NoopDatabaseAssignmentEnvelope");
@@ -145,4 +148,11 @@ public class AssignmentsModule extends AbstractModule {
         bind(ThreadPoolExecutor.class).annotatedWith(named("ruleCache.threadPool")).toInstance(ruleCacheExecutor);
     }
 
+    private void bindDoAssignmentsThreadPool(final Properties properties) {
+        LinkedBlockingQueue<Runnable> doAssignmentQueue = new LinkedBlockingQueue<>();
+        int poolSize = parseInt(getProperty("do.assignments.executor.pool.size", properties, "48"));
+        ExecutorService doAssignmentExecutorService = Executors.newFixedThreadPool(poolSize);
+
+        bind(ExecutorService.class).annotatedWith(named("doAssignment.threadPoolService")).toInstance(doAssignmentExecutorService);
+    }
 }
