@@ -686,7 +686,7 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
 //    }
 
     @Override
-    public BucketList getBuckets(Experiment.ID experimentID)
+    public BucketList getBuckets(Experiment.ID experimentID, boolean checkExperiment)
             throws RepositoryException {
 
         final String SQL_SELECT_ID =

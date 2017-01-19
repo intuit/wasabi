@@ -411,7 +411,7 @@ public class CassandraExperimentRepository implements ExperimentRepository {
 		LOGGER.debug("Get Assignment Counts for Experiment {} and context {}",
 				new Object[] { experimentID, context });
 
-		List<Bucket> bucketList = getBuckets(experimentID).getBuckets();
+		List<Bucket> bucketList = getBuckets(experimentID, false /* caller already checks if experiment exists */).getBuckets();
 
 		AssignmentCounts.Builder builder = new AssignmentCounts.Builder();
 		builder.withExperimentID(experimentID);
@@ -977,7 +977,7 @@ public class CassandraExperimentRepository implements ExperimentRepository {
         }
 
         BucketList buckets;
-        buckets = getBuckets(experimentID);
+        buckets = getBuckets(experimentID, false);
         return buckets;
 	}
 
@@ -1045,7 +1045,7 @@ public class CassandraExperimentRepository implements ExperimentRepository {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public BucketList getBuckets(Experiment.ID experimentID) {
+	public BucketList getBuckets(Experiment.ID experimentID, boolean checkExperiment) {
 
 		LOGGER.debug("Getting buckets for {}", experimentID);
 		
@@ -1053,11 +1053,13 @@ public class CassandraExperimentRepository implements ExperimentRepository {
 				"Parameter \"experimentID\" cannot be null");
 
 		try {
-			// Check if the experiment is live
-			Experiment experiment = getExperiment(experimentID);
-			if (experiment == null) {
-				throw new ExperimentNotFoundException(experimentID);
-			}
+            if (checkExperiment) {
+                // Check if the experiment is live
+                Experiment experiment = getExperiment(experimentID);
+                if (experiment == null) {
+                    throw new ExperimentNotFoundException(experimentID);
+                }
+            }
 	
 			 Result<com.intuit.wasabi.repository.cassandra.pojo.Bucket> bucketPojos = 
 					 bucketAccessor.getBucketByExperimentId(experimentID.getRawID());

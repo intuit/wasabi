@@ -1218,7 +1218,7 @@ public class AssignmentsImplTest {
 
         experiment.setState(Experiment.State.TERMINATED);
         Mockito.when(cassandraRepository.getExperiment(testApp, experiment.getLabel())).thenReturn(experiment);
-        Mockito.when(cassandraRepository.getBuckets(experiment.getID())).thenReturn(expBucketList);
+        Mockito.when(cassandraRepository.getBuckets(experiment.getID(), false)).thenReturn(expBucketList);
 
         boolean assertionErrorCaught = false;
         try {

@@ -196,7 +196,7 @@ public class ExperimentsImpl implements Experiments {
             * */
             if (currentState.equals(DRAFT) && desiredState.equals(RUNNING)) {
                 // Throw an exception if the sanity-check fails
-                BucketList bucketList = buckets.getBuckets(experimentID);
+                BucketList bucketList = buckets.getBuckets(experimentID, false /* don't check experiment again */);
                 validator.validateExperimentBuckets(bucketList.getBuckets());
             }
         }
