@@ -17,10 +17,10 @@ package com.intuit.wasabi.assignment.impl;
 
 import com.google.inject.Inject;
 import com.intuit.wasabi.assignment.AssignmentDecorator;
+import com.intuit.wasabi.assignmentobjects.SegmentationProfile;
+import com.intuit.wasabi.assignmentobjects.User.ID;
+import com.intuit.wasabi.experimentobjects.BucketList;
 import com.intuit.wasabi.experimentobjects.Experiment;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
 
 public class DefaultAssignmentDecorator implements AssignmentDecorator {
 
@@ -29,7 +29,7 @@ public class DefaultAssignmentDecorator implements AssignmentDecorator {
     }
 
     @Override
-    public URI materializeUri(final Experiment experiment) throws UnsupportedEncodingException {
+    public BucketList getBucketList(Experiment experiment, ID userID, SegmentationProfile segmentationProfile) {
         return null;
     }
 }

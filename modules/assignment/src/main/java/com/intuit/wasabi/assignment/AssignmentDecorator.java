@@ -15,23 +15,38 @@
  *******************************************************************************/
 package com.intuit.wasabi.assignment;
 
+import java.io.IOException;
+
+import com.intuit.wasabi.assignmentobjects.SegmentationProfile;
+import com.intuit.wasabi.assignmentobjects.User;
+import com.intuit.wasabi.exceptions.BucketDistributionNotFetchableException;
+import com.intuit.wasabi.experimentobjects.BucketList;
 import com.intuit.wasabi.experimentobjects.Experiment;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-
 /**
- * Decorator for creating uri from experiment
+ * Interface that provides method(s) to modify/enhance the default behavior of retrieving bucket list when
+ * retrieving assignment(s).
  */
 public interface AssignmentDecorator {
 
-
     /**
-     * Given an experiment, derive the materialized URI for calling other resources on this experiment
+     * Gets the bucket list through an external source (AssignmentDecorator). AssignmentDecorator can
+     * be a personalization engine that will execute a model to return a recommended bucket list. If the call
+     * is a successful, it merges the personalization parameters with segmentation profile
      *
-     * @param experiment {@link com.intuit.wasabi.experimentobjects.Experiment} current experiment
-     * @return URI contains the materialized URI for experiment
-     * @throws UnsupportedEncodingException
-     */
-    URI materializeUri(Experiment experiment) throws UnsupportedEncodingException;
+     * @param experiment
+     *            Experiment , it provides the modelName and modelVersion that needs to be used
+     * @param userID
+     *            UserId
+     * @param segmentationProfile
+     *            (provides the segmentationProfile to personalize the assignment)
+     * @return BucketList, which contains the buckets and the respective
+     *         allocation percentages for a userID
+     * @throws IOException
+     *             IO exception
+     * @throws com.intuit.wasabi.exceptions.BucketDistributionNotFetchableException
+     *             not able to fetch bucket distribution
+     */    
+    BucketList getBucketList(Experiment experiment, User.ID userID, SegmentationProfile segmentationProfile)
+            throws BucketDistributionNotFetchableException;
 }
