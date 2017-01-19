@@ -24,6 +24,7 @@ import com.intuit.wasabi.events.EventsExport;
 import com.intuit.wasabi.exceptions.AuthenticationException;
 import com.intuit.wasabi.experiment.Experiments;
 import com.intuit.wasabi.experimentobjects.Application;
+
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,11 +33,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import junit.framework.Assert;
 import static java.nio.charset.Charset.forName;
 import static org.apache.commons.codec.binary.Base64.encodeBase64;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -244,6 +247,155 @@ public class AuthorizationResourceTest {
 
         Response response = authorizationResource.deleteUserRoles(TESTAPP, TESTUSER, AUTHHEADER);
         assertThat(response.getStatus(), CoreMatchers.<Object>equalTo(204));
+    }
+
+    @Test
+    public void addUserToSuperadminRoleSuccess() throws Exception {
+
+        UserRole userRole = UserRole.newInstance(TESTAPP,Role.ADMIN).withUserID(USER).build();
+        UserRoleList userRoleList = new UserRoleList();
+        userRoleList.addRole(userRole);
+
+        AuthorizationResource authorizationResource = 
+        		new AuthorizationResource(authorization, new HttpHeader("jaba-???"));
+
+        when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
+        when(authorization.getUserInfo(USER)).thenReturn(UserInfo.from(USER).build());
+        
+        when(authorization.getUserInfo(TESTUSER)).thenReturn(UserInfo.from(TESTUSER).build());
+        
+        when(authorization.getUserRoleList(TESTUSER)).thenReturn(userRoleList);
+        
+        Response response = authorizationResource.assignUserToSuperAdmin(TESTUSER, AUTHHEADER);
+        
+        assertThat(response.getStatus(), CoreMatchers.<Object>equalTo(204));
+    }
+
+    @Test
+    public void removeUserFromSuperadminRoleSuccess() throws Exception {
+
+        UserRole superAdmin = UserRole.newInstance(TESTAPP,Role.SUPERADMIN).withUserID(USER).build();
+        List<UserRole> superAdmins = new ArrayList<>();
+        superAdmins.add(superAdmin);
+        AuthorizationResource authorizationResource = 
+        		new AuthorizationResource(authorization, new HttpHeader("jaba-???"));
+
+        when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
+        when(authorization.getUserInfo(USER)).thenReturn(UserInfo.from(USER).build());
+        
+        when(authorization.getUserInfo(TESTUSER)).thenReturn(UserInfo.from(TESTUSER).build());
+        
+        when(authorization.getSuperAdminRoleList()).thenReturn(superAdmins);
+        
+        Response response = authorizationResource.removeUserFromSuperAdmin(TESTUSER, AUTHHEADER);
+        
+        assertThat(response.getStatus(), CoreMatchers.<Object>equalTo(204));
+    }
+
+    @Test
+    public void getAllSuperadminRoleSuccess() throws Exception {
+
+        UserRole userRole = UserRole.newInstance(TESTAPP,Role.SUPERADMIN).withUserID(USER).build();
+        UserRoleList userRoleList = new UserRoleList();
+        userRoleList.addRole(userRole);
+
+        AuthorizationResource authorizationResource = 
+        		new AuthorizationResource(authorization, new HttpHeader("jaba-???"));
+
+        when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
+        when(authorization.getUserInfo(USER)).thenReturn(UserInfo.from(USER).build());
+        
+        when(authorization.getSuperAdminRoleList()).thenReturn(userRoleList.getRoleList());
+        
+        Response response = authorizationResource.getAllSuperAdminRoleList(AUTHHEADER);
+        
+        assertThat(response.getStatus(), CoreMatchers.<Object>equalTo(200));
+        Assert.assertEquals(response.getEntity(),(Object)userRoleList.getRoleList());
+    }
+
+    @Test(expected=AuthenticationException.class)
+    public void getAllSuperadminRoleNotAuthorized() throws Exception {
+
+        UserRole userRole = UserRole.newInstance(TESTAPP,Role.SUPERADMIN).withUserID(USER).build();
+        UserRoleList userRoleList = new UserRoleList();
+        userRoleList.addRole(userRole);
+
+        AuthorizationResource authorizationResource = 
+        		new AuthorizationResource(authorization, new HttpHeader("jaba-???"));
+
+        when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
+        when(authorization.getUserInfo(USER)).thenReturn(UserInfo.from(USER).build());
+        doThrow(AuthenticationException.class)
+        	.when(authorization).checkSuperAdmin(USER);
+
+        Response response = authorizationResource.getAllSuperAdminRoleList(AUTHHEADER);
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void removeUserFromSuperadminRoleUserNotFound() throws Exception {
+
+        UserRole userRole = UserRole.newInstance(TESTAPP,Role.SUPERADMIN).withUserID(USER).build();
+        UserRoleList userRoleList = new UserRoleList();
+        userRoleList.addRole(userRole);
+
+        AuthorizationResource authorizationResource = 
+        		new AuthorizationResource(authorization, new HttpHeader("jaba-???"));
+
+        when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
+        when(authorization.getUserInfo(USER)).thenReturn(UserInfo.from(USER).build());
+        
+        Response response = authorizationResource.removeUserFromSuperAdmin(TESTUSER, AUTHHEADER);
+        
+        assertThat(response.getStatus(), CoreMatchers.<Object>equalTo(204));
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void addUserToSuperadminRoleUserNotFound() throws Exception {
+
+        UserRole userRole = UserRole.newInstance(TESTAPP,Role.ADMIN).withUserID(USER).build();
+        UserRoleList userRoleList = new UserRoleList();
+        userRoleList.addRole(userRole);
+
+        AuthorizationResource authorizationResource = 
+        		new AuthorizationResource(authorization, new HttpHeader("jaba-???"));
+
+        when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
+        when(authorization.getUserInfo(USER)).thenReturn(UserInfo.from(USER).build());
+        
+        Response response = authorizationResource.assignUserToSuperAdmin(TESTUSER, AUTHHEADER);
+        
+    }
+
+    @Test(expected=AuthenticationException.class)
+    public void addUserToSuperadminRoleNotAuthorized() throws Exception {
+
+        UserRole userRole = UserRole.newInstance(TESTAPP,Role.ADMIN).withUserID(USER).build();
+        UserRoleList userRoleList = new UserRoleList();
+        userRoleList.addRole(userRole);
+
+        AuthorizationResource authorizationResource = 
+        		new AuthorizationResource(authorization, new HttpHeader("jaba-???"));
+
+        when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
+        when(authorization.getUserInfo(USER)).thenReturn(UserInfo.from(USER).build());
+        doThrow(AuthenticationException.class)
+        	.when(authorization).checkSuperAdmin(USER);
+       
+        Response response = authorizationResource.assignUserToSuperAdmin(TESTUSER, AUTHHEADER);
+    }
+
+    @Test(expected=AuthenticationException.class)
+    public void removeUserFromSuperadminRoleNotAuthorized() throws Exception {
+
+        AuthorizationResource authorizationResource = 
+        		new AuthorizationResource(authorization, new HttpHeader("jaba-???"));
+
+        when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
+        when(authorization.getUserInfo(USER)).thenReturn(UserInfo.from(USER).build());
+        doThrow(AuthenticationException.class)
+        	.when(authorization).checkSuperAdmin(USER);
+       
+        Response response = authorizationResource.removeUserFromSuperAdmin(TESTUSER, AUTHHEADER);
     }
 
     @Test
