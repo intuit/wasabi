@@ -531,6 +531,9 @@ public class AnalyticsImpl implements Analytics {
         if (release_date != null && release_date.before(experiment.getCreationTime())) {
             return assignmentRepository.getBucketAssignmentCount(experiment);
         } else {
+            if (Objects.isNull(experiment)) {
+                throw new ExperimentNotFoundException(experimentID);
+            }            
             return cassandraRepository.getAssignmentCounts(experimentID, context);
         }
     }
