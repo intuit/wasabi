@@ -83,8 +83,6 @@ import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-//import com.intuit.wasabi.util.PropertyFetcher;
-
 /**
  * A TestBase for new test sets.
  */
@@ -175,7 +173,7 @@ public class TestBase extends ServiceTestBase {
         setPropertyFromSystemProperty("application.name", "application-name");
         setPropertyFromSystemProperty("experiment.prefix", "experiment-prefix");
         setPropertyFromSystemProperty("bucket.prefix", "bucket-prefix");
-        
+	
         setPropertyFromSystemProperty("test-user", "test-user");
     }
 
