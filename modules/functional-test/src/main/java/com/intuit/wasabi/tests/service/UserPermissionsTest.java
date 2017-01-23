@@ -35,12 +35,10 @@ import com.intuit.wasabi.tests.model.APIUser;
 import com.intuit.wasabi.tests.model.Application;
 import com.intuit.wasabi.tests.model.Bucket;
 import com.intuit.wasabi.tests.model.Experiment;
-import com.intuit.wasabi.tests.model.UserRole;
 import com.intuit.wasabi.tests.model.factory.APIUserFactory;
 import com.intuit.wasabi.tests.model.factory.ApplicationFactory;
 import com.intuit.wasabi.tests.model.factory.BucketFactory;
 import com.intuit.wasabi.tests.model.factory.ExperimentFactory;
-import com.jayway.restassured.path.json.JsonPath;
 /**
  * This test class covers a scenario where a super-admin should be able to give permissions to
  * other users to access the app's and the user once he logins should be able to view all the 
@@ -145,11 +143,7 @@ public class UserPermissionsTest extends TestBase {
 		experiment3 = putExperiment(experiment3);
 		experiment4 = putExperiment(experiment4);
 		
-//		experimentsList.add(experiment1);
-//		experimentsList.add(experiment2);
-//		experimentsList.add(experiment3);
-//		experimentsList.add(experiment4);
-//		putExperimentList(experimentsList);
+
 		
 		experiment1.setState(Constants.EXPERIMENT_STATE_TERMINATED);
 		experiment2.setState(Constants.EXPERIMENT_STATE_TERMINATED);
@@ -161,7 +155,7 @@ public class UserPermissionsTest extends TestBase {
 		experiment4 = putExperiment(experiment4);
 		deleteExperiments(experimentsList);
 		
-		//thirdly lets delete the user from the application
+		//thirdly lets delete the user from the application so that t
 		for(Application application: applicationList)
 			deleteUserRole(testUserID, application.name);
 
