@@ -51,55 +51,41 @@ public class UserPermissionsTest extends TestBase {
 	String testUser = null;
 	String testUserPassword = null;
 	String testUserID = null;
-	List<Application> applicationList = null;
+	List<Application> applicationList = new ArrayList<>();
+	List<Experiment> experimentList = new ArrayList<>();
+	
+	static int NUMBER_OF_APPLICATIONS = 4;
 
 	@BeforeClass()
 	public void initializeTest()
-	{
+	{	
 		testUser = appProperties.getProperty("test-user", Constants.DEFAULT_TEST_USER);
+	
+		for(int i = 1 ; i <= NUMBER_OF_APPLICATIONS; i++) {
+			Application application = ApplicationFactory.createApplication().setName("testApplication_"+i);
+			applicationList.add(application);		
+		}
 		
-		//lets create an array list of application names
-		List<String> appNames = new ArrayList<String>();
-		appNames.add("testApplication_1");
-		appNames.add("testApplication_2");
-		appNames.add("testApplication_3");
-		appNames.add("testApplication_4");
-		
-		//lets create applications with above names and store the applications in arrayList
-		applicationList = ApplicationFactory.createApplications(appNames);
 		
 		//create and assign experiments to the applications
-		experiment1 = ExperimentFactory.createExperiment().setApplication(applicationList.get(0));
-		experiment2 = ExperimentFactory.createExperiment().setApplication(applicationList.get(1));
-		experiment3 = ExperimentFactory.createExperiment().setApplication(applicationList.get(2));
-		experiment4 = ExperimentFactory.createExperiment().setApplication(applicationList.get(3));
+		for(int i = 1 ; i <= NUMBER_OF_APPLICATIONS; i++) {
+			Experiment experiment = ExperimentFactory.createExperiment().setApplication(applicationList.get(i-1));
+			experimentList.add(experiment);		
+		}
 		
-		experiment1 = postExperiment(experiment1);
-		experiment2 = postExperiment(experiment2);
-		experiment3 = postExperiment(experiment3);
-		experiment4 = postExperiment(experiment4);
+		experimentList = postExperiments(experimentList);
 		
-		List<Bucket> buckets1 = BucketFactory.createBuckets(experiment1, 3);
-		List<Bucket> buckets2 = BucketFactory.createBuckets(experiment2, 3);
-		List<Bucket> buckets3 = BucketFactory.createBuckets(experiment3, 3);
-		List<Bucket> buckets4 = BucketFactory.createBuckets(experiment4, 3);
+		for(int i = 1 ; i <= NUMBER_OF_APPLICATIONS; i++) {
+			List<Bucket> bucketList = BucketFactory.createBuckets(experimentList.get(i-1), 3);
+			postBuckets(bucketList);
+		}
 		
-		 postBuckets(buckets1);
-		 postBuckets(buckets2);
-		 postBuckets(buckets3);
-		 postBuckets(buckets4);
-
-		//lets change state of the experiment to running 
-		experiment1.state = Constants.EXPERIMENT_STATE_RUNNING;
-		experiment2.state = Constants.EXPERIMENT_STATE_RUNNING;
-		experiment3.state = Constants.EXPERIMENT_STATE_RUNNING;
-		experiment4.state = Constants.EXPERIMENT_STATE_RUNNING;
-
-		//below we start the experiment
-		experiment1 = putExperiment(experiment1);
-		experiment2 = putExperiment(experiment2);
-		experiment3 = putExperiment(experiment3);
-		experiment4 = putExperiment(experiment4);
+		//lets change state of the experiment to running
+		for(int i = 1 ; i <= NUMBER_OF_APPLICATIONS; i++) {
+			Experiment experiment = experimentList.get(i-1);
+			experiment.state = Constants.EXPERIMENT_STATE_RUNNING;
+			putExperiment(experiment);
+		}
 	}
 	
 	@Test
@@ -129,35 +115,28 @@ public class UserPermissionsTest extends TestBase {
 
 
 	@AfterClass()
-	public void cleanUp()
-	{
-		List<Experiment> experimentsList = new ArrayList<Experiment>();
-		experiment1.setState(Constants.EXPERIMENT_STATE_PAUSED);
-		experiment2.setState(Constants.EXPERIMENT_STATE_PAUSED);
-		experiment3.setState(Constants.EXPERIMENT_STATE_PAUSED);
-		experiment4.setState(Constants.EXPERIMENT_STATE_PAUSED);
+	public void cleanUp() {
 		
-		experiment1 = putExperiment(experiment1);
-		experiment2 = putExperiment(experiment2);
-		experiment3 = putExperiment(experiment3);
-		experiment4 = putExperiment(experiment4);
+		//lets pause the experiments
+		for(int i = 1 ; i <= NUMBER_OF_APPLICATIONS; i++) {
+			Experiment experiment = experimentList.get(i-1);
+			experiment.state = Constants.EXPERIMENT_STATE_PAUSED;
+			putExperiment(experiment);
+		}
 		
-
+		//once paused, lets terminate the experiments
+		for(int i = 1 ; i <= NUMBER_OF_APPLICATIONS; i++) {
+			Experiment experiment = experimentList.get(i-1);
+			experiment.state = Constants.EXPERIMENT_STATE_TERMINATED;
+			putExperiment(experiment);
+		}
 		
-		experiment1.setState(Constants.EXPERIMENT_STATE_TERMINATED);
-		experiment2.setState(Constants.EXPERIMENT_STATE_TERMINATED);
-		experiment3.setState(Constants.EXPERIMENT_STATE_TERMINATED);
-		experiment4.setState(Constants.EXPERIMENT_STATE_TERMINATED);
-		experiment1 = putExperiment(experiment1);
-		experiment2 = putExperiment(experiment2);
-		experiment3 = putExperiment(experiment3);
-		experiment4 = putExperiment(experiment4);
-		deleteExperiments(experimentsList);
+		//here finally lets delete those experiments
+		deleteExperiments(experimentList);
 		
 		//thirdly lets delete the user from the application so that t
 		for(Application application: applicationList)
 			deleteUserRole(testUserID, application.name);
-
 	}
 
 }

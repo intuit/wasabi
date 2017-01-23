@@ -314,7 +314,23 @@ public class TestBase extends ServiceTestBase {
     //////////////////////////
     // experiments Endpoint //
     //////////////////////////
-
+    /**
+     * Sends a POST request to create an experiment.
+     * The response must contain {@link HttpStatus#SC_CREATED}.
+     * <p>
+     * Sets createNewApplication to {@code true}.
+     *
+     * @param experiments the list of experiments to POST
+     * @return the list of new experiments
+     */
+    public List<Experiment> postExperiments(List<Experiment> experiments) {
+    	List<Experiment> experimentsList = new ArrayList<Experiment>();
+    	for(Experiment exp: experiments)
+    		experimentsList.add(postExperiment(exp));
+        return experimentsList;
+    }
+    
+    
     /**
      * Sends a POST request to create an experiment.
      * The response must contain {@link HttpStatus#SC_CREATED}.
