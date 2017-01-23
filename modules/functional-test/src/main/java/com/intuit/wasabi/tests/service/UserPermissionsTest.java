@@ -110,6 +110,7 @@ public class UserPermissionsTest extends TestBase {
 		//first lets authenticate the user
 		APIUser validUser = APIUserFactory.createAPIUser().setEmail(testUser);
 		APIUser user = getUserExists(validUser);
+		user.password = (user.password==null || user.password.length()==0)? appProperties.getProperty("password"): user.password;
 		testUserPassword = user.password;
 		testUserID = user.userId;
 		
