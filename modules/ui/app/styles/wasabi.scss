@@ -4528,6 +4528,12 @@ nav.hamburger-nav {
     left: 0px;
     right: 0px;
     z-index: 19;
+    .title-name {
+        position: absolute;
+        top: 20px;
+        left: 160px;
+        font-size: large;
+    }
 }
 
 .sticky-nav-bar-logged-off {
@@ -4544,7 +4550,7 @@ nav.hamburger-nav {
     }
 
     #exprSummary > li {
-        height: 600px;
+        height: 560px;
         width: 355px;
         margin-left: 10px;
         .summaryBody .bucketsTable {

@@ -405,6 +405,7 @@ angular.module('wasabi.controllers').
                 // Force card view
                 $scope.data.enableCardView = true;
                 $scope.data.showGrid = true;
+                $cookies.wasabiCardViewSetting = true;
             }
 
             // If this user has turned on Card View and we've saved it in a cookie, enable it (or use the saved value).
