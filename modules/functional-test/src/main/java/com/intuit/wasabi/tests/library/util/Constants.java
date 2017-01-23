@@ -79,5 +79,7 @@ public class Constants {
 	public static final String NO_OPEN_BUCKETS = "NO_OPEN_BUCKETS";
 
 	public static final int EXP_SPAWN_COUNT = 5;
+	
+	public static final String ROLE_LIST = "roleList";
 
 }

@@ -4436,13 +4436,13 @@ public class TestBase extends ServiceTestBase {
     	apiServerConnector.setUserNameAndPassword(user.userId, user.password);
 		response = apiServerConnector.doGet("authorization/applications");
 		assertReturnCode(response,expectedStatus);
-		List<Map<String, Object>> jsonStrings = response.jsonPath().get("roleList");
+		List<Map<String, Object>> jsonStrings = response.jsonPath().get();
 		List<String> applicationList = new ArrayList<>(jsonStrings.size());
 		
 		//here I am only interested in the name of the application
 		for(int i = 0 ; i < jsonStrings.size(); i++)
 		{
-			String appName = response.jsonPath().get("roleList["+i+"].applicationName[0]").toString();
+			String appName = response.jsonPath().get(Constants.ROLE_LIST+"["+i+"].applicationName[0]").toString();
 			applicationList.add(appName);
 		}
 		apiServerConnector.setUserNameAndPassword(appProperties.getProperty("user-name"),appProperties.getProperty("password"));
@@ -4489,7 +4489,7 @@ public class TestBase extends ServiceTestBase {
     	//building the payload
     	StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("{");
-		stringBuilder.append("\"roleList\":");
+		stringBuilder.append("\""+Constants.ROLE_LIST+"\":");
 		stringBuilder.append(roles);
 		stringBuilder.append("}");
 		

@@ -57,24 +57,22 @@ public class UserPermissionsTest extends TestBase {
 	public void initializeTest()
 	{
 		testUser = appProperties.getProperty("test-user", Constants.DEFAULT_TEST_USER);
-		//lets create applications first
-		Application application1 = ApplicationFactory.createApplication().setName("testApplication_1");
-		Application application2 = ApplicationFactory.createApplication().setName("testApplication_2");
-		Application application3 = ApplicationFactory.createApplication().setName("testApplication_3");
-		Application application4 = ApplicationFactory.createApplication().setName("testApplication_4");
-
-		//store the applications in arrayList
-		applicationList = new ArrayList<Application>();
-		applicationList.add(application1);
-		applicationList.add(application2);
-		applicationList.add(application3);
-		applicationList.add(application4);
+		
+		//lets create an array list of application names
+		List<String> appNames = new ArrayList<String>();
+		appNames.add("testApplication_1");
+		appNames.add("testApplication_2");
+		appNames.add("testApplication_3");
+		appNames.add("testApplication_4");
+		
+		//lets create applications with above names and store the applications in arrayList
+		applicationList = ApplicationFactory.createApplications(appNames);
 		
 		//create and assign experiments to the applications
-		experiment1 = ExperimentFactory.createExperiment().setApplication(application1);
-		experiment2 = ExperimentFactory.createExperiment().setApplication(application2);
-		experiment3 = ExperimentFactory.createExperiment().setApplication(application3);
-		experiment4 = ExperimentFactory.createExperiment().setApplication(application4);
+		experiment1 = ExperimentFactory.createExperiment().setApplication(applicationList.get(0));
+		experiment2 = ExperimentFactory.createExperiment().setApplication(applicationList.get(1));
+		experiment3 = ExperimentFactory.createExperiment().setApplication(applicationList.get(2));
+		experiment4 = ExperimentFactory.createExperiment().setApplication(applicationList.get(3));
 		
 		experiment1 = postExperiment(experiment1);
 		experiment2 = postExperiment(experiment2);
