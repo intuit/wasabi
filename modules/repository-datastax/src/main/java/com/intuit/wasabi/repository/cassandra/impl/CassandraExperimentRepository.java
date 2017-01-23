@@ -696,13 +696,13 @@ public class CassandraExperimentRepository implements ExperimentRepository {
             			experimentAccessor.getExperiments(uuids);
             	
                 List<Experiment> experiments = experimentPojos.all().stream().filter(experiment -> 
-                	! experiment.getState().equals(Experiment.State.DELETED))
+                	!experiment.getState().equals(Experiment.State.DELETED.name()))
                 	.map(ExperimentHelper::makeExperiment).collect(Collectors.toList());
                 
                 result.setExperiments(experiments);
             }
         } catch (Exception e) {
-    		LOGGER.error("Errro while getting experiments {}", experimentIDs, e);
+    		LOGGER.error("Error while getting experiments {}", experimentIDs, e);
             throw new RepositoryException("Could not retrieve the experiments for the collection of experimentIDs", e);
         }
         
