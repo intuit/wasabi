@@ -500,6 +500,12 @@ public class TestBase extends ServiceTestBase {
         assertReturnCode(response, expectedStatus);
     }
 
+    public void addUserInfo(String userId, int expectedStatus) {
+
+        response = apiServerConnector.doGet("authorization/users/" + userId + "/roles");
+        assertReturnCode(response, expectedStatus);
+    }
+
     public void deleteSuperAdmin(String userId, int expectedStatus, APIServerConnector apiServerConnector) {
 
         response = apiServerConnector.doDelete("authorization/superadmins/" + userId);
