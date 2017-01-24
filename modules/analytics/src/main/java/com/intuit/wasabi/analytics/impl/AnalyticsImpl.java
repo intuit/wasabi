@@ -528,12 +528,12 @@ public class AnalyticsImpl implements Analytics {
 
         // Uses counters
         Experiment experiment = cassandraRepository.getExperiment(experimentID);
+        if (Objects.isNull(experiment)) {
+            throw new ExperimentNotFoundException(experimentID);
+        }            
         if (release_date != null && release_date.before(experiment.getCreationTime())) {
             return assignmentRepository.getBucketAssignmentCount(experiment);
         } else {
-            if (Objects.isNull(experiment)) {
-                throw new ExperimentNotFoundException(experimentID);
-            }            
             return cassandraRepository.getAssignmentCounts(experimentID, context);
         }
     }
