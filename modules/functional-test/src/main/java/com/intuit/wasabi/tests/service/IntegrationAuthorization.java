@@ -261,6 +261,12 @@ public class IntegrationAuthorization extends TestBase {
     }    
 
     @Test(dependsOnGroups = {"ping"})
+    public void t_addWasabiReaderToUserInfo() {
+    	addUserInfo("wasabi_reader", HttpStatus.SC_OK);
+    }
+    
+    
+    @Test(dependsOnMethods = {"t_addWasabiReaderToUserInfo"})
     public void t_addWasabiReaderAsSuperAdmin() {
     	
     	List<Map<String,Object>> superadminsBefore = getSuperAdmins(HttpStatus.SC_OK, apiServerConnector);
