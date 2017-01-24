@@ -479,7 +479,7 @@ public class DatabaseExperimentRepositoryTest {
         List firstQueryResult = mock(List.class);
         when(transaction.select(anyString(), eq(id), eq(DELETED.toString()))).thenReturn(firstQueryResult);
         when(firstQueryResult.size()).thenReturn(0);
-        BDDCatchException.when(repository).getBuckets(id);
+        BDDCatchException.when(repository).getBuckets(id, false);
         BDDCatchException.then(caughtException())
                 .isInstanceOf(ExperimentNotFoundException.class)
                 .hasMessageContaining("Experiment")
@@ -496,7 +496,7 @@ public class DatabaseExperimentRepositoryTest {
         when(queryMap.get("is_control")).thenReturn(true);
         when(queryMap.get("payload")).thenReturn("payload");
         when(transaction.select(anyString(), eq(id))).thenReturn(secondQueryResult);
-        BucketList result = repository.getBuckets(id);
+        BucketList result = repository.getBuckets(id, false);
         assertThat(result, is(not(nullValue())));
         assertThat(result.getBuckets().size(), is(1));
         assertThat(result.getBuckets().get(0).getExperimentID(), is(id));

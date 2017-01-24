@@ -613,7 +613,7 @@ public class AssignmentsImpl implements Assignments {
 
         //check that the desired bucket is valid
         if (desiredBucketLabel != null) {
-            BucketList buckets = repository.getBuckets(experimentID);
+            BucketList buckets = repository.getBuckets(experimentID, false /* don't check experiment again */);
             Boolean bucketFound = false;
             for (Bucket bucket : buckets.getBuckets()) {
                 if (bucket.getLabel().equals(desiredBucketLabel) && !bucket.getState().equals(Bucket.State.EMPTY)) {
@@ -967,12 +967,12 @@ public class AssignmentsImpl implements Assignments {
                 // In the case of batch assignments, when response from Assignment Decorator fails, we skip doing a back end call to cassandra
                 // This is consistent with the different manner in which generateAssignment method is used for single and batch assignment calls.
                 if ((Objects.isNull(bucketList) || bucketList.getBuckets().isEmpty()) && !skipBucketRetrieval) {
-                    bucketList = repository.getBuckets(experiment.getID());
+                    bucketList = repository.getBuckets(experiment.getID(), false /* don't check experiment again */);
                 }
             }
         } else {
             if (!skipBucketRetrieval) {
-                bucketList = repository.getBuckets(experiment.getID());
+                bucketList = repository.getBuckets(experiment.getID(), false /* don't check experiment again */);
             }
         }
         return bucketList;

@@ -89,7 +89,7 @@ public class ExperimentDetailsImpl implements ExperimentDetails {
      * @return the same ExperimentDetail object but with additional information
      */
     private ExperimentDetail getBucketData(ExperimentDetail exp) {
-        List<Bucket> buckList = buckets.getBuckets(exp.getId()).getBuckets();
+        List<Bucket> buckList = buckets.getBuckets(exp.getId(), false).getBuckets();
         exp.addBuckets(buckList);
 
         return exp;

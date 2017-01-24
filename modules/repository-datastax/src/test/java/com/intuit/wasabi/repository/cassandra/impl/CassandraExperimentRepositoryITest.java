@@ -713,7 +713,7 @@ public class CassandraExperimentRepositoryITest extends IntegrationTestBase  {
 
 	@Test(expected=ExperimentNotFoundException.class)
 	public void testGetBucketsThrowsExperimentNotFoundException() {
-		BucketList buckets = repository.getBuckets(Experiment.ID.newInstance());
+		BucketList buckets = repository.getBuckets(Experiment.ID.newInstance(), false);
 	}
 
 	@Test
@@ -723,7 +723,7 @@ public class CassandraExperimentRepositoryITest extends IntegrationTestBase  {
 		bucketList1.addBucket(bucket2);
 		repository.updateBucketBatch(experimentID1, bucketList1);
 
-		 BucketList buckets = repository.getBuckets(experimentID1);
+		 BucketList buckets = repository.getBuckets(experimentID1, false);
 		assertEquals("Value should be equal", 2, buckets.getBuckets().size());
 		List<Bucket> bucketsResponse = buckets.getBuckets();
 		
@@ -756,12 +756,12 @@ public class CassandraExperimentRepositoryITest extends IntegrationTestBase  {
 		bucketList1.addBucket(bucket2);
 		repository.updateBucketBatch(experimentID1, bucketList1);
 
-		BucketList buckets = repository.getBuckets(experimentID1);
+		BucketList buckets = repository.getBuckets(experimentID1, false);
 		assertEquals("Value should be equal", 2, buckets.getBuckets().size());
 
 		repository.deleteBucket(experimentID1, bucket1.getLabel());
 		
-		buckets = repository.getBuckets(experimentID1);
+		buckets = repository.getBuckets(experimentID1, false);
 		
 		assertEquals("Value should be equal", 1, buckets.getBuckets().size());
 		List<Bucket> bucketsResponse = buckets.getBuckets();
@@ -778,12 +778,12 @@ public class CassandraExperimentRepositoryITest extends IntegrationTestBase  {
 		bucketList1.addBucket(bucket1);
 		repository.updateBucketBatch(experimentID1, bucketList1);
 
-		BucketList buckets = repository.getBuckets(experimentID1);
+		BucketList buckets = repository.getBuckets(experimentID1, false);
 		assertEquals("Value should be equal", 1, buckets.getBuckets().size());
 
 		repository.deleteBucket(experimentID1, bucket1.getLabel());
 		
-		buckets = repository.getBuckets(experimentID1);
+		buckets = repository.getBuckets(experimentID1, false);
 		
 		assertEquals("Value should be equal", 0, buckets.getBuckets().size());
 		

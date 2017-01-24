@@ -448,7 +448,7 @@ public class CassandraExperimentRepositoryTest {
 	@Test(expected=RepositoryException.class)
 	public void testGetBucketsAccessorMockThrowsException() {
 		repository.setBucketAccessor(mockBucketAccessor);
-		BucketList buckets = repository.getBuckets(experimentID1);
+		BucketList buckets = repository.getBuckets(experimentID1, false);
 	}
 
 	@Test(expected=RepositoryException.class)
