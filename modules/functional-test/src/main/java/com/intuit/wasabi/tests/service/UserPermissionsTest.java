@@ -117,16 +117,15 @@ public class UserPermissionsTest extends TestBase {
 	@AfterClass()
 	public void cleanUp() {
 		
-		//lets pause the experiments
+		//lets pause the experiments and delete them
 		for(int i = 1 ; i <= NUMBER_OF_APPLICATIONS; i++) {
+			
+			//pause the experiment
 			Experiment experiment = experimentList.get(i-1);
 			experiment.state = Constants.EXPERIMENT_STATE_PAUSED;
 			putExperiment(experiment);
-		}
-		
-		//once paused, lets terminate the experiments
-		for(int i = 1 ; i <= NUMBER_OF_APPLICATIONS; i++) {
-			Experiment experiment = experimentList.get(i-1);
+			
+			//delete the experiment
 			experiment.state = Constants.EXPERIMENT_STATE_TERMINATED;
 			putExperiment(experiment);
 		}
