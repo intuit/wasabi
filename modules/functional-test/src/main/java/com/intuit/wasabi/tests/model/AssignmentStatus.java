@@ -25,20 +25,20 @@ import com.intuit.wasabi.tests.library.util.serialstrategies.SerializationStrate
  * A very simple AssignmentStatus wrapper..
  */
 public class AssignmentStatus extends ModelItem{
-	
-	/** the status of the role assignment */
-	private String roleAssignmentStatus;
-	
-	/** the role of the user */
-	private String role;
-	
-	/** the userID of the user */
-	private String userID;
-	
-	/** the name  of the application */
-	private String applicationName;
-	
-	/** The serialization strategy for comparisons and JSON serialization. */
+    
+    /** the status of the role assignment */
+    private String roleAssignmentStatus;
+    
+    /** the role of the user */
+    private String role;
+    
+    /** the userID of the user */
+    private String userID;
+    
+    /** the name  of the application */
+    private String applicationName;
+    
+    /** The serialization strategy for comparisons and JSON serialization. */
     private static SerializationStrategy serializationStrategy = new DefaultNameExclusionStrategy();
     
     
@@ -47,7 +47,7 @@ public class AssignmentStatus extends ModelItem{
      */
     public AssignmentStatus()
     {
-    	
+        
     }
     
     /**
@@ -60,55 +60,55 @@ public class AssignmentStatus extends ModelItem{
      */
     public AssignmentStatus(String roleAssignmentStatus, String role, String userID, String applicationName)
     {
-    	this.roleAssignmentStatus = roleAssignmentStatus;
-    	this.role = role;
-    	this.userID = userID;
-    	this.applicationName = applicationName;
+        this.roleAssignmentStatus = roleAssignmentStatus;
+        this.role = role;
+        this.userID = userID;
+        this.applicationName = applicationName;
     }
 
     public String getRoleAssignmentStatus() {
-		return roleAssignmentStatus;
-	}
+        return roleAssignmentStatus;
+    }
 
-	public void setRoleAssignmentStatus(String roleAssignmentStatus) {
-		this.roleAssignmentStatus = roleAssignmentStatus;
-	}
+    public void setRoleAssignmentStatus(String roleAssignmentStatus) {
+        this.roleAssignmentStatus = roleAssignmentStatus;
+    }
 
-	public String getRole() {
-		return role;
-	}
+    public String getRole() {
+        return role;
+    }
 
-	public void setRole(String role) {
-		this.role = role;
-	}
+    public void setRole(String role) {
+        this.role = role;
+    }
 
-	public String getUserID() {
-		return userID;
-	}
+    public String getUserID() {
+        return userID;
+    }
 
-	public void setUserID(String userID) {
-		this.userID = userID;
-	}
+    public void setUserID(String userID) {
+        this.userID = userID;
+    }
 
-	public String getApplicationName() {
-		return applicationName;
-	}
+    public String getApplicationName() {
+        return applicationName;
+    }
 
-	public void setApplicationName(String applicationName) {
-		this.applicationName = applicationName;
-	}
-	
-	@Override
-	public SerializationStrategy getSerializationStrategy() {
-		return serializationStrategy;
-	}
+    public void setApplicationName(String applicationName) {
+        this.applicationName = applicationName;
+    }
+    
+    @Override
+    public SerializationStrategy getSerializationStrategy() {
+        return serializationStrategy;
+    }
 
-	@Override
-	public void setSerializationStrategy(SerializationStrategy serializationStrategy) {
-		AssignmentStatus.serializationStrategy = serializationStrategy;
-	}
-	
-	 /**
+    @Override
+    public void setSerializationStrategy(SerializationStrategy serializationStrategy) {
+        AssignmentStatus.serializationStrategy = serializationStrategy;
+    }
+    
+     /**
      * Creates an AssignmentStatus from a JSON String.
      * @param json the JSON String.
      * @return an AssignmentStatus represented by the JSON String.

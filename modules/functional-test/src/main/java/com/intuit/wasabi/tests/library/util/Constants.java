@@ -73,13 +73,13 @@ public class Constants {
     public static final String ASSIGNMENT_NO_PROFILE_MATCH = "NO_PROFILE_MATCH";
     public static final String ASSIGNMENT_NEW_ASSIGNMENT = "NEW_ASSIGNMENT";
     public static final String ASSIGNMENT_EXISTING_ASSIGNMENT = "EXISTING_ASSIGNMENT";
-	public static final String ASSIGNMENT_EXPERIMENT_IN_DRAFT_STATE = "EXPERIMENT_IN_DRAFT_STATE";
+    public static final String ASSIGNMENT_EXPERIMENT_IN_DRAFT_STATE = "EXPERIMENT_IN_DRAFT_STATE";
 
     public static final String NEW_ASSIGNMENT = "NEW_ASSIGNMENT";
-	public static final String NO_OPEN_BUCKETS = "NO_OPEN_BUCKETS";
+    public static final String NO_OPEN_BUCKETS = "NO_OPEN_BUCKETS";
 
-	public static final int EXP_SPAWN_COUNT = 5;
-	
-	public static final String ROLE_LIST = "roleList";
+    public static final int EXP_SPAWN_COUNT = 5;
+    
+    public static final String ROLE_LIST = "roleList";
 
 }

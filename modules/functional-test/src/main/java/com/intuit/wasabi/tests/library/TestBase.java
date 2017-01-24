@@ -158,8 +158,8 @@ public class TestBase extends ServiceTestBase {
         setPropertyFromSystemProperty("api.version.string", "api-version-string");
         setPropertyFromSystemProperty("node.count", "node-count");
         // TODO It appears that the build system has user.name and pwd set to something different from what it should be for the environment. Commented next two lines out for now.
-        //	setPropertyFromSystemProperty ("user.name","user-name");
-        //	setPropertyFromSystemProperty ("user.password","password");
+        //    setPropertyFromSystemProperty ("user.name","user-name");
+        //    setPropertyFromSystemProperty ("user.password","password");
         setPropertyFromSystemProperty("database-url","database.url");
         setPropertyFromSystemProperty("database-username","database.username");
         setPropertyFromSystemProperty("database-password","database.password");
@@ -173,7 +173,7 @@ public class TestBase extends ServiceTestBase {
         setPropertyFromSystemProperty("application.name", "application-name");
         setPropertyFromSystemProperty("experiment.prefix", "experiment-prefix");
         setPropertyFromSystemProperty("bucket.prefix", "bucket-prefix");
-	
+    
         setPropertyFromSystemProperty("test-user", "test-user");
     }
 
@@ -324,9 +324,9 @@ public class TestBase extends ServiceTestBase {
      * @return the list of new experiments
      */
     public List<Experiment> postExperiments(List<Experiment> experiments) {
-    	List<Experiment> experimentsList = new ArrayList<Experiment>();
-    	for(Experiment exp: experiments)
-    		experimentsList.add(postExperiment(exp));
+        List<Experiment> experimentsList = new ArrayList<Experiment>();
+        for(Experiment exp: experiments)
+            experimentsList.add(postExperiment(exp));
         return experimentsList;
     }
     
@@ -1799,7 +1799,7 @@ public class TestBase extends ServiceTestBase {
         assertReturnCode(response, expectedStatus);
 
         if ( expectedStatus == HttpStatus.SC_NOT_FOUND)
-        	return new ArrayList<Assignment>();
+            return new ArrayList<Assignment>();
 
         String jsonArray = TestUtils.csvToJsonArray(response.body().asString(), Constants.TAB);
         String[] elements = jsonArray.substring(2, jsonArray.length() - 2).split("\\},\\{");
@@ -2099,7 +2099,7 @@ public class TestBase extends ServiceTestBase {
      * @return a list of pages
      */
      public List<Page> getPages(Application application){
-    	 return getPages(application,HttpStatus.SC_OK);
+         return getPages(application,HttpStatus.SC_OK);
      }
 
      /**
@@ -3306,7 +3306,7 @@ public class TestBase extends ServiceTestBase {
      */
     public List<Experiment> getExperimentsByApplication(Application application)
     {
-    	return getExperimentsByApplication(application,HttpStatus.SC_OK);
+        return getExperimentsByApplication(application,HttpStatus.SC_OK);
     }
 
 
@@ -3321,7 +3321,7 @@ public class TestBase extends ServiceTestBase {
      */
     public List<Experiment> getExperimentsByApplication(Application application, int expectedStatus)
     {
-    	return getExperimentsByApplication(application,expectedStatus,apiServerConnector);
+        return getExperimentsByApplication(application,expectedStatus,apiServerConnector);
     }
 
 
@@ -3337,7 +3337,7 @@ public class TestBase extends ServiceTestBase {
      */
     public List<Experiment> getExperimentsByApplication(Application application, int expectedStatus,APIServerConnector apiServerConnector)
     {
-    	 String uri = "applications/" + application.name+ "/experiments";
+         String uri = "applications/" + application.name+ "/experiments";
          response = apiServerConnector.doGet(uri);
          assertReturnCode(response, expectedStatus);
          List<Map<String, Object>> jsonStrings = response.jsonPath().getList("experiments");
@@ -4354,171 +4354,171 @@ public class TestBase extends ServiceTestBase {
         return response.jsonPath().get("experimentIDs");
     }
 
-	////////////////////////
-	// authorization endpoint //
-	////////////////////////
-	/**
-	  * Sends a DELETE request to delete a user role within an application
-	  * 
-	  * @param userID 			- the userID of the user whose role we want to delete
-	  * @param applicationName - the applicationName of the application
-	  */
+    ////////////////////////
+    // authorization endpoint //
+    ////////////////////////
+    /**
+      * Sends a DELETE request to delete a user role within an application
+      * 
+      * @param userID             - the userID of the user whose role we want to delete
+      * @param applicationName - the applicationName of the application
+      */
     public void deleteUserRole(String userID,String applicationName) {
-    	deleteUserRole(userID, applicationName,HttpStatus.SC_NO_CONTENT);
-	}
-	
+        deleteUserRole(userID, applicationName,HttpStatus.SC_NO_CONTENT);
+    }
+    
     /**
-	  * Sends a DELETE request to delete a user role within an application
-	  * 
-	  * @param userID 			- the userID of the user whose role we want to delete
-	  * @param applicationName - the applicationName of the application
-	  * @param expectedStatus  - the expected HTTP status code
-	  */
-	public void deleteUserRole(String userID,String applicationName,int expectedStatus) {
-		  deleteUserRole(userID, applicationName, expectedStatus, apiServerConnector);
-	}
-	  
-	/**
-	  * Sends a DELETE request to delete a user role within an application
-	  * 
-	  * @param userID 			    - the userID of the user whose role we want to delete
-	  * @param applicationName     - the applicationName of the application
-	  * @param expectedStatus      - the expected HTTP status code
-	  *  @param apiServerConnector - the server connector to use
-	  */
-	public void deleteUserRole(String userID,String applicationName,int expectedStatus,APIServerConnector apiServerConnector) {
-		
-   		response = apiServerConnector.doDelete("authorization/applications/"+applicationName+"/users/"+userID+"/roles");
-		assertReturnCode(response, expectedStatus);
-	}
-	  
+      * Sends a DELETE request to delete a user role within an application
+      * 
+      * @param userID             - the userID of the user whose role we want to delete
+      * @param applicationName - the applicationName of the application
+      * @param expectedStatus  - the expected HTTP status code
+      */
+    public void deleteUserRole(String userID,String applicationName,int expectedStatus) {
+          deleteUserRole(userID, applicationName, expectedStatus, apiServerConnector);
+    }
+      
     /**
-	  * Sends a POST request to assign roles for a list of users against list of applications.
-	  * 
-	  * @param userID - the userID to whom we are going to assign application
-	  * @param appList- the list of applications to whom we gonna assign the user
-	  * @param role   - the role of the user when assigning him to the application
-	  * @return list  - the list of Assignment statuses
+      * Sends a DELETE request to delete a user role within an application
+      * 
+      * @param userID                 - the userID of the user whose role we want to delete
+      * @param applicationName     - the applicationName of the application
+      * @param expectedStatus      - the expected HTTP status code
+      *  @param apiServerConnector - the server connector to use
+      */
+    public void deleteUserRole(String userID,String applicationName,int expectedStatus,APIServerConnector apiServerConnector) {
+        
+           response = apiServerConnector.doDelete("authorization/applications/"+applicationName+"/users/"+userID+"/roles");
+        assertReturnCode(response, expectedStatus);
+    }
+      
+    /**
+      * Sends a POST request to assign roles for a list of users against list of applications.
+      * 
+      * @param userID - the userID to whom we are going to assign application
+      * @param appList- the list of applications to whom we gonna assign the user
+      * @param role   - the role of the user when assigning him to the application
+      * @return list  - the list of Assignment statuses
       */
     public List<AssignmentStatus> postUserRolePermission(String userID,List<Application> appList,String role) {
-    	List<UserRole> userRoleList = new ArrayList<>();
-		for(Application appln : appList)
-		{
-			UserRole userRole = new UserRole();
-			userRole.setApplicationName(appln.name);
-			userRole.setUserID(userID);
-			userRole.setRole(role);
-			userRoleList.add(userRole);
-		}
-		return postUserRolePermission(userRoleList);
-	}
-
-
-    /**
-	  * Sends a GET request to get all the applications assigned to user.
-	  * The response must contain {@link HttpStatus#SC_OK}.
-	  *
-	  * @param user the user whose list of applications we are interested 
-	  * @return List of application names 
-	  */
-    public List<String> getUserApplications(APIUser user) {
-    	return getUserApplications(user, HttpStatus.SC_OK);
-	}
-
-	
-
-    /**
-	  * Sends a GET request to get all the applications assigned to user.
-	  * The response must contain {@link HttpStatus#SC_OK}.
-	  *
-	  * @param user the user whose list of applications we are interested
-	  * @param expectedStatus  the expected HTTP status code 
-	  * @return List of application names 
-	  */
-    public List<String>  getUserApplications(APIUser user, int expectedStatus) {
-    	return getUserApplications(user, expectedStatus, apiServerConnector);
-	}
-
-    /**
-	  * Sends a GET request to get all the applications assigned to user.
-	  * The response must contain {@link HttpStatus#SC_OK}.
-	  * 
-	  * @param user the user whose list of applications we are interested
-	  * @param expectedStatus  the expected HTTP status code 
-	  * @param apiServerConnector the server connector to use
-	  * @return List of application names
-	  */
-    public List<String>  getUserApplications(APIUser user, int expectedStatus, APIServerConnector apiServerConnector) {
-    	apiServerConnector.setUserNameAndPassword(user.userId, user.password);
-		response = apiServerConnector.doGet("authorization/applications");
-		assertReturnCode(response,expectedStatus);
-		List<Map<String, Object>> jsonStrings = response.jsonPath().get();
-		List<String> applicationList = new ArrayList<>(jsonStrings.size());
-		
-		//here I am only interested in the name of the application
-		for(int i = 0 ; i < jsonStrings.size(); i++)
-		{
-			String appName = response.jsonPath().get(Constants.ROLE_LIST+"["+i+"].applicationName[0]").toString();
-			applicationList.add(appName);
-		}
-		apiServerConnector.setUserNameAndPassword(appProperties.getProperty("user-name"),appProperties.getProperty("password"));
-		return applicationList;
+        List<UserRole> userRoleList = new ArrayList<>();
+        for(Application appln : appList)
+        {
+            UserRole userRole = new UserRole();
+            userRole.setApplicationName(appln.name);
+            userRole.setUserID(userID);
+            userRole.setRole(role);
+            userRoleList.add(userRole);
+        }
+        return postUserRolePermission(userRoleList);
     }
-	
+
+
     /**
-	  * Sends a POST request to assign roles to users against applications.
-	  * The response must contain {@link HttpStatus#SC_OK}.
-	  * Sets createNewApplication to {@code true}.
-	  *
-	  * @param roles the list of userRoles
-	  * @return List of assignment status 
-	  */
+      * Sends a GET request to get all the applications assigned to user.
+      * The response must contain {@link HttpStatus#SC_OK}.
+      *
+      * @param user the user whose list of applications we are interested 
+      * @return List of application names 
+      */
+    public List<String> getUserApplications(APIUser user) {
+        return getUserApplications(user, HttpStatus.SC_OK);
+    }
+
+    
+
+    /**
+      * Sends a GET request to get all the applications assigned to user.
+      * The response must contain {@link HttpStatus#SC_OK}.
+      *
+      * @param user the user whose list of applications we are interested
+      * @param expectedStatus  the expected HTTP status code 
+      * @return List of application names 
+      */
+    public List<String>  getUserApplications(APIUser user, int expectedStatus) {
+        return getUserApplications(user, expectedStatus, apiServerConnector);
+    }
+
+    /**
+      * Sends a GET request to get all the applications assigned to user.
+      * The response must contain {@link HttpStatus#SC_OK}.
+      * 
+      * @param user the user whose list of applications we are interested
+      * @param expectedStatus  the expected HTTP status code 
+      * @param apiServerConnector the server connector to use
+      * @return List of application names
+      */
+    public List<String>  getUserApplications(APIUser user, int expectedStatus, APIServerConnector apiServerConnector) {
+        apiServerConnector.setUserNameAndPassword(user.userId, user.password);
+        response = apiServerConnector.doGet("authorization/applications");
+        assertReturnCode(response,expectedStatus);
+        List<Map<String, Object>> jsonStrings = response.jsonPath().get();
+        List<String> applicationList = new ArrayList<>(jsonStrings.size());
+        
+        //here I am only interested in the name of the application
+        for(int i = 0 ; i < jsonStrings.size(); i++)
+        {
+            String appName = response.jsonPath().get(Constants.ROLE_LIST+"["+i+"].applicationName[0]").toString();
+            applicationList.add(appName);
+        }
+        apiServerConnector.setUserNameAndPassword(appProperties.getProperty("user-name"),appProperties.getProperty("password"));
+        return applicationList;
+    }
+    
+    /**
+      * Sends a POST request to assign roles to users against applications.
+      * The response must contain {@link HttpStatus#SC_OK}.
+      * Sets createNewApplication to {@code true}.
+      *
+      * @param roles the list of userRoles
+      * @return List of assignment status 
+      */
     public List<AssignmentStatus> postUserRolePermission(List<UserRole> roles) {
-    	return postUserRolePermission(roles, HttpStatus.SC_OK);
-	}
+        return postUserRolePermission(roles, HttpStatus.SC_OK);
+    }
 
-	
+    
     /**
-	  * Sends a POST request to assign roles to users against applications.
-	  * The response must contain {@link HttpStatus#SC_OK}.
-	  * Sets createNewApplication to {@code true}.
-	  *
-	  * @param roles 		  the list of userRoles
-	  * @param expectedStatus  the expected HTTP status code 
-	  * @return List of assignment status 
-	  */
+      * Sends a POST request to assign roles to users against applications.
+      * The response must contain {@link HttpStatus#SC_OK}.
+      * Sets createNewApplication to {@code true}.
+      *
+      * @param roles           the list of userRoles
+      * @param expectedStatus  the expected HTTP status code 
+      * @return List of assignment status 
+      */
     public List<AssignmentStatus>  postUserRolePermission(List<UserRole> roles, int expectedStatus) {
-    	return postUserRolePermission(roles, expectedStatus, apiServerConnector);
-	}
+        return postUserRolePermission(roles, expectedStatus, apiServerConnector);
+    }
 
     /**
-	  * Sends a POST request to assign roles to users against applications.
-	  * The response must contain {@link HttpStatus#SC_OK}.
-	  * <p>
-	  *
-	  * @param experiment         the experiment to POST
-	  * @param expectedStatus     the expected HTTP status code
-	  * @param apiServerConnector the server connector to use
-	  * @return List of assignment status
-	  */
+      * Sends a POST request to assign roles to users against applications.
+      * The response must contain {@link HttpStatus#SC_OK}.
+      * <p>
+      *
+      * @param experiment         the experiment to POST
+      * @param expectedStatus     the expected HTTP status code
+      * @param apiServerConnector the server connector to use
+      * @return List of assignment status
+      */
     public List<AssignmentStatus>  postUserRolePermission(List<UserRole> roles, int expectedStatus, APIServerConnector apiServerConnector) {
-    	//building the payload
-    	StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append("{");
-		stringBuilder.append("\""+Constants.ROLE_LIST+"\":");
-		stringBuilder.append(roles);
-		stringBuilder.append("}");
-		
-		response = apiServerConnector.doPost("authorization/roles",stringBuilder.toString());
-		assertReturnCode(response,expectedStatus);
-		List<Map<String, Object>> jsonStrings = response.jsonPath().getList("assignmentStatuses");
-		List<AssignmentStatus> assignmentStatusList = new ArrayList<>(jsonStrings.size());
-		for (Map jsonMap : jsonStrings) {
-			String jsonString = simpleGson.toJson(jsonMap);
-			assignmentStatusList.add(AssignmentStatus.createFromJSONString(jsonString));
-		}
-		return assignmentStatusList;
-	}
+        //building the payload
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("{");
+        stringBuilder.append("\""+Constants.ROLE_LIST+"\":");
+        stringBuilder.append(roles);
+        stringBuilder.append("}");
+        
+        response = apiServerConnector.doPost("authorization/roles",stringBuilder.toString());
+        assertReturnCode(response,expectedStatus);
+        List<Map<String, Object>> jsonStrings = response.jsonPath().getList("assignmentStatuses");
+        List<AssignmentStatus> assignmentStatusList = new ArrayList<>(jsonStrings.size());
+        for (Map jsonMap : jsonStrings) {
+            String jsonString = simpleGson.toJson(jsonMap);
+            assignmentStatusList.add(AssignmentStatus.createFromJSONString(jsonString));
+        }
+        return assignmentStatusList;
+    }
     
     ///////////
     // OTHER //

@@ -47,95 +47,95 @@ import com.intuit.wasabi.tests.model.factory.ExperimentFactory;
 
 public class UserPermissionsTest extends TestBase {
 
-	Experiment experiment1,experiment2,experiment3,experiment4;
-	String testUser = null;
-	String testUserPassword = null;
-	String testUserID = null;
-	List<Application> applicationList = new ArrayList<>();
-	List<Experiment> experimentList = new ArrayList<>();
-	
-	static int NUMBER_OF_APPLICATIONS = 4;
+    Experiment experiment1,experiment2,experiment3,experiment4;
+    String testUser = null;
+    String testUserPassword = null;
+    String testUserID = null;
+    List<Application> applicationList = new ArrayList<>();
+    List<Experiment> experimentList = new ArrayList<>();
+    
+    static int NUMBER_OF_APPLICATIONS = 4;
 
-	@BeforeClass()
-	public void initializeTest()
-	{	
-		testUser = appProperties.getProperty("test-user", Constants.DEFAULT_TEST_USER);
-	
-		for(int i = 1 ; i <= NUMBER_OF_APPLICATIONS; i++) {
-			Application application = ApplicationFactory.createApplication().setName("testApplication_"+i);
-			applicationList.add(application);		
-		}
-		
-		
-		//create and assign experiments to the applications
-		for(int i = 1 ; i <= NUMBER_OF_APPLICATIONS; i++) {
-			Experiment experiment = ExperimentFactory.createExperiment().setApplication(applicationList.get(i-1));
-			experimentList.add(experiment);		
-		}
-		
-		experimentList = postExperiments(experimentList);
-		
-		for(int i = 1 ; i <= NUMBER_OF_APPLICATIONS; i++) {
-			List<Bucket> bucketList = BucketFactory.createBuckets(experimentList.get(i-1), 3);
-			postBuckets(bucketList);
-		}
-		
-		//lets change state of the experiment to running
-		for(int i = 1 ; i <= NUMBER_OF_APPLICATIONS; i++) {
-			Experiment experiment = experimentList.get(i-1);
-			experiment.state = Constants.EXPERIMENT_STATE_RUNNING;
-			putExperiment(experiment);
-		}
-	}
-	
-	@Test
-	public void testUserPermission()
-	{
-		//first lets authenticate the user
-		APIUser validUser = APIUserFactory.createAPIUser().setEmail(testUser);
-		APIUser user = getUserExists(validUser);
-		user.password = (user.password==null || user.password.length()==0)? appProperties.getProperty("password"): user.password;
-		testUserPassword = user.password;
-		testUserID = user.userId;
-		
-		//secondly lets add the testApplications to the user
-		postUserRolePermission(testUserID,applicationList,Constants.ROLE_READONLY);
-		
-		//lets verify that the applications are indeed assigned to the user 
-		List<String> actualapplications = getUserApplications(user);
-		List<String> expectedlapplications = new ArrayList<>();
-		
-		for(Application application: applicationList)
-			expectedlapplications.add(application.name);
-		
-		Assert.assertTrue(actualapplications.containsAll(expectedlapplications));
-		
-	}
+    @BeforeClass()
+    public void initializeTest()
+    {    
+        testUser = appProperties.getProperty("test-user", Constants.DEFAULT_TEST_USER);
+    
+        for(int i = 1 ; i <= NUMBER_OF_APPLICATIONS; i++) {
+            Application application = ApplicationFactory.createApplication().setName("testApplication_"+i);
+            applicationList.add(application);        
+        }
+        
+        
+        //create and assign experiments to the applications
+        for(int i = 1 ; i <= NUMBER_OF_APPLICATIONS; i++) {
+            Experiment experiment = ExperimentFactory.createExperiment().setApplication(applicationList.get(i-1));
+            experimentList.add(experiment);        
+        }
+        
+        experimentList = postExperiments(experimentList);
+        
+        for(int i = 1 ; i <= NUMBER_OF_APPLICATIONS; i++) {
+            List<Bucket> bucketList = BucketFactory.createBuckets(experimentList.get(i-1), 3);
+            postBuckets(bucketList);
+        }
+        
+        //lets change state of the experiment to running
+        for(int i = 1 ; i <= NUMBER_OF_APPLICATIONS; i++) {
+            Experiment experiment = experimentList.get(i-1);
+            experiment.state = Constants.EXPERIMENT_STATE_RUNNING;
+            putExperiment(experiment);
+        }
+    }
+    
+    @Test
+    public void testUserPermission()
+    {
+        //first lets authenticate the user
+        APIUser validUser = APIUserFactory.createAPIUser().setEmail(testUser);
+        APIUser user = getUserExists(validUser);
+        user.password = (user.password==null || user.password.length()==0)? appProperties.getProperty("password"): user.password;
+        testUserPassword = user.password;
+        testUserID = user.userId;
+        
+        //secondly lets add the testApplications to the user
+        postUserRolePermission(testUserID,applicationList,Constants.ROLE_READONLY);
+        
+        //lets verify that the applications are indeed assigned to the user 
+        List<String> actualapplications = getUserApplications(user);
+        List<String> expectedlapplications = new ArrayList<>();
+        
+        for(Application application: applicationList)
+            expectedlapplications.add(application.name);
+        
+        Assert.assertTrue(actualapplications.containsAll(expectedlapplications));
+        
+    }
 
 
 
-	@AfterClass()
-	public void cleanUp() {
-		
-		//lets pause the experiments and delete them
-		for(int i = 1 ; i <= NUMBER_OF_APPLICATIONS; i++) {
-			
-			//pause the experiment
-			Experiment experiment = experimentList.get(i-1);
-			experiment.state = Constants.EXPERIMENT_STATE_PAUSED;
-			putExperiment(experiment);
-			
-			//delete the experiment
-			experiment.state = Constants.EXPERIMENT_STATE_TERMINATED;
-			putExperiment(experiment);
-		}
-		
-		//here finally lets delete those experiments
-		deleteExperiments(experimentList);
-		
-		//thirdly lets delete the user from the application so that t
-		for(Application application: applicationList)
-			deleteUserRole(testUserID, application.name);
-	}
+    @AfterClass()
+    public void cleanUp() {
+        
+        //lets pause the experiments and delete them
+        for(int i = 1 ; i <= NUMBER_OF_APPLICATIONS; i++) {
+            
+            //pause the experiment
+            Experiment experiment = experimentList.get(i-1);
+            experiment.state = Constants.EXPERIMENT_STATE_PAUSED;
+            putExperiment(experiment);
+            
+            //delete the experiment
+            experiment.state = Constants.EXPERIMENT_STATE_TERMINATED;
+            putExperiment(experiment);
+        }
+        
+        //here finally lets delete those experiments
+        deleteExperiments(experimentList);
+        
+        //thirdly lets delete the user from the application so that t
+        for(Application application: applicationList)
+            deleteUserRole(testUserID, application.name);
+    }
 
 }
