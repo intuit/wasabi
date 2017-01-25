@@ -270,7 +270,7 @@ public class AuthorizationResource {
     @GET
     @Path("/superadmins")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = "Get all superadmins Ids")
+    @ApiOperation(value = "Get all superadmins")
     @Timed
     public Response getAllSuperAdminRoleList(
             @HeaderParam(AUTHORIZATION)
