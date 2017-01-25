@@ -44,23 +44,8 @@ angular.module('wasabi.controllers')
                 };
 
                 $scope.updateApplicationRoles = function(userID) {
-                    AuthzFactory.getUserRoles({
-                        userId: userID
-                    }).$promise.then(function (roleList) {
-                        if (roleList) {
-                            // Go through list and get role for this application, if there.
-
-                            $scope.applications = [];
-                            roleList.forEach(function(nextRole) {
-                                $scope.applications.push({ label: nextRole.applicationName, role: nextRole.role });
-                            });
-                            $scope.user.applications = $scope.applications;
-
-                            $scope.getUsersPrivilegesForApplication();
-                        }
-                    }, function(response) {
-                        UtilitiesFactory.handleGlobalError(response, 'The roles for this user could not be retrieved.');
-                    });
+                    $scope.applications = UtilitiesFactory.updateApplicationRoles(userID, $scope.getUsersPrivilegesForApplication);
+                    $scope.user.applications = $scope.applications;
                 };
 
                 // This is called when we are in Add User and they enter a user ID and hit Verify.  We need to
