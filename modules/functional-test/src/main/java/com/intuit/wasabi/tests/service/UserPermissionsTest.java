@@ -59,7 +59,7 @@ public class UserPermissionsTest extends TestBase {
     @BeforeClass()
     public void initializeTest()
     {    
-        testUser = appProperties.getProperty("test-user", Constants.DEFAULT_TEST_USER);
+        testUser = appProperties.getProperty("test-wasabi-reader", Constants.DEFAULT_TEST_USER);
     
         for(int i = 1 ; i <= NUMBER_OF_APPLICATIONS; i++) {
             Application application = ApplicationFactory.createApplication().setName("testApplication_"+i);

@@ -174,7 +174,7 @@ public class TestBase extends ServiceTestBase {
         setPropertyFromSystemProperty("experiment.prefix", "experiment-prefix");
         setPropertyFromSystemProperty("bucket.prefix", "bucket-prefix");
     
-        setPropertyFromSystemProperty("test-user", "test-user");
+        setPropertyFromSystemProperty("test-wasabi-reader", "test-wasabi-reader");
     }
 
     /**
