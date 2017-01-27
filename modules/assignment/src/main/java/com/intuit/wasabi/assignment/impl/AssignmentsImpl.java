@@ -36,11 +36,15 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.StreamingOutput;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 
 import com.google.common.collect.HashBasedTable;
@@ -154,8 +158,6 @@ public class AssignmentsImpl implements Assignments {
      * @param ruleCache                           RuleCache which has cached segmentation rules
      * @param pages                               Pages for this experiment
      * @param priorities                          Priorities for the application
-     * @param assignmentDBEnvelopeProvider        AssignmentDBEnvelopeProvider
-     * @param assignmentWebEnvelopeProvider       AssignmentWebEnvelopeProvider
      * @param assignmentDecorator                 The assignmentDecorator to be used
      * @param ruleCacheExecutor                   The rule cache executor to be used
 
@@ -407,7 +409,7 @@ public class AssignmentsImpl implements Assignments {
                     // Generate the assignment; this always generates an assignment,
                     // which may or may not specify a bucket
                     //todo: change so this doesn't follow the 'read then write' Cassandra anti-pattern
-                    assignment = generateAssignment(experiment, userID, context, selectBucket, bucketList, currentDate, segmentationProfile);
+                    assignment = createAssignmentObject(experiment, userID, context, selectBucket, bucketList, currentDate, segmentationProfile);
                     assert assignment.getStatus() == Assignment.Status.NEW_ASSIGNMENT :
                             new StringBuilder("Assignment status should have been NEW_ASSIGNMENT for ")
                                     .append("userID = \"").append(userID).append("\", experiment = \"")
@@ -494,14 +496,15 @@ public class AssignmentsImpl implements Assignments {
         //Populate required experiment metadata along with all the existing user assignments for the given application
         assignmentsRepository.populateExperimentMetadata(userID, applicationName, context, experimentBatch, allowAssignmentsOptional, appPriorities, experimentMap, userAssignments, bucketMap, exclusionMap);
 
+        List<Pair<Experiment, Assignment>> assignmentPairs = new LinkedList<>();
         List<Map> allAssignments = new LinkedList<>();
         // iterate over all experiments in the application in priority order
         for (PrioritizedExperiment experiment : appPriorities.getPrioritizedExperiments()) {
-            if(LOGGER.isDebugEnabled()) LOGGER.debug("Now processing: {}", experiment);
+            LOGGER.debug("Now processing: {}", experiment);
 
             //check if the experiment was given in experimentBatch
             if (experimentBatch.getLabels().contains(experiment.getLabel())) {
-                if(LOGGER.isDebugEnabled()) LOGGER.debug("Experiment ({}) has given batch assignment....", experiment.getLabel());
+                LOGGER.debug("Experiment ({}) has given batch assignment....", experiment.getLabel());
 
                 String labelStr = experiment.getLabel().toString();
                 Map<String, Object> tempResult = new HashMap<>();
@@ -545,8 +548,9 @@ public class AssignmentsImpl implements Assignments {
                     }
 
                     tempResult.put("status", assignment.getStatus());
-                    if(LOGGER.isDebugEnabled()) LOGGER.debug("tempResult: {}", tempResult);
+                    LOGGER.debug("tempResult: {}", tempResult);
 
+                    assignmentPairs.add(new ImmutablePair<Experiment, Assignment>(experimentMap.get(experiment.getID()), assignment));
 
                 } catch (WasabiException ex) {
                     //FIXME: should not use exception as part of the flow control.
@@ -560,7 +564,11 @@ public class AssignmentsImpl implements Assignments {
                 experimentBatch.getLabels().remove(experiment.getLabel());
             }
         }
-        if(LOGGER.isDebugEnabled()) LOGGER.debug("allAssignments: {} ", allAssignments);
+        LOGGER.debug("allAssignments: {} ", allAssignments);
+
+        Stream<Pair<Experiment, Assignment>> newAssignments = assignmentPairs.stream().filter(pair -> {return (nonNull(pair) && pair.getRight().getStatus()==Assignment.Status.NEW_ASSIGNMENT);});
+        assignmentsRepository.assignUser(newAssignments.collect(Collectors.toList()), new Date());
+        LOGGER.debug("Finished Create_Assignments_DB...");
 
         return allAssignments;
     }
@@ -938,6 +946,62 @@ public class AssignmentsImpl implements Assignments {
 
         Assignment result = builder.build();
         return assignmentsRepository.assignUser(result, experiment, date);
+    }
+
+    Assignment createAssignmentObject(Experiment experiment, User.ID userID, Context context, boolean selectBucket,
+                                  BucketList bucketList, Date date, SegmentationProfile segmentationProfile) {
+
+        Assignment.Builder builder = Assignment.newInstance(experiment.getID())
+                .withApplicationName(experiment.getApplicationName())
+                .withUserID(userID)
+                .withContext(context);
+
+        if (selectBucket) {
+            Bucket assignedBucket;
+            /*
+            With the bucket state in effect, this part of the code could also result in
+            the generation of a null assignment in cases where the selected bucket is CLOSED or EMPTY
+            In CLOSED state, the current bucket assignments to the bucket are left as is and all the
+            assignments to this bucket are made null going forward.
+
+            In EMPTY state, the current bucket assignments are made null as well as all the future assignments
+            to this bucket are made null.
+
+            Retrieves buckets from Repository if personalization is not enabled and if skipBucketRetrieval is false
+            Retrieves buckets from Assignment Decorator if personalization is enabled
+            */
+            BucketList bucketsExternal = getBucketList(experiment, userID, segmentationProfile,
+                    !Objects.isNull(bucketList) /* do not skip retrieving bucket from repository if bucketList is null */);
+            if (Objects.isNull(bucketsExternal) || bucketsExternal.getBuckets().isEmpty()) {
+                // if bucketlist obtained from Assignment Decorator is null; use the bucketlist passed into the method
+                assignedBucket = selectBucket(bucketList.getBuckets());
+            } else {
+                //else use the bucketExternal obtained from the Assignment Decorator
+                assignedBucket = selectBucket(bucketsExternal.getBuckets());
+            }
+            //check that at least one bucket was open
+            if (!Objects.isNull(assignedBucket)) {
+                //create the bucket with bucketlabel
+                builder.withBucketLabel(assignedBucket.getLabel());
+            } else {
+                return nullAssignment(userID, experiment.getApplicationName(), experiment.getID(),
+                        Assignment.Status.NO_OPEN_BUCKETS);
+            }
+
+        } else {
+            builder.withBucketLabel(null);
+        }
+
+        //Assignment result = builder.build();
+        //return assignmentsRepository.assignUser(result, experiment, date);
+
+        Assignment result = builder
+                .withStatus(Assignment.Status.NEW_ASSIGNMENT)
+                .withCreated(Optional.ofNullable(date).orElseGet(Date::new))
+                .withCacheable(false)
+                .build();
+        LOGGER.debug("result => {}", result);
+        return result;
     }
     
     /**

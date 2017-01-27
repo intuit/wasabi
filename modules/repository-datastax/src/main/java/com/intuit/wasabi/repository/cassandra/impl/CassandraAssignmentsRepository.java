@@ -16,6 +16,10 @@
 package com.intuit.wasabi.repository.cassandra.impl;
 
 import com.codahale.metrics.annotation.Timed;
+import com.datastax.driver.core.BatchStatement;
+import com.datastax.driver.core.BoundStatement;
+import com.datastax.driver.core.ResultSetFuture;
+import com.datastax.driver.core.Session;
 import com.datastax.driver.core.exceptions.NoHostAvailableException;
 import com.datastax.driver.core.exceptions.ReadTimeoutException;
 import com.datastax.driver.core.exceptions.UnavailableException;
@@ -51,6 +55,7 @@ import com.intuit.wasabi.repository.cassandra.pojo.UserAssignment;
 import com.intuit.wasabi.repository.cassandra.pojo.export.UserAssignmentExport;
 import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentUserByUserIdContextAppNameExperimentId;
 import com.intuit.wasabi.repository.cassandra.pojo.index.UserAssignmentByUserId;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -555,6 +560,168 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
 
         return new_assignment;
     }
+
+    @Override
+    @Timed
+    public Assignment assignUser(List<Pair<Experiment, Assignment>> assignments, Date date) {
+        Assignment new_assignment = null;
+
+        //Assign user to user_assignment table
+        if (assignUserToOld) {
+            //Writing assignment to the old table - user_assignment
+            assignUserToOld(assignments, date);
+        }
+        if (assignUserToNew) {
+            //Writing assignment to the new table - user_assignment_look_up
+            assignUserToNew(assignments, date);
+        }
+
+        // Submit tasks for each assignment to increment/decrement counts
+        incrementCounts(assignments, date);
+
+        // Make entries in user_bucket_index table
+        indexUserToBucket(assignments);
+
+        // Make entries in experiment_user_index table
+        indexExperimentsToUser(assignments);
+
+        return new_assignment;
+    }
+
+    private void assignUserToNew(List<Pair<Experiment, Assignment>> assignments, Date date){
+        final Date paramDate = Optional.ofNullable(date).orElseGet(Date::new);
+        try {
+            final List<ResultSetFuture> rFutures = new ArrayList<>();
+            assignments.forEach(pair -> {
+                Assignment assignment = pair.getRight();
+                if (isNull(assignment.getBucketLabel())) {
+                    rFutures.add(userAssignmentIndexAccessor.asyncInsertBy(assignment.getExperimentID().getRawID(),
+                            assignment.getUserID().toString(),
+                            assignment.getContext().getContext(),
+                            paramDate));
+                } else {
+                    rFutures.add(userAssignmentIndexAccessor.asyncInsertBy(assignment.getExperimentID().getRawID(),
+                            assignment.getUserID().toString(),
+                            assignment.getContext().getContext(),
+                            paramDate,
+                            assignment.getBucketLabel().toString()));
+                }
+            });
+            rFutures.forEach(ResultSetFuture::getUninterruptibly);
+            logger.debug("Finished async AssignUserToOld");
+        } catch (WriteTimeoutException | UnavailableException | NoHostAvailableException e) {
+            throw new RepositoryException("Could not save user to the new table user assignment by user id: " +assignments, e);
+        }
+    }
+
+    private void assignUserToOld(List<Pair<Experiment, Assignment>> assignments, Date date){
+        final Date paramDate = Optional.ofNullable(date).orElseGet(Date::new);
+        try {
+            final List<ResultSetFuture> rFutures = new ArrayList<>();
+            assignments.forEach(pair -> {
+                Assignment assignment = pair.getRight();
+                if (isNull(assignment.getBucketLabel())) {
+                    rFutures.add(userAssignmentAccessor.asyncInsertBy(assignment.getExperimentID().getRawID(),
+                            assignment.getUserID().toString(),
+                            assignment.getContext().getContext(),
+                            paramDate));
+                } else {
+                    rFutures.add(userAssignmentAccessor.asyncInsertBy(assignment.getExperimentID().getRawID(),
+                            assignment.getUserID().toString(),
+                            assignment.getContext().getContext(),
+                            paramDate,
+                            assignment.getBucketLabel().toString()));
+                }
+            });
+            rFutures.forEach(ResultSetFuture::getUninterruptibly);
+            logger.debug("Finished async AssignUserToOld");
+        } catch (WriteTimeoutException | UnavailableException | NoHostAvailableException e) {
+            throw new RepositoryException("Could not save user to the old table user assignment: " +assignments, e);
+        }
+    }
+
+    /**
+     * Submit tasks for each assignment to increment/decrement counts
+     *
+     * @param assignments
+     * @param date
+     */
+    private void incrementCounts(List<Pair<Experiment, Assignment>> assignments, Date date) {
+        boolean countUp = true;
+        assignments.forEach(pair -> {
+            assignmentsCountExecutor.execute(new AssignmentCountEnvelope(this, experimentRepository, dbRepository, pair.getLeft(), pair.getRight(), countUp, eventLog, date, assignUserToExport, assignBucketCount));
+        });
+        logger.debug("Finished assignmentsCountExecutor");
+    }
+
+    /**
+     * Make entries in user_bucket_index table
+     *
+     * @param assignments
+     */
+    private void indexUserToBucket(List<Pair<Experiment, Assignment>> assignments) {
+        final List<ResultSetFuture> rFutures = new ArrayList<>();
+        assignments.forEach(pair -> {
+            rFutures.add(asyncIndexUserToBucket(pair.getRight()));
+        });
+        rFutures.forEach(ResultSetFuture::getUninterruptibly);
+        logger.debug("Finished asyncIndexUserToBucket");
+    }
+
+    /**
+     * Make entries in experiment_user_index table
+     *
+     * @param assignments
+     */
+    private void indexExperimentsToUser(List<Pair<Experiment, Assignment>> assignments) {
+        try {
+            Session session = driver.getSession();
+            final BatchStatement batchStatement = new BatchStatement(BatchStatement.Type.UNLOGGED);
+            assignments.forEach(pair -> {
+                Assignment assignment = pair.getRight();
+                logger.debug("assignment={}", assignment);
+                BoundStatement bs;
+                if (isNull(assignment.getBucketLabel())) {
+                    bs = experimentUserIndexAccessor.insertBoundStatement(assignment.getUserID().toString(), assignment.getContext().toString(), assignment.getApplicationName().toString(), assignment.getExperimentID().getRawID());
+                } else {
+                    bs = experimentUserIndexAccessor.insertBoundStatement(assignment.getUserID().toString(), assignment.getContext().toString(), assignment.getApplicationName().toString(), assignment.getExperimentID().getRawID(), assignment.getBucketLabel().toString());
+                }
+                batchStatement.add(bs);
+            });
+            session.execute(batchStatement);
+            logger.debug("Finished experiment_user_index");
+        } catch(Exception e) {
+            logger.error("Error occurred while adding data in to experiment_user_index", e);
+        }
+    }
+
+    ResultSetFuture asyncIndexUserToBucket(Assignment assignment) {
+        ResultSetFuture resultSetFuture = null;
+        try{
+            if(isNull(assignment.getBucketLabel())) {
+                resultSetFuture = userBucketIndexAccessor.asyncInsertBy(
+                        assignment.getExperimentID().getRawID(),
+                        assignment.getUserID().toString(),
+                        assignment.getContext().getContext(),
+                        assignment.getCreated(),
+                        new String(new byte[0], StandardCharsets.UTF_8 ) //Needed because of compact storage
+                );
+            } else {
+                resultSetFuture = userBucketIndexAccessor.asyncInsertBy(
+                        assignment.getExperimentID().getRawID(),
+                        assignment.getUserID().toString(),
+                        assignment.getContext().getContext(),
+                        assignment.getCreated(),
+                        assignment.getBucketLabel().toString()
+                );
+            }
+        }catch (WriteTimeoutException | UnavailableException | NoHostAvailableException e){
+            throw new RepositoryException("Could not index user to bucket \"" + assignment + "\"", e);
+        }
+
+        return resultSetFuture;
+    }
+
 
     void indexExperimentsToUser(Assignment assignment) {
         try {
