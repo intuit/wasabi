@@ -91,7 +91,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     private final ExperimentRepository dbRepository;
     private final EventLog eventLog;
     private final MappingManager mappingManager;
-    private final int assignmentsCountThreadPoolSize;
     private final boolean assignUserToOld;
     private final boolean assignUserToNew;
     private final boolean assignUserToExport;
@@ -99,8 +98,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     private final String defaultTimeFormat;
 
     final ThreadPoolExecutor assignmentsCountExecutor;
-
-    private LinkedBlockingQueue assignmentsCountQueue = new LinkedBlockingQueue<>();
 
     private ExperimentAccessor experimentAccessor;
     private ExperimentUserIndexAccessor experimentUserIndexAccessor;
@@ -141,7 +138,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
             PageExperimentIndexAccessor pageExperimentIndexAccessor,
             CassandraDriver driver,
             MappingManager mappingManager,
-            final @Named("export.pool.size") int assignmentsCountThreadPoolSize,
+            @Named("AssignmentsCountThreadPoolExecutor") ThreadPoolExecutor assignmentsCountExecutor,
             final @Named("assign.user.to.old") boolean assignUserToOld,
             final @Named("assign.user.to.new") boolean assignUserToNew,
             final @Named("assign.user.to.export") boolean assignUserToExport,
@@ -152,7 +149,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         this.dbRepository = dbRepository;
         this.eventLog = eventLog;
         this.mappingManager = mappingManager;
-        this.assignmentsCountThreadPoolSize = assignmentsCountThreadPoolSize;
         this.assignUserToOld = assignUserToOld;
         this.assignUserToNew = assignUserToNew;
         this.assignUserToExport = assignUserToExport;
@@ -175,12 +171,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         this.exclusionAccessor=exclusionAccessor;
         this.pageExperimentIndexAccessor=pageExperimentIndexAccessor;
         this.driver=driver;
-        this.assignmentsCountExecutor =  new ThreadPoolExecutor(
-                assignmentsCountThreadPoolSize,
-                assignmentsCountThreadPoolSize,
-                0L,
-                MILLISECONDS,
-                assignmentsCountQueue);
+        this.assignmentsCountExecutor = assignmentsCountExecutor;
     }
 
     Stream<ExperimentUserByUserIdContextAppNameExperimentId> getUserIndexStream(String userId,
@@ -561,6 +552,14 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         return new_assignment;
     }
 
+    /**
+     *
+     * Create use assignments in cassandra in a batch.
+     *
+     * @param assignments pair of experiment and assignment
+     * @param date       Date of user assignment
+     * @return
+     */
     @Override
     @Timed
     public Assignment assignUser(List<Pair<Experiment, Assignment>> assignments, Date date) {
@@ -588,6 +587,12 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         return new_assignment;
     }
 
+    /**
+     * Assign user to user_assignment_look_up table
+     *
+     * @param assignments
+     * @param date
+     */
     private void assignUserToNew(List<Pair<Experiment, Assignment>> assignments, Date date){
         final Date paramDate = Optional.ofNullable(date).orElseGet(Date::new);
         try {
@@ -614,6 +619,12 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         }
     }
 
+    /**
+     * Writing assignment to the user_assignment table
+     *
+     * @param assignments
+     * @param date
+     */
     private void assignUserToOld(List<Pair<Experiment, Assignment>> assignments, Date date){
         final Date paramDate = Optional.ofNullable(date).orElseGet(Date::new);
         try {
@@ -664,7 +675,10 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         assignments.forEach(pair -> {
             rFutures.add(asyncIndexUserToBucket(pair.getRight()));
         });
-        rFutures.forEach(ResultSetFuture::getUninterruptibly);
+
+        rFutures.forEach(resultSetFuture -> {
+            resultSetFuture.getUninterruptibly();
+        });
         logger.debug("Finished asyncIndexUserToBucket");
     }
 
@@ -695,6 +709,13 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         }
     }
 
+    /**
+     *
+     * Index user to bucket in asynchronous way
+     *
+     * @param assignment
+     * @return
+     */
     ResultSetFuture asyncIndexUserToBucket(Assignment assignment) {
         ResultSetFuture resultSetFuture = null;
         try{

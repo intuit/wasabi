@@ -15,6 +15,10 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.cassandra.impl;
 
+import com.datastax.driver.core.BatchStatement;
+import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.ResultSetFuture;
+import com.datastax.driver.core.Session;
 import com.datastax.driver.core.exceptions.ReadTimeoutException;
 import com.datastax.driver.core.exceptions.WriteTimeoutException;
 import com.datastax.driver.mapping.MappingManager;
@@ -48,6 +52,8 @@ import com.intuit.wasabi.repository.cassandra.pojo.*;
 import com.intuit.wasabi.repository.cassandra.pojo.count.BucketAssignmentCount;
 import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentUserByUserIdContextAppNameExperimentId;
 import com.intuit.wasabi.repository.cassandra.pojo.index.UserAssignmentByUserId;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -55,7 +61,9 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -63,8 +71,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.StreamingOutput;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -105,9 +115,13 @@ public class CassandraAssignmentsRepositoryTest {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS) MappingManager mappingManager;
     @Mock Result mockedResultMapping;
 
+    @Mock ThreadPoolExecutor assignmentsCountExecutor;
+
     CassandraAssignmentsRepository repository;
     CassandraAssignmentsRepository spyRepository;
     UUID experimentId = UUID.fromString("4d4d8f3b-3b81-44f3-968d-d1c1a48b4ac8");
+    UUID experimentId2 = UUID.fromString("4d4d8f3b-3b81-44f3-968d-d1c1a58b4ac8");
+
     public static final Application.Name APPLICATION_NAME = Application.Name.valueOf("testApp");
 
     @Before
@@ -130,7 +144,7 @@ public class CassandraAssignmentsRepositoryTest {
                 pageExperimentIndexAccessor,
                 driver,
                 mappingManager,
-                5,
+                assignmentsCountExecutor,
                 true,
                 false,
                 true,
@@ -572,7 +586,7 @@ public class CassandraAssignmentsRepositoryTest {
                 pageExperimentIndexAccessor,
                 driver,
                 mappingManager,
-                5,
+                assignmentsCountExecutor,
                 false,
                 true,
                 true,
@@ -612,7 +626,7 @@ public class CassandraAssignmentsRepositoryTest {
                 pageExperimentIndexAccessor,
                 driver,
                 mappingManager,
-                5,
+                assignmentsCountExecutor,
                 false,
                 false,
                 true,
@@ -656,7 +670,7 @@ public class CassandraAssignmentsRepositoryTest {
                 pageExperimentIndexAccessor,
                 driver,
                 mappingManager,
-                5,
+                assignmentsCountExecutor,
                 true,
                 true,
                 true,
@@ -1350,7 +1364,7 @@ public class CassandraAssignmentsRepositoryTest {
                 pageExperimentIndexAccessor,
                 driver,
                 mappingManager,
-                5,
+                assignmentsCountExecutor,
                 false,
                 true,
                 true,
@@ -1580,6 +1594,77 @@ public class CassandraAssignmentsRepositoryTest {
         assertThat(userAssignments.size(), is(0));
         assertThat(bucketMap.size(), is(0));
         assertThat(exclusionMap.size(), is(0));
+    }
+
+    @Test
+    public void testAssignUsersInBatchCalls() {
+
+        //------ Input
+
+        Experiment experiment = Experiment.withID(Experiment.ID.valueOf(this.experimentId))
+                .withIsPersonalizationEnabled(false)
+                .withIsRapidExperiment(false).build();
+        User.ID userID1 = User.ID.valueOf("testuser1");
+        User.ID userID2 = User.ID.valueOf("testuser2");
+        Context context = Context.valueOf("test");
+        Date date = new Date();
+        String bucketLabel = "bucket-1";
+
+        Assignment assignment1 = Assignment.newInstance(experiment.getID())
+                .withBucketLabel(Bucket.Label.valueOf(bucketLabel))
+                .withCreated(date)
+                .withApplicationName(APPLICATION_NAME)
+                .withContext(context)
+                .withUserID(userID1)
+                .build();
+
+        Assignment assignment2 = Assignment.newInstance(experiment.getID())
+                .withBucketLabel(null)
+                .withCreated(date)
+                .withApplicationName(APPLICATION_NAME)
+                .withContext(context)
+                .withUserID(userID2)
+                .build();
+
+        List<Pair<Experiment, Assignment>> assignmentPairs = new LinkedList<>();
+        assignmentPairs.add(new ImmutablePair<>(experiment, assignment1));
+        assignmentPairs.add(new ImmutablePair<>(experiment, assignment2));
+
+
+        //------ Mocking interacting calls
+        ResultSetFuture genericResultSetFuture = mock(ResultSetFuture.class);
+        ResultSet genericResultSet = mock(ResultSet.class);
+        when(genericResultSetFuture.getUninterruptibly()).thenReturn(genericResultSet);
+
+        when(userAssignmentIndexAccessor.asyncInsertBy(experiment.getID().getRawID(), userID1.toString(), context.getContext(), date)).thenReturn(genericResultSetFuture);
+        when(userAssignmentIndexAccessor.asyncInsertBy(experiment.getID().getRawID(), userID2.toString(), context.getContext(), date)).thenReturn(genericResultSetFuture);
+        when(userAssignmentIndexAccessor.asyncInsertBy(experiment.getID().getRawID(), userID1.toString(), context.getContext(), date, bucketLabel)).thenReturn(genericResultSetFuture);
+        when(userAssignmentIndexAccessor.asyncInsertBy(experiment.getID().getRawID(), userID2.toString(), context.getContext(), date, bucketLabel)).thenReturn(genericResultSetFuture);
+
+        when(userAssignmentAccessor.asyncInsertBy(experiment.getID().getRawID(), userID1.toString(), context.getContext(), date)).thenReturn(genericResultSetFuture);
+        when(userAssignmentAccessor.asyncInsertBy(experiment.getID().getRawID(), userID2.toString(), context.getContext(), date)).thenReturn(genericResultSetFuture);
+        when(userAssignmentAccessor.asyncInsertBy(experiment.getID().getRawID(), userID1.toString(), context.getContext(), date, bucketLabel)).thenReturn(genericResultSetFuture);
+        when(userAssignmentAccessor.asyncInsertBy(experiment.getID().getRawID(), userID2.toString(), context.getContext(), date, bucketLabel)).thenReturn(genericResultSetFuture);
+
+        doNothing().when(assignmentsCountExecutor).execute(any());
+
+        when(userBucketIndexAccessor.asyncInsertBy(assignment1.getExperimentID().getRawID(), assignment1.getUserID().toString(), assignment1.getContext().getContext(), assignment1.getCreated(), new String(new byte[0], StandardCharsets.UTF_8 ))).thenReturn(genericResultSetFuture);
+        when(userBucketIndexAccessor.asyncInsertBy(assignment2.getExperimentID().getRawID(), assignment2.getUserID().toString(), assignment2.getContext().getContext(), assignment2.getCreated(), new String(new byte[0], StandardCharsets.UTF_8 ))).thenReturn(genericResultSetFuture);
+        when(userBucketIndexAccessor.asyncInsertBy(assignment1.getExperimentID().getRawID(), assignment1.getUserID().toString(), assignment1.getContext().getContext(), assignment1.getCreated(), bucketLabel)).thenReturn(genericResultSetFuture);
+        when(userBucketIndexAccessor.asyncInsertBy(assignment2.getExperimentID().getRawID(), assignment2.getUserID().toString(), assignment2.getContext().getContext(), assignment2.getCreated(), bucketLabel)).thenReturn(genericResultSetFuture);
+
+        when(driver.getSession()).thenReturn(mock(Session.class));
+        when(driver.getSession().execute(any(BatchStatement.class))).thenReturn(genericResultSet);
+
+        //------ Make final call
+        boolean success = true;
+        try {
+            repository.assignUser(assignmentPairs, date);
+        } catch (Exception e) {
+            logger.error("Failed to execute assignUser test...", e);
+            success = false;
+        }
+        assertThat(success, is(true));
     }
 
 }
