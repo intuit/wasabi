@@ -676,9 +676,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
             rFutures.add(asyncIndexUserToBucket(pair.getRight()));
         });
 
-        rFutures.forEach(resultSetFuture -> {
-            resultSetFuture.getUninterruptibly();
-        });
+        rFutures.forEach(ResultSetFuture::getUninterruptibly);
         logger.debug("Finished asyncIndexUserToBucket");
     }
 

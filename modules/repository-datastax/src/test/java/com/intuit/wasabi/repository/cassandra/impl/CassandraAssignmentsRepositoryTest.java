@@ -120,7 +120,6 @@ public class CassandraAssignmentsRepositoryTest {
     CassandraAssignmentsRepository repository;
     CassandraAssignmentsRepository spyRepository;
     UUID experimentId = UUID.fromString("4d4d8f3b-3b81-44f3-968d-d1c1a48b4ac8");
-    UUID experimentId2 = UUID.fromString("4d4d8f3b-3b81-44f3-968d-d1c1a58b4ac8");
 
     public static final Application.Name APPLICATION_NAME = Application.Name.valueOf("testApp");
 
