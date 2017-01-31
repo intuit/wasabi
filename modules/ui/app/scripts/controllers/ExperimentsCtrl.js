@@ -710,6 +710,10 @@ angular.module('wasabi.controllers').
                 return UtilitiesFactory.hasPermission(experiment.applicationName, PERMISSIONS.updatePerm);
             };
 
+            $scope.isMobile = function() {
+                return window.mobilecheck();
+            }
+
             $scope.openExperimentModal = function (experiment) {
                 var modalInstance = $modal.open({
                     templateUrl: 'views/ExperimentModal.html',

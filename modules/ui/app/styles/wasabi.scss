@@ -197,7 +197,7 @@ header {
     display: inline-block;
 }
 
-.pageError {
+.pageError, .pageSuccess {
     display: none;
     position: fixed;
     top: 30px;
@@ -206,17 +206,25 @@ header {
     min-height: 26px;
     margin-left: -200px;
     padding: 15px 15px 15px 40px;
-    background: rgb(250, 228, 204);
-    border: 2px solid rgb(236, 146, 51);
     @include border-radius(3px);
-    box-shadow: 0 0 15px rgba(0,0,0,.7);
-    color: rgb(115, 60, 0);
     text-shadow: 0 1px 0 rgba(255,255,255,.5);
     z-index: 999999999999999;
     opacity: .93;
+
     h2 {
         font-weight: bold;
         padding-bottom: 4px;
+    }
+}
+
+.pageError {
+    background: rgb(250, 228, 204);
+    border: 2px solid rgb(236, 146, 51);
+    box-shadow: 0 0 15px rgba(0,0,0,.7);
+    color: rgb(115, 60, 0);
+    opacity: .93;
+
+    h2 {
         color: rgb(165, 90, 0);
     }
     .icon {
@@ -247,25 +255,12 @@ header {
 }
 
 .pageSuccess {
-    display: none;
-    position: fixed;
-    top: 30px;
-    left: 50%;
-    width: 400px;
-    min-height: 26px;
-    margin-left: -200px;
-    padding: 15px 15px 15px 40px;
     background: rgb(213, 236, 210);
     border: 1px solid rgb(171, 217, 164);
-    @include border-radius(3px);
     color: rgb(44, 160, 28);
     @include box-shadow(0 0 8px rgba(255,255,255,.5) inset);
-    text-shadow: 0 1px 0 rgba(255,255,255,.5);
-    z-index: 999999999999999;
     opacity: .93;
     h2 {
-        font-weight: bold;
-        padding-bottom: 4px;
         color: rgb(64, 180, 28);
     }
     .icon {
@@ -4555,9 +4550,27 @@ nav.hamburger-nav {
         margin-left: 10px;
         .summaryBody .bucketsTable {
             td {
-                width: 100%;
+                width: 90%;
             }
         }
+    }
+
+    #exprSummary > li {
+        .summaryBody .bucketsTable {
+            tbody {
+                td {
+                    .bucketLabel {
+                        width: 260px;
+                        line-height: 18px;
+                    }
+                }
+            }
+        }
+    }
+
+    .pageError, .pageSuccess {
+        width: 360px;
+        margin-left: -180px;
     }
 
     .signinBox {
@@ -4578,6 +4591,16 @@ nav.hamburger-nav {
 
     .toolbar {
         display: none !important;
+    }
+
+    #gridView {
+        font-size: 18px;
+    }
+
+    #dlgConfirm {
+        left: 0;
+        margin-left: -10px;
+        width: 360px;
     }
 }
 

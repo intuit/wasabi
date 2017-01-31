@@ -11,8 +11,6 @@ angular.module('wasabi.controllers')
                     password: ''
                 };
 
-                $scope.viewWidth = document.documentElement.clientWidth;
-
                 UtilitiesFactory.hideHeading(true);
 
                 $scope.handleOriginalPage = function() {
