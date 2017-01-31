@@ -441,14 +441,22 @@ public class CassandraAuthorizationRepository  implements AuthorizationRepositor
 				userRole.getAppName().equals(ALL_APPLICATIONS) ? WILDCARD : Application.Name.valueOf(userRole.getAppName());
 		UserInfo userInfo = getUserInfo(UserInfo.Username.valueOf(userRole.getUserId()));
 		
-		UserRole role = 
-				UserRole.newInstance(
+		UserRole role = null;
+		
+		if ( userInfo != null ) {
+			role = UserRole.newInstance(
 						appName,
 						Role.toRole(userRole.getRole())).
 						withUserID(UserInfo.Username.valueOf(userRole.getUserId())).
 						withFirstName(userInfo.getFirstName()).
 						withLastName(userInfo.getLastName()).
 						withUserEmail(userInfo.getEmail()).build();
+		}
+		else {
+			role = UserRole.newInstance(appName, Role.toRole(userRole.getRole()))
+					.withUserID(UserInfo.Username.valueOf(userRole.getUserId())).build();
+		}
+		
 		list.addRole(role);
 		
 		LOGGER.debug("Converted  user role {} to user role list {}", userRole, list);

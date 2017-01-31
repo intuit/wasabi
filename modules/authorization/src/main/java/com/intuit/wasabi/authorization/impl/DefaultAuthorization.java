@@ -58,9 +58,9 @@ public class DefaultAuthorization implements Authorization {
         SUPERADMIN_PERMISSIONS.add(SUPERADMIN);
     }
 
-    private final AuthorizationRepository authorizationRepository;
-    private final Experiments experiments;
-    private final EventLog eventLog;
+    protected final AuthorizationRepository authorizationRepository;
+    protected final Experiments experiments;
+    protected final EventLog eventLog;
 
     @Inject
     public DefaultAuthorization(final AuthorizationRepository authorizationRepository, final Experiments experiments,
