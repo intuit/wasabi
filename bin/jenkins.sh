@@ -20,6 +20,7 @@
 #   profile                      : project name
 #   build                        : build kill switch; default:false
 #   profile                      : maven profile; default:test
+#   test                         : whether to run tests or not; default:true
 #   modules                      : project modules to build; default:main ui
 #   execute_integration_tests    : execute integration test kill switch; default:true
 #   deploy_host                  : integration test host; default:deploy.host
@@ -41,6 +42,7 @@
 project=wasabi
 build=${PROJECT_BUILD:-false}
 profile=${PROJECT_PROFILE:-test}
+test=${PROJECT_UNIT_TESTS:-true}
 modules=${PROJECT_MODULES:-main ui}
 execute_integration_tests=${PROJECT_INTEGRATION_TEST:-true}
 deploy_host=${PROJECT_DEPLOY_HOST:-deploy.host}
@@ -97,7 +99,7 @@ version=$(mvn --settings ./settings.xml -f ./modules/main/pom.xml -P ${profile} 
 # build
 
 echo "packaging: ${project} / ${profile}"
-(eval ${project_env} ./bin/${project}.sh --profile=${profile} --verify=true package) || \
+(eval ${project_env} ./bin/${project}.sh --profile=${profile} --verify=${test} package) || \
   exitOnError "unable to build project : (${project_env} ./bin/${project}.sh --profile=${profile} --verify=true package)"
 
 for module in ${modules}; do
