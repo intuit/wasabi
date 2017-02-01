@@ -173,17 +173,18 @@ for module in ${modules}; do
       curl -v -u ${nexus_deploy} --upload-file ./target/${rpm} ${rpm_path} || \
         exitOnError "archive rpm failed: curl -v -u [nexus_deploy] --upload-file ./target/${rpm} ${rpm_path}"
 
-      if [ "${module}" == "ui" ]; then
-        # archive MILESTONE ui.zip
-        artifact=ui
-        path=${nexus_repositories}/${artifact_repository_id}/`echo ${group} | sed "s/\./\//g"`/${artifact}/${version}
-        zip=${project}-${artifact}-${profile}-${version}.zip
-        zip_path=${path}/${zip}
+    fi
+    # Always push the UI zip file because we need it for wasabi-intuit builds
+    if [ "${module}" == "ui" ]; then
+      # archive MILESTONE ui.zip
+      artifact=ui
+      path=${nexus_repositories}/${artifact_repository_id}/`echo ${group} | sed "s/\./\//g"`/${artifact}/${version}
+      zip=${project}-${artifact}-${profile}-${version}.zip
+      zip_path=${path}/${zip}
 
-        echo "archiving: ${zip} ${zip_path}"
-        curl -v -u ${nexus_deploy} --upload-file ./modules/ui/target/dist.zip ${zip_path} || \
-          exitOnError "archive failed: curl -v -u [nexus_deploy] --upload-file ./modules/ui/dist.zip ${zip_path}"
-      fi
+      echo "archiving: ${zip} ${zip_path}"
+      curl -v -u ${nexus_deploy} --upload-file ./modules/ui/target/dist.zip ${zip_path} || \
+        exitOnError "archive failed: curl -v -u [nexus_deploy] --upload-file ./modules/ui/dist.zip ${zip_path}"
     fi
   fi
 done
