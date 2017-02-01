@@ -39,7 +39,6 @@ import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.MutexRepository;
 import com.intuit.wasabi.repository.cassandra.impl.ExperimentRuleCacheUpdateEnvelope;
 import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,9 +47,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.ws.rs.core.HttpHeaders;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.*;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.hamcrest.core.Is.is;
@@ -70,6 +69,7 @@ public class AssignmentsImplTest {
 
     final static Application.Name testApp = Application.Name.valueOf("testApp");
     final static Context context = Context.valueOf("PROD");
+    final static String TEST_INGESTION_EXECUTOR_NAME = "TEST";
     AssignmentsImpl cassandraAssignments = mock(AssignmentsImpl.class);
     private ExperimentRepository cassandraRepository = mock(ExperimentRepository.class);
     private ExperimentRepository experimentRepository = mock(ExperimentRepository.class);
@@ -92,11 +92,14 @@ public class AssignmentsImplTest {
     private Provider<Envelope<AssignmentEnvelopePayload, WebExport>> assignmentWebEnvelopeProvider =
             mock(Provider.class, RETURNS_DEEP_STUBS);
     private AssignmentsRepository assignmentsRepository = mock(AssignmentsRepository.class, RETURNS_DEEP_STUBS);
+    private AssignmentIngestionExecutor ingestionExecutor = mock(AssignmentIngestionExecutor.class);
     private AssignmentsImpl assignmentsImpl;
 
     @Before
     public void setup() throws IOException, ConnectionException {
-        this.assignmentsImpl = new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
+        Map<String, AssignmentIngestionExecutor> executors = new HashMap<String, AssignmentIngestionExecutor>();
+        executors.put(TEST_INGESTION_EXECUTOR_NAME, ingestionExecutor);
+        this.assignmentsImpl = new AssignmentsImpl(executors,
                 experimentRepository, assignmentsRepository, mutexRepository,
                 ruleCache, pages, priorities, 
                 assignmentDecorator, threadPoolExecutor, eventLog);
@@ -107,9 +110,35 @@ public class AssignmentsImplTest {
         when(threadPoolExecutor.getQueue().size()).thenReturn(0);
         Map<String, Integer> queueLengthMap = new HashMap<String, Integer>();
         queueLengthMap.put(AssignmentsImpl.RULE_CACHE, new Integer(0));
+        queueLengthMap.put(TEST_INGESTION_EXECUTOR_NAME.toLowerCase(), new Integer(0));
         assertThat(assignmentsImpl.queuesLength(), is(queueLengthMap));
     }
 
+    @Test
+    public void testQueuesDetails() {
+        when(threadPoolExecutor.getQueue().size()).thenReturn(0);
+        Map<String, Object> testIngestionExecutorMap = new HashMap<String, Object>();
+        testIngestionExecutorMap.put(AssignmentsImpl.QUEUE_SIZE, new Integer(0));
+        when(ingestionExecutor.queueDetails()).thenReturn(testIngestionExecutorMap);
+        Map<String, Object> queueDetailsMap = new HashMap<String, Object>();
+        try {
+            queueDetailsMap.put(AssignmentsImpl.HOST_IP, InetAddress.getLocalHost().getHostAddress());
+        } catch (Exception e) {
+            // ignore
+        }
+        Map<String, Object> ruleCacheMap = new HashMap<String, Object>();
+        ruleCacheMap.put(AssignmentsImpl.QUEUE_SIZE, new Integer(0));
+        queueDetailsMap.put(AssignmentsImpl.RULE_CACHE, ruleCacheMap);
+        queueDetailsMap.put(TEST_INGESTION_EXECUTOR_NAME.toLowerCase(), testIngestionExecutorMap);
+
+        assertThat(assignmentsImpl.queuesDetails(), is(queueDetailsMap));
+    }
+    
+    @Test
+    public void testFlushMessages() {
+        assignmentsImpl.flushMessages();
+    }
+    
     @Test
     public void testGetSingleAssignmentNullAssignmentExperimentNotFound() {
         Application.Name appName = Application.Name.valueOf("Test");

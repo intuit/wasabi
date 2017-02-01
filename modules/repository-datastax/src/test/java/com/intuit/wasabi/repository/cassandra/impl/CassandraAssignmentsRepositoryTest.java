@@ -1047,18 +1047,18 @@ public class CassandraAssignmentsRepositoryTest {
 
     @Test
     public void testPushAssignmentToStaging(){
-        repository.pushAssignmentToStaging("string1", "string2");
+        repository.pushAssignmentToStaging("type", "string1", "string2");
         verify(stagingAccessor, times(1))
-                .insertBy(eq("string1"), eq("string2"));
+                .insertBy(eq("type"), eq("string1"), eq("string2"));
     }
 
     @Test
     public void testPushAssignmentToStagingrWriteException(){
         doThrow(WriteTimeoutException.class).when(stagingAccessor)
-                .insertBy(eq("string1"), eq("string2"));
+                .insertBy(eq("type"), eq("string1"), eq("string2"));
         thrown.expect(RepositoryException.class);
         thrown.expectMessage("Could not push the assignment to staging");
-        repository.pushAssignmentToStaging("string1", "string2");
+        repository.pushAssignmentToStaging("type", "string1", "string2");
     }
 
     @Test

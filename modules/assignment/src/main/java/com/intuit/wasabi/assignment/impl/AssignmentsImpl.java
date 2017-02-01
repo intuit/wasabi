@@ -20,6 +20,7 @@ import static java.util.Objects.nonNull;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -95,7 +96,10 @@ import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
  */
 public class AssignmentsImpl implements Assignments {
 
+    protected static final String HOST_IP = "hostIP";
     protected static final String RULE_CACHE = "ruleCache";
+    protected static final String QUEUE_SIZE = "queueSize";
+
     /**
      * Logger for the class
      */
@@ -130,6 +134,7 @@ public class AssignmentsImpl implements Assignments {
     private Pages pages;
 
     private EventLog eventLog;
+    private String hostIP;
 
     /**
      * Helper for unit tests
@@ -175,7 +180,11 @@ public class AssignmentsImpl implements Assignments {
                            final EventLog eventLog)
             throws IOException, ConnectionException {
         super();
-
+        try {
+            hostIP = InetAddress.getLocalHost().getHostAddress();
+        } catch (Exception e) {
+            // ignore
+        }
         this.executors = executors;
         this.repository = repository;
         // FIXME:
@@ -1095,7 +1104,25 @@ public class AssignmentsImpl implements Assignments {
         return queueLengthMap;
     }
 
-
+    @Override
+    public Map<String, Object> queuesDetails() {
+        Map<String, Object> queueLengthMap = new HashMap<String, Object>();
+        queueLengthMap.put(HOST_IP, hostIP);
+        Map<String, Object> ruleCacheMap = new HashMap<String, Object>();
+        ruleCacheMap.put(QUEUE_SIZE, new Integer(this.ruleCacheExecutor.getQueue().size()));
+        queueLengthMap.put(RULE_CACHE, ruleCacheMap);
+        for (String name : executors.keySet()) {
+            queueLengthMap.put(name.toLowerCase(), executors.get(name).queueDetails());
+        }
+        return queueLengthMap;
+    }
+    
+    public void flushMessages() {
+        for (String name : executors.keySet()) {
+            executors.get(name).flushMessages();
+        }
+    }
+    
     /**
      * Gets the experiment assignment ratios per day per experiment.
      *
