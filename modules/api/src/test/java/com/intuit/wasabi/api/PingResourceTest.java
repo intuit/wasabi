@@ -41,7 +41,7 @@ public class PingResourceTest {
 
     @Before
     public void setup() {
-        resouce = new PingResource(healthChecks, new HttpHeader(version));
+        resouce = new PingResource(healthChecks, new HttpHeader(version, "600"));
     }
 
     @Test

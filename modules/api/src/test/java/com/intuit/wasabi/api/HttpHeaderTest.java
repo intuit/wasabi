@@ -46,7 +46,7 @@ public class HttpHeaderTest {
 
     @Before
     public void before() {
-        httpHeader = new HttpHeader("name");
+        httpHeader = new HttpHeader("name", "600");
     }
 
     @Test
@@ -62,13 +62,14 @@ public class HttpHeaderTest {
 
         MultivaluedMap<String, Object> metaData = response.getMetadata();
 
-        assertThat(metaData.size(), is(6));
+        assertThat(metaData.size(), is(7));
         assertThat(metaData.get(HttpHeaders.CACHE_CONTROL), hasItem(CACHE_CONTROL));
         assertThat(metaData.get(ACCESS_CONTROL_ALLOW_ORIGIN), hasItem("*"));
         assertThat(metaData.get(ACCESS_CONTROL_ALLOW_HEADERS),
                 hasItem("Authorization,X-Forwarded-For,Accept-Language,Content-Type"));
-        assertThat(metaData.get(ACCESS_CONTROL_ALLOW_METHODS), hasItem("GET,POST,OPTIONS"));
-        assertThat(metaData.get(ACCESS_CONTROL_REQUEST_METHOD), hasItem("GET,POST,OPTIONS"));
+        assertThat(metaData.get(ACCESS_CONTROL_ALLOW_METHODS), hasItem("GET,POST,PUT,DELETE,OPTIONS"));
+        assertThat(metaData.get(ACCESS_CONTROL_REQUEST_METHOD), hasItem("GET,POST,PUT,DELETE,OPTIONS"));
+        assertThat(metaData.get(ACCESS_CONTROL_MAX_AGE), hasItem("600"));
         assertThat(metaData.get("X-Application-Id"), hasItem("name"));
         assertThat(response.getEntity(), is(nullValue()));
     }
@@ -81,13 +82,14 @@ public class HttpHeaderTest {
 
         MultivaluedMap<String, Object> metaData = response.getMetadata();
 
-        assertThat(metaData.size(), is(6));
+        assertThat(metaData.size(), is(7));
         assertThat(metaData.get(HttpHeaders.CACHE_CONTROL), hasItem(CACHE_CONTROL));
         assertThat(metaData.get(ACCESS_CONTROL_ALLOW_ORIGIN), hasItem("*"));
         assertThat(metaData.get(ACCESS_CONTROL_ALLOW_HEADERS),
                 hasItem("Authorization,X-Forwarded-For,Accept-Language,Content-Type"));
-        assertThat(metaData.get(ACCESS_CONTROL_ALLOW_METHODS), hasItem("GET,POST,OPTIONS"));
-        assertThat(metaData.get(ACCESS_CONTROL_REQUEST_METHOD), hasItem("GET,POST,OPTIONS"));
+        assertThat(metaData.get(ACCESS_CONTROL_ALLOW_METHODS), hasItem("GET,POST,PUT,DELETE,OPTIONS"));
+        assertThat(metaData.get(ACCESS_CONTROL_REQUEST_METHOD), hasItem("GET,POST,PUT,DELETE,OPTIONS"));
+        assertThat(metaData.get(ACCESS_CONTROL_MAX_AGE), hasItem("600"));
         assertThat(metaData.get("X-Application-Id"), hasItem("name"));
         assertThat(response.getEntity(), is(nullValue()));
     }

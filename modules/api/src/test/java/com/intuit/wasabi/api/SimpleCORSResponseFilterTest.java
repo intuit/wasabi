@@ -40,13 +40,14 @@ public class SimpleCORSResponseFilterTest {
 
     @Before
     public void setup() {
-    	filter = new SimpleCORSResponseFilter();
+    	filter = new SimpleCORSResponseFilter("name", "600");
     }
 
 	@Test
 	public void filter() {
 		Response response = Response.ok().build();
 		when(containerResponse.getResponse()).thenReturn(response);
+		when(containerRequest.getMethod()).thenReturn("OPTIONS");
 		when(containerRequest.getHeaderValue("Access-Control-Request-Headers")).thenReturn("foo");
 
 		assertNotNull(filter.filter(containerRequest, containerResponse));

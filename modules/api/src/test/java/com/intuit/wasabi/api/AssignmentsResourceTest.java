@@ -86,7 +86,7 @@ public class AssignmentsResourceTest {
 
     @Before
     public void setUp() {
-        resource = new AssignmentsResource(assignments, new HttpHeader("application-name"));
+        resource = new AssignmentsResource(assignments, new HttpHeader("application-name", "600"));
     }
 
     @Test

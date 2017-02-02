@@ -15,6 +15,8 @@
  *******************************************************************************/
 package com.intuit.wasabi.api;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerResponse;
 import com.sun.jersey.spi.container.ContainerResponseFilter;
@@ -27,9 +29,14 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class SimpleCORSResponseFilter implements ContainerResponseFilter {
 
     private final static Logger LOGGER = getLogger(SimpleCORSResponseFilter.class);
+    private final String applicationName;
+    private final String deltaSeconds;
 
-    public SimpleCORSResponseFilter() {
+    @Inject
+    public SimpleCORSResponseFilter(final @Named("application.id") String applicationName, final @Named("access.control.max.age.delta.seconds") String deltaSeconds) {
         LOGGER.info("Instantiated response filter {}", getClass().getName());
+        this.applicationName = applicationName;
+        this.deltaSeconds = deltaSeconds;
     }
 
     @Override
@@ -39,11 +46,14 @@ public class SimpleCORSResponseFilter implements ContainerResponseFilter {
         Response.ResponseBuilder response = Response.fromResponse(containerResponse.getResponse());
 
         if ("OPTIONS".equals(containerRequest.getMethod())) {
-
+            
             response.status(204)
                     .header("Access-Control-Allow-Origin", "*")
                     .header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+                    .header("Access-Control-Request-Method", "GET, POST, PUT, DELETE, OPTIONS")
+                    .header("Access-Control-Max-Age", deltaSeconds)
                     .header("Content-Type", "application/json")
+                    .header("X-Application-Id", applicationName)
                     .entity("");
 
             String requestHeader = containerRequest.getHeaderValue("Access-Control-Request-Headers");

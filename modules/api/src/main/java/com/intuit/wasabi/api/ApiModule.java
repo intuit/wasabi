@@ -69,6 +69,8 @@ public class ApiModule extends AbstractModule {
                 .toInstance(getProperty("default.time.zone", properties, "yyyy-MM-dd HH:mm:ss"));
         bind(String.class).annotatedWith(named("default.time.format"))
                 .toInstance(getProperty("default.time.format", properties, "yyyy-MM-dd HH:mm:ss"));
+        bind(String.class).annotatedWith(named("access.control.max.age.delta.seconds"))
+                .toInstance(getProperty("access.control.max.age.delta.seconds", properties));
 
         bind(AuthorizedExperimentGetter.class).in(SINGLETON);
         bind(HealthCheckRegistry.class).in(SINGLETON);
