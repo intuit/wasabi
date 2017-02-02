@@ -56,7 +56,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 /**
  * The API endpoint /logs provides audit logs for application admins.
- *
+ * <p>
  * The logs can be filtered, sorted, paginated. By default the page {@link APISwaggerResource#DEFAULT_PAGE} is returned,
  * containing the last {@link APISwaggerResource#DEFAULT_PER_PAGE} actions. The logs are by default sorted by their
  * occurence date, descending.
@@ -75,9 +75,9 @@ public class AuditLogResource {
     /**
      * Instantiates a LogsResource.
      *
-     * @param auditLog the auditlog repository
-     * @param authorization the authorization
-     * @param httpHeader the HTTP header
+     * @param auditLog         the auditlog repository
+     * @param authorization    the authorization
+     * @param httpHeader       the HTTP header
      * @param paginationHelper the pagination helper
      */
     @Inject
@@ -92,17 +92,17 @@ public class AuditLogResource {
     /**
      * Returns a list of audit log entries for the specified application if the requesting user has access to it.
      * To have access the user needs {@link Permission#ADMIN} permissions for the application.
-     *
+     * <p>
      * This endpoint is paginated.
      *
      * @param authorizationHeader the authentication headers
-     * @param applicationName the application name. If {@code null}, all logs for the authorized user's applications
-     *                        are returned.
-     * @param page the page which should be returned, defaults to 1
-     * @param perPage the number of log entries per page, defaults to 10. -1 to get all values.
-     * @param sort the sorting rules
-     * @param filter the filter rules
-     * @param timezoneOffset the time zone offset from UTC
+     * @param applicationName     the application name. If {@code null}, all logs for the authorized user's applications
+     *                            are returned.
+     * @param page                the page which should be returned, defaults to 1
+     * @param perPage             the number of log entries per page, defaults to 10. -1 to get all values.
+     * @param sort                the sorting rules
+     * @param filter              the filter rules
+     * @param timezoneOffset      the time zone offset from UTC
      * @return a response containing a map with a list with {@code 0} to {@code perPage} log entries,
      * if that many are on the page, and a count of how many log entries match the filter criteria.
      */
@@ -168,15 +168,15 @@ public class AuditLogResource {
     /**
      * Returns a list of audit log entries for all applications, if the requesting user has access to it.
      * To have access the user needs {@link Permission#SUPERADMIN} permissions.
-     *
+     * <p>
      * This endpoint is paginated.
      *
      * @param authorizationHeader the authentication headers
-     * @param page the page which should be returned, defaults to 1
-     * @param perPage the number of log entries per page, defaults to 10. -1 to get all values.
-     * @param sort the sorting rules
-     * @param filter the filter rules
-     * @param timezoneOffset the time zone offset from UTC
+     * @param page                the page which should be returned, defaults to 1
+     * @param perPage             the number of log entries per page, defaults to 10. -1 to get all values.
+     * @param sort                the sorting rules
+     * @param filter              the filter rules
+     * @param timezoneOffset      the time zone offset from UTC
      * @return a response containing a map with a list with {@code 0} to {@code perPage} log entries,
      * if that many are on the page, and a count of how many log entries match the filter criteria.
      */

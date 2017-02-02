@@ -24,6 +24,7 @@ import java.nio.ByteBuffer;
 
 /**
  * Astyanax serializer for
+ *
  * @see ExperimentsKeyspace.ExperimentStateIndexKey
  */
 public class ExperimentStateIndexKeySerializer
@@ -44,6 +45,7 @@ public class ExperimentStateIndexKeySerializer
 
     /**
      * Get instance of serializer
+     *
      * @return instance
      */
     public static ExperimentStateIndexKeySerializer get() {

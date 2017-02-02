@@ -31,7 +31,7 @@ import static org.mockito.Mockito.when;
 
 /**
  * Test for the {@link SQLTimestampDeserializerTest}
- *
+ * <p>
  * Created by asuckro on 8/20/15.
  */
 public class SQLTimestampDeserializerTest {

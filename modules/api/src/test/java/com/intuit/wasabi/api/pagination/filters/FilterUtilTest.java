@@ -32,7 +32,9 @@ import java.util.TimeZone;
  */
 public class FilterUtilTest {
 
-    /** Test object */
+    /**
+     * Test object
+     */
     private final PaginationFilter paginationFilter = new PaginationFilter() {
         @Override
         public boolean test(Object o) {

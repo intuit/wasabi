@@ -81,8 +81,8 @@ public class BucketsImpl implements Buckets {
      * {@inheritDoc}
      */
     @Override
-    public BucketList getBuckets(Experiment.ID experimentID) {
-        return cassandraRepository.getBuckets(experimentID);
+    public BucketList getBuckets(Experiment.ID experimentID, boolean checkExperiment) {
+        return cassandraRepository.getBuckets(experimentID, checkExperiment);
     }
 
     /**
@@ -166,7 +166,7 @@ public class BucketsImpl implements Buckets {
         cassandraRepository.updateBucketBatch(experimentID, bucketList);
         databaseRepository.updateBucketBatch(experimentID, bucketList);
 
-        return buckets.getBuckets(experimentID);
+        return buckets.getBuckets(experimentID, false /* don't check experiment again */);
     }
 
     /**
@@ -176,7 +176,7 @@ public class BucketsImpl implements Buckets {
     public BucketList adjustAllocationPercentages(Experiment experiment, Bucket newBucket) {
 
         double remainingAlloc = 1. - newBucket.getAllocationPercent();
-        BucketList bucketList = buckets.getBuckets(experiment.getID());
+        BucketList bucketList = buckets.getBuckets(experiment.getID(), false /* don't check experiment again */);
         BucketList newBuckets = new BucketList();
         for (Bucket bucket : bucketList.getBuckets()) {
             if (bucket.getLabel().equals(newBucket.getLabel())) {
@@ -283,7 +283,7 @@ public class BucketsImpl implements Buckets {
                 (desiredState == Bucket.State.CLOSED ||
                         desiredState == Bucket.State.EMPTY)) {
 
-            BucketList bucketList = getBuckets(experimentID);
+            BucketList bucketList = getBuckets(experimentID, false /* don't check experiment again */);
             //get starting allocation pct of bucket to be closed
             Double bucketB = roundToTwo(bucket.getAllocationPercent());
 
@@ -525,7 +525,7 @@ public class BucketsImpl implements Buckets {
         BucketList changeBucketList = new BucketList();
 
         List<List<Bucket.BucketAuditInfo>> allChanges = new ArrayList<>();
-        BucketList oldBuckets = buckets.getBuckets(experimentID);
+        BucketList oldBuckets = buckets.getBuckets(experimentID, false /* don't check experiment again */);
 
         if (oldBuckets == null) {
             throw new IllegalStateException("No Buckets could be found for this experiment");

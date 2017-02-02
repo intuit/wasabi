@@ -43,6 +43,7 @@ public class ExperimentIDSerializer extends AbstractSerializer<Experiment.ID> {
 
     /**
      * Get the instance of serializer
+     *
      * @return instance
      */
     public static ExperimentIDSerializer get() {

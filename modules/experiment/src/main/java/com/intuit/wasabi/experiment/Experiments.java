@@ -152,7 +152,6 @@ public interface Experiments {
     /**
      * Queries the database and returns a list of application names
      *
-     *
      * @return a list of Application.Name types
      */
     List<Application.Name> getApplications();

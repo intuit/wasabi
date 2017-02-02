@@ -35,14 +35,14 @@ public class ExperimentFilter extends PaginationFilter<Experiment> {
 
     /**
      * Initializes the ExperimentFilter.
-     *
+     * <p>
      * Registers modifiers to handle timezones correctly and excludes duplicate and specialized search query fields
      * from fulltext search to avoid difficulties in overly specific queries and to avoid duplications.
-     *
+     * <p>
      * The fields modified are:<br />
      * {@link Property#creation_time}, {@link Property#start_time}, {@link Property#end_time},
      * {@link Property#modification_time}, {@link Property#date_constraint_start}, {@link Property#date_constraint_end}
-     *
+     * <p>
      * The fields excluded from fulltext search are:<br />
      * {@link Property#application_name_exact}, {@link Property#state_exact}, {@link Property#date_constraint_start},
      * {@link Property#date_constraint_end}
@@ -82,8 +82,8 @@ public class ExperimentFilter extends PaginationFilter<Experiment> {
          * Creates a Property.
          *
          * @param propertyExtractor the property extractor
-         * @param filterPredicate the filter predicate
-         * @param <T> the property type
+         * @param filterPredicate   the filter predicate
+         * @param <T>               the property type
          */
         <T> Property(Function<Experiment, T> propertyExtractor, BiPredicate<T, String> filterPredicate) {
             this.propertyExtractor = propertyExtractor;
@@ -118,19 +118,19 @@ public class ExperimentFilter extends PaginationFilter<Experiment> {
     /**
      * A filter function used to test experiments for specific states with the filter key {@code state_exact}.
      * Allowed filter values (case insensitive) and their results are:
-     *
+     * <p>
      * <ul>
-     *     <li><b>{@code notTerminated}</b>: {@code true} if the experiment state is either {@code DRAFT},
-     *     {@code RUNNING}, or {@code PAUSED}.</li>
-     *     <li><b>{@code terminated}</b>: {@code true} if the experiment state is {@code TERMINATED}.</li>
-     *     <li><b>{@code running}</b>: {@code true} if the experiment state is {@code RUNNING}.</li>
-     *     <li><b>{@code draft}</b>: {@code true} if the experiment state is {@code DRAFT}.</li>
-     *     <li><b>{@code paused}</b>: {@code true} if the experiment state is {@code PAUSED}.</li>
-     *     <li><b>{@code any}</b>: {@code true}.</li>
-     *     <li>default/invalid filter values: {@code false}.</li>
+     * <li><b>{@code notTerminated}</b>: {@code true} if the experiment state is either {@code DRAFT},
+     * {@code RUNNING}, or {@code PAUSED}.</li>
+     * <li><b>{@code terminated}</b>: {@code true} if the experiment state is {@code TERMINATED}.</li>
+     * <li><b>{@code running}</b>: {@code true} if the experiment state is {@code RUNNING}.</li>
+     * <li><b>{@code draft}</b>: {@code true} if the experiment state is {@code DRAFT}.</li>
+     * <li><b>{@code paused}</b>: {@code true} if the experiment state is {@code PAUSED}.</li>
+     * <li><b>{@code any}</b>: {@code true}.</li>
+     * <li>default/invalid filter values: {@code false}.</li>
      * </ul>
      *
-     * @param state the experiment's state.
+     * @param state  the experiment's state.
      * @param filter the filter value to check, see above for details.
      * @return true/false depending on the state check, see above for details.
      */
@@ -159,23 +159,23 @@ public class ExperimentFilter extends PaginationFilter<Experiment> {
 
     /**
      * Tests dates for more sophisticated constraints than just partial string matches.
-     *
-     *
+     * <p>
+     * <p>
      * The a filter to check these constraints has to be of the following form:<br />
      * {@code is[any|on|before|after|between]:MM/dd/yyyy[:MM/dd/yyyy]}
-     *
+     * <p>
      * For example to check whether the start date was before March 15, 2014 you would use a filter like:<br />
      * {@code date_constraint_start=isbefore:03/15/2014}
-     *
+     * <p>
      * To check if an end date lies between (inclusive!) May 4, 2013 and July 4, 2014 you would use a
      * filter like:<br />
      * {@code date_constraint_end=isbetween:05/04/2013:07/04/2014}
-     *
+     * <p>
      * Note that {@code isbetween} is the only value taking two dates and {@code isany} as well as empty strings
      * and {@code null} always return true.
      *
      * @param experimentDate the experiment date value to test
-     * @param filter the filter
+     * @param filter         the filter
      * @return true if the constraint is fulfilled
      */
     /*test*/

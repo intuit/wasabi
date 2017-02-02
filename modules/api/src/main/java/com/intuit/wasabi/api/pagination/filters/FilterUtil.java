@@ -35,7 +35,9 @@ import java.util.function.BiFunction;
  */
 public class FilterUtil {
 
-    /** Used to append (and split) the timezone to (and from) the filter. */
+    /**
+     * Used to append (and split) the timezone to (and from) the filter.
+     */
     /*test*/ static final String TIMEZONE_SEPARATOR = "\t";
 
     /**
@@ -59,7 +61,7 @@ public class FilterUtil {
     /**
      * Extracts the timezone and original filter string and performs a partial match checking on the date.
      *
-     * @param date the date to check
+     * @param date   the date to check
      * @param filter the filter string
      * @return the result of a partial match
      */
@@ -93,7 +95,7 @@ public class FilterUtil {
      * Formats a date as it is shown in the UI to allow for matching searches on date fields.
      * Needs the requesting user's timezone offset to UTC for correct matches.
      *
-     * @param date the date
+     * @param date           the date
      * @param timeZoneOffset the timezone offset to UTC
      * @return a timezone offset adjusted string of the UI pattern {@code MMM d, YYYY HH:mm:ss a}.
      */
@@ -113,7 +115,7 @@ public class FilterUtil {
      * Parses a UI date of the format {@code M/d/yZ} (See {@link DateTimeFormatter}) as it is allowed to be
      * entered in advanced search fields in the UI. Throws a {@link PaginationException} on failure, notifying the user.
      *
-     * @param dateString the string as received from the UI
+     * @param dateString     the string as received from the UI
      * @param timeZoneOffset the user's timezone offset
      * @return a parsed date
      */

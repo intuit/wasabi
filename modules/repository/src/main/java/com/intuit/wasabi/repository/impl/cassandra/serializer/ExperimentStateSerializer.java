@@ -24,6 +24,7 @@ import java.nio.ByteBuffer;
 
 /**
  * Astyanax serializer for
+ *
  * @see Experiment.State
  */
 public class ExperimentStateSerializer extends AbstractSerializer<Experiment.State> {
@@ -43,6 +44,7 @@ public class ExperimentStateSerializer extends AbstractSerializer<Experiment.Sta
 
     /**
      * Get the instance
+     *
      * @return instance
      */
     public static ExperimentStateSerializer get() {

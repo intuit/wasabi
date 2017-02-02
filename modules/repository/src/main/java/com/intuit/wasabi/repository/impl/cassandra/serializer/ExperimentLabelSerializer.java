@@ -24,6 +24,7 @@ import java.nio.ByteBuffer;
 
 /**
  * Astyanax serializer for
+ *
  * @see Experiment.Label
  */
 public class ExperimentLabelSerializer
@@ -44,6 +45,7 @@ public class ExperimentLabelSerializer
 
     /**
      * Get instance of serializer
+     *
      * @return instance
      */
     public static ExperimentLabelSerializer get() {

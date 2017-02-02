@@ -38,8 +38,8 @@ import java.util.List;
 
 /**
  * Cassandra implementation of
- * @see FeedbackRepository
  *
+ * @see FeedbackRepository
  */
 public class CassandraFeedbackRepository implements FeedbackRepository {
 
@@ -48,9 +48,10 @@ public class CassandraFeedbackRepository implements FeedbackRepository {
 
     /**
      * Constructor
-     * @param driver Cassandra driver
+     *
+     * @param driver   Cassandra driver
      * @param keyspace cassandra keyspace
-     * @throws IOException   io exception
+     * @throws IOException         io exception
      * @throws ConnectionException connection exception
      */
     @Inject

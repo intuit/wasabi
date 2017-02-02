@@ -58,6 +58,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.TimeZone;
 
@@ -547,6 +548,9 @@ public class AnalyticsImpl implements Analytics {
 
         // Uses counters
         Experiment experiment = cassandraRepository.getExperiment(experimentID);
+        if (Objects.isNull(experiment)) {
+            throw new ExperimentNotFoundException(experimentID);
+        }
         if (release_date != null && release_date.before(experiment.getCreationTime())) {
             return assignmentRepository.getBucketAssignmentCount(experiment);
         } else {

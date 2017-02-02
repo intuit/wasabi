@@ -68,9 +68,9 @@ public class EventsResource {
     /**
      * Submit events for the specified user within the context of a specific
      * application and experiment. Each event is an impression or action.
-     *
+     * <p>
      * Example events structure
-     *
+     * <p>
      * "events": [
      * {
      * "timestamp": "...",
@@ -90,8 +90,8 @@ public class EventsResource {
      * @param experimentLabel the experiment label
      * @param userID          the current user id
      * @param eventList       the {@link com.intuit.wasabi.analyticsobjects.EventList} event list
-     * @throws Exception generic exception
      * @return Response object
+     * @throws Exception generic exception
      */
     @POST
     @Path("applications/{applicationName}/experiments/{experimentLabel}/users/{userID}")

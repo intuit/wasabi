@@ -30,7 +30,7 @@ import static org.mockito.Mockito.verify;
 
 /**
  * Unit test for the {@link NaNSerializerFloat}
- *
+ * <p>
  * Created by asuckro on 8/20/15.
  */
 public class NaNSerializerFloatTest {

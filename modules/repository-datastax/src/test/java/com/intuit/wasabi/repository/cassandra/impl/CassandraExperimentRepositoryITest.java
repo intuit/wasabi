@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright 2016 Intuit
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package com.intuit.wasabi.repository.cassandra.impl;
 
 import com.datastax.driver.mapping.Result;
@@ -36,9 +51,7 @@ import java.util.UUID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-/**
- * Integration tests
- */
+
 public class CassandraExperimentRepositoryITest extends IntegrationTestBase {
 
     ExperimentAccessor experimentAccessor;
@@ -715,7 +728,7 @@ public class CassandraExperimentRepositoryITest extends IntegrationTestBase {
 
     @Test(expected = ExperimentNotFoundException.class)
     public void testGetBucketsThrowsExperimentNotFoundException() {
-        BucketList buckets = repository.getBuckets(Experiment.ID.newInstance());
+        BucketList buckets = repository.getBuckets(Experiment.ID.newInstance(), false);
     }
 
     @Test
@@ -725,7 +738,7 @@ public class CassandraExperimentRepositoryITest extends IntegrationTestBase {
         bucketList1.addBucket(bucket2);
         repository.updateBucketBatch(experimentID1, bucketList1);
 
-        BucketList buckets = repository.getBuckets(experimentID1);
+        BucketList buckets = repository.getBuckets(experimentID1, false);
         assertEquals("Value should be equal", 2, buckets.getBuckets().size());
         List<Bucket> bucketsResponse = buckets.getBuckets();
 
@@ -758,12 +771,12 @@ public class CassandraExperimentRepositoryITest extends IntegrationTestBase {
         bucketList1.addBucket(bucket2);
         repository.updateBucketBatch(experimentID1, bucketList1);
 
-        BucketList buckets = repository.getBuckets(experimentID1);
+        BucketList buckets = repository.getBuckets(experimentID1, false);
         assertEquals("Value should be equal", 2, buckets.getBuckets().size());
 
         repository.deleteBucket(experimentID1, bucket1.getLabel());
 
-        buckets = repository.getBuckets(experimentID1);
+        buckets = repository.getBuckets(experimentID1, false);
 
         assertEquals("Value should be equal", 1, buckets.getBuckets().size());
         List<Bucket> bucketsResponse = buckets.getBuckets();
@@ -780,12 +793,12 @@ public class CassandraExperimentRepositoryITest extends IntegrationTestBase {
         bucketList1.addBucket(bucket1);
         repository.updateBucketBatch(experimentID1, bucketList1);
 
-        BucketList buckets = repository.getBuckets(experimentID1);
+        BucketList buckets = repository.getBuckets(experimentID1, false);
         assertEquals("Value should be equal", 1, buckets.getBuckets().size());
 
         repository.deleteBucket(experimentID1, bucket1.getLabel());
 
-        buckets = repository.getBuckets(experimentID1);
+        buckets = repository.getBuckets(experimentID1, false);
 
         assertEquals("Value should be equal", 0, buckets.getBuckets().size());
 

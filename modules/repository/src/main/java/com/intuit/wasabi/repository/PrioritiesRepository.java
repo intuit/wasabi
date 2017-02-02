@@ -32,7 +32,7 @@ public interface PrioritiesRepository {
     /**
      * Returns the priority list for an application
      *
-     * @param applicationName  name of application
+     * @param applicationName name of application
      * @return PrioritizedExperimentList
      */
     PrioritizedExperimentList getPriorities(Application.Name applicationName);
@@ -40,7 +40,7 @@ public interface PrioritiesRepository {
     /**
      * Returns the length of the priority list for an application
      *
-     * @param applicationName   name of application
+     * @param applicationName name of application
      * @return length of the list
      */
     int getPriorityListLength(Application.Name applicationName);
@@ -48,15 +48,15 @@ public interface PrioritiesRepository {
     /**
      * Upserts the priority list for an application
      *
-     * @param applicationName           name of application
-     * @param experimentPriorityList    list of experiments as their priorities
+     * @param applicationName        name of application
+     * @param experimentPriorityList list of experiments as their priorities
      */
     void createPriorities(Application.Name applicationName, List<Experiment.ID> experimentPriorityList);
 
     /**
      * Get priority list by application name
      *
-     * @param applicationName     name of application
+     * @param applicationName name of application
      * @return list of expriement ids
      */
     List<Experiment.ID> getPriorityList(Application.Name applicationName);

@@ -86,7 +86,6 @@ public class CassandraPrioritiesRepository implements PrioritiesRepository {
 
     /**
      * Deletes existing priority list for an application, and inserts with new priority list.
-     *
      */
     @Override
     public void createPriorities(Application.Name applicationName, List<Experiment.ID> experimentPriorityList) {
@@ -163,7 +162,8 @@ public class CassandraPrioritiesRepository implements PrioritiesRepository {
     /**
      * Get not exclusion list
      * TODO : More clarification
-     * @param base  base experiment id
+     *
+     * @param base base experiment id
      * @return experiment list
      */
     // TODO - Is this copy and paste from CassandraMutexRepository class ?

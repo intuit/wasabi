@@ -32,7 +32,7 @@ public class AuditLogEntryFilter extends PaginationFilter<AuditLogEntry> {
 
     /**
      * Initializes the AuditLogEntryFilter.
-     *
+     * <p>
      * Registers the {@link com.intuit.wasabi.api.pagination.filters.FilterUtil.FilterModifier#APPEND_TIMEZONEOFFSET}
      * for {@link Property#time} to handle timezones.
      */
@@ -71,8 +71,8 @@ public class AuditLogEntryFilter extends PaginationFilter<AuditLogEntry> {
          * Creates a Property.
          *
          * @param propertyExtractor the property extractor
-         * @param filterPredicate the filter predicate
-         * @param <T> the property type
+         * @param filterPredicate   the filter predicate
+         * @param <T>               the property type
          */
         <T> Property(Function<AuditLogEntry, T> propertyExtractor, BiPredicate<T, String> filterPredicate) {
             this.propertyExtractor = propertyExtractor;

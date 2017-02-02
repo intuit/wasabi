@@ -40,7 +40,7 @@ public class DatabaseFavoritesRepository implements FavoritesRepository {
      * Creates a DatabaseFavoritesRepository.
      *
      * @param transactionFactory the transaction factory
-     * @param flyway the flyway instance to initialize the database
+     * @param flyway             the flyway instance to initialize the database
      */
     @Inject
     public DatabaseFavoritesRepository(final TransactionFactory transactionFactory, final Flyway flyway,
@@ -112,9 +112,9 @@ public class DatabaseFavoritesRepository implements FavoritesRepository {
      * Inserts or updates the favorite value of an experiment for a user in the database.
      * Sets the value to {@code favorite}.
      *
-     * @param username the username
+     * @param username     the username
      * @param experimentID the experiment ID
-     * @param favorite the favorite status
+     * @param favorite     the favorite status
      * @throws DatabaseException if the update was unsuccessful
      */
     private void updateFavorite(UserInfo.Username username, Experiment.ID experimentID, boolean favorite)

@@ -33,6 +33,7 @@ public class RepositoryException extends WasabiServerException {
 
     /**
      * Constructor
+     *
      * @param message custom message to report
      */
     public RepositoryException(String message) {
@@ -41,7 +42,8 @@ public class RepositoryException extends WasabiServerException {
 
     /**
      * Constructor
-     * @param rootCause    root cause of the error
+     *
+     * @param rootCause root cause of the error
      */
     public RepositoryException(Throwable rootCause) {
         super(REPOSITORY_ERROR, rootCause);
@@ -49,6 +51,7 @@ public class RepositoryException extends WasabiServerException {
 
     /**
      * Constructor
+     *
      * @param message   custom message to report
      * @param rootCause root cause of the error
      */

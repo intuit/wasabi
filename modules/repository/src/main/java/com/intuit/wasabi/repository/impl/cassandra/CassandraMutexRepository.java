@@ -45,11 +45,12 @@ public class CassandraMutexRepository implements MutexRepository {
 
     /**
      * Constructor
+     *
      * @param experimentRepository cassandra repository
-     * @param driver cassandra driver
-     * @param keyspace cassandra keyspace
-     * @throws IOException  io exception
-     * @throws ConnectionException   connection exception
+     * @param driver               cassandra driver
+     * @param keyspace             cassandra keyspace
+     * @throws IOException         io exception
+     * @throws ConnectionException connection exception
      */
     @Inject
     public CassandraMutexRepository(
@@ -157,7 +158,6 @@ public class CassandraMutexRepository implements MutexRepository {
 
     /**
      * Get non exclusion for experiment
-     *
      */
     @Override
     public ExperimentList getNotExclusions(Experiment.ID base) {

@@ -30,7 +30,7 @@ public class ExperimentDetailComparator extends PaginationComparator<ExperimentD
 
     /**
      * Initializes the ExperimentDetailComparator.
-     *
+     * <p>
      * Sets the default sort order to the descending modification time ({@code -modification_time}),
      * that means the ExperimentDetails with the latest changes come first.
      */
@@ -57,9 +57,9 @@ public class ExperimentDetailComparator extends PaginationComparator<ExperimentD
         /**
          * Creates a Property.
          *
-         * @param propertyExtractor the property extractor
+         * @param propertyExtractor  the property extractor
          * @param comparisonFunction the comparison function
-         * @param <T> the property type
+         * @param <T>                the property type
          */
         <T> Property(Function<ExperimentDetail, T> propertyExtractor, BiFunction<T, T, Integer> comparisonFunction) {
             this.propertyExtractor = propertyExtractor;

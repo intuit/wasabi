@@ -24,6 +24,7 @@ import java.nio.ByteBuffer;
 
 /**
  * Astyanax serializer for
+ *
  * @see Application.Name
  */
 public class ApplicationNameSerializer
@@ -44,6 +45,7 @@ public class ApplicationNameSerializer
 
     /**
      * Get singleton instance
+     *
      * @return Application Name serializer
      */
     public static ApplicationNameSerializer get() {

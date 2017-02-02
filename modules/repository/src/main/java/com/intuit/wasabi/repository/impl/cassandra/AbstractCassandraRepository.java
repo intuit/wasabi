@@ -52,10 +52,11 @@ public class AbstractCassandraRepository<K extends RepositoryKeyspace> {
 
     /**
      * Constructor
-     * @param mutagen Cassandra Mutagen
-     * @param driver  Cassandra Driver
-     * @param keyspace  Cassandra keyspace
-     * @throws IOException io exception
+     *
+     * @param mutagen  Cassandra Mutagen
+     * @param driver   Cassandra Driver
+     * @param keyspace Cassandra keyspace
+     * @throws IOException         io exception
      * @throws ConnectionException connection exception
      */
     public AbstractCassandraRepository(CassandraMutagen mutagen,

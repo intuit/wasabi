@@ -33,6 +33,7 @@ public interface AuthorizationRepository {
 
     /**
      * Get user permissions
+     *
      * @param userID Username Object
      * @return UserPermissionList
      */
@@ -40,6 +41,7 @@ public interface AuthorizationRepository {
 
     /**
      * Get application user
+     *
      * @param applicationName Application.Name Object
      * @return user role list
      */
@@ -47,7 +49,8 @@ public interface AuthorizationRepository {
 
     /**
      * Get user permissions
-     * @param userID UserInfo.Username Object
+     *
+     * @param userID          UserInfo.Username Object
      * @param applicationName Application.Name Object
      * @return user permissions
      */
@@ -55,26 +58,30 @@ public interface AuthorizationRepository {
 
     /**
      * Delete user role
-     * @param userID UserInfo.Username Object
+     *
+     * @param userID          UserInfo.Username Object
      * @param applicationName Application.Name Object
      */
     void deleteUserRole(UserInfo.Username userID, Application.Name applicationName);
 
     /**
      * Set user role
+     *
      * @param userRole UserRole Object
      */
     void setUserRole(UserRole userRole);
 
     /**
      * Get user role list
-     * @param userID  UserInfo.Username Object
+     *
+     * @param userID UserInfo.Username Object
      * @return user role list
      */
     UserRoleList getUserRoleList(UserInfo.Username userID);
 
     /**
      * Get user info
+     *
      * @param userID UserInfo.Username Object
      * @return user info
      */
@@ -82,13 +89,15 @@ public interface AuthorizationRepository {
 
     /**
      * Set user info
+     *
      * @param userInfo UserInfo Object
      */
     void setUserInfo(UserInfo userInfo);
 
     /**
      * Check super user permissions
-     * @param userID UserInfo.Username Object
+     *
+     * @param userID          UserInfo.Username Object
      * @param applicationName Application.Name Object
      * @return user permissions
      */

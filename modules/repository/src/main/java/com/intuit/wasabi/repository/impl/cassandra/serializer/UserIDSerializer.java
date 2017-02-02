@@ -24,6 +24,7 @@ import java.nio.ByteBuffer;
 
 /**
  * Astyanax serializer for
+ *
  * @see User.ID
  */
 public class UserIDSerializer extends AbstractSerializer<User.ID> {
@@ -43,6 +44,7 @@ public class UserIDSerializer extends AbstractSerializer<User.ID> {
 
     /**
      * Get the instance
+     *
      * @return instance
      */
     public static UserIDSerializer get() {

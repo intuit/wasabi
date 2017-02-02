@@ -30,7 +30,7 @@ class ImpressionsActionsResourceParser {
 
     /**
      * Parses JSON submission for impressions and actions.
-     *
+     * <p>
      * Replaces a null timestamp with the current UTC time.
      *
      * @param body the JSON submission for either impressions or actions

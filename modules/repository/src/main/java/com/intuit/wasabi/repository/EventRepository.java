@@ -16,7 +16,7 @@
 package com.intuit.wasabi.repository;
 
 /**
- * Repository for events 
+ * Repository for events
  */
 public interface EventRepository {
 }

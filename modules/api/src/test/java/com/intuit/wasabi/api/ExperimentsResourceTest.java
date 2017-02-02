@@ -447,7 +447,7 @@ public class ExperimentsResourceTest {
         bucketList.addBucket(bucket);
         bucketList.addBucket(bucket1);
 
-        when(buckets.getBuckets(experiment.getID())).thenReturn(bucketList);
+        when(buckets.getBuckets(experiment.getID(), true)).thenReturn(bucketList);
         Response response = experimentsResource.getBuckets(experiment.getID(), null);
         Assert.assertEquals("case 1", bucketList, response.getEntity());
 

@@ -21,7 +21,6 @@ import com.intuit.wasabi.export.Envelope;
 
 /**
  * Noop implementation for assignment database analytics export
- *
  */
 public class NoopDatabaseAssignmentEnvelope implements Envelope<AssignmentEnvelopePayload, DatabaseExport> {
 

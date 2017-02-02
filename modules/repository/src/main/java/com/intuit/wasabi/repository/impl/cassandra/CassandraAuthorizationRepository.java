@@ -44,7 +44,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 /**
  * Cassandra AuthorizationRepository implementation
  *
- *  @see AuthorizationRepository
+ * @see AuthorizationRepository
  */
 public class CassandraAuthorizationRepository implements AuthorizationRepository {
 
@@ -59,11 +59,12 @@ public class CassandraAuthorizationRepository implements AuthorizationRepository
 
     /**
      * Constructor
-     * @param driver     cassandra driver
-     * @param keyspace   cassandra keyspace
-     * @param experimentRepository  experiment repository
-     * @param userDirectory       user tools
-     * @throws IOException    io exception
+     *
+     * @param driver               cassandra driver
+     * @param keyspace             cassandra keyspace
+     * @param experimentRepository experiment repository
+     * @param userDirectory        user tools
+     * @throws IOException         io exception
      * @throws ConnectionException connection exception
      */
     @Inject

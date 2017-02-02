@@ -277,10 +277,10 @@ public class ExperimentsImplTest {
         expImpl.checkStateTransition(experimentID, currentState, null);
 
         BucketList bucketList = mock(BucketList.class);
-        when(buckets.getBuckets(eq(experimentID))).thenReturn(bucketList);
+        when(buckets.getBuckets(experimentID, false)).thenReturn(bucketList);
         expImpl.checkStateTransition(experimentID, Experiment.State.DRAFT, Experiment.State.RUNNING);
         verify(validator, times(1)).validateStateTransition(Experiment.State.DRAFT, Experiment.State.RUNNING);
-        verify(buckets, times(1)).getBuckets(experimentID);
+        verify(buckets, times(1)).getBuckets(experimentID, false);
         verify(validator, times(1)).validateExperimentBuckets(bucketList.getBuckets());
 
     }

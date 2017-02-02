@@ -60,8 +60,8 @@ public class FavoritesResource {
     /**
      * Instantiates the favorites resource.
      *
-     * @param httpHeader the HTTP header
-     * @param favorites the favorites implementation
+     * @param httpHeader    the HTTP header
+     * @param favorites     the favorites implementation
      * @param authorization the authorization implementation
      */
     @Inject
@@ -128,7 +128,7 @@ public class FavoritesResource {
     /**
      * Deletes a favorite
      *
-     * @param authHeader the authorization
+     * @param authHeader   the authorization
      * @param experimentID the experiment ID
      * @return the current list of experiments as an HTTP response
      */

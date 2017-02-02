@@ -18,10 +18,7 @@ package com.intuit.wasabi.assignment.impl;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.name.Named;
-import com.intuit.autumn.client.HttpCall;
-import com.intuit.autumn.client.impl.HttpCallImplWithConnectionPooling;
 import com.intuit.hyrule.Rule;
 import com.intuit.hyrule.RuleBuilder;
 import com.intuit.hyrule.exceptions.InvalidInputException;
@@ -33,12 +30,12 @@ import com.intuit.wasabi.assignment.AssignmentIngestionExecutor;
 import com.intuit.wasabi.assignment.Assignments;
 import com.intuit.wasabi.assignmentobjects.Assignment;
 import com.intuit.wasabi.assignmentobjects.AssignmentEnvelopePayload;
-import com.intuit.wasabi.assignmentobjects.PersonalizationEngineResponse;
 import com.intuit.wasabi.assignmentobjects.RuleCache;
 import com.intuit.wasabi.assignmentobjects.SegmentationProfile;
 import com.intuit.wasabi.assignmentobjects.User;
 import com.intuit.wasabi.eventlog.EventLog;
 import com.intuit.wasabi.exceptions.AssignmentExistsException;
+import com.intuit.wasabi.exceptions.BucketDistributionNotFetchableException;
 import com.intuit.wasabi.exceptions.BucketNotFoundException;
 import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
 import com.intuit.wasabi.experiment.Pages;
@@ -56,9 +53,6 @@ import com.intuit.wasabi.experimentobjects.PrioritizedExperiment;
 import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
 import com.intuit.wasabi.experimentobjects.exceptions.InvalidExperimentStateException;
 import com.intuit.wasabi.experimentobjects.exceptions.WasabiException;
-import com.intuit.wasabi.export.DatabaseExport;
-import com.intuit.wasabi.export.Envelope;
-import com.intuit.wasabi.export.WebExport;
 import com.intuit.wasabi.repository.AssignmentsRepository;
 import com.intuit.wasabi.repository.CassandraRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
@@ -67,7 +61,6 @@ import com.intuit.wasabi.repository.cassandra.impl.ExperimentRuleCacheUpdateEnve
 import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
 import org.slf4j.Logger;
 
-import javax.annotation.Nullable;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
@@ -83,6 +76,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -124,16 +118,11 @@ public class AssignmentsImpl implements Assignments {
     protected Map<String, AssignmentIngestionExecutor> executors;
     protected AssignmentDecorator assignmentDecorator = null;
     protected ThreadPoolExecutor ruleCacheExecutor;
-    //TODO: instead of provider type, these needs to be factories
-    protected Provider<Envelope<AssignmentEnvelopePayload, DatabaseExport>> assignmentDBEnvelopeProvider;
-    //TODO: instead of provider type, these needs to be factories
-    protected Provider<Envelope<AssignmentEnvelopePayload, WebExport>> assignmentWebEnvelopeProvider;
     // Rule-Cache queue set up
     protected RuleCache ruleCache;
     /**
      * Proxy related info
      */
-    private HttpCall<PersonalizationEngineResponse> httpCall = new HttpCallImplWithConnectionPooling<>();
     private Priorities priorities;
     private Pages pages;
 
@@ -141,6 +130,7 @@ public class AssignmentsImpl implements Assignments {
 
     /**
      * Helper for unit tests
+     *
      * @param assignmentRepository
      * @param mutRepository
      */
@@ -156,18 +146,15 @@ public class AssignmentsImpl implements Assignments {
     /**
      * Constructor
      *
-     * @param repository                          CassandraRepository to connect to
-     * @param assignmentsRepository               reference to AssignmentsRepository
-     * @param mutexRepository                     reference to MutexRepository
-     * @param ruleCache                           RuleCache which has cached segmentation rules
-     * @param pages                               Pages for this experiment
-     * @param priorities                          Priorities for the application
-     * @param assignmentDBEnvelopeProvider        AssignmentDBEnvelopeProvider
-     * @param assignmentWebEnvelopeProvider       AssignmentWebEnvelopeProvider
-     * @param assignmentDecorator                 The assignmentDecorator to be used
-     * @param ruleCacheExecutor                   The rule cache executor to be used
-
-     * @param eventLog                            eventLog
+     * @param repository            CassandraRepository to connect to
+     * @param assignmentsRepository reference to AssignmentsRepository
+     * @param mutexRepository       reference to MutexRepository
+     * @param ruleCache             RuleCache which has cached segmentation rules
+     * @param pages                 Pages for this experiment
+     * @param priorities            Priorities for the application
+     * @param assignmentDecorator   The assignmentDecorator to be used
+     * @param ruleCacheExecutor     The rule cache executor to be used
+     * @param eventLog              eventLog
      * @throws IOException         io exception
      * @throws ConnectionException connection exception
      */
@@ -178,9 +165,7 @@ public class AssignmentsImpl implements Assignments {
                            final MutexRepository mutexRepository,
                            final RuleCache ruleCache, final Pages pages,
                            final Priorities priorities,
-                           final Provider<Envelope<AssignmentEnvelopePayload, DatabaseExport>> assignmentDBEnvelopeProvider,
-                           final Provider<Envelope<AssignmentEnvelopePayload, WebExport>> assignmentWebEnvelopeProvider,
-                           final @Nullable AssignmentDecorator assignmentDecorator,
+                           final AssignmentDecorator assignmentDecorator,
                            final @Named("ruleCache.threadPool") ThreadPoolExecutor ruleCacheExecutor,
                            final EventLog eventLog)
             throws IOException, ConnectionException {
@@ -193,14 +178,13 @@ public class AssignmentsImpl implements Assignments {
         this.ruleCache = ruleCache;
         this.pages = pages;
         this.priorities = priorities;
-        this.assignmentDBEnvelopeProvider = assignmentDBEnvelopeProvider;
-        this.assignmentWebEnvelopeProvider = assignmentWebEnvelopeProvider;
         this.assignmentDecorator = assignmentDecorator;
         this.eventLog = eventLog;
         this.ruleCacheExecutor = ruleCacheExecutor;
         this.assignmentsRepository = assignmentsRepository;
         this.mutexRepository = mutexRepository;
         this.eventLog = eventLog;
+
     }
 
     /**
@@ -273,7 +257,7 @@ public class AssignmentsImpl implements Assignments {
                     }
                     // Generate the assignment; this always generates an assignment,
                     // which may or may not specify a bucket
-                    assignment = generateAssignment(experiment, userID, context, selectBucket, currentDate);
+                    assignment = generateAssignment(experiment, userID, context, selectBucket, null /* no bucket list*/, currentDate, segmentationProfile);
                     assert assignment.getStatus() == Assignment.Status.NEW_ASSIGNMENT :
                             "Assignment status should have been NEW_ASSIGNMENT for " +
                                     "userID = \"" + userID + "\", experiment = \"" + experiment + "\"";
@@ -418,7 +402,7 @@ public class AssignmentsImpl implements Assignments {
                     // Generate the assignment; this always generates an assignment,
                     // which may or may not specify a bucket
                     //todo: change so this doesn't follow the 'read then write' Cassandra anti-pattern
-                    assignment = generateAssignment(experiment, userID, context, selectBucket, bucketList, currentDate);
+                    assignment = generateAssignment(experiment, userID, context, selectBucket, bucketList, currentDate, segmentationProfile);
                     assert assignment.getStatus() == Assignment.Status.NEW_ASSIGNMENT :
                             new StringBuilder("Assignment status should have been NEW_ASSIGNMENT for ")
                                     .append("userID = \"").append(userID).append("\", experiment = \"")
@@ -456,36 +440,31 @@ public class AssignmentsImpl implements Assignments {
     }
 
     /**
-     *
      * Create/Retrieve assignments for a given user, application, context and
      * given experiments (experimentBatch/allowAssignments).
-     *
+     * <p>
      * This method is called from two places:
      * 1. First directly through API call AssignmentsResource.getBatchAssignments() => api:/v1/assignments/applications/{applicationName}/users/{userID}
-     *    In this case pageName and allowAssignments are NULL
-     *
+     * In this case pageName and allowAssignments are NULL
+     * <p>
      * 2. Second from AssignmentsImpl.doPageAssignments() => api:/v1/assignments/applications/{applicationName}/pages/{pageName}/users/{userID}
-     *    In this case pageName and allowAssignments are provided.
-     *    To avoid performance degradation (duplicate calls to )
+     * In this case pageName and allowAssignments are provided.
+     * To avoid performance degradation (duplicate calls to )
      *
-     *
-     * @param userID           the {@link com.intuit.wasabi.assignmentobjects.User.ID} of the person we want the assignment for
-     * @param applicationName  the {@link com.intuit.wasabi.experimentobjects.Application.Name} the app we want the assignment for
-     * @param context          the {@link Context} of the assignment call
-     * @param createAssignment <code>true</code> when a new Assignment should be created
+     * @param userID            the {@link com.intuit.wasabi.assignmentobjects.User.ID} of the person we want the assignment for
+     * @param applicationName   the {@link com.intuit.wasabi.experimentobjects.Application.Name} the app we want the assignment for
+     * @param context           the {@link Context} of the assignment call
+     * @param createAssignment  <code>true</code> when a new Assignment should be created
      * @param forceInExperiment
-     * @param headers          the {@link HttpHeaders} that can be used by the segmentation
-     * @param experimentBatch  the {@link ExperimentBatch} experiment batch for batch assignments
-     *                         Experiment labels are NOT PRESENT when called from AssignmentsImpl.doPageAssignments()
-     *
-     * @param pageName         the {@link com.intuit.wasabi.experimentobjects.Page.Name} the page name for the assignment
-     *                         NULL when called from AssignmentsResource.getBatchAssignments()
-     *                         PRESENT when called from AssignmentsImpl.doPageAssignments()
-     *
-     * @param allowAssignments {@link HashMap} for each experiment whether the assignment is allowed
-     *                         NULL when called from AssignmentsResource.getBatchAssignments()
-     *                         PRESENT when called from AssignmentsImpl.doPageAssignments()
-     *
+     * @param headers           the {@link HttpHeaders} that can be used by the segmentation
+     * @param experimentBatch   the {@link ExperimentBatch} experiment batch for batch assignments
+     *                          Experiment labels are NOT PRESENT when called from AssignmentsImpl.doPageAssignments()
+     * @param pageName          the {@link com.intuit.wasabi.experimentobjects.Page.Name} the page name for the assignment
+     *                          NULL when called from AssignmentsResource.getBatchAssignments()
+     *                          PRESENT when called from AssignmentsImpl.doPageAssignments()
+     * @param allowAssignments  {@link HashMap} for each experiment whether the assignment is allowed
+     *                          NULL when called from AssignmentsResource.getBatchAssignments()
+     *                          PRESENT when called from AssignmentsImpl.doPageAssignments()
      * @return
      */
     @Override
@@ -625,7 +604,7 @@ public class AssignmentsImpl implements Assignments {
 
         //check that the desired bucket is valid
         if (desiredBucketLabel != null) {
-            BucketList buckets = repository.getBuckets(experimentID);
+            BucketList buckets = repository.getBuckets(experimentID, false /* don't check experiment again */);
             Boolean bucketFound = false;
             for (Bucket bucket : buckets.getBuckets()) {
                 if (bucket.getLabel().equals(desiredBucketLabel) && !bucket.getState().equals(Bucket.State.EMPTY)) {
@@ -904,49 +883,8 @@ public class AssignmentsImpl implements Assignments {
         }
     }
 
-    Assignment generateAssignment(Experiment experiment, User.ID userID, Context context,
-                                  boolean selectBucket, Date date) {
-
-        Assignment.Builder builder = Assignment.newInstance(experiment.getID())
-                .withApplicationName(experiment.getApplicationName())
-                .withUserID(userID)
-                .withContext(context);
-
-        if (selectBucket) {
-            /*
-            With the bucket state in effect, this part of the code could also result in
-            the generation of a null assignment in cases where the selected bucket is CLOSED or EMPTY
-            In CLOSED state, the current bucket assignments to the bucket are left as is and all the
-            assignments to this bucket are made null going forward.
-
-            In EMPTY state, the current bucket assignments are made null as well as all the future assignments
-            to this bucket are made null.
-
-            Retrieves buckets from Repository if personalization is not enabled and if skipBucketRetrieval is false
-            Retrieves buckets from DE if personalization is enabled
-            * */
-            BucketList buckets = getBucketList(experiment, false);
-            Bucket assignedBucket = selectBucket(buckets.getBuckets());
-
-            //check that at least one bucket was open
-            if (assignedBucket != null) {
-                //create the bucket with bucketlabel
-                builder.withBucketLabel(assignedBucket.getLabel());
-            } else {
-                return nullAssignment(userID, experiment.getApplicationName(), experiment.getID(),
-                        Assignment.Status.NO_OPEN_BUCKETS);
-            }
-
-        } else {
-            builder.withBucketLabel(null);
-        }
-
-        Assignment result = builder.build();
-        return assignmentsRepository.assignUser(result, experiment, date);
-    }
-
-    private Assignment generateAssignment(Experiment experiment, User.ID userID, Context context, boolean selectBucket,
-                                          BucketList buckets, Date date) {
+    Assignment generateAssignment(Experiment experiment, User.ID userID, Context context, boolean selectBucket,
+                                  BucketList bucketList, Date date, SegmentationProfile segmentationProfile) {
 
         Assignment.Builder builder = Assignment.newInstance(experiment.getID())
                 .withApplicationName(experiment.getApplicationName())
@@ -965,11 +903,19 @@ public class AssignmentsImpl implements Assignments {
             to this bucket are made null.
 
             Retrieves buckets from Repository if personalization is not enabled and if skipBucketRetrieval is false
-            Retrieves buckets from DE if personalization is enabled
+            Retrieves buckets from Assignment Decorator if personalization is enabled
             */
-            assignedBucket = selectBucket(buckets.getBuckets());
+            BucketList bucketsExternal = getBucketList(experiment, userID, segmentationProfile,
+                    !Objects.isNull(bucketList) /* do not skip retrieving bucket from repository if bucketList is null */);
+            if (Objects.isNull(bucketsExternal) || bucketsExternal.getBuckets().isEmpty()) {
+                // if bucketlist obtained from Assignment Decorator is null; use the bucketlist passed into the method
+                assignedBucket = selectBucket(bucketList.getBuckets());
+            } else {
+                //else use the bucketExternal obtained from the Assignment Decorator
+                assignedBucket = selectBucket(bucketsExternal.getBuckets());
+            }
             //check that at least one bucket was open
-            if (assignedBucket != null) {
+            if (!Objects.isNull(assignedBucket)) {
                 //create the bucket with bucketlabel
                 builder.withBucketLabel(assignedBucket.getLabel());
             } else {
@@ -987,19 +933,40 @@ public class AssignmentsImpl implements Assignments {
 
     /**
      * Returns a bucketList depending on whether it is a personalization experiment or not.
-     * Retrieves buckets from DE if personalization is enabled
+     * Retrieves buckets from Assignment Decorator if personalization is enabled
      * Retrieves buckets from Repository if personalization is not enabled and if skipBucketRetrieval is false
      *
      * @param experiment          Experiment
+     * @param userID              UserId
+     * @param segmentationProfile The segmentation profile
      * @param skipBucketRetrieval If false, retrieves buckets from Repository
      * @return BucketList
      */
-    protected BucketList getBucketList(Experiment experiment, Boolean skipBucketRetrieval) {
-        BucketList buckets = null;
-        if (!skipBucketRetrieval) {
-            buckets = repository.getBuckets(experiment.getID());
+    protected BucketList getBucketList(Experiment experiment, User.ID userID, SegmentationProfile segmentationProfile, Boolean skipBucketRetrieval) {
+
+        BucketList bucketList = null;
+        Boolean isPersonalizationEnabled = experiment.getIsPersonalizationEnabled();
+        if (isPersonalizationEnabled) {
+            try {
+                bucketList = assignmentDecorator.getBucketList(experiment, userID, segmentationProfile);
+            } catch (BucketDistributionNotFetchableException e) {
+                LOGGER.error("Error obtaining the Bucket List from {} for user_id {}, for experiment: {} due to {}",
+                        assignmentDecorator.getClass().getSimpleName(), userID, experiment.getLabel().toString(), e);
+            } finally {
+                //TODO: add some metrics on how often this fails
+                // Logic behind the below step is to ensure the following:
+                // In the case of batch assignments, when response from Assignment Decorator fails, we skip doing a back end call to cassandra
+                // This is consistent with the different manner in which generateAssignment method is used for single and batch assignment calls.
+                if ((Objects.isNull(bucketList) || bucketList.getBuckets().isEmpty()) && !skipBucketRetrieval) {
+                    bucketList = repository.getBuckets(experiment.getID(), false /* don't check experiment again */);
+                }
+            }
+        } else {
+            if (!skipBucketRetrieval) {
+                bucketList = repository.getBuckets(experiment.getID(), false /* don't check experiment again */);
+            }
         }
-        return buckets;
+        return bucketList;
     }
 
     protected Double rollDie() {
@@ -1070,7 +1037,6 @@ public class AssignmentsImpl implements Assignments {
      * @param segmentationProfile The segmentation profile object containing various segments.
      * @param headers             The http headers that need to be merged into segmentation profile as new segments.
      * @param context             The context object containing the context, for example, PROD or QA.
-     *
      * @return Returns The merged segmentation profile object containing new segments from headers and context objects.
      */
     protected SegmentationProfile mergeHeaderAndContextWithProfile(SegmentationProfile segmentationProfile, HttpHeaders headers, Context context) {
@@ -1083,23 +1049,6 @@ public class AssignmentsImpl implements Assignments {
 
         updatedSegmentationProfile.addAttribute("context", context.getContext());
         return updatedSegmentationProfile;
-    }
-
-    /**
-     * Merging response from personalization engine with segmentation profile.
-     *
-     * @param segmentationProfile           Segmentation Profile
-     * @param personalizationEngineResponse Personalization Engine Response
-     * @return SegmentationProfile the merged segmentation profile
-     */
-    SegmentationProfile mergePersonalizationResponseWithSegmentation(SegmentationProfile segmentationProfile, PersonalizationEngineResponse personalizationEngineResponse) {
-
-        if (personalizationEngineResponse != null) {
-            segmentationProfile.addAttribute("tid", personalizationEngineResponse.getTid());
-            segmentationProfile.addAttribute("data", personalizationEngineResponse.getData());
-            segmentationProfile.addAttribute("model", personalizationEngineResponse.getModel());
-        }
-        return segmentationProfile;
     }
 
     @Override

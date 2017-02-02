@@ -24,7 +24,6 @@ import com.intuit.wasabi.export.WebExport;
 
 /**
  * Noop implementation for web analytics export
- *
  */
 public class NoopWebAssignmentEnvelope implements Envelope<AssignmentEnvelopePayload, WebExport> {
 

@@ -130,11 +130,11 @@ public interface ExperimentRepository {
      * Return a list of bucket IDs for the specified experiment
      *
      * @param experimentID id of the experiment
+     * @param checkExperiment check if experiment exists before querying for bucket list
      * @return a list of buckets of that experiment
      *
      */
-    BucketList getBuckets(Experiment.ID experimentID);
-
+    BucketList getBuckets(Experiment.ID experimentID, boolean checkExperiment);
 
     /**
      * Create a new bucket for the specified experiment

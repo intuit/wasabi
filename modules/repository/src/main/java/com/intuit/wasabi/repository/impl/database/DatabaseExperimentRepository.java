@@ -749,6 +749,7 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
 
     /**
      * Creates an application at top level
+     *
      * @param applicationName Application Name
      */
     @Override

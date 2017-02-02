@@ -42,6 +42,7 @@ public class UsernameSerializer extends AbstractSerializer<UserInfo.Username> {
 
     /**
      * Get instance
+     *
      * @return instance
      */
     public static UsernameSerializer get() {

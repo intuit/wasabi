@@ -24,6 +24,7 @@ import java.nio.ByteBuffer;
 
 /**
  * Astyanax serializer for
+ *
  * @see Bucket.Label
  */
 public class BucketLabelSerializer extends AbstractSerializer<Bucket.Label> {
@@ -40,6 +41,7 @@ public class BucketLabelSerializer extends AbstractSerializer<Bucket.Label> {
 
     /**
      * Get singleton instance
+     *
      * @return instance
      */
     public static BucketLabelSerializer get() {

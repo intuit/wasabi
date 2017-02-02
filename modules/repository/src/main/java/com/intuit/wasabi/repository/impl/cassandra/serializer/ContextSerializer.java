@@ -42,6 +42,7 @@ public class ContextSerializer extends AbstractSerializer<Context> {
 
     /**
      * Get instance
+     *
      * @return instance
      */
     public static ContextSerializer get() {

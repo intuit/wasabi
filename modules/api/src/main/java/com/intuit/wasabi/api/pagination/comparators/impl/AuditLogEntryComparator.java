@@ -31,7 +31,7 @@ public class AuditLogEntryComparator extends PaginationComparator<AuditLogEntry>
 
     /**
      * Initializes an AuditLogEntryComparator.
-     *
+     * <p>
      * Sets the default sort order to descending time, that means
      * the most recent events are first.
      */
@@ -67,9 +67,9 @@ public class AuditLogEntryComparator extends PaginationComparator<AuditLogEntry>
         /**
          * Creates a Property.
          *
-         * @param propertyExtractor the property extractor
+         * @param propertyExtractor  the property extractor
          * @param comparisonFunction the comparison function
-         * @param <T> the property type
+         * @param <T>                the property type
          */
         <T> Property(Function<AuditLogEntry, T> propertyExtractor, BiFunction<T, T, Integer> comparisonFunction) {
             this.propertyExtractor = propertyExtractor;

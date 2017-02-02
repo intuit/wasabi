@@ -15,6 +15,9 @@
  *******************************************************************************/
 package com.intuit.wasabi.tests.model.factory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.gson.GsonBuilder;
 import com.intuit.wasabi.tests.library.util.Constants;
 import com.intuit.wasabi.tests.model.Application;
@@ -52,6 +55,20 @@ public class ApplicationFactory {
         return new Application(Constants.DEFAULT_PREFIX_APPLICATION + String.valueOf(internalId++));
     }
 
+    /**
+     * Creates a List of Applications with the required names specified in the list.
+     * @param applicationNames - the list of the names of the application one want 
+     * @return a list Applications with the specified names.
+     */
+    public static List<Application> createApplications(List<String> applicationNames) {
+    	List<Application> applicationsList = new ArrayList<Application>();
+        for(int i = 0 ; i < applicationNames.size(); i++) {
+        	Application application = new Application(applicationNames.get(i));
+        	applicationsList.add(application);
+        }
+        return applicationsList;	
+    }
+    
     /**
      * Creates an Application from a JSON String.
      *

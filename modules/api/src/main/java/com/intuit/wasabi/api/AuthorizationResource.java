@@ -98,7 +98,7 @@ public class AuthorizationResource {
     /**
      * Get permissions for a user across applications
      *
-     * @param userID User ID
+     * @param userID              User ID
      * @param authorizationHeader
      * @return Response object
      */
@@ -173,6 +173,7 @@ public class AuthorizationResource {
 
     /**
      * Assign roles for a list of users and applications
+     *
      * @param userRoleList
      * @param authorizationHeader
      * @return Response object
@@ -197,6 +198,7 @@ public class AuthorizationResource {
 
     /**
      * Get user role
+     *
      * @param userID
      * @param authorizationHeader
      * @return Response object
@@ -237,8 +239,9 @@ public class AuthorizationResource {
 
     /**
      * Update user roles
-     * @param userRoleList list of roles for the user
-     * @param authorizationHeader   http header
+     *
+     * @param userRoleList        list of roles for the user
+     * @param authorizationHeader http header
      * @return response object
      */
     @PUT
@@ -290,6 +293,7 @@ public class AuthorizationResource {
 
     /**
      * Delete a user's role within an application
+     *
      * @param applicationName
      * @param userID
      * @param authorizationHeader
@@ -323,6 +327,7 @@ public class AuthorizationResource {
 
     /**
      * Get roles for users
+     *
      * @param applicationName
      * @param authorizationHeader
      * @return Response object

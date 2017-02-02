@@ -21,22 +21,23 @@ import com.intuit.wasabi.feedbackobjects.UserFeedback;
 import java.util.List;
 
 /**
- * Repository for feedback data 
+ * Repository for feedback data
  *
  * @see UserFeedback
  * @see UserInfo
- *
  */
 public interface FeedbackRepository {
 
     /**
      * Create user feedback
+     *
      * @param userFeedback new user feedback
      */
     void createUserFeedback(UserFeedback userFeedback);
 
     /**
      * Get user feedback for user
+     *
      * @param username current user name
      * @return user feedback list
      */
@@ -44,6 +45,7 @@ public interface FeedbackRepository {
 
     /**
      * Get all feedbacks
+     *
      * @return list of feedbacks
      */
     List<UserFeedback> getAllUserFeedback();

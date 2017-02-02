@@ -56,7 +56,6 @@ import static org.slf4j.LoggerFactory.getLogger;
  * A thin wrapper around Cassandra implementation at com.intuit.wasabi.repository.impl.cassandra.CassandraExperimentRepository
  * {@link com.intuit.wasabi.repository.ExperimentRepository}
  * to keep business logic out of the persistence layer
- *
  */
 public class ExperimentsImpl implements Experiments {
 
@@ -205,7 +204,7 @@ public class ExperimentsImpl implements Experiments {
             * */
             if (currentState.equals(DRAFT) && desiredState.equals(RUNNING)) {
                 // Throw an exception if the sanity-check fails
-                BucketList bucketList = buckets.getBuckets(experimentID);
+                BucketList bucketList = buckets.getBuckets(experimentID, false /* don't check experiment again */);
                 validator.validateExperimentBuckets(bucketList.getBuckets());
             }
         }

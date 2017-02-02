@@ -474,7 +474,7 @@ public class ExperimentsResource {
                     READ);
         }
 
-        return httpHeader.headers().entity(buckets.getBuckets(experimentID)).build();
+        return httpHeader.headers().entity(buckets.getBuckets(experimentID, true)).build();
     }
 
     /**

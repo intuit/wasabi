@@ -1,5 +1,3 @@
-package com.intuit.wasabi.repository.cassandra.impl;
-
 /*******************************************************************************
  * Copyright 2016 Intuit
  * <p>
@@ -15,6 +13,7 @@ package com.intuit.wasabi.repository.cassandra.impl;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
+package com.intuit.wasabi.repository.cassandra.impl;
 
 import com.intuit.wasabi.assignmentobjects.Assignment;
 import com.intuit.wasabi.eventlog.EventLog;

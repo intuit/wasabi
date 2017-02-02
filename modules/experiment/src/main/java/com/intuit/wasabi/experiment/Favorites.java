@@ -36,7 +36,7 @@ public interface Favorites {
     /**
      * Adds a new favorite for a user.
      *
-     * @param username the user
+     * @param username     the user
      * @param experimentID the new favorite experiment ID
      * @return the new list of favorite IDs
      */
@@ -45,7 +45,7 @@ public interface Favorites {
     /**
      * Deletes a favorite for a user.
      *
-     * @param username the user
+     * @param username     the user
      * @param experimentID the favorite to delete
      * @return the new list of favorite IDs
      */

@@ -24,6 +24,7 @@ import java.nio.ByteBuffer;
 
 /**
  * Astyanax serializer for
+ *
  * @see State
  */
 public class BucketStateSerializer extends AbstractSerializer<State> {
@@ -42,6 +43,7 @@ public class BucketStateSerializer extends AbstractSerializer<State> {
 
     /**
      * Get instance
+     *
      * @return singleton instance
      */
     public static BucketStateSerializer get() {

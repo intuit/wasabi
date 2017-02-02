@@ -28,12 +28,14 @@ import com.intuit.wasabi.tests.model.APIUser;
 import com.intuit.wasabi.tests.model.AccessToken;
 import com.intuit.wasabi.tests.model.Application;
 import com.intuit.wasabi.tests.model.Assignment;
+import com.intuit.wasabi.tests.model.AssignmentStatus;
 import com.intuit.wasabi.tests.model.Bucket;
 import com.intuit.wasabi.tests.model.Event;
 import com.intuit.wasabi.tests.model.Experiment;
 import com.intuit.wasabi.tests.model.Page;
 import com.intuit.wasabi.tests.model.User;
 import com.intuit.wasabi.tests.model.UserFeedback;
+import com.intuit.wasabi.tests.model.UserRole;
 import com.intuit.wasabi.tests.model.analytics.AnalyticsParameters;
 import com.intuit.wasabi.tests.model.analytics.ExperimentCounts;
 import com.intuit.wasabi.tests.model.analytics.ExperimentCumulativeCounts;
@@ -80,8 +82,6 @@ import java.util.Properties;
 import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
-
-//import com.intuit.wasabi.util.PropertyFetcher;
 
 /**
  * A TestBase for new test sets.
@@ -158,8 +158,8 @@ public class TestBase extends ServiceTestBase {
         setPropertyFromSystemProperty("api.version.string", "api-version-string");
         setPropertyFromSystemProperty("node.count", "node-count");
         // TODO It appears that the build system has user.name and pwd set to something different from what it should be for the environment. Commented next two lines out for now.
-        //	setPropertyFromSystemProperty ("user.name","user-name");
-        //	setPropertyFromSystemProperty ("user.password","password");
+        //    setPropertyFromSystemProperty ("user.name","user-name");
+        //    setPropertyFromSystemProperty ("user.password","password");
         setPropertyFromSystemProperty("database-url", "database.url");
         setPropertyFromSystemProperty("database-username", "database.username");
         setPropertyFromSystemProperty("database-password", "database.password");
@@ -173,6 +173,8 @@ public class TestBase extends ServiceTestBase {
         setPropertyFromSystemProperty("application.name", "application-name");
         setPropertyFromSystemProperty("experiment.prefix", "experiment-prefix");
         setPropertyFromSystemProperty("bucket.prefix", "bucket-prefix");
+
+        setPropertyFromSystemProperty("test-user", "test-user");
     }
 
     /**
@@ -185,7 +187,6 @@ public class TestBase extends ServiceTestBase {
 
     /**
      * Creates an APIServerConnector.
-     *
      */
     private void createAPIServerConnector() {
         LOGGER.info("Creating APIServerConnector");
@@ -312,6 +313,23 @@ public class TestBase extends ServiceTestBase {
     //////////////////////////
     // experiments Endpoint //
     //////////////////////////
+
+    /**
+     * Sends a POST request to create an experiment.
+     * The response must contain {@link HttpStatus#SC_CREATED}.
+     * <p>
+     * Sets createNewApplication to {@code true}.
+     *
+     * @param experiments the list of experiments to POST
+     * @return the list of new experiments
+     */
+    public List<Experiment> postExperiments(List<Experiment> experiments) {
+        List<Experiment> experimentsList = new ArrayList<Experiment>();
+        for (Experiment exp : experiments)
+            experimentsList.add(postExperiment(exp));
+        return experimentsList;
+    }
+
 
     /**
      * Sends a POST request to create an experiment.
@@ -2089,7 +2107,7 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to retrieve pages assigned to the application.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param application the application
+     * @param application    the application
      * @param expectedStatus the expected HTTP status code
      * @return a list of pages
      */
@@ -2102,8 +2120,8 @@ public class TestBase extends ServiceTestBase {
      * Sends a GET request to retrieve pages assigned to the application.
      * The response must contain HTTP {@code expectedStatus}.
      *
-     * @param application the application
-     * @param expectedStatus the expected HTTP status code
+     * @param application        the application
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return a list of pages
      */
@@ -2820,8 +2838,8 @@ public class TestBase extends ServiceTestBase {
      * The response must contain {@link HttpStatus#SC_CREATED}.
      *
      * @param application the application
-     * @param user the user
-     * @param page the page
+     * @param user        the user
+     * @param page        the page
      * @return the created assignments, can be 0
      */
     public List<Assignment> postAssignments(Application application, Page page, User user) {
@@ -2833,9 +2851,9 @@ public class TestBase extends ServiceTestBase {
      * given in the {@code segmentationProfile}.
      * The response must contain {@link HttpStatus#SC_CREATED}.
      *
-     * @param application the application
-     * @param user the user
-     * @param page the page
+     * @param application         the application
+     * @param user                the user
+     * @param page                the page
      * @param segmentationProfile the segmantation profile, will be wrapped into the correct JSON object
      * @return the created assignments, can be 0
      */
@@ -3278,7 +3296,6 @@ public class TestBase extends ServiceTestBase {
 
 
     /**
-     *
      * Sends a GET request to receive a list of experiments for an application
      * The response must contain HTTP {@link HttpStatus#SC_OK}
      *
@@ -3291,11 +3308,10 @@ public class TestBase extends ServiceTestBase {
 
 
     /**
-     *
      * Sends a GET request to receive a list of experiments for an application
      * The response must contain HTTP {@link HttpStatus#SC_OK}
      *
-     * @param application the application for which the experiments are
+     * @param application    the application for which the experiments are
      * @param expectedStatus the expected HTTP status code
      * @return a list of experiments
      */
@@ -3305,12 +3321,11 @@ public class TestBase extends ServiceTestBase {
 
 
     /**
-     *
      * Sends a GET request to receive a list of experiments for an application
      * The response must contain HTTP {@link HttpStatus#SC_OK}
      *
-     * @param application the application for which the experiments are
-     * @param expectedStatus the expected HTTP status code
+     * @param application        the application for which the experiments are
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return a list of experiments
      */
@@ -4332,6 +4347,169 @@ public class TestBase extends ServiceTestBase {
         return response.jsonPath().get("experimentIDs");
     }
 
+    ////////////////////////
+    // authorization endpoint //
+    ////////////////////////
+
+    /**
+     * Sends a DELETE request to delete a user role within an application
+     *
+     * @param userID          - the userID of the user whose role we want to delete
+     * @param applicationName - the applicationName of the application
+     */
+    public void deleteUserRole(String userID, String applicationName) {
+        deleteUserRole(userID, applicationName, HttpStatus.SC_NO_CONTENT);
+    }
+
+    /**
+     * Sends a DELETE request to delete a user role within an application
+     *
+     * @param userID          - the userID of the user whose role we want to delete
+     * @param applicationName - the applicationName of the application
+     * @param expectedStatus  - the expected HTTP status code
+     */
+    public void deleteUserRole(String userID, String applicationName, int expectedStatus) {
+        deleteUserRole(userID, applicationName, expectedStatus, apiServerConnector);
+    }
+
+    /**
+     * Sends a DELETE request to delete a user role within an application
+     *
+     * @param userID             - the userID of the user whose role we want to delete
+     * @param applicationName    - the applicationName of the application
+     * @param expectedStatus     - the expected HTTP status code
+     * @param apiServerConnector - the server connector to use
+     */
+    public void deleteUserRole(String userID, String applicationName, int expectedStatus, APIServerConnector apiServerConnector) {
+
+        response = apiServerConnector.doDelete("authorization/applications/" + applicationName + "/users/" + userID + "/roles");
+        assertReturnCode(response, expectedStatus);
+    }
+
+    /**
+     * Sends a POST request to assign roles for a list of users against list of applications.
+     *
+     * @param userID   - the userID to whom we are going to assign application
+     * @param appList- the list of applications to whom we gonna assign the user
+     * @param role     - the role of the user when assigning him to the application
+     * @return list  - the list of Assignment statuses
+     */
+    public List<AssignmentStatus> postUserRolePermission(String userID, List<Application> appList, String role) {
+        List<UserRole> userRoleList = new ArrayList<>();
+        for (Application appln : appList) {
+            UserRole userRole = new UserRole();
+            userRole.setApplicationName(appln.name);
+            userRole.setUserID(userID);
+            userRole.setRole(role);
+            userRoleList.add(userRole);
+        }
+        return postUserRolePermission(userRoleList);
+    }
+
+
+    /**
+     * Sends a GET request to get all the applications assigned to user.
+     * The response must contain {@link HttpStatus#SC_OK}.
+     *
+     * @param user the user whose list of applications we are interested
+     * @return List of application names
+     */
+    public List<String> getUserApplications(APIUser user) {
+        return getUserApplications(user, HttpStatus.SC_OK);
+    }
+
+
+    /**
+     * Sends a GET request to get all the applications assigned to user.
+     * The response must contain {@link HttpStatus#SC_OK}.
+     *
+     * @param user           the user whose list of applications we are interested
+     * @param expectedStatus the expected HTTP status code
+     * @return List of application names
+     */
+    public List<String> getUserApplications(APIUser user, int expectedStatus) {
+        return getUserApplications(user, expectedStatus, apiServerConnector);
+    }
+
+    /**
+     * Sends a GET request to get all the applications assigned to user.
+     * The response must contain {@link HttpStatus#SC_OK}.
+     *
+     * @param user               the user whose list of applications we are interested
+     * @param expectedStatus     the expected HTTP status code
+     * @param apiServerConnector the server connector to use
+     * @return List of application names
+     */
+    public List<String> getUserApplications(APIUser user, int expectedStatus, APIServerConnector apiServerConnector) {
+        apiServerConnector.setUserNameAndPassword(user.userId, user.password);
+        response = apiServerConnector.doGet("authorization/applications");
+        assertReturnCode(response, expectedStatus);
+        List<Map<String, Object>> jsonStrings = response.jsonPath().get();
+        List<String> applicationList = new ArrayList<>(jsonStrings.size());
+
+        //here I am only interested in the name of the application
+        for (int i = 0; i < jsonStrings.size(); i++) {
+            String appName = response.jsonPath().get(Constants.ROLE_LIST + "[" + i + "].applicationName[0]").toString();
+            applicationList.add(appName);
+        }
+        apiServerConnector.setUserNameAndPassword(appProperties.getProperty("user-name"), appProperties.getProperty("password"));
+        return applicationList;
+    }
+
+    /**
+     * Sends a POST request to assign roles to users against applications.
+     * The response must contain {@link HttpStatus#SC_OK}.
+     * Sets createNewApplication to {@code true}.
+     *
+     * @param roles the list of userRoles
+     * @return List of assignment status
+     */
+    public List<AssignmentStatus> postUserRolePermission(List<UserRole> roles) {
+        return postUserRolePermission(roles, HttpStatus.SC_OK);
+    }
+
+
+    /**
+     * Sends a POST request to assign roles to users against applications.
+     * The response must contain {@link HttpStatus#SC_OK}.
+     * Sets createNewApplication to {@code true}.
+     *
+     * @param roles          the list of userRoles
+     * @param expectedStatus the expected HTTP status code
+     * @return List of assignment status
+     */
+    public List<AssignmentStatus> postUserRolePermission(List<UserRole> roles, int expectedStatus) {
+        return postUserRolePermission(roles, expectedStatus, apiServerConnector);
+    }
+
+    /**
+     * Sends a POST request to assign roles to users against applications.
+     * The response must contain {@link HttpStatus#SC_OK}.
+     * <p>
+     *
+     * @param experiment         the experiment to POST
+     * @param expectedStatus     the expected HTTP status code
+     * @param apiServerConnector the server connector to use
+     * @return List of assignment status
+     */
+    public List<AssignmentStatus> postUserRolePermission(List<UserRole> roles, int expectedStatus, APIServerConnector apiServerConnector) {
+        //building the payload
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("{");
+        stringBuilder.append("\"" + Constants.ROLE_LIST + "\":");
+        stringBuilder.append(roles);
+        stringBuilder.append("}");
+
+        response = apiServerConnector.doPost("authorization/roles", stringBuilder.toString());
+        assertReturnCode(response, expectedStatus);
+        List<Map<String, Object>> jsonStrings = response.jsonPath().getList("assignmentStatuses");
+        List<AssignmentStatus> assignmentStatusList = new ArrayList<>(jsonStrings.size());
+        for (Map jsonMap : jsonStrings) {
+            String jsonString = simpleGson.toJson(jsonMap);
+            assignmentStatusList.add(AssignmentStatus.createFromJSONString(jsonString));
+        }
+        return assignmentStatusList;
+    }
 
     ///////////
     // OTHER //
