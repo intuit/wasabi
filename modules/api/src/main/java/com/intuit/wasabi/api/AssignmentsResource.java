@@ -38,6 +38,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.httpclient.HttpStatus;
 import org.slf4j.Logger;
 
 import java.util.List;
@@ -565,7 +566,7 @@ public class AssignmentsResource {
         Username userName = authorization.getUser(authorizationHeader);
         authorization.checkSuperAdmin(userName);
         assignments.flushMessages();
-        return httpHeader.headers().build();
+        return httpHeader.headers(HttpStatus.SC_NO_CONTENT).build();
     }
 
     private Map<String, Object> toMap(final Assignment assignment) {

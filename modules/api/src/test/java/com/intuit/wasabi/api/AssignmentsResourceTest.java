@@ -19,9 +19,7 @@ import com.intuit.wasabi.assignment.Assignments;
 import com.intuit.wasabi.assignmentobjects.Assignment;
 import com.intuit.wasabi.assignmentobjects.Assignment.Status;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
-import com.intuit.wasabi.authenticationobjects.UserInfo.Username;
 import com.intuit.wasabi.authorization.Authorization;
-import com.intuit.wasabi.authorizationobjects.Permission;
 import com.intuit.wasabi.assignmentobjects.SegmentationProfile;
 import com.intuit.wasabi.assignmentobjects.User;
 import com.intuit.wasabi.exceptions.AssignmentNotFoundException;
@@ -43,7 +41,11 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
+
+import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -51,8 +53,7 @@ import static java.nio.charset.Charset.forName;
 import static org.apache.commons.codec.binary.Base64.encodeBase64;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.doThrow;
@@ -64,6 +65,9 @@ public class AssignmentsResourceTest {
     private static final String USERPASS = new String(encodeBase64("admin@example.com:admin01".getBytes(forName("UTF-8"))), forName("UTF-8"));
     private static final String AUTHHEADER = "Basic: " + USERPASS;
     private static final UserInfo.Username USER = UserInfo.Username.valueOf("admin@example.com");
+    private static final String HOST_IP = "hostIP";
+    private static final String RULE_CACHE = "ruleCache";
+    private static final String QUEUE_SIZE = "queueSize";
 
     private final Boolean CREATE = true;
     private final Boolean FORCE_IN_EXPERIMENT = true;
@@ -235,13 +239,28 @@ public class AssignmentsResourceTest {
     
     @Test
     public void getAssignmentsQueueDetails() throws Exception {
+        Map<String, Object> queueDetailsMap = new HashMap<String, Object>();
+        try {
+            queueDetailsMap.put(HOST_IP, InetAddress.getLocalHost().getHostAddress());
+        } catch (Exception e) {
+            // ignore
+        }
+        Map<String, Object> testIngestionExecutorMap = new HashMap<String, Object>();
+        testIngestionExecutorMap.put(QUEUE_SIZE, new Integer(0));
+        Map<String, Object> ruleCacheMap = new HashMap<String, Object>();
+        ruleCacheMap.put(QUEUE_SIZE, new Integer(0));
+        queueDetailsMap.put(RULE_CACHE, ruleCacheMap);
+        queueDetailsMap.put("test", testIngestionExecutorMap);
         assertThat(resource.getAssignmentsQueueDetails().getStatus(), is(HttpStatus.SC_OK));
+        when(assignments.queuesDetails()).thenReturn(queueDetailsMap);
+        Response response = resource.getAssignmentsQueueDetails();
+        assertEquals(queueDetailsMap, response.getEntity());
     }
     
     @Test
     public void flushMessages() throws Exception {
         when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
-        assertThat(resource.flushMessages(AUTHHEADER).getStatus(), is(HttpStatus.SC_OK));
+        assertThat(resource.flushMessages(AUTHHEADER).getStatus(), is(HttpStatus.SC_NO_CONTENT));
     }
     
     @Test

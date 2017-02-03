@@ -87,7 +87,6 @@ import com.intuit.wasabi.repository.CassandraRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.MutexRepository;
 import com.intuit.wasabi.repository.cassandra.impl.ExperimentRuleCacheUpdateEnvelope;
-import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
 
 /**
  * Assignments implementation
@@ -178,7 +177,7 @@ public class AssignmentsImpl implements Assignments {
                            final AssignmentDecorator assignmentDecorator,
                            final @Named("ruleCache.threadPool") ThreadPoolExecutor ruleCacheExecutor,
                            final EventLog eventLog)
-            throws IOException, ConnectionException {
+            throws IOException {
         super();
         try {
             hostIP = InetAddress.getLocalHost().getHostAddress();
