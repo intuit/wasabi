@@ -1105,15 +1105,15 @@ public class AssignmentsImpl implements Assignments {
 
     @Override
     public Map<String, Object> queuesDetails() {
-        Map<String, Object> queueLengthMap = new HashMap<String, Object>();
-        queueLengthMap.put(HOST_IP, hostIP);
+        Map<String, Object> queueDetailsMap = new HashMap<String, Object>();
+        queueDetailsMap.put(HOST_IP, hostIP);
         Map<String, Object> ruleCacheMap = new HashMap<String, Object>();
         ruleCacheMap.put(QUEUE_SIZE, new Integer(this.ruleCacheExecutor.getQueue().size()));
-        queueLengthMap.put(RULE_CACHE, ruleCacheMap);
+        queueDetailsMap.put(RULE_CACHE, ruleCacheMap);
         for (String name : executors.keySet()) {
-            queueLengthMap.put(name.toLowerCase(), executors.get(name).queueDetails());
+            queueDetailsMap.put(name.toLowerCase(), executors.get(name).queueDetails());
         }
-        return queueLengthMap;
+        return queueDetailsMap;
     }
     
     public void flushMessages() {
