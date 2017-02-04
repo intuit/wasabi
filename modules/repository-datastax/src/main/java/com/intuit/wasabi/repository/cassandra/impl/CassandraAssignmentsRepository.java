@@ -16,6 +16,10 @@
 package com.intuit.wasabi.repository.cassandra.impl;
 
 import com.codahale.metrics.annotation.Timed;
+import com.datastax.driver.core.BatchStatement;
+import com.datastax.driver.core.BoundStatement;
+import com.datastax.driver.core.ResultSetFuture;
+import com.datastax.driver.core.Session;
 import com.datastax.driver.core.exceptions.NoHostAvailableException;
 import com.datastax.driver.core.exceptions.ReadTimeoutException;
 import com.datastax.driver.core.exceptions.UnavailableException;
@@ -51,6 +55,7 @@ import com.intuit.wasabi.repository.cassandra.pojo.UserAssignment;
 import com.intuit.wasabi.repository.cassandra.pojo.export.UserAssignmentExport;
 import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentUserByUserIdContextAppNameExperimentId;
 import com.intuit.wasabi.repository.cassandra.pojo.index.UserAssignmentByUserId;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +72,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
@@ -75,18 +79,16 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static java.util.Objects.isNull;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 //TODO: rewrite this class to use BatchStatement after moving to datastax
 public class CassandraAssignmentsRepository implements AssignmentsRepository {
     public static final Bucket.Label NULL_LABEL = Bucket.Label.valueOf("NULL");
-    private final Logger logger = LoggerFactory.getLogger(CassandraAssignmentsRepository.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(CassandraAssignmentsRepository.class);
 
     private final ExperimentRepository experimentRepository;
     private final ExperimentRepository dbRepository;
     private final EventLog eventLog;
     private final MappingManager mappingManager;
-    private final int assignmentsCountThreadPoolSize;
     private final boolean assignUserToOld;
     private final boolean assignUserToNew;
     private final boolean assignUserToExport;
@@ -94,8 +96,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     private final String defaultTimeFormat;
 
     final ThreadPoolExecutor assignmentsCountExecutor;
-
-    private LinkedBlockingQueue assignmentsCountQueue = new LinkedBlockingQueue<>();
 
     private ExperimentAccessor experimentAccessor;
     private ExperimentUserIndexAccessor experimentUserIndexAccessor;
@@ -136,7 +136,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
             PageExperimentIndexAccessor pageExperimentIndexAccessor,
             CassandraDriver driver,
             MappingManager mappingManager,
-            final @Named("export.pool.size") int assignmentsCountThreadPoolSize,
+            @Named("AssignmentsCountThreadPoolExecutor") ThreadPoolExecutor assignmentsCountExecutor,
             final @Named("assign.user.to.old") boolean assignUserToOld,
             final @Named("assign.user.to.new") boolean assignUserToNew,
             final @Named("assign.user.to.export") boolean assignUserToExport,
@@ -147,7 +147,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         this.dbRepository = dbRepository;
         this.eventLog = eventLog;
         this.mappingManager = mappingManager;
-        this.assignmentsCountThreadPoolSize = assignmentsCountThreadPoolSize;
         this.assignUserToOld = assignUserToOld;
         this.assignUserToNew = assignUserToNew;
         this.assignUserToExport = assignUserToExport;
@@ -170,12 +169,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         this.exclusionAccessor=exclusionAccessor;
         this.pageExperimentIndexAccessor=pageExperimentIndexAccessor;
         this.driver=driver;
-        this.assignmentsCountExecutor =  new ThreadPoolExecutor(
-                assignmentsCountThreadPoolSize,
-                assignmentsCountThreadPoolSize,
-                0L,
-                MILLISECONDS,
-                assignmentsCountQueue);
+        this.assignmentsCountExecutor = assignmentsCountExecutor;
     }
 
     Stream<ExperimentUserByUserIdContextAppNameExperimentId> getUserIndexStream(String userId,
@@ -235,9 +229,9 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                                             Map<Experiment.ID, BucketList> bucketMap,
                                             Map<Experiment.ID, List<Experiment.ID>> exclusionMap
                                             ) {
-        if(logger.isDebugEnabled()) logger.debug("populateExperimentMetadata - STARTED: userID={}, appName={}, context={}, experimentBatch={}, experimentIds={}", userID, appName, context, experimentBatch, allowAssignments);
+        if(LOGGER.isDebugEnabled()) LOGGER.debug("populateExperimentMetadata - STARTED: userID={}, appName={}, context={}, experimentBatch={}, experimentIds={}", userID, appName, context, experimentBatch, allowAssignments);
         if(isNull(experimentBatch.getLabels()) && !allowAssignments.isPresent() ) {
-            logger.error("Invalid input to CassandraAssignmentsRepository.populateExperimentMetadata(): Given input: userID={}, appName={}, context={}, experimentBatch={}, allowAssignments={}", userID, appName, context, experimentBatch, allowAssignments);
+            LOGGER.error("Invalid input to CassandraAssignmentsRepository.populateExperimentMetadata(): Given input: userID={}, appName={}, context={}, experimentBatch={}, allowAssignments={}", userID, appName, context, experimentBatch, allowAssignments);
             return;
         }
 
@@ -251,7 +245,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         //Based on given experiment ids, populate experiment buckets and exclusions..
         populateBucketsAndExclusions(experimentIds, bucketMap, exclusionMap);
 
-        if(logger.isDebugEnabled()) logger.debug("populateExperimentMetadata - FINISHED...");
+        if(LOGGER.isDebugEnabled()) LOGGER.debug("populateExperimentMetadata - FINISHED...");
     }
 
     /**
@@ -273,20 +267,20 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
 
         //Send calls asynchronously
         experimentsFuture = experimentAccessor.asyncGetExperimentByAppName(appName.toString());
-        if(logger.isDebugEnabled()) logger.debug("Sent experimentAccessor.asyncGetExperimentByAppName({})", appName);
+        if(LOGGER.isDebugEnabled()) LOGGER.debug("Sent experimentAccessor.asyncGetExperimentByAppName({})", appName);
 
         applicationFuture = prioritiesAccessor.asyncGetPriorities(appName.toString());
-        if(logger.isDebugEnabled()) logger.debug("Sent prioritiesAccessor.asyncGetPriorities({})", appName);
+        if(LOGGER.isDebugEnabled()) LOGGER.debug("Sent prioritiesAccessor.asyncGetPriorities({})", appName);
 
         userAssignmentsFuture = experimentUserIndexAccessor.asyncSelectBy(userID.toString(), appName.toString(), context.toString());
-        if(logger.isDebugEnabled()) logger.debug("Sent experimentUserIndexAccessor.asyncSelectBy({}, {}, {})", userID, appName, context);
+        if(LOGGER.isDebugEnabled()) LOGGER.debug("Sent experimentUserIndexAccessor.asyncSelectBy({}, {}, {})", userID, appName, context);
 
         //Process the Futures in the order that are expected to arrive earlier
         UninterruptibleUtil.getUninterruptibly(experimentsFuture).all().stream().forEach(expPojo -> {
             Experiment exp = ExperimentHelper.makeExperiment(expPojo);
             experimentMap.put(exp.getID(), exp);
         });
-        if(logger.isDebugEnabled()) logger.debug("experimentMap=> {}", experimentMap);
+        if(LOGGER.isDebugEnabled()) LOGGER.debug("experimentMap=> {}", experimentMap);
 
         int priorityValue=1;
         for (com.intuit.wasabi.repository.cassandra.pojo.Application priority : UninterruptibleUtil.getUninterruptibly(applicationFuture).all()) {
@@ -296,9 +290,9 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                 priorityValue += 1;
             }
         }
-        if(logger.isDebugEnabled()) {
+        if(LOGGER.isDebugEnabled()) {
             for(PrioritizedExperiment exp:prioritizedExperimentList.getPrioritizedExperiments()) {
-                logger.debug("prioritizedExperiment=> {} ", exp);
+                LOGGER.debug("prioritizedExperiment=> {} ", exp);
             }
         }
 
@@ -313,7 +307,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                 );
             }
         });
-        if(logger.isDebugEnabled()) logger.debug("existingUserAssignments=> {} ", existingUserAssignments);
+        if(LOGGER.isDebugEnabled()) LOGGER.debug("existingUserAssignments=> {} ", existingUserAssignments);
     }
 
     /**
@@ -329,10 +323,10 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         //Send calls asynchronously
         experimentIds.stream().forEach(experimentId -> {
             bucketFutureMap.put(experimentId, bucketAccessor.asyncGetBucketByExperimentId(experimentId.getRawID()));
-            if(logger.isDebugEnabled()) logger.debug("Sent bucketAccessor.asyncGetBucketByExperimentId ({})", experimentId.getRawID());
+            if(LOGGER.isDebugEnabled()) LOGGER.debug("Sent bucketAccessor.asyncGetBucketByExperimentId ({})", experimentId.getRawID());
 
             exclusionFutureMap.put(experimentId, exclusionAccessor.asyncGetExclusions(experimentId.getRawID()));
-            if(logger.isDebugEnabled()) logger.debug("Sent exclusionAccessor.asyncGetExclusions ({})", experimentId.getRawID());
+            if(LOGGER.isDebugEnabled()) LOGGER.debug("Sent exclusionAccessor.asyncGetExclusions ({})", experimentId.getRawID());
         });
 
         //Process the Futures in the order that are expected to arrive earlier
@@ -344,7 +338,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                     }
             );
         }
-        if(logger.isDebugEnabled()) logger.debug("bucketMap=> {} ", bucketMap);
+        if(LOGGER.isDebugEnabled()) LOGGER.debug("bucketMap=> {} ", bucketMap);
 
         for (Experiment.ID expId : exclusionFutureMap.keySet()) {
             ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Exclusion>> exclusionFuture = exclusionFutureMap.get(expId);
@@ -354,7 +348,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                     }
             );
         }
-        if(logger.isDebugEnabled()) logger.debug("exclusionMap=> {} ", exclusionMap);
+        if(LOGGER.isDebugEnabled()) LOGGER.debug("exclusionMap=> {} ", exclusionMap);
     }
 
     /**
@@ -376,7 +370,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                     experimentIds.add(exp.getID());
                 }
             }
-            if(logger.isDebugEnabled()) logger.debug("experimentIds for given experiment labels ({})", experimentIds);
+            if(LOGGER.isDebugEnabled()) LOGGER.debug("experimentIds for given experiment labels ({})", experimentIds);
         } else {
             //If allowAssignments IS NOT EMPTY means experimentBatch.labels are NOT provided.
             //Use allowAssignments.experimentIds to populate experimentBatch.labels
@@ -388,7 +382,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                 }
             }
             experimentBatch.setLabels(expLabels);
-            if(logger.isDebugEnabled()) logger.debug("experimentBatch after updating labels ({})", experimentBatch);
+            if(LOGGER.isDebugEnabled()) LOGGER.debug("experimentBatch after updating labels ({})", experimentBatch);
         }
     }
 
@@ -555,6 +549,196 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
 
         return new_assignment;
     }
+
+    /**
+     *
+     * Create use assignments in cassandra in a batch.
+     *
+     * @param assignments pair of experiment and assignment
+     * @param date       Date of user assignment
+     * @return
+     */
+    @Override
+    @Timed
+    public Assignment assignUsersInBatch(List<Pair<Experiment, Assignment>> assignments, Date date) {
+        Assignment new_assignment = null;
+
+        //Assign user to user_assignment table
+        if (assignUserToOld) {
+            //Writing assignment to the old table - user_assignment
+            assignUserToOld(assignments, date);
+        }
+        if (assignUserToNew) {
+            //Writing assignment to the new table - user_assignment_look_up
+            assignUserToNew(assignments, date);
+        }
+
+        // Submit tasks for each assignment to increment/decrement counts
+        incrementCounts(assignments, date);
+
+        // Make entries in user_bucket_index table
+        indexUserToBucket(assignments);
+
+        // Make entries in experiment_user_index table
+        indexExperimentsToUser(assignments);
+
+        return new_assignment;
+    }
+
+    /**
+     * Assign user to user_assignment_look_up table
+     *
+     * @param assignments
+     * @param date
+     */
+    private void assignUserToNew(List<Pair<Experiment, Assignment>> assignments, Date date){
+        final Date paramDate = Optional.ofNullable(date).orElseGet(Date::new);
+        try {
+            final List<ResultSetFuture> rFutures = new ArrayList<>();
+            assignments.forEach(pair -> {
+                Assignment assignment = pair.getRight();
+                if (isNull(assignment.getBucketLabel())) {
+                    rFutures.add(userAssignmentIndexAccessor.asyncInsertBy(assignment.getExperimentID().getRawID(),
+                            assignment.getUserID().toString(),
+                            assignment.getContext().getContext(),
+                            paramDate));
+                } else {
+                    rFutures.add(userAssignmentIndexAccessor.asyncInsertBy(assignment.getExperimentID().getRawID(),
+                            assignment.getUserID().toString(),
+                            assignment.getContext().getContext(),
+                            paramDate,
+                            assignment.getBucketLabel().toString()));
+                }
+            });
+            rFutures.forEach(ResultSetFuture::getUninterruptibly);
+            LOGGER.debug("Finished async AssignUserToOld");
+        } catch (WriteTimeoutException | UnavailableException | NoHostAvailableException e) {
+            throw new RepositoryException("Could not save user to the new table user assignment by user id: " +assignments, e);
+        }
+    }
+
+    /**
+     * Writing assignment to the user_assignment table
+     *
+     * @param assignments
+     * @param date
+     */
+    private void assignUserToOld(List<Pair<Experiment, Assignment>> assignments, Date date){
+        final Date paramDate = Optional.ofNullable(date).orElseGet(Date::new);
+        try {
+            final List<ResultSetFuture> rFutures = new ArrayList<>();
+            assignments.forEach(pair -> {
+                Assignment assignment = pair.getRight();
+                if (isNull(assignment.getBucketLabel())) {
+                    rFutures.add(userAssignmentAccessor.asyncInsertBy(assignment.getExperimentID().getRawID(),
+                            assignment.getUserID().toString(),
+                            assignment.getContext().getContext(),
+                            paramDate));
+                } else {
+                    rFutures.add(userAssignmentAccessor.asyncInsertBy(assignment.getExperimentID().getRawID(),
+                            assignment.getUserID().toString(),
+                            assignment.getContext().getContext(),
+                            paramDate,
+                            assignment.getBucketLabel().toString()));
+                }
+            });
+            rFutures.forEach(ResultSetFuture::getUninterruptibly);
+            LOGGER.debug("Finished async AssignUserToOld");
+        } catch (WriteTimeoutException | UnavailableException | NoHostAvailableException e) {
+            throw new RepositoryException("Could not save user to the old table user assignment: " +assignments, e);
+        }
+    }
+
+    /**
+     * Submit tasks for each assignment to increment/decrement counts
+     *
+     * @param assignments
+     * @param date
+     */
+    private void incrementCounts(List<Pair<Experiment, Assignment>> assignments, Date date) {
+        boolean countUp = true;
+        assignments.forEach(pair -> {
+            assignmentsCountExecutor.execute(new AssignmentCountEnvelope(this, experimentRepository, dbRepository, pair.getLeft(), pair.getRight(), countUp, eventLog, date, assignUserToExport, assignBucketCount));
+        });
+        LOGGER.debug("Finished assignmentsCountExecutor");
+    }
+
+    /**
+     * Make entries in user_bucket_index table
+     *
+     * @param assignments
+     */
+    private void indexUserToBucket(List<Pair<Experiment, Assignment>> assignments) {
+        final List<ResultSetFuture> rFutures = new ArrayList<>();
+        assignments.forEach(pair -> {
+            rFutures.add(asyncIndexUserToBucket(pair.getRight()));
+        });
+
+        rFutures.forEach(ResultSetFuture::getUninterruptibly);
+        LOGGER.debug("Finished asyncIndexUserToBucket");
+    }
+
+    /**
+     * Make entries in experiment_user_index table
+     *
+     * @param assignments
+     */
+    private void indexExperimentsToUser(List<Pair<Experiment, Assignment>> assignments) {
+        try {
+            Session session = driver.getSession();
+            final BatchStatement batchStatement = new BatchStatement(BatchStatement.Type.UNLOGGED);
+            assignments.forEach(pair -> {
+                Assignment assignment = pair.getRight();
+                LOGGER.debug("assignment={}", assignment);
+                BoundStatement bs;
+                if (isNull(assignment.getBucketLabel())) {
+                    bs = experimentUserIndexAccessor.insertBoundStatement(assignment.getUserID().toString(), assignment.getContext().toString(), assignment.getApplicationName().toString(), assignment.getExperimentID().getRawID());
+                } else {
+                    bs = experimentUserIndexAccessor.insertBoundStatement(assignment.getUserID().toString(), assignment.getContext().toString(), assignment.getApplicationName().toString(), assignment.getExperimentID().getRawID(), assignment.getBucketLabel().toString());
+                }
+                batchStatement.add(bs);
+            });
+            session.execute(batchStatement);
+            LOGGER.debug("Finished experiment_user_index");
+        } catch(Exception e) {
+            LOGGER.error("Error occurred while adding data in to experiment_user_index", e);
+        }
+    }
+
+    /**
+     *
+     * Index user to bucket in asynchronous way
+     *
+     * @param assignment
+     * @return
+     */
+    ResultSetFuture asyncIndexUserToBucket(Assignment assignment) {
+        ResultSetFuture resultSetFuture = null;
+        try{
+            if(isNull(assignment.getBucketLabel())) {
+                resultSetFuture = userBucketIndexAccessor.asyncInsertBy(
+                        assignment.getExperimentID().getRawID(),
+                        assignment.getUserID().toString(),
+                        assignment.getContext().getContext(),
+                        assignment.getCreated(),
+                        new String(new byte[0], StandardCharsets.UTF_8 ) //Needed because of compact storage
+                );
+            } else {
+                resultSetFuture = userBucketIndexAccessor.asyncInsertBy(
+                        assignment.getExperimentID().getRawID(),
+                        assignment.getUserID().toString(),
+                        assignment.getContext().getContext(),
+                        assignment.getCreated(),
+                        assignment.getBucketLabel().toString()
+                );
+            }
+        }catch (WriteTimeoutException | UnavailableException | NoHostAvailableException e){
+            throw new RepositoryException("Could not index user to bucket \"" + assignment + "\"", e);
+        }
+
+        return resultSetFuture;
+    }
+
 
     void indexExperimentsToUser(Assignment assignment) {
         try {
@@ -808,7 +992,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                 writer.write(header);
                 for(Date dateHour : dateHours){
                     Result<UserAssignmentExport> result;
-                    logger.debug("Query user assignment export for experimentID={}, at dateHour={}", experimentID.getRawID(), dateHour);
+                    LOGGER.debug("Query user assignment export for experimentID={}, at dateHour={}", experimentID.getRawID(), dateHour);
                     if(ignoreNullBucket) {
                         result = userAssignmentExportAccessor.selectBy(experimentID.getRawID(), dateHour, context.getContext(), false);
                     }else{
