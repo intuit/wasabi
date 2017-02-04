@@ -18,12 +18,14 @@ package com.intuit.wasabi.repository.cassandra.impl;
 import com.datastax.driver.core.BatchStatement;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.mapping.Result;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.inject.Inject;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.ExperimentList;
 import com.intuit.wasabi.repository.RepositoryException;
 import com.intuit.wasabi.repository.MutexRepository;
+import com.intuit.wasabi.repository.cassandra.UninterruptibleUtil;
 import com.intuit.wasabi.repository.cassandra.accessor.ExclusionAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
 import com.intuit.wasabi.repository.cassandra.pojo.Exclusion;
@@ -214,28 +216,35 @@ public class CassandraMutexRepository implements MutexRepository {
     }
 
     /**
-     * {@inheritDoc}
+     * Improved way (async) of getting mutually exclusive experiments for give experiments.
      */
     @Override
-    public Map<Experiment.ID, List<Experiment.ID>> getExclusivesList(
-    		Collection<Experiment.ID> experimentIDCollection) {
-    	
-    	LOGGER.debug("Getting exclusions for {}", experimentIDCollection);
-    	
-        Map<Experiment.ID, List<Experiment.ID>> result = new HashMap<>(experimentIDCollection.size());
+    public Map<Experiment.ID, List<Experiment.ID>> getExclusivesList(Collection<Experiment.ID> experimentIds) {
+    	LOGGER.debug("Getting exclusions for {}", experimentIds);
+        Map<Experiment.ID, ListenableFuture<Result<Exclusion>>> exclusionFutureMap = new HashMap<>(experimentIds.size());
+        Map<Experiment.ID, List<Experiment.ID>> exclusionMap = new HashMap<>(experimentIds.size());
 
         try {
-        	for (Experiment.ID experimentId : experimentIDCollection) {
-        		result.put(experimentId, getExclusionList(experimentId));
+            //Send calls asynchronously
+            experimentIds.stream().forEach(experimentId -> {
+                exclusionFutureMap.put(experimentId, mutexAccessor.asyncGetExclusions(experimentId.getRawID()));
+                LOGGER.debug("Sent exclusionAccessor.asyncGetExclusions ({})", experimentId.getRawID());
+            });
+
+            //Process the Futures in the order that are expected to arrive earlier
+            for (Experiment.ID expId : exclusionFutureMap.keySet()) {
+                ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Exclusion>> exclusionFuture = exclusionFutureMap.get(expId);
+                exclusionMap.put(expId, new ArrayList<>());
+                UninterruptibleUtil.getUninterruptibly(exclusionFuture).all().forEach(exclusionPojo -> {
+                        exclusionMap.get(expId).add(Experiment.ID.valueOf(exclusionPojo.getPair()));
+                    }
+                );
             }
         } catch (Exception e) {
-        	LOGGER.error("Error while getting exclusions for {}", experimentIDCollection, e);
-            throw new RepositoryException("Could not fetch mutually exclusive experiments for the list of experiments"
-                    , e);
+        	LOGGER.error("Error while getting exclusions for {}", experimentIds, e);
+            throw new RepositoryException("Could not fetch mutually exclusive experiments for the list of experiments", e);
         }
-        
-    	LOGGER.debug("Returning exclusions map {}", result);
-    	
-        return result;
+    	LOGGER.debug("Returning exclusions map {}", exclusionMap);
+        return exclusionMap;
     }
 }

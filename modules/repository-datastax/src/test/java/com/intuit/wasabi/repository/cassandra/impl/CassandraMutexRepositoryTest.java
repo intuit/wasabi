@@ -17,6 +17,7 @@ package com.intuit.wasabi.repository.cassandra.impl;
 
 import com.datastax.driver.core.Session;
 import com.datastax.driver.mapping.Result;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Experiment;
@@ -41,7 +42,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
+import static io.codearte.catchexception.shade.mockito.Mockito.mock;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -78,12 +81,12 @@ public class CassandraMutexRepositoryTest {
     
     @Before
     public void setUp() throws Exception {
-    	accessor = Mockito.mock(ExclusionAccessor.class);
-    	experimentAccessor = Mockito.mock(ExperimentAccessor.class);
-    	resultDatastax = Mockito.mock(Result.class);
-    	resultExperimentDatastax = Mockito.mock(Result.class);
-    	driver = Mockito.mock(CassandraDriver.class);
-    	session = Mockito.mock(Session.class);
+    	accessor = mock(ExclusionAccessor.class);
+    	experimentAccessor = mock(ExperimentAccessor.class);
+    	resultDatastax = mock(Result.class);
+    	resultExperimentDatastax = mock(Result.class);
+    	driver = mock(CassandraDriver.class);
+    	session = mock(Session.class);
     	Mockito.when(driver.getSession()).thenReturn(session);
     	repository = new CassandraMutexRepository(experimentAccessor, accessor, driver);
     	base = Experiment.ID.newInstance();
@@ -202,12 +205,14 @@ public class CassandraMutexRepositoryTest {
 	}
 
 	@Test
-	public void testGetOneExclusiveListSuccess() {
+	public void testGetOneExclusiveListSuccess() throws InterruptedException, ExecutionException {
 		Exclusion exc = new Exclusion(base.getRawID(), pair.getRawID());
 		exclusions.add(exc);
-		Mockito.when(accessor.getExclusions(base.getRawID())).thenReturn(resultDatastax);
+		ListenableFuture<Result<Exclusion>> mockListenableFuture = mock(ListenableFuture.class);
+		Mockito.when(accessor.asyncGetExclusions(base.getRawID())).thenReturn(mockListenableFuture);
+		Mockito.when(mockListenableFuture.get()).thenReturn(resultDatastax);
 		Mockito.when(resultDatastax.all()).thenReturn(exclusions);
-		
+
 		ArrayList<Experiment.ID> ids = new ArrayList<>();
 		ids.add(base);
 		Map<ID, List<ID>> result = repository.getExclusivesList(ids);

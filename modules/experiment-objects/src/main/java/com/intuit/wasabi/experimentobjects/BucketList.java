@@ -20,10 +20,11 @@ import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BucketList {
+public class BucketList implements Serializable {
     @ApiModelProperty(required = true)
     private List<Bucket> buckets = new ArrayList<>();
 

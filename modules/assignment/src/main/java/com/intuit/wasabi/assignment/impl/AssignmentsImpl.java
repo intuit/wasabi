@@ -37,10 +37,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import javax.annotation.Nullable;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.StreamingOutput;
 
+import com.intuit.wasabi.assignment.cache.AssignmentsMetadataCache;
 import org.slf4j.Logger;
 
 import com.google.common.collect.HashBasedTable;
@@ -131,6 +131,10 @@ public class AssignmentsImpl implements Assignments {
 
     private EventLog eventLog;
 
+    private Boolean metadataCacheEnabled;
+    private AssignmentsMetadataCache metadataCache;
+
+
     /**
      * Helper for unit tests
      * @param assignmentRepository
@@ -154,12 +158,11 @@ public class AssignmentsImpl implements Assignments {
      * @param ruleCache                           RuleCache which has cached segmentation rules
      * @param pages                               Pages for this experiment
      * @param priorities                          Priorities for the application
-     * @param assignmentDBEnvelopeProvider        AssignmentDBEnvelopeProvider
-     * @param assignmentWebEnvelopeProvider       AssignmentWebEnvelopeProvider
      * @param assignmentDecorator                 The assignmentDecorator to be used
      * @param ruleCacheExecutor                   The rule cache executor to be used
-
      * @param eventLog                            eventLog
+     * @param metadataCache                       Assignments metadata cache
+     *
      * @throws IOException         io exception
      * @throws ConnectionException connection exception
      */
@@ -172,7 +175,9 @@ public class AssignmentsImpl implements Assignments {
                            final Priorities priorities,
                            final AssignmentDecorator assignmentDecorator,
                            final @Named("ruleCache.threadPool") ThreadPoolExecutor ruleCacheExecutor,
-                           final EventLog eventLog)
+                           final EventLog eventLog,
+                           final @Named("AssignmentsMetadataCacheEnabled") Boolean metadataCacheEnabled,
+                           final AssignmentsMetadataCache metadataCache)
             throws IOException, ConnectionException {
         super();
 
@@ -189,7 +194,8 @@ public class AssignmentsImpl implements Assignments {
         this.assignmentsRepository = assignmentsRepository;
         this.mutexRepository = mutexRepository;
         this.eventLog = eventLog;
-  
+        this.metadataCacheEnabled=metadataCacheEnabled;
+        this.metadataCache=metadataCache;
     }
 
     /**
@@ -492,7 +498,7 @@ public class AssignmentsImpl implements Assignments {
         Map<Experiment.ID, List<Experiment.ID>> exclusionMap = new HashMap<>();
 
         //Populate required experiment metadata along with all the existing user assignments for the given application
-        assignmentsRepository.populateExperimentMetadata(userID, applicationName, context, experimentBatch, allowAssignmentsOptional, appPriorities, experimentMap, userAssignments, bucketMap, exclusionMap);
+        populateAssignmentsMetadata(userID, applicationName, context, experimentBatch, allowAssignmentsOptional, appPriorities, experimentMap, userAssignments, bucketMap, exclusionMap);
 
         List<Map> allAssignments = new LinkedList<>();
         // iterate over all experiments in the application in priority order
@@ -563,6 +569,128 @@ public class AssignmentsImpl implements Assignments {
         if(LOGGER.isDebugEnabled()) LOGGER.debug("allAssignments: {} ", allAssignments);
 
         return allAssignments;
+    }
+
+    /**
+     * Populate assignments metadata; use metadata cache if it is enabled or use repository to populate from DB
+     *
+     * experimentIds is NULL when called from AssignmentsResource.getBatchAssignments() => api:/v1/assignments/applications/{applicationName}/users/{userID}
+     * experimentBatch.labels are NULL when called from AssignmentsImpl.doPageAssignments() => api:/v1/assignments/applications/{applicationName}/pages/{pageName}/users/{userID}
+     *
+     * @param userID Input: Given user id
+     * @param appName Input: Given application name
+     * @param context Input: Given context
+     * @param experimentBatch Input/Output: Given experiment batch. This object will be modified and become one of the output; in the case of AssignmentsImpl.doPageAssignments()
+     * @param allowAssignments Input: Given batch experiment ids with allow assignment flag.
+     * @param prioritizedExperimentList Output: prioritized experiment list of ALL the experiments for the given application.
+     * @param experimentMap Output: Map of 'experiment id TO experiment' of ALL the experiments for the given application.
+     * @param existingUserAssignments Output: ALL the existing user assignments of given user_id, application name and context.
+     * @param bucketMap Output: Map of 'experiment id TO BucketList' of ONLY experiments which are associated to the given application and page.
+     * @param exclusionMap Output: Map of 'experiment id TO to its mutual experiment ids' of ONLY experiments which are associated to the given application and page.
+     *
+     */
+    private void populateAssignmentsMetadata(User.ID userID, Application.Name appName, Context context, ExperimentBatch experimentBatch, Optional<Map<Experiment.ID, Boolean>> allowAssignments,
+                                             PrioritizedExperimentList prioritizedExperimentList,
+                                             Map<Experiment.ID, Experiment> experimentMap,
+                                             Table<Experiment.ID, Experiment.Label, String> existingUserAssignments,
+                                             Map<Experiment.ID, BucketList> bucketMap,
+                                             Map<Experiment.ID, List<Experiment.ID>> exclusionMap) {
+        LOGGER.debug("populateExperimentMetadata - STARTED: userID={}, appName={}, context={}, experimentBatch={}, experimentIds={}", userID, appName, context, experimentBatch, allowAssignments);
+        if(isNull(experimentBatch.getLabels()) && !allowAssignments.isPresent() ) {
+            LOGGER.error("Invalid input to AssignmentsImpl.populateExperimentMetadata(): Given input: userID={}, appName={}, context={}, experimentBatch={}, allowAssignments={}", userID, appName, context, experimentBatch, allowAssignments);
+            return;
+        }
+
+        //IF metadata cache is enabled, THEN use metadata cache to populate assignments metadata ELSE use assignments repository to populate assignments metadata
+        if(metadataCacheEnabled) {
+            //Populate experiments map of all the experiments of given application
+            metadataCache.getExperimentsByAppName(appName).forEach(exp -> experimentMap.put(exp.getID(), exp));
+            LOGGER.debug("[cache] experimentMap = {}", experimentMap);
+
+            //Populate prioritized experiments list of given application
+            Optional<PrioritizedExperimentList> prioritizedExperimentListOptional = metadataCache.getPrioritizedExperimentListMap(appName);
+            if (prioritizedExperimentListOptional.isPresent()) {
+                prioritizedExperimentListOptional.get().getPrioritizedExperiments().forEach(exp -> prioritizedExperimentList.addPrioritizedExperiment(exp));
+            } else {
+                //TODO: 1/30/17  What to do if there are no experiments for given application
+            }
+            LOGGER.debug("[cache] prioritizedExperimentList = {}", prioritizedExperimentList.getPrioritizedExperiments());
+
+            //Populate existing user assignments for given user, application & context
+            assignmentsRepository.getAssignments(userID, appName, context, experimentMap).forEach(assignmentPair -> existingUserAssignments.put(assignmentPair.getLeft().getID(), assignmentPair.getLeft().getLabel(), assignmentPair.getRight().toString()));
+            LOGGER.debug("[DB] existingUserAssignments = {}", existingUserAssignments);
+
+            //Populate experiments ids of given batch
+            Set<Experiment.ID> experimentIds = allowAssignments.isPresent() ? allowAssignments.get().keySet() : new HashSet<>();
+            populateExperimentIdsAndExperimentBatch(allowAssignments, experimentMap, experimentBatch, experimentIds);
+
+            //Based on given experiment ids, populate experiment buckets and exclusions..
+            experimentIds.forEach(expId -> {
+                bucketMap.put(expId, metadataCache.getBucketList(expId));
+                exclusionMap.put(expId, metadataCache.getExclusionList(expId));
+            });
+            LOGGER.debug("[cache] bucketMap = {}", bucketMap);
+            LOGGER.debug("[cache] exclusionMap = {}", exclusionMap);
+
+        } else {
+            assignmentsRepository.populateAssignmentsMetadata(userID, appName, context, experimentBatch, allowAssignments, prioritizedExperimentList, experimentMap, existingUserAssignments, bucketMap, exclusionMap);
+        }
+
+        LOGGER.debug("populateExperimentMetadata - FINISHED...");
+    }
+
+    /**
+     *
+     * Get list of page experiments associated to given application and page.
+     *
+     * Use metadata cache if it is enabled or use repository to fetch from Database
+     *
+     * @param applicationName
+     * @param pageName
+     * @return
+     */
+    private List<PageExperiment> getExperiments(Application.Name applicationName, Page.Name pageName) {
+        if(metadataCacheEnabled) {
+            return metadataCache.getPageExperiments(applicationName, pageName);
+        } else {
+            return pages.getExperimentsWithoutLabels(applicationName, pageName);
+        }
+    }
+
+
+    /**
+     * This method is used to :
+     * 1.   Populate experimentIds of the given batch only based on experiment labels (experimentBatch).
+     * 2.   Populate experiment labels based on given batch experiment ids (allowAssignments).
+     *
+     * @param allowAssignments - INPUT: if present then it contains given batch experiment ids.
+     * @param experimentMap - INPUT:  Map of all the experiments of the given application.
+     * @param experimentBatch - INPUT/OUTPUT:  if allowAssignments is empty then this contains given batch experiment labels.
+     * @param experimentIds - OUTPUT: Final given batch experiment ids.
+     */
+    private void populateExperimentIdsAndExperimentBatch(Optional<Map<Experiment.ID, Boolean>> allowAssignments, Map<Experiment.ID, com.intuit.wasabi.experimentobjects.Experiment> experimentMap, ExperimentBatch experimentBatch, Set<Experiment.ID> experimentIds ) {
+        //allowAssignments is EMPTY means experimentBatch.labels are present.
+        //Use experimentBatch.labels to populate experimentIds
+        if(!allowAssignments.isPresent()) {
+            for(Experiment exp:experimentMap.values()) {
+                if(experimentBatch.getLabels().contains(exp.getLabel())) {
+                    experimentIds.add(exp.getID());
+                }
+            }
+            LOGGER.debug("experimentIds for given experiment labels ({})", experimentIds);
+        } else {
+            //If allowAssignments IS NOT EMPTY means experimentBatch.labels are NOT provided.
+            //Use allowAssignments.experimentIds to populate experimentBatch.labels
+            Set<Experiment.Label> expLabels = new HashSet<>();
+            for(Experiment.ID expId:experimentIds) {
+                Experiment exp = experimentMap.get(expId);
+                if(exp!=null) {
+                    expLabels.add(exp.getLabel());
+                }
+            }
+            experimentBatch.setLabels(expLabels);
+            LOGGER.debug("experimentBatch after updating labels ({})", experimentBatch);
+        }
     }
 
     private Optional<Bucket> getBucketByLabel(BucketList bucketList, Bucket.Label bucketLabel) {
@@ -752,7 +880,7 @@ public class AssignmentsImpl implements Assignments {
                                            HttpHeaders headers, SegmentationProfile segmentationProfile) {
 
         //Get the experiments (id & allowNewAssignment only) associated to the given application and page.
-        List<PageExperiment> pageExperimentList = pages.getExperimentsWithoutLabels(applicationName, pageName);
+        List<PageExperiment> pageExperimentList = getExperiments(applicationName, pageName);
 
         //Prepare allowAssignments map
         Map<Experiment.ID, Boolean> allowAssignments = new HashMap<>(pageExperimentList.size());
@@ -1093,6 +1221,16 @@ public class AssignmentsImpl implements Assignments {
             queueLengthMap.put(name.toLowerCase(), new Integer(executors.get(name).queueLength()));
         }
         return queueLengthMap;
+    }
+
+    /**
+     * Clear metadata cache if it is enabled.
+     */
+    @Override
+    public void clearMetadataCache() {
+        if(metadataCacheEnabled) {
+            metadataCache.clear();
+        }
     }
 
 

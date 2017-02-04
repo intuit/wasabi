@@ -180,6 +180,14 @@ public interface Assignments {
                           HttpHeaders headers);
 
     /**
+     * This method is used to clear assignments metadata cache.
+     *
+     * @return True if cache is cleared successfully
+     *
+     */
+    void clearMetadataCache();
+
+    /**
      * Gets bucket assignment ratios per day for a list of experiments. Also contains meta information about the
      * experiments such as sampling percentages and priorities. The data is in rows by date and ordered by priority
      * per row.

@@ -20,6 +20,7 @@ import com.datastax.driver.mapping.Result;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.inject.Inject;
 import com.intuit.wasabi.analyticsobjects.counts.AssignmentCounts;
 import com.intuit.wasabi.analyticsobjects.counts.BucketAssignmentCount;
@@ -28,12 +29,16 @@ import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.exceptions.ConstraintViolationException;
 import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
 import com.intuit.wasabi.experimentobjects.*;
+import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Bucket.BucketAuditInfo;
+import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.Experiment.ExperimentAuditInfo;
 import com.intuit.wasabi.experimentobjects.Experiment.ID;
 import com.intuit.wasabi.experimentobjects.Experiment.State;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.RepositoryException;
+import com.intuit.wasabi.repository.cassandra.UninterruptibleUtil;
 import com.intuit.wasabi.repository.cassandra.accessor.ApplicationListAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.BucketAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
@@ -43,12 +48,14 @@ import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentLabelInde
 import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentState;
 import com.intuit.wasabi.repository.cassandra.accessor.index.StateExperimentIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.UserBucketIndexAccessor;
+import com.intuit.wasabi.repository.cassandra.pojo.*;
 import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentByAppNameLabel;
 import com.intuit.wasabi.repository.cassandra.pojo.index.StateExperimentIndex;
 import org.slf4j.Logger;
 
 import java.nio.ByteBuffer;
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -266,6 +273,75 @@ public class CassandraExperimentRepository implements ExperimentRepository {
 	}
 
 	/**
+	 * Improved way (async) of retrieving the experiments map for given experiment ids
+	 *
+	 * @param experimentIds IDs of experiments
+	 * @return experiments map for given experiment ids
+	 */
+	@Override
+	public Map<Experiment.ID, Experiment> getExperimentMap(Collection<Experiment.ID> experimentIds) {
+		Map<Experiment.ID, ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment>>> experimentsFutureMap = new HashMap<>(experimentIds.size());
+		Map<Experiment.ID, Experiment> experimentMap = new HashMap<>(experimentIds.size());
+
+		try {
+			//Send calls asynchronously
+			experimentIds.forEach(expId -> {
+				experimentsFutureMap.put(expId, experimentAccessor.asyncGetExperimentById(expId.getRawID()));
+				LOGGER.debug("Sent experimentAccessor.asyncGetExperimentById({})", expId);
+			});
+
+			//Process the Futures in the order that are expected to arrive earlier
+			for (Experiment.ID expId : experimentsFutureMap.keySet()) {
+				ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment>> experimentsFuture = experimentsFutureMap.get(expId);
+				UninterruptibleUtil.getUninterruptibly(experimentsFuture).all().stream().forEach(expPojo -> {
+					Experiment exp = ExperimentHelper.makeExperiment(expPojo);
+					experimentMap.put(exp.getID(), exp);
+				});
+			}
+			LOGGER.debug("experimentMap=> {}", experimentMap);
+		} catch (Exception e) {
+			LOGGER.error("Error while getting priorities for {}", experimentIds, e);
+			throw new RepositoryException("Error while getting priorities for given applications", e);
+		}
+		LOGGER.debug("Returning experimentMap {}", experimentMap);
+		return experimentMap;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Map<Application.Name, List<Experiment>> getExperimentsForApps(Collection<Application.Name> appNames) {
+		Map<Application.Name, ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment>>> experimentsFutureMap = new HashMap<>(appNames.size());
+		Map<Application.Name, List<Experiment>> experimentMap = new HashMap<>(appNames.size());
+
+		try {
+			//Send calls asynchronously
+			appNames.forEach(appName -> {
+				experimentsFutureMap.put(appName, experimentAccessor.asyncGetExperimentByAppName(appName.toString()));
+				LOGGER.debug("Sent experimentAccessor.asyncGetExperimentByAppName({})", appName);
+			});
+
+			//Process the Futures in the order that are expected to arrive earlier
+			for (Application.Name appName : experimentsFutureMap.keySet()) {
+				ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment>> experimentsFuture = experimentsFutureMap.get(appName);
+				final List<Experiment> appExperiments = new ArrayList<>();
+				UninterruptibleUtil.getUninterruptibly(experimentsFuture).all().stream().forEach(expPojo -> {
+					appExperiments.add(ExperimentHelper.makeExperiment(expPojo));
+				});
+				experimentMap.put(appName, appExperiments);
+			}
+			LOGGER.debug("experimentMap=> {}", experimentMap);
+		} catch (Exception e) {
+			LOGGER.error("Error while getExperimentsForApps {}", appNames, e);
+			throw new RepositoryException("Error while getExperimentsForApps", e);
+		}
+		LOGGER.debug("Returning experimentMap {}", experimentMap);
+		return experimentMap;
+	}
+
+
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -462,46 +538,33 @@ public class CassandraExperimentRepository implements ExperimentRepository {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Improved way of getting BucketList for given experiments
 	 */
 	@Override
-	public Map<Experiment.ID, BucketList> getBucketList(Collection<Experiment.ID> experimentIDCollection) {
-
-		LOGGER.debug("Getting buckets list by experimentId {}", experimentIDCollection);
-
-		List<UUID> experimentIds = ExperimentHelper.makeUUIDs(experimentIDCollection);
-
+	public Map<Experiment.ID, BucketList> getBucketList(Collection<Experiment.ID> experimentIds) {
+		LOGGER.debug("Getting buckets list by experimentIDs {}", experimentIds);
+		Map<Experiment.ID, BucketList> bucketMap = new HashMap<>();
 		try {
-			Result<com.intuit.wasabi.repository.cassandra.pojo.Bucket> buckets = 
-					bucketAccessor.getBucketByExperimentIds(experimentIds);
+			Map<Experiment.ID, ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Bucket>>> bucketFutureMap = new HashMap<>();
+			experimentIds.forEach(experimentId -> {
+				bucketFutureMap.put(experimentId, bucketAccessor.asyncGetBucketByExperimentId(experimentId.getRawID()));
+			});
 
-			Map<Experiment.ID, BucketList> result = new HashMap<>();
-
-			for (com.intuit.wasabi.repository.cassandra.pojo.Bucket bucketPojo : buckets
-					.all()) {
-
-				Bucket bucket = BucketHelper.makeBucket(bucketPojo);
-
-				BucketList bucketList = result.get(bucket.getExperimentID());
-				if (bucketList == null) {
-					bucketList = new BucketList();
-					bucketList.addBucket(bucket);
-				} else {
-					bucketList.addBucket(bucket);
-				}
-				
-				result.put(bucket.getExperimentID(), bucketList);
+			for (Experiment.ID expId : bucketFutureMap.keySet()) {
+				bucketMap.put(expId, new BucketList());
+				ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Bucket>> bucketFuture = bucketFutureMap.get(expId);
+				UninterruptibleUtil.getUninterruptibly(bucketFuture).all().forEach(bucketPojo -> {
+							bucketMap.get(expId).addBucket(BucketHelper.makeBucket(bucketPojo));
+						}
+				);
 			}
-			
-			LOGGER.debug("Returning result {}", result);
-			
-			return result;
-			
 		} catch (Exception e) {
-			LOGGER.error("getBucketList for {} failed", experimentIDCollection, e);
+			LOGGER.error("getBucketList for {} failed", experimentIds, e);
 			throw new RepositoryException("Could not fetch buckets for the list of experiments", e);
 		}
 
+		LOGGER.debug("Returning bucketMap {}", bucketMap);
+		return bucketMap;
 	}
 
 	/**
@@ -691,14 +754,8 @@ public class CassandraExperimentRepository implements ExperimentRepository {
         
 		try {
             if (!experimentIDs.isEmpty()) {
-            	List<UUID> uuids = experimentIDs.stream().map(Experiment.ID::getRawID).collect(Collectors.toList());
-            	Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment> experimentPojos = 
-            			experimentAccessor.getExperiments(uuids);
-            	
-                List<Experiment> experiments = experimentPojos.all().stream().filter(experiment -> 
-                	!experiment.getState().equals(Experiment.State.DELETED.name()))
-                	.map(ExperimentHelper::makeExperiment).collect(Collectors.toList());
-                
+				Map<Experiment.ID, Experiment> experimentMap = getExperimentsMap(experimentIDs);
+				List<Experiment> experiments = new ArrayList<>(experimentMap.values());
                 result.setExperiments(experiments);
             }
         } catch (Exception e) {
@@ -708,6 +765,38 @@ public class CassandraExperimentRepository implements ExperimentRepository {
         
 		return result;
     }
+
+	/**
+	 * {@inheritDoc}
+	 */
+    @Override
+	public Map<Experiment.ID, Experiment> getExperimentsMap(Collection<Experiment.ID> experimentIds) {
+		Map<Experiment.ID, ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment>>> experimentsFutureMap = new HashMap<>(experimentIds.size());
+		Map<Experiment.ID, Experiment> experimentMap = new HashMap<>(experimentIds.size());
+
+		try {
+			//Send calls asynchronously
+			experimentIds.forEach(expId -> {
+				experimentsFutureMap.put(expId, experimentAccessor.asyncGetExperimentById(expId.getRawID()));
+				LOGGER.debug("Sent experimentAccessor.asyncGetExperimentById({})", expId);
+			});
+
+			//Process the Futures in the order that are expected to arrive earlier
+			for (Experiment.ID expId : experimentsFutureMap.keySet()) {
+				ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment>> experimentsFuture = experimentsFutureMap.get(expId);
+				UninterruptibleUtil.getUninterruptibly(experimentsFuture).all().stream().forEach(expPojo -> {
+					Experiment exp = ExperimentHelper.makeExperiment(expPojo);
+					experimentMap.put(exp.getID(), exp);
+				});
+			}
+
+		} catch (Exception e) {
+			LOGGER.error("Error while experimentMap for {}", experimentIds, e);
+			throw new RepositoryException("Error while getting priorities for given applications", e);
+		}
+		LOGGER.debug("Returning experimentMap {}", experimentMap);
+		return experimentMap;
+	}
 
 	/**
 	 * {@inheritDoc}

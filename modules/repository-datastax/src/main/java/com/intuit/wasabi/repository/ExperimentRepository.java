@@ -50,6 +50,22 @@ public interface ExperimentRepository {
     Experiment getExperiment(Experiment.ID experimentID);
 
     /**
+     * Improved way (async) of retrieving the experiments map for given experiment ids
+     *
+     * @param experimentIds IDs of experiments
+     * @return experiments map for given experiment ids
+     */
+    Map<Experiment.ID, Experiment> getExperimentMap(Collection<Experiment.ID> experimentIds);
+
+    /**
+     * Improved way (async) of retrieving the list of experiments for given app names.
+     *
+     * @param appNames collection of App names
+     * @return Map of app name to list of experiments belonging to that app
+     */
+    Map<Application.Name, List<Experiment>> getExperimentsForApps(Collection<Application.Name> appNames);
+
+    /**
      * Retrieve the specified experiment from the repository using its label
      *
      * @param appName   name of the application
@@ -99,6 +115,14 @@ public interface ExperimentRepository {
      * @return experimentlist object
      */
     ExperimentList getExperiments(Collection<Experiment.ID> experimentIDs);
+
+    /**
+     * Retrieve the experiments for given experiment ids
+     *
+     * @param experimentIDs list of experiment ids
+     * @return Map of experiment ids to experiments for given experiment ids
+     */
+    Map<Experiment.ID, Experiment> getExperimentsMap(Collection<Experiment.ID> experimentIDs);
 
     /**
      * Get the experiments for an Application
@@ -251,5 +275,6 @@ public interface ExperimentRepository {
      *
      */
      void createApplication(Application.Name applicationName);
+
 
 }

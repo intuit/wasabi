@@ -22,6 +22,7 @@ import com.intuit.hyrule.Rule;
 import com.intuit.wasabi.assignment.AssignmentDecorator;
 import com.intuit.wasabi.assignment.AssignmentIngestionExecutor;
 import com.intuit.wasabi.assignment.Assignments;
+import com.intuit.wasabi.assignment.cache.AssignmentsMetadataCache;
 import com.intuit.wasabi.assignmentobjects.*;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.eventlog.EventLog;
@@ -39,7 +40,6 @@ import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.MutexRepository;
 import com.intuit.wasabi.repository.cassandra.impl.ExperimentRuleCacheUpdateEnvelope;
 import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,7 +50,6 @@ import javax.ws.rs.core.HttpHeaders;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.hamcrest.core.Is.is;
@@ -93,13 +92,15 @@ public class AssignmentsImplTest {
             mock(Provider.class, RETURNS_DEEP_STUBS);
     private AssignmentsRepository assignmentsRepository = mock(AssignmentsRepository.class, RETURNS_DEEP_STUBS);
     private AssignmentsImpl assignmentsImpl;
+    private AssignmentsMetadataCache metadataCache = mock(AssignmentsMetadataCache.class);
+    private Boolean metadataCacheEnabled = Boolean.TRUE;
 
     @Before
     public void setup() throws IOException, ConnectionException {
         this.assignmentsImpl = new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
                 experimentRepository, assignmentsRepository, mutexRepository,
                 ruleCache, pages, priorities, 
-                assignmentDecorator, threadPoolExecutor, eventLog);
+                assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache);
     }
 
     @Test
@@ -136,7 +137,7 @@ public class AssignmentsImplTest {
         AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
                 experimentRepository, assignmentsRepository,
                 mutexRepository, ruleCache, pages, priorities, assignmentDecorator, threadPoolExecutor,
-                eventLog));
+                eventLog, metadataCacheEnabled, metadataCache));
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class);
         when(experiment.getID()).thenReturn(id);
@@ -241,7 +242,7 @@ public class AssignmentsImplTest {
     public void testGetSingleAssignmentNullAssignmentExperimentNoProfileMatch() throws IOException, ConnectionException {
         AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
                 experimentRepository, assignmentsRepository,
-                mutexRepository, ruleCache, pages, priorities, assignmentDecorator, threadPoolExecutor, eventLog));
+                mutexRepository, ruleCache, pages, priorities, assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache));
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         when(experiment.getID()).thenReturn(id);
@@ -296,7 +297,7 @@ public class AssignmentsImplTest {
     public void testGetSingleAssignmentProfileMatchAssertNewAssignment() throws IOException, ConnectionException {
         AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
                 experimentRepository, assignmentsRepository,
-                mutexRepository, ruleCache, pages, priorities, assignmentDecorator, threadPoolExecutor, eventLog));
+                mutexRepository, ruleCache, pages, priorities, assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache));
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         Assignment assignment = mock(Assignment.class);
@@ -326,7 +327,7 @@ public class AssignmentsImplTest {
     public void testGetSingleAssignmentSuccess() throws IOException, ConnectionException {
         AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
                 experimentRepository, assignmentsRepository,
-                mutexRepository, ruleCache, pages, priorities, assignmentDecorator, threadPoolExecutor, eventLog));
+                mutexRepository, ruleCache, pages, priorities, assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache));
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         Assignment assignment = mock(Assignment.class);
@@ -385,7 +386,7 @@ public class AssignmentsImplTest {
         Assignment assignment = mock(Assignment.class);
         AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
                 experimentRepository, assignmentsRepository,
-                mutexRepository, ruleCache, pages, priorities, assignmentDecorator, threadPoolExecutor, eventLog));
+                mutexRepository, ruleCache, pages, priorities, assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache));
 
         doReturn(assignment).when(assignmentsImpl).getAssignment(eq(userID), eq(appName), eq(label),
                 eq(context), any(boolean.class), any(boolean.class), eq(segmentationProfile),

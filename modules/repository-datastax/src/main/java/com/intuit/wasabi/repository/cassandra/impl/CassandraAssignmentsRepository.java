@@ -51,6 +51,8 @@ import com.intuit.wasabi.repository.cassandra.pojo.UserAssignment;
 import com.intuit.wasabi.repository.cassandra.pojo.export.UserAssignmentExport;
 import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentUserByUserIdContextAppNameExperimentId;
 import com.intuit.wasabi.repository.cassandra.pojo.index.UserAssignmentByUserId;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,6 +77,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 //TODO: rewrite this class to use BatchStatement after moving to datastax
@@ -228,7 +231,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
      */
     @Override
     @Timed
-    public void populateExperimentMetadata( User.ID userID, Application.Name appName, Context context, ExperimentBatch experimentBatch, Optional<Map<Experiment.ID, Boolean>> allowAssignments,
+    public void populateAssignmentsMetadata( User.ID userID, Application.Name appName, Context context, ExperimentBatch experimentBatch, Optional<Map<Experiment.ID, Boolean>> allowAssignments,
                                             PrioritizedExperimentList prioritizedExperimentList,
                                             Map<Experiment.ID, com.intuit.wasabi.experimentobjects.Experiment> experimentMap,
                                             Table<Experiment.ID, Experiment.Label, String> existingUserAssignments,
@@ -412,6 +415,29 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                                 Optional.ofNullable(t.getBucket()).orElseGet(() ->"null")
                         );
                     });
+        });
+        return result;
+    }
+
+    /**
+     *
+     *
+     */
+    @Override
+    @Timed
+    public List<Pair<Experiment, Bucket.Label>> getAssignments(User.ID userID,
+                                                               Application.Name appLabel,
+                                                               Context context,
+                                                               Map<Experiment.ID, Experiment> experimentMap) {
+        final Stream<ExperimentUserByUserIdContextAppNameExperimentId> experimentUserStream = getUserIndexStream(userID.toString(), appLabel.toString(), context.getContext());
+        List<Pair<Experiment, Bucket.Label>> result = new ArrayList<>();
+        experimentUserStream.forEach((ExperimentUserByUserIdContextAppNameExperimentId t) -> {
+            Experiment exp = experimentMap.get(Experiment.ID.valueOf(t.getExperimentId()));
+            if(nonNull(exp)) {
+                result.add(new ImmutablePair<>(exp, Bucket.Label.valueOf(Optional.ofNullable(t.getBucket()).orElseGet(() ->"null"))));
+            } else {
+                logger.debug("{} experiment id is not present in the experimentMap...", t.getExperimentId());
+            }
         });
         return result;
     }

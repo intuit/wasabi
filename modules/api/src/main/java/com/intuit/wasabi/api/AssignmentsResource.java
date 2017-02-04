@@ -557,4 +557,23 @@ public class AssignmentsResource {
 
         return response;
     }
+
+
+    @POST
+    @Path("clearMetadataCache")
+    @Consumes(APPLICATION_JSON)
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "Clear assignments metadata cache...")
+    @Timed
+    public Response clearMetadataCache () {
+        boolean result = Boolean.TRUE;
+        try {
+            assignments.clearMetadataCache();
+        } catch (Exception e) {
+            LOGGER.error("Exception occurred while clearing assignments metadata cache...", e);
+            result = Boolean.FALSE;
+        }
+        return httpHeader.headers().entity(result).build();
+    }
+
 }

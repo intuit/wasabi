@@ -20,6 +20,8 @@ import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Interface for priorities repository
@@ -58,4 +60,13 @@ public interface PrioritiesRepository {
      * @return list of expriment ids
      */
     List<Experiment.ID> getPriorityList(Application.Name applicationName);
+
+    /**
+     * Returns the priority list for given set of applications
+     *
+     * @param applicationNames  Set of application names
+     * @return Map of PrioritizedExperimentList prioritized experiments for given application names.
+     */
+    Map<Application.Name, PrioritizedExperimentList> getPriorities(Set<Application.Name> applicationNames);
+
 }

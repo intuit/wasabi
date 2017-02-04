@@ -27,6 +27,7 @@ import com.intuit.wasabi.experimentobjects.Context;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.ExperimentBatch;
 import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
+import org.apache.commons.lang3.tuple.Pair;
 
 import javax.ws.rs.core.StreamingOutput;
 import java.time.OffsetDateTime;
@@ -84,6 +85,19 @@ public interface AssignmentsRepository {
                                                                   Table<Experiment.ID, Experiment.Label,
                                                                           Experiment> allExperiments);
 
+    /**
+     * Get assignments
+     *
+     * @param userID         User Id
+     * @param appLabel       Application Label
+     * @param context        Environment context
+     * @param experimentMap experiment map to fetch experiment label
+     *
+     * @return Experiment id
+     *
+     */
+     List<Pair<Experiment, Bucket.Label>> getAssignments(User.ID userID, Application.Name appLabel, Context context,
+                                                                  Map<Experiment.ID, Experiment> experimentMap);
     /**
      * Get assignment for experiment and user
      *
@@ -185,7 +199,7 @@ public interface AssignmentsRepository {
      * @param bucketMap
      * @param exclusionMap
      */
-    void populateExperimentMetadata(User.ID userID, Application.Name appName, Context context, ExperimentBatch experimentBatch, Optional<Map<Experiment.ID, Boolean>> allowAssignments,
+    void populateAssignmentsMetadata(User.ID userID, Application.Name appName, Context context, ExperimentBatch experimentBatch, Optional<Map<Experiment.ID, Boolean>> allowAssignments,
                                     PrioritizedExperimentList prioritizedExperimentList,
                                     Map<Experiment.ID, Experiment> experimentMap,
                                     Table<Experiment.ID, Experiment.Label, String> existingUserAssignments,
