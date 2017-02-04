@@ -117,8 +117,8 @@ public class CassandraRepositoryModule extends AbstractModule {
         bind(BucketAssignmentCountAccessor.class).toProvider(BucketAssignmentCountAccessorProvider.class).in(Singleton.class);
         //Bind those export
         bind(UserAssignmentExportAccessor.class).toProvider(UserAssignmentExportAccessorProvider.class).in(Singleton.class);
-
-        bindAssignmentsCountThreadPoolExecutor(assignmentsCountThreadPoolSize);
+        //Bind assignments Count thread pool executor
+        bind(ThreadPoolExecutor.class).annotatedWith(named("AssignmentsCountThreadPoolExecutor")).to(AssignmentCountExecutor.class).in(Singleton.class);
 
         //Bind those repositories
         bind(AssignmentsRepository.class).to(CassandraAssignmentsRepository.class).in(Singleton.class);
@@ -130,17 +130,4 @@ public class CassandraRepositoryModule extends AbstractModule {
         bind(PrioritiesRepository.class).to(CassandraPrioritiesRepository.class).in(Singleton.class);
         bind(ExperimentRepository.class).annotatedWith(CassandraRepository.class).to(CassandraExperimentRepository.class).in(Singleton.class);
     }
-
-    private void bindAssignmentsCountThreadPoolExecutor(int assignmentsCountThreadPoolSize) {
-        LinkedBlockingQueue assignmentsCountQueue = new LinkedBlockingQueue<>();
-        ThreadPoolExecutor assignmentsCountThreadPoolExecutor = new ThreadPoolExecutor(
-                assignmentsCountThreadPoolSize,
-                assignmentsCountThreadPoolSize,
-                0L,
-                MILLISECONDS,
-                assignmentsCountQueue);
-
-        bind(ThreadPoolExecutor.class).annotatedWith(named("AssignmentsCountThreadPoolExecutor")).toInstance(assignmentsCountThreadPoolExecutor);
-    }
-
 }

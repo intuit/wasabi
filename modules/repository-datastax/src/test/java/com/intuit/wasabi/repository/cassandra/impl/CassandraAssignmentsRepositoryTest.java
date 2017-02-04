@@ -40,7 +40,6 @@ import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.RepositoryException;
-import com.intuit.wasabi.repository.cassandra.UninterruptibleUtil;
 import com.intuit.wasabi.repository.cassandra.accessor.*;
 import com.intuit.wasabi.repository.cassandra.accessor.count.BucketAssignmentCountAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.export.UserAssignmentExportAccessor;
@@ -61,12 +60,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1658,7 +1652,7 @@ public class CassandraAssignmentsRepositoryTest {
         //------ Make final call
         boolean success = true;
         try {
-            repository.assignUser(assignmentPairs, date);
+            repository.assignUsersInBatch(assignmentPairs, date);
         } catch (Exception e) {
             logger.error("Failed to execute assignUser test...", e);
             success = false;

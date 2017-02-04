@@ -78,7 +78,7 @@ public interface AssignmentsRepository {
      * @param date       Date of user assignment
      * @return Resulting assignment
      */
-    Assignment assignUser(List<Pair<Experiment, Assignment>> assignments, Date date);
+    Assignment assignUsersInBatch(List<Pair<Experiment, Assignment>> assignments, Date date);
 
     /**
      * Get assignments

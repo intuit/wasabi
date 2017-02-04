@@ -39,7 +39,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.Nullable;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.StreamingOutput;
 
@@ -338,9 +337,12 @@ public class AssignmentsImpl implements Assignments {
 
 
     /**
-     * Return an existing assignment for a user, or potentially create a new
-     * assignment if the user is assignable to this experiment. Includes a Page.Name to identify the page through which
-     * the assignment was delivered.
+     * Return an existing assignment for a user. For new assignment, only create a new assignment object,
+     * and doesn't create new assignment in a database (cassandra).
+     *
+     * It is responsibility of caller method to create assignment entries in a database.
+     *
+     * Includes a Page.Name to identify the page through which the assignment was delivered.
      */
     protected Assignment getAssignment(User.ID userID, Application.Name applicationName, Experiment.Label experimentLabel,
                                     Context context, boolean createAssignment, boolean ignoreSamplingPercent,
@@ -415,9 +417,6 @@ public class AssignmentsImpl implements Assignments {
                                     .append("userID = \"").append(userID).append("\", experiment = \"")
                                     .append(experiment).append("\"").toString();
                 } else {
-                    // Make a call to Rule cache update
-                    ruleCacheExecutor.execute(new ExperimentRuleCacheUpdateEnvelope(experiment.getRule(),
-                            ruleCache, experimentID));
                     return nullAssignment(userID, applicationName, experimentID,
                             Assignment.Status.NO_PROFILE_MATCH);
                 }
@@ -429,19 +428,6 @@ public class AssignmentsImpl implements Assignments {
                             .append("userID = \"").append(userID)
                             .append("\", experiment = \"").append(experiment).append("\"").toString();
         }
-
-        // Ingest data to real time data ingestion systems if executors exist
-		for (String name : executors.keySet()) {
-			executors.get(name).execute(new AssignmentEnvelopePayload(userID, context, createAssignment, false,
-                    ignoreSamplingPercent, segmentationProfile, assignment != null ? assignment.getStatus() : null,
-                    assignment != null ? assignment.getBucketLabel() : null, pageName, applicationName, experimentLabel,
-                    experimentID, currentDate, headers));
-		}        
-        
-        // Updating rule cache.  This will cause future assignment calls, on this server, to
-        // use the new version of the rule, if it has recently been changed.
-        ruleCacheExecutor.execute(new ExperimentRuleCacheUpdateEnvelope(experiment.getRule(),
-                ruleCache, experimentID));
 
         return assignment;
     }
@@ -498,6 +484,7 @@ public class AssignmentsImpl implements Assignments {
 
         List<Pair<Experiment, Assignment>> assignmentPairs = new LinkedList<>();
         List<Map> allAssignments = new LinkedList<>();
+        SegmentationProfile segmentationProfile = SegmentationProfile.from(experimentBatch.getProfile()).build();
         // iterate over all experiments in the application in priority order
         for (PrioritizedExperiment experiment : appPriorities.getPrioritizedExperiments()) {
             LOGGER.debug("Now processing: {}", experiment);
@@ -511,12 +498,13 @@ public class AssignmentsImpl implements Assignments {
                 // get the assignment for user in this experiment
                 Experiment.Label label = Experiment.Label.valueOf(labelStr);
                 tempResult.put("experimentLabel", label);
-                SegmentationProfile segmentationProfile = SegmentationProfile.from(experimentBatch.getProfile())
-                        .build();
 
                 try {
-                      Assignment assignment = getAssignment(userID, applicationName, label,
-                            context, allowAssignmentsOptional.isPresent()?(allowAssignmentsOptional.get().get(experiment.getID())):createAssignment,
+                    boolean experimentCreateAssignment = allowAssignmentsOptional.isPresent()?(allowAssignmentsOptional.get().get(experiment.getID())):createAssignment;
+
+                    //This method only gets assignment object, and doesn't create new assignments in a database (cassandra)
+                    Assignment assignment = getAssignment(userID, applicationName, label,
+                            context, experimentCreateAssignment,
                             forceInExperiment, segmentationProfile,
                             headers, pageName, experimentMap.get(experiment.getID()),
                               bucketMap.get(experiment.getID()), userAssignments, exclusionMap);
@@ -566,9 +554,31 @@ public class AssignmentsImpl implements Assignments {
         }
         LOGGER.debug("allAssignments: {} ", allAssignments);
 
+        //Make new assignments in database (cassandra)
+        final Date currentDate = new Date();
         Stream<Pair<Experiment, Assignment>> newAssignments = assignmentPairs.stream().filter(pair -> {return (nonNull(pair) && pair.getRight().getStatus()==Assignment.Status.NEW_ASSIGNMENT);});
-        assignmentsRepository.assignUser(newAssignments.collect(Collectors.toList()), new Date());
+        assignmentsRepository.assignUsersInBatch(newAssignments.collect(Collectors.toList()), currentDate);
         LOGGER.debug("Finished Create_Assignments_DB...");
+
+        //Ingest data to real time data ingestion systems if executors exist
+        assignmentPairs.forEach(assignmentPair -> {
+            Assignment assignment = assignmentPair.getRight();
+            Experiment experiment = assignmentPair.getLeft();
+            boolean experimentCreateAssignment = allowAssignmentsOptional.isPresent()?(allowAssignmentsOptional.get().get(experiment.getID())):createAssignment;
+            for (String name : executors.keySet()) {
+                executors.get(name).execute(new AssignmentEnvelopePayload(userID, context, experimentCreateAssignment, false,
+                        forceInExperiment, segmentationProfile, assignment != null ? assignment.getStatus() : null,
+                        assignment != null ? assignment.getBucketLabel() : null, pageName, applicationName, experiment.getLabel(),
+                        experiment.getID(), currentDate, headers));
+            }
+        });
+
+        // Updating rule cache, This will cause future assignment calls, on this server, to
+        // use the new version of the rule, if it has recently been changed.
+        assignmentPairs.forEach(assignmentPair -> {
+            Experiment experiment = assignmentPair.getLeft();
+                ruleCacheExecutor.execute(new ExperimentRuleCacheUpdateEnvelope(experiment.getRule(), ruleCache, experiment.getID()));
+        });
 
         return allAssignments;
     }
@@ -900,54 +910,48 @@ public class AssignmentsImpl implements Assignments {
         }
     }
 
+    /**
+     *
+     * This method first create an assignment object for NEW_ASSIGNMENT and then make entries in to the database.
+     *
+     * @param experiment
+     * @param userID
+     * @param context
+     * @param selectBucket
+     * @param bucketList
+     * @param date
+     * @param segmentationProfile
+     *
+     * @return new assignment object which is created in the database as well.
+     *
+     */
     Assignment generateAssignment(Experiment experiment, User.ID userID, Context context, boolean selectBucket,
                                           BucketList bucketList, Date date, SegmentationProfile segmentationProfile) {
-
-        Assignment.Builder builder = Assignment.newInstance(experiment.getID())
-                .withApplicationName(experiment.getApplicationName())
-                .withUserID(userID)
-                .withContext(context);
-
-        if (selectBucket) {
-            Bucket assignedBucket;
-            /*
-            With the bucket state in effect, this part of the code could also result in
-            the generation of a null assignment in cases where the selected bucket is CLOSED or EMPTY
-            In CLOSED state, the current bucket assignments to the bucket are left as is and all the
-            assignments to this bucket are made null going forward.
-
-            In EMPTY state, the current bucket assignments are made null as well as all the future assignments
-            to this bucket are made null.
-
-            Retrieves buckets from Repository if personalization is not enabled and if skipBucketRetrieval is false
-            Retrieves buckets from Assignment Decorator if personalization is enabled
-            */
-            BucketList bucketsExternal = getBucketList(experiment, userID, segmentationProfile,
-                    !Objects.isNull(bucketList) /* do not skip retrieving bucket from repository if bucketList is null */);
-            if (Objects.isNull(bucketsExternal) || bucketsExternal.getBuckets().isEmpty()) {
-                // if bucketlist obtained from Assignment Decorator is null; use the bucketlist passed into the method
-                assignedBucket = selectBucket(bucketList.getBuckets());
-            } else {
-                //else use the bucketExternal obtained from the Assignment Decorator
-                assignedBucket = selectBucket(bucketsExternal.getBuckets());
-            }
-            //check that at least one bucket was open
-            if (!Objects.isNull(assignedBucket)) {
-                //create the bucket with bucketlabel
-                builder.withBucketLabel(assignedBucket.getLabel());
-            } else {
-                return nullAssignment(userID, experiment.getApplicationName(), experiment.getID(),
-                        Assignment.Status.NO_OPEN_BUCKETS);
-            }
-
+        Assignment result = createAssignmentObject(experiment, userID, context, selectBucket, bucketList, date, segmentationProfile);
+        if(result.getStatus().equals(Assignment.Status.NEW_ASSIGNMENT)) {
+            return assignmentsRepository.assignUser(result, experiment, date);
         } else {
-            builder.withBucketLabel(null);
+            return result;
         }
-
-        Assignment result = builder.build();
-        return assignmentsRepository.assignUser(result, experiment, date);
     }
 
+    /**
+     *
+     * This method creates an assignment object for NEW_ASSIGNMENT.
+     *
+     * Note: it does not create entries in the database.
+     *
+     * @param experiment
+     * @param userID
+     * @param context
+     * @param selectBucket
+     * @param bucketList
+     * @param date
+     * @param segmentationProfile
+     *
+     * @return new assignment object with status of either NEW_ASSIGNMENT or NO_OPEN_BUCKETS
+     *
+     */
     Assignment createAssignmentObject(Experiment experiment, User.ID userID, Context context, boolean selectBucket,
                                   BucketList bucketList, Date date, SegmentationProfile segmentationProfile) {
 
@@ -991,9 +995,6 @@ public class AssignmentsImpl implements Assignments {
         } else {
             builder.withBucketLabel(null);
         }
-
-        //Assignment result = builder.build();
-        //return assignmentsRepository.assignUser(result, experiment, date);
 
         Assignment result = builder
                 .withStatus(Assignment.Status.NEW_ASSIGNMENT)
