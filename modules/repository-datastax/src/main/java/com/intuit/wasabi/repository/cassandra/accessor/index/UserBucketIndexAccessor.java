@@ -16,6 +16,7 @@
 package com.intuit.wasabi.repository.cassandra.accessor.index;
 
 import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.mapping.annotations.Accessor;
 import com.datastax.driver.mapping.annotations.Query;
 
@@ -70,5 +71,29 @@ public interface UserBucketIndexAccessor {
      */
     @Query("delete from user_bucket_index where experiment_id = ? and user_id = ? and context = ? and bucket_label = ?")
     void deleteBy(UUID experimentId, String userId, String context, String bucketLabel);
+
+
+    /**
+     * Insert entry into the table
+     * @param experimentId
+     * @param userId
+     * @param context
+     * @param assigned
+     */
+    @Query("insert into user_bucket_index (experiment_id, user_id, context, assigned) values (?, ?, ?, ?)")
+    ResultSetFuture asyncInsertBy(UUID experimentId, String userId, String context, Date assigned);
+
+
+    /**
+     * Insert entry into the table
+     * @param experimentId
+     * @param userId
+     * @param context
+     * @param assigned
+     * @param bucketLabel
+     */
+    @Query("insert into user_bucket_index (experiment_id, user_id, context, assigned, bucket_label) values (?, ?, ?, ?, ?)")
+    ResultSetFuture asyncInsertBy(UUID experimentId, String userId, String context, Date assigned, String bucketLabel);
+
 
 }

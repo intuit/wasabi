@@ -72,6 +72,15 @@ public interface AssignmentsRepository {
     Assignment assignUser(Assignment assignment, Experiment experiment, Date date);
 
     /**
+     * Assign users to experiments in a batch
+     *
+     * @param assignments pair of experiment and assignment
+     * @param date       Date of user assignment
+     * @return Resulting assignment
+     */
+    Assignment assignUsersInBatch(List<Pair<Experiment, Assignment>> assignments, Date date);
+
+    /**
      * Get assignments
      *
      * @param userID         User Id

@@ -355,13 +355,14 @@ public class IntegrationPages extends TestBase {
 
         deleteExperiment(exp);
 
+        //Clear assignments metadata after experiment deletion
+        clearAssignmentsMetadataCache();
+
         List<Experiment> experiments = getExperiments();
         Assert.assertFalse(experiments.contains(exp), "experiment was not deleted");
 
         // try to post page for deleted experiment
         Page page = PageFactory.createPage().setName("home").setAllowNewAssignment(true);
-        //Clear assignments metadata after experiment deletion
-        clearAssignmentsMetadataCache();
 
         Response response = postPages(exp, page, HttpStatus.SC_NOT_FOUND);
         Assert.assertEquals(response.getStatusCode(), HttpStatus.SC_NOT_FOUND);

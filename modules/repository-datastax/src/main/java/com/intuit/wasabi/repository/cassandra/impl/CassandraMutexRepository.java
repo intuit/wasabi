@@ -152,9 +152,9 @@ public class CassandraMutexRepository implements MutexRepository {
     		for (Exclusion exclusion : exclusions)
     			experimentIds.add(exclusion.getPair());
     		    		
-             List<com.intuit.wasabi.repository.cassandra.pojo.Experiment> experimentPojos = 
+             List<com.intuit.wasabi.repository.cassandra.pojo.Experiment> experimentPojos =
             		 experimentAccessor.getExperiments(experimentIds).all();
-             
+
              List<Experiment> experiments = new ArrayList<>();
              for (com.intuit.wasabi.repository.cassandra.pojo.Experiment experimentPojo : experimentPojos) {
             	 experiments.add(ExperimentHelper.makeExperiment(experimentPojo));
