@@ -50,7 +50,7 @@ public class ClientConfigurationITest {
         assertEquals(10,config.getMaxConnectionsPerHost());
         assertEquals("datacenter1:1",config.getNetworkTopologyReplicationValues());
         assertEquals(Arrays.asList("localhost"),config.getNodeHosts());
-        assertEquals(9160,config.getPort());
+        assertEquals(9042,config.getPort());
         assertNull(config.getSSLTrustStore());
         assertNull(config.getSSLTrustStorePassword());
         assertEquals(Optional.empty(),config.getTokenAwareLoadBalancingLocalDC());
