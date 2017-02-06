@@ -1037,9 +1037,9 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
 
     @Override
     @Timed
-    public void pushAssignmentToStaging(String exception, String data) {
+    public void pushAssignmentToStaging(String type, String exception, String data) {
         try{
-            stagingAccessor.insertBy(exception, data);
+            stagingAccessor.insertBy(type, exception, data);
         } catch (WriteTimeoutException | UnavailableException | NoHostAvailableException e) {
             throw new RepositoryException("Could not push the assignment to staging", e);
         }

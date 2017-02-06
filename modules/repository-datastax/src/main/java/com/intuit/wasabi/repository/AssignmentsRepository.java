@@ -159,10 +159,11 @@ public interface AssignmentsRepository {
     /**
      * Push assignment to staging
      *
+     * @param type type of assignment to be staged
      * @param exception Exception
      * @param data      Assignment Data to be pushed to staging
      */
-    void pushAssignmentToStaging(String exception, String data);
+    void pushAssignmentToStaging(String type, String exception, String data);
 
     /**
      * Increments the bucket assignments counter up by 1 if countUp is true
