@@ -31,6 +31,8 @@ import com.intuit.wasabi.repository.cassandra.IntegrationTestBase;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.audit.BucketAuditLogAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.audit.ExperimentAuditLogAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.count.BucketAssignmentCountAccessor;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -60,6 +62,7 @@ public class CassandraExperimentRepositoryITest extends IntegrationTestBase  {
 
 	private BucketAuditLogAccessor bucketAuditLogAccessor;
 	private ExperimentAuditLogAccessor experimentAuditLogAccessor;
+	private BucketAssignmentCountAccessor bucketAssignmentCountAccessor;
 
     @Before
     public void setUp() throws Exception {
@@ -73,6 +76,8 @@ public class CassandraExperimentRepositoryITest extends IntegrationTestBase  {
         experimentAccessor = injector.getInstance(ExperimentAccessor.class);
         bucketAuditLogAccessor = injector.getInstance(BucketAuditLogAccessor.class);
         experimentAuditLogAccessor = injector.getInstance(ExperimentAuditLogAccessor.class);
+        bucketAssignmentCountAccessor = injector.getInstance(BucketAssignmentCountAccessor.class);
+    	
         session.execute("truncate wasabi_experiments.bucket");
         
         session.execute("delete from wasabi_experiments.auditlog where application_name = '" 
@@ -82,6 +87,9 @@ public class CassandraExperimentRepositoryITest extends IntegrationTestBase  {
 		experimentID2 = Experiment.ID.valueOf(UUID.randomUUID());
 		
     	repository = injector.getInstance(CassandraExperimentRepository.class);;
+    	
+    	repository.setBucketAssignmentCountAccessor(bucketAssignmentCountAccessor);
+    	
     	bucket1 = Bucket.newInstance(experimentID1,Bucket.Label.valueOf("bl1")).withAllocationPercent(.23)
     			.withControl(true)
     			.withDescription("b1").withPayload("p1")
@@ -713,7 +721,8 @@ public class CassandraExperimentRepositoryITest extends IntegrationTestBase  {
 
 	@Test(expected=ExperimentNotFoundException.class)
 	public void testGetBucketsThrowsExperimentNotFoundException() {
-		BucketList buckets = repository.getBuckets(Experiment.ID.newInstance(), false);
+		BucketList buckets = repository.getBuckets(Experiment.ID.newInstance(), true);
+		System.out.println("Buckets = " + buckets);
 	}
 
 	@Test

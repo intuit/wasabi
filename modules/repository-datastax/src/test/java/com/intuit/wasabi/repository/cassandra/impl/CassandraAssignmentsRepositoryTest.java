@@ -46,7 +46,6 @@ import com.intuit.wasabi.repository.cassandra.accessor.export.UserAssignmentExpo
 import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentUserIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.PageExperimentIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.UserAssignmentIndexAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.index.UserBucketIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.pojo.*;
 import com.intuit.wasabi.repository.cassandra.pojo.count.BucketAssignmentCount;
 import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentUserByUserIdContextAppNameExperimentId;
@@ -96,7 +95,6 @@ public class CassandraAssignmentsRepositoryTest {
     @Mock UserAssignmentExportAccessor userAssignmentExportAccessor;
 
     @Mock BucketAccessor bucketAccessor;
-    @Mock UserBucketIndexAccessor userBucketIndexAccessor;
     @Mock BucketAssignmentCountAccessor bucketAssignmentCountAccessor;
 
     @Mock StagingAccessor stagingAccessor;
@@ -129,7 +127,6 @@ public class CassandraAssignmentsRepositoryTest {
                 userAssignmentIndexAccessor,
                 userAssignmentExportAccessor,
                 bucketAccessor,
-                userBucketIndexAccessor,
                 bucketAssignmentCountAccessor,
                 stagingAccessor,
                 prioritiesAccessor,
@@ -566,12 +563,10 @@ public class CassandraAssignmentsRepositoryTest {
                 eventLog,
                 experimentAccessor,
                 experimentUserIndexAccessor,
-//                userExperimentIndexAccessor,
                 userAssignmentAccessor,
                 userAssignmentIndexAccessor,
                 userAssignmentExportAccessor,
                 bucketAccessor,
-                userBucketIndexAccessor,
                 bucketAssignmentCountAccessor,
                 stagingAccessor,
                 prioritiesAccessor,
@@ -606,12 +601,10 @@ public class CassandraAssignmentsRepositoryTest {
                 eventLog,
                 experimentAccessor,
                 experimentUserIndexAccessor,
-//                userExperimentIndexAccessor,
                 userAssignmentAccessor,
                 userAssignmentIndexAccessor,
                 userAssignmentExportAccessor,
                 bucketAccessor,
-                userBucketIndexAccessor,
                 bucketAssignmentCountAccessor,
                 stagingAccessor,
                 prioritiesAccessor,
@@ -655,7 +648,6 @@ public class CassandraAssignmentsRepositoryTest {
                 userAssignmentIndexAccessor,
                 userAssignmentExportAccessor,
                 bucketAccessor,
-                userBucketIndexAccessor,
                 bucketAssignmentCountAccessor,
                 stagingAccessor,
                 prioritiesAccessor,
@@ -922,38 +914,6 @@ public class CassandraAssignmentsRepositoryTest {
     }
 
     @Test
-    public void testRemoveIndexUserToBucketWriteException(){
-        User.ID userId = User.ID.valueOf("testuser1");
-        Experiment.ID experimentId = Experiment.ID.valueOf(this.experimentId);
-        Context context = Context.valueOf("test");
-        Bucket.Label bucketLabel = Bucket.Label.valueOf("bucket-1");
-        doThrow(WriteTimeoutException.class)
-                .when(userBucketIndexAccessor)
-                .deleteBy(
-                        eq(experimentId.getRawID()),
-                        eq(userId.toString()),
-                        eq(context.getContext()),
-                        eq(bucketLabel.toString()));
-        thrown.expect(RepositoryException.class);
-        thrown.expectMessage("Could not remove from user_bucket_index for user: testuser1 to experiment: 4d4d8f3b-3b81-44f3-968d-d1c1a48b4ac8");
-        repository.removeIndexUserToBucket(userId, experimentId, context, bucketLabel);
-    }
-
-    @Test
-    public void testRemoveIndexUserToBucket(){
-        User.ID userId = User.ID.valueOf("testuser1");
-        Experiment.ID experimentId = Experiment.ID.valueOf(this.experimentId);
-        Context context = Context.valueOf("test");
-        Bucket.Label bucketLabel = Bucket.Label.valueOf("bucket-1");
-
-        repository.removeIndexUserToBucket(userId, experimentId, context, bucketLabel);
-        verify(userBucketIndexAccessor, times(1)).deleteBy(
-                eq(experimentId.getRawID()),
-                eq(userId.toString()),
-                eq(context.getContext()),
-                eq(bucketLabel.toString()));
-    }
-    @Test
     public void testGetUserAssignmentPartitions(){
         Date date1 = new Date(116,7,1);
         Date date2 = new Date(116,7,2,1,0);
@@ -1170,70 +1130,6 @@ public class CassandraAssignmentsRepositoryTest {
     }
 
     @Test
-    public void testIndexUserToBucketEmptyBucket(){
-        Assignment assignment = Assignment.newInstance(Experiment.ID.valueOf(this.experimentId))
-                .withApplicationName(APPLICATION_NAME)
-                .withContext(Context.valueOf("test"))
-                .withUserID(User.ID.valueOf("testuser1"))
-                .withCreated(new Date())
-                .build();
-        repository.indexUserToBucket(assignment);
-        verify(userBucketIndexAccessor, times(0))
-                .insertBy(eq(this.experimentId),
-                        eq(assignment.getUserID().toString()),
-                        eq(assignment.getContext().getContext()),
-                        eq(assignment.getCreated())
-                );
-        verify(userBucketIndexAccessor, times(1))
-                .insertBy(eq(this.experimentId),
-                        eq(assignment.getUserID().toString()),
-                        eq(assignment.getContext().getContext()),
-                        eq(assignment.getCreated()),
-                        any()
-                );
-    }
-
-    @Test
-    public void testIndexUserToBucketWithBucket(){
-        Assignment assignment = Assignment.newInstance(Experiment.ID.valueOf(this.experimentId))
-                .withApplicationName(APPLICATION_NAME)
-                .withContext(Context.valueOf("test"))
-                .withUserID(User.ID.valueOf("testuser1"))
-                .withBucketLabel(Bucket.Label.valueOf("bucket1"))
-                .withCreated(new Date())
-                .build();
-        repository.indexUserToBucket(assignment);
-        verify(userBucketIndexAccessor, times(0))
-                .insertBy(eq(this.experimentId),
-                        eq(assignment.getUserID().toString()),
-                        eq(assignment.getContext().getContext()),
-                        eq(assignment.getCreated())
-                );
-        verify(userBucketIndexAccessor, times(1))
-                .insertBy(eq(this.experimentId),
-                        eq(assignment.getUserID().toString()),
-                        eq(assignment.getContext().getContext()),
-                        eq(assignment.getCreated()),
-                        eq(assignment.getBucketLabel().toString()));
-    }
-
-    @Test
-    public void testIndexUserToBucketWithBucketWriteException(){
-        Assignment assignment = Assignment.newInstance(Experiment.ID.valueOf(this.experimentId))
-                .withApplicationName(APPLICATION_NAME)
-                .withContext(Context.valueOf("test"))
-                .withUserID(User.ID.valueOf("testuser1"))
-                .withBucketLabel(Bucket.Label.valueOf("bucket1"))
-                .withCreated(new Date())
-                .build();
-        doThrow(WriteTimeoutException.class).when(userBucketIndexAccessor)
-                .insertBy(any(UUID.class), any(String.class), any(String.class), any(Date.class),  any(String.class));
-        thrown.expect(RepositoryException.class);
-        thrown.expectMessage("Could not index user to bucket");
-        repository.indexUserToBucket(assignment);
-    }
-
-    @Test
     public void testDeleteAssignmentOld(){
         Experiment.ID experimentId = Experiment.ID.valueOf(this.experimentId);
         User.ID userID = User.ID.valueOf("testuser1");
@@ -1300,12 +1196,6 @@ public class CassandraAssignmentsRepositoryTest {
                 eq(APPLICATION_NAME),
                 eq(currentAssignment.getBucketLabel())
         );
-        verify(spyRepository, times(1)).removeIndexUserToBucket(
-                eq(userID),
-                eq(experiment.getID()),
-                eq(context),
-                eq(currentAssignment.getBucketLabel())
-        );
         verify(spyRepository, times(1)).removeIndexExperimentsToUser(
                 eq(userID),
                 eq(experiment.getID()),
@@ -1333,7 +1223,6 @@ public class CassandraAssignmentsRepositoryTest {
         spyRepository.assignUser(currentAssignment, experiment, date);
         verify(spyRepository, times(1)).assignUserToOld(eq(currentAssignment), eq(date));
         verify(spyRepository, times(0)).assignUserToLookUp(eq(currentAssignment), eq(date));
-        verify(spyRepository, times(1)).indexUserToBucket(eq(currentAssignment));
         verify(spyRepository, times(1)).indexExperimentsToUser(eq(currentAssignment));
     }
 
@@ -1349,7 +1238,6 @@ public class CassandraAssignmentsRepositoryTest {
                 userAssignmentIndexAccessor,
                 userAssignmentExportAccessor,
                 bucketAccessor,
-                userBucketIndexAccessor,
                 bucketAssignmentCountAccessor,
                 stagingAccessor,
                 prioritiesAccessor,
@@ -1380,7 +1268,6 @@ public class CassandraAssignmentsRepositoryTest {
         spyRepository.assignUser(currentAssignment, experiment, date);
         verify(spyRepository, times(0)).assignUserToOld(eq(currentAssignment), eq(date));
         verify(spyRepository, times(1)).assignUserToLookUp(eq(currentAssignment), eq(date));
-        verify(spyRepository, times(1)).indexUserToBucket(eq(currentAssignment));
         verify(spyRepository, times(1)).indexExperimentsToUser(eq(currentAssignment));
     }
 

@@ -1305,7 +1305,6 @@ public class AssignmentsImplTest {
 
         Mockito.when(assignmentsRepository.assignUser(assignment, experiment, DATE)).thenReturn(newAssignment);
         Mockito.when(assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-b"), context)).thenReturn(newAssignment);
-        Mockito.doNothing().when(assignmentsRepository).removeIndexUserToBucket(User.ID.valueOf("user-b"), experiment.getID(), context, assignment.getBucketLabel());
         Mockito.doNothing().when(assignmentsRepository).deleteAssignment(experiment, User.ID.valueOf("user-b"), context, testApp, assignment);
 
         experiment.setState(Experiment.State.TERMINATED);
@@ -1338,7 +1337,6 @@ public class AssignmentsImplTest {
 
         Mockito.when(assignmentsRepository.assignUser(assignment, experiment, DATE)).thenReturn(newAssignment);
         Mockito.when(assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-b"), context)).thenReturn(null);
-        Mockito.doNothing().when(assignmentsRepository).removeIndexUserToBucket(User.ID.valueOf("user-b"), experiment.getID(), context, assignment.getBucketLabel());
         Mockito.doNothing().when(assignmentsRepository).deleteAssignment(experiment, User.ID.valueOf("user-b"), context, testApp, assignment);
 
         Mockito.when(cassandraAssignments.putAssignment(userA, testApp, expLabel, context, redBucket.getLabel(), true)).thenReturn(newAssignment);
