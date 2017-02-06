@@ -27,6 +27,7 @@ import com.intuit.wasabi.experimentobjects.Context;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.ExperimentBatch;
 import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
+import org.apache.commons.lang3.tuple.Pair;
 
 import javax.ws.rs.core.StreamingOutput;
 import java.time.OffsetDateTime;
@@ -69,6 +70,15 @@ public interface AssignmentsRepository {
      * @return Resulting assignment
      */
     Assignment assignUser(Assignment assignment, Experiment experiment, Date date);
+
+    /**
+     * Assign users to experiments in a batch
+     *
+     * @param assignments pair of experiment and assignment
+     * @param date       Date of user assignment
+     * @return Resulting assignment
+     */
+    Assignment assignUsersInBatch(List<Pair<Experiment, Assignment>> assignments, Date date);
 
     /**
      * Get assignments
