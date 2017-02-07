@@ -17,6 +17,7 @@ package com.intuit.wasabi.repository.cassandra.impl;
 
 
 import static org.junit.Assert.assertEquals;
+
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -56,7 +57,6 @@ import com.intuit.wasabi.repository.cassandra.accessor.audit.BucketAuditLogAcces
 import com.intuit.wasabi.repository.cassandra.accessor.audit.ExperimentAuditLogAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentLabelIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.StateExperimentIndexAccessor;
-//import com.intuit.wasabi.repository.cassandra.accessor.index.UserBucketIndexAccessor;
 
 public class CassandraExperimentRepositoryTest {
 
@@ -85,8 +85,6 @@ public class CassandraExperimentRepositoryTest {
 
 	private StateExperimentIndexAccessor mockStateExperimentIndexAccessor;
 
-//	private UserBucketIndexAccessor mockUserBucketIndexAccessor;
-
 	private BucketAuditLogAccessor mockBucketAuditLogAccessor;
 
 	private ExperimentAuditLogAccessor mockExperimentAuditLogAccessor;
@@ -98,7 +96,6 @@ public class CassandraExperimentRepositoryTest {
     	mockDriver = Mockito.mock(CassandraDriver.class);
     	mockExperimentAccessor = Mockito.mock(ExperimentAccessor.class);
     	mockStateExperimentIndexAccessor = Mockito.mock(StateExperimentIndexAccessor.class);
-    	//mockUserBucketIndexAccessor = Mockito.mock(UserBucketIndexAccessor.class);
     	mockBucketAuditLogAccessor = Mockito.mock(BucketAuditLogAccessor.class);
     	mockExperimentAuditLogAccessor = Mockito.mock(ExperimentAuditLogAccessor.class);
     	mockApplicationListAccessor = Mockito.mock(ApplicationListAccessor.class);
@@ -112,8 +109,7 @@ public class CassandraExperimentRepositoryTest {
 		experimentID2 = Experiment.ID.valueOf(UUID.randomUUID());
 
 		repository = new CassandraExperimentRepository(
-				mockDriver, mockExperimentAccessor, mockExperimentLabelIndexAccessor, 
-				//mockUserBucketIndexAccessor, 
+				mockDriver, mockExperimentAccessor, mockExperimentLabelIndexAccessor,  
 				mockBucketAccessor, mockApplicationListAccessor, 
 				mockBucketAuditLogAccessor, mockExperimentAuditLogAccessor, 
 				mockStateExperimentIndexAccessor, new ExperimentValidator());
@@ -482,7 +478,6 @@ public class CassandraExperimentRepositoryTest {
 		assertNotNull("value should be not be null",  repository.getExperimentAccessor());
 		assertNotNull("value should be not be null",  repository.getBucketAccessor());
 		assertNotNull("value should be not be null",  repository.getExperimentLabelIndexAccessor());
-	//	assertNotNull("value should be not be null",  repository.getUserBucketIndexAccessor());
 		assertNotNull("value should be not be null",  repository.getDriver());
 		
 		repository.setApplicationListAccessor(null);;
@@ -502,9 +497,6 @@ public class CassandraExperimentRepositoryTest {
 
 		repository.setStateExperimentIndexAccessor(null);
 		assertEquals("Value should be eq", null, repository.getStateExperimentIndexAccessor());
-
-//		repository.setUserBucketIndexAccessor(null);
-//		assertEquals("Value should be eq", null, repository.getUserBucketIndexAccessor());
 
 		repository.setExperimentLabelIndexAccessor(null);
 		assertEquals("Value should be eq", null, repository.getExperimentLabelIndexAccessor());

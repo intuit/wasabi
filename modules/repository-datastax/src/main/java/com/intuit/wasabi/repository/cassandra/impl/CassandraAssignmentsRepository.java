@@ -570,9 +570,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         // Submit tasks for each assignment to increment/decrement counts
         incrementCounts(assignments, date);
 
-        // Make entries in user_bucket_index table
-//        indexUserToBucket(assignments);
-
         // Make entries in experiment_user_index table
         indexExperimentsToUser(assignments);
 
@@ -658,21 +655,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     }
 
     /**
-     * Make entries in user_bucket_index table
-     *
-     * @param assignments
-     */
-//    private void indexUserToBucket(List<Pair<Experiment, Assignment>> assignments) {
-//        final List<ResultSetFuture> rFutures = new ArrayList<>();
-//        assignments.forEach(pair -> {
-//            rFutures.add(asyncIndexUserToBucket(pair.getRight()));
-//        });
-//
-//        rFutures.forEach(ResultSetFuture::getUninterruptibly);
-//        LOGGER.debug("Finished asyncIndexUserToBucket");
-//    }
-
-    /**
      * Make entries in experiment_user_index table
      *
      * @param assignments
@@ -698,41 +680,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
             LOGGER.error("Error occurred while adding data in to experiment_user_index", e);
         }
     }
-
-    /**
-     *
-     * Index user to bucket in asynchronous way
-     *
-     * @param assignment
-     * @return
-     */
-//    ResultSetFuture asyncIndexUserToBucket(Assignment assignment) {
-//        ResultSetFuture resultSetFuture = null;
-//        try{
-//            if(isNull(assignment.getBucketLabel())) {
-//                resultSetFuture = userBucketIndexAccessor.asyncInsertBy(
-//                        assignment.getExperimentID().getRawID(),
-//                        assignment.getUserID().toString(),
-//                        assignment.getContext().getContext(),
-//                        assignment.getCreated(),
-//                        new String(new byte[0], StandardCharsets.UTF_8 ) //Needed because of compact storage
-//                );
-//            } else {
-//                resultSetFuture = userBucketIndexAccessor.asyncInsertBy(
-//                        assignment.getExperimentID().getRawID(),
-//                        assignment.getUserID().toString(),
-//                        assignment.getContext().getContext(),
-//                        assignment.getCreated(),
-//                        assignment.getBucketLabel().toString()
-//                );
-//            }
-//        }catch (WriteTimeoutException | UnavailableException | NoHostAvailableException e){
-//            throw new RepositoryException("Could not index user to bucket \"" + assignment + "\"", e);
-//        }
-
-//        return resultSetFuture;
-//    }
-
 
     void indexExperimentsToUser(Assignment assignment) {
         try {
