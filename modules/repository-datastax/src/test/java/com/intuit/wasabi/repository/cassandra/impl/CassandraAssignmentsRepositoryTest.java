@@ -1528,11 +1528,6 @@ public class CassandraAssignmentsRepositoryTest {
 
         doNothing().when(assignmentsCountExecutor).execute(any());
 
-        when(userBucketIndexAccessor.asyncInsertBy(assignment1.getExperimentID().getRawID(), assignment1.getUserID().toString(), assignment1.getContext().getContext(), assignment1.getCreated(), new String(new byte[0], StandardCharsets.UTF_8 ))).thenReturn(genericResultSetFuture);
-        when(userBucketIndexAccessor.asyncInsertBy(assignment2.getExperimentID().getRawID(), assignment2.getUserID().toString(), assignment2.getContext().getContext(), assignment2.getCreated(), new String(new byte[0], StandardCharsets.UTF_8 ))).thenReturn(genericResultSetFuture);
-        when(userBucketIndexAccessor.asyncInsertBy(assignment1.getExperimentID().getRawID(), assignment1.getUserID().toString(), assignment1.getContext().getContext(), assignment1.getCreated(), bucketLabel)).thenReturn(genericResultSetFuture);
-        when(userBucketIndexAccessor.asyncInsertBy(assignment2.getExperimentID().getRawID(), assignment2.getUserID().toString(), assignment2.getContext().getContext(), assignment2.getCreated(), bucketLabel)).thenReturn(genericResultSetFuture);
-
         when(driver.getSession()).thenReturn(mock(Session.class));
         when(driver.getSession().execute(any(BatchStatement.class))).thenReturn(genericResultSet);
 
