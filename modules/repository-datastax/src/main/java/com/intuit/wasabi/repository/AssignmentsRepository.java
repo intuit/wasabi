@@ -27,6 +27,7 @@ import com.intuit.wasabi.experimentobjects.Context;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.ExperimentBatch;
 import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
+import org.apache.commons.lang3.tuple.Pair;
 
 import javax.ws.rs.core.StreamingOutput;
 import java.time.OffsetDateTime;
@@ -69,6 +70,15 @@ public interface AssignmentsRepository {
      * @return Resulting assignment
      */
     Assignment assignUser(Assignment assignment, Experiment experiment, Date date);
+
+    /**
+     * Assign users to experiments in a batch
+     *
+     * @param assignments pair of experiment and assignment
+     * @param date       Date of user assignment
+     * @return Resulting assignment
+     */
+    Assignment assignUsersInBatch(List<Pair<Experiment, Assignment>> assignments, Date date);
 
     /**
      * Get assignments
@@ -149,10 +159,11 @@ public interface AssignmentsRepository {
     /**
      * Push assignment to staging
      *
+     * @param type type of assignment to be staged
      * @param exception Exception
      * @param data      Assignment Data to be pushed to staging
      */
-    void pushAssignmentToStaging(String exception, String data);
+    void pushAssignmentToStaging(String type, String exception, String data);
 
     /**
      * Increments the bucket assignments counter up by 1 if countUp is true

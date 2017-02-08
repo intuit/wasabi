@@ -20,6 +20,7 @@ import static java.util.Objects.nonNull;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,11 +37,14 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import javax.annotation.Nullable;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.StreamingOutput;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 
 import com.google.common.collect.HashBasedTable;
@@ -86,7 +90,6 @@ import com.intuit.wasabi.repository.CassandraRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.MutexRepository;
 import com.intuit.wasabi.repository.cassandra.impl.ExperimentRuleCacheUpdateEnvelope;
-import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
 
 /**
  * Assignments implementation
@@ -95,7 +98,10 @@ import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
  */
 public class AssignmentsImpl implements Assignments {
 
+    protected static final String HOST_IP = "hostIP";
     protected static final String RULE_CACHE = "ruleCache";
+    protected static final String QUEUE_SIZE = "queueSize";
+
     /**
      * Logger for the class
      */
@@ -130,6 +136,7 @@ public class AssignmentsImpl implements Assignments {
     private Pages pages;
 
     private EventLog eventLog;
+    private String hostIP;
 
     /**
      * Helper for unit tests
@@ -154,8 +161,6 @@ public class AssignmentsImpl implements Assignments {
      * @param ruleCache                           RuleCache which has cached segmentation rules
      * @param pages                               Pages for this experiment
      * @param priorities                          Priorities for the application
-     * @param assignmentDBEnvelopeProvider        AssignmentDBEnvelopeProvider
-     * @param assignmentWebEnvelopeProvider       AssignmentWebEnvelopeProvider
      * @param assignmentDecorator                 The assignmentDecorator to be used
      * @param ruleCacheExecutor                   The rule cache executor to be used
 
@@ -173,9 +178,13 @@ public class AssignmentsImpl implements Assignments {
                            final AssignmentDecorator assignmentDecorator,
                            final @Named("ruleCache.threadPool") ThreadPoolExecutor ruleCacheExecutor,
                            final EventLog eventLog)
-            throws IOException, ConnectionException {
+            throws IOException {
         super();
-
+        try {
+            hostIP = InetAddress.getLocalHost().getHostAddress();
+        } catch (Exception e) {
+            // ignore
+        }
         this.executors = executors;
         this.repository = repository;
         // FIXME:
@@ -336,9 +345,12 @@ public class AssignmentsImpl implements Assignments {
 
 
     /**
-     * Return an existing assignment for a user, or potentially create a new
-     * assignment if the user is assignable to this experiment. Includes a Page.Name to identify the page through which
-     * the assignment was delivered.
+     * Return an existing assignment for a user. For new assignment, only create a new assignment object,
+     * and doesn't create new assignment in a database (cassandra).
+     *
+     * It is responsibility of caller method to create assignment entries in a database.
+     *
+     * Includes a Page.Name to identify the page through which the assignment was delivered.
      */
     protected Assignment getAssignment(User.ID userID, Application.Name applicationName, Experiment.Label experimentLabel,
                                     Context context, boolean createAssignment, boolean ignoreSamplingPercent,
@@ -407,15 +419,12 @@ public class AssignmentsImpl implements Assignments {
                     // Generate the assignment; this always generates an assignment,
                     // which may or may not specify a bucket
                     //todo: change so this doesn't follow the 'read then write' Cassandra anti-pattern
-                    assignment = generateAssignment(experiment, userID, context, selectBucket, bucketList, currentDate, segmentationProfile);
+                    assignment = createAssignmentObject(experiment, userID, context, selectBucket, bucketList, currentDate, segmentationProfile);
                     assert assignment.getStatus() == Assignment.Status.NEW_ASSIGNMENT :
                             new StringBuilder("Assignment status should have been NEW_ASSIGNMENT for ")
                                     .append("userID = \"").append(userID).append("\", experiment = \"")
                                     .append(experiment).append("\"").toString();
                 } else {
-                    // Make a call to Rule cache update
-                    ruleCacheExecutor.execute(new ExperimentRuleCacheUpdateEnvelope(experiment.getRule(),
-                            ruleCache, experimentID));
                     return nullAssignment(userID, applicationName, experimentID,
                             Assignment.Status.NO_PROFILE_MATCH);
                 }
@@ -427,19 +436,6 @@ public class AssignmentsImpl implements Assignments {
                             .append("userID = \"").append(userID)
                             .append("\", experiment = \"").append(experiment).append("\"").toString();
         }
-
-        // Ingest data to real time data ingestion systems if executors exist
-		for (String name : executors.keySet()) {
-			executors.get(name).execute(new AssignmentEnvelopePayload(userID, context, createAssignment, false,
-                    ignoreSamplingPercent, segmentationProfile, assignment != null ? assignment.getStatus() : null,
-                    assignment != null ? assignment.getBucketLabel() : null, pageName, applicationName, experimentLabel,
-                    experimentID, currentDate, headers));
-		}        
-        
-        // Updating rule cache.  This will cause future assignment calls, on this server, to
-        // use the new version of the rule, if it has recently been changed.
-        ruleCacheExecutor.execute(new ExperimentRuleCacheUpdateEnvelope(experiment.getRule(),
-                ruleCache, experimentID));
 
         return assignment;
     }
@@ -494,26 +490,29 @@ public class AssignmentsImpl implements Assignments {
         //Populate required experiment metadata along with all the existing user assignments for the given application
         assignmentsRepository.populateExperimentMetadata(userID, applicationName, context, experimentBatch, allowAssignmentsOptional, appPriorities, experimentMap, userAssignments, bucketMap, exclusionMap);
 
+        List<Pair<Experiment, Assignment>> assignmentPairs = new LinkedList<>();
         List<Map> allAssignments = new LinkedList<>();
+        SegmentationProfile segmentationProfile = SegmentationProfile.from(experimentBatch.getProfile()).build();
         // iterate over all experiments in the application in priority order
         for (PrioritizedExperiment experiment : appPriorities.getPrioritizedExperiments()) {
-            if(LOGGER.isDebugEnabled()) LOGGER.debug("Now processing: {}", experiment);
+            LOGGER.debug("Now processing: {}", experiment);
 
             //check if the experiment was given in experimentBatch
             if (experimentBatch.getLabels().contains(experiment.getLabel())) {
-                if(LOGGER.isDebugEnabled()) LOGGER.debug("Experiment ({}) has given batch assignment....", experiment.getLabel());
+                LOGGER.debug("Experiment ({}) has given batch assignment....", experiment.getLabel());
 
                 String labelStr = experiment.getLabel().toString();
                 Map<String, Object> tempResult = new HashMap<>();
                 // get the assignment for user in this experiment
                 Experiment.Label label = Experiment.Label.valueOf(labelStr);
                 tempResult.put("experimentLabel", label);
-                SegmentationProfile segmentationProfile = SegmentationProfile.from(experimentBatch.getProfile())
-                        .build();
 
                 try {
-                      Assignment assignment = getAssignment(userID, applicationName, label,
-                            context, allowAssignmentsOptional.isPresent()?(allowAssignmentsOptional.get().get(experiment.getID())):createAssignment,
+                    boolean experimentCreateAssignment = allowAssignmentsOptional.isPresent()?(allowAssignmentsOptional.get().get(experiment.getID())):createAssignment;
+
+                    //This method only gets assignment object, and doesn't create new assignments in a database (cassandra)
+                    Assignment assignment = getAssignment(userID, applicationName, label,
+                            context, experimentCreateAssignment,
                             forceInExperiment, segmentationProfile,
                             headers, pageName, experimentMap.get(experiment.getID()),
                               bucketMap.get(experiment.getID()), userAssignments, exclusionMap);
@@ -545,8 +544,9 @@ public class AssignmentsImpl implements Assignments {
                     }
 
                     tempResult.put("status", assignment.getStatus());
-                    if(LOGGER.isDebugEnabled()) LOGGER.debug("tempResult: {}", tempResult);
+                    LOGGER.debug("tempResult: {}", tempResult);
 
+                    assignmentPairs.add(new ImmutablePair<Experiment, Assignment>(experimentMap.get(experiment.getID()), assignment));
 
                 } catch (WasabiException ex) {
                     //FIXME: should not use exception as part of the flow control.
@@ -560,7 +560,33 @@ public class AssignmentsImpl implements Assignments {
                 experimentBatch.getLabels().remove(experiment.getLabel());
             }
         }
-        if(LOGGER.isDebugEnabled()) LOGGER.debug("allAssignments: {} ", allAssignments);
+        LOGGER.debug("allAssignments: {} ", allAssignments);
+
+        //Make new assignments in database (cassandra)
+        final Date currentDate = new Date();
+        Stream<Pair<Experiment, Assignment>> newAssignments = assignmentPairs.stream().filter(pair -> {return (nonNull(pair) && pair.getRight().getStatus()==Assignment.Status.NEW_ASSIGNMENT);});
+        assignmentsRepository.assignUsersInBatch(newAssignments.collect(Collectors.toList()), currentDate);
+        LOGGER.debug("Finished Create_Assignments_DB...");
+
+        //Ingest data to real time data ingestion systems if executors exist
+        assignmentPairs.forEach(assignmentPair -> {
+            Assignment assignment = assignmentPair.getRight();
+            Experiment experiment = assignmentPair.getLeft();
+            boolean experimentCreateAssignment = allowAssignmentsOptional.isPresent()?(allowAssignmentsOptional.get().get(experiment.getID())):createAssignment;
+            for (String name : executors.keySet()) {
+                executors.get(name).execute(new AssignmentEnvelopePayload(userID, context, experimentCreateAssignment, false,
+                        forceInExperiment, segmentationProfile, assignment != null ? assignment.getStatus() : null,
+                        assignment != null ? assignment.getBucketLabel() : null, pageName, applicationName, experiment.getLabel(),
+                        experiment.getID(), currentDate, headers));
+            }
+        });
+
+        // Updating rule cache, This will cause future assignment calls, on this server, to
+        // use the new version of the rule, if it has recently been changed.
+        assignmentPairs.forEach(assignmentPair -> {
+            Experiment experiment = assignmentPair.getLeft();
+                ruleCacheExecutor.execute(new ExperimentRuleCacheUpdateEnvelope(experiment.getRule(), ruleCache, experiment.getID()));
+        });
 
         return allAssignments;
     }
@@ -892,8 +918,50 @@ public class AssignmentsImpl implements Assignments {
         }
     }
 
+    /**
+     *
+     * This method first create an assignment object for NEW_ASSIGNMENT and then make entries in to the database.
+     *
+     * @param experiment
+     * @param userID
+     * @param context
+     * @param selectBucket
+     * @param bucketList
+     * @param date
+     * @param segmentationProfile
+     *
+     * @return new assignment object which is created in the database as well.
+     *
+     */
     Assignment generateAssignment(Experiment experiment, User.ID userID, Context context, boolean selectBucket,
                                           BucketList bucketList, Date date, SegmentationProfile segmentationProfile) {
+        Assignment result = createAssignmentObject(experiment, userID, context, selectBucket, bucketList, date, segmentationProfile);
+        if(result.getStatus().equals(Assignment.Status.NEW_ASSIGNMENT)) {
+            return assignmentsRepository.assignUser(result, experiment, date);
+        } else {
+            return result;
+        }
+    }
+
+    /**
+     *
+     * This method creates an assignment object for NEW_ASSIGNMENT.
+     *
+     * Note: it does not create entries in the database.
+     *
+     * @param experiment
+     * @param userID
+     * @param context
+     * @param selectBucket
+     * @param bucketList
+     * @param date
+     * @param segmentationProfile
+     *
+     * @return new assignment object with status of either NEW_ASSIGNMENT or NO_OPEN_BUCKETS
+     *
+     */
+    Assignment createAssignmentObject(Experiment experiment, User.ID userID, Context context, boolean selectBucket,
+                                  BucketList bucketList, Date date, SegmentationProfile segmentationProfile) {
 
         Assignment.Builder builder = Assignment.newInstance(experiment.getID())
                 .withApplicationName(experiment.getApplicationName())
@@ -936,8 +1004,13 @@ public class AssignmentsImpl implements Assignments {
             builder.withBucketLabel(null);
         }
 
-        Assignment result = builder.build();
-        return assignmentsRepository.assignUser(result, experiment, date);
+        Assignment result = builder
+                .withStatus(Assignment.Status.NEW_ASSIGNMENT)
+                .withCreated(Optional.ofNullable(date).orElseGet(Date::new))
+                .withCacheable(false)
+                .build();
+        LOGGER.debug("result => {}", result);
+        return result;
     }
     
     /**
@@ -1095,7 +1168,25 @@ public class AssignmentsImpl implements Assignments {
         return queueLengthMap;
     }
 
-
+    @Override
+    public Map<String, Object> queuesDetails() {
+        Map<String, Object> queueDetailsMap = new HashMap<String, Object>();
+        queueDetailsMap.put(HOST_IP, hostIP);
+        Map<String, Object> ruleCacheMap = new HashMap<String, Object>();
+        ruleCacheMap.put(QUEUE_SIZE, new Integer(this.ruleCacheExecutor.getQueue().size()));
+        queueDetailsMap.put(RULE_CACHE, ruleCacheMap);
+        for (String name : executors.keySet()) {
+            queueDetailsMap.put(name.toLowerCase(), executors.get(name).queueDetails());
+        }
+        return queueDetailsMap;
+    }
+    
+    public void flushMessages() {
+        for (String name : executors.keySet()) {
+            executors.get(name).flushMessages();
+        }
+    }
+    
     /**
      * Gets the experiment assignment ratios per day per experiment.
      *

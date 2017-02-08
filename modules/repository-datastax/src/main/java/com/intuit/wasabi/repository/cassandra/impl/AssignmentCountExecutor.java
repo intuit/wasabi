@@ -13,18 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package com.intuit.wasabi.repository.cassandra.accessor;
 
-import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.mapping.annotations.Accessor;
-import com.datastax.driver.mapping.annotations.Query;
+package com.intuit.wasabi.repository.cassandra.impl;
+
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
- * Accessor interface
+ * This class is created to overcome Guice exception
  *
  */
-@Accessor
-public interface StagingAccessor {
-    @Query("insert into staging(time, type, exep , msg) values(now(), ?, ? , ?)")
-    ResultSet insertBy(String type, String exception, String message);
+public class AssignmentCountExecutor extends ThreadPoolExecutor {
+
+    @Inject
+    public AssignmentCountExecutor(@Named("export.pool.size") Integer corePoolSize,
+                                   @Named("export.pool.size") Integer maximumPoolSize) {
+        super(corePoolSize, maximumPoolSize, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+    }
 }

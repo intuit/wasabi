@@ -16,6 +16,7 @@
 package com.intuit.wasabi.repository.cassandra;
 
 import com.datastax.driver.mapping.MappingManager;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
@@ -40,12 +41,15 @@ import org.slf4j.Logger;
 
 import javax.inject.Singleton;
 import java.util.Properties;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import static com.google.inject.name.Names.named;
 import static com.intuit.autumn.utils.PropertyFactory.create;
 import static com.intuit.autumn.utils.PropertyFactory.getProperty;
 import static java.lang.Boolean.TRUE;
 import static java.lang.Integer.parseInt;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class CassandraRepositoryModule extends AbstractModule {
@@ -61,8 +65,8 @@ public class CassandraRepositoryModule extends AbstractModule {
                 .toInstance(getProperty("assign.user.to.export", properties));
         bind(String.class).annotatedWith(named("assign.bucket.count"))
                 .toInstance(getProperty("assign.bucket.count", properties));
-        bind(Integer.class).annotatedWith(named("export.pool.size"))
-                .toInstance(parseInt(getProperty("export.pool.size", properties, "5")));
+        Integer assignmentsCountThreadPoolSize = parseInt(getProperty("export.pool.size", properties, "5"));
+        bind(Integer.class).annotatedWith(named("export.pool.size")).toInstance(assignmentsCountThreadPoolSize);
         bind(Boolean.class).annotatedWith(named("assign.user.to.old"))
                 .toInstance(Boolean.valueOf(getProperty("assign.user.to.old", properties, TRUE.toString())));
         bind(Boolean.class).annotatedWith(named("assign.user.to.new"))
@@ -113,6 +117,8 @@ public class CassandraRepositoryModule extends AbstractModule {
         bind(BucketAssignmentCountAccessor.class).toProvider(BucketAssignmentCountAccessorProvider.class).in(Singleton.class);
         //Bind those export
         bind(UserAssignmentExportAccessor.class).toProvider(UserAssignmentExportAccessorProvider.class).in(Singleton.class);
+        //Bind assignments Count thread pool executor
+        bind(ThreadPoolExecutor.class).annotatedWith(named("AssignmentsCountThreadPoolExecutor")).to(AssignmentCountExecutor.class).in(Singleton.class);
 
         //Bind those repositories
         bind(AssignmentsRepository.class).to(CassandraAssignmentsRepository.class).in(Singleton.class);
