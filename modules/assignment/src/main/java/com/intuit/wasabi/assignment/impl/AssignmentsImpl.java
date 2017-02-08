@@ -249,7 +249,7 @@ public class AssignmentsImpl implements Assignments {
                     Assignment.Status.EXPERIMENT_EXPIRED);
         }
 
-        Assignment assignment = assignmentsRepository.getAssignment(experimentID, userID, context);
+        Assignment assignment = assignmentsRepository.getAssignment(userID, applicationName, experimentID, context);
         if (assignment == null || assignment.isBucketEmpty()) {
             if (createAssignment) {
                 if (experiment.getState() == Experiment.State.PAUSED) {
@@ -756,7 +756,7 @@ public class AssignmentsImpl implements Assignments {
         }
 
         //throw exception if assignment already exists for user unless overwrite == true
-        Assignment currentAssignment = assignmentsRepository.getAssignment(experimentID, userID, context);
+        Assignment currentAssignment = assignmentsRepository.getAssignment(userID, applicationName, experimentID, context);
         if (!overwrite && currentAssignment != null && !currentAssignment.isBucketEmpty()) {
                 throw new AssignmentExistsException(userID, applicationName, experimentLabel);
         }

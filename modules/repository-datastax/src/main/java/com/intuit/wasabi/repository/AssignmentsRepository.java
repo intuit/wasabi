@@ -118,6 +118,19 @@ public interface AssignmentsRepository {
     Assignment getAssignment(Experiment.ID experimentID, User.ID userID, Context context);
 
     /**
+     * Get assignment for experiment and user
+     *
+     * @param userID
+     * @param appName
+     * @param experimentID
+     * @param context
+     *
+     * @return assignment object if assignment is present or NULL
+     *
+     */
+    Assignment getAssignment(User.ID userID, Application.Name appName, Experiment.ID experimentID, Context context);
+
+    /**
      * Delete assignment for experiment, user and application
      *
      * @param experiment        Experiment for which assignment is to be deleted

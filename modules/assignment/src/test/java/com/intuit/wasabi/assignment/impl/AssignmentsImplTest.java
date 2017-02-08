@@ -230,7 +230,7 @@ public class AssignmentsImplTest {
                 .withStatus(Assignment.Status.EXPERIMENT_PAUSED)
                 .build();
         when(experimentRepository.getExperiment(eq(appName), eq(label))).thenReturn(experiment);
-        when(assignmentsRepository.getAssignment(eq(id), eq(user), any(Context.class))).thenReturn(null);
+        when(assignmentsRepository.getAssignment(eq(user), eq(appName), eq(id), any(Context.class))).thenReturn(null);
         SegmentationProfile segmentationProfile = mock(SegmentationProfile.class);
         HttpHeaders headers = mock(HttpHeaders.class);
         Page.Name pageName = Page.Name.valueOf("p1");
@@ -260,7 +260,7 @@ public class AssignmentsImplTest {
                 .withStatus(Assignment.Status.NO_PROFILE_MATCH)
                 .build();
         when(experimentRepository.getExperiment(eq(appName), eq(label))).thenReturn(experiment);
-        when(assignmentsRepository.getAssignment(eq(id), eq(user), any(Context.class))).thenReturn(null);
+        when(assignmentsRepository.getAssignment(eq(user), eq(appName), eq(id), any(Context.class))).thenReturn(null);
         doReturn(false).when(assignmentsImpl).doesProfileMatch(any(Experiment.class), any(SegmentationProfile.class),
                 any(HttpHeaders.class), any(Context.class));
         SegmentationProfile segmentationProfile = mock(SegmentationProfile.class);
@@ -341,7 +341,7 @@ public class AssignmentsImplTest {
         User.ID user = User.ID.valueOf("testUser");
         Page.Name pageName = Page.Name.valueOf("p1");
         when(experimentRepository.getExperiment(eq(appName), eq(label))).thenReturn(experiment);
-        when(assignmentsRepository.getAssignment(eq(id), eq(user), any(Context.class))).thenReturn(assignment);
+        when(assignmentsRepository.getAssignment( eq(user), eq(appName), eq(id), any(Context.class))).thenReturn(assignment);
         when(assignment.getStatus()).thenReturn(Assignment.Status.EXISTING_ASSIGNMENT);
         Assignment result = assignmentsImpl.getSingleAssignment(user, appName, label, context, true, true,
                 null, null, pageName);

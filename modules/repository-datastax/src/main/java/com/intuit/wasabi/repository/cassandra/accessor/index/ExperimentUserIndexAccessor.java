@@ -56,6 +56,9 @@ public interface ExperimentUserIndexAccessor {
     @Query("select * from experiment_user_index where user_id = ? and app_name = ? and context = ?")
     ListenableFuture<Result<ExperimentUserByUserIdContextAppNameExperimentId>> asyncSelectBy(String userId, String appName, String context);
 
+    @Query("select * from experiment_user_index where user_id = ? and app_name = ? and experiment_id = ? and context = ?")
+    ListenableFuture<Result<ExperimentUserByUserIdContextAppNameExperimentId>> asyncSelectBy(String userId, String appName, UUID experimentId, String context);
+
     @Query("delete from experiment_user_index where user_id = ? and experiment_id = ? and context = ? and app_name = ?")
     ResultSet deleteBy(String userId, UUID experimentId, String context, String appName);
 

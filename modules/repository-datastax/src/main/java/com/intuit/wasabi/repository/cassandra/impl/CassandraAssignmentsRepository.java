@@ -558,6 +558,28 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         return result;
     }
 
+    @Override
+    @Timed
+    public Assignment getAssignment(User.ID userID, Application.Name appName, Experiment.ID experimentID, Context context) {
+        ListenableFuture<Result<ExperimentUserByUserIdContextAppNameExperimentId>> resultFuture = experimentUserIndexAccessor.asyncSelectBy(userID.toString(), appName.toString(), experimentID.getRawID(), context.toString());
+        Result<ExperimentUserByUserIdContextAppNameExperimentId> assignmentResult = UninterruptibleUtil.getUninterruptibly(resultFuture);
+
+        Stream<ExperimentUserByUserIdContextAppNameExperimentId> assignmentResultStream = StreamSupport.stream(Spliterators.spliteratorUnknownSize(assignmentResult.iterator(), Spliterator.ORDERED), false);
+
+        final Stream<Assignment.Builder> assignmentBuilderStream = assignmentResultStream.map(t ->{
+            Assignment.Builder builder = Assignment.newInstance(Experiment.ID.valueOf(t.getExperimentId()))
+                    .withUserID(User.ID.valueOf(t.getUserId()))
+                    .withContext(Context.valueOf(t.getContext()));
+
+            if(nonNull(t.getBucket())) {
+                builder.withBucketLabel(Bucket.Label.valueOf(t.getBucket()));
+            }
+            return builder;
+        });
+
+        Optional<Assignment> assignmentOptional = getAssignmentFromStream(experimentID, userID, context, assignmentBuilderStream);
+        return assignmentOptional.isPresent()?assignmentOptional.get():null;
+    }
 
     @Override
     @Timed
