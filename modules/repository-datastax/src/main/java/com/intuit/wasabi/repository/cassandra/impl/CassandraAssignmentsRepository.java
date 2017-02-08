@@ -555,6 +555,8 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     public Assignment assignUser(Assignment assignment, Experiment experiment, Date date) {
         Assignment new_assignment = null;
 
+        /*
+        Note: Only removing the use of user_assignment & user_assignment_bu_userid tables. A separate card is created to completely remove these tables.
         if (assignUserToOld) {
             //Writing assignment to the old table - user_assignment
             new_assignment = assignUserToOld(assignment, date);
@@ -563,6 +565,8 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
             //Writing assignment to the new table - user_assignment_look_up
             new_assignment = assignUserToLookUp(assignment, date);
         }
+        */
+
         //Updating the assignment bucket counts, user_assignment_export
         // in a asynchronous AssignmentCountEnvelope thread
         boolean countUp = true;
@@ -589,8 +593,9 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     public Assignment assignUsersInBatch(List<Pair<Experiment, Assignment>> assignments, Date date) {
         Assignment new_assignment = null;
 
-        //Assign user to user_assignment table
         /*
+        Note: Only removing the use of user_assignment & user_assignment_bu_userid tables. A separate card is created to completely remove these tables.
+
         if (assignUserToOld) {
             //Writing assignment to the old table - user_assignment
             assignUserToOld(assignments, date);
@@ -605,7 +610,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         incrementCounts(assignments, date);
 
         // Make entries in user_bucket_index table
-        //indexUserToBucket(assignments);
+        indexUserToBucket(assignments);
 
         // Make entries in experiment_user_index table
         indexExperimentsToUser(assignments);
@@ -912,13 +917,13 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
 
     }
 
-
     @Override
     public void deleteAssignment(Experiment experiment, User.ID userID, Context context, Application.Name appName, Assignment currentAssignment) {
         // Deletes the assignment data across all the relevant tables in a consistent manner
-        //TODO: make all assignment/delete part of batchstatement
-        deleteUserFromLookUp(experiment.getID(), userID, context);
-        deleteAssignmentOld(experiment.getID(), userID, context, appName, currentAssignment.getBucketLabel());
+
+        //Note: Only removing the use of user_assignment & user_assignment_bu_userid tables. A separate card is created to completely remove these tables.
+        //deleteUserFromLookUp(experiment.getID(), userID, context);
+        //deleteAssignmentOld(experiment.getID(), userID, context, appName, currentAssignment.getBucketLabel());
 
         //Updating the assignment bucket counts by -1 in a asynchronous AssignmentCountEnvelope thread
         // false to subtract 1 from the count for the bucket

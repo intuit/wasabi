@@ -34,11 +34,11 @@ import java.util.Optional;
 
 public interface AssignmentsMetadataCache {
     /**
-     * This method refresh the existing cache (keys) only with the updated data from Database.
+     * This method refresh the existing cache (keys) with the updated data from Database.
      *
      * This method doesn't add new keys into the cache.
      *
-     * @return TRUE is cache is successfully refreshed or FALSE.
+     * @return TRUE if cache is successfully refreshed or FALSE.
      */
     boolean refresh();
 

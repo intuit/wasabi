@@ -1292,14 +1292,6 @@ public class CassandraAssignmentsRepositoryTest {
                 .withBucketLabel(Bucket.Label.valueOf("bucket-1"))
                 .build();
         spyRepository.deleteAssignment(experiment, userID, context, APPLICATION_NAME, currentAssignment);
-        verify(spyRepository, times(1)).deleteUserFromLookUp(eq(experiment.getID()), eq(userID), eq(context));
-        verify(spyRepository, times(1)).deleteAssignmentOld(
-                eq(experiment.getID()),
-                eq(userID),
-                eq(context),
-                eq(APPLICATION_NAME),
-                eq(currentAssignment.getBucketLabel())
-        );
         verify(spyRepository, times(1)).removeIndexUserToBucket(
                 eq(userID),
                 eq(experiment.getID()),
@@ -1331,8 +1323,6 @@ public class CassandraAssignmentsRepositoryTest {
                 .withUserID(userID)
                 .build();
         spyRepository.assignUser(currentAssignment, experiment, date);
-        verify(spyRepository, times(1)).assignUserToOld(eq(currentAssignment), eq(date));
-        verify(spyRepository, times(0)).assignUserToLookUp(eq(currentAssignment), eq(date));
         verify(spyRepository, times(1)).indexUserToBucket(eq(currentAssignment));
         verify(spyRepository, times(1)).indexExperimentsToUser(eq(currentAssignment));
     }
@@ -1378,8 +1368,6 @@ public class CassandraAssignmentsRepositoryTest {
                 .withUserID(userID)
                 .build();
         spyRepository.assignUser(currentAssignment, experiment, date);
-        verify(spyRepository, times(0)).assignUserToOld(eq(currentAssignment), eq(date));
-        verify(spyRepository, times(1)).assignUserToLookUp(eq(currentAssignment), eq(date));
         verify(spyRepository, times(1)).indexUserToBucket(eq(currentAssignment));
         verify(spyRepository, times(1)).indexExperimentsToUser(eq(currentAssignment));
     }

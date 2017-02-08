@@ -617,7 +617,7 @@ public class AssignmentsImpl implements Assignments {
                                              Table<Experiment.ID, Experiment.Label, String> existingUserAssignments,
                                              Map<Experiment.ID, BucketList> bucketMap,
                                              Map<Experiment.ID, List<Experiment.ID>> exclusionMap) {
-        LOGGER.debug("populateExperimentMetadata - STARTED: userID={}, appName={}, context={}, experimentBatch={}, experimentIds={}", userID, appName, context, experimentBatch, allowAssignments);
+        LOGGER.debug("populateAssignmentsMetadata - STARTED: userID={}, appName={}, context={}, experimentBatch={}, experimentIds={}", userID, appName, context, experimentBatch, allowAssignments);
         if(isNull(experimentBatch.getLabels()) && !allowAssignments.isPresent() ) {
             LOGGER.error("Invalid input to AssignmentsImpl.populateExperimentMetadata(): Given input: userID={}, appName={}, context={}, experimentBatch={}, allowAssignments={}", userID, appName, context, experimentBatch, allowAssignments);
             return;
@@ -658,7 +658,7 @@ public class AssignmentsImpl implements Assignments {
             assignmentsRepository.populateAssignmentsMetadata(userID, appName, context, experimentBatch, allowAssignments, prioritizedExperimentList, experimentMap, existingUserAssignments, bucketMap, exclusionMap);
         }
 
-        LOGGER.debug("populateExperimentMetadata - FINISHED...");
+        LOGGER.debug("populateAssignmentsMetadata - FINISHED...");
     }
 
     /**
