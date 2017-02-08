@@ -252,7 +252,7 @@ public class CassandraPagesRepository implements PagesRepository{
     }
 
     @Override
-    public Map<Pair<Application.Name, Page.Name>, List<PageExperiment>> getExperimentsWithoutLabels(Set<Pair<Application.Name, Page.Name>> appAndPagePairs) {
+    public Map<Pair<Application.Name, Page.Name>, List<PageExperiment>> getExperimentsWithoutLabels(Collection<Pair<Application.Name, Page.Name>> appAndPagePairs) {
         logger.debug("getExperimentsWithoutLabels {}", appAndPagePairs);
         Map<Pair<Application.Name, Page.Name>, List<PageExperiment>> resultMap = new HashMap<>();
         try {

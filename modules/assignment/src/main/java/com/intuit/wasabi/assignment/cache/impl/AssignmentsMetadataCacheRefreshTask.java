@@ -25,12 +25,13 @@ import org.slf4j.LoggerFactory;
 import java.util.Date;
 
 public class AssignmentsMetadataCacheRefreshTask implements Runnable {
-    private final Logger logger = LoggerFactory.getLogger(AssignmentsMetadataCacheRefreshTask.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(AssignmentsMetadataCacheRefreshTask.class);
 
     private AssignmentsMetadataCache metadataCache;
+    private AssignmentMetadataCacheTimeService timeService;
+
     private Boolean refreshInProgress;
     private Date lastRefreshTime;
-    private AssignmentMetadataCacheTimeService timeService;
 
     @Inject
     public AssignmentsMetadataCacheRefreshTask(AssignmentsMetadataCache metadataCache, AssignmentMetadataCacheTimeService timeService) {
@@ -43,7 +44,7 @@ public class AssignmentsMetadataCacheRefreshTask implements Runnable {
     @Override
     public void run() {
         try {
-            logger.info("AssignmentsMetadataCache refresh started at = {}", timeService.getCurrentTime());
+            LOGGER.info("AssignmentsMetadataCache refresh started at = {}", timeService.getCurrentTime());
 
             if(!refreshInProgress) {
                 //Mark that refresh has been started...
@@ -52,22 +53,20 @@ public class AssignmentsMetadataCacheRefreshTask implements Runnable {
                 //Refresh metadata cache
                 metadataCache.refresh();
 
-                //Mark that refresh has been finished...
-                refreshInProgress = Boolean.FALSE;
-
                 //Update last refresh time
                 lastRefreshTime = timeService.getCurrentTime();
 
-                logger.info("AssignmentsMetadataCache has been refreshed at = {}", lastRefreshTime);
+                LOGGER.info("AssignmentsMetadataCache has been refreshed at = {}", lastRefreshTime);
             } else {
-                logger.info("AssignmentsMetadataCache refresh is skipped as previous refresh is in progress at = {}", timeService.getCurrentTime());
+                LOGGER.info("AssignmentsMetadataCache refresh is skipped as previous refresh is in progress at = {}", timeService.getCurrentTime());
             }
         } catch (Exception e) {
             //In case of any exception, clear the cache and mark refresh complete.
-            logger.error("Exception happened while refreshing AssignmentsMetadataCache...", e);
+            LOGGER.error("Exception happened while refreshing AssignmentsMetadataCache...", e);
             metadataCache.clear();
-            refreshInProgress = Boolean.FALSE;
         } finally {
+            //Mark that refresh has been finished...
+            refreshInProgress = Boolean.FALSE;
         }
     }
 

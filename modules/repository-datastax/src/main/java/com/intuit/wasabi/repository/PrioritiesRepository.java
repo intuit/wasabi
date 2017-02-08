@@ -19,6 +19,7 @@ import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -67,6 +68,6 @@ public interface PrioritiesRepository {
      * @param applicationNames  Set of application names
      * @return Map of PrioritizedExperimentList prioritized experiments for given application names.
      */
-    Map<Application.Name, PrioritizedExperimentList> getPriorities(Set<Application.Name> applicationNames);
+    Map<Application.Name, PrioritizedExperimentList> getPriorities(Collection<Application.Name> applicationNames);
 
 }

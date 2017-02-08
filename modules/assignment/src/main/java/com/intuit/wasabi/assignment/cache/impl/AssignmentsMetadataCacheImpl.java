@@ -46,7 +46,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -59,13 +58,12 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 
 public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
-    private final Logger logger = LoggerFactory.getLogger(AssignmentsMetadataCacheImpl.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(AssignmentsMetadataCacheImpl.class);
 
     private ExperimentRepository experimentRepository = null;
     private PrioritiesRepository prioritiesRepository = null;
     private MutexRepository mutexRepository = null;
     private PagesRepository pagesRepository = null;
-    private Integer refreshIntervalInMinutes;
     private AssignmentsMetadataCacheRefreshTask metadataCacheRefreshTask;
     private CacheManager cacheManager;
 
@@ -77,6 +75,8 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
         EXPERIMENT_ID_TO_BUCKET_CACHE,
         APP_NAME_N_PAGE_TO_EXPERIMENTS_CACHE
     }
+
+    private static final String ASSIGNMENT_METADATA_CACHE_SERVICE_NAME = "AssignmentsMetadataCache";
 
     @Inject
     public AssignmentsMetadataCacheImpl(@CassandraRepository ExperimentRepository experimentRepository, PrioritiesRepository prioritiesRepository,
@@ -92,44 +92,34 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
         this.prioritiesRepository = prioritiesRepository;
         this.mutexRepository = mutexRepository;
         this.pagesRepository = pagesRepository;
-        this.refreshIntervalInMinutes = refreshIntervalInMinutes;
         this.metadataCacheRefreshTask = (AssignmentsMetadataCacheRefreshTask) metadataCacheRefreshTask;
         this.cacheManager = cacheManager;
 
         refreshCacheService.scheduleAtFixedRate(metadataCacheRefreshTask, refreshIntervalInMinutes, refreshIntervalInMinutes, TimeUnit.MINUTES);
-        healthCheckRegistry.register("AssignmentsMetadataCache", metadataCacheHealthCheck);
+        healthCheckRegistry.register(ASSIGNMENT_METADATA_CACHE_SERVICE_NAME, metadataCacheHealthCheck);
 
         for(CACHE_NAME name: CACHE_NAME.values()) {
             cacheManager.addCache(name.toString());
         }
-    }
 
-    private Map<Application.Name, List<Experiment>> applicationExperimentsCache = new ConcurrentHashMap<>();
-    private Map<Experiment.ID, Experiment> experimentIdCache = new ConcurrentHashMap<>();
-    private Map<Application.Name, PrioritizedExperimentList> prioritizedExperimentListMap = new ConcurrentHashMap<>();
-    private Map<Experiment.ID, List<Experiment.ID>> exclusionMap = new ConcurrentHashMap<>();
-    private Map<Experiment.ID, BucketList> bucketMap = new ConcurrentHashMap<>();
-    private Map<Pair<Application.Name, Page.Name>, List<PageExperiment>> applicationPageToExperimentMap = new ConcurrentHashMap<>();
+        LOGGER.info("Assignments metadata cache has been created successfully...");
+    }
 
     /**
      * This method is used to clear cache.
      */
     @Override
-    public void clear() {
+    public boolean clear() {
         try {
             for (CACHE_NAME name : CACHE_NAME.values()) {
                 cacheManager.getCache(name.toString()).removeAll();
             }
+            LOGGER.info("Assignments metadata cache has been cleared successfully...");
+            return Boolean.TRUE;
         } catch(Exception e) {
-            logger.error("Exception occurred while clearing a cache...", e);
+            LOGGER.error("Exception occurred while clearing a cache...", e);
         }
-
-        applicationExperimentsCache = new ConcurrentHashMap<>();
-        experimentIdCache = new ConcurrentHashMap<>();
-        prioritizedExperimentListMap = new ConcurrentHashMap<>();
-        exclusionMap = new ConcurrentHashMap<>();
-        bucketMap = new ConcurrentHashMap<>();
-        applicationPageToExperimentMap = new ConcurrentHashMap<>();
+        return Boolean.FALSE;
     }
 
     /**
@@ -140,22 +130,33 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
      * @return New updated/refreshed cache copy.
      */
     @Override
-    public void refresh() {
+    public boolean refresh() {
         //------------------------------------------------------------------------------------------------
         //Get updated data from database
         //------------------------------------------------------------------------------------------------
         //Get experimentIdCache
-        Map<Application.Name, List<Experiment>> tApplicationExperimentsCache = experimentRepository.getExperimentsForApps(applicationExperimentsCache.keySet());
+        Cache localCache = cacheManager.getCache(CACHE_NAME.APP_NAME_TO_EXPERIMENTS_CACHE.toString());
+        Map<Application.Name, List<Experiment>> tApplicationExperimentsCache = experimentRepository.getExperimentsForApps(localCache.getKeys());
+
         //Get experimentIdCache
-        Map<Experiment.ID, Experiment> tExperimentIdCache = experimentRepository.getExperimentsMap(experimentIdCache.keySet());
+        localCache = cacheManager.getCache(CACHE_NAME.EXPERIMENT_ID_TO_EXPERIMENT_CACHE.toString());
+        Map<Experiment.ID, Experiment> tExperimentIdCache = experimentRepository.getExperimentsMap(localCache.getKeys());
+
         //Get prioritizedExperimentListMap
-        Map<Application.Name, PrioritizedExperimentList> tPrioritizedExperimentListMap = prioritiesRepository.getPriorities(prioritizedExperimentListMap.keySet());
+        localCache = cacheManager.getCache(CACHE_NAME.APP_NAME_TO_PRIORITIZED_EXPERIMENTS_CACHE.toString());
+        Map<Application.Name, PrioritizedExperimentList> tPrioritizedExperimentListMap = prioritiesRepository.getPriorities(localCache.getKeys());
+
         //Get exclusionMap
-        Map<Experiment.ID, List<Experiment.ID>> tExclusionMap = mutexRepository.getExclusivesList(exclusionMap.keySet());
+        localCache = cacheManager.getCache(CACHE_NAME.EXPERIMENT_ID_TO_EXCLUSION_CACHE.toString());
+        Map<Experiment.ID, List<Experiment.ID>> tExclusionMap = mutexRepository.getExclusivesList(localCache.getKeys());
+
         //Get bucketMap
-        Map<Experiment.ID, BucketList> tBucketMap = experimentRepository.getBucketList(bucketMap.keySet());
+        localCache = cacheManager.getCache(CACHE_NAME.EXPERIMENT_ID_TO_BUCKET_CACHE.toString());
+        Map<Experiment.ID, BucketList> tBucketMap = experimentRepository.getBucketList(localCache.getKeys());
+
         //Get applicationPageToExperimentMap
-        Map<Pair<Application.Name, Page.Name>, List<PageExperiment>> tApplicationPageToExperimentMap = pagesRepository.getExperimentsWithoutLabels(applicationPageToExperimentMap.keySet());
+        localCache = cacheManager.getCache(CACHE_NAME.APP_NAME_N_PAGE_TO_EXPERIMENTS_CACHE.toString());
+        Map<Pair<Application.Name, Page.Name>, List<PageExperiment>> tApplicationPageToExperimentMap = pagesRepository.getExperimentsWithoutLabels(localCache.getKeys());
 
         //------------------------------------------------------------------------------------------------
         //Now update cache
@@ -190,6 +191,9 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
             Cache cache = cacheManager.getCache(CACHE_NAME.APP_NAME_N_PAGE_TO_EXPERIMENTS_CACHE.toString());
             cache.put(new Element(appPagePair, experimentList));
         });
+
+        LOGGER.info("Assignments metadata cache has been refreshed successfully...");
+        return Boolean.TRUE;
     }
 
     /**
@@ -199,14 +203,6 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
      */
     @Override
     public List<Experiment> getExperimentsByAppName(Application.Name appName) {
-/*
-        List<Experiment> expList = applicationExperimentsCache.get(appName);
-        if(isNull(expList)) {
-            expList = experimentRepository.getExperimentsForApps(singleEntrySet(appName)).get(appName);
-            applicationExperimentsCache.put(appName, expList);
-        }
-*/
-
         List<Experiment> expList = null;
         Cache cache = cacheManager.getCache(CACHE_NAME.APP_NAME_TO_EXPERIMENTS_CACHE.toString());
         Element val = cache.get(appName);
@@ -228,14 +224,6 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
      */
     @Override
     public Optional<Experiment> getExperimentById(Experiment.ID expId) {
-/*
-        Experiment exp = experimentIdCache.get(expId);
-        if(exp==null) {
-            exp = experimentRepository.getExperimentsMap(singleEntrySet(expId)).get(expId);
-            experimentIdCache.put(expId, exp);
-        }
-*/
-
         Experiment exp = null;
         Cache cache = cacheManager.getCache(CACHE_NAME.EXPERIMENT_ID_TO_EXPERIMENT_CACHE.toString());
         Element val = cache.get(expId);
@@ -258,12 +246,6 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
      */
     @Override
     public Optional<PrioritizedExperimentList> getPrioritizedExperimentListMap(Application.Name appName) {
- /*       PrioritizedExperimentList val = prioritizedExperimentListMap.get(appName);
-        if(isNull(val)) {
-            val = prioritiesRepository.getPriorities(singleEntrySet(appName)).get(appName);
-            prioritizedExperimentListMap.put(appName, val);
-        }
-*/
         PrioritizedExperimentList expList = null;
         Cache cache = cacheManager.getCache(CACHE_NAME.APP_NAME_TO_PRIORITIZED_EXPERIMENTS_CACHE.toString());
         Element val = cache.get(appName);
@@ -285,14 +267,6 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
      */
     @Override
     public List<Experiment.ID> getExclusionList(Experiment.ID expId) {
-/*
-        List<Experiment.ID> exclusionList = exclusionMap.get(expId);
-        if(isNull(exclusionList)) {
-            exclusionList = mutexRepository.getExclusivesList(singleEntrySet(expId)).get(expId);
-            exclusionMap.put(expId, exclusionList);
-        }
-
-*/
         List<Experiment.ID> exclusionList = null;
         Cache cache = cacheManager.getCache(CACHE_NAME.EXPERIMENT_ID_TO_EXCLUSION_CACHE.toString());
         Element val = cache.get(expId);
@@ -313,13 +287,6 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
      */
     @Override
     public BucketList getBucketList(Experiment.ID expId) {
-/*
-        BucketList bucketList = bucketMap.get(expId);
-        if(isNull(bucketList)) {
-            bucketList = experimentRepository.getBucketList(singleEntrySet(expId)).get(expId);
-            bucketMap.put(expId, bucketList);
-        }
-*/
         BucketList bucketList = null;
         Cache cache = cacheManager.getCache(CACHE_NAME.EXPERIMENT_ID_TO_BUCKET_CACHE.toString());
         Element val = cache.get(expId);
@@ -343,13 +310,6 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
     @Override
     public List<PageExperiment> getPageExperiments(Application.Name appName, Page.Name pageName) {
         Pair<Application.Name, Page.Name> appPagePair = Pair.of(appName, pageName);
-
-/*        List<PageExperiment> pageExperiments = applicationPageToExperimentMap.get(appPagePair);
-        if(isNull(pageExperiments)) {
-            pageExperiments = pagesRepository.getExperimentsWithoutLabels(singleEntrySet(appPagePair)).get(appPagePair);
-            applicationPageToExperimentMap.put(appPagePair, pageExperiments);
-        }*/
-
         List<PageExperiment> pageExperiments = null;
         Cache cache = cacheManager.getCache(CACHE_NAME.APP_NAME_N_PAGE_TO_EXPERIMENTS_CACHE.toString());
         Element val = cache.get(appPagePair);

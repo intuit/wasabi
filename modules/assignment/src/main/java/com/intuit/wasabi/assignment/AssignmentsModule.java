@@ -120,21 +120,29 @@ public class AssignmentsModule extends AbstractModule {
             Integer metadataCacheRefreshInterval = Integer.parseInt(getProperty("metadata.cache.refresh.interval", properties, "5"));
             Integer metadataCacheNumberOfThreads = 1; //We want only single thread to refresh metadata cache.
             //This is allowed missed intervals. If cache hasn't been refreshed for more than allowed missed/buffer intervals then HealthCheck will be failed for this APP node.
-            Integer allowedStaleTime = Integer.parseInt(getProperty("metadata.cache.allowed.stale.time", properties, "30"));
+            Integer allowedStaleTime = Integer.parseInt(getProperty("metadata.cache.allowed.stale.time", properties, "360"));
 
+            //Create Scheduled Executor Service
             ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("AssignmentMetadataCache-%d").setDaemon(true).build();
-            ScheduledExecutorService ScheduledExecutorService = Executors.newScheduledThreadPool(metadataCacheNumberOfThreads, threadFactory);
+            ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(metadataCacheNumberOfThreads, threadFactory);
 
+            //Bind time service
             bind(AssignmentMetadataCacheTimeService.class).to(AssignmentMetadataCacheTimeServiceImpl.class).in(SINGLETON);
+            //Bind allowed stale time
             bind(Integer.class).annotatedWith(named("AssignmentsMetadataCacheAllowedStaleTime")).toInstance(allowedStaleTime);
+            //Bind health check
             bind(HealthCheck.class).annotatedWith(named("AssignmentsMetadataCacheHealthCheck")).to(AssignmentsMetadataCacheHealthCheck.class).in(SINGLETON);
-            bind(ScheduledExecutorService.class).annotatedWith(named("AssignmentsMetadataCacheRefreshCacheService")).toInstance(ScheduledExecutorService);
+            //Bind scheduled executor service
+            bind(ScheduledExecutorService.class).annotatedWith(named("AssignmentsMetadataCacheRefreshCacheService")).toInstance(scheduledExecutorService);
+            //Bind refresh interval
             bind(Integer.class).annotatedWith(named("AssignmentsMetadataCacheRefreshInterval")).toInstance(metadataCacheRefreshInterval);
-
+            //Bind actual cache here
             bind(AssignmentsMetadataCache.class).to(AssignmentsMetadataCacheImpl.class).in(SINGLETON);
+            //Bind cache refresh task
             bind(Runnable.class).annotatedWith(named("AssignmentsMetadataCacheRefreshTask")).to(AssignmentsMetadataCacheRefreshTask.class).in(SINGLETON);
 
         } else {
+            //Bind cache instance to NULL is cache is disabled.
             bind(AssignmentsMetadataCache.class).toInstance(null);
         }
     }

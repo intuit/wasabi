@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -129,7 +130,7 @@ public class CassandraPrioritiesRepository implements PrioritiesRepository {
 	 * @return Map of PrioritizedExperimentList prioritized experiments for given application names.
 	 */
 	@Override
-	public Map<Application.Name, PrioritizedExperimentList> getPriorities(Set<Application.Name> applicationNames) {
+	public Map<Application.Name, PrioritizedExperimentList> getPriorities(Collection<Application.Name> applicationNames) {
 		Map<Application.Name, ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Application>>> prioritiesFutureMap = new HashMap<>(applicationNames.size());
 		Map<Application.Name, PrioritizedExperimentList> appPrioritiesMap = new HashMap<>(applicationNames.size());
 		Map<Application.Name, ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment>>> experimentsFutureMap = new HashMap<>(applicationNames.size());

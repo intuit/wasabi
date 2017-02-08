@@ -38,9 +38,9 @@ public interface AssignmentsMetadataCache {
      *
      * This method doesn't add new keys into the cache.
      *
-     * @return New updated/refreshed cache copy.
+     * @return TRUE is cache is successfully refreshed or FALSE.
      */
-    void refresh();
+    boolean refresh();
 
     /**
      * @param appName
@@ -92,9 +92,11 @@ public interface AssignmentsMetadataCache {
      List<PageExperiment> getPageExperiments(Application.Name appName, Page.Name pageName);
 
     /**
-     * This method is used to clear cache
+     * This method is used to clear cache.
+     *
+     * @return TRUE is cache is cleared successfully else FALSE.
      */
-    void clear();
+    boolean clear();
 
     /**
      * This methods returns when was cache refreshed last time.

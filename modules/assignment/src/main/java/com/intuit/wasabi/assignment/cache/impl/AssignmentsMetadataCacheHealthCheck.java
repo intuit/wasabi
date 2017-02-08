@@ -1,18 +1,19 @@
-/*******************************************************************************
- * Copyright 2016 Intuit
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *******************************************************************************/
+/*
+ ****************************************************************************
+ Copyright 2016 Intuit
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ */
 
 package com.intuit.wasabi.assignment.cache.impl;
 
@@ -33,6 +34,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 public class AssignmentsMetadataCacheHealthCheck extends HealthCheck {
     private static final Logger LOGGER = getLogger(AssignmentsMetadataCacheHealthCheck.class);
+
     private AssignmentsMetadataCache metadataCache;
     private Integer metadataCacheInterval;
     private Integer allowedStaleTime;
@@ -59,8 +61,8 @@ public class AssignmentsMetadataCacheHealthCheck extends HealthCheck {
      */
     @Override
     public HealthCheck.Result check() {
-        boolean res = false;
-        String msg = "";
+        boolean res;
+        String msg;
         try {
             if(metadataCacheEnabled) {
                 Date currentTime = timeService.getCurrentTime();
@@ -74,18 +76,39 @@ public class AssignmentsMetadataCacheHealthCheck extends HealthCheck {
                 //Calculate the maximum allowed time (in milliseconds) for cache to be not being refreshed.
                 long maxAllowedDifferenceMS = allowedStaleTime * 60 * 1000;
 
-                //Calculate actual time (in milliseconds) cache has not been refreshed.
-                long diff = currentTimeMs - lastRefreshTimeMs;
+                //Calculate time (in milliseconds) for 2 cache refresh intervals
+                long warnDifferenceMS = 2 * metadataCacheIntervalMs;
 
-                //If cache has not been refreshed since maximum allowed the fail the health check
-                if (diff > maxAllowedDifferenceMS) {
+                //Calculate actual time (in milliseconds) cache has not been refreshed.
+                long diffMS = currentTimeMs - lastRefreshTimeMs;
+
+                if (diffMS > maxAllowedDifferenceMS) {
+                    //If cache has NOT been refreshed since maximum allowed stale time so fail the health check
+
                     res = false;
                     msg = new StringBuffer("AssignmentsMetadataCache hasn't been refreshed since last ").append(allowedStaleTime).append(" minutes. ")
                             .append("Defined interval is of ").append(metadataCacheInterval).append(" minutes. ")
                             .append("Last refresh time was ").append(lastRefreshTime)
                             .append(" and current time is ").append(currentTime).append(".")
                             .toString();
+                    LOGGER.error(msg);
+
+                } else if (diffMS > warnDifferenceMS) {
+                    //If cache has NOT been refreshed since last 2 intervals then log an error.
+
+                        String warnMsg = new StringBuffer("AssignmentsMetadataCache hasn't been refreshed since, at least, last two intervals...")
+                                .append("Defined interval is of ").append(metadataCacheInterval).append(" minutes. ")
+                                .append("Last refresh time was ").append(lastRefreshTime)
+                                .append(" and current time is ").append(currentTime).append(".")
+                                .toString();
+
+                        res = true;
+                        msg = warnMsg;
+                        LOGGER.warn(warnMsg);
+
                 } else {
+                    //All good, cache had been refreshed in last interval.
+
                     msg = new StringBuffer("AssignmentsMetadataCache refresh was successful. ")
                             .append("Defined interval is of ").append(metadataCacheInterval).append(" minutes. ")
                             .append("Last refresh time was ").append(lastRefreshTime)
@@ -94,19 +117,6 @@ public class AssignmentsMetadataCacheHealthCheck extends HealthCheck {
                     res = true;
                 }
 
-                //Calculate time (in milliseconds) for 2 cache refresh intervals
-                long warnDifference = 2 * metadataCacheIntervalMs;
-
-                //If cache has not been refreshed since last 2 intervals then log an error.
-                if (diff > warnDifference) {
-                    String warnMsg = new StringBuffer("AssignmentsMetadataCache hasn't been refreshed since, at least, last two intervals...")
-                            .append("Defined interval is of ").append(metadataCacheInterval).append(" minutes. ")
-                            .append("Last refresh time was ").append(lastRefreshTime)
-                            .append(" and current time is ").append(currentTime).append(".")
-                            .toString();
-
-                    LOGGER.warn(warnMsg);
-                }
             } else {
                 res = true;
                 msg = "AssignmentsMetadataCache is NOT enabled...";

@@ -590,6 +590,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         Assignment new_assignment = null;
 
         //Assign user to user_assignment table
+        /*
         if (assignUserToOld) {
             //Writing assignment to the old table - user_assignment
             assignUserToOld(assignments, date);
@@ -598,12 +599,13 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
             //Writing assignment to the new table - user_assignment_look_up
             assignUserToNew(assignments, date);
         }
+        */
 
         // Submit tasks for each assignment to increment/decrement counts
         incrementCounts(assignments, date);
 
         // Make entries in user_bucket_index table
-        indexUserToBucket(assignments);
+        //indexUserToBucket(assignments);
 
         // Make entries in experiment_user_index table
         indexExperimentsToUser(assignments);

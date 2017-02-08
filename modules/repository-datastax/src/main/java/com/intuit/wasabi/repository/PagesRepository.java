@@ -19,6 +19,7 @@ import com.intuit.wasabi.experimentobjects.*;
 import com.intuit.wasabi.repository.RepositoryException;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -111,6 +112,6 @@ public interface PagesRepository {
      * @return list of PageExperiment
      *
      */
-    Map<Pair<Application.Name, Page.Name>, List<PageExperiment>> getExperimentsWithoutLabels(Set<Pair<Application.Name, Page.Name>> appAndPagePairs);
+    Map<Pair<Application.Name, Page.Name>, List<PageExperiment>> getExperimentsWithoutLabels(Collection<Pair<Application.Name, Page.Name>> appAndPagePairs);
 
 }
