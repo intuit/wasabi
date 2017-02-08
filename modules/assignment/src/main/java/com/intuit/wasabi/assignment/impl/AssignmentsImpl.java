@@ -619,7 +619,7 @@ public class AssignmentsImpl implements Assignments {
                                              Map<Experiment.ID, List<Experiment.ID>> exclusionMap) {
         LOGGER.debug("populateAssignmentsMetadata - STARTED: userID={}, appName={}, context={}, experimentBatch={}, experimentIds={}", userID, appName, context, experimentBatch, allowAssignments);
         if(isNull(experimentBatch.getLabels()) && !allowAssignments.isPresent() ) {
-            LOGGER.error("Invalid input to AssignmentsImpl.populateExperimentMetadata(): Given input: userID={}, appName={}, context={}, experimentBatch={}, allowAssignments={}", userID, appName, context, experimentBatch, allowAssignments);
+            LOGGER.error("Invalid input to AssignmentsImpl.populateAssignmentsMetadata(): Given input: userID={}, appName={}, context={}, experimentBatch={}, allowAssignments={}", userID, appName, context, experimentBatch, allowAssignments);
             return;
         }
 
@@ -1302,6 +1302,19 @@ public class AssignmentsImpl implements Assignments {
         }
     }
 
+    /**
+     * Clear metadata cache if it is enabled.
+     */
+    @Override
+    public Map<String, String> metadataCacheDetails() {
+        Map<String, String> details = new HashMap<>();
+        if(metadataCacheEnabled) {
+            return metadataCache.getDetails();
+        } else {
+            details.put("Status", "Assignments metadata cache is not enabled...");
+        }
+        return details;
+    }
 
     /**
      * Gets the experiment assignment ratios per day per experiment.

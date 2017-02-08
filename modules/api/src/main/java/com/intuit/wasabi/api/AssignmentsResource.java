@@ -561,7 +561,6 @@ public class AssignmentsResource {
 
     @POST
     @Path("clearMetadataCache")
-    @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Clear assignments metadata cache...")
     @Timed
@@ -574,6 +573,20 @@ public class AssignmentsResource {
             result = Boolean.FALSE;
         }
         return httpHeader.headers().entity(result).build();
+    }
+
+    /**
+     * Get the details of assignments metadata cache
+     *
+     * @return Details of assignments metadata cache - cache entities and size of each entity cache
+     */
+    @GET
+    @Path("metadataCacheDetails")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "Get assignments metadata cache details...")
+    @Timed
+    public Response getMetadataCacheDetails() {
+        return httpHeader.headers().entity(assignments.metadataCacheDetails()).build();
     }
 
 }

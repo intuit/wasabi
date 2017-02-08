@@ -415,7 +415,16 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     }
 
     /**
-     * Populate existing user assignments for given user, application & context
+     * Populate existing user assignments for given user, application & context.
+     * This method make use of provided experimentMap to eliminate the call to database to fetch experiment object.
+     *
+     * @param userID         User Id
+     * @param appLabel       Application Label
+     * @param context        Environment context
+     * @param experimentMap experiment map to fetch experiment label
+     *
+     * @return List of assignments in term of pair of Experiment & Bucket label.
+     *
      */
     @Override
     @Timed

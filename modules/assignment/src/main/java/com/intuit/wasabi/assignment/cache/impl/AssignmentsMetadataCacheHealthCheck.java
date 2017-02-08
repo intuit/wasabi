@@ -56,7 +56,7 @@ public class AssignmentsMetadataCacheHealthCheck extends HealthCheck {
     }
 
     /**
-     * @return Result of healthy or unhealthy based last refresh time
+     * @return Result of healthy or unhealthy based on last refresh time
      *
      */
     @Override

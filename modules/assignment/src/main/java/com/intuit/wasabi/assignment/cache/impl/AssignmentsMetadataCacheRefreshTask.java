@@ -24,6 +24,10 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 
+/**
+ * This class is used to refresh assignment metadata cache.
+ *
+ */
 public class AssignmentsMetadataCacheRefreshTask implements Runnable {
     private final Logger LOGGER = LoggerFactory.getLogger(AssignmentsMetadataCacheRefreshTask.class);
 

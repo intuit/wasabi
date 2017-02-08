@@ -25,6 +25,7 @@ import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -104,4 +105,11 @@ public interface AssignmentsMetadataCache {
      * @return
      */
     Date getLastRefreshTime();
+
+    /**
+     *
+     * @return metadata cache details..
+     *
+     */
+    Map<String,String> getDetails();
 }

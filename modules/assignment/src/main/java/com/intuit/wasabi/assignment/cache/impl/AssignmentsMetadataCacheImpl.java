@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -123,11 +124,11 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
     }
 
     /**
-     * This method refresh the existing cache (keys) only with the updated data from Database.
+     * This method refresh the existing cache (keys) with the updated data from Database.
      *
      * This method doesn't add new keys into the cache.
      *
-     * @return New updated/refreshed cache copy.
+     * @return TRUE if cache is successfully refreshed else FALSE.
      */
     @Override
     public boolean refresh() {
@@ -330,6 +331,20 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
     @Override
     public Date getLastRefreshTime() {
         return metadataCacheRefreshTask.getLastRefreshTime();
+    }
+
+    /**
+     *
+     * @return Get metadata cache details
+     */
+    @Override
+    public Map<String,String> getDetails() {
+        Map<String,String> details = new HashMap<>();
+        details.put("status", "Enabled");
+        for(CACHE_NAME name: CACHE_NAME.values()) {
+            details.put(name+".SIZE", String.valueOf(cacheManager.getCache(name.toString()).getSize()));
+        }
+        return details;
     }
 
     /**

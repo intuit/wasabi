@@ -142,7 +142,7 @@ public class AssignmentsModule extends AbstractModule {
             bind(Runnable.class).annotatedWith(named("AssignmentsMetadataCacheRefreshTask")).to(AssignmentsMetadataCacheRefreshTask.class).in(SINGLETON);
 
         } else {
-            //Bind cache instance to NULL is cache is disabled.
+            //Bind cache instance to NULL if cache is disabled.
             bind(AssignmentsMetadataCache.class).toInstance(null);
         }
     }
