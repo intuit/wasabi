@@ -28,7 +28,7 @@ public class EmailResourceTest {
 
     @Before
     public void setUp() {
-        resource = new EmailResource(mock, new HttpHeader("apbcc"));
+        resource = new EmailResource(mock, new HttpHeader("apbcc", "600"));
     }
 
     @Test

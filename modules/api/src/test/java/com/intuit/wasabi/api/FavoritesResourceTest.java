@@ -47,7 +47,7 @@ public class FavoritesResourceTest {
     @Mock
     private Authorization authorization;
 
-    private HttpHeader httpHeader = new HttpHeader("TestApplication");
+    private HttpHeader httpHeader = new HttpHeader("TestApplication", "600");
     private FavoritesResource favoritesResource;
     private Experiment testExperiment;
     private List<Experiment.ID> expectedFavoriteList;
