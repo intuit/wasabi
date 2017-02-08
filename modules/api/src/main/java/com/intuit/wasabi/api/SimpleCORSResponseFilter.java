@@ -20,9 +20,11 @@ import com.google.inject.name.Named;
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerResponse;
 import com.sun.jersey.spi.container.ContainerResponseFilter;
+
 import org.slf4j.Logger;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import static org.slf4j.LoggerFactory.getLogger;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -47,10 +49,11 @@ public class SimpleCORSResponseFilter implements ContainerResponseFilter {
     @Override
     public ContainerResponse filter(ContainerRequest containerRequest, ContainerResponse containerResponse) {
         LOGGER.trace("CORS filter called for request: {}", containerRequest);
-
+        
         Response.ResponseBuilder response = Response.fromResponse(containerResponse.getResponse());
 
         if ("OPTIONS".equals(containerRequest.getMethod())) {
+            response.status(Status.NO_CONTENT);
             if (Objects.isNull(containerResponse.getHttpHeaders().get(ACCESS_CONTROL_ALLOW_ORIGIN)))
                 response.header(ACCESS_CONTROL_ALLOW_ORIGIN, "*");
             if (Objects.isNull(containerResponse.getHttpHeaders().get(ACCESS_CONTROL_ALLOW_METHODS)))
@@ -63,7 +66,7 @@ public class SimpleCORSResponseFilter implements ContainerResponseFilter {
                 response.header(CONTENT_TYPE, APPLICATION_JSON);
             if (Objects.isNull(containerResponse.getHttpHeaders().get(X_APPLICATION_ID)))
                 response.header(X_APPLICATION_ID, applicationName);
-            response.entity("");
+            response.entity(null);
 
             String requestHeader = containerRequest.getHeaderValue(ACCESS_CONTROL_REQUEST_HEADERS);
 

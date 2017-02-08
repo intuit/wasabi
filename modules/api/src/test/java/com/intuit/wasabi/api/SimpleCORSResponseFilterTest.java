@@ -26,7 +26,6 @@ import com.sun.jersey.core.header.OutBoundHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import static com.google.common.net.HttpHeaders.*;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 
