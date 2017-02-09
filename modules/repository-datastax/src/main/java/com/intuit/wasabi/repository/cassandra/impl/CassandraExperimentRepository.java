@@ -414,7 +414,7 @@ public class CassandraExperimentRepository implements ExperimentRepository {
 				Long count = 0L;
 				
 				if ( counts.one() != null )
-					counts.one().get(0, Long.class);
+					count = counts.one().get(0, Long.class);
 				
 				bucketAssignmentCountList
 						.add(new BucketAssignmentCount.Builder()
