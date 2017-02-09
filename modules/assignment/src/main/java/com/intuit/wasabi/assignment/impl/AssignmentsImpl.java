@@ -658,14 +658,6 @@ public class AssignmentsImpl implements Assignments {
                 .withUserID(userID)
                 .withContext(context);
         if (desiredBucketLabel != null) {
-            //before inserting the new data, we have to manually delete a corresponding row
-            //in the user_bucket_index table, since the primary key spans over bucketlabel
-            //as well and would therefore not be updated in the table
-        	// This code is not relevant since removeIndexUserToBucket is not in the interface anymore
-//            if (currentAssignment != null && currentAssignment.getBucketLabel() != null) {
-//                assignmentsRepository.removeIndexUserToBucket(userID, experimentID, context, currentAssignment
-//                        .getBucketLabel());
-//            }
             builder.withBucketLabel(desiredBucketLabel);
         } else {
             //first need to delete existing assignment, since otherwise cassandra
