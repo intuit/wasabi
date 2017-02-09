@@ -68,15 +68,6 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
     private AssignmentsMetadataCacheRefreshTask metadataCacheRefreshTask;
     private CacheManager cacheManager;
 
-    enum CACHE_NAME {
-        APP_NAME_TO_EXPERIMENTS_CACHE,
-        EXPERIMENT_ID_TO_EXPERIMENT_CACHE,
-        APP_NAME_TO_PRIORITIZED_EXPERIMENTS_CACHE,
-        EXPERIMENT_ID_TO_EXCLUSION_CACHE,
-        EXPERIMENT_ID_TO_BUCKET_CACHE,
-        APP_NAME_N_PAGE_TO_EXPERIMENTS_CACHE
-    }
-
     private static final String ASSIGNMENT_METADATA_CACHE_SERVICE_NAME = "AssignmentsMetadataCache";
 
     @Inject

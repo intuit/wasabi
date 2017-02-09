@@ -36,12 +36,15 @@ import com.intuit.wasabi.repository.MutexRepository;
 import com.intuit.wasabi.repository.PagesRepository;
 import com.intuit.wasabi.repository.PrioritiesRepository;
 import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.config.Configuration;
+import net.sf.ehcache.config.ConfigurationFactory;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -51,11 +54,15 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ScheduledExecutorService;
 
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import static org.hamcrest.core.Is.is;
 
 /**
  * Class to unit test AssignmentsMetadataCache
@@ -63,61 +70,74 @@ import static org.mockito.Mockito.when;
  */
 public class AssignmentsMetadataCacheTest {
     //Define mock objects
-    private static ExperimentRepository experimentRepository = mock(ExperimentRepository.class);
-    private static PrioritiesRepository prioritiesRepository = mock(PrioritiesRepository.class);
-    private static MutexRepository mutexRepository = mock(MutexRepository.class);
-    private static PagesRepository pagesRepository = mock(PagesRepository.class);
-    private static ScheduledExecutorService refreshCacheService = mock(ScheduledExecutorService.class);
-    private static Integer refreshIntervalInMinutes = 5;
-    private static AssignmentsMetadataCacheRefreshTask metadataCacheRefreshTask = mock(AssignmentsMetadataCacheRefreshTask.class);
-    private static HealthCheckRegistry healthCheckRegistry = mock(HealthCheckRegistry.class);
-    private static AssignmentsMetadataCacheHealthCheck metadataCacheHealthCheck = mock(AssignmentsMetadataCacheHealthCheck.class);
-    private static CacheManager cacheManager = CacheManager.getInstance();
-    private static Map resultMap = mock(Map.class);
-    private static List resultList = mock(List.class);
-    private static Experiment exprResultObject = mock(Experiment.class);
-    private static PrioritizedExperimentList pExpListResultObject = mock(PrioritizedExperimentList.class);
-    private static BucketList bucketListResultObject = mock(BucketList.class);
+    private  ExperimentRepository experimentRepository = mock(ExperimentRepository.class);
+    private  PrioritiesRepository prioritiesRepository = mock(PrioritiesRepository.class);
+    private  MutexRepository mutexRepository = mock(MutexRepository.class);
+    private  PagesRepository pagesRepository = mock(PagesRepository.class);
+    private  ScheduledExecutorService refreshCacheService = mock(ScheduledExecutorService.class);
+    private  Integer refreshIntervalInMinutes = 5;
+    private  AssignmentsMetadataCacheRefreshTask metadataCacheRefreshTask = mock(AssignmentsMetadataCacheRefreshTask.class);
+    private  HealthCheckRegistry healthCheckRegistry = mock(HealthCheckRegistry.class);
+    private  AssignmentsMetadataCacheHealthCheck metadataCacheHealthCheck = mock(AssignmentsMetadataCacheHealthCheck.class);
 
-    //Define real object not a mock
-    private static AssignmentsMetadataCache cache = new AssignmentsMetadataCacheImpl(experimentRepository, prioritiesRepository,
-            mutexRepository, pagesRepository, refreshCacheService, refreshIntervalInMinutes, metadataCacheRefreshTask,
-            healthCheckRegistry, metadataCacheHealthCheck, cacheManager);
+    private  List appResultList = mock(List.class);
+    private  Map appResultMap = mock(Map.class);
+
+    private  Experiment expResultObject = mock(Experiment.class);
+    private  Map expResultMap = mock(Map.class);
+
+    private  PrioritizedExperimentList priorityResultObject = mock(PrioritizedExperimentList.class);
+    private  Map priorityResultMap = mock(Map.class);
+
+    private  BucketList bucketResultObject = mock(BucketList.class);
+    private  Map bucketResultMap = mock(Map.class);
+
+    private  List exclusionResultList = mock(List.class);
+    private  Map exclusionResultMap = mock(Map.class);
+
+    private  List pageResultList = mock(List.class);
+    private  Map pageResultMap = mock(Map.class);
 
     @Test
     public void happyPathTestForGetExperimentsByAppName() {
+
+        Configuration conf = ConfigurationFactory.parseConfiguration();
+        conf.setName("happyPathTestForGetExperimentsByAppName");
+        AssignmentsMetadataCacheImpl cache = new AssignmentsMetadataCacheImpl(experimentRepository, prioritiesRepository,
+                mutexRepository, pagesRepository, refreshCacheService, refreshIntervalInMinutes, metadataCacheRefreshTask,
+                healthCheckRegistry, metadataCacheHealthCheck, CacheManager.newInstance(conf));
+
         //Mock the dependencies
         Application.Name appName1 = Application.Name.valueOf("Test-App-1");
         Set<Application.Name> appName1Set = singleEntrySet(appName1);
-        when(resultMap.get(appName1)).thenReturn(resultList);
-        when(experimentRepository.getExperimentsForApps(appName1Set)).thenReturn(resultMap);
-
-        Application.Name appName2 = Application.Name.valueOf("Test-App-2");
-        Set<Application.Name> appName2Set = singleEntrySet(appName2);
-        when(resultMap.get(appName2)).thenReturn(resultList);
-        when(experimentRepository.getExperimentsForApps(appName2Set)).thenReturn(resultMap);
+        when(appResultMap.get(appName1)).thenReturn(appResultList);
+        when(experimentRepository.getExperimentsForApps(appName1Set)).thenReturn(appResultMap);
 
         //Call actual business logic
         //Call same method for same appName 3 times
         cache.getExperimentsByAppName(appName1);
         cache.getExperimentsByAppName(appName1);
         cache.getExperimentsByAppName(appName1);
-        cache.getExperimentsByAppName(appName2);
-        cache.getExperimentsByAppName(appName2);
-        cache.getExperimentsByAppName(appName2);
 
         //Verify that even though cache is called 3 times there is only single database call.
-        verify(experimentRepository, times(2)).getExperimentsForApps(any());
+        verify(experimentRepository, times(1)).getExperimentsForApps(any());
 
     }
 
     @Test
     public void happyPathTestForGetExperimentById() {
+
+        Configuration conf = ConfigurationFactory.parseConfiguration();
+        conf.setName("happyPathTestForGetExperimentById");
+        AssignmentsMetadataCacheImpl cache = new AssignmentsMetadataCacheImpl(experimentRepository, prioritiesRepository,
+                mutexRepository, pagesRepository, refreshCacheService, refreshIntervalInMinutes, metadataCacheRefreshTask,
+                healthCheckRegistry, metadataCacheHealthCheck, CacheManager.newInstance(conf));
+
         //Mock the dependencies
         Experiment.ID expId = Experiment.ID.valueOf(UUID.randomUUID());
         Set<Experiment.ID> expIdSet = singleEntrySet(expId);
-        when(resultMap.get(expId)).thenReturn(exprResultObject);
-        when(experimentRepository.getExperimentsMap(expIdSet)).thenReturn(resultMap);
+        when(expResultMap.get(expId)).thenReturn(expResultObject);
+        when(experimentRepository.getExperimentsMap(expIdSet)).thenReturn(expResultMap);
 
         //Call actual business logic
         //Call same method for same appName 3 times
@@ -131,11 +151,17 @@ public class AssignmentsMetadataCacheTest {
 
     @Test
     public void happyPathTestForGetPrioritizedExperimentListMap() {
+        Configuration conf = ConfigurationFactory.parseConfiguration();
+        conf.setName("happyPathTestForGetPrioritizedExperimentListMap");
+        AssignmentsMetadataCacheImpl cache = new AssignmentsMetadataCacheImpl(experimentRepository, prioritiesRepository,
+                mutexRepository, pagesRepository, refreshCacheService, refreshIntervalInMinutes, metadataCacheRefreshTask,
+                healthCheckRegistry, metadataCacheHealthCheck, CacheManager.newInstance(conf));
+
         //Mock the dependencies
         Application.Name appName1 = Application.Name.valueOf("Test-App-1");
         Set<Application.Name> appName1Set = singleEntrySet(appName1);
-        when(resultMap.get(appName1)).thenReturn(pExpListResultObject);
-        when(prioritiesRepository.getPriorities(appName1Set)).thenReturn(resultMap);
+        when(priorityResultMap.get(appName1)).thenReturn(priorityResultObject);
+        when(prioritiesRepository.getPriorities(appName1Set)).thenReturn(priorityResultMap);
 
         //Call actual business logic
         //Call same method for same appName 3 times
@@ -149,11 +175,17 @@ public class AssignmentsMetadataCacheTest {
 
     @Test
     public void happyPathTestForGetExclusionList() {
+        Configuration conf = ConfigurationFactory.parseConfiguration();
+        conf.setName("happyPathTestForGetExclusionList");
+        AssignmentsMetadataCacheImpl cache = new AssignmentsMetadataCacheImpl(experimentRepository, prioritiesRepository,
+                mutexRepository, pagesRepository, refreshCacheService, refreshIntervalInMinutes, metadataCacheRefreshTask,
+                healthCheckRegistry, metadataCacheHealthCheck, CacheManager.newInstance(conf));
+
         //Mock the dependencies
         Experiment.ID expId = Experiment.ID.valueOf(UUID.randomUUID());
         Set<Experiment.ID> expIdSet = singleEntrySet(expId);
-        when(resultMap.get(expId)).thenReturn(resultList);
-        when(mutexRepository.getExclusivesList(expIdSet)).thenReturn(resultMap);
+        when(exclusionResultMap.get(expId)).thenReturn(exclusionResultList);
+        when(mutexRepository.getExclusivesList(expIdSet)).thenReturn(exclusionResultMap);
 
         //Call actual business logic
         //Call same method for same appName 3 times
@@ -167,11 +199,17 @@ public class AssignmentsMetadataCacheTest {
 
     @Test
     public void happyPathTestForGetBucketList() {
+        Configuration conf = ConfigurationFactory.parseConfiguration();
+        conf.setName("happyPathTestForGetBucketList");
+        AssignmentsMetadataCacheImpl cache = new AssignmentsMetadataCacheImpl(experimentRepository, prioritiesRepository,
+                mutexRepository, pagesRepository, refreshCacheService, refreshIntervalInMinutes, metadataCacheRefreshTask,
+                healthCheckRegistry, metadataCacheHealthCheck, CacheManager.newInstance(conf));
+
         //Mock the dependencies
         Experiment.ID expId = Experiment.ID.valueOf(UUID.randomUUID());
         Set<Experiment.ID> expIdSet = singleEntrySet(expId);
-        when(resultMap.get(expId)).thenReturn(bucketListResultObject);
-        when(experimentRepository.getBucketList(expIdSet)).thenReturn(resultMap);
+        when(bucketResultMap.get(expId)).thenReturn(bucketResultObject);
+        when(experimentRepository.getBucketList(expIdSet)).thenReturn(bucketResultMap);
 
         //Call actual business logic
         //Call same method for same appName 3 times
@@ -185,13 +223,19 @@ public class AssignmentsMetadataCacheTest {
 
     @Test
     public void happyPathTestForGetPageExperiments() {
+        Configuration conf = ConfigurationFactory.parseConfiguration();
+        conf.setName("happyPathTestForGetPageExperiments");
+        AssignmentsMetadataCacheImpl cache = new AssignmentsMetadataCacheImpl(experimentRepository, prioritiesRepository,
+                mutexRepository, pagesRepository, refreshCacheService, refreshIntervalInMinutes, metadataCacheRefreshTask,
+                healthCheckRegistry, metadataCacheHealthCheck, CacheManager.newInstance(conf));
+
         //Mock the dependencies
         Application.Name appName = Application.Name.valueOf("Test-App-1");
         Page.Name pageName = Page.Name.valueOf("Test-Page-1");
         Pair<Application.Name, Page.Name> appPagePair = Pair.of(appName, pageName);
         Set<Pair<Application.Name, Page.Name>> appPagePairSet = singleEntrySet(appPagePair);
-        when(resultMap.get(appPagePair)).thenReturn(resultList);
-        when(pagesRepository.getExperimentsWithoutLabels(appPagePairSet)).thenReturn(resultMap);
+        when(pageResultMap.get(appPagePair)).thenReturn(pageResultList);
+        when(pagesRepository.getExperimentsWithoutLabels(appPagePairSet)).thenReturn(pageResultMap);
 
         //Call actual business logic
         //Call same method for same appName 3 times
@@ -204,7 +248,259 @@ public class AssignmentsMetadataCacheTest {
     }
 
 
+    //===============================================================================================================
 
+
+    @Test
+    public void errorPath1TestForGetExperimentsByAppName() {
+
+        Configuration conf = ConfigurationFactory.parseConfiguration();
+        conf.setName("errorPath1TestForGetExperimentsByAppName");
+        AssignmentsMetadataCacheImpl cache2 = new AssignmentsMetadataCacheImpl(experimentRepository, prioritiesRepository,
+                mutexRepository, pagesRepository, refreshCacheService, refreshIntervalInMinutes, metadataCacheRefreshTask,
+                healthCheckRegistry, metadataCacheHealthCheck, CacheManager.newInstance(conf));
+
+        //Mock the dependencies
+        Application.Name appName1 = Application.Name.valueOf("Test-App-1");
+        Set<Application.Name> appName1Set = singleEntrySet(appName1);
+        when(experimentRepository.getExperimentsForApps(appName1Set)).thenThrow(new NullPointerException());
+
+        //Call actual business logic
+        try {
+            cache2.getExperimentsByAppName(appName1);
+            fail("Any database exception should be propagated to the caller method..");
+        } catch (Exception e) {
+
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        //Mock the dependencies
+        Experiment.ID expId = Experiment.ID.valueOf(UUID.randomUUID());
+        Set<Experiment.ID> expIdSet = singleEntrySet(expId);
+        when(experimentRepository.getExperimentsMap(expIdSet)).thenThrow(new NullPointerException());
+
+        //Call actual business logic
+        try {
+            cache2.getExperimentById(expId);
+            fail("Any database exception should be propagated to the caller method..");
+        } catch (Exception e) {
+
+        }
+        //-------------------------------------------------------------------------------------------------------------
+
+
+        //Mock the dependencies
+        when(prioritiesRepository.getPriorities(appName1Set)).thenThrow(new NullPointerException());
+
+        //Call actual business logic
+        try {
+            cache2.getPrioritizedExperimentListMap(appName1);
+            fail("Any database exception should be propagated to the caller method..");
+        } catch (Exception e) {
+
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        //Mock the dependencies
+        when(mutexRepository.getExclusivesList(expIdSet)).thenThrow(new NullPointerException());
+
+        //Call actual business logic
+        try {
+            cache2.getExclusionList(expId);
+            fail("Any database exception should be propagated to the caller method..");
+        } catch (Exception e) {
+
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        //Mock the dependencies
+        when(experimentRepository.getBucketList(expIdSet)).thenThrow(new NullPointerException());
+
+        //Call actual business logic
+        try {
+            cache2.getBucketList(expId);
+            fail("Any database exception should be propagated to the caller method..");
+        } catch (Exception e) {
+
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        //Mock the dependencies
+        Application.Name appName = Application.Name.valueOf("Test-App-1");
+        Page.Name pageName = Page.Name.valueOf("Test-Page-1");
+        Pair<Application.Name, Page.Name> appPagePair = Pair.of(appName, pageName);
+        Set<Pair<Application.Name, Page.Name>> appPagePairSet = singleEntrySet(appPagePair);
+        when(pagesRepository.getExperimentsWithoutLabels(appPagePairSet)).thenThrow(new NullPointerException());
+
+        //Call actual business logic
+        try {
+            cache2.getPageExperiments(appName, pageName);
+            fail("Any database exception should be propagated to the caller method..");
+        } catch (Exception e) {
+
+        }
+
+    }
+
+    //===============================================================================================================
+
+    @Test
+    public void happyPathTestForClear() {
+        Configuration conf = ConfigurationFactory.parseConfiguration();
+        conf.setName("happyPathTestForClear");
+        AssignmentsMetadataCacheImpl cache = new AssignmentsMetadataCacheImpl(experimentRepository, prioritiesRepository,
+                mutexRepository, pagesRepository, refreshCacheService, refreshIntervalInMinutes, metadataCacheRefreshTask,
+                healthCheckRegistry, metadataCacheHealthCheck, CacheManager.newInstance(conf));
+
+        //Mock the dependencies
+        Application.Name appName1 = Application.Name.valueOf("Test-App-1");
+        Set<Application.Name> appName1Set = singleEntrySet(appName1);
+        when(appResultMap.get(appName1)).thenReturn(appResultList);
+        when(experimentRepository.getExperimentsForApps(appName1Set)).thenReturn(appResultMap);
+
+        //Call actual business logic
+        cache.getExperimentsByAppName(appName1);
+        cache.getExperimentsByAppName(appName1);
+        cache.getExperimentsByAppName(appName1);
+
+        cache.clear();
+
+        cache.getExperimentsByAppName(appName1);
+        cache.getExperimentsByAppName(appName1);
+        cache.getExperimentsByAppName(appName1);
+
+        //Verify that there are 2 database calls, one before cache clear() and another after cache clear().
+        verify(experimentRepository, times(2)).getExperimentsForApps(any());
+
+    }
+
+    @Test
+    public void happyPathTestForRefresh() {
+        Configuration conf = ConfigurationFactory.parseConfiguration();
+        conf.setName("happyPathTestForRefresh");
+        AssignmentsMetadataCacheImpl cache = new AssignmentsMetadataCacheImpl(experimentRepository, prioritiesRepository,
+                mutexRepository, pagesRepository, refreshCacheService, refreshIntervalInMinutes, metadataCacheRefreshTask,
+                healthCheckRegistry, metadataCacheHealthCheck, CacheManager.newInstance(conf));
+
+        //Mock the dependencies
+        Application.Name appName = Application.Name.valueOf("Test-App-1");
+        Set<Application.Name> appNameSet = singleEntrySet(appName);
+        List<Application.Name> appNameList = singleEntryList(appName);
+
+        Experiment.ID expId = Experiment.ID.valueOf(UUID.randomUUID());
+        Set<Experiment.ID> expIdSet = singleEntrySet(expId);
+        List<Experiment.ID> expIdList = singleEntryList(expId);
+
+        Page.Name pageName = Page.Name.valueOf("Test-Page-1");
+        Pair<Application.Name, Page.Name> appPagePair = Pair.of(appName, pageName);
+        Set<Pair<Application.Name, Page.Name>> appPagePairSet = singleEntrySet(appPagePair);
+        List<Pair<Application.Name, Page.Name>> appPagePairList = singleEntryList(appPagePair);
+
+
+        when(appResultMap.get(appName)).thenReturn(appResultList);
+        when(experimentRepository.getExperimentsForApps(appNameSet)).thenReturn(appResultMap);
+
+        when(expResultMap.get(expId)).thenReturn(expResultObject);
+        when(experimentRepository.getExperimentsMap(expIdSet)).thenReturn(expResultMap);
+
+        when(priorityResultMap.get(appName)).thenReturn(priorityResultObject);
+        when(prioritiesRepository.getPriorities(appNameSet)).thenReturn(priorityResultMap);
+
+        when(exclusionResultMap.get(expId)).thenReturn(exclusionResultList);
+        when(mutexRepository.getExclusivesList(expIdSet)).thenReturn(exclusionResultMap);
+
+        when(bucketResultMap.get(expId)).thenReturn(bucketResultObject);
+        when(experimentRepository.getBucketList(expIdSet)).thenReturn(bucketResultMap);
+
+        when(pageResultMap.get(appPagePair)).thenReturn(pageResultList);
+        when(pagesRepository.getExperimentsWithoutLabels(appPagePairSet)).thenReturn(pageResultMap);
+
+        //Actual calls
+        //Fill up cache by requesting entities
+        cache.getExperimentsByAppName(appName);
+        cache.getExperimentById(expId);
+        cache.getBucketList(expId);
+        cache.getPrioritizedExperimentListMap(appName);
+        cache.getExclusionList(expId);
+        cache.getPageExperiments(appName, pageName);
+
+        cache.refresh();
+        cache.refresh();
+
+        //Verify that there are total 3 database calls for each entity, first to fill up cache and 2 while refresh() as refresh() is called 2 times.
+        verify(experimentRepository, times(1)).getExperimentsForApps(appNameSet);
+        verify(experimentRepository, times(1)).getExperimentsMap(expIdSet);
+        verify(prioritiesRepository, times(1)).getPriorities(appNameSet);
+        verify(mutexRepository, times(1)).getExclusivesList(expIdSet);
+        verify(experimentRepository, times(1)).getBucketList(expIdSet);
+        verify(pagesRepository, times(1)).getExperimentsWithoutLabels(appPagePairSet);
+
+        verify(experimentRepository, times(2)).getExperimentsForApps(appNameList);
+        verify(experimentRepository, times(2)).getExperimentsMap(expIdList);
+        verify(prioritiesRepository, times(2)).getPriorities(appNameList);
+        verify(mutexRepository, times(2)).getExclusivesList(expIdList);
+        verify(experimentRepository, times(2)).getBucketList(expIdList);
+        verify(pagesRepository, times(2)).getExperimentsWithoutLabels(appPagePairList);
+    }
+
+    @Test
+    public void happyPathTestForCacheDetails() {
+        Configuration conf = ConfigurationFactory.parseConfiguration();
+        conf.setName("happyPathTestForCacheDetails");
+        AssignmentsMetadataCacheImpl cache = new AssignmentsMetadataCacheImpl(experimentRepository, prioritiesRepository,
+                mutexRepository, pagesRepository, refreshCacheService, refreshIntervalInMinutes, metadataCacheRefreshTask,
+                healthCheckRegistry, metadataCacheHealthCheck, CacheManager.newInstance(conf));
+
+        //Mock the dependencies
+        Application.Name appName1 = Application.Name.valueOf("Test-App-1");
+        Set<Application.Name> appName1Set = singleEntrySet(appName1);
+        Application.Name appName2 = Application.Name.valueOf("Test-App-2");
+        Set<Application.Name> appName2Set = singleEntrySet(appName2);
+
+        //Mock for first input and then make actual call to fill cache
+        when(appResultMap.get(appName1)).thenReturn(appResultList);
+        when(experimentRepository.getExperimentsForApps(appName1Set)).thenReturn(appResultMap);
+        cache.getExperimentsByAppName(appName1);
+
+        //Mock for second input and then make actual call to fill cache
+        when(appResultMap.get(appName2)).thenReturn(appResultList);
+        when(experimentRepository.getExperimentsForApps(appName2Set)).thenReturn(appResultMap);
+        cache.getExperimentsByAppName(appName2);
+
+        //Make actual call to get cache details
+        Map<String, String> cacheDetails = cache.getDetails();
+
+        //Verify that there are 2 entries in the APP_NAME_TO_EXPERIMENTS_CACHE cache
+        String size = cacheDetails.get(AssignmentsMetadataCache.CACHE_NAME.APP_NAME_TO_EXPERIMENTS_CACHE+".SIZE");
+        assertThat(size, is("2"));
+
+        //Verify that total size of cache details map is 7 = 1 for status & other 6 caches
+        assertThat(cacheDetails.size(), is(7));
+
+    }
+
+    @Test
+    public void happyPathTestForLastRefreshTime() {
+        Configuration conf = ConfigurationFactory.parseConfiguration();
+        conf.setName("happyPathTestForLastRefreshTime");
+        AssignmentsMetadataCacheImpl cache = new AssignmentsMetadataCacheImpl(experimentRepository, prioritiesRepository,
+                mutexRepository, pagesRepository, refreshCacheService, refreshIntervalInMinutes, metadataCacheRefreshTask,
+                healthCheckRegistry, metadataCacheHealthCheck, CacheManager.newInstance(conf));
+
+        //Mock the dependencies
+        Date cTime = new Date();
+        when(metadataCacheRefreshTask.getLastRefreshTime()).thenReturn(cTime);
+
+        //Actual calls
+        Date lastRefreshTime = cache.getLastRefreshTime();
+
+        //Verify that cache returns the same time which is returned by the refresh task
+        assertThat(cTime, is(lastRefreshTime));
+    }
 
     /**
      * Utility to create single entry set
@@ -215,6 +511,19 @@ public class AssignmentsMetadataCacheTest {
      */
     private <T> Set<T> singleEntrySet(T entry) {
         Set aSet = new HashSet<T>(1);
+        aSet.add(entry);
+        return aSet;
+    }
+
+    /**
+     * Utility to create single entry List
+     *
+     * @param entry
+     * @param <T>
+     * @return
+     */
+    private <T> List<T> singleEntryList(T entry) {
+        List aSet = new ArrayList<T>(1);
         aSet.add(entry);
         return aSet;
     }

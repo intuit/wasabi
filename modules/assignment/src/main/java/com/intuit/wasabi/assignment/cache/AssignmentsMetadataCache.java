@@ -34,6 +34,15 @@ import java.util.Optional;
  */
 
 public interface AssignmentsMetadataCache {
+    enum CACHE_NAME {
+        APP_NAME_TO_EXPERIMENTS_CACHE,
+        EXPERIMENT_ID_TO_EXPERIMENT_CACHE,
+        APP_NAME_TO_PRIORITIZED_EXPERIMENTS_CACHE,
+        EXPERIMENT_ID_TO_EXCLUSION_CACHE,
+        EXPERIMENT_ID_TO_BUCKET_CACHE,
+        APP_NAME_N_PAGE_TO_EXPERIMENTS_CACHE
+    }
+
     /**
      * This method refresh the existing cache (keys) with the updated data from Database.
      *
