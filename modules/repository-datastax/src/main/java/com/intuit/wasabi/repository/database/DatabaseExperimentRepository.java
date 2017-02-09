@@ -650,14 +650,6 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
     }
 
     /**
-     * Get the summary of assignments delivered for each experiment
-     */
-    @Override
-    public AssignmentCounts getAssignmentCounts(Experiment.ID experimentID, Context context) {
-        throw new UnsupportedOperationException("Assignment counts not supported on sql");
-    }
-
-    /**
      * Get a bucket list for a list of Experiments in a single cassandra call
      */
     @Override

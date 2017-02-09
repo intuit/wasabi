@@ -39,14 +39,4 @@ public interface BucketAssignmentCountAccessor {
     @Query("SELECT * FROM bucket_assignment_counts WHERE experiment_id =?")
     Result<BucketAssignmentCount> selectBy(UUID experimentId);
 
-	/**
-	 * Get count by params
-	 * @param experimentId
-	 * @param bucketLable
-	 * @return result set
-	 */
-   @Query("select bucket_assignment_count from bucket_assignment_counts "
-   		+ "where experiment_id = ? and "
-   		+ "bucket_label = ? ")
-   ResultSet countBy(UUID experimentId, String bucketLable);
 }

@@ -69,7 +69,6 @@ public class CassandraExperimentRepository implements ExperimentRepository {
 
 	private ExperimentLabelIndexAccessor experimentLabelIndexAccessor;
 
-	private BucketAssignmentCountAccessor bucketAssignmentCountAccessor;
 	private BucketAccessor bucketAccessor;
 
 	private ApplicationListAccessor applicationListAccessor;
@@ -382,76 +381,6 @@ public class CassandraExperimentRepository implements ExperimentRepository {
 			throw new RepositoryException("Could not update indices for experiment \""
 							+ newExperiment + "\"", e);
 		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public AssignmentCounts getAssignmentCounts(Experiment.ID experimentID,
-			Context context) {
-		
-		LOGGER.debug("Get Assignment Counts for Experiment {} and context {}",
-				new Object[] { experimentID, context });
-
-		List<Bucket> bucketList = getBuckets(experimentID, false /* caller already checks if experiment exists */).getBuckets();
-
-		AssignmentCounts.Builder builder = new AssignmentCounts.Builder();
-		builder.withExperimentID(experimentID);
-
-		List<BucketAssignmentCount> bucketAssignmentCountList = new ArrayList<>(
-				bucketList.size() + 1);
-		long bucketAssignmentsCount = 0, nullAssignmentsCount = 0;
-
-		for (Bucket bucket : bucketList) {
-
-			try {
-				
-				ResultSet counts = bucketAssignmentCountAccessor.countBy(
-				experimentID.getRawID(), bucket
-						.getLabel().toString());
-				
-				Long count = 0L;
-				
-				if ( counts.one() != null )
-					count = counts.one().get(0, Long.class);
-				
-				bucketAssignmentCountList
-						.add(new BucketAssignmentCount.Builder()
-								.withBucket(bucket.getLabel()).withCount(count)
-								.build());
-				
-				bucketAssignmentsCount += count;
-
-			} catch (Exception e) {
-				LOGGER.error("Get Assignment Counts for Experiment {} and context {} failed", new Object[] { experimentID, context }, e);
-				throw new RepositoryException("Could not fetch assignmentCounts for experiment " + "with ID \"" + experimentID + "\"", e);
-			}
-
-		}
-
-		// Checking the count for null assignments
-		try {
-			ResultSet counts = bucketAssignmentCountAccessor.countBy(
-			experimentID.getRawID(), "");
-			
-			if ( counts.one() != null )
-				nullAssignmentsCount = counts.one().get(0, Long.class);
-			
-			bucketAssignmentCountList.add(new BucketAssignmentCount.Builder()
-					.withBucket(null).withCount(nullAssignmentsCount).build());
-		} catch (Exception e) {
-			LOGGER.error("Get Assignment Counts for Experiment {} and context {} failed",
-					new Object[] { experimentID, context }, e);
-			throw new RepositoryException("Could not fetch assignmentCounts for experiment " + "with ID \"" + experimentID + "\"", e);
-		}
-
-		return builder.withBucketAssignmentCount(bucketAssignmentCountList)
-				.withTotalUsers(new TotalUsers.Builder()
-								.withTotal(bucketAssignmentsCount + nullAssignmentsCount)
-								.withBucketAssignments(bucketAssignmentsCount)
-								.withNullAssignments(nullAssignmentsCount)
-								.build()).build();
 	}
 
 	/**
@@ -1212,12 +1141,6 @@ public class CassandraExperimentRepository implements ExperimentRepository {
 			throw new RepositoryException("Unable to insert into top level application list: \""
 							+ applicationName.toString() + "\"" + e);
 		}
-	}
-
-	public void setBucketAssignmentCountAccessor(
-			BucketAssignmentCountAccessor bucketAssignmentCountAccessor) {
-		this.bucketAssignmentCountAccessor = bucketAssignmentCountAccessor;
-		
 	}
 
 }

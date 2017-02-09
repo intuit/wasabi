@@ -251,12 +251,6 @@ public class DatabaseExperimentRepositoryTest {
 //                .hasMessage("No support for sql - indices are only created in Cassandra")
 //                .hasNoCause();
 
-        BDDCatchException.when(repository).getAssignmentCounts(Experiment.ID.newInstance(), null);
-        BDDCatchException.then(caughtException())
-                .isInstanceOf(UnsupportedOperationException.class)
-                .hasMessage("Assignment counts not supported on sql")
-                .hasNoCause();
-
         BDDCatchException.when(repository).getBucketList(Collections.<Experiment.ID>emptyList());
         BDDCatchException.then(caughtException())
                 .isInstanceOf(UnsupportedOperationException.class)

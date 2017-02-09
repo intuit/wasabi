@@ -400,11 +400,6 @@ public class CassandraExperimentRepositoryTest {
 	}
 
 	@Test(expected=RepositoryException.class)
-	public void testGetAssigmentsCountWithAccessorMockThrowsException() {
-		AssignmentCounts count = repository.getAssignmentCounts(experimentID1, QA);
-	}
-
-	@Test(expected=RepositoryException.class)
 	public void testLogBucketAuditAccessorMockThrowsException() {
 		String bucketLabel = "bkt" + System.currentTimeMillis();
 		List<Bucket.BucketAuditInfo> auditLog = new ArrayList<>();
