@@ -722,7 +722,6 @@ public class CassandraExperimentRepositoryITest extends IntegrationTestBase  {
 	@Test(expected=ExperimentNotFoundException.class)
 	public void testGetBucketsThrowsExperimentNotFoundException() {
 		BucketList buckets = repository.getBuckets(Experiment.ID.newInstance(), true);
-		System.out.println("Buckets = " + buckets);
 	}
 
 	@Test
