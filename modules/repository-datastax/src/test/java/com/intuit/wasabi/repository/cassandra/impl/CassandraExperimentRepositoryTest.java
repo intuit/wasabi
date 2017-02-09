@@ -401,7 +401,6 @@ public class CassandraExperimentRepositoryTest {
 
 	@Test(expected=RepositoryException.class)
 	public void testGetAssigmentsCountWithAccessorMockThrowsException() {
-//		repository.setUserBucketIndexAccessor(mockUserBucketIndexAccessor);
 		AssignmentCounts count = repository.getAssignmentCounts(experimentID1, QA);
 	}
 
