@@ -16,6 +16,7 @@
 package com.intuit.wasabi.repository.cassandra.impl;
 
 import com.datastax.driver.mapping.Result;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.inject.Inject;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Experiment;
@@ -23,16 +24,22 @@ import com.intuit.wasabi.experimentobjects.Experiment.ID;
 import com.intuit.wasabi.experimentobjects.PrioritizedExperiment;
 import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
 import com.intuit.wasabi.repository.RepositoryException;
+import com.intuit.wasabi.repository.cassandra.UninterruptibleUtil;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
 import com.intuit.wasabi.repository.PrioritiesRepository;
 import com.intuit.wasabi.repository.cassandra.accessor.PrioritiesAccessor;
 
+import com.intuit.wasabi.repository.cassandra.pojo.Exclusion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -114,6 +121,65 @@ public class CassandraPrioritiesRepository implements PrioritiesRepository {
 		LOGGER.debug("Returning prioritizedExperimentList {} ",prioritizedExperimentList);
 
 		return prioritizedExperimentList;
+	}
+
+	/**
+	 * Returns the priority list for given set of applications
+	 *
+	 * @param applicationNames  Set of application names
+	 * @return Map of PrioritizedExperimentList prioritized experiments for given application names.
+	 */
+	@Override
+	public Map<Application.Name, PrioritizedExperimentList> getPriorities(Collection<Application.Name> applicationNames) {
+		Map<Application.Name, ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Application>>> prioritiesFutureMap = new HashMap<>(applicationNames.size());
+		Map<Application.Name, PrioritizedExperimentList> appPrioritiesMap = new HashMap<>(applicationNames.size());
+		Map<Application.Name, ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment>>> experimentsFutureMap = new HashMap<>(applicationNames.size());
+
+		try {
+			//Send calls asynchronously
+			applicationNames.forEach(appName -> {
+				experimentsFutureMap.put(appName, experimentAccessor.asyncGetExperimentByAppName(appName.toString()));
+				LOGGER.debug("Sent experimentAccessor.asyncGetExperimentByAppName({})", appName);
+
+				prioritiesFutureMap.put(appName, prioritiesAccessor.asyncGetPriorities(appName.toString()));
+				LOGGER.debug("Sent prioritiesAccessor.asyncGetPriorities ({})", appName);
+			});
+
+			//Process the Futures in the order that are expected to arrive earlier
+			Map<Experiment.ID, Experiment> experimentMap = new HashMap<>();
+			for (Application.Name appName : experimentsFutureMap.keySet()) {
+				ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment>> experimentsFuture = experimentsFutureMap.get(appName);
+				UninterruptibleUtil.getUninterruptibly(experimentsFuture).all().stream().forEach(expPojo -> {
+					Experiment exp = ExperimentHelper.makeExperiment(expPojo);
+					experimentMap.put(exp.getID(), exp);
+				});
+			}
+			LOGGER.debug("experimentMap=> {}", experimentMap);
+
+			for (Application.Name appName : prioritiesFutureMap.keySet()) {
+				ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Application>> applicationFuture = prioritiesFutureMap.get(appName);
+				PrioritizedExperimentList prioritizedExperimentList = new PrioritizedExperimentList();
+				int priorityValue = 1;
+				for (com.intuit.wasabi.repository.cassandra.pojo.Application priority : UninterruptibleUtil.getUninterruptibly(applicationFuture).all()) {
+					for (UUID uuid : priority.getPriorities()) {
+						Experiment exp = experimentMap.get(Experiment.ID.valueOf(uuid));
+						prioritizedExperimentList.addPrioritizedExperiment(PrioritizedExperiment.from(exp, priorityValue).build());
+						priorityValue += 1;
+					}
+				}
+				if (LOGGER.isDebugEnabled()) {
+					for (PrioritizedExperiment exp : prioritizedExperimentList.getPrioritizedExperiments()) {
+						LOGGER.debug("prioritizedExperiment=> {} ", exp);
+					}
+				}
+				appPrioritiesMap.put(appName, prioritizedExperimentList);
+			}
+		} catch (Exception e) {
+			LOGGER.error("Error while getting priorities for {}", applicationNames, e);
+			throw new RepositoryException("Error while getting priorities for given applications", e);
+		}
+		LOGGER.debug("Returning app priorities map {}", appPrioritiesMap);
+		return appPrioritiesMap;
 	}
 
 	/**

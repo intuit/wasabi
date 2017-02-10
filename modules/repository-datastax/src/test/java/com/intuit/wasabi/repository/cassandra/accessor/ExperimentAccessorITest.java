@@ -92,11 +92,11 @@ public class ExperimentAccessorITest extends IntegrationTestBase {
 			public int compare(UUID o1, UUID o2) {
 				return o1.compareTo(o2);
 			} });
-    	
-    	Result<Experiment> experiment1 = accessor.getExperiments(experimentIds);
-    	List<Experiment> experimentResult = experiment1.all();
-    	experimentResult.sort(new Comparator<Experiment>() {
 
+		List<Experiment> experimentResult = new ArrayList<>(2);
+		experimentIds.forEach(expId -> experimentResult.add(accessor.getExperimentById(expId).one()));
+
+    	experimentResult.sort(new Comparator<Experiment>() {
 			@Override
 			public int compare(Experiment o1, Experiment o2) {
 				return o1.getId().compareTo(o2.getId());

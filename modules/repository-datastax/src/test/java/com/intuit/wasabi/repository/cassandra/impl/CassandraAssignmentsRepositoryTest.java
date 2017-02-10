@@ -1187,14 +1187,6 @@ public class CassandraAssignmentsRepositoryTest {
                 .withBucketLabel(Bucket.Label.valueOf("bucket-1"))
                 .build();
         spyRepository.deleteAssignment(experiment, userID, context, APPLICATION_NAME, currentAssignment);
-        verify(spyRepository, times(1)).deleteUserFromLookUp(eq(experiment.getID()), eq(userID), eq(context));
-        verify(spyRepository, times(1)).deleteAssignmentOld(
-                eq(experiment.getID()),
-                eq(userID),
-                eq(context),
-                eq(APPLICATION_NAME),
-                eq(currentAssignment.getBucketLabel())
-        );
         verify(spyRepository, times(1)).removeIndexExperimentsToUser(
                 eq(userID),
                 eq(experiment.getID()),
@@ -1220,8 +1212,6 @@ public class CassandraAssignmentsRepositoryTest {
                 .withUserID(userID)
                 .build();
         spyRepository.assignUser(currentAssignment, experiment, date);
-        verify(spyRepository, times(1)).assignUserToOld(eq(currentAssignment), eq(date));
-        verify(spyRepository, times(0)).assignUserToLookUp(eq(currentAssignment), eq(date));
         verify(spyRepository, times(1)).indexExperimentsToUser(eq(currentAssignment));
     }
 
@@ -1265,8 +1255,6 @@ public class CassandraAssignmentsRepositoryTest {
                 .withUserID(userID)
                 .build();
         spyRepository.assignUser(currentAssignment, experiment, date);
-        verify(spyRepository, times(0)).assignUserToOld(eq(currentAssignment), eq(date));
-        verify(spyRepository, times(1)).assignUserToLookUp(eq(currentAssignment), eq(date));
         verify(spyRepository, times(1)).indexExperimentsToUser(eq(currentAssignment));
     }
 
@@ -1432,7 +1420,7 @@ public class CassandraAssignmentsRepositoryTest {
         when(exclusionFuture.get()).thenReturn(exclusionResult);
 
         //------ Actual call ---------
-        repository.populateExperimentMetadata(userID, appName, context, experimentBatch, allowAssignmentsOptional, appPriorities, experimentMap, userAssignments, bucketMap, exclusionMap);
+        repository.populateAssignmentsMetadata(userID, appName, context, experimentBatch, allowAssignmentsOptional, appPriorities, experimentMap, userAssignments, bucketMap, exclusionMap);
 
         //------ Assert response output ---------
         assertThat(appPriorities.getPrioritizedExperiments().size(), is(1));
@@ -1465,7 +1453,7 @@ public class CassandraAssignmentsRepositoryTest {
         Map<Experiment.ID, List<Experiment.ID>> exclusionMap = new HashMap<>();
 
         //------ Actual call ---------
-        repository.populateExperimentMetadata(userID, appName, context, experimentBatch, allowAssignmentsOptional, appPriorities, experimentMap, userAssignments, bucketMap, exclusionMap);
+        repository.populateAssignmentsMetadata(userID, appName, context, experimentBatch, allowAssignmentsOptional, appPriorities, experimentMap, userAssignments, bucketMap, exclusionMap);
 
         //------ Assert response output ---------
         assertThat(appPriorities.getPrioritizedExperiments().size(), is(0));

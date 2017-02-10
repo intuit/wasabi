@@ -17,6 +17,7 @@ package com.intuit.wasabi.repository.cassandra.impl;
 
 import com.datastax.driver.core.Session;
 import com.datastax.driver.mapping.Result;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Experiment;
@@ -38,11 +39,19 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
+import static io.codearte.catchexception.shade.mockito.Mockito.mock;
+import static java.util.Objects.nonNull;
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CassandraMutexRepositoryTest {
@@ -78,12 +87,12 @@ public class CassandraMutexRepositoryTest {
     
     @Before
     public void setUp() throws Exception {
-    	accessor = Mockito.mock(ExclusionAccessor.class);
-    	experimentAccessor = Mockito.mock(ExperimentAccessor.class);
-    	resultDatastax = Mockito.mock(Result.class);
-    	resultExperimentDatastax = Mockito.mock(Result.class);
-    	driver = Mockito.mock(CassandraDriver.class);
-    	session = Mockito.mock(Session.class);
+    	accessor = mock(ExclusionAccessor.class);
+    	experimentAccessor = mock(ExperimentAccessor.class);
+    	resultDatastax = mock(Result.class);
+    	resultExperimentDatastax = mock(Result.class);
+    	driver = mock(CassandraDriver.class);
+    	session = mock(Session.class);
     	Mockito.when(driver.getSession()).thenReturn(session);
     	repository = new CassandraMutexRepository(experimentAccessor, accessor, driver);
     	base = Experiment.ID.newInstance();
@@ -202,12 +211,14 @@ public class CassandraMutexRepositoryTest {
 	}
 
 	@Test
-	public void testGetOneExclusiveListSuccess() {
+	public void testGetOneExclusiveListSuccess() throws InterruptedException, ExecutionException {
 		Exclusion exc = new Exclusion(base.getRawID(), pair.getRawID());
 		exclusions.add(exc);
-		Mockito.when(accessor.getExclusions(base.getRawID())).thenReturn(resultDatastax);
+		ListenableFuture<Result<Exclusion>> mockListenableFuture = mock(ListenableFuture.class);
+		Mockito.when(accessor.asyncGetExclusions(base.getRawID())).thenReturn(mockListenableFuture);
+		Mockito.when(mockListenableFuture.get()).thenReturn(resultDatastax);
 		Mockito.when(resultDatastax.all()).thenReturn(exclusions);
-		
+
 		ArrayList<Experiment.ID> ids = new ArrayList<>();
 		ids.add(base);
 		Map<ID, List<ID>> result = repository.getExclusivesList(ids);
@@ -244,5 +255,46 @@ public class CassandraMutexRepositoryTest {
 		Mockito.when(accessor.getExclusions(base.getRawID())).thenThrow(new RuntimeException("RTE"));
 		List<ID> result = repository.getExclusionList(base);
 		
+	}
+
+	@Test
+	public void testGetExclusivesList() throws ExecutionException, InterruptedException {
+		//------ Input --------
+		Experiment.ID expId1 = Experiment.ID.newInstance();
+		Experiment.ID expId2 = Experiment.ID.newInstance();
+		Experiment.ID expId3 = Experiment.ID.newInstance();
+
+		Set<Experiment.ID> expIdSet = new HashSet<>();
+		expIdSet.add(expId1);
+
+		//------ Mocking interacting calls
+		ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Exclusion>> experimentsFuture = Mockito.mock(ListenableFuture.class);
+		Mockito.when(accessor.asyncGetExclusions(expId1.getRawID())).thenReturn(experimentsFuture);
+		List<com.intuit.wasabi.repository.cassandra.pojo.Exclusion> expList = new ArrayList<>();
+		com.intuit.wasabi.repository.cassandra.pojo.Exclusion exp1 = com.intuit.wasabi.repository.cassandra.pojo.Exclusion.builder()
+				.base(expId1.getRawID())
+				.pair(expId2.getRawID())
+				.build();
+		expList.add(exp1);
+
+		com.intuit.wasabi.repository.cassandra.pojo.Exclusion exp2 = com.intuit.wasabi.repository.cassandra.pojo.Exclusion.builder()
+				.base(expId1.getRawID())
+				.pair(expId3.getRawID())
+				.build();
+		expList.add(exp2);
+
+		Result<com.intuit.wasabi.repository.cassandra.pojo.Exclusion> expResult = Mockito.mock(Result.class);
+		Mockito.when(expResult.all()).thenReturn(expList);
+		Mockito.when(experimentsFuture.get()).thenReturn(expResult);
+
+		//Make actual call
+		Map<Experiment.ID, List<Experiment.ID>> mutuallyExclusiveExperiments = repository.getExclusivesList(expIdSet);
+
+		//Verify result
+		assertThat(mutuallyExclusiveExperiments.size(), is(1));
+		assertThat(nonNull(mutuallyExclusiveExperiments.get(expId1)), is(true));
+		assertThat(mutuallyExclusiveExperiments.get(expId1).size(), is(2));
+		assertThat(mutuallyExclusiveExperiments.get(expId1).contains(expId2), is(true));
+		assertThat(mutuallyExclusiveExperiments.get(expId1).contains(expId3), is(true));
 	}
 }

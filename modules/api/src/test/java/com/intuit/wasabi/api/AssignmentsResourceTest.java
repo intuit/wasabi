@@ -53,7 +53,9 @@ import static java.nio.charset.Charset.forName;
 import static org.apache.commons.codec.binary.Base64.encodeBase64;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.doThrow;
@@ -236,7 +238,7 @@ public class AssignmentsResourceTest {
     public void getAssignmentsQueueLength() throws Exception {
         assertThat(resource.getAssignmentsQueueLength().getStatus(), is(HttpStatus.SC_OK));
     }
-    
+
     @Test
     public void getAssignmentsQueueDetails() throws Exception {
         Map<String, Object> queueDetailsMap = new HashMap<String, Object>();
@@ -256,13 +258,13 @@ public class AssignmentsResourceTest {
         Response response = resource.getAssignmentsQueueDetails();
         assertEquals(queueDetailsMap, response.getEntity());
     }
-    
+
     @Test
     public void flushMessages() throws Exception {
         when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
         assertThat(resource.flushMessages(AUTHHEADER).getStatus(), is(HttpStatus.SC_NO_CONTENT));
     }
-    
+
     @Test
     public void flushMessagesNotSuperAdmin() throws Exception {
         // fewer allowed experiments
@@ -273,7 +275,45 @@ public class AssignmentsResourceTest {
             resource.flushMessages(AUTHHEADER);
             fail();
         } catch (AuthenticationException ignored) {
-        }        
+        }
     }
 
+
+    @Test
+    public void clearAssignmentsMetadataCacheTest() throws Exception {
+        when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
+        assertThat(resource.clearMetadataCache(AUTHHEADER).getStatus(), is(HttpStatus.SC_OK));
+    }
+
+    @Test
+    public void clearAssignmentsMetadataCacheNotSuperAdminTest() throws Exception {
+        // fewer allowed experiments
+        when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
+        //this throw is so that only the allowed (TESTAPP) experiments get returned
+        doThrow(AuthenticationException.class).when(authorization).checkSuperAdmin(USER);
+        try {
+            resource.clearMetadataCache(AUTHHEADER);
+            fail();
+        } catch (AuthenticationException ignored) {
+        }
+    }
+
+    @Test
+    public void getMetadataCacheDetailsTest() throws Exception {
+        when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
+        assertThat(resource.getMetadataCacheDetails(AUTHHEADER).getStatus(), is(HttpStatus.SC_OK));
+    }
+
+    @Test
+    public void getMetadataCacheDetailsNotSuperAdminTest() throws Exception {
+        // fewer allowed experiments
+        when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
+        //this throw is so that only the allowed (TESTAPP) experiments get returned
+        doThrow(AuthenticationException.class).when(authorization).checkSuperAdmin(USER);
+        try {
+            resource.getMetadataCacheDetails(AUTHHEADER);
+            fail();
+        } catch (AuthenticationException ignored) {
+        }
+    }
 }

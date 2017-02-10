@@ -600,6 +600,7 @@ public class SmokeTest extends TestBase {
      */
     @Test(dependsOnMethods = {"t_deleteExperiments"})
     public void t_checkDeletedExperiments() {
+        clearAssignmentsMetadataCache();
         List<Experiment> experiments = getExperiments();
         Assert.assertFalse(experiments.contains(experiment), experiment + " not deleted.");
         Assert.assertFalse(experiments.contains(mutualExclusiveExperiment), mutualExclusiveExperiment + " not deleted.");

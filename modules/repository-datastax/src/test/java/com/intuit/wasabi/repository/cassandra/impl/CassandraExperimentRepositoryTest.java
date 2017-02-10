@@ -19,14 +19,28 @@ package com.intuit.wasabi.repository.cassandra.impl;
 import static org.junit.Assert.assertEquals;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
+import com.google.common.collect.HashBasedTable;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.intuit.wasabi.assignmentobjects.SegmentationProfile;
+import com.intuit.wasabi.assignmentobjects.User;
+import com.intuit.wasabi.experimentobjects.ExperimentBatch;
+import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -57,6 +71,8 @@ import com.intuit.wasabi.repository.cassandra.accessor.audit.BucketAuditLogAcces
 import com.intuit.wasabi.repository.cassandra.accessor.audit.ExperimentAuditLogAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentLabelIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.StateExperimentIndexAccessor;
+
+import static org.hamcrest.core.Is.is;
 
 public class CassandraExperimentRepositoryTest {
 
@@ -504,6 +520,137 @@ public class CassandraExperimentRepositoryTest {
 		repository.setExperimentAccessor(mockExperimentAccessor);
 		newExperiment1.setId(Experiment.ID.newInstance());;
 		ID experimentId = repository.createExperiment(newExperiment1);		
+	}
+
+	@Test
+	public void testGetExperimentsForApps() throws ExecutionException, InterruptedException {
+		//------ Input --------
+		Experiment.ID expId1 = Experiment.ID.newInstance();
+		Application.Name appName = Application.Name.valueOf("testApp1");
+		Set<Name> appNameSet = new HashSet<>();
+		appNameSet.add(appName);
+
+		//------ Mocking interacting calls
+		ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment>> experimentsFuture = mock(ListenableFuture.class);
+		when(mockExperimentAccessor.asyncGetExperimentByAppName(appName.toString())).thenReturn(experimentsFuture);
+		List<com.intuit.wasabi.repository.cassandra.pojo.Experiment> expList = new ArrayList<>();
+		com.intuit.wasabi.repository.cassandra.pojo.Experiment exp1 = com.intuit.wasabi.repository.cassandra.pojo.Experiment.builder()
+				.id(expId1.getRawID())
+				.appName(appName.toString())
+				.startTime(new Date())
+				.created(new Date())
+				.endTime(new Date())
+				.state(Experiment.State.RUNNING.toString())
+				.label("testExp1")
+				.modified(new Date())
+				.samplePercent(90.00)
+				.build();
+		expList.add(exp1);
+		Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment> expResult = mock(Result.class);
+		when(expResult.all()).thenReturn(expList);
+		when(experimentsFuture.get()).thenReturn(expResult);
+
+		//Make actual call
+		Map<Application.Name, List<Experiment>> actualResultMap = repository.getExperimentsForApps(appNameSet);
+
+		//Verify result
+		assertThat(actualResultMap.get(appName).size(), is(1));
+		assertThat(actualResultMap.get(appName).get(0).getID().getRawID(), is(exp1.getId()));
+	}
+
+	@Test
+	public void testGetExperimentsMap() throws ExecutionException, InterruptedException {
+		//------ Input --------
+		Application.Name appName = Application.Name.valueOf("testApp1");
+		Experiment.ID expId1 = Experiment.ID.newInstance();
+		Experiment.ID expId2 = Experiment.ID.newInstance();
+
+		Set<Experiment.ID> expIdSet = new HashSet<>();
+		expIdSet.add(expId1);
+		expIdSet.add(expId2);
+
+		//------ Mocking interacting calls
+		ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment>> experimentsFuture = mock(ListenableFuture.class);
+		when(mockExperimentAccessor.asyncGetExperimentById(expId1.getRawID())).thenReturn(experimentsFuture);
+		List<com.intuit.wasabi.repository.cassandra.pojo.Experiment> expList = new ArrayList<>();
+		com.intuit.wasabi.repository.cassandra.pojo.Experiment exp1 = com.intuit.wasabi.repository.cassandra.pojo.Experiment.builder()
+				.id(expId1.getRawID())
+				.appName(appName.toString())
+				.startTime(new Date())
+				.created(new Date())
+				.endTime(new Date())
+				.state(Experiment.State.RUNNING.toString())
+				.label("testExp1")
+				.modified(new Date())
+				.samplePercent(90.00)
+				.build();
+		expList.add(exp1);
+		Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment> expResult = mock(Result.class);
+		when(expResult.all()).thenReturn(expList);
+		when(experimentsFuture.get()).thenReturn(expResult);
+
+
+		ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment>> experimentsFuture2 = mock(ListenableFuture.class);
+		when(mockExperimentAccessor.asyncGetExperimentById(expId2.getRawID())).thenReturn(experimentsFuture2);
+		List<com.intuit.wasabi.repository.cassandra.pojo.Experiment> expList2 = new ArrayList<>();
+		com.intuit.wasabi.repository.cassandra.pojo.Experiment exp2 = com.intuit.wasabi.repository.cassandra.pojo.Experiment.builder()
+				.id(expId2.getRawID())
+				.appName(appName.toString())
+				.startTime(new Date())
+				.created(new Date())
+				.endTime(new Date())
+				.state(Experiment.State.RUNNING.toString())
+				.label("testExp1")
+				.modified(new Date())
+				.samplePercent(90.00)
+				.build();
+		expList2.add(exp2);
+		Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment> expResult2 = mock(Result.class);
+		when(expResult2.all()).thenReturn(expList2);
+		when(experimentsFuture2.get()).thenReturn(expResult2);
+
+
+		//Make actual call
+		Map<Experiment.ID, Experiment> actualResultMap = repository.getExperimentsMap(expIdSet);
+
+		//Verify result
+		assertThat(actualResultMap.size(), is(2));
+		assertThat(actualResultMap.get(expId1).getID().getRawID(), is(exp1.getId()));
+		assertThat(actualResultMap.get(expId2).getID().getRawID(), is(exp2.getId()));
+	}
+
+
+	@Test
+	public void testGetBucketList() throws ExecutionException, InterruptedException {
+		//------ Input --------
+		Experiment.ID expId1 = Experiment.ID.newInstance();
+		Set<Experiment.ID> expIdSet = new HashSet<>();
+		expIdSet.add(expId1);
+
+		//------ Mocking interacting calls
+		ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Bucket>> bucketsFuture = mock(ListenableFuture.class);
+		when(mockBucketAccessor.asyncGetBucketByExperimentId(expId1.getRawID())).thenReturn(bucketsFuture);
+		List<com.intuit.wasabi.repository.cassandra.pojo.Bucket> bucketList = new ArrayList<>();
+		com.intuit.wasabi.repository.cassandra.pojo.Bucket bucket1 = com.intuit.wasabi.repository.cassandra.pojo.Bucket.builder()
+				.experimentId(expId1.getRawID())
+				.state(State.OPEN.toString())
+				.allocation(0.4d)
+				.control(true)
+				.label("Test-Bucket-1")
+				.payload("Test-Bucket-1-Payload")
+				.build();
+		bucketList.add(bucket1);
+		Result<com.intuit.wasabi.repository.cassandra.pojo.Bucket> bucketResult = mock(Result.class);
+		when(bucketResult.all()).thenReturn(bucketList);
+		when(bucketsFuture.get()).thenReturn(bucketResult);
+
+		//Make actual call
+		Map<Experiment.ID, BucketList> actualResultMap = repository.getBucketList(expIdSet);
+
+		//Verify result
+		assertThat(actualResultMap.get(expId1)!=null, is(true));
+		assertThat(actualResultMap.get(expId1).getBuckets().size(), is(1));
+		assertThat(actualResultMap.get(expId1).getBuckets().get(0).getLabel().toString(), is("Test-Bucket-1"));
 	}
 
 }

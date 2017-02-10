@@ -27,6 +27,7 @@ import com.google.common.base.Preconditions;
 import com.intuit.wasabi.experimentobjects.exceptions.InvalidIdentifierException;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Objects;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -38,7 +39,7 @@ public interface Application {
 
     @JsonSerialize(using = Application.Name.Serializer.class)
     @JsonDeserialize(using = Application.Name.Deserializer.class)
-    class Name {
+    class Name implements Serializable {
 
         private Name(String name) {
             super();
