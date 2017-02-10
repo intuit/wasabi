@@ -50,7 +50,6 @@ import com.intuit.wasabi.repository.cassandra.accessor.export.UserAssignmentExpo
 import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentUserIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.PageExperimentIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.UserAssignmentIndexAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.index.UserBucketIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.pojo.UserAssignment;
 import com.intuit.wasabi.repository.cassandra.pojo.export.UserAssignmentExport;
 import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentUserByUserIdContextAppNameExperimentId;
@@ -65,7 +64,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
@@ -105,7 +103,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     private UserAssignmentExportAccessor userAssignmentExportAccessor;
 
     private BucketAccessor bucketAccessor;
-    private UserBucketIndexAccessor userBucketIndexAccessor;
     private BucketAssignmentCountAccessor bucketAssignmentCountAccessor;
 
     private StagingAccessor stagingAccessor;
@@ -127,7 +124,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
             UserAssignmentExportAccessor userAssignmentExportAccessor,
 
             BucketAccessor bucketAccessor,
-            UserBucketIndexAccessor userBucketIndexAccessor,
             BucketAssignmentCountAccessor bucketAssignmentCountAccessor,
 
             StagingAccessor stagingAccessor,
@@ -161,7 +157,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         this.userAssignmentExportAccessor = userAssignmentExportAccessor;
         //Bucket related accessors
         this.bucketAccessor = bucketAccessor;
-        this.userBucketIndexAccessor = userBucketIndexAccessor;
         this.bucketAssignmentCountAccessor = bucketAssignmentCountAccessor;
         //Staging related accessor
         this.stagingAccessor = stagingAccessor;
@@ -544,7 +539,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         assignmentsCountExecutor.execute(new AssignmentCountEnvelope(this, experimentRepository,
                 dbRepository, experiment, assignment, countUp, eventLog, date, assignUserToExport, assignBucketCount));
 
-        indexUserToBucket(assignment);
         indexExperimentsToUser(assignment);
 
         return new_assignment;
@@ -575,9 +569,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
 
         // Submit tasks for each assignment to increment/decrement counts
         incrementCounts(assignments, date);
-
-        // Make entries in user_bucket_index table
-        indexUserToBucket(assignments);
 
         // Make entries in experiment_user_index table
         indexExperimentsToUser(assignments);
@@ -664,21 +655,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     }
 
     /**
-     * Make entries in user_bucket_index table
-     *
-     * @param assignments
-     */
-    private void indexUserToBucket(List<Pair<Experiment, Assignment>> assignments) {
-        final List<ResultSetFuture> rFutures = new ArrayList<>();
-        assignments.forEach(pair -> {
-            rFutures.add(asyncIndexUserToBucket(pair.getRight()));
-        });
-
-        rFutures.forEach(ResultSetFuture::getUninterruptibly);
-        LOGGER.debug("Finished asyncIndexUserToBucket");
-    }
-
-    /**
      * Make entries in experiment_user_index table
      *
      * @param assignments
@@ -705,41 +681,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         }
     }
 
-    /**
-     *
-     * Index user to bucket in asynchronous way
-     *
-     * @param assignment
-     * @return
-     */
-    ResultSetFuture asyncIndexUserToBucket(Assignment assignment) {
-        ResultSetFuture resultSetFuture = null;
-        try{
-            if(isNull(assignment.getBucketLabel())) {
-                resultSetFuture = userBucketIndexAccessor.asyncInsertBy(
-                        assignment.getExperimentID().getRawID(),
-                        assignment.getUserID().toString(),
-                        assignment.getContext().getContext(),
-                        assignment.getCreated(),
-                        new String(new byte[0], StandardCharsets.UTF_8 ) //Needed because of compact storage
-                );
-            } else {
-                resultSetFuture = userBucketIndexAccessor.asyncInsertBy(
-                        assignment.getExperimentID().getRawID(),
-                        assignment.getUserID().toString(),
-                        assignment.getContext().getContext(),
-                        assignment.getCreated(),
-                        assignment.getBucketLabel().toString()
-                );
-            }
-        }catch (WriteTimeoutException | UnavailableException | NoHostAvailableException e){
-            throw new RepositoryException("Could not index user to bucket \"" + assignment + "\"", e);
-        }
-
-        return resultSetFuture;
-    }
-
-
     void indexExperimentsToUser(Assignment assignment) {
         try {
             if (isNull(assignment.getBucketLabel())) {
@@ -760,30 +701,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
             }
         } catch (WriteTimeoutException | UnavailableException | NoHostAvailableException e){
             throw new RepositoryException("Could not index experiment to user \"" + assignment + "\"", e);
-        }
-    }
-
-    void indexUserToBucket(Assignment assignment) {
-        try{
-            if(isNull(assignment.getBucketLabel())) {
-                userBucketIndexAccessor.insertBy(
-                        assignment.getExperimentID().getRawID(),
-                        assignment.getUserID().toString(),
-                        assignment.getContext().getContext(),
-                        assignment.getCreated(),
-                        new String(new byte[0], StandardCharsets.UTF_8 ) //Needed because of compact storage
-                );
-            } else {
-                userBucketIndexAccessor.insertBy(
-                        assignment.getExperimentID().getRawID(),
-                        assignment.getUserID().toString(),
-                        assignment.getContext().getContext(),
-                        assignment.getCreated(),
-                        assignment.getBucketLabel().toString()
-                );
-            }
-        }catch (WriteTimeoutException | UnavailableException | NoHostAvailableException e){
-            throw new RepositoryException("Could not index user to bucket \"" + assignment + "\"", e);
         }
     }
 
@@ -899,7 +816,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                 dbRepository, experiment, currentAssignment, countUp, eventLog, null, assignUserToExport,
                 assignBucketCount));
 
-        removeIndexUserToBucket(userID, experiment.getID(), context, currentAssignment.getBucketLabel());
         removeIndexExperimentsToUser(userID, experiment.getID(), context, appName);
     }
 
@@ -931,22 +847,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                     " and User " + userID, e);
         }
     }
-
-    @Override
-    public void removeIndexUserToBucket(User.ID userID, Experiment.ID experimentID, Context context, Bucket.Label bucketLabel) {
-        try {
-            userBucketIndexAccessor.deleteBy(
-                    experimentID.getRawID(),
-                    userID.toString(),
-                    context.getContext(),
-                    bucketLabel.toString()
-            );
-        } catch (WriteTimeoutException | UnavailableException | NoHostAvailableException e) {
-            throw new RepositoryException(
-                    "Could not remove from user_bucket_index for user: " + userID + " to experiment: " + experimentID, e);
-        }
-    }
-
 
     void removeIndexExperimentsToUser(User.ID userID, Experiment.ID experimentID, Context context,
                                       Application.Name appName) {

@@ -214,15 +214,6 @@ public interface ExperimentRepository {
     void createIndicesForNewExperiment(NewExperiment newExperiment);
 
     /**
-     * Get the summary of assignments delivered for each experiment
-     *
-     * @param experimentID   experiment id
-     * @param context  current context
-     * @return assignment counts
-     */
-    AssignmentCounts getAssignmentCounts(Experiment.ID experimentID, Context context);
-
-    /**
      * Get a bucket list for a list of Experiments in a single cassandra call
      *
      * @param experimentIDCollection    collection of experiment ids
