@@ -170,7 +170,7 @@ angular.module('wasabi.controllers').
                                 hasBeenStr = 'have been';
                             }
                             var removedExperimentNames = $scope.createNameList($scope.data.selectedExperiments, 'label');
-                            UtilitiesFactory.displayPageSuccessMessage('Experiments Removed', 'The ' + expmtStr + ', ' + removedExperimentNames + ', ' + hasBeenStr + ' removed from the page, ' + page + '.');
+                            UtilitiesFactory.displaySuccessWithCacheWarning('Experiments Removed', 'The ' + expmtStr + ', ' + removedExperimentNames + ', ' + hasBeenStr + ' removed from the page, ' + page + '.');
                             $scope.onSelectPage();
                         }
                     }, function(response) {
