@@ -90,6 +90,7 @@ public class BatchAssignment extends TestBase {
     @Test(groups={"batchAssign"}, dependsOnGroups = {"setup"},
             dataProvider = "BatchAssignmentStateAndExpectedValues", dataProviderClass = AssignmentDataProvider.class)
     public void t_batchAssign(String state, boolean isAssignment, String status){
+        clearAssignmentsMetadataCache();
 
         String lables = "{\"labels\": ["+experimentLabels.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(","))+"]}";
         String url = "/assignments/applications/testBatch/users/batchUser";

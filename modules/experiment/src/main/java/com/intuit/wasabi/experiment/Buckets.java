@@ -63,9 +63,10 @@ public interface Buckets {
      * the specified experiment.
      *
      * @param experimentId the unique experiment id
+     * @param checkExperiment check if experiment exists before querying for bucket list
      * @return a list of Bucket objects containing bucket metadata
      */
-    BucketList getBuckets(Experiment.ID experimentId);
+    BucketList getBuckets(Experiment.ID experimentId, boolean checkExperiment);
 
     /**
      * Updates a bucket by updating the specified metadata in the database.

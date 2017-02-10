@@ -26,6 +26,7 @@ public class Constants {
     public static final String DEFAULT_CONFIG_API_VERSION_STRING = "v1";
     public static final String DEFAULT_PAGE_NAME = "homepage";
     public static final String DEFAULT_NODE_COUNT = String.valueOf(1);
+    public static final String DEFAULT_TEST_USER = "wasabi_reader@example.com";
 
     public static final String NEW_LINE = System.getProperty("line.separator"); // OS dependent line separator
     public static final String TAB = "\t";
@@ -59,6 +60,11 @@ public class Constants {
     public static final String EXPERIMENT_STATE_TERMINATED = "TERMINATED";
     public static final String EXPERIMENT_STATE_DELETED = "DELETED";
     
+    public static final String ROLE_READONLY = "READONLY";
+    public static final String ROLE_READWRITE = "READWRITE";
+    public static final String ROLE_ADMIN = "ADMIN";
+    public static final String ROLE_SUPERADMIN = "SUPERADMIN";
+    
     public static final String BUCKET_STATE_OPEN = "OPEN";
     public static final String BUCKET_STATE_CLOSED = "CLOSED";
     public static final String BUCKET_STATE_EMPTY = "EMPTY";
@@ -67,11 +73,13 @@ public class Constants {
     public static final String ASSIGNMENT_NO_PROFILE_MATCH = "NO_PROFILE_MATCH";
     public static final String ASSIGNMENT_NEW_ASSIGNMENT = "NEW_ASSIGNMENT";
     public static final String ASSIGNMENT_EXISTING_ASSIGNMENT = "EXISTING_ASSIGNMENT";
-	public static final String ASSIGNMENT_EXPERIMENT_IN_DRAFT_STATE = "EXPERIMENT_IN_DRAFT_STATE";
+    public static final String ASSIGNMENT_EXPERIMENT_IN_DRAFT_STATE = "EXPERIMENT_IN_DRAFT_STATE";
 
     public static final String NEW_ASSIGNMENT = "NEW_ASSIGNMENT";
-	public static final String NO_OPEN_BUCKETS = "NO_OPEN_BUCKETS";
+    public static final String NO_OPEN_BUCKETS = "NO_OPEN_BUCKETS";
 
-	public static final int EXP_SPAWN_COUNT = 5;
+    public static final int EXP_SPAWN_COUNT = 5;
+    
+    public static final String ROLE_LIST = "roleList";
 
 }

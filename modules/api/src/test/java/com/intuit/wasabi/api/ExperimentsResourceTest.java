@@ -156,7 +156,7 @@ public class ExperimentsResourceTest {
                 .build();
 
         experimentsResource = new ExperimentsResource(experiments, eventsExport, assignments,
-                authorization, buckets, mutex, pages, priorities, favorites, "US/New York", "YYYY-mm-DD", new HttpHeader("MyApp-???"), paginationHelper);
+                authorization, buckets, mutex, pages, priorities, favorites, "US/New York", "YYYY-mm-DD", new HttpHeader("MyApp-???", "600"), paginationHelper);
         doReturn(Collections.emptyList()).when(favorites).getFavorites(Mockito.any());
     }
 
@@ -447,7 +447,7 @@ public class ExperimentsResourceTest {
         bucketList.addBucket(bucket);
         bucketList.addBucket(bucket1);
 
-        when(buckets.getBuckets(experiment.getID())).thenReturn(bucketList);
+        when(buckets.getBuckets(experiment.getID(), true)).thenReturn(bucketList);
         Response response = experimentsResource.getBuckets(experiment.getID(), null);
         Assert.assertEquals("case 1", bucketList, response.getEntity());
 

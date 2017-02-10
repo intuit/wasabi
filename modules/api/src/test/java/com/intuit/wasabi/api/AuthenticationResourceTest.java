@@ -44,7 +44,7 @@ public class AuthenticationResourceTest {
 
     @Before
     public void setup() {
-        authenticationResource = new AuthenticationResource(authentication, new HttpHeader("application-name"));
+        authenticationResource = new AuthenticationResource(authentication, new HttpHeader("application-name", "600"));
     }
 
     @Test

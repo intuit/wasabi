@@ -142,7 +142,7 @@ public class BucketsImplTest {
                 .withState(Experiment.State.DRAFT)
                 .build();
 
-        when(buckets.getBuckets(experimentID)).thenReturn(bucketList);
+        when(buckets.getBuckets(experimentID, false)).thenReturn(bucketList);
 
         BucketList newBuckets = bucketsImpl.adjustAllocationPercentages(experiment, newBucket);
         bucket.setAllocationPercent(.42);

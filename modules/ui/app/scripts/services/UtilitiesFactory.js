@@ -858,7 +858,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                 });
             },
 
-            balanceBuckets: function(buckets, experiment) {
+            balanceBuckets: function(buckets, experiment, afterBalanceFunc) {
                 if (buckets && buckets.length > 0) {
                     // Using the number of buckets, allocate each an even percent of 100%.  If there is not an even
                     // distribution, e.g., for three buckets, go to 2 decimal places and add the necessary amount
@@ -911,6 +911,10 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                                         that.trackEvent('saveItemSuccess',
                                             {key: 'dialog_name', value: 'balanceBucketAssignments'},
                                             {key: 'experiment_id', value: experiment.id});
+
+                                        if (afterBalanceFunc) {
+                                            afterBalanceFunc();
+                                        }
                                     }, function(response) {
                                         // Handle error
                                         that.handleGlobalError(response);
@@ -1151,7 +1155,13 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                     }
                 }
                 return nameList;
+            },
+
+            displaySuccessWithCacheWarning: function(title, extraMsg) {
+                var msg = extraMsg + '  PLEASE NOTE that this change may not be available for assignment calls for up to 5 minutes.';
+                this.displayPageSuccessMessage(title, msg);
             }
+
 
         };
     }

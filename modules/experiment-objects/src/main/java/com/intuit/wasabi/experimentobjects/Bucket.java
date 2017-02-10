@@ -34,6 +34,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -45,7 +46,7 @@ import static java.util.Arrays.asList;
 /**
  * An experiment bucket
  */
-public class Bucket {
+public class Bucket implements Serializable {
 
     @ApiModelProperty(value = "unique bucket label in the experiment", dataType = "String", required = true)
     private Bucket.Label label;
@@ -285,7 +286,7 @@ public class Bucket {
 
     @JsonSerialize(using = Bucket.Label.Serializer.class)
     @JsonDeserialize(using = Bucket.Label.Deserializer.class)
-    public static class Label {
+    public static class Label implements Serializable {
 
         private String label;
 

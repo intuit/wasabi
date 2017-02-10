@@ -50,6 +50,14 @@ public interface ExperimentRepository {
     Experiment getExperiment(Experiment.ID experimentID);
 
     /**
+     * Improved way (async) of retrieving the list of experiments for given app names.
+     *
+     * @param appNames collection of App names
+     * @return Map of app name to list of experiments belonging to that app
+     */
+    Map<Application.Name, List<Experiment>> getExperimentsForApps(Collection<Application.Name> appNames);
+
+    /**
      * Retrieve the specified experiment from the repository using its label
      *
      * @param appName   name of the application
@@ -101,6 +109,14 @@ public interface ExperimentRepository {
     ExperimentList getExperiments(Collection<Experiment.ID> experimentIDs);
 
     /**
+     * Retrieve the experiments for given experiment ids
+     *
+     * @param experimentIDs list of experiment ids
+     * @return Map of experiment ids to experiments for given experiment ids
+     */
+    Map<Experiment.ID, Experiment> getExperimentsMap(Collection<Experiment.ID> experimentIDs);
+
+    /**
      * Get the experiments for an Application
      *
      * @param appName  application name
@@ -124,11 +140,11 @@ public interface ExperimentRepository {
      * Return a list of bucket IDs for the specified experiment
      *
      * @param experimentID id of the experiment
+     * @param checkExperiment check if experiment exists before querying for bucket list
      * @return a list of buckets of that experiment
      *
      */
-    BucketList getBuckets(Experiment.ID experimentID);
-
+    BucketList getBuckets(Experiment.ID experimentID, boolean checkExperiment);
 
     /**
      * Create a new bucket for the specified experiment
@@ -214,15 +230,6 @@ public interface ExperimentRepository {
     void createIndicesForNewExperiment(NewExperiment newExperiment);
 
     /**
-     * Get the summary of assignments delivered for each experiment
-     *
-     * @param experimentID   experiment id
-     * @param context  current context
-     * @return assignment counts
-     */
-    AssignmentCounts getAssignmentCounts(Experiment.ID experimentID, Context context);
-
-    /**
      * Get a bucket list for a list of Experiments in a single cassandra call
      *
      * @param experimentIDCollection    collection of experiment ids
@@ -251,5 +258,6 @@ public interface ExperimentRepository {
      *
      */
      void createApplication(Application.Name applicationName);
+
 
 }

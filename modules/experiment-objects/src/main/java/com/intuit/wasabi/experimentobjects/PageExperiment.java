@@ -21,8 +21,10 @@ import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import java.io.Serializable;
+
 // TODO: Confirm if PageExperiment and ExperimentPage could be combined
-public class PageExperiment implements Cloneable {
+public class PageExperiment implements Cloneable, Serializable {
     @ApiModelProperty(value = "unique experiment ID", required = true)
     private Experiment.ID id;
 

@@ -23,6 +23,9 @@ import com.intuit.wasabi.assignment.Assignments;
 import com.intuit.wasabi.assignmentobjects.Assignment;
 import com.intuit.wasabi.assignmentobjects.SegmentationProfile;
 import com.intuit.wasabi.assignmentobjects.User;
+import com.intuit.wasabi.authenticationobjects.UserInfo;
+import com.intuit.wasabi.authenticationobjects.UserInfo.Username;
+import com.intuit.wasabi.authorization.Authorization;
 import com.intuit.wasabi.exceptions.AssignmentNotFoundException;
 import com.intuit.wasabi.experimentobjects.*;
 import com.intuit.wasabi.experimentobjects.Bucket.Label;
@@ -35,6 +38,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.httpclient.HttpStatus;
 import org.slf4j.Logger;
 
 import java.util.List;
@@ -43,7 +47,9 @@ import java.util.Map;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.intuit.wasabi.api.APISwaggerResource.*;
 import static com.intuit.wasabi.assignmentobjects.Assignment.Status.EXPERIMENT_EXPIRED;
+import static com.intuit.wasabi.authorizationobjects.Permission.CREATE;
 import static java.lang.Boolean.FALSE;
+import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -59,11 +65,13 @@ public class AssignmentsResource {
     private static final Logger LOGGER = getLogger(AssignmentsResource.class);
     private final HttpHeader httpHeader;
     private final Assignments assignments;
+    private Authorization authorization;
 
     @Inject
-    AssignmentsResource(final Assignments assignments, final HttpHeader httpHeader) {
+    AssignmentsResource(final Assignments assignments, final HttpHeader httpHeader, Authorization authorization) {
         this.assignments = assignments;
         this.httpHeader = httpHeader;
+        this.authorization = authorization;
     }
 
     /**
@@ -533,6 +541,34 @@ public class AssignmentsResource {
         return httpHeader.headers().entity(assignments.queuesLength()).build();
     }
 
+    /**
+     * Get the length of the assignments queue
+     *
+     * @return Response object
+     */
+    @GET
+    @Path("queueDetails")
+    @Produces(APPLICATION_JSON)
+    public Response getAssignmentsQueueDetails() {
+        return httpHeader.headers().entity(assignments.queuesDetails()).build();
+    }
+
+    /**
+     * Flush all active and queued messages from the ingestion queues.
+     *
+     * @return Response object
+     */
+    @POST
+    @Path("flushMessages")
+    @Produces(APPLICATION_JSON)
+    public Response flushMessages(
+            @HeaderParam(AUTHORIZATION) @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true) final String authorizationHeader) {
+        Username userName = authorization.getUser(authorizationHeader);
+        authorization.checkSuperAdmin(userName);
+        assignments.flushMessages();
+        return httpHeader.headers(HttpStatus.SC_NO_CONTENT).build();
+    }
+
     private Map<String, Object> toMap(final Assignment assignment) {
         Map<String, Object> response = newHashMap();
 
@@ -557,4 +593,42 @@ public class AssignmentsResource {
 
         return response;
     }
+
+
+    @POST
+    @Path("clearMetadataCache")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "Clear assignments metadata cache...")
+    @Timed
+    public Response clearMetadataCache (@HeaderParam(AUTHORIZATION) @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true) final String authorizationHeader) {
+        UserInfo.Username userName = authorization.getUser(authorizationHeader);
+        authorization.checkSuperAdmin(userName);
+
+        boolean result = Boolean.TRUE;
+        try {
+            assignments.clearMetadataCache();
+        } catch (Exception e) {
+            LOGGER.error("Exception occurred while clearing assignments metadata cache...", e);
+            result = Boolean.FALSE;
+        }
+        return httpHeader.headers().entity(result).build();
+    }
+
+    /**
+     * Get the details of assignments metadata cache
+     *
+     * @return Details of assignments metadata cache - cache entities and size of each entity cache
+     */
+    @GET
+    @Path("metadataCacheDetails")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "Get assignments metadata cache details...")
+    @Timed
+    public Response getMetadataCacheDetails(@HeaderParam(AUTHORIZATION) @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true) final String authorizationHeader) {
+        UserInfo.Username userName = authorization.getUser(authorizationHeader);
+        authorization.checkSuperAdmin(userName);
+
+        return httpHeader.headers().entity(assignments.metadataCacheDetails()).build();
+    }
+
 }

@@ -4,8 +4,8 @@
 'use strict';
 
 angular.module('wasabi.controllers').
-    controller('PrioritiesCtrl', ['$scope', '$filter', '$http', '$stateParams', 'PrioritiesFactory', '$modal', 'UtilitiesFactory', '$rootScope', 'DialogsFactory', 'AUTH_EVENTS', '$state', 'PERMISSIONS', 'ConfigFactory', 'ApplicationsFactory', 'ExperimentsFactory', '$cookies',
-        function ($scope, $filter, $http, $stateParams, PrioritiesFactory, $modal, UtilitiesFactory, $rootScope, DialogsFactory, AUTH_EVENTS, $state, PERMISSIONS, ConfigFactory, ApplicationsFactory, ExperimentsFactory, $cookies) {
+    controller('PrioritiesCtrl', ['$scope', '$filter', '$http', '$stateParams', 'PrioritiesFactory', '$modal', 'UtilitiesFactory', '$rootScope', 'DialogsFactory', 'AUTH_EVENTS', '$state', 'PERMISSIONS', 'ConfigFactory', 'ApplicationsFactory', 'ExperimentsFactory', '$cookies', 'FavoritesFactory',
+        function ($scope, $filter, $http, $stateParams, PrioritiesFactory, $modal, UtilitiesFactory, $rootScope, DialogsFactory, AUTH_EVENTS, $state, PERMISSIONS, ConfigFactory, ApplicationsFactory, ExperimentsFactory, $cookies, FavoritesFactory) {
 
             $scope.data = {
                 applicationName: '', // This is bound to the selection in the application name drop down menu.
@@ -14,6 +14,9 @@ angular.module('wasabi.controllers').
             };
             $scope.experiments = [];
             $scope.appNames = [];
+            $scope.favoritesObj = {
+                favorites: null
+            };
             // This is passed in as a parameter on the URL. The selection in the drop down will cause an URL
             // with this parameter to be hit. This is necessary so that going "back" from the details page will
             // come back to the correct form of the Priorities table.
@@ -59,7 +62,10 @@ angular.module('wasabi.controllers').
                     // Transitioning to PAUSED, that is, stopping the experiment.  Prompt the user to enter their results.
                     'PAUSED': $scope.openResultsModal,
                     // In other cases, just load the experiment.
-                    'RUNNING': $scope.loadPrioritiesAfterAction,
+                    'RUNNING': function() {
+                        UtilitiesFactory.displaySuccessWithCacheWarning('Experiment Started', 'Your experiment has been successfully started.');
+                        $scope.loadPrioritiesAfterAction();
+                    },
                     'TERMINATED': $scope.loadPrioritiesAfterAction
                 };
                 UtilitiesFactory.changeState(experiment, state, afterChangeActions);
@@ -67,6 +73,20 @@ angular.module('wasabi.controllers').
 
             $scope.deleteExperiment = function (experiment) {
                 UtilitiesFactory.deleteExperiment(experiment, $scope.loadPrioritiesAfterAction);
+            };
+
+            $scope.doFavorites = function() {
+                FavoritesFactory.query().$promise
+                .then(function(faves) {
+                    $scope.favoritesObj.favorites = (faves && faves.experimentIDs ? faves.experimentIDs : []);
+                    for (var i = 0; i < $scope.experiments.length; i++) {
+                        $scope.experiments[i].isFavorite = ($scope.favoritesObj.favorites.indexOf($scope.experiments[i].id) >= 0);
+                    }
+                },
+                    function(response) {
+                        UtilitiesFactory.handleGlobalError(response, 'The list of favorites could not be retrieved.');
+                    }
+                );
             };
 
             $scope.loadAllApplications = function () {
@@ -103,6 +123,7 @@ angular.module('wasabi.controllers').
                     $scope.noDrag = $scope.readOnly = !$scope.hasUpdatePermission(selectedApp);
                     PrioritiesFactory.query({applicationName: selectedApp}).$promise.then(function (priorities) {
                         $scope.experiments = priorities;
+                        $scope.doFavorites();
 
                         UtilitiesFactory.doTrackingInit();
 
@@ -194,6 +215,8 @@ angular.module('wasabi.controllers').
                             function experimentUpdateError(response) {
                                 UtilitiesFactory.handleGlobalError(response, 'Your experiment sampling percentage could not be changed.');
                             }
+
+                            var samplingPercentageChanged = false;
                             // Find changed percentages and save the changes
                             for (var i = 0; i < $scope.experiments.length; i++) {
                                 for (var j = 0; j < $scope.originalPercentages.length; j++) {
@@ -207,8 +230,14 @@ angular.module('wasabi.controllers').
                                             experimentUpdateSuccess,
                                             experimentUpdateError
                                         );
+                                        // Just for the purpose of showing the delayed change warning or not, set the flag.
+                                        samplingPercentageChanged = true;
                                     }
                                 }
+                            }
+                            if (samplingPercentageChanged) {
+                                // If any sampling percentages were changed, show the delayed warning message
+                                UtilitiesFactory.displaySuccessWithCacheWarning('Sampling Percentages Changed', 'Your sampling percentage changes have been saved.');
                             }
                         },
                         function() {
@@ -266,6 +295,9 @@ angular.module('wasabi.controllers').
                         experiments: function () {
                             return $scope.experiments;
                         },
+                        favoritesObj: function () {
+                            return $scope.favoritesObj;
+                        },
                         readOnly: function() {
                             return false;
                         },
@@ -277,9 +309,6 @@ angular.module('wasabi.controllers').
                             // Add ability for user to create a new application while creating an experiment.
                             clone.push(ConfigFactory.newApplicationNamePrompt);
                             return clone;
-                        },
-                        allApplications: function() {
-                            return $scope.allApplications;
                         }
                     }
                 });

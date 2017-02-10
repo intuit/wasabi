@@ -15,6 +15,8 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.cassandra.accessor.index;
 
+import com.datastax.driver.core.BoundStatement;
+import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.mapping.Result;
 import com.datastax.driver.mapping.annotations.Accessor;
@@ -37,13 +39,25 @@ public interface ExperimentUserIndexAccessor {
             " values (?, ?, ?, ?)")
     ResultSet insertBy(String userId, String context, String appName, UUID experimentId);
 
-    
+
+    @Query("insert into experiment_user_index (user_id, context, app_name, experiment_id, bucket)" +
+            " values (?, ?, ?, ?, ?)")
+    BoundStatement insertBoundStatement(String userId, String context, String appName, UUID experimentId, String bucketLabel);
+
+    @Query("insert into experiment_user_index (user_id, context, app_name, experiment_id)" +
+            " values (?, ?, ?, ?)")
+    BoundStatement insertBoundStatement(String userId, String context, String appName, UUID experimentId);
+
+
     @Query("select * from experiment_user_index where user_id = ? and app_name = ? and context = ?")
     Result<ExperimentUserByUserIdContextAppNameExperimentId> selectBy(String userId, String appName, String context);
 
 
     @Query("select * from experiment_user_index where user_id = ? and app_name = ? and context = ?")
     ListenableFuture<Result<ExperimentUserByUserIdContextAppNameExperimentId>> asyncSelectBy(String userId, String appName, String context);
+
+    @Query("select * from experiment_user_index where user_id = ? and app_name = ? and experiment_id = ? and context = ?")
+    ListenableFuture<Result<ExperimentUserByUserIdContextAppNameExperimentId>> asyncSelectBy(String userId, String appName, UUID experimentId, String context);
 
     @Query("delete from experiment_user_index where user_id = ? and experiment_id = ? and context = ? and app_name = ?")
     ResultSet deleteBy(String userId, UUID experimentId, String context, String appName);

@@ -30,7 +30,7 @@
             <class name="com.intuit.wasabi.tests.service.assignment.BatchAssignment" />
             <class name="com.intuit.wasabi.tests.service.assignment.PutAssignment" />
             <class name="com.intuit.wasabi.tests.service.assignment.ExportAssignment" />
-            <class name="com.intuit.wasabi.tests.service.assignment.DailyAssignmentCountsTest" />
+            <!--class name="com.intuit.wasabi.tests.service.assignment.DailyAssignmentCountsTest" -->
         </classes>
     </test>
     <test name="IntegrationBucketTests">
@@ -97,6 +97,13 @@
             <class name="com.intuit.wasabi.tests.service.IntegrationPages"/>
         </classes>
     </test>
+    <!--  
+    <test name="UserRoleTests">
+        <classes>
+            <class name="com.intuit.wasabi.tests.service.UserPermissionsTest"/>
+        </classes>
+    </test>
+    -->
     <test name="IntegrationPaginationTests">
         <classes>
             <class name="com.intuit.wasabi.tests.service.PaginationTest" />

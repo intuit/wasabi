@@ -57,7 +57,7 @@ public class EventsResourceTest {
 
     @Before
     public void setUp() throws Exception {
-        resource = new EventsResource(events, new HttpHeader("App-???"));
+        resource = new EventsResource(events, new HttpHeader("App-???", "600"));
     }
 
     @Test
