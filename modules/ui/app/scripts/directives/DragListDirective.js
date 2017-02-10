@@ -301,6 +301,8 @@ angular.module('wasabi.directives').directive('dragList', ['$compile', 'Prioriti
                     UtilitiesFactory.trackEvent('saveItemSuccess',
                         {key: 'dialog_name', value: 'experimentsRePrioritized'},
                         {key: 'application_name', value: appName});
+
+                    UtilitiesFactory.displaySuccessWithCacheWarning('Experiment Priorities Changed', 'Your experiment priority changes have been saved.');
                 }, function(response) {
                     // Handler error
                     //console.log(response);

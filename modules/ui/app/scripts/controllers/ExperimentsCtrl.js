@@ -494,7 +494,10 @@ angular.module('wasabi.controllers').
                     // Transitioning to PAUSED, that is, stopping the experiment.  Prompt the user to enter their results.
                     'PAUSED': $scope.openResultsModal,
                     // In other cases, just load the experiment.
-                    'RUNNING': $scope.loadExperiments,
+                    'RUNNING': function() {
+                        UtilitiesFactory.displaySuccessWithCacheWarning('Experiment Started', 'Your experiment has been successfully started.');
+                        $scope.loadExperiments();
+                    },
                     'TERMINATED': $scope.loadExperiments
                 };
                 UtilitiesFactory.changeState(experiment, state, afterChangeActions);

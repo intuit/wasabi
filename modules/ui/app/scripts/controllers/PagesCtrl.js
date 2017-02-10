@@ -97,6 +97,7 @@ angular.module('wasabi.controllers').
                         {key: 'dialog_name', value: 'addPage'},
                         {key: 'experiment_id', value: $scope.experiment.id});
 
+                    UtilitiesFactory.displaySuccessWithCacheWarning('Page Changes Saved', 'Your page changes have been saved.');
                     $scope.loadPages();
                 }, function(response) {
                     if (onErrorCleanupFunction) {
@@ -143,6 +144,7 @@ angular.module('wasabi.controllers').
                                     {key: 'experiment_id', value: $scope.experiment.id},
                                     {key: 'item_id', value: item.name});
 
+                                UtilitiesFactory.displaySuccessWithCacheWarning('Page Association Deleted', 'Your page change has been saved.');
                                 $scope.loadPages();
                             }, function(response) {
                                 $scope.loadPages(); // To put the page back that we removed above.

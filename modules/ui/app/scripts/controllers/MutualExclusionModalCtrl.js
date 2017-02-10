@@ -94,6 +94,7 @@ angular.module('wasabi.controllers')
                                     }
                                 });
                             }
+                            UtilitiesFactory.displaySuccessWithCacheWarning('Mutual Exclusions Saved', 'Your mutual exclusion changes have been saved.');
                             $modalInstance.close();
                         }, function(response) {
                             // Handle error
