@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * This class is used to refresh assignment metadata cache.
@@ -34,13 +35,13 @@ public class AssignmentsMetadataCacheRefreshTask implements Runnable {
     private AssignmentsMetadataCache metadataCache;
     private AssignmentMetadataCacheTimeService timeService;
 
-    private Boolean refreshInProgress;
+    private AtomicBoolean refreshInProgress;
     private Date lastRefreshTime;
 
     @Inject
     public AssignmentsMetadataCacheRefreshTask(AssignmentsMetadataCache metadataCache, AssignmentMetadataCacheTimeService timeService) {
         this.metadataCache = metadataCache;
-        this.refreshInProgress = Boolean.FALSE;
+        this.refreshInProgress = new AtomicBoolean(Boolean.FALSE);
         this.timeService = timeService;
         this.lastRefreshTime = timeService.getCurrentTime();
     }
@@ -50,9 +51,9 @@ public class AssignmentsMetadataCacheRefreshTask implements Runnable {
         try {
             LOGGER.info("AssignmentsMetadataCache refresh started at = {}", timeService.getCurrentTime());
 
-            if(!refreshInProgress) {
+            if(!refreshInProgress.get()) {
                 //Mark that refresh has been started...
-                refreshInProgress=Boolean.TRUE;
+                refreshInProgress.set(Boolean.TRUE);
 
                 //Refresh metadata cache
                 metadataCache.refresh();
@@ -70,12 +71,12 @@ public class AssignmentsMetadataCacheRefreshTask implements Runnable {
             metadataCache.clear();
         } finally {
             //Mark that refresh has been finished...
-            refreshInProgress = Boolean.FALSE;
+            refreshInProgress.set(Boolean.FALSE);
         }
     }
 
     public boolean isRefreshInProgress() {
-        return refreshInProgress;
+        return refreshInProgress.get();
     }
 
     public Date getLastRefreshTime() {
