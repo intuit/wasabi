@@ -472,4 +472,42 @@ public class CassandraPagesRepositoryTest {
         }
     }
 
+    @Test
+    public void testGetExperimentsWithoutLabels() {
+
+        //------ Input --------
+        Page.Name pageName = Page.Name.valueOf("testPage1");
+
+        //Mock interaction
+        List<PageExperimentByAppNamePage> mockedResult = new ArrayList<>();
+        mockedResult.add(
+                PageExperimentByAppNamePage.builder()
+                        .experimentId(experimentId)
+                        .page(pageName.toString())
+                        .appName(APPLICATION_NAME.toString())
+                        .assign(true)
+                        .build()
+        );
+        com.intuit.wasabi.repository.cassandra.pojo.Experiment experiment =
+                com.intuit.wasabi.repository.cassandra.pojo.Experiment.builder()
+                        .id(experimentId)
+                        .label("testLabel1")
+                        .build();
+        when(pageExperimentIndexAccessor.selectBy(eq(APPLICATION_NAME.toString()),
+                eq(pageName.toString()))).thenReturn(mockedResultMapping);
+        when(mockedResultMapping.iterator()).thenReturn(mockedResult.iterator());
+        when(experimentAccessor.selectBy(eq(experimentId))).thenReturn(mockedResultMapping);
+        when(mockedResultMapping.one()).thenReturn(experiment);
+
+        //Make actual call
+        List<PageExperiment> result = repository.getExperimentsWithoutLabels(APPLICATION_NAME, pageName);
+
+        //Verify result
+        assertThat(result.size(), is(1));
+        assertThat(result.get(0).getAllowNewAssignment(), is(mockedResult.get(0).isAssign()));
+        assertThat(result.get(0).getId().getRawID(), is(experimentId));
+        assertThat(result.get(0).getLabel()==null, is(true));
+
+    }
+
 }

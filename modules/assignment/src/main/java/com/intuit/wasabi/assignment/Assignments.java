@@ -188,7 +188,9 @@ public interface Assignments {
     void clearMetadataCache();
 
     /**
-     * Clear metadata cache if it is enabled.
+     * This method is used to get details about metadata cache.
+     *
+     * @return Map of metadata cache details
      */
      Map<String, String> metadataCacheDetails();
 

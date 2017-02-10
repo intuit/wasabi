@@ -273,41 +273,6 @@ public class CassandraExperimentRepository implements ExperimentRepository {
 	}
 
 	/**
-	 * Improved way (async) of retrieving the experiments map for given experiment ids
-	 *
-	 * @param experimentIds IDs of experiments
-	 * @return experiments map for given experiment ids
-	 */
-	@Override
-	public Map<Experiment.ID, Experiment> getExperimentMap(Collection<Experiment.ID> experimentIds) {
-		Map<Experiment.ID, ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment>>> experimentsFutureMap = new HashMap<>(experimentIds.size());
-		Map<Experiment.ID, Experiment> experimentMap = new HashMap<>(experimentIds.size());
-
-		try {
-			//Send calls asynchronously
-			experimentIds.forEach(expId -> {
-				experimentsFutureMap.put(expId, experimentAccessor.asyncGetExperimentById(expId.getRawID()));
-				LOGGER.debug("Sent experimentAccessor.asyncGetExperimentById({})", expId);
-			});
-
-			//Process the Futures in the order that are expected to arrive earlier
-			for (Experiment.ID expId : experimentsFutureMap.keySet()) {
-				ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment>> experimentsFuture = experimentsFutureMap.get(expId);
-				UninterruptibleUtil.getUninterruptibly(experimentsFuture).all().stream().forEach(expPojo -> {
-					Experiment exp = ExperimentHelper.makeExperiment(expPojo);
-					experimentMap.put(exp.getID(), exp);
-				});
-			}
-			LOGGER.debug("experimentMap=> {}", experimentMap);
-		} catch (Exception e) {
-			LOGGER.error("Error while getting priorities for {}", experimentIds, e);
-			throw new RepositoryException("Error while getting priorities for given applications", e);
-		}
-		LOGGER.debug("Returning experimentMap {}", experimentMap);
-		return experimentMap;
-	}
-
-	/**
 	 * {@inheritDoc}
 	 */
 	@Override

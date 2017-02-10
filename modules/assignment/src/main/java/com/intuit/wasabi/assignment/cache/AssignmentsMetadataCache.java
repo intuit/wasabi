@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2016 Intuit
+ * Copyright 2017 Intuit
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,7 +104,7 @@ public interface AssignmentsMetadataCache {
     /**
      * This method is used to clear cache.
      *
-     * @return TRUE is cache is cleared successfully else FALSE.
+     * @return TRUE if cache is cleared successfully else FALSE.
      */
     boolean clear();
 

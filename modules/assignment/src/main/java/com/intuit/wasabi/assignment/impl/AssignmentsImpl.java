@@ -199,8 +199,8 @@ public class AssignmentsImpl implements Assignments {
         this.assignmentsRepository = assignmentsRepository;
         this.mutexRepository = mutexRepository;
         this.eventLog = eventLog;
-        this.metadataCacheEnabled=metadataCacheEnabled;
-        this.metadataCache=metadataCache;
+        this.metadataCacheEnabled = metadataCacheEnabled;
+        this.metadataCache = metadataCache;
     }
 
     /**
@@ -706,7 +706,7 @@ public class AssignmentsImpl implements Assignments {
             Set<Experiment.Label> expLabels = new HashSet<>();
             for(Experiment.ID expId:experimentIds) {
                 Experiment exp = experimentMap.get(expId);
-                if(exp!=null) {
+                if(nonNull(exp)) {
                     expLabels.add(exp.getLabel());
                 }
             }
@@ -1293,7 +1293,7 @@ public class AssignmentsImpl implements Assignments {
     }
 
     /**
-     * Clear metadata cache if it is enabled.
+     * {@inheritDoc}
      */
     @Override
     public void clearMetadataCache() {
@@ -1303,7 +1303,7 @@ public class AssignmentsImpl implements Assignments {
     }
 
     /**
-     * Clear metadata cache if it is enabled.
+     * {@inheritDoc}
      */
     @Override
     public Map<String, String> metadataCacheDetails() {

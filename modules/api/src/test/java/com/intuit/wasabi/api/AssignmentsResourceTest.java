@@ -20,7 +20,10 @@ import com.intuit.wasabi.assignmentobjects.Assignment;
 import com.intuit.wasabi.assignmentobjects.Assignment.Status;
 import com.intuit.wasabi.assignmentobjects.SegmentationProfile;
 import com.intuit.wasabi.assignmentobjects.User;
+import com.intuit.wasabi.authenticationobjects.UserInfo;
+import com.intuit.wasabi.authorization.Authorization;
 import com.intuit.wasabi.exceptions.AssignmentNotFoundException;
+import com.intuit.wasabi.exceptions.AuthenticationException;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Bucket.Label;
@@ -42,15 +45,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.apache.commons.codec.binary.Base64.encodeBase64;
+import static java.nio.charset.Charset.forName;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AssignmentsResourceTest {
+
+    private static final String USERPASS = new String(encodeBase64("admin@example.com:admin01".getBytes(forName("UTF-8"))), forName("UTF-8"));
+    private static final String AUTHHEADER = "Basic: " + USERPASS;
+    private static final UserInfo.Username USER = UserInfo.Username.valueOf("admin@example.com");
 
     private final Boolean CREATE = true;
     private final Boolean FORCE_IN_EXPERIMENT = true;
@@ -58,6 +69,8 @@ public class AssignmentsResourceTest {
     public ExpectedException thrown = ExpectedException.none();
     @Mock
     private Assignments assignments;
+    @Mock
+    private Authorization authorization;
     @Mock
     private Assignment assignment;
     @Mock
@@ -86,7 +99,7 @@ public class AssignmentsResourceTest {
 
     @Before
     public void setUp() {
-        resource = new AssignmentsResource(assignments, new HttpHeader("application-name"));
+        resource = new AssignmentsResource(assignments, new HttpHeader("application-name"), authorization);
     }
 
     @Test
@@ -216,5 +229,43 @@ public class AssignmentsResourceTest {
     @Test
     public void getAssignmentsQueueLength() throws Exception {
         assertThat(resource.getAssignmentsQueueLength().getStatus(), is(HttpStatus.SC_OK));
+    }
+
+    @Test
+    public void clearAssignmentsMetadataCacheTest() throws Exception {
+        when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
+        assertThat(resource.clearMetadataCache(AUTHHEADER).getStatus(), is(HttpStatus.SC_OK));
+    }
+
+    @Test
+    public void clearAssignmentsMetadataCacheNotSuperAdminTest() throws Exception {
+        // fewer allowed experiments
+        when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
+        //this throw is so that only the allowed (TESTAPP) experiments get returned
+        doThrow(AuthenticationException.class).when(authorization).checkSuperAdmin(USER);
+        try {
+            resource.clearMetadataCache(AUTHHEADER);
+            fail();
+        } catch (AuthenticationException ignored) {
+        }
+    }
+
+    @Test
+    public void getMetadataCacheDetailsTest() throws Exception {
+        when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
+        assertThat(resource.getMetadataCacheDetails(AUTHHEADER).getStatus(), is(HttpStatus.SC_OK));
+    }
+
+    @Test
+    public void getMetadataCacheDetailsNotSuperAdminTest() throws Exception {
+        // fewer allowed experiments
+        when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
+        //this throw is so that only the allowed (TESTAPP) experiments get returned
+        doThrow(AuthenticationException.class).when(authorization).checkSuperAdmin(USER);
+        try {
+            resource.getMetadataCacheDetails(AUTHHEADER);
+            fail();
+        } catch (AuthenticationException ignored) {
+        }
     }
 }

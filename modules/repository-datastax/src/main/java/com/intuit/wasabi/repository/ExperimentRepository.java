@@ -50,14 +50,6 @@ public interface ExperimentRepository {
     Experiment getExperiment(Experiment.ID experimentID);
 
     /**
-     * Improved way (async) of retrieving the experiments map for given experiment ids
-     *
-     * @param experimentIds IDs of experiments
-     * @return experiments map for given experiment ids
-     */
-    Map<Experiment.ID, Experiment> getExperimentMap(Collection<Experiment.ID> experimentIds);
-
-    /**
      * Improved way (async) of retrieving the list of experiments for given app names.
      *
      * @param appNames collection of App names

@@ -113,11 +113,6 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
     }
 
     @Override
-    public Map<Experiment.ID, Experiment> getExperimentMap(Collection<Experiment.ID> experimentIds) {
-        throw new UnsupportedOperationException("Not supported ");
-    }
-
-    @Override
     public Map<Application.Name, List<Experiment>> getExperimentsForApps(Collection<Application.Name> appNames) {
         throw new UnsupportedOperationException("Not supported ");
     }

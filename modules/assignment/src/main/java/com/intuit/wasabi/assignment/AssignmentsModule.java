@@ -119,8 +119,8 @@ public class AssignmentsModule extends AbstractModule {
             //This is a cache refresh interval, at this frequency cache will be refreshed.
             Integer metadataCacheRefreshInterval = Integer.parseInt(getProperty("metadata.cache.refresh.interval", properties, "5"));
             Integer metadataCacheNumberOfThreads = 1; //We want only single thread to refresh metadata cache.
-            //This is allowed missed intervals. If cache hasn't been refreshed for more than allowed missed/buffer intervals then HealthCheck will be failed for this APP node.
-            Integer allowedStaleTime = Integer.parseInt(getProperty("metadata.cache.allowed.stale.time", properties, "360"));
+            //This is allowed missed intervals in minutes. If cache hasn't been refreshed for more than allowed missed/buffer intervals then HealthCheck will be failed for this APP node.
+            Integer allowedStaleTimeInMinutes = Integer.parseInt(getProperty("metadata.cache.allowed.stale.time", properties, "360"));
 
             //Create Scheduled Executor Service
             ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("AssignmentMetadataCache-%d").setDaemon(true).build();
@@ -129,7 +129,7 @@ public class AssignmentsModule extends AbstractModule {
             //Bind time service
             bind(AssignmentMetadataCacheTimeService.class).to(AssignmentMetadataCacheTimeServiceImpl.class).in(SINGLETON);
             //Bind allowed stale time
-            bind(Integer.class).annotatedWith(named("AssignmentsMetadataCacheAllowedStaleTime")).toInstance(allowedStaleTime);
+            bind(Integer.class).annotatedWith(named("AssignmentsMetadataCacheAllowedStaleTime")).toInstance(allowedStaleTimeInMinutes);
             //Bind health check
             bind(HealthCheck.class).annotatedWith(named("AssignmentsMetadataCacheHealthCheck")).to(AssignmentsMetadataCacheHealthCheck.class).in(SINGLETON);
             //Bind scheduled executor service

@@ -23,6 +23,8 @@ import com.intuit.wasabi.assignment.Assignments;
 import com.intuit.wasabi.assignmentobjects.Assignment;
 import com.intuit.wasabi.assignmentobjects.SegmentationProfile;
 import com.intuit.wasabi.assignmentobjects.User;
+import com.intuit.wasabi.authenticationobjects.UserInfo;
+import com.intuit.wasabi.authorization.Authorization;
 import com.intuit.wasabi.exceptions.AssignmentNotFoundException;
 import com.intuit.wasabi.experimentobjects.*;
 import com.intuit.wasabi.experimentobjects.Bucket.Label;
@@ -44,6 +46,7 @@ import static com.google.common.collect.Maps.newHashMap;
 import static com.intuit.wasabi.api.APISwaggerResource.*;
 import static com.intuit.wasabi.assignmentobjects.Assignment.Status.EXPERIMENT_EXPIRED;
 import static java.lang.Boolean.FALSE;
+import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -59,11 +62,13 @@ public class AssignmentsResource {
     private static final Logger LOGGER = getLogger(AssignmentsResource.class);
     private final HttpHeader httpHeader;
     private final Assignments assignments;
+    private Authorization authorization;
 
     @Inject
-    AssignmentsResource(final Assignments assignments, final HttpHeader httpHeader) {
+    AssignmentsResource(final Assignments assignments, final HttpHeader httpHeader, Authorization authorization) {
         this.assignments = assignments;
         this.httpHeader = httpHeader;
+        this.authorization = authorization;
     }
 
     /**
@@ -564,7 +569,10 @@ public class AssignmentsResource {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Clear assignments metadata cache...")
     @Timed
-    public Response clearMetadataCache () {
+    public Response clearMetadataCache (@HeaderParam(AUTHORIZATION) @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true) final String authorizationHeader) {
+        UserInfo.Username userName = authorization.getUser(authorizationHeader);
+        authorization.checkSuperAdmin(userName);
+
         boolean result = Boolean.TRUE;
         try {
             assignments.clearMetadataCache();
@@ -585,7 +593,10 @@ public class AssignmentsResource {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Get assignments metadata cache details...")
     @Timed
-    public Response getMetadataCacheDetails() {
+    public Response getMetadataCacheDetails(@HeaderParam(AUTHORIZATION) @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true) final String authorizationHeader) {
+        UserInfo.Username userName = authorization.getUser(authorizationHeader);
+        authorization.checkSuperAdmin(userName);
+
         return httpHeader.headers().entity(assignments.metadataCacheDetails()).build();
     }
 
