@@ -131,13 +131,7 @@ public class AssignmentsModule extends AbstractModule {
             ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(metadataCacheNumberOfThreads, threadFactory);
 
             //Configure and bind CacheManager
-            Configuration cacheManagerConfig = ConfigurationFactory.parseConfiguration();
-            //This default configuration is used for all the caches
-            CacheConfiguration defaultCacheConfiguration = cacheManagerConfig.getDefaultCacheConfiguration();
-            //This means, timeouts are ignored and the element is never expired.
-            defaultCacheConfiguration.setEternal(Boolean.TRUE);
-            //Now create cache manager and bind it
-            CacheManager cacheManager = CacheManager.create(cacheManagerConfig);
+            CacheManager cacheManager = CacheManager.create();
             bind(CacheManager.class).toInstance(cacheManager);
 
             //Bind time service
