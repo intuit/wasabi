@@ -61,7 +61,6 @@ public class AnalyticsImpl implements Analytics {
     private final AnalysisTools analysisTools;
     private final ExperimentRepository cassandraRepository;
     private final AssignmentsRepository assignmentRepository;
-    private Date release_date = null;
 
     /**
      * Constructor
@@ -89,11 +88,6 @@ public class AnalyticsImpl implements Analytics {
         // FIXME: inject
         Properties properties = create(PROPERTY_NAME, AnalyticsImpl.class);
 
-        try {
-            release_date = dateFormat.parse(getProperty("analytics.release.date", properties));
-        } catch (ParseException e) {
-            LOGGER.error("Error: Could not parse the specified date and set to default", e);
-        }
     }
 
     /**
@@ -531,11 +525,7 @@ public class AnalyticsImpl implements Analytics {
         if (Objects.isNull(experiment)) {
             throw new ExperimentNotFoundException(experimentID);
         }            
-        if (release_date != null && release_date.before(experiment.getCreationTime())) {
-            return assignmentRepository.getBucketAssignmentCount(experiment);
-        } else {
-            return cassandraRepository.getAssignmentCounts(experimentID, context);
-        }
+        return assignmentRepository.getBucketAssignmentCount(experiment);
     }
 
     /**

@@ -31,6 +31,8 @@ import com.intuit.wasabi.repository.cassandra.IntegrationTestBase;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.audit.BucketAuditLogAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.audit.ExperimentAuditLogAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.count.BucketAssignmentCountAccessor;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -73,6 +75,7 @@ public class CassandraExperimentRepositoryITest extends IntegrationTestBase  {
         experimentAccessor = injector.getInstance(ExperimentAccessor.class);
         bucketAuditLogAccessor = injector.getInstance(BucketAuditLogAccessor.class);
         experimentAuditLogAccessor = injector.getInstance(ExperimentAuditLogAccessor.class);
+    	
         session.execute("truncate wasabi_experiments.bucket");
         
         session.execute("delete from wasabi_experiments.auditlog where application_name = '" 
@@ -82,6 +85,7 @@ public class CassandraExperimentRepositoryITest extends IntegrationTestBase  {
 		experimentID2 = Experiment.ID.valueOf(UUID.randomUUID());
 		
     	repository = injector.getInstance(CassandraExperimentRepository.class);;
+    	
     	bucket1 = Bucket.newInstance(experimentID1,Bucket.Label.valueOf("bl1")).withAllocationPercent(.23)
     			.withControl(true)
     			.withDescription("b1").withPayload("p1")
@@ -575,27 +579,6 @@ public class CassandraExperimentRepositoryITest extends IntegrationTestBase  {
 		Experiment experiment = repository.getExperiment(newExperiment1.getApplicationName(),null);
 		
 	}
-
-	@Test
-	public void testGetAssigmentsCountWithNoAssignmentSuccess() {
-		BucketList bucketList = new BucketList();
-		bucketList.addBucket(bucket1);
-		repository.updateBucketBatch(experimentID1, bucketList);
-
-		AssignmentCounts count = repository.getAssignmentCounts(experimentID1, QA);
-		assertEquals("Value should be eq", 2, count.getAssignments().size());
-		assertEquals("Value should be eq", bucket1.getLabel(), 
-				count.getAssignments().get(0).getBucket());
-		assertEquals("Value should be eq", newExperiment1.getId(), 
-				count.getExperimentID());
-		assertEquals("Value should be eq", 0, 
-				count.getAssignments().get(0).getCount());
-		
-		assertEquals("Value should be eq", null, 
-				count.getAssignments().get(1).getBucket());
-		assertEquals("Value should be eq", 0, 
-				count.getAssignments().get(1).getCount());
-	}
 	
 	@Test
 	public void testLogBucketAuditSuccess() {
@@ -713,7 +696,7 @@ public class CassandraExperimentRepositoryITest extends IntegrationTestBase  {
 
 	@Test(expected=ExperimentNotFoundException.class)
 	public void testGetBucketsThrowsExperimentNotFoundException() {
-		BucketList buckets = repository.getBuckets(Experiment.ID.newInstance(), false);
+		BucketList buckets = repository.getBuckets(Experiment.ID.newInstance(), true);
 	}
 
 	@Test

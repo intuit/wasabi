@@ -161,16 +161,6 @@ public interface AssignmentsRepository {
     void assignUserToExports(Assignment assignment, Date date);
 
     /**
-     * Remove index user to bucket
-     *
-     * @param userID       UserId
-     * @param experimentID A Experiment.ID, uuid identifier for Experiment
-     * @param context      Environment context
-     * @param bucketLabel  Bucket Label
-     */
-    void removeIndexUserToBucket(User.ID userID, Experiment.ID experimentID, Context context, Bucket.Label bucketLabel);
-
-    /**
      * Get assignments as a stream
      *
      * @param experimentID     A Experiment.ID, uuid identifier for Experiment

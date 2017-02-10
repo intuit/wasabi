@@ -44,13 +44,13 @@ import com.intuit.wasabi.repository.cassandra.accessor.BucketAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.audit.BucketAuditLogAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.audit.ExperimentAuditLogAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.count.BucketAssignmentCountAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentLabelIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentState;
 import com.intuit.wasabi.repository.cassandra.accessor.index.StateExperimentIndexAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.index.UserBucketIndexAccessor;
-import com.intuit.wasabi.repository.cassandra.pojo.*;
 import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentByAppNameLabel;
 import com.intuit.wasabi.repository.cassandra.pojo.index.StateExperimentIndex;
+
 import org.slf4j.Logger;
 
 import java.nio.ByteBuffer;
@@ -74,8 +74,6 @@ public class CassandraExperimentRepository implements ExperimentRepository {
 	private ExperimentAccessor experimentAccessor;
 
 	private ExperimentLabelIndexAccessor experimentLabelIndexAccessor;
-
-	private UserBucketIndexAccessor userBucketIndexAccessor;
 
 	private BucketAccessor bucketAccessor;
 
@@ -114,21 +112,6 @@ public class CassandraExperimentRepository implements ExperimentRepository {
 	public void setExperimentLabelIndexAccessor(
 			ExperimentLabelIndexAccessor experimentLabelIndexAccessor) {
 		this.experimentLabelIndexAccessor = experimentLabelIndexAccessor;
-	}
-
-	/**
-	 * @return the userBucketIndexAccessor
-	 */
-	public UserBucketIndexAccessor getUserBucketIndexAccessor() {
-		return userBucketIndexAccessor;
-	}
-
-	/**
-	 * @param userBucketIndexAccessor the userBucketIndexAccessor to set
-	 */
-	public void setUserBucketIndexAccessor(
-			UserBucketIndexAccessor userBucketIndexAccessor) {
-		this.userBucketIndexAccessor = userBucketIndexAccessor;
 	}
 
 	/**
@@ -214,7 +197,6 @@ public class CassandraExperimentRepository implements ExperimentRepository {
 	public CassandraExperimentRepository(CassandraDriver driver,
 			ExperimentAccessor experimentAccessor,
 			ExperimentLabelIndexAccessor experimentLabelIndexAccessor,
-			UserBucketIndexAccessor userBucketIndexAccessor,
 			BucketAccessor bucketAccessor,
 			ApplicationListAccessor applicationListAccessor,
 			BucketAuditLogAccessor bucketAuditLogAccessor, 
@@ -224,7 +206,6 @@ public class CassandraExperimentRepository implements ExperimentRepository {
 		this.driver = driver;
 		this.experimentAccessor = experimentAccessor;
 		this.experimentLabelIndexAccessor = experimentLabelIndexAccessor;
-		this.userBucketIndexAccessor = userBucketIndexAccessor;
 		this.bucketAccessor = bucketAccessor;
 		this.applicationListAccessor = applicationListAccessor;
 		this.stateExperimentIndexAccessor = stateExperimentIndexAccessor;
@@ -440,66 +421,6 @@ public class CassandraExperimentRepository implements ExperimentRepository {
 			throw new RepositoryException("Could not update indices for experiment \""
 							+ newExperiment + "\"", e);
 		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public AssignmentCounts getAssignmentCounts(Experiment.ID experimentID,
-			Context context) {
-		
-		LOGGER.debug("Get Assignment Counts for Experiment {} and context {}",
-				new Object[] { experimentID, context });
-
-		List<Bucket> bucketList = getBuckets(experimentID, false /* caller already checks if experiment exists */).getBuckets();
-
-		AssignmentCounts.Builder builder = new AssignmentCounts.Builder();
-		builder.withExperimentID(experimentID);
-
-		List<BucketAssignmentCount> bucketAssignmentCountList = new ArrayList<>(
-				bucketList.size() + 1);
-		long bucketAssignmentsCount = 0, nullAssignmentsCount = 0;
-
-		for (Bucket bucket : bucketList) {
-
-			try {
-				ResultSet counts = userBucketIndexAccessor.countUserBy(
-						experimentID.getRawID(), context.toString(), bucket
-								.getLabel().toString());
-				Long count = counts.one().get(0, Long.class);
-				bucketAssignmentCountList
-						.add(new BucketAssignmentCount.Builder()
-								.withBucket(bucket.getLabel()).withCount(count)
-								.build());
-				bucketAssignmentsCount += count;
-
-			} catch (Exception e) {
-				LOGGER.error("Get Assignment Counts for Experiment {} and context {} failed", new Object[] { experimentID, context }, e);
-				throw new RepositoryException("Could not fetch assignmentCounts for experiment " + "with ID \"" + experimentID + "\"", e);
-			}
-
-		}
-
-		// Checking the count for null assignments
-		try {
-			ResultSet counts = userBucketIndexAccessor.countUserBy(
-					experimentID.getRawID(), context.toString(), "");
-			nullAssignmentsCount = counts.one().get(0, Long.class);
-			bucketAssignmentCountList.add(new BucketAssignmentCount.Builder()
-					.withBucket(null).withCount(nullAssignmentsCount).build());
-		} catch (Exception e) {
-			LOGGER.error("Get Assignment Counts for Experiment {} and context {} failed",
-					new Object[] { experimentID, context }, e);
-			throw new RepositoryException("Could not fetch assignmentCounts for experiment " + "with ID \"" + experimentID + "\"", e);
-		}
-
-		return builder.withBucketAssignmentCount(bucketAssignmentCountList)
-				.withTotalUsers(new TotalUsers.Builder()
-								.withTotal(bucketAssignmentsCount + nullAssignmentsCount)
-								.withBucketAssignments(bucketAssignmentsCount)
-								.withNullAssignments(nullAssignmentsCount)
-								.build()).build();
 	}
 
 	/**

@@ -97,13 +97,13 @@
             <class name="com.intuit.wasabi.tests.service.IntegrationPages"/>
         </classes>
     </test>
-    
+    <!--  
     <test name="UserRoleTests">
         <classes>
             <class name="com.intuit.wasabi.tests.service.UserPermissionsTest"/>
         </classes>
     </test>
-    
+    -->
     <test name="IntegrationPaginationTests">
         <classes>
             <class name="com.intuit.wasabi.tests.service.PaginationTest" />
