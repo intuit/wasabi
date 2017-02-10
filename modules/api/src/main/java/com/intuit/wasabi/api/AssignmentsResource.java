@@ -68,7 +68,7 @@ public class AssignmentsResource {
     private Authorization authorization;
 
     @Inject
-    AssignmentsResource(final Assignments assignments, final HttpHeader httpHeader, final Authorization authorization) {
+    AssignmentsResource(final Assignments assignments, final HttpHeader httpHeader, Authorization authorization) {
         this.assignments = assignments;
         this.httpHeader = httpHeader;
         this.authorization = authorization;
@@ -552,7 +552,7 @@ public class AssignmentsResource {
     public Response getAssignmentsQueueDetails() {
         return httpHeader.headers().entity(assignments.queuesDetails()).build();
     }
-    
+
     /**
      * Flush all active and queued messages from the ingestion queues.
      *
@@ -593,4 +593,42 @@ public class AssignmentsResource {
 
         return response;
     }
+
+
+    @POST
+    @Path("clearMetadataCache")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "Clear assignments metadata cache...")
+    @Timed
+    public Response clearMetadataCache (@HeaderParam(AUTHORIZATION) @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true) final String authorizationHeader) {
+        UserInfo.Username userName = authorization.getUser(authorizationHeader);
+        authorization.checkSuperAdmin(userName);
+
+        boolean result = Boolean.TRUE;
+        try {
+            assignments.clearMetadataCache();
+        } catch (Exception e) {
+            LOGGER.error("Exception occurred while clearing assignments metadata cache...", e);
+            result = Boolean.FALSE;
+        }
+        return httpHeader.headers().entity(result).build();
+    }
+
+    /**
+     * Get the details of assignments metadata cache
+     *
+     * @return Details of assignments metadata cache - cache entities and size of each entity cache
+     */
+    @GET
+    @Path("metadataCacheDetails")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "Get assignments metadata cache details...")
+    @Timed
+    public Response getMetadataCacheDetails(@HeaderParam(AUTHORIZATION) @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true) final String authorizationHeader) {
+        UserInfo.Username userName = authorization.getUser(authorizationHeader);
+        authorization.checkSuperAdmin(userName);
+
+        return httpHeader.headers().entity(assignments.metadataCacheDetails()).build();
+    }
+
 }

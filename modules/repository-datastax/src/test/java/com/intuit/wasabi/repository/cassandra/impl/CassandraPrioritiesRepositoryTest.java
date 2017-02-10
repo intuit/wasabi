@@ -15,13 +15,24 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.cassandra.impl;
 
+import static java.util.Objects.nonNull;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.notNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import com.google.common.util.concurrent.ListenableFuture;
 import io.codearte.catchexception.shade.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -197,5 +208,63 @@ public class CassandraPrioritiesRepositoryTest {
 		Mockito.doThrow(new RuntimeException("RuntimeException")).when(accessor).
 			getPriorities(Mockito.anyString());
 		repository.getPriorityListLength(applicationName);
+	}
+
+	@Test
+	public void testGetPrioritiesForApplications() throws ExecutionException, InterruptedException {
+
+		//experimentAccessor.asyncGetExperimentByAppName
+		//prioritiesAccessor.asyncGetPriorities
+
+		//------ Input --------
+		Application.Name appName = Application.Name.valueOf("testApp1");
+		Set<Application.Name> appNameSet = new HashSet<>();
+		appNameSet.add(appName);
+
+		//------ Mocking interacting calls
+		Experiment.ID expId1 = Experiment.ID.newInstance();
+
+		ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment>> experimentsFuture = mock(ListenableFuture.class);
+		Mockito.when(experimentAccessor.asyncGetExperimentByAppName(appName.toString())).thenReturn(experimentsFuture);
+		List<com.intuit.wasabi.repository.cassandra.pojo.Experiment> expList = new ArrayList<>();
+		com.intuit.wasabi.repository.cassandra.pojo.Experiment exp1 = com.intuit.wasabi.repository.cassandra.pojo.Experiment.builder()
+				.id(expId1.getRawID())
+				.appName(appName.toString())
+				.startTime(new Date())
+				.created(new Date())
+				.endTime(new Date())
+				.state(Experiment.State.RUNNING.toString())
+				.label("testExp1")
+				.modified(new Date())
+				.samplePercent(90.00)
+				.build();
+		expList.add(exp1);
+		Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment> expResult = mock(Result.class);
+		when(expResult.all()).thenReturn(expList);
+		when(experimentsFuture.get()).thenReturn(expResult);
+
+
+		ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Application>> appsFuture = mock(ListenableFuture.class);
+		Mockito.when(accessor.asyncGetPriorities(appName.toString())).thenReturn(appsFuture);
+		List<UUID> priorities = new ArrayList<>();
+		priorities.add(expId1.getRawID());
+		List<com.intuit.wasabi.repository.cassandra.pojo.Application> appsList = new ArrayList<>();
+		com.intuit.wasabi.repository.cassandra.pojo.Application app1 = com.intuit.wasabi.repository.cassandra.pojo.Application.builder()
+				.appName(appName.toString())
+				.priorities(priorities)
+				.build();
+		appsList.add(app1);
+		Result<com.intuit.wasabi.repository.cassandra.pojo.Application> appResult = mock(Result.class);
+		when(appResult.all()).thenReturn(appsList);
+		when(appsFuture.get()).thenReturn(appResult);
+
+		//Make actual call
+		Map<Application.Name, PrioritizedExperimentList> appPrioritiesMap = repository.getPriorities(appNameSet);
+
+		//Verify result
+		assertThat(appPrioritiesMap.size(), is(1));
+		assertThat(nonNull(appPrioritiesMap.get(appName)), is(true));
+		assertThat(appPrioritiesMap.get(appName).getPrioritizedExperiments().get(0).getID().getRawID(), is(expId1.getRawID()));
+
 	}
 }

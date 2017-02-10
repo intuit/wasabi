@@ -4496,7 +4496,7 @@ public class TestBase extends ServiceTestBase {
       * The response must contain {@link HttpStatus#SC_OK}.
       * <p>
       *
-      * @param experiment         the experiment to POST
+      * @param roles
       * @param expectedStatus     the expected HTTP status code
       * @param apiServerConnector the server connector to use
       * @return List of assignment status
@@ -4564,5 +4564,12 @@ public class TestBase extends ServiceTestBase {
             }
         }
         toCleanUp.clear();
+    }
+
+    public boolean clearAssignmentsMetadataCache() {
+        String uri = "assignments/clearMetadataCache";
+        response = apiServerConnector.doPost(uri);
+        assertReturnCode(response, HttpStatus.SC_OK);
+        return true;
     }
 }

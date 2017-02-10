@@ -22,6 +22,7 @@ import com.intuit.hyrule.Rule;
 import com.intuit.wasabi.assignment.AssignmentDecorator;
 import com.intuit.wasabi.assignment.AssignmentIngestionExecutor;
 import com.intuit.wasabi.assignment.Assignments;
+import com.intuit.wasabi.assignment.cache.AssignmentsMetadataCache;
 import com.intuit.wasabi.assignmentobjects.*;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.eventlog.EventLog;
@@ -94,6 +95,8 @@ public class AssignmentsImplTest {
     private AssignmentsRepository assignmentsRepository = mock(AssignmentsRepository.class, RETURNS_DEEP_STUBS);
     private AssignmentIngestionExecutor ingestionExecutor = mock(AssignmentIngestionExecutor.class);
     private AssignmentsImpl assignmentsImpl;
+    private AssignmentsMetadataCache metadataCache = mock(AssignmentsMetadataCache.class);
+    private Boolean metadataCacheEnabled = Boolean.TRUE;
 
     @Before
     public void setup() throws IOException {
@@ -102,7 +105,7 @@ public class AssignmentsImplTest {
         this.assignmentsImpl = new AssignmentsImpl(executors,
                 experimentRepository, assignmentsRepository, mutexRepository,
                 ruleCache, pages, priorities, 
-                assignmentDecorator, threadPoolExecutor, eventLog);
+                assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache);
     }
 
     @Test
@@ -165,7 +168,7 @@ public class AssignmentsImplTest {
         AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
                 experimentRepository, assignmentsRepository,
                 mutexRepository, ruleCache, pages, priorities, assignmentDecorator, threadPoolExecutor,
-                eventLog));
+                eventLog, metadataCacheEnabled, metadataCache));
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class);
         when(experiment.getID()).thenReturn(id);
@@ -257,7 +260,7 @@ public class AssignmentsImplTest {
                 .withStatus(Assignment.Status.EXPERIMENT_PAUSED)
                 .build();
         when(experimentRepository.getExperiment(eq(appName), eq(label))).thenReturn(experiment);
-        when(assignmentsRepository.getAssignment(eq(id), eq(user), any(Context.class))).thenReturn(null);
+        when(assignmentsRepository.getAssignment(eq(user), eq(appName), eq(id), any(Context.class))).thenReturn(null);
         SegmentationProfile segmentationProfile = mock(SegmentationProfile.class);
         HttpHeaders headers = mock(HttpHeaders.class);
         Page.Name pageName = Page.Name.valueOf("p1");
@@ -270,7 +273,7 @@ public class AssignmentsImplTest {
     public void testGetSingleAssignmentNullAssignmentExperimentNoProfileMatch() throws IOException {
         AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
                 experimentRepository, assignmentsRepository,
-                mutexRepository, ruleCache, pages, priorities, assignmentDecorator, threadPoolExecutor, eventLog));
+                mutexRepository, ruleCache, pages, priorities, assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache));
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         when(experiment.getID()).thenReturn(id);
@@ -287,7 +290,7 @@ public class AssignmentsImplTest {
                 .withStatus(Assignment.Status.NO_PROFILE_MATCH)
                 .build();
         when(experimentRepository.getExperiment(eq(appName), eq(label))).thenReturn(experiment);
-        when(assignmentsRepository.getAssignment(eq(id), eq(user), any(Context.class))).thenReturn(null);
+        when(assignmentsRepository.getAssignment(eq(user), eq(appName), eq(id), any(Context.class))).thenReturn(null);
         doReturn(false).when(assignmentsImpl).doesProfileMatch(any(Experiment.class), any(SegmentationProfile.class),
                 any(HttpHeaders.class), any(Context.class));
         SegmentationProfile segmentationProfile = mock(SegmentationProfile.class);
@@ -325,7 +328,7 @@ public class AssignmentsImplTest {
     public void testGetSingleAssignmentProfileMatchAssertNewAssignment() throws IOException {
         AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
                 experimentRepository, assignmentsRepository,
-                mutexRepository, ruleCache, pages, priorities, assignmentDecorator, threadPoolExecutor, eventLog));
+                mutexRepository, ruleCache, pages, priorities, assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache));
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         Assignment assignment = mock(Assignment.class);
@@ -355,7 +358,7 @@ public class AssignmentsImplTest {
     public void testGetSingleAssignmentSuccess() throws IOException {
         AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
                 experimentRepository, assignmentsRepository,
-                mutexRepository, ruleCache, pages, priorities, assignmentDecorator, threadPoolExecutor, eventLog));
+                mutexRepository, ruleCache, pages, priorities, assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache));
         Experiment.ID id = Experiment.ID.newInstance();
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         Assignment assignment = mock(Assignment.class);
@@ -368,7 +371,7 @@ public class AssignmentsImplTest {
         User.ID user = User.ID.valueOf("testUser");
         Page.Name pageName = Page.Name.valueOf("p1");
         when(experimentRepository.getExperiment(eq(appName), eq(label))).thenReturn(experiment);
-        when(assignmentsRepository.getAssignment(eq(id), eq(user), any(Context.class))).thenReturn(assignment);
+        when(assignmentsRepository.getAssignment( eq(user), eq(appName), eq(id), any(Context.class))).thenReturn(assignment);
         when(assignment.getStatus()).thenReturn(Assignment.Status.EXISTING_ASSIGNMENT);
         Assignment result = assignmentsImpl.getSingleAssignment(user, appName, label, context, true, true,
                 null, null, pageName);
@@ -414,7 +417,7 @@ public class AssignmentsImplTest {
         Assignment assignment = mock(Assignment.class);
         AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
                 experimentRepository, assignmentsRepository,
-                mutexRepository, ruleCache, pages, priorities, assignmentDecorator, threadPoolExecutor, eventLog));
+                mutexRepository, ruleCache, pages, priorities, assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache));
 
         doReturn(assignment).when(assignmentsImpl).getAssignment(eq(userID), eq(appName), eq(label),
                 eq(context), any(boolean.class), any(boolean.class), eq(segmentationProfile),
@@ -1305,7 +1308,6 @@ public class AssignmentsImplTest {
 
         Mockito.when(assignmentsRepository.assignUser(assignment, experiment, DATE)).thenReturn(newAssignment);
         Mockito.when(assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-b"), context)).thenReturn(newAssignment);
-        Mockito.doNothing().when(assignmentsRepository).removeIndexUserToBucket(User.ID.valueOf("user-b"), experiment.getID(), context, assignment.getBucketLabel());
         Mockito.doNothing().when(assignmentsRepository).deleteAssignment(experiment, User.ID.valueOf("user-b"), context, testApp, assignment);
 
         experiment.setState(Experiment.State.TERMINATED);
@@ -1338,7 +1340,6 @@ public class AssignmentsImplTest {
 
         Mockito.when(assignmentsRepository.assignUser(assignment, experiment, DATE)).thenReturn(newAssignment);
         Mockito.when(assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-b"), context)).thenReturn(null);
-        Mockito.doNothing().when(assignmentsRepository).removeIndexUserToBucket(User.ID.valueOf("user-b"), experiment.getID(), context, assignment.getBucketLabel());
         Mockito.doNothing().when(assignmentsRepository).deleteAssignment(experiment, User.ID.valueOf("user-b"), context, testApp, assignment);
 
         Mockito.when(cassandraAssignments.putAssignment(userA, testApp, expLabel, context, redBucket.getLabel(), true)).thenReturn(newAssignment);

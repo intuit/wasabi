@@ -78,7 +78,7 @@ public interface AssignmentsRepository {
      * @param date       Date of user assignment
      * @return Resulting assignment
      */
-    Assignment assignUsersInBatch(List<Pair<Experiment, Assignment>> assignments, Date date);
+    void assignUsersInBatch(List<Pair<Experiment, Assignment>> assignments, Date date);
 
     /**
      * Get assignments
@@ -95,6 +95,19 @@ public interface AssignmentsRepository {
                                                                           Experiment> allExperiments);
 
     /**
+     * Get assignments
+     *
+     * @param userID         User Id
+     * @param appLabel       Application Label
+     * @param context        Environment context
+     * @param experimentMap experiment map to fetch experiment label
+     *
+     * @return Experiment id
+     *
+     */
+     List<Pair<Experiment, Bucket.Label>> getAssignments(User.ID userID, Application.Name appLabel, Context context,
+                                                                  Map<Experiment.ID, Experiment> experimentMap);
+    /**
      * Get assignment for experiment and user
      *
      * @param experimentID A Experiment.ID, uuid identifier for Experiment
@@ -103,6 +116,19 @@ public interface AssignmentsRepository {
      * @return Assignment
      */
     Assignment getAssignment(Experiment.ID experimentID, User.ID userID, Context context);
+
+    /**
+     * Get assignment for experiment and user
+     *
+     * @param userID
+     * @param appName
+     * @param experimentID
+     * @param context
+     *
+     * @return assignment object if assignment is present or NULL
+     *
+     */
+    Assignment getAssignment(User.ID userID, Application.Name appName, Experiment.ID experimentID, Context context);
 
     /**
      * Delete assignment for experiment, user and application
@@ -133,16 +159,6 @@ public interface AssignmentsRepository {
      * @param date       Date of assignment
      */
     void assignUserToExports(Assignment assignment, Date date);
-
-    /**
-     * Remove index user to bucket
-     *
-     * @param userID       UserId
-     * @param experimentID A Experiment.ID, uuid identifier for Experiment
-     * @param context      Environment context
-     * @param bucketLabel  Bucket Label
-     */
-    void removeIndexUserToBucket(User.ID userID, Experiment.ID experimentID, Context context, Bucket.Label bucketLabel);
 
     /**
      * Get assignments as a stream
@@ -196,7 +212,7 @@ public interface AssignmentsRepository {
      * @param bucketMap
      * @param exclusionMap
      */
-    void populateExperimentMetadata(User.ID userID, Application.Name appName, Context context, ExperimentBatch experimentBatch, Optional<Map<Experiment.ID, Boolean>> allowAssignments,
+    void populateAssignmentsMetadata(User.ID userID, Application.Name appName, Context context, ExperimentBatch experimentBatch, Optional<Map<Experiment.ID, Boolean>> allowAssignments,
                                     PrioritizedExperimentList prioritizedExperimentList,
                                     Map<Experiment.ID, Experiment> experimentMap,
                                     Table<Experiment.ID, Experiment.Label, String> existingUserAssignments,

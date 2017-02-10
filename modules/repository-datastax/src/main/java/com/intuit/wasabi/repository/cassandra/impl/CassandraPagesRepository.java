@@ -24,17 +24,23 @@ import com.datastax.driver.core.exceptions.WriteTimeoutException;
 import com.datastax.driver.mapping.MappingManager;
 import com.datastax.driver.mapping.Result;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.inject.Inject;
 import com.intuit.wasabi.experimentobjects.*;
+import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.experimentobjects.ExperimentPage;
 import com.intuit.wasabi.repository.RepositoryException;
 import com.intuit.wasabi.repository.PagesRepository;
+import com.intuit.wasabi.repository.cassandra.UninterruptibleUtil;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentPageAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.audit.ExperimentAuditLogAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.AppPageIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.PageExperimentIndexAccessor;
-import com.intuit.wasabi.repository.cassandra.pojo.AppPage;
+import com.intuit.wasabi.repository.cassandra.pojo.*;
 import com.intuit.wasabi.repository.cassandra.pojo.index.PageExperimentByAppNamePage;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -243,6 +249,40 @@ public class CassandraPagesRepository implements PagesRepository{
                     return builder.build();
                 }
         ).collect(Collectors.toList());
+    }
+
+    @Override
+    public Map<Pair<Application.Name, Page.Name>, List<PageExperiment>> getExperimentsWithoutLabels(Collection<Pair<Application.Name, Page.Name>> appAndPagePairs) {
+        logger.debug("getExperimentsWithoutLabels {}", appAndPagePairs);
+        Map<Pair<Application.Name, Page.Name>, List<PageExperiment>> resultMap = new HashMap<>();
+        try {
+            Map<Pair<Application.Name, Page.Name>, ListenableFuture<Result<PageExperimentByAppNamePage>>> expFutureMap = new HashMap<>();
+            appAndPagePairs.forEach(pair -> {
+                expFutureMap.put(pair, pageExperimentIndexAccessor.asyncSelectBy(pair.getLeft().toString(), pair.getRight().toString()));
+            });
+
+            for (Pair<Application.Name, Page.Name> pair : expFutureMap.keySet()) {
+                ListenableFuture<Result<PageExperimentByAppNamePage>> expFuture = expFutureMap.get(pair);
+                Stream<PageExperimentByAppNamePage> resultList = StreamSupport.stream(Spliterators.spliteratorUnknownSize(UninterruptibleUtil.getUninterruptibly(expFuture).iterator(), Spliterator.ORDERED), false);
+                List<PageExperiment> pageExperimentsList = resultList.map(t -> {
+                            PageExperiment.Builder builder = new PageExperiment.Builder(
+                                    Experiment.ID.valueOf(t.getExperimentId()),
+                                    null,
+                                    t.isAssign()
+                            );
+                            return builder.build();
+                        }
+                ).collect(Collectors.toList());
+
+                resultMap.put(pair, pageExperimentsList);
+            }
+        } catch (Exception e) {
+            logger.error("getExperimentsWithoutLabels for {} failed", appAndPagePairs, e);
+            throw new RepositoryException("Could not getExperimentsWithoutLabels", e);
+        }
+
+        logger.debug("Returning PageExperimentList map {}", resultMap);
+        return resultMap;
     }
 
     @Override
