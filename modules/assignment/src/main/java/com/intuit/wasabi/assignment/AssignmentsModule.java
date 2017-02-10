@@ -33,6 +33,10 @@ import com.intuit.wasabi.export.Envelope;
 import com.intuit.wasabi.export.WebExport;
 import com.intuit.wasabi.export.rest.impl.ExportModule;
 import com.intuit.wasabi.repository.cassandra.CassandraRepositoryModule;
+import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.config.CacheConfiguration;
+import net.sf.ehcache.config.Configuration;
+import net.sf.ehcache.config.ConfigurationFactory;
 import org.slf4j.Logger;
 
 import java.net.URI;
@@ -117,7 +121,7 @@ public class AssignmentsModule extends AbstractModule {
 
         if(metadataCacheEnabled) {
             //This is a cache refresh interval, at this frequency cache will be refreshed.
-            Integer metadataCacheRefreshInterval = Integer.parseInt(getProperty("metadata.cache.refresh.interval", properties, "5"));
+            Integer metadataCacheRefreshIntervalInMinutes = Integer.parseInt(getProperty("metadata.cache.refresh.interval", properties, "5"));
             Integer metadataCacheNumberOfThreads = 1; //We want only single thread to refresh metadata cache.
             //This is allowed missed intervals in minutes. If cache hasn't been refreshed for more than allowed missed/buffer intervals then HealthCheck will be failed for this APP node.
             Integer allowedStaleTimeInMinutes = Integer.parseInt(getProperty("metadata.cache.allowed.stale.time", properties, "360"));
@@ -125,6 +129,16 @@ public class AssignmentsModule extends AbstractModule {
             //Create Scheduled Executor Service
             ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("AssignmentMetadataCache-%d").setDaemon(true).build();
             ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(metadataCacheNumberOfThreads, threadFactory);
+
+            //Configure and bind CacheManager
+            Configuration cacheManagerConfig = ConfigurationFactory.parseConfiguration();
+            //This default configuration is used for all the caches
+            CacheConfiguration defaultCacheConfiguration = cacheManagerConfig.getDefaultCacheConfiguration();
+            //This means, timeouts are ignored and the element is never expired.
+            defaultCacheConfiguration.setEternal(Boolean.TRUE);
+            //Now create cache manager and bind it
+            CacheManager cacheManager = CacheManager.create(cacheManagerConfig);
+            bind(CacheManager.class).toInstance(cacheManager);
 
             //Bind time service
             bind(AssignmentMetadataCacheTimeService.class).to(AssignmentMetadataCacheTimeServiceImpl.class).in(SINGLETON);
@@ -135,7 +149,7 @@ public class AssignmentsModule extends AbstractModule {
             //Bind scheduled executor service
             bind(ScheduledExecutorService.class).annotatedWith(named("AssignmentsMetadataCacheRefreshCacheService")).toInstance(scheduledExecutorService);
             //Bind refresh interval
-            bind(Integer.class).annotatedWith(named("AssignmentsMetadataCacheRefreshInterval")).toInstance(metadataCacheRefreshInterval);
+            bind(Integer.class).annotatedWith(named("AssignmentsMetadataCacheRefreshInterval")).toInstance(metadataCacheRefreshIntervalInMinutes);
             //Bind actual cache here
             bind(AssignmentsMetadataCache.class).to(AssignmentsMetadataCacheImpl.class).in(SINGLETON);
             //Bind cache refresh task
