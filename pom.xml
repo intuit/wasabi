@@ -31,6 +31,7 @@ http://www.w3.org/2001/XMLSchema-instance">
     <properties>
         <default.time.zone>UTC</default.time.zone>
         <default.time.format>yyyy-MM-dd HH:mm:ss</default.time.format>
+        <access.control.max.age.delta.seconds>86400</access.control.max.age.delta.seconds>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>

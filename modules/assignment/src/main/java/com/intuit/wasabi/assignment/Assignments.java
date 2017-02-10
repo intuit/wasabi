@@ -47,7 +47,18 @@ public interface Assignments {
      *
      * @return Map of number of elements each queue
      */
+    @Deprecated
     Map<String, Integer> queuesLength();
+
+    /**
+     * @return Details of the queues in rule cache and ingestion executors.
+     */
+    Map<String, Object> queuesDetails();
+    
+    /**
+     * Flush all active and queued messages in ThreadPoolExecutor to persistent store.
+     */
+    void flushMessages();
 
     /**
      * Gets the Assignment for one user for an specific experiment.

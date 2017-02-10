@@ -30,12 +30,13 @@ import static javax.ws.rs.core.Response.status;
 public class HttpHeader {
 
     private final String applicationName;
+    private final String deltaSeconds;
     private final CacheControl cacheControl;
 
     @Inject
-    public HttpHeader(final @Named("application.id") String applicationName) {
+    public HttpHeader(final @Named("application.id") String applicationName, final @Named("access.control.max.age.delta.seconds") String deltaSeconds) {
         this.applicationName = applicationName;
-
+        this.deltaSeconds = deltaSeconds;
         cacheControl = new CacheControl();
 
         cacheControl.setPrivate(TRUE);
@@ -59,8 +60,9 @@ public class HttpHeader {
                 .cacheControl(cacheControl)
                 .header(ACCESS_CONTROL_ALLOW_ORIGIN, "*")
                 .header(ACCESS_CONTROL_ALLOW_HEADERS, "Authorization,X-Forwarded-For,Accept-Language,Content-Type")
-                .header(ACCESS_CONTROL_ALLOW_METHODS, "GET,POST,OPTIONS")
-                .header(ACCESS_CONTROL_REQUEST_METHOD, "GET,POST,OPTIONS")
+                .header(ACCESS_CONTROL_ALLOW_METHODS, "GET,POST,PUT,DELETE,OPTIONS")
+                .header(ACCESS_CONTROL_REQUEST_METHOD, "GET,POST,PUT,DELETE,OPTIONS")
+                .header(ACCESS_CONTROL_MAX_AGE, deltaSeconds)
                 .header("X-Application-Id", applicationName);
     }
 }

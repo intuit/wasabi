@@ -39,7 +39,6 @@ import com.intuit.wasabi.repository.AssignmentsRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.MutexRepository;
 import com.intuit.wasabi.repository.cassandra.impl.ExperimentRuleCacheUpdateEnvelope;
-import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,6 +47,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.ws.rs.core.HttpHeaders;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.*;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -70,6 +70,7 @@ public class AssignmentsImplTest {
 
     final static Application.Name testApp = Application.Name.valueOf("testApp");
     final static Context context = Context.valueOf("PROD");
+    final static String TEST_INGESTION_EXECUTOR_NAME = "TEST";
     AssignmentsImpl cassandraAssignments = mock(AssignmentsImpl.class);
     private ExperimentRepository cassandraRepository = mock(ExperimentRepository.class);
     private ExperimentRepository experimentRepository = mock(ExperimentRepository.class);
@@ -92,13 +93,16 @@ public class AssignmentsImplTest {
     private Provider<Envelope<AssignmentEnvelopePayload, WebExport>> assignmentWebEnvelopeProvider =
             mock(Provider.class, RETURNS_DEEP_STUBS);
     private AssignmentsRepository assignmentsRepository = mock(AssignmentsRepository.class, RETURNS_DEEP_STUBS);
+    private AssignmentIngestionExecutor ingestionExecutor = mock(AssignmentIngestionExecutor.class);
     private AssignmentsImpl assignmentsImpl;
     private AssignmentsMetadataCache metadataCache = mock(AssignmentsMetadataCache.class);
     private Boolean metadataCacheEnabled = Boolean.TRUE;
 
     @Before
-    public void setup() throws IOException, ConnectionException {
-        this.assignmentsImpl = new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
+    public void setup() throws IOException {
+        Map<String, AssignmentIngestionExecutor> executors = new HashMap<String, AssignmentIngestionExecutor>();
+        executors.put(TEST_INGESTION_EXECUTOR_NAME, ingestionExecutor);
+        this.assignmentsImpl = new AssignmentsImpl(executors,
                 experimentRepository, assignmentsRepository, mutexRepository,
                 ruleCache, pages, priorities, 
                 assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache);
@@ -109,9 +113,35 @@ public class AssignmentsImplTest {
         when(threadPoolExecutor.getQueue().size()).thenReturn(0);
         Map<String, Integer> queueLengthMap = new HashMap<String, Integer>();
         queueLengthMap.put(AssignmentsImpl.RULE_CACHE, new Integer(0));
+        queueLengthMap.put(TEST_INGESTION_EXECUTOR_NAME.toLowerCase(), new Integer(0));
         assertThat(assignmentsImpl.queuesLength(), is(queueLengthMap));
     }
 
+    @Test
+    public void testQueuesDetails() {
+        when(threadPoolExecutor.getQueue().size()).thenReturn(0);
+        Map<String, Object> testIngestionExecutorMap = new HashMap<String, Object>();
+        testIngestionExecutorMap.put(AssignmentsImpl.QUEUE_SIZE, new Integer(0));
+        when(ingestionExecutor.queueDetails()).thenReturn(testIngestionExecutorMap);
+        Map<String, Object> queueDetailsMap = new HashMap<String, Object>();
+        try {
+            queueDetailsMap.put(AssignmentsImpl.HOST_IP, InetAddress.getLocalHost().getHostAddress());
+        } catch (Exception e) {
+            // ignore
+        }
+        Map<String, Object> ruleCacheMap = new HashMap<String, Object>();
+        ruleCacheMap.put(AssignmentsImpl.QUEUE_SIZE, new Integer(0));
+        queueDetailsMap.put(AssignmentsImpl.RULE_CACHE, ruleCacheMap);
+        queueDetailsMap.put(TEST_INGESTION_EXECUTOR_NAME.toLowerCase(), testIngestionExecutorMap);
+
+        assertThat(assignmentsImpl.queuesDetails(), is(queueDetailsMap));
+    }
+    
+    @Test
+    public void testFlushMessages() {
+        assignmentsImpl.flushMessages();
+    }
+    
     @Test
     public void testGetSingleAssignmentNullAssignmentExperimentNotFound() {
         Application.Name appName = Application.Name.valueOf("Test");
@@ -134,7 +164,7 @@ public class AssignmentsImplTest {
     }
 
     @Test
-    public void testGetSingleAssignmentNullAssignmentExperimentInDraftState() throws IOException, ConnectionException {
+    public void testGetSingleAssignmentNullAssignmentExperimentInDraftState() throws IOException {
         AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
                 experimentRepository, assignmentsRepository,
                 mutexRepository, ruleCache, pages, priorities, assignmentDecorator, threadPoolExecutor,
@@ -240,7 +270,7 @@ public class AssignmentsImplTest {
     }
 
     @Test
-    public void testGetSingleAssignmentNullAssignmentExperimentNoProfileMatch() throws IOException, ConnectionException {
+    public void testGetSingleAssignmentNullAssignmentExperimentNoProfileMatch() throws IOException {
         AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
                 experimentRepository, assignmentsRepository,
                 mutexRepository, ruleCache, pages, priorities, assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache));
@@ -295,7 +325,7 @@ public class AssignmentsImplTest {
     }
 
     @Test(expected = AssertionError.class)
-    public void testGetSingleAssignmentProfileMatchAssertNewAssignment() throws IOException, ConnectionException {
+    public void testGetSingleAssignmentProfileMatchAssertNewAssignment() throws IOException {
         AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
                 experimentRepository, assignmentsRepository,
                 mutexRepository, ruleCache, pages, priorities, assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache));
@@ -325,7 +355,7 @@ public class AssignmentsImplTest {
     }
 
     @Test
-    public void testGetSingleAssignmentSuccess() throws IOException, ConnectionException {
+    public void testGetSingleAssignmentSuccess() throws IOException {
         AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
                 experimentRepository, assignmentsRepository,
                 mutexRepository, ruleCache, pages, priorities, assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache));
@@ -351,7 +381,7 @@ public class AssignmentsImplTest {
 
 
     @Test
-    public void testGetAssignmentNullAssignment() throws IOException, ConnectionException {
+    public void testGetAssignmentNullAssignment() throws IOException {
         Application.Name appName = Application.Name.valueOf("testApp");
         User.ID userID = User.ID.valueOf("test");
         Experiment.Label label = Experiment.Label.valueOf("test");
@@ -375,7 +405,7 @@ public class AssignmentsImplTest {
     }
 
     @Test
-    public void testGetAssignment() throws IOException, ConnectionException {
+    public void testGetAssignment() throws IOException {
         Application.Name appName = Application.Name.valueOf("testApp");
         User.ID userID = User.ID.valueOf("test");
         Experiment.Label label = Experiment.Label.valueOf("test");
@@ -404,7 +434,7 @@ public class AssignmentsImplTest {
     // FIXME:
 //    @Ignore("FIXME:refactor-core")
 //    @Test
-//    public void checkContextInSegmentation() throws IOException, ConnectionException {
+//    public void checkContextInSegmentation() throws IOException {
 //
 //        //Create a segmentation profile
 //        SegmentationProfile segmentationProfile = SegmentationProfile.newInstance().build();
@@ -464,7 +494,7 @@ public class AssignmentsImplTest {
     // FIXME:
 //    @Ignore("FIXME:refactor-core")
 //    @Test
-//    public void getAssignment_test_1() throws IOException, ConnectionException {
+//    public void getAssignment_test_1() throws IOException {
 //
 //        cassandraAssignments = null; //new AssignmentsImpl(cassandraRepository, assignmentsRepository, mutexRepository, random,
 ////                ruleCache, pages, priorities, assignmentDBEnvelopeProvider, assignmentWebEnvelopeProvider, null, // FIXME
@@ -527,7 +557,7 @@ public class AssignmentsImplTest {
     // FIXME:
 //    @Ignore("FIXME:refactor-core")
 //    @Test
-//    public void getAssignment_test_2() throws IOException, ConnectionException {
+//    public void getAssignment_test_2() throws IOException {
 //        cassandraAssignments = null; //new AssignmentsImpl(cassandraRepository, assignmentsRepository, mutexRepository, random,
 ////                ruleCache, pages, priorities, assignmentDBEnvelopeProvider, assignmentWebEnvelopeProvider, null, // FIXME
 ////                decisionEngineScheme, decisionEngineHost, decisionEnginePath,
@@ -555,7 +585,7 @@ public class AssignmentsImplTest {
 //    }
 
     @Test
-    public void getAssignment_test_3() throws IOException, ConnectionException {
+    public void getAssignment_test_3() throws IOException {
         final Calendar c = Calendar.getInstance();
         c.setTime(new Date());
         c.add(Calendar.DATE, -1);
@@ -783,7 +813,7 @@ public class AssignmentsImplTest {
     */
 
     @Test
-    public void getAssignment_test_4() throws IOException, ConnectionException {
+    public void getAssignment_test_4() throws IOException {
         final Calendar c = Calendar.getInstance();
         c.setTime(new Date());
         c.add(Calendar.DATE, -1);
@@ -914,7 +944,7 @@ public class AssignmentsImplTest {
     }
 
     @Test
-    public void createAssignmentObjectTest() throws IOException, ConnectionException {
+    public void createAssignmentObjectTest() throws IOException {
 
         //------- Prepare input data
         Date date = new Date();
@@ -945,7 +975,7 @@ public class AssignmentsImplTest {
     }
 
     @Test
-    public void createAssignmentObjectTestForNoOpenBucket() throws IOException, ConnectionException {
+    public void createAssignmentObjectTestForNoOpenBucket() throws IOException {
 
         //------- Prepare input data
         Date date = new Date();
@@ -977,7 +1007,7 @@ public class AssignmentsImplTest {
 
 
     @Test
-    public void doBatchAssignmentsTest() throws IOException, ConnectionException {
+    public void doBatchAssignmentsTest() throws IOException {
         final Calendar c = Calendar.getInstance();
         c.setTime(new Date());
         c.add(Calendar.DATE, -1);
@@ -1106,7 +1136,7 @@ public class AssignmentsImplTest {
     }
 
     @Test
-    public void doPageAssignmentsTest() throws IOException, ConnectionException {
+    public void doPageAssignmentsTest() throws IOException {
         final Calendar c = Calendar.getInstance();
         c.setTime(new Date());
         c.add(Calendar.DATE, -1);
@@ -1239,7 +1269,7 @@ public class AssignmentsImplTest {
     }
 
     @Test
-    public void putAssignment_test() throws IOException, ConnectionException {
+    public void putAssignment_test() throws IOException {
         final Calendar c = Calendar.getInstance();
         c.setTime(new Date());
         final Experiment.Label expLabel = Experiment.Label.valueOf("testExp");
@@ -1346,7 +1376,7 @@ public class AssignmentsImplTest {
     // FIXME:
 //    @Ignore("FIXME:refactor-core")
 //    @Test
-//    public void URIConstructorTest() throws IOException, URISyntaxException, ConnectionException {
+//    public void URIConstructorTest() throws IOException, URISyntaxException {
 //
 //        cassandraAssignments = null; //new AssignmentsImpl(cassandraRepository, assignmentsRepository, mutexRepository, random,
 ////                ruleCache, pages, priorities, assignmentDBEnvelopeProvider, assignmentWebEnvelopeProvider, null, //FIXME

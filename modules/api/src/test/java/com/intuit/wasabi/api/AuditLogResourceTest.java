@@ -49,7 +49,7 @@ public class AuditLogResourceTest {
         AuditLog al = mock(AuditLogImpl.class);
         Authorization auth = mock(Authorization.class);
         List<AuditLogEntry> list = new ArrayList<>();
-        AuditLogResource lr = new AuditLogResource(al, auth, new HttpHeader("MyApp-???"), new PaginationHelper<>(new AuditLogEntryFilter(), new AuditLogEntryComparator()));
+        AuditLogResource lr = new AuditLogResource(al, auth, new HttpHeader("MyApp-???", "600"), new PaginationHelper<>(new AuditLogEntryFilter(), new AuditLogEntryComparator()));
 
         Mockito.when(al.getAuditLogs()).thenReturn(list);
         Response r = lr.getCompleteLogs("", 1, 10, "", "", null);
@@ -78,7 +78,7 @@ public class AuditLogResourceTest {
         Application.Name appName = Application.Name.valueOf("TestApp");
         Authorization auth = mock(Authorization.class);
         List<AuditLogEntry> list = new ArrayList<>();
-        AuditLogResource lr = new AuditLogResource(al, auth, new HttpHeader("MyApp-???"), new PaginationHelper<>(new AuditLogEntryFilter(), new AuditLogEntryComparator()));
+        AuditLogResource lr = new AuditLogResource(al, auth, new HttpHeader("MyApp-???", "600"), new PaginationHelper<>(new AuditLogEntryFilter(), new AuditLogEntryComparator()));
 
         Mockito.when(al.getAuditLogs(appName)).thenReturn(list);
         Response r = lr.getLogs("", appName, 1, 10, "", "", null);

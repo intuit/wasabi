@@ -20,6 +20,7 @@ import static java.util.Objects.nonNull;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,6 +44,7 @@ import javax.annotation.Nullable;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.StreamingOutput;
 
+import com.datastax.driver.core.exceptions.ConnectionException;
 import com.intuit.wasabi.assignment.cache.AssignmentsMetadataCache;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -91,7 +93,6 @@ import com.intuit.wasabi.repository.CassandraRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.MutexRepository;
 import com.intuit.wasabi.repository.cassandra.impl.ExperimentRuleCacheUpdateEnvelope;
-import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
 
 /**
  * Assignments implementation
@@ -100,7 +101,10 @@ import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
  */
 public class AssignmentsImpl implements Assignments {
 
+    protected static final String HOST_IP = "hostIP";
     protected static final String RULE_CACHE = "ruleCache";
+    protected static final String QUEUE_SIZE = "queueSize";
+
     /**
      * Logger for the class
      */
@@ -135,6 +139,7 @@ public class AssignmentsImpl implements Assignments {
     private Pages pages;
 
     private EventLog eventLog;
+    private String hostIP;
 
     private Boolean metadataCacheEnabled;
     private AssignmentsMetadataCache metadataCache;
@@ -185,7 +190,11 @@ public class AssignmentsImpl implements Assignments {
                            final AssignmentsMetadataCache metadataCache)
             throws IOException, ConnectionException {
         super();
-
+        try {
+            hostIP = InetAddress.getLocalHost().getHostAddress();
+        } catch (Exception e) {
+            // ignore
+        }
         this.executors = executors;
         this.repository = repository;
         // FIXME:
@@ -1290,6 +1299,25 @@ public class AssignmentsImpl implements Assignments {
             queueLengthMap.put(name.toLowerCase(), new Integer(executors.get(name).queueLength()));
         }
         return queueLengthMap;
+    }
+
+    @Override
+    public Map<String, Object> queuesDetails() {
+        Map<String, Object> queueDetailsMap = new HashMap<String, Object>();
+        queueDetailsMap.put(HOST_IP, hostIP);
+        Map<String, Object> ruleCacheMap = new HashMap<String, Object>();
+        ruleCacheMap.put(QUEUE_SIZE, new Integer(this.ruleCacheExecutor.getQueue().size()));
+        queueDetailsMap.put(RULE_CACHE, ruleCacheMap);
+        for (String name : executors.keySet()) {
+            queueDetailsMap.put(name.toLowerCase(), executors.get(name).queueDetails());
+        }
+        return queueDetailsMap;
+    }
+
+    public void flushMessages() {
+        for (String name : executors.keySet()) {
+            executors.get(name).flushMessages();
+        }
     }
 
     /**
