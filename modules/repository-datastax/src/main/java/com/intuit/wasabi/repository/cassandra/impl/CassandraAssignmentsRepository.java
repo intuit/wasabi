@@ -577,8 +577,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     @Override
     @Timed
     public Assignment assignUser(Assignment assignment, Experiment experiment, Date date) {
-        Assignment new_assignment = null;
-
         /*
         Note: Only removing the use of user_assignment & user_assignment_bu_userid tables. A separate card is created to completely remove these tables.
         if (assignUserToOld) {
@@ -600,7 +598,14 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
 
         indexExperimentsToUser(assignment);
 
-        return new_assignment;
+        return  (Assignment.newInstance(assignment.getExperimentID())
+                .withBucketLabel(assignment.getBucketLabel())
+                .withUserID(assignment.getUserID())
+                .withContext(assignment.getContext())
+                .withStatus(Assignment.Status.NEW_ASSIGNMENT)
+                .withCreated(Optional.ofNullable(date).orElseGet(Date::new))
+                .withCacheable(false)
+                .build());
     }
 
     /**
@@ -613,9 +618,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
      */
     @Override
     @Timed
-    public Assignment assignUsersInBatch(List<Pair<Experiment, Assignment>> assignments, Date date) {
-        Assignment new_assignment = null;
-
+    public void assignUsersInBatch(List<Pair<Experiment, Assignment>> assignments, Date date) {
         /*
         Note: Only removing the use of user_assignment & user_assignment_bu_userid tables. A separate card is created to completely remove these tables.
 
@@ -634,8 +637,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
 
         // Make entries in experiment_user_index table
         indexExperimentsToUser(assignments);
-
-        return new_assignment;
     }
 
     /**
