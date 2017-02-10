@@ -1158,7 +1158,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
             },
 
             displaySuccessWithCacheWarning: function(title, extraMsg) {
-                var msg = extraMsg + '  PLEASE NOTE that this change may not be available for batch assignment calls for up to 5 minutes.';
+                var msg = extraMsg + '  PLEASE NOTE that this change may not be available for assignment calls for up to 5 minutes.';
                 this.displayPageSuccessMessage(title, msg);
             }
 
