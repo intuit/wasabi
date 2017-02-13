@@ -49,9 +49,9 @@ public class AuditLogModule extends AbstractModule {
 
         Properties properties = create(PROPERTY_NAME, AuditLogModule.class);
 
-        bind(Integer.class).annotatedWith(named("auditlog.threadpoolsize.core")).toInstance(
+        bind(Integer.class).annotatedWith(named(AuditLogAnnotations.AUDITLOG_THREADPOOLSIZE_CORE)).toInstance(
                 parseInt(getProperty("auditlog.threadpoolsize.core", properties, "2")));
-        bind(Integer.class).annotatedWith(named("auditlog.threadpoolsize.max")).toInstance(
+        bind(Integer.class).annotatedWith(named(AuditLogAnnotations.AUDITLOG_THREADPOOLSIZE_MAX)).toInstance(
                 parseInt(getProperty("auditlog.threadpoolsize.max", properties, "4")));
 
         String auditLogListenerClass = getProperty("auditlog.listener.class.name", properties,
@@ -66,7 +66,7 @@ public class AuditLogModule extends AbstractModule {
             throw new AuditLogException("unable to find class: " + auditLogListenerClass, e);
         }
 
-        bind(Integer.class).annotatedWith(named("auditlog.fetchlimit")).toInstance(
+        bind(Integer.class).annotatedWith(named(AuditLogAnnotations.AUDITLOG_FETCHLIMIT)).toInstance(
                 parseInt(getProperty("auditlog.fetchlimit", properties, "10000")));
 
         String auditLogClass = getProperty("auditlog.implementation.class.name", properties,

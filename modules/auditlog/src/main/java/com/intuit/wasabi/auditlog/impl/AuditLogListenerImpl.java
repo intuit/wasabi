@@ -17,6 +17,7 @@ package com.intuit.wasabi.auditlog.impl;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import com.intuit.wasabi.auditlog.AuditLogAnnotations;
 import com.intuit.wasabi.auditlogobjects.AuditLogEntry;
 import com.intuit.wasabi.auditlogobjects.AuditLogEntryFactory;
 import com.intuit.wasabi.eventlog.EventLog;
@@ -54,8 +55,8 @@ public class AuditLogListenerImpl implements EventLogListener {
      */
     @Inject
     public AuditLogListenerImpl(final EventLog eventLog,
-                                final @Named("auditlog.threadpoolsize.core") int threadPoolSizeCore,
-                                final @Named("auditlog.threadpoolsize.max") int threadPoolSizeMax,
+                                final @Named(AuditLogAnnotations.AUDITLOG_THREADPOOLSIZE_CORE) int threadPoolSizeCore,
+                                final @Named(AuditLogAnnotations.AUDITLOG_THREADPOOLSIZE_MAX) int threadPoolSizeMax,
                                 final AuditLogRepository repository) {
         this.repository = repository;
         eventLog.register(this);
