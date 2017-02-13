@@ -262,13 +262,6 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
         return isNull(bucketList)?new BucketList():makeCopy(bucketList);
     }
 
-    private BucketList makeCopy(BucketList bucketList) {
-        List<Bucket> iBucketList = new ArrayList<>(bucketList.getBuckets());
-        BucketList newBucketList = new BucketList();
-        newBucketList.setBuckets(iBucketList);
-        return newBucketList;
-    }
-
     /**
      *
      * @param appName
@@ -355,6 +348,21 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
      */
     private Collection keys(CACHE_NAME cacheName) {
         return cacheManager.getCache(cacheName.name()).getKeys();
+    }
+
+    /**
+     * Creating a separate copy here to avoid ConcurrentModificationException as BucketList gets modified
+     * during assignment business logic execution.
+     *
+     * @param bucketList
+     * @return New object/deep copy of BucketList.
+     *
+     */
+    private BucketList makeCopy(BucketList bucketList) {
+        List<Bucket> iBucketList = new ArrayList<>(bucketList.getBuckets());
+        BucketList newBucketList = new BucketList();
+        newBucketList.setBuckets(iBucketList);
+        return newBucketList;
     }
 }
 
