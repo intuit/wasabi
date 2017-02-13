@@ -19,6 +19,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
+import com.intuit.wasabi.email.EmailAnnotations;
 import com.intuit.wasabi.email.EmailLinksList;
 import com.intuit.wasabi.email.EmailService;
 import com.intuit.wasabi.email.EmailTextProcessor;
@@ -53,10 +54,10 @@ public class EmailServiceImpl implements EmailService {
     private EmailTextProcessor emailTextProcessor;
 
     @Inject
-    public EmailServiceImpl(final @Named("email.service.enabled") boolean enabled,
-                            final @Named("email.service.host") String host,
-                            final @Named("email.service.from") String from,
-                            final @Named("email.service.subject.prefix") String subjectPrefix,
+    public EmailServiceImpl(final @Named(EmailAnnotations.EMAIL_SERVICE_ENABLED) boolean enabled,
+                            final @Named(EmailAnnotations.EMAIL_SERVICE_HOST) String host,
+                            final @Named(EmailAnnotations.EMAIL_SERVICE_FROM) String from,
+                            final @Named(EmailAnnotations.EMAIL_SERVICE_SUBJECT_PREFIX) String subjectPrefix,
                             final EmailTextProcessor emailTextProcessor) {
         this.enabled = enabled;
 

@@ -57,13 +57,13 @@ public class EmailModule extends AbstractModule {
 
         Properties properties = create(PROPERTY_NAME, EmailModule.class);
 
-        bind(Boolean.class).annotatedWith(named("email.service.enabled"))
+        bind(Boolean.class).annotatedWith(named(EmailAnnotations.EMAIL_SERVICE_ENABLED))
                 .toInstance(Boolean.valueOf(getProperty("email.service.enabled", properties, FALSE.toString())));
-        bind(String.class).annotatedWith(named("email.service.host"))
+        bind(String.class).annotatedWith(named(EmailAnnotations.EMAIL_SERVICE_HOST))
                 .toInstance(getProperty("email.service.host", properties, ""));
-        bind(String.class).annotatedWith(named("email.service.from"))
+        bind(String.class).annotatedWith(named(EmailAnnotations.EMAIL_SERVICE_FROM))
                 .toInstance(getProperty("email.service.from", properties, ""));
-        bind(String.class).annotatedWith(named("email.service.subject.prefix"))
+        bind(String.class).annotatedWith(named(EmailAnnotations.EMAIL_SERVICE_SUBJECT_PREFIX))
                 .toInstance(getProperty("email.service.subject.prefix", properties, ""));
 
         bind(EmailTextProcessor.class).to(EmailTextProcessorImpl.class).in(SINGLETON);
