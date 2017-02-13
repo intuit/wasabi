@@ -45,6 +45,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.StreamingOutput;
 
 import com.datastax.driver.core.exceptions.ConnectionException;
+import com.intuit.wasabi.assignment.AssignmentsAnnotations;
 import com.intuit.wasabi.assignment.cache.AssignmentsMetadataCache;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -184,9 +185,11 @@ public class AssignmentsImpl implements Assignments {
                            final RuleCache ruleCache, final Pages pages,
                            final Priorities priorities,
                            final AssignmentDecorator assignmentDecorator,
-                           final @Named("ruleCache.threadPool") ThreadPoolExecutor ruleCacheExecutor,
+                           final @Named(AssignmentsAnnotations.RULECACHE_THREADPOOL)
+                                   ThreadPoolExecutor ruleCacheExecutor,
                            final EventLog eventLog,
-                           final @Named("AssignmentsMetadataCacheEnabled") Boolean metadataCacheEnabled,
+                           final @Named(AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_ENABLED)
+                                   Boolean metadataCacheEnabled,
                            final AssignmentsMetadataCache metadataCache)
             throws IOException, ConnectionException {
         super();

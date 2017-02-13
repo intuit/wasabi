@@ -54,7 +54,8 @@ public class AssignmentsModuleTest {
         injector.getInstance(Key.get(String.class, Names.named("assignment.http.proxy.host")));
 
         //RuleCacheEngine
-        injector.getInstance(Key.get(ThreadPoolExecutor.class, Names.named("ruleCache.threadPool")));
+        injector.getInstance(Key.get(ThreadPoolExecutor.class,
+                Names.named(AssignmentsAnnotations.RULECACHE_THREADPOOL)));
 
         assertThat(injector.getInstance(Key.get(Assignments.class)), is(not(nullValue())));
     }

@@ -20,6 +20,7 @@ package com.intuit.wasabi.assignment.cache.impl;
 import com.codahale.metrics.health.HealthCheck;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import com.intuit.wasabi.assignment.AssignmentsAnnotations;
 import com.intuit.wasabi.assignment.cache.AssignmentMetadataCacheTimeService;
 import com.intuit.wasabi.assignment.cache.AssignmentsMetadataCache;
 import org.slf4j.Logger;
@@ -43,10 +44,10 @@ public class AssignmentsMetadataCacheHealthCheck extends HealthCheck {
 
     @Inject
     public AssignmentsMetadataCacheHealthCheck(AssignmentsMetadataCache metadataCache,
-                                                AssignmentMetadataCacheTimeService timeService,
-                                               @Named("AssignmentsMetadataCacheRefreshInterval") Integer metadataCacheInterval,
-                                               @Named("AssignmentsMetadataCacheAllowedStaleTime") Integer allowedStaleTime,
-                                               @Named("AssignmentsMetadataCacheEnabled") Boolean metadataCacheEnabled) {
+            AssignmentMetadataCacheTimeService timeService,
+            @Named(AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_REFRESH_INTERVAL) Integer metadataCacheInterval,
+            @Named(AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_ALLOWED_STALE_TIME) Integer allowedStaleTime,
+            @Named(AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_ENABLED) Boolean metadataCacheEnabled) {
         super();
         this.metadataCache = metadataCache;
         this.metadataCacheInterval = metadataCacheInterval;

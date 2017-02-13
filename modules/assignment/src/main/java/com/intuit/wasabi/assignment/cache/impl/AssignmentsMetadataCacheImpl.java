@@ -20,6 +20,7 @@ import com.codahale.metrics.health.HealthCheck;
 import com.codahale.metrics.health.HealthCheckRegistry;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import com.intuit.wasabi.assignment.AssignmentsAnnotations;
 import com.intuit.wasabi.assignment.cache.AssignmentsMetadataCache;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.BucketList;
@@ -71,14 +72,17 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
     private static final String ASSIGNMENT_METADATA_CACHE_SERVICE_NAME = "AssignmentsMetadataCache";
 
     @Inject
-    public AssignmentsMetadataCacheImpl(@CassandraRepository ExperimentRepository experimentRepository, PrioritiesRepository prioritiesRepository,
-                                        MutexRepository mutexRepository, PagesRepository pagesRepository,
-                                        @Named("AssignmentsMetadataCacheRefreshCacheService") ScheduledExecutorService refreshCacheService,
-                                        @Named("AssignmentsMetadataCacheRefreshInterval") Integer refreshIntervalInMinutes,
-                                        @Named("AssignmentsMetadataCacheRefreshTask") Runnable metadataCacheRefreshTask,
-                                        HealthCheckRegistry healthCheckRegistry,
-                                        @Named("AssignmentsMetadataCacheHealthCheck") HealthCheck metadataCacheHealthCheck,
-                                        CacheManager cacheManager) {
+    public AssignmentsMetadataCacheImpl(@CassandraRepository ExperimentRepository experimentRepository,
+            PrioritiesRepository prioritiesRepository,
+            MutexRepository mutexRepository,
+            PagesRepository pagesRepository,
+            @Named(AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_REFRESH_CACHE_SERVICE)
+                    ScheduledExecutorService refreshCacheService,
+            @Named(AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_REFRESH_INTERVAL) Integer refreshIntervalInMinutes,
+            @Named(AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_REFRESH_TASK) Runnable metadataCacheRefreshTask,
+            HealthCheckRegistry healthCheckRegistry,
+            @Named(AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_HEALTH_CHECK) HealthCheck metadataCacheHealthCheck,
+            CacheManager cacheManager) {
 
         this.experimentRepository = experimentRepository;
         this.prioritiesRepository = prioritiesRepository;

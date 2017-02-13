@@ -44,7 +44,8 @@ public class UserDirectoryModule extends AbstractModule {
         String userToolsClassName = getProperty("user.lookup.class.name", properties,
                 "com.intuit.wasabi.userdirectory.impl.DefaultUserDirectory");
 
-        bind(String.class).annotatedWith(Names.named("userDirectoryPath")).toInstance(PROPERTY_NAME);
+        bind(String.class).annotatedWith(Names.named(UserDirectoryAnnotations.USER_DIRECTORY_PATH))
+                .toInstance(PROPERTY_NAME);
         bind(new TypeLiteral<List<UserInfo>>() {}).annotatedWith(Names.named("authentication.users"))
                 .toProvider(UserInfoListProvider.class).in(SINGLETON);
         try {
