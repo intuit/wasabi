@@ -544,7 +544,7 @@ angular.module('wasabi.controllers')
                     $scope.validateBuckets(true, $scope.experiment.id, function() {
                         // Attempt to start the experiment.  If successful, let the user know.
                         $scope.changeState($scope.experiment, 'RUNNING', function() {
-                            DialogsFactory.alertDialog('Your experiment has been started successfully!', 'Start Successful');
+                            DialogsFactory.alertDialog('Your experiment has been started successfully!  PLEASE NOTE: The experiment may not be available for assignments for up to 5 minutes.', 'Start Successful');
                             $modalInstance.close(true);
                         });
                     });
