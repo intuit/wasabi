@@ -118,7 +118,7 @@ angular.module('wasabi.controllers')
                     UtilitiesFactory.failIfTokenExpired(modalInstance);
 
                     modalInstance.result.then(function () {
-                        UtilitiesFactory.displaySuccessWithCacheWarning((isEditFlag ? 'Bucket Updated' : 'Bucket Created'), 'Your bucket has been saved.');
+                        UtilitiesFactory.displaySuccessWithCacheWarning((!isEditFlag ? 'Bucket Updated' : 'Bucket Created'), 'Your bucket has been saved.');
 
                         $scope.changesMade = false;
                         $scope.allocationsUpdated = true;
