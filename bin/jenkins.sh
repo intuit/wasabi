@@ -172,18 +172,18 @@ for module in ${modules}; do
       echo "archiving: ${rpm} ${rpm_path}"
       curl -v -u ${nexus_deploy} --upload-file ./target/${rpm} ${rpm_path} || \
         exitOnError "archive rpm failed: curl -v -u [nexus_deploy] --upload-file ./target/${rpm} ${rpm_path}"
+    fi
 
-      if [ "${module}" == "ui" ]; then
-        # archive MILESTONE ui.zip
-        artifact=ui
-        path=${nexus_repositories}/${artifact_repository_id}/`echo ${group} | sed "s/\./\//g"`/${artifact}/${version}
-        zip=${project}-${artifact}-${profile}-${version}.zip
-        zip_path=${path}/${zip}
+    if [ "${module}" == "ui" ]; then
+      # archive MILESTONE ui.zip
+      artifact=ui
+      path=${nexus_repositories}/${artifact_repository_id}/`echo ${group} | sed "s/\./\//g"`/${artifact}/${version}
+      zip=${project}-${artifact}-${profile}-${version}.zip
+      zip_path=${path}/${zip}
 
-        echo "archiving: ${zip} ${zip_path}"
-        curl -v -u ${nexus_deploy} --upload-file ./modules/ui/target/dist.zip ${zip_path} || \
-          exitOnError "archive failed: curl -v -u [nexus_deploy] --upload-file ./modules/ui/dist.zip ${zip_path}"
-      fi
+      echo "archiving: ${zip} ${zip_path}"
+      curl -v -u ${nexus_deploy} --upload-file ./modules/ui/target/dist.zip ${zip_path} || \
+        exitOnError "archive failed: curl -v -u [nexus_deploy] --upload-file ./modules/ui/dist.zip ${zip_path}"
     fi
   fi
 done
