@@ -58,7 +58,7 @@ public class EventsModule extends AbstractModule {
 
         Properties properties = create(PROPERTY_NAME, EventsModule.class);
 
-        bind(Integer.class).annotatedWith(named("executor.threadpool.size"))
+        bind(Integer.class).annotatedWith(named(EventsAnnotations.EXECUTOR_THREADPOOL_SIZE))
                 .toInstance(parseInt(getProperty("executor.threadpool.size", properties, "0")));
         bind(Events.class).to(EventsImpl.class).in(SINGLETON);
         bind(EventsExport.class).to(EventsExportImpl.class).asEagerSingleton();
