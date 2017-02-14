@@ -26,6 +26,7 @@ import com.intuit.wasabi.assignment.cache.impl.AssignmentMetadataCacheTimeServic
 import com.intuit.wasabi.assignment.cache.impl.AssignmentsMetadataCacheHealthCheck;
 import com.intuit.wasabi.assignment.cache.impl.AssignmentsMetadataCacheImpl;
 import com.intuit.wasabi.assignment.cache.impl.AssignmentsMetadataCacheRefreshTask;
+import com.intuit.wasabi.assignment.cache.impl.NoopAssignmentsMetadataCacheImpl;
 import com.intuit.wasabi.assignmentobjects.AssignmentEnvelopePayload;
 import com.intuit.wasabi.exceptions.AssignmentException;
 import com.intuit.wasabi.export.DatabaseExport;
@@ -150,8 +151,8 @@ public class AssignmentsModule extends AbstractModule {
             bind(Runnable.class).annotatedWith(named("AssignmentsMetadataCacheRefreshTask")).to(AssignmentsMetadataCacheRefreshTask.class).in(SINGLETON);
 
         } else {
-            //Bind cache instance to NULL if cache is disabled.
-            bind(AssignmentsMetadataCache.class).toInstance(null);
+            //Bind cache instance to NOOP Instance if cache is disabled.
+            bind(AssignmentsMetadataCache.class).to(NoopAssignmentsMetadataCacheImpl.class).in(SINGLETON);
         }
     }
 
