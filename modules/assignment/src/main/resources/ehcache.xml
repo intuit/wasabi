@@ -19,7 +19,9 @@
          xsi:noNamespaceSchemaLocation="http://ehcache.org/ehcache.xsd"
          updateCheck="true"
          monitoring="autodetect"
-         dynamicConfig="true">
+         dynamicConfig="true"
+         maxBytesLocalHeap="2G"
+>
 
     <defaultCache maxEntriesLocalHeap="0" eternal="true" />
 

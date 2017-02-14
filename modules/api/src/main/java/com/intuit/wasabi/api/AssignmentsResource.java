@@ -407,17 +407,22 @@ public class AssignmentsResource {
 
                                             @javax.ws.rs.core.Context
                                             HttpHeaders headers) {
-    	if ( LOGGER.isDebugEnabled()) {
-    		LOGGER.debug("getBatchAssignmentsForPage applicationName={}, pageName={}, userID={}, context={}, createAssignment={}" +
-                                    ", ignoreSamplingPercent={}, headers={}", applicationName, pageName, userID, context, createAssignment,
-                                    ignoreSamplingPercent, headers);
-    	}
+        try {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("getBatchAssignmentsForPage applicationName={}, pageName={}, userID={}, context={}, createAssignment={}" +
+                                ", ignoreSamplingPercent={}, headers={}", applicationName, pageName, userID, context, createAssignment,
+                        ignoreSamplingPercent, headers);
+            }
 
-    	List<Map> assignmentsFromPage = assignments.doPageAssignments(applicationName, pageName, userID, context,
-                createAssignment, ignoreSamplingPercent, headers, null);
+            List<Map> assignmentsFromPage = assignments.doPageAssignments(applicationName, pageName, userID, context,
+                    createAssignment, ignoreSamplingPercent, headers, null);
 
-        return httpHeader.headers()
-                .entity(ImmutableMap.<String, Object>builder().put("assignments", assignmentsFromPage).build()).build();
+            return httpHeader.headers()
+                    .entity(ImmutableMap.<String, Object>builder().put("assignments", assignmentsFromPage).build()).build();
+        } catch (Exception e) {
+            LOGGER.error("Exception happened while batch-assignment [GET]...", e);
+            throw e;
+        }
     }
 
     /**
@@ -474,18 +479,23 @@ public class AssignmentsResource {
                                             final SegmentationProfile segmentationProfile,
 
                                             @javax.ws.rs.core.Context final HttpHeaders headers) {
-    	
-    	if ( LOGGER.isDebugEnabled()) {
-    		LOGGER.debug("postBatchAssignmentForPage applicationName={}, pageName={}, userID={}, context={}, createAssignment={}" +
-                                    ", ignoreSamplingPercent={}, headers={}, segmentationProfile={}", applicationName, 
-                                    pageName, userID, context, createAssignment, ignoreSamplingPercent, headers, segmentationProfile);
-    	}
+        try {
 
-        List<Map> assignmentsFromPage = assignments.doPageAssignments(applicationName, pageName, userID, context,
-                createAssignment, ignoreSamplingPercent, headers, segmentationProfile);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("postBatchAssignmentForPage applicationName={}, pageName={}, userID={}, context={}, createAssignment={}" +
+                                ", ignoreSamplingPercent={}, headers={}, segmentationProfile={}", applicationName,
+                        pageName, userID, context, createAssignment, ignoreSamplingPercent, headers, segmentationProfile);
+            }
 
-        return httpHeader.headers()
-                .entity(ImmutableMap.<String, Object>builder().put("assignments", assignmentsFromPage).build()).build();
+            List<Map> assignmentsFromPage = assignments.doPageAssignments(applicationName, pageName, userID, context,
+                    createAssignment, ignoreSamplingPercent, headers, segmentationProfile);
+
+            return httpHeader.headers()
+                    .entity(ImmutableMap.<String, Object>builder().put("assignments", assignmentsFromPage).build()).build();
+        } catch (Exception e) {
+            LOGGER.error("Exception happened while batch-assignment [GET]...", e);
+            throw e;
+        }
     }
 
     /**

@@ -49,7 +49,8 @@ public class AssignmentsMetadataCacheRefreshTask implements Runnable {
     @Override
     public void run() {
         try {
-            LOGGER.info("AssignmentsMetadataCache refresh started at = {}", timeService.getCurrentTime());
+            Date startTime = timeService.getCurrentTime();
+            LOGGER.debug("AssignmentsMetadataCache refresh started at = {}", startTime);
 
             if(!refreshInProgress.get()) {
                 //Mark that refresh has been started...
@@ -61,13 +62,13 @@ public class AssignmentsMetadataCacheRefreshTask implements Runnable {
                 //Update last refresh time
                 lastRefreshTime = timeService.getCurrentTime();
 
-                LOGGER.info("AssignmentsMetadataCache has been refreshed at = {}", lastRefreshTime);
+                LOGGER.info("AssignmentsMetadataCache has been refreshed and took = {} ms", (lastRefreshTime.getTime() - startTime.getTime()));
             } else {
                 LOGGER.info("AssignmentsMetadataCache refresh is skipped as previous refresh is in progress at = {}", timeService.getCurrentTime());
             }
         } catch (Exception e) {
             //In case of any exception, clear the cache and mark refresh complete.
-            LOGGER.error("Exception happened while refreshing AssignmentsMetadataCache...", e);
+            LOGGER.error("AssignmentsMetadataCache - Exception happened while refreshing cache...", e);
             metadataCache.clear();
         } finally {
             //Mark that refresh has been finished...
