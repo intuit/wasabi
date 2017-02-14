@@ -21,6 +21,7 @@ casks=("java" "docker")
 profile_default=development
 endpoint_default=localhost:8080
 verify_default=false
+buildtests_default=true
 sleep_default=30
 red=`tput setaf 9`
 green=`tput setaf 10`
@@ -42,6 +43,7 @@ options:
   -p | --profile [ profile ]             : profile; default ${profile_default}
   -e | --endpoint [ host:port ]          : api endpoint; default: ${endpoint_default}
   -v | --verify [ true | false ]         : verify installation configuration; default: ${verify_default}
+  -v | --buildtests [ true | false ]     : perform tests after build; default: ${buildtests_default}
   -s | --sleep [ sleep-time ]            : sleep/wait time in seconds; default: ${sleep_default}
   -h | --help                            : help message
 
@@ -199,7 +201,7 @@ test_api() {
   [ $? -ne 0 ] && usage "unable to start" 1
 
   [ ! -e ./modules/functional-test/target/wasabi-functional-test-*-SNAPSHOT-jar-with-dependencies.jar ] && \
-    build false ${verify}
+    build false ${buildtests}
 
   # FIXME: derive usr/pwd from env
   mkdir test.log >/dev/null 2>&1
@@ -251,7 +253,7 @@ package() {
   # FIXME: ?how to package profile=development?
   [ "${profile}" == "${profile_default}" ] && profile=build
 
-  build true ${verify} ${profile}
+  build true ${buildtests} ${profile}
 
   # FIXME: move to modules/ui/build.sh
   version=$(fromPom . build project.version)
@@ -360,6 +362,8 @@ while getopts "${optspec}" opt; do
         endpoint=*) endpoint="${OPTARG#*=}";;
         verify) verify="${!OPTIND}"; OPTIND=$(( ${OPTIND} + 1 ));;
         verify=*) verify="${OPTARG#*=}";;
+        buildtests) buildtests="${!OPTIND}"; OPTIND=$(( ${OPTIND} + 1 ));;
+        buildtests=*) buildtests="${OPTARG#*=}";;
         sleep) sleep="${!OPTIND}"; OPTIND=$(( ${OPTIND} + 1 ));;
         sleep=*) sleep="${OPTARG#*=}";;
         help) usage;;
@@ -368,6 +372,7 @@ while getopts "${optspec}" opt; do
     p) profile=${OPTARG};;
     e) endpoint=${OPTARG};;
     v) verify=${OPTARG};;
+    t) buildtests=${OPTARG};;
     s) sleep=${OPTARG};;
     h) usage;;
     :) usage "option -${OPTARG} requires an argument" 1;;
@@ -380,6 +385,7 @@ done
 profile=${profile:=${profile_default}}
 endpoint=${endpoint:=${endpoint_default}}
 verify=${verify:=${verify_default}}
+buildtests=${buildtests:=${buildtests_default}}
 sleep=${sleep:=${sleep_default}}
 
 [[ $# -eq 0 ]] && usage
@@ -387,7 +393,7 @@ sleep=${sleep:=${sleep_default}}
 for command in ${@:$OPTIND}; do
   case "${command}" in
     bootstrap) bootstrap;;
-    build) build true ${verify} ${profile};;
+    build) build true ${buildtests} ${profile};;
     clean) clean;;
     start) exec_commands start "cassandra,mysql,wasabi";;
     start:*) exec_commands start ${command};;

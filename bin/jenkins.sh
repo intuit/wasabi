@@ -22,6 +22,7 @@
 #   profile                      : maven profile; default:test
 #   modules                      : project modules to build; default:main ui
 #   execute_integration_tests    : execute integration test kill switch; default:true
+#   execute_unit_tests           : execute unit test kill switch; default:true
 #   deploy_host                  : integration test host; default:deploy.host
 #   deploy_host_url              : integration test deploy user; default:deploy.user
 #   sonar_host_url               : sonar host; default:+-Dsonar.host.url=SONAR_HOST_URL
@@ -43,6 +44,7 @@ build=${PROJECT_BUILD:-false}
 profile=${PROJECT_PROFILE:-test}
 modules=${PROJECT_MODULES:-main ui}
 execute_integration_tests=${PROJECT_INTEGRATION_TEST:-true}
+execute_unit_tests=${PROJECT_UNIT_TEST:-true}
 deploy_host=${PROJECT_DEPLOY_HOST:-deploy.host}
 deploy_host_user=${PROJECT_DEPLOY_USER:-usr}
 sonar_host_url=${SONAR_HOST_URL:+-Dsonar.host.url=$SONAR_HOST_URL}
@@ -98,7 +100,7 @@ version=$(mvn --settings ./settings.xml -f ./modules/main/pom.xml -P ${profile} 
 
 echo "packaging: ${project} / ${profile}"
 (eval ${project_env} ./bin/${project}.sh --profile=${profile} --verify=true package) || \
-  exitOnError "unable to build project : (${project_env} ./bin/${project}.sh --profile=${profile} --verify=true package)"
+  exitOnError "unable to build project : (${project_env} ./bin/${project}.sh --profile=${profile} --buildtests=${execute_unit_tests} --verify=true package)"
 
 for module in ${modules}; do
   if [[ ! -z "${module// }" ]]; then
