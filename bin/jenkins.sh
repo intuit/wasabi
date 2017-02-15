@@ -81,8 +81,8 @@ wget ${JENKINS_URL}jnlpJars/jenkins-cli.jar || \
 # fetch internal project
 
 echo "cloning: ${internal_project_repository} / ${internal_project_branch}"
-git clone -b ${internal_project_branch} https://${internal_project_user}@${internal_project_repository} || \
-  exitOnError "unable to clone project: git clone -b ${internal_project_branch} https://${internal_project_user}@${internal_project_repository}"
+#git clone -b ${internal_project_branch} https://${internal_project_user}@${internal_project_repository} || \
+#  exitOnError "unable to clone project: git clone -b ${internal_project_branch} https://${internal_project_user}@${internal_project_repository}"
 
 # construct viable/complete settings.xml
 # note: need to add distributionManagement/repository to [ws]/pom.xml to map to settings.xml in order to mvn-deploy internally
