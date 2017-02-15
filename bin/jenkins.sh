@@ -99,7 +99,7 @@ version=$(mvn --settings ./settings.xml -f ./modules/main/pom.xml -P ${profile} 
 # build
 
 echo "packaging: ${project} / ${profile}"
-(eval ${project_env} ./bin/${project}.sh --profile=${profile} --verify=true package) || \
+(eval ${project_env} ./bin/${project}.sh --profile=${profile} --buildtests=${execute_unit_tests} --verify=true package) || \
   exitOnError "unable to build project : (${project_env} ./bin/${project}.sh --profile=${profile} --buildtests=${execute_unit_tests} --verify=true package)"
 
 for module in ${modules}; do
