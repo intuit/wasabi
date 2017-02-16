@@ -105,7 +105,7 @@ public interface AssignmentsRepository {
      * @return Experiment id
      *
      */
-     List<Pair<Experiment, Bucket.Label>> getAssignments(User.ID userID, Application.Name appLabel, Context context,
+     List<Pair<Experiment, String>> getAssignments(User.ID userID, Application.Name appLabel, Context context,
                                                                   Map<Experiment.ID, Experiment> experimentMap);
     /**
      * Get assignment for experiment and user
