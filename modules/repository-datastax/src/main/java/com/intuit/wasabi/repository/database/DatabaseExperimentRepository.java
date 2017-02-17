@@ -125,6 +125,11 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
     }
 
     @Override
+    public Map<Application.Name, List<Experiment>> getExperimentsForApps(Collection<Application.Name> appNames) {
+        throw new UnsupportedOperationException("Not supported ");
+    }
+
+    @Override
     public Experiment getExperiment(Application.Name appName,
                                     Experiment.Label experimentLabel) {
 
@@ -207,6 +212,11 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
         }
 
         return result;
+    }
+
+    @Override
+    public Map<Experiment.ID, Experiment> getExperimentsMap(Collection<Experiment.ID> experimentIDs) {
+        throw new UnsupportedOperationException("Not supported ");
     }
 
     /**
@@ -658,14 +668,6 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
     @Override
     public void createIndicesForNewExperiment(NewExperiment newExperiment) {
         throw new UnsupportedOperationException("No support for sql - indices are only created in Cassandra");
-    }
-
-    /**
-     * Get the summary of assignments delivered for each experiment
-     */
-    @Override
-    public AssignmentCounts getAssignmentCounts(Experiment.ID experimentID, Context context) {
-        throw new UnsupportedOperationException("Assignment counts not supported on sql");
     }
 
     /**

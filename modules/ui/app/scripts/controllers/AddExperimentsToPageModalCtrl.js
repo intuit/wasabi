@@ -106,7 +106,7 @@ angular.module('wasabi.controllers')
                                     hasBeenStr = 'have been';
                                 }
                                 var selectedExperimentNames = $scope.createNameList(selectedExperiments, 'label');
-                                UtilitiesFactory.displayPageSuccessMessage('Experiments Added', 'The ' + expmtStr + ', ' + selectedExperimentNames + ', ' + hasBeenStr + ' added to the page, ' + page + '.');
+                                UtilitiesFactory.displaySuccessWithCacheWarning('Experiments Added', 'The ' + expmtStr + ', ' + selectedExperimentNames + ', ' + hasBeenStr + ' added to the page, ' + page + '.');
                                 $modalInstance.close();
                             }
                         }, function(response) {

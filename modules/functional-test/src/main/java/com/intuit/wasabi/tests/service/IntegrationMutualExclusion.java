@@ -333,6 +333,7 @@ public class IntegrationMutualExclusion extends TestBase {
     @Test(dependsOnMethods = {"t_batchAssignments"})
     public void t_removeOneBatchMutEx() {
         deleteExclusion(batchMutExExperiments.get(0), batchMutExExperiments.get(1));
+        clearAssignmentsMetadataCache();
     }
 
     /**

@@ -30,7 +30,9 @@ angular.module('wasabi.controllers')
                 };
 
                 $scope.balanceBuckets = function() {
-                    UtilitiesFactory.balanceBuckets($scope.buckets, $scope.experiment);
+                    UtilitiesFactory.balanceBuckets($scope.buckets, $scope.experiment, function() {
+                        UtilitiesFactory.displaySuccessWithCacheWarning('Bucket Allocations Balanced', 'Your bucket allocation percentages have been balanced.');
+                    });
                 };
 
                 $scope.totalBucketAllocation = function() {
@@ -116,6 +118,8 @@ angular.module('wasabi.controllers')
                     UtilitiesFactory.failIfTokenExpired(modalInstance);
 
                     modalInstance.result.then(function () {
+                        UtilitiesFactory.displaySuccessWithCacheWarning((!isEditFlag ? 'Bucket Updated' : 'Bucket Created'), 'Your bucket has been saved.');
+
                         $scope.changesMade = false;
                         $scope.allocationsUpdated = true;
                         $scope.loadBuckets();
@@ -143,6 +147,7 @@ angular.module('wasabi.controllers')
                                         {key: 'experiment_id', value: $scope.experiment.id},
                                         {key: 'item_label', value: bucketLabel});
 
+                                    UtilitiesFactory.displaySuccessWithCacheWarning('Bucket Closed', 'Your bucket has been closed.');
                                     $scope.changesMade = false;
                                     $scope.allocationsUpdated = true;
                                     $scope.loadBuckets();
@@ -175,6 +180,7 @@ angular.module('wasabi.controllers')
                                         {key: 'experiment_id', value: $scope.experiment.id},
                                         {key: 'item_label', value: bucketLabel});
 
+                                    UtilitiesFactory.displaySuccessWithCacheWarning('Bucket Emptied', 'Your bucket has been emptied.');
                                     $scope.changesMade = false;
                                     $scope.allocationsUpdated = true;
                                     $scope.loadBuckets();
@@ -219,6 +225,7 @@ angular.module('wasabi.controllers')
                                 {key: 'dialog_name', value: 'updateBucketAssignments'},
                                 {key: 'experiment_id', value: experiment.id});
 
+                            UtilitiesFactory.displaySuccessWithCacheWarning('Buckets Updated', 'Your bucket allocation changes have been saved.');
                             $modalInstance.close();
                         }, function(response) {
                             // Handle error

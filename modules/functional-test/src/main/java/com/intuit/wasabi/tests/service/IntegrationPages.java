@@ -357,6 +357,10 @@ public class IntegrationPages extends TestBase {
         Assert.assertNotNull(exp.label, "Experiment creation failed (No label).");
 
         deleteExperiment(exp);
+
+        //Clear assignments metadata after experiment deletion
+        clearAssignmentsMetadataCache();
+
         List<Experiment> experiments = getExperiments();
         Assert.assertFalse(experiments.contains(exp), "experiment was not deleted");
 

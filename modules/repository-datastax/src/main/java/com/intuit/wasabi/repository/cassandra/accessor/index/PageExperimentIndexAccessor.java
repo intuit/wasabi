@@ -19,6 +19,7 @@ import com.datastax.driver.core.Statement;
 import com.datastax.driver.mapping.Result;
 import com.datastax.driver.mapping.annotations.Accessor;
 import com.datastax.driver.mapping.annotations.Query;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.intuit.wasabi.repository.cassandra.pojo.index.PageExperimentByAppNamePage;
 
 import java.util.UUID;
@@ -58,5 +59,16 @@ public interface PageExperimentIndexAccessor {
      */
     @Query("select * from page_experiment_index where app_name = ? and page = ?")
     Result<PageExperimentByAppNamePage> selectBy(String appName, String page);
+
+
+    /**
+     * Asynchronously fetch experiments associated to given application and page.
+     *
+     * @param appName
+     * @param page
+     * @return result
+     */
+    @Query("select * from page_experiment_index where app_name = ? and page = ?")
+    ListenableFuture<Result<PageExperimentByAppNamePage>> asyncSelectBy(String appName, String page);
 
 }

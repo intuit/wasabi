@@ -86,7 +86,8 @@ public class DBITransactionFactory extends TransactionFactory {
                 LOGGER.error("Unable to do check", ex);
                 msg = ex.getMessage();
             } finally {
-                ((DBITransaction) trans).close();
+                //No need to close here as it (handle) gets closed as part of select() operation.
+                //((DBITransaction) trans).close();
             }
 
             return res ? Result.healthy() : Result.unhealthy(msg);

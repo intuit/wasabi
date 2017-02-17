@@ -15,41 +15,63 @@
  *******************************************************************************/
 package com.intuit.wasabi.api;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerResponse;
 import com.sun.jersey.spi.container.ContainerResponseFilter;
+
 import org.slf4j.Logger;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import static org.slf4j.LoggerFactory.getLogger;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static com.google.common.net.HttpHeaders.*;
+
+import java.util.Objects;
 
 public class SimpleCORSResponseFilter implements ContainerResponseFilter {
 
+    private static final String X_APPLICATION_ID = "X-Application-Id";
     private final static Logger LOGGER = getLogger(SimpleCORSResponseFilter.class);
+    private final String applicationName;
+    private final String deltaSeconds;
 
-    public SimpleCORSResponseFilter() {
+    @Inject
+    public SimpleCORSResponseFilter(final @Named("application.id") String applicationName, final @Named("access.control.max.age.delta.seconds") String deltaSeconds) {
         LOGGER.info("Instantiated response filter {}", getClass().getName());
+        this.applicationName = applicationName;
+        this.deltaSeconds = deltaSeconds;
     }
 
     @Override
     public ContainerResponse filter(ContainerRequest containerRequest, ContainerResponse containerResponse) {
         LOGGER.trace("CORS filter called for request: {}", containerRequest);
-
+        
         Response.ResponseBuilder response = Response.fromResponse(containerResponse.getResponse());
 
         if ("OPTIONS".equals(containerRequest.getMethod())) {
+            response.status(Status.NO_CONTENT);
+            if (Objects.isNull(containerResponse.getHttpHeaders().get(ACCESS_CONTROL_ALLOW_ORIGIN)))
+                response.header(ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+            if (Objects.isNull(containerResponse.getHttpHeaders().get(ACCESS_CONTROL_ALLOW_METHODS)))
+                response.header(ACCESS_CONTROL_ALLOW_METHODS, "GET, POST, PUT, DELETE, OPTIONS");
+            if (Objects.isNull(containerResponse.getHttpHeaders().get(ACCESS_CONTROL_REQUEST_METHOD)))
+                response.header(ACCESS_CONTROL_REQUEST_METHOD, "GET, POST, PUT, DELETE, OPTIONS");
+            if (Objects.isNull(containerResponse.getHttpHeaders().get(ACCESS_CONTROL_MAX_AGE)))
+                response.header(ACCESS_CONTROL_MAX_AGE, deltaSeconds);
+            if (Objects.isNull(containerResponse.getHttpHeaders().get(CONTENT_TYPE)))
+                response.header(CONTENT_TYPE, APPLICATION_JSON);
+            if (Objects.isNull(containerResponse.getHttpHeaders().get(X_APPLICATION_ID)))
+                response.header(X_APPLICATION_ID, applicationName);
+            response.entity(null);
 
-            response.status(204)
-                    .header("Access-Control-Allow-Origin", "*")
-                    .header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-                    .header("Content-Type", "application/json")
-                    .entity("");
-
-            String requestHeader = containerRequest.getHeaderValue("Access-Control-Request-Headers");
+            String requestHeader = containerRequest.getHeaderValue(ACCESS_CONTROL_REQUEST_HEADERS);
 
             if (requestHeader != null) {
-                response.header("Access-Control-Allow-Headers", requestHeader);
+                response.header(ACCESS_CONTROL_ALLOW_HEADERS, requestHeader);
             }
         }
 

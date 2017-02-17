@@ -139,8 +139,7 @@ public class AnalyticsImplTest {
         Experiment.ID id = Experiment.ID.newInstance();
         when(experimentRepository.getExperiment(eq(id))).thenReturn(experiment);
         when(assignmentsRepository.getBucketAssignmentCount(eq(experiment))).thenReturn(assignmentCounts);
-        when(experimentRepository.getAssignmentCounts(eq(id), any(Context.class))).thenReturn(assignmentCounts);
-        //test the else part
+       //test the else part
         Date date = new Date(1000); //some time in 1970
         when(experiment.getCreationTime()).thenReturn(date);
         AssignmentCounts result = this.analyticsImpl.getAssignmentCounts(id, null);

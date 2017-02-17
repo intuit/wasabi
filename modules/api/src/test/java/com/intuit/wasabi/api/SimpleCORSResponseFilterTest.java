@@ -22,10 +22,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-
+import com.sun.jersey.core.header.OutBoundHeaders;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -40,16 +41,26 @@ public class SimpleCORSResponseFilterTest {
 
     @Before
     public void setup() {
-        filter = new SimpleCORSResponseFilter();
+    	filter = new SimpleCORSResponseFilter("name", "600");
     }
 
-    @Test
-    public void filter() {
-        Response response = Response.ok().build();
-        when(containerResponse.getResponse()).thenReturn(response);
-        when(containerRequest.getHeaderValue("Access-Control-Request-Headers")).thenReturn("foo");
+	@Test
+	public void filter() {
+		Response response = Response.ok().build();
+		when(containerResponse.getResponse()).thenReturn(response);
+        when(containerResponse.getStatus()).thenReturn(Status.OK.getStatusCode());
+        when(containerResponse.getHttpHeaders()).thenReturn(new OutBoundHeaders());
+		when(containerRequest.getMethod()).thenReturn("OPTIONS");
+		when(containerRequest.getHeaderValue("Access-Control-Request-Headers")).thenReturn("foo");
 
-        assertNotNull(filter.filter(containerRequest, containerResponse));
-    }
+		ContainerResponse returnedContainerResponse = filter.filter(containerRequest, containerResponse);
+		assertNotNull(returnedContainerResponse);
+		assertEquals(Status.OK.getStatusCode(), returnedContainerResponse.getStatus());
+		
+		response = Response.status(Status.NOT_FOUND.getStatusCode()).build();
+        when(containerResponse.getStatus()).thenReturn(Status.NOT_FOUND.getStatusCode());
+		returnedContainerResponse = filter.filter(containerRequest, containerResponse);
+        assertEquals(Status.NOT_FOUND.getStatusCode(), returnedContainerResponse.getStatus());
+	}
 
 }

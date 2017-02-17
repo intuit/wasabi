@@ -23,6 +23,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -30,7 +31,7 @@ import java.util.Date;
  *
  * TODO: At the moment this is a clone of experiment. This should be changed in the future.
  */
-public class PrioritizedExperiment implements Cloneable, ExperimentBase {
+public class PrioritizedExperiment implements Cloneable, ExperimentBase, Serializable {
 
     @ApiModelProperty(value = "unique experiment ID", required = true)
     private Experiment.ID id;

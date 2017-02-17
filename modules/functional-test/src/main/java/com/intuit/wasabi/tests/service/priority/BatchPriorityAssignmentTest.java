@@ -98,8 +98,9 @@ public class BatchPriorityAssignmentTest extends TestBase {
         assertReturnCode(response, HttpStatus.SC_CREATED);
         response = apiServerConnector.doGet("applications/" + validExperimentsLists.get(0).applicationName + "/priorities");
         assertReturnCode(response, HttpStatus.SC_OK);
-        String lables = "{\"labels\": [" + validExperimentsLists.stream().map(s -> "\"" + s.label + "\"").collect(Collectors.joining(",")) + "]}";
-        response = apiServerConnector.doPost("/assignments/applications/" + validExperimentsLists.get(0).applicationName + "/users/johnDoe2", lables);
+        clearAssignmentsMetadataCache();
+        String lables = "{\"labels\": ["+validExperimentsLists.stream().map(s -> "\"" + s.label + "\"").collect(Collectors.joining(","))+"]}";
+        response = apiServerConnector.doPost("/assignments/applications/"+validExperimentsLists.get(0).applicationName+"/users/johnDoe2", lables);
         assertReturnCode(response, HttpStatus.SC_OK);
         LOGGER.info("output: " + response.asString());
         Type listType = new TypeToken<Map<String, ArrayList<Map<String, Object>>>>() {

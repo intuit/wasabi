@@ -34,6 +34,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.joda.time.DateMidnight;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.LongBuffer;
 import java.util.ArrayList;
@@ -54,7 +55,7 @@ import static java.util.UUID.randomUUID;
 /**
  * An experiment
  */
-public class Experiment implements Cloneable, ExperimentBase {
+public class Experiment implements Cloneable, ExperimentBase, Serializable {
 
     @ApiModelProperty(value = "unique experiment ID", dataType = "UUID", required = true)
     private Experiment.ID id;
@@ -649,7 +650,7 @@ public class Experiment implements Cloneable, ExperimentBase {
      */
     @JsonSerialize(using = Experiment.ID.Serializer.class)
     @JsonDeserialize(using = Experiment.ID.Deserializer.class)
-    public static class ID {
+    public static class ID implements Serializable {
 
         private UUID id;
 
@@ -747,7 +748,7 @@ public class Experiment implements Cloneable, ExperimentBase {
      */
     @JsonSerialize(using = Experiment.Label.Serializer.class)
     @JsonDeserialize(using = Experiment.Label.Deserializer.class)
-    public static class Label {
+    public static class Label implements Serializable {
 
         private String label;
 

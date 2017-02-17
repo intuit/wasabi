@@ -117,6 +117,7 @@ public class IntegrationExperiment extends TestBase {
      */
     @Test(groups = {"basicExperimentTests"}, dependsOnMethods = {"t_createTestExperiment"})
     public void t_experimentOutput() {
+        clearAssignmentsMetadataCache();
         List<Experiment> experiments = getExperiments();
         Assert.assertTrue(experiments.size() > 0, "List did not contain any elements - should be at least 1.");
     }

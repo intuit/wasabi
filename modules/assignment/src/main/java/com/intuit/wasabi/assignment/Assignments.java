@@ -43,7 +43,18 @@ public interface Assignments {
      *
      * @return Map of number of elements each queue
      */
+    @Deprecated
     Map<String, Integer> queuesLength();
+
+    /**
+     * @return Details of the queues in rule cache and ingestion executors.
+     */
+    Map<String, Object> queuesDetails();
+    
+    /**
+     * Flush all active and queued messages in ThreadPoolExecutor to persistent store.
+     */
+    void flushMessages();
 
     /**
      * Gets the Assignment for one user for an specific experiment.
@@ -174,6 +185,21 @@ public interface Assignments {
     boolean doSegmentTest(Application.Name applicationName, Experiment.Label experimentLabel,
                           Context context, SegmentationProfile segmentationProfile,
                           HttpHeaders headers);
+
+    /**
+     * This method is used to clear assignments metadata cache.
+     *
+     * @return True if cache is cleared successfully
+     *
+     */
+    void clearMetadataCache();
+
+    /**
+     * This method is used to get details about metadata cache.
+     *
+     * @return Map of metadata cache details
+     */
+     Map<String, String> metadataCacheDetails();
 
     /**
      * Gets bucket assignment ratios per day for a list of experiments. Also contains meta information about the

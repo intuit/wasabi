@@ -15,14 +15,14 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository;
 
-import com.intuit.wasabi.experimentobjects.Application;
-import com.intuit.wasabi.experimentobjects.Experiment;
-import com.intuit.wasabi.experimentobjects.ExperimentPageList;
-import com.intuit.wasabi.experimentobjects.Page;
-import com.intuit.wasabi.experimentobjects.PageExperiment;
+import com.intuit.wasabi.experimentobjects.*;
+import com.intuit.wasabi.repository.RepositoryException;
+import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Interface for supporting pages data
@@ -104,5 +104,14 @@ public interface PagesRepository {
      * @return list of PageExperiment (id and allowNewAssignment - No labels)
      */
     List<PageExperiment> getExperimentsWithoutLabels(Application.Name applicationName, Page.Name pageName);
+
+    /**
+     * In batch, get the experiments (List of PageExperiments) for given application and page pairs.
+     *
+     * @param appAndPagePairs name of the application
+     * @return list of PageExperiment
+     *
+     */
+    Map<Pair<Application.Name, Page.Name>, List<PageExperiment>> getExperimentsWithoutLabels(Collection<Pair<Application.Name, Page.Name>> appAndPagePairs);
 
 }

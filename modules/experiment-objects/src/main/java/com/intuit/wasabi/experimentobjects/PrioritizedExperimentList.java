@@ -17,13 +17,14 @@ package com.intuit.wasabi.experimentobjects;
 
 import io.swagger.annotations.ApiModelProperty;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Wrapper class to hold a list of {@link PrioritizedExperiment} objects.
  */
-public class PrioritizedExperimentList {
+public class PrioritizedExperimentList implements Serializable {
     @ApiModelProperty(required = true)
     private List<PrioritizedExperiment> prioritizedExperiments = new ArrayList<>();
 

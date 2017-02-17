@@ -32,6 +32,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.io.IOException;
+import java.io.Serializable;
+import java.util.Objects;
 
 public class Page {
 
@@ -93,7 +95,7 @@ public class Page {
      */
     @JsonSerialize(using = Page.Name.Serializer.class)
     @JsonDeserialize(using = Page.Name.Deserializer.class)
-    public static class Name {
+    public static class Name implements Serializable {
 
         private final String inner_name;
 

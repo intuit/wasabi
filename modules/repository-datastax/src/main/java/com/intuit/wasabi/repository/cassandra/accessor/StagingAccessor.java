@@ -25,6 +25,6 @@ import com.datastax.driver.mapping.annotations.Query;
  */
 @Accessor
 public interface StagingAccessor {
-    @Query("insert into staging(time, type, exep , msg) values(now(), 'ASSIGNMENT', ? , ?)")
-    ResultSet insertBy(String exception, String message);
+    @Query("insert into staging(time, type, exep , msg) values(now(), ?, ? , ?)")
+    ResultSet insertBy(String type, String exception, String message);
 }

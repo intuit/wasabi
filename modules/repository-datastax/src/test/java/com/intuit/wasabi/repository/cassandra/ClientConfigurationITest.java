@@ -43,14 +43,14 @@ public class ClientConfigurationITest {
                 new DatabaseExperimentRepositoryModule(),
                 new CassandraRepositoryModule());
         Configuration config = injector.getInstance(CassandraDriver.Configuration.class);
-        assertEquals(ConsistencyLevel.LOCAL_ONE, config.getDefaultReadConsistency());
-        assertEquals(ConsistencyLevel.LOCAL_ONE, config.getDefaultWriteConsistency());
-        assertEquals("wasabi_experiments", config.getKeyspaceName());
-        assertEquals(1, config.getKeyspaceReplicationFactor());
-        assertEquals(10, config.getMaxConnectionsPerHost());
-        assertEquals("datacenter1:1", config.getNetworkTopologyReplicationValues());
-        assertEquals(Arrays.asList("localhost"), config.getNodeHosts());
-        assertEquals(9160, config.getPort());
+        assertEquals(ConsistencyLevel.LOCAL_ONE,config.getDefaultReadConsistency());
+        assertEquals(ConsistencyLevel.LOCAL_ONE,config.getDefaultWriteConsistency());
+        assertEquals("wasabi_experiments",config.getKeyspaceName());
+        assertEquals(1,config.getKeyspaceReplicationFactor());
+        assertEquals(10,config.getMaxConnectionsPerHost());
+        assertEquals("datacenter1:1",config.getNetworkTopologyReplicationValues());
+        assertEquals(Arrays.asList("localhost"),config.getNodeHosts());
+        assertEquals(9042,config.getPort());
         assertNull(config.getSSLTrustStore());
         assertNull(config.getSSLTrustStorePassword());
         assertEquals(Optional.empty(), config.getTokenAwareLoadBalancingLocalDC());

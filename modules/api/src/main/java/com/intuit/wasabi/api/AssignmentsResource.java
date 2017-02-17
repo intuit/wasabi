@@ -23,6 +23,9 @@ import com.intuit.wasabi.assignment.Assignments;
 import com.intuit.wasabi.assignmentobjects.Assignment;
 import com.intuit.wasabi.assignmentobjects.SegmentationProfile;
 import com.intuit.wasabi.assignmentobjects.User;
+import com.intuit.wasabi.authenticationobjects.UserInfo;
+import com.intuit.wasabi.authenticationobjects.UserInfo.Username;
+import com.intuit.wasabi.authorization.Authorization;
 import com.intuit.wasabi.exceptions.AssignmentNotFoundException;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
@@ -47,13 +50,19 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+
+import org.apache.commons.httpclient.HttpStatus;
+import org.slf4j.Logger;
+
 import java.util.List;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_LABELLIST;
 import static com.intuit.wasabi.assignmentobjects.Assignment.Status.EXPERIMENT_EXPIRED;
+import static com.intuit.wasabi.authorizationobjects.Permission.CREATE;
 import static java.lang.Boolean.FALSE;
+import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -69,11 +78,13 @@ public class AssignmentsResource {
     private static final Logger LOGGER = getLogger(AssignmentsResource.class);
     private final HttpHeader httpHeader;
     private final Assignments assignments;
+    private Authorization authorization;
 
     @Inject
-    AssignmentsResource(final Assignments assignments, final HttpHeader httpHeader) {
+    AssignmentsResource(final Assignments assignments, final HttpHeader httpHeader, Authorization authorization) {
         this.assignments = assignments;
         this.httpHeader = httpHeader;
+        this.authorization = authorization;
     }
 
     /**
@@ -377,49 +388,54 @@ public class AssignmentsResource {
             notes = "If you want to pass segmentation information, use the POST-Call for this method")
     @Timed
     public Response getBatchAssignmentForPage(
-            @PathParam("applicationName")
-            @ApiParam(value = "Application Name")
-            final Application.Name applicationName,
+                                            @PathParam("applicationName")
+                                            @ApiParam(value = "Application Name")
+                                            final Application.Name applicationName,
 
-            @PathParam("pageName")
-            @ApiParam(value = "Page Name")
-            final Page.Name pageName,
+                                            @PathParam("pageName")
+                                            @ApiParam(value = "Page Name")
+                                            final Page.Name pageName,
 
-            @PathParam("userID")
-            @ApiParam(value = "User(customer) ID")
-            final User.ID userID,
+                                            @PathParam("userID")
+                                            @ApiParam(value = "User(customer) ID")
+                                            final User.ID userID,
 
-            @QueryParam("createAssignment")
-            @DefaultValue("true")
-            @ApiParam(value = "conditional to generate an assignment if one doesn't exist",
-                    defaultValue = "true")
-            final boolean createAssignment,
+                                            @QueryParam("createAssignment")
+                                            @DefaultValue("true")
+                                            @ApiParam(value = "conditional to generate an assignment if one doesn't exist",
+                                                    defaultValue = "true")
+                                            final boolean createAssignment,
 
-            @QueryParam("ignoreSamplingPercent")
-            @DefaultValue("false")
-            @ApiParam(value = "whether the sampling percent for the experiment should be ignored, " +
-                    "forcing the user into the experiment (if eligible)",
-                    defaultValue = "false")
-            final boolean ignoreSamplingPercent,
+                                            @QueryParam("ignoreSamplingPercent")
+                                            @DefaultValue("false")
+                                            @ApiParam(value = "whether the sampling percent for the experiment should be ignored, " +
+                                                    "forcing the user into the experiment (if eligible)",
+                                                    defaultValue = "false")
+                                            final boolean ignoreSamplingPercent,
 
-            @QueryParam("context")
-            @DefaultValue("PROD")
-            @ApiParam(value = "context for the experiment, eg QA, PROD")
-            final Context context,
+                                            @QueryParam("context")
+                                            @DefaultValue("PROD")
+                                            @ApiParam(value = "context for the experiment, eg QA, PROD")
+                                            final Context context,
 
-            @javax.ws.rs.core.Context
-                    HttpHeaders headers) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("getBatchAssignmentsForPage applicationName={}, pageName={}, userID={}, context={}, createAssignment={}" +
-                            ", ignoreSamplingPercent={}, headers={}", applicationName, pageName, userID, context, createAssignment,
-                    ignoreSamplingPercent, headers);
+                                            @javax.ws.rs.core.Context
+                                            HttpHeaders headers) {
+        try {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("getBatchAssignmentsForPage applicationName={}, pageName={}, userID={}, context={}, createAssignment={}" +
+                                ", ignoreSamplingPercent={}, headers={}", applicationName, pageName, userID, context, createAssignment,
+                        ignoreSamplingPercent, headers);
+            }
+
+            List<Map> assignmentsFromPage = assignments.doPageAssignments(applicationName, pageName, userID, context,
+                    createAssignment, ignoreSamplingPercent, headers, null);
+
+            return httpHeader.headers()
+                    .entity(ImmutableMap.<String, Object>builder().put("assignments", assignmentsFromPage).build()).build();
+        } catch (Exception e) {
+            LOGGER.error("Exception happened while batch-assignment [GET]...", e);
+            throw e;
         }
-
-        List<Map> assignmentsFromPage = assignments.doPageAssignments(applicationName, pageName, userID, context,
-                createAssignment, ignoreSamplingPercent, headers, null);
-
-        return httpHeader.headers()
-                .entity(ImmutableMap.<String, Object>builder().put("assignments", assignmentsFromPage).build()).build();
     }
 
     /**
@@ -442,52 +458,57 @@ public class AssignmentsResource {
             notes = "The mutual exclusion and segmentation rules apply")
     @Timed
     public Response postBatchAssignmentForPage(
-            @PathParam("applicationName")
-            @ApiParam(value = "Application Name")
-            final Application.Name applicationName,
+                                            @PathParam("applicationName")
+                                            @ApiParam(value = "Application Name")
+                                            final Application.Name applicationName,
 
-            @PathParam("pageName")
-            @ApiParam("Page Name")
-                    Page.Name pageName,
+                                            @PathParam("pageName")
+                                            @ApiParam("Page Name")
+                                            Page.Name pageName,
 
-            @PathParam("userID")
-            @ApiParam(value = "User(customer) ID")
-            final User.ID userID,
+                                            @PathParam("userID")
+                                            @ApiParam(value = "User(customer) ID")
+                                            final User.ID userID,
 
-            @QueryParam("createAssignment")
-            @DefaultValue("true")
-            @ApiParam(value = "conditional to generate an assignment if one doesn't exist",
-                    defaultValue = "true")
-            final boolean createAssignment,
+                                            @QueryParam("createAssignment")
+                                            @DefaultValue("true")
+                                            @ApiParam(value = "conditional to generate an assignment if one doesn't exist",
+                                                    defaultValue = "true")
+                                            final boolean createAssignment,
 
-            @QueryParam("ignoreSamplingPercent")
-            @DefaultValue("false")
-            @ApiParam(value = "whether the sampling percent for the experiment should be ignored, " +
-                    "forcing the user into the experiment (if eligible)",
-                    defaultValue = "false")
-            final boolean ignoreSamplingPercent,
+                                            @QueryParam("ignoreSamplingPercent")
+                                            @DefaultValue("false")
+                                            @ApiParam(value = "whether the sampling percent for the experiment should be ignored, " +
+                                                    "forcing the user into the experiment (if eligible)",
+                                                    defaultValue = "false")
+                                            final boolean ignoreSamplingPercent,
 
-            @QueryParam("context")
-            @DefaultValue("PROD")
-            @ApiParam(value = "context for the experiment, eg QA, PROD")
-            final Context context,
+                                            @QueryParam("context")
+                                            @DefaultValue("PROD")
+                                            @ApiParam(value = "context for the experiment, eg QA, PROD")
+                                            final Context context,
 
-            @ApiParam(value = "Segmentation Profile")
-            final SegmentationProfile segmentationProfile,
+                                            @ApiParam(value = "Segmentation Profile")
+                                            final SegmentationProfile segmentationProfile,
 
-            @javax.ws.rs.core.Context final HttpHeaders headers) {
+                                            @javax.ws.rs.core.Context final HttpHeaders headers) {
+        try {
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("postBatchAssignmentForPage applicationName={}, pageName={}, userID={}, context={}, createAssignment={}" +
-                            ", ignoreSamplingPercent={}, headers={}, segmentationProfile={}", applicationName,
-                    pageName, userID, context, createAssignment, ignoreSamplingPercent, headers, segmentationProfile);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("postBatchAssignmentForPage applicationName={}, pageName={}, userID={}, context={}, createAssignment={}" +
+                                ", ignoreSamplingPercent={}, headers={}, segmentationProfile={}", applicationName,
+                        pageName, userID, context, createAssignment, ignoreSamplingPercent, headers, segmentationProfile);
+            }
+
+            List<Map> assignmentsFromPage = assignments.doPageAssignments(applicationName, pageName, userID, context,
+                    createAssignment, ignoreSamplingPercent, headers, segmentationProfile);
+
+            return httpHeader.headers()
+                    .entity(ImmutableMap.<String, Object>builder().put("assignments", assignmentsFromPage).build()).build();
+        } catch (Exception e) {
+            LOGGER.error("Exception happened while batch-assignment [GET]...", e);
+            throw e;
         }
-
-        List<Map> assignmentsFromPage = assignments.doPageAssignments(applicationName, pageName, userID, context,
-                createAssignment, ignoreSamplingPercent, headers, segmentationProfile);
-
-        return httpHeader.headers()
-                .entity(ImmutableMap.<String, Object>builder().put("assignments", assignmentsFromPage).build()).build();
     }
 
     /**
@@ -543,6 +564,34 @@ public class AssignmentsResource {
         return httpHeader.headers().entity(assignments.queuesLength()).build();
     }
 
+    /**
+     * Get the length of the assignments queue
+     *
+     * @return Response object
+     */
+    @GET
+    @Path("queueDetails")
+    @Produces(APPLICATION_JSON)
+    public Response getAssignmentsQueueDetails() {
+        return httpHeader.headers().entity(assignments.queuesDetails()).build();
+    }
+
+    /**
+     * Flush all active and queued messages from the ingestion queues.
+     *
+     * @return Response object
+     */
+    @POST
+    @Path("flushMessages")
+    @Produces(APPLICATION_JSON)
+    public Response flushMessages(
+            @HeaderParam(AUTHORIZATION) @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true) final String authorizationHeader) {
+        Username userName = authorization.getUser(authorizationHeader);
+        authorization.checkSuperAdmin(userName);
+        assignments.flushMessages();
+        return httpHeader.headers(HttpStatus.SC_NO_CONTENT).build();
+    }
+
     private Map<String, Object> toMap(final Assignment assignment) {
         Map<String, Object> response = newHashMap();
 
@@ -567,4 +616,42 @@ public class AssignmentsResource {
 
         return response;
     }
+
+
+    @POST
+    @Path("clearMetadataCache")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "Clear assignments metadata cache...")
+    @Timed
+    public Response clearMetadataCache (@HeaderParam(AUTHORIZATION) @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true) final String authorizationHeader) {
+        UserInfo.Username userName = authorization.getUser(authorizationHeader);
+        authorization.checkSuperAdmin(userName);
+
+        boolean result = Boolean.TRUE;
+        try {
+            assignments.clearMetadataCache();
+        } catch (Exception e) {
+            LOGGER.error("Exception occurred while clearing assignments metadata cache...", e);
+            result = Boolean.FALSE;
+        }
+        return httpHeader.headers().entity(result).build();
+    }
+
+    /**
+     * Get the details of assignments metadata cache
+     *
+     * @return Details of assignments metadata cache - cache entities and size of each entity cache
+     */
+    @GET
+    @Path("metadataCacheDetails")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "Get assignments metadata cache details...")
+    @Timed
+    public Response getMetadataCacheDetails(@HeaderParam(AUTHORIZATION) @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true) final String authorizationHeader) {
+        UserInfo.Username userName = authorization.getUser(authorizationHeader);
+        authorization.checkSuperAdmin(userName);
+
+        return httpHeader.headers().entity(assignments.metadataCacheDetails()).build();
+    }
+
 }
