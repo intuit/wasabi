@@ -46,8 +46,10 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -261,7 +263,8 @@ public class CassandraPagesRepository implements PagesRepository {
     }
 
     @Override
-    public Map<Pair<Application.Name, Page.Name>, List<PageExperiment>> getExperimentsWithoutLabels(Collection<Pair<Application.Name, Page.Name>> appAndPagePairs) {
+    public Map<Pair<Application.Name, Page.Name>, List<PageExperiment>> getExperimentsWithoutLabels
+            (Collection<Pair<Application.Name, Page.Name>> appAndPagePairs) {
         logger.debug("getExperimentsWithoutLabels {}", appAndPagePairs);
         Map<Pair<Application.Name, Page.Name>, List<PageExperiment>> resultMap = new HashMap<>();
         try {
