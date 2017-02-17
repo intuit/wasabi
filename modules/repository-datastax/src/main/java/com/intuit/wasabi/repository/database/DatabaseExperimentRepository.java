@@ -19,7 +19,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import com.googlecode.flyway.core.Flyway;
-import com.intuit.wasabi.analyticsobjects.counts.AssignmentCounts;
 import com.intuit.wasabi.database.Transaction;
 import com.intuit.wasabi.database.TransactionFactory;
 import com.intuit.wasabi.exceptions.BucketNotFoundException;
@@ -27,7 +26,6 @@ import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.BucketList;
-import com.intuit.wasabi.experimentobjects.Context;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.Experiment.State;
 import com.intuit.wasabi.experimentobjects.ExperimentList;
@@ -748,6 +746,7 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
 
     /**
      * Creates an application at top level
+     *
      * @param applicationName Application Name
      */
     @Override

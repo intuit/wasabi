@@ -31,7 +31,6 @@ import java.io.IOException;
 
 /**
  * Represents an end user who's being assigned experiences to for experiments
- *
  */
 public interface User {
 

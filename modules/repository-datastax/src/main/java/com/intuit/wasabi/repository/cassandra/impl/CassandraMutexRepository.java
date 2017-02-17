@@ -145,29 +145,29 @@ public class CassandraMutexRepository implements MutexRepository {
      */
     @Override
     public ExperimentList getExclusions(Experiment.ID base) {
-    	
-    	LOGGER.debug("Getting exclusion list for {}", base);
-    	
-    	try {
-    		
-    		List<Exclusion> exclusions = mutexAccessor.getExclusions(base.getRawID()).all();
-    		
-    		List<UUID> experimentIds = new ArrayList<>();
-    		for (Exclusion exclusion : exclusions)
-    			experimentIds.add(exclusion.getPair());
-    		    		
-             List<com.intuit.wasabi.repository.cassandra.pojo.Experiment> experimentPojos =
-            		 experimentAccessor.getExperiments(experimentIds).all();
 
-             List<Experiment> experiments = new ArrayList<>();
-             for (com.intuit.wasabi.repository.cassandra.pojo.Experiment experimentPojo : experimentPojos) {
-            	 experiments.add(ExperimentHelper.makeExperiment(experimentPojo));
-             }
-             
-             ExperimentList experimentList = new ExperimentList();
-             experimentList.setExperiments(experiments);
-             
-             return experimentList;
+        LOGGER.debug("Getting exclusion list for {}", base);
+
+        try {
+
+            List<Exclusion> exclusions = mutexAccessor.getExclusions(base.getRawID()).all();
+
+            List<UUID> experimentIds = new ArrayList<>();
+            for (Exclusion exclusion : exclusions)
+                experimentIds.add(exclusion.getPair());
+
+            List<com.intuit.wasabi.repository.cassandra.pojo.Experiment> experimentPojos =
+                    experimentAccessor.getExperiments(experimentIds).all();
+
+            List<Experiment> experiments = new ArrayList<>();
+            for (com.intuit.wasabi.repository.cassandra.pojo.Experiment experimentPojo : experimentPojos) {
+                experiments.add(ExperimentHelper.makeExperiment(experimentPojo));
+            }
+
+            ExperimentList experimentList = new ExperimentList();
+            experimentList.setExperiments(experiments);
+
+            return experimentList;
         } catch (Exception e) {
             LOGGER.error("Error whil getting exclusion list for {}", base, e);
             throw new RepositoryException("Could not retrieve the exclusions for \"" + base + "\"", e);
@@ -224,7 +224,7 @@ public class CassandraMutexRepository implements MutexRepository {
      */
     @Override
     public Map<Experiment.ID, List<Experiment.ID>> getExclusivesList(Collection<Experiment.ID> experimentIds) {
-    	LOGGER.debug("Getting exclusions for {}", experimentIds);
+        LOGGER.debug("Getting exclusions for {}", experimentIds);
         Map<Experiment.ID, ListenableFuture<Result<Exclusion>>> exclusionFutureMap = new HashMap<>(experimentIds.size());
         Map<Experiment.ID, List<Experiment.ID>> exclusionMap = new HashMap<>(experimentIds.size());
 
@@ -240,15 +240,15 @@ public class CassandraMutexRepository implements MutexRepository {
                 ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Exclusion>> exclusionFuture = exclusionFutureMap.get(expId);
                 exclusionMap.put(expId, new ArrayList<>());
                 UninterruptibleUtil.getUninterruptibly(exclusionFuture).all().forEach(exclusionPojo -> {
-                        exclusionMap.get(expId).add(Experiment.ID.valueOf(exclusionPojo.getPair()));
-                    }
+                            exclusionMap.get(expId).add(Experiment.ID.valueOf(exclusionPojo.getPair()));
+                        }
                 );
             }
         } catch (Exception e) {
-        	LOGGER.error("Error while getting exclusions for {}", experimentIds, e);
+            LOGGER.error("Error while getting exclusions for {}", experimentIds, e);
             throw new RepositoryException("Could not fetch mutually exclusive experiments for the list of experiments", e);
         }
-    	LOGGER.debug("Returning exclusions map {}", exclusionMap);
+        LOGGER.debug("Returning exclusions map {}", exclusionMap);
         return exclusionMap;
     }
 }

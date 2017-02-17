@@ -35,6 +35,7 @@ public class APIUserFactory {
 
     /**
      * Creates an APIUser from a JSON String.
+     *
      * @param json API User Json formatted string
      * @return the APIUser Object {@link APIUser}
      */

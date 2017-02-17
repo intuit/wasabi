@@ -25,16 +25,24 @@ import com.intuit.wasabi.tests.model.ModelItem;
  */
 public class Estimate extends ModelItem {
 
-    /** the upper bound */
+    /**
+     * the upper bound
+     */
     public double upperBound;
 
-    /** the lower bound */
+    /**
+     * the lower bound
+     */
     public double lowerBound;
 
-    /** the estimate */
+    /**
+     * the estimate
+     */
     public double estimate;
 
-    /** The serialization strategy for comparisons and JSON serialization. */
+    /**
+     * The serialization strategy for comparisons and JSON serialization.
+     */
     private static SerializationStrategy serializationStrategy = new DefaultNameExclusionStrategy();
 
     @Override

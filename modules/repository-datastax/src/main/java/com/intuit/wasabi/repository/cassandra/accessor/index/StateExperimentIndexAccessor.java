@@ -25,13 +25,14 @@ import java.nio.ByteBuffer;
 import java.util.UUID;
 
 /**
- *  State experiment index accedssor
+ * State experiment index accedssor
  */
 @Accessor
 public interface StateExperimentIndexAccessor {
 
     /**
      * Insert a row into the table
+     *
      * @param index_key
      * @param experiment_id
      * @param byteBuffer
@@ -42,6 +43,7 @@ public interface StateExperimentIndexAccessor {
 
     /**
      * Delete from table
+     *
      * @param index_key
      * @param experiment_id
      */
@@ -50,6 +52,7 @@ public interface StateExperimentIndexAccessor {
 
     /**
      * Get rows by parameters
+     *
      * @param index_key
      * @param experiment_id
      * @return result
@@ -59,6 +62,7 @@ public interface StateExperimentIndexAccessor {
 
     /**
      * Get rows by parameters
+     *
      * @param index_key
      * @return result rows
      */

@@ -37,7 +37,7 @@ public class PathSetAssertHelper {
     /**
      * Instantiates an {@code PathSetAssertHelper} object.
      *
-     * @param response    the response object
+     * @param response the response object
      */
     public PathSetAssertHelper(Response response) {
         this.response = response;

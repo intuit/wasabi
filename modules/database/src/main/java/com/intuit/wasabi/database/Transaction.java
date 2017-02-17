@@ -26,7 +26,8 @@ public interface Transaction {
 
     /**
      * Executes an insert database query
-     * @param query Database query
+     *
+     * @param query  Database query
      * @param params Dynamic parameters
      * @throws Exception in case of errors
      */
@@ -34,7 +35,8 @@ public interface Transaction {
 
     /**
      * Executes an insert database query and returns unique row key
-     * @param query Database query
+     *
+     * @param query  Database query
      * @param params Dynamic parameters
      * @return unique key for the row
      */
@@ -42,7 +44,8 @@ public interface Transaction {
 
     /**
      * Executes a select database query and return selected rows
-     * @param query Database query
+     *
+     * @param query  Database query
      * @param params Dynamic parameters
      * @return list of selected rows
      */
@@ -50,6 +53,7 @@ public interface Transaction {
 
     /**
      * Returns the transaction object given a block
+     *
      * @param block Block
      * @return transaction object
      */
@@ -57,7 +61,8 @@ public interface Transaction {
 
     /**
      * Executes an update query and returns unique row key
-     * @param query Database query
+     *
+     * @param query  Database query
      * @param params Dynamic parameters
      * @return unique row key
      */
@@ -67,6 +72,7 @@ public interface Transaction {
 
         /**
          * Returns an object given the transaction
+         *
          * @param transaction Transaction
          * @return Object
          */

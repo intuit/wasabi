@@ -24,7 +24,7 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * This tests the functionality of the {@link ExperimentList}
- *
+ * <p>
  * Created by asuckro on 8/20/15.
  */
 public class ExperimentListTest {

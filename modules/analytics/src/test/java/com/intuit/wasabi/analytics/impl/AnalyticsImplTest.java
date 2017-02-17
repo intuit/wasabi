@@ -27,7 +27,6 @@ import com.intuit.wasabi.database.TransactionFactory;
 import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
 import com.intuit.wasabi.experiment.Experiments;
 import com.intuit.wasabi.experimentobjects.Bucket;
-import com.intuit.wasabi.experimentobjects.Context;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.repository.AnalyticsRepository;
 import com.intuit.wasabi.repository.AssignmentsRepository;
@@ -49,7 +48,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.AdditionalMatchers.not;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -139,7 +137,7 @@ public class AnalyticsImplTest {
         Experiment.ID id = Experiment.ID.newInstance();
         when(experimentRepository.getExperiment(eq(id))).thenReturn(experiment);
         when(assignmentsRepository.getBucketAssignmentCount(eq(experiment))).thenReturn(assignmentCounts);
-       //test the else part
+        //test the else part
         Date date = new Date(1000); //some time in 1970
         when(experiment.getCreationTime()).thenReturn(date);
         AssignmentCounts result = this.analyticsImpl.getAssignmentCounts(id, null);

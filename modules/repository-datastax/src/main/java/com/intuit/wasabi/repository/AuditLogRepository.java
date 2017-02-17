@@ -60,7 +60,7 @@ public interface AuditLogRepository {
      * Retrieves a limited list of AuditLogEntries for a specified application.
      *
      * @param applicationName the application to select
-     * @param limit the limit of log entried returend
+     * @param limit           the limit of log entried returend
      * @return a list of those AuditLogEntries
      */
     List<AuditLogEntry> getAuditLogEntryList(Application.Name applicationName, int limit);

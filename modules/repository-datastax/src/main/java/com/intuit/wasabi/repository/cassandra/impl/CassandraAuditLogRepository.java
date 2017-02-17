@@ -57,6 +57,7 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
 
     /**
      * Constructor
+     *
      * @param accessor
      */
     @Inject
@@ -85,6 +86,7 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
 
     /**
      * Helper method to get empty string for null
+     *
      * @param input string input
      * @return input or empty string
      */
@@ -94,6 +96,7 @@ public class CassandraAuditLogRepository implements AuditLogRepository {
 
     /**
      * Helper method to translate audit log list
+     *
      * @param entries audit log table pojo list
      * @return audit log domain object list
      */

@@ -23,19 +23,29 @@ import com.intuit.wasabi.tests.library.util.serialstrategies.SerializationStrate
  * By default all events are IMPRESSIONs.
  */
 public class Event extends ModelItem {
-    /** this event's timestamp */
+    /**
+     * this event's timestamp
+     */
     public String timestamp;
 
-    /** The event type, by default "IMPRESSION", but can be different to represent an Action. */
+    /**
+     * The event type, by default "IMPRESSION", but can be different to represent an Action.
+     */
     public String name = "IMPRESSION";
 
-    /** this event's context */
+    /**
+     * this event's context
+     */
     public String context;
 
-    /** The payload coming with the event. */
+    /**
+     * The payload coming with the event.
+     */
     public String payload;
 
-    /** This event's value. */
+    /**
+     * This event's value.
+     */
     public String value;
 
     public String userId;
@@ -44,7 +54,9 @@ public class Event extends ModelItem {
         this.userId = userId;
     }
 
-    /** The serialization strategy for comparisons and JSON serialization. */
+    /**
+     * The serialization strategy for comparisons and JSON serialization.
+     */
     private static SerializationStrategy serializationStrategy = new DefaultNameExclusionStrategy();
 
     /**

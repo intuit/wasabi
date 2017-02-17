@@ -38,10 +38,10 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Deletes all experiments starting with specified prefixes.
- *
+ * <p>
  * You can add more prefixes via the testng_teardown.xml or by supplying the parameter
  * -Dapplication-prefixes=appprefix1|appprefix2|...|appprefixN
- *
+ * <p>
  * Applications starting with {@link Constants#DEFAULT_PREFIX_APPLICATION} are always deleted.
  */
 public class TearDownTestExperiments extends TestBase {

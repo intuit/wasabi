@@ -22,13 +22,19 @@ import com.intuit.wasabi.tests.library.util.serialstrategies.SerializationStrate
  * A very simple Page wrapper.
  */
 public class Page extends ModelItem {
-    /** the page name */
+    /**
+     * the page name
+     */
     public String name;
 
-    /** are new assignments allowed? */
+    /**
+     * are new assignments allowed?
+     */
     public boolean allowNewAssignment;
 
-    /** The serialization strategy for comparisons and JSON serialization. */
+    /**
+     * The serialization strategy for comparisons and JSON serialization.
+     */
     private static SerializationStrategy serializationStrategy = new DefaultNameExclusionStrategy();
 
     /**
@@ -43,7 +49,7 @@ public class Page extends ModelItem {
     /**
      * Creates a page with a name and an assignment allowance status.
      *
-     * @param name page name
+     * @param name               page name
      * @param allowNewAssignment assignment allowance
      */
     public Page(String name, boolean allowNewAssignment) {

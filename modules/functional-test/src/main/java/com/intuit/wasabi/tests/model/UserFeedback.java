@@ -35,12 +35,15 @@ public class UserFeedback extends ModelItem {
     private boolean contactOkay = false;
     private String email;
 
-    /** The serialization strategy for comparisons and JSON serialization. */
+    /**
+     * The serialization strategy for comparisons and JSON serialization.
+     */
     private static SerializationStrategy serializationStrategy = new DefaultNameExclusionStrategy();
 
     /**
      * Creates an empty experiment.
-     * @param username    the user name
+     *
+     * @param username the user name
      */
     public UserFeedback(String username) {
         this.username = username;

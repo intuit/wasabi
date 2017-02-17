@@ -22,10 +22,14 @@ import com.intuit.wasabi.tests.library.util.serialstrategies.SerializationStrate
  * A very simple User wrapper.
  */
 public class User extends ModelItem {
-    /** The user name */
+    /**
+     * The user name
+     */
     public String userID;
 
-    /** The serialization strategy for comparisons and JSON serialization. */
+    /**
+     * The serialization strategy for comparisons and JSON serialization.
+     */
     private static SerializationStrategy serializationStrategy = new DefaultNameExclusionStrategy();
 
     /**

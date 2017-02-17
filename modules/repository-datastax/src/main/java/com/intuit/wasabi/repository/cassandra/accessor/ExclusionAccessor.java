@@ -32,6 +32,7 @@ public interface ExclusionAccessor {
 
     /**
      * Get exclusion for the base experiment
+     *
      * @param base experiment id
      * @return exclusion instances
      */
@@ -43,9 +44,9 @@ public interface ExclusionAccessor {
 
     /**
      * Delete exclusion pair
+     *
      * @param base expriment id
      * @param pair exclusion experiment id
-     *
      * @return Statement object
      */
     @Query("delete from exclusion where base = ? and pair = ?")
@@ -53,9 +54,9 @@ public interface ExclusionAccessor {
 
     /**
      * Create exclusion pair
+     *
      * @param base the base experiment id
      * @param pair the exclusion experiment id
-     *
      * @return Statement object
      */
     @Query("insert into exclusion(base, pair) values(?, ?)")

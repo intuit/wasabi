@@ -36,7 +36,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Tests for experiment priorities in application.
- *
  */
 public class PrioritiesTest extends TestBase {
 

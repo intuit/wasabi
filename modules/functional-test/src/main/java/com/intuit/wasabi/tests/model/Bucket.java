@@ -32,19 +32,33 @@ public class Bucket extends ModelItem {
      * The serialization strategy for comparisons and JSON serialization.
      */
     private static SerializationStrategy serializationStrategy = new DefaultNameExclusionStrategy();
-    /** The experiment Label. Required, unique among experiment. */
+    /**
+     * The experiment Label. Required, unique among experiment.
+     */
     public String label;
-    /** The experiment ID. Required. */
+    /**
+     * The experiment ID. Required.
+     */
     public String experimentID;
-    /** The bucket's allocation percentage. Required. */
+    /**
+     * The bucket's allocation percentage. Required.
+     */
     public double allocationPercent;
-    /** The bucket's control group status. Required. Only one bucket per experiment must be the control group. */
+    /**
+     * The bucket's control group status. Required. Only one bucket per experiment must be the control group.
+     */
     public boolean isControl;
-    /** The bucket's description. Optional. */
+    /**
+     * The bucket's description. Optional.
+     */
     public String description;
-    /** The bucket's payload. Optional. */
+    /**
+     * The bucket's payload. Optional.
+     */
     public String payload;
-    /** The bucket's state. Optional. */
+    /**
+     * The bucket's state. Optional.
+     */
     public String state;
 
     /**
@@ -68,8 +82,8 @@ public class Bucket extends ModelItem {
      * using an appropriate constructor or setting the control-option for one
      * bucket.
      *
-     * @param label the bucket label (will be prefixed)
-     * @param experiment the experiment
+     * @param label             the bucket label (will be prefixed)
+     * @param experiment        the experiment
      * @param allocationPercent the percentage that should go into this bucket
      */
     public Bucket(String label, Experiment experiment, double allocationPercent) {
@@ -82,8 +96,8 @@ public class Bucket extends ModelItem {
      * using an appropriate constructor or setting the control-option for one
      * bucket.
      *
-     * @param label the bucket label (will be prefixed)
-     * @param experimentId the experiment id
+     * @param label             the bucket label (will be prefixed)
+     * @param experimentId      the experiment id
      * @param allocationPercent the percentage that should go into this bucket
      */
     public Bucket(String label, String experimentId, double allocationPercent) {
@@ -93,10 +107,10 @@ public class Bucket extends ModelItem {
     /**
      * Creates a bucket with default values for all required arguments.
      *
-     * @param label the bucket label (will be prefixed)
-     * @param experiment the experiment
+     * @param label             the bucket label (will be prefixed)
+     * @param experiment        the experiment
      * @param allocationPercent the percentage that should go into this bucket
-     * @param isControl true if this bucket is the control group, else false
+     * @param isControl         true if this bucket is the control group, else false
      */
     public Bucket(String label, Experiment experiment, double allocationPercent, boolean isControl) {
         this(label, experiment.id, allocationPercent, isControl, null);
@@ -105,10 +119,10 @@ public class Bucket extends ModelItem {
     /**
      * Creates a bucket with default values for all required arguments.
      *
-     * @param label the bucket label (will be prefixed)
-     * @param experimentId the experiment id
+     * @param label             the bucket label (will be prefixed)
+     * @param experimentId      the experiment id
      * @param allocationPercent the percentage that should go into this bucket
-     * @param isControl true if this bucket is the control group, else false
+     * @param isControl         true if this bucket is the control group, else false
      */
     public Bucket(String label, String experimentId, double allocationPercent, boolean isControl) {
         this(label, experimentId, allocationPercent, isControl, null);
@@ -117,11 +131,11 @@ public class Bucket extends ModelItem {
     /**
      * Creates a bucket with the supplied values.
      *
-     * @param label the bucket label (will be prefixed)
-     * @param experiment the experiment
+     * @param label             the bucket label (will be prefixed)
+     * @param experiment        the experiment
      * @param allocationPercent the percentage that should go into this bucket
-     * @param isControl true if this bucket is the control group, else false
-     * @param description the bucket description
+     * @param isControl         true if this bucket is the control group, else false
+     * @param description       the bucket description
      */
     public Bucket(String label, Experiment experiment, double allocationPercent, boolean isControl, String description) {
         this(label, experiment.id, allocationPercent, isControl, description, null);
@@ -130,11 +144,11 @@ public class Bucket extends ModelItem {
     /**
      * Creates a bucket with the supplied values.
      *
-     * @param label the bucket label (will be prefixed)
-     * @param experimentId the experiment id
+     * @param label             the bucket label (will be prefixed)
+     * @param experimentId      the experiment id
      * @param allocationPercent the percentage that should go into this bucket
-     * @param isControl true if this bucket is the control group, else false
-     * @param description the bucket description
+     * @param isControl         true if this bucket is the control group, else false
+     * @param description       the bucket description
      */
     public Bucket(String label, String experimentId, double allocationPercent, boolean isControl, String description) {
         this(label, experimentId, allocationPercent, isControl, description, null);
@@ -143,12 +157,12 @@ public class Bucket extends ModelItem {
     /**
      * Creates a bucket with the supplied values.
      *
-     * @param label the bucket label (will be prefixed)
-     * @param experiment the experiment
+     * @param label             the bucket label (will be prefixed)
+     * @param experiment        the experiment
      * @param allocationPercent the percentage that should go into this bucket
-     * @param isControl true if this bucket is the control group, else false
-     * @param description the bucket description
-     * @param payload the payload for this bucket
+     * @param isControl         true if this bucket is the control group, else false
+     * @param description       the bucket description
+     * @param payload           the payload for this bucket
      */
     public Bucket(String label, Experiment experiment, double allocationPercent, boolean isControl, String description,
                   String payload) {
@@ -158,12 +172,12 @@ public class Bucket extends ModelItem {
     /**
      * Creates a bucket with the supplied values.
      *
-     * @param label the bucket label (will be prefixed)
-     * @param experimentId the experiment id
+     * @param label             the bucket label (will be prefixed)
+     * @param experimentId      the experiment id
      * @param allocationPercent the percentage that should go into this bucket
-     * @param isControl true if this bucket is the control group, else false
-     * @param description the bucket description
-     * @param payload the payload for this bucket
+     * @param isControl         true if this bucket is the control group, else false
+     * @param description       the bucket description
+     * @param payload           the payload for this bucket
      */
     public Bucket(String label, String experimentId, double allocationPercent, boolean isControl, String description,
                   String payload) {
@@ -173,13 +187,13 @@ public class Bucket extends ModelItem {
     /**
      * Creates a bucket with the supplied values.
      *
-     * @param label the bucket label (will be prefixed)
-     * @param experimentID the experimentID
+     * @param label             the bucket label (will be prefixed)
+     * @param experimentID      the experimentID
      * @param allocationPercent the percentage that should go into this bucket
-     * @param isControl true if this bucket is the control group, else false
-     * @param description the bucket description
-     * @param payload the payload for this bucket
-     * @param state   the desired state
+     * @param isControl         true if this bucket is the control group, else false
+     * @param description       the bucket description
+     * @param payload           the payload for this bucket
+     * @param state             the desired state
      */
     public Bucket(String label, String experimentID, double allocationPercent, boolean isControl, String description,
                   String payload, String state) {

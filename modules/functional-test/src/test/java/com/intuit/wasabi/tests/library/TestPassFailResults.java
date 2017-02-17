@@ -22,9 +22,8 @@ import org.testng.annotations.Test;
 
 /**
  * {@code TestPassFailResults} is mostly here as POC for how to add unit tests for helper functions.
- *
- * There is no intent to add unit tests for the tests themselves. 
- *
+ * <p>
+ * There is no intent to add unit tests for the tests themselves.
  */
 public class TestPassFailResults {
 

@@ -37,6 +37,7 @@ import com.intuit.wasabi.experimentobjects.Page;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.apache.commons.httpclient.HttpStatus;
 import org.slf4j.Logger;
 
 import javax.ws.rs.Consumes;
@@ -50,17 +51,12 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
-
-import org.apache.commons.httpclient.HttpStatus;
-import org.slf4j.Logger;
-
 import java.util.List;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_LABELLIST;
 import static com.intuit.wasabi.assignmentobjects.Assignment.Status.EXPERIMENT_EXPIRED;
-import static com.intuit.wasabi.authorizationobjects.Permission.CREATE;
 import static java.lang.Boolean.FALSE;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -388,38 +384,38 @@ public class AssignmentsResource {
             notes = "If you want to pass segmentation information, use the POST-Call for this method")
     @Timed
     public Response getBatchAssignmentForPage(
-                                            @PathParam("applicationName")
-                                            @ApiParam(value = "Application Name")
-                                            final Application.Name applicationName,
+            @PathParam("applicationName")
+            @ApiParam(value = "Application Name")
+            final Application.Name applicationName,
 
-                                            @PathParam("pageName")
-                                            @ApiParam(value = "Page Name")
-                                            final Page.Name pageName,
+            @PathParam("pageName")
+            @ApiParam(value = "Page Name")
+            final Page.Name pageName,
 
-                                            @PathParam("userID")
-                                            @ApiParam(value = "User(customer) ID")
-                                            final User.ID userID,
+            @PathParam("userID")
+            @ApiParam(value = "User(customer) ID")
+            final User.ID userID,
 
-                                            @QueryParam("createAssignment")
-                                            @DefaultValue("true")
-                                            @ApiParam(value = "conditional to generate an assignment if one doesn't exist",
-                                                    defaultValue = "true")
-                                            final boolean createAssignment,
+            @QueryParam("createAssignment")
+            @DefaultValue("true")
+            @ApiParam(value = "conditional to generate an assignment if one doesn't exist",
+                    defaultValue = "true")
+            final boolean createAssignment,
 
-                                            @QueryParam("ignoreSamplingPercent")
-                                            @DefaultValue("false")
-                                            @ApiParam(value = "whether the sampling percent for the experiment should be ignored, " +
-                                                    "forcing the user into the experiment (if eligible)",
-                                                    defaultValue = "false")
-                                            final boolean ignoreSamplingPercent,
+            @QueryParam("ignoreSamplingPercent")
+            @DefaultValue("false")
+            @ApiParam(value = "whether the sampling percent for the experiment should be ignored, " +
+                    "forcing the user into the experiment (if eligible)",
+                    defaultValue = "false")
+            final boolean ignoreSamplingPercent,
 
-                                            @QueryParam("context")
-                                            @DefaultValue("PROD")
-                                            @ApiParam(value = "context for the experiment, eg QA, PROD")
-                                            final Context context,
+            @QueryParam("context")
+            @DefaultValue("PROD")
+            @ApiParam(value = "context for the experiment, eg QA, PROD")
+            final Context context,
 
-                                            @javax.ws.rs.core.Context
-                                            HttpHeaders headers) {
+            @javax.ws.rs.core.Context
+                    HttpHeaders headers) {
         try {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("getBatchAssignmentsForPage applicationName={}, pageName={}, userID={}, context={}, createAssignment={}" +
@@ -458,40 +454,40 @@ public class AssignmentsResource {
             notes = "The mutual exclusion and segmentation rules apply")
     @Timed
     public Response postBatchAssignmentForPage(
-                                            @PathParam("applicationName")
-                                            @ApiParam(value = "Application Name")
-                                            final Application.Name applicationName,
+            @PathParam("applicationName")
+            @ApiParam(value = "Application Name")
+            final Application.Name applicationName,
 
-                                            @PathParam("pageName")
-                                            @ApiParam("Page Name")
-                                            Page.Name pageName,
+            @PathParam("pageName")
+            @ApiParam("Page Name")
+                    Page.Name pageName,
 
-                                            @PathParam("userID")
-                                            @ApiParam(value = "User(customer) ID")
-                                            final User.ID userID,
+            @PathParam("userID")
+            @ApiParam(value = "User(customer) ID")
+            final User.ID userID,
 
-                                            @QueryParam("createAssignment")
-                                            @DefaultValue("true")
-                                            @ApiParam(value = "conditional to generate an assignment if one doesn't exist",
-                                                    defaultValue = "true")
-                                            final boolean createAssignment,
+            @QueryParam("createAssignment")
+            @DefaultValue("true")
+            @ApiParam(value = "conditional to generate an assignment if one doesn't exist",
+                    defaultValue = "true")
+            final boolean createAssignment,
 
-                                            @QueryParam("ignoreSamplingPercent")
-                                            @DefaultValue("false")
-                                            @ApiParam(value = "whether the sampling percent for the experiment should be ignored, " +
-                                                    "forcing the user into the experiment (if eligible)",
-                                                    defaultValue = "false")
-                                            final boolean ignoreSamplingPercent,
+            @QueryParam("ignoreSamplingPercent")
+            @DefaultValue("false")
+            @ApiParam(value = "whether the sampling percent for the experiment should be ignored, " +
+                    "forcing the user into the experiment (if eligible)",
+                    defaultValue = "false")
+            final boolean ignoreSamplingPercent,
 
-                                            @QueryParam("context")
-                                            @DefaultValue("PROD")
-                                            @ApiParam(value = "context for the experiment, eg QA, PROD")
-                                            final Context context,
+            @QueryParam("context")
+            @DefaultValue("PROD")
+            @ApiParam(value = "context for the experiment, eg QA, PROD")
+            final Context context,
 
-                                            @ApiParam(value = "Segmentation Profile")
-                                            final SegmentationProfile segmentationProfile,
+            @ApiParam(value = "Segmentation Profile")
+            final SegmentationProfile segmentationProfile,
 
-                                            @javax.ws.rs.core.Context final HttpHeaders headers) {
+            @javax.ws.rs.core.Context final HttpHeaders headers) {
         try {
 
             if (LOGGER.isDebugEnabled()) {
@@ -623,7 +619,7 @@ public class AssignmentsResource {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Clear assignments metadata cache...")
     @Timed
-    public Response clearMetadataCache (@HeaderParam(AUTHORIZATION) @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true) final String authorizationHeader) {
+    public Response clearMetadataCache(@HeaderParam(AUTHORIZATION) @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true) final String authorizationHeader) {
         UserInfo.Username userName = authorization.getUser(authorizationHeader);
         authorization.checkSuperAdmin(userName);
 

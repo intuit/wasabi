@@ -27,7 +27,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * A retry analyzer which can be used as a retry strategy for experiments. It gets the number of maximum tries from
  * {@link RetryTest#maxTries()}.
- *
  */
 public class RetryAnalyzer implements IRetryAnalyzer {
 

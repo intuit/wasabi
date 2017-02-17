@@ -24,7 +24,7 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * This class tests the functionality of the {@link PageExperiment}
- *
+ * <p>
  * Created by asuckro on 8/19/15.
  */
 public class PageExperimentTest {

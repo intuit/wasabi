@@ -34,25 +34,28 @@ public interface AnalyticsRepository {
 
     /**
      * Get action rows for the arguments
+     *
      * @param experimentID experimentID
-     * @param parameters  parameters associated with this experiment
+     * @param parameters   parameters associated with this experiment
      * @return Map of action rows
      */
     List<Map> getActionsRows(Experiment.ID experimentID, Parameters parameters);
 
     /**
      * Get joint actions for arguments
+     *
      * @param experimentID experimentID
-     * @param parameters parameters associated with this experiment
+     * @param parameters   parameters associated with this experiment
      * @return Map of actions
      */
     List<Map> getJointActions(Experiment.ID experimentID, Parameters parameters);
 
     /**
      * Get rollup rows for arguments
+     *
      * @param experimentId experimentID
-     * @param rollupDate  the dates to roll up to
-     * @param parameters  parameters associated with this experiment
+     * @param rollupDate   the dates to roll up to
+     * @param parameters   parameters associated with this experiment
      * @return rollup rows map
      */
     List<Map> getRollupRows(Experiment.ID experimentId, String rollupDate, Parameters parameters)
@@ -60,14 +63,16 @@ public interface AnalyticsRepository {
 
     /**
      * Get impression rows for arguments
+     *
      * @param experimentID experimentID
-     * @param parameters parameters associated with this experiment
+     * @param parameters   parameters associated with this experiment
      * @return impression rows map
      */
     List<Map> getImpressionRows(Experiment.ID experimentID, Parameters parameters);
 
     /**
      * Get empty buckets with their labels
+     *
      * @param experimentID experimentID
      * @return map of buckets and count
      */
@@ -75,17 +80,19 @@ public interface AnalyticsRepository {
 
     /**
      * Get counts from roll ups
+     *
      * @param experimentID experimentID
-     * @param parameters parameters associated with this experiment
+     * @param parameters   parameters associated with this experiment
      * @return map of counts for rollups
      */
     List<Map> getCountsFromRollups(Experiment.ID experimentID, Parameters parameters);
 
     /**
      * Check most recent rollup
+     *
      * @param experiment experiment object
      * @param parameters parameters associated with this experiment
-     * @param to date
+     * @param to         date
      * @return whether the check succeeded
      */
     boolean checkMostRecentRollup(Experiment experiment, Parameters parameters, Date to);

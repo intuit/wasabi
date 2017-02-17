@@ -25,12 +25,13 @@ import com.intuit.wasabi.repository.cassandra.pojo.index.PageExperimentByAppName
 import java.util.UUID;
 
 /**
- * Interface for accessor 
+ * Interface for accessor
  */
 @Accessor
 public interface PageExperimentIndexAccessor {
     /**
      * Insert using attributes
+     *
      * @param appName
      * @param page
      * @param experimentId
@@ -43,6 +44,7 @@ public interface PageExperimentIndexAccessor {
 
     /**
      * Delete by using attributes
+     *
      * @param appName
      * @param page
      * @param uuid
@@ -53,6 +55,7 @@ public interface PageExperimentIndexAccessor {
 
     /**
      * Get by attributes
+     *
      * @param appName
      * @param page
      * @return result

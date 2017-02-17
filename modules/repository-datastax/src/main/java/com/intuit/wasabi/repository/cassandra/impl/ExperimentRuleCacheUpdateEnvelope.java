@@ -30,7 +30,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Runnable for updating rule caching
- *
  */
 public class ExperimentRuleCacheUpdateEnvelope implements Runnable {
 

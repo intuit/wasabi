@@ -50,7 +50,6 @@ import com.intuit.wasabi.repository.ExperimentRepository;
 import org.slf4j.Logger;
 
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -63,7 +62,6 @@ import java.util.Properties;
 import java.util.TimeZone;
 
 import static com.intuit.autumn.utils.PropertyFactory.create;
-import static com.intuit.autumn.utils.PropertyFactory.getProperty;
 import static com.intuit.wasabi.util.DateUtil.createCalendarMidnight;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -544,7 +542,7 @@ public class AnalyticsImpl implements Analytics {
         Experiment experiment = cassandraRepository.getExperiment(experimentID);
         if (Objects.isNull(experiment)) {
             throw new ExperimentNotFoundException(experimentID);
-        }            
+        }
         return assignmentRepository.getBucketAssignmentCount(experiment);
     }
 

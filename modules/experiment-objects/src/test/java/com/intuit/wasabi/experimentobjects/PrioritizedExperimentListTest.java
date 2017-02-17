@@ -25,7 +25,7 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * Test for the {@link PrioritizedExperimentList}
- *
+ * <p>
  * Created by asuckro on 8/20/15.
  */
 public class PrioritizedExperimentListTest {

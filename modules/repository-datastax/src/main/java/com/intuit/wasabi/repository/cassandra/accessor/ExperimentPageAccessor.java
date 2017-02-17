@@ -24,7 +24,7 @@ import com.intuit.wasabi.repository.cassandra.pojo.index.PageExperimentByAppName
 import java.util.UUID;
 
 /**
- * Accessor interface 
+ * Accessor interface
  */
 @Accessor
 public interface ExperimentPageAccessor {

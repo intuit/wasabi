@@ -27,7 +27,6 @@ import java.util.Map;
 
 /**
  * A class to holds a map of key values (user attributes) for segmentation with Hyrule
- *
  */
 //TODO: remove this class. it does nothing other than a wrapper over Map<String, Object>
 public class SegmentationProfile {

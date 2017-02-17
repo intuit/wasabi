@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,7 +16,6 @@
 package com.intuit.wasabi.repository.cassandra;
 
 import com.datastax.driver.mapping.MappingManager;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
@@ -53,7 +52,6 @@ import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentUserIndex
 import com.intuit.wasabi.repository.cassandra.accessor.index.PageExperimentIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.StateExperimentIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.UserAssignmentIndexAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.index.UserBucketIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.impl.CassandraAssignmentsRepository;
 import com.intuit.wasabi.repository.cassandra.impl.CassandraAuditLogRepository;
 import com.intuit.wasabi.repository.cassandra.impl.CassandraAuthorizationRepository;
@@ -86,12 +84,10 @@ import com.intuit.wasabi.repository.cassandra.provider.index.ExperimentUserIndex
 import com.intuit.wasabi.repository.cassandra.provider.index.PageExperimentIndexAccessorProvider;
 import com.intuit.wasabi.repository.cassandra.provider.index.StateExperimentIndexAccessorProvider;
 import com.intuit.wasabi.repository.cassandra.provider.index.UserAssignmentIndexAccessorProvider;
-import com.intuit.wasabi.repository.cassandra.provider.index.UserBucketIndexAccessorProvider;
 import org.slf4j.Logger;
 
 import javax.inject.Singleton;
 import java.util.Properties;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import static com.google.inject.name.Names.named;
@@ -99,7 +95,6 @@ import static com.intuit.autumn.utils.PropertyFactory.create;
 import static com.intuit.autumn.utils.PropertyFactory.getProperty;
 import static java.lang.Boolean.TRUE;
 import static java.lang.Integer.parseInt;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class CassandraRepositoryModule extends AbstractModule {

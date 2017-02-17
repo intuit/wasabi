@@ -31,27 +31,41 @@ public class Constants {
     public static final String NEW_LINE = System.getProperty("line.separator"); // OS dependent line separator
     public static final String TAB = "\t";
 
-    /** The integration tests prefix, should be {@code SW50ZWdyVGVzdA_} */
+    /**
+     * The integration tests prefix, should be {@code SW50ZWdyVGVzdA_}
+     */
     public static final String INTEGRATION_TESTS_PREFIX = new String(Base64.encodeBase64("IntegrTest".getBytes())).replace("==", "_");
 
-    /** {@link #INTEGRATION_TESTS_PREFIX}{@code + "Application_";} */
+    /**
+     * {@link #INTEGRATION_TESTS_PREFIX}{@code + "Application_";}
+     */
     public static final String DEFAULT_PREFIX_APPLICATION = INTEGRATION_TESTS_PREFIX + System.currentTimeMillis() + "App_";
 
     public static final String NEW_PREFIX_APPLICATION = INTEGRATION_TESTS_PREFIX + System.currentTimeMillis() + "App_New_";
 
-    /** {@link #INTEGRATION_TESTS_PREFIX}{@code + "Bucket_";} */
+    /**
+     * {@link #INTEGRATION_TESTS_PREFIX}{@code + "Bucket_";}
+     */
     public static final String DEFAULT_PREFIX_BUCKET = INTEGRATION_TESTS_PREFIX + "Bucket_";
 
-    /** {@link #INTEGRATION_TESTS_PREFIX}{@code + "Experiment_";} */
+    /**
+     * {@link #INTEGRATION_TESTS_PREFIX}{@code + "Experiment_";}
+     */
     public static final String DEFAULT_PREFIX_EXPERIMENT = INTEGRATION_TESTS_PREFIX + "Experiment_";
 
-    /** {@link #INTEGRATION_TESTS_PREFIX}{@code + "User_";} */
+    /**
+     * {@link #INTEGRATION_TESTS_PREFIX}{@code + "User_";}
+     */
     public static final String DEFAULT_PREFIX_USER = INTEGRATION_TESTS_PREFIX + "User_";
 
-    /** {@link #INTEGRATION_TESTS_PREFIX}{@code + "Page_";} */
+    /**
+     * {@link #INTEGRATION_TESTS_PREFIX}{@code + "Page_";}
+     */
     public static final String DEFAULT_PREFIX_PAGE = INTEGRATION_TESTS_PREFIX + "Page_";
 
-    /** {@link #INTEGRATION_TESTS_PREFIX}{@code + "UserFeedback_";} */
+    /**
+     * {@link #INTEGRATION_TESTS_PREFIX}{@code + "UserFeedback_";}
+     */
     public static final String DEFAULT_PREFIX_USER_FEEDBACK = INTEGRATION_TESTS_PREFIX + "UserFeedback_";
 
     public static final String EXPERIMENT_STATE_DRAFT = "DRAFT";

@@ -529,7 +529,7 @@ public class CassandraPagesRepositoryTest {
         assertThat(result.size(), is(1));
         assertThat(result.get(0).getAllowNewAssignment(), is(mockedResult.get(0).isAssign()));
         assertThat(result.get(0).getId().getRawID(), is(experimentId));
-        assertThat(result.get(0).getLabel()==null, is(true));
+        assertThat(result.get(0).getLabel() == null, is(true));
 
     }
 

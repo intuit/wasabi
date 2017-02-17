@@ -28,7 +28,7 @@ import static org.junit.Assert.fail;
 
 /**
  * This class tests the functionality of the Context object.
- *
+ * <p>
  * Created by asuckro on 8/12/15.
  */
 public class ContextTest {

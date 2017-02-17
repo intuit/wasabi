@@ -410,7 +410,7 @@ public class Experiment implements Cloneable, ExperimentBase, Serializable {
 
     /**
      * Calculates the last day of the experiment.
-     *
+     * <p>
      * This is generally the experiment end date, but may be an earlier date if
      * the experiment was TERMINATED early. In this case the modification date
      * is used.

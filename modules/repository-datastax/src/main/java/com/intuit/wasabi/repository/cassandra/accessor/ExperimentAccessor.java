@@ -42,7 +42,7 @@ public interface ExperimentAccessor {
     ListenableFuture<Result<Experiment>> asyncGetExperimentById(UUID experimentID);
 
     @Query("delete from experiment where id = ?")
-	void deleteExperiment(UUID id);
+    void deleteExperiment(UUID id);
 
     //TODO: figure out a better name?
     @Query("update experiment set state = ?, modified = ? where id = ?")

@@ -32,6 +32,7 @@ public interface UserAssignmentExportAccessor {
 
     /**
      * Insert with attributes
+     *
      * @param uuid
      * @param userId
      * @param context
@@ -47,6 +48,7 @@ public interface UserAssignmentExportAccessor {
 
     /**
      * Get by attributes
+     *
      * @param experimentId
      * @param dayHour
      * @param context
@@ -57,6 +59,7 @@ public interface UserAssignmentExportAccessor {
 
     /**
      * Get by attributes
+     *
      * @param experimentId
      * @param dayHour
      * @param context

@@ -28,10 +28,14 @@ import java.util.List;
  */
 public class ExperimentCumulativeCounts extends ModelItem {
 
-    /** cumulative counts per day */
+    /**
+     * cumulative counts per day
+     */
     public List<DailyCounts> days = new ArrayList<>();
 
-    /** The serialization strategy for comparisons and JSON serialization. */
+    /**
+     * The serialization strategy for comparisons and JSON serialization.
+     */
     private static SerializationStrategy serializationStrategy = new DefaultNameExclusionStrategy();
 
     @Override

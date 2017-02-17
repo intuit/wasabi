@@ -27,13 +27,19 @@ import java.util.Objects;
  */
 public class AccessToken extends ModelItem {
 
-    /** the token */
+    /**
+     * the token
+     */
     public String access_token;
 
-    /** token type */
+    /**
+     * token type
+     */
     public String token_type;
 
-    /** The serialization strategy for comparisons and JSON serialization. */
+    /**
+     * The serialization strategy for comparisons and JSON serialization.
+     */
     private static SerializationStrategy serializationStrategy = new DefaultNameExclusionStrategy();
 
     /**

@@ -4483,16 +4483,16 @@ public class TestBase extends ServiceTestBase {
     }
 
     /**
-      * Sends a POST request to assign roles to users against applications.
-      * The response must contain {@link HttpStatus#SC_OK}.
-      * <p>
-      *
-      * @param roles
-      * @param expectedStatus     the expected HTTP status code
-      * @param apiServerConnector the server connector to use
-      * @return List of assignment status
-      */
-    public List<AssignmentStatus>  postUserRolePermission(List<UserRole> roles, int expectedStatus, APIServerConnector apiServerConnector) {
+     * Sends a POST request to assign roles to users against applications.
+     * The response must contain {@link HttpStatus#SC_OK}.
+     * <p>
+     *
+     * @param roles
+     * @param expectedStatus     the expected HTTP status code
+     * @param apiServerConnector the server connector to use
+     * @return List of assignment status
+     */
+    public List<AssignmentStatus> postUserRolePermission(List<UserRole> roles, int expectedStatus, APIServerConnector apiServerConnector) {
         //building the payload
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("{");

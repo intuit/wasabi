@@ -36,7 +36,7 @@ public interface FavoritesRepository {
     /**
      * Adds an experiment ID to the favorites.
      *
-     * @param username the requesting user
+     * @param username     the requesting user
      * @param experimentID the experiment to favorite
      * @return the updated list of favorites
      * @throws RepositoryException if the favorites can not be updated
@@ -46,7 +46,7 @@ public interface FavoritesRepository {
     /**
      * Removes an experiment from the favorites.
      *
-     * @param username the requesting user
+     * @param username     the requesting user
      * @param experimentID the experiment to unfavorite
      * @return the updated list of favorites
      * @throws RepositoryException if the favorites can not be updated

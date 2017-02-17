@@ -34,6 +34,7 @@ public class AccessTokenFactory {
 
     /**
      * Creates an empty AccessToken.
+     *
      * @return the newly created access token
      */
     public static AccessToken createAccessToken() {

@@ -44,43 +44,42 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * <tt>SetupPerformanceTest</tt> can be used to setup E experiments for one application, each with B buckets, and each assigned as running on the same page, P.
- *
+ * <p>
  * All parameters can be passed in. To pass in new parameters use the -Dparameter-name switches to set the appProperties.
  * The available switches and their default values are: ({@code parametername: defaultvalue})
- *
+ * <p>
  * <ul>
- *     <li>application.name: SW50ZWdyVGVzdA_Application_Perf-</li>
- *     <li>experiment.prefix: SW50ZWdyVGVzdA_Experiment_Perf-</li>
- *     <li>experiment.count: 3</li>
- *     <li>page.name: SW50ZWdyVGVzdA_Page_Perf-</li>
- *     <li>bucket.prefix: SW50ZWdyVGVzdA_Bucket_Perf-</li>
- *     <li>buckets.in.experiment: 1</li>
- *     <li>mutualexclusions: false</li>
+ * <li>application.name: SW50ZWdyVGVzdA_Application_Perf-</li>
+ * <li>experiment.prefix: SW50ZWdyVGVzdA_Experiment_Perf-</li>
+ * <li>experiment.count: 3</li>
+ * <li>page.name: SW50ZWdyVGVzdA_Page_Perf-</li>
+ * <li>bucket.prefix: SW50ZWdyVGVzdA_Bucket_Perf-</li>
+ * <li>buckets.in.experiment: 1</li>
+ * <li>mutualexclusions: false</li>
  * </ul>
- *
+ * <p>
  * Additionally the parameter {@code mutualexclusions} is available. If it is set to {@code true}, all experiments
  * are mutual exclusive to each other. By default they are not.
- *
+ * <p>
  * NOTE: passing in the string "NULL" for the page name results in that the experiments will not be associated with any page.
- *
+ * <p>
  * Priority will automatically be in order of creation,
  * which will be in same order as the experiment names:
- *   &lt;experimentPrefix&gt;1
- *   &lt;experimentPrefix&gt;2
- *   ...
- *   &lt;experimentPrefix&gt;m
- *
+ * &lt;experimentPrefix&gt;1
+ * &lt;experimentPrefix&gt;2
+ * ...
+ * &lt;experimentPrefix&gt;m
+ * <p>
  * Bucket names will be:
- *   &lt;bucketPrefix&gt;1
- *   &lt;bucketPrefix&gt;2
- *   ...
- *   &lt;bucketPrefix&gt;n
- *
+ * &lt;bucketPrefix&gt;1
+ * &lt;bucketPrefix&gt;2
+ * ...
+ * &lt;bucketPrefix&gt;n
+ * <p>
  * Allocation for the buckets will be as follows:
  * With n = bucketCount
- *	  allocate 1/(n+1) of 100% to each non-control bucket
- *    and give the reminder ~ 2/(n+1) of 100% to the control bucket
- *
+ * allocate 1/(n+1) of 100% to each non-control bucket
+ * and give the reminder ~ 2/(n+1) of 100% to the control bucket
  */
 public class SetupPerformanceTest extends TestBase {
 

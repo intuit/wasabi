@@ -25,16 +25,24 @@ import com.intuit.wasabi.tests.model.ModelItem;
  */
 public class DailyCounts extends ModelItem {
 
-    /** the date */
+    /**
+     * the date
+     */
     public String date;
 
-    /** the counts on this day */
+    /**
+     * the counts on this day
+     */
     public ExperimentCounts perDay;
 
-    /** the cumulative counts up to and on this day */
+    /**
+     * the cumulative counts up to and on this day
+     */
     public ExperimentCounts cumulative;
 
-    /** The serialization strategy for comparisons and JSON serialization. */
+    /**
+     * The serialization strategy for comparisons and JSON serialization.
+     */
     private static SerializationStrategy serializationStrategy = new DefaultNameExclusionStrategy();
 
     @Override

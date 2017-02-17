@@ -39,6 +39,7 @@ public class IntegrationMetadata extends TestBase {
 
     /**
      * Creates a sample basic experiment
+     *
      * @return sample experiment
      */
     private Experiment createExperiment() {

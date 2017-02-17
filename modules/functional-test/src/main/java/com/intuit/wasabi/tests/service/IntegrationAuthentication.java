@@ -57,19 +57,19 @@ public class IntegrationAuthentication extends TestBase {
      * For username, password, and email it also tries to read them from the appProperties:
      * {@code user-name}, {@code password}, and {@code user-email}.
      * However, TestNG configurations take precedence, unless they match the defaults (see below).
-     *
-     *
-     *
+     * <p>
+     * <p>
+     * <p>
      * {@code validTokenPattern} can be null (and will be null if not supplied via TestNG XML). If it
      * is null, the appProperties will be searched for "validTokenPattern". If those can not be found
      * either, all tests concerning the validTokenPattern will be ignored and counted as automatic
      * passes.
      *
-     * @param username the user name, default: usernameXYZ123456
-     * @param password the password, default: passwordXYZ123456
-     * @param email the email address, default: mail@example.org
-     * @param firstName the first name, default: John
-     * @param lastName the last name, default: Doe
+     * @param username          the user name, default: usernameXYZ123456
+     * @param password          the password, default: passwordXYZ123456
+     * @param email             the email address, default: mail@example.org
+     * @param firstName         the first name, default: John
+     * @param lastName          the last name, default: Doe
      * @param validTokenPattern a regex pattern to validate the access token. See above for more details.
      */
     @Parameters({"username", "password", "email", "firstName", "lastName", "validTokenPattern"})
@@ -125,7 +125,6 @@ public class IntegrationAuthentication extends TestBase {
 
     /**
      * Checks if an invalid user exists.
-     *
      */
     @Test(dependsOnGroups = {"ping"}, retryAnalyzer = RetryAnalyzer.class)
     @RetryTest(maxTries = 3, warmup = 2000)
@@ -159,7 +158,6 @@ public class IntegrationAuthentication extends TestBase {
 
     /**
      * Tries to login with invalid users and requests.
-     *
      */
     @Test(dependsOnGroups = {"ping"})
     public void t_loginFail() {

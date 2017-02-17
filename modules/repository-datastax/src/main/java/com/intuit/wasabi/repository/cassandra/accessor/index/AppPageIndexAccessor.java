@@ -28,6 +28,7 @@ import com.intuit.wasabi.repository.cassandra.pojo.AppPage;
 public interface AppPageIndexAccessor {
     /**
      * Insert records
+     *
      * @param appName
      * @param page
      * @return statement
@@ -38,6 +39,7 @@ public interface AppPageIndexAccessor {
 
     /**
      * Delete by attributes
+     *
      * @param page
      * @param appName
      * @return statement
@@ -47,6 +49,7 @@ public interface AppPageIndexAccessor {
 
     /**
      * Get by attributes
+     *
      * @param page
      * @param appName
      * @return result
@@ -56,6 +59,7 @@ public interface AppPageIndexAccessor {
 
     /**
      * Get by attributes
+     *
      * @param appName
      * @return result
      */

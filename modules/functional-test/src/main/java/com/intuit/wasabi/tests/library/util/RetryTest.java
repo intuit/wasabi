@@ -23,7 +23,7 @@ import java.lang.annotation.Target;
 
 /**
  * An annotation to allow retrials of @Test methods.
- *
+ * <p>
  * Testmethods should be annotated similar to this to be retried multiple times:
  * <pre>
  * {@code

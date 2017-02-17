@@ -43,7 +43,7 @@ public class ModelUtil<T> {
      * Filteres a list according to the supplied filter strategy.
      *
      * @param dataList the list to filter
-     * @param filter the filter to use
+     * @param filter   the filter to use
      * @return the filtered list
      */
     public List<T> filterList(List<T> dataList, Filter<T> filter) {

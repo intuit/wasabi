@@ -15,14 +15,16 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository;
 
-import com.intuit.wasabi.experimentobjects.*;
-import com.intuit.wasabi.repository.RepositoryException;
+import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.experimentobjects.ExperimentPageList;
+import com.intuit.wasabi.experimentobjects.Page;
+import com.intuit.wasabi.experimentobjects.PageExperiment;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Interface for supporting pages data
@@ -31,15 +33,14 @@ import java.util.Set;
  * @see Application
  * @see Page
  * @see ExperimentPageList
- *
  */
 public interface PagesRepository {
 
     /**
      * Add a list of pages to an experiment
      *
-     * @param applicationName  name of the application
-     * @param experimentID id of the experiment
+     * @param applicationName    name of the application
+     * @param experimentID       id of the experiment
      * @param experimentPageList pagelist of the experiment
      * @throws RepositoryException exception
      */
@@ -49,16 +50,16 @@ public interface PagesRepository {
     /**
      * Delete a page from an experiment
      *
-     * @param applicationName  name of the application
-     * @param experimentID id of the experiment
-     * @param pageName page name
+     * @param applicationName name of the application
+     * @param experimentID    id of the experiment
+     * @param pageName        page name
      */
     void deletePage(Application.Name applicationName, Experiment.ID experimentID, Page.Name pageName);
 
     /**
      * Get the names of all pages associated with an application
      *
-     * @param applicationName    name of the application
+     * @param applicationName name of the application
      * @return list of pages
      */
     List<Page> getPageList(Application.Name applicationName);
@@ -71,18 +72,18 @@ public interface PagesRepository {
     /**
      * Get the page information(name and allowNewAssignment) for the associated pages for an experiment
      *
-     * @param experimentID    id of the experiment
+     * @param experimentID id of the experiment
      * @return list of experiment pages
-     *
-     *TODO: return list of experiment pages
+     * <p>
+     * TODO: return list of experiment pages
      */
     ExperimentPageList getExperimentPages(Experiment.ID experimentID);
 
     /**
      * Get the experiment information(id and allowNewAssignment) for the associated experiments for a page
      *
-     * @param applicationName    name of the application
-     * @param pageName  page name
+     * @param applicationName name of the application
+     * @param pageName        page name
      * @return list of PageExperiment
      */
     List<PageExperiment> getExperiments(Application.Name applicationName, Page.Name pageName);
@@ -90,17 +91,16 @@ public interface PagesRepository {
     /**
      * Erase the page related data associated to an experiment
      *
-     * @param applicationName    name of the application
-     * @param experimentID  page name
+     * @param applicationName name of the application
+     * @param experimentID    page name
      */
     void erasePageData(Application.Name applicationName, Experiment.ID experimentID);
 
     /**
      * Get the experiment information (id and allowNewAssignment - No labels) for the associated experiments for a page
      *
-     * @param applicationName    name of the application
-     * @param pageName  page name
-     *
+     * @param applicationName name of the application
+     * @param pageName        page name
      * @return list of PageExperiment (id and allowNewAssignment - No labels)
      */
     List<PageExperiment> getExperimentsWithoutLabels(Application.Name applicationName, Page.Name pageName);
@@ -110,7 +110,6 @@ public interface PagesRepository {
      *
      * @param appAndPagePairs name of the application
      * @return list of PageExperiment
-     *
      */
     Map<Pair<Application.Name, Page.Name>, List<PageExperiment>> getExperimentsWithoutLabels(Collection<Pair<Application.Name, Page.Name>> appAndPagePairs);
 

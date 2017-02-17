@@ -40,6 +40,7 @@ public class UserFactory {
 
     /**
      * Creates a user with a name. The name is prefixed.
+     *
      * @param name the username
      * @return the created user
      */

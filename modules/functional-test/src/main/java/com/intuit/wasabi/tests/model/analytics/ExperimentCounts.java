@@ -28,19 +28,29 @@ import java.util.Map;
  */
 public class ExperimentCounts extends ModelItem {
 
-    /** Counts by bucket, key = bucket label, value = counts */
+    /**
+     * Counts by bucket, key = bucket label, value = counts
+     */
     public Map<String, BucketStatistics> buckets = new HashMap<>();
 
-    /** total number of impressions */
+    /**
+     * total number of impressions
+     */
     public Counts impressionCounts;
 
-    /** counts for all actions as one */
+    /**
+     * counts for all actions as one
+     */
     public Counts jointActionCounts;
 
-    /** counts per action, key = action name, value = counts */
+    /**
+     * counts per action, key = action name, value = counts
+     */
     public Map<String, Counts> actionCounts;
 
-    /** The serialization strategy for comparisons and JSON serialization. */
+    /**
+     * The serialization strategy for comparisons and JSON serialization.
+     */
     private static SerializationStrategy serializationStrategy = new DefaultNameExclusionStrategy();
 
     @Override

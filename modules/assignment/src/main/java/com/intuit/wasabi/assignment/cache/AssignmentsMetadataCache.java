@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2017 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -66,7 +66,7 @@ public interface AssignmentsMetadataCache {
      *
      * @return An experiment for given experiment id.
      */
-     Optional<Experiment> getExperimentById(Experiment.ID expId);
+    Optional<Experiment> getExperimentById(Experiment.ID expId);
 
 
     /**
@@ -75,7 +75,7 @@ public interface AssignmentsMetadataCache {
      *
      * @return prioritized list of experiments for given application.
      */
-     Optional<PrioritizedExperimentList> getPrioritizedExperimentListMap(Application.Name appName);
+    Optional<PrioritizedExperimentList> getPrioritizedExperimentListMap(Application.Name appName);
 
     /**
      *
@@ -90,7 +90,7 @@ public interface AssignmentsMetadataCache {
      * @param expId
      * @return BucketList for given experiment.
      */
-     BucketList getBucketList(Experiment.ID expId);
+    BucketList getBucketList(Experiment.ID expId);
 
     /**
      *
@@ -99,7 +99,7 @@ public interface AssignmentsMetadataCache {
      *
      * @return List experiments associated to the given application and page.
      */
-     List<PageExperiment> getPageExperiments(Application.Name appName, Page.Name pageName);
+    List<PageExperiment> getPageExperiments(Application.Name appName, Page.Name pageName);
 
     /**
      * This method is used to clear cache.
@@ -120,5 +120,5 @@ public interface AssignmentsMetadataCache {
      * @return metadata cache details..
      *
      */
-    Map<String,String> getDetails();
+    Map<String, String> getDetails();
 }

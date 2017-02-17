@@ -26,7 +26,9 @@ import java.util.List;
  */
 public class DefaultNameExclusionStrategy implements SerializationStrategy {
 
-    /** the blacklist */
+    /**
+     * the blacklist
+     */
     private List<String> blacklist;
 
     /**

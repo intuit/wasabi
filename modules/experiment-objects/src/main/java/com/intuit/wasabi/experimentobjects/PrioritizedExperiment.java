@@ -28,7 +28,7 @@ import java.util.Date;
 
 /**
  * Object for holding an experiment with Priotization.
- *
+ * <p>
  * TODO: At the moment this is a clone of experiment. This should be changed in the future.
  */
 public class PrioritizedExperiment implements Cloneable, ExperimentBase, Serializable {

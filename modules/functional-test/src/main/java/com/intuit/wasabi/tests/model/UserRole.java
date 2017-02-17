@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,38 +23,38 @@ import com.intuit.wasabi.tests.library.util.serialstrategies.SerializationStrate
 /**
  * A very simple UserRole wrapper.
  */
-public class UserRole  extends ModelItem{
+public class UserRole extends ModelItem {
 
-	/** the name of the application for which we need to give access to the user */
-	public String applicationName;
+    /** the name of the application for which we need to give access to the user */
+    public String applicationName;
 
-	/** the role of the user against the application. See {@link Constants} for possible roles. */
-	public String role;
+    /** the role of the user against the application. See {@link Constants} for possible roles. */
+    public String role;
 
-	/** the userID of the user to whom we want to assign role */
-	public String userID;
+    /** the userID of the user to whom we want to assign role */
+    public String userID;
 
-	/** the email of the user */
-	public String userEmail;
+    /** the email of the user */
+    public String userEmail;
 
-	/** the first name of the user */
-	public String firstName;
+    /** the first name of the user */
+    public String firstName;
 
-	/** the last name of the user */
-	public String lasttName;
+    /** the last name of the user */
+    public String lasttName;
 
-	/** The serialization strategy for comparisons and JSON serialization. */
-	private static SerializationStrategy serializationStrategy = new DefaultNameExclusionStrategy();
+    /** The serialization strategy for comparisons and JSON serialization. */
+    private static SerializationStrategy serializationStrategy = new DefaultNameExclusionStrategy();
 
-	/**
-	 * Default Constructor
-	 * Creates an empty UserRole
-	 */
-	public UserRole() {
-		
-	}
-	
-	/**
+    /**
+     * Default Constructor
+     * Creates an empty UserRole
+     */
+    public UserRole() {
+
+    }
+
+    /**
      * Creates an userRole.
      * @param applicationName the name of the application
      * @param role the role of the user against the application
@@ -63,7 +63,7 @@ public class UserRole  extends ModelItem{
     public UserRole(String applicationName, String role, String userID) {
         this(applicationName, role, userID, null, null, null);
     }
-    
+
     /**
      * Cretes an userRole with all the parameters set
      * @param applicationName the name of the application
@@ -73,77 +73,76 @@ public class UserRole  extends ModelItem{
      * @param firstName the firstName of the user
      * @param lastName the lastName of the user
      */
-    public UserRole(String applicationName, String role, String userID, String userEmail, String firstName,String lastName)
-    {
-    	this.applicationName = applicationName;
-    	this.role = role;
-    	this.userID = userID;
-    	this.userEmail = userEmail;
-    	this.firstName = firstName;
-    	this.lasttName = lastName;
+    public UserRole(String applicationName, String role, String userID, String userEmail, String firstName, String lastName) {
+        this.applicationName = applicationName;
+        this.role = role;
+        this.userID = userID;
+        this.userEmail = userEmail;
+        this.firstName = firstName;
+        this.lasttName = lastName;
     }
-	
-	public String getApplicationName() {
-		return applicationName;
-	}
 
-	public void setApplicationName(String applicationName) {
-		this.applicationName = applicationName;
-	}
+    public String getApplicationName() {
+        return applicationName;
+    }
 
-	public String getRole() {
-		return role;
-	}
+    public void setApplicationName(String applicationName) {
+        this.applicationName = applicationName;
+    }
 
-	public void setRole(String role) {
-		this.role = role;
-	}
+    public String getRole() {
+        return role;
+    }
 
-	public String getUserID() {
-		return userID;
-	}
+    public void setRole(String role) {
+        this.role = role;
+    }
 
-	public void setUserID(String userID) {
-		this.userID = userID;
-	}
+    public String getUserID() {
+        return userID;
+    }
 
-	public String getUserEmail() {
-		return userEmail;
-	}
+    public void setUserID(String userID) {
+        this.userID = userID;
+    }
 
-	public void setUserEmail(String userEmail) {
-		this.userEmail = userEmail;
-	}
+    public String getUserEmail() {
+        return userEmail;
+    }
 
-	public String getFirstName() {
-		return firstName;
-	}
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
+    }
 
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
+    public String getFirstName() {
+        return firstName;
+    }
 
-	public String getLasttName() {
-		return lasttName;
-	}
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
 
-	public void setLasttName(String lasttName) {
-		this.lasttName = lasttName;
-	}
+    public String getLasttName() {
+        return lasttName;
+    }
 
-	
-	@Override
-	public SerializationStrategy getSerializationStrategy() {
-		return UserRole.serializationStrategy;
-	}
+    public void setLasttName(String lasttName) {
+        this.lasttName = lasttName;
+    }
 
-	@Override
-	public void setSerializationStrategy(SerializationStrategy serializationStrategy) {
-		UserRole.serializationStrategy = serializationStrategy;
 
-	}
-	
-	 /**
+    @Override
+    public SerializationStrategy getSerializationStrategy() {
+        return UserRole.serializationStrategy;
+    }
+
+    @Override
+    public void setSerializationStrategy(SerializationStrategy serializationStrategy) {
+        UserRole.serializationStrategy = serializationStrategy;
+
+    }
+
+    /**
      * Creates an UserRole object from a JSON String.
      * @param json the JSON String.
      * @return an UserRole represented by the JSON String.

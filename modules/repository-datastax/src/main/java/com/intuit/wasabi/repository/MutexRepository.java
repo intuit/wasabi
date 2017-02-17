@@ -32,8 +32,8 @@ public interface MutexRepository {
     /**
      * Delete an exclusion
      *
-     * @param baseID  base experiment id
-     * @param pairID  comparison experiment id
+     * @param baseID base experiment id
+     * @param pairID comparison experiment id
      * @throws RepositoryException exception
      */
     void deleteExclusion(Experiment.ID baseID, Experiment.ID pairID) throws RepositoryException;
@@ -41,8 +41,8 @@ public interface MutexRepository {
     /**
      * Create an exclusion
      *
-     * @param baseID  base experiment id
-     * @param pairID  comparison experiment id
+     * @param baseID base experiment id
+     * @param pairID comparison experiment id
      * @throws RepositoryException exception
      */
     void createExclusion(Experiment.ID baseID, Experiment.ID pairID) throws RepositoryException;
@@ -50,27 +50,25 @@ public interface MutexRepository {
     /**
      * Retrieve the list of experiments that are mutually exclusive to a given experiment
      *
-     * @param baseID   base experiment id
+     * @param baseID base experiment id
      * @return list of experiments
      * @throws RepositoryException exception
-     * @return list of experiments
      */
     ExperimentList getExclusions(Experiment.ID baseID) throws RepositoryException;
 
     /**
      * Retrieve the list of experiments that are <b>not</b> mutually exclusive to a given experiment
      *
-     * @param baseID   base experiment id
-     * @return list of experiments
-     * @throws RepositoryException exception
+     * @param baseID base experiment id
      * @return list of <b>not</b> exclusive experiments
+     * @throws RepositoryException exception
      */
     ExperimentList getNotExclusions(Experiment.ID baseID) throws RepositoryException;
 
     /**
      * Get the list of experiment IDs mutually exclusive to the given experiment
      *
-     * @param experimentID    current experiment id
+     * @param experimentID current experiment id
      * @return list of experiment ids that were mutually exclusive to the given experiment id
      */
     List<Experiment.ID> getExclusionList(Experiment.ID experimentID);
@@ -78,7 +76,7 @@ public interface MutexRepository {
     /**
      * Get a list of mutually exclusive experiments for an experiment in a single cassandra call
      *
-     * @param experimentIDCollection    collection of experiment IDs
+     * @param experimentIDCollection collection of experiment IDs
      * @return Map of experiment ID and their mutually exclusive IDs
      */
     Map<Experiment.ID, List<Experiment.ID>> getExclusivesList(Collection<Experiment.ID> experimentIDCollection);

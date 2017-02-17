@@ -33,8 +33,8 @@ import java.util.List;
 
 /**
  * Cassandra implementation of FeedbackRepository
- * @see FeedbackRepository
  *
+ * @see FeedbackRepository
  */
 public class CassandraFeedbackRepository implements FeedbackRepository {
 
@@ -50,6 +50,7 @@ public class CassandraFeedbackRepository implements FeedbackRepository {
 
     /**
      * Constructor
+     *
      * @param userFeedbackAccessor
      */
     @Inject
@@ -118,6 +119,7 @@ public class CassandraFeedbackRepository implements FeedbackRepository {
 
     /**
      * Helper method to translate pojo UserFeedback into UserFeedback
+     *
      * @param result with pojo UserFeedback objects
      * @return List of UserFeedback objects
      */
@@ -135,6 +137,7 @@ public class CassandraFeedbackRepository implements FeedbackRepository {
 
     /**
      * Translate one pojo user feedback object into UserFeedback
+     *
      * @param userFeedback pojo
      * @return UserFeedback
      */

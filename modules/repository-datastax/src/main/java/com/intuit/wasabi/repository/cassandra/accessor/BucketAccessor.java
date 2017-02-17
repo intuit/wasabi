@@ -32,6 +32,7 @@ public interface BucketAccessor {
 
     /**
      * Get buckets for the experiments
+     *
      * @param experimentIds
      * @return buckets
      */
@@ -40,6 +41,7 @@ public interface BucketAccessor {
 
     /**
      * Get bucket for one experiment
+     *
      * @param experimentId
      * @return buckets
      */
@@ -51,6 +53,7 @@ public interface BucketAccessor {
 
     /**
      * Insert a bucket
+     *
      * @param experimentId
      * @param label
      * @param description
@@ -67,6 +70,7 @@ public interface BucketAccessor {
 
     /**
      * Delete bucket for experiment
+     *
      * @param experimentId
      */
     @Query("delete from bucket where experiment_id = ?")
@@ -74,6 +78,7 @@ public interface BucketAccessor {
 
     /**
      * Delete bucket for experiment id and label
+     *
      * @param experimentId
      * @param label
      */
@@ -82,6 +87,7 @@ public interface BucketAccessor {
 
     /**
      * Update bucket state
+     *
      * @param name
      * @param rawID
      * @param label
@@ -91,6 +97,7 @@ public interface BucketAccessor {
 
     /**
      * Get bucket for experiment id and label
+     *
      * @param rawID
      * @param label
      * @return bucket result
@@ -100,6 +107,7 @@ public interface BucketAccessor {
 
     /**
      * Update control status of bucket
+     *
      * @param isControl
      * @param experimentId
      * @param label
@@ -109,6 +117,7 @@ public interface BucketAccessor {
 
     /**
      * Update bucket based on params
+     *
      * @param description
      * @param allocationPercent
      * @param control

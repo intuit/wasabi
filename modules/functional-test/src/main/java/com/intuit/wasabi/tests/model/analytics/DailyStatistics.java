@@ -25,16 +25,24 @@ import com.intuit.wasabi.tests.model.ModelItem;
  */
 public class DailyStatistics extends ModelItem {
 
-    /** the day */
+    /**
+     * the day
+     */
     public String date;
 
-    /** the statistics on this day */
+    /**
+     * the statistics on this day
+     */
     public ExperimentBasicStatistics perDay;
 
-    /** the statistics up to and on this day. */
+    /**
+     * the statistics up to and on this day.
+     */
     public ExperimentStatistics cumulative;
 
-    /** The serialization strategy for comparisons and JSON serialization. */
+    /**
+     * The serialization strategy for comparisons and JSON serialization.
+     */
     private static SerializationStrategy serializationStrategy = new DefaultNameExclusionStrategy();
 
     @Override

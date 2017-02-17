@@ -28,34 +28,54 @@ import java.util.Map;
  */
 public class ExperimentStatistics extends ModelItem {
 
-    /** statistics by bucket, key = bucket label, value = bucket statistics */
+    /**
+     * statistics by bucket, key = bucket label, value = bucket statistics
+     */
     public Map<String, BucketStatistics> buckets = new HashMap<>();
 
-    /** the experiment progress */
+    /**
+     * the experiment progress
+     */
     public Progress experimentProgress;
 
-    /** the overall progress */
+    /**
+     * the overall progress
+     */
     public Progress jointProgress;
 
-    /** the progress per action, key = action name, value = progress */
+    /**
+     * the progress per action, key = action name, value = progress
+     */
     public Map<String, Progress> actionProgress = new HashMap<>();
 
-    /** joint estimates for all actions */
+    /**
+     * joint estimates for all actions
+     */
     public Estimate jointActionRate;
 
-    /** statistics per action */
+    /**
+     * statistics per action
+     */
     public Map<String, Estimate> actionRates = new HashMap<>();
 
-    /** impressions */
+    /**
+     * impressions
+     */
     public Counts impressionCounts;
 
-    /** counts for all actions */
+    /**
+     * counts for all actions
+     */
     public Counts jointActionCounts;
 
-    /** the counts per action */
+    /**
+     * the counts per action
+     */
     public Map<String, Counts> actionCounts = new HashMap<>();
 
-    /** The serialization strategy for comparisons and JSON serialization. */
+    /**
+     * The serialization strategy for comparisons and JSON serialization.
+     */
     private static SerializationStrategy serializationStrategy = new DefaultNameExclusionStrategy();
 
     @Override

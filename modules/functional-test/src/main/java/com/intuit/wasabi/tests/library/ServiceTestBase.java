@@ -16,8 +16,7 @@
 package com.intuit.wasabi.tests.library;
 
 /**
- * <tt>ServiceTestBase</tt> - a base class for Web Service API testing using TestNG and Rest-Assured. 
- *
+ * <tt>ServiceTestBase</tt> - a base class for Web Service API testing using TestNG and Rest-Assured.
  */
 
 

@@ -23,25 +23,39 @@ import com.intuit.wasabi.tests.library.util.serialstrategies.SerializationStrate
  */
 public class APIUser extends ModelItem {
 
-    /** The user name. required field */
+    /**
+     * The user name. required field
+     */
     public String username;
 
-    /** user id */
+    /**
+     * user id
+     */
     public String userId;
 
-    /** first name */
+    /**
+     * first name
+     */
     public String firstName;
 
-    /** last name */
+    /**
+     * last name
+     */
     public String lastName;
 
-    /** email */
+    /**
+     * email
+     */
     public String email;
 
-    /** password */
+    /**
+     * password
+     */
     public String password;
 
-    /** The serialization strategy for comparisons and JSON serialization. */
+    /**
+     * The serialization strategy for comparisons and JSON serialization.
+     */
     private static SerializationStrategy serializationStrategy = new DefaultNameExclusionStrategy();
 
     /**

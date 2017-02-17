@@ -66,7 +66,7 @@ public interface ExperimentRepository {
     /**
      * Retrieve the specified experiment from the repository using its label
      *
-     * @param appName   name of the application
+     * @param appName         name of the application
      * @param experimentLabel lable of the experiment
      * @return experiment Object
      */
@@ -92,9 +92,8 @@ public interface ExperimentRepository {
     /**
      * Update the experiment state
      *
-     *
      * @param experiment current experiment
-     * @param state new state
+     * @param state      new state
      * @return updated experiment with the state
      */
     Experiment updateExperimentState(Experiment experiment, Experiment.State state);
@@ -125,7 +124,7 @@ public interface ExperimentRepository {
     /**
      * Get the experiments for an Application
      *
-     * @param appName  application name
+     * @param appName application name
      * @return a table contains experiment id, experiment label and the experiment objects
      */
     Table<Experiment.ID, Experiment.Label, Experiment> getExperimentList(Application.Name appName);
@@ -145,10 +144,9 @@ public interface ExperimentRepository {
     /**
      * Return a list of bucket IDs for the specified experiment
      *
-     * @param experimentID id of the experiment
+     * @param experimentID    id of the experiment
      * @param checkExperiment check if experiment exists before querying for bucket list
      * @return a list of buckets of that experiment
-     *
      */
     BucketList getBuckets(Experiment.ID experimentID, boolean checkExperiment);
 
@@ -169,7 +167,8 @@ public interface ExperimentRepository {
 
     /**
      * Update bucket allocation percentage
-     * @param bucket bucket to update
+     *
+     * @param bucket                      bucket to update
      * @param desiredAllocationPercentage allocation information
      * @return bucket
      */
@@ -177,7 +176,8 @@ public interface ExperimentRepository {
 
     /**
      * update bucket state
-     * @param bucket bucket to update
+     *
+     * @param bucket       bucket to update
      * @param desiredState new state
      * @return bucket updated
      */
@@ -185,10 +185,10 @@ public interface ExperimentRepository {
 
     /**
      * Update bucket batch
-     * @param experimentID experiment id
-     * @param bucketList list of buckets
-     * @return updated bucket list
      *
+     * @param experimentID experiment id
+     * @param bucketList   list of buckets
+     * @return updated bucket list
      */
     BucketList updateBucketBatch(Experiment.ID experimentID, BucketList bucketList);
 
@@ -196,7 +196,7 @@ public interface ExperimentRepository {
      * Delete a bucket
      *
      * @param experimentID experiment id
-     * @param bucketLabel label for bucket
+     * @param bucketLabel  label for bucket
      */
     void deleteBucket(Experiment.ID experimentID, Bucket.Label bucketLabel);
 
@@ -204,8 +204,8 @@ public interface ExperimentRepository {
      * Log changes made to the bucket metadata
      *
      * @param experimentID experiment id
-     * @param bucketLabel label for bucket
-     * @param changeList list of bucket audit info
+     * @param bucketLabel  label for bucket
+     * @param changeList   list of bucket audit info
      */
     void logBucketChanges(Experiment.ID experimentID, Bucket.Label bucketLabel,
                           List<BucketAuditInfo> changeList);
@@ -214,7 +214,7 @@ public interface ExperimentRepository {
      * Log changes made to the experiment metadata
      *
      * @param experimentID experiment id
-     * @param changeList list of bucket audit info
+     * @param changeList   list of bucket audit info
      */
     void logExperimentChanges(Experiment.ID experimentID, List<ExperimentAuditInfo> changeList);
 
@@ -238,7 +238,7 @@ public interface ExperimentRepository {
     /**
      * Get a bucket list for a list of Experiments in a single cassandra call
      *
-     * @param experimentIDCollection    collection of experiment ids
+     * @param experimentIDCollection collection of experiment ids
      * @return map of Id to BucketList objects
      */
     Map<Experiment.ID, BucketList> getBucketList(Collection<Experiment.ID> experimentIDCollection);
@@ -246,22 +246,22 @@ public interface ExperimentRepository {
     /**
      * Get the list of buckets for an experiment
      *
-     * @param experimentID    experiment id
+     * @param experimentID experiment id
      * @return List of buckets
-     *
      */
     BucketList getBucketList(Experiment.ID experimentID);
 
     /**
      * Update state index
+     *
      * @param experiment Experiment Object
      */
     void updateStateIndex(Experiment experiment);
 
     /**
      * Create an application at top level
-     * @param applicationName Application name
      *
+     * @param applicationName Application name
      */
     void createApplication(Application.Name applicationName);
 

@@ -23,8 +23,8 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * Test class for the {@link PrioritizedExperiment}
- *
- *
+ * <p>
+ * <p>
  * Created by asuckro on 8/12/15.
  */
 public class PrioritizedExperimentTest {

@@ -28,19 +28,29 @@ import java.util.List;
  */
 public class Progress extends ModelItem {
 
-    /** list of winning buckets */
+    /**
+     * list of winning buckets
+     */
     public List<String> winnersSoFar = new ArrayList<>();
 
-    /** list of losing buckets */
+    /**
+     * list of losing buckets
+     */
     public List<String> losersSoFar = new ArrayList<>();
 
-    /** enough data collectd */
+    /**
+     * enough data collectd
+     */
     public boolean hasSufficientData;
 
-    /** fraction collected to get effect size */
+    /**
+     * fraction collected to get effect size
+     */
     public double fractionDataCollected;
 
-    /** The serialization strategy for comparisons and JSON serialization. */
+    /**
+     * The serialization strategy for comparisons and JSON serialization.
+     */
     private static SerializationStrategy serializationStrategy = new DefaultNameExclusionStrategy();
 
     @Override

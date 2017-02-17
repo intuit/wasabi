@@ -21,7 +21,6 @@ import com.datastax.driver.mapping.annotations.Query;
 
 /**
  * Accessor interface
- *
  */
 @Accessor
 public interface StagingAccessor {

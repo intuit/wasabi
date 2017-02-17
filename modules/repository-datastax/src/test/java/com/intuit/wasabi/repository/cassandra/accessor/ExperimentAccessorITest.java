@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -87,35 +87,67 @@ public class ExperimentAccessorITest extends IntegrationTestBase {
                 "app2", date1, date2, true,
                 "m2", "v2", true, 5000, "c2");
 
-			@Override
-			public int compare(UUID o1, UUID o2) {
-				return o1.compareTo(o2);
-			} });
-
-		List<Experiment> experimentResult = new ArrayList<>(2);
-		experimentIds.forEach(expId -> experimentResult.add(accessor.getExperimentById(expId).one()));
-
-    	experimentResult.sort(new Comparator<Experiment>() {
-			@Override
-			public int compare(Experiment o1, Experiment o2) {
-				return o1.getId().compareTo(o2.getId());
-			} });
-
-        Result<Experiment> experiment1 = accessor.getExperiments(experimentIds);
-        List<Experiment> experimentResult = experiment1.all();
-        experimentResult.sort(new Comparator<Experiment>() {
-
-            @Override
-            public int compare(Experiment o1, Experiment o2) {
-                return o1.getId().compareTo(o2.getId());
-            }
-        });
-
-        assertEquals("size should be same", 2, experimentResult.size());
-
-        Experiment exp1 = experimentResult.get(0);
-        assertEquals("Value should be same", experimentIds.get(0), exp1.getId());
-        Experiment exp2 = experimentResult.get(1);
-        assertEquals("Value should be same", experimentIds.get(1), exp2.getId());
+        @Override
+        public int compare (UUID o1, UUID o2){
+            return o1.compareTo(o2);
+        }
     }
+
+    );
+
+    List<Experiment> experimentResult = new ArrayList<>(2);
+    experimentIds.forEach(expId->experimentResult.add(accessor.getExperimentById(expId).
+
+    one()
+
+    ));
+
+    experimentResult.sort(new Comparator<Experiment>()
+
+    {
+        @Override
+        public int compare (Experiment o1, Experiment o2){
+        return o1.getId().compareTo(o2.getId());
+    }
+    }
+
+    );
+
+    Result<Experiment> experiment1 = accessor.getExperiments(experimentIds);
+    List<Experiment> experimentResult = experiment1.all();
+    experimentResult.sort(new Comparator<Experiment>()
+
+    {
+
+        @Override
+        public int compare (Experiment o1, Experiment o2){
+        return o1.getId().compareTo(o2.getId());
+    }
+    }
+
+    );
+
+    assertEquals("size should be same",2,experimentResult.size()
+
+    );
+
+    Experiment exp1 = experimentResult.get(0);
+
+    assertEquals("Value should be same",experimentIds.get(0),exp1
+
+    .
+
+    getId()
+
+    );
+    Experiment exp2 = experimentResult.get(1);
+
+    assertEquals("Value should be same",experimentIds.get(1),exp2
+
+    .
+
+    getId()
+
+    );
+}
 }

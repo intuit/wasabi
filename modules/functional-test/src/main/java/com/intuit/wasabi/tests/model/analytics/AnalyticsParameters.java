@@ -28,34 +28,54 @@ import java.util.List;
  */
 public class AnalyticsParameters extends ModelItem {
 
-    /** the interval start time */
+    /**
+     * the interval start time
+     */
     public String fromTime;
 
-    /** the interval end time */
+    /**
+     * the interval end time
+     */
     public String toTime;
 
-    /** the confidence level */
+    /**
+     * the confidence level
+     */
     public double confidenceLevel;
 
-    /** the effect size */
+    /**
+     * the effect size
+     */
     public double effectSize;
 
-    /** a list of actions */
+    /**
+     * a list of actions
+     */
     public List<String> actions = new ArrayList<>();
 
-    /** single shot */
+    /**
+     * single shot
+     */
     public boolean isSingleShot;
 
-    /** should be NORMAL_APPROX or NORMAL_APPROX_SIM */
+    /**
+     * should be NORMAL_APPROX or NORMAL_APPROX_SIM
+     */
     public String metric;
 
-    /** The mode - should not be used according to Swagger. Can be PRODUCTION or TEST */
+    /**
+     * The mode - should not be used according to Swagger. Can be PRODUCTION or TEST
+     */
     public String mode;
 
-    /** Context */
+    /**
+     * Context
+     */
     public String context;
 
-    /** The serialization strategy for comparisons and JSON serialization. */
+    /**
+     * The serialization strategy for comparisons and JSON serialization.
+     */
     private static SerializationStrategy serializationStrategy = new DefaultNameExclusionStrategy();
 
     @Override

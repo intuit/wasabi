@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2017 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -101,7 +101,7 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
         healthCheckRegistry.register(ASSIGNMENT_METADATA_CACHE_SERVICE_NAME, metadataCacheHealthCheck);
 
         //Create new caches
-        for(CACHE_NAME name: CACHE_NAME.values()) {
+        for (CACHE_NAME name : CACHE_NAME.values()) {
             cacheManager.addCache(name.toString());
         }
 
@@ -119,7 +119,7 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
             }
             LOGGER.info("Assignments metadata cache has been cleared successfully...");
             return Boolean.TRUE;
-        } catch(Exception e) {
+        } catch (Exception e) {
             LOGGER.error("Exception occurred while clearing a cache...", e);
         }
         return Boolean.FALSE;
@@ -168,14 +168,14 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
         List<Experiment> expList = null;
         Cache cache = cacheManager.getCache(APP_NAME_TO_EXPERIMENTS_CACHE.toString());
         Element val = cache.get(appName);
-        if(isNull(val)) {
+        if (isNull(val)) {
             expList = experimentRepository.getExperimentsForApps(singleEntrySet(appName)).get(appName);
             cache.put(new Element(appName, expList));
         } else {
             expList = (List<Experiment>) val.getObjectValue();
         }
 
-        return isNull(expList)?new ArrayList<>():expList;
+        return isNull(expList) ? new ArrayList<>() : expList;
     }
 
     /**
@@ -189,7 +189,7 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
         Experiment exp = null;
         Cache cache = cacheManager.getCache(EXPERIMENT_ID_TO_EXPERIMENT_CACHE.toString());
         Element val = cache.get(expId);
-        if(isNull(val)) {
+        if (isNull(val)) {
             exp = experimentRepository.getExperimentsMap(singleEntrySet(expId)).get(expId);
             cache.put(new Element(expId, exp));
         } else {
@@ -211,7 +211,7 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
         PrioritizedExperimentList expList = null;
         Cache cache = cacheManager.getCache(APP_NAME_TO_PRIORITIZED_EXPERIMENTS_CACHE.toString());
         Element val = cache.get(appName);
-        if(isNull(val)) {
+        if (isNull(val)) {
             expList = prioritiesRepository.getPriorities(singleEntrySet(appName)).get(appName);
             cache.put(new Element(appName, expList));
         } else {
@@ -232,14 +232,14 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
         List<Experiment.ID> exclusionList = null;
         Cache cache = cacheManager.getCache(EXPERIMENT_ID_TO_EXCLUSION_CACHE.toString());
         Element val = cache.get(expId);
-        if(isNull(val)) {
+        if (isNull(val)) {
             exclusionList = mutexRepository.getExclusivesList(singleEntrySet(expId)).get(expId);
             cache.put(new Element(expId, exclusionList));
         } else {
             exclusionList = (List<Experiment.ID>) val.getObjectValue();
         }
 
-        return isNull(exclusionList)?new ArrayList<>():exclusionList;
+        return isNull(exclusionList) ? new ArrayList<>() : exclusionList;
     }
 
     /**
@@ -252,14 +252,14 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
         BucketList bucketList = null;
         Cache cache = cacheManager.getCache(EXPERIMENT_ID_TO_BUCKET_CACHE.toString());
         Element val = cache.get(expId);
-        if(isNull(val)) {
+        if (isNull(val)) {
             bucketList = experimentRepository.getBucketList(singleEntrySet(expId)).get(expId);
             cache.put(new Element(expId, bucketList));
         } else {
             bucketList = (BucketList) val.getObjectValue();
         }
 
-        return isNull(bucketList)?new BucketList():makeCopy(bucketList);
+        return isNull(bucketList) ? new BucketList() : makeCopy(bucketList);
     }
 
     /**
@@ -275,14 +275,14 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
         List<PageExperiment> pageExperiments = null;
         Cache cache = cacheManager.getCache(APP_NAME_N_PAGE_TO_EXPERIMENTS_CACHE.toString());
         Element val = cache.get(appPagePair);
-        if(isNull(val)) {
+        if (isNull(val)) {
             pageExperiments = pagesRepository.getExperimentsWithoutLabels(singleEntrySet(appPagePair)).get(appPagePair);
             cache.put(new Element(appPagePair, pageExperiments));
         } else {
             pageExperiments = (List<PageExperiment>) val.getObjectValue();
         }
 
-        return isNull(pageExperiments)?new ArrayList<>():pageExperiments;
+        return isNull(pageExperiments) ? new ArrayList<>() : pageExperiments;
     }
 
     /**
@@ -299,11 +299,11 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
      * @return Get metadata cache details
      */
     @Override
-    public Map<String,String> getDetails() {
-        Map<String,String> details = new HashMap<>();
+    public Map<String, String> getDetails() {
+        Map<String, String> details = new HashMap<>();
         details.put("status", "Enabled");
-        for(CACHE_NAME name: CACHE_NAME.values()) {
-            details.put(name+".SIZE", String.valueOf(cacheManager.getCache(name.toString()).getSize()));
+        for (CACHE_NAME name : CACHE_NAME.values()) {
+            details.put(name + ".SIZE", String.valueOf(cacheManager.getCache(name.toString()).getSize()));
         }
         return details;
     }

@@ -61,7 +61,7 @@ public class BucketFactory {
      * The allocation percentage is 1/3.
      *
      * @param experiment the experiment this bucket shall belong to
-     * @param isControl control group status
+     * @param isControl  control group status
      * @return the new bucket
      */
     public static Bucket createBucket(Experiment experiment, boolean isControl) {
@@ -85,7 +85,7 @@ public class BucketFactory {
      * Creates a bucket and sets all parameters to some default values.
      *
      * @param experiment the experiment for this bucket
-     * @param isControl the control group status
+     * @param isControl  the control group status
      * @return the new bucket
      */
     public static Bucket createCompleteBucket(Experiment experiment, boolean isControl) {
@@ -96,10 +96,10 @@ public class BucketFactory {
      * Creates a sample set of N minimal buckets for the given experiment.
      * The allocation percentage for each bucket is 1/N.
      * The first bucket (index 0) is the control group.
-     *
+     * <p>
      * Minimal means that only the required values are set.
      *
-     * @param experiment the experiment
+     * @param experiment      the experiment
      * @param numberOfBuckets N, the number of buckets
      * @return a list of N buckets with equally assigned allocation percentages
      */
@@ -112,10 +112,10 @@ public class BucketFactory {
     /**
      * Creates {@code allocationPercentages.length} many minimal buckets with their percentages assigned to them.
      * The first bucket (index 0) is the control group.
-     *
+     * <p>
      * Minimal means that only the required values are set.
      *
-     * @param experiment the experiment
+     * @param experiment            the experiment
      * @param allocationPercentages an array of allocation percentages
      * @return a list of N buckets with the assigned allocation percentages
      */
@@ -131,12 +131,12 @@ public class BucketFactory {
     /**
      * Creates {@code allocationPercentages.length} many minimal buckets with their percentages assigned to them.
      * The first bucket (index 0) is the control group. If there are more buckets than labels, the labels are repeated.
-     *
+     * <p>
      * Minimal means that only the required values are set.
      *
-     * @param experiment the experiment
+     * @param experiment            the experiment
      * @param allocationPercentages an array of allocation percentages
-     * @param labels the labels for the buckets
+     * @param labels                the labels for the buckets
      * @return a list of N buckets with the assigned allocation percentages
      */
     public static List<Bucket> createBuckets(Experiment experiment, double[] allocationPercentages, String[] labels) {
@@ -151,10 +151,10 @@ public class BucketFactory {
      * Creates a sample set of N complete buckets for the given experiment.
      * The allocation percentage for each bucket is 1/N.
      * The first bucket (index 0) is the control group.
-     *
+     * <p>
      * Complete means all values are set to some defaults.
      *
-     * @param experiment the experiment
+     * @param experiment      the experiment
      * @param numberOfBuckets N, the number of buckets
      * @return a list of N buckets with equally assigned allocation percentages
      */
@@ -167,10 +167,10 @@ public class BucketFactory {
     /**
      * Creates {@code allocationPercentages.length} many complete buckets with their percentages assigned to them.
      * The first bucket (index 0) is the control group.
-     *
+     * <p>
      * Complete means all values are set to some defaults.
      *
-     * @param experiment the experiment
+     * @param experiment            the experiment
      * @param allocationPercentages an array of allocation percentages
      * @return a list of N buckets with the assigned allocation percentages
      */
@@ -187,12 +187,12 @@ public class BucketFactory {
     /**
      * Creates {@code allocationPercentages.length} many complete buckets with their percentages assigned to them.
      * The first bucket (index 0) is the control group. If there are more buckets than labels, the labels are repeated.
-     *
+     * <p>
      * Complete means all values are set to some defaults.
      *
-     * @param experiment the experiment
+     * @param experiment            the experiment
      * @param allocationPercentages an array of allocation percentages
-     * @param labels the bucket labels
+     * @param labels                the bucket labels
      * @return a list of N buckets with the assigned allocation percentages
      */
     public static List<Bucket> createCompleteBuckets(Experiment experiment, double[] allocationPercentages, String[] labels) {

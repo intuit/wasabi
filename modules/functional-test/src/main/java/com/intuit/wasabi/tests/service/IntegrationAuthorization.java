@@ -54,8 +54,8 @@ public class IntegrationAuthorization extends TestBase {
      * For username, password, and email it also tries to read them from the appProperties:
      * {@code user-name}, {@code password}, and {@code user-email}.
      * However, TestNG configurations take precedence, unless they match the defaults (see below).
-     *
-     *
+     * <p>
+     * <p>
      * {@code validTokenPattern} can be null (and will be null if not supplied via TestNG XML). If it
      * is null, the appProperties will be searched for "validTokenPattern". If those can not be found
      * either, all tests concerning the validTokenPattern will be ignored and counted as automatic
@@ -63,7 +63,7 @@ public class IntegrationAuthorization extends TestBase {
      *
      * @param username the user name, default: usernameXYZ123456
      * @param password the password, default: passwordXYZ123456
-     * @param email the email address, default: mail@example.org
+     * @param email    the email address, default: mail@example.org
      */
     @Parameters({"username", "password", "email", "firstName", "lastName", "validTokenPattern"})
     public IntegrationAuthorization(@Optional("usernameXYZ123456") String username,

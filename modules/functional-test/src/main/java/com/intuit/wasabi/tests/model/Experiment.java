@@ -30,13 +30,19 @@ import java.util.GregorianCalendar;
  */
 public class Experiment extends ModelItem {
 
-    /** The experiment ID. Soft requirement: Should be fetched from server. */
+    /**
+     * The experiment ID. Soft requirement: Should be fetched from server.
+     */
     public String id;
 
-    /** The experiment's label. Required. */
+    /**
+     * The experiment's label. Required.
+     */
     public String label;
 
-    /** The name of the application this experiment belongs to. Required. */
+    /**
+     * The name of the application this experiment belongs to. Required.
+     */
     public String applicationName;
 
     /**
@@ -51,52 +57,84 @@ public class Experiment extends ModelItem {
      */
     public String endTime;
 
-    /** The sampling percentage (0, 1]. Required. */
+    /**
+     * The sampling percentage (0, 1]. Required.
+     */
     public double samplingPercent;
 
-    /** The description/hypothesis. Optional. */
+    /**
+     * The description/hypothesis. Optional.
+     */
     public String description;
 
-    /** The precision of the experiment hypothesis. Optional. */
+    /**
+     * The precision of the experiment hypothesis. Optional.
+     */
     public String hypothesisIsCorrect;
 
-    /** The results. Optional. */
+    /**
+     * The results. Optional.
+     */
     public String results;
 
-    /** The selection rules for this experiment. Optional. */
+    /**
+     * The selection rules for this experiment. Optional.
+     */
     public String rule;
 
-    /** The rules as a JSON String. Should be fetched from the server. */
+    /**
+     * The rules as a JSON String. Should be fetched from the server.
+     */
     public String ruleJson;
 
-    /** The creation time. Should be formatted {@code yyyy-MM-dd'T'hh:mm:ssZ}. Should be fetched from server. */
+    /**
+     * The creation time. Should be formatted {@code yyyy-MM-dd'T'hh:mm:ssZ}. Should be fetched from server.
+     */
     public String creationTime;
 
-    /** The modification time. Should be formatted {@code yyyy-MM-dd'T'hh:mm:ssZ}. Should be fetched from server. */
+    /**
+     * The modification time. Should be formatted {@code yyyy-MM-dd'T'hh:mm:ssZ}. Should be fetched from server.
+     */
     public String modificationTime;
 
-    /** The experiment state. See {@link Constants} for possible states. */
+    /**
+     * The experiment state. See {@link Constants} for possible states.
+     */
     public String state;
 
-    /** Personalization status. */
+    /**
+     * Personalization status.
+     */
     public Boolean isPersonalizationEnabled;
 
-    /** The model name to fetch the assignment distribution from. */
+    /**
+     * The model name to fetch the assignment distribution from.
+     */
     public String modelName;
 
-    /** The model version. */
+    /**
+     * The model version.
+     */
     public String modelVersion;
 
-    /** Flags if this Experiment is used for rapid Experimentation. */
+    /**
+     * Flags if this Experiment is used for rapid Experimentation.
+     */
     public Boolean isRapidExperiment;
 
-    /** userCap for Rapid Experimentation. */
+    /**
+     * userCap for Rapid Experimentation.
+     */
     public Integer userCap;
 
-    /** the user who created the experiment */
+    /**
+     * the user who created the experiment
+     */
     public String creatorID;
 
-    /** The serialization strategy for comparisons and JSON serialization. */
+    /**
+     * The serialization strategy for comparisons and JSON serialization.
+     */
     private static SerializationStrategy serializationStrategy = new DefaultNameExclusionStrategy();
 
     /**
@@ -116,6 +154,7 @@ public class Experiment extends ModelItem {
 
     /**
      * Creates an experiment with only an ID.
+     *
      * @param id the experiment ID.
      */
     public Experiment(String id) {
@@ -125,10 +164,10 @@ public class Experiment extends ModelItem {
     /**
      * Creates an experiment.
      *
-     * @param label the experiment label (will be prefixed)
-     * @param application the application name (will be prefixed)
-     * @param startTime the start time
-     * @param endTime the end time
+     * @param label           the experiment label (will be prefixed)
+     * @param application     the application name (will be prefixed)
+     * @param startTime       the start time
+     * @param endTime         the end time
      * @param samplingPercent the sampling percentage (0, 1]
      */
     public Experiment(String label, Application application, String startTime, String endTime,
@@ -139,19 +178,19 @@ public class Experiment extends ModelItem {
     /**
      * Creates an experiment.
      *
-     * @param label the experiment label (will be prefixed)
-     * @param application the application name (will be prefixed)
-     * @param startTime the start time
-     * @param endTime the end time
-     * @param samplingPercent the sampling percentage (0, 1]
-     * @param description the experiment description
-     * @param rule a rule set for the experiment
+     * @param label                    the experiment label (will be prefixed)
+     * @param application              the application name (will be prefixed)
+     * @param startTime                the start time
+     * @param endTime                  the end time
+     * @param samplingPercent          the sampling percentage (0, 1]
+     * @param description              the experiment description
+     * @param rule                     a rule set for the experiment
      * @param isPersonalizationEnabled flag for personalization
-     * @param modelName the model name
-     * @param modelVersion the model version
-     * @param isRapidExperiment flag if rapid experimentation
-     * @param userCap max users for rapid experiments
-     * @param creatorID the creator
+     * @param modelName                the model name
+     * @param modelVersion             the model version
+     * @param isRapidExperiment        flag if rapid experimentation
+     * @param userCap                  max users for rapid experiments
+     * @param creatorID                the creator
      */
     public Experiment(String label, Application application, String startTime, String endTime, double samplingPercent,
                       String description, String rule, Boolean isPersonalizationEnabled, String modelName,

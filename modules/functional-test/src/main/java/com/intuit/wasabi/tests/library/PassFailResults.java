@@ -16,7 +16,7 @@
 package com.intuit.wasabi.tests.library;
 
 /**
- * An <tt>PassFailResults</tt> object accumulates the count of passed and failed tests and returns strings with the results fit for logging. 
+ * An <tt>PassFailResults</tt> object accumulates the count of passed and failed tests and returns strings with the results fit for logging.
  *
  * @since September 13, 2014
  */

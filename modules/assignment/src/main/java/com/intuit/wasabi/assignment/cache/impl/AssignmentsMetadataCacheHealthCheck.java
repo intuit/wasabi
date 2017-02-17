@@ -30,7 +30,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Health check for assignment metadata cache.
- *
  */
 public class AssignmentsMetadataCacheHealthCheck extends HealthCheck {
     private static final Logger LOGGER = getLogger(AssignmentsMetadataCacheHealthCheck.class);
@@ -43,7 +42,7 @@ public class AssignmentsMetadataCacheHealthCheck extends HealthCheck {
 
     @Inject
     public AssignmentsMetadataCacheHealthCheck(AssignmentsMetadataCache metadataCache,
-                                                AssignmentMetadataCacheTimeService timeService,
+                                               AssignmentMetadataCacheTimeService timeService,
                                                @Named("AssignmentsMetadataCacheRefreshInterval") Integer metadataCacheInterval,
                                                @Named("AssignmentsMetadataCacheAllowedStaleTime") Integer allowedStaleTime,
                                                @Named("AssignmentsMetadataCacheEnabled") Boolean metadataCacheEnabled) {
@@ -51,20 +50,19 @@ public class AssignmentsMetadataCacheHealthCheck extends HealthCheck {
         this.metadataCache = metadataCache;
         this.metadataCacheInterval = metadataCacheInterval;
         this.allowedStaleTime = allowedStaleTime;
-        this.metadataCacheEnabled=metadataCacheEnabled;
-        this.timeService=timeService;
+        this.metadataCacheEnabled = metadataCacheEnabled;
+        this.timeService = timeService;
     }
 
     /**
      * @return Result of healthy or unhealthy based on last refresh time
-     *
      */
     @Override
     public HealthCheck.Result check() {
         boolean res;
         String msg;
         try {
-            if(metadataCacheEnabled) {
+            if (metadataCacheEnabled) {
                 Date currentTime = timeService.getCurrentTime();
                 Date lastRefreshTime = metadataCache.getLastRefreshTime();
 
@@ -96,15 +94,15 @@ public class AssignmentsMetadataCacheHealthCheck extends HealthCheck {
                 } else if (diffMS > warnDifferenceMS) {
                     //If cache has NOT been refreshed since last 2 intervals then log an error.
 
-                        String warnMsg = new StringBuffer("AssignmentsMetadataCache hasn't been refreshed since, at least, last two intervals...")
-                                .append("Defined interval is of ").append(metadataCacheInterval).append(" minutes. ")
-                                .append("Last refresh time was ").append(lastRefreshTime)
-                                .append(" and current time is ").append(currentTime).append(".")
-                                .toString();
+                    String warnMsg = new StringBuffer("AssignmentsMetadataCache hasn't been refreshed since, at least, last two intervals...")
+                            .append("Defined interval is of ").append(metadataCacheInterval).append(" minutes. ")
+                            .append("Last refresh time was ").append(lastRefreshTime)
+                            .append(" and current time is ").append(currentTime).append(".")
+                            .toString();
 
-                        res = true;
-                        msg = warnMsg;
-                        LOGGER.warn(warnMsg);
+                    res = true;
+                    msg = warnMsg;
+                    LOGGER.warn(warnMsg);
 
                 } else {
                     //All good, cache had been refreshed in last interval.

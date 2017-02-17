@@ -35,9 +35,6 @@ import com.intuit.wasabi.export.WebExport;
 import com.intuit.wasabi.export.rest.impl.ExportModule;
 import com.intuit.wasabi.repository.cassandra.CassandraRepositoryModule;
 import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.config.CacheConfiguration;
-import net.sf.ehcache.config.Configuration;
-import net.sf.ehcache.config.ConfigurationFactory;
 import org.slf4j.Logger;
 
 import java.net.URI;
@@ -120,7 +117,7 @@ public class AssignmentsModule extends AbstractModule {
         Boolean metadataCacheEnabled = Boolean.parseBoolean(getProperty("metadata.cache.enabled", properties, "true"));
         bind(Boolean.class).annotatedWith(named("AssignmentsMetadataCacheEnabled")).toInstance(metadataCacheEnabled);
 
-        if(metadataCacheEnabled) {
+        if (metadataCacheEnabled) {
             //This is a cache refresh interval, at this frequency cache will be refreshed.
             Integer metadataCacheRefreshIntervalInMinutes = Integer.parseInt(getProperty("metadata.cache.refresh.interval", properties, "5"));
             Integer metadataCacheNumberOfThreads = 1; //We want only single thread to refresh metadata cache.

@@ -22,13 +22,13 @@ import com.intuit.wasabi.repository.cassandra.pojo.ApplicationList;
 
 /**
  * Application list accessor
- *
  */
 @Accessor
 public interface ApplicationListAccessor {
 
     /**
      * Get application names
+     *
      * @return application names
      */
     @Query("select distinct app_name from applicationList")
@@ -36,6 +36,7 @@ public interface ApplicationListAccessor {
 
     /**
      * Delete application by name
+     *
      * @param appName
      */
     @Query("delete from applicationList where app_name = ?")
@@ -43,6 +44,7 @@ public interface ApplicationListAccessor {
 
     /**
      * Insert application name into the table
+     *
      * @param appName
      */
     @Query("insert into applicationList (app_name) values (?)")

@@ -38,9 +38,9 @@ public class ModelAssert {
     /**
      * Writes an info log about this assertion strategy.
      *
-     * @param actual the actual model item
-     * @param expected the expected model item
-     * @param strategy the serialization strategy (can be null)
+     * @param actual     the actual model item
+     * @param expected   the expected model item
+     * @param strategy   the serialization strategy (can be null)
      * @param equalItems if false, the items must not be equal
      */
     private static void logInfo(Object actual, Object expected, SerializationStrategy strategy, boolean equalItems) {
@@ -59,10 +59,10 @@ public class ModelAssert {
 
     /**
      * Asserts that two ModelItems have the same values for all their attributes except the excluded ones.
-     *
+     * <p>
      * The serialization strategy of the {@code expected} ModelItems is used for this assertion.
      *
-     * @param actual the actual ModelItem
+     * @param actual   the actual ModelItem
      * @param expected the expected ModelItem
      */
     public static void assertEqualModelItems(ModelItem actual, ModelItem expected) {
@@ -71,12 +71,12 @@ public class ModelAssert {
 
     /**
      * Asserts that two ModelItems have the same values for all their attributes except the excluded ones.
-     *
+     * <p>
      * If the serialization strategy is not {@code null}, the serialization strategy of the ModelItems is replaced
      * for this assertion, but restored afterwards.
      *
-     * @param actual the actual ModelItem
-     * @param expected the expected ModelItem
+     * @param actual       the actual ModelItem
+     * @param expected     the expected ModelItem
      * @param tempStrategy the (temporary) serialization strategy
      */
     public static void assertEqualModelItems(ModelItem actual, ModelItem expected, SerializationStrategy tempStrategy) {
@@ -85,14 +85,14 @@ public class ModelAssert {
 
     /**
      * Asserts that two ModelItems have the same values for all their attributes except the excluded ones.
-     *
+     * <p>
      * If the serialization strategy is not {@code null}, the serialization strategy of the ModelItems is replaced
      * for this assertion, but restored afterwards.
      *
-     * @param actual the actual ModelItem
-     * @param expected the expected ModelItem
+     * @param actual       the actual ModelItem
+     * @param expected     the expected ModelItem
      * @param tempStrategy the (temporary) serialization strategy
-     * @param equalItems if false, the items must not be equal
+     * @param equalItems   if false, the items must not be equal
      */
     public static void assertEqualModelItems(ModelItem actual, ModelItem expected, SerializationStrategy tempStrategy, boolean equalItems) {
         logInfo(actual, expected, tempStrategy, equalItems);
@@ -132,10 +132,10 @@ public class ModelAssert {
 
     /**
      * Asserts that two lists of ModelItems are equal (in order and per ModelItem).
-     *
+     * <p>
      * Uses the {@link SerializationStrategy} of each item in {@code expected}.
      *
-     * @param actual list one
+     * @param actual   list one
      * @param expected list two
      */
     public static void assertEqualModelItems(List<? extends ModelItem> actual, List<? extends ModelItem> expected) {
@@ -144,13 +144,13 @@ public class ModelAssert {
 
     /**
      * Asserts that two lists of ModelItems are equal (in order and per ModelItem).
-     *
+     * <p>
      * Uses the supplied {@link SerializationStrategy} or the one of each item in {@code expected} if
      * {@code tempStrategy} is {@code null}.
      * {@link #assertEqualModelItems(ModelItem, ModelItem, SerializationStrategy)} for more info.
      *
-     * @param actual list one
-     * @param expected list two
+     * @param actual       list one
+     * @param expected     list two
      * @param tempStrategy the (temporary) serialization strategy
      */
     public static void assertEqualModelItems(List<? extends ModelItem> actual, List<? extends ModelItem> expected, SerializationStrategy tempStrategy) {
@@ -159,15 +159,15 @@ public class ModelAssert {
 
     /**
      * Asserts that two lists of ModelItems are equal (in order and per ModelItem).
-     *
+     * <p>
      * Uses the supplied {@link SerializationStrategy} or the one of each item in {@code expected} if
      * {@code tempStrategy} is {@code null}.
      * {@link #assertEqualModelItems(ModelItem, ModelItem, SerializationStrategy)} for more info.
      *
-     * @param actual list one
-     * @param expected list two
+     * @param actual       list one
+     * @param expected     list two
      * @param tempStrategy the (temporary) serialization strategy
-     * @param equalItems if false, the items must not be equal
+     * @param equalItems   if false, the items must not be equal
      */
     public static void assertEqualModelItems(List<? extends ModelItem> actual, List<? extends ModelItem> expected, SerializationStrategy tempStrategy, boolean equalItems) {
         logInfo(actual, expected, tempStrategy, equalItems);
@@ -205,10 +205,10 @@ public class ModelAssert {
 
     /**
      * Asserts that two lists of ModelItems contain the same elements, thus are equal ignoring the order.
-     *
+     * <p>
      * Uses the {@link SerializationStrategy} of each item in {@code expected}.
      *
-     * @param actual list one
+     * @param actual   list one
      * @param expected list two
      */
     public static void assertEqualModelItemsNoOrder(List<? extends ModelItem> actual, List<? extends ModelItem> expected) {
@@ -217,15 +217,15 @@ public class ModelAssert {
 
     /**
      * Asserts that two lists of ModelItems contain the same elements, thus are equal ignoring the order.
-     *
+     * <p>
      * It is possible to supply a custom exclusion strategy, otherwise the serialization strategy of the
      * {@code expected} items are used.
      * For lists containing different types of ModelItems, it is recommended to set the appropriate
      * serialization strategies beforehand and simply pass {@code null} or to simply use
      * {@link #assertEqualModelItemsNoOrder(List, List)}.
      *
-     * @param actual list one
-     * @param expected list two
+     * @param actual       list one
+     * @param expected     list two
      * @param tempStrategy the (temporary) serialization strategy
      */
     public static void assertEqualModelItemsNoOrder(List<? extends ModelItem> actual, List<? extends ModelItem> expected, SerializationStrategy tempStrategy) {
@@ -234,17 +234,17 @@ public class ModelAssert {
 
     /**
      * Asserts that two lists of ModelItems contain the same elements, thus are equal ignoring the order.
-     *
+     * <p>
      * It is possible to supply a custom exclusion strategy, otherwise the serialization strategy of the
      * {@code expected} items are used.
      * For lists containing different types of ModelItems, it is recommended to set the appropriate
      * serialization strategies beforehand and simply pass {@code null} or to simply use
      * {@link #assertEqualModelItemsNoOrder(List, List)}.
      *
-     * @param actual list one
-     * @param expected list two
+     * @param actual       list one
+     * @param expected     list two
      * @param tempStrategy the (temporary) serialization strategy
-     * @param equalItems if false, the items must not be equal
+     * @param equalItems   if false, the items must not be equal
      */
     public static void assertEqualModelItemsNoOrder(List<? extends ModelItem> actual, List<? extends ModelItem> expected, SerializationStrategy tempStrategy, boolean equalItems) {
         logInfo(actual, expected, tempStrategy, equalItems);
@@ -318,7 +318,7 @@ public class ModelAssert {
      * Asserts that two maps of ModelItems contain the same elements and have the same number of elements.
      * Uses the serialization strategies of the expected items.
      *
-     * @param actual map one
+     * @param actual   map one
      * @param expected map two
      */
     public static void assertEqualModelItems(Map<? extends ModelItem, ? extends ModelItem> actual, Map<? extends ModelItem, ? extends ModelItem> expected) {
@@ -329,8 +329,8 @@ public class ModelAssert {
      * Asserts that two maps of ModelItems contain the same elements and have the same number of elements.
      * Uses the serialization strategies of the expected items if {@code tempStrategy} is {@code null}.
      *
-     * @param actual map one
-     * @param expected map two
+     * @param actual       map one
+     * @param expected     map two
      * @param tempStrategy the (temporary) serialization strategy
      */
     public static void assertEqualModelItems(Map<? extends ModelItem, ? extends ModelItem> actual, Map<? extends ModelItem, ? extends ModelItem> expected, SerializationStrategy tempStrategy) {
@@ -341,10 +341,10 @@ public class ModelAssert {
      * Asserts that two maps of ModelItems contain the same elements and have the same number of elements.
      * Uses the serialization strategies of the expected items if {@code tempStrategy} is {@code null}.
      *
-     * @param actual map one
-     * @param expected map two
+     * @param actual       map one
+     * @param expected     map two
      * @param tempStrategy the (temporary) serialization strategy
-     * @param equalItems if false, the items must not be equal
+     * @param equalItems   if false, the items must not be equal
      */
     public static void assertEqualModelItems(Map<? extends ModelItem, ? extends ModelItem> actual, Map<? extends ModelItem, ? extends ModelItem> expected, SerializationStrategy tempStrategy, boolean equalItems) {
         logInfo(actual, expected, tempStrategy, equalItems);

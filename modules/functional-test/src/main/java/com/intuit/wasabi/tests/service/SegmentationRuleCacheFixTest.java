@@ -48,7 +48,7 @@ import static com.intuit.wasabi.tests.library.util.ModelAssert.assertEqualModelI
 
 /**
  * Testing the fix for the Segmentation Rule Cache problem.
- *
+ * <p>
  * Issue was when a segmentation rule for a running experiment was updated the update would not take.
  * Root cause was that the old rule was cached.
  * Fix was to reset the cache, but that would have to be done once for each node running behind the load balancer.
@@ -149,9 +149,9 @@ public class SegmentationRuleCacheFixTest extends TestBase {
     /**
      * Tries to get an assignment, but fails as the rule fails.
      *
-     * @param user              the user
-     * @param userAgent         the user agent
-     * @param expectedStatus    the expected status
+     * @param user           the user
+     * @param userAgent      the user agent
+     * @param expectedStatus the expected status
      */
     @Test(dependsOnMethods = {"retrieveRunningExperiment"}, dataProvider = "assignmentDataProvider")
     public void assignUser(User user, String userAgent, String expectedStatus) {

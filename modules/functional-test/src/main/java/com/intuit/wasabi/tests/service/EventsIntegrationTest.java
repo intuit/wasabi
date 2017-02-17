@@ -180,7 +180,7 @@ public class EventsIntegrationTest extends TestBase {
     }
 
     /**
-     * This experiment tests scenario where we are trying 
+     * This experiment tests scenario where we are trying
      * to GET all assignments of an Invalid Experiment
      */
     @Test

@@ -29,7 +29,7 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * Testing the functionality of {@link ExperimentPage}
- *
+ * <p>
  * Created by asuckro on 8/20/15.
  */
 public class ExperimentPageTest {

@@ -23,6 +23,7 @@ import org.skife.jdbi.v2.Handle;
 public interface HandleBlock {
     /**
      * Returns an object given the handle
+     *
      * @param handle Handle
      * @return Object
      */

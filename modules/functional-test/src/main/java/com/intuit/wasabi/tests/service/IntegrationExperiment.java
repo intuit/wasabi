@@ -52,13 +52,13 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Tests the experiment functionality.
- *
+ * <p>
  * Known Issues:
  * - The python test checked for the number of experiments, but since this could be run on production environments
- *   it does not feel right to check those numbers, as they might change by other accessors.
- *
+ * it does not feel right to check those numbers, as they might change by other accessors.
+ * <p>
  * These transitions are tested:
- *
+ * <p>
  * <small>(row transitions to column)</small>
  * <pre>
  * DR = DRAFT, R = RUNNING, P = PAUSED, DEL = DELETED, T = TERMINATED, I = INVALID
@@ -73,16 +73,15 @@ import static org.slf4j.LoggerFactory.getLogger;
  * T  | b | b | b | b | b | b |
  * I  | x | x | x | x | x | x |
  * </pre>
- *
+ * <p>
  * Table legend:
  * <ul>
- *   <li>x: not possible</li>
- *   <li>o: not covered</li>
- *   <li>b: covered by {@link #t_basicStateTransitions(String, int)}</li>
- *   <li>c: covered by {@link #t_complexStateTransitions()}</li>
- *   <li>r: covered by {@link #t_remainingTransitionTests()}</li>
+ * <li>x: not possible</li>
+ * <li>o: not covered</li>
+ * <li>b: covered by {@link #t_basicStateTransitions(String, int)}</li>
+ * <li>c: covered by {@link #t_complexStateTransitions()}</li>
+ * <li>r: covered by {@link #t_remainingTransitionTests()}</li>
  * </ul>
- *
  */
 public class IntegrationExperiment extends TestBase {
 
@@ -193,8 +192,8 @@ public class IntegrationExperiment extends TestBase {
     /**
      * Checks invalid experiment IDs for their error message and HTTP Status codes.
      *
-     * @param id the ID
-     * @param status the error message/status
+     * @param id         the ID
+     * @param status     the error message/status
      * @param httpStatus the HTTP status code
      */
     @Test(dependsOnGroups = {"ping"}, dataProvider = "invalidIdProvider")
@@ -273,8 +272,8 @@ public class IntegrationExperiment extends TestBase {
     /**
      * Tries to POST invalid experiments.
      *
-     * @param experiment the experiment
-     * @param expectedError the expected error
+     * @param experiment         the experiment
+     * @param expectedError      the expected error
      * @param expectedStatusCode the expected HTTP status code
      */
     @Test(dependsOnMethods = {"t_createAndValidateExperiment"}, dataProvider = "badExperimentsPOST")

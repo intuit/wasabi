@@ -74,7 +74,7 @@ public interface AssignmentsRepository {
      * Assign users to experiments in a batch
      *
      * @param assignments pair of experiment and assignment
-     * @param date       Date of user assignment
+     * @param date        Date of user assignment
      * @return Resulting assignment
      */
     void assignUsersInBatch(List<Pair<Experiment, Assignment>> assignments, Date date);
@@ -96,16 +96,15 @@ public interface AssignmentsRepository {
     /**
      * Get assignments
      *
-     * @param userID         User Id
-     * @param appLabel       Application Label
-     * @param context        Environment context
+     * @param userID        User Id
+     * @param appLabel      Application Label
+     * @param context       Environment context
      * @param experimentMap experiment map to fetch experiment label
-     *
      * @return Experiment id
-     *
      */
-     List<Pair<Experiment, String>> getAssignments(User.ID userID, Application.Name appLabel, Context context,
-                                                                  Map<Experiment.ID, Experiment> experimentMap);
+    List<Pair<Experiment, String>> getAssignments(User.ID userID, Application.Name appLabel, Context context,
+                                                  Map<Experiment.ID, Experiment> experimentMap);
+
     /**
      * Get assignment for experiment and user
      *
@@ -123,9 +122,7 @@ public interface AssignmentsRepository {
      * @param appName
      * @param experimentID
      * @param context
-     *
      * @return assignment object if assignment is present or NULL
-     *
      */
     Assignment getAssignment(User.ID userID, Application.Name appName, Experiment.ID experimentID, Context context);
 
@@ -174,7 +171,7 @@ public interface AssignmentsRepository {
     /**
      * Push assignment to staging
      *
-     * @param type type of assignment to be staged
+     * @param type      type of assignment to be staged
      * @param exception Exception
      * @param data      Assignment Data to be pushed to staging
      */
@@ -212,11 +209,11 @@ public interface AssignmentsRepository {
      * @param exclusionMap
      */
     void populateAssignmentsMetadata(User.ID userID, Application.Name appName, Context context, ExperimentBatch experimentBatch, Optional<Map<Experiment.ID, Boolean>> allowAssignments,
-                                    PrioritizedExperimentList prioritizedExperimentList,
-                                    Map<Experiment.ID, Experiment> experimentMap,
-                                    Table<Experiment.ID, Experiment.Label, String> existingUserAssignments,
-                                    Map<Experiment.ID, BucketList> bucketMap,
-                                    Map<Experiment.ID, List<Experiment.ID>> exclusionMap
+                                     PrioritizedExperimentList prioritizedExperimentList,
+                                     Map<Experiment.ID, Experiment> experimentMap,
+                                     Table<Experiment.ID, Experiment.Label, String> existingUserAssignments,
+                                     Map<Experiment.ID, BucketList> bucketMap,
+                                     Map<Experiment.ID, List<Experiment.ID>> exclusionMap
     );
 
 }

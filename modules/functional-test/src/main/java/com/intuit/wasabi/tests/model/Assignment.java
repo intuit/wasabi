@@ -22,40 +22,64 @@ import com.intuit.wasabi.tests.library.util.serialstrategies.SerializationStrate
  * A very simple Assignment wrapper.
  */
 public class Assignment extends ModelItem {
-    /** the assigned bucket */
+    /**
+     * the assigned bucket
+     */
     public String assignment;
 
-    /** this assignment's payload */
+    /**
+     * this assignment's payload
+     */
     public String payload;
 
-    /** the assignment status */
+    /**
+     * the assignment status
+     */
     public String status;
 
-    /** the assignment context */
+    /**
+     * the assignment context
+     */
     public String context;
 
-    /** the assignment cache value */
+    /**
+     * the assignment cache value
+     */
     public boolean cache;
 
-    /** the assignment's overwrite value */
+    /**
+     * the assignment's overwrite value
+     */
     public boolean overwrite = true;
 
-    /** the experiment label for this assignment */
+    /**
+     * the experiment label for this assignment
+     */
     public String experimentLabel;
 
-    /** creation date */
+    /**
+     * creation date
+     */
     public String created;
 
-    /** experiment ID */
+    /**
+     * experiment ID
+     */
     public String experiment_id;
 
-    /** user id */
+    /**
+     * user id
+     */
     public String user_id;
 
-    /** Bucket label */
+    /**
+     * Bucket label
+     */
     public String bucket_label;
 
-    /** The serialization strategy for comparisons and JSON serialization. */
+    /**
+     * The serialization strategy for comparisons and JSON serialization.
+     */
     private static SerializationStrategy serializationStrategy = new DefaultNameExclusionStrategy();
 
     /**

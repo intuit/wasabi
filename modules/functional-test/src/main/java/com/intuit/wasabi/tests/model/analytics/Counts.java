@@ -25,13 +25,19 @@ import com.intuit.wasabi.tests.model.ModelItem;
  */
 public class Counts extends ModelItem {
 
-    /** event counts total */
+    /**
+     * event counts total
+     */
     public int eventCount;
 
-    /** number of unique users counted */
+    /**
+     * number of unique users counted
+     */
     public int uniqueUserCount;
 
-    /** The serialization strategy for comparisons and JSON serialization. */
+    /**
+     * The serialization strategy for comparisons and JSON serialization.
+     */
     private static SerializationStrategy serializationStrategy = new DefaultNameExclusionStrategy();
 
     @Override

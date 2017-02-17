@@ -25,7 +25,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Guice module for database analytics
- *
  */
 public class DatabaseAnalyticsModule extends AbstractModule {
 

@@ -43,13 +43,18 @@ import com.intuit.wasabi.experimentobjects.ExperimentBatch;
 import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.RepositoryException;
-import com.intuit.wasabi.repository.cassandra.accessor.*;
+import com.intuit.wasabi.repository.cassandra.accessor.BucketAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.ExclusionAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.PrioritiesAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.StagingAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.UserAssignmentAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.count.BucketAssignmentCountAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.export.UserAssignmentExportAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentUserIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.PageExperimentIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.UserAssignmentIndexAccessor;
-import com.intuit.wasabi.repository.cassandra.pojo.*;
+import com.intuit.wasabi.repository.cassandra.pojo.UserAssignment;
 import com.intuit.wasabi.repository.cassandra.pojo.count.BucketAssignmentCount;
 import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentUserByUserIdContextAppNameExperimentId;
 import com.intuit.wasabi.repository.cassandra.pojo.index.UserAssignmentByUserId;
@@ -102,31 +107,49 @@ public class CassandraAssignmentsRepositoryTest {
     private final Logger logger = LoggerFactory.getLogger(CassandraAssignmentsRepositoryTest.class);
     @Rule
     public ExpectedException thrown = ExpectedException.none();
-    @Mock ExperimentRepository experimentRepository;
-    @Mock ExperimentRepository dbRepository;
-    @Mock EventLog eventLog;
+    @Mock
+    ExperimentRepository experimentRepository;
+    @Mock
+    ExperimentRepository dbRepository;
+    @Mock
+    EventLog eventLog;
 
-    @Mock ExperimentAccessor experimentAccessor;
-    @Mock ExperimentUserIndexAccessor experimentUserIndexAccessor;
+    @Mock
+    ExperimentAccessor experimentAccessor;
+    @Mock
+    ExperimentUserIndexAccessor experimentUserIndexAccessor;
 
-    @Mock UserAssignmentAccessor userAssignmentAccessor;
-    @Mock UserAssignmentIndexAccessor userAssignmentIndexAccessor;
-    @Mock UserAssignmentExportAccessor userAssignmentExportAccessor;
+    @Mock
+    UserAssignmentAccessor userAssignmentAccessor;
+    @Mock
+    UserAssignmentIndexAccessor userAssignmentIndexAccessor;
+    @Mock
+    UserAssignmentExportAccessor userAssignmentExportAccessor;
 
-    @Mock BucketAccessor bucketAccessor;
-    @Mock BucketAssignmentCountAccessor bucketAssignmentCountAccessor;
+    @Mock
+    BucketAccessor bucketAccessor;
+    @Mock
+    BucketAssignmentCountAccessor bucketAssignmentCountAccessor;
 
-    @Mock StagingAccessor stagingAccessor;
-    @Mock PrioritiesAccessor prioritiesAccessor;
-    @Mock ExclusionAccessor exclusionAccessor;
-    @Mock PageExperimentIndexAccessor pageExperimentIndexAccessor;
+    @Mock
+    StagingAccessor stagingAccessor;
+    @Mock
+    PrioritiesAccessor prioritiesAccessor;
+    @Mock
+    ExclusionAccessor exclusionAccessor;
+    @Mock
+    PageExperimentIndexAccessor pageExperimentIndexAccessor;
 
-    @Mock CassandraDriver driver;
+    @Mock
+    CassandraDriver driver;
 
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS) MappingManager mappingManager;
-    @Mock Result mockedResultMapping;
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    MappingManager mappingManager;
+    @Mock
+    Result mockedResultMapping;
 
-    @Mock ThreadPoolExecutor assignmentsCountExecutor;
+    @Mock
+    ThreadPoolExecutor assignmentsCountExecutor;
 
     CassandraAssignmentsRepository repository;
     CassandraAssignmentsRepository spyRepository;
@@ -934,9 +957,9 @@ public class CassandraAssignmentsRepositoryTest {
     }
 
     @Test
-    public void testGetUserAssignmentPartitions(){
-        Date date1 = new Date(116,7,1);
-        Date date2 = new Date(116,7,2,1,0);
+    public void testGetUserAssignmentPartitions() {
+        Date date1 = new Date(116, 7, 1);
+        Date date2 = new Date(116, 7, 2, 1, 0);
         List<Date> result = repository.getUserAssignmentPartitions(date1, date2);
         assertThat(result.size(), is(26));
         result = repository.getUserAssignmentPartitions(date2, date1);
@@ -1033,7 +1056,7 @@ public class CassandraAssignmentsRepositoryTest {
     }
 
     @Test
-    public void testPushAssignmentToStaging(){
+    public void testPushAssignmentToStaging() {
         repository.pushAssignmentToStaging("type", "string1", "string2");
         verify(stagingAccessor, times(1))
                 .insertBy(eq("type"), eq("string1"), eq("string2"));
@@ -1150,7 +1173,7 @@ public class CassandraAssignmentsRepositoryTest {
     }
 
     @Test
-    public void testDeleteAssignmentOld(){
+    public void testDeleteAssignmentOld() {
         Experiment.ID experimentId = Experiment.ID.valueOf(this.experimentId);
         User.ID userID = User.ID.valueOf("testuser1");
         Context context = Context.valueOf("test");

@@ -30,7 +30,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Allows to retry tests multiple times without their (eventually succeeded) failures being reported.
- *
+ * <p>
  * Annotate your test class with {@code @Listeners(value = RetryListener.class)} to enable this listener.
  * Addition
  */

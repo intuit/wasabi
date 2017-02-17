@@ -20,17 +20,21 @@ import com.google.inject.name.Named;
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerResponse;
 import com.sun.jersey.spi.container.ContainerResponseFilter;
-
 import org.slf4j.Logger;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-
-import static org.slf4j.LoggerFactory.getLogger;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static com.google.common.net.HttpHeaders.*;
-
 import java.util.Objects;
+
+import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS;
+import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS;
+import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN;
+import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_MAX_AGE;
+import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS;
+import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD;
+import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public class SimpleCORSResponseFilter implements ContainerResponseFilter {
 
@@ -49,7 +53,7 @@ public class SimpleCORSResponseFilter implements ContainerResponseFilter {
     @Override
     public ContainerResponse filter(ContainerRequest containerRequest, ContainerResponse containerResponse) {
         LOGGER.trace("CORS filter called for request: {}", containerRequest);
-        
+
         Response.ResponseBuilder response = Response.fromResponse(containerResponse.getResponse());
 
         if ("OPTIONS".equals(containerRequest.getMethod())) {

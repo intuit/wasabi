@@ -18,10 +18,10 @@ package com.intuit.wasabi.api;
 import com.intuit.wasabi.assignment.Assignments;
 import com.intuit.wasabi.assignmentobjects.Assignment;
 import com.intuit.wasabi.assignmentobjects.Assignment.Status;
-import com.intuit.wasabi.authenticationobjects.UserInfo;
-import com.intuit.wasabi.authorization.Authorization;
 import com.intuit.wasabi.assignmentobjects.SegmentationProfile;
 import com.intuit.wasabi.assignmentobjects.User;
+import com.intuit.wasabi.authenticationobjects.UserInfo;
+import com.intuit.wasabi.authorization.Authorization;
 import com.intuit.wasabi.exceptions.AssignmentNotFoundException;
 import com.intuit.wasabi.exceptions.AuthenticationException;
 import com.intuit.wasabi.experimentobjects.Application;
@@ -42,7 +42,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
-
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -22,7 +22,6 @@ import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Interface for priorities repository
@@ -32,7 +31,7 @@ public interface PrioritiesRepository {
     /**
      * Returns the priority list for an application
      *
-     * @param applicationName  name of application
+     * @param applicationName name of application
      * @return PrioritizedExperimentList prioritized experiments
      */
     PrioritizedExperimentList getPriorities(Application.Name applicationName);
@@ -40,7 +39,7 @@ public interface PrioritiesRepository {
     /**
      * Get the length of the priority list for an application
      *
-     * @param applicationName   name of application
+     * @param applicationName name of application
      * @return length of the priority list
      */
 
@@ -49,8 +48,8 @@ public interface PrioritiesRepository {
     /**
      * Update the priority list for an application
      *
-     * @param applicationName           name of application
-     * @param experimentPriorityList    list of prioritized experiment ids in prioritized order
+     * @param applicationName        name of application
+     * @param experimentPriorityList list of prioritized experiment ids in prioritized order
      */
     void createPriorities(Application.Name applicationName, List<Experiment.ID> experimentPriorityList);
 
@@ -65,7 +64,7 @@ public interface PrioritiesRepository {
     /**
      * Returns the priority list for given set of applications
      *
-     * @param applicationNames  Set of application names
+     * @param applicationNames Set of application names
      * @return Map of PrioritizedExperimentList prioritized experiments for given application names.
      */
     Map<Application.Name, PrioritizedExperimentList> getPriorities(Collection<Application.Name> applicationNames);

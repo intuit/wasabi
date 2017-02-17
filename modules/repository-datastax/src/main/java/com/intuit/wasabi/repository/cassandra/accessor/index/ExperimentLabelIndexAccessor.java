@@ -32,6 +32,7 @@ public interface ExperimentLabelIndexAccessor {
 
     /**
      * Get experiment by app name and label
+     *
      * @param appName
      * @param Label
      * @return experiment label result
@@ -41,6 +42,7 @@ public interface ExperimentLabelIndexAccessor {
 
     /**
      * Update experiment label index
+     *
      * @param uuid
      * @param modified
      * @param startTime
@@ -56,6 +58,7 @@ public interface ExperimentLabelIndexAccessor {
 
     /**
      * Delete entry from experiment label index
+     *
      * @param appName
      * @param label
      * @return result set

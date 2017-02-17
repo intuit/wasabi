@@ -28,7 +28,7 @@ import static org.junit.Assert.assertNotEquals;
 
 /**
  * This class is testing the functionality of the {@link ExperimentBatch}
- *
+ * <p>
  * Created by asuckro on 8/19/15.
  */
 public class ExperimentBatchTest {

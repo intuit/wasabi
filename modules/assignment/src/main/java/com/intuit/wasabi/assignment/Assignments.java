@@ -50,7 +50,7 @@ public interface Assignments {
      * @return Details of the queues in rule cache and ingestion executors.
      */
     Map<String, Object> queuesDetails();
-    
+
     /**
      * Flush all active and queued messages in ThreadPoolExecutor to persistent store.
      */
@@ -190,7 +190,6 @@ public interface Assignments {
      * This method is used to clear assignments metadata cache.
      *
      * @return True if cache is cleared successfully
-     *
      */
     void clearMetadataCache();
 
@@ -199,7 +198,7 @@ public interface Assignments {
      *
      * @return Map of metadata cache details
      */
-     Map<String, String> metadataCacheDetails();
+    Map<String, String> metadataCacheDetails();
 
     /**
      * Gets bucket assignment ratios per day for a list of experiments. Also contains meta information about the

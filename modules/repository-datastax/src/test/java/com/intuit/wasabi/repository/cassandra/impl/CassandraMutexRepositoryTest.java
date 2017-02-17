@@ -49,7 +49,6 @@ import static java.util.Objects.nonNull;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CassandraMutexRepositoryTest {
@@ -86,214 +85,214 @@ public class CassandraMutexRepositoryTest {
 
     @Before
     public void setUp() throws Exception {
-    	accessor = mock(ExclusionAccessor.class);
-    	experimentAccessor = mock(ExperimentAccessor.class);
-    	resultDatastax = mock(Result.class);
-    	resultExperimentDatastax = mock(Result.class);
-    	driver = mock(CassandraDriver.class);
-    	session = mock(Session.class);
-    	Mockito.when(driver.getSession()).thenReturn(session);
-    	repository = new CassandraMutexRepository(experimentAccessor, accessor, driver);
-    	base = Experiment.ID.newInstance();
-    	pair = Experiment.ID.newInstance();
-    	exclusions = new ArrayList<>();
-    	experiments = new ArrayList<>();
-    	
-		UUID experimentId = UUID.randomUUID();
-		experiment = 
-				new com.intuit.wasabi.repository.cassandra.pojo.Experiment();
-		experiment.setId(experimentId);
-		experiment.setAppName("ap1");
-		experiment.setCreated(new Date());
-		experiment.setStartTime(new Date());
-		experiment.setEndTime(new Date());
-		experiment.setModified(new Date());
-		experiment.setLabel("l1");
-		experiment.setSamplePercent(.5d);
-		experiment.setState(Experiment.State.DRAFT.name());
+        accessor = mock(ExclusionAccessor.class);
+        experimentAccessor = mock(ExperimentAccessor.class);
+        resultDatastax = mock(Result.class);
+        resultExperimentDatastax = mock(Result.class);
+        driver = mock(CassandraDriver.class);
+        session = mock(Session.class);
+        Mockito.when(driver.getSession()).thenReturn(session);
+        repository = new CassandraMutexRepository(experimentAccessor, accessor, driver);
+        base = Experiment.ID.newInstance();
+        pair = Experiment.ID.newInstance();
+        exclusions = new ArrayList<>();
+        experiments = new ArrayList<>();
+
+        UUID experimentId = UUID.randomUUID();
+        experiment =
+                new com.intuit.wasabi.repository.cassandra.pojo.Experiment();
+        experiment.setId(experimentId);
+        experiment.setAppName("ap1");
+        experiment.setCreated(new Date());
+        experiment.setStartTime(new Date());
+        experiment.setEndTime(new Date());
+        experiment.setModified(new Date());
+        experiment.setLabel("l1");
+        experiment.setSamplePercent(.5d);
+        experiment.setState(Experiment.State.DRAFT.name());
 
     }
-    
-	@Test
-	public void testGetNonExclusionsSuccess() {
-		Exclusion exc = new Exclusion(base.getRawID(), pair.getRawID());
-		exclusions.add(exc);
-				
-		experiments.add(experiment);
-		
-		Mockito.when(accessor.getExclusions(base.getRawID())).thenReturn(resultDatastax);
-		Mockito.when(resultDatastax.all()).thenReturn(exclusions);
-		
-		Mockito.when(experimentAccessor.getExperimentById(Mockito.any())).thenReturn(resultExperimentDatastax);
-		Mockito.when(resultExperimentDatastax.one())
-				.thenReturn(experiment);
-		Mockito.when(experimentAccessor.getExperimentByAppName(Mockito.anyString()))
-			.thenReturn(resultExperimentDatastax);
-		Mockito.when(resultExperimentDatastax.all()).thenReturn(experiments);
-		
-		ExperimentList result = repository.getNotExclusions(base);
-		
-		assertEquals("Value should be eq", 1, result.getExperiments().size());
-	
-	}
 
-	@Test(expected=RepositoryException.class)
-	public void testGetNonExclusionsThrowsException() {
-		
-		Mockito.when(accessor.getExclusions(base.getRawID())).thenThrow(new RuntimeException("runtimeexcp"));
-		ExperimentList result = repository.getNotExclusions(base);		
-	}
+    @Test
+    public void testGetNonExclusionsSuccess() {
+        Exclusion exc = new Exclusion(base.getRawID(), pair.getRawID());
+        exclusions.add(exc);
 
-	@Test
-	public void testGetExclusionsSuccess() {
-		Exclusion exc = new Exclusion(base.getRawID(), pair.getRawID());
-		exclusions.add(exc);
-	
-		experiments.add(experiment);
-		
-		Mockito.when(accessor.getExclusions(base.getRawID())).thenReturn(resultDatastax);
-		Mockito.when(resultDatastax.all()).thenReturn(exclusions);
-		
-		Mockito.when(experimentAccessor.getExperiments(Mockito.any())).thenReturn(resultExperimentDatastax);
-		Mockito.when(resultExperimentDatastax.all())
-				.thenReturn(experiments);
-		ExperimentList result = repository.getExclusions(base);
-		
-		assertEquals("Value should be eq", 1, result.getExperiments().size());
-		assertEquals("value should be same", experiment.getId(), 
-				result.getExperiments().get(0).getID().getRawID());
-	
-	}
+        experiments.add(experiment);
 
-	@Test(expected=RepositoryException.class)
-	public void testGetExclusionsThrowsException() {
-		
-		Mockito.when(accessor.getExclusions(base.getRawID())).thenThrow(
-				new RuntimeException("RuntimeException"));
-		ExperimentList result = repository.getExclusions(base);		
-	}
+        Mockito.when(accessor.getExclusions(base.getRawID())).thenReturn(resultDatastax);
+        Mockito.when(resultDatastax.all()).thenReturn(exclusions);
 
-	
-	@Test
-	public void testCreateExclusionSuccess() {
-		repository.createExclusion(Experiment.ID.newInstance(), Experiment.ID.newInstance());
-	}
+        Mockito.when(experimentAccessor.getExperimentById(Mockito.any())).thenReturn(resultExperimentDatastax);
+        Mockito.when(resultExperimentDatastax.one())
+                .thenReturn(experiment);
+        Mockito.when(experimentAccessor.getExperimentByAppName(Mockito.anyString()))
+                .thenReturn(resultExperimentDatastax);
+        Mockito.when(resultExperimentDatastax.all()).thenReturn(experiments);
 
-	@Test(expected=RepositoryException.class)
-	public void testCreateExclusionAccesorThrowsException() {
-		Mockito.doThrow(new RuntimeException("RuntimeExcp")).when(accessor)
-			.createExclusion(base.getRawID(), pair.getRawID());
-		repository.createExclusion(base, pair);
-	}
+        ExperimentList result = repository.getNotExclusions(base);
 
-	@Test
-	public void testDeleteExclusionSuccess() {
-		repository.deleteExclusion(base, pair);
-	}
+        assertEquals("Value should be eq", 1, result.getExperiments().size());
 
-	@Test(expected=RepositoryException.class)
-	public void testDeleteExclusionAccesorThrowsException() {
-		Mockito.doThrow(new RuntimeException("RuntimeExcp")).when(accessor)
-			.deleteExclusion(base.getRawID(), pair.getRawID());
-		repository.deleteExclusion(base, pair);
-	}
+    }
 
-	@Test
-	public void testGetOneExclusionListSuccess() {
-		Exclusion exc = new Exclusion(base.getRawID(), pair.getRawID());
-		exclusions.add(exc);
-		Mockito.when(accessor.getExclusions(base.getRawID())).thenReturn(resultDatastax);
-		Mockito.when(resultDatastax.all()).thenReturn(exclusions);
-		List<ID> result = repository.getExclusionList(base);
-		
-		assertEquals("value should be equal", pair, result.get(0));
-	}
+    @Test(expected = RepositoryException.class)
+    public void testGetNonExclusionsThrowsException() {
 
-	@Test
-	public void testGetOneExclusiveListSuccess() throws InterruptedException, ExecutionException {
-		Exclusion exc = new Exclusion(base.getRawID(), pair.getRawID());
-		exclusions.add(exc);
-		ListenableFuture<Result<Exclusion>> mockListenableFuture = mock(ListenableFuture.class);
-		Mockito.when(accessor.asyncGetExclusions(base.getRawID())).thenReturn(mockListenableFuture);
-		Mockito.when(mockListenableFuture.get()).thenReturn(resultDatastax);
-		Mockito.when(resultDatastax.all()).thenReturn(exclusions);
+        Mockito.when(accessor.getExclusions(base.getRawID())).thenThrow(new RuntimeException("runtimeexcp"));
+        ExperimentList result = repository.getNotExclusions(base);
+    }
 
-		ArrayList<Experiment.ID> ids = new ArrayList<>();
-		ids.add(base);
-		Map<ID, List<ID>> result = repository.getExclusivesList(ids);
-		
-		assertEquals("value should be equal", 1, result.size());
-		assertEquals("value should be equal", 1, result.get(base).size());
-		assertEquals("value should be equal", pair, result.get(base).get(0));
-	}
+    @Test
+    public void testGetExclusionsSuccess() {
+        Exclusion exc = new Exclusion(base.getRawID(), pair.getRawID());
+        exclusions.add(exc);
 
-	@Test(expected=RepositoryException.class)
-	public void testGetOneExclusiveListThrowsException() {
-		Exclusion exc = new Exclusion(base.getRawID(), pair.getRawID());
-		exclusions.add(exc);
-		Mockito.when(accessor.getExclusions(base.getRawID())).thenThrow(
-				new RuntimeException("TestException"));
-		
-		ArrayList<Experiment.ID> ids = new ArrayList<>();
-		ids.add(base);
-		Map<ID, List<ID>> result = repository.getExclusivesList(ids);
-		
-	}
+        experiments.add(experiment);
 
-	@Test
-	public void testGetZeroExclusionListSuccess() {
-		Mockito.when(accessor.getExclusions(base.getRawID())).thenReturn(resultDatastax);
-		Mockito.when(resultDatastax.all()).thenReturn(exclusions);
-		List<ID> result = repository.getExclusionList(base);
-		
-		assertEquals("value should be equal", 0, result.size());
-	}
+        Mockito.when(accessor.getExclusions(base.getRawID())).thenReturn(resultDatastax);
+        Mockito.when(resultDatastax.all()).thenReturn(exclusions);
 
-	@Test(expected=RepositoryException.class)
-	public void testGetOneExclusionListThrowsException() {
-		Mockito.when(accessor.getExclusions(base.getRawID())).thenThrow(new RuntimeException("RTE"));
-		List<ID> result = repository.getExclusionList(base);
-		
-	}
+        Mockito.when(experimentAccessor.getExperiments(Mockito.any())).thenReturn(resultExperimentDatastax);
+        Mockito.when(resultExperimentDatastax.all())
+                .thenReturn(experiments);
+        ExperimentList result = repository.getExclusions(base);
 
-	@Test
-	public void testGetExclusivesList() throws ExecutionException, InterruptedException {
-		//------ Input --------
-		Experiment.ID expId1 = Experiment.ID.newInstance();
-		Experiment.ID expId2 = Experiment.ID.newInstance();
-		Experiment.ID expId3 = Experiment.ID.newInstance();
+        assertEquals("Value should be eq", 1, result.getExperiments().size());
+        assertEquals("value should be same", experiment.getId(),
+                result.getExperiments().get(0).getID().getRawID());
 
-		Set<Experiment.ID> expIdSet = new HashSet<>();
-		expIdSet.add(expId1);
+    }
 
-		//------ Mocking interacting calls
-		ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Exclusion>> experimentsFuture = Mockito.mock(ListenableFuture.class);
-		Mockito.when(accessor.asyncGetExclusions(expId1.getRawID())).thenReturn(experimentsFuture);
-		List<com.intuit.wasabi.repository.cassandra.pojo.Exclusion> expList = new ArrayList<>();
-		com.intuit.wasabi.repository.cassandra.pojo.Exclusion exp1 = com.intuit.wasabi.repository.cassandra.pojo.Exclusion.builder()
-				.base(expId1.getRawID())
-				.pair(expId2.getRawID())
-				.build();
-		expList.add(exp1);
+    @Test(expected = RepositoryException.class)
+    public void testGetExclusionsThrowsException() {
 
-		com.intuit.wasabi.repository.cassandra.pojo.Exclusion exp2 = com.intuit.wasabi.repository.cassandra.pojo.Exclusion.builder()
-				.base(expId1.getRawID())
-				.pair(expId3.getRawID())
-				.build();
-		expList.add(exp2);
+        Mockito.when(accessor.getExclusions(base.getRawID())).thenThrow(
+                new RuntimeException("RuntimeException"));
+        ExperimentList result = repository.getExclusions(base);
+    }
 
-		Result<com.intuit.wasabi.repository.cassandra.pojo.Exclusion> expResult = Mockito.mock(Result.class);
-		Mockito.when(expResult.all()).thenReturn(expList);
-		Mockito.when(experimentsFuture.get()).thenReturn(expResult);
 
-		//Make actual call
-		Map<Experiment.ID, List<Experiment.ID>> mutuallyExclusiveExperiments = repository.getExclusivesList(expIdSet);
+    @Test
+    public void testCreateExclusionSuccess() {
+        repository.createExclusion(Experiment.ID.newInstance(), Experiment.ID.newInstance());
+    }
 
-		//Verify result
-		assertThat(mutuallyExclusiveExperiments.size(), is(1));
-		assertThat(nonNull(mutuallyExclusiveExperiments.get(expId1)), is(true));
-		assertThat(mutuallyExclusiveExperiments.get(expId1).size(), is(2));
-		assertThat(mutuallyExclusiveExperiments.get(expId1).contains(expId2), is(true));
-		assertThat(mutuallyExclusiveExperiments.get(expId1).contains(expId3), is(true));
-	}
+    @Test(expected = RepositoryException.class)
+    public void testCreateExclusionAccesorThrowsException() {
+        Mockito.doThrow(new RuntimeException("RuntimeExcp")).when(accessor)
+                .createExclusion(base.getRawID(), pair.getRawID());
+        repository.createExclusion(base, pair);
+    }
+
+    @Test
+    public void testDeleteExclusionSuccess() {
+        repository.deleteExclusion(base, pair);
+    }
+
+    @Test(expected = RepositoryException.class)
+    public void testDeleteExclusionAccesorThrowsException() {
+        Mockito.doThrow(new RuntimeException("RuntimeExcp")).when(accessor)
+                .deleteExclusion(base.getRawID(), pair.getRawID());
+        repository.deleteExclusion(base, pair);
+    }
+
+    @Test
+    public void testGetOneExclusionListSuccess() {
+        Exclusion exc = new Exclusion(base.getRawID(), pair.getRawID());
+        exclusions.add(exc);
+        Mockito.when(accessor.getExclusions(base.getRawID())).thenReturn(resultDatastax);
+        Mockito.when(resultDatastax.all()).thenReturn(exclusions);
+        List<ID> result = repository.getExclusionList(base);
+
+        assertEquals("value should be equal", pair, result.get(0));
+    }
+
+    @Test
+    public void testGetOneExclusiveListSuccess() throws InterruptedException, ExecutionException {
+        Exclusion exc = new Exclusion(base.getRawID(), pair.getRawID());
+        exclusions.add(exc);
+        ListenableFuture<Result<Exclusion>> mockListenableFuture = mock(ListenableFuture.class);
+        Mockito.when(accessor.asyncGetExclusions(base.getRawID())).thenReturn(mockListenableFuture);
+        Mockito.when(mockListenableFuture.get()).thenReturn(resultDatastax);
+        Mockito.when(resultDatastax.all()).thenReturn(exclusions);
+
+        ArrayList<Experiment.ID> ids = new ArrayList<>();
+        ids.add(base);
+        Map<ID, List<ID>> result = repository.getExclusivesList(ids);
+
+        assertEquals("value should be equal", 1, result.size());
+        assertEquals("value should be equal", 1, result.get(base).size());
+        assertEquals("value should be equal", pair, result.get(base).get(0));
+    }
+
+    @Test(expected = RepositoryException.class)
+    public void testGetOneExclusiveListThrowsException() {
+        Exclusion exc = new Exclusion(base.getRawID(), pair.getRawID());
+        exclusions.add(exc);
+        Mockito.when(accessor.getExclusions(base.getRawID())).thenThrow(
+                new RuntimeException("TestException"));
+
+        ArrayList<Experiment.ID> ids = new ArrayList<>();
+        ids.add(base);
+        Map<ID, List<ID>> result = repository.getExclusivesList(ids);
+
+    }
+
+    @Test
+    public void testGetZeroExclusionListSuccess() {
+        Mockito.when(accessor.getExclusions(base.getRawID())).thenReturn(resultDatastax);
+        Mockito.when(resultDatastax.all()).thenReturn(exclusions);
+        List<ID> result = repository.getExclusionList(base);
+
+        assertEquals("value should be equal", 0, result.size());
+    }
+
+    @Test(expected = RepositoryException.class)
+    public void testGetOneExclusionListThrowsException() {
+        Mockito.when(accessor.getExclusions(base.getRawID())).thenThrow(new RuntimeException("RTE"));
+        List<ID> result = repository.getExclusionList(base);
+
+    }
+
+    @Test
+    public void testGetExclusivesList() throws ExecutionException, InterruptedException {
+        //------ Input --------
+        Experiment.ID expId1 = Experiment.ID.newInstance();
+        Experiment.ID expId2 = Experiment.ID.newInstance();
+        Experiment.ID expId3 = Experiment.ID.newInstance();
+
+        Set<Experiment.ID> expIdSet = new HashSet<>();
+        expIdSet.add(expId1);
+
+        //------ Mocking interacting calls
+        ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Exclusion>> experimentsFuture = Mockito.mock(ListenableFuture.class);
+        Mockito.when(accessor.asyncGetExclusions(expId1.getRawID())).thenReturn(experimentsFuture);
+        List<com.intuit.wasabi.repository.cassandra.pojo.Exclusion> expList = new ArrayList<>();
+        com.intuit.wasabi.repository.cassandra.pojo.Exclusion exp1 = com.intuit.wasabi.repository.cassandra.pojo.Exclusion.builder()
+                .base(expId1.getRawID())
+                .pair(expId2.getRawID())
+                .build();
+        expList.add(exp1);
+
+        com.intuit.wasabi.repository.cassandra.pojo.Exclusion exp2 = com.intuit.wasabi.repository.cassandra.pojo.Exclusion.builder()
+                .base(expId1.getRawID())
+                .pair(expId3.getRawID())
+                .build();
+        expList.add(exp2);
+
+        Result<com.intuit.wasabi.repository.cassandra.pojo.Exclusion> expResult = Mockito.mock(Result.class);
+        Mockito.when(expResult.all()).thenReturn(expList);
+        Mockito.when(experimentsFuture.get()).thenReturn(expResult);
+
+        //Make actual call
+        Map<Experiment.ID, List<Experiment.ID>> mutuallyExclusiveExperiments = repository.getExclusivesList(expIdSet);
+
+        //Verify result
+        assertThat(mutuallyExclusiveExperiments.size(), is(1));
+        assertThat(nonNull(mutuallyExclusiveExperiments.get(expId1)), is(true));
+        assertThat(mutuallyExclusiveExperiments.get(expId1).size(), is(2));
+        assertThat(mutuallyExclusiveExperiments.get(expId1).contains(expId2), is(true));
+        assertThat(mutuallyExclusiveExperiments.get(expId1).contains(expId3), is(true));
+    }
 }

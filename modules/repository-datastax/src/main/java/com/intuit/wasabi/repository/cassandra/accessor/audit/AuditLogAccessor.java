@@ -59,7 +59,7 @@ public interface AuditLogAccessor {
      * Retrieves a limited list of AuditLogEntries for a specified application.
      *
      * @param applicationName the application to select
-     * @param limit the item retireved limit
+     * @param limit           the item retireved limit
      * @return a list of those AuditLogEntries
      */
     @Query("SELECT * FROM auditlog WHERE application_name = ? limit ?")
@@ -69,19 +69,19 @@ public interface AuditLogAccessor {
      * Stores an AuditLogEntry into the database.
      *
      * @param applicationName appication name
-     * @param time time of audit log
-     * @param action the action taken
-     * @param firstName user first name
-     * @param lastName user last name
-     * @param email user email
-     * @param userName user name
-     * @param userId user id
-     * @param experimentId experiment id
+     * @param time            time of audit log
+     * @param action          the action taken
+     * @param firstName       user first name
+     * @param lastName        user last name
+     * @param email           user email
+     * @param userName        user name
+     * @param userId          user id
+     * @param experimentId    experiment id
      * @param experimentLabel experiment label
-     * @param bucketLabel bucket label
+     * @param bucketLabel     bucket label
      * @param changedProperty the property that was changed
-     * @param propertyBefore property before
-     * @param propertyAfter property after change
+     * @param propertyBefore  property before
+     * @param propertyAfter   property after change
      */
     @Query("INSERT INTO auditlog ( event_id, application_name, time, action, "
             + "user_firstname, user_lastname, user_email, user_username, user_userid, "

@@ -32,6 +32,7 @@ public interface BucketAuditLogAccessor {
 
     /**
      * Insert a row in to audit log table
+     *
      * @param experimentId
      * @param label
      * @param modified
@@ -46,6 +47,7 @@ public interface BucketAuditLogAccessor {
 
     /**
      * Get rows by arguments
+     *
      * @param experimentId
      * @param label
      * @return result
@@ -55,6 +57,7 @@ public interface BucketAuditLogAccessor {
 
     /**
      * Delete row from table by argument
+     *
      * @param experimentId
      * @param label
      * @return result

@@ -33,6 +33,7 @@ public interface UserAssignmentIndexAccessor {
 
     /**
      * Insert record into table based on attributes
+     *
      * @param uuid
      * @param userId
      * @param context
@@ -46,6 +47,7 @@ public interface UserAssignmentIndexAccessor {
 
     /**
      * Insert record based on attributes
+     *
      * @param uuid
      * @param userId
      * @param context
@@ -56,47 +58,49 @@ public interface UserAssignmentIndexAccessor {
             " values (?, ?, ?, ?)")
     ResultSet insertBy(UUID uuid, String userId, String context, Date created);
 
-	/**
-	 * Insert record into table based on attributes asynchronously
-	 *
-	 * @param uuid
-	 * @param userId
-	 * @param context
-	 * @param created
-	 * @param bucketLabel
-	 * @return resultSet
-	 */
-	@Query("insert into user_assignment_by_userid (experiment_id, user_id, context, created, bucket_label)" +
-			" values (?, ?, ?, ?, ?)")
-	ResultSetFuture asyncInsertBy(UUID uuid, String userId, String context, Date created, String bucketLabel);
+    /**
+     * Insert record into table based on attributes asynchronously
+     *
+     * @param uuid
+     * @param userId
+     * @param context
+     * @param created
+     * @param bucketLabel
+     * @return resultSet
+     */
+    @Query("insert into user_assignment_by_userid (experiment_id, user_id, context, created, bucket_label)" +
+            " values (?, ?, ?, ?, ?)")
+    ResultSetFuture asyncInsertBy(UUID uuid, String userId, String context, Date created, String bucketLabel);
 
-	/**
-	 * Insert record based on attributes asynchronously
-	 *
-	 * @param uuid
-	 * @param userId
-	 * @param context
-	 * @param created
-	 * @return resultSet
-	 */
-	@Query("insert into user_assignment_by_userid (experiment_id, user_id, context, created)" +
-			" values (?, ?, ?, ?)")
-	ResultSetFuture asyncInsertBy(UUID uuid, String userId, String context, Date created);
+    /**
+     * Insert record based on attributes asynchronously
+     *
+     * @param uuid
+     * @param userId
+     * @param context
+     * @param created
+     * @return resultSet
+     */
+    @Query("insert into user_assignment_by_userid (experiment_id, user_id, context, created)" +
+            " values (?, ?, ?, ?)")
+    ResultSetFuture asyncInsertBy(UUID uuid, String userId, String context, Date created);
 
 
-	/**
-	 * Get rows by parameters
-	 * @param experimentId
-	 * @param userId
-	 * @param context
-	 * @return result
-	 */
+    /**
+     * Get rows by parameters
+     *
+     * @param experimentId
+     * @param userId
+     * @param context
+     * @return result
+     */
     @Query("select * from user_assignment_by_userid where experiment_id = ? and user_id = ? and context = ?")
     Result<UserAssignmentByUserId> selectBy(UUID experimentId, String userId, String context);
 
 
     /**
      * delete rows by parameters
+     *
      * @param userId
      * @param context
      * @param experimentId

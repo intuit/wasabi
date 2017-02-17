@@ -115,7 +115,7 @@ public class SegmentOnHttpHeaderTest extends TestBase {
      * Tries to assign users to buckets with the provided user agents.
      *
      * @param user           the user
-     * @param userAgent the user agent to use
+     * @param userAgent      the user agent to use
      * @param expectedStatus the expected assignment status
      * @param shouldPass     the flag of if this is passed or not
      */

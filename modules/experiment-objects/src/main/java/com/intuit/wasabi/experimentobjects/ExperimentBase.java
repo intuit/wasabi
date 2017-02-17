@@ -20,10 +20,8 @@ import java.util.Date;
 /**
  * This interface is a quick workaround for the problem that {@link Experiment}, {@link PrioritizedExperiment}
  * and {@link NewExperiment} do not have a common interface.
- *
+ * <p>
  * TODO in future the structure should be changed to an interface called Experiment, a common mother class called ExperimentBase and then children of that for New..,Page..,Whatever..
- *
- *
  */
 public interface ExperimentBase {
 

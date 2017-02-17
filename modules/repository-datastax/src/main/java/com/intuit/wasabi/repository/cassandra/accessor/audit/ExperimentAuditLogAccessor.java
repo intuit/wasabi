@@ -26,12 +26,12 @@ import java.util.UUID;
 
 /**
  * Experiment audit log accessor
- *
  */
 @Accessor
 public interface ExperimentAuditLogAccessor {
     /**
      * Insert row into table
+     *
      * @param experimentId
      * @param modified
      * @param attributeName
@@ -45,6 +45,7 @@ public interface ExperimentAuditLogAccessor {
 
     /**
      * select row by argument
+     *
      * @param experimentId
      * @return result
      */
@@ -53,6 +54,7 @@ public interface ExperimentAuditLogAccessor {
 
     /**
      * Delete row by argument
+     *
      * @param experimentId
      */
     @Query("delete from experiment_audit_log where experiment_id = ? ")

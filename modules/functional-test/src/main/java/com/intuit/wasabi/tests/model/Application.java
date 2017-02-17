@@ -23,10 +23,14 @@ import com.intuit.wasabi.tests.library.util.serialstrategies.SerializationStrate
  */
 public class Application extends ModelItem {
 
-    /** the application name */
+    /**
+     * the application name
+     */
     public String name;
 
-    /** The serialization strategy for comparisons and JSON serialization. */
+    /**
+     * The serialization strategy for comparisons and JSON serialization.
+     */
     private static SerializationStrategy serializationStrategy = new DefaultNameExclusionStrategy();
 
     /**
