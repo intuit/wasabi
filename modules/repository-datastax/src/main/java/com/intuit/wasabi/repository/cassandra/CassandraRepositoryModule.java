@@ -52,6 +52,7 @@ import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentUserIndex
 import com.intuit.wasabi.repository.cassandra.accessor.index.PageExperimentIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.StateExperimentIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.UserAssignmentIndexAccessor;
+import com.intuit.wasabi.repository.cassandra.impl.AssignmentCountExecutor;
 import com.intuit.wasabi.repository.cassandra.impl.CassandraAssignmentsRepository;
 import com.intuit.wasabi.repository.cassandra.impl.CassandraAuditLogRepository;
 import com.intuit.wasabi.repository.cassandra.impl.CassandraAuthorizationRepository;
