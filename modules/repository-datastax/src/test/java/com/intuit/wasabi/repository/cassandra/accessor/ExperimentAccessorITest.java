@@ -87,67 +87,35 @@ public class ExperimentAccessorITest extends IntegrationTestBase {
                 "app2", date1, date2, true,
                 "m2", "v2", true, 5000, "c2");
 
-        @Override
-        public int compare (UUID o1, UUID o2){
-            return o1.compareTo(o2);
-        }
+
+        List<UUID> experimentIds = new ArrayList<>();
+        experimentIds.add(experimentId1);
+        experimentIds.add(experimentId2);
+        experimentIds.sort(new Comparator<UUID>() {
+
+            @Override
+            public int compare(UUID o1, UUID o2) {
+                return o1.compareTo(o2);
+            }
+        });
+
+        List<Experiment> experimentResult = new ArrayList<>(2);
+        experimentIds.forEach(expId -> experimentResult.add(accessor.getExperimentById(expId).one()));
+
+        experimentResult.sort(new Comparator<Experiment>() {
+            @Override
+            public int compare(Experiment o1, Experiment o2) {
+                return o1.getId().compareTo(o2.getId());
+            }
+        });
+
+        assertEquals("size should be same", 2, experimentResult.size());
+
+        Experiment exp1 = experimentResult.get(0);
+
+        assertEquals("Value should be same", experimentIds.get(0), exp1.getId());
+        Experiment exp2 = experimentResult.get(1);
+
+        assertEquals("Value should be same", experimentIds.get(1), exp2.getId());
     }
-
-    );
-
-    List<Experiment> experimentResult = new ArrayList<>(2);
-    experimentIds.forEach(expId->experimentResult.add(accessor.getExperimentById(expId).
-
-    one()
-
-    ));
-
-    experimentResult.sort(new Comparator<Experiment>()
-
-    {
-        @Override
-        public int compare (Experiment o1, Experiment o2){
-        return o1.getId().compareTo(o2.getId());
-    }
-    }
-
-    );
-
-    Result<Experiment> experiment1 = accessor.getExperiments(experimentIds);
-    List<Experiment> experimentResult = experiment1.all();
-    experimentResult.sort(new Comparator<Experiment>()
-
-    {
-
-        @Override
-        public int compare (Experiment o1, Experiment o2){
-        return o1.getId().compareTo(o2.getId());
-    }
-    }
-
-    );
-
-    assertEquals("size should be same",2,experimentResult.size()
-
-    );
-
-    Experiment exp1 = experimentResult.get(0);
-
-    assertEquals("Value should be same",experimentIds.get(0),exp1
-
-    .
-
-    getId()
-
-    );
-    Experiment exp2 = experimentResult.get(1);
-
-    assertEquals("Value should be same",experimentIds.get(1),exp2
-
-    .
-
-    getId()
-
-    );
-}
 }

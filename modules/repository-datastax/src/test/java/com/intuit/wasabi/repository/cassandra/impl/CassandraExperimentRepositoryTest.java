@@ -85,6 +85,7 @@ public class CassandraExperimentRepositoryTest {
     private CassandraDriver mockDriver;
 
     private ExperimentAccessor mockExperimentAccessor;
+    private ExperimentAuditLogAccessor mockExperimentAuditLogAccessor;
 
     private StateExperimentIndexAccessor mockStateExperimentIndexAccessor;
 

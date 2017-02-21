@@ -385,7 +385,9 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
      * @param experimentBatch  - INPUT/OUTPUT:  if allowAssignments is empty then this contains given batch experiment labels.
      * @param experimentIds    - OUTPUT: Final given batch experiment ids.
      */
-    private void populateExperimentIdsAndExperimentBatch(Optional<Map<Experiment.ID, Boolean>> allowAssignments, Map<Experiment.ID, com.intuit.wasabi.experimentobjects.Experiment> experimentMap, ExperimentBatch experimentBatch, Set<Experiment.ID> experimentIds) {
+    private void populateExperimentIdsAndExperimentBatch(Optional<Map<Experiment.ID, Boolean>> allowAssignments,
+                                                         Map<Experiment.ID, com.intuit.wasabi.experimentobjects.Experiment> experimentMap,
+                                                         ExperimentBatch experimentBatch, Set<Experiment.ID> experimentIds) {
         //allowAssignments is EMPTY means experimentBatch.labels are present.
         //Use experimentBatch.labels to populate experimentIds
         if (!allowAssignments.isPresent()) {
@@ -438,13 +440,11 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
      * Populate existing user assignments for given user, application & context.
      * This method make use of provided experimentMap to eliminate the call to database to fetch experiment object.
      *
-     * @param userID         User Id
-     * @param appLabel       Application Label
-     * @param context        Environment context
+     * @param userID        User Id
+     * @param appLabel      Application Label
+     * @param context       Environment context
      * @param experimentMap experiment map to fetch experiment label
-     *
      * @return List of assignments in term of pair of Experiment & Bucket label.
-     *
      */
     @Override
     @Timed
@@ -636,11 +636,10 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     }
 
     /**
-     *
      * Create use assignments in cassandra in a batch.
      *
      * @param assignments pair of experiment and assignment
-     * @param date       Date of user assignment
+     * @param date        Date of user assignment
      * @return
      */
     @Override
