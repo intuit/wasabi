@@ -421,16 +421,16 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
      */
     @Override
     @Timed
-    public List<Pair<Experiment, Bucket.Label>> getAssignments(User.ID userID,
+    public List<Pair<Experiment, String>> getAssignments(User.ID userID,
                                                                Application.Name appLabel,
                                                                Context context,
                                                                Map<Experiment.ID, Experiment> experimentMap) {
         final Stream<ExperimentUserByUserIdContextAppNameExperimentId> experimentUserStream = getUserIndexStream(userID.toString(), appLabel.toString(), context.getContext());
-        List<Pair<Experiment, Bucket.Label>> result = new ArrayList<>();
+        List<Pair<Experiment, String>> result = new ArrayList<>();
         experimentUserStream.forEach((ExperimentUserByUserIdContextAppNameExperimentId t) -> {
             Experiment exp = experimentMap.get(Experiment.ID.valueOf(t.getExperimentId()));
             if(nonNull(exp)) {
-                result.add(new ImmutablePair<>(exp, Bucket.Label.valueOf(Optional.ofNullable(t.getBucket()).orElseGet(() ->"null"))));
+                result.add(new ImmutablePair<>(exp, Optional.ofNullable(t.getBucket()).orElseGet(() ->"null")));
             } else {
                 LOGGER.debug("{} experiment id is not present in the experimentMap...", t.getExperimentId());
             }
