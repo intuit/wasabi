@@ -20,7 +20,7 @@
          updateCheck="true"
          monitoring="autodetect"
          dynamicConfig="true"
-         maxBytesLocalHeap="2G"
+         maxBytesLocalHeap="${assignment.metadata.cache.maxBytesLocalHeap}"
 >
 
     <defaultCache maxEntriesLocalHeap="0" eternal="true" />
