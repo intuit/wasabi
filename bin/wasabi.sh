@@ -253,7 +253,9 @@ package() {
   # FIXME: ?how to package profile=development?
   [ "${profile}" == "${profile_default}" ] && profile=build
 
+  echo "WASABI.SH start: build true ${buildtests} ${profile} "
   build true ${buildtests} ${profile}
+  echo "WASABI.SH end: build"
 
   # FIXME: move to modules/ui/build.sh
   version=$(fromPom . build project.version)
@@ -267,7 +269,9 @@ package() {
   content=$(fromPom ./modules/main build application.http.content.directory)
   ui_home=${home}/../${name}-${version}-${profile}
 
+  echo "WASABI.SH start: ./bin/fpm.sh -n ${name} -v ${version} -p ${profile} "
   ./bin/fpm.sh -n ${name} -v ${version} -p ${profile}
+  echo "WASABI.SH end: ./bin/fpm.sh "
 
 # FIXME: don't rebuild, cp dist/* target/*
   (for contrib_dir in $CONTRIB_PLUGINS_TO_INSTALL; do

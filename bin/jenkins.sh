@@ -101,6 +101,7 @@ version=$(mvn --settings ./settings.xml -f ./modules/main/pom.xml -P ${profile} 
 echo "packaging: ${project} / ${profile}"
 (eval ${project_env} ./bin/${project}.sh --profile=${profile} --buildtests=${execute_unit_tests} --verify=true package) || \
   exitOnError "unable to build project : (${project_env} ./bin/${project}.sh --profile=${profile} --buildtests=${execute_unit_tests} --verify=true package)"
+echo "end packaging"
 
 for module in ${modules}; do
   if [[ ! -z "${module// }" ]]; then
