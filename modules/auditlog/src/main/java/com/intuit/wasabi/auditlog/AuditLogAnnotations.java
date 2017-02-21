@@ -15,11 +15,11 @@
  *******************************************************************************/
 package com.intuit.wasabi.auditlog;
 
-public class AuditLogAnnotations {
+public interface AuditLogAnnotations {
 
     //Audit log thread pool
-    public static final String AUDITLOG_THREADPOOLSIZE_CORE = "auditlog.threadpoolsize.core";
-    public static final String AUDITLOG_THREADPOOLSIZE_MAX = "auditlog.threadpoolsize.max";
+    String AUDITLOG_THREADPOOLSIZE_CORE = "auditlog.threadpoolsize.core";
+    String AUDITLOG_THREADPOOLSIZE_MAX = "auditlog.threadpoolsize.max";
 
-    public static final String AUDITLOG_FETCHLIMIT = "auditlog.fetchlimit";
+    String AUDITLOG_FETCHLIMIT = "auditlog.fetchlimit";
 }

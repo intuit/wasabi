@@ -15,10 +15,10 @@
  *******************************************************************************/
 package com.intuit.wasabi.email;
 
-public class EmailAnnotations {
+public interface EmailAnnotations {
 
-    public static final String EMAIL_SERVICE_ENABLED = "email.service.enabled";
-    public static final String EMAIL_SERVICE_HOST = "email.service.host";
-    public static final String EMAIL_SERVICE_FROM = "email.service.from";
-    public static final String EMAIL_SERVICE_SUBJECT_PREFIX = "email.service.subject.prefix";
+    String EMAIL_SERVICE_ENABLED = "email.service.enabled";
+    String EMAIL_SERVICE_HOST = "email.service.host";
+    String EMAIL_SERVICE_FROM = "email.service.from";
+    String EMAIL_SERVICE_SUBJECT_PREFIX = "email.service.subject.prefix";
 }

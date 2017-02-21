@@ -15,6 +15,6 @@
  *******************************************************************************/
 package com.intuit.wasabi.userdirectory;
 
-public class UserDirectoryAnnotations {
-    public static final String USER_DIRECTORY_PATH = "userDirectoryPath";
+public interface UserDirectoryAnnotations {
+    String USER_DIRECTORY_PATH = "userDirectoryPath";
 }

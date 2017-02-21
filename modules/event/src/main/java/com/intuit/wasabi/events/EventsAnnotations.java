@@ -15,8 +15,8 @@
  *******************************************************************************/
 package com.intuit.wasabi.events;
 
-public class EventsAnnotations {
+public interface EventsAnnotations {
 
-    public static final String EXECUTOR_THREADPOOL_SIZE = "executor.threadpool.size";
+    String EXECUTOR_THREADPOOL_SIZE = "executor.threadpool.size";
 
 }

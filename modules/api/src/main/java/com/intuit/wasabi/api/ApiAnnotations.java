@@ -15,9 +15,9 @@
  *******************************************************************************/
 package com.intuit.wasabi.api;
 
-public class ApiAnnotations {
-    public static final String APPLICATION_ID = "application.id";
-    public static final String DEFAULT_TIME_ZONE = "default.time.zone";
-    public static final String DEFAULT_TIME_FORMAT = "default.time.format";
-    public static final String ACCESS_CONTROL_MAX_AGE_DELTA_SECONDS = "access.control.max.age.delta.seconds";
+public interface ApiAnnotations {
+    String APPLICATION_ID = "application.id";
+    String DEFAULT_TIME_ZONE = "default.time.zone";
+    String DEFAULT_TIME_FORMAT = "default.time.format";
+    String ACCESS_CONTROL_MAX_AGE_DELTA_SECONDS = "access.control.max.age.delta.seconds";
 }

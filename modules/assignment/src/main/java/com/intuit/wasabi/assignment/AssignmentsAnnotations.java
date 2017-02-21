@@ -15,19 +15,17 @@
  *******************************************************************************/
 package com.intuit.wasabi.assignment;
 
-public class AssignmentsAnnotations {
+public interface AssignmentsAnnotations {
 
     //Assignments metadata cache
-    public static final String ASSIGNMENTS_METADATA_CACHE_ENABLED = "AssignmentsMetadataCacheEnabled";
-    public static final String ASSIGNMENTS_METADATA_CACHE_ALLOWED_STALE_TIME =
-            "AssignmentsMetadataCacheAllowedStaleTime";
-    public static final String ASSIGNMENTS_METADATA_CACHE_HEALTH_CHECK = "AssignmentsMetadataCacheHealthCheck";
-    public static final String ASSIGNMENTS_METADATA_CACHE_REFRESH_CACHE_SERVICE =
-            "AssignmentsMetadataCacheRefreshCacheService";
-    public static final String ASSIGNMENTS_METADATA_CACHE_REFRESH_INTERVAL = "AssignmentsMetadataCacheRefreshInterval";
-    public static final String ASSIGNMENTS_METADATA_CACHE_REFRESH_TASK = "AssignmentsMetadataCacheRefreshTask";
+    String ASSIGNMENTS_METADATA_CACHE_ENABLED = "AssignmentsMetadataCacheEnabled";
+    String ASSIGNMENTS_METADATA_CACHE_ALLOWED_STALE_TIME = "AssignmentsMetadataCacheAllowedStaleTime";
+    String ASSIGNMENTS_METADATA_CACHE_HEALTH_CHECK = "AssignmentsMetadataCacheHealthCheck";
+    String ASSIGNMENTS_METADATA_CACHE_REFRESH_CACHE_SERVICE = "AssignmentsMetadataCacheRefreshCacheService";
+    String ASSIGNMENTS_METADATA_CACHE_REFRESH_INTERVAL = "AssignmentsMetadataCacheRefreshInterval";
+    String ASSIGNMENTS_METADATA_CACHE_REFRESH_TASK = "AssignmentsMetadataCacheRefreshTask";
 
-    public static final String ASSIGNMENT_DECORATOR_SERVICE = "assignment.decorator.service";
+    String ASSIGNMENT_DECORATOR_SERVICE = "assignment.decorator.service";
 
-    public static final String RULECACHE_THREADPOOL = "ruleCache.threadPool";
+    String RULECACHE_THREADPOOL = "ruleCache.threadPool";
 }
