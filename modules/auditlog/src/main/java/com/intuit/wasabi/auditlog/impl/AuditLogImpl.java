@@ -23,6 +23,7 @@ import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.repository.AuditLogRepository;
 
 import java.util.List;
+import static com.intuit.wasabi.auditlog.AuditLogAnnotations.AUDITLOG_FETCHLIMIT;
 
 /**
  * Implements the AuditLog with a default implementation.
@@ -39,7 +40,8 @@ public class AuditLogImpl implements AuditLog {
      * @param limit maximum audit log to fetch
      */
     @Inject
-    public AuditLogImpl(final AuditLogRepository repository, final @Named("auditlog.fetchlimit") int limit) {
+    public AuditLogImpl(final AuditLogRepository repository,
+            final @Named(AUDITLOG_FETCHLIMIT) int limit) {
         this.repository = repository;
         this.limit = limit;
     }

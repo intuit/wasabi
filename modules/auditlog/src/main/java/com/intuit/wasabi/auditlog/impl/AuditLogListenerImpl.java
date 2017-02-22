@@ -17,22 +17,19 @@ package com.intuit.wasabi.auditlog.impl;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import com.intuit.wasabi.auditlogobjects.AuditLogEntry;
-import com.intuit.wasabi.auditlogobjects.AuditLogEntryFactory;
 import com.intuit.wasabi.eventlog.EventLog;
 import com.intuit.wasabi.eventlog.EventLogListener;
 import com.intuit.wasabi.eventlog.events.EventLogEvent;
 import com.intuit.wasabi.repository.AuditLogRepository;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import static com.intuit.wasabi.auditlogobjects.AuditLogEntryFactory.createFromEvent;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.slf4j.LoggerFactory.getLogger;
+import static com.intuit.wasabi.auditlog.AuditLogAnnotations.*;
 
 /**
  * The AuditLogListener subscribes to events which should be logged for the user interface.
@@ -54,8 +51,8 @@ public class AuditLogListenerImpl implements EventLogListener {
      */
     @Inject
     public AuditLogListenerImpl(final EventLog eventLog,
-                                final @Named("auditlog.threadpoolsize.core") int threadPoolSizeCore,
-                                final @Named("auditlog.threadpoolsize.max") int threadPoolSizeMax,
+                                final @Named(AUDITLOG_THREADPOOLSIZE_CORE) int threadPoolSizeCore,
+                                final @Named(AUDITLOG_THREADPOOLSIZE_MAX) int threadPoolSizeMax,
                                 final AuditLogRepository repository) {
         this.repository = repository;
         eventLog.register(this);

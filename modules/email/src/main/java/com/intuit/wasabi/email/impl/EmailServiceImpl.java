@@ -37,6 +37,7 @@ import java.util.Set;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.slf4j.LoggerFactory.getLogger;
+import static com.intuit.wasabi.email.EmailAnnotations.*;
 
 /**
  * Implementation of the {@link com.intuit.wasabi.email.EmailService}
@@ -53,10 +54,10 @@ public class EmailServiceImpl implements EmailService {
     private EmailTextProcessor emailTextProcessor;
 
     @Inject
-    public EmailServiceImpl(final @Named("email.service.enabled") boolean enabled,
-                            final @Named("email.service.host") String host,
-                            final @Named("email.service.from") String from,
-                            final @Named("email.service.subject.prefix") String subjectPrefix,
+    public EmailServiceImpl(final @Named(EMAIL_SERVICE_ENABLED) boolean enabled,
+                            final @Named(EMAIL_SERVICE_HOST) String host,
+                            final @Named(EMAIL_SERVICE_FROM) String from,
+                            final @Named(EMAIL_SERVICE_SUBJECT_PREFIX) String subjectPrefix,
                             final EmailTextProcessor emailTextProcessor) {
         this.enabled = enabled;
 

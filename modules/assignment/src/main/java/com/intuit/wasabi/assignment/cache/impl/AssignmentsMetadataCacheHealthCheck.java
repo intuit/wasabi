@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import java.util.Date;
 
 import static org.slf4j.LoggerFactory.getLogger;
+import static com.intuit.wasabi.assignment.AssignmentsAnnotations.*;
 
 /**
  * Health check for assignment metadata cache.
@@ -43,10 +44,10 @@ public class AssignmentsMetadataCacheHealthCheck extends HealthCheck {
 
     @Inject
     public AssignmentsMetadataCacheHealthCheck(AssignmentsMetadataCache metadataCache,
-                                                AssignmentMetadataCacheTimeService timeService,
-                                               @Named("AssignmentsMetadataCacheRefreshInterval") Integer metadataCacheInterval,
-                                               @Named("AssignmentsMetadataCacheAllowedStaleTime") Integer allowedStaleTime,
-                                               @Named("AssignmentsMetadataCacheEnabled") Boolean metadataCacheEnabled) {
+            AssignmentMetadataCacheTimeService timeService,
+            @Named(ASSIGNMENTS_METADATA_CACHE_REFRESH_INTERVAL) Integer metadataCacheInterval,
+            @Named(ASSIGNMENTS_METADATA_CACHE_ALLOWED_STALE_TIME) Integer allowedStaleTime,
+            @Named(ASSIGNMENTS_METADATA_CACHE_ENABLED) Boolean metadataCacheEnabled) {
         super();
         this.metadataCache = metadataCache;
         this.metadataCacheInterval = metadataCacheInterval;
