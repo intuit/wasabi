@@ -63,13 +63,13 @@ public class ApiModule extends AbstractModule {
 
         Properties properties = create(PROPERTY_NAME, ApiModule.class);
 
-        bind(String.class).annotatedWith(named("application.id"))
+        bind(String.class).annotatedWith(named(ApiAnnotations.APPLICATION_ID))
                 .toInstance(getProperty("application.id", properties));
-        bind(String.class).annotatedWith(named("default.time.zone"))
-                .toInstance(getProperty("default.time.zone", properties, "yyyy-MM-dd HH:mm:ss"));
-        bind(String.class).annotatedWith(named("default.time.format"))
+        bind(String.class).annotatedWith(named(ApiAnnotations.DEFAULT_TIME_ZONE))
+                .toInstance(getProperty("default.time.zone", properties, "UTC"));
+        bind(String.class).annotatedWith(named(ApiAnnotations.DEFAULT_TIME_FORMAT))
                 .toInstance(getProperty("default.time.format", properties, "yyyy-MM-dd HH:mm:ss"));
-        bind(String.class).annotatedWith(named("access.control.max.age.delta.seconds"))
+        bind(String.class).annotatedWith(named(ApiAnnotations.ACCESS_CONTROL_MAX_AGE_DELTA_SECONDS))
                 .toInstance(getProperty("access.control.max.age.delta.seconds", properties));
 
         bind(AuthorizedExperimentGetter.class).in(SINGLETON);

@@ -40,7 +40,8 @@ public class SimpleCORSResponseFilter implements ContainerResponseFilter {
     private final String deltaSeconds;
 
     @Inject
-    public SimpleCORSResponseFilter(final @Named("application.id") String applicationName, final @Named("access.control.max.age.delta.seconds") String deltaSeconds) {
+    public SimpleCORSResponseFilter(final @Named(ApiAnnotations.APPLICATION_ID) String applicationName,
+            final @Named(ApiAnnotations.ACCESS_CONTROL_MAX_AGE_DELTA_SECONDS) String deltaSeconds) {
         LOGGER.info("Instantiated response filter {}", getClass().getName());
         this.applicationName = applicationName;
         this.deltaSeconds = deltaSeconds;

@@ -34,7 +34,7 @@ public class HttpHeader {
     private final CacheControl cacheControl;
 
     @Inject
-    public HttpHeader(final @Named("application.id") String applicationName, final @Named("access.control.max.age.delta.seconds") String deltaSeconds) {
+    public HttpHeader(final @Named(ApiAnnotations.APPLICATION_ID) String applicationName, final @Named(ApiAnnotations.ACCESS_CONTROL_MAX_AGE_DELTA_SECONDS) String deltaSeconds) {
         this.applicationName = applicationName;
         this.deltaSeconds = deltaSeconds;
         cacheControl = new CacheControl();

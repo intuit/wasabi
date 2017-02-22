@@ -132,8 +132,8 @@ public class ExperimentsResource {
     ExperimentsResource(final Experiments experiments, final EventsExport export, final Assignments assignments,
                         final Authorization authorization, final Buckets buckets, final Mutex mutex,
                         final Pages pages, final Priorities priorities, final Favorites favorites,
-                        final @Named("default.time.zone") String defaultTimezone,
-                        final @Named("default.time.format") String defaultTimeFormat,
+                        final @Named(ApiAnnotations.DEFAULT_TIME_ZONE) String defaultTimezone,
+                        final @Named(ApiAnnotations.DEFAULT_TIME_FORMAT) String defaultTimeFormat,
                         final HttpHeader httpHeader, final PaginationHelper<Experiment> experimentPaginationHelper
     ) {
         this.experiments = experiments;
