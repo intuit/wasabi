@@ -64,7 +64,6 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -103,6 +102,7 @@ import static javax.ws.rs.core.Response.Status.CREATED;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.slf4j.LoggerFactory.getLogger;
+import static com.intuit.wasabi.api.ApiAnnotations.*;
 
 /**
  * API endpoint for managing experiments
@@ -132,8 +132,8 @@ public class ExperimentsResource {
     ExperimentsResource(final Experiments experiments, final EventsExport export, final Assignments assignments,
                         final Authorization authorization, final Buckets buckets, final Mutex mutex,
                         final Pages pages, final Priorities priorities, final Favorites favorites,
-                        final @Named(ApiAnnotations.DEFAULT_TIME_ZONE) String defaultTimezone,
-                        final @Named(ApiAnnotations.DEFAULT_TIME_FORMAT) String defaultTimeFormat,
+                        final @Named(DEFAULT_TIME_ZONE) String defaultTimezone,
+                        final @Named(DEFAULT_TIME_FORMAT) String defaultTimeFormat,
                         final HttpHeader httpHeader, final PaginationHelper<Experiment> experimentPaginationHelper
     ) {
         this.experiments = experiments;

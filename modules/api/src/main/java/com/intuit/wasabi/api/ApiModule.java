@@ -50,6 +50,7 @@ import static com.google.inject.name.Names.named;
 import static com.intuit.autumn.utils.PropertyFactory.create;
 import static com.intuit.autumn.utils.PropertyFactory.getProperty;
 import static org.slf4j.LoggerFactory.getLogger;
+import static com.intuit.wasabi.api.ApiAnnotations.*;
 
 public class ApiModule extends AbstractModule {
 
@@ -63,13 +64,13 @@ public class ApiModule extends AbstractModule {
 
         Properties properties = create(PROPERTY_NAME, ApiModule.class);
 
-        bind(String.class).annotatedWith(named(ApiAnnotations.APPLICATION_ID))
+        bind(String.class).annotatedWith(named(APPLICATION_ID))
                 .toInstance(getProperty("application.id", properties));
-        bind(String.class).annotatedWith(named(ApiAnnotations.DEFAULT_TIME_ZONE))
+        bind(String.class).annotatedWith(named(DEFAULT_TIME_ZONE))
                 .toInstance(getProperty("default.time.zone", properties, "UTC"));
-        bind(String.class).annotatedWith(named(ApiAnnotations.DEFAULT_TIME_FORMAT))
+        bind(String.class).annotatedWith(named(DEFAULT_TIME_FORMAT))
                 .toInstance(getProperty("default.time.format", properties, "yyyy-MM-dd HH:mm:ss"));
-        bind(String.class).annotatedWith(named(ApiAnnotations.ACCESS_CONTROL_MAX_AGE_DELTA_SECONDS))
+        bind(String.class).annotatedWith(named(ACCESS_CONTROL_MAX_AGE_DELTA_SECONDS))
                 .toInstance(getProperty("access.control.max.age.delta.seconds", properties));
 
         bind(AuthorizedExperimentGetter.class).in(SINGLETON);

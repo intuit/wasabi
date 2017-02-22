@@ -31,6 +31,7 @@ import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+import static com.intuit.wasabi.assignment.AssignmentsAnnotations.RULECACHE_THREADPOOL;
 
 /**
  * Created on 3/2/16.
@@ -55,7 +56,7 @@ public class AssignmentsModuleTest {
 
         //RuleCacheEngine
         injector.getInstance(Key.get(ThreadPoolExecutor.class,
-                Names.named(AssignmentsAnnotations.RULECACHE_THREADPOOL)));
+                Names.named(RULECACHE_THREADPOOL)));
 
         assertThat(injector.getInstance(Key.get(Assignments.class)), is(not(nullValue())));
     }

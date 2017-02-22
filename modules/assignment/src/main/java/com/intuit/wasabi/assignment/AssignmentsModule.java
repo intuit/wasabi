@@ -35,9 +35,6 @@ import com.intuit.wasabi.export.WebExport;
 import com.intuit.wasabi.export.rest.impl.ExportModule;
 import com.intuit.wasabi.repository.cassandra.CassandraRepositoryModule;
 import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.config.CacheConfiguration;
-import net.sf.ehcache.config.Configuration;
-import net.sf.ehcache.config.ConfigurationFactory;
 import org.slf4j.Logger;
 
 import java.net.URI;
@@ -57,6 +54,7 @@ import static java.lang.Boolean.FALSE;
 import static java.lang.Integer.parseInt;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.slf4j.LoggerFactory.getLogger;
+import static com.intuit.wasabi.assignment.AssignmentsAnnotations.*;
 
 public class AssignmentsModule extends AbstractModule {
 
@@ -119,7 +117,7 @@ public class AssignmentsModule extends AbstractModule {
     private void bindMetadataCache(final Properties properties) {
         Boolean metadataCacheEnabled =
                 Boolean.parseBoolean(getProperty("metadata.cache.enabled", properties, "true"));
-        bind(Boolean.class).annotatedWith(named(AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_ENABLED))
+        bind(Boolean.class).annotatedWith(named(ASSIGNMENTS_METADATA_CACHE_ENABLED))
                 .toInstance(metadataCacheEnabled);
 
         if(metadataCacheEnabled) {
@@ -141,25 +139,25 @@ public class AssignmentsModule extends AbstractModule {
             bind(AssignmentMetadataCacheTimeService.class).to(AssignmentMetadataCacheTimeServiceImpl.class).in(SINGLETON);
             //Bind allowed stale time
             bind(Integer.class)
-                    .annotatedWith(named(AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_ALLOWED_STALE_TIME))
+                    .annotatedWith(named(ASSIGNMENTS_METADATA_CACHE_ALLOWED_STALE_TIME))
                     .toInstance(allowedStaleTimeInMinutes);
             //Bind health check
             bind(HealthCheck.class)
-                    .annotatedWith(named(AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_HEALTH_CHECK))
+                    .annotatedWith(named(ASSIGNMENTS_METADATA_CACHE_HEALTH_CHECK))
                     .to(AssignmentsMetadataCacheHealthCheck.class).in(SINGLETON);
             //Bind scheduled executor service
             bind(ScheduledExecutorService.class)
-                    .annotatedWith(named(AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_REFRESH_CACHE_SERVICE))
+                    .annotatedWith(named(ASSIGNMENTS_METADATA_CACHE_REFRESH_CACHE_SERVICE))
                     .toInstance(scheduledExecutorService);
             //Bind refresh interval
             bind(Integer.class)
-                    .annotatedWith(named(AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_REFRESH_INTERVAL))
+                    .annotatedWith(named(ASSIGNMENTS_METADATA_CACHE_REFRESH_INTERVAL))
                     .toInstance(metadataCacheRefreshIntervalInMinutes);
             //Bind actual cache here
             bind(AssignmentsMetadataCache.class).to(AssignmentsMetadataCacheImpl.class).in(SINGLETON);
             //Bind cache refresh task
             bind(Runnable.class)
-                    .annotatedWith(named(AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_REFRESH_TASK))
+                    .annotatedWith(named(ASSIGNMENTS_METADATA_CACHE_REFRESH_TASK))
                     .to(AssignmentsMetadataCacheRefreshTask.class).in(SINGLETON);
 
         } else {
@@ -181,7 +179,7 @@ public class AssignmentsModule extends AbstractModule {
                     properties));
 
             if (fromNullable(assignmentDecoratorUri).isPresent()) {
-                bind(URI.class).annotatedWith(named(AssignmentsAnnotations.ASSIGNMENT_DECORATOR_SERVICE))
+                bind(URI.class).annotatedWith(named(ASSIGNMENT_DECORATOR_SERVICE))
                         .toInstance(assignmentDecoratorUri);
             }
         }
@@ -212,7 +210,7 @@ public class AssignmentsModule extends AbstractModule {
                 .build());
 
         bind(ThreadPoolExecutor.class)
-                .annotatedWith(named(AssignmentsAnnotations.RULECACHE_THREADPOOL))
+                .annotatedWith(named(RULECACHE_THREADPOOL))
                 .toInstance(ruleCacheExecutor);
     }
 

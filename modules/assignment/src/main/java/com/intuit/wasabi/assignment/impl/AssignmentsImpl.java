@@ -40,12 +40,10 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.Nullable;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.StreamingOutput;
 
 import com.datastax.driver.core.exceptions.ConnectionException;
-import com.intuit.wasabi.assignment.AssignmentsAnnotations;
 import com.intuit.wasabi.assignment.cache.AssignmentsMetadataCache;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -94,6 +92,7 @@ import com.intuit.wasabi.repository.CassandraRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.MutexRepository;
 import com.intuit.wasabi.repository.cassandra.impl.ExperimentRuleCacheUpdateEnvelope;
+import static com.intuit.wasabi.assignment.AssignmentsAnnotations.*;
 
 /**
  * Assignments implementation
@@ -185,10 +184,10 @@ public class AssignmentsImpl implements Assignments {
                            final RuleCache ruleCache, final Pages pages,
                            final Priorities priorities,
                            final AssignmentDecorator assignmentDecorator,
-                           final @Named(AssignmentsAnnotations.RULECACHE_THREADPOOL)
+                           final @Named(RULECACHE_THREADPOOL)
                                    ThreadPoolExecutor ruleCacheExecutor,
                            final EventLog eventLog,
-                           final @Named(AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_ENABLED)
+                           final @Named(ASSIGNMENTS_METADATA_CACHE_ENABLED)
                                    Boolean metadataCacheEnabled,
                            final AssignmentsMetadataCache metadataCache)
             throws IOException, ConnectionException {

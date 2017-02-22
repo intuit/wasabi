@@ -33,6 +33,7 @@ import static com.intuit.autumn.utils.PropertyFactory.getProperty;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Class.forName;
 import static org.slf4j.LoggerFactory.getLogger;
+import static com.intuit.wasabi.email.EmailAnnotations.*;
 
 /**
  * This is the module which defines the implementation to be used by different
@@ -57,13 +58,13 @@ public class EmailModule extends AbstractModule {
 
         Properties properties = create(PROPERTY_NAME, EmailModule.class);
 
-        bind(Boolean.class).annotatedWith(named(EmailAnnotations.EMAIL_SERVICE_ENABLED))
+        bind(Boolean.class).annotatedWith(named(EMAIL_SERVICE_ENABLED))
                 .toInstance(Boolean.valueOf(getProperty("email.service.enabled", properties, FALSE.toString())));
-        bind(String.class).annotatedWith(named(EmailAnnotations.EMAIL_SERVICE_HOST))
+        bind(String.class).annotatedWith(named(EMAIL_SERVICE_HOST))
                 .toInstance(getProperty("email.service.host", properties, ""));
-        bind(String.class).annotatedWith(named(EmailAnnotations.EMAIL_SERVICE_FROM))
+        bind(String.class).annotatedWith(named(EMAIL_SERVICE_FROM))
                 .toInstance(getProperty("email.service.from", properties, ""));
-        bind(String.class).annotatedWith(named(EmailAnnotations.EMAIL_SERVICE_SUBJECT_PREFIX))
+        bind(String.class).annotatedWith(named(EMAIL_SERVICE_SUBJECT_PREFIX))
                 .toInstance(getProperty("email.service.subject.prefix", properties, ""));
 
         bind(EmailTextProcessor.class).to(EmailTextProcessorImpl.class).in(SINGLETON);

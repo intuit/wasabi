@@ -18,12 +18,12 @@ package com.intuit.wasabi.auditlog.impl;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.intuit.wasabi.auditlog.AuditLog;
-import com.intuit.wasabi.auditlog.AuditLogAnnotations;
 import com.intuit.wasabi.auditlogobjects.AuditLogEntry;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.repository.AuditLogRepository;
 
 import java.util.List;
+import static com.intuit.wasabi.auditlog.AuditLogAnnotations.AUDITLOG_FETCHLIMIT;
 
 /**
  * Implements the AuditLog with a default implementation.
@@ -41,7 +41,7 @@ public class AuditLogImpl implements AuditLog {
      */
     @Inject
     public AuditLogImpl(final AuditLogRepository repository,
-            final @Named(AuditLogAnnotations.AUDITLOG_FETCHLIMIT) int limit) {
+            final @Named(AUDITLOG_FETCHLIMIT) int limit) {
         this.repository = repository;
         this.limit = limit;
     }

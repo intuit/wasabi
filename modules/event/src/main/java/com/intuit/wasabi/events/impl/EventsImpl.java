@@ -26,7 +26,6 @@ import com.intuit.wasabi.eventobjects.EventEnvelopePayload;
 import com.intuit.wasabi.assignmentobjects.User;
 import com.intuit.wasabi.database.TransactionFactory;
 import com.intuit.wasabi.events.Events;
-import com.intuit.wasabi.events.EventsAnnotations;
 import com.intuit.wasabi.events.EventsMBean;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Context;
@@ -41,6 +40,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.slf4j.LoggerFactory.getLogger;
+import static com.intuit.wasabi.events.EventsAnnotations.EXECUTOR_THREADPOOL_SIZE;
 
 /**
  * This class <b>asychronously</b> posts events to the events database (mysql in this implementation).
@@ -64,7 +64,7 @@ public class EventsImpl implements Events, EventsMBean {
 
     @Inject
     public EventsImpl(Map<String, EventIngestionExecutor> eventIngestionExecutors,
-            final @Named(EventsAnnotations.EXECUTOR_THREADPOOL_SIZE) Integer threadPoolSize,
+            final @Named(EXECUTOR_THREADPOOL_SIZE) Integer threadPoolSize,
             final Assignments assignments,
             final TransactionFactory transactionFactory) {
         super();
