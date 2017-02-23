@@ -35,9 +35,12 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import static com.intuit.wasabi.email.EmailAnnotations.EMAIL_SERVICE_ENABLED;
+import static com.intuit.wasabi.email.EmailAnnotations.EMAIL_SERVICE_FROM;
+import static com.intuit.wasabi.email.EmailAnnotations.EMAIL_SERVICE_HOST;
+import static com.intuit.wasabi.email.EmailAnnotations.EMAIL_SERVICE_SUBJECT_PREFIX;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.slf4j.LoggerFactory.getLogger;
-import static com.intuit.wasabi.email.EmailAnnotations.*;
 
 /**
  * Implementation of the {@link com.intuit.wasabi.email.EmailService}
@@ -178,6 +181,7 @@ public class EmailServiceImpl implements EmailService {
 
     /**
      * Set the host for email
+     *
      * @param host
      * @throws IllegalArgumentException if host is blank
      */
@@ -191,6 +195,7 @@ public class EmailServiceImpl implements EmailService {
 
     /**
      * Set from for email
+     *
      * @param from - set default email if from argument is not valid
      */
     public void setFrom(String from) {
@@ -206,6 +211,7 @@ public class EmailServiceImpl implements EmailService {
 
     /**
      * Set the prefix
+     *
      * @param subjectPrefix the prefix for the email subject
      */
     public void setSubjectPrefix(String subjectPrefix) {

@@ -17,12 +17,12 @@ package com.intuit.wasabi.events;
 
 /**
  * Events MBean
- *
  */
 public interface EventsMBean {
 
     /**
      * Returns events recording queue size
+     *
      * @return Events recording queue size
      */
     int getQueueSize();

@@ -27,9 +27,9 @@ public interface EmailService {
     /**
      * Sends the specified message to the recipients.
      *
-     * @param subject    the subject of the email
-     * @param msg the plain messsage to be send
-     * @param to the email addresses of the recipients
+     * @param subject the subject of the email
+     * @param msg     the plain messsage to be send
+     * @param to      the email addresses of the recipients
      */
     void doSend(String subject, String msg, String... to);
 
@@ -38,8 +38,8 @@ public interface EmailService {
      * access for the User.
      *
      * @param appName the {@link com.intuit.wasabi.experimentobjects.Application.Name} the user requests access to
-     * @param user the user who wants access
-     * @param links the email links
+     * @param user    the user who wants access
+     * @param links   the email links
      */
     void sendEmailForUserPermission(Application.Name appName, UserInfo.Username user, EmailLinksList links);
 

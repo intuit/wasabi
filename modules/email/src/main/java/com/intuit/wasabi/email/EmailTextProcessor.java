@@ -63,7 +63,7 @@ public interface EmailTextProcessor {
     /**
      * Get's the message for permission access to a certain {@link Application}.
      *
-     * @param app the app the user wants access to
+     * @param app      the app the user wants access to
      * @param username the user who is requesting access
      * @param links    the list of links to email
      * @return the message for the permission email

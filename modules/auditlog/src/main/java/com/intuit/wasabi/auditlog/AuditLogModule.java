@@ -26,10 +26,12 @@ import java.util.Properties;
 import static com.google.inject.name.Names.named;
 import static com.intuit.autumn.utils.PropertyFactory.create;
 import static com.intuit.autumn.utils.PropertyFactory.getProperty;
+import static com.intuit.wasabi.auditlog.AuditLogAnnotations.AUDITLOG_FETCHLIMIT;
+import static com.intuit.wasabi.auditlog.AuditLogAnnotations.AUDITLOG_THREADPOOLSIZE_CORE;
+import static com.intuit.wasabi.auditlog.AuditLogAnnotations.AUDITLOG_THREADPOOLSIZE_MAX;
 import static java.lang.Class.forName;
 import static java.lang.Integer.parseInt;
 import static org.slf4j.LoggerFactory.getLogger;
-import static com.intuit.wasabi.auditlog.AuditLogAnnotations.*;
 
 /**
  * Module for providing an AuditLogListener.

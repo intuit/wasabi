@@ -21,7 +21,6 @@ import com.intuit.wasabi.export.Envelope;
 
 /**
  * Noop implementation for event database analytics export
- *
  */
 public class NoopDatabaseEventEnvelope implements Envelope<EventEnvelopePayload, DatabaseExport> {
 

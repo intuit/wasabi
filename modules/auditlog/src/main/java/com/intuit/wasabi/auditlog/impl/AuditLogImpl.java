@@ -23,6 +23,7 @@ import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.repository.AuditLogRepository;
 
 import java.util.List;
+
 import static com.intuit.wasabi.auditlog.AuditLogAnnotations.AUDITLOG_FETCHLIMIT;
 
 /**
@@ -37,11 +38,11 @@ public class AuditLogImpl implements AuditLog {
      * Constructs the AuditLogImpl. Should be called by Guice.
      *
      * @param repository the repository to query from.
-     * @param limit maximum audit log to fetch
+     * @param limit      maximum audit log to fetch
      */
     @Inject
     public AuditLogImpl(final AuditLogRepository repository,
-            final @Named(AUDITLOG_FETCHLIMIT) int limit) {
+                        final @Named(AUDITLOG_FETCHLIMIT) int limit) {
         this.repository = repository;
         this.limit = limit;
     }

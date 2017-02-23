@@ -26,8 +26,9 @@ import javax.ws.rs.core.StreamingOutput;
 public interface EventsExport {
     /**
      * Returns the streaming output for the given experiment ID and parameters
+     *
      * @param experimentID Experiment ID
-     * @param parameters Parameters
+     * @param parameters   Parameters
      * @return StreamingOutput object
      */
     StreamingOutput getEventStream(Experiment.ID experimentID, Parameters parameters);

@@ -28,9 +28,9 @@ import java.util.Properties;
 import static com.google.inject.Scopes.SINGLETON;
 import static com.intuit.autumn.utils.PropertyFactory.create;
 import static com.intuit.autumn.utils.PropertyFactory.getProperty;
+import static com.intuit.wasabi.userdirectory.UserDirectoryAnnotations.USER_DIRECTORY_PATH;
 import static java.lang.Class.forName;
 import static org.slf4j.LoggerFactory.getLogger;
-import static com.intuit.wasabi.userdirectory.UserDirectoryAnnotations.*;
 
 public class UserDirectoryModule extends AbstractModule {
 
@@ -47,7 +47,8 @@ public class UserDirectoryModule extends AbstractModule {
 
         bind(String.class).annotatedWith(Names.named(USER_DIRECTORY_PATH))
                 .toInstance(PROPERTY_NAME);
-        bind(new TypeLiteral<List<UserInfo>>() {}).annotatedWith(Names.named("authentication.users"))
+        bind(new TypeLiteral<List<UserInfo>>() {
+        }).annotatedWith(Names.named("authentication.users"))
                 .toProvider(UserInfoListProvider.class).in(SINGLETON);
         try {
             @SuppressWarnings("unchecked")

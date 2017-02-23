@@ -31,7 +31,6 @@ import java.util.Set;
 /**
  * This listener is looking out for events and processes new events to
  * a format that can be sent via mail using the {@link com.intuit.wasabi.email.EmailService}
- *
  */
 public class EmailEventLogListener implements EventLogListener {
 
@@ -42,9 +41,10 @@ public class EmailEventLogListener implements EventLogListener {
     /**
      * The constructor uses the EventLog to register for updates on certain
      * events (at the moment this only listens to changes in Buckets and Experiments)
-     * @param eventLog the event log we want to sign up for
-     * @param emailService          the email service
-     * @param emailTextProcessor    the email text processor
+     *
+     * @param eventLog           the event log we want to sign up for
+     * @param emailService       the email service
+     * @param emailTextProcessor the email text processor
      */
     @Inject
     public EmailEventLogListener(final EventLog eventLog, final EmailService emailService,

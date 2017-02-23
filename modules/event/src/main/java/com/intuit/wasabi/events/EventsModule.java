@@ -37,10 +37,10 @@ import static com.google.inject.Scopes.SINGLETON;
 import static com.google.inject.name.Names.named;
 import static com.intuit.autumn.utils.PropertyFactory.create;
 import static com.intuit.autumn.utils.PropertyFactory.getProperty;
+import static com.intuit.wasabi.events.EventsAnnotations.EXECUTOR_THREADPOOL_SIZE;
 import static java.lang.Class.forName;
 import static java.lang.Integer.parseInt;
 import static org.slf4j.LoggerFactory.getLogger;
-import static com.intuit.wasabi.events.EventsAnnotations.EXECUTOR_THREADPOOL_SIZE;
 
 /**
  * Guice module for configuring events related objects
