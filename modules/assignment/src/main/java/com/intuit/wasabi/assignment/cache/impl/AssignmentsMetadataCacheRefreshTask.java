@@ -27,7 +27,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * This class is used to refresh assignment metadata cache.
- *
  */
 public class AssignmentsMetadataCacheRefreshTask implements Runnable {
     private final Logger LOGGER = LoggerFactory.getLogger(AssignmentsMetadataCacheRefreshTask.class);

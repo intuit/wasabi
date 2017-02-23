@@ -22,7 +22,6 @@ import java.util.Date;
 
 /**
  * Separate time service class so that cache functionality can be unit tested.
- *
  */
 public class AssignmentMetadataCacheTimeServiceImpl implements AssignmentMetadataCacheTimeService {
     @Override

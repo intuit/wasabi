@@ -20,7 +20,6 @@ import java.util.Date;
 
 /**
  * This service is used to get the time details.
- *
  */
 public interface AssignmentMetadataCacheTimeService {
     Date getCurrentTime();

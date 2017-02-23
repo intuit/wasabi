@@ -32,7 +32,6 @@ import static org.mockito.Mockito.when;
 
 /**
  * Class to unit test Health check for assignment metadata cache.
- *
  */
 public class AssignmentsMetadataCacheHealthCheckTest {
 

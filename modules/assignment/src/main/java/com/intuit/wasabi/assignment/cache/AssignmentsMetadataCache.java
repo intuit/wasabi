@@ -29,8 +29,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- *  Local cache created and used during user assignment flow.
- *
+ * Local cache created and used during user assignment flow.
  */
 
 public interface AssignmentsMetadataCache {
@@ -45,7 +44,7 @@ public interface AssignmentsMetadataCache {
 
     /**
      * This method refresh the existing cache (keys) with the updated data from Database.
-     *
+     * <p>
      * This method doesn't add new keys into the cache.
      *
      * @return TRUE if cache is successfully refreshed or FALSE.
@@ -54,49 +53,39 @@ public interface AssignmentsMetadataCache {
 
     /**
      * @param appName
-     *
      * @return List of experiments created in the given application.
      */
     List<Experiment> getExperimentsByAppName(Application.Name appName);
 
 
     /**
-     *
      * @param expId
-     *
      * @return An experiment for given experiment id.
      */
     Optional<Experiment> getExperimentById(Experiment.ID expId);
 
 
     /**
-     *
      * @param appName
-     *
      * @return prioritized list of experiments for given application.
      */
     Optional<PrioritizedExperimentList> getPrioritizedExperimentListMap(Application.Name appName);
 
     /**
-     *
      * @param expId
-     *
      * @return List of experiments which are mutually exclusive to the given experiment.
      */
     List<Experiment.ID> getExclusionList(Experiment.ID expId);
 
     /**
-     *
      * @param expId
      * @return BucketList for given experiment.
      */
     BucketList getBucketList(Experiment.ID expId);
 
     /**
-     *
      * @param appName
      * @param pageName
-     *
      * @return List experiments associated to the given application and page.
      */
     List<PageExperiment> getPageExperiments(Application.Name appName, Page.Name pageName);
@@ -116,9 +105,7 @@ public interface AssignmentsMetadataCache {
     Date getLastRefreshTime();
 
     /**
-     *
      * @return metadata cache details..
-     *
      */
     Map<String, String> getDetails();
 }

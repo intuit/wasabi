@@ -99,6 +99,8 @@ import static com.intuit.wasabi.api.APISwaggerResource.DOC_PER_PAGE;
 import static com.intuit.wasabi.api.APISwaggerResource.DOC_SORT;
 import static com.intuit.wasabi.api.APISwaggerResource.DOC_TIMEZONE;
 import static com.intuit.wasabi.api.APISwaggerResource.EXAMPLE_AUTHORIZATION_HEADER;
+import static com.intuit.wasabi.api.ApiAnnotations.DEFAULT_TIME_FORMAT;
+import static com.intuit.wasabi.api.ApiAnnotations.DEFAULT_TIME_ZONE;
 import static com.intuit.wasabi.authorizationobjects.Permission.CREATE;
 import static com.intuit.wasabi.authorizationobjects.Permission.READ;
 import static com.intuit.wasabi.authorizationobjects.Permission.UPDATE;
@@ -117,7 +119,6 @@ import static javax.ws.rs.core.Response.Status.CREATED;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.slf4j.LoggerFactory.getLogger;
-import static com.intuit.wasabi.api.ApiAnnotations.*;
 
 /**
  * API endpoint for managing experiments

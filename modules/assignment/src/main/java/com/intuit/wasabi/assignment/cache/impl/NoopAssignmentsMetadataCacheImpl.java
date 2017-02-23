@@ -33,8 +33,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- *  Local cache created and used during user assignment flow.
- *
+ * Local cache created and used during user assignment flow.
  */
 
 public class NoopAssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
@@ -56,7 +55,7 @@ public class NoopAssignmentsMetadataCacheImpl implements AssignmentsMetadataCach
 
     /**
      * This method refresh the existing cache (keys) with the updated data from Database.
-     *
+     * <p>
      * This method doesn't add new keys into the cache.
      *
      * @return TRUE if cache is successfully refreshed else FALSE.
@@ -69,7 +68,6 @@ public class NoopAssignmentsMetadataCacheImpl implements AssignmentsMetadataCach
 
     /**
      * @param appName
-     *
      * @return List of experiments created in the given application.
      */
     @Override
@@ -79,9 +77,7 @@ public class NoopAssignmentsMetadataCacheImpl implements AssignmentsMetadataCach
     }
 
     /**
-     *
      * @param expId
-     *
      * @return An experiment for given experiment id.
      */
     @Override
@@ -92,9 +88,7 @@ public class NoopAssignmentsMetadataCacheImpl implements AssignmentsMetadataCach
 
 
     /**
-     *
      * @param appName
-     *
      * @return prioritized list of experiments for given application.
      */
     @Override
@@ -104,9 +98,7 @@ public class NoopAssignmentsMetadataCacheImpl implements AssignmentsMetadataCach
     }
 
     /**
-     *
      * @param expId
-     *
      * @return List of experiments which are mutually exclusive to the given experiment.
      */
     @Override
@@ -116,7 +108,6 @@ public class NoopAssignmentsMetadataCacheImpl implements AssignmentsMetadataCach
     }
 
     /**
-     *
      * @param expId
      * @return BucketList for given experiment.
      */
@@ -127,10 +118,8 @@ public class NoopAssignmentsMetadataCacheImpl implements AssignmentsMetadataCach
     }
 
     /**
-     *
      * @param appName
      * @param pageName
-     *
      * @return List experiments associated to the given application and page.
      */
     @Override
@@ -140,7 +129,6 @@ public class NoopAssignmentsMetadataCacheImpl implements AssignmentsMetadataCach
     }
 
     /**
-     *
      * @return Last cache refresh time.
      */
     @Override
@@ -151,7 +139,6 @@ public class NoopAssignmentsMetadataCacheImpl implements AssignmentsMetadataCach
     }
 
     /**
-     *
      * @return Get metadata cache details
      */
     @Override
