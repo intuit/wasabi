@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,13 +23,27 @@ import com.intuit.wasabi.assignment.AssignmentDecorator;
 import com.intuit.wasabi.assignment.AssignmentIngestionExecutor;
 import com.intuit.wasabi.assignment.Assignments;
 import com.intuit.wasabi.assignment.cache.AssignmentsMetadataCache;
-import com.intuit.wasabi.assignmentobjects.*;
+import com.intuit.wasabi.assignmentobjects.Assignment;
+import com.intuit.wasabi.assignmentobjects.AssignmentEnvelopePayload;
+import com.intuit.wasabi.assignmentobjects.PersonalizationEngineResponse;
+import com.intuit.wasabi.assignmentobjects.RuleCache;
+import com.intuit.wasabi.assignmentobjects.SegmentationProfile;
+import com.intuit.wasabi.assignmentobjects.User;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.eventlog.EventLog;
 import com.intuit.wasabi.experiment.Mutex;
 import com.intuit.wasabi.experiment.Pages;
 import com.intuit.wasabi.experiment.Priorities;
-import com.intuit.wasabi.experimentobjects.*;
+import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.experimentobjects.Bucket;
+import com.intuit.wasabi.experimentobjects.BucketList;
+import com.intuit.wasabi.experimentobjects.Context;
+import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.experimentobjects.ExperimentBatch;
+import com.intuit.wasabi.experimentobjects.Page;
+import com.intuit.wasabi.experimentobjects.PageExperiment;
+import com.intuit.wasabi.experimentobjects.PrioritizedExperiment;
+import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
 import com.intuit.wasabi.export.DatabaseExport;
 import com.intuit.wasabi.export.Envelope;
 import com.intuit.wasabi.export.WebExport;
@@ -48,12 +62,23 @@ import org.mockito.runners.MockitoJUnitRunner;
 import javax.ws.rs.core.HttpHeaders;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.RETURNS_DEEP_STUBS;
 import static org.mockito.BDDMockito.any;
 import static org.mockito.BDDMockito.doReturn;
@@ -61,7 +86,6 @@ import static org.mockito.BDDMockito.eq;
 import static org.mockito.BDDMockito.spy;
 import static org.mockito.BDDMockito.times;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -104,7 +128,7 @@ public class AssignmentsImplTest {
         executors.put(TEST_INGESTION_EXECUTOR_NAME, ingestionExecutor);
         this.assignmentsImpl = new AssignmentsImpl(executors,
                 experimentRepository, assignmentsRepository, mutexRepository,
-                ruleCache, pages, priorities, 
+                ruleCache, pages, priorities,
                 assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache);
     }
 
@@ -136,12 +160,12 @@ public class AssignmentsImplTest {
 
         assertThat(assignmentsImpl.queuesDetails(), is(queueDetailsMap));
     }
-    
+
     @Test
     public void testFlushMessages() {
         assignmentsImpl.flushMessages();
     }
-    
+
     @Test
     public void testGetSingleAssignmentNullAssignmentExperimentNotFound() {
         Application.Name appName = Application.Name.valueOf("Test");
@@ -371,7 +395,7 @@ public class AssignmentsImplTest {
         User.ID user = User.ID.valueOf("testUser");
         Page.Name pageName = Page.Name.valueOf("p1");
         when(experimentRepository.getExperiment(eq(appName), eq(label))).thenReturn(experiment);
-        when(assignmentsRepository.getAssignment( eq(user), eq(appName), eq(id), any(Context.class))).thenReturn(assignment);
+        when(assignmentsRepository.getAssignment(eq(user), eq(appName), eq(id), any(Context.class))).thenReturn(assignment);
         when(assignment.getStatus()).thenReturn(Assignment.Status.EXISTING_ASSIGNMENT);
         Assignment result = assignmentsImpl.getSingleAssignment(user, appName, label, context, true, true,
                 null, null, pageName);
@@ -969,7 +993,7 @@ public class AssignmentsImplTest {
         Assignment newAssignment = assignmentsImpl.createAssignmentObject(exp1, userID, context, selectBucket, bucketList1, date, segmentationProfile);
 
         //---------- Validate result
-        assertTrue(newAssignment!=null);
+        assertTrue(newAssignment != null);
         assertTrue(newAssignment.getStatus().equals(Assignment.Status.NEW_ASSIGNMENT));
 
     }
@@ -1000,7 +1024,7 @@ public class AssignmentsImplTest {
         Assignment newAssignment = assignmentsImpl.createAssignmentObject(exp1, userID, context, selectBucket, bucketList1, date, segmentationProfile);
 
         //---------- Validate result
-        assertTrue(newAssignment!=null);
+        assertTrue(newAssignment != null);
         assertTrue(newAssignment.getStatus().equals(Assignment.Status.NO_OPEN_BUCKETS));
 
     }

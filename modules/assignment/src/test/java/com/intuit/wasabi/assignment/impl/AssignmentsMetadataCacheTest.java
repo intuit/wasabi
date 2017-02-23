@@ -17,9 +17,7 @@
 
 package com.intuit.wasabi.assignment.impl;
 
-import com.codahale.metrics.health.HealthCheck;
 import com.codahale.metrics.health.HealthCheckRegistry;
-import com.google.inject.name.Named;
 import com.intuit.wasabi.assignment.cache.AssignmentsMetadataCache;
 import com.intuit.wasabi.assignment.cache.impl.AssignmentsMetadataCacheHealthCheck;
 import com.intuit.wasabi.assignment.cache.impl.AssignmentsMetadataCacheImpl;
@@ -28,9 +26,7 @@ import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.BucketList;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.Page;
-import com.intuit.wasabi.experimentobjects.PageExperiment;
 import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
-import com.intuit.wasabi.repository.CassandraRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.MutexRepository;
 import com.intuit.wasabi.repository.PagesRepository;
@@ -39,21 +35,18 @@ import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.config.Configuration;
 import net.sf.ehcache.config.ConfigurationFactory;
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ScheduledExecutorService;
 
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
@@ -62,41 +55,38 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import static org.hamcrest.core.Is.is;
-
 /**
  * Class to unit test AssignmentsMetadataCache
- *
  */
 public class AssignmentsMetadataCacheTest {
     //Define mock objects
-    private  ExperimentRepository experimentRepository = mock(ExperimentRepository.class);
-    private  PrioritiesRepository prioritiesRepository = mock(PrioritiesRepository.class);
-    private  MutexRepository mutexRepository = mock(MutexRepository.class);
-    private  PagesRepository pagesRepository = mock(PagesRepository.class);
-    private  ScheduledExecutorService refreshCacheService = mock(ScheduledExecutorService.class);
-    private  Integer refreshIntervalInMinutes = 5;
-    private  AssignmentsMetadataCacheRefreshTask metadataCacheRefreshTask = mock(AssignmentsMetadataCacheRefreshTask.class);
-    private  HealthCheckRegistry healthCheckRegistry = mock(HealthCheckRegistry.class);
-    private  AssignmentsMetadataCacheHealthCheck metadataCacheHealthCheck = mock(AssignmentsMetadataCacheHealthCheck.class);
+    private ExperimentRepository experimentRepository = mock(ExperimentRepository.class);
+    private PrioritiesRepository prioritiesRepository = mock(PrioritiesRepository.class);
+    private MutexRepository mutexRepository = mock(MutexRepository.class);
+    private PagesRepository pagesRepository = mock(PagesRepository.class);
+    private ScheduledExecutorService refreshCacheService = mock(ScheduledExecutorService.class);
+    private Integer refreshIntervalInMinutes = 5;
+    private AssignmentsMetadataCacheRefreshTask metadataCacheRefreshTask = mock(AssignmentsMetadataCacheRefreshTask.class);
+    private HealthCheckRegistry healthCheckRegistry = mock(HealthCheckRegistry.class);
+    private AssignmentsMetadataCacheHealthCheck metadataCacheHealthCheck = mock(AssignmentsMetadataCacheHealthCheck.class);
 
-    private  List appResultList = mock(List.class);
-    private  Map appResultMap = mock(Map.class);
+    private List appResultList = mock(List.class);
+    private Map appResultMap = mock(Map.class);
 
-    private  Experiment expResultObject = mock(Experiment.class);
-    private  Map expResultMap = mock(Map.class);
+    private Experiment expResultObject = mock(Experiment.class);
+    private Map expResultMap = mock(Map.class);
 
-    private  PrioritizedExperimentList priorityResultObject = mock(PrioritizedExperimentList.class);
-    private  Map priorityResultMap = mock(Map.class);
+    private PrioritizedExperimentList priorityResultObject = mock(PrioritizedExperimentList.class);
+    private Map priorityResultMap = mock(Map.class);
 
-    private  BucketList bucketResultObject = mock(BucketList.class);
-    private  Map bucketResultMap = mock(Map.class);
+    private BucketList bucketResultObject = mock(BucketList.class);
+    private Map bucketResultMap = mock(Map.class);
 
-    private  List exclusionResultList = mock(List.class);
-    private  Map exclusionResultMap = mock(Map.class);
+    private List exclusionResultList = mock(List.class);
+    private Map exclusionResultMap = mock(Map.class);
 
-    private  List pageResultList = mock(List.class);
-    private  Map pageResultMap = mock(Map.class);
+    private List pageResultList = mock(List.class);
+    private Map pageResultMap = mock(Map.class);
 
     @Test
     public void happyPathTestForGetExperimentsByAppName() {
@@ -475,7 +465,7 @@ public class AssignmentsMetadataCacheTest {
         Map<String, String> cacheDetails = cache.getDetails();
 
         //Verify that there are 2 entries in the APP_NAME_TO_EXPERIMENTS_CACHE cache
-        String size = cacheDetails.get(AssignmentsMetadataCache.CACHE_NAME.APP_NAME_TO_EXPERIMENTS_CACHE+".SIZE");
+        String size = cacheDetails.get(AssignmentsMetadataCache.CACHE_NAME.APP_NAME_TO_EXPERIMENTS_CACHE + ".SIZE");
         assertThat(size, is("2"));
 
         //Verify that total size of cache details map is 7 = 1 for status & other 6 caches

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,10 +15,10 @@
  *******************************************************************************/
 package com.intuit.wasabi.tests.service;
 
+import com.intuit.wasabi.tests.library.APIServerConnector;
 import com.intuit.wasabi.tests.library.TestBase;
 import com.intuit.wasabi.tests.model.Experiment;
 import com.intuit.wasabi.tests.model.factory.ExperimentFactory;
-import com.intuit.wasabi.tests.library.APIServerConnector;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -65,9 +65,9 @@ public class AuthTest extends TestBase {
     @DataProvider
     public Object[][] InvalidAuthProvider() {
         return new Object[][]{
-                {"user@foo.com",""},
-                {"","user01"},
-                {"user@foo.com","notMyPassword"},
+                {"user@foo.com", ""},
+                {"", "user01"},
+                {"user@foo.com", "notMyPassword"},
                 {"", ""}
         };
     }
@@ -77,7 +77,7 @@ public class AuthTest extends TestBase {
     ///////////////
 
     // FIXME: comment this out as DefaultAuthentication is currently not checking for invalid auth provider.
-    
+
 //    /**
 //     * Tries to create experiments with inalid authorizations.
 //     *
@@ -106,7 +106,6 @@ public class AuthTest extends TestBase {
         asc.setUserNameAndPassword(userName, password);
         experiment = postExperiment(ExperimentFactory.createExperiment());
     }
-
 
 
     /**

@@ -20,18 +20,23 @@ import com.google.inject.name.Named;
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerResponse;
 import com.sun.jersey.spi.container.ContainerResponseFilter;
-
 import org.slf4j.Logger;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-
-import static org.slf4j.LoggerFactory.getLogger;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static com.google.common.net.HttpHeaders.*;
-import static com.intuit.wasabi.api.ApiAnnotations.*;
-
 import java.util.Objects;
+
+import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS;
+import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS;
+import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN;
+import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_MAX_AGE;
+import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS;
+import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD;
+import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
+import static com.intuit.wasabi.api.ApiAnnotations.ACCESS_CONTROL_MAX_AGE_DELTA_SECONDS;
+import static com.intuit.wasabi.api.ApiAnnotations.APPLICATION_ID;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public class SimpleCORSResponseFilter implements ContainerResponseFilter {
 
@@ -42,7 +47,7 @@ public class SimpleCORSResponseFilter implements ContainerResponseFilter {
 
     @Inject
     public SimpleCORSResponseFilter(final @Named(APPLICATION_ID) String applicationName,
-            final @Named(ACCESS_CONTROL_MAX_AGE_DELTA_SECONDS) String deltaSeconds) {
+                                    final @Named(ACCESS_CONTROL_MAX_AGE_DELTA_SECONDS) String deltaSeconds) {
         LOGGER.info("Instantiated response filter {}", getClass().getName());
         this.applicationName = applicationName;
         this.deltaSeconds = deltaSeconds;
@@ -51,7 +56,7 @@ public class SimpleCORSResponseFilter implements ContainerResponseFilter {
     @Override
     public ContainerResponse filter(ContainerRequest containerRequest, ContainerResponse containerResponse) {
         LOGGER.trace("CORS filter called for request: {}", containerRequest);
-        
+
         Response.ResponseBuilder response = Response.fromResponse(containerResponse.getResponse());
 
         if ("OPTIONS".equals(containerRequest.getMethod())) {

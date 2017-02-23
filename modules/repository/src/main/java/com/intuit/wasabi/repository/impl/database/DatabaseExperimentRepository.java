@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,7 +35,6 @@ import com.intuit.wasabi.experimentobjects.ExperimentList;
 import com.intuit.wasabi.experimentobjects.ExperimentValidator;
 import com.intuit.wasabi.experimentobjects.NewExperiment;
 import com.intuit.wasabi.experimentobjects.exceptions.WasabiException;
-import com.intuit.wasabi.repository.DatabaseRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.RepositoryException;
 import com.netflix.astyanax.MutationBatch;
@@ -64,7 +63,7 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
 
     @Inject
     public DatabaseExperimentRepository(TransactionFactory transactionFactory, ExperimentValidator validator,
-            Flyway flyway, final @Named("mysql.mutagen.root.resource.path") String mutagenRootResourcePath) {
+                                        Flyway flyway, final @Named("mysql.mutagen.root.resource.path") String mutagenRootResourcePath) {
         super();
 
         this.transactionFactory = transactionFactory;
@@ -562,13 +561,12 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
             SQL.setLength(SQL.length() - 1);
         }
 
-        SQL.append( " WHERE experiment_id = ? and label in (");
+        SQL.append(" WHERE experiment_id = ? and label in (");
         for (int i = 0; i < bucketListSize; i++) {
             SQL.append("?,");
         }
         SQL.setLength(SQL.length() - 1);
         SQL.append(")");
-
 
 
         for (int i = 0; i < bucketListSize; i++) {
@@ -751,6 +749,7 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
 
     /**
      * Creates an application at top level
+     *
      * @param applicationName Application Name
      */
     @Override

@@ -48,14 +48,14 @@ public class BatchAssignment extends TestBase {
 //    List<Experiment> experimentBadList = new ArrayList<>();
 //    List<String> experimentBadLabels = new ArrayList<>();
 
-    @Test(groups={"setup"}, dataProvider = "BatchAssignmentExperimentData", dataProviderClass = AssignmentDataProvider.class)
-    public void t_setup(String experimentData){
+    @Test(groups = {"setup"}, dataProvider = "BatchAssignmentExperimentData", dataProviderClass = AssignmentDataProvider.class)
+    public void t_setup(String experimentData) {
         response = apiServerConnector.doPost("/experiments", experimentData);
         assertReturnCode(response, HttpStatus.SC_CREATED);
         Experiment experiment = ExperimentFactory.createFromJSONString(response.asString());
         experimentList.add(experiment);
         experimentLabels.add(experiment.label);
-        String url = "/experiments/"+experiment.id+"/buckets";
+        String url = "/experiments/" + experiment.id + "/buckets";
         String bucketA = "{\"label\": \"A\", \"allocationPercent\": 0.5, \"isControl\": true, " +
                 "\"description\": \"Bucket A\",\"payload\": \"This is bucket A\"}";
         response = apiServerConnector.doPost(url, bucketA);
@@ -87,28 +87,28 @@ public class BatchAssignment extends TestBase {
 //        assertReturnCode(response, HttpStatus.SC_OK);
 //    }
 
-    @Test(groups={"batchAssign"}, dependsOnGroups = {"setup"},
+    @Test(groups = {"batchAssign"}, dependsOnGroups = {"setup"},
             dataProvider = "BatchAssignmentStateAndExpectedValues", dataProviderClass = AssignmentDataProvider.class)
-    public void t_batchAssign(String state, boolean isAssignment, String status){
+    public void t_batchAssign(String state, boolean isAssignment, String status) {
         clearAssignmentsMetadataCache();
 
-        String lables = "{\"labels\": ["+experimentLabels.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(","))+"]}";
+        String lables = "{\"labels\": [" + experimentLabels.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(",")) + "]}";
         String url = "/assignments/applications/testBatch/users/batchUser";
-        for(Experiment experiment : experimentList){
-            response = apiServerConnector.doPut("/experiments/" +experiment.id, "{\"state\": \""+state+"\"}");
+        for (Experiment experiment : experimentList) {
+            response = apiServerConnector.doPut("/experiments/" + experiment.id, "{\"state\": \"" + state + "\"}");
             assertReturnCode(response, HttpStatus.SC_OK);
         }
         response = apiServerConnector.doPost(url, lables);
-        LOGGER.debug("experiment not found State="+state+" status=" + response.getStatusCode()
+        LOGGER.debug("experiment not found State=" + state + " status=" + response.getStatusCode()
                 + " response=" + response.asString());
         Type listType = new TypeToken<Map<String, ArrayList<Assignment>>>() {
         }.getType();
         Map<String, List<Assignment>> batchAssignmentResult = new Gson().fromJson(response.asString(), listType);
-        for(Assignment assignment : batchAssignmentResult.get("assignments")){
-            if(isAssignment){
-                Assert.assertNotNull(assignment.assignment, "Assignment should not be null for: "+ assignment);
-            }else{
-                Assert.assertNull(assignment.assignment, "Assignment should be null for: "+ assignment);
+        for (Assignment assignment : batchAssignmentResult.get("assignments")) {
+            if (isAssignment) {
+                Assert.assertNotNull(assignment.assignment, "Assignment should not be null for: " + assignment);
+            } else {
+                Assert.assertNull(assignment.assignment, "Assignment should be null for: " + assignment);
             }
             Assert.assertEquals(assignment.status, status);
         }
@@ -116,12 +116,12 @@ public class BatchAssignment extends TestBase {
 
 
     @AfterClass
-    public void t_cleanUp(){
-        for(Experiment experiment : experimentList){
-            response = apiServerConnector.doPut("experiments/"+experiment.id, "{\"state\": \"RUNNING\"}");
-            response = apiServerConnector.doPut("experiments/"+experiment.id, "{\"state\": \"TERMINATED\"}");
+    public void t_cleanUp() {
+        for (Experiment experiment : experimentList) {
+            response = apiServerConnector.doPut("experiments/" + experiment.id, "{\"state\": \"RUNNING\"}");
+            response = apiServerConnector.doPut("experiments/" + experiment.id, "{\"state\": \"TERMINATED\"}");
             assertReturnCode(response, HttpStatus.SC_OK);
-            response = apiServerConnector.doDelete("experiments/"+experiment.id);
+            response = apiServerConnector.doDelete("experiments/" + experiment.id);
             assertReturnCode(response, HttpStatus.SC_NO_CONTENT);
         }
     }

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,17 +33,17 @@ import com.intuit.wasabi.userdirectory.UserDirectoryModule;
 public class IntegrationTestBase {
     protected static Session session;
     protected static MappingManager manager;
-	protected static Injector injector;
+    protected static Injector injector;
 
-    public static void setup(){
-    	if (injector != null)
-    		return;
+    public static void setup() {
+        if (injector != null)
+            return;
         injector = Guice.createInjector(
                 new UserDirectoryModule(),
                 new CassandraRepositoryModule(),
-        		new DatabaseExperimentRepositoryModule(),
-        		new DatabaseModule(),
-        		new EventLogModule());
+                new DatabaseExperimentRepositoryModule(),
+                new DatabaseModule(),
+                new EventLogModule());
         injector.getInstance(Key.get(String.class, Names.named("CassandraInstanceName")));
 
         session = injector.getInstance(CassandraDriver.class).getSession();

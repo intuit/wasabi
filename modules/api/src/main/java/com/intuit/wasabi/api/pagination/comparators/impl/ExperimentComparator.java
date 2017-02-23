@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,7 +30,7 @@ public class ExperimentComparator extends PaginationComparator<Experiment> {
 
     /**
      * Initializes the ExperimentComparator.
-     *
+     * <p>
      * Sets the default sort order to the descending modification time ({@code -modification_time}),
      * that means the latest changes come first.
      */
@@ -52,8 +52,7 @@ public class ExperimentComparator extends PaginationComparator<Experiment> {
         end_time(Experiment::getEndTime, Date::compareTo),
         modification_time(Experiment::getModificationTime, Date::compareTo),
         state(experiment -> experiment.getState().name(), String::compareToIgnoreCase),
-        favorite(Experiment::isFavorite, Boolean::compareTo)
-        ;
+        favorite(Experiment::isFavorite, Boolean::compareTo);
 
         private final Function<Experiment, ?> propertyExtractor;
         private final BiFunction<?, ?, Integer> comparisonFunction;
@@ -61,9 +60,9 @@ public class ExperimentComparator extends PaginationComparator<Experiment> {
         /**
          * Creates a Property.
          *
-         * @param propertyExtractor the property extractor
+         * @param propertyExtractor  the property extractor
          * @param comparisonFunction the comparison function
-         * @param <T> the property type
+         * @param <T>                the property type
          */
         <T> Property(Function<Experiment, T> propertyExtractor, BiFunction<T, T, Integer> comparisonFunction) {
             this.propertyExtractor = propertyExtractor;

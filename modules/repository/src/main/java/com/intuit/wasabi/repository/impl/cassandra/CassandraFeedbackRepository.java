@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,8 +38,8 @@ import java.util.List;
 
 /**
  * Cassandra implementation of
- * @see FeedbackRepository
  *
+ * @see FeedbackRepository
  */
 public class CassandraFeedbackRepository implements FeedbackRepository {
 
@@ -48,9 +48,10 @@ public class CassandraFeedbackRepository implements FeedbackRepository {
 
     /**
      * Constructor
-     * @param driver Cassandra driver
+     *
+     * @param driver   Cassandra driver
      * @param keyspace cassandra keyspace
-     * @throws IOException   io exception
+     * @throws IOException         io exception
      * @throws ConnectionException connection exception
      */
     @Inject
@@ -103,7 +104,7 @@ public class CassandraFeedbackRepository implements FeedbackRepository {
                 "where user_id = ?";
 
         try {
-            OperationResult<CqlResult<UserInfo.Username,String>> opResult=
+            OperationResult<CqlResult<UserInfo.Username, String>> opResult =
                     driver.getKeyspace()
                             .prepareQuery(keyspace.feedbackCF())
                             .withCql(CQL)
@@ -111,7 +112,7 @@ public class CassandraFeedbackRepository implements FeedbackRepository {
                             .withByteBufferValue(username, UsernameSerializer.get())
                             .execute();
 
-            Rows<UserInfo.Username,String> rows=opResult.getResult().getRows();
+            Rows<UserInfo.Username, String> rows = opResult.getResult().getRows();
 
             List<UserFeedback> result = new ArrayList<>();
             for (Row<UserInfo.Username, String> row : rows) {
@@ -124,8 +125,7 @@ public class CassandraFeedbackRepository implements FeedbackRepository {
                         .build());
             }
             return result;
-        }
-        catch (ConnectionException e) {
+        } catch (ConnectionException e) {
             throw new RepositoryException("Could not retrieve feedback from user " + username.toString(), e);
         }
     }
@@ -138,14 +138,14 @@ public class CassandraFeedbackRepository implements FeedbackRepository {
         final String CQL = "select * from user_feedback";
 
         try {
-            OperationResult<CqlResult<UserInfo.Username,String>> opResult=
+            OperationResult<CqlResult<UserInfo.Username, String>> opResult =
                     driver.getKeyspace()
                             .prepareQuery(keyspace.feedbackCF())
                             .withCql(CQL)
                             .asPreparedStatement()
                             .execute();
 
-            Rows<UserInfo.Username,String> rows=opResult.getResult().getRows();
+            Rows<UserInfo.Username, String> rows = opResult.getResult().getRows();
 
             List<UserFeedback> result = new ArrayList<>();
             for (Row<UserInfo.Username, String> row : rows) {
@@ -159,9 +159,8 @@ public class CassandraFeedbackRepository implements FeedbackRepository {
                         .build());
             }
             return result;
-        }
-        catch (ConnectionException e) {
-            throw new RepositoryException("Could not retrieve feedback from all users",e);
+        } catch (ConnectionException e) {
+            throw new RepositoryException("Could not retrieve feedback from all users", e);
         }
     }
 }

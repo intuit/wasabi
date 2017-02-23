@@ -22,11 +22,16 @@ import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
-import static com.google.common.net.HttpHeaders.*;
+import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS;
+import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS;
+import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN;
+import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_MAX_AGE;
+import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD;
+import static com.intuit.wasabi.api.ApiAnnotations.ACCESS_CONTROL_MAX_AGE_DELTA_SECONDS;
+import static com.intuit.wasabi.api.ApiAnnotations.APPLICATION_ID;
 import static java.lang.Boolean.TRUE;
 import static javax.ws.rs.core.Response.Status.OK;
 import static javax.ws.rs.core.Response.status;
-import static com.intuit.wasabi.api.ApiAnnotations.*;
 
 public class HttpHeader {
 
@@ -36,7 +41,7 @@ public class HttpHeader {
 
     @Inject
     public HttpHeader(final @Named(APPLICATION_ID) String applicationName,
-            final @Named(ACCESS_CONTROL_MAX_AGE_DELTA_SECONDS) String deltaSeconds) {
+                      final @Named(ACCESS_CONTROL_MAX_AGE_DELTA_SECONDS) String deltaSeconds) {
         this.applicationName = applicationName;
         this.deltaSeconds = deltaSeconds;
         cacheControl = new CacheControl();

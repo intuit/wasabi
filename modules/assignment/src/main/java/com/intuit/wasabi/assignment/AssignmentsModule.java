@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -50,11 +50,18 @@ import static com.google.inject.Scopes.SINGLETON;
 import static com.google.inject.name.Names.named;
 import static com.intuit.autumn.utils.PropertyFactory.create;
 import static com.intuit.autumn.utils.PropertyFactory.getProperty;
+import static com.intuit.wasabi.assignment.AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_ALLOWED_STALE_TIME;
+import static com.intuit.wasabi.assignment.AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_ENABLED;
+import static com.intuit.wasabi.assignment.AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_HEALTH_CHECK;
+import static com.intuit.wasabi.assignment.AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_REFRESH_CACHE_SERVICE;
+import static com.intuit.wasabi.assignment.AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_REFRESH_INTERVAL;
+import static com.intuit.wasabi.assignment.AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_REFRESH_TASK;
+import static com.intuit.wasabi.assignment.AssignmentsAnnotations.ASSIGNMENT_DECORATOR_SERVICE;
+import static com.intuit.wasabi.assignment.AssignmentsAnnotations.RULECACHE_THREADPOOL;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Integer.parseInt;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.slf4j.LoggerFactory.getLogger;
-import static com.intuit.wasabi.assignment.AssignmentsAnnotations.*;
 
 public class AssignmentsModule extends AbstractModule {
 
@@ -120,7 +127,7 @@ public class AssignmentsModule extends AbstractModule {
         bind(Boolean.class).annotatedWith(named(ASSIGNMENTS_METADATA_CACHE_ENABLED))
                 .toInstance(metadataCacheEnabled);
 
-        if(metadataCacheEnabled) {
+        if (metadataCacheEnabled) {
             //This is a cache refresh interval, at this frequency cache will be refreshed.
             Integer metadataCacheRefreshIntervalInMinutes = Integer.parseInt(getProperty("metadata.cache.refresh.interval", properties, "5"));
             Integer metadataCacheNumberOfThreads = 1; //We want only single thread to refresh metadata cache.

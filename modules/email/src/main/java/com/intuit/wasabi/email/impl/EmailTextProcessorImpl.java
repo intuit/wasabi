@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,7 +16,6 @@
 package com.intuit.wasabi.email.impl;
 
 import com.google.inject.Inject;
-
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authorizationobjects.Role;
 import com.intuit.wasabi.authorizationobjects.UserRole;
@@ -25,7 +24,12 @@ import com.intuit.wasabi.email.EmailLinksList;
 import com.intuit.wasabi.email.EmailTextProcessor;
 import com.intuit.wasabi.email.TextTemplates;
 import com.intuit.wasabi.eventlog.EventLogEventType;
-import com.intuit.wasabi.eventlog.events.*;
+import com.intuit.wasabi.eventlog.events.BucketChangeEvent;
+import com.intuit.wasabi.eventlog.events.BucketCreateEvent;
+import com.intuit.wasabi.eventlog.events.EventLogEvent;
+import com.intuit.wasabi.eventlog.events.ExperimentChangeEvent;
+import com.intuit.wasabi.eventlog.events.ExperimentCreateEvent;
+import com.intuit.wasabi.eventlog.events.ExperimentEvent;
 import com.intuit.wasabi.exceptions.EventLogException;
 import com.intuit.wasabi.exceptions.WasabiEmailException;
 import com.intuit.wasabi.experimentobjects.Application;
@@ -36,10 +40,26 @@ import org.apache.commons.validator.routines.EmailValidator;
 import org.slf4j.Logger;
 import org.stringtemplate.v4.ST;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
-import static com.intuit.wasabi.email.WasabiEmailFields.*;
-import static com.intuit.wasabi.email.TextTemplates.*;
+import static com.intuit.wasabi.email.TextTemplates.APP_ACCESS;
+import static com.intuit.wasabi.email.TextTemplates.BUCKET_CHANGE;
+import static com.intuit.wasabi.email.TextTemplates.BUCKET_CREATED;
+import static com.intuit.wasabi.email.TextTemplates.EXPERIMENT_CHANGED;
+import static com.intuit.wasabi.email.TextTemplates.EXPERIMENT_CREATED;
+import static com.intuit.wasabi.email.WasabiEmailFields.APPLICATION_NAME;
+import static com.intuit.wasabi.email.WasabiEmailFields.BUCKET_NAME;
+import static com.intuit.wasabi.email.WasabiEmailFields.EMAIL_LINKS;
+import static com.intuit.wasabi.email.WasabiEmailFields.EXPERIMENT_ID;
+import static com.intuit.wasabi.email.WasabiEmailFields.EXPERIMENT_LABEL;
+import static com.intuit.wasabi.email.WasabiEmailFields.FIELD_AFTER;
+import static com.intuit.wasabi.email.WasabiEmailFields.FIELD_BEFORE;
+import static com.intuit.wasabi.email.WasabiEmailFields.FIELD_NAME;
+import static com.intuit.wasabi.email.WasabiEmailFields.USER_NAME;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**

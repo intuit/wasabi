@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,9 +35,12 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import static com.intuit.wasabi.email.EmailAnnotations.EMAIL_SERVICE_ENABLED;
+import static com.intuit.wasabi.email.EmailAnnotations.EMAIL_SERVICE_FROM;
+import static com.intuit.wasabi.email.EmailAnnotations.EMAIL_SERVICE_HOST;
+import static com.intuit.wasabi.email.EmailAnnotations.EMAIL_SERVICE_SUBJECT_PREFIX;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.slf4j.LoggerFactory.getLogger;
-import static com.intuit.wasabi.email.EmailAnnotations.*;
 
 /**
  * Implementation of the {@link com.intuit.wasabi.email.EmailService}
@@ -64,7 +67,7 @@ public class EmailServiceImpl implements EmailService {
         setHost(host);
 
         setFrom(from);
-        
+
         this.subjectPrefix = subjectPrefix;
         this.emailTextProcessor = emailTextProcessor;
     }
@@ -160,7 +163,7 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
-    Email createSimpleMailService(){
+    Email createSimpleMailService() {
         return new SimpleEmail();
     }
 
@@ -178,22 +181,24 @@ public class EmailServiceImpl implements EmailService {
 
     /**
      * Set the host for email
+     *
      * @param host
      * @throws IllegalArgumentException if host is blank
      */
-	public void setHost(String host) {
+    public void setHost(String host) {
         if (isBlank(host)) {
             throw new IllegalArgumentException("Host can not be empty or contain a space, check the configuration file");
         }
 
         this.host = host;
-	}
+    }
 
-	/**
-	 * Set from for email
-	 * @param from - set default email if from argument is not valid
-	 */
-	public void setFrom(String from) {
+    /**
+     * Set from for email
+     *
+     * @param from - set default email if from argument is not valid
+     */
+    public void setFrom(String from) {
         if (!emailVal.isValid(from)) {
             LOGGER.warn("The from-value for the email service is set to the default value: wasabi-service@example.com");
 
@@ -202,13 +207,14 @@ public class EmailServiceImpl implements EmailService {
         } else {
             this.from = from;
         }
-	}
+    }
 
-	/**
-	 * Set the prefix
-	 * @param subjectPrefix the prefix for the email subject
-	 */
-	public void setSubjectPrefix(String subjectPrefix) {
-		this.subjectPrefix = subjectPrefix;
-	}
+    /**
+     * Set the prefix
+     *
+     * @param subjectPrefix the prefix for the email subject
+     */
+    public void setSubjectPrefix(String subjectPrefix) {
+        this.subjectPrefix = subjectPrefix;
+    }
 }

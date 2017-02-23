@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,7 +25,11 @@ import com.intuit.wasabi.eventlog.EventLogModule;
 import com.intuit.wasabi.repository.AuthorizationRepository;
 import com.intuit.wasabi.repository.FeedbackRepository;
 import com.intuit.wasabi.repository.PagesRepository;
-import com.intuit.wasabi.repository.cassandra.accessor.*;
+import com.intuit.wasabi.repository.cassandra.accessor.BucketAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.ExclusionAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.PrioritiesAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.StagingAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.UserAssignmentAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.audit.AuditLogAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.count.BucketAssignmentCountAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.export.UserAssignmentExportAccessor;
@@ -70,6 +74,6 @@ public class CassandraRepositoryModuleITest {
         assertThat(injector.getInstance(AuditLogAccessor.class), is(not(nullValue())));
         assertThat(injector.getInstance(BucketAssignmentCountAccessor.class), is(not(nullValue())));
         assertThat(injector.getInstance(UserAssignmentExportAccessor.class), is(not(nullValue())));
-               
+
     }
 }

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,7 +35,7 @@ public class DefaultCassandraHealthCheck extends HealthCheck {
     private Session session;
 //    private PreparedStatement preparedStatement;
 
-    public DefaultCassandraHealthCheck(Session session){
+    public DefaultCassandraHealthCheck(Session session) {
         super();
         this.session = session;
 //        this.preparedStatement = this.session.prepare(SELECT_NOW_FROM_SYSTEM_LOCAL)
@@ -56,7 +56,7 @@ public class DefaultCassandraHealthCheck extends HealthCheck {
         String msg = "";
         try {
 //            this.session.execute( getBoundedStatemen() );
-            this.session.execute( SELECT_NOW_FROM_SYSTEM_LOCAL );
+            this.session.execute(SELECT_NOW_FROM_SYSTEM_LOCAL);
             res = true;
         } catch (NoHostAvailableException ex) {
             LOGGER.error("No hosts available", ex);

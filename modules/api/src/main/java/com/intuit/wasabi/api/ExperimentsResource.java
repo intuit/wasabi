@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,15 +29,31 @@ import com.intuit.wasabi.authorization.Authorization;
 import com.intuit.wasabi.authorizationobjects.Permission;
 import com.intuit.wasabi.authorizationobjects.UserRole;
 import com.intuit.wasabi.events.EventsExport;
-import com.intuit.wasabi.exceptions.*;
-import com.intuit.wasabi.experiment.*;
-import com.intuit.wasabi.experimentobjects.*;
+import com.intuit.wasabi.exceptions.AuthenticationException;
+import com.intuit.wasabi.exceptions.BucketNotFoundException;
+import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
+import com.intuit.wasabi.exceptions.TimeFormatException;
+import com.intuit.wasabi.exceptions.TimeZoneFormatException;
+import com.intuit.wasabi.experiment.Buckets;
+import com.intuit.wasabi.experiment.Experiments;
+import com.intuit.wasabi.experiment.Favorites;
+import com.intuit.wasabi.experiment.Mutex;
+import com.intuit.wasabi.experiment.Pages;
+import com.intuit.wasabi.experiment.Priorities;
+import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.experimentobjects.Bucket;
+import com.intuit.wasabi.experimentobjects.BucketList;
+import com.intuit.wasabi.experimentobjects.Context;
+import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.experimentobjects.ExperimentIDList;
+import com.intuit.wasabi.experimentobjects.ExperimentList;
+import com.intuit.wasabi.experimentobjects.ExperimentPageList;
+import com.intuit.wasabi.experimentobjects.NewExperiment;
+import com.intuit.wasabi.experimentobjects.Page;
 import com.intuit.wasabi.repository.RepositoryException;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-
 import org.slf4j.Logger;
 
 import javax.ws.rs.Consumes;
@@ -53,7 +69,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.DateTimeException;
@@ -84,6 +99,8 @@ import static com.intuit.wasabi.api.APISwaggerResource.DOC_PER_PAGE;
 import static com.intuit.wasabi.api.APISwaggerResource.DOC_SORT;
 import static com.intuit.wasabi.api.APISwaggerResource.DOC_TIMEZONE;
 import static com.intuit.wasabi.api.APISwaggerResource.EXAMPLE_AUTHORIZATION_HEADER;
+import static com.intuit.wasabi.api.ApiAnnotations.DEFAULT_TIME_FORMAT;
+import static com.intuit.wasabi.api.ApiAnnotations.DEFAULT_TIME_ZONE;
 import static com.intuit.wasabi.authorizationobjects.Permission.CREATE;
 import static com.intuit.wasabi.authorizationobjects.Permission.READ;
 import static com.intuit.wasabi.authorizationobjects.Permission.UPDATE;
@@ -102,7 +119,6 @@ import static javax.ws.rs.core.Response.Status.CREATED;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.slf4j.LoggerFactory.getLogger;
-import static com.intuit.wasabi.api.ApiAnnotations.*;
 
 /**
  * API endpoint for managing experiments
@@ -276,15 +292,14 @@ public class ExperimentsResource {
         String creatorID = (userName != null) ? userName.getUsername() : null;
 
         newExperiment.setCreatorID(creatorID);
-        
+
         // TODO - Should validate experiment before hand rather than catching errors later
         try {
-        	experiments.createExperiment(newExperiment, authorization.getUserInfo(userName));
+            experiments.createExperiment(newExperiment, authorization.getUserInfo(userName));
+        } catch (RepositoryException e) {
+            throw new RepositoryException("Could not create experiment " + newExperiment + " because " + e);
         }
-        catch(RepositoryException e) {
-        	throw new RepositoryException("Could not create experiment " + newExperiment + " because " + e);
-        }
-        
+
         Experiment experiment = experiments.getExperiment(newExperiment.getID());
 
         if (createNewApplication) {
