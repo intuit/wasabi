@@ -117,6 +117,7 @@ import static javax.ws.rs.core.Response.Status.CREATED;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.slf4j.LoggerFactory.getLogger;
+import static com.intuit.wasabi.api.ApiAnnotations.*;
 
 /**
  * API endpoint for managing experiments
@@ -146,8 +147,8 @@ public class ExperimentsResource {
     ExperimentsResource(final Experiments experiments, final EventsExport export, final Assignments assignments,
                         final Authorization authorization, final Buckets buckets, final Mutex mutex,
                         final Pages pages, final Priorities priorities, final Favorites favorites,
-                        final @Named("default.time.zone") String defaultTimezone,
-                        final @Named("default.time.format") String defaultTimeFormat,
+                        final @Named(DEFAULT_TIME_ZONE) String defaultTimezone,
+                        final @Named(DEFAULT_TIME_FORMAT) String defaultTimeFormat,
                         final HttpHeader httpHeader, final PaginationHelper<Experiment> experimentPaginationHelper
     ) {
         this.experiments = experiments;

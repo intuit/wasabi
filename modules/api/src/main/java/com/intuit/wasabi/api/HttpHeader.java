@@ -30,6 +30,7 @@ import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD;
 import static java.lang.Boolean.TRUE;
 import static javax.ws.rs.core.Response.Status.OK;
 import static javax.ws.rs.core.Response.status;
+import static com.intuit.wasabi.api.ApiAnnotations.*;
 
 public class HttpHeader {
 
@@ -38,7 +39,8 @@ public class HttpHeader {
     private final CacheControl cacheControl;
 
     @Inject
-    public HttpHeader(final @Named("application.id") String applicationName, final @Named("access.control.max.age.delta.seconds") String deltaSeconds) {
+    public HttpHeader(final @Named(APPLICATION_ID) String applicationName,
+            final @Named(ACCESS_CONTROL_MAX_AGE_DELTA_SECONDS) String deltaSeconds) {
         this.applicationName = applicationName;
         this.deltaSeconds = deltaSeconds;
         cacheControl = new CacheControl();

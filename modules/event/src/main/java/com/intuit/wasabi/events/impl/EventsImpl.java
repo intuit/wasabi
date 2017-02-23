@@ -40,6 +40,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.slf4j.LoggerFactory.getLogger;
+import static com.intuit.wasabi.events.EventsAnnotations.EXECUTOR_THREADPOOL_SIZE;
 
 /**
  * This class <b>asychronously</b> posts events to the events database (mysql in this implementation).
@@ -63,9 +64,9 @@ public class EventsImpl implements Events, EventsMBean {
 
     @Inject
     public EventsImpl(Map<String, EventIngestionExecutor> eventIngestionExecutors,
-                      final @Named("executor.threadpool.size") Integer threadPoolSize,
-                      final Assignments assignments,
-                      final TransactionFactory transactionFactory) {
+            final @Named(EXECUTOR_THREADPOOL_SIZE) Integer threadPoolSize,
+            final Assignments assignments,
+            final TransactionFactory transactionFactory) {
         super();
         this.eventIngestionExecutors = eventIngestionExecutors;
         this.transactionFactory = transactionFactory;

@@ -31,6 +31,7 @@ import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+import static com.intuit.wasabi.assignment.AssignmentsAnnotations.RULECACHE_THREADPOOL;
 
 /**
  * Created on 3/2/16.
@@ -54,7 +55,8 @@ public class AssignmentsModuleTest {
         injector.getInstance(Key.get(String.class, Names.named("assignment.http.proxy.host")));
 
         //RuleCacheEngine
-        injector.getInstance(Key.get(ThreadPoolExecutor.class, Names.named("ruleCache.threadPool")));
+        injector.getInstance(Key.get(ThreadPoolExecutor.class,
+                Names.named(RULECACHE_THREADPOOL)));
 
         assertThat(injector.getInstance(Key.get(Assignments.class)), is(not(nullValue())));
     }

@@ -34,7 +34,10 @@ import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS;
 import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD;
 import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.slf4j.LoggerFactory.getLogger;
+import static com.google.common.net.HttpHeaders.*;
+import static com.intuit.wasabi.api.ApiAnnotations.*;
+
+import java.util.Objects;
 
 public class SimpleCORSResponseFilter implements ContainerResponseFilter {
 
@@ -44,7 +47,8 @@ public class SimpleCORSResponseFilter implements ContainerResponseFilter {
     private final String deltaSeconds;
 
     @Inject
-    public SimpleCORSResponseFilter(final @Named("application.id") String applicationName, final @Named("access.control.max.age.delta.seconds") String deltaSeconds) {
+    public SimpleCORSResponseFilter(final @Named(APPLICATION_ID) String applicationName,
+            final @Named(ACCESS_CONTROL_MAX_AGE_DELTA_SECONDS) String deltaSeconds) {
         LOGGER.info("Instantiated response filter {}", getClass().getName());
         this.applicationName = applicationName;
         this.deltaSeconds = deltaSeconds;

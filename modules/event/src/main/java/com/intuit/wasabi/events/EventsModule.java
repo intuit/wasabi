@@ -40,6 +40,7 @@ import static com.intuit.autumn.utils.PropertyFactory.getProperty;
 import static java.lang.Class.forName;
 import static java.lang.Integer.parseInt;
 import static org.slf4j.LoggerFactory.getLogger;
+import static com.intuit.wasabi.events.EventsAnnotations.EXECUTOR_THREADPOOL_SIZE;
 
 /**
  * Guice module for configuring events related objects
@@ -58,7 +59,7 @@ public class EventsModule extends AbstractModule {
 
         Properties properties = create(PROPERTY_NAME, EventsModule.class);
 
-        bind(Integer.class).annotatedWith(named("executor.threadpool.size"))
+        bind(Integer.class).annotatedWith(named(EXECUTOR_THREADPOOL_SIZE))
                 .toInstance(parseInt(getProperty("executor.threadpool.size", properties, "0")));
         bind(Events.class).to(EventsImpl.class).in(SINGLETON);
         bind(EventsExport.class).to(EventsExportImpl.class).asEagerSingleton();
