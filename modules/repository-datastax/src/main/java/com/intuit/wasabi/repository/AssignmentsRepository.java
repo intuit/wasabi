@@ -50,27 +50,7 @@ import java.util.Set;
  */
 public interface AssignmentsRepository {
 
-    /**
-     * Get user assignments
-     *
-     * @param userID   User ID
-     * @param appLabel Application Label
-     * @param context  Environment context
-     * @return Set of experiments for user
-     */
-    Set<Experiment.ID> getUserAssignments(User.ID userID, Application.Name appLabel, Context context);
-
-    /**
-     * Assign a user to experiment
-     *
-     * @param assignment Assignment assignment
-     * @param experiment For Experiment experiment
-     * @param date       Date of user assignment
-     * @return Resulting assignment
-     */
-    Assignment assignUser(Assignment assignment, Experiment experiment, Date date);
-
-    /**
+     /**
      * Assign users to experiments in a batch
      *
      * @param assignments pair of experiment and assignment
@@ -94,16 +74,6 @@ public interface AssignmentsRepository {
     /**
      * Get assignment for experiment and user
      *
-     * @param experimentID A Experiment.ID, uuid identifier for Experiment
-     * @param userID       User Id
-     * @param context      Environment context
-     * @return Assignment
-     */
-    Assignment getAssignment(Experiment.ID experimentID, User.ID userID, Context context);
-
-    /**
-     * Get assignment for experiment and user
-     *
      * @param userID
      * @param appName
      * @param experimentID
@@ -123,16 +93,6 @@ public interface AssignmentsRepository {
      */
     void deleteAssignment(Experiment experiment, User.ID userID, Context context, Application.Name appName,
                           Assignment currentAssignment);
-
-    /**
-     * Assign user to the old user_assignment table.
-     * This will be completely removed once new table user_assignment_lookup starts serving all assignments.
-     *
-     * @param assignment Assignment object
-     * @param date       Date of assignment
-     * @return Assignment
-     */
-    Assignment assignUserToOld(Assignment assignment, Date date);
 
     /**
      * Assign user to exports

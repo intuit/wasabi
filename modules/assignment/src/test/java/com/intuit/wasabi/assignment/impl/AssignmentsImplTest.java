@@ -132,8 +132,8 @@ public class AssignmentsImplTest {
         Map<String, AssignmentIngestionExecutor> executors = new HashMap<String, AssignmentIngestionExecutor>();
         executors.put(TEST_INGESTION_EXECUTOR_NAME, ingestionExecutor);
         this.assignmentsImpl = new AssignmentsImpl(executors,
-                experimentRepository, assignmentsRepository, mutexRepository,
-                ruleCache, pages, priorities,
+                experimentRepository, assignmentsRepository,
+                ruleCache, pages,
                 assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache);
     }
 
@@ -218,7 +218,7 @@ public class AssignmentsImplTest {
     public void testGetSingleAssignmentNullAssignmentExperimentInDraftState() throws IOException {
         AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
                 experimentRepository, assignmentsRepository,
-                mutexRepository, ruleCache, pages, priorities, assignmentDecorator, threadPoolExecutor,
+                ruleCache, pages, assignmentDecorator, threadPoolExecutor,
                 eventLog, metadataCacheEnabled, metadataCache));
         //Input
         Application.Name appName = Application.Name.valueOf("Test");
@@ -390,7 +390,7 @@ public class AssignmentsImplTest {
     public void testGetSingleAssignmentNullAssignmentExperimentNoProfileMatch() throws IOException {
         AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
                 experimentRepository, assignmentsRepository,
-                mutexRepository, ruleCache, pages, priorities, assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache));
+                ruleCache, pages, assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache));
 
         //Input
         Application.Name appName = Application.Name.valueOf("Test");
@@ -480,10 +480,6 @@ public class AssignmentsImplTest {
         when(experiment.getState()).thenReturn(Experiment.State.RUNNING);
         when(experiment.getEndTime().getTime()).thenReturn(new Date().getTime() + 1000000L);
 
-        Assignment assignment = mock(Assignment.class);
-        when(assignmentsRepository.getAssignment(eq(id), eq(user), any(Context.class))).thenReturn(assignment);
-        when(assignment.getStatus()).thenReturn(Assignment.Status.NEW_ASSIGNMENT);
-
         List<Pair<Experiment, String>> existingAssignments = newArrayList(new ImmutablePair<Experiment, String>(experiment, "red"));
         Map<Experiment.ID, Experiment> expMap = newHashMap();
         expMap.put(id, experiment);
@@ -498,8 +494,8 @@ public class AssignmentsImplTest {
     @Test(expected = AssertionError.class)
     public void testGetSingleAssignmentProfileMatchAssertNewAssignment() throws IOException {
         AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
-                experimentRepository, assignmentsRepository,
-                mutexRepository, ruleCache, pages, priorities, assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache));
+                experimentRepository, assignmentsRepository, ruleCache, pages, assignmentDecorator, threadPoolExecutor,
+                eventLog, metadataCacheEnabled, metadataCache));
 
         //Input
         Application.Name appName = Application.Name.valueOf("Test");
@@ -554,7 +550,7 @@ public class AssignmentsImplTest {
     public void testGetSingleAssignmentSuccess() throws IOException {
         AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
                 experimentRepository, assignmentsRepository,
-                mutexRepository, ruleCache, pages, priorities, assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache));
+                ruleCache, pages, assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache));
 
         //Input
         Application.Name appName = Application.Name.valueOf("Test");
@@ -824,10 +820,9 @@ public class AssignmentsImplTest {
                 .withCreated(DATE)
                 .withCacheable(null)
                 .build();
-        Mockito.when(assignmentsRepository.assignUser(assignment, experiment, DATE)).thenReturn(newAssignment);
-        Mockito.when(assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-a"), context)).thenReturn(newAssignment);
+        Mockito.when(assignmentsRepository.getAssignment(User.ID.valueOf("user-a"), testApp, experiment.getID(), context)).thenReturn(newAssignment);
 
-        assignment = assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-a"), context);
+        assignment = assignmentsRepository.getAssignment(User.ID.valueOf("user-a"), testApp, experiment.getID(), context);
         assert assignment.getBucketLabel() == null;
         assert assignment.getStatus() == Assignment.Status.NEW_ASSIGNMENT;
 
@@ -855,10 +850,9 @@ public class AssignmentsImplTest {
                 .withCreated(DATE)
                 .withCacheable(null)
                 .build();
-        Mockito.when(assignmentsRepository.assignUser(assignment, experiment, DATE)).thenReturn(newAssignment);
-        Mockito.when(assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-b"), context)).thenReturn(newAssignment);
+        Mockito.when(assignmentsRepository.getAssignment(User.ID.valueOf("user-b"), testApp, experiment.getID(), context)).thenReturn(newAssignment);
 
-        assignment = assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-b"), context);
+        assignment = assignmentsRepository.getAssignment(User.ID.valueOf("user-b"), testApp, experiment.getID(), context);
         assert assignment.getBucketLabel() == null;
         assert assignment.getStatus() == Assignment.Status.NEW_ASSIGNMENT;
 
@@ -871,8 +865,8 @@ public class AssignmentsImplTest {
                 .withCacheable(null)
                 .build();
 
-        Mockito.when(assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-b"), context)).thenReturn(newAssignment);
-        assignment = assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-b"), context);
+        Mockito.when(assignmentsRepository.getAssignment(User.ID.valueOf("user-b"), testApp, experiment.getID(), context)).thenReturn(newAssignment);
+        assignment = assignmentsRepository.getAssignment(User.ID.valueOf("user-b"), testApp, experiment.getID(), context);
 
         assert assignment.getStatus() == Assignment.Status.EXISTING_ASSIGNMENT;
         assert assignment.getBucketLabel() == null;
@@ -892,9 +886,8 @@ public class AssignmentsImplTest {
                 .withCreated(DATE)
                 .withCacheable(null)
                 .build();
-        Mockito.when(assignmentsRepository.assignUser(assignment, experiment, DATE)).thenReturn(newAssignment);
-        Mockito.when(assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-c"), context)).thenReturn(newAssignment);
-        assignment = assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-c"), context);
+        Mockito.when(assignmentsRepository.getAssignment(User.ID.valueOf("user-c"), testApp, experiment.getID(), context)).thenReturn(newAssignment);
+        assignment = assignmentsRepository.getAssignment(User.ID.valueOf("user-c"), testApp, experiment.getID(), context);
 
         assert assignment.getBucketLabel() == yellowBucket.getLabel();
         assert assignment.getStatus() == Assignment.Status.NEW_ASSIGNMENT;
@@ -1033,10 +1026,9 @@ public class AssignmentsImplTest {
                 .withCreated(DATE)
                 .withCacheable(null)
                 .build();
-        Mockito.when(assignmentsRepository.assignUser(assignment, experiment, DATE)).thenReturn(newAssignment);
-        Mockito.when(assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-a"), context)).thenReturn(newAssignment);
+        Mockito.when(assignmentsRepository.getAssignment(User.ID.valueOf("user-a"), testApp, experiment.getID(), context)).thenReturn(newAssignment);
 
-        assignment = assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-a"), context);
+        assignment = assignmentsRepository.getAssignment(User.ID.valueOf("user-a"), testApp, experiment.getID(), context);
         assertTrue(assignment.getBucketLabel().equals(experienceA.getLabel()));
         assertTrue(assignment.getStatus() == Assignment.Status.NEW_ASSIGNMENT);
 
@@ -1061,10 +1053,9 @@ public class AssignmentsImplTest {
                 .withCreated(DATE)
                 .withCacheable(null)
                 .build();
-        Mockito.when(assignmentsRepository.assignUser(assignment, experiment, DATE)).thenReturn(newAssignment);
-        Mockito.when(assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-b"), context)).thenReturn(newAssignment);
+        Mockito.when(assignmentsRepository.getAssignment(User.ID.valueOf("user-b"), testApp, experiment.getID(), context)).thenReturn(newAssignment);
 
-        assignment = assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-b"), context);
+        assignment = assignmentsRepository.getAssignment(User.ID.valueOf("user-b"), testApp, experiment.getID(), context);
         assertTrue(assignment.getBucketLabel().equals(experienceB.getLabel()));
         assertTrue(assignment.getStatus() == Assignment.Status.NEW_ASSIGNMENT);
 
@@ -1077,8 +1068,8 @@ public class AssignmentsImplTest {
                 .withCacheable(null)
                 .build();
 
-        Mockito.when(assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-b"), context)).thenReturn(newAssignment);
-        assignment = assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-b"), context);
+        Mockito.when(assignmentsRepository.getAssignment(User.ID.valueOf("user-b"), testApp, experiment.getID(), context)).thenReturn(newAssignment);
+        assignment = assignmentsRepository.getAssignment(User.ID.valueOf("user-b"), testApp, experiment.getID(), context);
 
         assertTrue(assignment.getStatus() == Assignment.Status.EXISTING_ASSIGNMENT);
         assertTrue(assignment.getBucketLabel().equals(experienceB.getLabel()));
@@ -1099,9 +1090,8 @@ public class AssignmentsImplTest {
                 .withCreated(DATE)
                 .withCacheable(null)
                 .build();
-        Mockito.when(assignmentsRepository.assignUser(assignment, experiment, DATE)).thenReturn(newAssignment);
-        Mockito.when(assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-c"), context)).thenReturn(newAssignment);
-        assignment = assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-c"), context);
+        Mockito.when(assignmentsRepository.getAssignment(User.ID.valueOf("user-c"), testApp, experiment.getID(), context)).thenReturn(newAssignment);
+        assignment = assignmentsRepository.getAssignment(User.ID.valueOf("user-c"), testApp, experiment.getID(), context);
 
         assertTrue(assignment.getBucketLabel() == experienceC.getLabel());
         assertTrue(assignment.getStatus() == Assignment.Status.NEW_ASSIGNMENT);
@@ -1263,8 +1253,7 @@ public class AssignmentsImplTest {
                 .withCreated(DATE)
                 .withCacheable(null)
                 .build();
-        Mockito.when(assignmentsRepository.assignUser(assignment, experiment, DATE)).thenReturn(newAssignment);
-        Mockito.when(assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-b"), context)).thenReturn(newAssignment);
+        Mockito.when(assignmentsRepository.getAssignment(User.ID.valueOf("user-b"), testApp, experiment.getID(), context)).thenReturn(newAssignment);
 
         builder = Assignment.newInstance(experiment.getID())
                 .withApplicationName(experiment.getApplicationName())
@@ -1391,8 +1380,7 @@ public class AssignmentsImplTest {
                 .withCreated(DATE)
                 .withCacheable(null)
                 .build();
-        Mockito.when(assignmentsRepository.assignUser(assignment, experiment, DATE)).thenReturn(newAssignment);
-        Mockito.when(assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-b"), context)).thenReturn(newAssignment);
+        Mockito.when(assignmentsRepository.getAssignment(User.ID.valueOf("user-b"), testApp, experiment.getID(), context)).thenReturn(newAssignment);
 
         builder = Assignment.newInstance(experiment.getID())
                 .withApplicationName(experiment.getApplicationName())
@@ -1461,8 +1449,7 @@ public class AssignmentsImplTest {
                 .withCacheable(null)
                 .build();
 
-        Mockito.when(assignmentsRepository.assignUser(assignment, experiment, DATE)).thenReturn(newAssignment);
-        Mockito.when(assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-b"), context)).thenReturn(newAssignment);
+        Mockito.when(assignmentsRepository.getAssignment(User.ID.valueOf("user-b"), testApp, experiment.getID(), context)).thenReturn(newAssignment);
         Mockito.doNothing().when(assignmentsRepository).deleteAssignment(experiment, User.ID.valueOf("user-b"), context, testApp, assignment);
 
         experiment.setState(Experiment.State.TERMINATED);
@@ -1493,8 +1480,7 @@ public class AssignmentsImplTest {
                 .withCacheable(null)
                 .build();
 
-        Mockito.when(assignmentsRepository.assignUser(assignment, experiment, DATE)).thenReturn(newAssignment);
-        Mockito.when(assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-b"), context)).thenReturn(null);
+        Mockito.when(assignmentsRepository.getAssignment(User.ID.valueOf("user-b"), testApp, experiment.getID(), context)).thenReturn(null);
         Mockito.doNothing().when(assignmentsRepository).deleteAssignment(experiment, User.ID.valueOf("user-b"), context, testApp, assignment);
 
         Mockito.when(cassandraAssignments.putAssignment(userA, testApp, expLabel, context, redBucket.getLabel(), true)).thenReturn(newAssignment);

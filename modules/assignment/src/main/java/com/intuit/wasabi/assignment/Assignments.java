@@ -39,6 +39,24 @@ import java.util.Map;
 public interface Assignments {
 
     /**
+     * Holds the length of queues stored in rule cache and ingestion executors.
+     *
+     * @return Map of number of elements each queue
+     */
+    @Deprecated
+    Map<String, Integer> queuesLength();
+
+    /**
+     * @return Details of the queues in rule cache and ingestion executors.
+     */
+    Map<String, Object> queuesDetails();
+
+    /**
+     * Flush all active and queued messages in ThreadPoolExecutor to persistent store.
+     */
+    void flushMessages();
+
+    /**
      * Get or create a single assignment for a given user to a given experiment.
      *
      * @param userID                the {@link com.intuit.wasabi.assignmentobjects.User.ID} of the person we want the assignment for
@@ -155,23 +173,6 @@ public interface Assignments {
      */
     Map<String, String> metadataCacheDetails();
 
-    /**
-     * Holds the length of queues stored in rule cache and ingestion executors.
-     *
-     * @return Map of number of elements each queue
-     */
-    @Deprecated
-    Map<String, Integer> queuesLength();
-
-    /**
-     * @return Details of the queues in rule cache and ingestion executors.
-     */
-    Map<String, Object> queuesDetails();
-
-    /**
-     * Flush all active and queued messages in ThreadPoolExecutor to persistent store.
-     */
-    void flushMessages();
 
     /**
      * Gets bucket assignment ratios per day for a list of experiments. Also contains meta information about the
