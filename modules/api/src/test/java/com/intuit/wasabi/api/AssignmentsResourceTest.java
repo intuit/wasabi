@@ -48,12 +48,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.nio.charset.Charset.forName;
 import static org.apache.commons.codec.binary.Base64.encodeBase64;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
@@ -295,5 +297,66 @@ public class AssignmentsResourceTest {
     @Test
     public void getMetadataCacheDetailsTest() throws Exception {
         assertThat(resource.getMetadataCacheDetails().getStatus(), is(HttpStatus.SC_OK));
+    }
+
+    @Test
+    public void toMapTest() {
+
+        Assignment assignment = Assignment.newInstance(Experiment.ID.newInstance())
+                .withExperimentLabel(Experiment.Label.valueOf("TestExpLabel"))
+                .withApplicationName(Application.Name.valueOf("testApp"))
+                .withUserID(User.ID.valueOf("TestUser"))
+                .withBucketLabel(Bucket.Label.valueOf("red"))
+                .withPayload("RedBucketPayload")
+                .withCacheable(false)
+                .withContext(Context.valueOf("TEST"))
+                .withStatus(Status.EXISTING_ASSIGNMENT)
+                .build();
+
+        Map<String, Object> response1 = resource.toMap(assignment, true);
+        assertThat(response1.size(), is(5));
+        assertNull(response1.get("experimentLabel"));
+
+        Map<String, Object> response2 = resource.toMap(assignment, false);
+        assertThat(response2.size(), is(4));
+        assertNotNull(response2.get("experimentLabel"));
+    }
+
+    @Test
+    public void toMapListTest() {
+
+        Assignment assignment1 = Assignment.newInstance(Experiment.ID.newInstance())
+                .withExperimentLabel(Experiment.Label.valueOf("TestExpLabel"))
+                .withApplicationName(Application.Name.valueOf("testApp"))
+                .withUserID(User.ID.valueOf("TestUser"))
+                .withBucketLabel(Bucket.Label.valueOf("red"))
+                .withPayload("RedBucketPayload")
+                .withCacheable(false)
+                .withContext(Context.valueOf("TEST"))
+                .withStatus(Status.EXISTING_ASSIGNMENT)
+                .build();
+
+        Assignment assignment2 = Assignment.newInstance(Experiment.ID.newInstance())
+                .withExperimentLabel(Experiment.Label.valueOf("TestExpLabel2"))
+                .withApplicationName(Application.Name.valueOf("testApp2"))
+                .withUserID(User.ID.valueOf("TestUser2"))
+                .withBucketLabel(Bucket.Label.valueOf("red2"))
+                .withPayload("RedBucketPayload2")
+                .withCacheable(false)
+                .withContext(Context.valueOf("TEST"))
+                .withStatus(Status.NEW_ASSIGNMENT)
+                .build();
+
+        List<Assignment> assignments = newArrayList(assignment1, assignment2);
+
+        List<Map<String, Object>> response1 = resource.toMap(assignments, true);
+        assertThat(response1.size(), is(2));
+        assertNull(response1.get(0).get("experimentLabel"));
+        assertNull(response1.get(1).get("experimentLabel"));
+
+        List<Map<String, Object>> response2 = resource.toMap(assignments, false);
+        assertThat(response2.size(), is(2));
+        assertNotNull(response2.get(0).get("experimentLabel"));
+        assertNotNull(response2.get(1).get("experimentLabel"));
     }
 }

@@ -630,8 +630,8 @@ public class AssignmentsImpl implements Assignments {
                     //Create an assignment object with status as NEW_ASSIGNMENT / NO_OPEN_BUCKETS
                     assignment = createAssignmentObject(experiment, userID, context, selectBucket, bucketList, currentDate, segmentationProfile);
 
-                    assert assignment.getStatus() == Assignment.Status.NEW_ASSIGNMENT :
-                            new StringBuilder("Assignment status should have been NEW_ASSIGNMENT for ")
+                    assert (assignment.getStatus() == Assignment.Status.NEW_ASSIGNMENT || assignment.getStatus() == Assignment.Status.NO_OPEN_BUCKETS):
+                            new StringBuilder("Assignment status should have been NEW_ASSIGNMENT / NO_OPEN_BUCKETS for ")
                                     .append("userID = \"").append(userID).append("\", experiment = \"")
                                     .append(experiment).append("\"").toString();
                 } else {

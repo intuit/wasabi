@@ -63,6 +63,7 @@ import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_LABELLIST;
 import static com.intuit.wasabi.api.APISwaggerResource.EXAMPLE_AUTHORIZATION_HEADER;
 import static com.intuit.wasabi.assignmentobjects.Assignment.Status.EXPERIMENT_EXPIRED;
 import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
@@ -157,7 +158,7 @@ public class AssignmentsResource {
         Assignment assignment = getAssignment(userID, applicationName, experimentLabel, context, createAssignment,
                 ignoreSamplingPercent, null, headers);
 
-        return httpHeader.headers().entity(toMap(assignment)).build();
+        return httpHeader.headers().entity(toMap(assignment, TRUE)).build();
     }
 
     private Assignment getAssignment(final User.ID userID, final Application.Name applicationName,
@@ -244,7 +245,7 @@ public class AssignmentsResource {
         Assignment assignment = getAssignment(userID, applicationName, experimentLabel, context, createAssignment,
                 ignoreSamplingPercent, segmentationProfile, headers);
 
-        return httpHeader.headers().entity(toMap(assignment)).build();
+        return httpHeader.headers().entity(toMap(assignment, TRUE)).build();
     }
 
     /**
@@ -298,7 +299,7 @@ public class AssignmentsResource {
         List<Assignment> myAssignments = assignments.doBatchAssignments(userID, applicationName, context, createAssignment, FALSE,
                 headers, experimentBatch);
 
-        return httpHeader.headers().entity(ImmutableMap.<String, Object>builder().put("assignments", toMap(myAssignments)).build()).build();
+        return httpHeader.headers().entity(ImmutableMap.<String, Object>builder().put("assignments", toMap(myAssignments, FALSE)).build()).build();
     }
 
     /**
@@ -369,7 +370,7 @@ public class AssignmentsResource {
         Assignment response = assignments.putAssignment(userID, applicationName, experimentLabel, context,
                 submittedLabel, overwrite);
 
-        return httpHeader.headers().entity(toMap(response)).build();
+        return httpHeader.headers().entity(toMap(response, TRUE)).build();
     }
 
     /**
@@ -434,7 +435,7 @@ public class AssignmentsResource {
                     createAssignment, ignoreSamplingPercent, headers, null);
 
             return httpHeader.headers()
-                    .entity(ImmutableMap.<String, Object>builder().put("assignments", toMap(assignmentsFromPage)).build()).build();
+                    .entity(ImmutableMap.<String, Object>builder().put("assignments", toMap(assignmentsFromPage, FALSE)).build()).build();
         } catch (Exception e) {
             LOGGER.error("Exception happened while batch-assignment [GET]...", e);
             throw e;
@@ -507,7 +508,7 @@ public class AssignmentsResource {
                     createAssignment, ignoreSamplingPercent, headers, segmentationProfile);
 
             return httpHeader.headers()
-                    .entity(ImmutableMap.<String, Object>builder().put("assignments", toMap(assignmentsFromPage)).build()).build();
+                    .entity(ImmutableMap.<String, Object>builder().put("assignments", toMap(assignmentsFromPage, FALSE)).build()).build();
         } catch (Exception e) {
             LOGGER.error("Exception happened while batch-assignment [GET]...", e);
             throw e;
@@ -634,26 +635,40 @@ public class AssignmentsResource {
      * @param assignments
      * @return
      */
-    protected List<Map<String, Object>> toMap(Collection<Assignment> assignments) {
+    protected List<Map<String, Object>> toMap(Collection<Assignment> assignments, boolean isSingleAssignment) {
         List<Map<String, Object>> responseList = new ArrayList<>();
         assignments.forEach(assignment -> {
-            responseList.add(toMap(assignment));
+            responseList.add(toMap(assignment, isSingleAssignment));
         });
         return responseList;
     }
 
     /**
      * Convert Assignment object to the response MAP expected by the end user.
+     * Batch-assignment response map can contain:
+     *  - experimentLabel *
+     *  - assignment
+     *  - payload
+     *  - status
+     *
+     *  Single-assignment response map can contain:
+     *  - assignment
+     *  - payload
+     *  - status
+     *  - cache *
+     *  - context *
      *
      * @param assignment
+     * @param isSingleAssignment
      *
      * @return response map
      *
      */
-    protected Map<String, Object> toMap(final Assignment assignment) {
+    protected Map<String, Object> toMap(final Assignment assignment, boolean isSingleAssignment) {
         Map<String, Object> response = newHashMap();
 
-        if(nonNull(assignment.getExperimentLabel())) {
+        //Add experimentLabel for batch-assignment flow only
+        if(!isSingleAssignment && nonNull(assignment.getExperimentLabel())) {
             response.put("experimentLabel", assignment.getExperimentLabel());
         }
 
@@ -667,10 +682,13 @@ public class AssignmentsResource {
         }
 
         response.put("status", assignment.getStatus());
-        response.put("cache", assignment.getStatus().isCacheable());
 
-        if (assignment.getContext() != null) {
-            response.put("context", assignment.getContext().toString());
+        //Add cache & context fields for single-assignment flow only
+        if(isSingleAssignment) {
+            response.put("cache", assignment.getStatus().isCacheable());
+            if (assignment.getContext() != null) {
+                response.put("context", assignment.getContext().toString());
+            }
         }
 
         return response;
