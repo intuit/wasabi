@@ -412,30 +412,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         }
     }
 
-    //TODO: why return the last field as String instead of Bucket.Lable?
-    @Override
-    @Timed
-    public Table<Experiment.ID, Experiment.Label, String> getAssignments(User.ID userID,
-                                                                         Application.Name appLabel,
-                                                                         Context context,
-                                                                         Table<Experiment.ID, Experiment.Label, Experiment> allExperiments) {
-        final Stream<ExperimentUserByUserIdContextAppNameExperimentId> experimentUserStream =
-                getUserIndexStream(userID.toString(), appLabel.toString(), context.getContext());
-        final Table<Experiment.ID, Experiment.Label, String> result = HashBasedTable.create();
-        experimentUserStream.forEach((ExperimentUserByUserIdContextAppNameExperimentId t) -> {
-            Experiment.ID experimentID = Experiment.ID.valueOf(t.getExperimentId());
-            allExperiments.row(experimentID).values().stream()
-                    .forEach(i -> {
-                        result.put(
-                                experimentID,
-                                i.getLabel(), //expects this to be non-null
-                                Optional.ofNullable(t.getBucket()).orElseGet(() -> "null")
-                        );
-                    });
-        });
-        return result;
-    }
-
     /**
      * Populate existing user assignments for given user, application & context.
      * This method make use of provided experimentMap to eliminate the call to database to fetch experiment object.

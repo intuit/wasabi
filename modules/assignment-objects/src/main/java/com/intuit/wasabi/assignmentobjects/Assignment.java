@@ -56,6 +56,14 @@ public class Assignment {
     @ApiModelProperty(value = "if the bucket was empty resulting in null assignment", required = false)
     private boolean bucketEmpty = false;
 
+    @ApiModelProperty(value = "Label of an experiment to which user is assigned to", required = false)
+    private Experiment.Label experimentLabel;
+
+    @ApiModelProperty(
+            value = "bucket payload or null if the user is not in the experiment",
+            notes = "not present if no assignment can be returned", required = false, dataType = "String")
+    private String payload;
+
     protected Assignment() {
         super();
     }
@@ -96,6 +104,13 @@ public class Assignment {
         return applicationName;
     }
 
+    public Experiment.Label getExperimentLabel() {
+        return experimentLabel;
+    }
+
+    public String getPayload() {
+        return payload;
+    }
 
     public static Builder newInstance(Experiment.ID experimentID) {
         return new Builder(experimentID);
@@ -124,6 +139,8 @@ public class Assignment {
             instance.context = other.context;
             instance.applicationName = other.applicationName;
             instance.bucketEmpty = other.bucketEmpty;
+            instance.experimentLabel = other.experimentLabel;
+            instance.payload = other.payload;
         }
 
         public Builder withUserID(final User.ID userID) {
@@ -166,6 +183,16 @@ public class Assignment {
             return this;
         }
 
+        public Builder withExperimentLabel(Experiment.Label experimentLabel) {
+            instance.experimentLabel = experimentLabel;
+            return this;
+        }
+
+        public Builder withPayload(String payload) {
+            instance.payload = payload;
+            return this;
+        }
+
         public User.ID getUserID() {
             return instance.userID;
         }
@@ -196,6 +223,14 @@ public class Assignment {
 
         public Application.Name getApplicationName() {
             return instance.applicationName;
+        }
+
+        public Experiment.Label getExperimentLabel() {
+            return instance.experimentLabel;
+        }
+
+        public String getPayload() {
+            return instance.payload;
         }
 
         public Assignment build() {
@@ -233,6 +268,8 @@ public class Assignment {
                 .append(context, other.getContext())
                 .append(applicationName, other.getApplicationName())
                 .append(bucketEmpty, other.isBucketEmpty())
+                .append(experimentLabel, other.getExperimentLabel())
+                .append(payload, other.getPayload())
                 .isEquals();
     }
 
@@ -250,7 +287,8 @@ public class Assignment {
         EXISTING_ASSIGNMENT(true),
         NEW_ASSIGNMENT(true),
         NO_OPEN_BUCKETS(true),
-        NO_PROFILE_MATCH(false);
+        NO_PROFILE_MATCH(false),
+        ASSIGNMENT_FAILED(true);
 
         Status(boolean cacheable) {
             this.cacheable = cacheable;

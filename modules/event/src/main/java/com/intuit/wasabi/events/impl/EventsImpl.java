@@ -104,8 +104,7 @@ public class EventsImpl implements Events, EventsMBean {
                                                       Experiment.Label experimentLabel, Set<Context> contextSet) {
         Map<Context, Assignment> assignmentHashMap = new HashMap<>();
         for (Context context : contextSet) {
-            Assignment assignment = assignments.getAssignment(
-                    userID, applicationName, experimentLabel, context, false, false, null, null);
+            Assignment assignment = assignments.getExistingAssignment(userID, applicationName, experimentLabel, context);
             assignmentHashMap.put(context, assignment);
         }
         return assignmentHashMap;

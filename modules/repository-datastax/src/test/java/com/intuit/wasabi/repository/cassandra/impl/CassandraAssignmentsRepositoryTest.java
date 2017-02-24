@@ -86,6 +86,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
+import static com.google.common.collect.Maps.newHashMap;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -243,75 +244,81 @@ public class CassandraAssignmentsRepositoryTest {
 
     @Test
     public void testGetAssignmentsMultiple() {
+        Experiment.ID expId1 = Experiment.ID.newInstance();
+        Experiment.ID expId2 = Experiment.ID.newInstance();
+        Date endTime = new Date(System.currentTimeMillis()+30*24*60*60*1000);
+
+        Experiment exp1 = Experiment.withID(expId1).withEndTime(endTime)
+                .withLabel(Experiment.Label.valueOf("Exp1")).build();
+        Experiment exp2 = Experiment.withID(expId2).withEndTime(endTime)
+                .withLabel(Experiment.Label.valueOf("Exp2")).build();
+
         List<ExperimentUserByUserIdContextAppNameExperimentId> mocked = new ArrayList<>();
         mocked.add(ExperimentUserByUserIdContextAppNameExperimentId.builder()
                 .appName(APPLICATION_NAME.toString())
-                .experimentId(UUID.randomUUID())
+                .experimentId(expId1.getRawID())
                 .context("test")
                 .bucket("bucket1")
                 .build()
         );
         mocked.add(ExperimentUserByUserIdContextAppNameExperimentId.builder()
                 .appName(APPLICATION_NAME.toString())
-                .experimentId(UUID.randomUUID())
+                .experimentId(expId2.getRawID())
                 .context("test")
                 .bucket("bucket2")
                 .build()
         );
 
-        Table<Experiment.ID, Experiment.Label, Experiment> experimentTable = HashBasedTable.create();
-        UUID random = UUID.randomUUID();
-        experimentTable.put(Experiment.ID.valueOf(random),
-                Experiment.Label.valueOf("random-" + random.toString()),
-                Experiment.withID(Experiment.ID.valueOf(random)).build()
-        );
-        for (ExperimentUserByUserIdContextAppNameExperimentId item : mocked) {
-            experimentTable.put(Experiment.ID.valueOf(item.getExperimentId()),
-                    Experiment.Label.valueOf("test-" + item.getBucket()),
-                    Experiment.withID(Experiment.ID.valueOf(item.getExperimentId()))
-                            .withLabel(Experiment.Label.valueOf("test-" + item.getBucket())).build()
-            );
-        }
+        Map<Experiment.ID, Experiment> experimentMap = newHashMap();
+        experimentMap.put(expId1, exp1);
+        experimentMap.put(expId2, exp2);
 
         doReturn(mocked.stream()).when(spyRepository).getUserIndexStream(anyString(), anyString(), anyString());
-        Table<Experiment.ID, Experiment.Label, String> result = spyRepository.getAssignments(User.ID.valueOf("testUser"),
+
+        List<Pair<Experiment, String>> result = spyRepository.getAssignments(User.ID.valueOf("testUser"),
                 APPLICATION_NAME,
                 Context.valueOf("test"),
-                experimentTable
+                experimentMap
         );
+
+        //Verif the result
         assertThat(result.size(), is(2));
-        for (Experiment.ID id : result.rowKeySet()) {
-            assertThat(mocked.stream().map(t -> t.getExperimentId()).collect(Collectors.toList()), hasItems(id.getRawID()));
-        }
+        result.forEach(pair -> {
+            assertThat(mocked.stream().map(t -> t.getExperimentId()).collect(Collectors.toList()), hasItems(pair.getLeft().getID().getRawID()));
+        });
+
     }
 
     @Test
     public void testGetAssignmentsSingle() {
+        Experiment.ID expId1 = Experiment.ID.newInstance();
+        Date endTime = new Date(System.currentTimeMillis()+30*24*60*60*1000);
+
+        Experiment exp1 = Experiment.withID(expId1).withEndTime(endTime)
+                .withLabel(Experiment.Label.valueOf("Exp1")).build();
+
         List<ExperimentUserByUserIdContextAppNameExperimentId> mocked = new ArrayList<>();
         mocked.add(ExperimentUserByUserIdContextAppNameExperimentId.builder()
                 .appName(APPLICATION_NAME.toString())
-                .experimentId(experimentId)
+                .experimentId(expId1.getRawID())
                 .context("test")
                 .bucket("bucket1")
                 .build()
         );
 
-        Table<Experiment.ID, Experiment.Label, Experiment> experimentTable = HashBasedTable.create();
-        experimentTable.put(Experiment.ID.valueOf(experimentId),
-                Experiment.Label.valueOf("test-" + experimentId.toString()),
-                Experiment.withID(Experiment.ID.valueOf(experimentId))
-                        .withLabel(Experiment.Label.valueOf("test-bucket")).build()
-        );
+        Map<Experiment.ID, Experiment> experimentMap = newHashMap();
+        experimentMap.put(expId1, exp1);
+
         doReturn(mocked.stream()).when(spyRepository).getUserIndexStream(anyString(), anyString(), anyString());
-        Table<Experiment.ID, Experiment.Label, String> result = spyRepository.getAssignments(User.ID.valueOf("testUser"),
+        List<Pair<Experiment, String>> result = spyRepository.getAssignments(User.ID.valueOf("testUser"),
                 APPLICATION_NAME,
                 Context.valueOf("test"),
-                experimentTable
+                experimentMap
         );
         assertThat(result.size(), is(1));
-        for (Experiment.ID id : result.rowKeySet()) {
-            assertThat(mocked.stream().map(t -> t.getExperimentId()).collect(Collectors.toList()), hasItems(id.getRawID()));
-        }
+        result.forEach(pair -> {
+            assertThat(mocked.stream().map(t -> t.getExperimentId()).collect(Collectors.toList()), hasItems(pair.getLeft().getID().getRawID()));
+        });
     }
 
     @Test
@@ -325,6 +332,8 @@ public class CassandraAssignmentsRepositoryTest {
                 .build()
         );
 
+        Map<Experiment.ID, Experiment> experimentMap = newHashMap();
+
         Table<Experiment.ID, Experiment.Label, Experiment> experimentTable = HashBasedTable.create();
         experimentTable.put(Experiment.ID.valueOf(UUID.randomUUID()),
                 Experiment.Label.valueOf("test-" + experimentId.toString()),
@@ -332,10 +341,10 @@ public class CassandraAssignmentsRepositoryTest {
                         .withLabel(Experiment.Label.valueOf("test-bucket")).build()
         );
         doReturn(mocked.stream()).when(spyRepository).getUserIndexStream(anyString(), anyString(), anyString());
-        Table<Experiment.ID, Experiment.Label, String> result = spyRepository.getAssignments(User.ID.valueOf("testUser"),
+        List<Pair<Experiment, String>> result = spyRepository.getAssignments(User.ID.valueOf("testUser"),
                 APPLICATION_NAME,
                 Context.valueOf("test"),
-                experimentTable
+                experimentMap
         );
         assertThat(result.size(), is(0));
     }
@@ -344,16 +353,13 @@ public class CassandraAssignmentsRepositoryTest {
     public void testGetAssignmentsEmptyResult() {
         List<ExperimentUserByUserIdContextAppNameExperimentId> mocked = new ArrayList<>();
         Table<Experiment.ID, Experiment.Label, Experiment> experimentTable = HashBasedTable.create();
-        experimentTable.put(Experiment.ID.valueOf(UUID.randomUUID()),
-                Experiment.Label.valueOf("test-" + experimentId.toString()),
-                Experiment.withID(Experiment.ID.valueOf(experimentId))
-                        .withLabel(Experiment.Label.valueOf("test-bucket")).build()
-        );
+        Map<Experiment.ID, Experiment> experimentMap = newHashMap();
+
         doReturn(mocked.stream()).when(spyRepository).getUserIndexStream(anyString(), anyString(), anyString());
-        Table<Experiment.ID, Experiment.Label, String> result = spyRepository.getAssignments(User.ID.valueOf("testUser"),
+        List<Pair<Experiment, String>> result = spyRepository.getAssignments(User.ID.valueOf("testUser"),
                 APPLICATION_NAME,
                 Context.valueOf("test"),
-                experimentTable
+                experimentMap
         );
         assertThat(result.size(), is(0));
     }

@@ -82,20 +82,6 @@ public interface AssignmentsRepository {
     /**
      * Get assignments
      *
-     * @param userID         User Id
-     * @param appLabel       Application Label
-     * @param context        Environment context
-     * @param allExperiments A table of all Experiments for this application
-     * @return Table of assignments
-     */
-    Table<Experiment.ID, Experiment.Label, String> getAssignments(User.ID userID, Application.Name appLabel,
-                                                                  Context context,
-                                                                  Table<Experiment.ID, Experiment.Label,
-                                                                          Experiment> allExperiments);
-
-    /**
-     * Get assignments
-     *
      * @param userID        User Id
      * @param appLabel      Application Label
      * @param context       Environment context

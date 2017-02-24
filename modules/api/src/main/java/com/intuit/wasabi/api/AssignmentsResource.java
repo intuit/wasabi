@@ -52,14 +52,19 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_LABELLIST;
 import static com.intuit.wasabi.api.APISwaggerResource.EXAMPLE_AUTHORIZATION_HEADER;
 import static com.intuit.wasabi.assignmentobjects.Assignment.Status.EXPERIMENT_EXPIRED;
 import static java.lang.Boolean.FALSE;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -159,11 +164,11 @@ public class AssignmentsResource {
                                      final Experiment.Label experimentLabel, final Context context,
                                      final boolean createAssignment, final boolean ignoreSamplingPercent,
                                      final SegmentationProfile segmentationProfile, final HttpHeaders headers) {
-        Assignment assignment = assignments.getSingleAssignment(userID, applicationName, experimentLabel, context,
-                createAssignment, ignoreSamplingPercent, segmentationProfile, headers, null);
+        Assignment assignment = assignments.doSingleAssignment(userID, applicationName, experimentLabel, context,
+                createAssignment, ignoreSamplingPercent, segmentationProfile, headers);
 
         // This should not happen when createAssignment == true
-        if (assignment == null) {
+        if (isNull(assignment)) {
             throw new AssignmentNotFoundException(userID, applicationName, experimentLabel);
         }
 
@@ -290,10 +295,10 @@ public class AssignmentsResource {
                     headers, experimentBatch);
         }
 
-        List<Map> myAssignments = assignments.doBatchAssignments(userID, applicationName, context, createAssignment, FALSE,
-                headers, experimentBatch, null, null);
+        List<Assignment> myAssignments = assignments.doBatchAssignments(userID, applicationName, context, createAssignment, FALSE,
+                headers, experimentBatch);
 
-        return httpHeader.headers().entity(ImmutableMap.<String, Object>builder().put("assignments", myAssignments).build()).build();
+        return httpHeader.headers().entity(ImmutableMap.<String, Object>builder().put("assignments", toMap(myAssignments)).build()).build();
     }
 
     /**
@@ -425,11 +430,11 @@ public class AssignmentsResource {
                         ignoreSamplingPercent, headers);
             }
 
-            List<Map> assignmentsFromPage = assignments.doPageAssignments(applicationName, pageName, userID, context,
+            List<Assignment> assignmentsFromPage = assignments.doPageAssignments(applicationName, pageName, userID, context,
                     createAssignment, ignoreSamplingPercent, headers, null);
 
             return httpHeader.headers()
-                    .entity(ImmutableMap.<String, Object>builder().put("assignments", assignmentsFromPage).build()).build();
+                    .entity(ImmutableMap.<String, Object>builder().put("assignments", toMap(assignmentsFromPage)).build()).build();
         } catch (Exception e) {
             LOGGER.error("Exception happened while batch-assignment [GET]...", e);
             throw e;
@@ -498,11 +503,11 @@ public class AssignmentsResource {
                         pageName, userID, context, createAssignment, ignoreSamplingPercent, headers, segmentationProfile);
             }
 
-            List<Map> assignmentsFromPage = assignments.doPageAssignments(applicationName, pageName, userID, context,
+            List<Assignment> assignmentsFromPage = assignments.doPageAssignments(applicationName, pageName, userID, context,
                     createAssignment, ignoreSamplingPercent, headers, segmentationProfile);
 
             return httpHeader.headers()
-                    .entity(ImmutableMap.<String, Object>builder().put("assignments", assignmentsFromPage).build()).build();
+                    .entity(ImmutableMap.<String, Object>builder().put("assignments", toMap(assignmentsFromPage)).build()).build();
         } catch (Exception e) {
             LOGGER.error("Exception happened while batch-assignment [GET]...", e);
             throw e;
@@ -590,32 +595,6 @@ public class AssignmentsResource {
         return httpHeader.headers(HttpStatus.SC_NO_CONTENT).build();
     }
 
-    private Map<String, Object> toMap(final Assignment assignment) {
-        Map<String, Object> response = newHashMap();
-
-        // Only include `assignment` property if there is a definitive assignment, either to a bucket or not
-        if (assignment.getStatus().isCacheable() && assignment.getStatus() != EXPERIMENT_EXPIRED) {
-            response.put("assignment",
-                    assignment.getBucketLabel() != null ? assignment.getBucketLabel().toString() : null);
-
-            if (assignment.getBucketLabel() != null) {
-                Bucket bucket = assignments.getBucket(assignment.getExperimentID(), assignment.getBucketLabel());
-
-                response.put("payload", bucket.getPayload() != null ? bucket.getPayload() : null);
-            }
-        }
-
-        response.put("status", assignment.getStatus());
-        response.put("cache", assignment.getStatus().isCacheable());
-
-        if (assignment.getContext() != null) {
-            response.put("context", assignment.getContext().toString());
-        }
-
-        return response;
-    }
-
-
     @POST
     @Path("clearMetadataCache")
     @Produces(APPLICATION_JSON)
@@ -645,11 +624,56 @@ public class AssignmentsResource {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Get assignments metadata cache details...")
     @Timed
-    public Response getMetadataCacheDetails(@HeaderParam(AUTHORIZATION) @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true) final String authorizationHeader) {
-        UserInfo.Username userName = authorization.getUser(authorizationHeader);
-        authorization.checkSuperAdmin(userName);
-
+    public Response getMetadataCacheDetails() {
         return httpHeader.headers().entity(assignments.metadataCacheDetails()).build();
+    }
+
+    /**
+     * Convert Assignment object collection to the List of response MAP expected by the end user.
+     *
+     * @param assignments
+     * @return
+     */
+    protected List<Map<String, Object>> toMap(Collection<Assignment> assignments) {
+        List<Map<String, Object>> responseList = new ArrayList<>();
+        assignments.forEach(assignment -> {
+            responseList.add(toMap(assignment));
+        });
+        return responseList;
+    }
+
+    /**
+     * Convert Assignment object to the response MAP expected by the end user.
+     *
+     * @param assignment
+     *
+     * @return response map
+     *
+     */
+    protected Map<String, Object> toMap(final Assignment assignment) {
+        Map<String, Object> response = newHashMap();
+
+        if(nonNull(assignment.getExperimentLabel())) {
+            response.put("experimentLabel", assignment.getExperimentLabel());
+        }
+
+        // Only include `assignment` property if there is a definitive assignment, either to a bucket or not
+        if (assignment.getStatus().isCacheable() && assignment.getStatus() != EXPERIMENT_EXPIRED) {
+            response.put("assignment", nonNull(assignment.getBucketLabel()) ? assignment.getBucketLabel().toString() : null);
+
+            if (nonNull(assignment.getBucketLabel())) {
+                response.put("payload", assignment.getPayload());
+            }
+        }
+
+        response.put("status", assignment.getStatus());
+        response.put("cache", assignment.getStatus().isCacheable());
+
+        if (assignment.getContext() != null) {
+            response.put("context", assignment.getContext().toString());
+        }
+
+        return response;
     }
 
 }
