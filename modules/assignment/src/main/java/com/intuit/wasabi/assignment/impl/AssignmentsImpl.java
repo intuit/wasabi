@@ -165,7 +165,6 @@ public class AssignmentsImpl implements Assignments {
      * @param assignmentsRepository reference to AssignmentsRepository
      * @param ruleCache             RuleCache which has cached segmentation rules
      * @param pages                 Pages for this experiment
-     * @param priorities            Priorities for the application
      * @param assignmentDecorator   The assignmentDecorator to be used
      * @param ruleCacheExecutor     The rule cache executor to be used
      * @param eventLog              eventLog
@@ -328,16 +327,18 @@ public class AssignmentsImpl implements Assignments {
                 Experiment.State.PAUSED);
 
         Experiment experiment = getExperiment(applicationName, experimentLabel);
-        if (experiment == null) {
+        if (isNull(experiment)) {
             throw new ExperimentNotFoundException(experimentLabel);
         }
+
         Experiment.ID experimentID = experiment.getID();
         assert experiment.getState() != Experiment.State.TERMINATED :
                 new StringBuilder("Should not be able to access terminated experiment \"")
                         .append(experimentID).append("\" via label \"")
                         .append(experimentLabel).append("\"").toString();
+
         if (!validStates.contains(experiment.getState())) {
-            throw new InvalidExperimentStateException(experiment.getID(), validStates, Experiment.State.DRAFT);
+            throw new InvalidExperimentStateException(experiment.getID(), validStates, experiment.getState());
         }
 
         //throw exception if assignment already exists for user unless overwrite == true
@@ -827,6 +828,7 @@ public class AssignmentsImpl implements Assignments {
      * @return
      */
     protected Experiment.Label getExperimentLabel(Experiment.ID experimentID) {
+        if(isNull(experimentID)) return null;
         Experiment.Label label = null;
         Experiment exp = null;
         if (metadataCacheEnabled) {
@@ -1068,11 +1070,13 @@ public class AssignmentsImpl implements Assignments {
         if (userAssignments != null && userAssignments.row(experimentID).isEmpty()) {
             return null;
         } else {
+            boolean isBucketEmpty = false;
             String bucketLabel = userAssignments.row(experimentID).values().iterator().next();
             for (Bucket b : bucketList.getBuckets()) {
                 if (bucketLabel.equals(b.getLabel().toString())) {
                     if (b.getState() == Bucket.State.EMPTY) {
                         bucketLabel = "null";
+                        isBucketEmpty = true;
                         break;
                     } else {
                         break;
@@ -1084,6 +1088,7 @@ public class AssignmentsImpl implements Assignments {
                     .withBucketLabel("null".equals(bucketLabel)
                             ? null
                             : Bucket.Label.valueOf(bucketLabel))
+                    .withBucketEmpty(isBucketEmpty)
                     .withPayload(getBucketPayload(experimentID, bucketLabel))
                     .withUserID(userID)
                     .withContext(context)

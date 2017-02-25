@@ -68,21 +68,21 @@ public class SegmentationDataProvider {
                         0,
                         "segmentation_" + time,
                         "user_0",
-                        "{\"labels\":[\"batch_exp_label_" + time + "_0\",\"batch_exp_label_" + time + "_1\",\"bad_exp_label_" + time + "_2\"], " +
+                        "{\"labels\":[\"batch_seg_label_" + time + "_0\",\"batch_seg_label_" + time + "_1\",\"batch_seg_label_" + time + "_2\"], " +
                                 "\"profile\": {\"state\":\"CA\"}}"
                 },
                 new Object[]{
                         1,
                         "segmentation_" + time,
                         "user_1",
-                        "{\"labels\":[\"batch_exp_label_" + time + "_0\",\"batch_exp_label_" + time + "_1\",\"bad_exp_label_" + time + "_2\"], " +
+                        "{\"labels\":[\"batch_seg_label_" + time + "_0\",\"batch_seg_label_" + time + "_1\",\"batch_seg_label_" + time + "_2\"], " +
                                 "\"profile\": {\"state\":\"RI\"}}"
                 },
                 new Object[]{
                         2,
                         "segmentation_" + time,
                         "user_2",
-                        "{\"labels\":[\"batch_exp_label_" + time + "_0\",\"batch_exp_label_" + time + "_1\",\"bad_exp_label_" + time + "_2\"], " +
+                        "{\"labels\":[\"batch_seg_label_" + time + "_0\",\"batch_seg_label_" + time + "_1\",\"batch_seg_label_" + time + "_2\"], " +
                                 "\"profile\": {\"state\":\"VA\"}}"
                 }
 

@@ -2280,6 +2280,9 @@ public class TestBase extends ServiceTestBase {
      * @return an assignment
      */
     public Assignment getAssignment(Experiment experiment, User user, String context, boolean createAssignment, boolean ignoreSamplingPercent, int expectedStatus, APIServerConnector apiServerConnector) {
+        //Clear cache before assignment call
+        clearAssignmentsMetadataCache();
+
         String uri = "assignments/applications/" + experiment.applicationName + "/experiments/" + experiment.label
                 + "/users/" + user.userID;
         if (context != null || !createAssignment || ignoreSamplingPercent) {
@@ -2402,6 +2405,8 @@ public class TestBase extends ServiceTestBase {
      * @return an assignment
      */
     public Assignment postAssignment(Experiment experiment, User user, String context, boolean createAssignment, boolean ignoreSamplingPercent, Map<String, Object> profile, int expectedStatus, APIServerConnector apiServerConnector) {
+        clearAssignmentsMetadataCache();
+
         String uri = "assignments/applications/" + experiment.applicationName + "/experiments/" + experiment.label
                 + "/users/" + user.userID;
         if (context != null || !createAssignment || ignoreSamplingPercent) {
@@ -2587,6 +2592,8 @@ public class TestBase extends ServiceTestBase {
      * @return a new assignment reflecting the update
      */
     public Assignment putAssignment(Experiment experiment, Assignment assignment, User user, String context, int expectedStatus, APIServerConnector apiServerConnector) {
+        clearAssignmentsMetadataCache();
+
         String uri = "assignments/applications/" + experiment.applicationName + "/experiments/" + experiment.label
                 + "/users/" + user.userID + (context != null ? ("?context=" + context) : "");
 
@@ -2679,6 +2686,7 @@ public class TestBase extends ServiceTestBase {
      * @return the created assignments, can be 0
      */
     public List<Assignment> postAssignments(Application application, User user, List<Experiment> experiments, String context, boolean create, int expectedStatus, APIServerConnector apiServerConnector) {
+        clearAssignmentsMetadataCache();
         String uri = "assignments/applications/" + application.name + "/users/" + user.userID;
         if ((context != null) || !create) {
             uri += "?";
@@ -2806,6 +2814,7 @@ public class TestBase extends ServiceTestBase {
      * @return the created assignments, can be 0
      */
     public List<Assignment> getAssignments(Application application, Page page, User user, String context, boolean createAssignment, boolean ignoreSamplingPercent, int expectedStatus, APIServerConnector apiServerConnector) {
+        clearAssignmentsMetadataCache();
         String uri = "assignments/applications/" + application.name + "/pages/" + page.name + "/users/" + user.userID;
         if (context != null || !createAssignment || ignoreSamplingPercent) {
             uri += "?";
@@ -2948,6 +2957,7 @@ public class TestBase extends ServiceTestBase {
      * @return the created assignments, can be 0
      */
     public List<Assignment> postAssignments(Application application, Page page, User user, Map<String, Object> segmentationProfile, String context, boolean createAssignment, boolean ignoreSamplingPercent, int expectedStatus, APIServerConnector apiServerConnector) {
+        clearAssignmentsMetadataCache();
         String uri = "assignments/applications/" + application.name + "/pages/" + page.name + "/users/" + user.userID;
         if (context != null || !createAssignment || ignoreSamplingPercent) {
             uri += "?";
@@ -3053,6 +3063,8 @@ public class TestBase extends ServiceTestBase {
      * @return the response
      */
     public Response postEvents(List<Event> events, Experiment experiment, User user, int expectedStatus, APIServerConnector apiServerConnector) {
+        clearAssignmentsMetadataCache();
+
         String uri = "events/applications/" + experiment.applicationName + "/experiments/"
                 + experiment.label + "/users/" + user.userID;
         String json = TestUtils.wrapJsonIntoObject(simpleGson.toJson(events.toArray()), "events");

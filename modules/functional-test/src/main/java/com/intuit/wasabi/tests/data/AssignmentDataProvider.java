@@ -92,7 +92,7 @@ public class AssignmentDataProvider extends CombinableDataProvider {
                 new Object[]{"DRAFT", HttpStatus.SC_BAD_REQUEST},
                 new Object[]{"PAUSED", HttpStatus.SC_OK},
                 new Object[]{"RUNNING", HttpStatus.SC_OK},
-                new Object[]{"TERMINATED", HttpStatus.SC_NOT_FOUND}
+                new Object[]{"TERMINATED", HttpStatus.SC_BAD_REQUEST}
         };
     }
 
