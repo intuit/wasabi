@@ -34,6 +34,7 @@ import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.slf4j.Logger;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -52,6 +53,7 @@ import static com.intuit.wasabi.authorizationobjects.Permission.UPDATE;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * API endpoint for accessing & managing applications
@@ -69,10 +71,17 @@ public class ApplicationsResource {
     private Pages pages;
     private Priorities priorities;
 
+    /**
+     * Logger for the class
+     */
+    private static final Logger LOGGER = getLogger(ApplicationsResource.class);
+
     @Inject
-    ApplicationsResource(final AuthorizedExperimentGetter authorizedExperimentGetter, final Experiments experiments,
-                         final Authorization authorization, final Priorities priorities, final Pages pages,
-                         final HttpHeader httpHeader) {
+    ApplicationsResource(final AuthorizedExperimentGetter authorizedExperimentGetter,
+            final Experiments experiments,
+            final Authorization authorization,
+            final Priorities priorities, final Pages pages,
+            final HttpHeader httpHeader) {
         this.authorizedExperimentGetter = authorizedExperimentGetter;
         this.pages = pages;
         this.experiments = experiments;
@@ -91,16 +100,22 @@ public class ApplicationsResource {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Returns all applications")
     @Timed
-    public Response getApplications(@HeaderParam(AUTHORIZATION)
-                                    @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                    final String authorizationHeader) {
-        if (authorization.getUser(authorizationHeader) == null) {
-            throw new AuthenticationException("User is not authenticated");
+    public Response getApplications(
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) {
+        try {
+            if (authorization.getUser(authorizationHeader) == null) {
+                throw new AuthenticationException("User is not authenticated");
+            }
+
+            List<Application.Name> applications = experiments.getApplications();
+
+            return httpHeader.headers().entity(applications).build();
+        } catch (Exception e) {
+            LOGGER.error("Get applications request failed for provided authorization headers:", e);
+            throw e;
         }
-
-        List<Application.Name> applications = experiments.getApplications();
-
-        return httpHeader.headers().entity(applications).build();
     }
 
     /**
@@ -119,21 +134,30 @@ public class ApplicationsResource {
     @ApiOperation(value = "Return metadata for a single experiment",
             response = Experiment.class)
     @Timed
-    public Response getExperiment(@PathParam("applicationName")
-                                  @ApiParam(value = "Application Name")
-                                  final Application.Name applicationName,
+    public Response getExperiment(
+            @PathParam("applicationName")
+            @ApiParam(value = "Application Name")
+            final Application.Name applicationName,
 
-                                  @PathParam("experimentLabel")
-                                  @ApiParam(value = "Experiment Label")
-                                  final Experiment.Label experimentLabel,
+            @PathParam("experimentLabel")
+            @ApiParam(value = "Experiment Label")
+            final Experiment.Label experimentLabel,
 
-                                  @HeaderParam(AUTHORIZATION)
-                                  @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                  final String authorizationHeader) {
-        Experiment experiment = authorizedExperimentGetter.getAuthorizedExperimentByName(authorizationHeader, applicationName,
-                experimentLabel);
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) {
+        try {
+            Experiment experiment = authorizedExperimentGetter
+                    .getAuthorizedExperimentByName(authorizationHeader, applicationName, experimentLabel);
 
-        return httpHeader.headers().entity(experiment).build();
+            return httpHeader.headers().entity(experiment).build();
+        } catch (Exception e) {
+            LOGGER.error("Get experiment failed for application={} & experiment label={} with error:",
+                    applicationName,
+                    experimentLabel,
+                    e);
+            throw e;
+        }
     }
 
     /**
@@ -151,15 +175,21 @@ public class ApplicationsResource {
     @ApiOperation(value = "Returns metadata for all experiments within an application",
             response = ExperimentList.class)
     @Timed
-    public Response getExperiments(@PathParam("applicationName")
-                                   @ApiParam(value = "Application Name")
-                                   final Application.Name applicationName,
+    public Response getExperiments(
+            @PathParam("applicationName")
+            @ApiParam(value = "Application Name")
+            final Application.Name applicationName,
 
-                                   @HeaderParam(AUTHORIZATION)
-                                   @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = false)
-                                   final String authorizationHeader
-    ) {
-        return httpHeader.headers().entity(authorizedExperimentGetter.getExperimentsByName(false, authorizationHeader, applicationName)).build();
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = false)
+            final String authorizationHeader) {
+        try {
+            return httpHeader.headers().entity(authorizedExperimentGetter
+                    .getExperimentsByName(false, authorizationHeader, applicationName)).build();
+        } catch (Exception e) {
+            LOGGER.error("Get experiments failed for application={} with error:", applicationName, e);
+            throw e;
+        }
     }
 
     /**
@@ -176,20 +206,29 @@ public class ApplicationsResource {
     @ApiOperation(value = "Create global priority list for an application",
             notes = "Experiments can only be placed in a priority list in DRAFT, RUNNING, and PAUSED states.")
     @Timed
-    public Response createPriorities(@PathParam("applicationName")
-                                     @ApiParam(value = "Application Name")
-                                     final Application.Name applicationName,
+    public Response createPriorities(
+            @PathParam("applicationName")
+            @ApiParam(value = "Application Name")
+            final Application.Name applicationName,
 
-                                     @ApiParam(required = true, defaultValue = DEFAULT_MODEXP)
-                                     final ExperimentIDList experimentIDList,
+            @ApiParam(required = true, defaultValue = DEFAULT_MODEXP)
+            final ExperimentIDList experimentIDList,
 
-                                     @HeaderParam(AUTHORIZATION)
-                                     @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                     final String authorizationHeader) {
-        authorization.checkUserPermissions(authorization.getUser(authorizationHeader), applicationName, UPDATE);
-        priorities.createPriorities(applicationName, experimentIDList, true);
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) {
+        try {
+            authorization.checkUserPermissions(authorization.getUser(authorizationHeader), applicationName, UPDATE);
+            priorities.createPriorities(applicationName, experimentIDList, true);
 
-        return httpHeader.headers(NO_CONTENT).build();
+            return httpHeader.headers(NO_CONTENT).build();
+        } catch (Exception e) {
+            LOGGER.error("Create priorities failed for application={} and experimentIdList={} with error:",
+                    applicationName,
+                    experimentIDList,
+                    e);
+            throw e;
+        }
     }
 
     /**
@@ -207,18 +246,25 @@ public class ApplicationsResource {
             notes = "The returned priority list is rank ordered.")
     //            response = ??, //todo: update with proper object
     @Timed
-    public Response getPriorities(@PathParam("applicationName")
-                                  @ApiParam(value = "Application Name")
-                                  final Application.Name applicationName,
+    public Response getPriorities(
+            @PathParam("applicationName")
+            @ApiParam(value = "Application Name")
+            final Application.Name applicationName,
 
-                                  @HeaderParam(AUTHORIZATION)
-                                  @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                  final String authorizationHeader) {
-        authorization.checkUserPermissions(authorization.getUser(authorizationHeader), applicationName, READ);
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) {
+        try {
+            authorization.checkUserPermissions(authorization.getUser(authorizationHeader), applicationName, READ);
 
-        PrioritizedExperimentList prioritizedExperiments = priorities.getPriorities(applicationName, true);
+            PrioritizedExperimentList prioritizedExperiments =
+                    priorities.getPriorities(applicationName, true);
 
-        return httpHeader.headers().entity(prioritizedExperiments).build();
+            return httpHeader.headers().entity(prioritizedExperiments).build();
+        } catch (Exception e) {
+            LOGGER.error("Get priorities failed for application={} with error:", applicationName, e);
+            throw e;
+        }
     }
 
     /**
@@ -233,19 +279,25 @@ public class ApplicationsResource {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Get the set of pages associated with an application.")
     @Timed
-    public Response getPagesForApplication(@PathParam("applicationName")
-                                           @ApiParam(value = "Application Name")
-                                           final Application.Name applicationName,
+    public Response getPagesForApplication(
+            @PathParam("applicationName")
+            @ApiParam(value = "Application Name")
+            final Application.Name applicationName,
 
-                                           @HeaderParam(AUTHORIZATION)
-                                           @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                           final String authorizationHeader) {
-        authorization.checkUserPermissions(authorization.getUser(authorizationHeader), applicationName, READ);
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) {
+        try {
+            authorization.checkUserPermissions(authorization.getUser(authorizationHeader), applicationName, READ);
 
-        ImmutableMap<String, List<Page>> applicationPages = ImmutableMap.<String, List<Page>>builder()
-                .put("pages", pages.getPageList(applicationName)).build();
+            ImmutableMap<String, List<Page>> applicationPages = ImmutableMap.<String, List<Page>>builder()
+                    .put("pages", pages.getPageList(applicationName)).build();
 
-        return httpHeader.headers().entity(applicationPages).build();
+            return httpHeader.headers().entity(applicationPages).build();
+        } catch (Exception e) {
+            LOGGER.error("Get pages for application failed for application={} with error:", applicationName, e);
+            throw e;
+        }
     }
 
     /**
@@ -262,23 +314,28 @@ public class ApplicationsResource {
     @ApiOperation(value = "Get the experiments associated to a page",
             notes = "The experiments returned belong to a single application")
     @Timed
-    public Response getExperiments(@PathParam("applicationName")
-                                   @ApiParam(value = "Application Name")
-                                   final Application.Name applicationName,
+    public Response getExperimentsForPage(
+            @PathParam("applicationName")
+            @ApiParam(value = "Application Name")
+            final Application.Name applicationName,
 
-                                   @PathParam("pageName")
-                                   final Page.Name pageName,
+            @PathParam("pageName") final Page.Name pageName,
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true) final String authorizationHeader) {
+        try {
+            authorization.checkUserPermissions(authorization.getUser(authorizationHeader), applicationName, READ);
 
-                                   @HeaderParam(AUTHORIZATION)
-                                   @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                   final String authorizationHeader) {
-        authorization.checkUserPermissions(authorization.getUser(authorizationHeader), applicationName, READ);
+            ImmutableMap<String, List<PageExperiment>> pageExperiments = ImmutableMap.<String, List<PageExperiment>>builder()
+                    .put("experiments", pages.getExperiments(applicationName, pageName)).build();
 
-        ImmutableMap<String, List<PageExperiment>> pageExperiments =
-                ImmutableMap.<String, List<PageExperiment>>builder().put("experiments",
-                        pages.getExperiments(applicationName, pageName)).build();
-
-        return httpHeader.headers().entity(pageExperiments).build();
+            return httpHeader.headers().entity(pageExperiments).build();
+        } catch (Exception e) {
+            LOGGER.error("Get experiments for page failed for application={} & page={} with error:",
+                    applicationName,
+                    pageName,
+                    e);
+            throw e;
+        }
     }
 
     /**
@@ -293,17 +350,25 @@ public class ApplicationsResource {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Get the set of pages associated with an application.")
     @Timed
-    public Response getPageAndExperimentsForApplication(@PathParam("applicationName")
-                                                        @ApiParam(value = "Application Name")
-                                                        final Application.Name applicationName,
+    public Response getPagesAndAssociatedExperimentsForApplication(
+            @PathParam("applicationName")
+            @ApiParam(value = "Application Name")
+            final Application.Name applicationName,
 
-                                                        @HeaderParam(AUTHORIZATION)
-                                                        @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                                        final String authorizationHeader) {
-        authorization.checkUserPermissions(authorization.getUser(authorizationHeader), applicationName, READ);
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) {
+        try {
+            authorization.checkUserPermissions(authorization.getUser(authorizationHeader), applicationName, READ);
 
-        Map<Page.Name, List<PageExperiment>> pageExperimentListMap = pages.getPageAndExperimentList(applicationName);
+            Map<Page.Name, List<PageExperiment>> pageExperimentListMap =
+                    pages.getPageAndExperimentList(applicationName);
 
-        return httpHeader.headers().entity(pageExperimentListMap).build();
+            return httpHeader.headers().entity(pageExperimentListMap).build();
+        } catch (Exception e) {
+            LOGGER.error("Get pages and associated experiments failed for application "
+                            + "failed for application={} with error:", applicationName, e);
+            throw e;
+        }
     }
 }
