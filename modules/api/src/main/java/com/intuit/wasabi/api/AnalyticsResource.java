@@ -94,9 +94,14 @@ public class AnalyticsResource {
     private Authorization authorization;
 
     @Inject
-    AnalyticsResource(final Analytics analytics, final AuthorizedExperimentGetter authorizedExperimentGetter,
-                      final HttpHeader httpHeader, final PaginationHelper<ExperimentDetail> experimentDetailPaginationHelper,
-                      final ExperimentDetails experimentDetails, final Favorites favorites, final Authorization authorization) {
+    AnalyticsResource(
+            final Analytics analytics,
+            final AuthorizedExperimentGetter authorizedExperimentGetter,
+            final HttpHeader httpHeader,
+            final PaginationHelper<ExperimentDetail> experimentDetailPaginationHelper,
+            final ExperimentDetails experimentDetails,
+            final Favorites favorites,
+            final Authorization authorization) {
         this.analytics = analytics;
         this.authorizedExperimentGetter = authorizedExperimentGetter;
         this.httpHeader = httpHeader;
@@ -131,100 +136,110 @@ public class AnalyticsResource {
     @GET
     @Produces(APPLICATION_JSON)
     @Path("/experiments")
-    @ApiOperation(value = "Return details of all experiments with details for the card view, with respect to the authorization",
+    @ApiOperation(value = "Return details of all experiments with details "
+            + "for the card view, with respect to the authorization",
             response = ExperimentDetail.class)
     @Timed
-    public Response getExperimentDetails(@HeaderParam(AUTHORIZATION)
-                                         @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                         final String authorizationHeader,
+    public Response getExperimentDetails(
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader,
 
-                                         @QueryParam("context")
-                                         @DefaultValue("PROD")
-                                         @ApiParam(value = "context for the experiment, eg \"QA\", \"PROD\"")
-                                         final Context context,
+            @QueryParam("context")
+            @DefaultValue("PROD")
+            @ApiParam(value = "context for the experiment, eg \"QA\", \"PROD\"")
+            final Context context,
 
-                                         @QueryParam("page")
-                                         @DefaultValue(DEFAULT_PAGE)
-                                         @ApiParam(name = "page", defaultValue = DEFAULT_PAGE, value = DOC_PAGE)
-                                         final int page,
+            @QueryParam("page")
+            @DefaultValue(DEFAULT_PAGE)
+            @ApiParam(name = "page", defaultValue = DEFAULT_PAGE, value = DOC_PAGE)
+            final int page,
 
-                                         @QueryParam("per_page")
-                                         @DefaultValue(DEFAULT_PER_PAGE_CARDVIEW)
-                                         @ApiParam(name = "per_page", defaultValue = DEFAULT_PER_PAGE_CARDVIEW, value = DOC_PER_PAGE)
-                                         final int perPage,
+            @QueryParam("per_page")
+            @DefaultValue(DEFAULT_PER_PAGE_CARDVIEW)
+            @ApiParam(name = "per_page", defaultValue = DEFAULT_PER_PAGE_CARDVIEW, value = DOC_PER_PAGE)
+            final int perPage,
 
-                                         @QueryParam("filter")
-                                         @DefaultValue("")
-                                         @ApiParam(name = "filter", defaultValue = DEFAULT_FILTER, value = DOC_FILTER)
-                                         final String filter,
+            @QueryParam("filter")
+            @DefaultValue("")
+            @ApiParam(name = "filter", defaultValue = DEFAULT_FILTER, value = DOC_FILTER)
+            final String filter,
 
-                                         @QueryParam("sort")
-                                         @DefaultValue("")
-                                         @ApiParam(name = "sort", defaultValue = DEFAULT_SORT, value = DOC_SORT)
-                                         final String sort,
+            @QueryParam("sort")
+            @DefaultValue("")
+            @ApiParam(name = "sort", defaultValue = DEFAULT_SORT, value = DOC_SORT)
+            final String sort,
 
-                                         @QueryParam("timezone")
-                                         @DefaultValue(DEFAULT_TIMEZONE)
-                                         @ApiParam(name = "timezone", defaultValue = DEFAULT_TIMEZONE, value = DOC_TIMEZONE)
-                                         final String timezoneOffset) {
-        if (authorizationHeader == null)
-            throw new AuthenticationException("No authorization given.");
+            @QueryParam("timezone")
+            @DefaultValue(DEFAULT_TIMEZONE)
+            @ApiParam(name = "timezone", defaultValue = DEFAULT_TIMEZONE, value = DOC_TIMEZONE)
+            final String timezoneOffset) {
+        try {
+            if (authorizationHeader == null)
+                throw new AuthenticationException("No authorization given.");
 
-        List<ExperimentDetail> experimentList = experimentDetails.getExperimentDetailsBase();
-        List<ExperimentDetail> authorizedExperiments = new ArrayList<>();
+            List<ExperimentDetail> experimentList = experimentDetails.getExperimentDetailsBase();
+            List<ExperimentDetail> authorizedExperiments = new ArrayList<>();
 
-        UserInfo.Username userName = authorization.getUser(authorizationHeader);
-        Set<Application.Name> allowed = new HashSet<>();
+            UserInfo.Username userName = authorization.getUser(authorizationHeader);
+            Set<Application.Name> allowed = new HashSet<>();
 
-        for (ExperimentDetail experiment : experimentList) {
-            if (experiment == null) {
-                continue;
-            }
+            for (ExperimentDetail experiment : experimentList) {
+                if (experiment == null) {
+                    continue;
+                }
 
-            Application.Name applicationName = experiment.getApplicationName();
+                Application.Name applicationName = experiment.getApplicationName();
 
-            if (allowed.contains(applicationName)) {
-                authorizedExperiments.add(experiment);
-            } else {
-                try {
-                    authorization.checkUserPermissions(userName, applicationName, READ);
+                if (allowed.contains(applicationName)) {
                     authorizedExperiments.add(experiment);
-                    allowed.add(applicationName);
-                } catch (AuthenticationException ignored) {
-                    LOGGER.trace("Ignoring Authentication Exception", ignored);
+                } else {
+                    try {
+                        authorization.checkUserPermissions(userName, applicationName, READ);
+                        authorizedExperiments.add(experiment);
+                        allowed.add(applicationName);
+                    } catch (AuthenticationException ignored) {
+                        LOGGER.trace("Ignoring Authentication Exception", ignored);
+                    }
                 }
             }
+
+            List<Experiment.ID> favoriteList = favorites.getFavorites(userName);
+            authorizedExperiments.parallelStream().filter(
+                    experiment -> favoriteList.contains(experiment.getId()))
+                    .forEach(experiment -> experiment.setFavorite(true));
+
+            //filter and paginate
+            Map<String, Object> experimentResponse = experimentDetailPaginationHelper
+                    .paginate("experimentDetails", authorizedExperiments, filter, timezoneOffset,
+                            (perPage != -1 ? "-favorite," : "") + sort, page, perPage);
+
+            //and now add the analytics data
+            Parameters parameters = createParameters(context);
+            parameters.setMetric(BinomialMetrics.NORMAL_APPROX);
+            parameters.parse();
+
+            List<ExperimentDetail> expDetailsWithAnalytics =
+                    (List<ExperimentDetail>) experimentResponse.get("experimentDetails");
+
+            expDetailsWithAnalytics = experimentDetails.getAnalyticData(expDetailsWithAnalytics, parameters);
+            experimentResponse.put("experimentDetails", expDetailsWithAnalytics);
+
+            return httpHeader.headers().entity(experimentResponse).build();
+        } catch (Exception exception) {
+            LOGGER.error("getExperimentDetails failed for context={}, page={}, perPage={},"
+                    + " filter={}, sort={}, timezoneOffset={} with error:",
+                    context, page, perPage, filter, sort, timezoneOffset,
+                    exception);
+            throw exception;
         }
-
-        List<Experiment.ID> favoriteList = favorites.getFavorites(userName);
-        authorizedExperiments
-                .parallelStream()
-                .filter(experiment -> favoriteList.contains(experiment.getId()))
-                .forEach(experiment -> experiment.setFavorite(true));
-
-        //filter and paginate
-        Map<String, Object> experimentResponse = experimentDetailPaginationHelper.paginate("experimentDetails",
-                authorizedExperiments, filter, timezoneOffset,
-                (perPage != -1 ? "-favorite," : "") + sort, page, perPage);
-
-        //and now add the analytics data
-        Parameters parameters = createParameters(context);
-        parameters.setMetric(BinomialMetrics.NORMAL_APPROX);
-        parameters.parse();
-
-        List<ExperimentDetail> expDetailsWithAnalytics = (List<ExperimentDetail>)
-                experimentResponse.get("experimentDetails");
-
-        expDetailsWithAnalytics = experimentDetails.getAnalyticData(expDetailsWithAnalytics, parameters);
-        experimentResponse.put("experimentDetails", expDetailsWithAnalytics);
-
-        return httpHeader.headers().entity(experimentResponse).build();
     }
 
     /**
      * Returns a number of summary counts for the specified experiment.
      * <p>
-     * Returns unique and non-unique counts at the experiment, bucket, and action levels for both actions and impressions.
+     * Returns unique and non-unique counts at the experiment, bucket,
+     * and action levels for both actions and impressions.
      *
      * @param experimentID        the unique experiment ID
      * @param parameters          parameters to customize request
@@ -252,12 +267,18 @@ public class AnalyticsResource {
             @HeaderParam(AUTHORIZATION)
             @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
             final String authorizationHeader) {
-        authorizedExperimentGetter.getAuthorizedExperimentById(authorizationHeader, experimentID);
-        parameters.parse();
+        try {
+            authorizedExperimentGetter.getAuthorizedExperimentById(authorizationHeader, experimentID);
+            parameters.parse();
 
-        ExperimentCounts experimentCounts = analytics.getExperimentRollup(experimentID, parameters);
+            ExperimentCounts experimentCounts = analytics.getExperimentRollup(experimentID, parameters);
 
-        return httpHeader.headers().entity(experimentCounts).build();
+            return httpHeader.headers().entity(experimentCounts).build();
+        } catch (Exception exception) {
+            LOGGER.error("getExperimentCountsParameters failed for experimentID={}, parameters={} with error:",
+                    experimentID, parameters, exception);
+            throw exception;
+        }
     }
 
     /**
@@ -287,10 +308,16 @@ public class AnalyticsResource {
             @HeaderParam(AUTHORIZATION)
             @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
             final String authorizationHeader) {
-        // note: auth not required because the called method is authorized add context value to parameters
-        Parameters parameters = createParameters(context);
+        try {
+            // note: auth not required because the called method is authorized add context value to parameters
+            Parameters parameters = createParameters(context);
 
-        return getExperimentCountsParameters(experimentID, parameters, authorizationHeader);
+            return getExperimentCountsParameters(experimentID, parameters, authorizationHeader);
+        } catch (Exception exception) {
+            LOGGER.error("getExperimentCounts failed for experimentID={}, context={} with error:",
+                    experimentID, context, exception);
+            throw exception;
+        }
     }
 
     private Parameters createParameters(final Context context) {
@@ -304,8 +331,10 @@ public class AnalyticsResource {
     /**
      * Returns a number of summary counts for the specified experiment, by day.
      * <p>
-     * Returns unique and non-unique counts at the experiment, bucket, and action levels for both actions and impressions.
-     * For each day, includes counts for that day and cumulative counts, calculated from the beginning of the experiment.
+     * Returns unique and non-unique counts at the experiment, bucket,
+     * and action levels for both actions and impressions.
+     * For each day, includes counts for that day and cumulative counts,
+     * calculated from the beginning of the experiment.
      *
      * @param experimentID        the unique experiment ID
      * @param parameters          parameters to customize request
@@ -333,13 +362,19 @@ public class AnalyticsResource {
             @HeaderParam(AUTHORIZATION)
             @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
             final String authorizationHeader) {
-        authorizedExperimentGetter.getAuthorizedExperimentById(authorizationHeader, experimentID);
-        parameters.parse();
+        try {
+            authorizedExperimentGetter.getAuthorizedExperimentById(authorizationHeader, experimentID);
+            parameters.parse();
 
-        ExperimentCumulativeCounts experimentCumulativeCounts =
-                analytics.getExperimentRollupDailies(experimentID, parameters);
+            ExperimentCumulativeCounts experimentCumulativeCounts = analytics
+                    .getExperimentRollupDailies(experimentID, parameters);
 
-        return httpHeader.headers().entity(experimentCumulativeCounts).build();
+            return httpHeader.headers().entity(experimentCumulativeCounts).build();
+        } catch (Exception exception) {
+            LOGGER.error("getExperimentCountsDailiesParameters failed for experimentID={}, parameters={} with error:",
+                    experimentID, parameters, exception);
+            throw exception;
+        }
     }
 
     /**
@@ -369,10 +404,16 @@ public class AnalyticsResource {
             @HeaderParam(AUTHORIZATION)
             @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
             final String authorizationHeader) {
-        // note: auth not required because the called method is authorized add context value to parameters
-        Parameters parameters = createParameters(context);
+        try {
+            // note: auth not required because the called method is authorized add context value to parameters
+            Parameters parameters = createParameters(context);
 
-        return getExperimentCountsDailiesParameters(experimentID, parameters, authorizationHeader);
+            return getExperimentCountsDailiesParameters(experimentID, parameters, authorizationHeader);
+        } catch (Exception exception) {
+            LOGGER.error("getExperimentCountsDailies failed for experimentID={}, context={} with error:",
+                    experimentID, context, exception);
+            throw exception;
+        }
     }
 
     /**
@@ -407,12 +448,18 @@ public class AnalyticsResource {
             @HeaderParam(AUTHORIZATION)
             @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
             final String authorizationHeader) {
-        authorizedExperimentGetter.getAuthorizedExperimentById(authorizationHeader, experimentID);
-        parameters.parse();
+        try {
+            authorizedExperimentGetter.getAuthorizedExperimentById(authorizationHeader, experimentID);
+            parameters.parse();
 
-        ExperimentStatistics experimentStatistics = analytics.getExperimentStatistics(experimentID, parameters);
+            ExperimentStatistics experimentStatistics = analytics.getExperimentStatistics(experimentID, parameters);
 
-        return httpHeader.headers().entity(experimentStatistics).build();
+            return httpHeader.headers().entity(experimentStatistics).build();
+        } catch (Exception exception) {
+            LOGGER.error("getExperimentStatisticsParameters failed for experimentID={}, parameters={} with error:",
+                    experimentID, parameters, exception);
+            throw exception;
+        }
     }
 
     /**
@@ -443,17 +490,25 @@ public class AnalyticsResource {
             @HeaderParam(AUTHORIZATION)
             @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
             final String authorizationHeader) {
-        // note: auth not required because the called method is authorized add context value to parameters
-        Parameters parameters = createParameters(context);
+        try {
+            // note: auth not required because the called method is authorized add context value to parameters
+            Parameters parameters = createParameters(context);
 
-        return getExperimentStatisticsParameters(experimentID, parameters, authorizationHeader);
+            return getExperimentStatisticsParameters(experimentID, parameters, authorizationHeader);
+        } catch (Exception exception) {
+            LOGGER.error("getExperimentStatistics failed for experimentID={}, context={} with error:",
+                    experimentID, context, exception);
+            throw exception;
+        }
     }
 
     /**
      * Returns a number of summary counts and statistics for the specified experiment, by day
      * <p>
-     * Returns unique and non-unique counts at the experiment, bucket, and action levels for both actions and impressions.
-     * For each day, includes counts for that day and cumulative counts, calculated from the beginning of the experiment.
+     * Returns unique and non-unique counts at the experiment, bucket,
+     * and action levels for both actions and impressions.
+     * For each day, includes counts for that day and cumulative counts,
+     * calculated from the beginning of the experiment.
      * Also returns a number of statistics calculated from the unique counts.
      * Comparison statistics are only calculated based on cumulative counts
      *
@@ -484,13 +539,20 @@ public class AnalyticsResource {
             @HeaderParam(AUTHORIZATION)
             @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
             final String authorizationHeader) {
-        authorizedExperimentGetter.getAuthorizedExperimentById(authorizationHeader, experimentID);
-        parameters.parse();
+        try {
+            authorizedExperimentGetter.getAuthorizedExperimentById(authorizationHeader, experimentID);
+            parameters.parse();
 
-        ExperimentCumulativeStatistics experimentCumulativeStatistics =
-                analytics.getExperimentStatisticsDailies(experimentID, parameters);
+            ExperimentCumulativeStatistics experimentCumulativeStatistics = analytics
+                    .getExperimentStatisticsDailies(experimentID, parameters);
 
-        return httpHeader.headers().entity(experimentCumulativeStatistics).build();
+            return httpHeader.headers().entity(experimentCumulativeStatistics).build();
+        } catch (Exception exception) {
+            LOGGER.error("getExperimentStatisticsDailiesParameters failed for "
+                            + "experimentID={}, parameters={} with error:",
+                    experimentID, parameters, exception);
+            throw exception;
+        }
     }
 
     /**
@@ -520,10 +582,16 @@ public class AnalyticsResource {
             @HeaderParam(AUTHORIZATION)
             @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
             final String authorizationHeader) {
-        // note: auth not required because the called method is authorized add context value to parameters
-        Parameters parameters = createParameters(context);
+        try {
+            // note: auth not required because the called method is authorized add context value to parameters
+            Parameters parameters = createParameters(context);
 
-        return getExperimentStatisticsDailiesParameters(experimentID, parameters, authorizationHeader);
+            return getExperimentStatisticsDailiesParameters(experimentID, parameters, authorizationHeader);
+        } catch (Exception exception) {
+            LOGGER.error("getExperimentStatisticsDailies failed for experimentID={}, context={} with error:",
+                    experimentID, context, exception);
+            throw exception;
+        }
     }
 
     /**
@@ -553,11 +621,17 @@ public class AnalyticsResource {
             @HeaderParam(AUTHORIZATION)
             @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
             final String authorizationHeader) {
-        authorizedExperimentGetter.getAuthorizedExperimentById(authorizationHeader, experimentID);
+        try {
+            authorizedExperimentGetter.getAuthorizedExperimentById(authorizationHeader, experimentID);
 
-        AssignmentCounts assignmentCounts = analytics.getAssignmentCounts(experimentID, context);
+            AssignmentCounts assignmentCounts = analytics.getAssignmentCounts(experimentID, context);
 
-        return httpHeader.headers().entity(assignmentCounts).build();
+            return httpHeader.headers().entity(assignmentCounts).build();
+        } catch (Exception exception) {
+            LOGGER.error("getAssignmentCounts failed for experimentID={}, context={} with error:",
+                    experimentID, context, exception);
+            throw exception;
+        }
     }
 
     /**
@@ -592,10 +666,18 @@ public class AnalyticsResource {
             @HeaderParam(AUTHORIZATION)
             @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
             final String authorizationHeader) {
-        Experiment experiment = authorizedExperimentGetter.getAuthorizedExperimentByName(authorizationHeader,
-                applicationName, experimentLabel);
-        AssignmentCounts assignmentCounts = analytics.getAssignmentCounts(experiment.getID(), context);
+        try {
+            Experiment experiment = authorizedExperimentGetter
+                    .getAuthorizedExperimentByName(authorizationHeader, applicationName, experimentLabel);
+            AssignmentCounts assignmentCounts = analytics.getAssignmentCounts(experiment.getID(), context);
 
-        return httpHeader.headers().entity(assignmentCounts).build();
+            return httpHeader.headers().entity(assignmentCounts).build();
+        } catch (Exception exception) {
+            LOGGER.error("getAssignmentCountsByApp failed for applicationName={}, "
+                            + "experimentLabel={}, context={} with error:",
+                    applicationName, experimentLabel, context,
+                    exception);
+            throw exception;
+        }
     }
 }
