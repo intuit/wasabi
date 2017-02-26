@@ -112,9 +112,9 @@ public class ApplicationsResource {
             List<Application.Name> applications = experiments.getApplications();
 
             return httpHeader.headers().entity(applications).build();
-        } catch (Exception e) {
-            LOGGER.error("Get applications request failed for provided authorization headers:", e);
-            throw e;
+        } catch (Exception exception) {
+            LOGGER.error("Get applications request failed for provided authorization headers:", exception);
+            throw exception;
         }
     }
 
@@ -151,12 +151,12 @@ public class ApplicationsResource {
                     .getAuthorizedExperimentByName(authorizationHeader, applicationName, experimentLabel);
 
             return httpHeader.headers().entity(experiment).build();
-        } catch (Exception e) {
+        } catch (Exception exception) {
             LOGGER.error("getExperiment failed for applicationName={} & experimentLabel={} with error:",
                     applicationName,
                     experimentLabel,
-                    e);
-            throw e;
+                    exception);
+            throw exception;
         }
     }
 
@@ -186,9 +186,9 @@ public class ApplicationsResource {
         try {
             return httpHeader.headers().entity(authorizedExperimentGetter
                     .getExperimentsByName(false, authorizationHeader, applicationName)).build();
-        } catch (Exception e) {
-            LOGGER.error("getExperiments failed for applicationName={} with error:", applicationName, e);
-            throw e;
+        } catch (Exception exception) {
+            LOGGER.error("getExperiments failed for applicationName={} with error:", applicationName, exception);
+            throw exception;
         }
     }
 
@@ -222,12 +222,12 @@ public class ApplicationsResource {
             priorities.createPriorities(applicationName, experimentIDList, true);
 
             return httpHeader.headers(NO_CONTENT).build();
-        } catch (Exception e) {
+        } catch (Exception exception) {
             LOGGER.error("createPriorities failed for applicationName={} and experimentIDList={} with error:",
                     applicationName,
                     experimentIDList,
-                    e);
-            throw e;
+                    exception);
+            throw exception;
         }
     }
 
@@ -261,9 +261,9 @@ public class ApplicationsResource {
                     priorities.getPriorities(applicationName, true);
 
             return httpHeader.headers().entity(prioritizedExperiments).build();
-        } catch (Exception e) {
-            LOGGER.error("getPriorities failed for applicationName={} with error:", applicationName, e);
-            throw e;
+        } catch (Exception exception) {
+            LOGGER.error("getPriorities failed for applicationName={} with error:", applicationName, exception);
+            throw exception;
         }
     }
 
@@ -294,9 +294,10 @@ public class ApplicationsResource {
                     .put("pages", pages.getPageList(applicationName)).build();
 
             return httpHeader.headers().entity(applicationPages).build();
-        } catch (Exception e) {
-            LOGGER.error("getPagesForApplication failed for applicationName={} with error:", applicationName, e);
-            throw e;
+        } catch (Exception exception) {
+            LOGGER.error("getPagesForApplication failed for applicationName={} with error:", applicationName,
+                    exception);
+            throw exception;
         }
     }
 
@@ -325,16 +326,17 @@ public class ApplicationsResource {
         try {
             authorization.checkUserPermissions(authorization.getUser(authorizationHeader), applicationName, READ);
 
-            ImmutableMap<String, List<PageExperiment>> pageExperiments = ImmutableMap.<String, List<PageExperiment>>builder()
+            ImmutableMap<String, List<PageExperiment>> pageExperiments =
+                    ImmutableMap.<String, List<PageExperiment>>builder()
                     .put("experiments", pages.getExperiments(applicationName, pageName)).build();
 
             return httpHeader.headers().entity(pageExperiments).build();
-        } catch (Exception e) {
+        } catch (Exception exception) {
             LOGGER.error("getExperimentsForPage failed for applicationName={} & pageName={} with error:",
                     applicationName,
                     pageName,
-                    e);
-            throw e;
+                    exception);
+            throw exception;
         }
     }
 
@@ -365,10 +367,10 @@ public class ApplicationsResource {
                     pages.getPageAndExperimentList(applicationName);
 
             return httpHeader.headers().entity(pageExperimentListMap).build();
-        } catch (Exception e) {
-            LOGGER.error("getPagesAndAssociatedExperimentsForApplication "
-                            + "failed for applicationName={} with error:", applicationName, e);
-            throw e;
+        } catch (Exception exception) {
+            LOGGER.error("getPagesAndAssociatedExperimentsForApplication failed for applicationName={} with error:",
+                    applicationName, exception);
+            throw exception;
         }
     }
 }
