@@ -52,21 +52,21 @@ public class AuditLogResourceTest {
         AuditLogResource lr = new AuditLogResource(al, auth, new HttpHeader("MyApp-???", "600"), new PaginationHelper<>(new AuditLogEntryFilter(), new AuditLogEntryComparator()));
 
         Mockito.when(al.getAuditLogs()).thenReturn(list);
-        Response r = lr.getCompleteLogs("", 1, 10, "", "", null);
+        Response r = lr.getLogsForAllApplications("", 1, 10, "", "", null);
         assertThat("{logEntries=[], totalEntries=0}", is(r.getEntity().toString()));
 
         for (int i = 0; i < 5; i++) {
             list.add(AuditLogEntryFactory.createFromEvent(new SimpleEvent("Event")));
         }
         Mockito.when(al.getAuditLogs()).thenReturn(list);
-        r = lr.getCompleteLogs("", 1, 10, "", "", null);
+        r = lr.getLogsForAllApplications("", 1, 10, "", "", null);
         Assert.assertTrue(r.getEntity().toString().contains("totalEntries=5"));
 
         for (int i = 0; i < 6; i++) {
             list.add(AuditLogEntryFactory.createFromEvent(new SimpleEvent("Event")));
         }
         Mockito.when(al.getAuditLogs()).thenReturn(list);
-        r = lr.getCompleteLogs("", 1, 10, "", "", null);
+        r = lr.getLogsForAllApplications("", 1, 10, "", "", null);
         Assert.assertTrue(r.getEntity().toString().contains("totalEntries=11"));
     }
 
@@ -81,7 +81,7 @@ public class AuditLogResourceTest {
         AuditLogResource lr = new AuditLogResource(al, auth, new HttpHeader("MyApp-???", "600"), new PaginationHelper<>(new AuditLogEntryFilter(), new AuditLogEntryComparator()));
 
         Mockito.when(al.getAuditLogs(appName)).thenReturn(list);
-        Response r = lr.getLogs("", appName, 1, 10, "", "", null);
+        Response r = lr.getLogsForApplication("", appName, 1, 10, "", "", null);
         assertThat(((List) ((Map<String, Object>) r.getEntity()).get("logEntries")).size(), is(0));
         assertThat(((Map<String, Object>) r.getEntity()).get("totalEntries"), is(0));
 
@@ -89,7 +89,7 @@ public class AuditLogResourceTest {
             list.add(AuditLogEntryFactory.createFromEvent(new SimpleEvent("Event")));
         }
         Mockito.when(al.getAuditLogs(appName)).thenReturn(list);
-        r = lr.getLogs("", appName, 1, 10, "", "", null);
+        r = lr.getLogsForApplication("", appName, 1, 10, "", "", null);
         assertThat(((List) ((Map<String, Object>) r.getEntity()).get("logEntries")).size(), is(5));
         assertThat(((Map<String, Object>) r.getEntity()).get("totalEntries"), is(5));
 
@@ -97,7 +97,7 @@ public class AuditLogResourceTest {
             list.add(AuditLogEntryFactory.createFromEvent(new SimpleEvent("Event")));
         }
         Mockito.when(al.getAuditLogs(appName)).thenReturn(list);
-        r = lr.getLogs("", appName, 1, 10, "", "", null);
+        r = lr.getLogsForApplication("", appName, 1, 10, "", "", null);
         assertThat(((List) ((Map<String, Object>) r.getEntity()).get("logEntries")).size(), is(10));
         assertThat(((Map<String, Object>) r.getEntity()).get("totalEntries"), is(11));
     }

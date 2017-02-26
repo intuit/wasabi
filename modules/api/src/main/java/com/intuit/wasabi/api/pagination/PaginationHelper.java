@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
  * <p>
  * Note that you will need to modify the endpoint to take the parameters for {@code filter}, {@code timezoneOffset},
  * {@code sort}, {@code page}, and {@code perPage}. See
- * {@link com.intuit.wasabi.api.AuditLogResource#getLogs(String, Application.Name, int, int, String, String, String)}
+ * {@link com.intuit.wasabi.api.AuditLogResource#getLogsForApplication(String, Application.Name, int, int, String, String, String)}
  * for an example.
  * <p>
  * You can not use the list wrappers directly (e.g. {@link ExperimentList}), instead you have to use the raw lists.

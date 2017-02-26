@@ -27,6 +27,7 @@ import com.intuit.wasabi.experimentobjects.Application;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.slf4j.Logger;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -53,6 +54,7 @@ import static com.intuit.wasabi.api.APISwaggerResource.EXAMPLE_AUTHORIZATION_HEA
 import static com.intuit.wasabi.authorizationobjects.Permission.ADMIN;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * The API endpoint /logs provides audit logs for application admins.
@@ -66,6 +68,8 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Singleton
 @Api(value = "Audit Logs (Activity Logs about changes in experiments-buckets)", produces = "application/json")
 public class AuditLogResource {
+
+    private static final Logger LOGGER = getLogger(AuditLogResource.class);
 
     private final AuditLog auditLog;
     private final Authorization authorization;
@@ -116,53 +120,62 @@ public class AuditLogResource {
             httpMethod = "GET",
             produces = "application/json",
             protocols = "https")
-    @Timed(name = "getLogs")
-    public Response getLogs(@HeaderParam(AUTHORIZATION)
-                            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                            final String authorizationHeader,
+    @Timed(name = "getLogsForApplication")
+    public Response getLogsForApplication(
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader,
 
-                            @PathParam("applicationName")
-                            @ApiParam(value = "Application Name")
-                            final Application.Name applicationName,
+            @PathParam("applicationName")
+            @ApiParam(value = "Application Name")
+            final Application.Name applicationName,
 
-                            @QueryParam("page")
-                            @DefaultValue(DEFAULT_PAGE)
-                            @ApiParam(name = "page", defaultValue = DEFAULT_PAGE, value = DOC_PAGE)
-                            final int page,
+            @QueryParam("page")
+            @DefaultValue(DEFAULT_PAGE)
+            @ApiParam(name = "page", defaultValue = DEFAULT_PAGE, value = DOC_PAGE)
+            final int page,
 
-                            @QueryParam("per_page")
-                            @DefaultValue(DEFAULT_PER_PAGE)
-                            @ApiParam(name = "per_page", defaultValue = DEFAULT_PER_PAGE, value = DOC_PER_PAGE)
-                            final int perPage,
+            @QueryParam("per_page")
+            @DefaultValue(DEFAULT_PER_PAGE)
+            @ApiParam(name = "per_page", defaultValue = DEFAULT_PER_PAGE, value = DOC_PER_PAGE)
+            final int perPage,
 
-                            @QueryParam("filter")
-                            @DefaultValue("")
-                            @ApiParam(name = "filter", defaultValue = DEFAULT_FILTER, value = DOC_FILTER)
-                            final String filter,
+            @QueryParam("filter")
+            @DefaultValue("")
+            @ApiParam(name = "filter", defaultValue = DEFAULT_FILTER, value = DOC_FILTER)
+            final String filter,
 
-                            @QueryParam("sort")
-                            @DefaultValue("")
-                            @ApiParam(name = "sort", defaultValue = DEFAULT_SORT, value = DOC_SORT)
-                            final String sort,
+            @QueryParam("sort")
+            @DefaultValue("")
+            @ApiParam(name = "sort", defaultValue = DEFAULT_SORT, value = DOC_SORT)
+            final String sort,
 
-                            @QueryParam("timezone")
-                            @DefaultValue(DEFAULT_TIMEZONE)
-                            @ApiParam(name = "timezone", defaultValue = DEFAULT_TIMEZONE, value = DOC_TIMEZONE)
-                            final String timezoneOffset) {
-        List<AuditLogEntry> auditLogs;
+            @QueryParam("timezone")
+            @DefaultValue(DEFAULT_TIMEZONE)
+            @ApiParam(name = "timezone", defaultValue = DEFAULT_TIMEZONE, value = DOC_TIMEZONE)
+            final String timezoneOffset) {
+        try {
+            List<AuditLogEntry> auditLogs;
 
-        if (applicationName != null) {
-            authorization.checkUserPermissions(authorization.getUser(authorizationHeader), applicationName, ADMIN);
-            auditLogs = auditLog.getAuditLogs(applicationName);
-        } else {
-            authorization.checkSuperAdmin(authorization.getUser(authorizationHeader));
-            auditLogs = auditLog.getAuditLogs();
+            if (applicationName != null) {
+                authorization.checkUserPermissions(authorization.getUser(authorizationHeader), applicationName, ADMIN);
+                auditLogs = auditLog.getAuditLogs(applicationName);
+            } else {
+                authorization.checkSuperAdmin(authorization.getUser(authorizationHeader));
+                auditLogs = auditLog.getAuditLogs();
+            }
+
+            Map<String, Object> response = paginationHelper
+                    .paginate("logEntries", auditLogs, filter, timezoneOffset, sort, page, perPage);
+
+            return httpHeader.headers().entity(response).build();
+        } catch (Exception exception) {
+            LOGGER.error("getLogsForApplication failed for applicationName={}, page={}, perPage={},"
+                    + " filter={}, sort={}, timezoneOffset={} with error:",
+                    applicationName, page, perPage, filter, sort, timezoneOffset,
+                    exception);
+            throw exception;
         }
-
-        Map<String, Object> response = paginationHelper.paginate("logEntries",
-                auditLogs, filter, timezoneOffset, sort, page, perPage);
-
-        return httpHeader.headers().entity(response).build();
     }
 
     /**
@@ -189,36 +202,46 @@ public class AuditLogResource {
             httpMethod = "GET",
             produces = "application/json",
             protocols = "https")
-    @Timed(name = "getCompleteLogs")
-    public Response getCompleteLogs(@HeaderParam(AUTHORIZATION)
-                                    @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                    final String authorizationHeader,
+    @Timed(name = "getLogsForAllApplications")
+    public Response getLogsForAllApplications(
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader,
 
-                                    @QueryParam("page")
-                                    @DefaultValue(DEFAULT_PAGE)
-                                    @ApiParam(name = "page", defaultValue = DEFAULT_PAGE, value = DOC_PAGE)
-                                    final int page,
+            @QueryParam("page")
+            @DefaultValue(DEFAULT_PAGE)
+            @ApiParam(name = "page", defaultValue = DEFAULT_PAGE, value = DOC_PAGE)
+            final int page,
 
-                                    @QueryParam("per_page")
-                                    @DefaultValue(DEFAULT_PER_PAGE)
-                                    @ApiParam(name = "per_page", defaultValue = DEFAULT_PER_PAGE, value = DOC_PER_PAGE)
-                                    final int perPage,
+            @QueryParam("per_page")
+            @DefaultValue(DEFAULT_PER_PAGE)
+            @ApiParam(name = "per_page", defaultValue = DEFAULT_PER_PAGE, value = DOC_PER_PAGE)
+            final int perPage,
 
-                                    @QueryParam("filter")
-                                    @DefaultValue("")
-                                    @ApiParam(name = "filter", defaultValue = DEFAULT_FILTER, value = DOC_FILTER)
-                                    final String filter,
+            @QueryParam("filter")
+            @DefaultValue("")
+            @ApiParam(name = "filter", defaultValue = DEFAULT_FILTER, value = DOC_FILTER)
+            final String filter,
 
-                                    @QueryParam("sort")
-                                    @DefaultValue("")
-                                    @ApiParam(name = "sort", defaultValue = DEFAULT_SORT, value = DOC_SORT)
-                                    final String sort,
+            @QueryParam("sort")
+            @DefaultValue("")
+            @ApiParam(name = "sort", defaultValue = DEFAULT_SORT, value = DOC_SORT)
+            final String sort,
 
-                                    @QueryParam("timezone")
-                                    @DefaultValue(DEFAULT_TIMEZONE)
-                                    @ApiParam(name = "timezone", defaultValue = DEFAULT_TIMEZONE, value = DOC_TIMEZONE)
-                                    final String timezoneOffset) {
-        return getLogs(authorizationHeader, null, page, perPage, filter, sort, timezoneOffset);
+            @QueryParam("timezone")
+            @DefaultValue(DEFAULT_TIMEZONE)
+            @ApiParam(name = "timezone", defaultValue = DEFAULT_TIMEZONE, value = DOC_TIMEZONE)
+            final String timezoneOffset) {
+        try {
+            return getLogsForApplication(authorizationHeader, null, page, perPage,
+                    filter, sort, timezoneOffset);
+        } catch (Exception exception) {
+            LOGGER.error("getLogsForAllApplications failed for page:{}, perPage={}, filter={},"
+                    + " sort={}, timezoneOffset={} with error:",
+                    page, perPage, filter, sort, timezoneOffset,
+                    exception);
+            throw exception;
+        }
     }
 
 }
