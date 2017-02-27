@@ -72,4 +72,12 @@ public class UserRoleList {
                 .append(getRoleList().size())
                 .toHashCode();
     }
+
+    @Override
+    public String toString() {
+        if (null != roleList)
+            return roleList.toString();
+        else
+            return null;
+    }
 }
