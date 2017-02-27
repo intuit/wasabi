@@ -41,6 +41,7 @@ import com.intuit.wasabi.exceptions.AssignmentExistsException;
 import com.intuit.wasabi.exceptions.BucketDistributionNotFetchableException;
 import com.intuit.wasabi.exceptions.BucketNotFoundException;
 import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
+import com.intuit.wasabi.exceptions.InvalidAssignmentStateException;
 import com.intuit.wasabi.experiment.Pages;
 import com.intuit.wasabi.experiment.Priorities;
 import com.intuit.wasabi.experimentobjects.Application;
@@ -54,7 +55,9 @@ import com.intuit.wasabi.experimentobjects.Page;
 import com.intuit.wasabi.experimentobjects.PageExperiment;
 import com.intuit.wasabi.experimentobjects.PrioritizedExperiment;
 import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
+import com.intuit.wasabi.experimentobjects.exceptions.InvalidBucketStateTransitionException;
 import com.intuit.wasabi.experimentobjects.exceptions.InvalidExperimentStateException;
+import com.intuit.wasabi.experimentobjects.exceptions.WasabiClientException;
 import com.intuit.wasabi.experimentobjects.exceptions.WasabiException;
 import com.intuit.wasabi.repository.AssignmentsRepository;
 import com.intuit.wasabi.repository.CassandraRepository;
@@ -332,10 +335,6 @@ public class AssignmentsImpl implements Assignments {
         }
 
         Experiment.ID experimentID = experiment.getID();
-        assert experiment.getState() != Experiment.State.TERMINATED :
-                new StringBuilder("Should not be able to access terminated experiment \"")
-                        .append(experimentID).append("\" via label \"")
-                        .append(experimentLabel).append("\"").toString();
 
         if (!validStates.contains(experiment.getState())) {
             throw new InvalidExperimentStateException(experiment.getID(), validStates, experiment.getState());
@@ -502,7 +501,7 @@ public class AssignmentsImpl implements Assignments {
 
                 } catch (WasabiException ex) {
                     LOGGER.error("Exception happened while executing assignment business logic", ex);
-                    assignment = nullAssignment(userID, applicationName, experiment.getID(), ASSIGNMENT_FAILED);
+                    assignment = nullAssignment(userID, applicationName, experiment.getID(), label, ASSIGNMENT_FAILED);
                 }
 
                 allAssignments.add(assignment);
@@ -579,10 +578,11 @@ public class AssignmentsImpl implements Assignments {
 
         Experiment.ID experimentID = experiment.getID();
 
-        assert experiment.getState() != Experiment.State.TERMINATED :
-                new StringBuilder("Should not be able to access terminated experiment \"")
-                        .append(experimentID).append("\" via label \"")
-                        .append(experimentLabel).append("\"");
+        if (experiment.getState() == Experiment.State.TERMINATED) {
+            throw new InvalidExperimentStateException(new StringBuilder("Should not be able to access terminated experiment \"")
+                    .append(experimentID).append("\" via label \"")
+                    .append(experimentLabel).append("\"").toString());
+        }
 
         if (experiment.getState() == Experiment.State.DRAFT) {
             return nullAssignment(userID, applicationName, experimentID,
@@ -608,7 +608,11 @@ public class AssignmentsImpl implements Assignments {
 
                 // Generate a new assignment
                 double samplePercent = experiment.getSamplingPercent();
-                assert samplePercent >= 0.0 && samplePercent <= 1.0 : "Sample percent must be between 0.0 and 1.0";
+                if(!(samplePercent >= 0.0 && samplePercent <= 1.0)) {
+                    throw new InvalidExperimentStateException(new StringBuilder("Sample percent must be between 0.0 and 1.0 for experiment \"")
+                            .append(experimentID).append("\" via label \"")
+                            .append(experimentLabel).append("\"").toString());
+                }
 
                 boolean selectBucket;
 
@@ -631,10 +635,10 @@ public class AssignmentsImpl implements Assignments {
                     //Create an assignment object with status as NEW_ASSIGNMENT / NO_OPEN_BUCKETS
                     assignment = createAssignmentObject(experiment, userID, context, selectBucket, bucketList, currentDate, segmentationProfile);
 
-                    assert (assignment.getStatus() == Assignment.Status.NEW_ASSIGNMENT || assignment.getStatus() == Assignment.Status.NO_OPEN_BUCKETS):
-                            new StringBuilder("Assignment status should have been NEW_ASSIGNMENT / NO_OPEN_BUCKETS for ")
-                                    .append("userID = \"").append(userID).append("\", experiment = \"")
-                                    .append(experiment).append("\"").toString();
+                    if(assignment.getStatus() != Assignment.Status.NEW_ASSIGNMENT && assignment.getStatus() != Assignment.Status.NO_OPEN_BUCKETS) {
+                        throw new InvalidAssignmentStateException(userID, applicationName, experimentLabel, assignment.getStatus(), null);
+                    }
+
                 } else {
                     return nullAssignment(userID, applicationName, experimentID,
                             Assignment.Status.NO_PROFILE_MATCH);
@@ -642,10 +646,9 @@ public class AssignmentsImpl implements Assignments {
             }
         } else {
             // Do nothing; user has an assignment, with or without a bucket
-            assert assignment.getStatus() == Assignment.Status.EXISTING_ASSIGNMENT :
-                    new StringBuilder("Assignment status should have been EXISTING_ASSIGNMENT for ")
-                            .append("userID = \"").append(userID)
-                            .append("\", experiment = \"").append(experiment).append("\"").toString();
+            if(assignment.getStatus() != Assignment.Status.EXISTING_ASSIGNMENT) {
+                throw new InvalidAssignmentStateException(userID, applicationName, experimentLabel, assignment.getStatus(), null);
+            }
         }
 
         return assignment;
@@ -959,9 +962,25 @@ public class AssignmentsImpl implements Assignments {
      */
     protected Assignment nullAssignment(User.ID userID, Application.Name appName, Experiment.ID experimentID,
                                         Assignment.Status status) {
+        return nullAssignment(userID, appName, experimentID, getExperimentLabel(experimentID), status) ;
+    }
+
+    /**
+     * Create an assignment object for given user, app, experiment & status with NULL bucket (so NULL assignment)
+     *
+     * @param userID
+     * @param appName
+     * @param experimentID
+     * @param experimentLabel
+     * @param status
+     *
+     * @return
+     */
+    protected Assignment nullAssignment(User.ID userID, Application.Name appName, Experiment.ID experimentID, Experiment.Label experimentLabel,
+                                        Assignment.Status status) {
 
         return Assignment.newInstance(experimentID)
-                .withExperimentLabel(getExperimentLabel(experimentID))
+                .withExperimentLabel(experimentLabel)
                 .withApplicationName(appName)
                 .withBucketLabel(null)
                 .withPayload(null)

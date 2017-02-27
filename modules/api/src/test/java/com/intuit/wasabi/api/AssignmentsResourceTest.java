@@ -313,11 +313,11 @@ public class AssignmentsResourceTest {
                 .withStatus(Status.EXISTING_ASSIGNMENT)
                 .build();
 
-        Map<String, Object> response1 = resource.toMap(assignment, true);
+        Map<String, Object> response1 = resource.toSingleAssignmentResponseMap(assignment);
         assertThat(response1.size(), is(5));
         assertNull(response1.get("experimentLabel"));
 
-        Map<String, Object> response2 = resource.toMap(assignment, false);
+        Map<String, Object> response2 = resource.toBatchAssignmentResponseMap(assignment);
         assertThat(response2.size(), is(4));
         assertNotNull(response2.get("experimentLabel"));
     }
@@ -349,14 +349,18 @@ public class AssignmentsResourceTest {
 
         List<Assignment> assignments = newArrayList(assignment1, assignment2);
 
-        List<Map<String, Object>> response1 = resource.toMap(assignments, true);
-        assertThat(response1.size(), is(2));
-        assertNull(response1.get(0).get("experimentLabel"));
-        assertNull(response1.get(1).get("experimentLabel"));
+        Map<String, Object> response1 = resource.toSingleAssignmentResponseMap(assignments.get(0));
+        assertThat(response1.size(), is(5));
+        assertNull(response1.get("experimentLabel"));
 
-        List<Map<String, Object>> response2 = resource.toMap(assignments, false);
+        response1 = resource.toSingleAssignmentResponseMap(assignments.get(1));
+        assertThat(response1.size(), is(5));
+        assertNull(response1.get("experimentLabel"));
+
+        List<Map<String, Object>> response2 = resource.toBatchAssignmentResponseMap(assignments);
         assertThat(response2.size(), is(2));
         assertNotNull(response2.get(0).get("experimentLabel"));
         assertNotNull(response2.get(1).get("experimentLabel"));
     }
+
 }

@@ -282,22 +282,23 @@ public class Assignment {
         EXPERIMENT_NOT_FOUND(false),
         EXPERIMENT_NOT_STARTED(false),
         EXPERIMENT_IN_DRAFT_STATE(false),
-        EXPERIMENT_EXPIRED(true),
         EXPERIMENT_PAUSED(false),
+        NO_PROFILE_MATCH(false),
+        EXPERIMENT_EXPIRED(false),
+        ASSIGNMENT_FAILED(false),
+
         EXISTING_ASSIGNMENT(true),
         NEW_ASSIGNMENT(true),
-        NO_OPEN_BUCKETS(true),
-        NO_PROFILE_MATCH(false),
-        ASSIGNMENT_FAILED(true);
+        NO_OPEN_BUCKETS(true);
 
-        Status(boolean cacheable) {
-            this.cacheable = cacheable;
+        Status(boolean definitiveAssignment) {
+            this.definitiveAssignment = definitiveAssignment;
         }
 
-        public boolean isCacheable() {
-            return cacheable;
+        public boolean isDefinitiveAssignment() {
+            return definitiveAssignment;
         }
 
-        private boolean cacheable;
+        private boolean definitiveAssignment;
     }
 }

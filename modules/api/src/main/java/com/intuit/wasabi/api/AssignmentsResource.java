@@ -28,7 +28,6 @@ import com.intuit.wasabi.authenticationobjects.UserInfo.Username;
 import com.intuit.wasabi.authorization.Authorization;
 import com.intuit.wasabi.exceptions.AssignmentNotFoundException;
 import com.intuit.wasabi.experimentobjects.Application;
-import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Bucket.Label;
 import com.intuit.wasabi.experimentobjects.Context;
 import com.intuit.wasabi.experimentobjects.Experiment;
@@ -56,14 +55,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_LABELLIST;
 import static com.intuit.wasabi.api.APISwaggerResource.EXAMPLE_AUTHORIZATION_HEADER;
 import static com.intuit.wasabi.assignmentobjects.Assignment.Status.EXPERIMENT_EXPIRED;
 import static java.lang.Boolean.FALSE;
-import static java.lang.Boolean.TRUE;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
@@ -158,7 +155,7 @@ public class AssignmentsResource {
         Assignment assignment = getAssignment(userID, applicationName, experimentLabel, context, createAssignment,
                 ignoreSamplingPercent, null, headers);
 
-        return httpHeader.headers().entity(toMap(assignment, TRUE)).build();
+        return httpHeader.headers().entity(toSingleAssignmentResponseMap(assignment)).build();
     }
 
     private Assignment getAssignment(final User.ID userID, final Application.Name applicationName,
@@ -245,7 +242,7 @@ public class AssignmentsResource {
         Assignment assignment = getAssignment(userID, applicationName, experimentLabel, context, createAssignment,
                 ignoreSamplingPercent, segmentationProfile, headers);
 
-        return httpHeader.headers().entity(toMap(assignment, TRUE)).build();
+        return httpHeader.headers().entity(toSingleAssignmentResponseMap(assignment)).build();
     }
 
     /**
@@ -299,7 +296,7 @@ public class AssignmentsResource {
         List<Assignment> myAssignments = assignments.doBatchAssignments(userID, applicationName, context, createAssignment, FALSE,
                 headers, experimentBatch);
 
-        return httpHeader.headers().entity(ImmutableMap.<String, Object>builder().put("assignments", toMap(myAssignments, FALSE)).build()).build();
+        return httpHeader.headers().entity(ImmutableMap.<String, Object>builder().put("assignments", toBatchAssignmentResponseMap(myAssignments)).build()).build();
     }
 
     /**
@@ -370,7 +367,7 @@ public class AssignmentsResource {
         Assignment response = assignments.putAssignment(userID, applicationName, experimentLabel, context,
                 submittedLabel, overwrite);
 
-        return httpHeader.headers().entity(toMap(response, TRUE)).build();
+        return httpHeader.headers().entity(toSingleAssignmentResponseMap(response)).build();
     }
 
     /**
@@ -435,7 +432,7 @@ public class AssignmentsResource {
                     createAssignment, ignoreSamplingPercent, headers, null);
 
             return httpHeader.headers()
-                    .entity(ImmutableMap.<String, Object>builder().put("assignments", toMap(assignmentsFromPage, FALSE)).build()).build();
+                    .entity(ImmutableMap.<String, Object>builder().put("assignments", toBatchAssignmentResponseMap(assignmentsFromPage)).build()).build();
         } catch (Exception e) {
             LOGGER.error("Exception happened while batch-assignment [GET]...", e);
             throw e;
@@ -508,7 +505,7 @@ public class AssignmentsResource {
                     createAssignment, ignoreSamplingPercent, headers, segmentationProfile);
 
             return httpHeader.headers()
-                    .entity(ImmutableMap.<String, Object>builder().put("assignments", toMap(assignmentsFromPage, FALSE)).build()).build();
+                    .entity(ImmutableMap.<String, Object>builder().put("assignments", toBatchAssignmentResponseMap(assignmentsFromPage)).build()).build();
         } catch (Exception e) {
             LOGGER.error("Exception happened while batch-assignment [GET]...", e);
             throw e;
@@ -635,45 +632,37 @@ public class AssignmentsResource {
      * @param assignments
      * @return
      */
-    protected List<Map<String, Object>> toMap(Collection<Assignment> assignments, boolean isSingleAssignment) {
+    protected List<Map<String, Object>> toBatchAssignmentResponseMap(Collection<Assignment> assignments) {
         List<Map<String, Object>> responseList = new ArrayList<>();
         assignments.forEach(assignment -> {
-            responseList.add(toMap(assignment, isSingleAssignment));
+            responseList.add(toBatchAssignmentResponseMap(assignment));
         });
         return responseList;
     }
 
     /**
-     * Convert Assignment object to the response MAP expected by the end user.
+     * Convert Assignment object of batch-assignment to the response MAP expected by the end user.
      * Batch-assignment response map can contain:
-     *  - experimentLabel *
+     *  - experimentLabel
      *  - assignment
      *  - payload
      *  - status
-     *
-     *  Single-assignment response map can contain:
-     *  - assignment
-     *  - payload
-     *  - status
-     *  - cache *
-     *  - context *
      *
      * @param assignment
-     * @param isSingleAssignment
      *
      * @return response map
      *
      */
-    protected Map<String, Object> toMap(final Assignment assignment, boolean isSingleAssignment) {
+    protected Map<String, Object> toBatchAssignmentResponseMap(final Assignment assignment) {
         Map<String, Object> response = newHashMap();
 
         //Add experimentLabel for batch-assignment flow only
-        if(!isSingleAssignment && nonNull(assignment.getExperimentLabel())) {
+        if(nonNull(assignment.getExperimentLabel())) {
             response.put("experimentLabel", assignment.getExperimentLabel());
         }
 
         // Only include `assignment` property if there is a definitive assignment, either to a bucket or not
-        if (assignment.getStatus().isCacheable() && assignment.getStatus() != EXPERIMENT_EXPIRED) {
+        if (assignment.getStatus() != EXPERIMENT_EXPIRED) {
             response.put("assignment", nonNull(assignment.getBucketLabel()) ? assignment.getBucketLabel().toString() : null);
 
             if (nonNull(assignment.getBucketLabel())) {
@@ -683,12 +672,41 @@ public class AssignmentsResource {
 
         response.put("status", assignment.getStatus());
 
-        //Add cache & context fields for single-assignment flow only
-        if(isSingleAssignment) {
-            response.put("cache", assignment.getStatus().isCacheable());
-            if (assignment.getContext() != null) {
-                response.put("context", assignment.getContext().toString());
+        return response;
+    }
+
+    /**
+     * Convert Assignment object of single-assignment to the response MAP expected by the end user.
+     *
+     *  Single-assignment response map can contain:
+     *  - assignment
+     *  - payload
+     *  - status
+     *  - cache
+     *  - context
+     *
+     * @param assignment
+     *
+     * @return response map
+     *
+     */
+    protected Map<String, Object> toSingleAssignmentResponseMap(final Assignment assignment) {
+        Map<String, Object> response = newHashMap();
+
+        // Only include `assignment` property if there is a definitive assignment, either to a bucket or not
+        if (assignment.getStatus().isDefinitiveAssignment()) {
+            response.put("assignment", nonNull(assignment.getBucketLabel()) ? assignment.getBucketLabel().toString() : null);
+
+            if (nonNull(assignment.getBucketLabel())) {
+                response.put("payload", assignment.getPayload());
             }
+        }
+
+        response.put("status", assignment.getStatus());
+
+        response.put("cache", assignment.getStatus().isDefinitiveAssignment());
+        if (assignment.getContext() != null) {
+            response.put("context", assignment.getContext().toString());
         }
 
         return response;

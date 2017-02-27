@@ -50,6 +50,7 @@ public enum ErrorCode {
 
     // Assignment update errors
     ASSIGNMENT_EXISTS_VIOLATION("4401", 409), //todo: is this the correct code?
+    INVALID_ASSIGNMENT("4402", 409),
 
     // Not allowed errors
     AUTHENTICATION_FAILED("4501", 401),
