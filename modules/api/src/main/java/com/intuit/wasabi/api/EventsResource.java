@@ -28,6 +28,7 @@ import com.intuit.wasabi.experimentobjects.Experiment;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.slf4j.Logger;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -46,6 +47,7 @@ import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_EVENT;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.CREATED;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * API endpoint for managing events
@@ -55,6 +57,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 @Singleton
 @Api(value = "Events (Record-Manage Events)")
 public class EventsResource {
+
+    private static final Logger LOGGER = getLogger(EventsResource.class);
 
     private final Events events;
     private final HttpHeader httpHeader;
@@ -120,25 +124,32 @@ public class EventsResource {
             @ApiParam(name = "eventList", required = true, value = "For impression", defaultValue = DEFAULT_EVENT)
             final EventList eventList)
             throws Exception {
-        final Date NOW = new Date();
-        Set<Context> contextSet = new HashSet<>();
+        try {
+            final Date NOW = new Date();
+            Set<Context> contextSet = new HashSet<>();
 
-        for (Event event : eventList.getEvents()) {
-            if (event.getTimestamp() == null) {
-                event.setTimestamp(NOW);
+            for (Event event : eventList.getEvents()) {
+                if (event.getTimestamp() == null) {
+                    event.setTimestamp(NOW);
+                }
+
+                contextSet.add(event.getContext());
+
+                // TODO: add checking to Event.Name constructor instead of here
+                if (event.getName() == null || isBlank(event.getName().toString())) {
+                    throw new IllegalArgumentException("Event name cannot be null or an empty string");
+                }
             }
 
-            contextSet.add(event.getContext());
+            events.recordEvents(applicationName, experimentLabel, userID, eventList, contextSet);
 
-            // TODO: add checking to Event.Name constructor instead of here
-            if (event.getName() == null || isBlank(event.getName().toString())) {
-                throw new IllegalArgumentException("Event name cannot be null or an empty string");
-            }
+            return httpHeader.headers(CREATED).build();
+        } catch (Exception exception) {
+            LOGGER.error("recordEvents failed for applicationName={},"
+                    + " experimentLabel={}, userID={}, eventList={} with error:",
+                    applicationName, experimentLabel, userID, eventList, exception);
+            throw exception;
         }
-
-        events.recordEvents(applicationName, experimentLabel, userID, eventList, contextSet);
-
-        return httpHeader.headers(CREATED).build();
     }
 
     /**
@@ -163,6 +174,7 @@ public class EventsResource {
             final Experiment.Label experimentLabel,
 
             final Map<User.ID, List<Event>> eventList) {
+        LOGGER.warn("recordUsersEvents is unsupported");
         throw new UnsupportedOperationException("Not implemented");
     }
 
@@ -171,7 +183,6 @@ public class EventsResource {
      * specific application. Each event is an impression or action.
      *
      * @param applicationName the application name
-     * @param userID          the user id
      * @param eventList       the {@link com.intuit.wasabi.analyticsobjects.EventList} event list
      * @throws UnsupportedOperationException always throws
      */
@@ -182,8 +193,8 @@ public class EventsResource {
     @Timed
     public Response recordExperimentsEvents(
             @PathParam("applicationName") final Application.Name applicationName,
-            @PathParam("userID") final User.ID userID,
             final Map<Experiment.Label, Map<User.ID, List<Event>>> eventList) {
+        LOGGER.warn("recordExperimentsEvents is unsupported");
         throw new UnsupportedOperationException("Not implemented");
     }
 
@@ -197,6 +208,11 @@ public class EventsResource {
     @Produces(APPLICATION_JSON)
     @Timed
     public Response getEventsQueueLength() {
-        return httpHeader.headers().entity(events.queuesLength()).build();
+        try {
+            return httpHeader.headers().entity(events.queuesLength()).build();
+        } catch (Exception exception) {
+            LOGGER.error("getEventsQueueLength failed with error:", exception);
+            throw exception;
+        }
     }
 }

@@ -38,4 +38,12 @@ public class EventList {
     public void setEvents(List<Event> value) {
         events = value;
     }
+
+    @Override
+    public String toString() {
+        if (null != events) {
+            return events.toString();
+        }
+        return null;
+    }
 }
