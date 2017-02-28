@@ -25,6 +25,7 @@ import com.intuit.wasabi.experimentobjects.Experiment;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.slf4j.Logger;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -42,7 +43,7 @@ import java.util.Map;
 import static com.intuit.wasabi.api.APISwaggerResource.EXAMPLE_AUTHORIZATION_HEADER;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Manages favorited experiments.
@@ -52,6 +53,8 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Produces(APPLICATION_JSON)
 @Api(value = "Allows to create and delete favorites.")
 public class FavoritesResource {
+
+    private static final Logger LOGGER = getLogger(FavoritesResource.class);
 
     private final HttpHeader httpHeader;
     private final Favorites favorites;
@@ -65,7 +68,8 @@ public class FavoritesResource {
      * @param authorization the authorization implementation
      */
     @Inject
-    public FavoritesResource(final HttpHeader httpHeader, final Favorites favorites, final Authorization authorization) {
+    public FavoritesResource(final HttpHeader httpHeader,
+            final Favorites favorites, final Authorization authorization) {
         this.httpHeader = httpHeader;
         this.favorites = favorites;
         this.authorization = authorization;
@@ -92,13 +96,17 @@ public class FavoritesResource {
             final String authHeader,
 
             @ApiParam(value = "id")
-            final Experiment experiment
-    ) {
-        UserInfo.Username userName = authorization.getUser(authHeader);
+            final Experiment experiment) {
+        try {
+            UserInfo.Username userName = authorization.getUser(authHeader);
 
-        List<Experiment.ID> favoriteList = favorites.addFavorite(userName, experiment.getID());
+            List<Experiment.ID> favoriteList = favorites.addFavorite(userName, experiment.getID());
 
-        return httpHeader.headers(Response.Status.OK).entity(prepareResponseEntity(favoriteList)).build();
+            return httpHeader.headers(Response.Status.OK).entity(prepareResponseEntity(favoriteList)).build();
+        } catch (Exception exception) {
+            LOGGER.error("postFavorite failed for experiment={} with error:", experiment, exception);
+            throw exception;
+        }
     }
 
     /**
@@ -116,13 +124,17 @@ public class FavoritesResource {
     public Response getFavorites(
             @HeaderParam(AUTHORIZATION)
             @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-            final String authHeader
-    ) {
-        UserInfo.Username userName = authorization.getUser(authHeader);
+            final String authHeader) {
+        try {
+            UserInfo.Username userName = authorization.getUser(authHeader);
 
-        List<Experiment.ID> favoriteList = favorites.getFavorites(userName);
+            List<Experiment.ID> favoriteList = favorites.getFavorites(userName);
 
-        return httpHeader.headers(Response.Status.OK).entity(prepareResponseEntity(favoriteList)).build();
+            return httpHeader.headers(Response.Status.OK).entity(prepareResponseEntity(favoriteList)).build();
+        } catch (Exception exception) {
+            LOGGER.error("getFavorites failed with error:", exception);
+            throw exception;
+        }
     }
 
     /**
@@ -146,13 +158,17 @@ public class FavoritesResource {
 
             @PathParam("experimentID")
             @ApiParam(value = "Experiment ID")
-            final Experiment.ID experimentID
-    ) {
-        UserInfo.Username userName = authorization.getUser(authHeader);
+            final Experiment.ID experimentID) {
+        try {
+            UserInfo.Username userName = authorization.getUser(authHeader);
 
-        List<Experiment.ID> favoriteList = favorites.deleteFavorite(userName, experimentID);
+            List<Experiment.ID> favoriteList = favorites.deleteFavorite(userName, experimentID);
 
-        return httpHeader.headers(Response.Status.OK).entity(prepareResponseEntity(favoriteList)).build();
+            return httpHeader.headers(Response.Status.OK).entity(prepareResponseEntity(favoriteList)).build();
+        } catch (Exception exception) {
+            LOGGER.error("deleteFavorite failed for experimentID={} with error:", experimentID, exception);
+            throw exception;
+        }
     }
 
     /**
