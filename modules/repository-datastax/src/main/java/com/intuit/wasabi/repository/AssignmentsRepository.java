@@ -150,14 +150,12 @@ public interface AssignmentsRepository {
      * @param allowAssignments
      * @param prioritizedExperimentList
      * @param experimentMap
-     * @param existingUserAssignments
      * @param bucketMap
      * @param exclusionMap
      */
     void populateAssignmentsMetadata(User.ID userID, Application.Name appName, Context context, ExperimentBatch experimentBatch, Optional<Map<Experiment.ID, Boolean>> allowAssignments,
                                      PrioritizedExperimentList prioritizedExperimentList,
                                      Map<Experiment.ID, Experiment> experimentMap,
-                                     Table<Experiment.ID, Experiment.Label, String> existingUserAssignments,
                                      Map<Experiment.ID, BucketList> bucketMap,
                                      Map<Experiment.ID, List<Experiment.ID>> exclusionMap
     );

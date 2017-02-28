@@ -207,7 +207,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
      * @param allowAssignments          Input: Given batch experiment ids with allow assignment flag.
      * @param prioritizedExperimentList Output: prioritized experiment list of ALL the experiments for the given application.
      * @param experimentMap             Output: Map of 'experiment id TO experiment' of ALL the experiments for the given application.
-     * @param existingUserAssignments   Output: ALL the existing user assignments of given user_id, application name and context.
      * @param bucketMap                 Output: Map of 'experiment id TO BucketList' of ONLY experiments which are associated to the given application and page.
      * @param exclusionMap              Output: Map of 'experiment id TO to its mutual experiment ids' of ONLY experiments which are associated to the given application and page.
      */
@@ -216,7 +215,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     public void populateAssignmentsMetadata(User.ID userID, Application.Name appName, Context context, ExperimentBatch experimentBatch, Optional<Map<Experiment.ID, Boolean>> allowAssignments,
                                             PrioritizedExperimentList prioritizedExperimentList,
                                             Map<Experiment.ID, com.intuit.wasabi.experimentobjects.Experiment> experimentMap,
-                                            Table<Experiment.ID, Experiment.Label, String> existingUserAssignments,
                                             Map<Experiment.ID, BucketList> bucketMap,
                                             Map<Experiment.ID, List<Experiment.ID>> exclusionMap
     ) {
@@ -228,7 +226,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         }
 
         //Populate experiments map, prioritized experiments list and existing user assignments.
-        populateExperimentApplicationAndUserAssignments(userID, appName, context, prioritizedExperimentList, experimentMap, existingUserAssignments);
+        populateExperimentApplicationAndUserAssignments(userID, appName, context, prioritizedExperimentList, experimentMap);
 
         //Populate experiments ids of given batch
         Set<Experiment.ID> experimentIds = allowAssignments.isPresent() ? allowAssignments.get().keySet() : new HashSet<>();
@@ -246,12 +244,10 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
      * @param context                   Input: Given context
      * @param prioritizedExperimentList Output: prioritized experiment list of ALL the experiments for the given application.
      * @param experimentMap             Output: Map of 'experiment id TO experiment' of ALL the experiments for the given application.
-     * @param existingUserAssignments   Output: ALL the existing user assignments of given user_id, application name and context.
      */
     private void populateExperimentApplicationAndUserAssignments(User.ID userID, Application.Name appName, Context context,
                                                                  PrioritizedExperimentList prioritizedExperimentList,
-                                                                 Map<Experiment.ID, com.intuit.wasabi.experimentobjects.Experiment> experimentMap,
-                                                                 Table<Experiment.ID, Experiment.Label, String> existingUserAssignments) {
+                                                                 Map<Experiment.ID, com.intuit.wasabi.experimentobjects.Experiment> experimentMap) {
         ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Application>> applicationFuture = null;
         ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment>> experimentsFuture = null;
         ListenableFuture<Result<ExperimentUserByUserIdContextAppNameExperimentId>> userAssignmentsFuture = null;
@@ -287,19 +283,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                 LOGGER.debug("prioritizedExperiment=> {} ", exp);
             }
         }
-
-        UninterruptibleUtil.getUninterruptibly(userAssignmentsFuture).all().stream().forEach((ExperimentUserByUserIdContextAppNameExperimentId uaPojo) -> {
-            Experiment.ID experimentID = Experiment.ID.valueOf(uaPojo.getExperimentId());
-            Experiment exp = experimentMap.get(experimentID);
-            if (!isNull(exp)) {
-                existingUserAssignments.put(
-                        exp.getID(),
-                        exp.getLabel(), //expects this to be non-null
-                        Optional.ofNullable(uaPojo.getBucket()).orElseGet(() -> "null")
-                );
-            }
-        });
-        if (LOGGER.isDebugEnabled()) LOGGER.debug("existingUserAssignments=> {} ", existingUserAssignments);
     }
 
     /**

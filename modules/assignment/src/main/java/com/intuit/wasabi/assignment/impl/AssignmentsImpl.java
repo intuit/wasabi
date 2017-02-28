@@ -458,8 +458,13 @@ public class AssignmentsImpl implements Assignments {
         Map<Experiment.ID, BucketList> bucketMap = new HashMap<>();
         Map<Experiment.ID, List<Experiment.ID>> exclusionMap = new HashMap<>();
 
-        //Populate required experiment metadata along with all the existing user assignments for the given application
-        populateAssignmentsMetadata(userID, applicationName, context, experimentBatch, allowAssignmentsOptional, appPriorities, experimentMap, userAssignments, bucketMap, exclusionMap);
+        //Populate required assignment metadata
+        populateAssignmentsMetadata(userID, applicationName, context, experimentBatch, allowAssignmentsOptional, appPriorities, experimentMap, bucketMap, exclusionMap);
+
+        //Now fetch existing user assignments for given user, application & context
+        assignmentsRepository.getAssignments(userID, applicationName, context, experimentMap)
+                .forEach(assignmentPair -> userAssignments.put(assignmentPair.getLeft().getID(), assignmentPair.getLeft().getLabel(), assignmentPair.getRight().toString()));
+        LOGGER.debug("[DB] existingUserAssignments = {}", userAssignments);
 
         List<Pair<Experiment, Assignment>> assignmentPairs = new LinkedList<>();
         List<Assignment> allAssignments = new LinkedList<>();
@@ -667,14 +672,12 @@ public class AssignmentsImpl implements Assignments {
      * @param allowAssignments          Input: Given batch experiment ids with allow assignment flag.
      * @param prioritizedExperimentList Output: prioritized experiment list of ALL the experiments for the given application.
      * @param experimentMap             Output: Map of 'experiment id TO experiment' of ALL the experiments for the given application.
-     * @param existingUserAssignments   Output: ALL the existing user assignments of given user_id, application name and context.
      * @param bucketMap                 Output: Map of 'experiment id TO BucketList' of ONLY experiments which are associated to the given application and page.
      * @param exclusionMap              Output: Map of 'experiment id TO to its mutual experiment ids' of ONLY experiments which are associated to the given application and page.
      */
     private void populateAssignmentsMetadata(User.ID userID, Application.Name appName, Context context, ExperimentBatch experimentBatch, Optional<Map<Experiment.ID, Boolean>> allowAssignments,
                                              PrioritizedExperimentList prioritizedExperimentList,
                                              Map<Experiment.ID, Experiment> experimentMap,
-                                             Table<Experiment.ID, Experiment.Label, String> existingUserAssignments,
                                              Map<Experiment.ID, BucketList> bucketMap,
                                              Map<Experiment.ID, List<Experiment.ID>> exclusionMap) {
         LOGGER.debug("populateAssignmentsMetadata - STARTED: userID={}, appName={}, context={}, experimentBatch={}, experimentIds={}", userID, appName, context, experimentBatch, allowAssignments);
@@ -698,10 +701,6 @@ public class AssignmentsImpl implements Assignments {
             }
             LOGGER.debug("[cache] prioritizedExperimentList = {}", prioritizedExperimentList.getPrioritizedExperiments());
 
-            //Populate existing user assignments for given user, application & context
-            assignmentsRepository.getAssignments(userID, appName, context, experimentMap).forEach(assignmentPair -> existingUserAssignments.put(assignmentPair.getLeft().getID(), assignmentPair.getLeft().getLabel(), assignmentPair.getRight().toString()));
-            LOGGER.debug("[DB] existingUserAssignments = {}", existingUserAssignments);
-
             //Populate experiments ids of given batch
             Set<Experiment.ID> experimentIds = allowAssignments.isPresent() ? allowAssignments.get().keySet() : new HashSet<>();
             populateExperimentIdsAndExperimentBatch(allowAssignments, experimentMap, experimentBatch, experimentIds);
@@ -715,7 +714,7 @@ public class AssignmentsImpl implements Assignments {
             LOGGER.debug("[cache] exclusionMap = {}", exclusionMap);
 
         } else {
-            assignmentsRepository.populateAssignmentsMetadata(userID, appName, context, experimentBatch, allowAssignments, prioritizedExperimentList, experimentMap, existingUserAssignments, bucketMap, exclusionMap);
+            assignmentsRepository.populateAssignmentsMetadata(userID, appName, context, experimentBatch, allowAssignments, prioritizedExperimentList, experimentMap, bucketMap, exclusionMap);
         }
 
         LOGGER.debug("populateAssignmentsMetadata - FINISHED...");
