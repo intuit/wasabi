@@ -111,7 +111,7 @@ public class EventsResourceTest {
 
         thrown.expect(UnsupportedOperationException.class);
         thrown.expectMessage("Not implemented");
-        resource.recordExperimentsEvents(applicationName, userID, eventList);
+        resource.recordExperimentsEvents(applicationName, eventList);
     }
 
     @Test
