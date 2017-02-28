@@ -772,7 +772,6 @@ public class CassandraAssignmentsRepositoryTest {
         //----- Output -----------
         PrioritizedExperimentList appPriorities = new PrioritizedExperimentList();
         Map<Experiment.ID, com.intuit.wasabi.experimentobjects.Experiment> experimentMap = new HashMap<>();
-        Table<Experiment.ID, Experiment.Label, String> userAssignments = HashBasedTable.create();
         Map<Experiment.ID, BucketList> bucketMap = new HashMap<>();
         Map<Experiment.ID, List<Experiment.ID>> exclusionMap = new HashMap<>();
 
@@ -847,13 +846,12 @@ public class CassandraAssignmentsRepositoryTest {
         when(exclusionFuture.get()).thenReturn(exclusionResult);
 
         //------ Actual call ---------
-        repository.populateAssignmentsMetadata(userID, appName, context, experimentBatch, allowAssignmentsOptional, appPriorities, experimentMap, userAssignments, bucketMap, exclusionMap);
+        repository.populateAssignmentsMetadata(userID, appName, context, experimentBatch, allowAssignmentsOptional, appPriorities, experimentMap, bucketMap, exclusionMap);
 
         //------ Assert response output ---------
         assertThat(appPriorities.getPrioritizedExperiments().size(), is(1));
         assertThat(appPriorities.getPrioritizedExperiments().get(0).getID(), is(expId1));
         assertThat(experimentMap.get(expId1) != null, is(true));
-        assertThat(userAssignments.size(), is(1));
         assertThat(bucketMap.size(), is(1));
         assertThat(exclusionMap.size(), is(1));
         assertThat(exclusionMap.get(expId1).get(0).getRawID(), is(exclusion1.getPair()));
@@ -880,12 +878,11 @@ public class CassandraAssignmentsRepositoryTest {
         Map<Experiment.ID, List<Experiment.ID>> exclusionMap = new HashMap<>();
 
         //------ Actual call ---------
-        repository.populateAssignmentsMetadata(userID, appName, context, experimentBatch, allowAssignmentsOptional, appPriorities, experimentMap, userAssignments, bucketMap, exclusionMap);
+        repository.populateAssignmentsMetadata(userID, appName, context, experimentBatch, allowAssignmentsOptional, appPriorities, experimentMap, bucketMap, exclusionMap);
 
         //------ Assert response output ---------
         assertThat(appPriorities.getPrioritizedExperiments().size(), is(0));
         assertThat(experimentMap.get(expId1) != null, is(false));
-        assertThat(userAssignments.size(), is(0));
         assertThat(bucketMap.size(), is(0));
         assertThat(exclusionMap.size(), is(0));
     }
