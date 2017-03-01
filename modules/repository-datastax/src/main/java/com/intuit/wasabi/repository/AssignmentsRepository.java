@@ -50,7 +50,7 @@ import java.util.Set;
  */
 public interface AssignmentsRepository {
 
-     /**
+    /**
      * Assign users to experiments in a batch
      *
      * @param assignments pair of experiment and assignment

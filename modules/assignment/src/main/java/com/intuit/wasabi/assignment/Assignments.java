@@ -83,12 +83,11 @@ public interface Assignments {
      * @param overwrite        <code>true</code> if the assignment should be forced for existing assignments
      * @param headers          the {@link HttpHeaders} that can be used by the segmentation
      * @param experimentBatch  the {@link ExperimentBatch} experiment batch for batch assignments
-     *
      * @return a brand new or old {@link Assignment}
      */
     List<Assignment> doBatchAssignments(User.ID userID, Application.Name applicationName, Context context,
-                                 boolean createAssignment, boolean overwrite, HttpHeaders headers,
-                                 ExperimentBatch experimentBatch);
+                                        boolean createAssignment, boolean overwrite, HttpHeaders headers,
+                                        ExperimentBatch experimentBatch);
 
     /**
      * Get or create user assignments for a given user to experiments associated to given application and page.
@@ -111,11 +110,10 @@ public interface Assignments {
      * Return an existing assignment of a given user to the given experiment.
      * This method does not create a NEW ASSIGNMENT and returns NULL if assignment does not exists.
      *
-     * @param userID                the {@link com.intuit.wasabi.assignmentobjects.User.ID} of the person we want the assignment for
-     * @param appLabel              the {@link com.intuit.wasabi.experimentobjects.Application.Name} the app we want the assignment for
-     * @param experimentLabel       the {@link com.intuit.wasabi.experimentobjects.Experiment.Label} the experiment
-     * @param context               the {@link Context} of the assignment call
-     *
+     * @param userID          the {@link com.intuit.wasabi.assignmentobjects.User.ID} of the person we want the assignment for
+     * @param appLabel        the {@link com.intuit.wasabi.experimentobjects.Application.Name} the app we want the assignment for
+     * @param experimentLabel the {@link com.intuit.wasabi.experimentobjects.Experiment.Label} the experiment
+     * @param context         the {@link Context} of the assignment call
      * @return Existing {@link Assignment} or NULL
      */
     Assignment getExistingAssignment(User.ID userID, Application.Name appLabel, Experiment.Label experimentLabel, Context context);

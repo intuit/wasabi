@@ -182,7 +182,7 @@ public class CassandraAssignmentsRepositoryTest {
     public void testGetAssignmentsMultiple() {
         Experiment.ID expId1 = Experiment.ID.newInstance();
         Experiment.ID expId2 = Experiment.ID.newInstance();
-        Date endTime = new Date(System.currentTimeMillis()+30*24*60*60*1000);
+        Date endTime = new Date(System.currentTimeMillis() + 30 * 24 * 60 * 60 * 1000);
 
         Experiment exp1 = Experiment.withID(expId1).withEndTime(endTime)
                 .withLabel(Experiment.Label.valueOf("Exp1")).build();
@@ -228,7 +228,7 @@ public class CassandraAssignmentsRepositoryTest {
     @Test
     public void testGetAssignmentsSingle() {
         Experiment.ID expId1 = Experiment.ID.newInstance();
-        Date endTime = new Date(System.currentTimeMillis()+30*24*60*60*1000);
+        Date endTime = new Date(System.currentTimeMillis() + 30 * 24 * 60 * 60 * 1000);
 
         Experiment exp1 = Experiment.withID(expId1).withEndTime(endTime)
                 .withLabel(Experiment.Label.valueOf("Exp1")).build();

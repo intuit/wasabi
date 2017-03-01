@@ -643,21 +643,19 @@ public class AssignmentsResource {
     /**
      * Convert Assignment object of batch-assignment to the response MAP expected by the end user.
      * Batch-assignment response map can contain:
-     *  - experimentLabel
-     *  - assignment
-     *  - payload
-     *  - status
+     * - experimentLabel
+     * - assignment
+     * - payload
+     * - status
      *
      * @param assignment
-     *
      * @return response map
-     *
      */
     protected Map<String, Object> toBatchAssignmentResponseMap(final Assignment assignment) {
         Map<String, Object> response = newHashMap();
 
         //Add experimentLabel for batch-assignment flow only
-        if(nonNull(assignment.getExperimentLabel())) {
+        if (nonNull(assignment.getExperimentLabel())) {
             response.put("experimentLabel", assignment.getExperimentLabel());
         }
 
@@ -677,18 +675,16 @@ public class AssignmentsResource {
 
     /**
      * Convert Assignment object of single-assignment to the response MAP expected by the end user.
-     *
-     *  Single-assignment response map can contain:
-     *  - assignment
-     *  - payload
-     *  - status
-     *  - cache
-     *  - context
+     * <p>
+     * Single-assignment response map can contain:
+     * - assignment
+     * - payload
+     * - status
+     * - cache
+     * - context
      *
      * @param assignment
-     *
      * @return response map
-     *
      */
     protected Map<String, Object> toSingleAssignmentResponseMap(final Assignment assignment) {
         Map<String, Object> response = newHashMap();

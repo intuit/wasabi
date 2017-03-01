@@ -384,7 +384,6 @@ public class AssignmentsImplTest {
         when(metadataCache.getExclusionList(id)).thenReturn(exclusionList);
 
 
-
         Assignment result = assignmentsImpl.doSingleAssignment(user, appName, label, context, true, true,
                 segmentationProfile, headers);
 
@@ -1240,7 +1239,7 @@ public class AssignmentsImplTest {
 
         //Verify result
         assertThat(resultAssignments.size(), is(2));
-        assertThat(resultAssignments.get(0).getBucketLabel().toString(), anyOf(is("red"),is("blue")));
+        assertThat(resultAssignments.get(0).getBucketLabel().toString(), anyOf(is("red"), is("blue")));
         assertThat(resultAssignments.get(0).getStatus().toString(), is(Assignment.Status.NEW_ASSIGNMENT.toString()));
         assertThat(resultAssignments.get(1).getBucketLabel().toString(), is("yellow"));
         assertThat(resultAssignments.get(1).getStatus().toString(), is(Assignment.Status.NEW_ASSIGNMENT.toString()));
@@ -1319,7 +1318,7 @@ public class AssignmentsImplTest {
 
         //Verify result
         assertThat(resultAssignments.size(), is(2));
-        assertThat(resultAssignments.get(0).getBucketLabel().toString(), anyOf(is("red"),is("blue")));
+        assertThat(resultAssignments.get(0).getBucketLabel().toString(), anyOf(is("red"), is("blue")));
         assertThat(resultAssignments.get(0).getStatus().toString(), is(Assignment.Status.NEW_ASSIGNMENT.toString()));
         assertThat(resultAssignments.get(1).getBucketLabel().toString(), is("yellow"));
         assertThat(resultAssignments.get(1).getStatus().toString(), is(Assignment.Status.EXISTING_ASSIGNMENT.toString()));
@@ -1404,7 +1403,7 @@ public class AssignmentsImplTest {
 
         //Verify result
         assertThat(resultAssignments.size(), is(2));
-        assertThat(resultAssignments.get(0).getBucketLabel().toString(), anyOf(is("red"),is("blue")));
+        assertThat(resultAssignments.get(0).getBucketLabel().toString(), anyOf(is("red"), is("blue")));
         assertThat(resultAssignments.get(0).getStatus().toString(), is(Assignment.Status.NEW_ASSIGNMENT.toString()));
         assertThat(resultAssignments.get(1).getBucketLabel().toString(), is("yellow"));
         assertThat(resultAssignments.get(1).getStatus().toString(), is(Assignment.Status.EXISTING_ASSIGNMENT.toString()));
