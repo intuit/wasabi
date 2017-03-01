@@ -18,7 +18,6 @@
     <contextName>${project.artifactId}</contextName>
     <jmxConfigurator/>
     <property name="LOG" value="${log.dir}/${application.name}"/>
-    <property name="EHCACHE_LOG" value="${log.dir}/${application.name}-ehcache"/>
     <!--
     <property name="AUDIT" value="${log.dir}/${application.name}-audit"/>
     -->
@@ -38,21 +37,6 @@
         </rollingPolicy>
         <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
            <maxFileSize>500MB</maxFileSize>
-        </triggeringPolicy>
-        <encoder>
-            <pattern>%date %level [%thread] %logger{10} [%file:%line] %msg%n</pattern>
-        </encoder>
-    </appender>
-
-    <appender name="EHCACHE_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${EHCACHE_LOG}.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-            <fileNamePattern>${EHCACHE_LOG}.%i.log.zip</fileNamePattern>
-            <minIndex>1</minIndex>
-            <maxIndex>6</maxIndex>
-        </rollingPolicy>
-        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-            <maxFileSize>500MB</maxFileSize>
         </triggeringPolicy>
         <encoder>
             <pattern>%date %level [%thread] %logger{10} [%file:%line] %msg%n</pattern>
@@ -117,10 +101,6 @@
         <appender-ref ref="AUDIT"/>
     </logger>
     -->
-
-    <logger name="net.sf.ehcache" level="${log.level}" additivity="false">
-        <appender-ref ref="EHCACHE_FILE"/>
-    </logger>
 
     <root level="${log.level}">
         <appender-ref ref="FILE"/>
