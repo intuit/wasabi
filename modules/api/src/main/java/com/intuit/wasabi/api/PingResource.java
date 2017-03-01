@@ -66,7 +66,8 @@ public class PingResource {
     @GET
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Pings the server",
-            notes = "Also returns the status of other components. Uses metrics-healthchecks and pings/check connections to MySql and Cassandra.",
+            notes = "Also returns the status of other components. " +
+                    "Uses metrics-healthchecks and pings/check connections to MySql and Cassandra.",
             response = ComponentHealthList.class)
     @Timed
     public Response ping() {

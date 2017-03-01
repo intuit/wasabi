@@ -151,7 +151,7 @@ public class FeedbackResource {
 
             ImmutableMap<String, List<UserFeedback>> userFeedback =
                     new ImmutableMap.Builder<String, List<UserFeedback>>()
-                    .put("feedbackList", feedback.getUserFeedback(username)).build();
+                            .put("feedbackList", feedback.getUserFeedback(username)).build();
 
             return httpHeader.headers().entity(userFeedback).build();
         } catch (Exception exception) {

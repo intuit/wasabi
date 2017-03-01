@@ -47,7 +47,8 @@ import java.util.stream.Collectors;
  * <p>
  * Note that you will need to modify the endpoint to take the parameters for {@code filter}, {@code timezoneOffset},
  * {@code sort}, {@code page}, and {@code perPage}. See
- * {@link com.intuit.wasabi.api.AuditLogResource#getLogsForApplication(String, Application.Name, int, int, String, String, String)}
+ * {@link com.intuit.wasabi.api.AuditLogResource#getLogsForApplication(String, Application.Name, int, int,
+ * String, String, String)}
  * for an example.
  * <p>
  * You can not use the list wrappers directly (e.g. {@link ExperimentList}), instead you have to use the raw lists.
@@ -148,7 +149,8 @@ public class PaginationHelper<T> {
      * @param perPage        the number of elements per page (positive or -1 for all items)
      * @return a response map to be passed to {@link javax.ws.rs.core.Response.ResponseBuilder#entity(Object)}.
      */
-    public Map<String, Object> paginate(String jsonKey, List<T> list, String filter, String timezoneOffset, String sort, int page, int perPage) {
+    public Map<String, Object> paginate(String jsonKey, List<T> list, String filter,
+                                        String timezoneOffset, String sort, int page, int perPage) {
         Map<String, Object> response = new HashMap<>();
 
         paginationFilter.replaceFilter(filter, timezoneOffset);

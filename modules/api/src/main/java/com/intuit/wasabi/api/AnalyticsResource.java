@@ -228,7 +228,7 @@ public class AnalyticsResource {
             return httpHeader.headers().entity(experimentResponse).build();
         } catch (Exception exception) {
             LOGGER.error("getExperimentDetails failed for context={}, page={}, perPage={},"
-                    + " filter={}, sort={}, timezoneOffset={} with error:",
+                            + " filter={}, sort={}, timezoneOffset={} with error:",
                     context, page, perPage, filter, sort, timezoneOffset,
                     exception);
             throw exception;

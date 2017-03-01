@@ -264,7 +264,7 @@ public class ExperimentsResource {
             return httpHeader.headers().entity(experimentResponse).build();
         } catch (Exception exception) {
             LOGGER.error("getExperiments failed for page={}, perPage={}, "
-                    + "filter={}, sort={}, timezoneOffset={} with error:",
+                            + "filter={}, sort={}, timezoneOffset={} with error:",
                     page, perPage, filter, sort, timezoneOffset,
                     exception);
             throw exception;
@@ -431,7 +431,7 @@ public class ExperimentsResource {
                     httpHeader.headers().entity(experiment).build();
         } catch (Exception exception) {
             LOGGER.error("putExperiment failed for experimentID={}, experimentEntity={}, "
-                    + "createNewApplication={} with error:",
+                            + "createNewApplication={} with error:",
                     experimentID, experimentEntity, createNewApplication,
                     exception);
             throw exception;
@@ -477,7 +477,8 @@ public class ExperimentsResource {
             // updating its state to "deleted" -- so reuse the code.
             Experiment updatedExperiment = from(experiment).withState(DELETED).build();
 
-            experiment = experiments.updateExperiment(experimentID, updatedExperiment, authorization.getUserInfo(userName));
+            experiment = experiments.updateExperiment
+                    (experimentID, updatedExperiment, authorization.getUserInfo(userName));
 
             assert experiment != null : "Error deleting experiment";
 
@@ -1288,8 +1289,8 @@ public class ExperimentsResource {
                     .header("Content-Disposition", "attachment; filename =\"assignments.csv\"")
                     .entity(streamAssignment).build();
         } catch (Exception exception) {
-            LOGGER.error("exportAssignments failed for experimentID={}, context={}, "
-                    + "ignoreStringNullBucket={}, fromStringDate={}, toStringDate={}, timeZoneString={} with error:",
+            LOGGER.error("exportAssignments failed for experimentID={}, context={}, ignoreStringNullBucket={}," +
+                            " fromStringDate={}, toStringDate={}, timeZoneString={} with error:",
                     experimentID, context, ignoreStringNullBucket, fromStringDate, toStringDate, timeZoneString,
                     exception);
             throw exception;
@@ -1563,11 +1564,17 @@ public class ExperimentsResource {
      */
     /*test*/ OffsetDateTime parseUIDate(String uiDate, String timezoneOffset, String debugIdentifier) {
         try {
-            return OffsetDateTime.of(LocalDateTime.of(LocalDate.from(DateTimeFormatter.ofPattern("M/d/y").parse(uiDate)), LocalTime.MIDNIGHT), ZoneOffset.of(timezoneOffset));
+            return OffsetDateTime.of(
+                    LocalDateTime.of(LocalDate.from(DateTimeFormatter.ofPattern("M/d/y").parse(uiDate)),
+                            LocalTime.MIDNIGHT), ZoneOffset.of(timezoneOffset));
         } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException(String.format("Can not parse \"%s\" date \"%s\", expecting format M/d/y, e.g. 05/24/2014.", debugIdentifier, uiDate), e);
+            throw new IllegalArgumentException(
+                    String.format("Can not parse \"%s\" date \"%s\", expecting format M/d/y, e.g. 05/24/2014.",
+                            debugIdentifier, uiDate), e);
         } catch (DateTimeException e) {
-            throw new IllegalArgumentException(String.format("No proper timezoneOffset given (\"%s\"), expecting format -0000 or +0000.", timezoneOffset));
+            throw new IllegalArgumentException(
+                    String.format("No proper timezoneOffset given (\"%s\"), expecting format -0000 or +0000.",
+                            timezoneOffset));
         }
     }
 

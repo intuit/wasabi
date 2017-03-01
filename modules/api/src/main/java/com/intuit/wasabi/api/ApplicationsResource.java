@@ -78,10 +78,10 @@ public class ApplicationsResource {
 
     @Inject
     ApplicationsResource(final AuthorizedExperimentGetter authorizedExperimentGetter,
-            final Experiments experiments,
-            final Authorization authorization,
-            final Priorities priorities, final Pages pages,
-            final HttpHeader httpHeader) {
+                         final Experiments experiments,
+                         final Authorization authorization,
+                         final Priorities priorities, final Pages pages,
+                         final HttpHeader httpHeader) {
         this.authorizedExperimentGetter = authorizedExperimentGetter;
         this.pages = pages;
         this.experiments = experiments;
@@ -328,7 +328,7 @@ public class ApplicationsResource {
 
             ImmutableMap<String, List<PageExperiment>> pageExperiments =
                     ImmutableMap.<String, List<PageExperiment>>builder()
-                    .put("experiments", pages.getExperiments(applicationName, pageName)).build();
+                            .put("experiments", pages.getExperiments(applicationName, pageName)).build();
 
             return httpHeader.headers().entity(pageExperiments).build();
         } catch (Exception exception) {

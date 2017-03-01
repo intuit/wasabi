@@ -69,7 +69,7 @@ public class FavoritesResource {
      */
     @Inject
     public FavoritesResource(final HttpHeader httpHeader,
-            final Favorites favorites, final Authorization authorization) {
+                             final Favorites favorites, final Authorization authorization) {
         this.httpHeader = httpHeader;
         this.favorites = favorites;
         this.authorization = authorization;

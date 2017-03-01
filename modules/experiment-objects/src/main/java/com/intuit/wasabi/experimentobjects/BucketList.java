@@ -59,5 +59,7 @@ public class BucketList implements Serializable {
     }
 
     @Override
-    public String toString() { return buckets.toString(); }
+    public String toString() {
+        return buckets.toString();
+    }
 }

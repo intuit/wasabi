@@ -171,7 +171,7 @@ public class AuditLogResource {
             return httpHeader.headers().entity(response).build();
         } catch (Exception exception) {
             LOGGER.error("getLogsForApplication failed for applicationName={}, page={}, perPage={},"
-                    + " filter={}, sort={}, timezoneOffset={} with error:",
+                            + " filter={}, sort={}, timezoneOffset={} with error:",
                     applicationName, page, perPage, filter, sort, timezoneOffset,
                     exception);
             throw exception;
@@ -237,7 +237,7 @@ public class AuditLogResource {
                     filter, sort, timezoneOffset);
         } catch (Exception exception) {
             LOGGER.error("getLogsForAllApplications failed for page:{}, perPage={}, filter={},"
-                    + " sort={}, timezoneOffset={} with error:",
+                            + " sort={}, timezoneOffset={} with error:",
                     page, perPage, filter, sort, timezoneOffset,
                     exception);
             throw exception;

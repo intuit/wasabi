@@ -146,7 +146,7 @@ public class EventsResource {
             return httpHeader.headers(CREATED).build();
         } catch (Exception exception) {
             LOGGER.error("recordEvents failed for applicationName={},"
-                    + " experimentLabel={}, userID={}, eventList={} with error:",
+                            + " experimentLabel={}, userID={}, eventList={} with error:",
                     applicationName, experimentLabel, userID, eventList, exception);
             throw exception;
         }

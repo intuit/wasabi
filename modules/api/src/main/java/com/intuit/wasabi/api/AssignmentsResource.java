@@ -158,7 +158,7 @@ public class AssignmentsResource {
             return httpHeader.headers().entity(toSingleAssignmentResponseMap(assignment)).build();
         } catch (Exception exception) {
             LOGGER.error("getAssignment failed for applicationName={}, experimentLabel={}, userID={}, context={},"
-                    + " createAssignment={}, ignoreSamplingPercent={}, headers={} with error:",
+                            + " createAssignment={}, ignoreSamplingPercent={}, headers={} with error:",
                     applicationName, experimentLabel, userID, context, createAssignment, ignoreSamplingPercent, headers,
                     exception);
             throw exception;
@@ -251,7 +251,8 @@ public class AssignmentsResource {
             return httpHeader.headers().entity(toSingleAssignmentResponseMap(assignment)).build();
         } catch (Exception exception) {
             LOGGER.error("postAssignment failed for applicationName={}, experimentLabel={}, userID={}, context={},"
-                    + " createAssignment={}, ignoreSamplingPercent={}, segmentationProfile={}, headers={} with error:",
+                            + " createAssignment={}, ignoreSamplingPercent={}," +
+                            " segmentationProfile={}, headers={} with error:",
                     applicationName, experimentLabel, userID, context, createAssignment,
                     ignoreSamplingPercent, segmentationProfile, headers,
                     exception);
@@ -276,43 +277,46 @@ public class AssignmentsResource {
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Return bucket assignments for a user across multiple experiments",
-            notes = "Generate the assignments first if the user has no assignment for the specified experiments if the " +
-                    "CREATE flag is set to true and the user is eligible with respect to the segmentation profile. " +
-                    "Return null if the user is not in the experiment.")
-    public Response getBatchAssignments(@PathParam("applicationName")
-                                        @ApiParam(value = "Application Name")
-                                        final Application.Name applicationName,
+            notes = "Generate the assignments first if the user has no assignment for the specified experiments if the "
+                    + "CREATE flag is set to true and the user is eligible with respect to the segmentation profile. "
+                    + "Return null if the user is not in the experiment.")
+    public Response getBatchAssignments(
+            @PathParam("applicationName")
+            @ApiParam(value = "Application Name")
+            final Application.Name applicationName,
 
-                                        @PathParam("userID")
-                                        @ApiParam(value = "User(customer) ID")
-                                        final User.ID userID,
+            @PathParam("userID")
+            @ApiParam(value = "User(customer) ID")
+            final User.ID userID,
 
-                                        @QueryParam("context")
-                                        @DefaultValue("PROD")
-                                        @ApiParam(value = "context for the experiment, eg QA, PROD")
-                                        final Context context,
+            @QueryParam("context")
+            @DefaultValue("PROD")
+            @ApiParam(value = "context for the experiment, eg QA, PROD")
+            final Context context,
 
-                                        @QueryParam("create")
-                                        @DefaultValue("true")
-                                        final Boolean createAssignment,
+            @QueryParam("create")
+            @DefaultValue("true")
+            final Boolean createAssignment,
 
-                                        @ApiParam(required = true, defaultValue = DEFAULT_LABELLIST)
-                                        final ExperimentBatch experimentBatch,
+            @ApiParam(required = true, defaultValue = DEFAULT_LABELLIST)
+            final ExperimentBatch experimentBatch,
 
-                                        @javax.ws.rs.core.Context
-                                        final HttpHeaders headers) {
+            @javax.ws.rs.core.Context
+            final HttpHeaders headers) {
         try {
             LOGGER.debug("getBatchAssignment userID={}, applicationName={}, context={}, createAssignment={}, "
                             + "headers={}, experimentBatch={}",
                     userID, applicationName, context, createAssignment, headers, experimentBatch);
 
-            List<Assignment> myAssignments = assignments.doBatchAssignments(userID, applicationName, context, createAssignment, FALSE,
+            List<Assignment> myAssignments = assignments.doBatchAssignments(userID, applicationName,
+                    context, createAssignment, FALSE,
                     headers, experimentBatch);
 
-            return httpHeader.headers().entity(ImmutableMap.<String, Object>builder().put("assignments", toBatchAssignmentResponseMap(myAssignments)).build()).build();
+            return httpHeader.headers().entity(ImmutableMap.<String, Object>builder().put("assignments",
+                    toBatchAssignmentResponseMap(myAssignments)).build()).build();
         } catch (Exception exception) {
             LOGGER.error("getBatchAssignments failed for applicationName={}, userID={}, context={}, "
-                    + "createAssignment={}, experimentBatch={}, headers={} with error:",
+                            + "createAssignment={}, experimentBatch={}, headers={} with error:",
                     applicationName, userID, context, createAssignment, experimentBatch, headers,
                     exception);
             throw exception;
@@ -389,7 +393,7 @@ public class AssignmentsResource {
             return httpHeader.headers().entity(toSingleAssignmentResponseMap(response)).build();
         } catch (Exception exception) {
             LOGGER.error("updateAssignment failed for applicationName={}, experimentLabel={},"
-                    + " userID={}, submittedData={}, context={} with error:",
+                            + " userID={}, submittedData={}, context={} with error:",
                     applicationName, experimentLabel, userID, submittedData, context,
                     exception);
             throw exception;
@@ -452,14 +456,15 @@ public class AssignmentsResource {
                             + " context={}, createAssignment={}, ignoreSamplingPercent={}, headers={}",
                     applicationName, pageName, userID, context, createAssignment, ignoreSamplingPercent, headers);
 
-            List<Assignment> assignmentsFromPage = assignments.doPageAssignments(applicationName, pageName, userID, context,
-                    createAssignment, ignoreSamplingPercent, headers, null);
+            List<Assignment> assignmentsFromPage = assignments.doPageAssignments(applicationName,
+                    pageName, userID, context, createAssignment, ignoreSamplingPercent, headers, null);
 
             return httpHeader.headers()
-                    .entity(ImmutableMap.<String, Object>builder().put("assignments", toBatchAssignmentResponseMap(assignmentsFromPage)).build()).build();
+                    .entity(ImmutableMap.<String, Object>builder().put("assignments",
+                            toBatchAssignmentResponseMap(assignmentsFromPage)).build()).build();
         } catch (Exception exception) {
             LOGGER.error("getBatchAssignmentsForPage failed for applicationName={}, pageName={}, userID={},"
-                    + " createAssignment={}, ignoreSamplingPercent={}, context={}, headers={} with error:",
+                            + " createAssignment={}, ignoreSamplingPercent={}, context={}, headers={} with error:",
                     applicationName, pageName, userID, createAssignment, ignoreSamplingPercent, context, headers,
                     exception);
             throw exception;
@@ -526,11 +531,13 @@ public class AssignmentsResource {
                     applicationName, pageName, userID, context, createAssignment, ignoreSamplingPercent, headers,
                     segmentationProfile);
 
-            List<Assignment> assignmentsFromPage = assignments.doPageAssignments(applicationName, pageName, userID, context,
-                    createAssignment, ignoreSamplingPercent, headers, segmentationProfile);
+            List<Assignment> assignmentsFromPage =
+                    assignments.doPageAssignments(applicationName, pageName, userID, context,
+                            createAssignment, ignoreSamplingPercent, headers, segmentationProfile);
 
             return httpHeader.headers()
-                    .entity(ImmutableMap.<String, Object>builder().put("assignments", toBatchAssignmentResponseMap(assignmentsFromPage)).build()).build();
+                    .entity(ImmutableMap.<String, Object>builder().put("assignments",
+                            toBatchAssignmentResponseMap(assignmentsFromPage)).build()).build();
         } catch (Exception exception) {
             LOGGER.error("postBatchAssignmentForPage failed for applicationName={}, pageName={}, userID={}, "
                             + "createAssignment={}, ignoreSamplingPercent={}, context={}, segmentationProfile={},"
@@ -583,7 +590,7 @@ public class AssignmentsResource {
                     .build();
         } catch (Exception exception) {
             LOGGER.error("postAssignmentRuleTest failed for applicationName={}, experimentLabel={},"
-                    + " context={}, segmentationProfile={}, headers={} with error:",
+                            + " context={}, segmentationProfile={}, headers={} with error:",
                     applicationName, experimentLabel, context, segmentationProfile, headers,
                     exception);
             throw exception;
@@ -728,7 +735,8 @@ public class AssignmentsResource {
 
         // Only include `assignment` property if there is a definitive assignment, either to a bucket or not
         if (assignment.getStatus() != EXPERIMENT_EXPIRED) {
-            response.put("assignment", nonNull(assignment.getBucketLabel()) ? assignment.getBucketLabel().toString() : null);
+            response.put("assignment",
+                    nonNull(assignment.getBucketLabel()) ? assignment.getBucketLabel().toString() : null);
 
             if (nonNull(assignment.getBucketLabel())) {
                 response.put("payload", assignment.getPayload());
@@ -758,7 +766,8 @@ public class AssignmentsResource {
 
         // Only include `assignment` property if there is a definitive assignment, either to a bucket or not
         if (assignment.getStatus().isDefinitiveAssignment()) {
-            response.put("assignment", nonNull(assignment.getBucketLabel()) ? assignment.getBucketLabel().toString() : null);
+            response.put("assignment",
+                    nonNull(assignment.getBucketLabel()) ? assignment.getBucketLabel().toString() : null);
 
             if (nonNull(assignment.getBucketLabel())) {
                 response.put("payload", assignment.getPayload());
