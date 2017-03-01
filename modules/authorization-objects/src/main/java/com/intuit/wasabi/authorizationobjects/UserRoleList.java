@@ -22,6 +22,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Objects.nonNull;
+
 public class UserRoleList {
 
     @ApiModelProperty(required = true)
@@ -75,7 +77,7 @@ public class UserRoleList {
 
     @Override
     public String toString() {
-        if (null != roleList)
+        if (nonNull(roleList))
             return roleList.toString();
         else
             return null;
