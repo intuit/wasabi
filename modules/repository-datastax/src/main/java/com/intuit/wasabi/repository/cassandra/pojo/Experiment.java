@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,7 +18,6 @@ package com.intuit.wasabi.repository.cassandra.pojo;
 import com.datastax.driver.mapping.annotations.Column;
 import com.datastax.driver.mapping.annotations.PartitionKey;
 import com.datastax.driver.mapping.annotations.Table;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -34,7 +33,7 @@ import java.util.UUID;
  * 3) for boolean method, uses setXXXX for set value, but isXXXX for get value
  */
 
-@Table(name="experiment")
+@Table(name = "experiment")
 @Data
 @Builder(toBuilder = true)
 @NoArgsConstructor
@@ -46,18 +45,18 @@ public class Experiment {
 
     private String description;
 
-    @Column(name="sample_percent")
+    @Column(name = "sample_percent")
     private Double samplePercent;
 
-    @Column(name="start_time")
+    @Column(name = "start_time")
     private Date startTime;
 
-    @Column(name="end_time")
+    @Column(name = "end_time")
     private Date endTime;
 
     private String state;
 
-    @Column(name="app_name")
+    @Column(name = "app_name")
     private String appName;
 
     private String label;
@@ -68,28 +67,28 @@ public class Experiment {
 
     private String rule;
 
-    @Column(name="model_name")
+    @Column(name = "model_name")
     private String modelName = "";
 
-    @Column(name="model_version")
+    @Column(name = "model_version")
     private String modelVersion = "";
 
-    @Column(name="is_personalized")
+    @Column(name = "is_personalized")
     private boolean personalized = false;
 
-    @Column(name="is_rapid_experiment")
+    @Column(name = "is_rapid_experiment")
     private boolean rapidExperiment = false;
 
-    @Column(name="user_cap")
+    @Column(name = "user_cap")
     private int userCap = Integer.MAX_VALUE;
 
-    @Column(name="creatorid")
+    @Column(name = "creatorid")
     private String creatorId;
 
-    @Column(name="hypothesis_is_correct")
+    @Column(name = "hypothesis_is_correct")
     private String hypothesisIsCorrect;
 
-    @Column(name="results")
+    @Column(name = "results")
     private String results;
 
 }

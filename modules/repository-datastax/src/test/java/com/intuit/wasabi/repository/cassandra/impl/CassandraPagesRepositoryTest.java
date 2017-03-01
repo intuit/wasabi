@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,7 +22,12 @@ import com.datastax.driver.core.exceptions.ReadTimeoutException;
 import com.datastax.driver.core.exceptions.WriteTimeoutException;
 import com.datastax.driver.mapping.MappingManager;
 import com.datastax.driver.mapping.Result;
-import com.intuit.wasabi.experimentobjects.*;
+import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.experimentobjects.ExperimentPage;
+import com.intuit.wasabi.experimentobjects.ExperimentPageList;
+import com.intuit.wasabi.experimentobjects.Page;
+import com.intuit.wasabi.experimentobjects.PageExperiment;
 import com.intuit.wasabi.repository.RepositoryException;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentPageAccessor;
@@ -40,26 +45,44 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CassandraPagesRepositoryTest {
     private final Logger LOGGER = LoggerFactory.getLogger(CassandraPagesRepositoryTest.class);
 
-    @Mock PageExperimentIndexAccessor pageExperimentIndexAccessor;
-    @Mock ExperimentPageAccessor experimentPageAccessor;
-    @Mock AppPageIndexAccessor appPageIndexAccessor;
-    @Mock ExperimentAuditLogAccessor experimentAuditLogAccessor;
-    @Mock ExperimentAccessor experimentAccessor;
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS) MappingManager mappingManager;
+    @Mock
+    PageExperimentIndexAccessor pageExperimentIndexAccessor;
+    @Mock
+    ExperimentPageAccessor experimentPageAccessor;
+    @Mock
+    AppPageIndexAccessor appPageIndexAccessor;
+    @Mock
+    ExperimentAuditLogAccessor experimentAuditLogAccessor;
+    @Mock
+    ExperimentAccessor experimentAccessor;
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    MappingManager mappingManager;
 
-    @Mock Result mockedResultMapping;
+    @Mock
+    Result mockedResultMapping;
 
     CassandraPagesRepository repository;
     CassandraPagesRepository spyRepository;
@@ -79,7 +102,7 @@ public class CassandraPagesRepositoryTest {
     }
 
     @Test
-    public void getExperimentPagesEmptyResultTest(){
+    public void getExperimentPagesEmptyResultTest() {
         List<PageExperimentByAppNamePage> mockedResult = new ArrayList<>();
         when(experimentPageAccessor.selectBy(any(UUID.class))).thenReturn(mockedResultMapping);
         when(mockedResultMapping.iterator()).thenReturn(mockedResult.iterator());
@@ -88,7 +111,7 @@ public class CassandraPagesRepositoryTest {
     }
 
     @Test
-    public void getExperimentPagesSingleResultTest(){
+    public void getExperimentPagesSingleResultTest() {
         List<PageExperimentByAppNamePage> mockedResult = new ArrayList<>();
         mockedResult.add(
                 PageExperimentByAppNamePage.builder()
@@ -107,7 +130,7 @@ public class CassandraPagesRepositoryTest {
     }
 
     @Test
-    public void getExperimentPagesMultipleResultTest(){
+    public void getExperimentPagesMultipleResultTest() {
         List<PageExperimentByAppNamePage> mockedResult = new ArrayList<>();
         mockedResult.add(
                 PageExperimentByAppNamePage.builder()
@@ -129,21 +152,21 @@ public class CassandraPagesRepositoryTest {
         when(mockedResultMapping.iterator()).thenReturn(mockedResult.iterator());
         ExperimentPageList result = repository.getExperimentPages(Experiment.ID.valueOf(experimentId));
         assertThat(result.getPages().size(), is(2));
-        for(int i = 0; i<result.getPages().size(); i++) {
+        for (int i = 0; i < result.getPages().size(); i++) {
             assertThat(result.getPages().get(i).getName().toString(), is(mockedResult.get(i).getPage()));
             assertThat(result.getPages().get(i).getAllowNewAssignment(), is(mockedResult.get(i).isAssign()));
         }
     }
 
     @Test(expected = RepositoryException.class)
-    public void getExperimentPagesExceptionTest(){
+    public void getExperimentPagesExceptionTest() {
         doThrow(ReadTimeoutException.class).when(experimentPageAccessor).selectBy(eq(experimentId));
         ExperimentPageList result = repository.getExperimentPages(Experiment.ID.valueOf(experimentId));
         assertThat(result.getPages().size(), is(1));// always False condition to detect if exception is not thrown
     }
 
     @Test
-    public void saveExperimentPageStateTest(){
+    public void saveExperimentPageStateTest() {
         Experiment.ID experimentID = Experiment.ID.valueOf(experimentId);
         ExperimentPageList oldPageList = new ExperimentPageList();
         ExperimentPageList newPageList = new ExperimentPageList();
@@ -158,7 +181,7 @@ public class CassandraPagesRepositoryTest {
     }
 
     @Test(expected = RepositoryException.class)
-    public void saveExperimentPageStateExceptionTest(){
+    public void saveExperimentPageStateExceptionTest() {
         Experiment.ID experimentID = Experiment.ID.valueOf(experimentId);
         ExperimentPageList oldPageList = new ExperimentPageList();
         ExperimentPageList newPageList = new ExperimentPageList();
@@ -174,7 +197,7 @@ public class CassandraPagesRepositoryTest {
     }
 
     @Test
-    public void postPagesTest(){
+    public void postPagesTest() {
         Experiment.ID experimentID = Experiment.ID.valueOf(experimentId);
         ExperimentPageList inputExperiemntPages = new ExperimentPageList();
         inputExperiemntPages.addPage(
@@ -182,7 +205,7 @@ public class CassandraPagesRepositoryTest {
                         Page.Name.valueOf("testPage1"),
                         true
                 )
-                .build()
+                        .build()
         );
         ExperimentPageList mockedExperimentPageList = mock(ExperimentPageList.class);
         doReturn(mockedExperimentPageList).when(spyRepository).getExperimentPages(eq(experimentID));
@@ -205,7 +228,7 @@ public class CassandraPagesRepositoryTest {
     }
 
     @Test
-    public void deletePagesTest(){
+    public void deletePagesTest() {
         Experiment.ID experimentID = Experiment.ID.valueOf(experimentId);
         Page.Name pageName = Page.Name.valueOf("testPage1");
         ExperimentPageList mockedExperimentPageList = mock(ExperimentPageList.class);
@@ -230,15 +253,15 @@ public class CassandraPagesRepositoryTest {
     }
 
     @Test
-    public void erasePageDataTest(){
+    public void erasePageDataTest() {
         Experiment.ID experimentID = Experiment.ID.valueOf(experimentId);
         Page.Name pageName = Page.Name.valueOf("testPage1");
         ExperimentPageList experimentPageList = new ExperimentPageList();
-        experimentPageList.addPage( ExperimentPage.withAttributes(
+        experimentPageList.addPage(ExperimentPage.withAttributes(
                 pageName,
                 true
                 )
-                .build()
+                        .build()
         );
         doReturn(experimentPageList).when(spyRepository).getExperimentPages(eq(experimentID));
         doNothing().when(spyRepository).deletePage(eq(APPLICATION_NAME), eq(experimentID), eq(pageName));
@@ -249,7 +272,7 @@ public class CassandraPagesRepositoryTest {
     }
 
     @Test(expected = RepositoryException.class)
-    public void executeBatchStatement(){
+    public void executeBatchStatement() {
         Session session = mock(Session.class);
         when(mappingManager.getSession()).thenReturn(session);
         doThrow(WriteTimeoutException.class).when(session).execute(any(Statement.class));
@@ -258,7 +281,7 @@ public class CassandraPagesRepositoryTest {
     }
 
     @Test
-    public void getPageExperimentListEmptyTest(){
+    public void getPageExperimentListEmptyTest() {
         List<AppPage> queryResult = new ArrayList<>();
         when(appPageIndexAccessor.selectBy(eq(APPLICATION_NAME.toString()))).thenReturn(mockedResultMapping);
         when(mockedResultMapping.iterator()).thenReturn(queryResult.iterator());
@@ -267,15 +290,15 @@ public class CassandraPagesRepositoryTest {
     }
 
     @Test
-    public void getPageExperimentListSingleTest(){
+    public void getPageExperimentListSingleTest() {
         String pageName = "page1";
         List<AppPage> queryResult = new ArrayList<>();
         List<PageExperiment> pageExperimentList = new ArrayList<>();
         pageExperimentList.add(
                 PageExperiment.withAttributes(
-                    Experiment.ID.valueOf(experimentId),
-                    Experiment.Label.valueOf("lable"),
-                    true
+                        Experiment.ID.valueOf(experimentId),
+                        Experiment.Label.valueOf("lable"),
+                        true
                 ).build()
         );
         queryResult.add(AppPage.builder().page(pageName).appName(APPLICATION_NAME.toString()).build());
@@ -291,7 +314,7 @@ public class CassandraPagesRepositoryTest {
     }
 
     @Test
-    public void getPageExperimentListMultipleTest(){
+    public void getPageExperimentListMultipleTest() {
         List<AppPage> queryResult = new ArrayList<>();
         List<PageExperiment> pageExperimentList = new ArrayList<>();
         pageExperimentList.add(
@@ -318,13 +341,13 @@ public class CassandraPagesRepositoryTest {
         );
         Map<Page.Name, List<PageExperiment>> result = spyRepository.getPageExperimentList(APPLICATION_NAME);
         assertThat(result.size(), is(2));
-        for(AppPage appPage : queryResult) {
+        for (AppPage appPage : queryResult) {
             assertThat(result.get(Page.Name.valueOf(appPage.getPage())), is(pageExperimentList));
         }
     }
 
     @Test(expected = RepositoryException.class)
-    public void getPageExperimentListExceptionTest(){
+    public void getPageExperimentListExceptionTest() {
         doThrow(ReadTimeoutException.class).when(appPageIndexAccessor).selectBy(any(String.class));
         Map<Page.Name, List<PageExperiment>> result = spyRepository.getPageExperimentList(
                 APPLICATION_NAME
@@ -333,7 +356,7 @@ public class CassandraPagesRepositoryTest {
     }
 
     @Test
-    public void getPageListTest(){
+    public void getPageListTest() {
         List<AppPage> queryResult = new ArrayList<>();
         queryResult.add(AppPage.builder().page("page1").appName(APPLICATION_NAME.toString()).build());
         queryResult.add(AppPage.builder().page("page2").appName(APPLICATION_NAME.toString()).build());
@@ -341,7 +364,7 @@ public class CassandraPagesRepositoryTest {
         when(mockedResultMapping.iterator()).thenReturn(queryResult.iterator());
         List<Page> result = repository.getPageList(APPLICATION_NAME);
         assertThat(result.size(), is(queryResult.size()));
-        for(int i =0; i < queryResult.size(); i++){
+        for (int i = 0; i < queryResult.size(); i++) {
             Page page = result.get(i);
             AppPage appPage = queryResult.get(i);
             assertThat(page.getName().toString(), is(appPage.getPage()));
@@ -349,7 +372,7 @@ public class CassandraPagesRepositoryTest {
     }
 
     @Test(expected = RepositoryException.class)
-    public void getExperimentsExceptionTest(){
+    public void getExperimentsExceptionTest() {
         Page.Name pageName = Page.Name.valueOf("testPage1");
         doThrow(ReadTimeoutException.class)
                 .when(pageExperimentIndexAccessor)
@@ -360,7 +383,7 @@ public class CassandraPagesRepositoryTest {
     }
 
     @Test
-    public void getExperimentsEmptyExperiemntSelectTest(){
+    public void getExperimentsEmptyExperiemntSelectTest() {
         Page.Name pageName = Page.Name.valueOf("testPage1");
         List<PageExperimentByAppNamePage> mockedResult = new ArrayList<>();
         mockedResult.add(
@@ -381,7 +404,7 @@ public class CassandraPagesRepositoryTest {
     }
 
     @Test
-    public void getExperimentsEmptyQueryTest(){
+    public void getExperimentsEmptyQueryTest() {
         Page.Name pageName = Page.Name.valueOf("testPage1");
         com.intuit.wasabi.repository.cassandra.pojo.Experiment experiment =
                 com.intuit.wasabi.repository.cassandra.pojo.Experiment.builder()
@@ -399,7 +422,7 @@ public class CassandraPagesRepositoryTest {
     }
 
     @Test
-    public void getExperimentSingleTest(){
+    public void getExperimentSingleTest() {
         Page.Name pageName = Page.Name.valueOf("testPage1");
         List<PageExperimentByAppNamePage> mockedResult = new ArrayList<>();
         mockedResult.add(
@@ -413,7 +436,7 @@ public class CassandraPagesRepositoryTest {
         com.intuit.wasabi.repository.cassandra.pojo.Experiment experiment =
                 com.intuit.wasabi.repository.cassandra.pojo.Experiment.builder()
                         .id(experimentId)
-                .label("testLabel1")
+                        .label("testLabel1")
                         .build();
         when(pageExperimentIndexAccessor.selectBy(eq(APPLICATION_NAME.toString()),
                 eq(pageName.toString()))).thenReturn(mockedResultMapping);
@@ -458,14 +481,14 @@ public class CassandraPagesRepositoryTest {
         when(pageExperimentIndexAccessor.selectBy(eq(APPLICATION_NAME.toString()),
                 eq(pageName.toString()))).thenReturn(mockedResultMapping);
         when(mockedResultMapping.iterator()).thenReturn(mockedResult.iterator());
-        for(com.intuit.wasabi.repository.cassandra.pojo.Experiment experiment : experiments) {
+        for (com.intuit.wasabi.repository.cassandra.pojo.Experiment experiment : experiments) {
             Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment> mocked = mock(Result.class);
             when(experimentAccessor.selectBy(eq(experiment.getId()))).thenReturn(mocked);
-            when(mocked.one()).thenReturn( experiment );
+            when(mocked.one()).thenReturn(experiment);
         }
         List<PageExperiment> result = repository.getExperiments(APPLICATION_NAME, pageName);
         assertThat(result.size(), is(mockedResult.size()));
-        for(int i =0; i< mockedResult.size(); i++) {
+        for (int i = 0; i < mockedResult.size(); i++) {
             assertThat(result.get(i).getAllowNewAssignment(), is(mockedResult.get(i).isAssign()));
             assertThat(result.get(i).getId().getRawID(), is(mockedResult.get(i).getExperimentId()));
             assertThat(result.get(i).getLabel().toString(), is(experiments.get(i).getLabel()));
@@ -506,7 +529,7 @@ public class CassandraPagesRepositoryTest {
         assertThat(result.size(), is(1));
         assertThat(result.get(0).getAllowNewAssignment(), is(mockedResult.get(0).isAssign()));
         assertThat(result.get(0).getId().getRawID(), is(experimentId));
-        assertThat(result.get(0).getLabel()==null, is(true));
+        assertThat(result.get(0).getLabel() == null, is(true));
 
     }
 

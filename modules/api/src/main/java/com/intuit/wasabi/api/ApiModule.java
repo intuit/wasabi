@@ -49,6 +49,10 @@ import static com.google.inject.Scopes.SINGLETON;
 import static com.google.inject.name.Names.named;
 import static com.intuit.autumn.utils.PropertyFactory.create;
 import static com.intuit.autumn.utils.PropertyFactory.getProperty;
+import static com.intuit.wasabi.api.ApiAnnotations.ACCESS_CONTROL_MAX_AGE_DELTA_SECONDS;
+import static com.intuit.wasabi.api.ApiAnnotations.APPLICATION_ID;
+import static com.intuit.wasabi.api.ApiAnnotations.DEFAULT_TIME_FORMAT;
+import static com.intuit.wasabi.api.ApiAnnotations.DEFAULT_TIME_ZONE;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class ApiModule extends AbstractModule {
@@ -63,13 +67,13 @@ public class ApiModule extends AbstractModule {
 
         Properties properties = create(PROPERTY_NAME, ApiModule.class);
 
-        bind(String.class).annotatedWith(named("application.id"))
+        bind(String.class).annotatedWith(named(APPLICATION_ID))
                 .toInstance(getProperty("application.id", properties));
-        bind(String.class).annotatedWith(named("default.time.zone"))
-                .toInstance(getProperty("default.time.zone", properties, "yyyy-MM-dd HH:mm:ss"));
-        bind(String.class).annotatedWith(named("default.time.format"))
+        bind(String.class).annotatedWith(named(DEFAULT_TIME_ZONE))
+                .toInstance(getProperty("default.time.zone", properties, "UTC"));
+        bind(String.class).annotatedWith(named(DEFAULT_TIME_FORMAT))
                 .toInstance(getProperty("default.time.format", properties, "yyyy-MM-dd HH:mm:ss"));
-        bind(String.class).annotatedWith(named("access.control.max.age.delta.seconds"))
+        bind(String.class).annotatedWith(named(ACCESS_CONTROL_MAX_AGE_DELTA_SECONDS))
                 .toInstance(getProperty("access.control.max.age.delta.seconds", properties));
 
         bind(AuthorizedExperimentGetter.class).in(SINGLETON);
@@ -78,19 +82,31 @@ public class ApiModule extends AbstractModule {
         bind(ExceptionJsonifier.class).in(SINGLETON);
 
         // Bind comparators and filters for pagination
-        bind(new TypeLiteral<PaginationComparator<AuditLogEntry>>(){}).to(new TypeLiteral<AuditLogEntryComparator>(){});
-        bind(new TypeLiteral<PaginationFilter<AuditLogEntry>>(){}).to(new TypeLiteral<AuditLogEntryFilter>(){});
-        bind(new TypeLiteral<PaginationComparator<Experiment>>(){}).to(new TypeLiteral<ExperimentComparator>(){});
-        bind(new TypeLiteral<PaginationFilter<Experiment>>(){}).to(new TypeLiteral<ExperimentFilter>(){});
-        bind(new TypeLiteral<PaginationFilter<ExperimentDetail>>(){}).to(new TypeLiteral<ExperimentDetailFilter>(){});
-        bind(new TypeLiteral<PaginationComparator<ExperimentDetail>>(){}).to(new TypeLiteral<ExperimentDetailComparator>(){});
+        bind(new TypeLiteral<PaginationComparator<AuditLogEntry>>() {
+        }).to(new TypeLiteral<AuditLogEntryComparator>() {
+        });
+        bind(new TypeLiteral<PaginationFilter<AuditLogEntry>>() {
+        }).to(new TypeLiteral<AuditLogEntryFilter>() {
+        });
+        bind(new TypeLiteral<PaginationComparator<Experiment>>() {
+        }).to(new TypeLiteral<ExperimentComparator>() {
+        });
+        bind(new TypeLiteral<PaginationFilter<Experiment>>() {
+        }).to(new TypeLiteral<ExperimentFilter>() {
+        });
+        bind(new TypeLiteral<PaginationFilter<ExperimentDetail>>() {
+        }).to(new TypeLiteral<ExperimentDetailFilter>() {
+        });
+        bind(new TypeLiteral<PaginationComparator<ExperimentDetail>>() {
+        }).to(new TypeLiteral<ExperimentDetailComparator>() {
+        });
 
     }
-    
+
     protected void installUserModule() {
         install(new UserDirectoryModule());
     }
-    
+
     protected void installAuthModule() {
         install(new AuthorizationModule());
     }
@@ -98,7 +114,7 @@ public class ApiModule extends AbstractModule {
     protected void installEventModule() {
         install(new EventsModule());
     }
-    
+
     private void installModules() {
         LOGGER.debug("installing module: {}", ApiModule.class.getCanonicalName());
 

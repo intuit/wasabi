@@ -41,6 +41,8 @@ http://www.w3.org/2001/XMLSchema-instance">
         <application.name>${project.name}-${project.version}-${application.profile}</application.name>
         <application.version>1.0</application.version>
         <application.home>/usr/local/${application.name}</application.home>
+        <application.heapsize>256m</application.heapsize>
+        <assignment.metadata.cache.maxBytesLocalHeap>128M</assignment.metadata.cache.maxBytesLocalHeap>
 
         <jacoco.version>0.7.2.201409121644</jacoco.version>
         <jacoco.destFile>${basedir}/../target/jacoco.exec</jacoco.destFile>
@@ -78,8 +80,6 @@ http://www.w3.org/2001/XMLSchema-instance">
         <authentication.class.name>com.intuit.wasabi.authentication.impl.DefaultAuthentication
         </authentication.class.name>
 
-        <assign.user.to.old>true</assign.user.to.old>
-        <assign.user.to.new>false</assign.user.to.new>
         <assign.user.to.export>true</assign.user.to.export>
         <assign.bucket.count>true</assign.bucket.count>
         <assignment.decorator.enabled>false</assignment.decorator.enabled>

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,8 +38,7 @@ public enum AuditLogAction {
     BUCKET_CREATED(BucketCreateEvent.class),
     BUCKET_CHANGED(BucketChangeEvent.class),
     BUCKET_DELETED(BucketDeleteEvent.class),
-    AUTHORIZATION_CHANGE(AuthorizationChangeEvent.class),
-    ;
+    AUTHORIZATION_CHANGE(AuthorizationChangeEvent.class),;
 
     private final Class<? extends EventLogEvent> eventType;
 
@@ -95,7 +94,8 @@ public enum AuditLogAction {
      * @param entry the audit log entry
      * @return a simple description of the change
      */
-    /*test*/ static String getDescriptionAuthorizationChange(AuditLogEntry entry) {
+    /*test*/
+    static String getDescriptionAuthorizationChange(AuditLogEntry entry) {
         if (StringUtils.isBlank(entry.getAfter())) {
             return "removed access from " + entry.getChangedProperty();
         } else {
@@ -108,7 +108,7 @@ public enum AuditLogAction {
                     access = "WRITE";
                     break;
                 default:
-                	break;
+                    break;
             }
 
             if (StringUtils.isBlank(entry.getBefore())) {
@@ -124,7 +124,7 @@ public enum AuditLogAction {
                     accessFrom = "WRITE";
                     break;
                 default:
-                	break;
+                    break;
             }
 
             return "changed access from " + accessFrom + " to " + access + " for " + entry.getChangedProperty();
@@ -137,7 +137,8 @@ public enum AuditLogAction {
      * @param entry the audit log entry
      * @return a simple description of the change
      */
-    /*test*/ static String getDescriptionExperimentChanged(AuditLogEntry entry) {
+    /*test*/
+    static String getDescriptionExperimentChanged(AuditLogEntry entry) {
         switch (entry.getChangedProperty()) {
             // direct experiment properties
             case "state":
@@ -214,7 +215,8 @@ public enum AuditLogAction {
      * @param entry the audit log entry
      * @return a simple description of the change
      */
-    /*test*/ static String getDescriptionBucketChanged(AuditLogEntry entry) {
+    /*test*/
+    static String getDescriptionBucketChanged(AuditLogEntry entry) {
         switch (entry.getChangedProperty()) {
             case "is_control":
                 if (!StringUtils.isBlank(entry.getAfter()) && Boolean.parseBoolean(entry.getAfter())) {
@@ -248,7 +250,8 @@ public enum AuditLogAction {
      * @param doubleString an input string representing a double
      * @return an output string representing a percentage (including %)
      */
-    /*test*/ static String getPercentString(String doubleString) {
+    /*test*/
+    static String getPercentString(String doubleString) {
         try {
             return new DecimalFormat("###.##%").format(Double.parseDouble(doubleString));
         } catch (NumberFormatException ignored) {

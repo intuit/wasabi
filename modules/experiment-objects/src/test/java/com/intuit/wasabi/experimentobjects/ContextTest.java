@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,37 +28,37 @@ import static org.junit.Assert.fail;
 
 /**
  * This class tests the functionality of the Context object.
- *
+ * <p>
  * Created by asuckro on 8/12/15.
  */
 public class ContextTest {
 
     @Test
-    public void testContextCreation(){
+    public void testContextCreation() {
         //with builder
         Context con = Context.newInstance("foo").build();
-        assertEquals("foo",con.getContext());
+        assertEquals("foo", con.getContext());
         con.setContext("foo2");
-        assertEquals("foo2",con.getContext());
+        assertEquals("foo2", con.getContext());
 
         //protected Constructor
         con = new Context();
-        assertEquals("PROD",con.getContext());
+        assertEquals("PROD", con.getContext());
     }
 
     @Test(expected = NullPointerException.class)
-    public void testContextCreationWithNull(){
+    public void testContextCreationWithNull() {
         Context.newInstance(null).build();
     }
 
     @Test
-    public void testContextCreationWithIllegalName(){
-        List<String> badNames = Arrays.asList("1QA","PRODÜCTION"," PROD", "Pre Prod");
-        for (String name : badNames){
+    public void testContextCreationWithIllegalName() {
+        List<String> badNames = Arrays.asList("1QA", "PRODÜCTION", " PROD", "Pre Prod");
+        for (String name : badNames) {
             try {
                 Context.newInstance(name);
                 fail();
-            }catch (InvalidIdentifierException e){
+            } catch (InvalidIdentifierException e) {
                 //all names are invalid Identifieres!
             }
         }
@@ -66,17 +66,17 @@ public class ContextTest {
     }
 
     @Test
-    public void testCopyConstructor(){
+    public void testCopyConstructor() {
 
         Context con = Context.newInstance("a$123_a").build();
         Context con2 = Context.from(con).build();
 
-        assertEquals(con.getContext(),con2.getContext());
+        assertEquals(con.getContext(), con2.getContext());
 
     }
 
     @Test
-    public void testEquals(){
+    public void testEquals() {
         Context con = Context.newInstance("qa").build();
         assertFalse(con.equals(null));
         assertTrue(con.equals(con));
@@ -88,9 +88,6 @@ public class ContextTest {
 
         assertEquals(con.hashCode(), Context.from(con).build().hashCode());
     }
-
-
-
 
 
 }

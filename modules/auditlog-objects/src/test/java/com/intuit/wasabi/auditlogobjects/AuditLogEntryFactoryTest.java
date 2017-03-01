@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,7 +15,14 @@
  *******************************************************************************/
 package com.intuit.wasabi.auditlogobjects;
 
-import com.intuit.wasabi.eventlog.events.*;
+import com.intuit.wasabi.eventlog.events.BucketCreateEvent;
+import com.intuit.wasabi.eventlog.events.BucketEvent;
+import com.intuit.wasabi.eventlog.events.ChangeEvent;
+import com.intuit.wasabi.eventlog.events.EventLogEvent;
+import com.intuit.wasabi.eventlog.events.ExperimentChangeEvent;
+import com.intuit.wasabi.eventlog.events.ExperimentCreateEvent;
+import com.intuit.wasabi.eventlog.events.ExperimentEvent;
+import com.intuit.wasabi.eventlog.events.SimpleEvent;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import org.junit.Assert;
@@ -33,7 +40,7 @@ public class AuditLogEntryFactoryTest {
     public void testCreateFromEvent() throws Exception {
         new AuditLogEntryFactory();
 
-        EventLogEvent[] events = new EventLogEvent[] {
+        EventLogEvent[] events = new EventLogEvent[]{
                 new SimpleEvent("SimpleEvent"),
                 new ExperimentChangeEvent(Mockito.mock(Experiment.class), "Property", "before", "after"),
                 new ExperimentCreateEvent(Mockito.mock(Experiment.class)),

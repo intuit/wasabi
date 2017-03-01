@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,7 +23,7 @@ import java.util.function.Function;
  * An implementation of the PaginationFilterProperty is best
  * achieved by implementing an {@code enum} which implements
  * this interface.
- *
+ * <p>
  * This interface assures that a {@link PaginationFilter} can work
  * with a property extractor (which is a {@link Function}) to get
  * properties for comparison, as well as with a filter predicate
@@ -38,7 +38,7 @@ import java.util.function.Function;
  * {@link org.apache.commons.lang3.StringUtils#containsIgnoreCase(CharSequence, CharSequence)}.
  * However, if the property in question is no String, more sophisticated methods/functions might
  * be needed to be able to filter the two properties.
- *
+ * <p>
  * Example:
  * <pre>{@code
  *  private enum Property implements PaginationFilterProperty<Object> {
@@ -65,23 +65,23 @@ import java.util.function.Function;
  *      }
  * }
  * }</pre>
- *
+ * <p>
  * Some useful helper predicates, especially for handling dates and times, are implemented in
  * {@link FilterUtil}.
  *
- * @see FilterUtil
  * @param <T> The type to be filtered, in the example above {@link Object}.
+ * @see FilterUtil
  */
 public interface PaginationFilterProperty<T> {
 
     /**
      * Returns a Function which allows to get
      * a value of some type from an object of type T.
-     *
+     * <p>
      * Usually this is a getter, for example:
      * {@code Person::getName}. Another common pattern is
      * something similar to {@code person -> person.getName().toString()}.
-     *
+     * <p>
      * The returned function may return {@code null}, which will cause
      * the object to be ignored.
      *
@@ -92,12 +92,12 @@ public interface PaginationFilterProperty<T> {
     /**
      * Returns a {@link java.util.function.Predicate} which allows to test
      * a value extracted by {@link #getPropertyExtractor()}.
-     *
+     * <p>
      * Common values are for example:
      * <ul>
-     *     <li>{@link org.apache.commons.lang.StringUtils#containsIgnoreCase(String, String)}</li>
-     *     <li>{@link Integer#equals(Object)} </li>
-     *     <li>{@link java.util.Date#before(Date)}</li>
+     * <li>{@link org.apache.commons.lang.StringUtils#containsIgnoreCase(String, String)}</li>
+     * <li>{@link Integer#equals(Object)} </li>
+     * <li>{@link java.util.Date#before(Date)}</li>
      * </ul>
      *
      * @return a function to test one argument against some condition.

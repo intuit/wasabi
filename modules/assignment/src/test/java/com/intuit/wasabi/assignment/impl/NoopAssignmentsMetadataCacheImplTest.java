@@ -25,7 +25,6 @@ import com.intuit.wasabi.experimentobjects.Page;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static java.util.Objects.isNull;
 import static org.hamcrest.core.Is.is;
 
 /**

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,7 +24,12 @@ import com.intuit.wasabi.experiment.Buckets;
 import com.intuit.wasabi.experiment.Experiments;
 import com.intuit.wasabi.experiment.Pages;
 import com.intuit.wasabi.experiment.Priorities;
-import com.intuit.wasabi.experimentobjects.*;
+import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.experimentobjects.BucketList;
+import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.experimentobjects.ExperimentList;
+import com.intuit.wasabi.experimentobjects.ExperimentValidator;
+import com.intuit.wasabi.experimentobjects.NewExperiment;
 import com.intuit.wasabi.experimentobjects.exceptions.InvalidIdentifierException;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.RepositoryException;
@@ -41,8 +46,21 @@ import java.util.Date;
 import java.util.List;
 
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ExperimentsImplTest {
@@ -81,14 +99,14 @@ public class ExperimentsImplTest {
     public void setup() {
         experimentID = Experiment.ID.newInstance();
         startTime = new Date();
-        endTime = new Date(startTime.getTime()+60000);
+        endTime = new Date(startTime.getTime() + 60000);
         samplingPercent = 0.5;
-        expImpl = new ExperimentsImpl(databaseRepository,cassandraRepository,experiments,buckets,pages,priorities,validator,ruleCache,eventLog);
+        expImpl = new ExperimentsImpl(databaseRepository, cassandraRepository, experiments, buckets, pages, priorities, validator, ruleCache, eventLog);
         description = "Some description";
     }
 
     @Test(expected = InvalidIdentifierException.class)
-    public void testCreateExperimentFailedValidator(){
+    public void testCreateExperimentFailedValidator() {
         NewExperiment testExp = NewExperiment.withID(experimentID)
                 .withAppName(testApp)
                 .withLabel(testLabel)
@@ -104,7 +122,7 @@ public class ExperimentsImplTest {
     // Experiments or New Experiments should throw IllegalArgumentException when
     // personalization is enabled and model name is not specified
     @Test(expected = IllegalArgumentException.class)
-    public void testCreateExperimentFailedValidatorPersonalization(){
+    public void testCreateExperimentFailedValidatorPersonalization() {
         NewExperiment testExp = NewExperiment.withID(experimentID)
                 .withAppName(testApp)
                 .withLabel(testLabel)
@@ -119,7 +137,7 @@ public class ExperimentsImplTest {
     }
 
     @Test
-    public void testCreateExperimentFailedPriority(){
+    public void testCreateExperimentFailedPriority() {
         NewExperiment testExp = NewExperiment.withID(experimentID)
                 .withAppName(testApp)
                 .withLabel(testLabel)
@@ -131,18 +149,17 @@ public class ExperimentsImplTest {
         doNothing().when(validator).validateNewExperiment(testExp);
         when(cassandraRepository.createExperiment(testExp)).thenReturn(experimentID);
         doThrow(new IllegalArgumentException()).when(priorities).appendToPriorityList(experimentID);
-        try{
+        try {
             expImpl.createExperiment(testExp, UserInfo.from(UserInfo.Username.valueOf("user")).build());
             fail("Expected RepositoryException.");
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             assertEquals(e.getClass(), IllegalArgumentException.class);
         }
         verify(cassandraRepository, atLeastOnce()).deleteExperiment(testExp);
     }
 
     @Test
-    public void testCreateExperimentFailedDatabaseCreateExperiment(){
+    public void testCreateExperimentFailedDatabaseCreateExperiment() {
         NewExperiment testExp = NewExperiment.withID(experimentID)
                 .withAppName(testApp)
                 .withLabel(testLabel)
@@ -154,11 +171,10 @@ public class ExperimentsImplTest {
         doNothing().when(validator).validateNewExperiment(testExp);
         when(cassandraRepository.createExperiment(testExp)).thenReturn(experimentID);
         doThrow(new RepositoryException()).when(databaseRepository).createExperiment(testExp);
-        try{
+        try {
             expImpl.createExperiment(testExp, UserInfo.from(UserInfo.Username.valueOf("user")).build());
             fail("Expected RepositoryException.");
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             assertEquals(e.getClass(), RepositoryException.class);
         }
         verify(priorities, times(1)).removeFromPriorityList(testExp.getApplicationName(), experimentID);
@@ -179,20 +195,19 @@ public class ExperimentsImplTest {
         doNothing().when(priorities).appendToPriorityList(experimentID);
         when(databaseRepository.createExperiment(testExp)).thenReturn(experimentID);
         doThrow(new RepositoryException()).when(cassandraRepository).createIndicesForNewExperiment(testExp);
-        try{
+        try {
             expImpl.createExperiment(testExp, UserInfo.from(UserInfo.Username.valueOf("user")).build());
             fail("Expected RepositoryException.");
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             assertEquals(e.getClass(), RepositoryException.class);
         }
         verify(cassandraRepository, atLeastOnce()).deleteExperiment(testExp);
         verify(databaseRepository, atLeastOnce()).deleteExperiment(testExp);
-        verify(priorities, atLeastOnce()).removeFromPriorityList(testApp,experimentID);
+        verify(priorities, atLeastOnce()).removeFromPriorityList(testApp, experimentID);
     }
 
     @Test
-    public void testCreateExperimentPass(){
+    public void testCreateExperimentPass() {
         NewExperiment testExp = NewExperiment.withID(experimentID)
                 .withAppName(testApp)
                 .withLabel(testLabel)
@@ -255,11 +270,11 @@ public class ExperimentsImplTest {
     public void testCheckStateTransition() {
         Experiment.State currentState = Experiment.State.RUNNING;
         Experiment.State desiredState = Experiment.State.RUNNING;
-        verify(validator, never()).validateStateTransition(currentState,desiredState);
+        verify(validator, never()).validateStateTransition(currentState, desiredState);
         expImpl.checkStateTransition(experimentID, currentState, desiredState);
 
-        verify(validator, never()).validateStateTransition(currentState,desiredState);
-        expImpl.checkStateTransition(experimentID, currentState,null);
+        verify(validator, never()).validateStateTransition(currentState, desiredState);
+        expImpl.checkStateTransition(experimentID, currentState, null);
 
         BucketList bucketList = mock(BucketList.class);
         when(buckets.getBuckets(experimentID, false)).thenReturn(bucketList);
@@ -271,7 +286,7 @@ public class ExperimentsImplTest {
     }
 
     @Test
-    public void testCheckForIllegalUpdate(){
+    public void testCheckForIllegalUpdate() {
         Experiment testExp = Experiment.withID(experimentID)
                 .withApplicationName(testApp)
                 .withLabel(testLabel)
@@ -287,11 +302,10 @@ public class ExperimentsImplTest {
 
         // Attempt to modify experimentID
         updateExp.setID(Experiment.ID.newInstance());
-        try{
+        try {
             expImpl.checkForIllegalUpdate(testExp, updateExp);
             fail("Expected IllegalArgumentException.");
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             assertEquals(e.getClass(), IllegalArgumentException.class);
         }
         updateExp.setID(experimentID);
@@ -299,22 +313,20 @@ public class ExperimentsImplTest {
         // Attempt to modify Creation Time
         Date tempCreationTime = updateExp.getCreationTime();
         updateExp.setCreationTime(new Date());
-        try{
+        try {
             expImpl.checkForIllegalUpdate(testExp, updateExp);
             fail("Expected IllegalArgumentException.");
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             assertEquals(e.getClass(), IllegalArgumentException.class);
         }
         updateExp.setCreationTime(tempCreationTime);
 
         // Attempt to modify Modification Time
         updateExp.setModificationTime(new Date());
-        try{
+        try {
             expImpl.checkForIllegalUpdate(testExp, updateExp);
             fail("Expected IllegalArgumentException.");
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             assertEquals(e.getClass(), IllegalArgumentException.class);
         }
     }
@@ -340,27 +352,27 @@ public class ExperimentsImplTest {
 
         // Attempt to change Application Name
         updateExp.setApplicationName(Application.Name.valueOf("ChangedAppName"));
-        try{
+        try {
             expImpl.checkForIllegalTerminatedUpdate(testExp, updateExp);
             fail("Expected IllegalArgumentException.");
-        }catch (Exception e) {
+        } catch (Exception e) {
             assertEquals(e.getClass(), IllegalArgumentException.class);
         }
         updateExp.setApplicationName(testApp);
 
         // Attempt to change label
         updateExp.setLabel(Experiment.Label.valueOf("ChangedLabel"));
-        try{
+        try {
             expImpl.checkForIllegalTerminatedUpdate(testExp, updateExp);
             fail("Expected IllegalArgumentException.");
-        }catch (Exception e) {
+        } catch (Exception e) {
             assertEquals(e.getClass(), IllegalArgumentException.class);
         }
         updateExp.setLabel(testLabel);
 
         // Attempt to change end time
         updateExp.setEndTime(new Date());
-        try{
+        try {
             expImpl.checkForIllegalTerminatedUpdate(testExp, updateExp);
             fail("Expected IllegalArgumentException.");
         } catch (Exception e) {
@@ -370,7 +382,7 @@ public class ExperimentsImplTest {
 
         // Attempt to change sampling percent
         updateExp.setSamplingPercent(100.0);
-        try{
+        try {
             expImpl.checkForIllegalTerminatedUpdate(testExp, updateExp);
             fail("Expected IllegalArgumentException.");
         } catch (Exception e) {
@@ -379,9 +391,9 @@ public class ExperimentsImplTest {
         updateExp.setSamplingPercent(samplingPercent);
 
         // Attempt to check when Rules are different
-        try{
+        try {
             expImpl.checkForIllegalTerminatedUpdate(testExp, updateExp);
-        } catch(Exception e){
+        } catch (Exception e) {
             assertEquals(e.getClass(), IllegalArgumentException.class);
         }
     }
@@ -390,7 +402,7 @@ public class ExperimentsImplTest {
      *
      */
     @Test
-    public void testCheckForIllegalExperimentEndTime(){
+    public void testCheckForIllegalExperimentEndTime() {
         Experiment mockCurrentExperiment = mock(Experiment.class);
         Experiment mockUpdateExperiment = mock(Experiment.class);
         Date currentStartDate = mock(Date.class);
@@ -420,16 +432,16 @@ public class ExperimentsImplTest {
     }
 
     void assertIllegalExperimentEndTime(Experiment mockCurrentExperiment, Experiment mockUpdateExperiment) {
-        try{
+        try {
             expImpl.checkForIllegalExperimentEndTime(mockCurrentExperiment, mockUpdateExperiment);
             fail();
-        } catch (Exception e){
+        } catch (Exception e) {
             assertEquals(e.getClass(), IllegalArgumentException.class);
         }
     }
 
     @Test
-    public void testCheckForIllegalExperimentStartTime(){
+    public void testCheckForIllegalExperimentStartTime() {
         Experiment mockCurrentExperiment = mock(Experiment.class);
         Experiment mockUpdateExperiment = mock(Experiment.class);
         Date updateEndDate = mock(Date.class);
@@ -459,18 +471,18 @@ public class ExperimentsImplTest {
     }
 
     void assertIllegalExperimentStartTime(Experiment mockCurrentExperiment, Experiment mockUpdateExperiment) {
-        try{
+        try {
             expImpl.checkForIllegalExperimentStartTime(mockCurrentExperiment, mockUpdateExperiment);
             fail();
-        } catch (Exception e){
+        } catch (Exception e) {
             assertEquals(e.getClass(), IllegalArgumentException.class);
         }
     }
 
     @Test
     public void testCheckForIllegalPausedUpdate() {
-        ExperimentsImpl expImpl= spy(new ExperimentsImpl(databaseRepository,cassandraRepository,experiments,
-                buckets,pages,priorities,validator,ruleCache,eventLog));
+        ExperimentsImpl expImpl = spy(new ExperimentsImpl(databaseRepository, cassandraRepository, experiments,
+                buckets, pages, priorities, validator, ruleCache, eventLog));
 
         Experiment mockCurrentExperiment = mock(Experiment.class);
         Experiment mockUpdateExperiment = mock(Experiment.class);
@@ -482,7 +494,7 @@ public class ExperimentsImplTest {
         when(mockUpdateExperiment.getApplicationName()).thenReturn(Application.Name.valueOf("B"));
         try {
             expImpl.checkForIllegalPausedRunningUpdate(mockCurrentExperiment, mockUpdateExperiment);
-        } catch (Exception e){
+        } catch (Exception e) {
             assertEquals(e.getClass(), IllegalArgumentException.class);
             when(mockUpdateExperiment.getApplicationName()).thenReturn(Application.Name.valueOf("A"));
         }
@@ -491,7 +503,7 @@ public class ExperimentsImplTest {
         when(mockUpdateExperiment.getLabel()).thenReturn(Experiment.Label.valueOf("B"));
         try {
             expImpl.checkForIllegalPausedRunningUpdate(mockCurrentExperiment, mockUpdateExperiment);
-        } catch (Exception e){
+        } catch (Exception e) {
             assertEquals(e.getClass(), IllegalArgumentException.class);
             when(mockUpdateExperiment.getLabel()).thenReturn(Experiment.Label.valueOf("A"));
         }
@@ -539,7 +551,7 @@ public class ExperimentsImplTest {
     }
 
     @Test
-    public void testBuildUpdatedExperiment(){
+    public void testBuildUpdatedExperiment() {
         Experiment current = mock(Experiment.class);
         Experiment update = mock(Experiment.class);
         Experiment.Builder builder = mock(Experiment.Builder.class);
@@ -605,12 +617,12 @@ public class ExperimentsImplTest {
     }
 
     @Test
-    public void testUpdateExperiment(){
+    public void testUpdateExperiment() {
         Experiment update = mock(Experiment.class);
         Experiment current = mock(Experiment.class);
         UserInfo user = mock(UserInfo.class);
-        ExperimentsImpl expImpl = spy(new ExperimentsImpl(databaseRepository,cassandraRepository,experiments,
-                buckets,pages,priorities,validator,ruleCache,eventLog));
+        ExperimentsImpl expImpl = spy(new ExperimentsImpl(databaseRepository, cassandraRepository, experiments,
+                buckets, pages, priorities, validator, ruleCache, eventLog));
         when(current.getID()).thenReturn(experimentID);
         doReturn(current).when(expImpl).getExperiment(experimentID);
         doReturn(false).when(expImpl).buildUpdatedExperiment(eq(current), eq(update),
@@ -640,7 +652,7 @@ public class ExperimentsImplTest {
         doReturn(Experiment.State.RUNNING).when(concretExperiment).getState();
         result = expImpl.updateExperiment(experimentID, update, user);
         assertThat(result.getState(), is(Experiment.State.DELETED));
-        verify(validator,times(1)).validateExperiment(any(Experiment.class));
+        verify(validator, times(1)).validateExperiment(any(Experiment.class));
         verify(databaseRepository, times(1)).updateExperiment(any(Experiment.class));
         verify(priorities, times(1)).appendToPriorityList(any(Experiment.ID.class));
         verify(cassandraRepository, times(1)).logExperimentChanges(any(Experiment.ID.class), any(List.class));

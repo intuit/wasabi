@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,9 +27,9 @@ public interface EmailService {
     /**
      * Sends the specified message to the recipients.
      *
-     * @param subject    the subject of the email
-     * @param msg the plain messsage to be send
-     * @param to the email addresses of the recipients
+     * @param subject the subject of the email
+     * @param msg     the plain messsage to be send
+     * @param to      the email addresses of the recipients
      */
     void doSend(String subject, String msg, String... to);
 
@@ -38,8 +38,8 @@ public interface EmailService {
      * access for the User.
      *
      * @param appName the {@link com.intuit.wasabi.experimentobjects.Application.Name} the user requests access to
-     * @param user the user who wants access
-     * @param links the email links
+     * @param user    the user who wants access
+     * @param links   the email links
      */
     void sendEmailForUserPermission(Application.Name appName, UserInfo.Username user, EmailLinksList links);
 

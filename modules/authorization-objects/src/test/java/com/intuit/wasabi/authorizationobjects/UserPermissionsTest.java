@@ -15,18 +15,16 @@
  *******************************************************************************/
 package com.intuit.wasabi.authorizationobjects;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.intuit.wasabi.experimentobjects.Application;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.intuit.wasabi.experimentobjects.Application;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**

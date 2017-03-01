@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -51,7 +51,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -94,7 +93,7 @@ public class DefaultCassandraDriver implements CassandraDriver {
                         .withRetryPolicy(DefaultRetryPolicy.INSTANCE);
                 builder.withPort(getConfiguration().getPort());
 
-                if(getConfiguration().getTokenAwareLoadBalancingLocalDC().isPresent() &&
+                if (getConfiguration().getTokenAwareLoadBalancingLocalDC().isPresent() &&
                         getConfiguration().getTokenAwareLoadBalancingUsedHostsPerRemoteDc() >= 0) {
                     builder.withLoadBalancingPolicy(
                             new TokenAwarePolicy(
@@ -147,11 +146,11 @@ public class DefaultCassandraDriver implements CassandraDriver {
                 if (getConfiguration().useSSL()) {
                     try {
                         SSLContext context = getSSLContext(getConfiguration().getSSLTrustStore(),
-                                                            getConfiguration().getSSLTrustStorePassword());
+                                getConfiguration().getSSLTrustStorePassword());
 
                         builder.withSSL(JdkSSLOptions.builder()
-                                            .withSSLContext(context)
-                                            .withCipherSuites(CIPHER_SUITES).build());
+                                .withSSLContext(context)
+                                .withCipherSuites(CIPHER_SUITES).build());
                     } catch (Exception ex) {
                         LOGGER.error("General exception while construct SSL Context: ", ex);
                         //TODO: should we fail fast if no ssl is configured correctly? I think yes, but it is open.
@@ -164,7 +163,7 @@ public class DefaultCassandraDriver implements CassandraDriver {
                 synchronized (this) {
                     try {
                         session = cluster.connect(getConfiguration().getKeyspaceName());
-                    } catch (InvalidQueryException ex){ //This exception occurs when namesapce does not exists
+                    } catch (InvalidQueryException ex) { //This exception occurs when namesapce does not exists
                         session = cluster.connect(); // have to attach to the root keyspace first
                         initializeKeyspace();
                     } catch (Exception e) {
@@ -175,12 +174,12 @@ public class DefaultCassandraDriver implements CassandraDriver {
                     // Try to get the definition to test if the keyspace exists
                     try {
 
-                            if (session.getLoggedKeyspace() != null) {
-                                keyspaceInitialized = true;
-                            } else {
-                                initializeKeyspace();
-                                keyspaceInitialized = true;
-                            }
+                        if (session.getLoggedKeyspace() != null) {
+                            keyspaceInitialized = true;
+                        } else {
+                            initializeKeyspace();
+                            keyspaceInitialized = true;
+                        }
 
                     } catch (DriverException e) {
                         LOGGER.warn("Keyspace " + getConfiguration().getKeyspaceName() + " doesn't exist", e);
@@ -197,11 +196,11 @@ public class DefaultCassandraDriver implements CassandraDriver {
                                 host.getAddress(),
                                 host.getRack());
                     }
-                } catch (Exception e){
+                } catch (Exception e) {
                     LOGGER.error("Failed to connect to cluster\n", e);
                 }
 
-                if(getConfiguration().isSlowQueryLoggingEnabled()){
+                if (getConfiguration().isSlowQueryLoggingEnabled()) {
 
                     LOGGER.warn("Enabling slow query logging could have performance impact!!");
                     QueryLogger queryLogger = QueryLogger.builder()
@@ -337,7 +336,7 @@ public class DefaultCassandraDriver implements CassandraDriver {
         this.cluster.close();
     }
 
-    private void poolingMonitoring(PoolingOptions poolingOptions){
+    private void poolingMonitoring(PoolingOptions poolingOptions) {
         final LoadBalancingPolicy loadBalancingPolicy =
                 cluster.getConfiguration().getPolicies().getLoadBalancingPolicy();
         ScheduledExecutorService scheduled =

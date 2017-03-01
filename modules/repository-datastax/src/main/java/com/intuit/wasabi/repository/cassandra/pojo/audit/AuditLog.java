@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,7 +26,7 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 import java.util.UUID;
 
-@Table(name="auditlog")
+@Table(name = "auditlog")
 @Data
 @Builder(toBuilder = true)
 @NoArgsConstructor
@@ -48,37 +48,37 @@ public class AuditLog {
     UUID experimentId;
 
     @Column(name = "experiment_label")
-    String  experimentLabel;
+    String experimentLabel;
 
     @Column(name = "action")
-    String  action;
+    String action;
 
     @Column(name = "bucket_label")
-    String  bucketLabel;
+    String bucketLabel;
 
     //TODO: move the user info into a UDT
     @Column(name = "user_firstname")
-    String  firstName;
+    String firstName;
 
     @Column(name = "user_lastname")
-    String  lastName;
+    String lastName;
 
     @Column(name = "user_email")
-    String  email;
+    String email;
 
     @Column(name = "user_username")
-    String  username;
+    String username;
 
     @Column(name = "user_userid")
-    String  userId;
+    String userId;
 
     @Column(name = "changed_property")
-    String  property;
+    String property;
 
     @Column(name = "property_before")
-    String  before;
+    String before;
 
     @Column(name = "property_after")
-    String  after;
+    String after;
 
 }

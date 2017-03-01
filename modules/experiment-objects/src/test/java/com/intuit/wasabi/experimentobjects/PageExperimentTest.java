@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,7 +24,7 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * This class tests the functionality of the {@link PageExperiment}
- *
+ * <p>
  * Created by asuckro on 8/19/15.
  */
 public class PageExperimentTest {
@@ -35,10 +35,10 @@ public class PageExperimentTest {
 
 
     @Test
-    public void testBuilder(){
+    public void testBuilder() {
 
-        assertEquals(pe.getLabel(),label);
-        assertEquals(pe.getId(),id);
+        assertEquals(pe.getLabel(), label);
+        assertEquals(pe.getId(), id);
         assertFalse(pe.getAllowNewAssignment());
 
         id = Experiment.ID.newInstance();
@@ -54,7 +54,7 @@ public class PageExperimentTest {
     }
 
     @Test
-    public void testHashCode(){
+    public void testHashCode() {
 
         PageExperiment pe2 = PageExperiment.withAttributes(id, label, false).build();
 
@@ -66,7 +66,7 @@ public class PageExperimentTest {
     }
 
     @Test
-    public void testEquals(){
+    public void testEquals() {
 
         PageExperiment pe2 = PageExperiment.withAttributes(id, label, false).build();
 
@@ -80,16 +80,16 @@ public class PageExperimentTest {
     }
 
     @Test
-    public void testClone() throws Exception{
+    public void testClone() throws Exception {
         PageExperiment pClone = pe.clone();
         assertEquals(pClone, pe);
     }
 
     @Test
-    public void testToString(){
-        assertEquals(pe.toString(),"PageExperiment{" +
+    public void testToString() {
+        assertEquals(pe.toString(), "PageExperiment{" +
                 "id=" + id +
                 ", label=" + label +
-                ", allowNewAssignment="+ false +'}');
+                ", allowNewAssignment=" + false + '}');
     }
 }
