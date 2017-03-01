@@ -129,8 +129,7 @@ public class EventsImplTest {
         contextSet.add(c1);
         eventsList.add(event);
         given(event.getContext()).willReturn(c1);
-        given(assignments.getAssignment(userId, appName, label, contextSet.iterator().next(),
-                false, false, null, null)).willReturn(assignment);
+        given(assignments.getExistingAssignment(userId, appName, label, contextSet.iterator().next())).willReturn(assignment);
         given(events.getEvents()).willReturn(eventsList);
         eventsImpl.recordEvents(appName, label
                 , userId, events, contextSet);

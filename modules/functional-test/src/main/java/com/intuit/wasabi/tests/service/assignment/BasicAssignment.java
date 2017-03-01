@@ -90,6 +90,8 @@ public class BasicAssignment extends TestBase {
             response = apiServerConnector.doPut("/experiments/" + experimentMeta.getExperiment().id,
                     "{\"state\": \"RUNNING\"}");
             assertReturnCode(response, HttpStatus.SC_OK);
+            clearAssignmentsMetadataCache();
+
             String url = "assignments/applications/qbo/experiments/" + experimentMeta.getExperiment().label
                     + "/users/" + user;
             response = apiServerConnector.doGet(url);
@@ -129,6 +131,8 @@ public class BasicAssignment extends TestBase {
             response = apiServerConnector.doPut("/experiments/" + experimentMeta.getExperiment().id,
                     "{\"state\": \"PAUSED\"}");
             assertReturnCode(response, HttpStatus.SC_OK);
+            clearAssignmentsMetadataCache();
+
             String url = "assignments/applications/qbo/experiments/" + experimentMeta.getExperiment().label
                     + "/users/" + user;
             response = apiServerConnector.doGet(url);
@@ -167,6 +171,8 @@ public class BasicAssignment extends TestBase {
             response = apiServerConnector.doPut("/experiments/" + experimentMeta.getExperiment().id,
                     "{\"state\": \"RUNNING\"}");
             assertReturnCode(response, HttpStatus.SC_OK);
+            clearAssignmentsMetadataCache();
+
             String url = "assignments/applications/qbo/experiments/" + experimentMeta.getExperiment().label
                     + "/users/" + user;
             response = apiServerConnector.doGet(url);
@@ -203,6 +209,8 @@ public class BasicAssignment extends TestBase {
         response = apiServerConnector.doPut("/experiments/" + experimentMeta.getExperiment().id,
                 "{\"state\": \"PAUSED\"}");
         assertReturnCode(response, HttpStatus.SC_OK);
+        clearAssignmentsMetadataCache();
+
         String url = "assignments/applications/qbo/experiments/" + experimentMeta.getExperiment().label
                 + "/users/anotheruser";
         response = apiServerConnector.doGet(url);
@@ -218,6 +226,8 @@ public class BasicAssignment extends TestBase {
         response = apiServerConnector.doPut("/experiments/" + experimentMeta.getExperiment().id,
                 "{\"state\": \"RUNNING\"}");
         assertReturnCode(response, HttpStatus.SC_OK);
+        clearAssignmentsMetadataCache();
+
         url = "assignments/applications/qbo/experiments/notanexistingexperiment/users/anotheruser";
         response = apiServerConnector.doGet(url);
         LOGGER.info("experiment not found State=PAUSED meta=" + experimentMeta.getMeta() + " status=" + response.getStatusCode()

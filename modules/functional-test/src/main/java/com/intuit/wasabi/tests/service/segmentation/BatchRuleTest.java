@@ -68,6 +68,7 @@ public class BatchRuleTest extends TestBase {
             dataProvider = "batchAssignmentData", dataProviderClass = SegmentationDataProvider.class)
     public void t_batchAssignExperiment(int index, String applicationName, String userId, String data) {
         LOGGER.debug(data);
+        clearAssignmentsMetadataCache();
         response = apiServerConnector.doPost("/assignments/applications/" + applicationName + "/users/" + userId, data);
         Type listType = new TypeToken<Map<String, ArrayList<Assignment>>>() {
         }.getType();
@@ -84,7 +85,6 @@ public class BatchRuleTest extends TestBase {
         }
     }
 
-
     @AfterClass
     public void t_cleanUp() {
         LOGGER.info("Clean up experiments");
@@ -95,6 +95,4 @@ public class BatchRuleTest extends TestBase {
             assertReturnCode(response, HttpStatus.SC_NO_CONTENT);
         }
     }
-
-
 }

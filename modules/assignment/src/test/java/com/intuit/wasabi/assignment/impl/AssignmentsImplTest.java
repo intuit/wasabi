@@ -53,6 +53,8 @@ import com.intuit.wasabi.repository.AssignmentsRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.MutexRepository;
 import com.intuit.wasabi.repository.cassandra.impl.ExperimentRuleCacheUpdateEnvelope;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -70,13 +72,21 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import static com.google.common.base.Predicates.in;
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.collect.Sets.newHashSet;
 import static org.assertj.core.api.BDDAssertions.then;
+import static org.hamcrest.core.AnyOf.anyOf;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.RETURNS_DEEP_STUBS;
@@ -127,8 +137,8 @@ public class AssignmentsImplTest {
         Map<String, AssignmentIngestionExecutor> executors = new HashMap<String, AssignmentIngestionExecutor>();
         executors.put(TEST_INGESTION_EXECUTOR_NAME, ingestionExecutor);
         this.assignmentsImpl = new AssignmentsImpl(executors,
-                experimentRepository, assignmentsRepository, mutexRepository,
-                ruleCache, pages, priorities,
+                experimentRepository, assignmentsRepository,
+                ruleCache, pages,
                 assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache);
     }
 
@@ -168,213 +178,375 @@ public class AssignmentsImplTest {
 
     @Test
     public void testGetSingleAssignmentNullAssignmentExperimentNotFound() {
+
+        //Input
         Application.Name appName = Application.Name.valueOf("Test");
-        Experiment.Label label = Experiment.Label.valueOf("label");
         User.ID user = User.ID.valueOf("testUser");
-        Assignment nullAssignment = Assignment.newInstance(null)
-                .withApplicationName(appName)
-                .withBucketLabel(null)
-                .withUserID(user)
-                .withContext(null)
-                .withStatus(Assignment.Status.EXPERIMENT_NOT_FOUND)
-                .build();
-        when(experimentRepository.getExperiment(eq(appName), eq(label))).thenReturn(null);
+        Experiment.ID id = Experiment.ID.newInstance();
+        Experiment.Label label = Experiment.Label.valueOf("TestExpLabel");
         SegmentationProfile segmentationProfile = mock(SegmentationProfile.class);
         HttpHeaders headers = mock(HttpHeaders.class);
-        Page.Name pageName = Page.Name.valueOf("p1");
-        Assignment result = assignmentsImpl.getSingleAssignment(user, appName, label, context, true, true,
-                segmentationProfile, headers, pageName);
-        assertThat(result.equals(nullAssignment), is(true));
+
+        //Mock dependent interactions
+        Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
+        when(experiment.getID()).thenReturn(id);
+        when(experiment.getEndTime().getTime()).thenReturn(1000000L);
+        when(experiment.getLabel()).thenReturn(label);
+
+        List<Experiment> expList = newArrayList(experiment);
+
+        PrioritizedExperimentList pExpList = new PrioritizedExperimentList();
+        pExpList.addPrioritizedExperiment(PrioritizedExperiment.from(experiment, 1).build());
+        Optional<PrioritizedExperimentList> prioritizedExperimentListOptional = Optional.of(pExpList);
+
+        BucketList bucketList = new BucketList();
+        bucketList.addBucket(Bucket.newInstance(id, Bucket.Label.valueOf("red")).withAllocationPercent(0.5).build());
+        bucketList.addBucket(Bucket.newInstance(id, Bucket.Label.valueOf("blue")).withAllocationPercent(0.5).build());
+
+        List<Experiment.ID> exclusionList = newArrayList();
+
+        when(metadataCache.getExperimentById(any())).thenReturn(Optional.empty());
+        when(metadataCache.getExperimentsByAppName(appName)).thenReturn(expList);
+        when(metadataCache.getPrioritizedExperimentListMap(appName)).thenReturn(prioritizedExperimentListOptional);
+        when(metadataCache.getBucketList(id)).thenReturn(bucketList);
+        when(metadataCache.getExclusionList(id)).thenReturn(exclusionList);
+
+        Experiment.Label nonExistantLabel = Experiment.Label.valueOf("ThisExpIsNotCreated");
+
+        Assignment result = assignmentsImpl.doSingleAssignment(user, appName, nonExistantLabel, context, true, true,
+                segmentationProfile, headers);
+
+        assertThat(result.getStatus(), is(Assignment.Status.EXPERIMENT_NOT_FOUND));
     }
 
     @Test
     public void testGetSingleAssignmentNullAssignmentExperimentInDraftState() throws IOException {
         AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
                 experimentRepository, assignmentsRepository,
-                mutexRepository, ruleCache, pages, priorities, assignmentDecorator, threadPoolExecutor,
+                ruleCache, pages, assignmentDecorator, threadPoolExecutor,
                 eventLog, metadataCacheEnabled, metadataCache));
-        Experiment.ID id = Experiment.ID.newInstance();
-        Experiment experiment = mock(Experiment.class);
-        when(experiment.getID()).thenReturn(id);
-        when(experiment.getState()).thenReturn(Experiment.State.DRAFT);
+        //Input
         Application.Name appName = Application.Name.valueOf("Test");
-        Experiment.Label label = Experiment.Label.valueOf("label");
         User.ID user = User.ID.valueOf("testUser");
-        Assignment nullAssignment = Assignment.newInstance(id)
-                .withApplicationName(appName)
-                .withBucketLabel(null)
-                .withUserID(user)
-                .withContext(null)
-                .withStatus(Assignment.Status.EXPERIMENT_IN_DRAFT_STATE)
-                .build();
-        when(experimentRepository.getExperiment(eq(appName), eq(label))).thenReturn(experiment);
+        Experiment.ID id = Experiment.ID.newInstance();
+        Experiment.Label label = Experiment.Label.valueOf("TestExpLabel");
         SegmentationProfile segmentationProfile = mock(SegmentationProfile.class);
         HttpHeaders headers = mock(HttpHeaders.class);
-        Page.Name pageName = Page.Name.valueOf("p1");
-        Assignment result = assignmentsImpl.getSingleAssignment(user, appName, label, context, true, true,
-                segmentationProfile, headers, pageName);
-        assertThat(result.equals(nullAssignment), is(true));
+
+        //Mock dependent interactions
+        Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
+        when(experiment.getID()).thenReturn(id);
+        when(experiment.getEndTime().getTime()).thenReturn(1000000L);
+        when(experiment.getLabel()).thenReturn(label);
+        when(experiment.getState()).thenReturn(Experiment.State.DRAFT);
+
+        List<Experiment> expList = newArrayList(experiment);
+
+        PrioritizedExperimentList pExpList = new PrioritizedExperimentList();
+        pExpList.addPrioritizedExperiment(PrioritizedExperiment.from(experiment, 1).build());
+        Optional<PrioritizedExperimentList> prioritizedExperimentListOptional = Optional.of(pExpList);
+
+        BucketList bucketList = new BucketList();
+        bucketList.addBucket(Bucket.newInstance(id, Bucket.Label.valueOf("red")).withAllocationPercent(0.5).build());
+        bucketList.addBucket(Bucket.newInstance(id, Bucket.Label.valueOf("blue")).withAllocationPercent(0.5).build());
+
+        List<Experiment.ID> exclusionList = newArrayList();
+
+        when(metadataCache.getExperimentById(id)).thenReturn(Optional.of(experiment));
+        when(metadataCache.getExperimentsByAppName(appName)).thenReturn(expList);
+        when(metadataCache.getPrioritizedExperimentListMap(appName)).thenReturn(prioritizedExperimentListOptional);
+        when(metadataCache.getBucketList(id)).thenReturn(bucketList);
+        when(metadataCache.getExclusionList(id)).thenReturn(exclusionList);
+
+        Assignment result = assignmentsImpl.doSingleAssignment(user, appName, label, context, true, true,
+                segmentationProfile, headers);
+
+        assertThat(result.getStatus(), is(Assignment.Status.EXPERIMENT_IN_DRAFT_STATE));
     }
 
     @Test
     public void testGetSingleAssignmentNullAssignmentExperimentNotStarted() {
+
+        //Input
+        Application.Name appName = Application.Name.valueOf("Test");
+        User.ID user = User.ID.valueOf("testUser");
         Experiment.ID id = Experiment.ID.newInstance();
+        Experiment.Label label = Experiment.Label.valueOf("label");
+        SegmentationProfile segmentationProfile = mock(SegmentationProfile.class);
+        HttpHeaders headers = mock(HttpHeaders.class);
+
+        //Mock dependent interactions
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         when(experiment.getID()).thenReturn(id);
         when(experiment.getStartTime().getTime()).thenReturn(new Date().getTime() + 1000000L);
-        Application.Name appName = Application.Name.valueOf("Test");
-        Experiment.Label label = Experiment.Label.valueOf("label");
-        User.ID user = User.ID.valueOf("testUser");
-        Assignment nullAssignment = Assignment.newInstance(id)
-                .withApplicationName(appName)
-                .withBucketLabel(null)
-                .withUserID(user)
-                .withContext(null)
-                .withStatus(Assignment.Status.EXPERIMENT_NOT_STARTED)
-                .build();
-        when(experimentRepository.getExperiment(eq(appName), eq(label))).thenReturn(experiment);
-        SegmentationProfile segmentationProfile = mock(SegmentationProfile.class);
-        HttpHeaders headers = mock(HttpHeaders.class);
-        Page.Name pageName = Page.Name.valueOf("p1");
-        Assignment result = assignmentsImpl.getSingleAssignment(user, appName, label, context, true, true,
-                segmentationProfile, headers, pageName);
-        assertThat(result.equals(nullAssignment), is(true));
+        when(experiment.getLabel()).thenReturn(label);
+
+        List<Experiment> expList = newArrayList(experiment);
+
+        PrioritizedExperimentList pExpList = new PrioritizedExperimentList();
+        pExpList.addPrioritizedExperiment(PrioritizedExperiment.from(experiment, 1).build());
+        Optional<PrioritizedExperimentList> prioritizedExperimentListOptional = Optional.of(pExpList);
+
+        BucketList bucketList = new BucketList();
+        bucketList.addBucket(Bucket.newInstance(id, Bucket.Label.valueOf("red")).withAllocationPercent(0.5).build());
+        bucketList.addBucket(Bucket.newInstance(id, Bucket.Label.valueOf("blue")).withAllocationPercent(0.5).build());
+
+        List<Experiment.ID> exclusionList = newArrayList();
+
+        when(metadataCache.getExperimentById(id)).thenReturn(Optional.of(experiment));
+        when(metadataCache.getExperimentsByAppName(appName)).thenReturn(expList);
+        when(metadataCache.getPrioritizedExperimentListMap(appName)).thenReturn(prioritizedExperimentListOptional);
+        when(metadataCache.getBucketList(id)).thenReturn(bucketList);
+        when(metadataCache.getExclusionList(id)).thenReturn(exclusionList);
+
+
+        Assignment result = assignmentsImpl.doSingleAssignment(user, appName, label, context, true, true,
+                segmentationProfile, headers);
+
+        assertThat(result.getStatus(), is(Assignment.Status.EXPERIMENT_NOT_STARTED));
     }
 
     @Test
     public void testGetSingleAssignmentNullAssignmentExperimentExpired() {
+        //Input
+        Application.Name appName = Application.Name.valueOf("Test");
+        User.ID user = User.ID.valueOf("testUser");
         Experiment.ID id = Experiment.ID.newInstance();
+        Experiment.Label label = Experiment.Label.valueOf("label");
+        SegmentationProfile segmentationProfile = mock(SegmentationProfile.class);
+        HttpHeaders headers = mock(HttpHeaders.class);
+
+        //Mock dependent interactions
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         when(experiment.getID()).thenReturn(id);
         when(experiment.getEndTime().getTime()).thenReturn(1000000L);
-        Application.Name appName = Application.Name.valueOf("Test");
-        Experiment.Label label = Experiment.Label.valueOf("label");
-        User.ID user = User.ID.valueOf("testUser");
-        Assignment nullAssignment = Assignment.newInstance(id)
-                .withApplicationName(appName)
-                .withBucketLabel(null)
-                .withUserID(user)
-                .withContext(null)
-                .withStatus(Assignment.Status.EXPERIMENT_EXPIRED)
-                .build();
-        when(experimentRepository.getExperiment(eq(appName), eq(label))).thenReturn(experiment);
-        SegmentationProfile segmentationProfile = mock(SegmentationProfile.class);
-        HttpHeaders headers = mock(HttpHeaders.class);
-        Page.Name pageName = Page.Name.valueOf("p1");
-        Assignment result = assignmentsImpl.getSingleAssignment(user, appName, label, context, true, true,
-                segmentationProfile, headers, pageName);
-        assertThat(result.equals(nullAssignment), is(true));
+        when(experiment.getLabel()).thenReturn(label);
+
+        List<Experiment> expList = newArrayList(experiment);
+
+        PrioritizedExperimentList pExpList = new PrioritizedExperimentList();
+        pExpList.addPrioritizedExperiment(PrioritizedExperiment.from(experiment, 1).build());
+        Optional<PrioritizedExperimentList> prioritizedExperimentListOptional = Optional.of(pExpList);
+
+        BucketList bucketList = new BucketList();
+        bucketList.addBucket(Bucket.newInstance(id, Bucket.Label.valueOf("red")).withAllocationPercent(0.5).build());
+        bucketList.addBucket(Bucket.newInstance(id, Bucket.Label.valueOf("blue")).withAllocationPercent(0.5).build());
+
+        List<Experiment.ID> exclusionList = newArrayList();
+
+        when(metadataCache.getExperimentById(id)).thenReturn(Optional.of(experiment));
+        when(metadataCache.getExperimentsByAppName(appName)).thenReturn(expList);
+        when(metadataCache.getPrioritizedExperimentListMap(appName)).thenReturn(prioritizedExperimentListOptional);
+        when(metadataCache.getBucketList(id)).thenReturn(bucketList);
+        when(metadataCache.getExclusionList(id)).thenReturn(exclusionList);
+
+        //This is actual call
+        Assignment result = assignmentsImpl.doSingleAssignment(user, appName, label, context, true, true, segmentationProfile, headers);
+
+        //Verify result
+        assertThat(result.getStatus(), is(Assignment.Status.EXPERIMENT_EXPIRED));
     }
 
     @Test
     public void testGetSingleAssignmentNullAssignmentExperimentPaused() {
-        Experiment.ID id = Experiment.ID.newInstance();
-        Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
-        when(experiment.getID()).thenReturn(id);
-        when(experiment.getState()).thenReturn(Experiment.State.PAUSED);
-        when(experiment.getEndTime().getTime()).thenReturn(new Date().getTime() + 1000000L);
+
+        //Input
         Application.Name appName = Application.Name.valueOf("Test");
-        Experiment.Label label = Experiment.Label.valueOf("label");
         User.ID user = User.ID.valueOf("testUser");
-        Assignment nullAssignment = Assignment.newInstance(id)
-                .withApplicationName(appName)
-                .withBucketLabel(null)
-                .withUserID(user)
-                .withContext(null)
-                .withStatus(Assignment.Status.EXPERIMENT_PAUSED)
-                .build();
-        when(experimentRepository.getExperiment(eq(appName), eq(label))).thenReturn(experiment);
-        when(assignmentsRepository.getAssignment(eq(user), eq(appName), eq(id), any(Context.class))).thenReturn(null);
+        Experiment.ID id = Experiment.ID.newInstance();
+        Experiment.Label label = Experiment.Label.valueOf("label");
         SegmentationProfile segmentationProfile = mock(SegmentationProfile.class);
         HttpHeaders headers = mock(HttpHeaders.class);
-        Page.Name pageName = Page.Name.valueOf("p1");
-        Assignment result = assignmentsImpl.getSingleAssignment(user, appName, label, context, true, true,
-                segmentationProfile, headers, pageName);
-        assertThat(result.equals(nullAssignment), is(true));
+
+        //Mock dependent interactions
+        Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
+        when(experiment.getID()).thenReturn(id);
+        when(experiment.getEndTime().getTime()).thenReturn(new Date().getTime() + 1000000L);
+        when(experiment.getLabel()).thenReturn(label);
+        when(experiment.getState()).thenReturn(Experiment.State.PAUSED);
+
+        List<Experiment> expList = newArrayList(experiment);
+
+        PrioritizedExperimentList pExpList = new PrioritizedExperimentList();
+        pExpList.addPrioritizedExperiment(PrioritizedExperiment.from(experiment, 1).build());
+        Optional<PrioritizedExperimentList> prioritizedExperimentListOptional = Optional.of(pExpList);
+
+        BucketList bucketList = new BucketList();
+        bucketList.addBucket(Bucket.newInstance(id, Bucket.Label.valueOf("red")).withAllocationPercent(0.5).build());
+        bucketList.addBucket(Bucket.newInstance(id, Bucket.Label.valueOf("blue")).withAllocationPercent(0.5).build());
+
+        List<Experiment.ID> exclusionList = newArrayList();
+
+        when(metadataCache.getExperimentById(id)).thenReturn(Optional.of(experiment));
+        when(metadataCache.getExperimentsByAppName(appName)).thenReturn(expList);
+        when(metadataCache.getPrioritizedExperimentListMap(appName)).thenReturn(prioritizedExperimentListOptional);
+        when(metadataCache.getBucketList(id)).thenReturn(bucketList);
+        when(metadataCache.getExclusionList(id)).thenReturn(exclusionList);
+
+
+        Assignment result = assignmentsImpl.doSingleAssignment(user, appName, label, context, true, true,
+                segmentationProfile, headers);
+
+        assertThat(result.getStatus(), is(Assignment.Status.EXPERIMENT_PAUSED));
     }
 
     @Test
     public void testGetSingleAssignmentNullAssignmentExperimentNoProfileMatch() throws IOException {
         AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
                 experimentRepository, assignmentsRepository,
-                mutexRepository, ruleCache, pages, priorities, assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache));
+                ruleCache, pages, assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache));
+
+        //Input
+        Application.Name appName = Application.Name.valueOf("Test");
+        User.ID user = User.ID.valueOf("TestUser");
         Experiment.ID id = Experiment.ID.newInstance();
+        Experiment.Label label = Experiment.Label.valueOf("TestExpLabel");
+        SegmentationProfile segmentationProfile = mock(SegmentationProfile.class);
+        HttpHeaders headers = mock(HttpHeaders.class);
+
+        //Mock dependent interactions
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
+        when(experiment.getID()).thenReturn(id);
+        when(experiment.getEndTime().getTime()).thenReturn(1000000L);
+        when(experiment.getLabel()).thenReturn(label);
+
+        List<Experiment> expList = newArrayList(experiment);
+
+        PrioritizedExperimentList pExpList = new PrioritizedExperimentList();
+        pExpList.addPrioritizedExperiment(PrioritizedExperiment.from(experiment, 1).build());
+        Optional<PrioritizedExperimentList> prioritizedExperimentListOptional = Optional.of(pExpList);
+
+        BucketList bucketList = new BucketList();
+        bucketList.addBucket(Bucket.newInstance(id, Bucket.Label.valueOf("red")).withAllocationPercent(0.5).build());
+        bucketList.addBucket(Bucket.newInstance(id, Bucket.Label.valueOf("blue")).withAllocationPercent(0.5).build());
+
+        List<Experiment.ID> exclusionList = newArrayList();
+
+        when(metadataCache.getExperimentById(id)).thenReturn(Optional.of(experiment));
+        when(metadataCache.getExperimentsByAppName(appName)).thenReturn(expList);
+        when(metadataCache.getPrioritizedExperimentListMap(appName)).thenReturn(prioritizedExperimentListOptional);
+        when(metadataCache.getBucketList(id)).thenReturn(bucketList);
+        when(metadataCache.getExclusionList(id)).thenReturn(exclusionList);
+
         when(experiment.getID()).thenReturn(id);
         when(experiment.getState()).thenReturn(Experiment.State.RUNNING);
         when(experiment.getEndTime().getTime()).thenReturn(new Date().getTime() + 1000000L);
-        Application.Name appName = Application.Name.valueOf("Test");
-        Experiment.Label label = Experiment.Label.valueOf("label");
-        User.ID user = User.ID.valueOf("testUser");
-        Assignment nullAssignment = Assignment.newInstance(id)
-                .withApplicationName(appName)
-                .withBucketLabel(null)
-                .withUserID(user)
-                .withContext(null)
-                .withStatus(Assignment.Status.NO_PROFILE_MATCH)
-                .build();
-        when(experimentRepository.getExperiment(eq(appName), eq(label))).thenReturn(experiment);
-        when(assignmentsRepository.getAssignment(eq(user), eq(appName), eq(id), any(Context.class))).thenReturn(null);
+
+        //Forcing NO_PROFILE_MATCH
         doReturn(false).when(assignmentsImpl).doesProfileMatch(any(Experiment.class), any(SegmentationProfile.class),
                 any(HttpHeaders.class), any(Context.class));
-        SegmentationProfile segmentationProfile = mock(SegmentationProfile.class);
-        HttpHeaders headers = mock(HttpHeaders.class);
-        Page.Name pageName = Page.Name.valueOf("p1");
-        Assignment result = assignmentsImpl.getSingleAssignment(user, appName, label, context, true, true,
-                segmentationProfile, headers, pageName);
-        assertThat(result.equals(nullAssignment), is(true));
+
+        //Make actual call
+        Assignment result = assignmentsImpl.doSingleAssignment(user, appName, label, context, true, true,
+                segmentationProfile, headers);
+
+        //Varify result
+        assertThat(result.getStatus(), is(Assignment.Status.NO_PROFILE_MATCH));
         verify(threadPoolExecutor, times(1)).execute(any(ExperimentRuleCacheUpdateEnvelope.class));
     }
 
     @Test(expected = AssertionError.class)
     public void testGetSingleAssignmentAssertExistingAssignment() {
+
+        //Input
+        Application.Name appName = Application.Name.valueOf("Test");
+        User.ID user = User.ID.valueOf("testUser");
         Experiment.ID id = Experiment.ID.newInstance();
+        Experiment.Label label = Experiment.Label.valueOf("label");
+        SegmentationProfile segmentationProfile = mock(SegmentationProfile.class);
+        HttpHeaders headers = mock(HttpHeaders.class);
+
+        //Mock dependent interactions
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
+        when(experiment.getID()).thenReturn(id);
+        when(experiment.getEndTime().getTime()).thenReturn(1000000L);
+        when(experiment.getLabel()).thenReturn(label);
+
+        List<Experiment> expList = newArrayList(experiment);
+
+        PrioritizedExperimentList pExpList = new PrioritizedExperimentList();
+        pExpList.addPrioritizedExperiment(PrioritizedExperiment.from(experiment, 1).build());
+        Optional<PrioritizedExperimentList> prioritizedExperimentListOptional = Optional.of(pExpList);
+
+        BucketList bucketList = new BucketList();
+        bucketList.addBucket(Bucket.newInstance(id, Bucket.Label.valueOf("red")).withAllocationPercent(0.5).build());
+        bucketList.addBucket(Bucket.newInstance(id, Bucket.Label.valueOf("blue")).withAllocationPercent(0.5).build());
+
+        List<Experiment.ID> exclusionList = newArrayList();
+
+        when(metadataCache.getExperimentById(id)).thenReturn(Optional.of(experiment));
+        when(metadataCache.getExperimentsByAppName(appName)).thenReturn(expList);
+        when(metadataCache.getPrioritizedExperimentListMap(appName)).thenReturn(prioritizedExperimentListOptional);
+        when(metadataCache.getBucketList(id)).thenReturn(bucketList);
+        when(metadataCache.getExclusionList(id)).thenReturn(exclusionList);
+
         when(experiment.getID()).thenReturn(id);
         when(experiment.getState()).thenReturn(Experiment.State.RUNNING);
         when(experiment.getEndTime().getTime()).thenReturn(new Date().getTime() + 1000000L);
-        Application.Name appName = Application.Name.valueOf("Test");
-        Experiment.Label label = Experiment.Label.valueOf("label");
-        User.ID user = User.ID.valueOf("testUser");
-        when(experimentRepository.getExperiment(eq(appName), eq(label))).thenReturn(experiment);
-        Assignment assignment = mock(Assignment.class);
-        when(assignmentsRepository.getAssignment(eq(id), eq(user), any(Context.class))).thenReturn(assignment);
-        when(assignment.getStatus()).thenReturn(Assignment.Status.NEW_ASSIGNMENT);
-        SegmentationProfile segmentationProfile = mock(SegmentationProfile.class);
-        HttpHeaders headers = mock(HttpHeaders.class);
-        Page.Name pageName = Page.Name.valueOf("p1");
-        verify(threadPoolExecutor, times(0)).execute(any(Runnable.class));
-        assignmentsImpl.getSingleAssignment(user, appName, label, context, true, true, segmentationProfile, headers, pageName);
+
+        List<Pair<Experiment, String>> existingAssignments = newArrayList(new ImmutablePair<Experiment, String>(experiment, "red"));
+        Map<Experiment.ID, Experiment> expMap = newHashMap();
+        expMap.put(id, experiment);
+        when(assignmentsRepository.getAssignments(user, appName, context, expMap)).thenReturn(existingAssignments);
+
+        Assignment result = assignmentsImpl.doSingleAssignment(user, appName, label, context, true, true, segmentationProfile, headers);
+
+        assertThat(result.getStatus(), is(Assignment.Status.EXISTING_ASSIGNMENT));
         verify(threadPoolExecutor, times(0)).execute(any(Runnable.class));
     }
 
     @Test(expected = AssertionError.class)
     public void testGetSingleAssignmentProfileMatchAssertNewAssignment() throws IOException {
         AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
-                experimentRepository, assignmentsRepository,
-                mutexRepository, ruleCache, pages, priorities, assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache));
+                experimentRepository, assignmentsRepository, ruleCache, pages, assignmentDecorator, threadPoolExecutor,
+                eventLog, metadataCacheEnabled, metadataCache));
+
+        //Input
+        Application.Name appName = Application.Name.valueOf("Test");
+        User.ID user = User.ID.valueOf("testUser");
         Experiment.ID id = Experiment.ID.newInstance();
+        Experiment.Label label = Experiment.Label.valueOf("label");
+        SegmentationProfile segmentationProfile = mock(SegmentationProfile.class);
+        HttpHeaders headers = mock(HttpHeaders.class);
+
+        //Mock dependent interactions
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
+        when(experiment.getID()).thenReturn(id);
+        when(experiment.getEndTime().getTime()).thenReturn(1000000L);
+        when(experiment.getLabel()).thenReturn(label);
+
+        List<Experiment> expList = newArrayList(experiment);
+
+        PrioritizedExperimentList pExpList = new PrioritizedExperimentList();
+        pExpList.addPrioritizedExperiment(PrioritizedExperiment.from(experiment, 1).build());
+        Optional<PrioritizedExperimentList> prioritizedExperimentListOptional = Optional.of(pExpList);
+
+        BucketList bucketList = new BucketList();
+        bucketList.addBucket(Bucket.newInstance(id, Bucket.Label.valueOf("red")).withAllocationPercent(0.5).build());
+        bucketList.addBucket(Bucket.newInstance(id, Bucket.Label.valueOf("blue")).withAllocationPercent(0.5).build());
+
+        List<Experiment.ID> exclusionList = newArrayList();
+
+        when(metadataCache.getExperimentById(id)).thenReturn(Optional.of(experiment));
+        when(metadataCache.getExperimentsByAppName(appName)).thenReturn(expList);
+        when(metadataCache.getPrioritizedExperimentListMap(appName)).thenReturn(prioritizedExperimentListOptional);
+        when(metadataCache.getBucketList(id)).thenReturn(bucketList);
+        when(metadataCache.getExclusionList(id)).thenReturn(exclusionList);
+
         Assignment assignment = mock(Assignment.class);
         when(experiment.getID()).thenReturn(id);
         when(experiment.getState()).thenReturn(Experiment.State.RUNNING);
         when(experiment.getSamplingPercent()).thenReturn(0.5);
         when(experiment.getEndTime().getTime()).thenReturn(new Date().getTime() + 1000000L);
-        Application.Name appName = Application.Name.valueOf("Test");
-        Experiment.Label label = Experiment.Label.valueOf("label");
-        User.ID user = User.ID.valueOf("testUser");
-        when(experimentRepository.getExperiment(eq(appName), eq(label))).thenReturn(experiment);
-        when(assignmentsRepository.getAssignment(eq(id), eq(user), any(Context.class))).thenReturn(null);
+
         doReturn(true).when(assignmentsImpl).doesProfileMatch(any(Experiment.class), any(SegmentationProfile.class),
                 any(HttpHeaders.class), any(Context.class));
+
         doReturn(assignment).when(assignmentsImpl).generateAssignment(any(Experiment.class), eq(user),
                 any(Context.class), any(Boolean.class), any(BucketList.class), any(Date.class), any(SegmentationProfile.class));
-        doReturn(true).when(assignmentsImpl).checkMutex(any(Experiment.class), eq(user), any(Context.class));
-        HttpHeaders headers = mock(HttpHeaders.class);
         when(assignment.getStatus()).thenReturn(Assignment.Status.EXPERIMENT_NOT_FOUND);
-        Page.Name pageName = Page.Name.valueOf("p1");
-        verify(threadPoolExecutor, times(0)).execute(any(Runnable.class));
-        assignmentsImpl.getSingleAssignment(user, appName, label, context, true, true, null, headers, pageName);
+
+        assignmentsImpl.doSingleAssignment(user, appName, label, context, true, true, null, headers);
         verify(threadPoolExecutor, times(0)).execute(any(Runnable.class));
     }
 
@@ -382,77 +554,52 @@ public class AssignmentsImplTest {
     public void testGetSingleAssignmentSuccess() throws IOException {
         AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
                 experimentRepository, assignmentsRepository,
-                mutexRepository, ruleCache, pages, priorities, assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache));
+                ruleCache, pages, assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache));
+
+        //Input
+        Application.Name appName = Application.Name.valueOf("Test");
+        User.ID user = User.ID.valueOf("testUser");
         Experiment.ID id = Experiment.ID.newInstance();
+        Experiment.Label label = Experiment.Label.valueOf("TestExpLabel");
+        SegmentationProfile segmentationProfile = mock(SegmentationProfile.class);
+        HttpHeaders headers = mock(HttpHeaders.class);
+
+        //Mock dependent interactions
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
-        Assignment assignment = mock(Assignment.class);
+        when(experiment.getLabel()).thenReturn(label);
         when(experiment.getID()).thenReturn(id);
         when(experiment.getState()).thenReturn(Experiment.State.RUNNING);
         when(experiment.getSamplingPercent()).thenReturn(0.5);
         when(experiment.getEndTime().getTime()).thenReturn(new Date().getTime() + 1000000L);
-        Application.Name appName = Application.Name.valueOf("Test");
-        Experiment.Label label = Experiment.Label.valueOf("label");
-        User.ID user = User.ID.valueOf("testUser");
-        Page.Name pageName = Page.Name.valueOf("p1");
-        when(experimentRepository.getExperiment(eq(appName), eq(label))).thenReturn(experiment);
-        when(assignmentsRepository.getAssignment(eq(user), eq(appName), eq(id), any(Context.class))).thenReturn(assignment);
-        when(assignment.getStatus()).thenReturn(Assignment.Status.EXISTING_ASSIGNMENT);
-        Assignment result = assignmentsImpl.getSingleAssignment(user, appName, label, context, true, true,
-                null, null, pageName);
+
+        List<Experiment> expList = newArrayList(experiment);
+
+        PrioritizedExperimentList pExpList = new PrioritizedExperimentList();
+        pExpList.addPrioritizedExperiment(PrioritizedExperiment.from(experiment, 1).build());
+        Optional<PrioritizedExperimentList> prioritizedExperimentListOptional = Optional.of(pExpList);
+
+        BucketList bucketList = new BucketList();
+        bucketList.addBucket(Bucket.newInstance(id, Bucket.Label.valueOf("red")).withAllocationPercent(0.5).build());
+        bucketList.addBucket(Bucket.newInstance(id, Bucket.Label.valueOf("blue")).withAllocationPercent(0.5).build());
+
+        List<Experiment.ID> exclusionList = newArrayList();
+
+        when(metadataCache.getExperimentById(experiment.getID())).thenReturn(Optional.of(experiment));
+        when(metadataCache.getExperimentsByAppName(appName)).thenReturn(expList);
+        when(metadataCache.getPrioritizedExperimentListMap(appName)).thenReturn(prioritizedExperimentListOptional);
+        when(metadataCache.getBucketList(id)).thenReturn(bucketList);
+        when(metadataCache.getExclusionList(id)).thenReturn(exclusionList);
+
+        List<Pair<Experiment, String>> existingAssignments = newArrayList(new ImmutablePair<Experiment, String>(experiment, "red"));
+        Map<Experiment.ID, Experiment> expMap = newHashMap();
+        expMap.put(id, experiment);
+        when(assignmentsRepository.getAssignments(user, appName, context, expMap)).thenReturn(existingAssignments);
+
+        Assignment result = assignmentsImpl.doSingleAssignment(user, appName, label, context, true, true,
+                segmentationProfile, headers);
+
+        assertThat(result.getStatus(), is(Assignment.Status.EXISTING_ASSIGNMENT));
         verify(threadPoolExecutor, times(1)).execute(any(ExperimentRuleCacheUpdateEnvelope.class));
-        assertThat(result, is(assignment));
-    }
-
-
-    @Test
-    public void testGetAssignmentNullAssignment() throws IOException {
-        Application.Name appName = Application.Name.valueOf("testApp");
-        User.ID userID = User.ID.valueOf("test");
-        Experiment.Label label = Experiment.Label.valueOf("test");
-        Table table = mock(Table.class, RETURNS_DEEP_STUBS);
-        Collection collection = mock(Collection.class);
-        when(table.column(eq(label)).values()).thenReturn(collection);
-        when(collection.isEmpty()).thenReturn(true);
-        SegmentationProfile segmentationProfile = mock(SegmentationProfile.class);
-        HttpHeaders headers = mock(HttpHeaders.class);
-        when(experimentRepository.getExperimentList(eq(appName))).thenReturn(table);
-        Assignment nullAssignment = Assignment.newInstance(null)
-                .withApplicationName(appName)
-                .withBucketLabel(null)
-                .withUserID(userID)
-                .withContext(null)
-                .withStatus(Assignment.Status.EXPERIMENT_NOT_FOUND)
-                .build();
-        Assignment result = this.assignmentsImpl.getAssignment(userID, appName, label, null, true, true,
-                segmentationProfile, headers);
-        assertThat(result, is(nullAssignment));
-    }
-
-    @Test
-    public void testGetAssignment() throws IOException {
-        Application.Name appName = Application.Name.valueOf("testApp");
-        User.ID userID = User.ID.valueOf("test");
-        Experiment.Label label = Experiment.Label.valueOf("test");
-        Table table = mock(Table.class, RETURNS_DEEP_STUBS);
-        Experiment experiment = mock(Experiment.class);
-        SegmentationProfile segmentationProfile = mock(SegmentationProfile.class);
-        HttpHeaders headers = mock(HttpHeaders.class);
-        when(experimentRepository.getExperimentList(eq(appName))).thenReturn(table);
-        Assignment assignment = mock(Assignment.class);
-        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
-                experimentRepository, assignmentsRepository,
-                mutexRepository, ruleCache, pages, priorities, assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache));
-
-        doReturn(assignment).when(assignmentsImpl).getAssignment(eq(userID), eq(appName), eq(label),
-                eq(context), any(boolean.class), any(boolean.class), eq(segmentationProfile),
-                eq(headers), any(Page.Name.class), any(Experiment.class), any(BucketList.class),
-                any(Table.class), any(Map.class));
-
-        doReturn(experiment).when(assignmentsImpl).getExperimentFromTable(any(Table.class), any(Experiment.Label.class));
-
-        Assignment result = assignmentsImpl.getAssignment(userID, appName, label, context, true, true,
-                segmentationProfile, headers);
-        assertThat(result, is(assignment));
     }
 
     // FIXME:
@@ -661,7 +808,7 @@ public class AssignmentsImplTest {
 
         Table<Experiment.ID, Experiment.Label, String> result = HashBasedTable.create();
         result.put(experiment.getID(), experiment.getLabel(), "red");
-        Mockito.when(assignmentsRepository.getAssignments(User.ID.valueOf("user-b"), testApp, context, allExperiments)).thenReturn(result);
+        //Mockito.when(assignmentsRepository.getAssignments(User.ID.valueOf("user-b"), testApp, context, allExperiments)).thenReturn(result);
         Assignment.Builder builder = Assignment.newInstance(experiment.getID())
                 .withApplicationName(experiment.getApplicationName())
                 .withUserID(User.ID.valueOf("user-b"))
@@ -677,10 +824,9 @@ public class AssignmentsImplTest {
                 .withCreated(DATE)
                 .withCacheable(null)
                 .build();
-        Mockito.when(assignmentsRepository.assignUser(assignment, experiment, DATE)).thenReturn(newAssignment);
-        Mockito.when(assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-a"), context)).thenReturn(newAssignment);
+        Mockito.when(assignmentsRepository.getAssignment(User.ID.valueOf("user-a"), testApp, experiment.getID(), context)).thenReturn(newAssignment);
 
-        assignment = assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-a"), context);
+        assignment = assignmentsRepository.getAssignment(User.ID.valueOf("user-a"), testApp, experiment.getID(), context);
         assert assignment.getBucketLabel() == null;
         assert assignment.getStatus() == Assignment.Status.NEW_ASSIGNMENT;
 
@@ -690,8 +836,8 @@ public class AssignmentsImplTest {
 
         result = HashBasedTable.create();
         result.put(experiment.getID(), experiment.getLabel(), "red");
-        Mockito.when(assignmentsRepository.getAssignments(User.ID.valueOf("user-b"), testApp, context, allExperiments)).thenReturn(result);
-        Mockito.when(assignmentsRepository.getAssignments(User.ID.valueOf("user-a"), testApp, context, allExperiments)).thenReturn(result);
+        //Mockito.when(assignmentsRepository.getAssignments(User.ID.valueOf("user-b"), testApp, context, allExperiments)).thenReturn(result);
+        //Mockito.when(assignmentsRepository.getAssignments(User.ID.valueOf("user-a"), testApp, context, allExperiments)).thenReturn(result);
 
         builder = Assignment.newInstance(experiment.getID())
                 .withApplicationName(experiment.getApplicationName())
@@ -708,10 +854,9 @@ public class AssignmentsImplTest {
                 .withCreated(DATE)
                 .withCacheable(null)
                 .build();
-        Mockito.when(assignmentsRepository.assignUser(assignment, experiment, DATE)).thenReturn(newAssignment);
-        Mockito.when(assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-b"), context)).thenReturn(newAssignment);
+        Mockito.when(assignmentsRepository.getAssignment(User.ID.valueOf("user-b"), testApp, experiment.getID(), context)).thenReturn(newAssignment);
 
-        assignment = assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-b"), context);
+        assignment = assignmentsRepository.getAssignment(User.ID.valueOf("user-b"), testApp, experiment.getID(), context);
         assert assignment.getBucketLabel() == null;
         assert assignment.getStatus() == Assignment.Status.NEW_ASSIGNMENT;
 
@@ -724,8 +869,8 @@ public class AssignmentsImplTest {
                 .withCacheable(null)
                 .build();
 
-        Mockito.when(assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-b"), context)).thenReturn(newAssignment);
-        assignment = assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-b"), context);
+        Mockito.when(assignmentsRepository.getAssignment(User.ID.valueOf("user-b"), testApp, experiment.getID(), context)).thenReturn(newAssignment);
+        assignment = assignmentsRepository.getAssignment(User.ID.valueOf("user-b"), testApp, experiment.getID(), context);
 
         assert assignment.getStatus() == Assignment.Status.EXISTING_ASSIGNMENT;
         assert assignment.getBucketLabel() == null;
@@ -745,21 +890,14 @@ public class AssignmentsImplTest {
                 .withCreated(DATE)
                 .withCacheable(null)
                 .build();
-        Mockito.when(assignmentsRepository.assignUser(assignment, experiment, DATE)).thenReturn(newAssignment);
-        Mockito.when(assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-c"), context)).thenReturn(newAssignment);
-        assignment = assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-c"), context);
+        Mockito.when(assignmentsRepository.getAssignment(User.ID.valueOf("user-c"), testApp, experiment.getID(), context)).thenReturn(newAssignment);
+        assignment = assignmentsRepository.getAssignment(User.ID.valueOf("user-c"), testApp, experiment.getID(), context);
 
         assert assignment.getBucketLabel() == yellowBucket.getLabel();
         assert assignment.getStatus() == Assignment.Status.NEW_ASSIGNMENT;
 
     }
 
-    @Test
-    public void checkMutexWithExperimentNullTrue() throws Exception {
-        AssignmentsImpl impl = new AssignmentsImpl(assignmentsRepository, mutexRepository);
-        boolean value = impl.checkMutex(null, null, Context.valueOf("dummystring"));
-        then(value).isEqualTo(true);
-    }
 
     /* FIXME
     @Test
@@ -876,7 +1014,7 @@ public class AssignmentsImplTest {
 
         Table<Experiment.ID, Experiment.Label, String> result = HashBasedTable.create();
         result.put(experiment.getID(), experiment.getLabel(), "experienceA");
-        Mockito.when(assignmentsRepository.getAssignments(User.ID.valueOf("user-a"), testApp, context, allExperiments)).thenReturn(result);
+        //Mockito.when(assignmentsRepository.getAssignments(User.ID.valueOf("user-a"), testApp, context, allExperiments)).thenReturn(result);
         Assignment.Builder builder = Assignment.newInstance(experiment.getID())
                 .withApplicationName(experiment.getApplicationName())
                 .withUserID(User.ID.valueOf("user-a"))
@@ -892,18 +1030,17 @@ public class AssignmentsImplTest {
                 .withCreated(DATE)
                 .withCacheable(null)
                 .build();
-        Mockito.when(assignmentsRepository.assignUser(assignment, experiment, DATE)).thenReturn(newAssignment);
-        Mockito.when(assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-a"), context)).thenReturn(newAssignment);
+        Mockito.when(assignmentsRepository.getAssignment(User.ID.valueOf("user-a"), testApp, experiment.getID(), context)).thenReturn(newAssignment);
 
-        assignment = assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-a"), context);
+        assignment = assignmentsRepository.getAssignment(User.ID.valueOf("user-a"), testApp, experiment.getID(), context);
         assertTrue(assignment.getBucketLabel().equals(experienceA.getLabel()));
         assertTrue(assignment.getStatus() == Assignment.Status.NEW_ASSIGNMENT);
 
 
         result = HashBasedTable.create();
         result.put(experiment.getID(), experiment.getLabel(), "experienceA");
-        Mockito.when(assignmentsRepository.getAssignments(User.ID.valueOf("user-b"), testApp, context, allExperiments)).thenReturn(result);
-        Mockito.when(assignmentsRepository.getAssignments(User.ID.valueOf("user-a"), testApp, context, allExperiments)).thenReturn(result);
+        //Mockito.when(assignmentsRepository.getAssignments(User.ID.valueOf("user-b"), testApp, context, allExperiments)).thenReturn(result);
+        //Mockito.when(assignmentsRepository.getAssignments(User.ID.valueOf("user-a"), testApp, context, allExperiments)).thenReturn(result);
 
         builder = Assignment.newInstance(experiment.getID())
                 .withApplicationName(experiment.getApplicationName())
@@ -920,10 +1057,9 @@ public class AssignmentsImplTest {
                 .withCreated(DATE)
                 .withCacheable(null)
                 .build();
-        Mockito.when(assignmentsRepository.assignUser(assignment, experiment, DATE)).thenReturn(newAssignment);
-        Mockito.when(assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-b"), context)).thenReturn(newAssignment);
+        Mockito.when(assignmentsRepository.getAssignment(User.ID.valueOf("user-b"), testApp, experiment.getID(), context)).thenReturn(newAssignment);
 
-        assignment = assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-b"), context);
+        assignment = assignmentsRepository.getAssignment(User.ID.valueOf("user-b"), testApp, experiment.getID(), context);
         assertTrue(assignment.getBucketLabel().equals(experienceB.getLabel()));
         assertTrue(assignment.getStatus() == Assignment.Status.NEW_ASSIGNMENT);
 
@@ -936,8 +1072,8 @@ public class AssignmentsImplTest {
                 .withCacheable(null)
                 .build();
 
-        Mockito.when(assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-b"), context)).thenReturn(newAssignment);
-        assignment = assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-b"), context);
+        Mockito.when(assignmentsRepository.getAssignment(User.ID.valueOf("user-b"), testApp, experiment.getID(), context)).thenReturn(newAssignment);
+        assignment = assignmentsRepository.getAssignment(User.ID.valueOf("user-b"), testApp, experiment.getID(), context);
 
         assertTrue(assignment.getStatus() == Assignment.Status.EXISTING_ASSIGNMENT);
         assertTrue(assignment.getBucketLabel().equals(experienceB.getLabel()));
@@ -958,9 +1094,8 @@ public class AssignmentsImplTest {
                 .withCreated(DATE)
                 .withCacheable(null)
                 .build();
-        Mockito.when(assignmentsRepository.assignUser(assignment, experiment, DATE)).thenReturn(newAssignment);
-        Mockito.when(assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-c"), context)).thenReturn(newAssignment);
-        assignment = assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-c"), context);
+        Mockito.when(assignmentsRepository.getAssignment(User.ID.valueOf("user-c"), testApp, experiment.getID(), context)).thenReturn(newAssignment);
+        assignment = assignmentsRepository.getAssignment(User.ID.valueOf("user-c"), testApp, experiment.getID(), context);
 
         assertTrue(assignment.getBucketLabel() == experienceC.getLabel());
         assertTrue(assignment.getStatus() == Assignment.Status.NEW_ASSIGNMENT);
@@ -988,6 +1123,7 @@ public class AssignmentsImplTest {
 
         //--------- Mock calls
         when(assignmentDecorator.getBucketList(exp1, userID, segmentationProfile)).thenReturn(bucketList1);
+        when(metadataCache.getExperimentById(exp1.getID())).thenReturn(Optional.of(exp1));
 
         //--------- Make actual call
         Assignment newAssignment = assignmentsImpl.createAssignmentObject(exp1, userID, context, selectBucket, bucketList1, date, segmentationProfile);
@@ -1019,6 +1155,7 @@ public class AssignmentsImplTest {
 
         //--------- Mock calls
         when(assignmentDecorator.getBucketList(exp1, userID, segmentationProfile)).thenReturn(bucketList1);
+        when(metadataCache.getExperimentById(exp1.getID())).thenReturn(Optional.of(exp1));
 
         //--------- Make actual call
         Assignment newAssignment = assignmentsImpl.createAssignmentObject(exp1, userID, context, selectBucket, bucketList1, date, segmentationProfile);
@@ -1031,265 +1168,329 @@ public class AssignmentsImplTest {
 
 
     @Test
-    public void doBatchAssignmentsTest() throws IOException {
-        final Calendar c = Calendar.getInstance();
-        c.setTime(new Date());
-        c.add(Calendar.DATE, -1);
-        final Experiment experiment = Experiment.withID(Experiment.ID.newInstance()).withApplicationName(testApp)
-                .withLabel(Experiment.Label.valueOf("exp")).withStartTime(c.getTime()).withSamplingPercent(1.0).build();
-        Experiment experiment2 = Experiment.withID(Experiment.ID.newInstance()).withApplicationName(testApp)
-                .withLabel(Experiment.Label.valueOf("exp2")).withStartTime(c.getTime()).withSamplingPercent(1.0).build();
-        c.add(Calendar.DATE, 10);
-        experiment.setEndTime(c.getTime());
-        experiment2.setEndTime(c.getTime());
+    public void doBatchAssignmentsAllNewAssignmentTest() throws IOException {
+        //Input
+        Application.Name appName = Application.Name.valueOf("Test");
+        User.ID user = User.ID.valueOf("testUser");
+        Context context = Context.valueOf("TEST");
+        SegmentationProfile segmentationProfile = mock(SegmentationProfile.class);
+        HttpHeaders headers = mock(HttpHeaders.class);
+        Calendar date1 = Calendar.getInstance();
+        date1.add(Calendar.DAY_OF_MONTH, -1);
+        Calendar date2 = Calendar.getInstance();
+        date2.add(Calendar.DAY_OF_MONTH, 10);
 
-        final Bucket redBucket = Bucket.newInstance(experiment.getID(), Bucket.Label.valueOf("red"))
-                .withState(Bucket.State.OPEN).withAllocationPercent(1.0).build();
-        Bucket yellowBucket = Bucket.newInstance(experiment.getID(), Bucket.Label.valueOf("yellow"))
-                .withState(Bucket.State.OPEN).withAllocationPercent(0.0).build();
-        BucketList expBucketList = new BucketList(2);
-        expBucketList.addBucket(redBucket);
-        expBucketList.addBucket(yellowBucket);
-
-        Bucket greenBucket = Bucket.newInstance(experiment2.getID(), Bucket.Label.valueOf("green")).withAllocationPercent(1.0).build();
-        BucketList exp2bucketList = new BucketList(1);
-        exp2bucketList.addBucket(greenBucket);
-
-        experiment.setState(Experiment.State.RUNNING);
-        experiment2.setState(Experiment.State.RUNNING);
-
-        Table<Experiment.ID, Experiment.Label, Experiment> allExperiments = HashBasedTable.create();
-        allExperiments.put(experiment.getID(), experiment.getLabel(), experiment);
-        allExperiments.put(experiment2.getID(), experiment2.getLabel(), experiment2);
-
-        List<Experiment.ID> exclusivesList = new ArrayList<>(1);
-        exclusivesList.add(experiment2.getID());
-
-        List<Experiment.ID> exclusivesList2 = new ArrayList<>(1);
-        exclusivesList2.add(experiment.getID());
-
-        PrioritizedExperiment prioritizedExperiment1 = PrioritizedExperiment.from(experiment, 1).build();
-        PrioritizedExperiment prioritizedExperiment2 = PrioritizedExperiment.from(experiment2, 2).build();
-        PrioritizedExperimentList prioritizedExperimentList = new PrioritizedExperimentList();
-        prioritizedExperimentList.addPrioritizedExperiment(prioritizedExperiment1);
-        prioritizedExperimentList.addPrioritizedExperiment(prioritizedExperiment2);
-
-        HashSet<Experiment.Label> labels = new HashSet<>(2);
-        labels.add(experiment.getLabel());
-        labels.add(experiment2.getLabel());
-        ExperimentBatch experimentBatch;
-        experimentBatch = ExperimentBatch.newInstance().withLabels(labels).build();
-
-        HashSet<Experiment.ID> experimentIDs = new HashSet<>(2);
-        experimentIDs.add(experiment.getID());
-        experimentIDs.add(experiment2.getID());
-        Set<Experiment.ID> experimentSet = allExperiments.rowKeySet();
-
-        Map<Experiment.ID, BucketList> bucketListMap = new HashMap<>(2);
-        bucketListMap.put(experiment.getID(), expBucketList);
-        bucketListMap.put(experiment2.getID(), exp2bucketList);
-
-        Map<Experiment.ID, List<Experiment.ID>> exclusivesMap = new HashMap<>(2);
-        exclusivesMap.put(experiment.getID(), exclusivesList);
-        exclusivesMap.put(experiment2.getID(), exclusivesList2);
-
-        Mockito.when(cassandraRepository.getExperimentList(testApp)).thenReturn(allExperiments);
-        Mockito.when(cassandraRepository.getBucketList(experiment.getID())).thenReturn(expBucketList);
-        Mockito.when(cassandraRepository.getBucketList(experiment2.getID())).thenReturn(exp2bucketList);
-        Mockito.when(mutexRepository.getExclusivesList(experimentSet)).thenReturn(exclusivesMap);
-        Mockito.when(priorities.getPriorities(testApp, false)).thenReturn(prioritizedExperimentList);
-        Mockito.when(cassandraRepository.getBucketList(experimentIDs)).thenReturn(bucketListMap);
-
-        Table<Experiment.ID, Experiment.Label, String> result = HashBasedTable.create();
-        result.put(experiment.getID(), experiment.getLabel(), "red");
-        Mockito.when(assignmentsRepository.getAssignments(User.ID.valueOf("user-a"), testApp, context, allExperiments)).thenReturn(result);
-
-        final Date DATE = new Date();
-        Assignment.Builder builder = Assignment.newInstance(experiment.getID())
-                .withApplicationName(experiment.getApplicationName())
-                .withUserID(User.ID.valueOf("user-b"))
-                .withContext(context)
-                .withBucketLabel(null);
-        Assignment assignment = builder.build();
-
-        Assignment newAssignment = Assignment.newInstance(assignment.getExperimentID())
-                .withBucketLabel(assignment.getBucketLabel())
-                .withUserID(assignment.getUserID())
-                .withContext(assignment.getContext())
-                .withStatus(Assignment.Status.NEW_ASSIGNMENT)
-                .withCreated(DATE)
-                .withCacheable(null)
-                .build();
-        Mockito.when(assignmentsRepository.assignUser(assignment, experiment, DATE)).thenReturn(newAssignment);
-        Mockito.when(assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-b"), context)).thenReturn(newAssignment);
-
-        builder = Assignment.newInstance(experiment.getID())
-                .withApplicationName(experiment.getApplicationName())
-                .withUserID(User.ID.valueOf("user-b"))
-                .withContext(context)
-                .withBucketLabel(redBucket.getLabel());
-        Assignment assignment_2 = builder.build();
-
-        Assignment newAssignment_2 = Assignment.newInstance(assignment_2.getExperimentID())
-                .withBucketLabel(assignment_2.getBucketLabel())
-                .withUserID(assignment_2.getUserID())
-                .withContext(assignment_2.getContext())
-                .withStatus(Assignment.Status.EXISTING_ASSIGNMENT)
-                .withCreated(DATE)
-                .withCacheable(null)
+        Experiment exp1 = Experiment.withID(Experiment.ID.newInstance())
+                .withApplicationName(appName)
+                .withLabel(Experiment.Label.valueOf("exp1Label"))
+                .withStartTime(date1.getTime())
+                .withEndTime(date2.getTime())
+                .withSamplingPercent(1.0)
+                .withState(Experiment.State.RUNNING)
+                .withIsPersonalizationEnabled(false)
                 .build();
 
-        List<Map> batchAssignments = new ArrayList<>();
-        Map<String, Object> tempResult = new HashMap<>();
-        tempResult.put("assignment", newAssignment_2.getBucketLabel() != null ? newAssignment_2.getBucketLabel().toString() : null);
-        tempResult.put("status", newAssignment_2.getStatus());
-        batchAssignments.add(tempResult);
-        Map<String, Object> tempResult1 = new HashMap<>();
-        tempResult1.put("assignment", newAssignment.getBucketLabel() != null ? newAssignment.getBucketLabel().toString() : null);
-        tempResult1.put("status", newAssignment.getStatus());
-        batchAssignments.add(tempResult1);
+        Experiment exp2 = Experiment.withID(Experiment.ID.newInstance())
+                .withApplicationName(appName)
+                .withLabel(Experiment.Label.valueOf("exp2Label"))
+                .withStartTime(date1.getTime())
+                .withEndTime(date2.getTime())
+                .withSamplingPercent(1.0)
+                .withState(Experiment.State.RUNNING)
+                .withIsPersonalizationEnabled(false)
+                .build();
 
-        Mockito.when(cassandraAssignments.doBatchAssignments(User.ID.valueOf("user-a"), testApp,
-                context, true, false, null, experimentBatch, null, null)).thenReturn(batchAssignments);
+        ExperimentBatch experimentBatch = ExperimentBatch.newInstance().withLabels(newHashSet(exp1.getLabel(), exp2.getLabel())).build();
+        List<Experiment> expList = newArrayList(exp1, exp2);
 
-        assert batchAssignments.size() == 2;
-        assert batchAssignments.get(0).get("assignment").toString().equals(redBucket.getLabel().toString());
-        assert batchAssignments.get(0).get("status").toString().equals(Assignment.Status.EXISTING_ASSIGNMENT.toString());
-        assert batchAssignments.get(1).get("assignment") == null;
-        assert batchAssignments.get(1).get("status").toString().equals(Assignment.Status.NEW_ASSIGNMENT.toString());
+        Map expMap = newHashMap();
+        expMap.put(exp1.getID(), exp1);
+        expMap.put(exp2.getID(), exp2);
+
+        PrioritizedExperimentList pExpList = new PrioritizedExperimentList();
+        pExpList.addPrioritizedExperiment(PrioritizedExperiment.from(exp1, 1).build());
+        pExpList.addPrioritizedExperiment(PrioritizedExperiment.from(exp2, 2).build());
+        Optional<PrioritizedExperimentList> prioritizedExperimentListOptional = Optional.of(pExpList);
+
+        BucketList bucketList1 = new BucketList();
+        bucketList1.addBucket(Bucket.newInstance(exp1.getID(), Bucket.Label.valueOf("red")).withAllocationPercent(0.5).build());
+        bucketList1.addBucket(Bucket.newInstance(exp1.getID(), Bucket.Label.valueOf("blue")).withAllocationPercent(0.5).build());
+        BucketList bucketList2 = new BucketList();
+        bucketList2.addBucket(Bucket.newInstance(exp2.getID(), Bucket.Label.valueOf("yellow")).withAllocationPercent(1.0).build());
+
+        List<Experiment.ID> exclusionList = newArrayList();
+
+        //Mock dependent interactions
+        when(metadataCache.getExperimentById(exp1.getID())).thenReturn(Optional.of(exp1));
+        when(metadataCache.getExperimentById(exp2.getID())).thenReturn(Optional.of(exp2));
+        when(metadataCache.getExperimentsByAppName(appName)).thenReturn(expList);
+        when(metadataCache.getPrioritizedExperimentListMap(appName)).thenReturn(prioritizedExperimentListOptional);
+        when(metadataCache.getBucketList(exp1.getID())).thenReturn(bucketList1);
+        when(metadataCache.getBucketList(exp2.getID())).thenReturn(bucketList2);
+        when(metadataCache.getExclusionList(exp1.getID())).thenReturn(exclusionList);
+        when(metadataCache.getExclusionList(exp2.getID())).thenReturn(exclusionList);
+
+        List<Pair<Experiment, String>> noExistingAssignments = newArrayList();
+        Mockito.when(assignmentsRepository.getAssignments(user, appName, context, expMap)).thenReturn(noExistingAssignments);
+
+        //This is real call to the method
+        List<Assignment> resultAssignments = assignmentsImpl.doBatchAssignments(user, appName,
+                context, true, false, null, experimentBatch);
+
+        //Verify result
+        assertThat(resultAssignments.size(), is(2));
+        assertThat(resultAssignments.get(0).getBucketLabel().toString(), anyOf(is("red"), is("blue")));
+        assertThat(resultAssignments.get(0).getStatus().toString(), is(Assignment.Status.NEW_ASSIGNMENT.toString()));
+        assertThat(resultAssignments.get(1).getBucketLabel().toString(), is("yellow"));
+        assertThat(resultAssignments.get(1).getStatus().toString(), is(Assignment.Status.NEW_ASSIGNMENT.toString()));
+
+    }
+
+    @Test
+    public void doBatchAssignmentsMixAssignmentTest() throws IOException {
+        //Input
+        Application.Name appName = Application.Name.valueOf("Test");
+        User.ID user = User.ID.valueOf("testUser");
+        Context context = Context.valueOf("TEST");
+        SegmentationProfile segmentationProfile = mock(SegmentationProfile.class);
+        HttpHeaders headers = mock(HttpHeaders.class);
+        Calendar date1 = Calendar.getInstance();
+        date1.add(Calendar.DAY_OF_MONTH, -1);
+        Calendar date2 = Calendar.getInstance();
+        date2.add(Calendar.DAY_OF_MONTH, 10);
+
+        Experiment exp1 = Experiment.withID(Experiment.ID.newInstance())
+                .withApplicationName(appName)
+                .withLabel(Experiment.Label.valueOf("exp1Label"))
+                .withStartTime(date1.getTime())
+                .withEndTime(date2.getTime())
+                .withSamplingPercent(1.0)
+                .withState(Experiment.State.RUNNING)
+                .withIsPersonalizationEnabled(false)
+                .build();
+
+        Experiment exp2 = Experiment.withID(Experiment.ID.newInstance())
+                .withApplicationName(appName)
+                .withLabel(Experiment.Label.valueOf("exp2Label"))
+                .withStartTime(date1.getTime())
+                .withEndTime(date2.getTime())
+                .withSamplingPercent(1.0)
+                .withState(Experiment.State.RUNNING)
+                .withIsPersonalizationEnabled(false)
+                .build();
+
+        ExperimentBatch experimentBatch = ExperimentBatch.newInstance().withLabels(newHashSet(exp1.getLabel(), exp2.getLabel())).build();
+        List<Experiment> expList = newArrayList(exp1, exp2);
+
+        Map expMap = newHashMap();
+        expMap.put(exp1.getID(), exp1);
+        expMap.put(exp2.getID(), exp2);
+
+        PrioritizedExperimentList pExpList = new PrioritizedExperimentList();
+        pExpList.addPrioritizedExperiment(PrioritizedExperiment.from(exp1, 1).build());
+        pExpList.addPrioritizedExperiment(PrioritizedExperiment.from(exp2, 2).build());
+        Optional<PrioritizedExperimentList> prioritizedExperimentListOptional = Optional.of(pExpList);
+
+        BucketList bucketList1 = new BucketList();
+        bucketList1.addBucket(Bucket.newInstance(exp1.getID(), Bucket.Label.valueOf("red")).withAllocationPercent(0.5).build());
+        bucketList1.addBucket(Bucket.newInstance(exp1.getID(), Bucket.Label.valueOf("blue")).withAllocationPercent(0.5).build());
+        BucketList bucketList2 = new BucketList();
+        bucketList2.addBucket(Bucket.newInstance(exp2.getID(), Bucket.Label.valueOf("yellow")).withAllocationPercent(1.0).build());
+
+        List<Experiment.ID> exclusionList = newArrayList();
+
+        //Mock dependent interactions
+        when(metadataCache.getExperimentById(exp1.getID())).thenReturn(Optional.of(exp1));
+        when(metadataCache.getExperimentById(exp2.getID())).thenReturn(Optional.of(exp2));
+        when(metadataCache.getExperimentsByAppName(appName)).thenReturn(expList);
+        when(metadataCache.getPrioritizedExperimentListMap(appName)).thenReturn(prioritizedExperimentListOptional);
+        when(metadataCache.getBucketList(exp1.getID())).thenReturn(bucketList1);
+        when(metadataCache.getBucketList(exp2.getID())).thenReturn(bucketList2);
+        when(metadataCache.getExclusionList(exp1.getID())).thenReturn(exclusionList);
+        when(metadataCache.getExclusionList(exp2.getID())).thenReturn(exclusionList);
+
+        List<Pair<Experiment, String>> existingAssignments = newArrayList(new ImmutablePair<>(exp2, "yellow"));
+        Mockito.when(assignmentsRepository.getAssignments(user, appName, context, expMap)).thenReturn(existingAssignments);
+
+        //This is real call to the method
+        List<Assignment> resultAssignments = assignmentsImpl.doBatchAssignments(user, appName,
+                context, true, false, null, experimentBatch);
+
+        //Verify result
+        assertThat(resultAssignments.size(), is(2));
+        assertThat(resultAssignments.get(0).getBucketLabel().toString(), anyOf(is("red"), is("blue")));
+        assertThat(resultAssignments.get(0).getStatus().toString(), is(Assignment.Status.NEW_ASSIGNMENT.toString()));
+        assertThat(resultAssignments.get(1).getBucketLabel().toString(), is("yellow"));
+        assertThat(resultAssignments.get(1).getStatus().toString(), is(Assignment.Status.EXISTING_ASSIGNMENT.toString()));
+
     }
 
     @Test
     public void doPageAssignmentsTest() throws IOException {
-        final Calendar c = Calendar.getInstance();
-        c.setTime(new Date());
-        c.add(Calendar.DATE, -1);
-        final Experiment experiment = Experiment.withID(Experiment.ID.newInstance()).withApplicationName(testApp)
-                .withLabel(Experiment.Label.valueOf("exp")).withStartTime(c.getTime()).withSamplingPercent(1.0).build();
-        Experiment experiment2 = Experiment.withID(Experiment.ID.newInstance()).withApplicationName(testApp)
-                .withLabel(Experiment.Label.valueOf("exp2")).withStartTime(c.getTime()).withSamplingPercent(1.0).build();
-        c.add(Calendar.DATE, 10);
-        experiment.setEndTime(c.getTime());
-        experiment2.setEndTime(c.getTime());
+        //Input
+        Application.Name appName = Application.Name.valueOf("Test");
+        Page.Name pageName = Page.Name.valueOf("TestPage1");
+        User.ID user = User.ID.valueOf("testUser");
+        Context context = Context.valueOf("TEST");
+        SegmentationProfile segmentationProfile = mock(SegmentationProfile.class);
+        HttpHeaders headers = mock(HttpHeaders.class);
+        Calendar date1 = Calendar.getInstance();
+        date1.add(Calendar.DAY_OF_MONTH, -1);
+        Calendar date2 = Calendar.getInstance();
+        date2.add(Calendar.DAY_OF_MONTH, 10);
 
-        final Bucket redBucket = Bucket.newInstance(experiment.getID(), Bucket.Label.valueOf("red"))
-                .withState(Bucket.State.OPEN).withAllocationPercent(1.0).build();
-        Bucket yellowBucket = Bucket.newInstance(experiment.getID(), Bucket.Label.valueOf("yellow"))
-                .withState(Bucket.State.OPEN).withAllocationPercent(0.0).build();
-        BucketList expBucketList = new BucketList(2);
-        expBucketList.addBucket(redBucket);
-        expBucketList.addBucket(yellowBucket);
-
-        Bucket greenBucket = Bucket.newInstance(experiment2.getID(), Bucket.Label.valueOf("green")).withAllocationPercent(1.0).build();
-        BucketList exp2bucketList = new BucketList(1);
-        exp2bucketList.addBucket(greenBucket);
-
-        experiment.setState(Experiment.State.RUNNING);
-        experiment2.setState(Experiment.State.RUNNING);
-
-        Table<Experiment.ID, Experiment.Label, Experiment> allExperiments = HashBasedTable.create();
-        allExperiments.put(experiment.getID(), experiment.getLabel(), experiment);
-        allExperiments.put(experiment2.getID(), experiment2.getLabel(), experiment2);
-        Set<Experiment.ID> experimentSet = allExperiments.rowKeySet();
-
-        List<Experiment.ID> exclusivesList = new ArrayList<>(1);
-        exclusivesList.add(experiment2.getID());
-
-        List<Experiment.ID> exclusivesList2 = new ArrayList<>(1);
-        exclusivesList2.add(experiment.getID());
-
-        PrioritizedExperiment prioritizedExperiment1 = PrioritizedExperiment.from(experiment, 1).build();
-        PrioritizedExperiment prioritizedExperiment2 = PrioritizedExperiment.from(experiment2, 2).build();
-        PrioritizedExperimentList prioritizedExperimentList = new PrioritizedExperimentList();
-        prioritizedExperimentList.addPrioritizedExperiment(prioritizedExperiment1);
-        prioritizedExperimentList.addPrioritizedExperiment(prioritizedExperiment2);
-
-        HashSet<Experiment.ID> experimentIDs = new HashSet<>(2);
-        experimentIDs.add(experiment.getID());
-        experimentIDs.add(experiment2.getID());
-
-        HashMap<Experiment.ID, BucketList> bucketListMap = new HashMap<>(2);
-        bucketListMap.put(experiment.getID(), expBucketList);
-        bucketListMap.put(experiment2.getID(), exp2bucketList);
-
-        Map<Experiment.ID, List<Experiment.ID>> exclusivesMap = new HashMap<>(2);
-        exclusivesMap.put(experiment.getID(), exclusivesList);
-        exclusivesMap.put(experiment2.getID(), exclusivesList2);
-
-        PageExperiment pageExperiment = PageExperiment.withAttributes(experiment.getID(), experiment.getLabel(), true)
-                .build();
-        PageExperiment pageExperiment2 = PageExperiment.withAttributes(experiment2.getID(), experiment2.getLabel(),
-                true).build();
-
-        List<PageExperiment> pageExperimentList = new ArrayList<>(2);
-        pageExperimentList.add(pageExperiment);
-        pageExperimentList.add(pageExperiment2);
-
-        final Page.Name pageName = Page.Name.valueOf("testPage");
-        Mockito.when(cassandraRepository.getExperimentList(testApp)).thenReturn(allExperiments);
-        Mockito.when(cassandraRepository.getBucketList(experiment.getID())).thenReturn(expBucketList);
-        Mockito.when(cassandraRepository.getBucketList(experiment2.getID())).thenReturn(exp2bucketList);
-        Mockito.when(mutexRepository.getExclusivesList(experimentSet)).thenReturn(exclusivesMap);
-        Mockito.when(priorities.getPriorities(testApp, false)).thenReturn(prioritizedExperimentList);
-        Mockito.when(cassandraRepository.getBucketList(experimentIDs)).thenReturn(bucketListMap);
-        Mockito.when(pages.getExperiments(testApp, pageName)).thenReturn(pageExperimentList);
-
-        Table<Experiment.ID, Experiment.Label, String> result = HashBasedTable.create();
-        result.put(experiment.getID(), experiment.getLabel(), "red");
-        Mockito.when(assignmentsRepository.getAssignments(User.ID.valueOf("user-a"), testApp, context, allExperiments)).thenReturn(result);
-
-        final Date DATE = new Date();
-        Assignment.Builder builder = Assignment.newInstance(experiment.getID())
-                .withApplicationName(experiment.getApplicationName())
-                .withUserID(User.ID.valueOf("user-b"))
-                .withContext(context)
-                .withBucketLabel(null);
-        Assignment assignment = builder.build();
-
-        Assignment newAssignment = Assignment.newInstance(assignment.getExperimentID())
-                .withBucketLabel(assignment.getBucketLabel())
-                .withUserID(assignment.getUserID())
-                .withContext(assignment.getContext())
-                .withStatus(Assignment.Status.NEW_ASSIGNMENT)
-                .withCreated(DATE)
-                .withCacheable(null)
-                .build();
-        Mockito.when(assignmentsRepository.assignUser(assignment, experiment, DATE)).thenReturn(newAssignment);
-        Mockito.when(assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-b"), context)).thenReturn(newAssignment);
-
-        builder = Assignment.newInstance(experiment.getID())
-                .withApplicationName(experiment.getApplicationName())
-                .withUserID(User.ID.valueOf("user-b"))
-                .withContext(context)
-                .withBucketLabel(redBucket.getLabel());
-        Assignment assignment_2 = builder.build();
-
-        Assignment newAssignment_2 = Assignment.newInstance(assignment_2.getExperimentID())
-                .withBucketLabel(assignment_2.getBucketLabel())
-                .withUserID(assignment_2.getUserID())
-                .withContext(assignment_2.getContext())
-                .withStatus(Assignment.Status.EXISTING_ASSIGNMENT)
-                .withCreated(DATE)
-                .withCacheable(null)
+        Experiment exp1 = Experiment.withID(Experiment.ID.newInstance())
+                .withApplicationName(appName)
+                .withLabel(Experiment.Label.valueOf("exp1Label"))
+                .withStartTime(date1.getTime())
+                .withEndTime(date2.getTime())
+                .withSamplingPercent(1.0)
+                .withState(Experiment.State.RUNNING)
+                .withIsPersonalizationEnabled(false)
                 .build();
 
-        List<Map> pageAssignments = new ArrayList<>();
-        Map<String, Object> tempResult = new HashMap<>();
-        tempResult.put("assignment", newAssignment_2.getBucketLabel() != null ? newAssignment_2.getBucketLabel().toString() : null);
-        tempResult.put("status", newAssignment_2.getStatus());
-        pageAssignments.add(tempResult);
-        Map<String, Object> tempResult1 = new HashMap<>();
-        tempResult1.put("assignment", newAssignment.getBucketLabel() != null ? newAssignment.getBucketLabel().toString() : null);
-        tempResult1.put("status", newAssignment.getStatus());
-        pageAssignments.add(tempResult1);
+        Experiment exp2 = Experiment.withID(Experiment.ID.newInstance())
+                .withApplicationName(appName)
+                .withLabel(Experiment.Label.valueOf("exp2Label"))
+                .withStartTime(date1.getTime())
+                .withEndTime(date2.getTime())
+                .withSamplingPercent(1.0)
+                .withState(Experiment.State.RUNNING)
+                .withIsPersonalizationEnabled(false)
+                .build();
 
-        Mockito.when(cassandraAssignments.doPageAssignments(testApp, pageName, User.ID.valueOf("user-a"), context, true, false, null, null)).thenReturn(pageAssignments);
+        List<PageExperiment> pageExperiments = newArrayList();
+        pageExperiments.add(PageExperiment.withAttributes(exp1.getID(), exp1.getLabel(), true).build());
+        pageExperiments.add(PageExperiment.withAttributes(exp2.getID(), exp2.getLabel(), true).build());
 
-        assert pageAssignments.size() == 2;
-        assert pageAssignments.get(0).get("assignment").toString().equals(redBucket.getLabel().toString());
-        assert pageAssignments.get(0).get("status").toString().equals(Assignment.Status.EXISTING_ASSIGNMENT.toString());
-        assert pageAssignments.get(1).get("assignment") == null;
-        assert pageAssignments.get(1).get("status").toString().equals(Assignment.Status.NEW_ASSIGNMENT.toString());
+        ExperimentBatch experimentBatch = ExperimentBatch.newInstance().withLabels(newHashSet(exp1.getLabel(), exp2.getLabel())).build();
+        List<Experiment> expList = newArrayList(exp1, exp2);
+
+        Map expMap = newHashMap();
+        expMap.put(exp1.getID(), exp1);
+        expMap.put(exp2.getID(), exp2);
+
+        PrioritizedExperimentList pExpList = new PrioritizedExperimentList();
+        pExpList.addPrioritizedExperiment(PrioritizedExperiment.from(exp1, 1).build());
+        pExpList.addPrioritizedExperiment(PrioritizedExperiment.from(exp2, 2).build());
+        Optional<PrioritizedExperimentList> prioritizedExperimentListOptional = Optional.of(pExpList);
+
+        BucketList bucketList1 = new BucketList();
+        bucketList1.addBucket(Bucket.newInstance(exp1.getID(), Bucket.Label.valueOf("red")).withAllocationPercent(0.5).build());
+        bucketList1.addBucket(Bucket.newInstance(exp1.getID(), Bucket.Label.valueOf("blue")).withAllocationPercent(0.5).build());
+        BucketList bucketList2 = new BucketList();
+        bucketList2.addBucket(Bucket.newInstance(exp2.getID(), Bucket.Label.valueOf("yellow")).withAllocationPercent(1.0).build());
+
+        List<Experiment.ID> exclusionList = newArrayList();
+
+        //Mock dependent interactions
+        when(metadataCache.getPageExperiments(appName, pageName)).thenReturn(pageExperiments);
+        when(metadataCache.getExperimentById(exp1.getID())).thenReturn(Optional.of(exp1));
+        when(metadataCache.getExperimentById(exp2.getID())).thenReturn(Optional.of(exp2));
+        when(metadataCache.getExperimentsByAppName(appName)).thenReturn(expList);
+        when(metadataCache.getPrioritizedExperimentListMap(appName)).thenReturn(prioritizedExperimentListOptional);
+        when(metadataCache.getBucketList(exp1.getID())).thenReturn(bucketList1);
+        when(metadataCache.getBucketList(exp2.getID())).thenReturn(bucketList2);
+        when(metadataCache.getExclusionList(exp1.getID())).thenReturn(exclusionList);
+        when(metadataCache.getExclusionList(exp2.getID())).thenReturn(exclusionList);
+
+        List<Pair<Experiment, String>> existingAssignments = newArrayList(new ImmutablePair<>(exp2, "yellow"));
+        Mockito.when(assignmentsRepository.getAssignments(user, appName, context, expMap)).thenReturn(existingAssignments);
+
+        //This is real call to the method
+        List<Assignment> resultAssignments = assignmentsImpl.doPageAssignments(appName, pageName, user,
+                context, true, false, headers, segmentationProfile);
+
+        //Verify result
+        assertThat(resultAssignments.size(), is(2));
+        assertThat(resultAssignments.get(0).getBucketLabel().toString(), anyOf(is("red"), is("blue")));
+        assertThat(resultAssignments.get(0).getStatus().toString(), is(Assignment.Status.NEW_ASSIGNMENT.toString()));
+        assertThat(resultAssignments.get(1).getBucketLabel().toString(), is("yellow"));
+        assertThat(resultAssignments.get(1).getStatus().toString(), is(Assignment.Status.EXISTING_ASSIGNMENT.toString()));
+    }
+
+    @Test
+    public void getExistingAssignmentsTest() {
+        //Input
+        Application.Name appName = Application.Name.valueOf("Test");
+        Page.Name pageName = Page.Name.valueOf("TestPage1");
+        User.ID user = User.ID.valueOf("testUser");
+        Context context = Context.valueOf("TEST");
+        SegmentationProfile segmentationProfile = mock(SegmentationProfile.class);
+        HttpHeaders headers = mock(HttpHeaders.class);
+        Calendar date1 = Calendar.getInstance();
+        date1.add(Calendar.DAY_OF_MONTH, -1);
+        Calendar date2 = Calendar.getInstance();
+        date2.add(Calendar.DAY_OF_MONTH, 10);
+
+        Experiment exp1 = Experiment.withID(Experiment.ID.newInstance())
+                .withApplicationName(appName)
+                .withLabel(Experiment.Label.valueOf("exp1Label"))
+                .withStartTime(date1.getTime())
+                .withEndTime(date2.getTime())
+                .withSamplingPercent(1.0)
+                .withState(Experiment.State.RUNNING)
+                .withIsPersonalizationEnabled(false)
+                .build();
+
+        Experiment exp2 = Experiment.withID(Experiment.ID.newInstance())
+                .withApplicationName(appName)
+                .withLabel(Experiment.Label.valueOf("exp2Label"))
+                .withStartTime(date1.getTime())
+                .withEndTime(date2.getTime())
+                .withSamplingPercent(1.0)
+                .withState(Experiment.State.RUNNING)
+                .withIsPersonalizationEnabled(false)
+                .build();
+
+        List<PageExperiment> pageExperiments = newArrayList();
+        pageExperiments.add(PageExperiment.withAttributes(exp1.getID(), exp1.getLabel(), true).build());
+        pageExperiments.add(PageExperiment.withAttributes(exp2.getID(), exp2.getLabel(), true).build());
+
+        ExperimentBatch experimentBatch = ExperimentBatch.newInstance().withLabels(newHashSet(exp1.getLabel(), exp2.getLabel())).build();
+        List<Experiment> expList = newArrayList(exp1, exp2);
+
+        Map expMap = newHashMap();
+        expMap.put(exp1.getID(), exp1);
+        expMap.put(exp2.getID(), exp2);
+
+        PrioritizedExperimentList pExpList = new PrioritizedExperimentList();
+        pExpList.addPrioritizedExperiment(PrioritizedExperiment.from(exp1, 1).build());
+        pExpList.addPrioritizedExperiment(PrioritizedExperiment.from(exp2, 2).build());
+        Optional<PrioritizedExperimentList> prioritizedExperimentListOptional = Optional.of(pExpList);
+
+        BucketList bucketList1 = new BucketList();
+        bucketList1.addBucket(Bucket.newInstance(exp1.getID(), Bucket.Label.valueOf("red")).withAllocationPercent(0.5).build());
+        bucketList1.addBucket(Bucket.newInstance(exp1.getID(), Bucket.Label.valueOf("blue")).withAllocationPercent(0.5).build());
+        BucketList bucketList2 = new BucketList();
+        bucketList2.addBucket(Bucket.newInstance(exp2.getID(), Bucket.Label.valueOf("yellow")).withAllocationPercent(1.0).build());
+
+        List<Experiment.ID> exclusionList = newArrayList();
+
+        //Mock dependent interactions
+        when(metadataCache.getPageExperiments(appName, pageName)).thenReturn(pageExperiments);
+        when(metadataCache.getExperimentById(exp1.getID())).thenReturn(Optional.of(exp1));
+        when(metadataCache.getExperimentById(exp2.getID())).thenReturn(Optional.of(exp2));
+        when(metadataCache.getExperimentsByAppName(appName)).thenReturn(expList);
+        when(metadataCache.getPrioritizedExperimentListMap(appName)).thenReturn(prioritizedExperimentListOptional);
+        when(metadataCache.getBucketList(exp1.getID())).thenReturn(bucketList1);
+        when(metadataCache.getBucketList(exp2.getID())).thenReturn(bucketList2);
+        when(metadataCache.getExclusionList(exp1.getID())).thenReturn(exclusionList);
+        when(metadataCache.getExclusionList(exp2.getID())).thenReturn(exclusionList);
+
+        List<Pair<Experiment, String>> existingAssignments = newArrayList(new ImmutablePair<>(exp2, "yellow"));
+        Mockito.when(assignmentsRepository.getAssignments(user, appName, context, expMap)).thenReturn(existingAssignments);
+
+        //This is real call to the method
+        Assignment resultAssignment1 = assignmentsImpl.getExistingAssignment(user, appName, exp1.getLabel(), context);
+        Assignment resultAssignment2 = assignmentsImpl.getExistingAssignment(user, appName, exp2.getLabel(), context);
+
+        //Verify result
+        assertNull(resultAssignment1);
+        assertNotNull(resultAssignment2);
+        assertThat(resultAssignment2.getStatus(), is(Assignment.Status.EXISTING_ASSIGNMENT));
+
+
     }
 
     @Test
@@ -1330,8 +1531,7 @@ public class AssignmentsImplTest {
                 .withCacheable(null)
                 .build();
 
-        Mockito.when(assignmentsRepository.assignUser(assignment, experiment, DATE)).thenReturn(newAssignment);
-        Mockito.when(assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-b"), context)).thenReturn(newAssignment);
+        Mockito.when(assignmentsRepository.getAssignment(User.ID.valueOf("user-b"), testApp, experiment.getID(), context)).thenReturn(newAssignment);
         Mockito.doNothing().when(assignmentsRepository).deleteAssignment(experiment, User.ID.valueOf("user-b"), context, testApp, assignment);
 
         experiment.setState(Experiment.State.TERMINATED);
@@ -1362,8 +1562,7 @@ public class AssignmentsImplTest {
                 .withCacheable(null)
                 .build();
 
-        Mockito.when(assignmentsRepository.assignUser(assignment, experiment, DATE)).thenReturn(newAssignment);
-        Mockito.when(assignmentsRepository.getAssignment(experiment.getID(), User.ID.valueOf("user-b"), context)).thenReturn(null);
+        Mockito.when(assignmentsRepository.getAssignment(User.ID.valueOf("user-b"), testApp, experiment.getID(), context)).thenReturn(null);
         Mockito.doNothing().when(assignmentsRepository).deleteAssignment(experiment, User.ID.valueOf("user-b"), context, testApp, assignment);
 
         Mockito.when(cassandraAssignments.putAssignment(userA, testApp, expLabel, context, redBucket.getLabel(), true)).thenReturn(newAssignment);

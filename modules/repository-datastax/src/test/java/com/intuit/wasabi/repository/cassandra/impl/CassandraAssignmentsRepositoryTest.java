@@ -48,12 +48,10 @@ import com.intuit.wasabi.repository.cassandra.accessor.ExclusionAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.PrioritiesAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.StagingAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.UserAssignmentAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.count.BucketAssignmentCountAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.export.UserAssignmentExportAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentUserIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.PageExperimentIndexAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.index.UserAssignmentIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.pojo.UserAssignment;
 import com.intuit.wasabi.repository.cassandra.pojo.count.BucketAssignmentCount;
 import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentUserByUserIdContextAppNameExperimentId;
@@ -80,12 +78,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
+import static com.google.common.collect.Maps.newHashMap;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -121,10 +119,6 @@ public class CassandraAssignmentsRepositoryTest {
     @Mock
     ExperimentUserIndexAccessor experimentUserIndexAccessor;
 
-    @Mock
-    UserAssignmentAccessor userAssignmentAccessor;
-    @Mock
-    UserAssignmentIndexAccessor userAssignmentIndexAccessor;
     @Mock
     UserAssignmentExportAccessor userAssignmentExportAccessor;
 
@@ -167,8 +161,6 @@ public class CassandraAssignmentsRepositoryTest {
                 eventLog,
                 experimentAccessor,
                 experimentUserIndexAccessor,
-                userAssignmentAccessor,
-                userAssignmentIndexAccessor,
                 userAssignmentExportAccessor,
                 bucketAccessor,
                 bucketAssignmentCountAccessor,
@@ -180,8 +172,6 @@ public class CassandraAssignmentsRepositoryTest {
                 mappingManager,
                 assignmentsCountExecutor,
                 true,
-                false,
-                true,
                 true,
                 "yyyy-MM-dd HH:mm:ss"
         );
@@ -189,129 +179,82 @@ public class CassandraAssignmentsRepositoryTest {
     }
 
     @Test
-    public void testGetUserAssignments() {
-        List<ExperimentUserByUserIdContextAppNameExperimentId> mocked = new ArrayList<>();
-        mocked.add(ExperimentUserByUserIdContextAppNameExperimentId.builder()
-                .appName(APPLICATION_NAME.toString())
-                .experimentId(UUID.randomUUID())
-                .context("test")
-                .bucket("bucket1")
-                .build()
-        );
-        mocked.add(ExperimentUserByUserIdContextAppNameExperimentId.builder()
-                .appName(APPLICATION_NAME.toString())
-                .experimentId(null)
-                .bucket("bucket1")
-                .context("test")
-                .build()
-        );
-        mocked.add(ExperimentUserByUserIdContextAppNameExperimentId.builder()
-                .appName(APPLICATION_NAME.toString())
-                .experimentId(UUID.randomUUID())
-                .context("test")
-                .bucket(null)
-                .build()
-        );
-        when(experimentUserIndexAccessor.selectBy(
-                anyString(),
-                eq(APPLICATION_NAME.toString()),
-                anyString()
-        )).thenReturn(mockedResultMapping);
-        when(mockedResultMapping.iterator()).thenReturn(mocked.iterator());
-        Set<Experiment.ID> result = repository.getUserAssignments(
-                User.ID.valueOf("user1"),
-                APPLICATION_NAME,
-                Context.valueOf("test"));
-        assertThat(result.size(), is(1));
-        Experiment.ID resultObject = result.iterator().next();
-        assertThat(resultObject.getRawID(), is(mocked.get(0).getExperimentId()));
-    }
-
-    @Test
-    public void testGetUserAssignmentsException() {
-        doThrow(ReadTimeoutException.class).when(experimentUserIndexAccessor)
-                .selectBy(eq("testUser"),
-                        eq(APPLICATION_NAME.toString()),
-                        eq("test"));
-        thrown.expect(RepositoryException.class);
-        thrown.expectMessage("Could not retrieve assignments for experimentID = \"testApp\" userID = \"testUser\" and context test");
-        repository.getUserAssignments(
-                User.ID.valueOf("testUser"),
-                APPLICATION_NAME,
-                Context.valueOf("test"));
-    }
-
-    @Test
     public void testGetAssignmentsMultiple() {
+        Experiment.ID expId1 = Experiment.ID.newInstance();
+        Experiment.ID expId2 = Experiment.ID.newInstance();
+        Date endTime = new Date(System.currentTimeMillis() + 30 * 24 * 60 * 60 * 1000);
+
+        Experiment exp1 = Experiment.withID(expId1).withEndTime(endTime)
+                .withLabel(Experiment.Label.valueOf("Exp1")).build();
+        Experiment exp2 = Experiment.withID(expId2).withEndTime(endTime)
+                .withLabel(Experiment.Label.valueOf("Exp2")).build();
+
         List<ExperimentUserByUserIdContextAppNameExperimentId> mocked = new ArrayList<>();
         mocked.add(ExperimentUserByUserIdContextAppNameExperimentId.builder()
                 .appName(APPLICATION_NAME.toString())
-                .experimentId(UUID.randomUUID())
+                .experimentId(expId1.getRawID())
                 .context("test")
                 .bucket("bucket1")
                 .build()
         );
         mocked.add(ExperimentUserByUserIdContextAppNameExperimentId.builder()
                 .appName(APPLICATION_NAME.toString())
-                .experimentId(UUID.randomUUID())
+                .experimentId(expId2.getRawID())
                 .context("test")
                 .bucket("bucket2")
                 .build()
         );
 
-        Table<Experiment.ID, Experiment.Label, Experiment> experimentTable = HashBasedTable.create();
-        UUID random = UUID.randomUUID();
-        experimentTable.put(Experiment.ID.valueOf(random),
-                Experiment.Label.valueOf("random-" + random.toString()),
-                Experiment.withID(Experiment.ID.valueOf(random)).build()
-        );
-        for (ExperimentUserByUserIdContextAppNameExperimentId item : mocked) {
-            experimentTable.put(Experiment.ID.valueOf(item.getExperimentId()),
-                    Experiment.Label.valueOf("test-" + item.getBucket()),
-                    Experiment.withID(Experiment.ID.valueOf(item.getExperimentId()))
-                            .withLabel(Experiment.Label.valueOf("test-" + item.getBucket())).build()
-            );
-        }
+        Map<Experiment.ID, Experiment> experimentMap = newHashMap();
+        experimentMap.put(expId1, exp1);
+        experimentMap.put(expId2, exp2);
 
         doReturn(mocked.stream()).when(spyRepository).getUserIndexStream(anyString(), anyString(), anyString());
-        Table<Experiment.ID, Experiment.Label, String> result = spyRepository.getAssignments(User.ID.valueOf("testUser"),
+
+        List<Pair<Experiment, String>> result = spyRepository.getAssignments(User.ID.valueOf("testUser"),
                 APPLICATION_NAME,
                 Context.valueOf("test"),
-                experimentTable
+                experimentMap
         );
+
+        //Verif the result
         assertThat(result.size(), is(2));
-        for (Experiment.ID id : result.rowKeySet()) {
-            assertThat(mocked.stream().map(t -> t.getExperimentId()).collect(Collectors.toList()), hasItems(id.getRawID()));
-        }
+        result.forEach(pair -> {
+            assertThat(mocked.stream().map(t -> t.getExperimentId()).collect(Collectors.toList()), hasItems(pair.getLeft().getID().getRawID()));
+        });
+
     }
 
     @Test
     public void testGetAssignmentsSingle() {
+        Experiment.ID expId1 = Experiment.ID.newInstance();
+        Date endTime = new Date(System.currentTimeMillis() + 30 * 24 * 60 * 60 * 1000);
+
+        Experiment exp1 = Experiment.withID(expId1).withEndTime(endTime)
+                .withLabel(Experiment.Label.valueOf("Exp1")).build();
+
         List<ExperimentUserByUserIdContextAppNameExperimentId> mocked = new ArrayList<>();
         mocked.add(ExperimentUserByUserIdContextAppNameExperimentId.builder()
                 .appName(APPLICATION_NAME.toString())
-                .experimentId(experimentId)
+                .experimentId(expId1.getRawID())
                 .context("test")
                 .bucket("bucket1")
                 .build()
         );
 
-        Table<Experiment.ID, Experiment.Label, Experiment> experimentTable = HashBasedTable.create();
-        experimentTable.put(Experiment.ID.valueOf(experimentId),
-                Experiment.Label.valueOf("test-" + experimentId.toString()),
-                Experiment.withID(Experiment.ID.valueOf(experimentId))
-                        .withLabel(Experiment.Label.valueOf("test-bucket")).build()
-        );
+        Map<Experiment.ID, Experiment> experimentMap = newHashMap();
+        experimentMap.put(expId1, exp1);
+
         doReturn(mocked.stream()).when(spyRepository).getUserIndexStream(anyString(), anyString(), anyString());
-        Table<Experiment.ID, Experiment.Label, String> result = spyRepository.getAssignments(User.ID.valueOf("testUser"),
+        List<Pair<Experiment, String>> result = spyRepository.getAssignments(User.ID.valueOf("testUser"),
                 APPLICATION_NAME,
                 Context.valueOf("test"),
-                experimentTable
+                experimentMap
         );
         assertThat(result.size(), is(1));
-        for (Experiment.ID id : result.rowKeySet()) {
-            assertThat(mocked.stream().map(t -> t.getExperimentId()).collect(Collectors.toList()), hasItems(id.getRawID()));
-        }
+        result.forEach(pair -> {
+            assertThat(mocked.stream().map(t -> t.getExperimentId()).collect(Collectors.toList()), hasItems(pair.getLeft().getID().getRawID()));
+        });
     }
 
     @Test
@@ -325,6 +268,8 @@ public class CassandraAssignmentsRepositoryTest {
                 .build()
         );
 
+        Map<Experiment.ID, Experiment> experimentMap = newHashMap();
+
         Table<Experiment.ID, Experiment.Label, Experiment> experimentTable = HashBasedTable.create();
         experimentTable.put(Experiment.ID.valueOf(UUID.randomUUID()),
                 Experiment.Label.valueOf("test-" + experimentId.toString()),
@@ -332,10 +277,10 @@ public class CassandraAssignmentsRepositoryTest {
                         .withLabel(Experiment.Label.valueOf("test-bucket")).build()
         );
         doReturn(mocked.stream()).when(spyRepository).getUserIndexStream(anyString(), anyString(), anyString());
-        Table<Experiment.ID, Experiment.Label, String> result = spyRepository.getAssignments(User.ID.valueOf("testUser"),
+        List<Pair<Experiment, String>> result = spyRepository.getAssignments(User.ID.valueOf("testUser"),
                 APPLICATION_NAME,
                 Context.valueOf("test"),
-                experimentTable
+                experimentMap
         );
         assertThat(result.size(), is(0));
     }
@@ -344,16 +289,13 @@ public class CassandraAssignmentsRepositoryTest {
     public void testGetAssignmentsEmptyResult() {
         List<ExperimentUserByUserIdContextAppNameExperimentId> mocked = new ArrayList<>();
         Table<Experiment.ID, Experiment.Label, Experiment> experimentTable = HashBasedTable.create();
-        experimentTable.put(Experiment.ID.valueOf(UUID.randomUUID()),
-                Experiment.Label.valueOf("test-" + experimentId.toString()),
-                Experiment.withID(Experiment.ID.valueOf(experimentId))
-                        .withLabel(Experiment.Label.valueOf("test-bucket")).build()
-        );
+        Map<Experiment.ID, Experiment> experimentMap = newHashMap();
+
         doReturn(mocked.stream()).when(spyRepository).getUserIndexStream(anyString(), anyString(), anyString());
-        Table<Experiment.ID, Experiment.Label, String> result = spyRepository.getAssignments(User.ID.valueOf("testUser"),
+        List<Pair<Experiment, String>> result = spyRepository.getAssignments(User.ID.valueOf("testUser"),
                 APPLICATION_NAME,
                 Context.valueOf("test"),
-                experimentTable
+                experimentMap
         );
         assertThat(result.size(), is(0));
     }
@@ -439,454 +381,6 @@ public class CassandraAssignmentsRepositoryTest {
                 Context.valueOf("test"),
                 mockedResult.stream());
         assertThat(assignmentOptional.isPresent(), is(false));
-    }
-
-    @Test
-    public void testGetAssignmentFromLookUp() {
-        List<UserAssignmentByUserId> mockedResult = new ArrayList<>();
-        mockedResult.add(UserAssignmentByUserId.builder()
-                .experimentId(experimentId)
-                .context("test")
-                .bucketLabel("bucket-1")
-                .created(new Date())
-                .userId("testuser1")
-                .build()
-        );
-        when(userAssignmentIndexAccessor.selectBy(eq(experimentId), eq("testuser1"), eq("test")))
-                .thenReturn(mockedResultMapping);
-        when(mockedResultMapping.iterator()).thenReturn(mockedResult.iterator());
-        Bucket mockedBucket = Bucket.newInstance(Experiment.ID.valueOf(experimentId), Bucket.Label.valueOf("bucket-1"))
-                .withAllocationPercent(1.0)
-                .withState(Bucket.State.OPEN)
-                .build();
-        when(experimentRepository.getBucket(eq(Experiment.ID.valueOf(experimentId)), eq(Bucket.Label.valueOf("bucket-1"))))
-                .thenReturn(mockedBucket);
-        Optional<Assignment> assignment = repository.getAssignmentFromLookUp(
-                Experiment.ID.valueOf(experimentId),
-                User.ID.valueOf("testuser1"),
-                Context.valueOf("test"));
-        assertThat(assignment.isPresent(), is(true));
-        Assignment result = assignment.get();
-        assertThat(result.getBucketLabel(), is(Bucket.Label.valueOf("bucket-1")));
-        assertThat(result.getExperimentID().getRawID(), is(experimentId));
-        assertThat(result.getContext().getContext(), is("test"));
-        assertThat(result.getStatus(), is(Assignment.Status.EXISTING_ASSIGNMENT));
-        assertThat(result.isBucketEmpty(), is(false));
-        assertThat(result.isCacheable(), is(false));
-    }
-
-    @Test
-    public void testGetAssignmentFromLookUpReadException() {
-        doThrow(ReadTimeoutException.class)
-                .when(userAssignmentIndexAccessor)
-                .selectBy(eq(experimentId), eq("testuser1"), eq("test"));
-        thrown.expect(RepositoryException.class);
-        thrown.expectMessage("Could not retrieve assignment for experimentID = \"4d4d8f3b-3b81-44f3-968d-d1c1a48b4ac8\" userID = \"testuser1\"");
-        repository.getAssignmentFromLookUp(Experiment.ID.valueOf(experimentId),
-                User.ID.valueOf("testuser1"),
-                Context.valueOf("test")
-        );
-    }
-
-    @Test
-    public void testGetAssignmentFromLookUpBucketIsNull() {
-        List<UserAssignmentByUserId> mockedResult = new ArrayList<>();
-        mockedResult.add(UserAssignmentByUserId.builder()
-                .experimentId(experimentId)
-                .context("test")
-                .bucketLabel(null)
-                .created(new Date())
-                .userId("testuser1")
-                .build()
-        );
-        when(userAssignmentIndexAccessor.selectBy(eq(experimentId), eq("testuser1"), eq("test")))
-                .thenReturn(mockedResultMapping);
-        when(mockedResultMapping.iterator()).thenReturn(mockedResult.iterator());
-        Bucket mockedBucket = Bucket.newInstance(Experiment.ID.valueOf(experimentId), Bucket.Label.valueOf("bucket-1"))
-                .withAllocationPercent(1.0)
-                .withState(Bucket.State.OPEN)
-                .build();
-        when(experimentRepository.getBucket(eq(Experiment.ID.valueOf(experimentId)), isNull(Bucket.Label.class)))
-                .thenReturn(mockedBucket);
-        Optional<Assignment> assignment = repository.getAssignmentFromLookUp(
-                Experiment.ID.valueOf(experimentId),
-                User.ID.valueOf("testuser1"),
-                Context.valueOf("test"));
-        assertThat(assignment.isPresent(), is(true));
-        Assignment result = assignment.get();
-        assertThat(result.getBucketLabel(), is(nullValue()));
-        assertThat(result.getExperimentID().getRawID(), is(experimentId));
-        assertThat(result.getContext().getContext(), is("test"));
-        assertThat(result.getStatus(), is(Assignment.Status.EXISTING_ASSIGNMENT));
-        assertThat(result.isBucketEmpty(), is(false));
-        assertThat(result.isCacheable(), is(false));
-    }
-
-    @Test
-    public void testGetAssignmentOldReadException() {
-        doThrow(ReadTimeoutException.class)
-                .when(userAssignmentAccessor)
-                .selectBy(eq(experimentId), eq("testuser1"), eq("test"));
-        thrown.expect(RepositoryException.class);
-        thrown.expectMessage("Could not retrieve assignment for experimentID = \"4d4d8f3b-3b81-44f3-968d-d1c1a48b4ac8\" userID = \"testuser1\"");
-        repository.getAssignmentOld(Experiment.ID.valueOf(experimentId),
-                User.ID.valueOf("testuser1"),
-                Context.valueOf("test"));
-    }
-
-    @Test
-    public void testGetAssignmentOld() {
-        List<UserAssignment> mockedResult = new ArrayList<>();
-        mockedResult.add(UserAssignment.builder()
-                .experimentId(experimentId)
-                .context("test")
-                .bucketLabel("bucket-1")
-                .created(new Date())
-                .userId("testuser1")
-                .build()
-        );
-        when(userAssignmentAccessor.selectBy(eq(experimentId), eq("testuser1"), eq("test")))
-                .thenReturn(mockedResultMapping);
-        when(mockedResultMapping.iterator()).thenReturn(mockedResult.iterator());
-        Bucket mockedBucket = Bucket.newInstance(Experiment.ID.valueOf(experimentId), Bucket.Label.valueOf("bucket-1"))
-                .withAllocationPercent(1.0)
-                .withState(Bucket.State.OPEN)
-                .build();
-        when(experimentRepository.getBucket(eq(Experiment.ID.valueOf(experimentId)), eq(Bucket.Label.valueOf("bucket-1"))))
-                .thenReturn(mockedBucket);
-        Optional<Assignment> assignment = repository.getAssignmentOld(
-                Experiment.ID.valueOf(experimentId),
-                User.ID.valueOf("testuser1"),
-                Context.valueOf("test"));
-        assertThat(assignment.isPresent(), is(true));
-        Assignment result = assignment.get();
-        assertThat(result.getBucketLabel(), is(Bucket.Label.valueOf("bucket-1")));
-        assertThat(result.getExperimentID().getRawID(), is(experimentId));
-        assertThat(result.getContext().getContext(), is("test"));
-        assertThat(result.getStatus(), is(Assignment.Status.EXISTING_ASSIGNMENT));
-        assertThat(result.isBucketEmpty(), is(false));
-        assertThat(result.isCacheable(), is(false));
-    }
-
-    @Test
-    public void testGetAssignmentOldEmptyQueryResult() {
-        List<UserAssignment> mockedResult = new ArrayList<>();
-        when(userAssignmentAccessor.selectBy(eq(experimentId), eq("testuser1"), eq("test")))
-                .thenReturn(mockedResultMapping);
-        when(mockedResultMapping.iterator()).thenReturn(mockedResult.iterator());
-        Optional<Assignment> assignment = repository.getAssignmentOld(
-                Experiment.ID.valueOf(experimentId),
-                User.ID.valueOf("testuser1"),
-                Context.valueOf("test"));
-        assertThat(assignment.isPresent(), is(false));
-    }
-
-    @Test
-    public void testGetAssignmentAssignToOldIsTrue() {
-        Optional<Assignment> mocked = Optional.ofNullable(mock(Assignment.class));
-        doReturn(Optional.empty()).when(spyRepository).getAssignmentFromLookUp(eq(Experiment.ID.valueOf(experimentId)),
-                eq(User.ID.valueOf("testuser1")),
-                eq(Context.valueOf("test"))
-        );
-        doReturn(mocked).when(spyRepository).getAssignmentOld(eq(Experiment.ID.valueOf(experimentId)),
-                eq(User.ID.valueOf("testuser1")),
-                eq(Context.valueOf("test"))
-        );
-        Assignment result = spyRepository.getAssignment(Experiment.ID.valueOf(experimentId),
-                User.ID.valueOf("testuser1"),
-                Context.valueOf("test"));
-        assertThat(mocked.get(), is(result));
-        assertThat(result, is(notNullValue()));
-    }
-
-    @Test
-    public void testGetAssignmentAssignToNewIsTrue() {
-        CassandraAssignmentsRepository assignmentsRepository = spy(new CassandraAssignmentsRepository(
-                experimentRepository,
-                dbRepository,
-                eventLog,
-                experimentAccessor,
-                experimentUserIndexAccessor,
-                userAssignmentAccessor,
-                userAssignmentIndexAccessor,
-                userAssignmentExportAccessor,
-                bucketAccessor,
-                bucketAssignmentCountAccessor,
-                stagingAccessor,
-                prioritiesAccessor,
-                exclusionAccessor,
-                pageExperimentIndexAccessor,
-                driver,
-                mappingManager,
-                assignmentsCountExecutor,
-                false,
-                true,
-                true,
-                true,
-                "yyyy-MM-dd HH:mm:ss"
-        ));
-        Optional<Assignment> mocked = Optional.ofNullable(mock(Assignment.class));
-        doReturn(mocked).when(assignmentsRepository).getAssignmentFromLookUp(eq(Experiment.ID.valueOf(experimentId)),
-                eq(User.ID.valueOf("testuser1")),
-                eq(Context.valueOf("test"))
-        );
-        Assignment result = assignmentsRepository.getAssignment(Experiment.ID.valueOf(experimentId),
-                User.ID.valueOf("testuser1"),
-                Context.valueOf("test"));
-        assertThat(mocked.get(), is(result));
-        assertThat(result, is(notNullValue()));
-    }
-
-    @Test
-    public void testGetAssignmentBothFalse() {
-        CassandraAssignmentsRepository assignmentsRepository = spy(new CassandraAssignmentsRepository(
-                experimentRepository,
-                dbRepository,
-                eventLog,
-                experimentAccessor,
-                experimentUserIndexAccessor,
-                userAssignmentAccessor,
-                userAssignmentIndexAccessor,
-                userAssignmentExportAccessor,
-                bucketAccessor,
-                bucketAssignmentCountAccessor,
-                stagingAccessor,
-                prioritiesAccessor,
-                exclusionAccessor,
-                pageExperimentIndexAccessor,
-                driver,
-                mappingManager,
-                assignmentsCountExecutor,
-                false,
-                false,
-                true,
-                true,
-                "yyyy-MM-dd HH:mm:ss"
-        ));
-        Optional<Assignment> mocked1 = Optional.ofNullable(mock(Assignment.class));
-        doReturn(mocked1).when(assignmentsRepository).getAssignmentFromLookUp(eq(Experiment.ID.valueOf(experimentId)),
-                eq(User.ID.valueOf("testuser1")),
-                eq(Context.valueOf("test"))
-        );
-        Optional<Assignment> mocked2 = Optional.ofNullable(mock(Assignment.class));
-        doReturn(mocked2).when(spyRepository).getAssignmentFromLookUp(eq(Experiment.ID.valueOf(experimentId)),
-                eq(User.ID.valueOf("testuser1")),
-                eq(Context.valueOf("test"))
-        );
-        Assignment result = assignmentsRepository.getAssignment(Experiment.ID.valueOf(experimentId),
-                User.ID.valueOf("testuser1"),
-                Context.valueOf("test"));
-        assertThat(result, is(nullValue()));
-    }
-
-
-    @Test
-    public void testGetAssignmentBothTrue() {
-        CassandraAssignmentsRepository assignmentsRepository = spy(new CassandraAssignmentsRepository(
-                experimentRepository,
-                dbRepository,
-                eventLog,
-                experimentAccessor,
-                experimentUserIndexAccessor,
-                userAssignmentAccessor,
-                userAssignmentIndexAccessor,
-                userAssignmentExportAccessor,
-                bucketAccessor,
-                bucketAssignmentCountAccessor,
-                stagingAccessor,
-                prioritiesAccessor,
-                exclusionAccessor,
-                pageExperimentIndexAccessor,
-                driver,
-                mappingManager,
-                assignmentsCountExecutor,
-                true,
-                true,
-                true,
-                true,
-                "yyyy-MM-dd HH:mm:ss"
-        ));
-        Optional<Assignment> mocked1 = Optional.ofNullable(mock(Assignment.class));
-        doReturn(mocked1).when(assignmentsRepository).getAssignmentFromLookUp(eq(Experiment.ID.valueOf(experimentId)),
-                eq(User.ID.valueOf("testuser1")),
-                eq(Context.valueOf("test"))
-        );
-        Optional<Assignment> mocked2 = Optional.ofNullable(mock(Assignment.class));
-        doReturn(mocked2).when(spyRepository).getAssignmentFromLookUp(eq(Experiment.ID.valueOf(experimentId)),
-                eq(User.ID.valueOf("testuser1")),
-                eq(Context.valueOf("test"))
-        );
-        Assignment result = assignmentsRepository.getAssignment(Experiment.ID.valueOf(experimentId),
-                User.ID.valueOf("testuser1"),
-                Context.valueOf("test"));
-        assertThat(result, is(notNullValue()));
-        assertThat(result, is(mocked1.get()));
-    }
-
-    @Test
-    public void testAssignUserToLookUpWriteException() {
-        Assignment expected = Assignment.newInstance(Experiment.ID.valueOf(experimentId))
-                .withApplicationName(APPLICATION_NAME)
-                .withBucketLabel(Bucket.Label.valueOf("bucket-1"))
-                .withContext(Context.valueOf("test"))
-                .withCreated(new Date())
-                .withUserID(User.ID.valueOf("testuser1"))
-                .withStatus(Assignment.Status.NEW_ASSIGNMENT)
-                .withCacheable(false)
-                .build();
-        doThrow(WriteTimeoutException.class)
-                .when(userAssignmentIndexAccessor)
-                .insertBy(eq(expected.getExperimentID().getRawID()),
-                        eq(expected.getUserID().toString()),
-                        eq(expected.getContext().getContext()),
-                        eq(expected.getCreated()),
-                        eq(expected.getBucketLabel().toString()));
-        thrown.expect(RepositoryException.class);
-        thrown.expectMessage("Could not save user assignment");
-        repository.assignUserToLookUp(expected, expected.getCreated());
-    }
-
-
-    @Test
-    public void testAssignUserToLookUpFullParameter() {
-        Assignment expected = Assignment.newInstance(Experiment.ID.valueOf(experimentId))
-                .withApplicationName(APPLICATION_NAME)
-                .withBucketLabel(Bucket.Label.valueOf("bucket-1"))
-                .withContext(Context.valueOf("test"))
-                .withCreated(new Date())
-                .withUserID(User.ID.valueOf("testuser1"))
-                .withStatus(Assignment.Status.NEW_ASSIGNMENT)
-                .withCacheable(false)
-                .build();
-        Assignment result = repository.assignUserToLookUp(expected, expected.getCreated());
-        verify(userAssignmentIndexAccessor, times(0)).insertBy(eq(expected.getExperimentID().getRawID()),
-                eq(expected.getUserID().toString()),
-                eq(expected.getContext().getContext()),
-                eq(expected.getCreated()));
-        verify(userAssignmentIndexAccessor, times(1)).insertBy(eq(expected.getExperimentID().getRawID()),
-                eq(expected.getUserID().toString()),
-                eq(expected.getContext().getContext()),
-                eq(expected.getCreated()),
-                eq(expected.getBucketLabel().toString()));
-        assertThat(result.getBucketLabel(), is(expected.getBucketLabel()));
-        assertThat(result.getStatus(), is(expected.getStatus()));
-        assertThat(result.getContext(), is(expected.getContext()));
-        assertThat(result.getCreated(), is(expected.getCreated()));
-        assertThat(result.getUserID(), is(expected.getUserID()));
-        assertThat(result.getExperimentID(), is(expected.getExperimentID()));
-        assertThat(result.getApplicationName(), is(nullValue()));
-    }
-
-    @Test
-    public void testAssignUserToLookUpWihtoutLabel() {
-        Assignment expected = Assignment.newInstance(Experiment.ID.valueOf(experimentId))
-                .withApplicationName(APPLICATION_NAME)
-                .withContext(Context.valueOf("test"))
-                .withCreated(new Date())
-                .withUserID(User.ID.valueOf("testuser1"))
-                .withStatus(Assignment.Status.NEW_ASSIGNMENT)
-                .withCacheable(false)
-                .build();
-        Assignment result = repository.assignUserToLookUp(expected, expected.getCreated());
-        verify(userAssignmentIndexAccessor, times(1)).insertBy(eq(expected.getExperimentID().getRawID()),
-                eq(expected.getUserID().toString()),
-                eq(expected.getContext().getContext()),
-                eq(expected.getCreated()));
-        verify(userAssignmentIndexAccessor, times(0)).insertBy(eq(expected.getExperimentID().getRawID()),
-                eq(expected.getUserID().toString()),
-                eq(expected.getContext().getContext()),
-                eq(expected.getCreated()),
-                any());
-        assertThat(result.getBucketLabel(), is(nullValue()));
-        assertThat(result.getStatus(), is(expected.getStatus()));
-        assertThat(result.getContext(), is(expected.getContext()));
-        assertThat(result.getCreated(), is(expected.getCreated()));
-        assertThat(result.getUserID(), is(expected.getUserID()));
-        assertThat(result.getExperimentID(), is(expected.getExperimentID()));
-        assertThat(result.getApplicationName(), is(nullValue()));
-    }
-
-    @Test
-    public void testAssignUserToOldWriteException() {
-        Assignment expected = Assignment.newInstance(Experiment.ID.valueOf(experimentId))
-                .withApplicationName(APPLICATION_NAME)
-                .withBucketLabel(Bucket.Label.valueOf("bucket-1"))
-                .withContext(Context.valueOf("test"))
-                .withCreated(new Date())
-                .withUserID(User.ID.valueOf("testuser1"))
-                .withStatus(Assignment.Status.NEW_ASSIGNMENT)
-                .withCacheable(false)
-                .build();
-        doThrow(WriteTimeoutException.class)
-                .when(userAssignmentAccessor)
-                .insertBy(eq(expected.getExperimentID().getRawID()),
-                        eq(expected.getUserID().toString()),
-                        eq(expected.getContext().getContext()),
-                        eq(expected.getCreated()),
-                        eq(expected.getBucketLabel().toString()));
-        thrown.expect(RepositoryException.class);
-        thrown.expectMessage("Could not save user to the old table user assignment ");
-        repository.assignUserToOld(expected, expected.getCreated());
-    }
-
-
-    @Test
-    public void testAssignUserToOldFullParameter() {
-        Assignment expected = Assignment.newInstance(Experiment.ID.valueOf(experimentId))
-                .withApplicationName(APPLICATION_NAME)
-                .withBucketLabel(Bucket.Label.valueOf("bucket-1"))
-                .withContext(Context.valueOf("test"))
-                .withCreated(new Date())
-                .withUserID(User.ID.valueOf("testuser1"))
-                .withStatus(Assignment.Status.NEW_ASSIGNMENT)
-                .withCacheable(false)
-                .build();
-        Assignment result = repository.assignUserToOld(expected, expected.getCreated());
-        verify(userAssignmentAccessor, times(0)).insertBy(eq(expected.getExperimentID().getRawID()),
-                eq(expected.getUserID().toString()),
-                eq(expected.getContext().getContext()),
-                eq(expected.getCreated()));
-        verify(userAssignmentAccessor, times(1)).insertBy(eq(expected.getExperimentID().getRawID()),
-                eq(expected.getUserID().toString()),
-                eq(expected.getContext().getContext()),
-                eq(expected.getCreated()),
-                eq(expected.getBucketLabel().toString()));
-        assertThat(result.getBucketLabel(), is(expected.getBucketLabel()));
-        assertThat(result.getStatus(), is(expected.getStatus()));
-        assertThat(result.getContext(), is(expected.getContext()));
-        assertThat(result.getCreated(), is(expected.getCreated()));
-        assertThat(result.getUserID(), is(expected.getUserID()));
-        assertThat(result.getExperimentID(), is(expected.getExperimentID()));
-        assertThat(result.getApplicationName(), is(nullValue()));
-    }
-
-    @Test
-    public void testAssignUserToOldWihtoutLabel() {
-        Assignment expected = Assignment.newInstance(Experiment.ID.valueOf(experimentId))
-                .withApplicationName(APPLICATION_NAME)
-                .withContext(Context.valueOf("test"))
-                .withCreated(new Date())
-                .withUserID(User.ID.valueOf("testuser1"))
-                .withStatus(Assignment.Status.NEW_ASSIGNMENT)
-                .withCacheable(false)
-                .build();
-        Assignment result = repository.assignUserToOld(expected, expected.getCreated());
-        verify(userAssignmentAccessor, times(1)).insertBy(eq(expected.getExperimentID().getRawID()),
-                eq(expected.getUserID().toString()),
-                eq(expected.getContext().getContext()),
-                eq(expected.getCreated()));
-        verify(userAssignmentAccessor, times(0)).insertBy(eq(expected.getExperimentID().getRawID()),
-                eq(expected.getUserID().toString()),
-                eq(expected.getContext().getContext()),
-                eq(expected.getCreated()),
-                any());
-        assertThat(result.getBucketLabel(), is(nullValue()));
-        assertThat(result.getStatus(), is(expected.getStatus()));
-        assertThat(result.getContext(), is(expected.getContext()));
-        assertThat(result.getCreated(), is(expected.getCreated()));
-        assertThat(result.getUserID(), is(expected.getUserID()));
-        assertThat(result.getExperimentID(), is(expected.getExperimentID()));
-        assertThat(result.getApplicationName(), is(nullValue()));
     }
 
     @Test
@@ -1175,56 +669,6 @@ public class CassandraAssignmentsRepositoryTest {
     }
 
     @Test
-    public void testDeleteAssignmentOld() {
-        Experiment.ID experimentId = Experiment.ID.valueOf(this.experimentId);
-        User.ID userID = User.ID.valueOf("testuser1");
-        Context context = Context.valueOf("test");
-        repository.deleteAssignmentOld(experimentId, userID, context, null, null);
-        verify(userAssignmentAccessor, times(1)).deleteBy(
-                eq(this.experimentId),
-                eq(userID.toString()),
-                eq(context.getContext())
-        );
-    }
-
-    @Test
-    public void testDeleteAssignmentOldWriteException() {
-        Experiment.ID experimentId = Experiment.ID.valueOf(this.experimentId);
-        User.ID userID = User.ID.valueOf("testuser1");
-        Context context = Context.valueOf("test");
-        doThrow(WriteTimeoutException.class).when(userAssignmentAccessor)
-                .deleteBy(any(UUID.class), any(String.class), any(String.class));
-        thrown.expect(RepositoryException.class);
-        thrown.expectMessage("Could not delete user assignment for Experiment:4d4d8f3b-3b81-44f3-968d-d1c1a48b4ac8 and User testuser1");
-        repository.deleteAssignmentOld(experimentId, userID, context, null, null);
-    }
-
-    @Test
-    public void testDeleteUserFromLookUp() {
-        Experiment.ID experimentId = Experiment.ID.valueOf(this.experimentId);
-        User.ID userID = User.ID.valueOf("testuser1");
-        Context context = Context.valueOf("test");
-        repository.deleteUserFromLookUp(experimentId, userID, context);
-        verify(userAssignmentIndexAccessor, times(1)).deleteBy(
-                eq(userID.toString()),
-                eq(context.getContext()),
-                eq(this.experimentId)
-        );
-    }
-
-    @Test
-    public void testDeleteUserFromLookUpException() {
-        Experiment.ID experimentId = Experiment.ID.valueOf(this.experimentId);
-        User.ID userID = User.ID.valueOf("testuser1");
-        Context context = Context.valueOf("test");
-        doThrow(WriteTimeoutException.class).when(userAssignmentIndexAccessor)
-                .deleteBy(any(String.class), any(String.class), any(UUID.class));
-        thrown.expect(RepositoryException.class);
-        thrown.expectMessage("Could not delete user assignment for Experiment:4d4d8f3b-3b81-44f3-968d-d1c1a48b4ac8 and User testuser1");
-        repository.deleteUserFromLookUp(experimentId, userID, context);
-    }
-
-    @Test
     public void testDeleteAssignment() {
         Experiment experiment = Experiment.withID(Experiment.ID.valueOf(this.experimentId)).build();
         User.ID userID = User.ID.valueOf("testuser1");
@@ -1239,69 +683,6 @@ public class CassandraAssignmentsRepositoryTest {
                 eq(context),
                 eq(APPLICATION_NAME)
         );
-    }
-
-
-    @Test
-    public void testAssignmentUserOld() {
-        Experiment experiment = Experiment.withID(Experiment.ID.valueOf(this.experimentId))
-                .withIsPersonalizationEnabled(false)
-                .withIsRapidExperiment(false).build();
-        User.ID userID = User.ID.valueOf("testuser1");
-        Context context = Context.valueOf("test");
-        Date date = new Date();
-        Assignment currentAssignment = Assignment.newInstance(experiment.getID())
-                .withBucketLabel(Bucket.Label.valueOf("bucket-1"))
-                .withCreated(date)
-                .withApplicationName(APPLICATION_NAME)
-                .withContext(context)
-                .withUserID(userID)
-                .build();
-        spyRepository.assignUser(currentAssignment, experiment, date);
-        verify(spyRepository, times(1)).indexExperimentsToUser(eq(currentAssignment));
-    }
-
-    @Test
-    public void testAssignmentUserNew() {
-        CassandraAssignmentsRepository spyRepository = spy(new CassandraAssignmentsRepository(
-                experimentRepository,
-                dbRepository,
-                eventLog,
-                experimentAccessor,
-                experimentUserIndexAccessor,
-                userAssignmentAccessor,
-                userAssignmentIndexAccessor,
-                userAssignmentExportAccessor,
-                bucketAccessor,
-                bucketAssignmentCountAccessor,
-                stagingAccessor,
-                prioritiesAccessor,
-                exclusionAccessor,
-                pageExperimentIndexAccessor,
-                driver,
-                mappingManager,
-                assignmentsCountExecutor,
-                false,
-                true,
-                true,
-                true,
-                "yyyy-MM-dd HH:mm:ss"
-        ));
-        Experiment experiment = Experiment.withID(Experiment.ID.valueOf(this.experimentId))
-                .withIsPersonalizationEnabled(false)
-                .withIsRapidExperiment(false).build();
-        User.ID userID = User.ID.valueOf("testuser1");
-        Context context = Context.valueOf("test");
-        Date date = new Date();
-        Assignment currentAssignment = Assignment.newInstance(experiment.getID())
-                .withBucketLabel(Bucket.Label.valueOf("bucket-1"))
-                .withCreated(date)
-                .withApplicationName(APPLICATION_NAME)
-                .withContext(context)
-                .withUserID(userID)
-                .build();
-        spyRepository.assignUser(currentAssignment, experiment, date);
-        verify(spyRepository, times(1)).indexExperimentsToUser(eq(currentAssignment));
     }
 
     @Test
@@ -1391,7 +772,6 @@ public class CassandraAssignmentsRepositoryTest {
         //----- Output -----------
         PrioritizedExperimentList appPriorities = new PrioritizedExperimentList();
         Map<Experiment.ID, com.intuit.wasabi.experimentobjects.Experiment> experimentMap = new HashMap<>();
-        Table<Experiment.ID, Experiment.Label, String> userAssignments = HashBasedTable.create();
         Map<Experiment.ID, BucketList> bucketMap = new HashMap<>();
         Map<Experiment.ID, List<Experiment.ID>> exclusionMap = new HashMap<>();
 
@@ -1466,13 +846,12 @@ public class CassandraAssignmentsRepositoryTest {
         when(exclusionFuture.get()).thenReturn(exclusionResult);
 
         //------ Actual call ---------
-        repository.populateAssignmentsMetadata(userID, appName, context, experimentBatch, allowAssignmentsOptional, appPriorities, experimentMap, userAssignments, bucketMap, exclusionMap);
+        repository.populateAssignmentsMetadata(userID, appName, context, experimentBatch, allowAssignmentsOptional, appPriorities, experimentMap, bucketMap, exclusionMap);
 
         //------ Assert response output ---------
         assertThat(appPriorities.getPrioritizedExperiments().size(), is(1));
         assertThat(appPriorities.getPrioritizedExperiments().get(0).getID(), is(expId1));
         assertThat(experimentMap.get(expId1) != null, is(true));
-        assertThat(userAssignments.size(), is(1));
         assertThat(bucketMap.size(), is(1));
         assertThat(exclusionMap.size(), is(1));
         assertThat(exclusionMap.get(expId1).get(0).getRawID(), is(exclusion1.getPair()));
@@ -1499,12 +878,11 @@ public class CassandraAssignmentsRepositoryTest {
         Map<Experiment.ID, List<Experiment.ID>> exclusionMap = new HashMap<>();
 
         //------ Actual call ---------
-        repository.populateAssignmentsMetadata(userID, appName, context, experimentBatch, allowAssignmentsOptional, appPriorities, experimentMap, userAssignments, bucketMap, exclusionMap);
+        repository.populateAssignmentsMetadata(userID, appName, context, experimentBatch, allowAssignmentsOptional, appPriorities, experimentMap, bucketMap, exclusionMap);
 
         //------ Assert response output ---------
         assertThat(appPriorities.getPrioritizedExperiments().size(), is(0));
         assertThat(experimentMap.get(expId1) != null, is(false));
-        assertThat(userAssignments.size(), is(0));
         assertThat(bucketMap.size(), is(0));
         assertThat(exclusionMap.size(), is(0));
     }
@@ -1548,16 +926,6 @@ public class CassandraAssignmentsRepositoryTest {
         ResultSetFuture genericResultSetFuture = mock(ResultSetFuture.class);
         ResultSet genericResultSet = mock(ResultSet.class);
         when(genericResultSetFuture.getUninterruptibly()).thenReturn(genericResultSet);
-
-        when(userAssignmentIndexAccessor.asyncInsertBy(experiment.getID().getRawID(), userID1.toString(), context.getContext(), date)).thenReturn(genericResultSetFuture);
-        when(userAssignmentIndexAccessor.asyncInsertBy(experiment.getID().getRawID(), userID2.toString(), context.getContext(), date)).thenReturn(genericResultSetFuture);
-        when(userAssignmentIndexAccessor.asyncInsertBy(experiment.getID().getRawID(), userID1.toString(), context.getContext(), date, bucketLabel)).thenReturn(genericResultSetFuture);
-        when(userAssignmentIndexAccessor.asyncInsertBy(experiment.getID().getRawID(), userID2.toString(), context.getContext(), date, bucketLabel)).thenReturn(genericResultSetFuture);
-
-        when(userAssignmentAccessor.asyncInsertBy(experiment.getID().getRawID(), userID1.toString(), context.getContext(), date)).thenReturn(genericResultSetFuture);
-        when(userAssignmentAccessor.asyncInsertBy(experiment.getID().getRawID(), userID2.toString(), context.getContext(), date)).thenReturn(genericResultSetFuture);
-        when(userAssignmentAccessor.asyncInsertBy(experiment.getID().getRawID(), userID1.toString(), context.getContext(), date, bucketLabel)).thenReturn(genericResultSetFuture);
-        when(userAssignmentAccessor.asyncInsertBy(experiment.getID().getRawID(), userID2.toString(), context.getContext(), date, bucketLabel)).thenReturn(genericResultSetFuture);
 
         doNothing().when(assignmentsCountExecutor).execute(any());
 

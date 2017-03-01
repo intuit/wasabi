@@ -48,12 +48,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.nio.charset.Charset.forName;
 import static org.apache.commons.codec.binary.Base64.encodeBase64;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
@@ -111,21 +113,20 @@ public class AssignmentsResourceTest {
 
     @Test
     public void testGetAssignmentNull() {
-        when(assignments.getSingleAssignment(userID, applicationName, experimentLabel,
+        when(assignments.doSingleAssignment(userID, applicationName, experimentLabel,
                 context, createAssignment, ignoreSamplingPercent, null,
-                headers, null)).thenReturn(null);
+                headers)).thenReturn(null);
         thrown.expect(AssignmentNotFoundException.class);
         resource.getAssignment(applicationName, experimentLabel, userID, context, createAssignment, ignoreSamplingPercent, headers);
     }
 
     @Test
     public void getAssignment() {
-        when(assignments.getSingleAssignment(userID, applicationName, experimentLabel,
+        when(assignments.doSingleAssignment(userID, applicationName, experimentLabel,
                 context, createAssignment, ignoreSamplingPercent, null,
-                headers, null)).thenReturn(assignment);
+                headers)).thenReturn(assignment);
         when(assignment.getStatus()).thenReturn(Status.NEW_ASSIGNMENT);
         when(assignment.getBucketLabel()).thenReturn(label);
-        when(assignments.getBucket(any(Experiment.ID.class), any(Label.class))).thenReturn(bucket);
         when(assignment.getContext()).thenReturn(context);
 
         assertNotNull(resource.getAssignment(applicationName, experimentLabel, userID, context, createAssignment, ignoreSamplingPercent, headers));
@@ -133,19 +134,18 @@ public class AssignmentsResourceTest {
 
     @Test
     public void postAssignmentNull() throws Exception {
-        when(assignments.getSingleAssignment(userID, applicationName, experimentLabel,
-                context, createAssignment, ignoreSamplingPercent, segmentationProfile, headers, null)).thenReturn(null);
+        when(assignments.doSingleAssignment(userID, applicationName, experimentLabel,
+                context, createAssignment, ignoreSamplingPercent, segmentationProfile, headers)).thenReturn(null);
         thrown.expect(AssignmentNotFoundException.class);
         resource.postAssignment(applicationName, experimentLabel, userID, createAssignment, ignoreSamplingPercent, context, segmentationProfile, headers);
     }
 
     @Test
     public void postAssignment() throws Exception {
-        when(assignments.getSingleAssignment(userID, applicationName, experimentLabel,
-                context, createAssignment, ignoreSamplingPercent, segmentationProfile, headers, null)).thenReturn(assignment);
+        when(assignments.doSingleAssignment(userID, applicationName, experimentLabel,
+                context, createAssignment, ignoreSamplingPercent, segmentationProfile, headers)).thenReturn(assignment);
         when(assignment.getStatus()).thenReturn(Status.EXPERIMENT_PAUSED);
         when(assignment.getBucketLabel()).thenReturn(label);
-        when(assignments.getBucket(any(Experiment.ID.class), any(Label.class))).thenReturn(bucket);
         when(assignment.getContext()).thenReturn(context);
 
         assertNotNull(resource.postAssignment(applicationName, experimentLabel, userID, createAssignment, ignoreSamplingPercent, context, segmentationProfile, headers));
@@ -158,7 +158,6 @@ public class AssignmentsResourceTest {
                 headers)).thenReturn(true);
         when(assignment.getStatus()).thenReturn(Status.EXPERIMENT_PAUSED);
         when(assignment.getBucketLabel()).thenReturn(label);
-        when(assignments.getBucket(any(Experiment.ID.class), any(Label.class))).thenReturn(bucket);
         when(assignment.getContext()).thenReturn(context);
 
         assertNotNull(resource.postAssignmentRuleTest(applicationName, experimentLabel, context, segmentationProfile, headers));
@@ -166,9 +165,9 @@ public class AssignmentsResourceTest {
 
     @Test
     public void getBatchAssignmentExp() throws Exception {
-        List<Map> myAssignments = new ArrayList<>();
+        List<Assignment> myAssignments = new ArrayList<>();
         when(assignments.doBatchAssignments(userID, applicationName, context,
-                CREATE, FORCE_IN_EXPERIMENT, headers, experimentBatch, null, null)).thenReturn(myAssignments);
+                CREATE, FORCE_IN_EXPERIMENT, headers, experimentBatch)).thenReturn(myAssignments);
         assertNotNull(resource.getBatchAssignments(applicationName, userID, context, CREATE, experimentBatch, headers));
     }
 
@@ -186,7 +185,6 @@ public class AssignmentsResourceTest {
                 any(Context.class), any(Bucket.Label.class), anyBoolean())).thenReturn(assignment);
         when(assignment.getStatus()).thenReturn(Status.EXPERIMENT_PAUSED);
         when(assignment.getBucketLabel()).thenReturn(label);
-        when(assignments.getBucket(any(Experiment.ID.class), any(Label.class))).thenReturn(bucket);
         when(assignment.getContext()).thenReturn(context);
 
         assertNotNull(resource.updateAssignment(applicationName, experimentLabel, userID, submittedData, context));
@@ -199,7 +197,6 @@ public class AssignmentsResourceTest {
                 any(Context.class), any(Bucket.Label.class), anyBoolean())).thenReturn(assignment);
         when(assignment.getStatus()).thenReturn(Status.EXPERIMENT_PAUSED);
         when(assignment.getBucketLabel()).thenReturn(label);
-        when(assignments.getBucket(any(Experiment.ID.class), any(Label.class))).thenReturn(bucket);
         when(assignment.getContext()).thenReturn(context);
 
         assertNotNull(resource.updateAssignment(applicationName, experimentLabel, userID, submittedData, context));
@@ -213,7 +210,7 @@ public class AssignmentsResourceTest {
 
     @Test
     public void getBatchAssignmentForPage() throws Exception {
-        List<Map> assignmentsFromPage = new ArrayList<>();
+        List<Assignment> assignmentsFromPage = new ArrayList<>();
 
         when(assignments.doPageAssignments(applicationName, pageName, userID, context,
                 createAssignment, ignoreSamplingPercent, headers, null)).thenReturn(assignmentsFromPage);
@@ -224,7 +221,7 @@ public class AssignmentsResourceTest {
 
     @Test
     public void postBatchAssignmentForPage() throws Exception {
-        List<Map> assignmentsFromPage = new ArrayList<>();
+        List<Assignment> assignmentsFromPage = new ArrayList<>();
 
         when(assignments.doPageAssignments(applicationName, pageName, userID, context,
                 createAssignment, ignoreSamplingPercent, headers, segmentationProfile)).thenReturn(assignmentsFromPage);
@@ -299,20 +296,71 @@ public class AssignmentsResourceTest {
 
     @Test
     public void getMetadataCacheDetailsTest() throws Exception {
-        when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
-        assertThat(resource.getMetadataCacheDetails(AUTHHEADER).getStatus(), is(HttpStatus.SC_OK));
+        assertThat(resource.getMetadataCacheDetails().getStatus(), is(HttpStatus.SC_OK));
     }
 
     @Test
-    public void getMetadataCacheDetailsNotSuperAdminTest() throws Exception {
-        // fewer allowed experiments
-        when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
-        //this throw is so that only the allowed (TESTAPP) experiments get returned
-        doThrow(AuthenticationException.class).when(authorization).checkSuperAdmin(USER);
-        try {
-            resource.getMetadataCacheDetails(AUTHHEADER);
-            fail();
-        } catch (AuthenticationException ignored) {
-        }
+    public void toMapTest() {
+
+        Assignment assignment = Assignment.newInstance(Experiment.ID.newInstance())
+                .withExperimentLabel(Experiment.Label.valueOf("TestExpLabel"))
+                .withApplicationName(Application.Name.valueOf("testApp"))
+                .withUserID(User.ID.valueOf("TestUser"))
+                .withBucketLabel(Bucket.Label.valueOf("red"))
+                .withPayload("RedBucketPayload")
+                .withCacheable(false)
+                .withContext(Context.valueOf("TEST"))
+                .withStatus(Status.EXISTING_ASSIGNMENT)
+                .build();
+
+        Map<String, Object> response1 = resource.toSingleAssignmentResponseMap(assignment);
+        assertThat(response1.size(), is(5));
+        assertNull(response1.get("experimentLabel"));
+
+        Map<String, Object> response2 = resource.toBatchAssignmentResponseMap(assignment);
+        assertThat(response2.size(), is(4));
+        assertNotNull(response2.get("experimentLabel"));
     }
+
+    @Test
+    public void toMapListTest() {
+
+        Assignment assignment1 = Assignment.newInstance(Experiment.ID.newInstance())
+                .withExperimentLabel(Experiment.Label.valueOf("TestExpLabel"))
+                .withApplicationName(Application.Name.valueOf("testApp"))
+                .withUserID(User.ID.valueOf("TestUser"))
+                .withBucketLabel(Bucket.Label.valueOf("red"))
+                .withPayload("RedBucketPayload")
+                .withCacheable(false)
+                .withContext(Context.valueOf("TEST"))
+                .withStatus(Status.EXISTING_ASSIGNMENT)
+                .build();
+
+        Assignment assignment2 = Assignment.newInstance(Experiment.ID.newInstance())
+                .withExperimentLabel(Experiment.Label.valueOf("TestExpLabel2"))
+                .withApplicationName(Application.Name.valueOf("testApp2"))
+                .withUserID(User.ID.valueOf("TestUser2"))
+                .withBucketLabel(Bucket.Label.valueOf("red2"))
+                .withPayload("RedBucketPayload2")
+                .withCacheable(false)
+                .withContext(Context.valueOf("TEST"))
+                .withStatus(Status.NEW_ASSIGNMENT)
+                .build();
+
+        List<Assignment> assignments = newArrayList(assignment1, assignment2);
+
+        Map<String, Object> response1 = resource.toSingleAssignmentResponseMap(assignments.get(0));
+        assertThat(response1.size(), is(5));
+        assertNull(response1.get("experimentLabel"));
+
+        response1 = resource.toSingleAssignmentResponseMap(assignments.get(1));
+        assertThat(response1.size(), is(5));
+        assertNull(response1.get("experimentLabel"));
+
+        List<Map<String, Object>> response2 = resource.toBatchAssignmentResponseMap(assignments);
+        assertThat(response2.size(), is(2));
+        assertNotNull(response2.get(0).get("experimentLabel"));
+        assertNotNull(response2.get(1).get("experimentLabel"));
+    }
+
 }

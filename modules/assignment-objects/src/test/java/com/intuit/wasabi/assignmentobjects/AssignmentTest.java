@@ -91,7 +91,7 @@ public class AssignmentTest {
         assertNotNull(assignment.getStatus());
         assertNotNull(assignment.getUserID());
         assertTrue(assignment.isCacheable());
-        assertTrue(assignment.getStatus().isCacheable());
+        assertTrue(assignment.getStatus().isDefinitiveAssignment());
         assertFalse(assignment.isBucketEmpty());
     }
 
@@ -107,7 +107,7 @@ public class AssignmentTest {
         assertNotNull(assignment.getStatus());
         assertNotNull(assignment.getUserID());
         assertTrue(assignment.isCacheable());
-        assertTrue(assignment.getStatus().isCacheable());
+        assertTrue(assignment.getStatus().isDefinitiveAssignment());
         assertTrue(assignment.isBucketEmpty());
     }
 
