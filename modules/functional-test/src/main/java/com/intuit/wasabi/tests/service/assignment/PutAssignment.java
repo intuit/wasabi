@@ -51,6 +51,8 @@ public class PutAssignment extends TestBase {
     public void t_NullAssignmentToBucketAssignment(String state, int statusCode) {
         response = apiServerConnector.doPut("/experiments/" + experiment.id, "{\"state\": \"" + state + "\"}");
         assertReturnCode(response, HttpStatus.SC_OK);
+        clearAssignmentsMetadataCache();
+
         String url = "/assignments/applications/" + this.appName + "/experiments/" + this.experimentLable + "/users/";
         if (!"DRAFT".equals(state) && !"TERMINATED".equals(state)) {
             assignUserStateFromNullToBucket(state, url);
@@ -68,11 +70,14 @@ public class PutAssignment extends TestBase {
         LOGGER.info("State=" + state + " status=" + response.getStatusCode() + " response=" + response.asString());
         Assert.assertEquals(response.asString().contains("NEW_ASSIGNMENT"), true);
         Assert.assertEquals(response.asString().contains("null"), true);
+
         response = apiServerConnector.doPut(url + "user-" + state + "-1", "{\"assignment\": \"onlybucket\", \"overwrite\":false}");
         assertReturnCode(response, HttpStatus.SC_CONFLICT);
+
         response = apiServerConnector.doGet(url + "user-" + state + "-1");
         assertReturnCode(response, HttpStatus.SC_OK);
         Assert.assertEquals(response.asString().contains("EXISTING_ASSIGNMENT"), true);
+
         response = apiServerConnector.doPut(url + "user-" + state + "-1", "{\"assignment\": \"onlybucket\", \"overwrite\":true}");
         assertReturnCode(response, HttpStatus.SC_OK);
         Assert.assertEquals(response.asString().contains("NEW_ASSIGNMENT"), true);
@@ -85,11 +90,14 @@ public class PutAssignment extends TestBase {
         LOGGER.debug("State=" + state + " status=" + response.getStatusCode() + " response=" + response.asString());
         Assert.assertEquals(response.asString().contains("NEW_ASSIGNMENT"), true);
         Assert.assertEquals(response.asString().contains("onlybucket"), true);
+
         response = apiServerConnector.doPut(url + "user-" + state + "-2", "{\"assignment\": null, \"overwrite\":false}");
         assertReturnCode(response, HttpStatus.SC_CONFLICT);
+
         response = apiServerConnector.doGet(url + "user-" + state + "-2");
         assertReturnCode(response, HttpStatus.SC_OK);
         Assert.assertEquals(response.asString().contains("EXISTING_ASSIGNMENT"), true);
+
         response = apiServerConnector.doPut(url + "user-" + state + "-2", "{\"assignment\": null, \"overwrite\":true}");
         assertReturnCode(response, HttpStatus.SC_OK);
         Assert.assertEquals(response.asString().contains("NEW_ASSIGNMENT"), true);

@@ -37,7 +37,6 @@ import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentPageAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.PrioritiesAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.StagingAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.UserAssignmentAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.UserFeedbackAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.UserInfoAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.UserRoleAccessor;
@@ -51,7 +50,6 @@ import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentLabelInde
 import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentUserIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.PageExperimentIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.StateExperimentIndexAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.index.UserAssignmentIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.impl.AssignmentCountExecutor;
 import com.intuit.wasabi.repository.cassandra.impl.CassandraAssignmentsRepository;
 import com.intuit.wasabi.repository.cassandra.impl.CassandraAuditLogRepository;
@@ -70,7 +68,6 @@ import com.intuit.wasabi.repository.cassandra.provider.ExperimentPageAccessorPro
 import com.intuit.wasabi.repository.cassandra.provider.MappingManagerProvider;
 import com.intuit.wasabi.repository.cassandra.provider.PrioritiesAccessorProvider;
 import com.intuit.wasabi.repository.cassandra.provider.StagingAccessorProvider;
-import com.intuit.wasabi.repository.cassandra.provider.UserAssignmentAccessorProvider;
 import com.intuit.wasabi.repository.cassandra.provider.UserFeedbackAccessorProvider;
 import com.intuit.wasabi.repository.cassandra.provider.UserInfoAccessorProvider;
 import com.intuit.wasabi.repository.cassandra.provider.UserRoleAccessorProvider;
@@ -84,7 +81,6 @@ import com.intuit.wasabi.repository.cassandra.provider.index.ExperimentLabelInde
 import com.intuit.wasabi.repository.cassandra.provider.index.ExperimentUserIndexAccessorProvider;
 import com.intuit.wasabi.repository.cassandra.provider.index.PageExperimentIndexAccessorProvider;
 import com.intuit.wasabi.repository.cassandra.provider.index.StateExperimentIndexAccessorProvider;
-import com.intuit.wasabi.repository.cassandra.provider.index.UserAssignmentIndexAccessorProvider;
 import org.slf4j.Logger;
 
 import javax.inject.Singleton;
@@ -113,10 +109,6 @@ public class CassandraRepositoryModule extends AbstractModule {
                 .toInstance(getProperty("assign.bucket.count", properties));
         Integer assignmentsCountThreadPoolSize = parseInt(getProperty("export.pool.size", properties, "5"));
         bind(Integer.class).annotatedWith(named("export.pool.size")).toInstance(assignmentsCountThreadPoolSize);
-        bind(Boolean.class).annotatedWith(named("assign.user.to.old"))
-                .toInstance(Boolean.valueOf(getProperty("assign.user.to.old", properties, TRUE.toString())));
-        bind(Boolean.class).annotatedWith(named("assign.user.to.new"))
-                .toInstance(Boolean.valueOf(getProperty("assign.user.to.new", properties, TRUE.toString())));
         bind(String.class).annotatedWith(named("default.time.format"))
                 .toInstance(getProperty("default.time.format", properties, "yyyy-MM-dd HH:mm:ss"));
         bind(String.class).annotatedWith(named("cassandra.mutagen.root.resource.path"))
@@ -142,7 +134,6 @@ public class CassandraRepositoryModule extends AbstractModule {
         bind(ExperimentPageAccessor.class).toProvider(ExperimentPageAccessorProvider.class).in(Singleton.class);
         bind(PrioritiesAccessor.class).toProvider(PrioritiesAccessorProvider.class).in(Singleton.class);
         bind(StagingAccessor.class).toProvider(StagingAccessorProvider.class).in(Singleton.class);
-        bind(UserAssignmentAccessor.class).toProvider(UserAssignmentAccessorProvider.class).in(Singleton.class);
         bind(UserFeedbackAccessor.class).toProvider(UserFeedbackAccessorProvider.class).in(Singleton.class);
         bind(UserInfoAccessor.class).toProvider(UserInfoAccessorProvider.class).in(Singleton.class);
         bind(UserRoleAccessor.class).toProvider(UserRoleAccessorProvider.class).in(Singleton.class);
@@ -153,7 +144,6 @@ public class CassandraRepositoryModule extends AbstractModule {
         bind(ExperimentUserIndexAccessor.class).toProvider(ExperimentUserIndexAccessorProvider.class).in(Singleton.class);
         bind(PageExperimentIndexAccessor.class).toProvider(PageExperimentIndexAccessorProvider.class).in(Singleton.class);
         bind(StateExperimentIndexAccessor.class).toProvider(StateExperimentIndexAccessorProvider.class).in(Singleton.class);
-        bind(UserAssignmentIndexAccessor.class).toProvider(UserAssignmentIndexAccessorProvider.class).in(Singleton.class);
         //Bind those audit
         bind(AuditLogAccessor.class).toProvider(AuditLogAccessorProvider.class).in(Singleton.class);
         bind(BucketAuditLogAccessor.class).toProvider(BucketAuditLogAccessorProvider.class).in(Singleton.class);

@@ -680,8 +680,8 @@ public class CassandraExperimentRepository implements ExperimentRepository {
             }
 
         } catch (Exception e) {
-            LOGGER.error("Error while experimentMap for {}", experimentIds, e);
-            throw new RepositoryException("Error while getting priorities for given applications", e);
+            LOGGER.error("Error while preparing experimentMap for {}", experimentIds, e);
+            throw new RepositoryException("Error while preparing experimentMap", e);
         }
         LOGGER.debug("Returning experimentMap {}", experimentMap);
         return experimentMap;
