@@ -45,6 +45,7 @@ import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.BucketList;
 import com.intuit.wasabi.experimentobjects.Context;
 import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.experimentobjects.Experiment.ID;
 import com.intuit.wasabi.experimentobjects.ExperimentBatch;
 import com.intuit.wasabi.experimentobjects.PrioritizedExperiment;
 import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
@@ -65,12 +66,14 @@ import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentUserIndex
 import com.intuit.wasabi.repository.cassandra.accessor.index.PageExperimentIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.pojo.export.UserAssignmentExport;
 import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentUserByUserIdContextAppNameExperimentId;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.StreamingOutput;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -79,7 +82,9 @@ import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
@@ -749,4 +754,16 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         }
         return assignmentCountsBuilder.build();
     }
+
+	@Override
+	public void insertExperimentBucketAssignment(ID experimentID, Instant date,
+			boolean bucketAssignment) {
+		throw new UnsupportedOperationException("Method not implemented yet");
+	}
+
+	@Override
+	public Map<OffsetDateTime, Double> getExperimentBucketAssignmentRatioPerDay(
+			ID experimentID, OffsetDateTime fromDate, OffsetDateTime toDate) {
+		throw new UnsupportedOperationException("Method not implemented yet");
+	}
 }

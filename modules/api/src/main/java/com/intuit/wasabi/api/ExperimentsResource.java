@@ -51,9 +51,11 @@ import com.intuit.wasabi.experimentobjects.ExperimentPageList;
 import com.intuit.wasabi.experimentobjects.NewExperiment;
 import com.intuit.wasabi.experimentobjects.Page;
 import com.intuit.wasabi.repository.RepositoryException;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+
 import org.slf4j.Logger;
 
 import javax.ws.rs.Consumes;
@@ -69,6 +71,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.DateTimeException;
@@ -79,6 +82,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -1459,8 +1463,6 @@ public class ExperimentsResource {
 
     /**
      *
-     * FIXME: Traffic Analyzer change commented for Datastax-driver-migration release...
-     *
      * Returns a summary of assignment ratios per day, containing several meta information like sampling
      * percentages and priorities.
      *
@@ -1471,9 +1473,6 @@ public class ExperimentsResource {
      * @param timezone            the timezone offset, +/-0000 or parsable by Java
      * @return a summary of assignment ratios per day.
      */
-
-
-    /*
 
     @GET
     @Path("/{experimentID}/assignments/traffic/{from}/{to}")
@@ -1527,7 +1526,6 @@ public class ExperimentsResource {
         // build table and dispatch it
         return httpHeader.headers().entity(assignmentRatios).build();
     }
-    */
 
     /**
      * Gets the experiment for a given ID and checks if the user has permission.

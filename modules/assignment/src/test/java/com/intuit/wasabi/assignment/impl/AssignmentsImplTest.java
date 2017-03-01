@@ -16,6 +16,7 @@
 package com.intuit.wasabi.assignment.impl;
 
 import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Table;
 import com.google.inject.Provider;
 import com.intuit.hyrule.Rule;
@@ -53,8 +54,10 @@ import com.intuit.wasabi.repository.AssignmentsRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.MutexRepository;
 import com.intuit.wasabi.repository.cassandra.impl.ExperimentRuleCacheUpdateEnvelope;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -62,8 +65,12 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.ws.rs.core.HttpHeaders;
+
 import java.io.IOException;
 import java.net.InetAddress;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -76,6 +83,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Predicates.in;
 import static com.google.common.collect.Lists.newArrayList;
@@ -1679,8 +1687,6 @@ public class AssignmentsImplTest {
 //        assertEquals(segmentationProfile.getAttribute("data"), testData);
 //        assertEquals(segmentationProfile.getAttribute("model"), "model");
 //    }
-        /*
-    FIXME: Traffic Analyzer change commented for Datastax-driver-migration release...
 
     @Test
     public void testGetExperimentAssignmentRatioPerDay() {
@@ -1721,8 +1727,6 @@ public class AssignmentsImplTest {
         Assert.assertEquals("T2 EntrySet for ID 3 should contain 1 element", 1, actual.get(experiment3.getID()).size());
         Assert.assertEquals("T2 EntrySet for ID 3 should contain map3", map3, actual.get(experiment3.getID()));
     }
-
-    FIXME: Traffic Analyzer change commented for Datastax-driver-migration release...
 
     @Test
     public void testGetExperimentAssignmentRatioPerDayTable() {
@@ -1800,5 +1804,4 @@ public class AssignmentsImplTest {
                             .allMatch(val -> val == 5));
         }
     }
-    */
 }

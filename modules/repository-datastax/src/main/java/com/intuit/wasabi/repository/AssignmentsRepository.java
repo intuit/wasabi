@@ -27,9 +27,13 @@ import com.intuit.wasabi.experimentobjects.Context;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.ExperimentBatch;
 import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
+
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.ws.rs.core.StreamingOutput;
+
+import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -159,5 +163,26 @@ public interface AssignmentsRepository {
                                      Map<Experiment.ID, BucketList> bucketMap,
                                      Map<Experiment.ID, List<Experiment.ID>> exclusionMap
     );
+
+    /**
+     * Inserts an assignment type to be counted by {@link #getExperimentBucketAssignmentRatioPerDay(Experiment.ID, OffsetDateTime, OffsetDateTime)}.
+     *
+     * @param experimentID     the experiment ID
+     * @param date             the date of the assignment
+     * @param bucketAssignment the assignment status: true = bucket assignment; false = null assignment
+     */
+    void insertExperimentBucketAssignment(Experiment.ID experimentID, Instant date, boolean bucketAssignment);
+
+    /**
+     * Gets assignment counts per day for an experiment.
+     *
+     * @param experimentID the experiment ID
+     * @param fromDate     the first day to include
+     * @param toDate       the last day to include
+     * @return A map entry with the experiment ID as its key. It maps to a Map containing the keys "bucketAssignments"
+     * and "nullAssignments", which each have a list of values which represent the assignment counts of new assignments
+     * for each day, ordered from {@code fromDate} to {@code toDate}.
+     */
+    Map<OffsetDateTime, Double> getExperimentBucketAssignmentRatioPerDay(Experiment.ID experimentID, OffsetDateTime fromDate, OffsetDateTime toDate);
 
 }

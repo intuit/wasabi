@@ -15,8 +15,49 @@
  *******************************************************************************/
 package com.intuit.wasabi.assignment.impl;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static org.slf4j.LoggerFactory.getLogger;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.security.SecureRandom;
+import java.time.Duration;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+import javax.annotation.Nullable;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.StreamingOutput;
+
 import com.datastax.driver.core.exceptions.ConnectionException;
+import com.intuit.wasabi.assignment.cache.AssignmentsMetadataCache;
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+
 import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
@@ -64,33 +105,7 @@ import com.intuit.wasabi.repository.CassandraRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.MutexRepository;
 import com.intuit.wasabi.repository.cassandra.impl.ExperimentRuleCacheUpdateEnvelope;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
 
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.StreamingOutput;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
@@ -99,9 +114,6 @@ import static com.intuit.wasabi.assignment.AssignmentsAnnotations.ASSIGNMENTS_ME
 import static com.intuit.wasabi.assignment.AssignmentsAnnotations.RULECACHE_THREADPOOL;
 import static com.intuit.wasabi.assignmentobjects.Assignment.Status.ASSIGNMENT_FAILED;
 import static com.intuit.wasabi.assignmentobjects.Assignment.Status.EXPERIMENT_EXPIRED;
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
-import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Assignments implementation
@@ -1417,23 +1429,15 @@ public class AssignmentsImpl implements Assignments {
      * @param toDate      the last day to include
      * @return a map mapping experiment IDs to their daily values for each of the given days
      */
-    /*test*/
-    /*
-    FIXME: Traffic Analyzer change commented for Datastax-driver-migration release...
-
     Map<Experiment.ID, Map<OffsetDateTime, Double>> getExperimentAssignmentRatioPerDay(List<Experiment> experiments, OffsetDateTime fromDate, OffsetDateTime toDate) {
         return experiments.parallelStream()
                 .collect(Collectors.toMap(Experiment::getID,
-                        experiment -> assignmentsRepository.getExperimentBucketAssignmentRatioPerDay(experiment.getID(), fromDate, toDate)));
+                        experiment -> (Map<OffsetDateTime,Double>) assignmentsRepository.getExperimentBucketAssignmentRatioPerDay(experiment.getID(), fromDate, toDate)));
     }
-    */
 
     /**
      * {@inheritDoc}
      */
-    /*
-    FIXME: Traffic Analyzer change commented for Datastax-driver-migration release...
-
     @Override
     public ImmutableMap<String, ?> getExperimentAssignmentRatioPerDayTable(List<Experiment> experiments, Map<Experiment.ID, Integer> experimentPriorities, OffsetDateTime fromDate, OffsetDateTime toDate) {
         Map<Experiment.ID, Map<OffsetDateTime, Double>> assignmentRatios = getExperimentAssignmentRatioPerDay(experiments, fromDate, toDate);
@@ -1475,6 +1479,5 @@ public class AssignmentsImpl implements Assignments {
         assignmentRatioTableBuilder.put("assignmentRatios", assignmentRatioCells);
         return assignmentRatioTableBuilder.build();
     }
-    */
 }
 

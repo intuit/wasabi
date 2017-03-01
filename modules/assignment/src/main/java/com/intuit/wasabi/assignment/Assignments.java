@@ -15,6 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.assignment;
 
+import com.google.common.collect.ImmutableMap;
 import com.intuit.wasabi.analyticsobjects.Parameters;
 import com.intuit.wasabi.assignmentobjects.Assignment;
 import com.intuit.wasabi.assignmentobjects.SegmentationProfile;
@@ -28,6 +29,8 @@ import com.intuit.wasabi.experimentobjects.Page;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.StreamingOutput;
+
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -183,8 +186,5 @@ public interface Assignments {
      * @param toDate               the date to report to
      * @return bucket assignment ratios per day and meta
      */
-    /*
-    FIXME: Traffic Analyzer change commented for Datastax-driver-migration release...
     ImmutableMap<String, ?> getExperimentAssignmentRatioPerDayTable(List<Experiment> experiments, Map<Experiment.ID, Integer> experimentPriorities, OffsetDateTime fromDate, OffsetDateTime toDate);
-    */
 }
