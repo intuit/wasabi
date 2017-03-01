@@ -115,7 +115,7 @@
     <div class="page-wrapper">
       <div class="dark-box"></div>
       <div class="content">
-        
+
           <h1 id="overview">Overview</h1>
 
 <p>The Wasabi AB Testing service is from Intuit Data Engineering and Analytics (IDEA)  based on a set of RESTful APIs that allow
@@ -621,7 +621,7 @@ CONTAINER ID        IMAGE                    COMMAND                  CREATED   
 <pre class="highlight shell"><code><span class="gp">% </span>curl -H <span class="s2">"Content-Type: application/json"</span> <span class="se">\</span>
     http://localhost:8080/api/v1/assignments/applications/Demo_App/experiments/BuyButton/users/userID1
 
-<span class="o">{</span>  
+<span class="o">{</span>
    <span class="s2">"cache"</span>:true,
    <span class="s2">"payload"</span>:<span class="s2">"green"</span>,
    <span class="s2">"assignment"</span>:<span class="s2">"BucketA"</span>,
@@ -884,7 +884,7 @@ seeing an experience (impression), and clicking a button (action).
 <div></div></p>
 
 <h2 id="track-experiment-results">Track experiment results</h2>
-<pre class="highlight shell"><code><span class="gp">% </span>open http://localhost:8080      
+<pre class="highlight shell"><code><span class="gp">% </span>open http://localhost:8080
 <span class="c">## note: sign in as admin/admin</span>
 </code></pre>
 
@@ -1413,6 +1413,12 @@ different expression:</p>
 <p><code class="prettyprint">income &gt; 10000 &amp; (!(age &gt; 65) | state = &quot;california&quot;</code></p>
 
           <h1 id="developing-wasabi">Developing Wasabi</h1>
+
+
+<h2 id="codestyle-guideline">Using Wasabi's Codestyle</h2>
+
+<p>Wasabi comes with a codestyle setting for both IntelliJ and Eclipse. They can be found in the <a href="https://github.com/intuit/wasabi/tree/develop/bin/codestyle">bin</a> directory and easily imported
+to your IDE. When writing new code those should be used to align your addition with the rest of the codebase.</p>
 
 <h2 id="extending-server-side-modules">Extending Server-side Modules</h2>
 
@@ -2346,7 +2352,7 @@ it to add a <code class="prettyprint">&lt;script&gt;</code> tag to pull in the c
 <span class="nx">tracking</span><span class="p">.</span><span class="nx">init</span><span class="p">();</span>
 </code></pre>
 
-          
+
       </div>
       <div class="dark-box">
           <div class="lang-selector">
