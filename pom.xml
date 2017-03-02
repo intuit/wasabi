@@ -493,7 +493,7 @@ http://www.w3.org/2001/XMLSchema-instance">
                 <version>4.1.0</version>
                 <configuration>
                     <repoToken>${env.coveralls_repo_token}</repoToken>
-                    <jacocoReports>${basedir}/modules/target/jacoco.xml</jacocoReports>
+                    <jacocoReports>${project.reporting.outputDirectory}/modules/target/jacoco.xml</jacocoReports>
                 </configuration>
             </plugin>
             <!-- FIXME: this plugin is retired, see [ http://maven.apache.org/plugins/maven-eclipse-plugin ] -->
