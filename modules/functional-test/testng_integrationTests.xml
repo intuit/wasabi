@@ -28,8 +28,10 @@
         <classes>
             <class name="com.intuit.wasabi.tests.service.assignment.BasicAssignment" />
             <class name="com.intuit.wasabi.tests.service.assignment.BatchAssignment" />
+            <class name="com.intuit.wasabi.tests.service.assignment.BatchAssignmentContextTest" />
             <class name="com.intuit.wasabi.tests.service.assignment.PutAssignment" />
             <class name="com.intuit.wasabi.tests.service.assignment.ExportAssignment" />
+            <class name="com.intuit.wasabi.tests.service.assignment.SingleAssignmentContextTest" />
             <!--class name="com.intuit.wasabi.tests.service.assignment.DailyAssignmentCountsTest" -->
         </classes>
     </test>
@@ -38,6 +40,7 @@
             <class name="com.intuit.wasabi.tests.service.IntegrationBucket" />
             <class name="com.intuit.wasabi.tests.service.EmptyBucketUserAssignmentTest" />
             <class name="com.intuit.wasabi.tests.service.EmptyBucketUserAssignmentToEmptyBucket" />
+            <class name="com.intuit.wasabi.tests.service.EmptyBucketUserAssignmentForBatchAssignment" />
             <class name="com.intuit.wasabi.tests.service.EmptyBucketGetUserAssignmentTest" />
             <class name="com.intuit.wasabi.tests.service.EmptyBucketGetUserAssignmentToEmptyBucketTest" />
             <class name="com.intuit.wasabi.tests.service.BucketIntegrationTest" />
