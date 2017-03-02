@@ -45,7 +45,7 @@ http://www.w3.org/2001/XMLSchema-instance">
         <assignment.metadata.cache.maxBytesLocalHeap>128M</assignment.metadata.cache.maxBytesLocalHeap>
 
         <jacoco.version>0.7.2.201409121644</jacoco.version>
-        <jacoco.destFile>${basedir}/../target/jacoco.exec</jacoco.destFile>
+        <jacoco.destFile>${basedir}/modules/target/jacoco.exec</jacoco.destFile>
 
         <http.proxy.host>http://insert.your.proxy.host.here</http.proxy.host>
         <http.proxy.port>80</http.proxy.port>
@@ -390,7 +390,6 @@ http://www.w3.org/2001/XMLSchema-instance">
             <artifactId>org.jacoco.agent</artifactId>
             <version>${jacoco.version}</version>
             <type>pom</type>
-            <!-- FIXME: ?don't we want to scope this to test only? -->
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -448,6 +447,7 @@ http://www.w3.org/2001/XMLSchema-instance">
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${jacoco.version}</version>
                 <configuration>
+                    <dataFile>${basedir}/modules/target/jacoco.exec</dataFile>
                     <excludes>
                         <exclude>com/intuit/wasabi/tests/**/*.class</exclude>
                     </excludes>
@@ -458,6 +458,17 @@ http://www.w3.org/2001/XMLSchema-instance">
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
+                    </execution>
+                    <execution>
+                            <id>post-unit-test</id>
+                            <phase>test</phase>
+                            <goals>
+                                <goal>report</goal>
+                            </goals>
+                            <configuration>
+                                <dataFile>${project.build.directory}/target/jacoco.exec</dataFile>
+                                <outputDirectory>${basedir}/modules/target/</outputDirectory>
+                            </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -482,6 +493,9 @@ http://www.w3.org/2001/XMLSchema-instance">
                 <version>4.1.0</version>
                 <configuration>
                     <repoToken>${env.coveralls_repo_token}</repoToken>
+                    <jacocoReports>
+                        <jacocoReport>${basedir}/modules/target/jacoco.xml</jacocoReport>
+                    </jacocoReports>
                 </configuration>
             </plugin>
             <!-- FIXME: this plugin is retired, see [ http://maven.apache.org/plugins/maven-eclipse-plugin ] -->
@@ -546,7 +560,7 @@ http://www.w3.org/2001/XMLSchema-instance">
                 <artifactId>maven-changelog-plugin</artifactId>
                 <version>2.3</version>
             </plugin>
-<!--             
+<!--
             <plugin>
                 <groupId>com.github.jinnovations</groupId>
                 <artifactId>attribution-maven-plugin</artifactId>
@@ -563,7 +577,7 @@ http://www.w3.org/2001/XMLSchema-instance">
                     </execution>
                 </executions>
             </plugin>
--->            
+-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
