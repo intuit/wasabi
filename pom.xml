@@ -494,7 +494,7 @@ http://www.w3.org/2001/XMLSchema-instance">
                 <configuration>
                     <repoToken>${env.coveralls_repo_token}</repoToken>
                     <jacocoReports>
-                        <jacocoReport>${basedir}//modules/target/jacoco.xml</jacocoReport>
+                        <jacocoReport>${basedir}/modules/target/jacoco.xml</jacocoReport>
                     </jacocoReports>
                 </configuration>
             </plugin>
