@@ -30,7 +30,6 @@ import com.intuit.wasabi.tests.model.Application;
 import com.intuit.wasabi.tests.model.Assignment;
 import com.intuit.wasabi.tests.model.Bucket;
 import com.intuit.wasabi.tests.model.Experiment;
-import com.intuit.wasabi.tests.model.Page;
 import com.intuit.wasabi.tests.model.User;
 import com.intuit.wasabi.tests.model.factory.ApplicationFactory;
 import com.intuit.wasabi.tests.model.factory.BucketFactory;
@@ -45,19 +44,18 @@ import com.intuit.wasabi.tests.model.factory.ExperimentFactory;
 public class BatchAssignmentContextTest extends TestBase{
 
     Application batchAssignmentContextTestApp = null;
-    Application batchAssignmentContextTestApp2 = null;
+    
     List<Experiment> testExperimentsList ; // this holds experiments that are created in the test class to be deleted eventually
 
     int numberOfExperimentsPerBatch = 4; // number of experiments that are associated with a batch (page) call
 
-    Page testPage = null; // the page to which all the test experiments will be associated
-
+   
     @BeforeClass
     public void setUp()
     {
         //lets create application and assign it to the variable
         batchAssignmentContextTestApp = ApplicationFactory.createApplication().setName("batchAssignmentContextTestApp");
-        batchAssignmentContextTestApp2 = ApplicationFactory.createApplication().setName("batchAssignmentContextTestApp2");
+        
 
         // initialize the experiment list variable that holds list of all the experiments
         testExperimentsList = new ArrayList<Experiment>();
