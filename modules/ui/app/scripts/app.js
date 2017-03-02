@@ -201,7 +201,6 @@ angular.module('wasabi', [
                             $rootScope.originalURI = $window.location.hash;
                             $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
                             $rootScope.goToSignin();
-                            //$state.go('signin');
                         }
                     }
                 }
