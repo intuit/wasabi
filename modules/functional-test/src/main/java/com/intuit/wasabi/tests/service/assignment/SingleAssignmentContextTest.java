@@ -58,7 +58,7 @@ public class SingleAssignmentContextTest extends TestBase {
      */
     @Test
     public void createAssignmentForExperimentStartedInPast() {
-        
+
         // create experiment with start date as todaysdate -1 and assign it to the above created Application
         Experiment exp = ExperimentFactory.createExperiment("_" + UUID.randomUUID().toString(), -1)
                 .setApplication(singleAssignmentContextTestApp);
@@ -75,8 +75,7 @@ public class SingleAssignmentContextTest extends TestBase {
         exp.state = Constants.EXPERIMENT_STATE_RUNNING;
         putExperiment(exp);
 
-        // lets clear the cache and do an assignment for a user with context set to PROD
-        clearAssignmentsMetadataCache();
+        // lets do an assignment for a user with context set to PROD
         Assignment assignment = postAssignment(exp, new User("user123"), "PROD");
 
         // lets assert the status and response code
@@ -84,16 +83,13 @@ public class SingleAssignmentContextTest extends TestBase {
         Assert.assertEquals(assignment.status, "NEW_ASSIGNMENT");
 
         // lets repeat the assignment for same user but with different context- context set to DEV
-        clearAssignmentsMetadataCache();
         assignment = postAssignment(exp, new User("user123"), "DEV");
 
         // lets assert the status and response code
         assertReturnCode(response, HttpStatus.SC_OK);
         Assert.assertEquals(assignment.status, "NEW_ASSIGNMENT");
 
-        // lets clear the cache and do an assignment for a user with context set to PROD so that we will get back
-        // existing assignment
-        clearAssignmentsMetadataCache();
+        // lets do an assignment for a user with context set to PROD so that we will get back existing assignment
         assignment = postAssignment(exp, new User("user123"), "PROD");
 
         // lets assert the status and response code
@@ -122,10 +118,9 @@ public class SingleAssignmentContextTest extends TestBase {
         exp.state = Constants.EXPERIMENT_STATE_RUNNING;
         putExperiment(exp);
 
-        // lets clear the cache and do an assignment for a user with context set to PROD
-        clearAssignmentsMetadataCache();
+        // lets do an assignment for a user with context set to PROD
         Assignment assignment = postAssignment(exp, new User("user456"), "PROD");
-        System.out.println("assignment = " + assignment);
+
         // lets assert the status and response code
         assertReturnCode(response, HttpStatus.SC_OK);
         Assert.assertEquals(assignment.status, "EXPERIMENT_EXPIRED");
@@ -150,8 +145,7 @@ public class SingleAssignmentContextTest extends TestBase {
         exp.state = Constants.EXPERIMENT_STATE_RUNNING;
         putExperiment(exp);
 
-        // lets clear the cache and do an assignment for a user with context set to PROD
-        clearAssignmentsMetadataCache();
+        // lets do an assignment for a user with context set to PROD
         Assignment assignment = postAssignment(exp, new User("user456"), "PROD");
 
         // lets assert the status and response code

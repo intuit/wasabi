@@ -68,7 +68,7 @@ public class EmptyBucketUserAssignmentForBatchAssignment extends TestBase {
      * buckets and do assignment again for the same user against the same experiments should make a new assignment
      */
     @Test
-    public void createBatchAssignmentAndDeleteAssignedBucketTest() {
+    public void createBatchAssignmentAndEmptyeAssignedBucketTest() {
 
         List<Experiment> expList = new ArrayList<Experiment>();
         assignedBucketLabels = new ArrayList<String>();
@@ -129,7 +129,7 @@ public class EmptyBucketUserAssignmentForBatchAssignment extends TestBase {
      * buckets and when we do assignment again for the same user against the same experiments should get no open bucket
      */
     @Test
-    public void createBatchAssignmentAndDeleteAllBucketTest() {
+    public void createBatchAssignmentAndEmptyAllBucketTest() {
 
         List<Experiment> expList = new ArrayList<Experiment>();
         assignedBucketLabels = new ArrayList<String>();
