@@ -4,7 +4,7 @@
 **Documentation:** [User Guide](https://intuit.github.io/wasabi/v1/guide/index.html), [JavaDocs](https://intuit.github.io/wasabi/v1/javadocs/latest/)
 <br/>
 **Continuous Integration:** [![Build Status](https://api.travis-ci.org/intuit/wasabi.svg?branch=develop)](https://travis-ci.org/intuit/wasabi)
-[![Coverage Status](https://coveralls.io/repos/github/intuit/wasabi/badge.svg?branch=master)](https://coveralls.io/github/intuit/wasabi?branch=develop)
+[![Coverage Status](https://coveralls.io/repos/github/intuit/wasabi/badge.svg)](https://coveralls.io/github/intuit/wasabi?branch=develop)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.intuit.wasabi/wasabi/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.intuit.wasabi/wasabi) <br/>
 **License:** [![Apache 2](http://img.shields.io/badge/license-Apache%202-brightgreen.svg)](http://www.apache.org/licenses/LICENSE-2.0) <br/>
 
