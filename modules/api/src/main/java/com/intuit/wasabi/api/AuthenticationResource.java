@@ -23,6 +23,7 @@ import com.intuit.wasabi.exceptions.AuthenticationException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.slf4j.Logger;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
@@ -40,6 +41,7 @@ import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * API endpoint for managing user authentication
@@ -49,6 +51,8 @@ import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 @Singleton
 @Api(value = "Authentication (Login-Logout)")
 public class AuthenticationResource {
+
+    private static final Logger LOGGER = getLogger(AuthenticationResource.class);
 
     private final HttpHeader httpHeader;
     private Authentication authentication;
@@ -72,21 +76,27 @@ public class AuthenticationResource {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Log a user in")
     @Timed
-    public Response logUserIn(@HeaderParam(AUTHORIZATION)
-                              @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                              final String authorizationHeader,
+    public Response logUserIn(
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader,
 
-                              @FormParam("grant_type")
-                              @DefaultValue("client_credentials")
-                              @ApiParam(value = "please enter client_credentials in this field")
-                              final String grantType) {
-        //FIXME: This should be taken out
-        if (!"client_credentials".equals(grantType)) {
-            throw new AuthenticationException("error, grant_type was not provided");
+            @FormParam("grant_type")
+            @DefaultValue("client_credentials")
+            @ApiParam(value = "please enter client_credentials in this field")
+            final String grantType) {
+        try {
+            //FIXME: This should be taken out
+            if (!"client_credentials".equals(grantType)) {
+                throw new AuthenticationException("error, grant_type was not provided");
+            }
+
+            //pass the headers along to try and log the user in
+            return httpHeader.headers().entity(authentication.logIn(authorizationHeader)).build();
+        } catch (Exception exception) {
+            LOGGER.error("logUserIn failed for grantType={} with error:", grantType, exception);
+            throw exception;
         }
-
-        //pass the headers along to try and log the user in
-        return httpHeader.headers().entity(authentication.logIn(authorizationHeader)).build();
     }
 
     /**
@@ -100,10 +110,16 @@ public class AuthenticationResource {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Verify user's authorization")
     @Timed
-    public Response verifyToken(@HeaderParam(AUTHORIZATION)
-                                @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                final String tokenHeader) {
-        return httpHeader.headers().entity(authentication.verifyToken(tokenHeader)).build();
+    public Response verifyToken(
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String tokenHeader) {
+        try {
+            return httpHeader.headers().entity(authentication.verifyToken(tokenHeader)).build();
+        } catch (Exception exception) {
+            LOGGER.error("verifyToken failed with error:", exception);
+            throw exception;
+        }
     }
 
     /**
@@ -117,11 +133,17 @@ public class AuthenticationResource {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Log a user out")
     @Timed
-    public Response logUserOut(@HeaderParam(AUTHORIZATION)
-                               @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                               final String tokenHeader) {
-        authentication.logOut(tokenHeader);
-        return httpHeader.headers(NO_CONTENT).build();
+    public Response logUserOut(
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String tokenHeader) {
+        try {
+            authentication.logOut(tokenHeader);
+            return httpHeader.headers(NO_CONTENT).build();
+        } catch (Exception exception) {
+            LOGGER.error("logUserOut failed with error:", exception);
+            throw exception;
+        }
     }
 
     /**
@@ -135,9 +157,15 @@ public class AuthenticationResource {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Check if user exists using user's email")
     @Timed
-    public Response getUserExists(@PathParam("userEmail")
-                                  @ApiParam(value = "Email of the user")
-                                  final String userEmail) {
-        return httpHeader.headers().entity(authentication.getUserExists(userEmail)).build();
+    public Response getUserExists(
+            @PathParam("userEmail")
+            @ApiParam(value = "Email of the user")
+            final String userEmail) {
+        try {
+            return httpHeader.headers().entity(authentication.getUserExists(userEmail)).build();
+        } catch (Exception exception) {
+            LOGGER.error("getUserExists failed for userEmail={} with error:", userEmail, exception);
+            throw exception;
+        }
     }
 }

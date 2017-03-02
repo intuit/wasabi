@@ -20,6 +20,8 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Objects.nonNull;
+
 /**
  * A collection of {@link Event} objects
  */
@@ -37,5 +39,13 @@ public class EventList {
 
     public void setEvents(List<Event> value) {
         events = value;
+    }
+
+    @Override
+    public String toString() {
+        if (nonNull(events)) {
+            return events.toString();
+        }
+        return null;
     }
 }

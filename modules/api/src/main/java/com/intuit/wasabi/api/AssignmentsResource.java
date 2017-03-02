@@ -146,16 +146,23 @@ public class AssignmentsResource {
 
             @javax.ws.rs.core.Context
             final HttpHeaders headers) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("getAssignment userID={}, applicationName={}, experimentLabel={}, context={}, createAssignment={}" +
-                            ", ignoreSamplingPercent={}, headers={}", userID, applicationName, experimentLabel, context, createAssignment,
+        try {
+            LOGGER.debug("getAssignment userID={}, applicationName={}, experimentLabel={}, context={},"
+                            + " createAssignment={}, ignoreSamplingPercent={}, headers={}",
+                    userID, applicationName, experimentLabel, context, createAssignment,
                     ignoreSamplingPercent, headers);
+
+            Assignment assignment = getAssignment(userID, applicationName, experimentLabel, context, createAssignment,
+                    ignoreSamplingPercent, null, headers);
+
+            return httpHeader.headers().entity(toSingleAssignmentResponseMap(assignment)).build();
+        } catch (Exception exception) {
+            LOGGER.error("getAssignment failed for applicationName={}, experimentLabel={}, userID={}, context={},"
+                            + " createAssignment={}, ignoreSamplingPercent={}, headers={} with error:",
+                    applicationName, experimentLabel, userID, context, createAssignment, ignoreSamplingPercent, headers,
+                    exception);
+            throw exception;
         }
-
-        Assignment assignment = getAssignment(userID, applicationName, experimentLabel, context, createAssignment,
-                ignoreSamplingPercent, null, headers);
-
-        return httpHeader.headers().entity(toSingleAssignmentResponseMap(assignment)).build();
     }
 
     private Assignment getAssignment(final User.ID userID, final Application.Name applicationName,
@@ -232,17 +239,25 @@ public class AssignmentsResource {
 
             @javax.ws.rs.core.Context
             final HttpHeaders headers) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("postAssignment userID={}, applicationName={}, experimentLabel={}, context={}, createAssignment={}" +
-                            ", ignoreSamplingPercent={}, segmentationProfile={}, headers={}", userID, applicationName,
-                    experimentLabel, context, createAssignment,
+        try {
+            LOGGER.debug("postAssignment userID={}, applicationName={}, experimentLabel={}, context={},"
+                            + " createAssignment={}, ignoreSamplingPercent={}, segmentationProfile={}, headers={}",
+                    userID, applicationName, experimentLabel, context, createAssignment, ignoreSamplingPercent,
+                    segmentationProfile, headers);
+
+            Assignment assignment = getAssignment(userID, applicationName, experimentLabel, context, createAssignment,
                     ignoreSamplingPercent, segmentationProfile, headers);
+
+            return httpHeader.headers().entity(toSingleAssignmentResponseMap(assignment)).build();
+        } catch (Exception exception) {
+            LOGGER.error("postAssignment failed for applicationName={}, experimentLabel={}, userID={}, context={},"
+                            + " createAssignment={}, ignoreSamplingPercent={}," +
+                            " segmentationProfile={}, headers={} with error:",
+                    applicationName, experimentLabel, userID, context, createAssignment,
+                    ignoreSamplingPercent, segmentationProfile, headers,
+                    exception);
+            throw exception;
         }
-
-        Assignment assignment = getAssignment(userID, applicationName, experimentLabel, context, createAssignment,
-                ignoreSamplingPercent, segmentationProfile, headers);
-
-        return httpHeader.headers().entity(toSingleAssignmentResponseMap(assignment)).build();
     }
 
     /**
@@ -262,41 +277,50 @@ public class AssignmentsResource {
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Return bucket assignments for a user across multiple experiments",
-            notes = "Generate the assignments first if the user has no assignment for the specified experiments if the " +
-                    "CREATE flag is set to true and the user is eligible with respect to the segmentation profile. " +
-                    "Return null if the user is not in the experiment.")
-    public Response getBatchAssignments(@PathParam("applicationName")
-                                        @ApiParam(value = "Application Name")
-                                        final Application.Name applicationName,
+            notes = "Generate the assignments first if the user has no assignment for the specified experiments if the "
+                    + "CREATE flag is set to true and the user is eligible with respect to the segmentation profile. "
+                    + "Return null if the user is not in the experiment.")
+    public Response getBatchAssignments(
+            @PathParam("applicationName")
+            @ApiParam(value = "Application Name")
+            final Application.Name applicationName,
 
-                                        @PathParam("userID")
-                                        @ApiParam(value = "User(customer) ID")
-                                        final User.ID userID,
+            @PathParam("userID")
+            @ApiParam(value = "User(customer) ID")
+            final User.ID userID,
 
-                                        @QueryParam("context")
-                                        @DefaultValue("PROD")
-                                        @ApiParam(value = "context for the experiment, eg QA, PROD")
-                                        final Context context,
+            @QueryParam("context")
+            @DefaultValue("PROD")
+            @ApiParam(value = "context for the experiment, eg QA, PROD")
+            final Context context,
 
-                                        @QueryParam("create")
-                                        @DefaultValue("true")
-                                        final Boolean createAssignment,
+            @QueryParam("create")
+            @DefaultValue("true")
+            final Boolean createAssignment,
 
-                                        @ApiParam(required = true, defaultValue = DEFAULT_LABELLIST)
-                                        final ExperimentBatch experimentBatch,
+            @ApiParam(required = true, defaultValue = DEFAULT_LABELLIST)
+            final ExperimentBatch experimentBatch,
 
-                                        @javax.ws.rs.core.Context
-                                        final HttpHeaders headers) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("getBatchAssignment userID={}, applicationName={}, context={}, createAssignment={}" +
-                            ", headers={}, experimentBatch={}", userID, applicationName, context, createAssignment,
+            @javax.ws.rs.core.Context
+            final HttpHeaders headers) {
+        try {
+            LOGGER.debug("getBatchAssignment userID={}, applicationName={}, context={}, createAssignment={}, "
+                            + "headers={}, experimentBatch={}",
+                    userID, applicationName, context, createAssignment, headers, experimentBatch);
+
+            List<Assignment> myAssignments = assignments.doBatchAssignments(userID, applicationName,
+                    context, createAssignment, FALSE,
                     headers, experimentBatch);
+
+            return httpHeader.headers().entity(ImmutableMap.<String, Object>builder().put("assignments",
+                    toBatchAssignmentResponseMap(myAssignments)).build()).build();
+        } catch (Exception exception) {
+            LOGGER.error("getBatchAssignments failed for applicationName={}, userID={}, context={}, "
+                            + "createAssignment={}, experimentBatch={}, headers={} with error:",
+                    applicationName, userID, context, createAssignment, experimentBatch, headers,
+                    exception);
+            throw exception;
         }
-
-        List<Assignment> myAssignments = assignments.doBatchAssignments(userID, applicationName, context, createAssignment, FALSE,
-                headers, experimentBatch);
-
-        return httpHeader.headers().entity(ImmutableMap.<String, Object>builder().put("assignments", toBatchAssignmentResponseMap(myAssignments)).build()).build();
     }
 
     /**
@@ -340,34 +364,40 @@ public class AssignmentsResource {
             @DefaultValue("PROD")
             @ApiParam(value = "context for the experiment, eg \"QA\", \"PROD\"")
             final Context context) {
-        if (LOGGER.isDebugEnabled()) {
+        try {
             LOGGER.debug("udpateAssignment userID={}, applicationName={}, experimentLabel={}, context={}, "
-                    + "submittedDatat={}", userID, applicationName, experimentLabel, context, submittedData);
+                    + "submittedData={}", userID, applicationName, experimentLabel, context, submittedData);
+
+            if (submittedData == null) {
+                throw new IllegalArgumentException("Assignment JSON not found in request body");
+            }
+
+            Label submittedLabel;
+            boolean overwrite;
+
+            if (submittedData.containsKey("assignment")) {
+                String submittedAssignment = (String) submittedData.get("assignment");
+
+                // Bucket.Label constructor doesn't accept a null String (indicating assignment out of the experiment).
+                // So we have to handle that case by explicitly setting submittedLabel to null.
+                submittedLabel = submittedAssignment != null ? Label.valueOf(submittedAssignment) : null;
+            } else {
+                throw new IllegalArgumentException("Request entity JSON must contain an \"assignment\" property");
+            }
+
+            overwrite = submittedData.containsKey("overwrite") && (boolean) submittedData.get("overwrite");
+
+            Assignment response = assignments
+                    .putAssignment(userID, applicationName, experimentLabel, context, submittedLabel, overwrite);
+
+            return httpHeader.headers().entity(toSingleAssignmentResponseMap(response)).build();
+        } catch (Exception exception) {
+            LOGGER.error("updateAssignment failed for applicationName={}, experimentLabel={},"
+                            + " userID={}, submittedData={}, context={} with error:",
+                    applicationName, experimentLabel, userID, submittedData, context,
+                    exception);
+            throw exception;
         }
-
-        if (submittedData == null) {
-            throw new IllegalArgumentException("Assignment JSON not found in request body");
-        }
-
-        Label submittedLabel;
-        boolean overwrite;
-
-        if (submittedData.containsKey("assignment")) {
-            String submittedAssignment = (String) submittedData.get("assignment");
-
-            // Bucket.Label constructor doesn't accept a null String (indicating assignment out of the experiment).
-            // So we have to handle that case by explicitly setting submittedLabel to null.
-            submittedLabel = submittedAssignment != null ? Label.valueOf(submittedAssignment) : null;
-        } else {
-            throw new IllegalArgumentException("Request entity JSON must contain an \"assignment\" property");
-        }
-
-        overwrite = submittedData.containsKey("overwrite") && (boolean) submittedData.get("overwrite");
-
-        Assignment response = assignments.putAssignment(userID, applicationName, experimentLabel, context,
-                submittedLabel, overwrite);
-
-        return httpHeader.headers().entity(toSingleAssignmentResponseMap(response)).build();
     }
 
     /**
@@ -422,20 +452,22 @@ public class AssignmentsResource {
             @javax.ws.rs.core.Context
                     HttpHeaders headers) {
         try {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("getBatchAssignmentsForPage applicationName={}, pageName={}, userID={}, context={}, createAssignment={}" +
-                                ", ignoreSamplingPercent={}, headers={}", applicationName, pageName, userID, context, createAssignment,
-                        ignoreSamplingPercent, headers);
-            }
+            LOGGER.debug("getBatchAssignmentsForPage applicationName={}, pageName={}, userID={},"
+                            + " context={}, createAssignment={}, ignoreSamplingPercent={}, headers={}",
+                    applicationName, pageName, userID, context, createAssignment, ignoreSamplingPercent, headers);
 
-            List<Assignment> assignmentsFromPage = assignments.doPageAssignments(applicationName, pageName, userID, context,
-                    createAssignment, ignoreSamplingPercent, headers, null);
+            List<Assignment> assignmentsFromPage = assignments.doPageAssignments(applicationName,
+                    pageName, userID, context, createAssignment, ignoreSamplingPercent, headers, null);
 
             return httpHeader.headers()
-                    .entity(ImmutableMap.<String, Object>builder().put("assignments", toBatchAssignmentResponseMap(assignmentsFromPage)).build()).build();
-        } catch (Exception e) {
-            LOGGER.error("Exception happened while batch-assignment [GET]...", e);
-            throw e;
+                    .entity(ImmutableMap.<String, Object>builder().put("assignments",
+                            toBatchAssignmentResponseMap(assignmentsFromPage)).build()).build();
+        } catch (Exception exception) {
+            LOGGER.error("getBatchAssignmentsForPage failed for applicationName={}, pageName={}, userID={},"
+                            + " createAssignment={}, ignoreSamplingPercent={}, context={}, headers={} with error:",
+                    applicationName, pageName, userID, createAssignment, ignoreSamplingPercent, context, headers,
+                    exception);
+            throw exception;
         }
     }
 
@@ -494,21 +526,24 @@ public class AssignmentsResource {
 
             @javax.ws.rs.core.Context final HttpHeaders headers) {
         try {
+            LOGGER.debug("postBatchAssignmentForPage applicationName={}, pageName={}, userID={}, context={}, "
+                            + "createAssignment={}, ignoreSamplingPercent={}, headers={}, segmentationProfile={}",
+                    applicationName, pageName, userID, context, createAssignment, ignoreSamplingPercent, headers,
+                    segmentationProfile);
 
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("postBatchAssignmentForPage applicationName={}, pageName={}, userID={}, context={}, createAssignment={}" +
-                                ", ignoreSamplingPercent={}, headers={}, segmentationProfile={}", applicationName,
-                        pageName, userID, context, createAssignment, ignoreSamplingPercent, headers, segmentationProfile);
-            }
-
-            List<Assignment> assignmentsFromPage = assignments.doPageAssignments(applicationName, pageName, userID, context,
-                    createAssignment, ignoreSamplingPercent, headers, segmentationProfile);
+            List<Assignment> assignmentsFromPage =
+                    assignments.doPageAssignments(applicationName, pageName, userID, context,
+                            createAssignment, ignoreSamplingPercent, headers, segmentationProfile);
 
             return httpHeader.headers()
-                    .entity(ImmutableMap.<String, Object>builder().put("assignments", toBatchAssignmentResponseMap(assignmentsFromPage)).build()).build();
-        } catch (Exception e) {
-            LOGGER.error("Exception happened while batch-assignment [GET]...", e);
-            throw e;
+                    .entity(ImmutableMap.<String, Object>builder().put("assignments",
+                            toBatchAssignmentResponseMap(assignmentsFromPage)).build()).build();
+        } catch (Exception exception) {
+            LOGGER.error("postBatchAssignmentForPage failed for applicationName={}, pageName={}, userID={}, "
+                            + "createAssignment={}, ignoreSamplingPercent={}, context={}, segmentationProfile={},"
+                            + " headers={} with error:", applicationName, pageName, userID, createAssignment,
+                    ignoreSamplingPercent, context, segmentationProfile, headers, exception);
+            throw exception;
         }
     }
 
@@ -547,10 +582,19 @@ public class AssignmentsResource {
 
             @javax.ws.rs.core.Context
             final HttpHeaders headers) {
-        boolean ruleResult = assignments.doSegmentTest(applicationName, experimentLabel, context, segmentationProfile,
-                headers);
+        try {
+            boolean ruleResult = assignments
+                    .doSegmentTest(applicationName, experimentLabel, context, segmentationProfile, headers);
 
-        return httpHeader.headers().entity(ImmutableMap.<String, Object>builder().put("result", ruleResult).build()).build();
+            return httpHeader.headers().entity(ImmutableMap.<String, Object>builder().put("result", ruleResult).build())
+                    .build();
+        } catch (Exception exception) {
+            LOGGER.error("postAssignmentRuleTest failed for applicationName={}, experimentLabel={},"
+                            + " context={}, segmentationProfile={}, headers={} with error:",
+                    applicationName, experimentLabel, context, segmentationProfile, headers,
+                    exception);
+            throw exception;
+        }
     }
 
     /**
@@ -562,7 +606,12 @@ public class AssignmentsResource {
     @Path("queueLength")
     @Produces(APPLICATION_JSON)
     public Response getAssignmentsQueueLength() {
-        return httpHeader.headers().entity(assignments.queuesLength()).build();
+        try {
+            return httpHeader.headers().entity(assignments.queuesLength()).build();
+        } catch (Exception exception) {
+            LOGGER.error("getAssignmentsQueueLength failed with error:", exception);
+            throw exception;
+        }
     }
 
     /**
@@ -574,7 +623,12 @@ public class AssignmentsResource {
     @Path("queueDetails")
     @Produces(APPLICATION_JSON)
     public Response getAssignmentsQueueDetails() {
-        return httpHeader.headers().entity(assignments.queuesDetails()).build();
+        try {
+            return httpHeader.headers().entity(assignments.queuesDetails()).build();
+        } catch (Exception exception) {
+            LOGGER.error("getAssignmentsQueueDetails failed with error:", exception);
+            throw exception;
+        }
     }
 
     /**
@@ -586,11 +640,18 @@ public class AssignmentsResource {
     @Path("flushMessages")
     @Produces(APPLICATION_JSON)
     public Response flushMessages(
-            @HeaderParam(AUTHORIZATION) @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true) final String authorizationHeader) {
-        Username userName = authorization.getUser(authorizationHeader);
-        authorization.checkSuperAdmin(userName);
-        assignments.flushMessages();
-        return httpHeader.headers(HttpStatus.SC_NO_CONTENT).build();
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) {
+        try {
+            Username userName = authorization.getUser(authorizationHeader);
+            authorization.checkSuperAdmin(userName);
+            assignments.flushMessages();
+            return httpHeader.headers(HttpStatus.SC_NO_CONTENT).build();
+        } catch (Exception exception) {
+            LOGGER.error("flushMessages failed with error:", exception);
+            throw exception;
+        }
     }
 
     @POST
@@ -598,18 +659,26 @@ public class AssignmentsResource {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Clear assignments metadata cache...")
     @Timed
-    public Response clearMetadataCache(@HeaderParam(AUTHORIZATION) @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true) final String authorizationHeader) {
-        UserInfo.Username userName = authorization.getUser(authorizationHeader);
-        authorization.checkSuperAdmin(userName);
-
-        boolean result = Boolean.TRUE;
+    public Response clearMetadataCache(
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) {
         try {
-            assignments.clearMetadataCache();
-        } catch (Exception e) {
-            LOGGER.error("Exception occurred while clearing assignments metadata cache...", e);
-            result = Boolean.FALSE;
+            UserInfo.Username userName = authorization.getUser(authorizationHeader);
+            authorization.checkSuperAdmin(userName);
+
+            boolean result = Boolean.TRUE;
+            try {
+                assignments.clearMetadataCache();
+            } catch (Exception e) {
+                LOGGER.error("Exception occurred while clearing assignments metadata cache...", e);
+                result = Boolean.FALSE;
+            }
+            return httpHeader.headers().entity(result).build();
+        } catch (Exception exception) {
+            LOGGER.error("clearMetadataCache failed with error:", exception);
+            throw exception;
         }
-        return httpHeader.headers().entity(result).build();
     }
 
     /**
@@ -623,7 +692,12 @@ public class AssignmentsResource {
     @ApiOperation(value = "Get assignments metadata cache details...")
     @Timed
     public Response getMetadataCacheDetails() {
-        return httpHeader.headers().entity(assignments.metadataCacheDetails()).build();
+        try {
+            return httpHeader.headers().entity(assignments.metadataCacheDetails()).build();
+        } catch (Exception exception) {
+            LOGGER.error("getMetadataCacheDetails failed with error:", exception);
+            throw exception;
+        }
     }
 
     /**
@@ -661,7 +735,8 @@ public class AssignmentsResource {
 
         // Only include `assignment` property if there is a definitive assignment, either to a bucket or not
         if (assignment.getStatus() != EXPERIMENT_EXPIRED) {
-            response.put("assignment", nonNull(assignment.getBucketLabel()) ? assignment.getBucketLabel().toString() : null);
+            response.put("assignment",
+                    nonNull(assignment.getBucketLabel()) ? assignment.getBucketLabel().toString() : null);
 
             if (nonNull(assignment.getBucketLabel())) {
                 response.put("payload", assignment.getPayload());
@@ -691,7 +766,8 @@ public class AssignmentsResource {
 
         // Only include `assignment` property if there is a definitive assignment, either to a bucket or not
         if (assignment.getStatus().isDefinitiveAssignment()) {
-            response.put("assignment", nonNull(assignment.getBucketLabel()) ? assignment.getBucketLabel().toString() : null);
+            response.put("assignment",
+                    nonNull(assignment.getBucketLabel()) ? assignment.getBucketLabel().toString() : null);
 
             if (nonNull(assignment.getBucketLabel())) {
                 response.put("payload", assignment.getPayload());

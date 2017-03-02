@@ -22,6 +22,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Objects.nonNull;
+
 public class UserRoleList {
 
     @ApiModelProperty(required = true)
@@ -71,5 +73,13 @@ public class UserRoleList {
         return new HashCodeBuilder(1, 31)
                 .append(getRoleList().size())
                 .toHashCode();
+    }
+
+    @Override
+    public String toString() {
+        if (nonNull(roleList))
+            return roleList.toString();
+        else
+            return null;
     }
 }
