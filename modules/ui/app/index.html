@@ -23,7 +23,7 @@
     <link rel="stylesheet" href="styles/branding.css">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.0/themes/ui-lightness/jquery-ui.css">
   </head>
-  <body ng-app="wasabi">
+  <body ng-app="wasabi" ng-controller="MenuCtrl">
     <!--[if lt IE 7]>
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
     <![endif]-->
@@ -70,12 +70,22 @@
         </div>
     </header>
     <div class="sticky-nav-bar">
-        <nav class="hamburger-nav"> </nav>
+        <a href="#" ng-click="showMenu()"><nav class="hamburger-nav"> </nav></a>
         <div class="title-name">Wasabi</div>
         <a href="#" class="logout-button-container" ng-controller="SignOutCtrl" onclick="return false;" ng-click="signOut()">
           <div class="image-button logout-button" data-qty=""></div>
         </a>
     </div>
+
+    <div class="menuPanel">
+      <ul>
+        <li><a href="#" ng-click="showMenu()">Experiments</a></li>
+        <li><a href="#" ng-click="showMenu()">Priority</a></li>
+        <li><a href="#" ng-click="showMenu()">Users</a></li>
+        <li><a href="#" ng-click="showMenu()">Applications</a></li>
+      </ul>
+    </div>
+    <div class="fixedPanel" ng-click="showMenu()"></div>
 
     <div id="mainContent">
         <!-- MAIN CONTENT AND INJECTED VIEWS  -->
@@ -205,6 +215,7 @@
     <script src="scripts/controllers/PluginsCtrl.js"></script>
     <script src="scripts/controllers/PageManagementCtrl.js"></script>
     <script src="scripts/controllers/AddExperimentsToPageModalCtrl.js"></script>
+    <script src="scripts/controllers/MenuCtrl.js"></script>
     <script src="scripts/directives/ConvertPercentDirective.js"></script>
     <script src="scripts/directives/CustomTooltip.js"></script>
     <script src="scripts/directives/EnsureNumber.js"></script>
