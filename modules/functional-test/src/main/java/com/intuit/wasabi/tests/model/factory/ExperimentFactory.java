@@ -47,6 +47,63 @@ public class ExperimentFactory {
                 .setCreatorID(System.getProperty("user-name") != null ? System.getProperty("user-name") : "admin")
                 .setDescription("A sample Experiment description.");
     }
+    
+    
+    /**
+     * Creates a basic Experiment with the required default values but no ID.
+     * The values are a name, the default application, a start and end time and the sampling percentage (100%), as
+     * well as a hypothesis/description.
+     * <p>
+     * @param String experimentLabel- the label of the experiment
+     * Sets the creatorID to admin email
+     *
+     * @return a default Experiment.
+     */
+    public static Experiment createExperiment(String experimentLabel) {
+        return new Experiment(experimentLabel,
+                ApplicationFactory.defaultApplication(),
+                TestUtils.currentTimeString(),
+                TestUtils.relativeTimeString(42), 1)
+                .setCreatorID(System.getProperty("user-name") != null ? System.getProperty("user-name") : "admin")
+                .setDescription("A sample Experiment description.");
+    }
+    
+    /**
+     * Creates a basic Experiment with the required default values but no ID.
+     * The values are a name, the default application, end time and the sampling percentage (100%), as
+     * well as a hypothesis/description.
+     * <p>
+     * @param experimentLabel - the label of the experiment
+     * @param relativeStartDay -the relative day on which u want your experiment to start
+     * @return
+     */
+    public static Experiment createExperiment(String experimentLabel, int relativeStartDay) {
+        return new Experiment(experimentLabel,
+                ApplicationFactory.defaultApplication(),
+                TestUtils.relativeTimeString(relativeStartDay),
+                TestUtils.relativeTimeString(42), 1)
+                .setCreatorID(System.getProperty("user-name") != null ? System.getProperty("user-name") : "admin")
+                .setDescription("A sample Experiment description.");
+    }
+    
+    /**
+     * Creates a basic Experiment with the required default values but no ID.
+     * The values are a name, the default application and the sampling percentage (100%), as
+     * well as a hypothesis/description.
+     * <p>
+     * @param experimentLabel - the label of the experiment
+     * @param relativeStartDay -the relative day on which u want your experiment to start with respect to current time
+     * @param relativeEndDay -the relative day on which u want your experiment to end with respect to current time
+     * @return
+     */
+    public static Experiment createExperiment(String experimentLabel, int relativeStartDay, int relativeEndDay) {
+        return new Experiment(experimentLabel,
+                ApplicationFactory.defaultApplication(),
+                TestUtils.relativeTimeString(relativeStartDay),
+                TestUtils.relativeTimeString(relativeEndDay), 1)
+                .setCreatorID(System.getProperty("user-name") != null ? System.getProperty("user-name") : "admin")
+                .setDescription("A sample Experiment description.");
+    }
 
     /**
      * Creates a basic Experiment with the required default values and the optional value
