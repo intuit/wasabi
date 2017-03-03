@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,11 +14,6 @@
  * limitations under the License.
  *******************************************************************************/
 package com.intuit.wasabi.authenticationobjects;
-
-import java.io.IOException;
-
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -30,6 +25,10 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Preconditions;
 import io.swagger.annotations.ApiModelProperty;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+import java.io.IOException;
 
 /**
  * Information about admin users, IE not users in the assignments/events sense
@@ -40,7 +39,7 @@ public class UserInfo {
     private Username username;
     @ApiModelProperty(value = "user password", required = false)
     private String password;
-   	@ApiModelProperty(value = "numerical user ID", required = false)
+    @ApiModelProperty(value = "numerical user ID", required = false)
     private String userId;
     @ApiModelProperty(value = "the first name of the user", required = false)
     private String firstName;
@@ -62,28 +61,28 @@ public class UserInfo {
     }
 
     public String getPassword() {
-		return password;
-	}
+        return password;
+    }
 
-	public void setPassword(String password) {
-		this.password = password;
-	}
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
     /**
-	 * @return the userId
-	 */
-	public String getUserId() {
-		return userId;
-	}
+     * @return the userId
+     */
+    public String getUserId() {
+        return userId;
+    }
 
-	/**
-	 * @param userId the userId to set
-	 */
-	public void setUserId(String userId) {
-		this.userId = userId;
-	}
+    /**
+     * @param userId the userId to set
+     */
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 
-	public String getFirstName() {
+    public String getFirstName() {
         return firstName;
     }
 
@@ -123,8 +122,8 @@ public class UserInfo {
         }
 
         public Builder withUserId(final String userId) {
-        	this.instance.userId = userId;
-        	return this;
+            this.instance.userId = userId;
+            return this;
         }
 
         public Builder withFirstName(final String name) {
@@ -201,6 +200,7 @@ public class UserInfo {
         public String getUsername() {
             return username;
         }
+
         public void setUsername(String username) {
             this.username = username;
         }
@@ -212,12 +212,12 @@ public class UserInfo {
 
         @Override
         public int hashCode() {
-        	return HashCodeBuilder.reflectionHashCode(this);
+            return HashCodeBuilder.reflectionHashCode(this);
         }
 
         @Override
         public boolean equals(Object obj) {
-        	   return EqualsBuilder.reflectionEquals(this, obj);
+            return EqualsBuilder.reflectionEquals(this, obj);
         }
 
         @Override

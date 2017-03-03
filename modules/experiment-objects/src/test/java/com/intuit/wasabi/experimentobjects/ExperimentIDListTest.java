@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,7 +26,7 @@ import static org.junit.Assert.assertNotEquals;
 
 /**
  * This class tests the functionality of the {@link ExperimentIDList}
- *
+ * <p>
  * Created by asuckro on 8/19/15.
  */
 public class ExperimentIDListTest {
@@ -34,25 +34,25 @@ public class ExperimentIDListTest {
     private List<Experiment.ID> ids = new ArrayList<>();
 
     @Before
-    public void initList(){
+    public void initList() {
         for (int i = 0; i < 21; i++) {
             ids.add(Experiment.ID.newInstance());
         }
     }
 
     @Test
-    public void testBuilder(){
+    public void testBuilder() {
         ExperimentIDList expList = ExperimentIDList.newInstance().withExperimentIDs(ids).build();
         //list are equal iff their elements are equal!
         assertEquals(expList.getExperimentIDs(), ids);
 
         ExperimentIDList expListClone = ExperimentIDList.from(expList).build();
-        assertEquals(expList.getExperimentIDs(),expListClone.getExperimentIDs());
+        assertEquals(expList.getExperimentIDs(), expListClone.getExperimentIDs());
 
     }
 
     @Test
-    public void testEquals(){
+    public void testEquals() {
         ExperimentIDList oneList = ExperimentIDList.withExperimentIDList(ids).build();
         ExperimentIDList anotherList = ExperimentIDList.withExperimentIDList(ids).build();
         // the same Id's should lead to equal lists
@@ -63,24 +63,24 @@ public class ExperimentIDListTest {
 
         assertNotEquals(oneList, null);
         assertNotEquals(oneList, "Apple");
-        assertEquals(oneList,oneList);
+        assertEquals(oneList, oneList);
     }
 
     @Test
-    public void testHashCode(){
+    public void testHashCode() {
         ExperimentIDList oneList = ExperimentIDList.withExperimentIDList(ids).build();
         ExperimentIDList anotherList = ExperimentIDList.withExperimentIDList(ids).build();
 
-        assertEquals(oneList.hashCode(),anotherList.hashCode());
-        assertEquals(oneList.hashCode(),oneList.hashCode());
+        assertEquals(oneList.hashCode(), anotherList.hashCode());
+        assertEquals(oneList.hashCode(), oneList.hashCode());
     }
 
     @Test
-    public void testToString(){
+    public void testToString() {
 
         ExperimentIDList list = ExperimentIDList.withExperimentIDList(ids).build();
         assertEquals(list.toString(),
-        		"ExperimentIDList[experimentIDs=" + ids + "]");
+                "ExperimentIDList[experimentIDs=" + ids + "]");
 
     }
 }

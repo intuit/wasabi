@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -101,47 +101,47 @@ public class ClientConfiguration implements CassandraDriver.Configuration {
     }
 
     @Override
-    public int getMaxConnectionsPerHostLocal(){
+    public int getMaxConnectionsPerHostLocal() {
         return parseInt(getProperty("maxConnectionsPerHostLocal", properties, "32"));
     }
 
     @Override
-    public int getCoreConnectionsPerHostLocal(){
+    public int getCoreConnectionsPerHostLocal() {
         return parseInt(getProperty("coreConnectionsPerHostLocal", properties, "8"));
     }
 
     @Override
-    public int getMaxRequestPerConnectionLocal(){
+    public int getMaxRequestPerConnectionLocal() {
         return parseInt(getProperty("maxRequestPerConnectionLocal", properties, "32768"));
     }
 
     @Override
-    public int getNewConnectionThresholdLocal(){
+    public int getNewConnectionThresholdLocal() {
         return parseInt(getProperty("newConnectionThresholdLocal", properties, "50"));
     }
 
     @Override
-    public int getPoolTimeoutMillis(){
+    public int getPoolTimeoutMillis() {
         return parseInt(getProperty("poolTimeoutMillis", properties, "0"));
     }
 
     @Override
-    public int getMaxConnectionsPerHostRemote(){
+    public int getMaxConnectionsPerHostRemote() {
         return parseInt(getProperty("maxConnectionsPerHostRemote", properties, "32"));
     }
 
     @Override
-    public int getCoreConnectionsPerHostRemote(){
+    public int getCoreConnectionsPerHostRemote() {
         return parseInt(getProperty("coreConnectionsPerHostRemote", properties, "8"));
     }
 
     @Override
-    public int getMaxRequestPerConnectionRemote(){
+    public int getMaxRequestPerConnectionRemote() {
         return parseInt(getProperty("maxRequestPerConnectionRemote", properties, "2000"));
     }
 
     @Override
-    public int getNewConnectionThresholdRemote(){
+    public int getNewConnectionThresholdRemote() {
         return parseInt(getProperty("newConnectionThresholdRemote", properties, "50"));
     }
 
@@ -177,12 +177,12 @@ public class ClientConfiguration implements CassandraDriver.Configuration {
     }
 
     @Override
-    public boolean isSlowQueryLoggingEnabled(){
+    public boolean isSlowQueryLoggingEnabled() {
         return Boolean.valueOf(getProperty("isSlowQueryLoggingEnabled", properties, "False"));
     }
 
     @Override
-    public long getSlowQueryLoggingThresholdMilli(){
+    public long getSlowQueryLoggingThresholdMilli() {
         return Long.valueOf(getProperty("slowQueryLoggingThresholdMilli", properties, "100"));
     }
 }

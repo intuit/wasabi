@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,15 +29,31 @@ import com.intuit.wasabi.authorization.Authorization;
 import com.intuit.wasabi.authorizationobjects.Permission;
 import com.intuit.wasabi.authorizationobjects.UserRole;
 import com.intuit.wasabi.events.EventsExport;
-import com.intuit.wasabi.exceptions.*;
-import com.intuit.wasabi.experiment.*;
-import com.intuit.wasabi.experimentobjects.*;
+import com.intuit.wasabi.exceptions.AuthenticationException;
+import com.intuit.wasabi.exceptions.BucketNotFoundException;
+import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
+import com.intuit.wasabi.exceptions.TimeFormatException;
+import com.intuit.wasabi.exceptions.TimeZoneFormatException;
+import com.intuit.wasabi.experiment.Buckets;
+import com.intuit.wasabi.experiment.Experiments;
+import com.intuit.wasabi.experiment.Favorites;
+import com.intuit.wasabi.experiment.Mutex;
+import com.intuit.wasabi.experiment.Pages;
+import com.intuit.wasabi.experiment.Priorities;
+import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.experimentobjects.Bucket;
+import com.intuit.wasabi.experimentobjects.BucketList;
+import com.intuit.wasabi.experimentobjects.Context;
+import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.experimentobjects.ExperimentIDList;
+import com.intuit.wasabi.experimentobjects.ExperimentList;
+import com.intuit.wasabi.experimentobjects.ExperimentPageList;
+import com.intuit.wasabi.experimentobjects.NewExperiment;
+import com.intuit.wasabi.experimentobjects.Page;
 import com.intuit.wasabi.repository.RepositoryException;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-
 import org.slf4j.Logger;
 
 import javax.ws.rs.Consumes;
@@ -53,7 +69,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.DateTimeException;
@@ -64,7 +79,6 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -85,6 +99,8 @@ import static com.intuit.wasabi.api.APISwaggerResource.DOC_PER_PAGE;
 import static com.intuit.wasabi.api.APISwaggerResource.DOC_SORT;
 import static com.intuit.wasabi.api.APISwaggerResource.DOC_TIMEZONE;
 import static com.intuit.wasabi.api.APISwaggerResource.EXAMPLE_AUTHORIZATION_HEADER;
+import static com.intuit.wasabi.api.ApiAnnotations.DEFAULT_TIME_FORMAT;
+import static com.intuit.wasabi.api.ApiAnnotations.DEFAULT_TIME_ZONE;
 import static com.intuit.wasabi.authorizationobjects.Permission.CREATE;
 import static com.intuit.wasabi.authorizationobjects.Permission.READ;
 import static com.intuit.wasabi.authorizationobjects.Permission.UPDATE;
@@ -132,8 +148,8 @@ public class ExperimentsResource {
     ExperimentsResource(final Experiments experiments, final EventsExport export, final Assignments assignments,
                         final Authorization authorization, final Buckets buckets, final Mutex mutex,
                         final Pages pages, final Priorities priorities, final Favorites favorites,
-                        final @Named("default.time.zone") String defaultTimezone,
-                        final @Named("default.time.format") String defaultTimeFormat,
+                        final @Named(DEFAULT_TIME_ZONE) String defaultTimezone,
+                        final @Named(DEFAULT_TIME_FORMAT) String defaultTimeFormat,
                         final HttpHeader httpHeader, final PaginationHelper<Experiment> experimentPaginationHelper
     ) {
         this.experiments = experiments;
@@ -172,78 +188,87 @@ public class ExperimentsResource {
     @ApiOperation(value = "Return details of all the experiments, with respect to the authorization",
             response = ExperimentList.class)
     @Timed
-    public Response getExperiments(@HeaderParam(AUTHORIZATION)
-                                   @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                   final String authorizationHeader,
+    public Response getExperiments(
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader,
 
-                                   @QueryParam("page")
-                                   @DefaultValue(DEFAULT_PAGE)
-                                   @ApiParam(name = "page", defaultValue = DEFAULT_PAGE, value = DOC_PAGE)
-                                   final int page,
+            @QueryParam("page")
+            @DefaultValue(DEFAULT_PAGE)
+            @ApiParam(name = "page", defaultValue = DEFAULT_PAGE, value = DOC_PAGE)
+            final int page,
 
-                                   @QueryParam("per_page")
-                                   @DefaultValue(DEFAULT_PER_PAGE)
-                                   @ApiParam(name = "per_page", defaultValue = DEFAULT_PER_PAGE, value = DOC_PER_PAGE)
-                                   final int perPage,
+            @QueryParam("per_page")
+            @DefaultValue(DEFAULT_PER_PAGE)
+            @ApiParam(name = "per_page", defaultValue = DEFAULT_PER_PAGE, value = DOC_PER_PAGE)
+            final int perPage,
 
-                                   @QueryParam("filter")
-                                   @DefaultValue("")
-                                   @ApiParam(name = "filter", defaultValue = DEFAULT_FILTER, value = DOC_FILTER)
-                                   final String filter,
+            @QueryParam("filter")
+            @DefaultValue("")
+            @ApiParam(name = "filter", defaultValue = DEFAULT_FILTER, value = DOC_FILTER)
+            final String filter,
 
-                                   @QueryParam("sort")
-                                   @DefaultValue("")
-                                   @ApiParam(name = "sort", defaultValue = DEFAULT_SORT, value = DOC_SORT)
-                                   final String sort,
+            @QueryParam("sort")
+            @DefaultValue("")
+            @ApiParam(name = "sort", defaultValue = DEFAULT_SORT, value = DOC_SORT)
+            final String sort,
 
-                                   @QueryParam("timezone")
-                                   @DefaultValue(DEFAULT_TIMEZONE)
-                                   @ApiParam(name = "timezone", defaultValue = DEFAULT_TIMEZONE, value = DOC_TIMEZONE)
-                                   final String timezoneOffset) {
+            @QueryParam("timezone")
+            @DefaultValue(DEFAULT_TIMEZONE)
+            @ApiParam(name = "timezone", defaultValue = DEFAULT_TIMEZONE, value = DOC_TIMEZONE)
+            final String timezoneOffset) {
 
-        ExperimentList experimentList = experiments.getExperiments();
-        ExperimentList authorizedExperiments;
+        try {
+            ExperimentList experimentList = experiments.getExperiments();
+            ExperimentList authorizedExperiments;
 
-        if (authorizationHeader == null) {
-            throw new AuthenticationException("No authorization given.");
-        } else {
-            Username userName = authorization.getUser(authorizationHeader);
-            Set<Application.Name> allowed = new HashSet<>();
+            if (authorizationHeader == null) {
+                throw new AuthenticationException("No authorization given.");
+            } else {
+                Username userName = authorization.getUser(authorizationHeader);
+                Set<Application.Name> allowed = new HashSet<>();
 
-            authorizedExperiments = new ExperimentList();
+                authorizedExperiments = new ExperimentList();
 
-            for (Experiment experiment : experimentList.getExperiments()) {
-                if (experiment == null) {
-                    continue;
-                }
+                for (Experiment experiment : experimentList.getExperiments()) {
+                    if (experiment == null) {
+                        continue;
+                    }
 
-                Application.Name applicationName = experiment.getApplicationName();
+                    Application.Name applicationName = experiment.getApplicationName();
 
-                if (allowed.contains(applicationName)) {
-                    authorizedExperiments.addExperiment(experiment);
-                } else {
-                    try {
-                        authorization.checkUserPermissions(userName, applicationName, READ);
+                    if (allowed.contains(applicationName)) {
                         authorizedExperiments.addExperiment(experiment);
-                        allowed.add(applicationName);
-                    } catch (AuthenticationException ignored) {
-                        LOGGER.trace("ignoring authentication exception", ignored);
+                    } else {
+                        try {
+                            authorization.checkUserPermissions(userName, applicationName, READ);
+                            authorizedExperiments.addExperiment(experiment);
+                            allowed.add(applicationName);
+                        } catch (AuthenticationException ignored) {
+                            LOGGER.trace("ignoring authentication exception", ignored);
+                        }
                     }
                 }
+
+                List<Experiment.ID> favoriteList = favorites.getFavorites(userName);
+
+                authorizedExperiments.getExperiments().
+                        parallelStream().filter(experiment -> favoriteList.contains(experiment.getID()))
+                        .forEach(experiment -> experiment.setFavorite(true));
             }
 
-            List<Experiment.ID> favoriteList = favorites.getFavorites(userName);
-            authorizedExperiments.getExperiments()
-                    .parallelStream()
-                    .filter(experiment -> favoriteList.contains(experiment.getID()))
-                    .forEach(experiment -> experiment.setFavorite(true));
+            Map<String, Object> experimentResponse = experimentPaginationHelper
+                    .paginate("experiments", authorizedExperiments.getExperiments(), filter, timezoneOffset,
+                            (perPage != -1 ? "-favorite," : "") + sort, page, perPage);
+
+            return httpHeader.headers().entity(experimentResponse).build();
+        } catch (Exception exception) {
+            LOGGER.error("getExperiments failed for page={}, perPage={}, "
+                            + "filter={}, sort={}, timezoneOffset={} with error:",
+                    page, perPage, filter, sort, timezoneOffset,
+                    exception);
+            throw exception;
         }
-
-        Map<String, Object> experimentResponse = experimentPaginationHelper.paginate("experiments",
-                authorizedExperiments.getExperiments(), filter, timezoneOffset,
-                (perPage != -1 ? "-favorite," : "") + sort, page, perPage);
-
-        return httpHeader.headers().entity(experimentResponse).build();
     }
 
 
@@ -252,48 +277,54 @@ public class ExperimentsResource {
     @ApiOperation(value = "Create an experiment",
             response = Experiment.class)
     @Timed
-    public Response postExperiment(@ApiParam(required = true)
-                                   final NewExperiment newExperiment,
+    public Response postExperiment(
+            @ApiParam(required = true)
+            final NewExperiment newExperiment,
 
-                                   @QueryParam("createNewApplication")
-                                   @DefaultValue("false")
-                                   final boolean createNewApplication,
+            @QueryParam("createNewApplication")
+            @DefaultValue("false")
+            final boolean createNewApplication,
 
-                                   @HeaderParam(AUTHORIZATION)
-                                   @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                   final String authorizationHeader) {
-        if (newExperiment.getApplicationName() == null || isBlank(newExperiment.getApplicationName().toString())) {
-            throw new IllegalArgumentException("Experiment application name cannot be null or an empty string");
-        }
-
-        Username userName = authorization.getUser(authorizationHeader);
-
-        if (!createNewApplication) {
-            authorization.checkUserPermissions(userName, newExperiment.getApplicationName(), CREATE);
-        }
-
-        // Avoid causing breaking change in API request body, derive creatorID from auth headers
-        String creatorID = (userName != null) ? userName.getUsername() : null;
-
-        newExperiment.setCreatorID(creatorID);
-        
-        // TODO - Should validate experiment before hand rather than catching errors later
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) {
         try {
-        	experiments.createExperiment(newExperiment, authorization.getUserInfo(userName));
-        }
-        catch(RepositoryException e) {
-        	throw new RepositoryException("Could not create experiment " + newExperiment + " because " + e);
-        }
-        
-        Experiment experiment = experiments.getExperiment(newExperiment.getID());
+            if (newExperiment.getApplicationName() == null || isBlank(newExperiment.getApplicationName().toString())) {
+                throw new IllegalArgumentException("Experiment application name cannot be null or an empty string");
+            }
 
-        if (createNewApplication) {
-            UserRole userRole = newInstance(experiment.getApplicationName(), ADMIN).withUserID(userName).build();
+            Username userName = authorization.getUser(authorizationHeader);
 
-            authorization.setUserRole(userRole, null);
+            if (!createNewApplication) {
+                authorization.checkUserPermissions(userName, newExperiment.getApplicationName(), CREATE);
+            }
+
+            // Avoid causing breaking change in API request body, derive creatorID from auth headers
+            String creatorID = (userName != null) ? userName.getUsername() : null;
+
+            newExperiment.setCreatorID(creatorID);
+
+            // TODO - Should validate experiment before hand rather than catching errors later
+            try {
+                experiments.createExperiment(newExperiment, authorization.getUserInfo(userName));
+            } catch (RepositoryException e) {
+                throw new RepositoryException("Could not create experiment " + newExperiment + " because " + e);
+            }
+
+            Experiment experiment = experiments.getExperiment(newExperiment.getID());
+
+            if (createNewApplication) {
+                UserRole userRole = newInstance(experiment.getApplicationName(), ADMIN).withUserID(userName).build();
+
+                authorization.setUserRole(userRole, null);
+            }
+
+            return httpHeader.headers(CREATED).entity(experiment).build();
+        } catch (Exception exception) {
+            LOGGER.error("postExperiment failed for newExperiment={}, createNewApplication={} with error:",
+                    newExperiment, createNewApplication, exception);
+            throw exception;
         }
-
-        return httpHeader.headers(CREATED).entity(experiment).build();
     }
 
     /**
@@ -310,26 +341,32 @@ public class ExperimentsResource {
     @ApiOperation(value = "Return details of a single experiment",
             response = Experiment.class)
     @Timed
-    public Response getExperiment(@PathParam("experimentID")
-                                  @ApiParam(value = "Experiment ID")
-                                  final Experiment.ID experimentID,
+    public Response getExperiment(
+            @PathParam("experimentID")
+            @ApiParam(value = "Experiment ID")
+            final Experiment.ID experimentID,
 
-                                  @HeaderParam(AUTHORIZATION)
-                                  @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                  final String authorizationHeader) {
-        Experiment experiment = experiments.getExperiment(experimentID);
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) {
+        try {
+            Experiment experiment = experiments.getExperiment(experimentID);
 
-        if (experiment == null) {
-            throw new ExperimentNotFoundException(experimentID);
+            if (experiment == null) {
+                throw new ExperimentNotFoundException(experimentID);
+            }
+
+            if (authorizationHeader != null) {
+                Username userName = authorization.getUser(authorizationHeader);
+
+                authorization.checkUserPermissions(userName, experiment.getApplicationName(), READ);
+            }
+
+            return httpHeader.headers().entity(experiment).type(APPLICATION_JSON_TYPE).build();
+        } catch (Exception exception) {
+            LOGGER.error("getExperiment failed for experimentID={} with error:", experimentID, exception);
+            throw exception;
         }
-
-        if (authorizationHeader != null) {
-            Username userName = authorization.getUser(authorizationHeader);
-
-            authorization.checkUserPermissions(userName, experiment.getApplicationName(), READ);
-        }
-
-        return httpHeader.headers().entity(experiment).type(APPLICATION_JSON_TYPE).build();
     }
 
     /**
@@ -351,43 +388,54 @@ public class ExperimentsResource {
                     "to change sampling percentage or to enable personalization and more.",
             response = Experiment.class)
     @Timed
-    public Response putExperiment(@PathParam("experimentID")
-                                  @ApiParam(value = "Experiment ID")
-                                  final Experiment.ID experimentID,
+    public Response putExperiment(
+            @PathParam("experimentID")
+            @ApiParam(value = "Experiment ID")
+            final Experiment.ID experimentID,
 
-                                  @ApiParam(value = "Please read the implementation notes above", required = true)
-                                  final Experiment experimentEntity,
+            @ApiParam(value = "Please read the implementation notes above", required = true)
+            final Experiment experimentEntity,
 
-                                  @QueryParam("createNewApplication")
-                                  @DefaultValue("false")
-                                  final boolean createNewApplication,
+            @QueryParam("createNewApplication")
+            @DefaultValue("false")
+            final boolean createNewApplication,
 
-                                  @HeaderParam(AUTHORIZATION)
-                                  @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                  final String authorizationHeader) {
-        Username userName = authorization.getUser(authorizationHeader);
-        Experiment experiment = experiments.getExperiment(experimentID);
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) {
+        try {
+            Username userName = authorization.getUser(authorizationHeader);
+            Experiment experiment = experiments.getExperiment(experimentID);
 
-        // Throw an exception if the current experiment is not valid
-        if (experiment == null) {
-            throw new ExperimentNotFoundException(experimentID);
+            // Throw an exception if the current experiment is not valid
+            if (experiment == null) {
+                throw new ExperimentNotFoundException(experimentID);
+            }
+
+            if (!createNewApplication) {
+                authorization.checkUserPermissions(userName, experiment.getApplicationName(), UPDATE);
+            }
+
+            experiment = experiments.updateExperiment(experimentID, experimentEntity,
+                    authorization.getUserInfo(userName));
+            assert experiment != null : "Error updating experiment";
+
+            if ((createNewApplication) && !experiment.getState().equals(DELETED)) {
+                UserRole userRole = newInstance(experiment.getApplicationName(), ADMIN).withUserID(userName).build();
+
+                authorization.setUserRole(userRole, null);
+            }
+
+            return experiment.getState().equals(DELETED) ?
+                    httpHeader.headers(NO_CONTENT).build() :
+                    httpHeader.headers().entity(experiment).build();
+        } catch (Exception exception) {
+            LOGGER.error("putExperiment failed for experimentID={}, experimentEntity={}, "
+                            + "createNewApplication={} with error:",
+                    experimentID, experimentEntity, createNewApplication,
+                    exception);
+            throw exception;
         }
-
-        if (!createNewApplication) {
-            authorization.checkUserPermissions(userName, experiment.getApplicationName(), UPDATE);
-        }
-
-        experiment = experiments.updateExperiment(experimentID, experimentEntity, authorization.getUserInfo(userName));
-        assert experiment != null : "Error updating experiment";
-
-        if ((createNewApplication) && !experiment.getState().equals(DELETED)) {
-            UserRole userRole = newInstance(experiment.getApplicationName(), ADMIN).withUserID(userName).build();
-
-            authorization.setUserRole(userRole, null);
-        }
-
-        return experiment.getState().equals(DELETED) ?
-                httpHeader.headers(NO_CONTENT).build() : httpHeader.headers().entity(experiment).build();
     }
 
     /**
@@ -407,31 +455,38 @@ public class ExperimentsResource {
             notes = "Can only delete an experiment that is in DRAFT or TERMINATED state.  The default call is " +
                     "safe to use, but other than that please only delete experiments which you have created.")
     @Timed
-    public Response deleteExperiment(@PathParam("experimentID")
-                                     @ApiParam(value = "Experiment ID")
-                                     final Experiment.ID experimentID,
+    public Response deleteExperiment(
+            @PathParam("experimentID")
+            @ApiParam(value = "Experiment ID")
+            final Experiment.ID experimentID,
 
-                                     @HeaderParam(AUTHORIZATION)
-                                     @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                     final String authorizationHeader) {
-        Username userName = authorization.getUser(authorizationHeader);
-        Experiment experiment = experiments.getExperiment(experimentID);
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) {
+        try {
+            Username userName = authorization.getUser(authorizationHeader);
+            Experiment experiment = experiments.getExperiment(experimentID);
 
-        if (experiment == null) {
-            throw new ExperimentNotFoundException(experimentID);
+            if (experiment == null) {
+                throw new ExperimentNotFoundException(experimentID);
+            }
+
+            authorization.checkUserPermissions(userName, experiment.getApplicationName(), Permission.DELETE);
+
+            // Note: deleting an experiment follows the same rules as
+            // updating its state to "deleted" -- so reuse the code.
+            Experiment updatedExperiment = from(experiment).withState(DELETED).build();
+
+            experiment = experiments.updateExperiment
+                    (experimentID, updatedExperiment, authorization.getUserInfo(userName));
+
+            assert experiment != null : "Error deleting experiment";
+
+            return httpHeader.headers(NO_CONTENT).build();
+        } catch (Exception exception) {
+            LOGGER.error("deleteExperiment failed for experimentID={} with error:", experimentID, exception);
+            throw exception;
         }
-
-        authorization.checkUserPermissions(userName, experiment.getApplicationName(), Permission.DELETE);
-
-        // Note: deleting an experiment follows the same rules as
-        // updating its state to "deleted" -- so reuse the code.
-        Experiment updatedExperiment = from(experiment).withState(DELETED).build();
-
-        experiment = experiments.updateExperiment(experimentID, updatedExperiment, authorization.getUserInfo(userName));
-
-        assert experiment != null : "Error deleting experiment";
-
-        return httpHeader.headers(NO_CONTENT).build();
     }
 
     /**
@@ -447,21 +502,28 @@ public class ExperimentsResource {
     @ApiOperation(value = "Return all buckets for an experiment",
             response = BucketList.class)
     @Timed
-    public Response getBuckets(@PathParam("experimentID")
-                               @ApiParam(value = "Experiment ID")
-                               final Experiment.ID experimentID,
+    public Response getBuckets(
+            @PathParam("experimentID")
+            @ApiParam(value = "Experiment ID")
+            final Experiment.ID experimentID,
 
-                               @HeaderParam(AUTHORIZATION)
-                               @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                               final String authorizationHeader) {
-        if (authorizationHeader != null) {
-            Username userName = authorization.getUser(authorizationHeader);
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) {
+        try {
+            if (authorizationHeader != null) {
+                Username userName = authorization.getUser(authorizationHeader);
 
-            authorization.checkUserPermissions(userName, experiments.getExperiment(experimentID).getApplicationName(),
-                    READ);
+                authorization.checkUserPermissions(userName,
+                        experiments.getExperiment(experimentID).getApplicationName(),
+                        READ);
+            }
+
+            return httpHeader.headers().entity(buckets.getBuckets(experimentID, true)).build();
+        } catch (Exception exception) {
+            LOGGER.error("getBuckets failed for experimentID={} with error:", experimentID, exception);
+            throw exception;
         }
-
-        return httpHeader.headers().entity(buckets.getBuckets(experimentID, true)).build();
     }
 
     /**
@@ -481,36 +543,44 @@ public class ExperimentsResource {
             notes = "Can only modify buckets for an experiment that is in DRAFT state.",
             response = Bucket.class)
     @Timed
-    public Response postBucket(@PathParam("experimentID")
-                               @ApiParam(value = "Experiment ID")
-                               final Experiment.ID experimentID,
+    public Response postBucket(
+            @PathParam("experimentID")
+            @ApiParam(value = "Experiment ID")
+            final Experiment.ID experimentID,
 
-                               @ApiParam(required = true, defaultValue = DEFAULT_MODBUCK)
-                               final Bucket newBucketEntity,
+            @ApiParam(required = true, defaultValue = DEFAULT_MODBUCK)
+            final Bucket newBucketEntity,
 
-                               @HeaderParam(AUTHORIZATION)
-                               @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                               final String authorizationHeader) {
-        Username userName = authorization.getUser(authorizationHeader);
-        Experiment experiment = experiments.getExperiment(experimentID);
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) {
+        try {
+            Username userName = authorization.getUser(authorizationHeader);
+            Experiment experiment = experiments.getExperiment(experimentID);
 
-        if (experiment == null) {
-            throw new ExperimentNotFoundException(experimentID);
+            if (experiment == null) {
+                throw new ExperimentNotFoundException(experimentID);
+            }
+
+            authorization.checkUserPermissions(userName, experiment.getApplicationName(), CREATE);
+
+            Bucket newBucket = Bucket.from(newBucketEntity).withExperimentID(experimentID).build();
+
+            LOGGER.warn("Bucket edited: user " + userName.toString()
+                    + " is adding bucket " + newBucket.toString() + " to experiment "
+                    + experimentID.toString());
+
+            UserInfo user = authorization.getUserInfo(userName);
+            Bucket bucket = buckets.createBucket(experimentID, newBucket, user);
+
+            assert bucket != null : "Created bucket was null";
+
+            return httpHeader.headers(CREATED).entity(bucket).build();
+        } catch (Exception exception) {
+            LOGGER.error("postBucket failed for experimentID={}, newBucketEntity={} with error:",
+                    experimentID, newBucketEntity, exception);
+            throw exception;
         }
-
-        authorization.checkUserPermissions(userName, experiment.getApplicationName(), CREATE);
-
-        Bucket newBucket = Bucket.from(newBucketEntity).withExperimentID(experimentID).build();
-
-        LOGGER.warn("Bucket edited: user " + userName.toString() + " is adding bucket " + newBucket.toString() + " to experiment "
-                + experimentID.toString());
-
-        UserInfo user = authorization.getUserInfo(userName);
-        Bucket bucket = buckets.createBucket(experimentID, newBucket, user);
-
-        assert bucket != null : "Created bucket was null";
-
-        return httpHeader.headers(CREATED).entity(bucket).build();
     }
 
     /**
@@ -530,32 +600,39 @@ public class ExperimentsResource {
             notes = "Can only modify buckets for an experiment that is in DRAFT state.",
             response = Bucket.class)
     @Timed
-    public Response putBucket(@PathParam("experimentID")
-                              @ApiParam(value = "Experiment ID")
-                              final Experiment.ID experimentID,
+    public Response putBucket(
+            @PathParam("experimentID")
+            @ApiParam(value = "Experiment ID")
+            final Experiment.ID experimentID,
 
-                              @ApiParam(required = true, defaultValue = DEFAULT_MODBUCK)
-                              final BucketList bucketList,
+            @ApiParam(required = true, defaultValue = DEFAULT_MODBUCK)
+            final BucketList bucketList,
 
-                              @HeaderParam(AUTHORIZATION)
-                              @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                              final String authorizationHeader) {
-        Username userName = authorization.getUser(authorizationHeader);
-        Experiment experiment = experiments.getExperiment(experimentID);
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) {
+        try {
+            Username userName = authorization.getUser(authorizationHeader);
+            Experiment experiment = experiments.getExperiment(experimentID);
 
-        if (experiment == null) {
-            throw new ExperimentNotFoundException(experimentID);
+            if (experiment == null) {
+                throw new ExperimentNotFoundException(experimentID);
+            }
+
+            authorization.checkUserPermissions(userName, experiment.getApplicationName(), UPDATE);
+
+            LOGGER.warn("Bucket edited: user " + userName.toString()
+                    + " is batch editing buckets for experiment " + experimentID.toString());
+
+            UserInfo user = authorization.getUserInfo(userName);
+            BucketList bucketList1 = buckets.updateBucketBatch(experimentID, bucketList, user);
+
+            return httpHeader.headers().entity(bucketList1).build();
+        } catch (Exception exception) {
+            LOGGER.error("putBucket failed for experimentID={}, bucketList={} with error:",
+                    experimentID, bucketList, exception);
+            throw exception;
         }
-
-        authorization.checkUserPermissions(userName, experiment.getApplicationName(), UPDATE);
-
-        LOGGER.warn("Bucket edited: user " + userName.toString() + " is batch editing buckets for experiment " + experimentID
-                .toString());
-
-        UserInfo user = authorization.getUserInfo(userName);
-        BucketList bucketList1 = buckets.updateBucketBatch(experimentID, bucketList, user);
-
-        return httpHeader.headers().entity(bucketList1).build();
     }
 
     /**
@@ -572,35 +649,43 @@ public class ExperimentsResource {
     @ApiOperation(value = "Return a single bucket for an experiment",
             response = Bucket.class)
     @Timed
-    public Response getBucket(@PathParam("experimentID")
-                              @ApiParam(value = "Experiment ID")
-                              final Experiment.ID experimentID,
+    public Response getBucket(
+            @PathParam("experimentID")
+            @ApiParam(value = "Experiment ID")
+            final Experiment.ID experimentID,
 
-                              @PathParam("bucketLabel")
-                              @ApiParam(value = "Bucket Label")
-                              final Bucket.Label bucketLabel,
+            @PathParam("bucketLabel")
+            @ApiParam(value = "Bucket Label")
+            final Bucket.Label bucketLabel,
 
-                              @HeaderParam(AUTHORIZATION)
-                              @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                              final String authorizationHeader) {
-        if (authorizationHeader != null) {
-            Username userName = authorization.getUser(authorizationHeader);
-            Experiment experiment = experiments.getExperiment(experimentID);
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) {
+        try {
+            //TODO: Duplicated code: move to a separate method
+            if (authorizationHeader != null) {
+                Username userName = authorization.getUser(authorizationHeader);
+                Experiment experiment = experiments.getExperiment(experimentID);
 
-            if (experiment == null) {
-                throw new ExperimentNotFoundException(experimentID);
+                if (experiment == null) {
+                    throw new ExperimentNotFoundException(experimentID);
+                }
+
+                authorization.checkUserPermissions(userName, experiment.getApplicationName(), READ);
             }
 
-            authorization.checkUserPermissions(userName, experiment.getApplicationName(), READ);
+            Bucket bucket = buckets.getBucket(experimentID, bucketLabel);
+
+            if (bucket == null) {
+                throw new BucketNotFoundException(bucketLabel);
+            }
+
+            return httpHeader.headers().entity(bucket).build();
+        } catch (Exception exception) {
+            LOGGER.error("getBucket failed for experimentID={}, bucketLabel={} with error:",
+                    experimentID, bucketLabel, exception);
+            throw exception;
         }
-
-        Bucket bucket = buckets.getBucket(experimentID, bucketLabel);
-
-        if (bucket == null) {
-            throw new BucketNotFoundException(bucketLabel);
-        }
-
-        return httpHeader.headers().entity(bucket).build();
     }
 
     /**
@@ -621,36 +706,44 @@ public class ExperimentsResource {
             notes = "Can only update buckets for an experiment that is in DRAFT state.",
             response = Bucket.class)
     @Timed
-    public Response putBucket(@PathParam("experimentID")
-                              @ApiParam(value = "Experiment ID")
-                              final Experiment.ID experimentID,
+    public Response putBucket(
+            @PathParam("experimentID")
+            @ApiParam(value = "Experiment ID")
+            final Experiment.ID experimentID,
 
-                              @PathParam("bucketLabel")
-                              @ApiParam(value = "Bucket Label")
-                              final Bucket.Label bucketLabel,
+            @PathParam("bucketLabel")
+            @ApiParam(value = "Bucket Label")
+            final Bucket.Label bucketLabel,
 
-                              @ApiParam(required = true, defaultValue = DEFAULT_PUTBUCK)
-                              final Bucket bucketEntity,
+            @ApiParam(required = true, defaultValue = DEFAULT_PUTBUCK)
+            final Bucket bucketEntity,
 
-                              @HeaderParam(AUTHORIZATION)
-                              @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                              final String authorizationHeader) {
-        Username userName = authorization.getUser(authorizationHeader);
-        Experiment experiment = experiments.getExperiment(experimentID);
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) {
+        try {
+            Username userName = authorization.getUser(authorizationHeader);
+            Experiment experiment = experiments.getExperiment(experimentID);
 
-        // Throw an exception if the current experiment is not valid
-        if (experiment == null) {
-            throw new ExperimentNotFoundException(experimentID);
+            // Throw an exception if the current experiment is not valid
+            if (experiment == null) {
+                throw new ExperimentNotFoundException(experimentID);
+            }
+
+            authorization.checkUserPermissions(userName, experiment.getApplicationName(), UPDATE);
+
+            UserInfo user = authorization.getUserInfo(userName);
+            Bucket bucket = buckets.updateBucket(experimentID, bucketLabel, bucketEntity, user);
+
+            assert bucket != null : "Error updating bucket";
+
+            return httpHeader.headers().entity(bucket).build();
+        } catch (Exception exception) {
+            LOGGER.error("putBucket failed for experimentID={}, bucketLabel={}, bucketEntity={} with error:",
+                    experimentID, bucketLabel, bucketEntity,
+                    exception);
+            throw exception;
         }
-
-        authorization.checkUserPermissions(userName, experiment.getApplicationName(), UPDATE);
-
-        UserInfo user = authorization.getUserInfo(userName);
-        Bucket bucket = buckets.updateBucket(experimentID, bucketLabel, bucketEntity, user);
-
-        assert bucket != null : "Error updating bucket";
-
-        return httpHeader.headers().entity(bucket).build();
     }
 
     /**
@@ -671,37 +764,45 @@ public class ExperimentsResource {
             notes = "Can only close a bucket which is not in DRAFT state",
             response = Bucket.class)
     @Timed
-    public Response putBucketState(@PathParam("experimentID")
-                                   @ApiParam(value = "Experiment ID")
-                                   final Experiment.ID experimentID,
+    public Response putBucketState(
+            @PathParam("experimentID")
+            @ApiParam(value = "Experiment ID")
+            final Experiment.ID experimentID,
 
-                                   @PathParam("bucketLabel")
-                                   @ApiParam(value = "Bucket Label")
-                                   final Bucket.Label bucketLabel,
+            @PathParam("bucketLabel")
+            @ApiParam(value = "Bucket Label")
+            final Bucket.Label bucketLabel,
 
-                                   @PathParam("desiredState")
-                                   @ApiParam(value = "Desired Bucket State")
-                                   final Bucket.State desiredState,
+            @PathParam("desiredState")
+            @ApiParam(value = "Desired Bucket State")
+            final Bucket.State desiredState,
 
-                                   @HeaderParam(AUTHORIZATION)
-                                   @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                   final String authorizationHeader) {
-        Username userName = authorization.getUser(authorizationHeader);
-        Experiment experiment = experiments.getExperiment(experimentID);
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) {
+        try {
+            Username userName = authorization.getUser(authorizationHeader);
+            Experiment experiment = experiments.getExperiment(experimentID);
 
-        // Throw an exception if the current experiment is not valid
-        if (experiment == null) {
-            throw new ExperimentNotFoundException(experimentID);
+            // Throw an exception if the current experiment is not valid
+            if (experiment == null) {
+                throw new ExperimentNotFoundException(experimentID);
+            }
+
+            authorization.checkUserPermissions(userName, experiment.getApplicationName(), UPDATE);
+
+            UserInfo user = authorization.getUserInfo(userName);
+            Bucket bucket = buckets.updateBucketState(experimentID, bucketLabel, desiredState, user);
+
+            assert bucket != null : "Error updating bucket state";
+
+            return httpHeader.headers().entity(bucket).build();
+        } catch (Exception exception) {
+            LOGGER.error("putBucketState failed for experimentID={}, bucketLabel={}, desiredState={} with error:",
+                    experimentID, bucketLabel, desiredState,
+                    exception);
+            throw exception;
         }
-
-        authorization.checkUserPermissions(userName, experiment.getApplicationName(), UPDATE);
-
-        UserInfo user = authorization.getUserInfo(userName);
-        Bucket bucket = buckets.updateBucketState(experimentID, bucketLabel, desiredState, user);
-
-        assert bucket != null : "Error updating bucket state";
-
-        return httpHeader.headers().entity(bucket).build();
     }
 
     /**
@@ -720,31 +821,38 @@ public class ExperimentsResource {
             notes = "Can only delete a bucket for experiment that is in DRAFT state.  The default call is " +
                     "safe to use, but other than that please only delete buckets which you have created.")
     @Timed
-    public Response deleteBucket(@PathParam("experimentID")
-                                 @ApiParam(value = "Experiment ID")
-                                 final Experiment.ID experimentID,
+    public Response deleteBucket(
+            @PathParam("experimentID")
+            @ApiParam(value = "Experiment ID")
+            final Experiment.ID experimentID,
 
-                                 @PathParam("bucketLabel")
-                                 @ApiParam(value = "Bucket Label")
-                                 final Bucket.Label bucketLabel,
+            @PathParam("bucketLabel")
+            @ApiParam(value = "Bucket Label")
+            final Bucket.Label bucketLabel,
 
-                                 @HeaderParam(AUTHORIZATION)
-                                 @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                 final String authorizationHeader) {
-        Username userName = authorization.getUser(authorizationHeader);
-        Experiment experiment = experiments.getExperiment(experimentID);
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) {
+        try {
+            Username userName = authorization.getUser(authorizationHeader);
+            Experiment experiment = experiments.getExperiment(experimentID);
 
-        if (experiment == null) {
-            throw new ExperimentNotFoundException(experimentID);
+            if (experiment == null) {
+                throw new ExperimentNotFoundException(experimentID);
+            }
+
+            authorization.checkUserPermissions(userName, experiment.getApplicationName(), Permission.DELETE);
+
+            UserInfo user = authorization.getUserInfo(userName);
+
+            buckets.deleteBucket(experimentID, bucketLabel, user);
+
+            return httpHeader.headers(NO_CONTENT).build();
+        } catch (Exception exception) {
+            LOGGER.error("deleteBucket failed for experimentID={}, bucketLabel={} with error:",
+                    experimentID, bucketLabel, exception);
+            throw exception;
         }
-
-        authorization.checkUserPermissions(userName, experiment.getApplicationName(), Permission.DELETE);
-
-        UserInfo user = authorization.getUserInfo(userName);
-
-        buckets.deleteBucket(experimentID, bucketLabel, user);
-
-        return httpHeader.headers(NO_CONTENT).build();
     }
 
     /**
@@ -762,26 +870,33 @@ public class ExperimentsResource {
             notes = "A wrapper for POST API with default parameters",
             response = StreamingOutput.class)
     @Timed
-    public Response exportActions_get(@PathParam("experimentID")
-                                      @ApiParam(value = "Experiment ID")
-                                      final Experiment.ID experimentID,
+    public Response exportActions_get(
+            @PathParam("experimentID")
+            @ApiParam(value = "Experiment ID")
+            final Experiment.ID experimentID,
 
-                                      @HeaderParam(AUTHORIZATION)
-                                      @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                      final String authorizationHeader) {
-        //TODO: this check is redundant because it is checked again in regardless is exportActions
-        if (authorizationHeader != null) {
-            Username userName = authorization.getUser(authorizationHeader);
-            Experiment experiment = experiments.getExperiment(experimentID);
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) {
+        try {
+            //TODO: this check is redundant because it is checked again in regardless is exportActions
+            //TODO: Duplicate code
+            if (authorizationHeader != null) {
+                Username userName = authorization.getUser(authorizationHeader);
+                Experiment experiment = experiments.getExperiment(experimentID);
 
-            if (experiment == null) {
-                throw new ExperimentNotFoundException(experimentID);
+                if (experiment == null) {
+                    throw new ExperimentNotFoundException(experimentID);
+                }
+
+                authorization.checkUserPermissions(userName, experiment.getApplicationName(), READ);
             }
 
-            authorization.checkUserPermissions(userName, experiment.getApplicationName(), READ);
+            return exportActions(experimentID, new Parameters(), authorizationHeader);
+        } catch (Exception exception) {
+            LOGGER.error("exportActions_get failed for experimentID={} with error:", experimentID, exception);
+            throw exception;
         }
-
-        return exportActions(experimentID, new Parameters(), authorizationHeader);
     }
 
     /**
@@ -800,32 +915,36 @@ public class ExperimentsResource {
             notes = "Download all event records for a given experiment in a tab-delimited text format.",
             response = StreamingOutput.class)
     @Timed
-    public Response exportActions(@PathParam("experimentID")
-                                  @ApiParam(value = "Experiment ID")
-                                  final Experiment.ID experimentID,
+    public Response exportActions(
+            @PathParam("experimentID")
+            @ApiParam(value = "Experiment ID")
+            final Experiment.ID experimentID,
 
-                                  final Parameters parameters,
+            final Parameters parameters,
 
-                                  @HeaderParam(AUTHORIZATION)
-                                  @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                  final String authorizationHeader) {
-        Username userName = authorization.getUser(authorizationHeader);
-        Experiment experiment = experiments.getExperiment(experimentID);
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) {
+        try {
+            Username userName = authorization.getUser(authorizationHeader);
+            Experiment experiment = experiments.getExperiment(experimentID);
 
-        // Throw an exception if the current experiment is not valid
-        if (experiment == null) {
-            throw new ExperimentNotFoundException(experimentID);
+            // Throw an exception if the current experiment is not valid
+            if (experiment == null) {
+                throw new ExperimentNotFoundException(experimentID);
+            }
+
+            authorization.checkUserPermissions(userName, experiment.getApplicationName(), READ);
+
+            StreamingOutput stream = export.getEventStream(experimentID, parameters);
+
+            return httpHeader.headers().
+                    header("Content-Disposition", "attachment; filename=\"events.csv\"").
+                    entity(stream).type(TEXT_PLAIN).build();
+        } catch (Exception exception) {
+            LOGGER.error("exportActions failed for experimentID={} with error:", experimentID, exception);
+            throw exception;
         }
-
-        authorization.checkUserPermissions(userName, experiment.getApplicationName(), READ);
-
-        StreamingOutput stream = export.getEventStream(experimentID, parameters);
-
-        return httpHeader.headers()
-                .header("Content-Disposition", "attachment; filename=\"events.csv\"")
-                .entity(stream)
-                .type(TEXT_PLAIN)
-                .build();
     }
 
     /**
@@ -847,32 +966,38 @@ public class ExperimentsResource {
                     "the same application")
 //          response = ??, //todo: update with proper object in @ApiOperation
     @Timed
-    public Response createExclusions(@PathParam("experimentID")
-                                     @ApiParam(value = "Experiment ID")
-                                     final Experiment.ID experimentID,
+    public Response createExclusions(
+            @PathParam("experimentID")
+            @ApiParam(value = "Experiment ID")
+            final Experiment.ID experimentID,
 
-                                     final ExperimentIDList experimentIDList,
+            final ExperimentIDList experimentIDList,
 
-                                     @HeaderParam(AUTHORIZATION)
-                                     @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                     final String authorizationHeader) {
-        Username userName = authorization.getUser(authorizationHeader);
-        Experiment experiment = experiments.getExperiment(experimentID);
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) {
+        try {
+            Username userName = authorization.getUser(authorizationHeader);
+            Experiment experiment = experiments.getExperiment(experimentID);
 
-        // Throw an exception if the current experiment is not valid
-        if (experiment == null) {
-            throw new ExperimentNotFoundException(experimentID);
+            // Throw an exception if the current experiment is not valid
+            if (experiment == null) {
+                throw new ExperimentNotFoundException(experimentID);
+            }
+
+            authorization.checkUserPermissions(userName, experiment.getApplicationName(), CREATE);
+
+            //this is the user that triggered the event and will be used for logging
+            UserInfo user = authorization.getUserInfo(userName);
+            List<Map> exclusions = mutex.createExclusions(experimentID, experimentIDList, user);
+
+            return httpHeader.headers(CREATED)
+                    .entity(ImmutableMap.<String, Object>builder().put("exclusions", exclusions).build()).build();
+        } catch (Exception exception) {
+            LOGGER.error("createExclusions failed for experimentID={}, experimentIDList={} with error:",
+                    experimentID, experimentIDList, exception);
+            throw exception;
         }
-
-        authorization.checkUserPermissions(userName, experiment.getApplicationName(), CREATE);
-
-        //this is the user that triggered the event and will be used for logging
-        UserInfo user = authorization.getUserInfo(userName);
-        List<Map> exclusions = mutex.createExclusions(experimentID, experimentIDList, user);
-
-        return httpHeader.headers(CREATED)
-                .entity(ImmutableMap.<String, Object>builder().put("exclusions", exclusions).build())
-                .build();
     }
 
     /**
@@ -891,31 +1016,38 @@ public class ExperimentsResource {
                     "exists.  This operation is symmetric")
 //            response = ??, //todo: update with proper object in @ApiOperation
     @Timed
-    public Response removeExclusions(@PathParam("experimentID_1")
-                                     @ApiParam(value = "Experiment ID 1")
-                                     final Experiment.ID experimentID_1,
+    public Response removeExclusions(
+            @PathParam("experimentID_1")
+            @ApiParam(value = "Experiment ID 1")
+            final Experiment.ID experimentID_1,
 
-                                     @PathParam("experimentID_2")
-                                     @ApiParam(value = "Experiment ID 2")
-                                     final Experiment.ID experimentID_2,
+            @PathParam("experimentID_2")
+            @ApiParam(value = "Experiment ID 2")
+            final Experiment.ID experimentID_2,
 
-                                     @HeaderParam(AUTHORIZATION)
-                                     @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                     final String authorizationHeader) {
-        //todo: do we want to check that exp1 and exp2 are in the same app?
-        Username userName = authorization.getUser(authorizationHeader);
-        Experiment experiment = experiments.getExperiment(experimentID_1);
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) {
+        try {
+            //todo: do we want to check that exp1 and exp2 are in the same app?
+            Username userName = authorization.getUser(authorizationHeader);
+            Experiment experiment = experiments.getExperiment(experimentID_1);
 
-        // Throw an exception if the current experiment is not valid
-        if (experiment == null) {
-            throw new ExperimentNotFoundException(experimentID_1);
+            // Throw an exception if the current experiment is not valid
+            if (experiment == null) {
+                throw new ExperimentNotFoundException(experimentID_1);
+            }
+
+            authorization.checkUserPermissions(userName, experiment.getApplicationName(), Permission.DELETE);
+            //this is the user that triggered the event and will be used for logging
+            mutex.deleteExclusion(experimentID_1, experimentID_2, authorization.getUserInfo(userName));
+
+            return httpHeader.headers(NO_CONTENT).build();
+        } catch (Exception exception) {
+            LOGGER.error("removeExclusions failed for experimentID_1={}, experimentID_2={} with error:",
+                    experimentID_1, experimentID_2, exception);
+            throw exception;
         }
-
-        authorization.checkUserPermissions(userName, experiment.getApplicationName(), Permission.DELETE);
-        //this is the user that triggered the event and will be used for logging
-        mutex.deleteExclusion(experimentID_1, experimentID_2, authorization.getUserInfo(userName));
-
-        return httpHeader.headers(NO_CONTENT).build();
     }
 
     /**
@@ -937,48 +1069,58 @@ public class ExperimentsResource {
                     "mutually exclusive with input experiment.")
     //            response = ??, //todo: update with proper object in @ApiOperation
     @Timed
-    public Response getExclusions(@PathParam("experimentID")
-                                  @ApiParam(value = "Experiment ID")
-                                  final Experiment.ID experimentID,
+    public Response getExclusions(
+            @PathParam("experimentID")
+            @ApiParam(value = "Experiment ID")
+            final Experiment.ID experimentID,
 
-                                  @QueryParam("showAll")
-                                  @DefaultValue("true")
-                                  final Boolean showAll,
+            @QueryParam("showAll")
+            @DefaultValue("true")
+            final Boolean showAll,
 
-                                  @QueryParam("exclusive")
-                                  @DefaultValue("true")
-                                  final Boolean exclusive,
+            @QueryParam("exclusive")
+            @DefaultValue("true")
+            final Boolean exclusive,
 
-                                  @HeaderParam(AUTHORIZATION)
-                                  @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                  final String authorizationHeader) {
-        if (authorizationHeader != null) {
-            Username userName = authorization.getUser(authorizationHeader);
-            Experiment experiment = experiments.getExperiment(experimentID);
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) {
+        try {
+            //TODO: Duplicate code. Move to separate method
+            if (authorizationHeader != null) {
+                Username userName = authorization.getUser(authorizationHeader);
+                Experiment experiment = experiments.getExperiment(experimentID);
 
-            if (experiment == null) {
-                throw new ExperimentNotFoundException(experimentID);
-            }
-
-            authorization.checkUserPermissions(userName, experiment.getApplicationName(), READ);
-        }
-
-        ExperimentList experimentList = exclusive ? mutex.getExclusions(experimentID) : mutex.getNotExclusions(experimentID);
-        ExperimentList returnedExperiments = experimentList;
-
-        if (!showAll) {
-            ExperimentList allExperiments = new ExperimentList();
-
-            for (Experiment experiment : experimentList.getExperiments()) {
-                if (!experiment.getState().equals(TERMINATED) && !experiment.getState().equals(DELETED)) {
-                    allExperiments.addExperiment(experiment);
+                if (experiment == null) {
+                    throw new ExperimentNotFoundException(experimentID);
                 }
+
+                authorization.checkUserPermissions(userName, experiment.getApplicationName(), READ);
             }
 
-            returnedExperiments = allExperiments;
-        }
+            ExperimentList experimentList =
+                    exclusive ? mutex.getExclusions(experimentID) : mutex.getNotExclusions(experimentID);
+            ExperimentList returnedExperiments = experimentList;
 
-        return httpHeader.headers().entity(returnedExperiments).build();
+            if (!showAll) {
+                ExperimentList allExperiments = new ExperimentList();
+
+                for (Experiment experiment : experimentList.getExperiments()) {
+                    if (!experiment.getState().equals(TERMINATED) && !experiment.getState().equals(DELETED)) {
+                        allExperiments.addExperiment(experiment);
+                    }
+                }
+
+                returnedExperiments = allExperiments;
+            }
+
+            return httpHeader.headers().entity(returnedExperiments).build();
+        } catch (Exception exception) {
+            LOGGER.error("getExclusions failed for experimentID={}, showAll={}, exclusive={} with error:",
+                    experimentID, showAll, exclusive,
+                    exception);
+            throw exception;
+        }
     }
 
     /**
@@ -996,28 +1138,35 @@ public class ExperimentsResource {
             notes = "Experiments can only be placed in a priority list DRAFT, RUNNING, and PAUSED states within" +
                     "the same application")
     @Timed
-    public Response setPriority(@PathParam("experimentID")
-                                @ApiParam(value = "Experiment ID")
-                                final Experiment.ID experimentID,
+    public Response setPriority(
+            @PathParam("experimentID")
+            @ApiParam(value = "Experiment ID")
+            final Experiment.ID experimentID,
 
-                                @PathParam("priorityPosition")
-                                final int priorityNum,
+            @PathParam("priorityPosition")
+            final int priorityNum,
 
-                                @HeaderParam(AUTHORIZATION)
-                                @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                final String authorizationHeader) {
-        Username userName = authorization.getUser(authorizationHeader);
-        Experiment experiment = experiments.getExperiment(experimentID);
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) {
+        try {
+            Username userName = authorization.getUser(authorizationHeader);
+            Experiment experiment = experiments.getExperiment(experimentID);
 
-        // Throw an exception if the current experiment is not valid
-        if (experiment == null) {
-            throw new ExperimentNotFoundException(experimentID);
+            // Throw an exception if the current experiment is not valid
+            if (experiment == null) {
+                throw new ExperimentNotFoundException(experimentID);
+            }
+
+            authorization.checkUserPermissions(userName, experiment.getApplicationName(), CREATE);
+            priorities.setPriority(experimentID, priorityNum);
+
+            return httpHeader.headers(CREATED).build();
+        } catch (Exception exception) {
+            LOGGER.error("setPriority failed for experimentID={}, priorityNum={} with error:",
+                    experimentID, priorityNum, exception);
+            throw exception;
         }
-
-        authorization.checkUserPermissions(userName, experiment.getApplicationName(), CREATE);
-        priorities.setPriority(experimentID, priorityNum);
-
-        return httpHeader.headers(CREATED).build();
     }
 
     /**
@@ -1042,101 +1191,110 @@ public class ExperimentsResource {
                     "assignments as well as bucket assignments.",
             response = StreamingOutput.class)
     @Timed
-    public Response exportAssignments(@PathParam("experimentID")
-                                      @ApiParam(value = "Experiment ID")
-                                      final Experiment.ID experimentID,
+    public Response exportAssignments(
+            @PathParam("experimentID")
+            @ApiParam(value = "Experiment ID")
+            final Experiment.ID experimentID,
 
-                                      @QueryParam("context")
-                                      @DefaultValue("PROD")
-                                      @ApiParam(value = "context for the experiment, eg QA, PROD")
-                                      final Context context,
+            @QueryParam("context")
+            @DefaultValue("PROD")
+            @ApiParam(value = "context for the experiment, eg QA, PROD")
+            final Context context,
 
-                                      @QueryParam("ignoreNullBucket")
-                                      @DefaultValue("false")
-                                      @ApiParam(value = "Filtering on the null bucket")
-                                      final String ignoreStringNullBucket,
+            @QueryParam("ignoreNullBucket")
+            @DefaultValue("false")
+            @ApiParam(value = "Filtering on the null bucket")
+            final String ignoreStringNullBucket,
 
-                                      @QueryParam("fromDate")
-                                      @ApiParam(value = "from date to download assignments")
-                                      final String fromStringDate,
+            @QueryParam("fromDate")
+            @ApiParam(value = "from date to download assignments")
+            final String fromStringDate,
 
-                                      @QueryParam("toDate")
-                                      @ApiParam(value = "to date to download assignments")
-                                      final String toStringDate,
+            @QueryParam("toDate")
+            @ApiParam(value = "to date to download assignments")
+            final String toStringDate,
 
-                                      @QueryParam("timeZone")
-                                      @ApiParam(value = "value of the time zone")
-                                      final String timeZoneString,
+            @QueryParam("timeZone")
+            @ApiParam(value = "value of the time zone")
+            final String timeZoneString,
 
-                                      @HeaderParam(AUTHORIZATION)
-                                      @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                      final String authorizationHeader) throws ParseException {
-        if (authorizationHeader != null) {
-            Username userName = authorization.getUser(authorizationHeader);
-            Experiment experiment = experiments.getExperiment(experimentID);
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) throws ParseException {
+        try {
+            //TODO: Duplicate code: Move to separate method
+            if (authorizationHeader != null) {
+                Username userName = authorization.getUser(authorizationHeader);
+                Experiment experiment = experiments.getExperiment(experimentID);
 
-            if (experiment == null) {
-                throw new ExperimentNotFoundException(experimentID);
+                if (experiment == null) {
+                    throw new ExperimentNotFoundException(experimentID);
+                }
+
+                authorization.checkUserPermissions(userName, experiment.getApplicationName(), READ);
             }
 
-            authorization.checkUserPermissions(userName, experiment.getApplicationName(), READ);
-        }
+            //Initializing the parameters
+            Parameters parameters = new Parameters();
+            //Setting the filtering behavior on the null buckets --default is set to get all the assignments
+            Boolean ignoreNullBucket = FALSE;
 
-        //Initializing the parameters
-        Parameters parameters = new Parameters();
-        //Setting the filtering behavior on the null buckets --default is set to get all the assignments
-        Boolean ignoreNullBucket = FALSE;
-
-        if (ignoreStringNullBucket != null) {
-            ignoreNullBucket = Boolean.parseBoolean(ignoreStringNullBucket);
-        }
-
-        parameters.setTimeZone(getTimeZone(defaultTimezone));
-
-        //Input format of the dates
-        SimpleDateFormat sdf = new SimpleDateFormat(defaultTimeFormat);
-
-        if (timeZoneString != null) {
-            TimeZone timeZone = getTimeZone(timeZoneString);
-
-            //Note: TimeZone.getTimeZone doesn't have an inbuilt error catch. Hence, the below check is necessary.
-            // Allowed time zones http://tutorials.jenkov.com/java-date-time/java-util-timezone.html
-            if (!timeZone.getID().equals(timeZoneString)) {
-                throw new TimeZoneFormatException(timeZoneString);
+            if (ignoreStringNullBucket != null) {
+                ignoreNullBucket = Boolean.parseBoolean(ignoreStringNullBucket);
             }
 
-            sdf.setTimeZone(timeZone);
-            // Resetting the default time zone value to user entered time zone.
-            parameters.setTimeZone(timeZone);
-        }
+            parameters.setTimeZone(getTimeZone(defaultTimezone));
 
-        if (fromStringDate != null) {
-            try {
-                Date fromDate = sdf.parse(fromStringDate);
+            //Input format of the dates
+            SimpleDateFormat sdf = new SimpleDateFormat(defaultTimeFormat);
 
-                parameters.setFromTime(fromDate);
-            } catch (ParseException e) {
-                throw new TimeFormatException(fromStringDate);
+            if (timeZoneString != null) {
+                TimeZone timeZone = getTimeZone(timeZoneString);
+
+                //Note: TimeZone.getTimeZone doesn't have an inbuilt error catch. Hence, the below check is necessary.
+                // Allowed time zones http://tutorials.jenkov.com/java-date-time/java-util-timezone.html
+                if (!timeZone.getID().equals(timeZoneString)) {
+                    throw new TimeZoneFormatException(timeZoneString);
+                }
+
+                sdf.setTimeZone(timeZone);
+                // Resetting the default time zone value to user entered time zone.
+                parameters.setTimeZone(timeZone);
             }
-        }
 
-        if (toStringDate != null) {
-            try {
-                Date toDate = sdf.parse(toStringDate);
+            if (fromStringDate != null) {
+                try {
+                    Date fromDate = sdf.parse(fromStringDate);
 
-                parameters.setToTime(toDate);
-            } catch (ParseException e) {
-                throw new TimeFormatException(toStringDate);
+                    parameters.setFromTime(fromDate);
+                } catch (ParseException e) {
+                    throw new TimeFormatException(fromStringDate);
+                }
             }
+
+            if (toStringDate != null) {
+                try {
+                    Date toDate = sdf.parse(toStringDate);
+
+                    parameters.setToTime(toDate);
+                } catch (ParseException e) {
+                    throw new TimeFormatException(toStringDate);
+                }
+            }
+
+            StreamingOutput streamAssignment = assignments
+                    .getAssignmentStream(experimentID, context, parameters, ignoreNullBucket);
+
+            return httpHeader.headers()
+                    .header("Content-Disposition", "attachment; filename =\"assignments.csv\"")
+                    .entity(streamAssignment).build();
+        } catch (Exception exception) {
+            LOGGER.error("exportAssignments failed for experimentID={}, context={}, ignoreStringNullBucket={}," +
+                            " fromStringDate={}, toStringDate={}, timeZoneString={} with error:",
+                    experimentID, context, ignoreStringNullBucket, fromStringDate, toStringDate, timeZoneString,
+                    exception);
+            throw exception;
         }
-
-        StreamingOutput streamAssignment = assignments.getAssignmentStream(experimentID, context, parameters,
-                ignoreNullBucket);
-
-        return httpHeader.headers()
-                .header("Content-Disposition", "attachment; filename =\"assignments.csv\"")
-                .entity(streamAssignment)
-                .build();
     }
 
     /**
@@ -1153,27 +1311,34 @@ public class ExperimentsResource {
     @ApiOperation(value = "Post a list of pages to an experiment",
             notes = "Pages can only be added to an experiment with DRAFT, RUNNING, or PAUSED states")
     @Timed
-    public Response postPages(@PathParam("experimentID")
-                              @ApiParam(value = "Experiment ID")
-                              final Experiment.ID experimentID,
+    public Response postPages(
+            @PathParam("experimentID")
+            @ApiParam(value = "Experiment ID")
+            final Experiment.ID experimentID,
 
-                              final ExperimentPageList experimentPageList,
+            final ExperimentPageList experimentPageList,
 
-                              @HeaderParam(AUTHORIZATION)
-                              @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                              final String authorizationHeader) {
-        Username userName = authorization.getUser(authorizationHeader);
-        Experiment experiment = experiments.getExperiment(experimentID);
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) {
+        try {
+            Username userName = authorization.getUser(authorizationHeader);
+            Experiment experiment = experiments.getExperiment(experimentID);
 
-        // Throw an exception if the current experiment is not valid
-        if (experiment == null) {
-            throw new ExperimentNotFoundException(experimentID);
+            // Throw an exception if the current experiment is not valid
+            if (experiment == null) {
+                throw new ExperimentNotFoundException(experimentID);
+            }
+
+            authorization.checkUserPermissions(userName, experiment.getApplicationName(), CREATE);
+            pages.postPages(experimentID, experimentPageList, authorization.getUserInfo(userName));
+
+            return httpHeader.headers(CREATED).build();
+        } catch (Exception exception) {
+            LOGGER.error("postPages failed for experimentID={}, experimentPageList={} with error:",
+                    experimentID, experimentPageList, exception);
+            throw exception;
         }
-
-        authorization.checkUserPermissions(userName, experiment.getApplicationName(), CREATE);
-        pages.postPages(experimentID, experimentPageList, authorization.getUserInfo(userName));
-
-        return httpHeader.headers(CREATED).build();
     }
 
     /**
@@ -1189,29 +1354,36 @@ public class ExperimentsResource {
     @ApiOperation(value = "Remove a page from an experiment",
             notes = "Pages can only be added to an experiment with DRAFT, RUNNING, or PAUSED states")
     @Timed
-    public Response deletePage(@PathParam("experimentID")
-                               @ApiParam(value = "Experiment ID")
-                               final Experiment.ID experimentID,
+    public Response deletePage(
+            @PathParam("experimentID")
+            @ApiParam(value = "Experiment ID")
+            final Experiment.ID experimentID,
 
-                               @PathParam("pageName")
-                               @ApiParam(value = "Page name where the experiment will appear")
-                               final Page.Name pageName,
+            @PathParam("pageName")
+            @ApiParam(value = "Page name where the experiment will appear")
+            final Page.Name pageName,
 
-                               @HeaderParam(AUTHORIZATION)
-                               @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                               final String authorizationHeader) {
-        Username userName = authorization.getUser(authorizationHeader);
-        Experiment experiment = experiments.getExperiment(experimentID);
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) {
+        try {
+            Username userName = authorization.getUser(authorizationHeader);
+            Experiment experiment = experiments.getExperiment(experimentID);
 
-        // Throw an exception if the current experiment is not valid
-        if (experiment == null) {
-            throw new ExperimentNotFoundException(experimentID);
+            // Throw an exception if the current experiment is not valid
+            if (experiment == null) {
+                throw new ExperimentNotFoundException(experimentID);
+            }
+
+            authorization.checkUserPermissions(userName, experiment.getApplicationName(), Permission.DELETE);
+            pages.deletePage(experimentID, pageName, authorization.getUserInfo(userName));
+
+            return httpHeader.headers(NO_CONTENT).build();
+        } catch (Exception exception) {
+            LOGGER.error("deletePage failed for experimentID={}, pageName={} with error:",
+                    experimentID, pageName, exception);
+            throw exception;
         }
-
-        authorization.checkUserPermissions(userName, experiment.getApplicationName(), Permission.DELETE);
-        pages.deletePage(experimentID, pageName, authorization.getUserInfo(userName));
-
-        return httpHeader.headers(NO_CONTENT).build();
     }
 
     /**
@@ -1225,27 +1397,34 @@ public class ExperimentsResource {
     @Path("{experimentID}/pages")
     @ApiOperation(value = "Get the associated pages information for a given experiment ID")
     @Timed
-    public Response getExperimentPages(@PathParam("experimentID")
-                                       @ApiParam(value = "Experiment ID")
-                                       final Experiment.ID experimentID,
+    public Response getExperimentPages(
+            @PathParam("experimentID")
+            @ApiParam(value = "Experiment ID")
+            final Experiment.ID experimentID,
 
-                                       @HeaderParam(AUTHORIZATION)
-                                       @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                       final String authorizationHeader) {
-        if (authorizationHeader != null) {
-            Username userName = authorization.getUser(authorizationHeader);
-            Experiment experiment = experiments.getExperiment(experimentID);
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) {
+        try {
+            //TODO: Duplicate code: Move to separate method.
+            if (authorizationHeader != null) {
+                Username userName = authorization.getUser(authorizationHeader);
+                Experiment experiment = experiments.getExperiment(experimentID);
 
-            if (experiment == null) {
-                throw new ExperimentNotFoundException(experimentID);
+                if (experiment == null) {
+                    throw new ExperimentNotFoundException(experimentID);
+                }
+
+                authorization.checkUserPermissions(userName, experiment.getApplicationName(), READ);
             }
 
-            authorization.checkUserPermissions(userName, experiment.getApplicationName(), READ);
+            ExperimentPageList experimentPages = pages.getExperimentPages(experimentID);
+
+            return httpHeader.headers().entity(experimentPages).build();
+        } catch (Exception exception) {
+            LOGGER.error("getExperimentPages failed for experimentID={} with error:", experimentID, exception);
+            throw exception;
         }
-
-        ExperimentPageList experimentPages = pages.getExperimentPages(experimentID);
-
-        return httpHeader.headers().entity(experimentPages).build();
     }
 
     /**
@@ -1260,14 +1439,21 @@ public class ExperimentsResource {
     @ApiOperation(value = "Return all experiments for page for app",
             response = ExperimentList.class)
     @Timed
-    public Response getPageExperiments(@PathParam("applicationName")
-                                       @ApiParam(value = "Application Name")
-                                       final Application.Name applicationName,
+    public Response getPageExperiments(
+            @PathParam("applicationName")
+            @ApiParam(value = "Application Name")
+            final Application.Name applicationName,
 
-                                       @PathParam("pageName")
-                                       @ApiParam(value = "Page name where the experiment will appear")
-                                       final Page.Name pageName) {
-        return httpHeader.headers().entity(pages.getPageExperiments(applicationName, pageName)).build();
+            @PathParam("pageName")
+            @ApiParam(value = "Page name where the experiment will appear")
+            final Page.Name pageName) {
+        try {
+            return httpHeader.headers().entity(pages.getPageExperiments(applicationName, pageName)).build();
+        } catch (Exception exception) {
+            LOGGER.error("getPageExperiments failed for applicationName={}, pageName={} with error:",
+                    applicationName, pageName, exception);
+            throw exception;
+        }
     }
 
 
@@ -1378,11 +1564,17 @@ public class ExperimentsResource {
      */
     /*test*/ OffsetDateTime parseUIDate(String uiDate, String timezoneOffset, String debugIdentifier) {
         try {
-            return OffsetDateTime.of(LocalDateTime.of(LocalDate.from(DateTimeFormatter.ofPattern("M/d/y").parse(uiDate)), LocalTime.MIDNIGHT), ZoneOffset.of(timezoneOffset));
+            return OffsetDateTime.of(
+                    LocalDateTime.of(LocalDate.from(DateTimeFormatter.ofPattern("M/d/y").parse(uiDate)),
+                            LocalTime.MIDNIGHT), ZoneOffset.of(timezoneOffset));
         } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException(String.format("Can not parse \"%s\" date \"%s\", expecting format M/d/y, e.g. 05/24/2014.", debugIdentifier, uiDate), e);
+            throw new IllegalArgumentException(
+                    String.format("Can not parse \"%s\" date \"%s\", expecting format M/d/y, e.g. 05/24/2014.",
+                            debugIdentifier, uiDate), e);
         } catch (DateTimeException e) {
-            throw new IllegalArgumentException(String.format("No proper timezoneOffset given (\"%s\"), expecting format -0000 or +0000.", timezoneOffset));
+            throw new IllegalArgumentException(
+                    String.format("No proper timezoneOffset given (\"%s\"), expecting format -0000 or +0000.",
+                            timezoneOffset));
         }
     }
 

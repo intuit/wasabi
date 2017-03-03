@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,11 +24,27 @@ import com.intuit.wasabi.analyticsobjects.counts.BucketCounts;
 import com.intuit.wasabi.analyticsobjects.counts.Counts;
 import com.intuit.wasabi.analyticsobjects.counts.ExperimentCounts;
 import com.intuit.wasabi.analyticsobjects.metrics.BinomialMetrics;
-import com.intuit.wasabi.analyticsobjects.statistics.*;
+import com.intuit.wasabi.analyticsobjects.statistics.AbstractContainerStatistics;
+import com.intuit.wasabi.analyticsobjects.statistics.ActionComparisonStatistics;
+import com.intuit.wasabi.analyticsobjects.statistics.ActionProgress;
+import com.intuit.wasabi.analyticsobjects.statistics.ActionRate;
+import com.intuit.wasabi.analyticsobjects.statistics.BucketComparison;
+import com.intuit.wasabi.analyticsobjects.statistics.BucketStatistics;
+import com.intuit.wasabi.analyticsobjects.statistics.ComparisonStatistics;
+import com.intuit.wasabi.analyticsobjects.statistics.DistinguishableEffectSize;
+import com.intuit.wasabi.analyticsobjects.statistics.Estimate;
+import com.intuit.wasabi.analyticsobjects.statistics.ExperimentStatistics;
+import com.intuit.wasabi.analyticsobjects.statistics.Progress;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import org.slf4j.Logger;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static java.lang.Double.NaN;
 import static java.lang.Math.max;
@@ -61,9 +77,9 @@ public class AnalysisToolsImpl implements AnalysisTools {
         try {
             jointRate = metric.estimateRate(uniqueImpressions, container.getJointActionCounts().getUniqueUserCount());
         } catch (IllegalArgumentException iae) {
-        	if ( LOGGER.isWarnEnabled() )
-        		LOGGER.warn("BinomialMetric.estimateRate called with invalid arguments by " +
-                    "AnalyticsService.generateRates: ", iae);
+            if (LOGGER.isWarnEnabled())
+                LOGGER.warn("BinomialMetric.estimateRate called with invalid arguments by " +
+                        "AnalyticsService.generateRates: ", iae);
 
             jointRate = new Estimate(NaN, NaN, NaN);
         }
@@ -77,9 +93,9 @@ public class AnalysisToolsImpl implements AnalysisTools {
             try {
                 rate = metric.estimateRate(uniqueImpressions, action.getUniqueUserCount());
             } catch (IllegalArgumentException iae) {
-            	if ( LOGGER.isWarnEnabled() )
-            		LOGGER.warn("BinomialMetric.estimateRate called with invalid arguments by " +
-                        "AnalyticsService.generateRates: ", iae);
+                if (LOGGER.isWarnEnabled())
+                    LOGGER.warn("BinomialMetric.estimateRate called with invalid arguments by " +
+                            "AnalyticsService.generateRates: ", iae);
 
                 rate = new Estimate(NaN, NaN, NaN);
             }
@@ -139,7 +155,7 @@ public class AnalysisToolsImpl implements AnalysisTools {
                             .withFractionDataCollected(fractionData)
                             .build();
 
-                    jointComparison.setSufficientData( DoubleMath.fuzzyEquals(fractionData, 1.0, Math.ulp(1.0)));
+                    jointComparison.setSufficientData(DoubleMath.fuzzyEquals(fractionData, 1.0, Math.ulp(1.0)));
 
                     computeClearComparisonWinner(bucket, otherBucket, rateDifference, jointComparison);
 
@@ -171,7 +187,7 @@ public class AnalysisToolsImpl implements AnalysisTools {
                             effects = metric.distinguishableEffectSizes(bucketImpressions,
                                     bucketUniqueCounts, otherBucketImpressions, otherBucketUniqueCounts);
                         } catch (IllegalArgumentException iae) {
-                            LOGGER.warn("BinomialMetric.distinguishableEffectSizes called with invalid arguments by AnalyticsService.generateBucketComparisons: ",  iae);
+                            LOGGER.warn("BinomialMetric.distinguishableEffectSizes called with invalid arguments by AnalyticsService.generateBucketComparisons: ", iae);
 
                             effects = new DistinguishableEffectSize(NaN, NaN);
                         }
@@ -183,7 +199,7 @@ public class AnalysisToolsImpl implements AnalysisTools {
                                 .withFractionDataCollected(fractionData)
                                 .build();
 
-                        actionComparison.setSufficientData( DoubleMath.fuzzyEquals(fractionData, 1.0, Math.ulp(1.0)) );
+                        actionComparison.setSufficientData(DoubleMath.fuzzyEquals(fractionData, 1.0, Math.ulp(1.0)));
 
                         computeClearComparisonWinner(bucket, otherBucket, rateDifference, actionComparison);
 

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,7 +16,6 @@
 package com.intuit.wasabi.webapi.jackson;
 
 import com.fasterxml.jackson.core.JsonParser;
-//import org.codehaus.jackson.JsonParser;
 import com.intuit.wasabi.api.jackson.SQLTimestampDeserializer;
 import org.junit.Test;
 
@@ -28,24 +27,26 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+//import org.codehaus.jackson.JsonParser;
+
 /**
  * Test for the {@link SQLTimestampDeserializerTest}
- *
+ * <p>
  * Created by asuckro on 8/20/15.
  */
 public class SQLTimestampDeserializerTest {
 
     @Test
-    public void deserializationFailureTest() throws IOException{
+    public void deserializationFailureTest() throws IOException {
         JsonParser jsonParser = mock(JsonParser.class);
         when(jsonParser.getText()).thenReturn("asdasd");
 
         SQLTimestampDeserializer deserializer = new SQLTimestampDeserializer();
-        try{
+        try {
             deserializer.deserialize(jsonParser, null);
             fail();
 
-        } catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             //this is what we want
         }
 
@@ -53,16 +54,16 @@ public class SQLTimestampDeserializerTest {
     }
 
     @Test
-    public void deserializationTest() throws IOException{
+    public void deserializationTest() throws IOException {
         JsonParser jsonParser = mock(JsonParser.class);
         when(jsonParser.getText()).thenReturn("2014-05-12 12:32:32");
 
         SQLTimestampDeserializer deserializer = new SQLTimestampDeserializer();
-        try{
+        try {
             Timestamp ts = deserializer.deserialize(jsonParser, null);
-            assertEquals(ts,Timestamp.valueOf("2014-05-12 12:32:32"));
+            assertEquals(ts, Timestamp.valueOf("2014-05-12 12:32:32"));
 
-        } catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             fail();
         }
 

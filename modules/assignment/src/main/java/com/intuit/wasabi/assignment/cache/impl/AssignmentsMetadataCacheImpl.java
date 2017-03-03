@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2017 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -52,6 +52,10 @@ import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static com.intuit.wasabi.assignment.AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_HEALTH_CHECK;
+import static com.intuit.wasabi.assignment.AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_REFRESH_CACHE_SERVICE;
+import static com.intuit.wasabi.assignment.AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_REFRESH_INTERVAL;
+import static com.intuit.wasabi.assignment.AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_REFRESH_TASK;
 import static com.intuit.wasabi.assignment.cache.AssignmentsMetadataCache.CACHE_NAME.APP_NAME_N_PAGE_TO_EXPERIMENTS_CACHE;
 import static com.intuit.wasabi.assignment.cache.AssignmentsMetadataCache.CACHE_NAME.APP_NAME_TO_EXPERIMENTS_CACHE;
 import static com.intuit.wasabi.assignment.cache.AssignmentsMetadataCache.CACHE_NAME.APP_NAME_TO_PRIORITIZED_EXPERIMENTS_CACHE;
@@ -61,8 +65,7 @@ import static com.intuit.wasabi.assignment.cache.AssignmentsMetadataCache.CACHE_
 import static java.util.Objects.isNull;
 
 /**
- *  Local cache created and used during user assignment flow.
- *
+ * Local cache created and used during user assignment flow.
  */
 
 public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
@@ -78,13 +81,16 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
     private static final String ASSIGNMENT_METADATA_CACHE_SERVICE_NAME = "AssignmentsMetadataCache";
 
     @Inject
-    public AssignmentsMetadataCacheImpl(@CassandraRepository ExperimentRepository experimentRepository, PrioritiesRepository prioritiesRepository,
-                                        MutexRepository mutexRepository, PagesRepository pagesRepository,
-                                        @Named("AssignmentsMetadataCacheRefreshCacheService") ScheduledExecutorService refreshCacheService,
-                                        @Named("AssignmentsMetadataCacheRefreshInterval") Integer refreshIntervalInMinutes,
-                                        @Named("AssignmentsMetadataCacheRefreshTask") Runnable metadataCacheRefreshTask,
+    public AssignmentsMetadataCacheImpl(@CassandraRepository ExperimentRepository experimentRepository,
+                                        PrioritiesRepository prioritiesRepository,
+                                        MutexRepository mutexRepository,
+                                        PagesRepository pagesRepository,
+                                        @Named(ASSIGNMENTS_METADATA_CACHE_REFRESH_CACHE_SERVICE)
+                                                ScheduledExecutorService refreshCacheService,
+                                        @Named(ASSIGNMENTS_METADATA_CACHE_REFRESH_INTERVAL) Integer refreshIntervalInMinutes,
+                                        @Named(ASSIGNMENTS_METADATA_CACHE_REFRESH_TASK) Runnable metadataCacheRefreshTask,
                                         HealthCheckRegistry healthCheckRegistry,
-                                        @Named("AssignmentsMetadataCacheHealthCheck") HealthCheck metadataCacheHealthCheck,
+                                        @Named(ASSIGNMENTS_METADATA_CACHE_HEALTH_CHECK) HealthCheck metadataCacheHealthCheck,
                                         CacheManager cacheManager) {
 
         this.experimentRepository = experimentRepository;
@@ -101,7 +107,7 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
         healthCheckRegistry.register(ASSIGNMENT_METADATA_CACHE_SERVICE_NAME, metadataCacheHealthCheck);
 
         //Create new caches
-        for(CACHE_NAME name: CACHE_NAME.values()) {
+        for (CACHE_NAME name : CACHE_NAME.values()) {
             cacheManager.addCache(name.toString());
         }
 
@@ -119,7 +125,7 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
             }
             LOGGER.info("Assignments metadata cache has been cleared successfully...");
             return Boolean.TRUE;
-        } catch(Exception e) {
+        } catch (Exception e) {
             LOGGER.error("Exception occurred while clearing a cache...", e);
         }
         return Boolean.FALSE;
@@ -127,7 +133,7 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
 
     /**
      * This method refresh the existing cache (keys) with the updated data from Database.
-     *
+     * <p>
      * This method doesn't add new keys into the cache.
      *
      * @return TRUE if cache is successfully refreshed else FALSE.
@@ -160,7 +166,6 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
 
     /**
      * @param appName
-     *
      * @return List of experiments created in the given application.
      */
     @Override
@@ -168,20 +173,18 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
         List<Experiment> expList = null;
         Cache cache = cacheManager.getCache(APP_NAME_TO_EXPERIMENTS_CACHE.toString());
         Element val = cache.get(appName);
-        if(isNull(val)) {
+        if (isNull(val)) {
             expList = experimentRepository.getExperimentsForApps(singleEntrySet(appName)).get(appName);
             cache.put(new Element(appName, expList));
         } else {
             expList = (List<Experiment>) val.getObjectValue();
         }
 
-        return isNull(expList)?new ArrayList<>():expList;
+        return isNull(expList) ? new ArrayList<>() : expList;
     }
 
     /**
-     *
      * @param expId
-     *
      * @return An experiment for given experiment id.
      */
     @Override
@@ -189,7 +192,7 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
         Experiment exp = null;
         Cache cache = cacheManager.getCache(EXPERIMENT_ID_TO_EXPERIMENT_CACHE.toString());
         Element val = cache.get(expId);
-        if(isNull(val)) {
+        if (isNull(val)) {
             exp = experimentRepository.getExperimentsMap(singleEntrySet(expId)).get(expId);
             cache.put(new Element(expId, exp));
         } else {
@@ -201,9 +204,7 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
 
 
     /**
-     *
      * @param appName
-     *
      * @return prioritized list of experiments for given application.
      */
     @Override
@@ -211,7 +212,7 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
         PrioritizedExperimentList expList = null;
         Cache cache = cacheManager.getCache(APP_NAME_TO_PRIORITIZED_EXPERIMENTS_CACHE.toString());
         Element val = cache.get(appName);
-        if(isNull(val)) {
+        if (isNull(val)) {
             expList = prioritiesRepository.getPriorities(singleEntrySet(appName)).get(appName);
             cache.put(new Element(appName, expList));
         } else {
@@ -222,9 +223,7 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
     }
 
     /**
-     *
      * @param expId
-     *
      * @return List of experiments which are mutually exclusive to the given experiment.
      */
     @Override
@@ -232,18 +231,17 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
         List<Experiment.ID> exclusionList = null;
         Cache cache = cacheManager.getCache(EXPERIMENT_ID_TO_EXCLUSION_CACHE.toString());
         Element val = cache.get(expId);
-        if(isNull(val)) {
+        if (isNull(val)) {
             exclusionList = mutexRepository.getExclusivesList(singleEntrySet(expId)).get(expId);
             cache.put(new Element(expId, exclusionList));
         } else {
             exclusionList = (List<Experiment.ID>) val.getObjectValue();
         }
 
-        return isNull(exclusionList)?new ArrayList<>():exclusionList;
+        return isNull(exclusionList) ? new ArrayList<>() : exclusionList;
     }
 
     /**
-     *
      * @param expId
      * @return BucketList for given experiment.
      */
@@ -252,21 +250,19 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
         BucketList bucketList = null;
         Cache cache = cacheManager.getCache(EXPERIMENT_ID_TO_BUCKET_CACHE.toString());
         Element val = cache.get(expId);
-        if(isNull(val)) {
+        if (isNull(val)) {
             bucketList = experimentRepository.getBucketList(singleEntrySet(expId)).get(expId);
             cache.put(new Element(expId, bucketList));
         } else {
             bucketList = (BucketList) val.getObjectValue();
         }
 
-        return isNull(bucketList)?new BucketList():makeCopy(bucketList);
+        return isNull(bucketList) ? new BucketList() : makeCopy(bucketList);
     }
 
     /**
-     *
      * @param appName
      * @param pageName
-     *
      * @return List experiments associated to the given application and page.
      */
     @Override
@@ -275,18 +271,17 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
         List<PageExperiment> pageExperiments = null;
         Cache cache = cacheManager.getCache(APP_NAME_N_PAGE_TO_EXPERIMENTS_CACHE.toString());
         Element val = cache.get(appPagePair);
-        if(isNull(val)) {
+        if (isNull(val)) {
             pageExperiments = pagesRepository.getExperimentsWithoutLabels(singleEntrySet(appPagePair)).get(appPagePair);
             cache.put(new Element(appPagePair, pageExperiments));
         } else {
             pageExperiments = (List<PageExperiment>) val.getObjectValue();
         }
 
-        return isNull(pageExperiments)?new ArrayList<>():pageExperiments;
+        return isNull(pageExperiments) ? new ArrayList<>() : pageExperiments;
     }
 
     /**
-     *
      * @return Last cache refresh time.
      */
     @Override
@@ -295,15 +290,14 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
     }
 
     /**
-     *
      * @return Get metadata cache details
      */
     @Override
-    public Map<String,String> getDetails() {
-        Map<String,String> details = new HashMap<>();
+    public Map<String, String> getDetails() {
+        Map<String, String> details = new HashMap<>();
         details.put("status", "Enabled");
-        for(CACHE_NAME name: CACHE_NAME.values()) {
-            details.put(name+".SIZE", String.valueOf(cacheManager.getCache(name.toString()).getSize()));
+        for (CACHE_NAME name : CACHE_NAME.values()) {
+            details.put(name + ".SIZE", String.valueOf(cacheManager.getCache(name.toString()).getSize()));
         }
         return details;
     }
@@ -313,7 +307,6 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
      *
      * @param entry
      * @param <T>
-     *
      * @return
      */
     private <T> Set<T> singleEntrySet(T entry) {
@@ -323,13 +316,11 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
     }
 
     /**
-     *
      * Make elements list which is specific to the ehcache format..
      *
      * @param elementsMap
      * @param <K>
      * @param <V>
-     *
      * @return Elements list
      */
     private <K, V> List<Element> makeElementsList(Map<K, V> elementsMap) {
@@ -356,7 +347,6 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
      *
      * @param bucketList
      * @return New object/deep copy of BucketList.
-     *
      */
     private BucketList makeCopy(BucketList bucketList) {
         List<Bucket> iBucketList = new ArrayList<>(bucketList.getBuckets());

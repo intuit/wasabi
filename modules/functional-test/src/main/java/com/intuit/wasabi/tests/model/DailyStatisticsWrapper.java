@@ -29,5 +29,4 @@ public class DailyStatisticsWrapper {
     private List<DailyStatisticsComputed> days;
 
 
-
 }

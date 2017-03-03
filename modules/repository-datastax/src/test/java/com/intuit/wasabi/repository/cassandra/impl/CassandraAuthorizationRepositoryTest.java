@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -52,23 +52,42 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyObject;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CassandraAuthorizationRepositoryTest {
     private final Logger logger = LoggerFactory.getLogger(CassandraAuthorizationRepositoryTest.class);
-    @Mock ApplicationListAccessor applicationListAccessor;
-    @Mock AppRoleAccessor appRoleAccessor;
-    @Mock UserInfoAccessor userInfoAccessor;
-    @Mock UserRoleAccessor userRoleAccessor;
+    @Mock
+    ApplicationListAccessor applicationListAccessor;
+    @Mock
+    AppRoleAccessor appRoleAccessor;
+    @Mock
+    UserInfoAccessor userInfoAccessor;
+    @Mock
+    UserRoleAccessor userRoleAccessor;
 
-    @Mock Result<ApplicationList> applicationListResult;
-    @Mock Result<AppRole> appRoleResult;
-    @Mock Result<UserInfo> userInfoResult;
-    @Mock Result<UserRole> userRoleResult;
+    @Mock
+    Result<ApplicationList> applicationListResult;
+    @Mock
+    Result<AppRole> appRoleResult;
+    @Mock
+    Result<UserInfo> userInfoResult;
+    @Mock
+    Result<UserRole> userRoleResult;
 
-    @Mock UserDirectory userDirectory;
-    @Mock (answer = Answers.RETURNS_DEEP_STUBS) MappingManager mappingMapager;
+    @Mock
+    UserDirectory userDirectory;
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    MappingManager mappingMapager;
 
     private CassandraAuthorizationRepository repository;
     private CassandraAuthorizationRepository spyRepository;
@@ -87,14 +106,14 @@ public class CassandraAuthorizationRepositoryTest {
 
 
     @Test
-    public void userLookup(){
+    public void userLookup() {
         com.intuit.wasabi.authenticationobjects.UserInfo userInfo =
                 com.intuit.wasabi.authenticationobjects.UserInfo.newInstance(
-                    com.intuit.wasabi.authenticationobjects.UserInfo.Username.valueOf("test"))
-                .withEmail("test")
-                .withFirstName("test")
-                .withLastName("test")
-                .build();
+                        com.intuit.wasabi.authenticationobjects.UserInfo.Username.valueOf("test"))
+                        .withEmail("test")
+                        .withFirstName("test")
+                        .withLastName("test")
+                        .build();
         com.intuit.wasabi.authenticationobjects.UserInfo.Username userName =
                 com.intuit.wasabi.authenticationobjects.UserInfo.Username.valueOf("test");
         when(userDirectory.lookupUser(eq(userName)))
@@ -103,7 +122,7 @@ public class CassandraAuthorizationRepositoryTest {
     }
 
     @Test
-    public void userLookupException(){
+    public void userLookupException() {
         com.intuit.wasabi.authenticationobjects.UserInfo.Username userName =
                 com.intuit.wasabi.authenticationobjects.UserInfo.Username.valueOf("test");
         com.intuit.wasabi.authenticationobjects.UserInfo expected =
@@ -118,7 +137,7 @@ public class CassandraAuthorizationRepositoryTest {
     }
 
     @Test
-    public void setUserInfoTest(){
+    public void setUserInfoTest() {
         com.intuit.wasabi.authenticationobjects.UserInfo expected =
                 com.intuit.wasabi.authenticationobjects.UserInfo.newInstance(
                         com.intuit.wasabi.authenticationobjects.UserInfo.Username.valueOf("test"))
@@ -131,7 +150,7 @@ public class CassandraAuthorizationRepositoryTest {
     }
 
     @Test
-    public void getUserRolesWithWildcardAppNameTest(){
+    public void getUserRolesWithWildcardAppNameTest() {
         List<UserRole> userRoleList = new ArrayList<>();
         userRoleList.add(
                 UserRole.builder().appName("test").role("test").userId("test").build()
@@ -148,7 +167,7 @@ public class CassandraAuthorizationRepositoryTest {
     }
 
     @Test
-    public void checkSuperAdminPermissionsTest(){
+    public void checkSuperAdminPermissionsTest() {
         List<UserRole> spiedUserRole = new ArrayList<>();
         spiedUserRole.add(
                 UserRole.builder()
@@ -172,7 +191,7 @@ public class CassandraAuthorizationRepositoryTest {
     }
 
     @Test
-    public void checkSuperAdminPermissionsNullTest(){
+    public void checkSuperAdminPermissionsNullTest() {
         doReturn(Collections.EMPTY_LIST).when(spyRepository).getUserRolesWithWildcardAppName(
                 com.intuit.wasabi.authenticationobjects.UserInfo.Username.valueOf("test"),
                 Application.Name.valueOf("test")
@@ -185,7 +204,7 @@ public class CassandraAuthorizationRepositoryTest {
     }
 
     @Test
-    public void getUserInfoListTest(){
+    public void getUserInfoListTest() {
         List<UserInfo> userInfo = new ArrayList<>();
         userInfo.add(UserInfo.builder()
                 .firstName("test1")
@@ -218,7 +237,7 @@ public class CassandraAuthorizationRepositoryTest {
     }
 
     @Test
-    public void getUserInfoEmptyResult(){
+    public void getUserInfoEmptyResult() {
         List<UserInfo> userInfo = Collections.EMPTY_LIST;
         doReturn(userInfo).when(spyRepository).getUserInfoList(
                 com.intuit.wasabi.authenticationobjects.UserInfo.Username.valueOf("test")
@@ -229,7 +248,7 @@ public class CassandraAuthorizationRepositoryTest {
     }
 
     @Test
-    public void getUserInfoSingleResult(){
+    public void getUserInfoSingleResult() {
         //TODO: once we fixed userid is uuid and username is string problem we can use the proper setter/getter here
         List<UserInfo> userInfo = new ArrayList<>();
         userInfo.add(UserInfo.builder()
@@ -251,7 +270,7 @@ public class CassandraAuthorizationRepositoryTest {
     }
 
     @Test(expected = AuthenticationException.class)
-    public void getUserInfoMultipleResults(){
+    public void getUserInfoMultipleResults() {
         List<UserInfo> mocked = mock(List.class);
         when(mocked.size()).thenReturn(2);
         doReturn(mocked).when(spyRepository).getUserInfoList(
@@ -262,7 +281,7 @@ public class CassandraAuthorizationRepositoryTest {
     }
 
     @Test
-    public void getUserRolesListTest(){
+    public void getUserRolesListTest() {
         List<com.intuit.wasabi.repository.cassandra.pojo.UserRole> userRoleList = new ArrayList<>();
         userRoleList.add(com.intuit.wasabi.repository.cassandra.pojo.UserRole.builder()
                 .appName("test1")
@@ -291,7 +310,7 @@ public class CassandraAuthorizationRepositoryTest {
     }
 
     @Test
-    public void getUserRolesListSingleTest(){
+    public void getUserRolesListSingleTest() {
         List<com.intuit.wasabi.repository.cassandra.pojo.UserRole> userRoleList = new ArrayList<>();
         userRoleList.add(com.intuit.wasabi.repository.cassandra.pojo.UserRole.builder()
                 .appName("test1")
@@ -308,7 +327,7 @@ public class CassandraAuthorizationRepositoryTest {
     }
 
     @Test
-    public void getUserRoleEmptyTest(){
+    public void getUserRoleEmptyTest() {
         List<com.intuit.wasabi.repository.cassandra.pojo.UserRole> userRoleList = new ArrayList<>();
         when(userRoleAccessor.getUserRolesByUserId(eq("test"))).thenReturn(userRoleResult);
         when(userRoleResult.iterator()).thenReturn(userRoleList.iterator());
@@ -319,7 +338,7 @@ public class CassandraAuthorizationRepositoryTest {
     }
 
     @Test
-    public void getUserRoleEmptyWithAppNameTest(){
+    public void getUserRoleEmptyWithAppNameTest() {
         List<com.intuit.wasabi.repository.cassandra.pojo.UserRole> userRoleList = new ArrayList<>();
         when(userRoleAccessor.getUserRolesBy(eq("test"), eq("testApp"))).thenReturn(userRoleResult);
         when(userRoleResult.iterator()).thenReturn(userRoleList.iterator());
@@ -330,7 +349,7 @@ public class CassandraAuthorizationRepositoryTest {
     }
 
     @Test
-    public void getLimitedUserRolesTest(){
+    public void getLimitedUserRolesTest() {
         List<com.intuit.wasabi.repository.cassandra.pojo.UserRole> userRoleList = new ArrayList<>();
         userRoleList.add(com.intuit.wasabi.repository.cassandra.pojo.UserRole.builder()
                 .appName("test1")
@@ -353,7 +372,7 @@ public class CassandraAuthorizationRepositoryTest {
         when(userRoleAccessor.getUserRolesBy(
                 eq("test"),
                 eq("testApp")
-            )
+                )
         ).thenReturn(userRoleResult);
         when(userRoleResult.iterator()).thenReturn(userRoleList.iterator());
         List<com.intuit.wasabi.repository.cassandra.pojo.UserRole> result =
@@ -364,7 +383,7 @@ public class CassandraAuthorizationRepositoryTest {
     }
 
     @Test
-    public void getLimitedUserRolesZeroTest(){
+    public void getLimitedUserRolesZeroTest() {
         List<com.intuit.wasabi.repository.cassandra.pojo.UserRole> userRoleList = new ArrayList<>();
         when(userRoleAccessor.getUserRolesBy(
                 eq("test"),
@@ -380,7 +399,7 @@ public class CassandraAuthorizationRepositoryTest {
     }
 
     @Test
-    public void retrieveOrDefaultUserTest(){
+    public void retrieveOrDefaultUserTest() {
         com.intuit.wasabi.authenticationobjects.UserInfo mocked =
                 mock(com.intuit.wasabi.authenticationobjects.UserInfo.class);
         com.intuit.wasabi.authenticationobjects.UserInfo.Username username =
@@ -393,7 +412,7 @@ public class CassandraAuthorizationRepositoryTest {
     }
 
     @Test
-    public void getUserRoleListContainsSuperAdminTest(){
+    public void getUserRoleListContainsSuperAdminTest() {
         com.intuit.wasabi.authenticationobjects.UserInfo.Username username =
                 com.intuit.wasabi.authenticationobjects.UserInfo.Username.valueOf("test_user");
         List<com.intuit.wasabi.repository.cassandra.pojo.UserRole> userRoleList = new ArrayList<>();
@@ -406,12 +425,12 @@ public class CassandraAuthorizationRepositoryTest {
         );
 
         com.intuit.wasabi.authenticationobjects.UserInfo userInfo =
-                new com.intuit.wasabi.authenticationobjects.UserInfo.Builder( username )
-                .withEmail("test@test.com")
-                .withUserId("test_id")
-                .withFirstName("test_fn")
-                .withLastName("test_ln")
-                .build();
+                new com.intuit.wasabi.authenticationobjects.UserInfo.Builder(username)
+                        .withEmail("test@test.com")
+                        .withUserId("test_id")
+                        .withFirstName("test_fn")
+                        .withLastName("test_ln")
+                        .build();
 
         List<ApplicationList> allAppsNames = new ArrayList<>();
         allAppsNames.add(ApplicationList.builder().appName("testApp1").build());
@@ -432,7 +451,7 @@ public class CassandraAuthorizationRepositoryTest {
     }
 
     @Test
-    public void getUserRoleListNormalUserTest(){
+    public void getUserRoleListNormalUserTest() {
         com.intuit.wasabi.authenticationobjects.UserInfo.Username username =
                 com.intuit.wasabi.authenticationobjects.UserInfo.Username.valueOf("test_user");
         List<com.intuit.wasabi.repository.cassandra.pojo.UserRole> userRoleList = new ArrayList<>();
@@ -444,7 +463,7 @@ public class CassandraAuthorizationRepositoryTest {
                         .build()
         );
         com.intuit.wasabi.authenticationobjects.UserInfo userInfo =
-                new com.intuit.wasabi.authenticationobjects.UserInfo.Builder( username )
+                new com.intuit.wasabi.authenticationobjects.UserInfo.Builder(username)
                         .withEmail("test@test.com")
                         .withUserId("test_id")
                         .withFirstName("test_fn")
@@ -452,9 +471,9 @@ public class CassandraAuthorizationRepositoryTest {
                         .build();
         doReturn(new ArrayList<com.intuit.wasabi.repository.cassandra.pojo.UserRole>())
                 .when(spyRepository).getUserRolesWithWildcardAppName(
-                    eq(username),
-                    eq(CassandraAuthorizationRepository.WILDCARD)
-                );
+                eq(username),
+                eq(CassandraAuthorizationRepository.WILDCARD)
+        );
         doReturn(userInfo).when(spyRepository).retrieveOrDefaultUser(username);
         doReturn(userRoleList).when(spyRepository).getUserRoleList(username, Optional.empty());
         UserRoleList result = spyRepository.getUserRoleList(username);
@@ -466,7 +485,7 @@ public class CassandraAuthorizationRepositoryTest {
     }
 
     @Test
-    public void setUserRoleTest(){
+    public void setUserRoleTest() {
         Session mockSession = mock(Session.class);
         when(mappingMapager.getSession()).thenReturn(mockSession);
         com.intuit.wasabi.authorizationobjects.UserRole userRole = com.intuit.wasabi.authorizationobjects.UserRole
@@ -482,7 +501,7 @@ public class CassandraAuthorizationRepositoryTest {
     }
 
     @Test
-    public void deleteUserRoleTest(){
+    public void deleteUserRoleTest() {
         Session mockSession = mock(Session.class);
         when(mappingMapager.getSession()).thenReturn(mockSession);
         com.intuit.wasabi.authorizationobjects.UserRole userRole = com.intuit.wasabi.authorizationobjects.UserRole
@@ -498,18 +517,18 @@ public class CassandraAuthorizationRepositoryTest {
     }
 
     @Test
-    public void getAppSpecificPermissionTest(){
+    public void getAppSpecificPermissionTest() {
         List<com.intuit.wasabi.repository.cassandra.pojo.UserRole> expected = new ArrayList<>();
         com.intuit.wasabi.authenticationobjects.UserInfo.Username testUser =
                 com.intuit.wasabi.authenticationobjects.UserInfo.Username.valueOf("testUser");
         Optional<Application.Name> testApp = Optional.ofNullable(Application.Name.valueOf("TestApp"));
-        doReturn(expected).when(spyRepository).getUserRoleList( eq(testUser), eq(testApp));
+        doReturn(expected).when(spyRepository).getUserRoleList(eq(testUser), eq(testApp));
         UserPermissions result = spyRepository.getAppSpecificPermission(testUser, testApp.get());
         assertThat(result, is(nullValue()));
     }
 
     @Test
-    public void getAppSpecificPermissionSingleElementTest(){
+    public void getAppSpecificPermissionSingleElementTest() {
         Optional<Application.Name> testApp = Optional.ofNullable(Application.Name.valueOf("TestApp"));
         List<com.intuit.wasabi.repository.cassandra.pojo.UserRole> expected = new ArrayList<>();
         expected.add(UserRole.builder()
@@ -520,14 +539,14 @@ public class CassandraAuthorizationRepositoryTest {
         );
         com.intuit.wasabi.authenticationobjects.UserInfo.Username testUser =
                 com.intuit.wasabi.authenticationobjects.UserInfo.Username.valueOf("testUser");
-        doReturn(expected).when(spyRepository).getUserRoleList( eq(testUser), eq(testApp));
+        doReturn(expected).when(spyRepository).getUserRoleList(eq(testUser), eq(testApp));
         UserPermissions result = spyRepository.getAppSpecificPermission(testUser, testApp.get());
         assertThat(result.getApplicationName().toString(), is(testApp.get().toString()));
         assertThat(result.getPermissions(), is(Role.READONLY.getRolePermissions()));
     }
 
     @Test(expected = AssertionError.class)
-    public void getAppSpecificPermissionSingleElementNoRoleTest(){
+    public void getAppSpecificPermissionSingleElementNoRoleTest() {
         Optional<Application.Name> testApp = Optional.ofNullable(Application.Name.valueOf("TestApp"));
         List<com.intuit.wasabi.repository.cassandra.pojo.UserRole> expected = new ArrayList<>();
         expected.add(UserRole.builder()
@@ -537,12 +556,12 @@ public class CassandraAuthorizationRepositoryTest {
         );
         com.intuit.wasabi.authenticationobjects.UserInfo.Username testUser =
                 com.intuit.wasabi.authenticationobjects.UserInfo.Username.valueOf("testUser");
-        doReturn(expected).when(spyRepository).getUserRoleList( eq(testUser), eq(testApp));
+        doReturn(expected).when(spyRepository).getUserRoleList(eq(testUser), eq(testApp));
         UserPermissions result = spyRepository.getAppSpecificPermission(testUser, testApp.get());
     }
 
     @Test(expected = AssertionError.class)
-    public void getAppSpecificPermissionMultipleElementsTest(){
+    public void getAppSpecificPermissionMultipleElementsTest() {
         Optional<Application.Name> testApp = Optional.ofNullable(Application.Name.valueOf("TestApp"));
         List<com.intuit.wasabi.repository.cassandra.pojo.UserRole> expected = new ArrayList<>();
         expected.add(UserRole.builder()
@@ -557,12 +576,12 @@ public class CassandraAuthorizationRepositoryTest {
         );
         com.intuit.wasabi.authenticationobjects.UserInfo.Username testUser =
                 com.intuit.wasabi.authenticationobjects.UserInfo.Username.valueOf("testUser");
-        doReturn(expected).when(spyRepository).getUserRoleList( eq(testUser), eq(testApp));
+        doReturn(expected).when(spyRepository).getUserRoleList(eq(testUser), eq(testApp));
         UserPermissions result = spyRepository.getAppSpecificPermission(testUser, testApp.get());
     }
 
     @Test
-    public void getUserPermissionsWithSuperAdminTest(){
+    public void getUserPermissionsWithSuperAdminTest() {
         Application.Name testApp = Application.Name.valueOf("TestApp");
         com.intuit.wasabi.authenticationobjects.UserInfo.Username testUser =
                 com.intuit.wasabi.authenticationobjects.UserInfo.Username.valueOf("testUser");
@@ -580,7 +599,7 @@ public class CassandraAuthorizationRepositoryTest {
     }
 
     @Test
-    public void convertAppRoleToUserRoleWithoutLookupTest(){
+    public void convertAppRoleToUserRoleWithoutLookupTest() {
         Application.Name applicationName = Application.Name.valueOf("TestApp");
         AppRole appRole = AppRole.builder()
                 .role(Role.SUPERADMIN.name())
@@ -592,11 +611,11 @@ public class CassandraAuthorizationRepositoryTest {
                 new com.intuit.wasabi.authenticationobjects.UserInfo.Builder(
                         com.intuit.wasabi.authenticationobjects.UserInfo.Username.valueOf("user1")
                 )
-                .withFirstName("firstname")
-                .withLastName("lastname")
-                .withUserId("user1")
-                .withEmail("test@test.com")
-                .build();
+                        .withFirstName("firstname")
+                        .withLastName("lastname")
+                        .withUserId("user1")
+                        .withEmail("test@test.com")
+                        .build();
         doReturn(userInfo).when(spyRepository)
                 .getUserInfo(eq(com.intuit.wasabi.authenticationobjects.UserInfo.Username.valueOf("user1")));
         com.intuit.wasabi.authorizationobjects.UserRole result =
@@ -610,7 +629,7 @@ public class CassandraAuthorizationRepositoryTest {
     }
 
     @Test
-    public void convertAppRoleToUserRoleWithLookupTest(){
+    public void convertAppRoleToUserRoleWithLookupTest() {
         Application.Name applicationName = Application.Name.valueOf("TestApp");
         AppRole appRole = AppRole.builder()
                 .role(Role.SUPERADMIN.name())
@@ -642,7 +661,7 @@ public class CassandraAuthorizationRepositoryTest {
     }
 
     @Test
-    public void getAppRoleListSingleElement(){
+    public void getAppRoleListSingleElement() {
         List<com.intuit.wasabi.repository.cassandra.pojo.AppRole> appRoleList = new ArrayList<>();
         appRoleList.add(com.intuit.wasabi.repository.cassandra.pojo.AppRole.builder()
                 .appName("testApp")
@@ -650,7 +669,7 @@ public class CassandraAuthorizationRepositoryTest {
                 .userId("user1")
                 .build()
         );
-        when(appRoleAccessor.getAppRoleByAppName( eq("testApp") ) ).thenReturn(appRoleResult);
+        when(appRoleAccessor.getAppRoleByAppName(eq("testApp"))).thenReturn(appRoleResult);
         when(appRoleResult.iterator()).thenReturn(appRoleList.iterator());
         List<com.intuit.wasabi.repository.cassandra.pojo.AppRole> result =
                 repository.getAppRoleList(Application.Name.valueOf("testApp"));
@@ -659,9 +678,9 @@ public class CassandraAuthorizationRepositoryTest {
     }
 
     @Test
-    public void getAppRoleListZeroElement(){
+    public void getAppRoleListZeroElement() {
         List<com.intuit.wasabi.repository.cassandra.pojo.AppRole> appRoleList = new ArrayList<>();
-        when(appRoleAccessor.getAppRoleByAppName( eq("testApp") ) ).thenReturn(appRoleResult);
+        when(appRoleAccessor.getAppRoleByAppName(eq("testApp"))).thenReturn(appRoleResult);
         when(appRoleResult.iterator()).thenReturn(appRoleList.iterator());
         List<com.intuit.wasabi.repository.cassandra.pojo.AppRole> result =
                 repository.getAppRoleList(Application.Name.valueOf("testApp"));
@@ -669,7 +688,7 @@ public class CassandraAuthorizationRepositoryTest {
     }
 
     @Test
-    public void getAppRoleListMoreThanTwoElement(){
+    public void getAppRoleListMoreThanTwoElement() {
         List<com.intuit.wasabi.repository.cassandra.pojo.AppRole> appRoleList = new ArrayList<>();
         appRoleList.add(com.intuit.wasabi.repository.cassandra.pojo.AppRole.builder()
                 .appName("testApp")
@@ -689,7 +708,7 @@ public class CassandraAuthorizationRepositoryTest {
                 .userId("user3")
                 .build()
         );
-        when(appRoleAccessor.getAppRoleByAppName( eq("testApp") ) ).thenReturn(appRoleResult);
+        when(appRoleAccessor.getAppRoleByAppName(eq("testApp"))).thenReturn(appRoleResult);
         when(appRoleResult.iterator()).thenReturn(appRoleList.iterator());
         List<com.intuit.wasabi.repository.cassandra.pojo.AppRole> result =
                 repository.getAppRoleList(Application.Name.valueOf("testApp"));
@@ -700,11 +719,11 @@ public class CassandraAuthorizationRepositoryTest {
     }
 
     @Test
-    public void getApplicationUsersTest(){
+    public void getApplicationUsersTest() {
         Application.Name applicaitonName = Application.Name.valueOf("TestApp");
         List<AppRole> appRoleList = new ArrayList<>();
         appRoleList.add(AppRole.builder()
-            .appName(applicaitonName.toString())
+                .appName(applicaitonName.toString())
                 .userId("user1")
                 .role(Role.ADMIN.name())
                 .build()
@@ -733,7 +752,7 @@ public class CassandraAuthorizationRepositoryTest {
     }
 
     @Test
-    public void getUserPermissionsListAsSuperadminTest(){
+    public void getUserPermissionsListAsSuperadminTest() {
         List<ApplicationList> allAppsNames = new ArrayList<>();
         allAppsNames.add(ApplicationList.builder().appName("testApp1").build());
         allAppsNames.add(ApplicationList.builder().appName("testApp2").build());
@@ -744,13 +763,13 @@ public class CassandraAuthorizationRepositoryTest {
         doReturn(Optional.ofNullable(expected)).when(spyRepository).getSuperAdminUserPermissions(
                 eq(testUser),
                 eq(CassandraAuthorizationRepository.WILDCARD)
-                );
+        );
         when(applicationListAccessor.getUniqueAppName()).thenReturn(applicationListResult);
         when(applicationListResult.iterator()).thenReturn(allAppsNames.iterator());
-        UserPermissionsList userPermissionsList = spyRepository.getUserPermissionsList( testUser );
+        UserPermissionsList userPermissionsList = spyRepository.getUserPermissionsList(testUser);
         assertThat(userPermissionsList.getPermissionsList().size(), is(2));
         int i = 0;
-        for(UserPermissions userPermissions : userPermissionsList.getPermissionsList() ) {
+        for (UserPermissions userPermissions : userPermissionsList.getPermissionsList()) {
             assertThat(userPermissions.getPermissions(), is(Role.SUPERADMIN.getRolePermissions()));
             assertThat(allAppsNames.get(i).getAppName(), is(userPermissions.getApplicationName().toString()));
             i++;
@@ -758,7 +777,7 @@ public class CassandraAuthorizationRepositoryTest {
     }
 
     @Test
-    public void getUserPermissionsListAsNormalUserTest(){
+    public void getUserPermissionsListAsNormalUserTest() {
         com.intuit.wasabi.authenticationobjects.UserInfo.Username testUser =
                 com.intuit.wasabi.authenticationobjects.UserInfo.Username.valueOf("user1");
         doReturn(Optional.empty()).when(spyRepository).getSuperAdminUserPermissions(
@@ -769,10 +788,10 @@ public class CassandraAuthorizationRepositoryTest {
         List<com.intuit.wasabi.repository.cassandra.pojo.UserRole> expectedUserRoles = new ArrayList<>();
         expectedUserRoles.add(
                 com.intuit.wasabi.repository.cassandra.pojo.UserRole.builder()
-                .appName("app1")
-                .userId("user1")
-                .role(Role.READONLY.name())
-                .build()
+                        .appName("app1")
+                        .userId("user1")
+                        .role(Role.READONLY.name())
+                        .build()
         );
         expectedUserRoles.add(
                 com.intuit.wasabi.repository.cassandra.pojo.UserRole.builder()
@@ -786,7 +805,7 @@ public class CassandraAuthorizationRepositoryTest {
                 eq(Optional.empty())
         );
 
-        UserPermissionsList userPermissionsList = spyRepository.getUserPermissionsList( testUser );
+        UserPermissionsList userPermissionsList = spyRepository.getUserPermissionsList(testUser);
         assertThat(userPermissionsList.getPermissionsList().size(), is(2));
         assertThat(userPermissionsList.getPermissionsList().get(0).getPermissions(),
                 is(Role.READONLY.getRolePermissions()));

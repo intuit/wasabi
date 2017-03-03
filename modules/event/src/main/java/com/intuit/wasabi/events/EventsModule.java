@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,6 +37,7 @@ import static com.google.inject.Scopes.SINGLETON;
 import static com.google.inject.name.Names.named;
 import static com.intuit.autumn.utils.PropertyFactory.create;
 import static com.intuit.autumn.utils.PropertyFactory.getProperty;
+import static com.intuit.wasabi.events.EventsAnnotations.EXECUTOR_THREADPOOL_SIZE;
 import static java.lang.Class.forName;
 import static java.lang.Integer.parseInt;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -58,7 +59,7 @@ public class EventsModule extends AbstractModule {
 
         Properties properties = create(PROPERTY_NAME, EventsModule.class);
 
-        bind(Integer.class).annotatedWith(named("executor.threadpool.size"))
+        bind(Integer.class).annotatedWith(named(EXECUTOR_THREADPOOL_SIZE))
                 .toInstance(parseInt(getProperty("executor.threadpool.size", properties, "0")));
         bind(Events.class).to(EventsImpl.class).in(SINGLETON);
         bind(EventsExport.class).to(EventsExportImpl.class).asEagerSingleton();
@@ -81,10 +82,10 @@ public class EventsModule extends AbstractModule {
 
         LOGGER.debug("installed module: {}", EventsModule.class.getSimpleName());
     }
-    
+
     @Provides
     @Inject
     public Map<String, EventIngestionExecutor> ingestionExecutors() {
         return new HashMap<String, EventIngestionExecutor>();
-    }   
+    }
 }

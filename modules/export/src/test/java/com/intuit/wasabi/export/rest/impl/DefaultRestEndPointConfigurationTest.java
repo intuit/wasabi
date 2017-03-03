@@ -9,7 +9,6 @@ import java.util.Properties;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.eq;
 
 /**
  * Created on 4/13/16.
@@ -20,7 +19,7 @@ public class DefaultRestEndPointConfigurationTest {
     DefaultRestEndPointConfiguration defaultRestEndPointConfiguration;
 
     @Before
-    public void setup(){
+    public void setup() {
         properties = new Properties();
         defaultRestEndPointConfiguration = new DefaultRestEndPointConfiguration(properties);
         properties.put("export.rest.scheme", "scheme1");
@@ -32,7 +31,7 @@ public class DefaultRestEndPointConfigurationTest {
     }
 
     @Test
-    public void testPropertiesGetter(){
+    public void testPropertiesGetter() {
         assertThat(defaultRestEndPointConfiguration.getScheme(), is("scheme1"));
         assertThat(defaultRestEndPointConfiguration.getHost(), is("host"));
         assertThat(defaultRestEndPointConfiguration.getPath(), is("path"));

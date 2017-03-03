@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,21 +25,23 @@ import com.intuit.wasabi.experimentobjects.Application;
 
 /**
  * Repository for getting authorization information
- * 
+ *
  * @see UserInfo
  * @see Application
  */
 public interface AuthorizationRepository {
 
-	/**
-	 * Get user permissions
-	 * @param userID Username Object
-	 * @return UserPermissionList
-	 */
+    /**
+     * Get user permissions
+     *
+     * @param userID Username Object
+     * @return UserPermissionList
+     */
     UserPermissionsList getUserPermissionsList(UserInfo.Username userID);
 
     /**
      * Get application user
+     *
      * @param applicationName Application.Name Object
      * @return user role list
      */
@@ -47,7 +49,8 @@ public interface AuthorizationRepository {
 
     /**
      * Get user permissions
-     * @param userID UserInfo.Username Object
+     *
+     * @param userID          UserInfo.Username Object
      * @param applicationName Application.Name Object
      * @return user permissions
      */
@@ -55,26 +58,30 @@ public interface AuthorizationRepository {
 
     /**
      * Delete user role
-     * @param userID UserInfo.Username Object
+     *
+     * @param userID          UserInfo.Username Object
      * @param applicationName Application.Name Object
      */
     void deleteUserRole(UserInfo.Username userID, Application.Name applicationName);
 
     /**
      * Set user role
+     *
      * @param userRole UserRole Object
      */
     void setUserRole(UserRole userRole);
 
     /**
      * Get user role list
-     * @param userID  UserInfo.Username Object
+     *
+     * @param userID UserInfo.Username Object
      * @return user role list
      */
     UserRoleList getUserRoleList(UserInfo.Username userID);
 
     /**
      * Get user info
+     *
      * @param userID UserInfo.Username Object
      * @return user info
      */
@@ -82,13 +89,15 @@ public interface AuthorizationRepository {
 
     /**
      * Set user info
+     *
      * @param userInfo UserInfo Object
      */
     void setUserInfo(UserInfo userInfo);
 
     /**
      * Check super user permissions
-     * @param userID UserInfo.Username Object
+     *
+     * @param userID          UserInfo.Username Object
      * @param applicationName Application.Name Object
      * @return user permissions
      */

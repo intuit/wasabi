@@ -18,12 +18,6 @@
 
 package com.intuit.wasabi.tests.model;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -32,7 +26,7 @@ import java.util.Map;
 public class OutputBucketStatistics extends StatisticsBase {
     private final String label;
 
-    public OutputBucketStatistics(String label){
+    public OutputBucketStatistics(String label) {
         this.label = label;
     }
 
@@ -64,12 +58,12 @@ public class OutputBucketStatistics extends StatisticsBase {
         return result;
     }
 
-    public static class ActionCount{
+    public static class ActionCount {
         private String actionName;
         private Integer eventCount;
         private Integer uniqueUserCount;
 
-        public ActionCount(){
+        public ActionCount() {
             eventCount = 0;
             uniqueUserCount = 0;
         }

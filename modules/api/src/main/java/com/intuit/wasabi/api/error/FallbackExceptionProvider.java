@@ -28,7 +28,6 @@ import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
  * the errors are only mapped to internal server errors and all have the same
  * error message. This may be seen as an attempt to promote proper handling of
  * exceptional states in services.
- *
  */
 @Provider
 public class FallbackExceptionProvider extends ExceptionProvider<Exception> {
