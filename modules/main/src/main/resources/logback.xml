@@ -29,7 +29,7 @@
         </encoder>
     </appender>
 
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="APPLICATION_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG}.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
             <fileNamePattern>${LOG}.%i.log.zip</fileNamePattern>
@@ -44,7 +44,7 @@
         </encoder>
     </appender>
 
-    <appender name="EHCACHE_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="EHCACHE_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${EHCACHE_LOG}.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
             <fileNamePattern>${EHCACHE_LOG}.%i.log.zip</fileNamePattern>
@@ -57,6 +57,18 @@
         <encoder>
             <pattern>%date %level [%thread] %logger{10} [%file:%line] %msg%n</pattern>
         </encoder>
+    </appender>
+
+    <appender name="ASYNC_APPLICATION_LOG" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>500</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <appender-ref ref="APPLICATION_LOG" />
+    </appender>
+
+    <appender name="ASYNC_EHCACHE_LOG" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>50000</queueSize>
+        <discardingThreshold>5000</discardingThreshold>
+        <appender-ref ref="EHCACHE_LOG" />
     </appender>
 
     <!--
@@ -119,11 +131,11 @@
     -->
 
     <logger name="net.sf.ehcache" level="${log.level}" additivity="false">
-        <appender-ref ref="EHCACHE_FILE"/>
+        <appender-ref ref="ASYNC_EHCACHE_LOG"/>
     </logger>
 
     <root level="${log.level}">
-        <appender-ref ref="FILE"/>
+        <appender-ref ref="ASYNC_APPLICATION_LOG"/>
         <appender-ref ref="CONSOLE"/>
     </root>
 </configuration>
