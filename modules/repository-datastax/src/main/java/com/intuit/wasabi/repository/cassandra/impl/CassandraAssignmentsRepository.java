@@ -58,12 +58,14 @@ import com.intuit.wasabi.repository.cassandra.UninterruptibleUtil;
 import com.intuit.wasabi.repository.cassandra.accessor.BucketAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.ExclusionAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAssignmentTypeAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.PrioritiesAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.StagingAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.count.BucketAssignmentCountAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.export.UserAssignmentExportAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentUserIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.PageExperimentIndexAccessor;
+import com.intuit.wasabi.repository.cassandra.pojo.ExperimentAssignmentType;
 import com.intuit.wasabi.repository.cassandra.pojo.export.UserAssignmentExport;
 import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentUserByUserIdContextAppNameExperimentId;
 
@@ -86,6 +88,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -117,7 +120,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     private final boolean assignUserToExport;
     private final boolean assignBucketCount;
     private final String defaultTimeFormat;
-
+    private final ExperimentAssignmentTypeAccessor experimentAssignmentTypeAccessor;
     final ThreadPoolExecutor assignmentsCountExecutor;
 
     private ExperimentAccessor experimentAccessor;
@@ -150,6 +153,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
             PrioritiesAccessor prioritiesAccessor,
             ExclusionAccessor exclusionAccessor,
             PageExperimentIndexAccessor pageExperimentIndexAccessor,
+            ExperimentAssignmentTypeAccessor experimentAssignmentTypeAccessor,
             CassandraDriver driver,
             MappingManager mappingManager,
             @Named("AssignmentsCountThreadPoolExecutor") ThreadPoolExecutor assignmentsCountExecutor,
@@ -178,6 +182,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         this.exclusionAccessor = exclusionAccessor;
         this.driver = driver;
         this.assignmentsCountExecutor = assignmentsCountExecutor;
+        this.experimentAssignmentTypeAccessor = experimentAssignmentTypeAccessor;
     }
 
     Stream<ExperimentUserByUserIdContextAppNameExperimentId> getUserIndexStream(String userId,
@@ -758,12 +763,52 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
 	@Override
 	public void insertExperimentBucketAssignment(ID experimentID, Instant date,
 			boolean bucketAssignment) {
-		throw new UnsupportedOperationException("Method not implemented yet");
+		try {
+			experimentAssignmentTypeAccessor.insert(experimentID.getRawID(), Date.from(date), bucketAssignment);
+        } catch (Exception e) {
+            LOGGER.error("Failed to write into experiment_assignment_type for experiment {} on {}. Exception: {}",
+                    experimentID.getRawID().toString(), date, e.getMessage());
+            throw new RepositoryException("Failed ot write into  experiment_assignment_type for experiment " + experimentID + 
+            		" on " + date + " bucketAssignment " + bucketAssignment  + ". Exception: " + e.getMessage());
+            		
+        }	
 	}
 
 	@Override
 	public Map<OffsetDateTime, Double> getExperimentBucketAssignmentRatioPerDay(
 			ID experimentID, OffsetDateTime fromDate, OffsetDateTime toDate) {
-		throw new UnsupportedOperationException("Method not implemented yet");
-	}
+		Map<OffsetDateTime, Double> experimentBucketAssignmentRatios = new HashMap<>();
+		
+        OffsetDateTime currentDate = fromDate;
+        do { // while (currentDate.isBefore(toDate))
+            OffsetDateTime currentDatePlusOne = currentDate.plusDays(1).truncatedTo(ChronoUnit.DAYS);
+
+            // counts[0]: bucket assignments, counts[1]: total
+            final int[] counts = new int[2];
+            Result<ExperimentAssignmentType> rows;
+            try {
+                rows = experimentAssignmentTypeAccessor.selectBy(experimentID.getRawID(),
+                		Date.from(currentDate.toInstant()), 
+                		Date.from(currentDatePlusOne.toInstant()));
+            } catch (Exception e) {
+                throw new RepositoryException(
+                        String.format("Failed to select from experiment_assignment_type for experiment %s between %s and %s.",
+                                experimentID.getRawID().toString(),
+                                currentDate.toString(),
+                                currentDate.plusDays(1).toString()),
+                        e);
+            }
+            for (ExperimentAssignmentType experimentAssignmentType : rows.all()) {
+                if (experimentAssignmentType.isBucketAssignment()) {
+                    counts[0] += 1;
+                }
+                counts[1] += 1;
+            }
+            experimentBucketAssignmentRatios.put(currentDate, counts[1] > 0 ? (double) counts[0] / (double) counts[1] : 0);
+
+            currentDate = currentDatePlusOne;
+        } while (!currentDate.isAfter(toDate));
+
+        return experimentBucketAssignmentRatios;
+    }
 }

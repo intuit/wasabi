@@ -46,6 +46,7 @@ import com.intuit.wasabi.repository.RepositoryException;
 import com.intuit.wasabi.repository.cassandra.accessor.BucketAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.ExclusionAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAssignmentTypeAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.PrioritiesAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.StagingAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.count.BucketAssignmentCountAccessor;
@@ -54,6 +55,7 @@ import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentUserIndex
 import com.intuit.wasabi.repository.cassandra.accessor.index.PageExperimentIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.pojo.count.BucketAssignmentCount;
 import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentUserByUserIdContextAppNameExperimentId;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
@@ -68,6 +70,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.StreamingOutput;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -133,6 +136,8 @@ public class CassandraAssignmentsRepositoryTest {
     ExclusionAccessor exclusionAccessor;
     @Mock
     PageExperimentIndexAccessor pageExperimentIndexAccessor;
+    @Mock
+    ExperimentAssignmentTypeAccessor experimentAssignmentTypeAccessor;
 
     @Mock
     CassandraDriver driver;
@@ -166,7 +171,7 @@ public class CassandraAssignmentsRepositoryTest {
                 prioritiesAccessor,
                 exclusionAccessor,
                 pageExperimentIndexAccessor,
-                driver,
+                experimentAssignmentTypeAccessor, driver,
                 mappingManager,
                 assignmentsCountExecutor,
                 true,
