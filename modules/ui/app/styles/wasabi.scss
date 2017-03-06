@@ -186,7 +186,8 @@ header {
 }
 
 #mainContent {
-  margin: 0 20px 20px 20px;
+  margin: 0 auto 20px auto;
+  width: 1000px;
 }
 
 .truncateDiv {
@@ -4577,6 +4578,7 @@ nav.hamburger-nav {
 @media (max-width: 768px) {
     #mainContent {
         margin: 0 auto 20px auto;
+        width: 375px;
         position: absolute;
         left: 0;
         @include transform(translate3d(0,0,0));
@@ -4614,6 +4616,15 @@ nav.hamburger-nav {
     .pageError, .pageSuccess {
         width: 360px;
         margin-left: -180px;
+    }
+
+    #resultsModal {
+        width: 300px;
+        left: 210px;
+        top: 0;
+        textarea {
+            width: 250px !important;
+        }
     }
 
     .signinBox {

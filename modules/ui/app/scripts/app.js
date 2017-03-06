@@ -222,5 +222,31 @@ angular.module('wasabi', [
             $rootScope.multiply100 = function (value) {
                 return parseFloat((value * 100).toFixed(8));
             };
+
+            $rootScope.showMenu = function (forceHide) {
+                var forceHideFlag = (forceHide !== undefined ? forceHide : false);
+
+                if (forceHideFlag || $('#mainContent').hasClass('gridShowingMenu')) {
+                    $('#mainContent').css('left', 0).width($(window).width()).height('auto');
+                    $('.menuPanel').css('left', -300);
+                }
+                else {
+                    var winHeight = $(window).height();
+                    $('#mainContent').css('left', 300);
+                    $('#mainContent').width($(window).width() - 300).height(winHeight);
+                    //$('.menuPanel').height(winHeight - 60);
+                    $('.menuPanel, .fixedPanel').css('left', 0);
+                }
+                if (forceHideFlag) {
+                    $('.fixedPanel').hide();
+                    $('#mainContent').removeClass('gridShowingMenu');
+                }
+                else {
+                    $('.fixedPanel').toggle();
+                    $('#mainContent').toggleClass('gridShowingMenu');
+                }
+                return false;
+            };
+
         }
     ]);
