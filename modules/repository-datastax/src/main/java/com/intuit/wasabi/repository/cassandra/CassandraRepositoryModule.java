@@ -34,6 +34,7 @@ import com.intuit.wasabi.repository.cassandra.accessor.ApplicationListAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.BucketAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.ExclusionAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAssignmentTypeAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentPageAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.PrioritiesAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.StagingAccessor;
@@ -64,6 +65,8 @@ import com.intuit.wasabi.repository.cassandra.provider.ApplicationListAccessorPr
 import com.intuit.wasabi.repository.cassandra.provider.BucketAccessorProvider;
 import com.intuit.wasabi.repository.cassandra.provider.ExclusionAccessorProvider;
 import com.intuit.wasabi.repository.cassandra.provider.ExperimentAccessorProvider;
+import com.intuit.wasabi.repository.cassandra.provider.ExperimentAssignmentTypeAccessorProvider;
+//import com.intuit.wasabi.repository.cassandra.provider.ExperimentAssignmentTypeAccessorProvider;
 import com.intuit.wasabi.repository.cassandra.provider.ExperimentPageAccessorProvider;
 import com.intuit.wasabi.repository.cassandra.provider.MappingManagerProvider;
 import com.intuit.wasabi.repository.cassandra.provider.PrioritiesAccessorProvider;
@@ -81,9 +84,11 @@ import com.intuit.wasabi.repository.cassandra.provider.index.ExperimentLabelInde
 import com.intuit.wasabi.repository.cassandra.provider.index.ExperimentUserIndexAccessorProvider;
 import com.intuit.wasabi.repository.cassandra.provider.index.PageExperimentIndexAccessorProvider;
 import com.intuit.wasabi.repository.cassandra.provider.index.StateExperimentIndexAccessorProvider;
+
 import org.slf4j.Logger;
 
 import javax.inject.Singleton;
+
 import java.util.Properties;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -131,6 +136,7 @@ public class CassandraRepositoryModule extends AbstractModule {
         bind(BucketAccessor.class).toProvider(BucketAccessorProvider.class).in(Singleton.class);
         bind(ExclusionAccessor.class).toProvider(ExclusionAccessorProvider.class).in(Singleton.class);
         bind(ExperimentAccessor.class).toProvider(ExperimentAccessorProvider.class).in(Singleton.class);
+        bind(ExperimentAssignmentTypeAccessor.class).toProvider(ExperimentAssignmentTypeAccessorProvider.class).in(Singleton.class);
         bind(ExperimentPageAccessor.class).toProvider(ExperimentPageAccessorProvider.class).in(Singleton.class);
         bind(PrioritiesAccessor.class).toProvider(PrioritiesAccessorProvider.class).in(Singleton.class);
         bind(StagingAccessor.class).toProvider(StagingAccessorProvider.class).in(Singleton.class);

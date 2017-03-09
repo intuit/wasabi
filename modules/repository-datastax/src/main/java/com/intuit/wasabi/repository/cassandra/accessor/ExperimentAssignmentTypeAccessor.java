@@ -15,28 +15,27 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.cassandra.accessor;
 
-import com.datastax.driver.core.Statement;
 import com.datastax.driver.mapping.Result;
 import com.datastax.driver.mapping.annotations.Accessor;
 import com.datastax.driver.mapping.annotations.Query;
+
 import com.intuit.wasabi.repository.cassandra.pojo.ExperimentAssignmentType;
-import com.intuit.wasabi.repository.cassandra.pojo.index.PageExperimentByAppNamePage;
 
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 /**
  * Accessor interface
- * @param <ExperimentAssignmentType>
  */
 @Accessor
 public interface ExperimentAssignmentTypeAccessor {
-    @Query("SELECT bucket_assignment FROM experiment_assignment_type "
+	
+    @Query("SELECT * FROM experiment_assignment_type "
     		+ "WHERE experiment_id = ? AND timestamp >= ? AND timestamp < ?")
     Result<ExperimentAssignmentType> selectBy(UUID experimentId, Date startTime, Date endTime);
 
-    @Query("INSERT INTO experiment_assignment_type ( experiment_id, timestamp, bucket_assignment ) VALUES ( ?, ?, ? )")
-    Result insert(UUID experimentId, Date timestamp, boolean bucketAssignment);
+    @Query("INSERT INTO experiment_assignment_type ( experiment_id, timestamp, bucket_assignment ) "
+    		+ "VALUES ( ?, ?, ? )")
+    void insert(UUID experimentId, Date timestamp, boolean bucketAssignment);
 
 }

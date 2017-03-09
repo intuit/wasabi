@@ -66,6 +66,7 @@ import com.intuit.wasabi.repository.cassandra.accessor.export.UserAssignmentExpo
 import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentUserIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.PageExperimentIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.pojo.ExperimentAssignmentType;
+//import com.intuit.wasabi.repository.cassandra.pojo.ExperimentAssignmentType;
 import com.intuit.wasabi.repository.cassandra.pojo.export.UserAssignmentExport;
 import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentUserByUserIdContextAppNameExperimentId;
 

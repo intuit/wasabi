@@ -34,14 +34,15 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ExperimentAssignmentType {
-    @PartitionKey(0)
+	
+    @PartitionKey
     @Column(name = "experiment_id")
-    UUID experimentId;
+    private UUID experimentId;
 
-    @ClusteringColumn(0)
-    Date timestamp;
+    @ClusteringColumn
+    private Date timestamp;
 
     @Column(name = "bucket_assignment")
-    boolean bucketAssignment;
+    private boolean bucketAssignment;
 
 }
