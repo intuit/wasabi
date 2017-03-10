@@ -86,6 +86,11 @@ public class AssignmentCountEnvelope implements Runnable {
 
     @Override
     public void run() {
+    	
+    	if (countUp) {
+    		assignmentsRepository.insertExperimentBucketAssignment(experiment.getID(), date.toInstant(), null != assignment.getBucketLabel());
+        }
+    	
         try {
             // Updates the bucket assignment counts
             if (assignBucketCount) {
