@@ -241,7 +241,7 @@ public class DefaultAuthorizationTest {
 
     @Test
     public void testGetSuperAdminListSuccess() throws Exception {
-    	UserRole userRole = UserRole.newInstance(TESTAPP,Role.SUPERADMIN).withUserID(USER).build();
+        UserRole userRole = UserRole.newInstance(TESTAPP, Role.SUPERADMIN).withUserID(USER).build();
         UserRoleList userRoleList = new UserRoleList();
         userRoleList.addRole(userRole);
         when(authorizationRepository.getSuperAdminRoleList()).thenReturn(userRoleList.getRoleList());
@@ -250,102 +250,102 @@ public class DefaultAuthorizationTest {
         assertEquals(userRoleList.getRoleList(), roles);
     }
 
-    @Test(expected=RepositoryException.class)
+    @Test(expected = RepositoryException.class)
     public void testGetSuperAdminListThrowsException() throws Exception {
         doThrow(RepositoryException.class).when(authorizationRepository)
-        		.getSuperAdminRoleList();
+                .getSuperAdminRoleList();
         List<UserRole> roles = defaultAuthorization.getSuperAdminRoleList();
     }
 
     @Test
     public void testAssignUserToSuperadminSuccess() throws Exception {
-		UserInfo candidate = UserInfo.newInstance(Username.valueOf("candidate1")).build();
+        UserInfo candidate = UserInfo.newInstance(Username.valueOf("candidate1")).build();
         UserRoleList userRoleList = new UserRoleList();
         when(authorizationRepository.getUserRoleList(candidate.getUsername())).thenReturn(userRoleList);
 
         defaultAuthorization.assignUserToSuperAdminRole(candidate,
-        		UserInfo.newInstance(USER).build());
+                UserInfo.newInstance(USER).build());
 
-        verify(authorizationRepository,times(1)).assignUserToSuperAdminRole(candidate);
-        verify(eventLog,times(1)).postEvent(any(AuthorizationChangeEvent.class));
+        verify(authorizationRepository, times(1)).assignUserToSuperAdminRole(candidate);
+        verify(eventLog, times(1)).postEvent(any(AuthorizationChangeEvent.class));
     }
 
-    @Test(expected=RepositoryException.class)
+    @Test(expected = RepositoryException.class)
     public void testAssignToSuperAdminThrowsException() throws Exception {
-		UserInfo candidate = UserInfo.newInstance(USER).build();
+        UserInfo candidate = UserInfo.newInstance(USER).build();
         doThrow(RepositoryException.class).when(authorizationRepository)
-        		.getUserRoleList(candidate.getUsername());
+                .getUserRoleList(candidate.getUsername());
         defaultAuthorization.assignUserToSuperAdminRole(
-        		candidate, UserInfo.newInstance(USER).build());
+                candidate, UserInfo.newInstance(USER).build());
     }
 
     @Test
     public void testRemoveUserFromSuperadminSuccess() throws Exception {
-		UserInfo candidate = UserInfo.newInstance(Username.valueOf("candidate1")).build();
-        UserRole userRole1 = UserRole.newInstance(TESTAPP,Role.SUPERADMIN)
-        		.withUserID(candidate.getUsername()).build();
-        UserRole userRole2 = UserRole.newInstance(TESTAPP,Role.SUPERADMIN)
-        		.withUserID(USER).build();
+        UserInfo candidate = UserInfo.newInstance(Username.valueOf("candidate1")).build();
+        UserRole userRole1 = UserRole.newInstance(TESTAPP, Role.SUPERADMIN)
+                .withUserID(candidate.getUsername()).build();
+        UserRole userRole2 = UserRole.newInstance(TESTAPP, Role.SUPERADMIN)
+                .withUserID(USER).build();
         UserRoleList userRoleList = new UserRoleList();
         userRoleList.addRole(userRole1);
         userRoleList.addRole(userRole2);
         when(authorizationRepository.getSuperAdminRoleList()).thenReturn(
-        		userRoleList.getRoleList());
+                userRoleList.getRoleList());
         defaultAuthorization.removeUserFromSuperAdminRole(candidate,
-        		UserInfo.newInstance(USER).build());
-        verify(authorizationRepository,times(1)).removeUserFromSuperAdminRole(candidate);
-        verify(eventLog,times(1)).postEvent(any(AuthorizationChangeEvent.class));
+                UserInfo.newInstance(USER).build());
+        verify(authorizationRepository, times(1)).removeUserFromSuperAdminRole(candidate);
+        verify(eventLog, times(1)).postEvent(any(AuthorizationChangeEvent.class));
     }
 
-    @Test(expected=IllegalArgumentException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testRemoveUserFromSuperadminNotSuperadminFailure() throws Exception {
-		UserInfo candidate = UserInfo.newInstance(Username.valueOf("candidate1")).build();
-        UserRole userRole1 = UserRole.newInstance(TESTAPP,Role.ADMIN)
-        		.withUserID(candidate.getUsername()).build();
-        UserRole userRole2 = UserRole.newInstance(TESTAPP,Role.SUPERADMIN)
-        		.withUserID(USER).build();
+        UserInfo candidate = UserInfo.newInstance(Username.valueOf("candidate1")).build();
+        UserRole userRole1 = UserRole.newInstance(TESTAPP, Role.ADMIN)
+                .withUserID(candidate.getUsername()).build();
+        UserRole userRole2 = UserRole.newInstance(TESTAPP, Role.SUPERADMIN)
+                .withUserID(USER).build();
         UserRoleList userRoleList = new UserRoleList();
         userRoleList.addRole(userRole1);
         userRoleList.addRole(userRole2);
         when(authorizationRepository.getSuperAdminRoleList()).thenReturn(
-        		userRoleList.getRoleList());
+                userRoleList.getRoleList());
         defaultAuthorization.removeUserFromSuperAdminRole(candidate,
-        		UserInfo.newInstance(USER).build());
-        verify(authorizationRepository,times(1)).removeUserFromSuperAdminRole(candidate);
-        verify(eventLog,times(1)).postEvent(any(AuthorizationChangeEvent.class));
+                UserInfo.newInstance(USER).build());
+        verify(authorizationRepository, times(1)).removeUserFromSuperAdminRole(candidate);
+        verify(eventLog, times(1)).postEvent(any(AuthorizationChangeEvent.class));
     }
 
-    @Test(expected=IllegalArgumentException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testRemoveLastUserFromSuperadminThrowsException() throws Exception {
-		UserInfo candidate = UserInfo.newInstance(USER).build();
-        UserRole userRole1 = UserRole.newInstance(TESTAPP,Role.SUPERADMIN)
-        		.withUserID(candidate.getUsername()).build();
+        UserInfo candidate = UserInfo.newInstance(USER).build();
+        UserRole userRole1 = UserRole.newInstance(TESTAPP, Role.SUPERADMIN)
+                .withUserID(candidate.getUsername()).build();
         UserRoleList userRoleList = new UserRoleList();
         userRoleList.addRole(userRole1);
         when(authorizationRepository.getSuperAdminRoleList()).thenReturn(
-        		userRoleList.getRoleList());
+                userRoleList.getRoleList());
         defaultAuthorization.removeUserFromSuperAdminRole(candidate,
-        		UserInfo.newInstance(USER).build());
-        verify(authorizationRepository,times(1)).removeUserFromSuperAdminRole(candidate);
-        verify(eventLog,times(1)).postEvent(any(AuthorizationChangeEvent.class));
+                UserInfo.newInstance(USER).build());
+        verify(authorizationRepository, times(1)).removeUserFromSuperAdminRole(candidate);
+        verify(eventLog, times(1)).postEvent(any(AuthorizationChangeEvent.class));
     }
 
-    @Test(expected=RepositoryException.class)
+    @Test(expected = RepositoryException.class)
     public void testRemoveFromSuperadminThrowsException() throws Exception {
-		UserInfo candidate = UserInfo.newInstance(Username.valueOf("candidate1")).build();
-        UserRole userRole1 = UserRole.newInstance(TESTAPP,Role.SUPERADMIN)
-        		.withUserID(candidate.getUsername()).build();
-        UserRole userRole2 = UserRole.newInstance(TESTAPP,Role.SUPERADMIN)
-        		.withUserID(USER).build();
+        UserInfo candidate = UserInfo.newInstance(Username.valueOf("candidate1")).build();
+        UserRole userRole1 = UserRole.newInstance(TESTAPP, Role.SUPERADMIN)
+                .withUserID(candidate.getUsername()).build();
+        UserRole userRole2 = UserRole.newInstance(TESTAPP, Role.SUPERADMIN)
+                .withUserID(USER).build();
         UserRoleList userRoleList = new UserRoleList();
         userRoleList.addRole(userRole1);
         userRoleList.addRole(userRole2);
         when(authorizationRepository.getSuperAdminRoleList()).thenReturn(
-        		userRoleList.getRoleList());
+                userRoleList.getRoleList());
         doThrow(RepositoryException.class).when(authorizationRepository)
-        		.removeUserFromSuperAdminRole(candidate);
+                .removeUserFromSuperAdminRole(candidate);
         defaultAuthorization.removeUserFromSuperAdminRole(
-        		candidate, UserInfo.newInstance(USER).build());
+                candidate, UserInfo.newInstance(USER).build());
     }
 
     @Test

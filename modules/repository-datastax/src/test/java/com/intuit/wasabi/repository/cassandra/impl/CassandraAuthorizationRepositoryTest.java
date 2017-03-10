@@ -169,34 +169,34 @@ public class CassandraAuthorizationRepositoryTest {
     }
 
     @Test
-    public void assignUserToSuperadminTest(){
-    	com.intuit.wasabi.authenticationobjects.UserInfo uInfo =
-    			com.intuit.wasabi.authenticationobjects.UserInfo.newInstance(
-    					com.intuit.wasabi.authenticationobjects.UserInfo.Username.
-    					valueOf("test1")).build();
+    public void assignUserToSuperadminTest() {
+        com.intuit.wasabi.authenticationobjects.UserInfo uInfo =
+                com.intuit.wasabi.authenticationobjects.UserInfo.newInstance(
+                        com.intuit.wasabi.authenticationobjects.UserInfo.Username.
+                                valueOf("test1")).build();
         repository.assignUserToSuperAdminRole(uInfo);
         verify(appRoleAccessor).insertAppRoleBy(
-        		CassandraAuthorizationRepository.ALL_APPLICATIONS, "test1",
-        		CassandraAuthorizationRepository.SUPERADMIN);
+                CassandraAuthorizationRepository.ALL_APPLICATIONS, "test1",
+                CassandraAuthorizationRepository.SUPERADMIN);
         verify(userRoleAccessor).insertUserRoleBy("test1",
-        		CassandraAuthorizationRepository.ALL_APPLICATIONS, CassandraAuthorizationRepository.SUPERADMIN);
+                CassandraAuthorizationRepository.ALL_APPLICATIONS, CassandraAuthorizationRepository.SUPERADMIN);
     }
 
     @Test
-    public void removeUserFromSuperadminTest(){
-    	com.intuit.wasabi.authenticationobjects.UserInfo uInfo =
-    			com.intuit.wasabi.authenticationobjects.UserInfo.newInstance(
-    					com.intuit.wasabi.authenticationobjects.UserInfo.Username.
-    					valueOf("test1")).build();
+    public void removeUserFromSuperadminTest() {
+        com.intuit.wasabi.authenticationobjects.UserInfo uInfo =
+                com.intuit.wasabi.authenticationobjects.UserInfo.newInstance(
+                        com.intuit.wasabi.authenticationobjects.UserInfo.Username.
+                                valueOf("test1")).build();
         repository.removeUserFromSuperAdminRole(uInfo);
         verify(appRoleAccessor).deleteAppRoleBy(
-        		CassandraAuthorizationRepository.ALL_APPLICATIONS, "test1");
+                CassandraAuthorizationRepository.ALL_APPLICATIONS, "test1");
         verify(userRoleAccessor).deleteUserRoleBy("test1",
-        		CassandraAuthorizationRepository.ALL_APPLICATIONS);
+                CassandraAuthorizationRepository.ALL_APPLICATIONS);
     }
 
     @Test
-    public void getAllUserRolesOneSuperadminTest(){
+    public void getAllUserRolesOneSuperadminTest() {
         List<UserRole> userRoleList = new ArrayList<>();
         userRoleList.add(
                 UserRole.builder().appName("*").role("superadmin").userId("test").build()
@@ -216,20 +216,20 @@ public class CassandraAuthorizationRepositoryTest {
         when(userRoleResult.all()).thenReturn(userRoleList);
 
         List<com.intuit.wasabi.authorizationobjects.UserRole>
-        	result = repository.getSuperAdminRoleList();
+                result = repository.getSuperAdminRoleList();
 
         logger.info(result.toString());
         assertThat(result.size(), is(1));
     }
 
     @Test
-    public void getAllUserRolesNoSuperuserTest(){
+    public void getAllUserRolesNoSuperuserTest() {
         List<UserRole> userRoleList = new ArrayList<>();
         when(userRoleAccessor.getAllUserRoles()).thenReturn(userRoleResult);
         when(userRoleResult.all()).thenReturn(userRoleList);
 
         List<com.intuit.wasabi.authorizationobjects.UserRole>
-        	result = repository.getSuperAdminRoleList();
+                result = repository.getSuperAdminRoleList();
 
         logger.info(result.toString());
         assertThat(result.size(), is(0));

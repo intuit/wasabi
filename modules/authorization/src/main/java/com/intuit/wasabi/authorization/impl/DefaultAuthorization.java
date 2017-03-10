@@ -32,18 +32,15 @@ import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.repository.AuthorizationRepository;
 import com.intuit.wasabi.repository.RepositoryException;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static com.intuit.wasabi.authorizationobjects.Permission.SUPERADMIN;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -63,9 +60,9 @@ public class DefaultAuthorization implements Authorization {
         SUPERADMIN_PERMISSIONS.add(SUPERADMIN);
     }
 
-    protected final AuthorizationRepository authorizationRepository;
-    protected final Experiments experiments;
-    protected final EventLog eventLog;
+    private final AuthorizationRepository authorizationRepository;
+    private final Experiments experiments;
+    private final EventLog eventLog;
 
     @Inject
     public DefaultAuthorization(final AuthorizationRepository authorizationRepository, final Experiments experiments,
@@ -220,55 +217,55 @@ public class DefaultAuthorization implements Authorization {
         return UserInfo.Username.valueOf(fields[0]);
     }
 
-	@Override
-	public void assignUserToSuperAdminRole(UserInfo candidateUserInfo, UserInfo assigningUserInfo) {
-        
+    @Override
+    public void assignUserToSuperAdminRole(UserInfo candidateUserInfo, UserInfo assigningUserInfo) {
+
         LOGGER.debug("Assigning super admin role to {} by {} ", candidateUserInfo, assigningUserInfo);
 
         UserRoleList userRoleList = getUserRoleList(candidateUserInfo.getUsername());
-        
+
         LOGGER.debug("User role list {}", userRoleList);
-        
-        boolean isSuperAdmin =  userRoleList.getRoleList().stream().anyMatch((UserRole ur) -> ur.getRole().equals(Role.SUPERADMIN));
-        
-        if ( isSuperAdmin ) {
-        	throw new IllegalArgumentException("User " + candidateUserInfo.getUsername() + " already a superadmin");
+
+        boolean isSuperAdmin = userRoleList.getRoleList().stream().anyMatch((UserRole ur) -> ur.getRole().equals(Role.SUPERADMIN));
+
+        if (isSuperAdmin) {
+            throw new IllegalArgumentException("User " + candidateUserInfo.getUsername() + " already a superadmin");
         }
-        
+
         authorizationRepository.assignUserToSuperAdminRole(candidateUserInfo);
         eventLog.postEvent(new AuthorizationChangeEvent(assigningUserInfo,
-        		null, candidateUserInfo, null, Role.SUPERADMIN.toString()));
-	}
+                null, candidateUserInfo, null, Role.SUPERADMIN.toString()));
+    }
 
-	@Override
-	public void removeUserFromSuperAdminRole(UserInfo candidateUserInfo, UserInfo assigningUserInfo) {
-        
-		LOGGER.debug("Removing user {} from superadmin by {}", candidateUserInfo, assigningUserInfo);
-		
+    @Override
+    public void removeUserFromSuperAdminRole(UserInfo candidateUserInfo, UserInfo assigningUserInfo) {
+
+        LOGGER.debug("Removing user {} from superadmin by {}", candidateUserInfo, assigningUserInfo);
+
         List<UserRole> allSuperAdmins = getSuperAdminRoleList();
 
-		LOGGER.debug("Current superadmins {}", allSuperAdmins);
+        LOGGER.debug("Current superadmins {}", allSuperAdmins);
 
-		if ( allSuperAdmins.size() == 1 )
-        	throw new IllegalArgumentException("Cannot delete last superadmin " + candidateUserInfo.getUsername());
-        
-        boolean isSuperAdmin = allSuperAdmins.stream().anyMatch((UserRole ur) -> ur.getRole().equals(Role.SUPERADMIN) 
-        		&& ur.getUserID().equals(candidateUserInfo.getUsername()));
-        
-        if ( ! isSuperAdmin ) {
-        	throw new IllegalArgumentException("User " + candidateUserInfo.getUsername() + " not a superadmin");
+        if (allSuperAdmins.size() == 1)
+            throw new IllegalArgumentException("Cannot delete last superadmin " + candidateUserInfo.getUsername());
+
+        boolean isSuperAdmin = allSuperAdmins.stream().anyMatch((UserRole ur) -> ur.getRole().equals(Role.SUPERADMIN)
+                && ur.getUserID().equals(candidateUserInfo.getUsername()));
+
+        if (!isSuperAdmin) {
+            throw new IllegalArgumentException("User " + candidateUserInfo.getUsername() + " not a superadmin");
         }
-        
+
         authorizationRepository.removeUserFromSuperAdminRole(candidateUserInfo);
         eventLog.postEvent(new AuthorizationChangeEvent(assigningUserInfo,
-        		null, candidateUserInfo, Role.SUPERADMIN.toString(), null));
-	}
+                null, candidateUserInfo, Role.SUPERADMIN.toString(), null));
+    }
 
-	@Override
-	public List<UserRole> getSuperAdminRoleList() {
-		LOGGER.debug("Getting all super admins");
-		
-        return authorizationRepository.getSuperAdminRoleList();	
-	}
+    @Override
+    public List<UserRole> getSuperAdminRoleList() {
+        LOGGER.debug("Getting all super admins");
+
+        return authorizationRepository.getSuperAdminRoleList();
+    }
 
 }
