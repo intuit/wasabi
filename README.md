@@ -305,18 +305,6 @@ The runtime logs can be accessed executing the following command in a another sh
 % grunt build
 ```
 
-> Edit Gruntfile.js with the following change to the apiHostBaseUrlValue value, since you would be running the
-Wasabi server on localhost.
-
-```javascript
-development: {
-  constants: {
-    supportEmail: 'you@example.com',
-    apiHostBaseUrlValue: 'http://localhost:8080/api/v1'
-  }
-}
-```
-
 ```bash
 % grunt serve
 ```
