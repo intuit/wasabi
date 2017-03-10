@@ -31,7 +31,6 @@ import com.intuit.wasabi.experimentobjects.Application;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
@@ -46,7 +45,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

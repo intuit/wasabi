@@ -54,8 +54,8 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 public class CassandraAuthorizationRepository implements AuthorizationRepository {
-    public static final String ALL_APPLICATIONS = "*";
     private static final Logger LOGGER = LoggerFactory.getLogger(CassandraAuthorizationRepository.class);
+    public static final String ALL_APPLICATIONS = "*";
     static final String SUPERADMIN = "superadmin";
     static final Application.Name WILDCARD = Application.Name.valueOf("wildcard");
 

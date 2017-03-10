@@ -17,7 +17,6 @@ package com.intuit.wasabi.repository;
 
 
 import java.util.List;
-
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authorizationobjects.UserPermissions;
 import com.intuit.wasabi.authorizationobjects.UserPermissionsList;
