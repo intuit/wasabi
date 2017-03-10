@@ -233,7 +233,7 @@ public class AuthorizationResource {
     @POST
     @Path("/superadmins/{userID}")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = "Assign superadmin priveleges to user")
+    @ApiOperation(value = "Assign superadmin privileges to user")
     @Timed
     public Response assignUserToSuperAdmin(
             @PathParam("userID")
@@ -243,21 +243,26 @@ public class AuthorizationResource {
             @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
             final String authorizationHeader) {
 
-        LOGGER.debug("Assign user {} to super admin", userID);
+        try {
+            LOGGER.debug("Assign userID={} to super admin", userID);
 
-        // Check for assigning user is superadmin
-        Username assigningUser = authorization.getUser(authorizationHeader);
-        UserInfo assigningUserInfo = authorization.getUserInfo(assigningUser);
+            // Check for assigning user is superadmin
+            Username assigningUser = authorization.getUser(authorizationHeader);
+            UserInfo assigningUserInfo = authorization.getUserInfo(assigningUser);
 
-        authorization.checkSuperAdmin(assigningUser);
+            authorization.checkSuperAdmin(assigningUser);
 
-        UserInfo candidateUserInfo = authorization.getUserInfo(userID);
-        if (candidateUserInfo == null || StringUtils.isBlank(candidateUserInfo.getUsername() + ""))
-            throw new IllegalArgumentException("User " + userID + " not valid");
+            UserInfo candidateUserInfo = authorization.getUserInfo(userID);
+            if (candidateUserInfo == null || StringUtils.isBlank(candidateUserInfo.getUsername() + ""))
+                throw new IllegalArgumentException("User " + userID + " not valid");
 
-        authorization.assignUserToSuperAdminRole(candidateUserInfo, assigningUserInfo);
+            authorization.assignUserToSuperAdminRole(candidateUserInfo, assigningUserInfo);
 
-        return httpHeader.headers(Status.NO_CONTENT).build();
+            return httpHeader.headers(Status.NO_CONTENT).build();
+        } catch (Exception exception) {
+            LOGGER.error("assignUserToSuperAdmin failed for userID={} with error:", userID, exception);
+            throw exception;
+        }
     }
 
     /**
@@ -280,19 +285,24 @@ public class AuthorizationResource {
             @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
             final String authorizationHeader) {
 
-        LOGGER.debug("Removing user {} from superadmin ", userID);
+        try {
+            LOGGER.debug("Removing user {} from superadmin ", userID);
 
-        // Check for assigning user is superadmin
-        Username assigningUser = authorization.getUser(authorizationHeader);
-        UserInfo assigninUserInfo = authorization.getUserInfo(assigningUser);
+            // Check for assigning user is superadmin
+            Username assigningUser = authorization.getUser(authorizationHeader);
+            UserInfo assigninUserInfo = authorization.getUserInfo(assigningUser);
 
-        authorization.checkSuperAdmin(assigningUser);
-        UserInfo candidateUser = authorization.getUserInfo(userID);
-        if (candidateUser == null)
-            throw new IllegalArgumentException("User " + userID + " not valid");
+            authorization.checkSuperAdmin(assigningUser);
+            UserInfo candidateUser = authorization.getUserInfo(userID);
+            if (candidateUser == null)
+                throw new IllegalArgumentException("User " + userID + " not valid");
 
-        authorization.removeUserFromSuperAdminRole(candidateUser, assigninUserInfo);
-        return httpHeader.headers(Status.NO_CONTENT).build();
+            authorization.removeUserFromSuperAdminRole(candidateUser, assigninUserInfo);
+            return httpHeader.headers(Status.NO_CONTENT).build();
+        } catch (Exception exception) {
+            LOGGER.error("removeUserFromSuperAdmin failed for usedID={} with error:", userID, exception);
+            throw exception;
+        }
     }
 
     /**
@@ -311,18 +321,23 @@ public class AuthorizationResource {
             @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
             final String authorizationHeader) {
 
-        LOGGER.debug("Getting super admins role");
+        try {
+            LOGGER.debug("Getting super admins role");
 
-        // Check for  user is superadmin
-        Username requestingUser = authorization.getUser(authorizationHeader);
+            // Check for  user is superadmin
+            Username requestingUser = authorization.getUser(authorizationHeader);
 
-        authorization.checkSuperAdmin(requestingUser);
+            authorization.checkSuperAdmin(requestingUser);
 
-        List<UserRole> userRoles = authorization.getSuperAdminRoleList();
+            List<UserRole> userRoles = authorization.getSuperAdminRoleList();
 
-        LOGGER.debug("Super admin user roles received {}", userRoles);
+            LOGGER.debug("Super admin user roles received {}", userRoles);
 
-        return httpHeader.headers().entity(userRoles).build();
+            return httpHeader.headers().entity(userRoles).build();
+        } catch (Exception exception) {
+            LOGGER.error("getAllSuperAdminRoleList failed with error:", exception);
+            throw exception;
+        }
     }
 
     /**
