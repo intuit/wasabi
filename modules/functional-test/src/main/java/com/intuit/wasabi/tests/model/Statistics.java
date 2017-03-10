@@ -22,20 +22,21 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.HashMap;
 import java.util.Map;
+
 /**
  * Created on 6/13/16.
  */
-public class Statistics extends StatisticsBase{
+public class Statistics extends StatisticsBase {
     @SerializedName("buckets")
     private Map<String, OutputBucketStatistics> experimentStatistics = new HashMap<>();
 
-    public OutputBucketStatistics getStatisticsByLable(String label){
+    public OutputBucketStatistics getStatisticsByLable(String label) {
         OutputBucketStatistics statistics = experimentStatistics.getOrDefault(label, new OutputBucketStatistics(label));
         experimentStatistics.put(label, statistics);
         return statistics;
     }
 
-   public Map<String, OutputBucketStatistics> get(){
+    public Map<String, OutputBucketStatistics> get() {
         return this.experimentStatistics;
     }
 

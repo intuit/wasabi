@@ -18,6 +18,8 @@
     <contextName>${project.artifactId}</contextName>
     <jmxConfigurator/>
     <property name="LOG" value="${log.dir}/${application.name}"/>
+    <property name="EHCACHE_LOG" value="${log.dir}/${application.name}-ehcache"/>
+    <property name="ASSIGNMENT_EXPORT_DB_LOG" value="${log.dir}/${application.name}-assignment-export-db"/>
     <!--
     <property name="AUDIT" value="${log.dir}/${application.name}-audit"/>
     -->
@@ -28,19 +30,67 @@
         </encoder>
     </appender>
 
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="APPLICATION_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG}.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
             <fileNamePattern>${LOG}.%i.log.zip</fileNamePattern>
             <minIndex>1</minIndex>
-            <maxIndex>6</maxIndex>
+            <maxIndex>3</maxIndex>
         </rollingPolicy>
         <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-           <maxFileSize>500MB</maxFileSize>
+           <maxFileSize>50MB</maxFileSize>
         </triggeringPolicy>
         <encoder>
             <pattern>%date %level [%thread] %logger{10} [%file:%line] %msg%n</pattern>
         </encoder>
+    </appender>
+
+    <appender name="EHCACHE_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${EHCACHE_LOG}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>${EHCACHE_LOG}.%i.log.zip</fileNamePattern>
+            <minIndex>1</minIndex>
+            <maxIndex>3</maxIndex>
+        </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>50MB</maxFileSize>
+        </triggeringPolicy>
+        <encoder>
+            <pattern>%date %level [%thread] %logger{10} [%file:%line] %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="ASSIGNMENT_EXPORT_DB_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${ASSIGNMENT_EXPORT_DB_LOG}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>${ASSIGNMENT_EXPORT_DB_LOG}.%i.log.zip</fileNamePattern>
+            <minIndex>1</minIndex>
+            <maxIndex>6</maxIndex>
+        </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>600MB</maxFileSize>
+        </triggeringPolicy>
+        <encoder>
+            <pattern>%date %level [%thread] %logger{10} [%file:%line] %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="ASYNC_APPLICATION_LOG" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>500</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <appender-ref ref="APPLICATION_LOG" />
+    </appender>
+
+    <appender name="ASYNC_EHCACHE_LOG" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>50000</queueSize>
+        <discardingThreshold>5000</discardingThreshold>
+        <appender-ref ref="EHCACHE_LOG" />
+    </appender>
+
+    <appender name="ASYNC_ASSIGNMENT_EXPORT_DB_LOG" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>500000</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <appender-ref ref="ASSIGNMENT_EXPORT_DB_LOG" />
     </appender>
 
     <!--
@@ -102,8 +152,17 @@
     </logger>
     -->
 
+    <logger name="net.sf.ehcache" level="${log.level}" additivity="false">
+        <appender-ref ref="ASYNC_EHCACHE_LOG"/>
+    </logger>
+
+    <logger name="com.intuit.wasabi.assignment.impl.NoopDatabaseAssignmentEnvelope"
+            level="${log.level}" additivity="false">
+        <appender-ref ref="ASYNC_ASSIGNMENT_EXPORT_DB_LOG"/>
+    </logger>
+
     <root level="${log.level}">
-        <appender-ref ref="FILE"/>
+        <appender-ref ref="ASYNC_APPLICATION_LOG"/>
         <appender-ref ref="CONSOLE"/>
     </root>
 </configuration>

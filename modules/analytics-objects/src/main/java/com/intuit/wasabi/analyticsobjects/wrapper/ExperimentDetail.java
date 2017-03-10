@@ -253,9 +253,10 @@ public class ExperimentDetail {
     }
 
     private void setState(Experiment.State state) {
-        if (state != null)
+        if (state != null && !Experiment.State.DELETED.equals(state))
             this.state = state;
-        else throw new IllegalArgumentException("Experiment.State is not allowed to be null for ExperimentDetail");
+        else
+            throw new IllegalArgumentException("Experiment.State is not allowed to be null or DELETED for ExperimentDetail");
     }
 
     public Experiment.Label getLabel() {

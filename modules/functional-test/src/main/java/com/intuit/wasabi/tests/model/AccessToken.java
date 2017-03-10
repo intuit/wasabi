@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,13 +27,19 @@ import java.util.Objects;
  */
 public class AccessToken extends ModelItem {
 
-    /** the token */
+    /**
+     * the token
+     */
     public String access_token;
 
-    /** token type */
+    /**
+     * token type
+     */
     public String token_type;
 
-    /** The serialization strategy for comparisons and JSON serialization. */
+    /**
+     * The serialization strategy for comparisons and JSON serialization.
+     */
     private static SerializationStrategy serializationStrategy = new DefaultNameExclusionStrategy();
 
     /**
@@ -134,7 +140,7 @@ public class AccessToken extends ModelItem {
         if (parts.length == 6) {
             return parts;
         } else {
-            return new String[] { "", "", "", "", "", "" };
+            return new String[]{"", "", "", "", "", ""};
         }
     }
 
@@ -158,13 +164,13 @@ public class AccessToken extends ModelItem {
 
     /**
      * Returns the timestamp.
-     * 
+     *
      * @return the timestamp
      */
     public String getTokenTimestamp() {
         return getTokenParts()[2];
     }
-    
+
     /**
      * Returns the token date as a string.
      *

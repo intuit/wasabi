@@ -20,18 +20,13 @@
     <parent>
         <groupId>com.intuit.wasabi</groupId>
         <artifactId>wasabi</artifactId>
-        <version>1.0.20170113205431-SNAPSHOT</version>
+        <version>1.0.20170303185048-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <artifactId>wasabi-analytics</artifactId>
     <packaging>jar</packaging>
     <name>${project.artifactId}</name>
-
-    <properties>
-        <!-- FIXME: we can do better -->
-        <analytics.release.date>2001-07-04T12:08:56.235-0700</analytics.release.date>
-    </properties>
 
     <dependencies>
         <dependency>

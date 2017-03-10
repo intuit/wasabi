@@ -102,6 +102,7 @@ cp ${home}/classes/web.properties ${home}/${id}/conf
 cp ./modules/analytics/target/classes/analytics.properties ${home}/${id}/conf
 cp ./modules/api/target/classes/api.properties ${home}/${id}/conf
 cp ./modules/assignment/target/classes/assignment.properties ${home}/${id}/conf
+cp ./modules/assignment/target/classes/ehcache.xml ${home}/${id}/conf
 cp ./modules/auditlog/target/classes/auditlog.properties ${home}/${id}/conf
 cp ./modules/authentication/target/classes/authentication.properties ${home}/${id}/conf
 cp ./modules/authorization/target/classes/authorization.properties ${home}/${id}/conf

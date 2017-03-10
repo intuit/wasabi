@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,25 +15,33 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.cassandra.impl;
 
-import com.datastax.driver.core.*;
+import com.datastax.driver.core.BatchStatement;
+import com.datastax.driver.core.BoundStatement;
+import com.datastax.driver.core.PreparedStatement;
+import com.datastax.driver.core.Statement;
 import com.datastax.driver.mapping.Result;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.inject.Inject;
-import com.intuit.wasabi.analyticsobjects.counts.AssignmentCounts;
-import com.intuit.wasabi.analyticsobjects.counts.BucketAssignmentCount;
-import com.intuit.wasabi.analyticsobjects.counts.TotalUsers;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.exceptions.ConstraintViolationException;
 import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
-import com.intuit.wasabi.experimentobjects.*;
+import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Bucket.BucketAuditInfo;
+import com.intuit.wasabi.experimentobjects.BucketList;
+import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.Experiment.ExperimentAuditInfo;
 import com.intuit.wasabi.experimentobjects.Experiment.ID;
 import com.intuit.wasabi.experimentobjects.Experiment.State;
+import com.intuit.wasabi.experimentobjects.ExperimentList;
+import com.intuit.wasabi.experimentobjects.ExperimentValidator;
+import com.intuit.wasabi.experimentobjects.NewExperiment;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.RepositoryException;
+import com.intuit.wasabi.repository.cassandra.UninterruptibleUtil;
 import com.intuit.wasabi.repository.cassandra.accessor.ApplicationListAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.BucketAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
@@ -42,739 +50,709 @@ import com.intuit.wasabi.repository.cassandra.accessor.audit.ExperimentAuditLogA
 import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentLabelIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentState;
 import com.intuit.wasabi.repository.cassandra.accessor.index.StateExperimentIndexAccessor;
-import com.intuit.wasabi.repository.cassandra.accessor.index.UserBucketIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentByAppNameLabel;
 import com.intuit.wasabi.repository.cassandra.pojo.index.StateExperimentIndex;
 import org.slf4j.Logger;
 
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Cassandra experiment repository
- * 
+ *
  * @see ExperimentRepository
  */
 public class CassandraExperimentRepository implements ExperimentRepository {
 
-	private final ExperimentValidator validator;
+    private final ExperimentValidator validator;
 
-	private CassandraDriver driver;
+    private CassandraDriver driver;
 
-	private ExperimentAccessor experimentAccessor;
+    private ExperimentAccessor experimentAccessor;
 
-	private ExperimentLabelIndexAccessor experimentLabelIndexAccessor;
+    private ExperimentLabelIndexAccessor experimentLabelIndexAccessor;
 
-	private UserBucketIndexAccessor userBucketIndexAccessor;
+    private BucketAccessor bucketAccessor;
 
-	private BucketAccessor bucketAccessor;
+    private ApplicationListAccessor applicationListAccessor;
 
-	private ApplicationListAccessor applicationListAccessor;
-	
-	private StateExperimentIndexAccessor stateExperimentIndexAccessor;
+    private StateExperimentIndexAccessor stateExperimentIndexAccessor;
 
-	private BucketAuditLogAccessor bucketAuditLogAccessor;
+    private BucketAuditLogAccessor bucketAuditLogAccessor;
 
-	private ExperimentAuditLogAccessor experimentAuditLogAccessor;
+    private ExperimentAuditLogAccessor experimentAuditLogAccessor;
 
-	/**
-	 * @return the experimentAccessor
-	 */
-	public ExperimentAccessor getExperimentAccessor() {
-		return experimentAccessor;
-	}
+    /**
+     * @return the experimentAccessor
+     */
+    public ExperimentAccessor getExperimentAccessor() {
+        return experimentAccessor;
+    }
 
-	/**
-	 * @param experimentAccessor the experimentAccessor to set
-	 */
-	public void setExperimentAccessor(ExperimentAccessor experimentAccessor) {
-		this.experimentAccessor = experimentAccessor;
-	}
+    /**
+     * @param experimentAccessor the experimentAccessor to set
+     */
+    public void setExperimentAccessor(ExperimentAccessor experimentAccessor) {
+        this.experimentAccessor = experimentAccessor;
+    }
 
-	/**
-	 * @return the experimentLabelIndexAccessor
-	 */
-	public ExperimentLabelIndexAccessor getExperimentLabelIndexAccessor() {
-		return experimentLabelIndexAccessor;
-	}
+    /**
+     * @return the experimentLabelIndexAccessor
+     */
+    public ExperimentLabelIndexAccessor getExperimentLabelIndexAccessor() {
+        return experimentLabelIndexAccessor;
+    }
 
-	/**
-	 * @param experimentLabelIndexAccessor the experimentLabelIndexAccessor to set
-	 */
-	public void setExperimentLabelIndexAccessor(
-			ExperimentLabelIndexAccessor experimentLabelIndexAccessor) {
-		this.experimentLabelIndexAccessor = experimentLabelIndexAccessor;
-	}
+    /**
+     * @param experimentLabelIndexAccessor the experimentLabelIndexAccessor to set
+     */
+    public void setExperimentLabelIndexAccessor(
+            ExperimentLabelIndexAccessor experimentLabelIndexAccessor) {
+        this.experimentLabelIndexAccessor = experimentLabelIndexAccessor;
+    }
 
-	/**
-	 * @return the userBucketIndexAccessor
-	 */
-	public UserBucketIndexAccessor getUserBucketIndexAccessor() {
-		return userBucketIndexAccessor;
-	}
+    /**
+     * @return the bucketAccessor
+     */
+    public BucketAccessor getBucketAccessor() {
+        return bucketAccessor;
+    }
 
-	/**
-	 * @param userBucketIndexAccessor the userBucketIndexAccessor to set
-	 */
-	public void setUserBucketIndexAccessor(
-			UserBucketIndexAccessor userBucketIndexAccessor) {
-		this.userBucketIndexAccessor = userBucketIndexAccessor;
-	}
+    /**
+     * @param bucketAccessor the bucketAccessor to set
+     */
+    public void setBucketAccessor(BucketAccessor bucketAccessor) {
+        this.bucketAccessor = bucketAccessor;
+    }
 
-	/**
-	 * @return the bucketAccessor
-	 */
-	public BucketAccessor getBucketAccessor() {
-		return bucketAccessor;
-	}
+    /**
+     * @return the applicationListAccessor
+     */
+    public ApplicationListAccessor getApplicationListAccessor() {
+        return applicationListAccessor;
+    }
 
-	/**
-	 * @param bucketAccessor the bucketAccessor to set
-	 */
-	public void setBucketAccessor(BucketAccessor bucketAccessor) {
-		this.bucketAccessor = bucketAccessor;
-	}
+    /**
+     * @param applicationListAccessor the applicationListAccessor to set
+     */
+    public void setApplicationListAccessor(
+            ApplicationListAccessor applicationListAccessor) {
+        this.applicationListAccessor = applicationListAccessor;
+    }
 
-	/**
-	 * @return the applicationListAccessor
-	 */
-	public ApplicationListAccessor getApplicationListAccessor() {
-		return applicationListAccessor;
-	}
+    /**
+     * @return the stateExperimentIndexAccessor
+     */
+    public StateExperimentIndexAccessor getStateExperimentIndexAccessor() {
+        return stateExperimentIndexAccessor;
+    }
 
-	/**
-	 * @param applicationListAccessor the applicationListAccessor to set
-	 */
-	public void setApplicationListAccessor(
-			ApplicationListAccessor applicationListAccessor) {
-		this.applicationListAccessor = applicationListAccessor;
-	}
+    /**
+     * @param stateExperimentIndexAccessor the stateExperimentIndexAccessor to set
+     */
+    public void setStateExperimentIndexAccessor(
+            StateExperimentIndexAccessor stateExperimentIndexAccessor) {
+        this.stateExperimentIndexAccessor = stateExperimentIndexAccessor;
+    }
 
-	/**
-	 * @return the stateExperimentIndexAccessor
-	 */
-	public StateExperimentIndexAccessor getStateExperimentIndexAccessor() {
-		return stateExperimentIndexAccessor;
-	}
+    /**
+     * @return the bucketAuditLogAccessor
+     */
+    public BucketAuditLogAccessor getBucketAuditLogAccessor() {
+        return bucketAuditLogAccessor;
+    }
 
-	/**
-	 * @param stateExperimentIndexAccessor the stateExperimentIndexAccessor to set
-	 */
-	public void setStateExperimentIndexAccessor(
-			StateExperimentIndexAccessor stateExperimentIndexAccessor) {
-		this.stateExperimentIndexAccessor = stateExperimentIndexAccessor;
-	}
+    /**
+     * @param bucketAuditLogAccessor the bucketAuditLogAccessor to set
+     */
+    public void setBucketAuditLogAccessor(
+            BucketAuditLogAccessor bucketAuditLogAccessor) {
+        this.bucketAuditLogAccessor = bucketAuditLogAccessor;
+    }
 
-	/**
-	 * @return the bucketAuditLogAccessor
-	 */
-	public BucketAuditLogAccessor getBucketAuditLogAccessor() {
-		return bucketAuditLogAccessor;
-	}
+    /**
+     * @return the experimentAuditLogAccessor
+     */
+    public ExperimentAuditLogAccessor getExperimentAuditLogAccessor() {
+        return experimentAuditLogAccessor;
+    }
 
-	/**
-	 * @param bucketAuditLogAccessor the bucketAuditLogAccessor to set
-	 */
-	public void setBucketAuditLogAccessor(
-			BucketAuditLogAccessor bucketAuditLogAccessor) {
-		this.bucketAuditLogAccessor = bucketAuditLogAccessor;
-	}
+    /**
+     * @param experimentAuditLogAccessor the experimentAuditLogAccessor to set
+     */
+    public void setExperimentAuditLogAccessor(
+            ExperimentAuditLogAccessor experimentAuditLogAccessor) {
+        this.experimentAuditLogAccessor = experimentAuditLogAccessor;
+    }
 
-	/**
-	 * @return the experimentAuditLogAccessor
-	 */
-	public ExperimentAuditLogAccessor getExperimentAuditLogAccessor() {
-		return experimentAuditLogAccessor;
-	}
+    /**
+     * Logger for this class
+     */
+    private static final Logger LOGGER = getLogger(CassandraExperimentRepository.class);
 
-	/**
-	 * @param experimentAuditLogAccessor the experimentAuditLogAccessor to set
-	 */
-	public void setExperimentAuditLogAccessor(
-			ExperimentAuditLogAccessor experimentAuditLogAccessor) {
-		this.experimentAuditLogAccessor = experimentAuditLogAccessor;
-	}
+    @Inject
+    public CassandraExperimentRepository(CassandraDriver driver,
+                                         ExperimentAccessor experimentAccessor,
+                                         ExperimentLabelIndexAccessor experimentLabelIndexAccessor,
+                                         BucketAccessor bucketAccessor,
+                                         ApplicationListAccessor applicationListAccessor,
+                                         BucketAuditLogAccessor bucketAuditLogAccessor,
+                                         ExperimentAuditLogAccessor experimentAuditLogAccessor,
+                                         StateExperimentIndexAccessor stateExperimentIndexAccessor,
+                                         ExperimentValidator validator) {
+        this.driver = driver;
+        this.experimentAccessor = experimentAccessor;
+        this.experimentLabelIndexAccessor = experimentLabelIndexAccessor;
+        this.bucketAccessor = bucketAccessor;
+        this.applicationListAccessor = applicationListAccessor;
+        this.stateExperimentIndexAccessor = stateExperimentIndexAccessor;
+        this.bucketAuditLogAccessor = bucketAuditLogAccessor;
+        this.experimentAuditLogAccessor = experimentAuditLogAccessor;
+        this.validator = validator;
+    }
 
-	/**
-	 * Logger for this class
-	 */
-	private static final Logger LOGGER = getLogger(CassandraExperimentRepository.class);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Experiment getExperiment(Experiment.ID experimentID) {
+        LOGGER.debug("Getting experiment", experimentID);
 
-	@Inject
-	public CassandraExperimentRepository(CassandraDriver driver,
-			ExperimentAccessor experimentAccessor,
-			ExperimentLabelIndexAccessor experimentLabelIndexAccessor,
-			UserBucketIndexAccessor userBucketIndexAccessor,
-			BucketAccessor bucketAccessor,
-			ApplicationListAccessor applicationListAccessor,
-			BucketAuditLogAccessor bucketAuditLogAccessor, 
-			ExperimentAuditLogAccessor experimentAuditLogAccessor, 
-			StateExperimentIndexAccessor stateExperimentIndexAccessor,
-			ExperimentValidator validator) {
-		this.driver = driver;
-		this.experimentAccessor = experimentAccessor;
-		this.experimentLabelIndexAccessor = experimentLabelIndexAccessor;
-		this.userBucketIndexAccessor = userBucketIndexAccessor;
-		this.bucketAccessor = bucketAccessor;
-		this.applicationListAccessor = applicationListAccessor;
-		this.stateExperimentIndexAccessor = stateExperimentIndexAccessor;
-		this.bucketAuditLogAccessor = bucketAuditLogAccessor;
-		this.experimentAuditLogAccessor = experimentAuditLogAccessor;
-		this.validator = validator;
-	}
+        return internalGetExperiment(experimentID);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Experiment getExperiment(Experiment.ID experimentID) {
-		LOGGER.debug("Getting experiment", experimentID);
+    /**
+     * {@inheritDoc}
+     */
+    protected Experiment internalGetExperiment(Experiment.ID experimentID) {
 
-		return internalGetExperiment(experimentID);
-	}
+        LOGGER.debug("Getting experiment {}", experimentID);
 
-	/**
-	 * {@inheritDoc}
-	 */
-	protected Experiment internalGetExperiment(Experiment.ID experimentID) {
+        Preconditions.checkNotNull(experimentID, "Parameter \"experimentID\" cannot be null");
 
-		LOGGER.debug("Getting experiment {}", experimentID);
+        try {
 
-		Preconditions.checkNotNull(experimentID, "Parameter \"experimentID\" cannot be null");
+            com.intuit.wasabi.repository.cassandra.pojo.Experiment experimentPojo = experimentAccessor
+                    .getExperimentById(experimentID.getRawID()).one();
 
-		try {
+            LOGGER.debug("Experiment retrieved {}", experimentPojo);
 
-			com.intuit.wasabi.repository.cassandra.pojo.Experiment experimentPojo = experimentAccessor
-					.getExperimentById(experimentID.getRawID()).one();
+            if (experimentPojo == null)
+                return null;
 
-			LOGGER.debug("Experiment retrieved {}", experimentPojo);
+            if (State.DELETED.name().equals(experimentPojo.getState()))
+                return null;
 
-			if (experimentPojo == null)
-				return null;
-			
-			if (State.DELETED.name().equals(experimentPojo.getState()))
-				return null;
+            return ExperimentHelper.makeExperiment(experimentPojo);
+        } catch (Exception e) {
+            LOGGER.error("Exception while getting experiment {}", experimentID);
+            throw new RepositoryException("Could not retrieve experiment with ID \"" + experimentID + "\"", e);
+        }
+    }
 
-			return ExperimentHelper.makeExperiment(experimentPojo);
-		} catch (Exception e) {
-			LOGGER.error("Exception while getting experiment {}", experimentID);
-			throw new RepositoryException("Could not retrieve experiment with ID \"" + experimentID + "\"", e);
-		}
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Map<Application.Name, List<Experiment>> getExperimentsForApps(Collection<Application.Name> appNames) {
+        Map<Application.Name, ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment>>> experimentsFutureMap = new HashMap<>(appNames.size());
+        Map<Application.Name, List<Experiment>> experimentMap = new HashMap<>(appNames.size());
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Experiment getExperiment(Application.Name appName,
-			Experiment.Label experimentLabel) {
+        try {
+            //Send calls asynchronously
+            appNames.forEach(appName -> {
+                experimentsFutureMap.put(appName, experimentAccessor.asyncGetExperimentByAppName(appName.toString()));
+                LOGGER.debug("Sent experimentAccessor.asyncGetExperimentByAppName({})", appName);
+            });
 
-		LOGGER.debug("Getting App {} with label {}", new Object[] { appName,experimentLabel });
+            //Process the Futures in the order that are expected to arrive earlier
+            for (Application.Name appName : experimentsFutureMap.keySet()) {
+                ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment>> experimentsFuture = experimentsFutureMap.get(appName);
+                final List<Experiment> appExperiments = new ArrayList<>();
+                UninterruptibleUtil.getUninterruptibly(experimentsFuture).all().stream().forEach(expPojo -> {
+                    appExperiments.add(ExperimentHelper.makeExperiment(expPojo));
+                });
+                experimentMap.put(appName, appExperiments);
+            }
+            LOGGER.debug("experimentMap=> {}", experimentMap);
+        } catch (Exception e) {
+            LOGGER.error("Error while getExperimentsForApps {}", appNames, e);
+            throw new RepositoryException("Error while getExperimentsForApps", e);
+        }
+        LOGGER.debug("Returning experimentMap {}", experimentMap);
+        return experimentMap;
+    }
 
-		return internalGetExperiment(appName, experimentLabel);
-	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	protected Experiment internalGetExperiment(Application.Name appName,
-			Experiment.Label experimentLabel) {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Experiment getExperiment(Application.Name appName,
+                                    Experiment.Label experimentLabel) {
 
-		LOGGER.debug("Getting experiment by app {} with label {} ",	new Object[] { appName, experimentLabel });
+        LOGGER.debug("Getting App {} with label {}", new Object[]{appName, experimentLabel});
 
-		Preconditions.checkNotNull(appName,"Parameter \"appName\" cannot be null");
-		Preconditions.checkNotNull(experimentLabel,"Parameter \"experimentLabel\" cannot be null");
+        return internalGetExperiment(appName, experimentLabel);
+    }
 
-		Experiment experiment = null;
-		
-		try {
-			ExperimentByAppNameLabel experimentAppLabel = experimentLabelIndexAccessor
-					.getExperimentBy(appName.toString(),
-							experimentLabel.toString()).one();
+    /**
+     * {@inheritDoc}
+     */
+    protected Experiment internalGetExperiment(Application.Name appName,
+                                               Experiment.Label experimentLabel) {
 
-			if (experimentAppLabel != null) {
-				com.intuit.wasabi.repository.cassandra.pojo.Experiment experimentPojo = experimentAccessor
-						.getExperimentById(experimentAppLabel.getId()).one();
-				experiment = ExperimentHelper.makeExperiment(experimentPojo);
-			} 
-			
-		} catch (Exception e) {
-			LOGGER.error("Error while getting experiment by app {} with label {} ",	new Object[] { appName, experimentLabel }, e);
+        LOGGER.debug("Getting experiment by app {} with label {} ", new Object[]{appName, experimentLabel});
 
-			throw new RepositoryException("Could not retrieve experiment \"" + appName + "\".\"" + experimentLabel + "\"", e);
-		}
+        Preconditions.checkNotNull(appName, "Parameter \"appName\" cannot be null");
+        Preconditions.checkNotNull(experimentLabel, "Parameter \"experimentLabel\" cannot be null");
 
-		LOGGER.debug("Returning experiment {}", experiment);
+        Experiment experiment = null;
 
-		return experiment;
-	}
+        try {
+            ExperimentByAppNameLabel experimentAppLabel = experimentLabelIndexAccessor
+                    .getExperimentBy(appName.toString(),
+                            experimentLabel.toString()).one();
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Experiment.ID createExperiment(NewExperiment newExperiment) {
+            if (experimentAppLabel != null) {
+                com.intuit.wasabi.repository.cassandra.pojo.Experiment experimentPojo = experimentAccessor
+                        .getExperimentById(experimentAppLabel.getId()).one();
+                experiment = ExperimentHelper.makeExperiment(experimentPojo);
+            }
 
-		validator.validateNewExperiment(newExperiment);
+        } catch (Exception e) {
+            LOGGER.error("Error while getting experiment by app {} with label {} ", new Object[]{appName, experimentLabel}, e);
 
-		// Ensure no other experiment is using the label
-		Experiment existingExperiment = getExperiment(
-				newExperiment.getApplicationName(), newExperiment.getLabel());
+            throw new RepositoryException("Could not retrieve experiment \"" + appName + "\".\"" + experimentLabel + "\"", e);
+        }
 
-		if (existingExperiment != null) {
-			throw new ConstraintViolationException(
-					ConstraintViolationException.Reason.UNIQUE_CONSTRAINT_VIOLATION,
-					"An active experiment with label \""
-							+ newExperiment.getApplicationName() + "\".\""
-							+ newExperiment.getLabel()
-							+ "\" already exists (id = "
-							+ existingExperiment.getID() + ")", null);
-		}
+        LOGGER.debug("Returning experiment {}", experiment);
 
-		// Yes, there is a race condition here, where two experiments
-		// being created with the same app name/label could result in one being
-		// clobbered. In practice, this should never happen, but...
-		// TODO: Implement a transactional recipe
+        return experiment;
+    }
 
-		final Date NOW = new Date();
-		final Experiment.State DRAFT = State.DRAFT;
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Experiment.ID createExperiment(NewExperiment newExperiment) {
 
-		try {
-			experimentAccessor.insertExperiment(
-				newExperiment.getId().getRawID(),
-				(newExperiment.getDescription() != null) ? newExperiment.getDescription() : "",
-                (newExperiment.getHypothesisIsCorrect() != null) ? newExperiment.getHypothesisIsCorrect() : "",
-                (newExperiment.getResults() != null) ? newExperiment.getResults() : "",
-				(newExperiment.getRule() != null) ? newExperiment.getRule() : "",
-				newExperiment.getSamplingPercent(),
-				newExperiment.getStartTime(),
-				newExperiment.getEndTime(),
-				DRAFT.name(),
-				newExperiment.getLabel().toString(),
-				newExperiment.getApplicationName().toString(),
-				NOW,
-				NOW,
-				newExperiment.getIsPersonalizationEnabled(),
-				newExperiment.getModelName(),
-				newExperiment.getModelVersion(),
-				newExperiment.getIsRapidExperiment(),
-				newExperiment.getUserCap(),
-				(newExperiment.getCreatorID() != null) ? newExperiment.getCreatorID() : "");
+        validator.validateNewExperiment(newExperiment);
 
-			// TODO - Do we need to create an application while creating a new experiment ?
-			createApplication(newExperiment.getApplicationName());
-		}
-		catch(Exception e) {
-			LOGGER.error("Error while creating experiment {}", newExperiment, e);
-			throw new RepositoryException("Exception while creating experiment " + newExperiment + " message " + e, e);
-		}
-		return newExperiment.getId();
+        // Ensure no other experiment is using the label
+        Experiment existingExperiment = getExperiment(
+                newExperiment.getApplicationName(), newExperiment.getLabel());
 
-	}
+        if (existingExperiment != null) {
+            throw new ConstraintViolationException(
+                    ConstraintViolationException.Reason.UNIQUE_CONSTRAINT_VIOLATION,
+                    "An active experiment with label \""
+                            + newExperiment.getApplicationName() + "\".\""
+                            + newExperiment.getLabel()
+                            + "\" already exists (id = "
+                            + existingExperiment.getID() + ")", null);
+        }
 
-	/**
-	 * {@inheritDoc}
-	 */
+        // Yes, there is a race condition here, where two experiments
+        // being created with the same app name/label could result in one being
+        // clobbered. In practice, this should never happen, but...
+        // TODO: Implement a transactional recipe
+
+        final Date NOW = new Date();
+        final Experiment.State DRAFT = State.DRAFT;
+
+        try {
+            experimentAccessor.insertExperiment(
+                    newExperiment.getId().getRawID(),
+                    (newExperiment.getDescription() != null) ? newExperiment.getDescription() : "",
+                    (newExperiment.getHypothesisIsCorrect() != null) ? newExperiment.getHypothesisIsCorrect() : "",
+                    (newExperiment.getResults() != null) ? newExperiment.getResults() : "",
+                    (newExperiment.getRule() != null) ? newExperiment.getRule() : "",
+                    newExperiment.getSamplingPercent(),
+                    newExperiment.getStartTime(),
+                    newExperiment.getEndTime(),
+                    DRAFT.name(),
+                    newExperiment.getLabel().toString(),
+                    newExperiment.getApplicationName().toString(),
+                    NOW,
+                    NOW,
+                    newExperiment.getIsPersonalizationEnabled(),
+                    newExperiment.getModelName(),
+                    newExperiment.getModelVersion(),
+                    newExperiment.getIsRapidExperiment(),
+                    newExperiment.getUserCap(),
+                    (newExperiment.getCreatorID() != null) ? newExperiment.getCreatorID() : "");
+
+            // TODO - Do we need to create an application while creating a new experiment ?
+            createApplication(newExperiment.getApplicationName());
+        } catch (Exception e) {
+            LOGGER.error("Error while creating experiment {}", newExperiment, e);
+            throw new RepositoryException("Exception while creating experiment " + newExperiment + " message " + e, e);
+        }
+        return newExperiment.getId();
+
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     // TODO - Why is this method is on the interface - if the client does not call it, the indices will be inconsistent ?	
-	@Override
-	public void createIndicesForNewExperiment(NewExperiment newExperiment) {
-		// Point the experiment index to this experiment
-		LOGGER.debug("Create indices for new experiment Experiment {}",newExperiment);
+    @Override
+    public void createIndicesForNewExperiment(NewExperiment newExperiment) {
+        // Point the experiment index to this experiment
+        LOGGER.debug("Create indices for new experiment Experiment {}", newExperiment);
 
-		updateExperimentLabelIndex(newExperiment.getID(),
-				newExperiment.getApplicationName(), newExperiment.getLabel(),
-				newExperiment.getStartTime(), newExperiment.getEndTime(),
-				State.DRAFT);
+        updateExperimentLabelIndex(newExperiment.getID(),
+                newExperiment.getApplicationName(), newExperiment.getLabel(),
+                newExperiment.getStartTime(), newExperiment.getEndTime(),
+                State.DRAFT);
 
-		try {
-			 updateStateIndex( newExperiment.getID(), ExperimentState.NOT_DELETED );
-		} catch (Exception e) {
-			LOGGER.error("Create indices for new experiment Experiment {} failed",newExperiment, e);
-			// remove the created ExperimentLabelIndex
-			removeExperimentLabelIndex(newExperiment.getApplicationName(),
-					newExperiment.getLabel());
-			throw new RepositoryException("Could not update indices for experiment \""
-							+ newExperiment + "\"", e);
-		}
-	}
+        try {
+            updateStateIndex(newExperiment.getID(), ExperimentState.NOT_DELETED);
+        } catch (Exception e) {
+            LOGGER.error("Create indices for new experiment Experiment {} failed", newExperiment, e);
+            // remove the created ExperimentLabelIndex
+            removeExperimentLabelIndex(newExperiment.getApplicationName(),
+                    newExperiment.getLabel());
+            throw new RepositoryException("Could not update indices for experiment \""
+                    + newExperiment + "\"", e);
+        }
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public AssignmentCounts getAssignmentCounts(Experiment.ID experimentID,
-			Context context) {
-		
-		LOGGER.debug("Get Assignment Counts for Experiment {} and context {}",
-				new Object[] { experimentID, context });
+    /**
+     * Improved way of getting BucketList for given experiments
+     */
+    @Override
+    public Map<Experiment.ID, BucketList> getBucketList(Collection<Experiment.ID> experimentIds) {
+        LOGGER.debug("Getting buckets list by experimentIDs {}", experimentIds);
+        Map<Experiment.ID, BucketList> bucketMap = new HashMap<>();
+        try {
+            Map<Experiment.ID, ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Bucket>>> bucketFutureMap = new HashMap<>();
+            experimentIds.forEach(experimentId -> {
+                bucketFutureMap.put(experimentId, bucketAccessor.asyncGetBucketByExperimentId(experimentId.getRawID()));
+            });
 
-		List<Bucket> bucketList = getBuckets(experimentID).getBuckets();
+            for (Experiment.ID expId : bucketFutureMap.keySet()) {
+                bucketMap.put(expId, new BucketList());
+                ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Bucket>> bucketFuture = bucketFutureMap.get(expId);
+                UninterruptibleUtil.getUninterruptibly(bucketFuture).all().forEach(bucketPojo -> {
+                            bucketMap.get(expId).addBucket(BucketHelper.makeBucket(bucketPojo));
+                        }
+                );
+            }
+        } catch (Exception e) {
+            LOGGER.error("getBucketList for {} failed", experimentIds, e);
+            throw new RepositoryException("Could not fetch buckets for the list of experiments", e);
+        }
 
-		AssignmentCounts.Builder builder = new AssignmentCounts.Builder();
-		builder.withExperimentID(experimentID);
+        LOGGER.debug("Returning bucketMap {}", bucketMap);
+        return bucketMap;
+    }
 
-		List<BucketAssignmentCount> bucketAssignmentCountList = new ArrayList<>(
-				bucketList.size() + 1);
-		long bucketAssignmentsCount = 0, nullAssignmentsCount = 0;
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public BucketList getBucketList(Experiment.ID experimentID) {
+        LOGGER.debug("Getting buckets list by one experimentId {}", experimentID);
 
-		for (Bucket bucket : bucketList) {
+        BucketList bucketList = new BucketList();
 
-			try {
-				ResultSet counts = userBucketIndexAccessor.countUserBy(
-						experimentID.getRawID(), context.toString(), bucket
-								.getLabel().toString());
-				Long count = counts.one().get(0, Long.class);
-				bucketAssignmentCountList
-						.add(new BucketAssignmentCount.Builder()
-								.withBucket(bucket.getLabel()).withCount(count)
-								.build());
-				bucketAssignmentsCount += count;
+        try {
+            Result<com.intuit.wasabi.repository.cassandra.pojo.Bucket> bucketPojos =
+                    bucketAccessor.getBucketByExperimentId(experimentID.getRawID());
 
-			} catch (Exception e) {
-				LOGGER.error("Get Assignment Counts for Experiment {} and context {} failed", new Object[] { experimentID, context }, e);
-				throw new RepositoryException("Could not fetch assignmentCounts for experiment " + "with ID \"" + experimentID + "\"", e);
-			}
+            for (com.intuit.wasabi.repository.cassandra.pojo.Bucket bucketPojo : bucketPojos
+                    .all()) {
+                bucketList.addBucket(BucketHelper.makeBucket(bucketPojo));
+            }
 
-		}
+        } catch (Exception e) {
+            LOGGER.error("Getting bucket list by one experiment id {} failed", experimentID, e);
+            throw new RepositoryException("Could not fetch buckets for experiment \"" + experimentID
+                    + "\" ", e);
+        }
 
-		// Checking the count for null assignments
-		try {
-			ResultSet counts = userBucketIndexAccessor.countUserBy(
-					experimentID.getRawID(), context.toString(), "");
-			nullAssignmentsCount = counts.one().get(0, Long.class);
-			bucketAssignmentCountList.add(new BucketAssignmentCount.Builder()
-					.withBucket(null).withCount(nullAssignmentsCount).build());
-		} catch (Exception e) {
-			LOGGER.error("Get Assignment Counts for Experiment {} and context {} failed",
-					new Object[] { experimentID, context }, e);
-			throw new RepositoryException("Could not fetch assignmentCounts for experiment " + "with ID \"" + experimentID + "\"", e);
-		}
+        LOGGER.debug("Returning buckets list by one experimentId {} bucket {}",
+                new Object[]{experimentID, bucketList});
 
-		return builder.withBucketAssignmentCount(bucketAssignmentCountList)
-				.withTotalUsers(new TotalUsers.Builder()
-								.withTotal(bucketAssignmentsCount + nullAssignmentsCount)
-								.withBucketAssignments(bucketAssignmentsCount)
-								.withNullAssignments(nullAssignmentsCount)
-								.build()).build();
-	}
+        return bucketList;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Map<Experiment.ID, BucketList> getBucketList(Collection<Experiment.ID> experimentIDCollection) {
-
-		LOGGER.debug("Getting buckets list by experimentId {}", experimentIDCollection);
-
-		List<UUID> experimentIds = ExperimentHelper.makeUUIDs(experimentIDCollection);
-
-		try {
-			Result<com.intuit.wasabi.repository.cassandra.pojo.Bucket> buckets = 
-					bucketAccessor.getBucketByExperimentIds(experimentIds);
-
-			Map<Experiment.ID, BucketList> result = new HashMap<>();
-
-			for (com.intuit.wasabi.repository.cassandra.pojo.Bucket bucketPojo : buckets
-					.all()) {
-
-				Bucket bucket = BucketHelper.makeBucket(bucketPojo);
-
-				BucketList bucketList = result.get(bucket.getExperimentID());
-				if (bucketList == null) {
-					bucketList = new BucketList();
-					bucketList.addBucket(bucket);
-				} else {
-					bucketList.addBucket(bucket);
-				}
-				
-				result.put(bucket.getExperimentID(), bucketList);
-			}
-			
-			LOGGER.debug("Returning result {}", result);
-			
-			return result;
-			
-		} catch (Exception e) {
-			LOGGER.error("getBucketList for {} failed", experimentIDCollection, e);
-			throw new RepositoryException("Could not fetch buckets for the list of experiments", e);
-		}
-
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public BucketList getBucketList(Experiment.ID experimentID) {
-		LOGGER.debug("Getting buckets list by one experimentId {}",experimentID);
-
-		BucketList bucketList = new BucketList();
-
-		try {
-			Result<com.intuit.wasabi.repository.cassandra.pojo.Bucket> bucketPojos = 
-					bucketAccessor.getBucketByExperimentId(experimentID.getRawID());
-
-			for (com.intuit.wasabi.repository.cassandra.pojo.Bucket bucketPojo : bucketPojos
-					.all()) {
-				bucketList.addBucket(BucketHelper.makeBucket(bucketPojo));
-			}
-
-		} catch (Exception e) {
-			LOGGER.error("Getting bucket list by one experiment id {} failed", experimentID, e);
-			throw new RepositoryException("Could not fetch buckets for experiment \"" + experimentID
-							+ "\" ", e);
-		}
-
-		LOGGER.debug("Returning buckets list by one experimentId {} bucket {}",
-				new Object[] { experimentID, bucketList });
-
-		return bucketList;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Experiment updateExperiment(Experiment experiment) {
 
-		LOGGER.debug("Updating experiment  {}",experiment);
-		
-		validator.validateExperiment(experiment);
-		
-		try {
-		   // Note that this timestamp gets serialized as mulliseconds from
-		   // the epoch, so timezone is irrelevant
-		   final Date NOW = new Date();
-	
-		   experimentAccessor.updateExperiment(
-				   experiment.getDescription() != null ? experiment.getDescription() : "",
-                   (experiment.getHypothesisIsCorrect() != null) ? experiment.getHypothesisIsCorrect() : "",
-                   (experiment.getResults() != null) ? experiment.getResults() : "",
-                   experiment.getRule() != null ? experiment.getRule() : "", 
-                   experiment.getSamplingPercent(), 
-                   experiment.getStartTime(), 
-                   experiment.getEndTime(), 
-                   experiment.getState().name(), 
-                   experiment.getLabel().toString(), 
-                   experiment.getApplicationName().toString(), 
-                   NOW, 
-                   experiment.getIsPersonalizationEnabled(), 
-                   experiment.getModelName(), 
-                   experiment.getModelVersion(), 
-                   experiment.getIsRapidExperiment(), 
-                   experiment.getUserCap(), 
-                   experiment.getID().getRawID());
-		
-		   // Point the experiment index to this experiment
-		   updateExperimentLabelIndex(experiment.getID(), experiment.getApplicationName(), experiment.getLabel(),
-		           experiment.getStartTime(), experiment.getEndTime(), experiment.getState());
-		
-		   updateStateIndex(experiment);
-		
-		} catch (Exception e) {
-			LOGGER.error("Error while experiment updating experiment  {}",experiment,e);
-		   throw new RepositoryException("Could not update experiment with ID \"" + experiment.getID() + "\"", e);
-		}
-		
-		return experiment;
-	}
+        LOGGER.debug("Updating experiment  {}", experiment);
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-    public Experiment updateExperimentState(Experiment experiment, State state){
+        validator.validateExperiment(experiment);
 
-		LOGGER.debug("Updating experiment  {} state {} ", new Object [] {experiment, state});
+        try {
+            // Note that this timestamp gets serialized as mulliseconds from
+            // the epoch, so timezone is irrelevant
+            final Date NOW = new Date();
 
-		validator.validateExperiment(experiment);
-		
-		try {
-		   // Note that this timestamp gets serialized as mulliseconds from
-		   // the epoch, so timezone is irrelevant
-		   final Date NOW = new Date();
+            experimentAccessor.updateExperiment(
+                    experiment.getDescription() != null ? experiment.getDescription() : "",
+                    (experiment.getHypothesisIsCorrect() != null) ? experiment.getHypothesisIsCorrect() : "",
+                    (experiment.getResults() != null) ? experiment.getResults() : "",
+                    experiment.getRule() != null ? experiment.getRule() : "",
+                    experiment.getSamplingPercent(),
+                    experiment.getStartTime(),
+                    experiment.getEndTime(),
+                    experiment.getState().name(),
+                    experiment.getLabel().toString(),
+                    experiment.getApplicationName().toString(),
+                    NOW,
+                    experiment.getIsPersonalizationEnabled(),
+                    experiment.getModelName(),
+                    experiment.getModelVersion(),
+                    experiment.getIsRapidExperiment(),
+                    experiment.getUserCap(),
+                    experiment.getID().getRawID());
 
-		   experimentAccessor.updateExperiment(state.name(), NOW, experiment.getID().getRawID());
-		   
-		   experiment = Experiment.from(experiment).withState(state).build();
-		
-		   // Point the experiment index to this experiment
-		   updateExperimentLabelIndex(experiment.getID(), experiment.getApplicationName(), experiment.getLabel(),
-		           experiment.getStartTime(), experiment.getEndTime(), experiment.getState());
-		
-		   updateStateIndex(experiment);
-		
-		} catch (Exception e) {
-			LOGGER.error("Error while updating experiment  {} state {} ",new Object [] {experiment, state}, e);
-		    throw new RepositoryException("Could not update experiment with ID \""
-		           + experiment.getID() + "\"" + " to state " + state.toString(), e);
-		}
-		
-		return experiment;
-	}
+            // Point the experiment index to this experiment
+            updateExperimentLabelIndex(experiment.getID(), experiment.getApplicationName(), experiment.getLabel(),
+                    experiment.getStartTime(), experiment.getEndTime(), experiment.getState());
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-    public List<Experiment.ID> getExperiments() {
-		LOGGER.debug("Getting experiment ids which are live {}", ExperimentState.NOT_DELETED);
+            updateStateIndex(experiment);
 
-		try {
-            // Get all experiments that are live
-        	Result<StateExperimentIndex> ids = stateExperimentIndexAccessor
-        			.selectByKey(ExperimentState.NOT_DELETED.name());
-        	List<ID> experimentIds = ids.all().stream().map(
-        			sei -> Experiment.ID.valueOf(sei.getExperimentId())).collect(Collectors.toList());
-        	
-        	return experimentIds;
         } catch (Exception e) {
-    		LOGGER.error("Error while getting experiment ids which are live {}", ExperimentState.NOT_DELETED, e);
+            LOGGER.error("Error while experiment updating experiment  {}", experiment, e);
+            throw new RepositoryException("Could not update experiment with ID \"" + experiment.getID() + "\"", e);
+        }
+
+        return experiment;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Experiment updateExperimentState(Experiment experiment, State state) {
+
+        LOGGER.debug("Updating experiment  {} state {} ", new Object[]{experiment, state});
+
+        validator.validateExperiment(experiment);
+
+        try {
+            // Note that this timestamp gets serialized as mulliseconds from
+            // the epoch, so timezone is irrelevant
+            final Date NOW = new Date();
+
+            experimentAccessor.updateExperiment(state.name(), NOW, experiment.getID().getRawID());
+
+            experiment = Experiment.from(experiment).withState(state).build();
+
+            // Point the experiment index to this experiment
+            updateExperimentLabelIndex(experiment.getID(), experiment.getApplicationName(), experiment.getLabel(),
+                    experiment.getStartTime(), experiment.getEndTime(), experiment.getState());
+
+            updateStateIndex(experiment);
+
+        } catch (Exception e) {
+            LOGGER.error("Error while updating experiment  {} state {} ", new Object[]{experiment, state}, e);
+            throw new RepositoryException("Could not update experiment with ID \""
+                    + experiment.getID() + "\"" + " to state " + state.toString(), e);
+        }
+
+        return experiment;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Experiment.ID> getExperiments() {
+        LOGGER.debug("Getting experiment ids which are live {}", ExperimentState.NOT_DELETED);
+
+        try {
+            // Get all experiments that are live
+            Result<StateExperimentIndex> ids = stateExperimentIndexAccessor
+                    .selectByKey(ExperimentState.NOT_DELETED.name());
+            List<ID> experimentIds = ids.all().stream().map(
+                    sei -> Experiment.ID.valueOf(sei.getExperimentId())).collect(Collectors.toList());
+
+            return experimentIds;
+        } catch (Exception e) {
+            LOGGER.error("Error while getting experiment ids which are live {}", ExperimentState.NOT_DELETED, e);
             throw new RepositoryException("Could not retrieve experiments", e);
         }
     }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public List<Experiment> getExperiments(Application.Name appName) {
-		LOGGER.debug("Getting experiments for application {}", appName);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Experiment> getExperiments(Application.Name appName) {
+        LOGGER.debug("Getting experiments for application {}", appName);
 
-		try { 
-			Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment> experimentPojos = 
-					experimentAccessor.getExperimentByAppName(appName.toString());
-			
-			List<Experiment> experiments = experimentPojos.all().stream().filter(experiment -> 
-				(experiment.getState() != null) &&
-				(! experiment.getState().equals(Experiment.State.TERMINATED.name())) &&
-				(! experiment.getState().equals(Experiment.State.DELETED.name())))
-				.map(experimentPojo -> ExperimentHelper.makeExperiment(experimentPojo))
-						.collect(Collectors.toList());
-			
-			return experiments;
-		}
-		catch(Exception e) {
-    		LOGGER.error("Error while getting experiments for app {}", appName, e);
+        try {
+            Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment> experimentPojos =
+                    experimentAccessor.getExperimentByAppName(appName.toString());
+
+            List<Experiment> experiments = experimentPojos.all().stream().filter(experiment ->
+                    (experiment.getState() != null) &&
+                            (!experiment.getState().equals(Experiment.State.TERMINATED.name())) &&
+                            (!experiment.getState().equals(Experiment.State.DELETED.name())))
+                    .map(experimentPojo -> ExperimentHelper.makeExperiment(experimentPojo))
+                    .collect(Collectors.toList());
+
+            return experiments;
+        } catch (Exception e) {
+            LOGGER.error("Error while getting experiments for app {}", appName, e);
             throw new RepositoryException("Could not retrieve experiments for app " + appName, e);
-		}
+        }
     }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void deleteExperiment(NewExperiment newExperiment) {
-		LOGGER.debug("Deleting experiment {}", newExperiment);
-		
-		try {
-			experimentAccessor.deleteExperiment(newExperiment.getID().getRawID());
-		} catch (Exception e) {
-			LOGGER.debug("Error while deleting experiment {}", newExperiment, e);
-			throw new RepositoryException("Could not delete experiment "
-					+ "with id \"" + newExperiment.getId() + "\"", e);
-		}
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void deleteExperiment(NewExperiment newExperiment) {
+        LOGGER.debug("Deleting experiment {}", newExperiment);
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
+        try {
+            experimentAccessor.deleteExperiment(newExperiment.getID().getRawID());
+        } catch (Exception e) {
+            LOGGER.debug("Error while deleting experiment {}", newExperiment, e);
+            throw new RepositoryException("Could not delete experiment "
+                    + "with id \"" + newExperiment.getId() + "\"", e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public ExperimentList getExperiments(Collection<Experiment.ID> experimentIDs) {
-		
-		LOGGER.debug("Getting experiments {}", experimentIDs);
-        
-		ExperimentList result = new ExperimentList();
-        
-		try {
+
+        LOGGER.debug("Getting experiments {}", experimentIDs);
+
+        ExperimentList result = new ExperimentList();
+
+        try {
             if (!experimentIDs.isEmpty()) {
-            	List<UUID> uuids = experimentIDs.stream().map(Experiment.ID::getRawID).collect(Collectors.toList());
-            	Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment> experimentPojos = 
-            			experimentAccessor.getExperiments(uuids);
-            	
-                List<Experiment> experiments = experimentPojos.all().stream().filter(experiment -> 
-                	! experiment.getState().equals(Experiment.State.DELETED))
-                	.map(ExperimentHelper::makeExperiment).collect(Collectors.toList());
-                
+                Map<Experiment.ID, Experiment> experimentMap = getExperimentsMap(experimentIDs);
+                List<Experiment> experiments = new ArrayList<>(experimentMap.values());
                 result.setExperiments(experiments);
             }
         } catch (Exception e) {
-    		LOGGER.error("Errro while getting experiments {}", experimentIDs, e);
+            LOGGER.error("Error while getting experiments {}", experimentIDs, e);
             throw new RepositoryException("Could not retrieve the experiments for the collection of experimentIDs", e);
         }
-        
-		return result;
+
+        return result;
     }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Map<Experiment.ID, Experiment> getExperimentsMap(Collection<Experiment.ID> experimentIds) {
+        Map<Experiment.ID, ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment>>> experimentsFutureMap = new HashMap<>(experimentIds.size());
+        Map<Experiment.ID, Experiment> experimentMap = new HashMap<>(experimentIds.size());
+
+        try {
+            //Send calls asynchronously
+            experimentIds.forEach(expId -> {
+                experimentsFutureMap.put(expId, experimentAccessor.asyncGetExperimentById(expId.getRawID()));
+                LOGGER.debug("Sent experimentAccessor.asyncGetExperimentById({})", expId);
+            });
+
+            //Process the Futures in the order that are expected to arrive earlier
+            for (Experiment.ID expId : experimentsFutureMap.keySet()) {
+                ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.Experiment>> experimentsFuture = experimentsFutureMap.get(expId);
+                UninterruptibleUtil.getUninterruptibly(experimentsFuture).all().stream().forEach(expPojo -> {
+                    Experiment exp = ExperimentHelper.makeExperiment(expPojo);
+                    experimentMap.put(exp.getID(), exp);
+                });
+            }
+
+        } catch (Exception e) {
+            LOGGER.error("Error while preparing experimentMap for {}", experimentIds, e);
+            throw new RepositoryException("Error while preparing experimentMap", e);
+        }
+        LOGGER.debug("Returning experimentMap {}", experimentMap);
+        return experimentMap;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Table<Experiment.ID, Experiment.Label, Experiment> getExperimentList(Application.Name appName) {
 
         try {
-			List<com.intuit.wasabi.repository.cassandra.pojo.Experiment> experimentPojos = 
-					experimentAccessor.getExperimentByAppName(appName.toString()).all();
-			
-	        Table<Experiment.ID, Experiment.Label, Experiment> result = HashBasedTable.create();
-			for (com.intuit.wasabi.repository.cassandra.pojo.Experiment experimentPojo : 
-				experimentPojos ) {
-				Experiment experiment = ExperimentHelper.makeExperiment(experimentPojo);
+            List<com.intuit.wasabi.repository.cassandra.pojo.Experiment> experimentPojos =
+                    experimentAccessor.getExperimentByAppName(appName.toString()).all();
+
+            Table<Experiment.ID, Experiment.Label, Experiment> result = HashBasedTable.create();
+            for (com.intuit.wasabi.repository.cassandra.pojo.Experiment experimentPojo :
+                    experimentPojos) {
+                Experiment experiment = ExperimentHelper.makeExperiment(experimentPojo);
                 if (experiment.getState() != State.TERMINATED && experiment.getState() != State.DELETED) {
-    				result.put(experiment.getID(), experiment.getLabel(), experiment);
+                    result.put(experiment.getID(), experiment.getLabel(), experiment);
                 }
-			}
-			
-	        return result;
+            }
+
+            return result;
         } catch (Exception e) {
             throw new RepositoryException("Could not retrieve experiment list " + appName.toString() + "because: " + e, e);
         }
     }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public List<Application.Name> getApplicationsList() {
 
         List<Application.Name> result = new ArrayList<>();
 
         try {
-        	result = applicationListAccessor.getUniqueAppName().all().stream()
-        		.map(app -> Application.Name.valueOf(app.getAppName())).collect(Collectors.toList());
-        	
-        	
+            result = applicationListAccessor.getUniqueAppName().all().stream()
+                    .map(app -> Application.Name.valueOf(app.getAppName())).collect(Collectors.toList());
+
+
         } catch (Exception e) {
             throw new RepositoryException("Could not retrieve the application names because : " + e, e);
         }
         return result;
     }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Bucket getBucket(Experiment.ID experimentID, Bucket.Label bucketLabel) {
 
         Preconditions.checkNotNull(experimentID, "Parameter \"experimentID\" cannot be null");
         Preconditions.checkNotNull(bucketLabel, "Parameter \"bucketLabel\" cannot be null");
 
         try {
-        	List<com.intuit.wasabi.repository.cassandra.pojo.Bucket> bucket = 
-        			bucketAccessor.getBucketByExperimentIdAndBucket(
-        					experimentID.getRawID(), bucketLabel.toString()).all();
+            List<com.intuit.wasabi.repository.cassandra.pojo.Bucket> bucket =
+                    bucketAccessor.getBucketByExperimentIdAndBucket(
+                            experimentID.getRawID(), bucketLabel.toString()).all();
 
-        	if ( bucket.size() == 0 )
-        		return null;
-        	
-        	if ( bucket.size() > 1 )
-        		throw new RepositoryException("More than one row found for experiment ID " 
-        				+ experimentID + " and label " + bucketLabel);
+            if (bucket.size() == 0)
+                return null;
 
-        	Bucket result = BucketHelper.makeBucket(bucket.get(0));
+            if (bucket.size() > 1)
+                throw new RepositoryException("More than one row found for experiment ID "
+                        + experimentID + " and label " + bucketLabel);
+
+            Bucket result = BucketHelper.makeBucket(bucket.get(0));
 
 
             return result;
@@ -784,37 +762,37 @@ public class CassandraExperimentRepository implements ExperimentRepository {
         }
     }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void createBucket(Bucket newBucket) {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void createBucket(Bucket newBucket) {
 
-		LOGGER.debug("Creating bucket {}", newBucket);
-		
-		Preconditions.checkNotNull(newBucket,"Parameter \"newBucket\" cannot be null");
+        LOGGER.debug("Creating bucket {}", newBucket);
 
-		final Bucket.State STATE = Bucket.State.OPEN;
+        Preconditions.checkNotNull(newBucket, "Parameter \"newBucket\" cannot be null");
 
-		try {
-			bucketAccessor.insert(newBucket.getExperimentID().getRawID(), 
-				newBucket.getLabel().toString(), 
-				newBucket.getDescription(), 
-				newBucket.getAllocationPercent(), 
-				newBucket.isControl(), 
-				newBucket.getPayload(), 
-				STATE.name());
-			
-		} catch (Exception e) {
-			LOGGER.error("Error creating bucket {}", newBucket, e);
-			throw new RepositoryException("Could not create bucket \"" + newBucket + "\" because " + e, e); 
-	    }
-	}
+        final Bucket.State STATE = Bucket.State.OPEN;
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
+        try {
+            bucketAccessor.insert(newBucket.getExperimentID().getRawID(),
+                    newBucket.getLabel().toString(),
+                    newBucket.getDescription(),
+                    newBucket.getAllocationPercent(),
+                    newBucket.isControl(),
+                    newBucket.getPayload(),
+                    STATE.name());
+
+        } catch (Exception e) {
+            LOGGER.error("Error creating bucket {}", newBucket, e);
+            throw new RepositoryException("Could not create bucket \"" + newBucket + "\" because " + e, e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Bucket updateBucket(Bucket bucket) {
 
         // Note, if the bucket doesn't already exist, it will be created
@@ -830,60 +808,60 @@ public class CassandraExperimentRepository implements ExperimentRepository {
 
             try {
 
-            	List<Bucket> buckets = bucketAccessor.getBucketByExperimentId(bucket.getExperimentID()
-						.getRawID()).all().stream().map(BucketHelper::makeBucket)
-						.collect(Collectors.toList());
-            	
+                List<Bucket> buckets = bucketAccessor.getBucketByExperimentId(bucket.getExperimentID()
+                        .getRawID()).all().stream().map(BucketHelper::makeBucket)
+                        .collect(Collectors.toList());
+
                 buckets.forEach(currentBucket ->
-                    		bucketAccessor.updateControl(false, 
-                    				currentBucket.getExperimentID().getRawID(), 
-                    				currentBucket.getLabel().toString()));
-                    
+                        bucketAccessor.updateControl(false,
+                                currentBucket.getExperimentID().getRawID(),
+                                currentBucket.getLabel().toString()));
+
             } catch (Exception e) {
                 throw new RepositoryException("Could not update buckets", e);
             }
         }
 
         try {
-        	bucketAccessor.updateBucket(
-        			bucket.getDescription() != null ? bucket.getDescription() : "",
+            bucketAccessor.updateBucket(
+                    bucket.getDescription() != null ? bucket.getDescription() : "",
                     bucket.getAllocationPercent(),
                     bucket.isControl(),
                     bucket.getPayload() != null ? bucket.getPayload() : "",
                     bucket.getExperimentID().getRawID(),
                     bucket.getLabel().toString());
-        	
+
 
         } catch (Exception e) {
             throw new RepositoryException("Could not update bucket \"" + bucket.getExperimentID() + "\".\"" + bucket.getLabel() + "\"", e);
         }
-        
+
         return bucket;
     }
 
-	/**
-	 * @return the driver
-	 */
-	public CassandraDriver getDriver() {
-		return driver;
-	}
+    /**
+     * @return the driver
+     */
+    public CassandraDriver getDriver() {
+        return driver;
+    }
 
-	/**
-	 * @param driver the driver to set
-	 */
-	public void setDriver(CassandraDriver driver) {
-		this.driver = driver;
-	}
+    /**
+     * @param driver the driver to set
+     */
+    public void setDriver(CassandraDriver driver) {
+        this.driver = driver;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Bucket updateBucketAllocationPercentage(Bucket bucket, Double desiredAllocationPercentage) {
 
         try {
-        	bucketAccessor.updateAllocation(desiredAllocationPercentage, bucket.getExperimentID().getRawID(),
-        			bucket.getLabel().toString());
+            bucketAccessor.updateAllocation(desiredAllocationPercentage, bucket.getExperimentID().getRawID(),
+                    bucket.getLabel().toString());
         } catch (Exception e) {
             throw new RepositoryException("Could not update bucket allocation percentage \"" +
                     bucket.getExperimentID() + "\".\"" + bucket.getLabel() + "\"", e);
@@ -895,42 +873,41 @@ public class CassandraExperimentRepository implements ExperimentRepository {
         return bucket;
     }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Bucket updateBucketState(Bucket bucket, Bucket.State desiredState) {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Bucket updateBucketState(Bucket bucket, Bucket.State desiredState) {
 
-		LOGGER.debug("Updating bucket {} state {}", new Object[] { bucket, desiredState});
-		
-		try {
-			bucketAccessor.updateState(desiredState.name(), bucket
-					.getExperimentID().getRawID(), bucket.getLabel().toString());
-	
-			Result<com.intuit.wasabi.repository.cassandra.pojo.Bucket> bucketPojo = 
-					bucketAccessor.getBucketByExperimentIdAndBucket(bucket.getExperimentID()
-							.getRawID(), bucket.getLabel().toString());
-	
-			return BucketHelper.makeBucket(bucketPojo.one());
-		}
-		catch(Exception e) {
-			LOGGER.error("Error while updating bucket {} state {}", new Object[] { bucket, desiredState}, e);
-			throw new RepositoryException("Exception while updating bucket state " + 
-					bucket + " state " + desiredState, e);
-		}
-	}
+        LOGGER.debug("Updating bucket {} state {}", new Object[]{bucket, desiredState});
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public BucketList updateBucketBatch(Experiment.ID experimentID,
-			BucketList bucketList) {
+        try {
+            bucketAccessor.updateState(desiredState.name(), bucket
+                    .getExperimentID().getRawID(), bucket.getLabel().toString());
 
-		LOGGER.debug("bucket update {} for experiment id {}", new Object [] { bucketList, experimentID});
+            Result<com.intuit.wasabi.repository.cassandra.pojo.Bucket> bucketPojo =
+                    bucketAccessor.getBucketByExperimentIdAndBucket(bucket.getExperimentID()
+                            .getRawID(), bucket.getLabel().toString());
 
-		ArrayList<Object> args = new ArrayList<>();
-		
+            return BucketHelper.makeBucket(bucketPojo.one());
+        } catch (Exception e) {
+            LOGGER.error("Error while updating bucket {} state {}", new Object[]{bucket, desiredState}, e);
+            throw new RepositoryException("Exception while updating bucket state " +
+                    bucket + " state " + desiredState, e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public BucketList updateBucketBatch(Experiment.ID experimentID,
+                                        BucketList bucketList) {
+
+        LOGGER.debug("bucket update {} for experiment id {}", new Object[]{bucketList, experimentID});
+
+        ArrayList<Object> args = new ArrayList<>();
+
         String CQL = "BEGIN BATCH ";
         for (int i = 0; i < bucketList.getBuckets().size(); i++) {
             Bucket b = bucketList.getBuckets().get(i);
@@ -964,75 +941,75 @@ public class CassandraExperimentRepository implements ExperimentRepository {
         }
         CQL += "APPLY BATCH;";
 
-        LOGGER.debug("bucket update {} for experiment id {} statement{} with args {}", 
-        		new Object [] { bucketList, experimentID, CQL, args});
-        
+        LOGGER.debug("bucket update {} for experiment id {} statement{} with args {}",
+                new Object[]{bucketList, experimentID, CQL, args});
+
         try {
-        	PreparedStatement preparedStatement = driver.getSession().prepare(CQL);
-        	BoundStatement boundStatement = new BoundStatement(preparedStatement);
-        	boundStatement.bind(args.toArray());
-        	driver.getSession().execute(boundStatement);
+            PreparedStatement preparedStatement = driver.getSession().prepare(CQL);
+            BoundStatement boundStatement = new BoundStatement(preparedStatement);
+            boundStatement.bind(args.toArray());
+            driver.getSession().execute(boundStatement);
         } catch (Exception e) {
             throw new RepositoryException("Could not update bucket for experiment \"" + experimentID + "\"", e);
         }
 
         BucketList buckets;
-        buckets = getBuckets(experimentID);
+        buckets = getBuckets(experimentID, false);
         return buckets;
-	}
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void deleteBucket(Experiment.ID experimentID, Bucket.Label bucketLabel) {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void deleteBucket(Experiment.ID experimentID, Bucket.Label bucketLabel) {
 
-		Preconditions.checkNotNull(experimentID, "Parameter \"experimentID\" cannot be null");
-		Preconditions.checkNotNull(bucketLabel,	"Parameter \"bucketLabel\" cannot be null");
-		try {
+        Preconditions.checkNotNull(experimentID, "Parameter \"experimentID\" cannot be null");
+        Preconditions.checkNotNull(bucketLabel, "Parameter \"bucketLabel\" cannot be null");
+        try {
 
-			bucketAccessor.deleteByExperimentIdAndLabel(experimentID.getRawID(), bucketLabel.toString());
+            bucketAccessor.deleteByExperimentIdAndLabel(experimentID.getRawID(), bucketLabel.toString());
 
-		} catch (Exception e) {
-			throw new RepositoryException("Could not delete bucket \""	+ bucketLabel + "\" from experiment with ID \""
-					+ experimentID + "\"", e);
-		}
-	}
+        } catch (Exception e) {
+            throw new RepositoryException("Could not delete bucket \"" + bucketLabel + "\" from experiment with ID \""
+                    + experimentID + "\"", e);
+        }
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void logBucketChanges(Experiment.ID experimentID, Bucket.Label bucketLabel,
-            List<BucketAuditInfo> changeList)  {
+                                 List<BucketAuditInfo> changeList) {
 
-		final Date NOW = new Date();
+        final Date NOW = new Date();
 
-		try {
-			for (BucketAuditInfo changeData : changeList) {
-				bucketAuditLogAccessor.insertBy(experimentID.getRawID(), 
-						bucketLabel.toString(), NOW, changeData.getAttributeName(), 
-						(changeData.getOldValue() != null) ? changeData.getOldValue() : "", 
-						(changeData.getNewValue() != null) ? changeData.getNewValue() : "");
-				
-			}
-		} catch (Exception e) {
-			throw new RepositoryException("Could not log bucket changes \"" + experimentID + " : " + bucketLabel + " " +"\"", e);
-		}
-	}
+        try {
+            for (BucketAuditInfo changeData : changeList) {
+                bucketAuditLogAccessor.insertBy(experimentID.getRawID(),
+                        bucketLabel.toString(), NOW, changeData.getAttributeName(),
+                        (changeData.getOldValue() != null) ? changeData.getOldValue() : "",
+                        (changeData.getNewValue() != null) ? changeData.getNewValue() : "");
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
+            }
+        } catch (Exception e) {
+            throw new RepositoryException("Could not log bucket changes \"" + experimentID + " : " + bucketLabel + " " + "\"", e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void logExperimentChanges(Experiment.ID experimentID, List<ExperimentAuditInfo> changeList) {
-		final Date NOW = new Date();
+        final Date NOW = new Date();
         try {
 
             for (ExperimentAuditInfo changeData : changeList) {
-            	experimentAuditLogAccessor.insertBy(experimentID.getRawID(), 
-            			NOW, changeData.getAttributeName(), 
-            			(changeData.getOldValue() != null) ? changeData.getOldValue() : "", 
+                experimentAuditLogAccessor.insertBy(experimentID.getRawID(),
+                        NOW, changeData.getAttributeName(),
+                        (changeData.getOldValue() != null) ? changeData.getOldValue() : "",
                         (changeData.getNewValue() != null) ? changeData.getNewValue() : "");
             }
         } catch (Exception e) {
@@ -1041,182 +1018,180 @@ public class CassandraExperimentRepository implements ExperimentRepository {
         }
     }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public BucketList getBuckets(Experiment.ID experimentID) {
-
-		LOGGER.debug("Getting buckets for {}", experimentID);
-		
-		Preconditions.checkNotNull(experimentID,
-				"Parameter \"experimentID\" cannot be null");
-
-		try {
-			// Check if the experiment is live
-			Experiment experiment = getExperiment(experimentID);
-			if (experiment == null) {
-				throw new ExperimentNotFoundException(experimentID);
-			}
-	
-			 Result<com.intuit.wasabi.repository.cassandra.pojo.Bucket> bucketPojos = 
-					 bucketAccessor.getBucketByExperimentId(experimentID.getRawID());
-			 
-			 List<Bucket> buckets = bucketPojos.all().stream().map(BucketHelper::makeBucket).collect(Collectors.toList());
-			 
-			 BucketList bucketList = new BucketList();
-			 bucketList.setBuckets(buckets);
-			 
-			 LOGGER.debug("Returning buckets {} for experiment {}", new Object[] {
-					 bucketList, experimentID});
-			 
-			 return bucketList;
-		}
-		catch(ExperimentNotFoundException e) {
-			throw e;
-		}
-		catch(Exception e) {
-			LOGGER.error("Error while getting buckets for {}", experimentID,e);
-			throw new RepositoryException("Unable to get buckets for " + experimentID, e);
-		}
-	}
-
-	protected void updateExperimentLabelIndex(Experiment.ID experimentID,
-			Application.Name appName, Experiment.Label experimentLabel,
-			Date startTime, Date endTime, Experiment.State state) {
-
-		LOGGER.debug("update experiment label index experiment id {} app {} label {} "
-				+ " start time {} end time {} state {} ", 
-				new Object [] {experimentID, appName, experimentLabel, startTime, endTime, state});
-
-		if (state == Experiment.State.TERMINATED
-				|| state == Experiment.State.DELETED) {
-			removeExperimentLabelIndex(appName, experimentLabel);
-			return;
-		}
-
-		try {
-			// Note that this timestamp gets serialized as mulliseconds from
-			// the epoch, so timezone is irrelevant
-			final Date NOW = new Date();
-
-			experimentLabelIndexAccessor.updateBy(experimentID.getRawID(), NOW,
-					startTime, endTime, state.name(), appName.toString(),
-					experimentLabel.toString());
-
-		} catch (Exception e) {
-			LOGGER.debug("Error while updating experiment label index experiment id {} app {} label {} "
-					+ " start time {} end time {} state {} ", 
-					new Object [] {experimentID, appName, experimentLabel, startTime, endTime, state}, e);
-			throw new RepositoryException("Could not index experiment \"" + experimentID + "\"", e);
-		}
-
-	}
-
-	protected void removeExperimentLabelIndex(Application.Name appName, Experiment.Label experimentLabel) {
-		LOGGER.debug("Removing experiment label index for app {}, label {} ", new Object[] {
-				appName, experimentLabel});
-		
-		try {
-			experimentLabelIndexAccessor.deleteBy(appName.toString(),
-				experimentLabel.toString());
-		}
-		catch (Exception e) {
-			LOGGER.error("Error while removing experiment label index for app {}, label {} ", new Object[] {
-					appName, experimentLabel},e);
-			 throw new RepositoryException("Could not remove index for " +
-					 "experiment \"" + appName + "\".\"" + experimentLabel + "\"", e); 
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
+    /**
+     * {@inheritDoc}
+     */
     @Override
-	public void updateStateIndex(Experiment experiment) {
-		LOGGER.debug("update state index experiment {} ", experiment);
-		
-		try {
-			 updateStateIndex(experiment.getID(),
-					 experiment.getState() != State.DELETED  ? ExperimentState.NOT_DELETED : ExperimentState.DELETED);
-		 } catch (Exception e) {
-			 LOGGER.error("update state index experiment {} ", experiment, e);
-			 throw new RepositoryException("Exception while updating state index: " + e, e);
-		 }
-	}
+    public BucketList getBuckets(Experiment.ID experimentID, boolean checkExperiment) {
 
-	protected void updateStateIndex(Experiment.ID experimentID, ExperimentState state) {
+        LOGGER.debug("Getting buckets for {}", experimentID);
 
-		LOGGER.debug("update state index experiment id {} state {} ", new Object[] { experimentID, state});
-		
-		try {
-			switch(state) {
-				case DELETED:
-					LOGGER.debug("update state index insert experiment id {} state {} ", 
-							new Object[] { experimentID, ExperimentState.DELETED.name()});
-					
-					BatchStatement batch1 = new BatchStatement();
-					Statement insertStatement1 = stateExperimentIndexAccessor.insert(ExperimentState.DELETED.name(), 
-							experimentID.getRawID(), ByteBuffer.wrap("".getBytes()));
-					batch1.add(insertStatement1);
-					
-					LOGGER.debug("update state index delete experiment id {} state {} ", 
-							new Object[] { experimentID, ExperimentState.NOT_DELETED.name()});
-					
-					Statement deleteStatement1 = stateExperimentIndexAccessor.deleteBy(ExperimentState.NOT_DELETED.name(), 
-							experimentID.getRawID());
-					batch1.add(deleteStatement1);
-					
-					driver.getSession().execute(batch1);
-					
-					break;
-					
-				case NOT_DELETED:
-					LOGGER.debug("update state index insert experiment id {} state {} ", 
-							new Object[] { experimentID, ExperimentState.NOT_DELETED.name()});
-					
-					BatchStatement batch2 = new BatchStatement();
-					Statement insert2 = stateExperimentIndexAccessor.insert(ExperimentState.NOT_DELETED.name(), 
-							experimentID.getRawID(), ByteBuffer.wrap("".getBytes()));
-					batch2.add(insert2);
-					
-					LOGGER.debug("update state index delete experiment id {} state {} ", 
-							new Object[] { experimentID, ExperimentState.DELETED.name()});
-					
-					Statement delete2 = stateExperimentIndexAccessor.deleteBy(ExperimentState.DELETED.name(), 
-							experimentID.getRawID());
-					batch2.add(delete2);
-					
-					driver.getSession().execute(batch2);
-					
-					break;
-				default:
-					throw new RepositoryException("Unknown experiment state: " + state);
-			}
-		}
-		catch(Exception e) {
-			LOGGER.error("Error while updating state index experiment id {} state {} ", 
-					new Object[] { experimentID, state}, e);
-			throw new RepositoryException("Unable to update experiment " + experimentID + " with state " + state);
-		}
-		
-	}
+        Preconditions.checkNotNull(experimentID,
+                "Parameter \"experimentID\" cannot be null");
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void createApplication(Application.Name applicationName) {
+        try {
+            if (checkExperiment) {
+                // Check if the experiment is live
+                Experiment experiment = getExperiment(experimentID);
+                if (experiment == null) {
+                    throw new ExperimentNotFoundException(experimentID);
+                }
+            }
 
-		LOGGER.debug("Creating application {}", applicationName);
+            Result<com.intuit.wasabi.repository.cassandra.pojo.Bucket> bucketPojos =
+                    bucketAccessor.getBucketByExperimentId(experimentID.getRawID());
 
-		try {
-			applicationListAccessor.insert(applicationName.toString());
-		} catch (Exception e) {
-			LOGGER.error("Error while creating application {}", applicationName, e);
-			throw new RepositoryException("Unable to insert into top level application list: \""
-							+ applicationName.toString() + "\"" + e);
-		}
-	}
+            List<Bucket> buckets = bucketPojos.all().stream().map(BucketHelper::makeBucket).collect(Collectors.toList());
+
+            BucketList bucketList = new BucketList();
+            bucketList.setBuckets(buckets);
+
+            LOGGER.debug("Returning buckets {} for experiment {}", new Object[]{
+                    bucketList, experimentID});
+
+            return bucketList;
+        } catch (ExperimentNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            LOGGER.error("Error while getting buckets for {}", experimentID, e);
+            throw new RepositoryException("Unable to get buckets for " + experimentID, e);
+        }
+    }
+
+    protected void updateExperimentLabelIndex(Experiment.ID experimentID,
+                                              Application.Name appName, Experiment.Label experimentLabel,
+                                              Date startTime, Date endTime, Experiment.State state) {
+
+        LOGGER.debug("update experiment label index experiment id {} app {} label {} "
+                        + " start time {} end time {} state {} ",
+                new Object[]{experimentID, appName, experimentLabel, startTime, endTime, state});
+
+        if (state == Experiment.State.TERMINATED
+                || state == Experiment.State.DELETED) {
+            removeExperimentLabelIndex(appName, experimentLabel);
+            return;
+        }
+
+        try {
+            // Note that this timestamp gets serialized as mulliseconds from
+            // the epoch, so timezone is irrelevant
+            final Date NOW = new Date();
+
+            experimentLabelIndexAccessor.updateBy(experimentID.getRawID(), NOW,
+                    startTime, endTime, state.name(), appName.toString(),
+                    experimentLabel.toString());
+
+        } catch (Exception e) {
+            LOGGER.debug("Error while updating experiment label index experiment id {} app {} label {} "
+                            + " start time {} end time {} state {} ",
+                    new Object[]{experimentID, appName, experimentLabel, startTime, endTime, state}, e);
+            throw new RepositoryException("Could not index experiment \"" + experimentID + "\"", e);
+        }
+
+    }
+
+    protected void removeExperimentLabelIndex(Application.Name appName, Experiment.Label experimentLabel) {
+        LOGGER.debug("Removing experiment label index for app {}, label {} ", new Object[]{
+                appName, experimentLabel});
+
+        try {
+            experimentLabelIndexAccessor.deleteBy(appName.toString(),
+                    experimentLabel.toString());
+        } catch (Exception e) {
+            LOGGER.error("Error while removing experiment label index for app {}, label {} ", new Object[]{
+                    appName, experimentLabel}, e);
+            throw new RepositoryException("Could not remove index for " +
+                    "experiment \"" + appName + "\".\"" + experimentLabel + "\"", e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void updateStateIndex(Experiment experiment) {
+        LOGGER.debug("update state index experiment {} ", experiment);
+
+        try {
+            updateStateIndex(experiment.getID(),
+                    experiment.getState() != State.DELETED ? ExperimentState.NOT_DELETED : ExperimentState.DELETED);
+        } catch (Exception e) {
+            LOGGER.error("update state index experiment {} ", experiment, e);
+            throw new RepositoryException("Exception while updating state index: " + e, e);
+        }
+    }
+
+    protected void updateStateIndex(Experiment.ID experimentID, ExperimentState state) {
+
+        LOGGER.debug("update state index experiment id {} state {} ", new Object[]{experimentID, state});
+
+        try {
+            switch (state) {
+                case DELETED:
+                    LOGGER.debug("update state index insert experiment id {} state {} ",
+                            new Object[]{experimentID, ExperimentState.DELETED.name()});
+
+                    BatchStatement batch1 = new BatchStatement();
+                    Statement insertStatement1 = stateExperimentIndexAccessor.insert(ExperimentState.DELETED.name(),
+                            experimentID.getRawID(), ByteBuffer.wrap("".getBytes()));
+                    batch1.add(insertStatement1);
+
+                    LOGGER.debug("update state index delete experiment id {} state {} ",
+                            new Object[]{experimentID, ExperimentState.NOT_DELETED.name()});
+
+                    Statement deleteStatement1 = stateExperimentIndexAccessor.deleteBy(ExperimentState.NOT_DELETED.name(),
+                            experimentID.getRawID());
+                    batch1.add(deleteStatement1);
+
+                    driver.getSession().execute(batch1);
+
+                    break;
+
+                case NOT_DELETED:
+                    LOGGER.debug("update state index insert experiment id {} state {} ",
+                            new Object[]{experimentID, ExperimentState.NOT_DELETED.name()});
+
+                    BatchStatement batch2 = new BatchStatement();
+                    Statement insert2 = stateExperimentIndexAccessor.insert(ExperimentState.NOT_DELETED.name(),
+                            experimentID.getRawID(), ByteBuffer.wrap("".getBytes()));
+                    batch2.add(insert2);
+
+                    LOGGER.debug("update state index delete experiment id {} state {} ",
+                            new Object[]{experimentID, ExperimentState.DELETED.name()});
+
+                    Statement delete2 = stateExperimentIndexAccessor.deleteBy(ExperimentState.DELETED.name(),
+                            experimentID.getRawID());
+                    batch2.add(delete2);
+
+                    driver.getSession().execute(batch2);
+
+                    break;
+                default:
+                    throw new RepositoryException("Unknown experiment state: " + state);
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error while updating state index experiment id {} state {} ",
+                    new Object[]{experimentID, state}, e);
+            throw new RepositoryException("Unable to update experiment " + experimentID + " with state " + state);
+        }
+
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void createApplication(Application.Name applicationName) {
+
+        LOGGER.debug("Creating application {}", applicationName);
+
+        try {
+            applicationListAccessor.insert(applicationName.toString());
+        } catch (Exception e) {
+            LOGGER.error("Error while creating application {}", applicationName, e);
+            throw new RepositoryException("Unable to insert into top level application list: \""
+                    + applicationName.toString() + "\"" + e);
+        }
+    }
 
 }

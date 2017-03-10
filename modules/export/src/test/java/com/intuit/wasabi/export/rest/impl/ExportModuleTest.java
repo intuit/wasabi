@@ -49,16 +49,16 @@ public class ExportModuleTest {
     }
 
     @Test
-    public void testGetNamedInstances(){
+    public void testGetNamedInstances() {
         Injector injector = Guice.createInjector(new ExportModule());
         assertThat(injector.getInstance(Key.get(Integer.class, Names.named("export.rest.client.connectionTimeout"))),
                 is(5000));
         assertThat(injector.getInstance(Key.get(Integer.class, Names.named("export.rest.client.socketTimeout"))),
-                is(8000) );
+                is(8000));
         assertThat(injector.getInstance(Key.get(Integer.class, Names.named("export.http.proxy.port"))),
-                is(8080) );
+                is(8080));
         assertThat(injector.getInstance(Key.get(String.class, Names.named("export.http.proxy.host"))),
-                is("192.168.1.1") );
+                is("192.168.1.1"));
     }
 
 }

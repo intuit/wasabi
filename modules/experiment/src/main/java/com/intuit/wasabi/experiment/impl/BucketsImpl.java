@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,7 +39,11 @@ import com.intuit.wasabi.repository.RepositoryException;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 import static com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -77,8 +81,8 @@ public class BucketsImpl implements Buckets {
      * {@inheritDoc}
      */
     @Override
-    public BucketList getBuckets(Experiment.ID experimentID) {
-        return cassandraRepository.getBuckets(experimentID);
+    public BucketList getBuckets(Experiment.ID experimentID, boolean checkExperiment) {
+        return cassandraRepository.getBuckets(experimentID, checkExperiment);
     }
 
     /**
@@ -121,7 +125,7 @@ public class BucketsImpl implements Buckets {
         return getBucket(experimentID, newBucket.getLabel());
     }
 
-    private void validateExperimentState(Experiment experiment){
+    private void validateExperimentState(Experiment experiment) {
         Experiment.State state = experiment.getState();
 
         if (!(state.equals(Experiment.State.PAUSED)
@@ -137,7 +141,7 @@ public class BucketsImpl implements Buckets {
         }
     }
 
-    private void checkBucketConstraint(Experiment experiment,Bucket newBucket){
+    private void checkBucketConstraint(Experiment experiment, Bucket newBucket) {
         Bucket test = cassandraRepository.getBucket(newBucket.getExperimentID(), newBucket.getLabel());
         if (test != null) {
             throw new ConstraintViolationException(ConstraintViolationException.Reason.UNIQUE_CONSTRAINT_VIOLATION,
@@ -162,7 +166,7 @@ public class BucketsImpl implements Buckets {
         cassandraRepository.updateBucketBatch(experimentID, bucketList);
         databaseRepository.updateBucketBatch(experimentID, bucketList);
 
-        return buckets.getBuckets(experimentID);
+        return buckets.getBuckets(experimentID, false /* don't check experiment again */);
     }
 
     /**
@@ -172,7 +176,7 @@ public class BucketsImpl implements Buckets {
     public BucketList adjustAllocationPercentages(Experiment experiment, Bucket newBucket) {
 
         double remainingAlloc = 1. - newBucket.getAllocationPercent();
-        BucketList bucketList = buckets.getBuckets(experiment.getID());
+        BucketList bucketList = buckets.getBuckets(experiment.getID(), false /* don't check experiment again */);
         BucketList newBuckets = new BucketList();
         for (Bucket bucket : bucketList.getBuckets()) {
             if (bucket.getLabel().equals(newBucket.getLabel())) {
@@ -200,7 +204,7 @@ public class BucketsImpl implements Buckets {
      */
     @Override
     public Bucket updateBucket(final Experiment.ID experimentID, final Bucket.Label bucketLabel,
-                               final Bucket updates, UserInfo user)  {
+                               final Bucket updates, UserInfo user) {
 
         Experiment experiment = experiments.getExperiment(experimentID);
         if (experiment == null) {
@@ -279,7 +283,7 @@ public class BucketsImpl implements Buckets {
                 (desiredState == Bucket.State.CLOSED ||
                         desiredState == Bucket.State.EMPTY)) {
 
-            BucketList bucketList = getBuckets(experimentID);
+            BucketList bucketList = getBuckets(experimentID, false /* don't check experiment again */);
             //get starting allocation pct of bucket to be closed
             Double bucketB = roundToTwo(bucket.getAllocationPercent());
 
@@ -415,7 +419,7 @@ public class BucketsImpl implements Buckets {
      */
     @Override
     public void deleteBucket(final Experiment.ID experimentID, final Bucket.Label bucketLabel,
-                             UserInfo user)  {
+                             UserInfo user) {
 
         Experiment experiment = experiments.getExperiment(experimentID);
         if (experiment == null) {
@@ -521,7 +525,7 @@ public class BucketsImpl implements Buckets {
         BucketList changeBucketList = new BucketList();
 
         List<List<Bucket.BucketAuditInfo>> allChanges = new ArrayList<>();
-        BucketList oldBuckets = buckets.getBuckets(experimentID);
+        BucketList oldBuckets = buckets.getBuckets(experimentID, false /* don't check experiment again */);
 
         if (oldBuckets == null) {
             throw new IllegalStateException("No Buckets could be found for this experiment");

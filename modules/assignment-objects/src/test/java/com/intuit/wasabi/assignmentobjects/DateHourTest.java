@@ -14,7 +14,7 @@ public class DateHourTest {
     private long dateLong = 10239129312L;
 
     @Test
-    public void testBasicMethods(){
+    public void testBasicMethods() {
         Date seed = new Date(dateLong);
         DateHour date1 = new DateHour();
         DateHour date2 = new DateHour();

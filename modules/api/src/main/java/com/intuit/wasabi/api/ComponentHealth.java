@@ -16,10 +16,7 @@
 package com.intuit.wasabi.api;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.annotations.ApiModelProperty;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 // note: class/method scoping public required for json'ification
 @JsonInclude(JsonInclude.Include.NON_EMPTY)

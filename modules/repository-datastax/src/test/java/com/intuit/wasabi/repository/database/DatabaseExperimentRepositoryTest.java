@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,8 +22,14 @@ import com.intuit.wasabi.database.TransactionFactory;
 import com.intuit.wasabi.exceptions.BucketNotFoundException;
 import com.intuit.wasabi.exceptions.DatabaseException;
 import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
-import com.intuit.wasabi.experimentobjects.*;
+import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Bucket.Label;
+import com.intuit.wasabi.experimentobjects.BucketList;
+import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.experimentobjects.ExperimentList;
+import com.intuit.wasabi.experimentobjects.ExperimentValidator;
+import com.intuit.wasabi.experimentobjects.NewExperiment;
 import com.intuit.wasabi.experimentobjects.exceptions.WasabiException;
 import com.intuit.wasabi.repository.RepositoryException;
 import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
@@ -36,7 +42,12 @@ import javax.sql.DataSource;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import static com.googlecode.catchexception.CatchException.caughtException;
 import static com.intuit.wasabi.experimentobjects.Experiment.State.DELETED;
@@ -45,7 +56,19 @@ import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 
 public class DatabaseExperimentRepositoryTest {
@@ -251,12 +274,6 @@ public class DatabaseExperimentRepositoryTest {
 //                .hasMessage("No support for sql - indices are only created in Cassandra")
 //                .hasNoCause();
 
-        BDDCatchException.when(repository).getAssignmentCounts(Experiment.ID.newInstance(), null);
-        BDDCatchException.then(caughtException())
-                .isInstanceOf(UnsupportedOperationException.class)
-                .hasMessage("Assignment counts not supported on sql")
-                .hasNoCause();
-
         BDDCatchException.when(repository).getBucketList(Collections.<Experiment.ID>emptyList());
         BDDCatchException.then(caughtException())
                 .isInstanceOf(UnsupportedOperationException.class)
@@ -456,10 +473,10 @@ public class DatabaseExperimentRepositoryTest {
     public void testDeleteExperiment() {
         when(transaction.update(anyString(), Matchers.anyVararg())).thenReturn(0);
         BDDCatchException.when(repository).deleteExperiment(
-        		NewExperiment.withID(Experiment.ID.newInstance())
-                .withDescription("TEST")
-        		.withStartTime(new Date()).withEndTime(new Date())
-                .withSamplingPercent(0.5).withLabel(Experiment.Label.valueOf("l1")).build());
+                NewExperiment.withID(Experiment.ID.newInstance())
+                        .withDescription("TEST")
+                        .withStartTime(new Date()).withEndTime(new Date())
+                        .withSamplingPercent(0.5).withLabel(Experiment.Label.valueOf("l1")).build());
         BDDCatchException.then(caughtException())
                 .isInstanceOf(ExperimentNotFoundException.class)
                 .hasMessageContaining("Experiment")
@@ -479,7 +496,7 @@ public class DatabaseExperimentRepositoryTest {
         List firstQueryResult = mock(List.class);
         when(transaction.select(anyString(), eq(id), eq(DELETED.toString()))).thenReturn(firstQueryResult);
         when(firstQueryResult.size()).thenReturn(0);
-        BDDCatchException.when(repository).getBuckets(id);
+        BDDCatchException.when(repository).getBuckets(id, false);
         BDDCatchException.then(caughtException())
                 .isInstanceOf(ExperimentNotFoundException.class)
                 .hasMessageContaining("Experiment")
@@ -496,7 +513,7 @@ public class DatabaseExperimentRepositoryTest {
         when(queryMap.get("is_control")).thenReturn(true);
         when(queryMap.get("payload")).thenReturn("payload");
         when(transaction.select(anyString(), eq(id))).thenReturn(secondQueryResult);
-        BucketList result = repository.getBuckets(id);
+        BucketList result = repository.getBuckets(id, false);
         assertThat(result, is(not(nullValue())));
         assertThat(result.getBuckets().size(), is(1));
         assertThat(result.getBuckets().get(0).getExperimentID(), is(id));

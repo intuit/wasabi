@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,8 +16,7 @@
 package com.intuit.wasabi.tests.library;
 
 /**
- * <tt>ServiceTestBase</tt> - a base class for Web Service API testing using TestNG and Rest-Assured. 
- *
+ * <tt>ServiceTestBase</tt> - a base class for Web Service API testing using TestNG and Rest-Assured.
  */
 
 
@@ -90,7 +89,7 @@ public class ServiceTestBase {
      */
     public String prettyResponse(Response response) {
         String prettyResponse = "";
-        if (response != null && response.toString() != null && ! response.toString().isEmpty()) {
+        if (response != null && response.toString() != null && !response.toString().isEmpty()) {
             try {
                 prettyResponse = response.jsonPath().prettify();
                 prettyResponse = prettyResponse.replaceAll("\\\\n", System.getProperty("line.separator"));
@@ -129,7 +128,7 @@ public class ServiceTestBase {
      * @param expectedStatusCode  the status code expected in the response
      */
     public void assertReturnCode(Response response, int expectedStatusCode) {
-    	System.out.println("Response was: " + prettyResponse(response));
+        System.out.println("Response was: " + prettyResponse(response));
         int actualStatusCode = response.getStatusCode();
 
         Assert.assertEquals(actualStatusCode, expectedStatusCode,
@@ -159,7 +158,7 @@ public class ServiceTestBase {
 
     @BeforeClass
     protected void runBeforeClassBase() {
-        logger.debug("======> Base BeforeClass: "+ this.getClass().getName() +" <======");
+        logger.debug("======> Base BeforeClass: " + this.getClass().getName() + " <======");
     }
 
     @AfterClass
@@ -177,7 +176,7 @@ public class ServiceTestBase {
      * @param method TestNG will pass in the method about to be called.
      */
     @BeforeMethod
-    protected void runBeforeMethodBase(Method method)  {
+    protected void runBeforeMethodBase(Method method) {
         logger.info("======> Base Starting test: " + method.getName() + " <======");
         response = null;
     }

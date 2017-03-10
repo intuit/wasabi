@@ -31,7 +31,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.util.List;
 
 import static com.intuit.wasabi.authorizationobjects.Permission.READ;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AuthorizedExperimentGetterTest {
@@ -184,12 +187,11 @@ public class AuthorizedExperimentGetterTest {
         when(authorization.getUser("foo")).thenReturn(username);
         when(experiments.getExperiment(experimentId)).thenReturn(null);
         try {
-        	authorizedExperimentGetter.getAuthorizedExperimentByName("foo", applicationName, experimentLabel);
-        }
-        finally {
-        	verify(authorization).getUser("foo");
-        	verify(authorization).checkUserPermissions(username, applicationName, READ);
-        	verify(experiments, times(1)).getExperiment(applicationName, experimentLabel);
+            authorizedExperimentGetter.getAuthorizedExperimentByName("foo", applicationName, experimentLabel);
+        } finally {
+            verify(authorization).getUser("foo");
+            verify(authorization).checkUserPermissions(username, applicationName, READ);
+            verify(experiments, times(1)).getExperiment(applicationName, experimentLabel);
         }
     }
 }

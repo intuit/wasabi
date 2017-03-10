@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,7 +18,12 @@ package com.intuit.wasabi.api;
 import com.intuit.wasabi.assignment.Assignments;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authorization.Authorization;
-import com.intuit.wasabi.authorizationobjects.*;
+import com.intuit.wasabi.authorizationobjects.Permission;
+import com.intuit.wasabi.authorizationobjects.Role;
+import com.intuit.wasabi.authorizationobjects.UserPermissions;
+import com.intuit.wasabi.authorizationobjects.UserPermissionsList;
+import com.intuit.wasabi.authorizationobjects.UserRole;
+import com.intuit.wasabi.authorizationobjects.UserRoleList;
 import com.intuit.wasabi.eventlog.EventLog;
 import com.intuit.wasabi.events.EventsExport;
 import com.intuit.wasabi.exceptions.AuthenticationException;
@@ -70,9 +75,9 @@ public class AuthorizationResourceTest {
     @Test
     public void getRolePermissions() throws Exception {
 
-        AuthorizationResource authorizationResource = new AuthorizationResource(authorization, new HttpHeader("jaba-???"));
+        AuthorizationResource authorizationResource = new AuthorizationResource(authorization, new HttpHeader("jaba-???", "600"));
 
-        HashMap<String,Object> result = new HashMap<>();
+        HashMap<String, Object> result = new HashMap<>();
 
         when(authorization.getPermissionsFromRole(Role.READONLY)).thenReturn(Role.READONLY.getRolePermissions());
         result.put("permissions", Role.READONLY.getRolePermissions());
@@ -83,7 +88,7 @@ public class AuthorizationResourceTest {
     @Test
     public void getUserPermissions() throws Exception {
 
-        AuthorizationResource authorizationResource = new AuthorizationResource(authorization, new HttpHeader("jaba-???"));
+        AuthorizationResource authorizationResource = new AuthorizationResource(authorization, new HttpHeader("jaba-???", "600"));
 
         when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
         UserPermissions userPermissions = UserPermissions.newInstance(TESTAPP,
@@ -107,7 +112,7 @@ public class AuthorizationResourceTest {
     @Test
     public void getUserAppPermissions() throws Exception {
 
-        AuthorizationResource authorizationResource = new AuthorizationResource(authorization, new HttpHeader("jaba-???"));
+        AuthorizationResource authorizationResource = new AuthorizationResource(authorization, new HttpHeader("jaba-???", "600"));
 
         when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
         UserPermissions userPermissions = UserPermissions.newInstance(TESTAPP,
@@ -127,9 +132,9 @@ public class AuthorizationResourceTest {
     @Test
     public void assignUserRoles() throws Exception {
 
-        AuthorizationResource authorizationResource = new AuthorizationResource(authorization, new HttpHeader("jaba-???"));
+        AuthorizationResource authorizationResource = new AuthorizationResource(authorization, new HttpHeader("jaba-???", "600"));
 
-        UserRole userRole = UserRole.newInstance(TESTAPP,Role.ADMIN).withUserID(USER).build();
+        UserRole userRole = UserRole.newInstance(TESTAPP, Role.ADMIN).withUserID(USER).build();
         UserRole userRole1 = UserRole.newInstance(TESTAPP2, Role.READWRITE).withUserID(TESTUSER).build();
         UserRoleList userRoleList = new UserRoleList();
         userRoleList.addRole(userRole);
@@ -168,9 +173,9 @@ public class AuthorizationResourceTest {
     @Test
     public void updateUserRoles() throws Exception {
 
-        AuthorizationResource authorizationResource = new AuthorizationResource(authorization, new HttpHeader("jaba-???"));
+        AuthorizationResource authorizationResource = new AuthorizationResource(authorization, new HttpHeader("jaba-???", "600"));
 
-        UserRole userRole = UserRole.newInstance(TESTAPP,Role.ADMIN).withUserID(USER).build();
+        UserRole userRole = UserRole.newInstance(TESTAPP, Role.ADMIN).withUserID(USER).build();
         UserRole userRole1 = UserRole.newInstance(TESTAPP2, Role.READWRITE).withUserID(TESTUSER).build();
         UserRoleList userRoleList = new UserRoleList();
         userRoleList.addRole(userRole);
@@ -209,9 +214,9 @@ public class AuthorizationResourceTest {
     @Test
     public void getUserRole() throws Exception {
 
-        AuthorizationResource authorizationResource = new AuthorizationResource(authorization, new HttpHeader("jaba-???"));
+        AuthorizationResource authorizationResource = new AuthorizationResource(authorization, new HttpHeader("jaba-???", "600"));
 
-        UserRole userRole = UserRole.newInstance(TESTAPP,Role.ADMIN).withUserID(USER).build();
+        UserRole userRole = UserRole.newInstance(TESTAPP, Role.ADMIN).withUserID(USER).build();
         UserRole userRole1 = UserRole.newInstance(TESTAPP2, Role.READWRITE).withUserID(USER).build();
         UserRoleList userRoleList = new UserRoleList();
         userRoleList.addRole(userRole);
@@ -220,9 +225,9 @@ public class AuthorizationResourceTest {
         when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
         when(authorization.getUserRoleList(USER)).thenReturn(userRoleList);
         Response response = authorizationResource.getUserRole(USER, AUTHHEADER);
-        assert(userRoleList.equals(response.getEntity()));
+        assert (userRoleList.equals(response.getEntity()));
 
-        userRole = UserRole.newInstance(TESTAPP,Role.ADMIN).withUserID(TESTUSER).build();
+        userRole = UserRole.newInstance(TESTAPP, Role.ADMIN).withUserID(TESTUSER).build();
         userRole1 = UserRole.newInstance(TESTAPP2, Role.READWRITE).withUserID(TESTUSER).build();
         userRoleList = new UserRoleList();
         userRoleList.addRole(userRole);
@@ -235,13 +240,13 @@ public class AuthorizationResourceTest {
         UserRoleList userRoleList1 = new UserRoleList();
         userRoleList1.addRole(userRoleList.getRoleList().get(0));
         UserRoleList x = (UserRoleList) response.getEntity();
-        assert(x.equals(userRoleList1));
+        assert (x.equals(userRoleList1));
     }
 
     @Test
     public void deleteUserRoles() throws Exception {
 
-        AuthorizationResource authorizationResource = new AuthorizationResource(authorization, new HttpHeader("jaba-???"));
+        AuthorizationResource authorizationResource = new AuthorizationResource(authorization, new HttpHeader("jaba-???", "600"));
 
         when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
 
@@ -257,7 +262,7 @@ public class AuthorizationResourceTest {
         userRoleList.addRole(userRole);
 
         AuthorizationResource authorizationResource = 
-        		new AuthorizationResource(authorization, new HttpHeader("jaba-???"));
+        		new AuthorizationResource(authorization, new HttpHeader("jaba-???", "600"));
 
         when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
         when(authorization.getUserInfo(USER)).thenReturn(UserInfo.from(USER).build());
@@ -278,7 +283,7 @@ public class AuthorizationResourceTest {
         List<UserRole> superAdmins = new ArrayList<>();
         superAdmins.add(superAdmin);
         AuthorizationResource authorizationResource = 
-        		new AuthorizationResource(authorization, new HttpHeader("jaba-???"));
+        		new AuthorizationResource(authorization, new HttpHeader("jaba-???", "600"));
 
         when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
         when(authorization.getUserInfo(USER)).thenReturn(UserInfo.from(USER).build());
@@ -300,7 +305,7 @@ public class AuthorizationResourceTest {
         userRoleList.addRole(userRole);
 
         AuthorizationResource authorizationResource = 
-        		new AuthorizationResource(authorization, new HttpHeader("jaba-???"));
+        		new AuthorizationResource(authorization, new HttpHeader("jaba-???", "600"));
 
         when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
         when(authorization.getUserInfo(USER)).thenReturn(UserInfo.from(USER).build());
@@ -321,7 +326,7 @@ public class AuthorizationResourceTest {
         userRoleList.addRole(userRole);
 
         AuthorizationResource authorizationResource = 
-        		new AuthorizationResource(authorization, new HttpHeader("jaba-???"));
+        		new AuthorizationResource(authorization, new HttpHeader("jaba-???", "600"));
 
         when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
         when(authorization.getUserInfo(USER)).thenReturn(UserInfo.from(USER).build());
@@ -339,7 +344,7 @@ public class AuthorizationResourceTest {
         userRoleList.addRole(userRole);
 
         AuthorizationResource authorizationResource = 
-        		new AuthorizationResource(authorization, new HttpHeader("jaba-???"));
+        		new AuthorizationResource(authorization, new HttpHeader("jaba-???", "600"));
 
         when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
         when(authorization.getUserInfo(USER)).thenReturn(UserInfo.from(USER).build());
@@ -357,7 +362,7 @@ public class AuthorizationResourceTest {
         userRoleList.addRole(userRole);
 
         AuthorizationResource authorizationResource = 
-        		new AuthorizationResource(authorization, new HttpHeader("jaba-???"));
+        		new AuthorizationResource(authorization, new HttpHeader("jaba-???", "600"));
 
         when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
         when(authorization.getUserInfo(USER)).thenReturn(UserInfo.from(USER).build());
@@ -374,7 +379,7 @@ public class AuthorizationResourceTest {
         userRoleList.addRole(userRole);
 
         AuthorizationResource authorizationResource = 
-        		new AuthorizationResource(authorization, new HttpHeader("jaba-???"));
+        		new AuthorizationResource(authorization, new HttpHeader("jaba-???", "600"));
 
         when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
         when(authorization.getUserInfo(USER)).thenReturn(UserInfo.from(USER).build());
@@ -388,7 +393,7 @@ public class AuthorizationResourceTest {
     public void removeUserFromSuperadminRoleNotAuthorized() throws Exception {
 
         AuthorizationResource authorizationResource = 
-        		new AuthorizationResource(authorization, new HttpHeader("jaba-???"));
+        		new AuthorizationResource(authorization, new HttpHeader("jaba-???", "600"));
 
         when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
         when(authorization.getUserInfo(USER)).thenReturn(UserInfo.from(USER).build());
@@ -401,9 +406,9 @@ public class AuthorizationResourceTest {
     @Test
     public void getApplicationUsersByRole() throws Exception {
 
-        AuthorizationResource authorizationResource = new AuthorizationResource(authorization, new HttpHeader("jaba-???"));
+        AuthorizationResource authorizationResource = new AuthorizationResource(authorization, new HttpHeader("jaba-???", "600"));
 
-        UserRole userRole = UserRole.newInstance(TESTAPP,Role.ADMIN).withUserID(USER).build();
+        UserRole userRole = UserRole.newInstance(TESTAPP, Role.ADMIN).withUserID(USER).build();
         UserRole userRole1 = UserRole.newInstance(TESTAPP2, Role.READWRITE).withUserID(USER).build();
         UserRoleList userRoleList = new UserRoleList();
         userRoleList.addRole(userRole);
@@ -412,13 +417,13 @@ public class AuthorizationResourceTest {
         when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
         when(authorization.getApplicationUsers(TESTAPP)).thenReturn(userRoleList);
 
-        Response response = authorizationResource.getApplicationUsersByRole(TESTAPP,AUTHHEADER);
+        Response response = authorizationResource.getApplicationUsersByRole(TESTAPP, AUTHHEADER);
         assertThat(response.getEntity(), CoreMatchers.<Object>equalTo(userRoleList));
     }
 
     @Test
     public void testGetUserList() throws Exception {
-        AuthorizationResource authorizationResource = new AuthorizationResource(authorization, new HttpHeader("jaba-???"));
+        AuthorizationResource authorizationResource = new AuthorizationResource(authorization, new HttpHeader("jaba-???", "600"));
 
         UserRole userRole = UserRole.newInstance(TESTAPP, Role.ADMIN).withUserID(USER).build();
         UserRoleList userRoleList = new UserRoleList();

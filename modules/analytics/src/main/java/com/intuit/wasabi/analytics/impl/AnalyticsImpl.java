@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,9 +20,21 @@ import com.intuit.wasabi.analytics.AnalysisTools;
 import com.intuit.wasabi.analytics.Analytics;
 import com.intuit.wasabi.analyticsobjects.Event;
 import com.intuit.wasabi.analyticsobjects.Parameters;
-import com.intuit.wasabi.analyticsobjects.counts.*;
+import com.intuit.wasabi.analyticsobjects.counts.ActionCounts;
+import com.intuit.wasabi.analyticsobjects.counts.AssignmentCounts;
+import com.intuit.wasabi.analyticsobjects.counts.BucketCounts;
+import com.intuit.wasabi.analyticsobjects.counts.Counts;
+import com.intuit.wasabi.analyticsobjects.counts.DailyCounts;
+import com.intuit.wasabi.analyticsobjects.counts.ExperimentCounts;
+import com.intuit.wasabi.analyticsobjects.counts.ExperimentCumulativeCounts;
 import com.intuit.wasabi.analyticsobjects.metrics.BinomialMetrics.BinomialMetric;
-import com.intuit.wasabi.analyticsobjects.statistics.*;
+import com.intuit.wasabi.analyticsobjects.statistics.BucketBasicStatistics;
+import com.intuit.wasabi.analyticsobjects.statistics.BucketComparison;
+import com.intuit.wasabi.analyticsobjects.statistics.BucketStatistics;
+import com.intuit.wasabi.analyticsobjects.statistics.DailyStatistics;
+import com.intuit.wasabi.analyticsobjects.statistics.ExperimentBasicStatistics;
+import com.intuit.wasabi.analyticsobjects.statistics.ExperimentCumulativeStatistics;
+import com.intuit.wasabi.analyticsobjects.statistics.ExperimentStatistics;
 import com.intuit.wasabi.database.Transaction;
 import com.intuit.wasabi.database.Transaction.Block;
 import com.intuit.wasabi.database.TransactionFactory;
@@ -38,12 +50,18 @@ import com.intuit.wasabi.repository.ExperimentRepository;
 import org.slf4j.Logger;
 
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Properties;
+import java.util.TimeZone;
 
 import static com.intuit.autumn.utils.PropertyFactory.create;
-import static com.intuit.autumn.utils.PropertyFactory.getProperty;
 import static com.intuit.wasabi.util.DateUtil.createCalendarMidnight;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -61,7 +79,6 @@ public class AnalyticsImpl implements Analytics {
     private final AnalysisTools analysisTools;
     private final ExperimentRepository cassandraRepository;
     private final AssignmentsRepository assignmentRepository;
-    private Date release_date = null;
 
     /**
      * Constructor
@@ -89,11 +106,6 @@ public class AnalyticsImpl implements Analytics {
         // FIXME: inject
         Properties properties = create(PROPERTY_NAME, AnalyticsImpl.class);
 
-        try {
-            release_date = dateFormat.parse(getProperty("analytics.release.date", properties));
-        } catch (ParseException e) {
-            LOGGER.error("Error: Could not parse the specified date and set to default", e);
-        }
     }
 
     /**
@@ -325,9 +337,9 @@ public class AnalyticsImpl implements Analytics {
                             } else {
                                 //carry over cumulative counts from previous day if there are no new counts
                                 if (currentDay > 0) {
-                                    DailyCounts currentDailyCounts =  days.get(currentDay);
-                                    DailyCounts missingDailyCounts =  getPreviousDayDailyCountAsCurrentDailyCount(
-                                            currentDailyCounts, days, currentDay) ;
+                                    DailyCounts currentDailyCounts = days.get(currentDay);
+                                    DailyCounts missingDailyCounts = getPreviousDayDailyCountAsCurrentDailyCount(
+                                            currentDailyCounts, days, currentDay);
                                     days.set(currentDay, missingDailyCounts);
                                 }
 
@@ -350,7 +362,7 @@ public class AnalyticsImpl implements Analytics {
                 for (; currentDay < numberDays; currentDay += 1) {
                     DailyCounts thisDailyCounts = days.get(currentDay);
                     DailyCounts currentDailyCount = getPreviousDayDailyCountAsCurrentDailyCount(
-                            thisDailyCounts, days, currentDay) ;
+                            thisDailyCounts, days, currentDay);
 
                     days.set(currentDay, currentDailyCount);
                 }
@@ -364,7 +376,7 @@ public class AnalyticsImpl implements Analytics {
         DailyCounts.Builder dailyCountsBuilder = new DailyCounts.Builder()
                 .setDate(currentDailyCount.getDate())
                 .withPerDay(currentDailyCount.getPerDay())
-                .withCumulative( days.get(currentDay - 1).getCumulative() );
+                .withCumulative(days.get(currentDay - 1).getCumulative());
         return dailyCountsBuilder.build();
     }
 
@@ -528,11 +540,10 @@ public class AnalyticsImpl implements Analytics {
 
         // Uses counters
         Experiment experiment = cassandraRepository.getExperiment(experimentID);
-        if (release_date != null && release_date.before(experiment.getCreationTime())) {
-            return assignmentRepository.getBucketAssignmentCount(experiment);
-        } else {
-            return cassandraRepository.getAssignmentCounts(experimentID, context);
+        if (Objects.isNull(experiment)) {
+            throw new ExperimentNotFoundException(experimentID);
         }
+        return assignmentRepository.getBucketAssignmentCount(experiment);
     }
 
     /**

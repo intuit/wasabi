@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,7 +24,6 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -83,26 +82,31 @@ public class ActionProgress extends Progress {
             this.item.actionName = value;
             return this;
         }
+
         public Builder withWinnersSoFarList(Collection<Bucket.Label> value) {
             Set<Bucket.Label> winnerSoFar = new HashSet<>();
             winnerSoFar.addAll(value);
             this.item.winnersSoFar = winnerSoFar;
             return this;
         }
+
         public Builder withLosersSoFarList(Collection<Bucket.Label> value) {
             Set<Bucket.Label> loserSoFar = new HashSet<>();
             loserSoFar.addAll(value);
             this.item.losersSoFar = loserSoFar;
             return this;
         }
+
         public Builder withSufficientData(Boolean value) {
             this.item.hasSufficientData = value;
             return this;
         }
+
         public Builder withFractionDataCollected(double value) {
             this.item.fractionDataCollected = value;
             return this;
         }
+
         public Builder withProgress(Progress value) {
             this.item.fractionDataCollected = value.fractionDataCollected;
             this.item.losersSoFar = value.losersSoFar;

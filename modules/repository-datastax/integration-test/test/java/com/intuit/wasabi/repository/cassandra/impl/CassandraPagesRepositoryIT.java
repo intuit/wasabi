@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,9 +17,8 @@ package com.intuit.wasabi.repository.cassandra.impl;
 
 import com.datastax.driver.mapping.MappingManager;
 import com.google.inject.Inject;
-import com.intuit.wasabi.experimentobjects.*;
-import com.intuit.wasabi.repository.cassandra.CassandraRepositoryModule;
 import com.intuit.wasabi.repository.PagesRepository;
+import com.intuit.wasabi.repository.cassandra.CassandraRepositoryModule;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
 import com.intuit.wasabi.repository.cassandra.data.PageRepositoryDataProvider;
 import org.slf4j.Logger;
@@ -28,7 +27,6 @@ import org.testng.annotations.AfterTest;
 import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
 
-import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.CoreMatchers.hasItem;
@@ -41,23 +39,26 @@ import static org.hamcrest.core.Is.is;
 @Guice(modules = CassandraRepositoryModule.class)
 public class CassandraPagesRepositoryIT {
     private final Logger logger = LoggerFactory.getLogger(CassandraPagesRepositoryIT.class);
-    @Inject PagesRepository pagesRepository;
-    @Inject MappingManager mappingManager;
-    @Inject ExperimentAccessor experimentAccessor;
+    @Inject
+    PagesRepository pagesRepository;
+    @Inject
+    MappingManager mappingManager;
+    @Inject
+    ExperimentAccessor experimentAccessor;
     Map<Page.Name, List<PageExperiment>> pageExperimentListMap = new HashMap<>();
     Map<Application.Name, List<Page>> pageListMap = new HashMap<>();
     Set<Experiment.ID> experimentIds = new HashSet<>();
 
-    @Test(groups={"setup"},
+    @Test(groups = {"setup"},
             dataProvider = "postPagesDataProvider",
             dataProviderClass = PageRepositoryDataProvider.class)
     public void setup(Application.Name appName,
-                        Experiment.ID experimentId,
-                        Experiment.Label label,
-                        ExperimentPageList experimentPageList){
+                      Experiment.ID experimentId,
+                      Experiment.Label label,
+                      ExperimentPageList experimentPageList) {
         List<Page> pageList = pageListMap.getOrDefault(appName, new ArrayList<>());
         experimentIds.add(experimentId);
-        for(ExperimentPage experimentPage : experimentPageList.getPages()){
+        for (ExperimentPage experimentPage : experimentPageList.getPages()) {
             List<PageExperiment> pageExperimentList = pageExperimentListMap.getOrDefault(experimentPage.getName(), new ArrayList<>());
             pageExperimentList.add(PageExperiment.withAttributes(experimentId, label, experimentPage.getAllowNewAssignment()).build());
             pageExperimentListMap.put(experimentPage.getName(), pageExperimentList);
@@ -68,13 +69,13 @@ public class CassandraPagesRepositoryIT {
     }
 
 
-    @Test(groups={"setup"},
+    @Test(groups = {"setup"},
             dataProvider = "postPagesDataProvider",
             dataProviderClass = PageRepositoryDataProvider.class)
     public void prepare(Application.Name appName,
                         Experiment.ID experimentId,
                         Experiment.Label label,
-                        ExperimentPageList experimentPageList){
+                        ExperimentPageList experimentPageList) {
         //TODO: how to insert just partial experiment for testing without creating tombstones
         experimentAccessor.insertExperiment(experimentId.getRawID(),
                 "",
@@ -101,11 +102,11 @@ public class CassandraPagesRepositoryIT {
             dataProvider = "postPagesDataProvider",
             dataProviderClass = PageRepositoryDataProvider.class)
     public void testGetByExperimenList(Application.Name appName,
-                                      Experiment.ID experimentId,
-                                      Experiment.Label label,
-                                      ExperimentPageList experimentPageList){
+                                       Experiment.ID experimentId,
+                                       Experiment.Label label,
+                                       ExperimentPageList experimentPageList) {
         Map<Page.Name, List<PageExperiment>> result = pagesRepository.getPageExperimentList(appName);
-        for(ExperimentPage page : experimentPageList.getPages()){
+        for (ExperimentPage page : experimentPageList.getPages()) {
             List<PageExperiment> pageExperimentList = result.get(page.getName());
             assertThat(pageExperimentList, is(notNullValue()));
             PageExperiment pageExperiment = PageExperiment.withAttributes(experimentId, label, page.getAllowNewAssignment()).build();
@@ -119,9 +120,9 @@ public class CassandraPagesRepositoryIT {
             dataProvider = "postPagesDataProvider",
             dataProviderClass = PageRepositoryDataProvider.class)
     public void testGetExperimentPages(Application.Name appName,
-                        Experiment.ID experimentId,
-                        Experiment.Label label,
-                        ExperimentPageList experimentPageList){
+                                       Experiment.ID experimentId,
+                                       Experiment.Label label,
+                                       ExperimentPageList experimentPageList) {
         ExperimentPageList experimentPageListResult = pagesRepository.getExperimentPages(experimentId);
         assertThat(experimentPageList.getPages(), is(experimentPageListResult.getPages()));
     }
@@ -131,13 +132,13 @@ public class CassandraPagesRepositoryIT {
             dataProvider = "postPagesDataProvider",
             dataProviderClass = PageRepositoryDataProvider.class)
     public void testGetExperiments(Application.Name appName,
-                                      Experiment.ID experimentId,
-                                      Experiment.Label labe,
-                                      ExperimentPageList experimentPageList){
-        for(ExperimentPage page : experimentPageList.getPages()) {
+                                   Experiment.ID experimentId,
+                                   Experiment.Label labe,
+                                   ExperimentPageList experimentPageList) {
+        for (ExperimentPage page : experimentPageList.getPages()) {
             List<PageExperiment> result = pagesRepository.getExperiments(appName, page.getName());
             List<PageExperiment> expected = pageExperimentListMap.get(page.getName());
-            for(PageExperiment pageExperiment : result){
+            for (PageExperiment pageExperiment : result) {
                 assertThat(expected, hasItem(pageExperiment));
             }
         }
@@ -147,12 +148,12 @@ public class CassandraPagesRepositoryIT {
             dataProvider = "postPagesDataProvider",
             dataProviderClass = PageRepositoryDataProvider.class)
     public void testGetPageList(Application.Name appName,
-                                       Experiment.ID experimentId,
-                                       Experiment.Label label,
-                                       ExperimentPageList experimentPageList){
+                                Experiment.ID experimentId,
+                                Experiment.Label label,
+                                ExperimentPageList experimentPageList) {
         List<Page> result = pagesRepository.getPageList(appName);
         List<Page> expected = pageListMap.get(appName);
-        for(Page page : result){
+        for (Page page : result) {
             assertThat(expected, hasItem(page));
         }
     }
@@ -161,9 +162,9 @@ public class CassandraPagesRepositoryIT {
             dataProvider = "postPagesDataProvider",
             dataProviderClass = PageRepositoryDataProvider.class)
     public void testRemovePageData(Application.Name appName,
-                                Experiment.ID experimentId,
-                                Experiment.Label label,
-                                ExperimentPageList experimentPageList){
+                                   Experiment.ID experimentId,
+                                   Experiment.Label label,
+                                   ExperimentPageList experimentPageList) {
         ExperimentPageList oldPageList = pagesRepository.getExperimentPages(experimentId);
         assertThat(oldPageList.getPages().size(), is(experimentPageList.getPages().size()));
         pagesRepository.erasePageData(appName, experimentId);
@@ -174,13 +175,13 @@ public class CassandraPagesRepositoryIT {
 
 
     @AfterTest
-    public void cleanup(){
+    public void cleanup() {
         logger.debug("cleaning up experiment table and experiment_audit_log table");
 //        mappingManager.getSession().execute("TRUNCATE TABLE experiment");
 //        mappingManager.getSession().execute("TRUNCATE TABLE experiment_audit_log");
-        for(Experiment.ID experimentId : experimentIds){
+        for (Experiment.ID experimentId : experimentIds) {
             experimentAccessor.deleteExperiment(experimentId.getRawID());
-            mappingManager.getSession().execute("DELETE FROM experiment_audit_log where experiment_id="+experimentId);
+            mappingManager.getSession().execute("DELETE FROM experiment_audit_log where experiment_id=" + experimentId);
         }
 
         logger.debug("cleaning up page_experiment_index table");
@@ -190,7 +191,6 @@ public class CassandraPagesRepositoryIT {
 //        logger.debug("cleaning up app_page_index table");
 //        mappingManager.getSession().execute("TRUNCATE TABLE app_page_index");
     }
-
 
 
 }

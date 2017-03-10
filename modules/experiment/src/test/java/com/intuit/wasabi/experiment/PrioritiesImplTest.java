@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,7 +17,12 @@ package com.intuit.wasabi.experiment;
 
 import com.intuit.wasabi.exceptions.ApplicationNotFoundException;
 import com.intuit.wasabi.experiment.impl.PrioritiesImpl;
-import com.intuit.wasabi.experimentobjects.*;
+import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.experimentobjects.ExperimentIDList;
+import com.intuit.wasabi.experimentobjects.ExperimentValidator;
+import com.intuit.wasabi.experimentobjects.PrioritizedExperiment;
+import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
 import com.intuit.wasabi.repository.PrioritiesRepository;
 import org.junit.Before;
 import org.junit.Rule;
@@ -33,7 +38,11 @@ import java.util.List;
 import static com.googlecode.catchexception.CatchException.verifyException;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PrioritiesImplTest {
@@ -50,7 +59,7 @@ public class PrioritiesImplTest {
     private ExperimentValidator validator;
 
     @Before
-    public void setUp(){
+    public void setUp() {
         prioritiesImpl = new PrioritiesImpl(prioritiesRepository, experiments);
     }
 
@@ -64,7 +73,7 @@ public class PrioritiesImplTest {
         experimentList.add(experiment);
         List<Experiment.ID> priorityList = new ArrayList<>();
         priorityList.add(experiment.getID());
-        PrioritizedExperiment prioritizedExperiment = PrioritizedExperiment.from(experiment,0).build();
+        PrioritizedExperiment prioritizedExperiment = PrioritizedExperiment.from(experiment, 0).build();
         PrioritizedExperimentList prioritizedExperimentList = new PrioritizedExperimentList();
         prioritizedExperimentList.addPrioritizedExperiment(prioritizedExperiment);
 
@@ -73,7 +82,7 @@ public class PrioritiesImplTest {
         when(prioritiesRepository.getPriorities(testApp)).thenReturn(prioritizedExperimentList);
         prioritiesImpl.getPriorities(testApp, true);
         // verify that the control doesnt enter into the createPriorities part
-        verify(prioritiesRepository,never()).createPriorities(testApp,priorityList);
+        verify(prioritiesRepository, never()).createPriorities(testApp, priorityList);
 
         // Creating a badPriorityList
         List<Experiment.ID> badPriorityList = new ArrayList<>();
@@ -95,9 +104,9 @@ public class PrioritiesImplTest {
 
         //Adding an experiment which belongs to a different application
         Experiment differentApplicationExperiment = Experiment.withID(Experiment.ID.newInstance())
-                                                    .withApplicationName(Application.Name
-                                                            .valueOf("differentApplication"))
-                                                    .build();
+                .withApplicationName(Application.Name
+                        .valueOf("differentApplication"))
+                .build();
         differentApplicationExperiment.setState(Experiment.State.DRAFT);
         badPriorityList.add(differentApplicationExperiment.getID());
         when(experiments.getExperiment(differentApplicationExperiment.getID()))
@@ -118,11 +127,11 @@ public class PrioritiesImplTest {
         prioritiesImpl.getPriorities(testApp, true);
         priorityList.add(missingExperiment.getID()); // build the correct priorityList
         // Verify that the control gets into the createPriorities part with the corrected priorityList
-        verify(prioritiesRepository, times(1)).createPriorities(testApp,priorityList);
+        verify(prioritiesRepository, times(1)).createPriorities(testApp, priorityList);
     }
 
     @Test
-    public void createPriorities_test(){
+    public void createPriorities_test() {
 
         Experiment experiment = Experiment.withID(Experiment.ID.newInstance()).withApplicationName(testApp).build();
         experiment.setState(Experiment.State.DRAFT);
@@ -148,21 +157,21 @@ public class PrioritiesImplTest {
 
         // Verify that null applicationName delivers an ApplicationNotFoundException exception
         verifyException(prioritiesImpl, ApplicationNotFoundException.class)
-                .createPriorities(null,experimentIDList,true);
+                .createPriorities(null, experimentIDList, true);
 
         prioritiesImpl.createPriorities(testApp, experimentIDList, false);
         // Verify that the createPriorities method is invoked with the given experimentIDList
         // when verifyPriorityList is false
-        verify(prioritiesRepository, times(1)).createPriorities(testApp,experimentIDList.getExperimentIDs());
+        verify(prioritiesRepository, times(1)).createPriorities(testApp, experimentIDList.getExperimentIDs());
 
         prioritiesImpl.createPriorities(testApp, experimentIDList, true);
         // Verify that the createPriorities method is invoked with the corrected priorityList
         // when verifyPriorityList is true
-        verify(prioritiesRepository, times(1)).createPriorities(testApp,priorityList);
+        verify(prioritiesRepository, times(1)).createPriorities(testApp, priorityList);
     }
 
     @Test
-    public void cleanPriorityList_test(){
+    public void cleanPriorityList_test() {
         Experiment experiment = Experiment.withID(Experiment.ID.newInstance()).withApplicationName(testApp)
                 .withState(Experiment.State.DRAFT).build();
         Experiment experiment2 = Experiment.withID(Experiment.ID.newInstance())
@@ -210,7 +219,7 @@ public class PrioritiesImplTest {
     }
 
     @Test
-    public void setPriority_for_Experiment(){
+    public void setPriority_for_Experiment() {
 
         Experiment experiment = mock(Experiment.class);
 
@@ -220,7 +229,7 @@ public class PrioritiesImplTest {
         when(experiment.getState()).thenReturn(Experiment.State.TERMINATED);
         when(experiment.getID()).thenReturn(Experiment.ID.newInstance());
 
-        prioritiesImpl.setPriority(experiment.getID(),42);
+        prioritiesImpl.setPriority(experiment.getID(), 42);
 
         //verify that he never got to the point where the priority is set
         verify(prioritiesRepository, never()).createPriorities(any(Application.Name.class), anyList());
@@ -231,7 +240,7 @@ public class PrioritiesImplTest {
     }
 
     @Test
-    public void setPriorityForExperimentWithPrioritySame(){
+    public void setPriorityForExperimentWithPrioritySame() {
 
         Experiment experiment = Experiment.withID(Experiment.ID.newInstance()).withApplicationName(testApp)
                 .withState(Experiment.State.RUNNING).build();
@@ -240,13 +249,13 @@ public class PrioritiesImplTest {
         when(prioritiesRepository.getPriorityList(testApp)).thenReturn(list);
         when(experiments.getExperiment(experiment.getID())).thenReturn(experiment);
 
-        prioritiesImpl.setPriority(experiment.getID(),1);
+        prioritiesImpl.setPriority(experiment.getID(), 1);
 
         verify(prioritiesRepository, never()).createPriorities(any(Application.Name.class), anyList());
     }
 
     @Test
-    public void setPriorityForExperimentWithPriorityNotSame(){
+    public void setPriorityForExperimentWithPriorityNotSame() {
 
         Experiment experiment = Experiment.withID(Experiment.ID.newInstance()).withApplicationName(testApp)
                 .withState(Experiment.State.RUNNING).build();
@@ -255,13 +264,13 @@ public class PrioritiesImplTest {
         when(prioritiesRepository.getPriorityList(testApp)).thenReturn(list);
         when(experiments.getExperiment(experiment.getID())).thenReturn(experiment);
 
-        prioritiesImpl.setPriority(experiment.getID(),2);
+        prioritiesImpl.setPriority(experiment.getID(), 2);
 
         verify(prioritiesRepository, times(1)).createPriorities(any(Application.Name.class), anyList());
     }
 
     @Test
-    public void setPriorityForExperimentWithPriorityZero(){
+    public void setPriorityForExperimentWithPriorityZero() {
 
         Experiment experiment = Experiment.withID(Experiment.ID.newInstance()).withApplicationName(testApp)
                 .withState(Experiment.State.RUNNING).build();
@@ -270,7 +279,7 @@ public class PrioritiesImplTest {
         when(prioritiesRepository.getPriorityList(testApp)).thenReturn(list);
         when(experiments.getExperiment(experiment.getID())).thenReturn(experiment);
 
-        prioritiesImpl.setPriority(experiment.getID(),0);
+        prioritiesImpl.setPriority(experiment.getID(), 0);
 
         verify(prioritiesRepository, times(1)).createPriorities(any(Application.Name.class), anyList());
     }

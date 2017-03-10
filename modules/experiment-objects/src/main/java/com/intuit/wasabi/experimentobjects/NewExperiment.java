@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -75,66 +75,70 @@ public class NewExperiment implements ExperimentBase {
     }
 
     public Experiment.ID getId() {
-		return id;
-	}
+        return id;
+    }
 
-	public void setId(Experiment.ID id) {
+    public void setId(Experiment.ID id) {
         Preconditions.checkNotNull(id);
-		this.id = id;
-	}
+        this.id = id;
+    }
 
-	public void setLabel(Experiment.Label label) {
+    public void setLabel(Experiment.Label label) {
         Preconditions.checkNotNull(label);
-		this.label = label;
-	}
+        this.label = label;
+    }
 
-	public void setStartTime(Date startTime) {
+    public void setStartTime(Date startTime) {
         Preconditions.checkNotNull(startTime);
-		this.startTime = startTime;
-	}
+        this.startTime = startTime;
+    }
 
-	public void setEndTime(Date endTime) {
+    public void setEndTime(Date endTime) {
         Preconditions.checkNotNull(endTime);
-		this.endTime = endTime;
-	}
+        this.endTime = endTime;
+    }
 
-	public void setSamplingPercent(Double samplingPercent) {
-		this.samplingPercent = samplingPercent;
-	}
+    public void setSamplingPercent(Double samplingPercent) {
+        this.samplingPercent = samplingPercent;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-    public void setHypothesisIsCorrect(String hypothesisIsCorrect) { this.hypothesisIsCorrect = hypothesisIsCorrect; }
+    public void setHypothesisIsCorrect(String hypothesisIsCorrect) {
+        this.hypothesisIsCorrect = hypothesisIsCorrect;
+    }
 
-    public void setResults(String results) { this.results = results; }
+    public void setResults(String results) {
+        this.results = results;
+    }
 
     public void setRule(String rule) {
-		this.rule = rule;
-	}
+        this.rule = rule;
+    }
 
-	public void setIsPersonalizationEnabled(Boolean isPersonalizationEnabled) {
-		this.isPersonalizationEnabled = isPersonalizationEnabled;
-	}
+    public void setIsPersonalizationEnabled(Boolean isPersonalizationEnabled) {
+        this.isPersonalizationEnabled = isPersonalizationEnabled;
+    }
 
     public void setModelName(String modelName) {
-		this.modelName = modelName;
-	}
+        this.modelName = modelName;
+    }
 
-	public void setModelVersion(String modelVersion) {
-		this.modelVersion = modelVersion;
-	}
+    public void setModelVersion(String modelVersion) {
+        this.modelVersion = modelVersion;
+    }
 
-	public void setIsRapidExperiment(Boolean isRapidExperiment) {
-		this.isRapidExperiment = isRapidExperiment;
-	}
+    public void setIsRapidExperiment(Boolean isRapidExperiment) {
+        this.isRapidExperiment = isRapidExperiment;
+    }
 
-	public void setUserCap(Integer userCap) {
-		this.userCap = userCap;
-	}
+    public void setUserCap(Integer userCap) {
+        this.userCap = userCap;
+    }
 
-	public static NewExperiment.Builder withID(Experiment.ID id) {
+    public static NewExperiment.Builder withID(Experiment.ID id) {
         return new NewExperiment.Builder(id);
     }
 
@@ -143,7 +147,8 @@ public class NewExperiment implements ExperimentBase {
      *
      * @return the experiment ID
      */
-    @Override @JsonIgnore
+    @Override
+    @JsonIgnore
     public Experiment.ID getID() {
         return id;
     }
@@ -174,9 +179,13 @@ public class NewExperiment implements ExperimentBase {
         return description;
     }
 
-    public String getHypothesisIsCorrect() { return hypothesisIsCorrect; }
+    public String getHypothesisIsCorrect() {
+        return hypothesisIsCorrect;
+    }
 
-    public String getResults() { return results;  }
+    public String getResults() {
+        return results;
+    }
 
     @Override
     public String getRule() {
@@ -229,7 +238,7 @@ public class NewExperiment implements ExperimentBase {
 
     @Override
     public String toString() {
-    	return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 
     /**
