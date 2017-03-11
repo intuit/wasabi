@@ -132,17 +132,17 @@ public interface Authorization {
      * Assign user to be a superadmin
      *
      * @param candidateUserInfo the superadmin candidate
-     * @param assigninUserInfo  the assigning user
+     * @param assigningUserInfo  the assigning user
      */
-    void assignUserToSuperAdminRole(UserInfo candidateUserInfo, UserInfo assigninUserInfo);
+    void assignUserToSuperAdminRole(UserInfo candidateUserInfo, UserInfo assigningUserInfo);
 
     /**
      * Remove user from superadmin role
      *
      * @param candidateUserInfo the candidate
-     * @param assigninUserInfo  the assigning user
+     * @param assigningUserInfo  the assigning user
      */
-    void removeUserFromSuperAdminRole(UserInfo candidateUserInfo, UserInfo assigninUserInfo);
+    void removeUserFromSuperAdminRole(UserInfo candidateUserInfo, UserInfo assigningUserInfo);
 
     /**
      * Get all superadmin roles

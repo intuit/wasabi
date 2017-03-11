@@ -16,6 +16,8 @@
 package com.intuit.wasabi.api;
 
 import com.codahale.metrics.annotation.Timed;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -55,6 +57,8 @@ import static com.intuit.wasabi.api.APISwaggerResource.EXAMPLE_ALL_ROLES;
 import static com.intuit.wasabi.api.APISwaggerResource.EXAMPLE_AUTHORIZATION_HEADER;
 import static com.intuit.wasabi.authorizationobjects.Permission.ADMIN;
 import static com.intuit.wasabi.authorizationobjects.Role.toRole;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
@@ -253,8 +257,13 @@ public class AuthorizationResource {
             authorization.checkSuperAdmin(assigningUser);
 
             UserInfo candidateUserInfo = authorization.getUserInfo(userID);
-            if (candidateUserInfo == null || StringUtils.isBlank(candidateUserInfo.getUsername() + ""))
-                throw new IllegalArgumentException("User " + userID + " not valid");
+
+            final String USER_ID_INVALID_ERROR_TEMPLATE = "User id %s is not valid";
+            Preconditions.checkArgument(nonNull(candidateUserInfo), USER_ID_INVALID_ERROR_TEMPLATE, userID);
+            Preconditions.checkArgument(nonNull(candidateUserInfo.getUsername()),
+                    USER_ID_INVALID_ERROR_TEMPLATE, userID);
+            Preconditions.checkArgument(!Strings.isNullOrEmpty(candidateUserInfo.getUsername().getUsername()),
+                    USER_ID_INVALID_ERROR_TEMPLATE, userID);
 
             authorization.assignUserToSuperAdminRole(candidateUserInfo, assigningUserInfo);
 
@@ -275,7 +284,7 @@ public class AuthorizationResource {
     @DELETE
     @Path("/superadmins/{userID}")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = "Remove superadmin priveleges to user")
+    @ApiOperation(value = "Remove superadmin privileges to user")
     @Timed
     public Response removeUserFromSuperAdmin(
             @PathParam("userID")
@@ -290,14 +299,14 @@ public class AuthorizationResource {
 
             // Check for assigning user is superadmin
             Username assigningUser = authorization.getUser(authorizationHeader);
-            UserInfo assigninUserInfo = authorization.getUserInfo(assigningUser);
+            UserInfo assigningUserInfo = authorization.getUserInfo(assigningUser);
 
             authorization.checkSuperAdmin(assigningUser);
-            UserInfo candidateUser = authorization.getUserInfo(userID);
-            if (candidateUser == null)
-                throw new IllegalArgumentException("User " + userID + " not valid");
+            UserInfo candidateUserInfo = authorization.getUserInfo(userID);
+            Preconditions.checkArgument(nonNull(candidateUserInfo),
+                    "User id %s is invalid", userID);
 
-            authorization.removeUserFromSuperAdminRole(candidateUser, assigninUserInfo);
+            authorization.removeUserFromSuperAdminRole(candidateUserInfo, assigningUserInfo);
             return httpHeader.headers(Status.NO_CONTENT).build();
         } catch (Exception exception) {
             LOGGER.error("removeUserFromSuperAdmin failed for usedID={} with error:", userID, exception);
