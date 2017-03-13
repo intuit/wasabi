@@ -32,6 +32,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -41,9 +42,8 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class DBITransaction implements Transaction {
 
     private static final Logger LOGGER = getLogger(DBITransaction.class);
-    private Handle handle;
     private DBI dbi;
-    private boolean inTransaction = false;
+    private AtomicBoolean inTransaction = new AtomicBoolean(false);
     private final Pattern notNullPattern = compile("^.*Column \'(\\S+)\' cannot be null");
     private final Pattern duplicateEntryPattern = compile("^.*Duplicate entry \'(\\S+)\' for key \'(\\S+)\'");
 
@@ -56,29 +56,31 @@ public class DBITransaction implements Transaction {
      */
     @Override
     public Object transaction(Block block) {
+        Handle handle = null;
         try {
-            begin();
+            handle = getHandle();
+            begin(handle);
             Object value = block.value(this);
-            commit();
+            commit(handle);
             return value;
         } catch (WasabiException | IllegalArgumentException e) {
             LOGGER.warn("Problem executing block. Trying to rollback...", e);
-            tryRollback();
+            tryRollback(handle);
             throw e;
         } catch (Exception e) {
             LOGGER.warn("Unexpected exception executing block. Trying to rollback...", e);
 
-            tryRollback();
+            tryRollback(handle);
 
             throw new DatabaseException("Unexpected exception when executing block \"" + block + "\"", e);
         } finally {
-            close();
+            close(handle);
         }
     }
 
-    private void tryRollback() {
+    private void tryRollback(Handle handle) {
         try {
-            rollback();
+            rollback(handle);
         } catch (Exception e) {
             LOGGER.error("Failed rolling back transaction", e);
         }
@@ -226,11 +228,9 @@ public class DBITransaction implements Transaction {
      *
      * @throws WasabiServerException
      */
-    protected void begin() throws WasabiServerException {
-        Handle h = getHandle();
-        handle = h;
+    protected void begin(Handle handle) throws WasabiServerException {
         try {
-            Connection connection = h.getConnection();
+            Connection connection = handle.getConnection();
 
             connection.setAutoCommit(false);
         } catch (SQLException e) {
@@ -238,65 +238,33 @@ public class DBITransaction implements Transaction {
         }
 
         handle.begin();
-
-        inTransaction = true;
+        inTransaction.set(true);
     }
 
     /**
      * Commits an active transaction of this instance of DBITransaction
      *
      */
-    protected void commit() {
-        if (handleIsMissing()) {
-            return;
-        }
-
+    protected void commit(Handle handle) {
         handle.commit();
-
-        inTransaction = false;
+        inTransaction.set(false);
     }
 
     /**
      * Rollback an active transaction of this instance of DBITransaction
      *
      */
-    protected void rollback() {
-        if (handleIsMissing()) {
-            return;
-        }
-
+    protected void rollback(Handle handle) {
         handle.rollback();
-
-        inTransaction = false;
+        inTransaction.set(false);
     }
 
     /**
      * Close the handle (JDBC Connection) of this instance of DBITransaction and set the handle to NULL
      *
      */
-    public void close() {
-        if (handleIsMissing()) {
-            return;
-        }
-
+    public void close(Handle handle) {
         handle.close();
-
-        handle = null;
-    }
-
-    /**
-     * Check if the handle (JDBC Connection) of this instance of DBITransaction initialized or not.
-     *
-     * @return
-     */
-    private boolean handleIsMissing() {
-        if (handle == null) {
-            LOGGER.warn("no handle present - this should not happen");
-
-            return true;
-        }
-
-        return false;
     }
 
     /**
