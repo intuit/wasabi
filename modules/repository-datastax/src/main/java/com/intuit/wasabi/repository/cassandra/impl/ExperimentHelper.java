@@ -81,6 +81,8 @@ public class ExperimentHelper {
         experimentObject.setUserCap(experimentPojo.getUserCap());
         experimentObject.setCreatorID(experimentPojo.getCreatorId());
         experimentObject.setRuleJson(convertRuleToJson(experimentPojo.getRule()));
+        experimentObject.setHypothesisIsCorrect(experimentPojo.getHypothesisIsCorrect());
+        experimentObject.setResults(experimentPojo.getResults());
 
         return experimentObject;
     }
