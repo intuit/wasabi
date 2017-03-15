@@ -397,11 +397,11 @@ public class CassandraAuthorizationRepository implements AuthorizationRepository
         LOGGER.debug("Adding user {} as superadmin", candidateUser);
 
         String superAdminRole = Role.SUPERADMIN.toString().toLowerCase();
-        String userId = candidateUser.getUsername().toString();
+        String userID = candidateUser.getUsername().toString();
 
-        userRoleAccessor.insertUserRoleBy(userId, ALL_APPLICATIONS,
+        userRoleAccessor.insertUserRoleBy(userID, ALL_APPLICATIONS,
                 superAdminRole);
-        appRoleAccessor.insertAppRoleBy(ALL_APPLICATIONS, userId,
+        appRoleAccessor.insertAppRoleBy(ALL_APPLICATIONS, userID,
                 superAdminRole);
     }
 
@@ -409,9 +409,9 @@ public class CassandraAuthorizationRepository implements AuthorizationRepository
     public void removeUserFromSuperAdminRole(UserInfo candidateUser) {
         LOGGER.debug("Removing user {} from user admin role", candidateUser);
 
-        String userId = candidateUser.getUsername().toString();
-        userRoleAccessor.deleteUserRoleBy(userId, ALL_APPLICATIONS);
-        appRoleAccessor.deleteAppRoleBy(ALL_APPLICATIONS, userId);
+        String userID = candidateUser.getUsername().toString();
+        userRoleAccessor.deleteUserRoleBy(userID, ALL_APPLICATIONS);
+        appRoleAccessor.deleteAppRoleBy(ALL_APPLICATIONS, userID);
     }
 
     @Override
