@@ -466,7 +466,7 @@ http://www.w3.org/2001/XMLSchema-instance">
                                 <goal>report</goal>
                             </goals>
                             <configuration>
-                                <dataFile>${project.build.directory}/target/jacoco.exec</dataFile>
+                                <dataFile>${project.build.directory}/jacoco.exec</dataFile>
                                 <outputDirectory>${basedir}/target/</outputDirectory>
                             </configuration>
                     </execution>
