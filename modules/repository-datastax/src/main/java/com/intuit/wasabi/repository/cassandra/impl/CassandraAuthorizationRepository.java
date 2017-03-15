@@ -423,14 +423,14 @@ public class CassandraAuthorizationRepository implements AuthorizationRepository
 
         LOGGER.debug("Received all roles {}", allUserRoles);
 
-        List<UserRole> superadmins = allUserRoles.stream().filter(
+        List<UserRole> superAdmins = allUserRoles.stream().filter(
                 userRole -> Role.SUPERADMIN.toString().equalsIgnoreCase(
                         userRole.getRole().toString()) && ALL_APPLICATIONS.equals(userRole.getAppName())).map(
                 userRole -> getRoleWithUserInfo(userRole)).collect(Collectors.toList());
 
-        LOGGER.debug("Returning {} roles", superadmins);
+        LOGGER.debug("Returning {} roles", superAdmins);
 
-        return superadmins;
+        return superAdmins;
     }
 
     private UserRole getRoleWithUserInfo(com.intuit.wasabi.repository.cassandra.pojo.UserRole userRole) {
