@@ -32,25 +32,25 @@ public interface UserRoleAccessor {
     Result<UserRole> getAllUserRoles();
 
     @Query("select * from user_roles where user_id = ? and app_name = ?")
-    Result<UserRole> getUserRolesBy(String userId, String appName);
+    Result<UserRole> getUserRolesBy(String userID, String appName);
 
     @Query("select * from user_roles where user_id = ? and app_name = '*'")
-    Result<UserRole> getUserRolesByUserIdWithWildcardAppName(String userId);
+    Result<UserRole> getUserRolesByUserIdWithWildcardAppName(String userID);
 
     @Query("select * from user_roles where user_id = ?")
-    Result<UserRole> getUserRolesByUserId(String userId);
+    Result<UserRole> getUserRolesByUserId(String userID);
 
     @Query("delete from user_roles where user_id = ? and app_name = ?")
-    ResultSet deleteUserRoleBy(String userId, String appName);
+    ResultSet deleteUserRoleBy(String userID, String appName);
 
     @Query("insert into user_roles (user_id, app_name, role) values (?, ?, ?)")
-    ResultSet insertUserRoleBy(String userId, String appName, String role);
+    ResultSet insertUserRoleBy(String userID, String appName, String role);
 
     //TODO: this is a hack for multitable batch statement
     @Query("insert into user_roles (user_id, app_name, role) values (?, ?, ?)")
-    Statement insertUserRoleStatement(String userId, String appName, String role);
+    Statement insertUserRoleStatement(String userID, String appName, String role);
 
     @Query("delete from user_roles where user_id = ? and app_name = ?")
-    Statement deleteUserRoleStatement(String userId, String appName);
+    Statement deleteUserRoleStatement(String userID, String appName);
 
 }
