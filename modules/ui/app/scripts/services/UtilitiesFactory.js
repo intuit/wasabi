@@ -1002,16 +1002,22 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
 
             changeState: function (experiment, state, afterUpdateFunction) {
                 var stateChange = 'start',
-                    that = this;
+                    that = this,
+                    title = 'Confirm State Change';
                 switch (state.toLowerCase()) {
                     case 'paused':
                         stateChange = 'stop';
                         break;
                     case 'terminated':
                         stateChange = 'terminate';
+                        title = 'Permanently Terminate Experiment';
                         break;
                 }
-                DialogsFactory.confirmDialog('Are you sure you want to ' + stateChange + ' the experiment ' + experiment.label + '?', 'Confirm State Change',
+                var msg = 'Are you sure you want to ' + stateChange + ' the experiment ' + experiment.label + '?';
+                if (state.toLowerCase() === 'terminated') {
+                    msg = 'Are you sure you want to <span style="font-weight: bold;">PERMANENTLY TERMINATE</span> the experiment ' + experiment.label + '?';
+                }
+                DialogsFactory.confirmDialog(msg, title,
                         function() {
                             // Let the state change go through
                             ExperimentsFactory.update({id: experiment.id, state: state}).$promise.then(function () {
