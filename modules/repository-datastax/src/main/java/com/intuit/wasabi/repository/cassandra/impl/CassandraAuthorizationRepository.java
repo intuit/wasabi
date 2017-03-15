@@ -53,6 +53,8 @@ import java.util.Spliterators;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static java.util.Objects.nonNull;
+
 public class CassandraAuthorizationRepository implements AuthorizationRepository {
     private static final Logger LOGGER = LoggerFactory.getLogger(CassandraAuthorizationRepository.class);
     public static final String ALL_APPLICATIONS = "*";
@@ -398,7 +400,7 @@ public class CassandraAuthorizationRepository implements AuthorizationRepository
         String userId = candidateUser.getUsername().toString();
 
         userRoleAccessor.insertUserRoleBy(userId, ALL_APPLICATIONS,
-                Role.SUPERADMIN.toString().toLowerCase());
+                superAdminRole);
         appRoleAccessor.insertAppRoleBy(ALL_APPLICATIONS, userId,
                 superAdminRole);
     }
@@ -416,42 +418,34 @@ public class CassandraAuthorizationRepository implements AuthorizationRepository
     public List<UserRole> getSuperAdminRoleList() {
 
         LOGGER.debug("Getting super admin role list");
-        Result<com.intuit.wasabi.repository.cassandra.pojo.UserRole> allUserRoles =
-                userRoleAccessor.getAllUserRoles();
+        List<com.intuit.wasabi.repository.cassandra.pojo.UserRole> allUserRoles =
+                userRoleAccessor.getAllUserRoles().all();
 
-        List<com.intuit.wasabi.repository.cassandra.pojo.UserRole> roles =
-                allUserRoles.all();
+        LOGGER.debug("Received all roles {}", allUserRoles);
 
-        LOGGER.debug("Received all roles {}", roles);
-
-        List<UserRoleList> superadmins = roles.stream().filter(
+        List<UserRole> superadmins = allUserRoles.stream().filter(
                 userRole -> Role.SUPERADMIN.toString().equalsIgnoreCase(
-                        userRole.getRole().toString()) && ALL_APPLICATIONS.equals(userRole.getAppName())).map(userRole -> convertToUserRoleList(userRole)).collect(Collectors.toList());
+                        userRole.getRole().toString()) && ALL_APPLICATIONS.equals(userRole.getAppName())).map(
+                userRole -> getRoleWithUserInfo(userRole)).collect(Collectors.toList());
 
-        LOGGER.debug("Received super admin roles list {}", superadmins);
+        LOGGER.debug("Returning {} roles", superadmins);
 
-        List<UserRole> userRoles = superadmins.stream().flatMap(
-                userRoleList -> userRoleList.getRoleList().stream()).collect(Collectors.toList());
-
-        LOGGER.debug("Returning {} roles", userRoles);
-
-        return userRoles;
+        return superadmins;
     }
 
-    private UserRoleList convertToUserRoleList(
-            com.intuit.wasabi.repository.cassandra.pojo.UserRole userRole) {
+    private UserRole getRoleWithUserInfo(com.intuit.wasabi.repository.cassandra.pojo.UserRole userRole) {
 
-        LOGGER.debug("Concerting user role {} to user role list", userRole);
+        LOGGER.debug("Getting user info for user role={}", userRole);
 
-        UserRoleList list = new UserRoleList();
-        Application.Name appName =
-                userRole.getAppName().equals(ALL_APPLICATIONS) ? WILDCARD : Application.Name.valueOf(userRole.getAppName());
+        Application.Name appName = userRole.getAppName().equals(ALL_APPLICATIONS) ? WILDCARD :
+                Application.Name.valueOf(userRole.getAppName());
+
         UserInfo userInfo = getUserInfo(UserInfo.Username.valueOf(userRole.getUserId()));
 
-        UserRole role = null;
+        UserRole roleWithUserInfo;
 
-        if (userInfo != null) {
-            role = UserRole.newInstance(
+        if (nonNull(userInfo)) {
+            roleWithUserInfo = UserRole.newInstance(
                     appName,
                     Role.toRole(userRole.getRole())).
                     withUserID(UserInfo.Username.valueOf(userRole.getUserId())).
@@ -459,15 +453,13 @@ public class CassandraAuthorizationRepository implements AuthorizationRepository
                     withLastName(userInfo.getLastName()).
                     withUserEmail(userInfo.getEmail()).build();
         } else {
-            role = UserRole.newInstance(appName, Role.toRole(userRole.getRole()))
+            roleWithUserInfo = UserRole.newInstance(appName, Role.toRole(userRole.getRole()))
                     .withUserID(UserInfo.Username.valueOf(userRole.getUserId())).build();
         }
 
-        list.addRole(role);
+        LOGGER.debug("Role with user info for user role={} is {}", userRole, roleWithUserInfo);
 
-        LOGGER.debug("Converted  user role {} to user role list {}", userRole, list);
-
-        return list;
+        return roleWithUserInfo;
     }
 
 }

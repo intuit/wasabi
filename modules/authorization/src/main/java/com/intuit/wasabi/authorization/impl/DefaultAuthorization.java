@@ -219,7 +219,7 @@ public class DefaultAuthorization implements Authorization {
     }
 
     @Override
-    public void assignUserToSuperAdminRole(UserInfo candidateUserInfo, UserInfo assigningUserInfo) {
+    public void assignUserToSuperAdminRole(final UserInfo candidateUserInfo, final UserInfo assigningUserInfo) {
 
         LOGGER.debug("Assigning super admin role to user={} by user={} ", candidateUserInfo, assigningUserInfo);
 
@@ -239,9 +239,9 @@ public class DefaultAuthorization implements Authorization {
     }
 
     @Override
-    public void removeUserFromSuperAdminRole(UserInfo candidateUserInfo, UserInfo assigningUserInfo) {
+    public void removeUserFromSuperAdminRole(final UserInfo candidateUserInfo, final UserInfo assigningUserInfo) {
 
-        LOGGER.debug("Removing user {} from superadmin by {}", candidateUserInfo, assigningUserInfo);
+        LOGGER.debug("Removing user={} from superadmin by assigningUser={}", candidateUserInfo, assigningUserInfo);
 
         List<UserRole> allSuperAdmins = getSuperAdminRoleList();
 
