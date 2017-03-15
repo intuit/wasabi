@@ -105,7 +105,7 @@ public interface AuthorizationRepository {
     UserPermissions checkSuperAdminPermissions(UserInfo.Username userID, Application.Name applicationName);
 
     /**
-     * Assign user to superadmin role
+     * Assign candidate user to superadmin role
      *
      * @param candidateUser the candidate user
      */
