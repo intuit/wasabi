@@ -3,6 +3,10 @@
 angular.module('wasabi.services').factory('ConfigFactory', ['apiHostBaseUrlValue', function(apiHostBaseUrlValue) {
     return {
         baseUrl: function() {
+            if (apiHostBaseUrlValue === 'DEFAULT') {
+                // We want to pull the URL to use as the backend URL from where the UI was served.
+                return window.location.protocol + '//' + window.location.host + '/api/v1';
+            }
             return apiHostBaseUrlValue;
         },
 
