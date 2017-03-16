@@ -273,7 +273,7 @@ public class IntegrationAuthorization extends TestBase {
         boolean isWasabiSuperadmin = superadminsBefore.stream().map(map -> map.get(USER_USER_ID)).
                 anyMatch(userId -> USER_READER.equals(userId.toString()));
 
-        Assert.assertEquals(false, isWasabiSuperadmin);
+        Assert.assertEquals(isWasabiSuperadmin, false);
 
         postSuperAdmin(USER_READER, HttpStatus.SC_NO_CONTENT, apiServerConnector);
 
@@ -282,18 +282,18 @@ public class IntegrationAuthorization extends TestBase {
         isWasabiSuperadmin = superadminsAfterAdd.stream().map(map -> map.get(USER_USER_ID)).
                 anyMatch(userId -> USER_READER.equals(userId.toString()));
 
-        Assert.assertEquals(true, isWasabiSuperadmin);
+        Assert.assertEquals(isWasabiSuperadmin, true);
 
         Map<String, Object> wasabi = superadminsAfterAdd.stream().
                 filter(map -> USER_READER.equals(map.get(USER_USER_ID))).findFirst().get();
 
-        Assert.assertEquals(true, isWasabiSuperadmin);
-        Assert.assertEquals(WASABI_FIRST_NAME, wasabi.get(USER_FIRST_NAME).toString());
-        Assert.assertEquals(WASABI_LAST_NAME, wasabi.get(USER_LAST_NAME).toString());
-        Assert.assertEquals("SUPERADMIN", wasabi.get(USER_ROLE).toString());
-        Assert.assertEquals(WASABI_EMAIL, wasabi.get(USER_EMAIL).toString());
+        Assert.assertEquals(isWasabiSuperadmin, true);
+        Assert.assertEquals(wasabi.get(USER_FIRST_NAME).toString(), WASABI_FIRST_NAME);
+        Assert.assertEquals(wasabi.get(USER_LAST_NAME).toString(), WASABI_LAST_NAME,);
+        Assert.assertEquals(wasabi.get(USER_ROLE).toString(), "SUPERADMIN");
+        Assert.assertEquals(wasabi.get(USER_EMAIL).toString(), WASABI_EMAIL);
 
-        Assert.assertEquals(true, isWasabiSuperadmin);
+        Assert.assertEquals(isWasabiSuperadmin, true);
 
     }
 
@@ -305,7 +305,7 @@ public class IntegrationAuthorization extends TestBase {
         boolean isWasabiSuperadmin = superadminsBefore.stream().map(map -> map.get(USER_USER_ID)).
                 anyMatch(userId -> USER_READER.equals(userId.toString()));
 
-        Assert.assertEquals(true, isWasabiSuperadmin);
+        Assert.assertEquals(isWasabiSuperadmin, true);
         deleteSuperAdmin(USER_READER, HttpStatus.SC_NO_CONTENT, apiServerConnector);
 
         List<Map<String, Object>> superadminsAfterDelete = getSuperAdmins(HttpStatus.SC_OK, apiServerConnector);
@@ -313,7 +313,7 @@ public class IntegrationAuthorization extends TestBase {
         isWasabiSuperadmin = superadminsAfterDelete.stream().map(map -> map.get(USER_USER_ID)).
                 anyMatch(userId -> USER_READER.equals(userId.toString()));
 
-        Assert.assertEquals(false, isWasabiSuperadmin);
+        Assert.assertEquals(isWasabiSuperadmin, false);
     }
 
     @Test(dependsOnMethods = {"t_removeWasabiReaderAsSuperAdmin"})
