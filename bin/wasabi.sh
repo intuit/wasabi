@@ -43,7 +43,7 @@ options:
   -p | --profile [ profile ]             : profile; default ${profile_default}
   -e | --endpoint [ host:port ]          : api endpoint; default: ${endpoint_default}
   -v | --verify [ true | false ]         : verify installation configuration; default: ${verify_default}
-  -v | --buildtests [ true | false ]     : perform tests after build; default: ${buildtests_default}
+  -t | --buildtests [ true | false ]     : perform tests after build; default: ${buildtests_default}
   -s | --sleep [ sleep-time ]            : sleep/wait time in seconds; default: ${sleep_default}
   -h | --help                            : help message
 
