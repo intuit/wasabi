@@ -8,22 +8,22 @@
         </div>
         <!--<a href="#" id="refreshButton" onclick="return false;" ng-click="refreshDialog()" class="button">Refresh</a>-->
 
-        <div style="position: relative; top: -50px; left: 759px;">
-            <div style="float: left"><img ng-src="{{stateImgUrl(experiment.state)}}"
+        <div class="controlBox">
+            <div style="float: left;"><img ng-src="{{stateImgUrl(experiment.state)}}"
                      alt="{{capitalizeFirstLetter(stateName(experiment.state))}}"
                      sortindex="2"> <span style="position: relative; top: -9px;">{{capitalizeFirstLetter(stateName(experiment.state))}}</span>
             </div>
             <div class="detailsActionContainer">
-                <a class="command start" href="#" title="Start" onclick="return false;" ng-click="changeState(experiment, 'RUNNING')"
+                <a class="command start" href="#" title="Start" custom-tooltip="Start experiment" onclick="return false;" ng-click="changeState(experiment, 'RUNNING')"
                    ng-if="hasUpdatePermission(experiment) && (experiment.state === 'DRAFT' ||
                           experiment.state === 'PAUSED')"></a>
-                <a class="command stop" href="#" title="Stop" onclick="return false;" ng-click="changeState(experiment, 'PAUSED')"
+                <a class="command stop" href="#" title="Stop" custom-tooltip="Stop experiment" onclick="return false;" ng-click="changeState(experiment, 'PAUSED')"
                         ng-if="hasUpdatePermission(experiment) && experiment.state === 'RUNNING'"></a>
-                <a class="command terminate" href="#" title="Terminate" onclick="return false;" ng-click="changeState(experiment, 'TERMINATED')"
+                <a class="command terminate" href="#" title="Terminate" custom-tooltip="Permanently TERMINATE experiment!" onclick="return false;" ng-click="changeState(experiment, 'TERMINATED')"
                         ng-if="hasUpdatePermission(experiment) && (experiment.state === 'RUNNING'||
                                experiment.state === 'PAUSED')"></a>
-                <a class="command start" href="#" style="visibility: hidden;" onclick="return false;" ng-if="experiment.state === 'TERMINATED'">&nbsp;</a>
-                <a class="command delete" href="#" title="Delete" onclick="return false;" ng-click="deleteExperiment(experiment)"
+                <a class="command start" href="#" style="visibility: hidden;" onclick="return false;" ng-if="experiment.state === 'TERMINATED'"></a>
+                <a class="command delete" href="#" title="Delete" custom-tooltip="Delete experiment" onclick="return false;" ng-click="deleteExperiment(experiment)"
                    ng-if="hasDeletePermission(experiment) && (experiment.state === 'DRAFT' ||
                           experiment.state === 'TERMINATED')"></a>
             </div>
