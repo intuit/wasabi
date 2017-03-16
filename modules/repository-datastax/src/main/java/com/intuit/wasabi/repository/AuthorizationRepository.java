@@ -16,6 +16,7 @@
 package com.intuit.wasabi.repository;
 
 
+import java.util.List;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authorizationobjects.UserPermissions;
 import com.intuit.wasabi.authorizationobjects.UserPermissionsList;
@@ -102,4 +103,26 @@ public interface AuthorizationRepository {
      * @return user permissions
      */
     UserPermissions checkSuperAdminPermissions(UserInfo.Username userID, Application.Name applicationName);
+
+    /**
+     * Assign candidate user to superadmin role
+     *
+     * @param candidateUser the candidate user
+     */
+    void assignUserToSuperAdminRole(UserInfo candidateUser);
+
+    /**
+     * Assign user to superadmin role
+     *
+     * @param candidateUser the candidate user
+     */
+    void removeUserFromSuperAdminRole(UserInfo candidateUser);
+
+    /**
+     * Get super admins roles list
+     *
+     * @return list of userroles
+     */
+    List<UserRole> getSuperAdminRoleList();
+
 }

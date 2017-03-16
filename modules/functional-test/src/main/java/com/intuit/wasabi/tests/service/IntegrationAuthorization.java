@@ -33,6 +33,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.intuit.wasabi.tests.library.util.Constants.USER_EMAIL;
+import static com.intuit.wasabi.tests.library.util.Constants.USER_FIRST_NAME;
+import static com.intuit.wasabi.tests.library.util.Constants.USER_LAST_NAME;
+import static com.intuit.wasabi.tests.library.util.Constants.USER_READER;
+import static com.intuit.wasabi.tests.library.util.Constants.USER_ROLE;
+import static com.intuit.wasabi.tests.library.util.Constants.USER_USER_ID;
+import static com.intuit.wasabi.tests.library.util.Constants.WASABI_EMAIL;
+import static com.intuit.wasabi.tests.library.util.Constants.WASABI_FIRST_NAME;
+import static com.intuit.wasabi.tests.library.util.Constants.WASABI_LAST_NAME;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -40,6 +49,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 public class IntegrationAuthorization extends TestBase {
 
+    private static final String USER_ADMIN = "admin";
     private static final Logger LOGGER = getLogger(IntegrationAuthorization.class);
     private String userName;
     private String password;
@@ -247,5 +257,69 @@ public class IntegrationAuthorization extends TestBase {
     @Test(dependsOnMethods = {"t_getApplicationUsersByRoleAgain"})
     public void t_deleteExperiments() {
         deleteExperiment(experiment);
+    }
+
+    @Test(dependsOnGroups = {"ping"})
+    public void t_addWasabiReaderToUserInfo() {
+        addUserInfo("wasabi_reader", HttpStatus.SC_OK);
+    }
+
+
+    @Test(dependsOnMethods = {"t_addWasabiReaderToUserInfo"})
+    public void t_addWasabiReaderAsSuperAdmin() {
+
+        List<Map<String, Object>> superadminsBefore = getSuperAdmins(HttpStatus.SC_OK, apiServerConnector);
+
+        boolean isWasabiSuperadmin = superadminsBefore.stream().map(map -> map.get(USER_USER_ID)).
+                anyMatch(userId -> USER_READER.equals(userId.toString()));
+
+        Assert.assertEquals(isWasabiSuperadmin, false);
+
+        postSuperAdmin(USER_READER, HttpStatus.SC_NO_CONTENT, apiServerConnector);
+
+        List<Map<String, Object>> superadminsAfterAdd = getSuperAdmins(HttpStatus.SC_OK, apiServerConnector);
+
+        isWasabiSuperadmin = superadminsAfterAdd.stream().map(map -> map.get(USER_USER_ID)).
+                anyMatch(userId -> USER_READER.equals(userId.toString()));
+
+        Assert.assertEquals(isWasabiSuperadmin, true);
+
+        Map<String, Object> wasabi = superadminsAfterAdd.stream().
+                filter(map -> USER_READER.equals(map.get(USER_USER_ID))).findFirst().get();
+
+        Assert.assertEquals(isWasabiSuperadmin, true);
+        Assert.assertEquals(wasabi.get(USER_FIRST_NAME).toString(), WASABI_FIRST_NAME);
+        Assert.assertEquals(wasabi.get(USER_LAST_NAME).toString(), WASABI_LAST_NAME);
+        Assert.assertEquals(wasabi.get(USER_ROLE).toString(), "SUPERADMIN");
+        Assert.assertEquals(wasabi.get(USER_EMAIL).toString(), WASABI_EMAIL);
+
+        Assert.assertEquals(isWasabiSuperadmin, true);
+
+    }
+
+    @Test(dependsOnMethods = {"t_addWasabiReaderAsSuperAdmin"})
+    public void t_removeWasabiReaderAsSuperAdmin() {
+
+        List<Map<String, Object>> superadminsBefore = getSuperAdmins(HttpStatus.SC_OK, apiServerConnector);
+
+        boolean isWasabiSuperadmin = superadminsBefore.stream().map(map -> map.get(USER_USER_ID)).
+                anyMatch(userId -> USER_READER.equals(userId.toString()));
+
+        Assert.assertEquals(isWasabiSuperadmin, true);
+        deleteSuperAdmin(USER_READER, HttpStatus.SC_NO_CONTENT, apiServerConnector);
+
+        List<Map<String, Object>> superadminsAfterDelete = getSuperAdmins(HttpStatus.SC_OK, apiServerConnector);
+
+        isWasabiSuperadmin = superadminsAfterDelete.stream().map(map -> map.get(USER_USER_ID)).
+                anyMatch(userId -> USER_READER.equals(userId.toString()));
+
+        Assert.assertEquals(isWasabiSuperadmin, false);
+    }
+
+    @Test(dependsOnMethods = {"t_removeWasabiReaderAsSuperAdmin"})
+    public void t_removeLastSuperAdmin() {
+
+        deleteSuperAdmin(USER_ADMIN, HttpStatus.SC_BAD_REQUEST, apiServerConnector);
+
     }
 }

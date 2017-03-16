@@ -20,6 +20,7 @@
 #   profile                      : project name
 #   build                        : build kill switch; default:false
 #   profile                      : maven profile; default:test
+#   test                         : whether to run tests or not; default:true
 #   modules                      : project modules to build; default:main ui
 #   execute_integration_tests    : execute integration test kill switch; default:true
 #   deploy_host                  : integration test host; default:deploy.host
@@ -41,6 +42,7 @@
 project=wasabi
 build=${PROJECT_BUILD:-false}
 profile=${PROJECT_PROFILE:-test}
+test=${PROJECT_UNIT_TESTS:-true}
 modules=${PROJECT_MODULES:-main ui}
 execute_integration_tests=${PROJECT_INTEGRATION_TEST:-true}
 deploy_host=${PROJECT_DEPLOY_HOST:-deploy.host}
@@ -97,7 +99,7 @@ version=$(mvn --settings ./settings.xml -f ./modules/main/pom.xml -P ${profile} 
 # build
 
 echo "packaging: ${project} / ${profile}"
-(eval ${project_env} ./bin/${project}.sh --profile=${profile} --verify=true package) || \
+(eval ${project_env} ./bin/${project}.sh --profile=${profile} --verify=${test} package) || \
   exitOnError "unable to build project : (${project_env} ./bin/${project}.sh --profile=${profile} --verify=true package)"
 
 for module in ${modules}; do
@@ -173,17 +175,18 @@ for module in ${modules}; do
       curl -v -u ${nexus_deploy} --upload-file ./target/${rpm} ${rpm_path} || \
         exitOnError "archive rpm failed: curl -v -u [nexus_deploy] --upload-file ./target/${rpm} ${rpm_path}"
 
-      if [ "${module}" == "ui" ]; then
-        # archive MILESTONE ui.zip
-        artifact=ui
-        path=${nexus_repositories}/${artifact_repository_id}/`echo ${group} | sed "s/\./\//g"`/${artifact}/${version}
-        zip=${project}-${artifact}-${profile}-${version}.zip
-        zip_path=${path}/${zip}
+    fi
+    # Always push the UI zip file because we need it for wasabi-intuit builds
+    if [ "${module}" == "ui" ]; then
+      # archive MILESTONE ui.zip
+      artifact=ui
+      path=${nexus_repositories}/${artifact_repository_id}/`echo ${group} | sed "s/\./\//g"`/${artifact}/${version}
+      zip=${project}-${artifact}-${profile}-${version}.zip
+      zip_path=${path}/${zip}
 
-        echo "archiving: ${zip} ${zip_path}"
-        curl -v -u ${nexus_deploy} --upload-file ./modules/ui/target/dist.zip ${zip_path} || \
-          exitOnError "archive failed: curl -v -u [nexus_deploy] --upload-file ./modules/ui/dist.zip ${zip_path}"
-      fi
+      echo "archiving: ${zip} ${zip_path}"
+      curl -v -u ${nexus_deploy} --upload-file ./modules/ui/target/dist.zip ${zip_path} || \
+        exitOnError "archive failed: curl -v -u [nexus_deploy] --upload-file ./modules/ui/dist.zip ${zip_path}"
     fi
   fi
 done

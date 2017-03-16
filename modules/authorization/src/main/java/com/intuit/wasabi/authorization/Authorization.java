@@ -127,4 +127,28 @@ public interface Authorization {
      * @return the complete {@link UserInfo}
      */
     UserInfo getUserInfo(UserInfo.Username userID);
+
+    /**
+     * Assign user to be a superadmin
+     *
+     * @param candidateUserInfo the superadmin candidate
+     * @param assigningUserInfo  the assigning user
+     */
+    void assignUserToSuperAdminRole(UserInfo candidateUserInfo, UserInfo assigningUserInfo);
+
+    /**
+     * Remove user from superadmin role
+     *
+     * @param candidateUserInfo the candidate
+     * @param assigningUserInfo  the assigning user
+     */
+    void removeUserFromSuperAdminRole(UserInfo candidateUserInfo, UserInfo assigningUserInfo);
+
+    /**
+     * Get all superadmin roles
+     *
+     * @return list of super admin roles
+     */
+    List<UserRole> getSuperAdminRoleList();
+
 }
