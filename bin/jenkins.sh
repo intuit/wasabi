@@ -20,9 +20,9 @@
 #   profile                      : project name
 #   build                        : build kill switch; default:false
 #   profile                      : maven profile; default:test
-#   test                         : whether to run tests or not; default:true
 #   modules                      : project modules to build; default:main ui
 #   execute_integration_tests    : execute integration test kill switch; default:true
+#   execute_unit_tests           : execute unit test kill switch; default:true
 #   deploy_host                  : integration test host; default:deploy.host
 #   deploy_host_url              : integration test deploy user; default:deploy.user
 #   sonar_host_url               : sonar host; default:+-Dsonar.host.url=SONAR_HOST_URL
@@ -42,9 +42,9 @@
 project=wasabi
 build=${PROJECT_BUILD:-false}
 profile=${PROJECT_PROFILE:-test}
-test=${PROJECT_UNIT_TESTS:-true}
 modules=${PROJECT_MODULES:-main ui}
 execute_integration_tests=${PROJECT_INTEGRATION_TEST:-true}
+execute_unit_tests=${PROJECT_UNIT_TEST:-true}
 deploy_host=${PROJECT_DEPLOY_HOST:-deploy.host}
 deploy_host_user=${PROJECT_DEPLOY_USER:-usr}
 sonar_host_url=${SONAR_HOST_URL:+-Dsonar.host.url=$SONAR_HOST_URL}
@@ -99,8 +99,9 @@ version=$(mvn --settings ./settings.xml -f ./modules/main/pom.xml -P ${profile} 
 # build
 
 echo "packaging: ${project} / ${profile}"
-(eval ${project_env} ./bin/${project}.sh --profile=${profile} --verify=${test} package) || \
-  exitOnError "unable to build project : (${project_env} ./bin/${project}.sh --profile=${profile} --verify=true package)"
+(eval ${project_env} ./bin/${project}.sh --profile=${profile} --buildtests=${execute_unit_tests} --verify=true package) || \
+  exitOnError "unable to build project : (${project_env} ./bin/${project}.sh --profile=${profile} --buildtests=${execute_unit_tests} --verify=true package)"
+echo "end packaging"
 
 for module in ${modules}; do
   if [[ ! -z "${module// }" ]]; then
@@ -142,8 +143,8 @@ for module in ${modules}; do
     # publish sonar report
 
     echo "publishing sonar report"
-    (mvn --settings ./settings.xml ${sonar_host_url} ${sonar_auth_token} -P ${profile} package sonar:sonar) || \
-      exitOnError "unable to report to sonar: (mvn --settings ./settings.xml [sonar_host_url] [sonar_auth_token] -P ${profile} package sonar:sonar)"
+    (mvn --settings ./settings.xml ${sonar_host_url} ${sonar_auth_token} -P ${profile} sonar:sonar) || \
+      exitOnError "unable to report to sonar: (mvn --settings ./settings.xml [sonar_host_url] [sonar_auth_token] -P ${profile} sonar:sonar)"
 
     [ "${status}" -ne "0" ] && exitOnError "integration tests failed: (cd ${project}; eval ${project_env} ./bin/${project}.sh --profile=${profile} --endpoint=${deploy_host}:8080 test)"
 
@@ -174,8 +175,8 @@ for module in ${modules}; do
       echo "archiving: ${rpm} ${rpm_path}"
       curl -v -u ${nexus_deploy} --upload-file ./target/${rpm} ${rpm_path} || \
         exitOnError "archive rpm failed: curl -v -u [nexus_deploy] --upload-file ./target/${rpm} ${rpm_path}"
-
     fi
+
     # Always push the UI zip file because we need it for wasabi-intuit builds
     if [ "${module}" == "ui" ]; then
       # archive MILESTONE ui.zip
