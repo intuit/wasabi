@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package com.intuit.wasabi.tests.service;
+package com.intuit.wasabi.tests.service.events;
 
 import com.intuit.wasabi.tests.library.TestBase;
 import com.intuit.wasabi.tests.library.util.serialstrategies.DefaultNameExclusionStrategy;
@@ -28,6 +28,8 @@ import com.intuit.wasabi.tests.model.factory.EventFactory;
 import com.intuit.wasabi.tests.model.factory.ExperimentFactory;
 import com.intuit.wasabi.tests.model.factory.UserFactory;
 import com.jayway.restassured.response.Response;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -71,10 +73,10 @@ public class EventsIntegrationTest extends TestBase {
     private User userBill = UserFactory.createUser("Bill");
     private User userJane = UserFactory.createUser("Jane");
     private User userTom = UserFactory.createUser("Tom");
-
     private User[] users = {userBill, userJane, userTom};
 
-    private String actionImpression = "IMPRESSION";
+    private String eventImpression = "IMPRESSION";
+    private String eventAction = "ACTION";
     private String actionClick = "click";
     private String actionLoveIt = "love it";
     private SimpleDateFormat dateFormat;
@@ -209,7 +211,7 @@ public class EventsIntegrationTest extends TestBase {
                 HttpStatus.SC_OK, apiServerConnector);
         assertEquals(events.size(), 0);
         for (Event event : events) {
-            assertEquals(event.name, actionImpression);
+            assertEquals(event.name, eventImpression);
         }
     }
 
@@ -355,4 +357,12 @@ public class EventsIntegrationTest extends TestBase {
             assertEquals(result.getStatusCode(), HttpStatus.SC_BAD_REQUEST);
         }
     }
+    
+    @Test
+    public void testUserIdLength() {
+        
+    }
+    
+    
+    
 }
