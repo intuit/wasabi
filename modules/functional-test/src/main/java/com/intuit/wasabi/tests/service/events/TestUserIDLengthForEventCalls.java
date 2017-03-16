@@ -189,7 +189,7 @@ public class TestUserIDLengthForEventCalls extends TestBase {
         experiment.state = Constants.EXPERIMENT_STATE_TERMINATED;
         putExperiment(experiment);
 
-        // lets dereference the list and call the Garbage collector Daemon
+        // lets dereference the experiment and call the Garbage collector Daemon
         experiment = null;
         System.gc();
     }
