@@ -289,7 +289,7 @@ public class IntegrationAuthorization extends TestBase {
 
         Assert.assertEquals(isWasabiSuperadmin, true);
         Assert.assertEquals(wasabi.get(USER_FIRST_NAME).toString(), WASABI_FIRST_NAME);
-        Assert.assertEquals(wasabi.get(USER_LAST_NAME).toString(), WASABI_LAST_NAME,);
+        Assert.assertEquals(wasabi.get(USER_LAST_NAME).toString(), WASABI_LAST_NAME);
         Assert.assertEquals(wasabi.get(USER_ROLE).toString(), "SUPERADMIN");
         Assert.assertEquals(wasabi.get(USER_EMAIL).toString(), WASABI_EMAIL);
 
