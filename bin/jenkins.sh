@@ -140,8 +140,8 @@ for module in ${modules}; do
     # publish sonar report
 
     echo "publishing sonar report"
-    (mvn -e -X --settings ./settings.xml ${sonar_host_url} ${sonar_auth_token} -P ${profile} package sonar:sonar) || \
-      exitOnError "unable to report to sonar: (mvn -e -X --settings ./settings.xml [sonar_host_url] [sonar_auth_token] -P ${profile} package sonar:sonar)"
+    (mvn --settings ./settings.xml ${sonar_host_url} ${sonar_auth_token} -P ${profile} package sonar:sonar) || \
+      exitOnError "unable to report to sonar: (mvn --settings ./settings.xml [sonar_host_url] [sonar_auth_token] -P ${profile} package sonar:sonar)"
 
     [ "${status}" -ne "0" ] && exitOnError "integration tests failed: (cd ${project}; eval ${project_env} ./bin/${project}.sh --profile=${profile} --endpoint=${deploy_host}:8080 test)"
 
