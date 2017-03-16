@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2017 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,6 +22,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.intuit.wasabi.assignment.cache.AssignmentsMetadataCache;
 import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.BucketList;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.Page;
@@ -40,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -50,12 +52,20 @@ import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static com.intuit.wasabi.assignment.AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_HEALTH_CHECK;
+import static com.intuit.wasabi.assignment.AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_REFRESH_CACHE_SERVICE;
+import static com.intuit.wasabi.assignment.AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_REFRESH_INTERVAL;
+import static com.intuit.wasabi.assignment.AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_REFRESH_TASK;
+import static com.intuit.wasabi.assignment.cache.AssignmentsMetadataCache.CACHE_NAME.APP_NAME_N_PAGE_TO_EXPERIMENTS_CACHE;
+import static com.intuit.wasabi.assignment.cache.AssignmentsMetadataCache.CACHE_NAME.APP_NAME_TO_EXPERIMENTS_CACHE;
+import static com.intuit.wasabi.assignment.cache.AssignmentsMetadataCache.CACHE_NAME.APP_NAME_TO_PRIORITIZED_EXPERIMENTS_CACHE;
+import static com.intuit.wasabi.assignment.cache.AssignmentsMetadataCache.CACHE_NAME.EXPERIMENT_ID_TO_BUCKET_CACHE;
+import static com.intuit.wasabi.assignment.cache.AssignmentsMetadataCache.CACHE_NAME.EXPERIMENT_ID_TO_EXCLUSION_CACHE;
+import static com.intuit.wasabi.assignment.cache.AssignmentsMetadataCache.CACHE_NAME.EXPERIMENT_ID_TO_EXPERIMENT_CACHE;
 import static java.util.Objects.isNull;
-import static org.slf4j.LoggerFactory.getLogger;
 
 /**
- *  Local cache created and used during user assignment flow.
- *
+ * Local cache created and used during user assignment flow.
  */
 
 public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
@@ -71,13 +81,16 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
     private static final String ASSIGNMENT_METADATA_CACHE_SERVICE_NAME = "AssignmentsMetadataCache";
 
     @Inject
-    public AssignmentsMetadataCacheImpl(@CassandraRepository ExperimentRepository experimentRepository, PrioritiesRepository prioritiesRepository,
-                                        MutexRepository mutexRepository, PagesRepository pagesRepository,
-                                        @Named("AssignmentsMetadataCacheRefreshCacheService") ScheduledExecutorService refreshCacheService,
-                                        @Named("AssignmentsMetadataCacheRefreshInterval") Integer refreshIntervalInMinutes,
-                                        @Named("AssignmentsMetadataCacheRefreshTask") Runnable metadataCacheRefreshTask,
+    public AssignmentsMetadataCacheImpl(@CassandraRepository ExperimentRepository experimentRepository,
+                                        PrioritiesRepository prioritiesRepository,
+                                        MutexRepository mutexRepository,
+                                        PagesRepository pagesRepository,
+                                        @Named(ASSIGNMENTS_METADATA_CACHE_REFRESH_CACHE_SERVICE)
+                                                ScheduledExecutorService refreshCacheService,
+                                        @Named(ASSIGNMENTS_METADATA_CACHE_REFRESH_INTERVAL) Integer refreshIntervalInMinutes,
+                                        @Named(ASSIGNMENTS_METADATA_CACHE_REFRESH_TASK) Runnable metadataCacheRefreshTask,
                                         HealthCheckRegistry healthCheckRegistry,
-                                        @Named("AssignmentsMetadataCacheHealthCheck") HealthCheck metadataCacheHealthCheck,
+                                        @Named(ASSIGNMENTS_METADATA_CACHE_HEALTH_CHECK) HealthCheck metadataCacheHealthCheck,
                                         CacheManager cacheManager) {
 
         this.experimentRepository = experimentRepository;
@@ -87,10 +100,14 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
         this.metadataCacheRefreshTask = (AssignmentsMetadataCacheRefreshTask) metadataCacheRefreshTask;
         this.cacheManager = cacheManager;
 
+        //Schedule metadata cache refresh task
         refreshCacheService.scheduleAtFixedRate(metadataCacheRefreshTask, refreshIntervalInMinutes, refreshIntervalInMinutes, TimeUnit.MINUTES);
+
+        //Register health check
         healthCheckRegistry.register(ASSIGNMENT_METADATA_CACHE_SERVICE_NAME, metadataCacheHealthCheck);
 
-        for(CACHE_NAME name: CACHE_NAME.values()) {
+        //Create new caches
+        for (CACHE_NAME name : CACHE_NAME.values()) {
             cacheManager.addCache(name.toString());
         }
 
@@ -108,7 +125,7 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
             }
             LOGGER.info("Assignments metadata cache has been cleared successfully...");
             return Boolean.TRUE;
-        } catch(Exception e) {
+        } catch (Exception e) {
             LOGGER.error("Exception occurred while clearing a cache...", e);
         }
         return Boolean.FALSE;
@@ -116,7 +133,7 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
 
     /**
      * This method refresh the existing cache (keys) with the updated data from Database.
-     *
+     * <p>
      * This method doesn't add new keys into the cache.
      *
      * @return TRUE if cache is successfully refreshed else FALSE.
@@ -124,102 +141,58 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
     @Override
     public boolean refresh() {
         //------------------------------------------------------------------------------------------------
-        //Get updated data from database
+        //Get updated data from database for each caches
         //------------------------------------------------------------------------------------------------
-        //Get experimentIdCache
-        Cache localCache = cacheManager.getCache(CACHE_NAME.APP_NAME_TO_EXPERIMENTS_CACHE.toString());
-        Map<Application.Name, List<Experiment>> tApplicationExperimentsCache = experimentRepository.getExperimentsForApps(localCache.getKeys());
-
-        //Get experimentIdCache
-        localCache = cacheManager.getCache(CACHE_NAME.EXPERIMENT_ID_TO_EXPERIMENT_CACHE.toString());
-        Map<Experiment.ID, Experiment> tExperimentIdCache = experimentRepository.getExperimentsMap(localCache.getKeys());
-
-        //Get prioritizedExperimentListMap
-        localCache = cacheManager.getCache(CACHE_NAME.APP_NAME_TO_PRIORITIZED_EXPERIMENTS_CACHE.toString());
-        Map<Application.Name, PrioritizedExperimentList> tPrioritizedExperimentListMap = prioritiesRepository.getPriorities(localCache.getKeys());
-
-        //Get exclusionMap
-        localCache = cacheManager.getCache(CACHE_NAME.EXPERIMENT_ID_TO_EXCLUSION_CACHE.toString());
-        Map<Experiment.ID, List<Experiment.ID>> tExclusionMap = mutexRepository.getExclusivesList(localCache.getKeys());
-
-        //Get bucketMap
-        localCache = cacheManager.getCache(CACHE_NAME.EXPERIMENT_ID_TO_BUCKET_CACHE.toString());
-        Map<Experiment.ID, BucketList> tBucketMap = experimentRepository.getBucketList(localCache.getKeys());
-
-        //Get applicationPageToExperimentMap
-        localCache = cacheManager.getCache(CACHE_NAME.APP_NAME_N_PAGE_TO_EXPERIMENTS_CACHE.toString());
-        Map<Pair<Application.Name, Page.Name>, List<PageExperiment>> tApplicationPageToExperimentMap = pagesRepository.getExperimentsWithoutLabels(localCache.getKeys());
+        List<Element> appToExperiments = makeElementsList(experimentRepository.getExperimentsForApps(keys(APP_NAME_TO_EXPERIMENTS_CACHE)));
+        List<Element> expIdsToExperiments = makeElementsList(experimentRepository.getExperimentsMap(keys(EXPERIMENT_ID_TO_EXPERIMENT_CACHE)));
+        List<Element> appToPrioritizedExperiments = makeElementsList(prioritiesRepository.getPriorities(keys(APP_NAME_TO_PRIORITIZED_EXPERIMENTS_CACHE)));
+        List<Element> expIdsToExclusions = makeElementsList(mutexRepository.getExclusivesList(keys(EXPERIMENT_ID_TO_EXCLUSION_CACHE)));
+        List<Element> expIdsToBuckets = makeElementsList(experimentRepository.getBucketList(keys(EXPERIMENT_ID_TO_BUCKET_CACHE)));
+        List<Element> appNPageToExperiments = makeElementsList(pagesRepository.getExperimentsWithoutLabels(keys(APP_NAME_N_PAGE_TO_EXPERIMENTS_CACHE)));
 
         //------------------------------------------------------------------------------------------------
-        //Now update cache
+        //Now update individual caches
         //------------------------------------------------------------------------------------------------
-        //Update applicationExperimentsCache
-        tApplicationExperimentsCache.forEach((appName, experimentList) -> {
-            Cache cache = cacheManager.getCache(CACHE_NAME.APP_NAME_TO_EXPERIMENTS_CACHE.toString());
-            cache.put(new Element(appName, experimentList));
-        });
-        //Update experimentIdCache
-        tExperimentIdCache.forEach((expId, exp) -> {
-            Cache cache = cacheManager.getCache(CACHE_NAME.EXPERIMENT_ID_TO_EXPERIMENT_CACHE.toString());
-            cache.put(new Element(expId, exp));
-        });
-        //Update prioritizedExperimentListMap
-        tPrioritizedExperimentListMap.forEach((appName, prioritizedExperimentList) -> {
-            Cache cache = cacheManager.getCache(CACHE_NAME.APP_NAME_TO_PRIORITIZED_EXPERIMENTS_CACHE.toString());
-            cache.put(new Element(appName, prioritizedExperimentList));
-        });
-        //Update exclusionMap
-        tExclusionMap.forEach((expId, excludedExperimentList) -> {
-            Cache cache = cacheManager.getCache(CACHE_NAME.EXPERIMENT_ID_TO_EXCLUSION_CACHE.toString());
-            cache.put(new Element(expId, excludedExperimentList));
-        });
-        //Update bucketMap
-        tBucketMap.forEach((expId, bucketList) -> {
-            Cache cache = cacheManager.getCache(CACHE_NAME.EXPERIMENT_ID_TO_BUCKET_CACHE.toString());
-            cache.put(new Element(expId, bucketList));
-        });
-        //Update applicationPageToExperimentMap
-        tApplicationPageToExperimentMap.forEach((appPagePair, experimentList) -> {
-            Cache cache = cacheManager.getCache(CACHE_NAME.APP_NAME_N_PAGE_TO_EXPERIMENTS_CACHE.toString());
-            cache.put(new Element(appPagePair, experimentList));
-        });
+        cacheManager.getCache(APP_NAME_TO_EXPERIMENTS_CACHE.toString()).putAll(appToExperiments);
+        cacheManager.getCache(EXPERIMENT_ID_TO_EXPERIMENT_CACHE.toString()).putAll(expIdsToExperiments);
+        cacheManager.getCache(APP_NAME_TO_PRIORITIZED_EXPERIMENTS_CACHE.toString()).putAll(appToPrioritizedExperiments);
+        cacheManager.getCache(EXPERIMENT_ID_TO_EXCLUSION_CACHE.toString()).putAll(expIdsToExclusions);
+        cacheManager.getCache(EXPERIMENT_ID_TO_BUCKET_CACHE.toString()).putAll(expIdsToBuckets);
+        cacheManager.getCache(APP_NAME_N_PAGE_TO_EXPERIMENTS_CACHE.toString()).putAll(appNPageToExperiments);
 
-        LOGGER.info("Assignments metadata cache has been refreshed successfully...");
+        LOGGER.debug("Assignments metadata cache has been refreshed successfully...");
         return Boolean.TRUE;
     }
 
     /**
      * @param appName
-     *
      * @return List of experiments created in the given application.
      */
     @Override
     public List<Experiment> getExperimentsByAppName(Application.Name appName) {
         List<Experiment> expList = null;
-        Cache cache = cacheManager.getCache(CACHE_NAME.APP_NAME_TO_EXPERIMENTS_CACHE.toString());
+        Cache cache = cacheManager.getCache(APP_NAME_TO_EXPERIMENTS_CACHE.toString());
         Element val = cache.get(appName);
-        if(isNull(val)) {
+        if (isNull(val)) {
             expList = experimentRepository.getExperimentsForApps(singleEntrySet(appName)).get(appName);
             cache.put(new Element(appName, expList));
         } else {
             expList = (List<Experiment>) val.getObjectValue();
         }
 
-        return isNull(expList)?new ArrayList<>():expList;
+        return isNull(expList) ? new ArrayList<>() : expList;
     }
 
     /**
-     *
      * @param expId
-     *
      * @return An experiment for given experiment id.
      */
     @Override
     public Optional<Experiment> getExperimentById(Experiment.ID expId) {
         Experiment exp = null;
-        Cache cache = cacheManager.getCache(CACHE_NAME.EXPERIMENT_ID_TO_EXPERIMENT_CACHE.toString());
+        Cache cache = cacheManager.getCache(EXPERIMENT_ID_TO_EXPERIMENT_CACHE.toString());
         Element val = cache.get(expId);
-        if(isNull(val)) {
+        if (isNull(val)) {
             exp = experimentRepository.getExperimentsMap(singleEntrySet(expId)).get(expId);
             cache.put(new Element(expId, exp));
         } else {
@@ -231,17 +204,15 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
 
 
     /**
-     *
      * @param appName
-     *
      * @return prioritized list of experiments for given application.
      */
     @Override
     public Optional<PrioritizedExperimentList> getPrioritizedExperimentListMap(Application.Name appName) {
         PrioritizedExperimentList expList = null;
-        Cache cache = cacheManager.getCache(CACHE_NAME.APP_NAME_TO_PRIORITIZED_EXPERIMENTS_CACHE.toString());
+        Cache cache = cacheManager.getCache(APP_NAME_TO_PRIORITIZED_EXPERIMENTS_CACHE.toString());
         Element val = cache.get(appName);
-        if(isNull(val)) {
+        if (isNull(val)) {
             expList = prioritiesRepository.getPriorities(singleEntrySet(appName)).get(appName);
             cache.put(new Element(appName, expList));
         } else {
@@ -252,71 +223,65 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
     }
 
     /**
-     *
      * @param expId
-     *
      * @return List of experiments which are mutually exclusive to the given experiment.
      */
     @Override
     public List<Experiment.ID> getExclusionList(Experiment.ID expId) {
         List<Experiment.ID> exclusionList = null;
-        Cache cache = cacheManager.getCache(CACHE_NAME.EXPERIMENT_ID_TO_EXCLUSION_CACHE.toString());
+        Cache cache = cacheManager.getCache(EXPERIMENT_ID_TO_EXCLUSION_CACHE.toString());
         Element val = cache.get(expId);
-        if(isNull(val)) {
+        if (isNull(val)) {
             exclusionList = mutexRepository.getExclusivesList(singleEntrySet(expId)).get(expId);
             cache.put(new Element(expId, exclusionList));
         } else {
             exclusionList = (List<Experiment.ID>) val.getObjectValue();
         }
 
-        return isNull(exclusionList)?new ArrayList<>():exclusionList;
+        return isNull(exclusionList) ? new ArrayList<>() : exclusionList;
     }
 
     /**
-     *
      * @param expId
      * @return BucketList for given experiment.
      */
     @Override
     public BucketList getBucketList(Experiment.ID expId) {
         BucketList bucketList = null;
-        Cache cache = cacheManager.getCache(CACHE_NAME.EXPERIMENT_ID_TO_BUCKET_CACHE.toString());
+        Cache cache = cacheManager.getCache(EXPERIMENT_ID_TO_BUCKET_CACHE.toString());
         Element val = cache.get(expId);
-        if(isNull(val)) {
+        if (isNull(val)) {
             bucketList = experimentRepository.getBucketList(singleEntrySet(expId)).get(expId);
             cache.put(new Element(expId, bucketList));
         } else {
             bucketList = (BucketList) val.getObjectValue();
         }
 
-        return isNull(bucketList)?new BucketList():bucketList;
+        return isNull(bucketList) ? new BucketList() : makeCopy(bucketList);
     }
 
     /**
-     *
      * @param appName
      * @param pageName
-     *
      * @return List experiments associated to the given application and page.
      */
     @Override
     public List<PageExperiment> getPageExperiments(Application.Name appName, Page.Name pageName) {
         Pair<Application.Name, Page.Name> appPagePair = Pair.of(appName, pageName);
         List<PageExperiment> pageExperiments = null;
-        Cache cache = cacheManager.getCache(CACHE_NAME.APP_NAME_N_PAGE_TO_EXPERIMENTS_CACHE.toString());
+        Cache cache = cacheManager.getCache(APP_NAME_N_PAGE_TO_EXPERIMENTS_CACHE.toString());
         Element val = cache.get(appPagePair);
-        if(isNull(val)) {
+        if (isNull(val)) {
             pageExperiments = pagesRepository.getExperimentsWithoutLabels(singleEntrySet(appPagePair)).get(appPagePair);
             cache.put(new Element(appPagePair, pageExperiments));
         } else {
             pageExperiments = (List<PageExperiment>) val.getObjectValue();
         }
 
-        return isNull(pageExperiments)?new ArrayList<>():pageExperiments;
+        return isNull(pageExperiments) ? new ArrayList<>() : pageExperiments;
     }
 
     /**
-     *
      * @return Last cache refresh time.
      */
     @Override
@@ -325,15 +290,14 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
     }
 
     /**
-     *
      * @return Get metadata cache details
      */
     @Override
-    public Map<String,String> getDetails() {
-        Map<String,String> details = new HashMap<>();
+    public Map<String, String> getDetails() {
+        Map<String, String> details = new HashMap<>();
         details.put("status", "Enabled");
-        for(CACHE_NAME name: CACHE_NAME.values()) {
-            details.put(name+".SIZE", String.valueOf(cacheManager.getCache(name.toString()).getSize()));
+        for (CACHE_NAME name : CACHE_NAME.values()) {
+            details.put(name + ".SIZE", String.valueOf(cacheManager.getCache(name.toString()).getSize()));
         }
         return details;
     }
@@ -349,6 +313,46 @@ public class AssignmentsMetadataCacheImpl implements AssignmentsMetadataCache {
         Set aSet = new HashSet<T>(1);
         aSet.add(entry);
         return aSet;
+    }
+
+    /**
+     * Make elements list which is specific to the ehcache format..
+     *
+     * @param elementsMap
+     * @param <K>
+     * @param <V>
+     * @return Elements list
+     */
+    private <K, V> List<Element> makeElementsList(Map<K, V> elementsMap) {
+        List<Element> elementsList = new ArrayList<>();
+        elementsMap.forEach((key, value) -> {
+            elementsList.add(new Element(key, value));
+        });
+        return elementsList;
+    }
+
+    /**
+     * Get the cache keys
+     *
+     * @param cacheName
+     * @return cache keys
+     */
+    private Collection keys(CACHE_NAME cacheName) {
+        return cacheManager.getCache(cacheName.name()).getKeys();
+    }
+
+    /**
+     * Creating a separate copy here to avoid ConcurrentModificationException as BucketList gets modified
+     * during assignment business logic execution.
+     *
+     * @param bucketList
+     * @return New object/deep copy of BucketList.
+     */
+    private BucketList makeCopy(BucketList bucketList) {
+        List<Bucket> iBucketList = new ArrayList<>(bucketList.getBuckets());
+        BucketList newBucketList = new BucketList();
+        newBucketList.setBuckets(iBucketList);
+        return newBucketList;
     }
 }
 

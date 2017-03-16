@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2017 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,7 +27,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * This class is used to refresh assignment metadata cache.
- *
  */
 public class AssignmentsMetadataCacheRefreshTask implements Runnable {
     private final Logger LOGGER = LoggerFactory.getLogger(AssignmentsMetadataCacheRefreshTask.class);
@@ -49,9 +48,10 @@ public class AssignmentsMetadataCacheRefreshTask implements Runnable {
     @Override
     public void run() {
         try {
-            LOGGER.info("AssignmentsMetadataCache refresh started at = {}", timeService.getCurrentTime());
+            Date startTime = timeService.getCurrentTime();
+            LOGGER.debug("AssignmentsMetadataCache refresh started at = {}", startTime);
 
-            if(!refreshInProgress.get()) {
+            if (!refreshInProgress.get()) {
                 //Mark that refresh has been started...
                 refreshInProgress.set(Boolean.TRUE);
 
@@ -61,13 +61,13 @@ public class AssignmentsMetadataCacheRefreshTask implements Runnable {
                 //Update last refresh time
                 lastRefreshTime = timeService.getCurrentTime();
 
-                LOGGER.info("AssignmentsMetadataCache has been refreshed at = {}", lastRefreshTime);
+                LOGGER.info("AssignmentsMetadataCache has been refreshed and took = {} ms", (lastRefreshTime.getTime() - startTime.getTime()));
             } else {
                 LOGGER.info("AssignmentsMetadataCache refresh is skipped as previous refresh is in progress at = {}", timeService.getCurrentTime());
             }
         } catch (Exception e) {
             //In case of any exception, clear the cache and mark refresh complete.
-            LOGGER.error("Exception happened while refreshing AssignmentsMetadataCache...", e);
+            LOGGER.error("AssignmentsMetadataCache - Exception happened while refreshing cache...", e);
             metadataCache.clear();
         } finally {
             //Mark that refresh has been finished...

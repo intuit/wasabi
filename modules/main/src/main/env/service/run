@@ -23,8 +23,12 @@ MAIN=${application.main}
 DAEMON=\${WASABI_DAEMON:-${application.daemon.enable}}
 CONSOLE_LOG=\${LOG_DIR}/${application.name}-console.log
 CLASSPATH=\${HOME_DIR}/conf:\${HOME_DIR}/lib/${application.name}-all.jar
+HEAP_SIZE=${application.heapsize}
 
-JAVA_OPTIONS="-server\
+JAVA_OPTIONS="
+  -Xms\${HEAP_SIZE}\
+  -Xmx\${HEAP_SIZE}\
+  -server\
   ${application.instrument}\
   ${application.monitor}\
   -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=\${LOG_DIR}/java_$$.hprof\

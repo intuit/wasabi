@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,6 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.tests.service;
 
+import com.intuit.wasabi.tests.library.APIServerConnector;
 import com.intuit.wasabi.tests.library.TestBase;
 import com.intuit.wasabi.tests.library.util.RetryAnalyzer;
 import com.intuit.wasabi.tests.library.util.RetryTest;
@@ -24,7 +25,6 @@ import com.intuit.wasabi.tests.model.Experiment;
 import com.intuit.wasabi.tests.model.factory.APIUserFactory;
 import com.intuit.wasabi.tests.model.factory.AccessTokenFactory;
 import com.intuit.wasabi.tests.model.factory.ExperimentFactory;
-import com.intuit.wasabi.tests.library.APIServerConnector;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpStatus;
 import org.testng.Assert;
@@ -57,22 +57,22 @@ public class IntegrationAuthentication extends TestBase {
      * For username, password, and email it also tries to read them from the appProperties:
      * {@code user-name}, {@code password}, and {@code user-email}.
      * However, TestNG configurations take precedence, unless they match the defaults (see below).
-     *
-     *
-     *
+     * <p>
+     * <p>
+     * <p>
      * {@code validTokenPattern} can be null (and will be null if not supplied via TestNG XML). If it
      * is null, the appProperties will be searched for "validTokenPattern". If those can not be found
      * either, all tests concerning the validTokenPattern will be ignored and counted as automatic
      * passes.
      *
-     * @param username the user name, default: usernameXYZ123456
-     * @param password the password, default: passwordXYZ123456
-     * @param email the email address, default: mail@example.org
-     * @param firstName the first name, default: John
-     * @param lastName the last name, default: Doe
+     * @param username          the user name, default: usernameXYZ123456
+     * @param password          the password, default: passwordXYZ123456
+     * @param email             the email address, default: mail@example.org
+     * @param firstName         the first name, default: John
+     * @param lastName          the last name, default: Doe
      * @param validTokenPattern a regex pattern to validate the access token. See above for more details.
      */
-    @Parameters({"username","password","email","firstName","lastName","validTokenPattern"})
+    @Parameters({"username", "password", "email", "firstName", "lastName", "validTokenPattern"})
     public IntegrationAuthentication(@Optional("usernameXYZ123456") String username,
                                      @Optional("passwordXYZ123456") String password,
                                      @Optional("mail@example.org") String email,
@@ -115,7 +115,7 @@ public class IntegrationAuthentication extends TestBase {
     /**
      * Checks if the default user exists.
      */
-    @Test(dependsOnGroups={"ping"}, retryAnalyzer = RetryAnalyzer.class)
+    @Test(dependsOnGroups = {"ping"}, retryAnalyzer = RetryAnalyzer.class)
     @RetryTest(maxTries = 3, warmup = 2000)
     public void t_checkUser() {
         APIUser apiUserNew = getUserExists(apiUser);
@@ -125,7 +125,6 @@ public class IntegrationAuthentication extends TestBase {
 
     /**
      * Checks if an invalid user exists.
-     *
      */
     @Test(dependsOnGroups = {"ping"}, retryAnalyzer = RetryAnalyzer.class)
     @RetryTest(maxTries = 3, warmup = 2000)
@@ -152,14 +151,13 @@ public class IntegrationAuthentication extends TestBase {
     private void assertEqualAdmin(AccessToken token) {
         if (token != null) {
             Assert.assertEquals(token.access_token,
-                    new String(Base64.encodeBase64((username+":"+password).getBytes(Charset.defaultCharset()))),
-                    token+" did not match admin");
+                    new String(Base64.encodeBase64((username + ":" + password).getBytes(Charset.defaultCharset()))),
+                    token + " did not match admin");
         }
     }
 
     /**
      * Tries to login with invalid users and requests.
-     *
      */
     @Test(dependsOnGroups = {"ping"})
     public void t_loginFail() {
@@ -169,9 +167,9 @@ public class IntegrationAuthentication extends TestBase {
         postLogin(null, null, HttpStatus.SC_INTERNAL_SERVER_ERROR);
 
         postLogin(APIUserFactory
-                    .createAPIUser()
-                    .setUsername("invalidusername")
-                    .setPassword("1234Password"),
+                        .createAPIUser()
+                        .setUsername("invalidusername")
+                        .setPassword("1234Password"),
                 "client_credentials", HttpStatus.SC_UNAUTHORIZED);
 
 
@@ -254,9 +252,9 @@ public class IntegrationAuthentication extends TestBase {
     public void t_sessionVerifyModifiedToken() {
         token = postLogin(apiUser);
         AccessToken accessToken = new AccessToken(token);
-        accessToken.access_token = token.access_token.substring(0, token.access_token.length()/2)
+        accessToken.access_token = token.access_token.substring(0, token.access_token.length() / 2)
                 + "a"
-                + token.access_token.substring(token.access_token.length()/2, token.access_token.length());
+                + token.access_token.substring(token.access_token.length() / 2, token.access_token.length());
 
         AccessToken newToken = getVerifyToken(accessToken, HttpStatus.SC_UNAUTHORIZED);
         assertEqualModelItems(newToken, accessToken, null, false);

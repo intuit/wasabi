@@ -93,6 +93,7 @@ for module in "$modules"; do
     modules/api/target/classes/api.properties=${home}/conf/api.properties\
     modules/api/target/generated/swagger-ui/=${home}/content/ui/dist/swagger/swaggerjson\
     modules/assignment/target/classes/assignment.properties=${home}/conf/assignment.properties\
+    modules/assignment/target/classes/ehcache.xml=${home}/conf/ehcache.xml\
     modules/auditlog/target/classes/auditlog.properties=${home}/conf/auditlog.properties\
     modules/authentication/target/classes/authentication.properties=${home}/conf/authentication.properties\
     modules/authorization/target/classes/authorization.properties=${home}/conf/authorization.properties\

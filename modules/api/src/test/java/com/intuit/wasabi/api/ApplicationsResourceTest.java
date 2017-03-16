@@ -236,7 +236,7 @@ public class ApplicationsResourceTest {
         when(responseBuilder.entity(anyCollection())).thenReturn(responseBuilder);
         when(responseBuilder.build()).thenReturn(response);
 
-        applicationsResource.getExperiments(applicationName, pageName, "foo");
+        applicationsResource.getExperimentsForPage(applicationName, pageName, "foo");
 
         verify(authorization).getUser("foo");
         verify(authorization).checkUserPermissions(username, applicationName, READ);

@@ -1,26 +1,26 @@
 package com.intuit.wasabi.assignment;
 
+import com.intuit.wasabi.assignmentobjects.AssignmentEnvelopePayload;
+
 import java.util.Map;
 import java.util.concurrent.Future;
 
-import com.intuit.wasabi.assignmentobjects.AssignmentEnvelopePayload;
-
 public interface AssignmentIngestionExecutor {
 
-	/**
-	 * This method ingests what is contained in the {@link com.intuit.wasabi.assignmentobjects.AssignmentEnvelopePayload} to real time data ingestion system.
-	 * 
-	 * @param assignmentEnvelopePayload
+    /**
+     * This method ingests what is contained in the {@link com.intuit.wasabi.assignmentobjects.AssignmentEnvelopePayload} to real time data ingestion system.
+     *
+     * @param assignmentEnvelopePayload
      * @return a Future representing pending completion of the task
-	 */
-	public Future<?> execute(AssignmentEnvelopePayload assignmentEnvelopePayload);
-	
+     */
+    public Future<?> execute(AssignmentEnvelopePayload assignmentEnvelopePayload);
+
     /**
      * Number of elements in the ingestion queue.
      *
      * @return number of elements in the queue
      */
-	@Deprecated
+    @Deprecated
     public int queueLength();
 
     /**
@@ -29,7 +29,7 @@ public interface AssignmentIngestionExecutor {
      * @return details of ingestion queue
      */
     public Map<String, Object> queueDetails();
-    
+
     /**
      * Flush all messages from ingestion memory queue including active and the ones waiting. These messages should be persisted before flushed.
      */
@@ -37,7 +37,7 @@ public interface AssignmentIngestionExecutor {
 
     /**
      * Name of the ingestion executor.
-     * 
+     *
      * @return the name of the ingestion executor.
      */
     public String name();

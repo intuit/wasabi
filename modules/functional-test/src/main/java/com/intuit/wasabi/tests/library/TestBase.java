@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -160,20 +160,20 @@ public class TestBase extends ServiceTestBase {
         // TODO It appears that the build system has user.name and pwd set to something different from what it should be for the environment. Commented next two lines out for now.
         //    setPropertyFromSystemProperty ("user.name","user-name");
         //    setPropertyFromSystemProperty ("user.password","password");
-        setPropertyFromSystemProperty("database-url","database.url");
-        setPropertyFromSystemProperty("database-username","database.username");
-        setPropertyFromSystemProperty("database-password","database.password");
+        setPropertyFromSystemProperty("database-url", "database.url");
+        setPropertyFromSystemProperty("database-username", "database.username");
+        setPropertyFromSystemProperty("database-password", "database.password");
 
-        setPropertyFromSystemProperty ("user-name","user-name");
-        setPropertyFromSystemProperty ("password","password");
-        setPropertyFromSystemProperty ("user-lastname","user-lastname");
+        setPropertyFromSystemProperty("user-name", "user-name");
+        setPropertyFromSystemProperty("password", "password");
+        setPropertyFromSystemProperty("user-lastname", "user-lastname");
         setPropertyFromSystemProperty("validTokenPattern", "validTokenPattern");
         setPropertyFromSystemProperty("user-email", "user-email");
 
         setPropertyFromSystemProperty("application.name", "application-name");
         setPropertyFromSystemProperty("experiment.prefix", "experiment-prefix");
         setPropertyFromSystemProperty("bucket.prefix", "bucket-prefix");
-    
+
         setPropertyFromSystemProperty("test-user", "test-user");
     }
 
@@ -187,7 +187,6 @@ public class TestBase extends ServiceTestBase {
 
     /**
      * Creates an APIServerConnector.
-     *
      */
     private void createAPIServerConnector() {
         LOGGER.info("Creating APIServerConnector");
@@ -314,6 +313,7 @@ public class TestBase extends ServiceTestBase {
     //////////////////////////
     // experiments Endpoint //
     //////////////////////////
+
     /**
      * Sends a POST request to create an experiment.
      * The response must contain {@link HttpStatus#SC_CREATED}.
@@ -325,12 +325,12 @@ public class TestBase extends ServiceTestBase {
      */
     public List<Experiment> postExperiments(List<Experiment> experiments) {
         List<Experiment> experimentsList = new ArrayList<Experiment>();
-        for(Experiment exp: experiments)
+        for (Experiment exp : experiments)
             experimentsList.add(postExperiment(exp));
         return experimentsList;
     }
-    
-    
+
+
     /**
      * Sends a POST request to create an experiment.
      * The response must contain {@link HttpStatus#SC_CREATED}.
@@ -509,6 +509,38 @@ public class TestBase extends ServiceTestBase {
             return new Experiment();
         }
         return ExperimentFactory.createFromJSONString(response.jsonPath().prettify());
+    }
+
+    public void postSuperAdmin(String userId, int expectedStatus, APIServerConnector apiServerConnector) {
+
+        response = apiServerConnector.doPost("authorization/superadmins/" + userId);
+        assertReturnCode(response, expectedStatus);
+    }
+
+    public void addUserInfo(String userId, int expectedStatus) {
+
+        response = apiServerConnector.doGet("authorization/users/" + userId + "/roles");
+        assertReturnCode(response, expectedStatus);
+    }
+
+    public void deleteSuperAdmin(String userId, int expectedStatus, APIServerConnector apiServerConnector) {
+
+        response = apiServerConnector.doDelete("authorization/superadmins/" + userId);
+        assertReturnCode(response, expectedStatus);
+    }
+
+    public List<Map<String, Object>> getSuperAdmins(int expectedStatus, APIServerConnector apiServerConnector) {
+        response = apiServerConnector.doGet("authorization/superadmins");
+
+        LOGGER.debug("Response body: " + response.print());
+
+        List<Map<String, Object>> superadmins = response.jsonPath().getList("");
+
+        System.out.println(superadmins.size());
+
+        assertReturnCode(response, expectedStatus);
+
+        return superadmins;
     }
 
     /**
@@ -1798,7 +1830,7 @@ public class TestBase extends ServiceTestBase {
         response = apiServerConnector.doGet(uri, context);
         assertReturnCode(response, expectedStatus);
 
-        if ( expectedStatus == HttpStatus.SC_NOT_FOUND)
+        if (expectedStatus == HttpStatus.SC_NOT_FOUND)
             return new ArrayList<Assignment>();
 
         String jsonArray = TestUtils.csvToJsonArray(response.body().asString(), Constants.TAB);
@@ -2091,6 +2123,7 @@ public class TestBase extends ServiceTestBase {
     //////////////////////////////////////////////////////////////////
     // applications/<appName>/pages/ endpoint //
     //////////////////////////////////////////////////////////////////
+
     /**
      * Sends a GET request to retrieve pages assigned to the application.
      * The response must contain HTTP {@link HttpStatus#SC_OK}.
@@ -2098,46 +2131,44 @@ public class TestBase extends ServiceTestBase {
      * @param application the application
      * @return a list of pages
      */
-     public List<Page> getPages(Application application){
-         return getPages(application,HttpStatus.SC_OK);
-     }
+    public List<Page> getPages(Application application) {
+        return getPages(application, HttpStatus.SC_OK);
+    }
 
-     /**
-      * Sends a GET request to retrieve pages assigned to the application.
-      * The response must contain HTTP {@code expectedStatus}.
-      *
-      * @param application the application
-      * @param expectedStatus the expected HTTP status code
-      * @return a list of pages
-      */
-     public List<Page> getPages(Application application,  int expectedStatus) {
-         return getPages(application, expectedStatus, apiServerConnector);
-     }
-
-
-     /**
-      * Sends a GET request to retrieve pages assigned to the application.
-      * The response must contain HTTP {@code expectedStatus}.
-      *
-      * @param application the application
-      * @param expectedStatus the expected HTTP status code
-      * @param apiServerConnector the server connector to use
-      * @return a list of pages
-      */
-     public List<Page> getPages(Application application, int expectedStatus, APIServerConnector apiServerConnector) {
-         String uri = "applications/" + application.name + "/pages/";
-         response = apiServerConnector.doGet(uri);
-         assertReturnCode(response, expectedStatus);
-         List<Map<String, Object>> jsonMapping = response.jsonPath().getList("pages");
-         List<Page> pageList = new ArrayList<>(jsonMapping.size());
-         for (Map jsonMap : jsonMapping) {
-             String jsonString = simpleGson.toJson(jsonMap);
-             pageList.add(PageFactory.createFromJSONString(jsonString));
-         }
-         return pageList;
-     }
+    /**
+     * Sends a GET request to retrieve pages assigned to the application.
+     * The response must contain HTTP {@code expectedStatus}.
+     *
+     * @param application    the application
+     * @param expectedStatus the expected HTTP status code
+     * @return a list of pages
+     */
+    public List<Page> getPages(Application application, int expectedStatus) {
+        return getPages(application, expectedStatus, apiServerConnector);
+    }
 
 
+    /**
+     * Sends a GET request to retrieve pages assigned to the application.
+     * The response must contain HTTP {@code expectedStatus}.
+     *
+     * @param application        the application
+     * @param expectedStatus     the expected HTTP status code
+     * @param apiServerConnector the server connector to use
+     * @return a list of pages
+     */
+    public List<Page> getPages(Application application, int expectedStatus, APIServerConnector apiServerConnector) {
+        String uri = "applications/" + application.name + "/pages/";
+        response = apiServerConnector.doGet(uri);
+        assertReturnCode(response, expectedStatus);
+        List<Map<String, Object>> jsonMapping = response.jsonPath().getList("pages");
+        List<Page> pageList = new ArrayList<>(jsonMapping.size());
+        for (Map jsonMap : jsonMapping) {
+            String jsonString = simpleGson.toJson(jsonMap);
+            pageList.add(PageFactory.createFromJSONString(jsonString));
+        }
+        return pageList;
+    }
 
 
     //////////////////////////////////////////////////////////////////
@@ -2281,6 +2312,9 @@ public class TestBase extends ServiceTestBase {
      * @return an assignment
      */
     public Assignment getAssignment(Experiment experiment, User user, String context, boolean createAssignment, boolean ignoreSamplingPercent, int expectedStatus, APIServerConnector apiServerConnector) {
+        //Clear cache before assignment call
+        clearAssignmentsMetadataCache();
+
         String uri = "assignments/applications/" + experiment.applicationName + "/experiments/" + experiment.label
                 + "/users/" + user.userID;
         if (context != null || !createAssignment || ignoreSamplingPercent) {
@@ -2403,6 +2437,8 @@ public class TestBase extends ServiceTestBase {
      * @return an assignment
      */
     public Assignment postAssignment(Experiment experiment, User user, String context, boolean createAssignment, boolean ignoreSamplingPercent, Map<String, Object> profile, int expectedStatus, APIServerConnector apiServerConnector) {
+        clearAssignmentsMetadataCache();
+
         String uri = "assignments/applications/" + experiment.applicationName + "/experiments/" + experiment.label
                 + "/users/" + user.userID;
         if (context != null || !createAssignment || ignoreSamplingPercent) {
@@ -2588,6 +2624,8 @@ public class TestBase extends ServiceTestBase {
      * @return a new assignment reflecting the update
      */
     public Assignment putAssignment(Experiment experiment, Assignment assignment, User user, String context, int expectedStatus, APIServerConnector apiServerConnector) {
+        clearAssignmentsMetadataCache();
+
         String uri = "assignments/applications/" + experiment.applicationName + "/experiments/" + experiment.label
                 + "/users/" + user.userID + (context != null ? ("?context=" + context) : "");
 
@@ -2680,6 +2718,7 @@ public class TestBase extends ServiceTestBase {
      * @return the created assignments, can be 0
      */
     public List<Assignment> postAssignments(Application application, User user, List<Experiment> experiments, String context, boolean create, int expectedStatus, APIServerConnector apiServerConnector) {
+        clearAssignmentsMetadataCache();
         String uri = "assignments/applications/" + application.name + "/users/" + user.userID;
         if ((context != null) || !create) {
             uri += "?";
@@ -2807,6 +2846,7 @@ public class TestBase extends ServiceTestBase {
      * @return the created assignments, can be 0
      */
     public List<Assignment> getAssignments(Application application, Page page, User user, String context, boolean createAssignment, boolean ignoreSamplingPercent, int expectedStatus, APIServerConnector apiServerConnector) {
+        clearAssignmentsMetadataCache();
         String uri = "assignments/applications/" + application.name + "/pages/" + page.name + "/users/" + user.userID;
         if (context != null || !createAssignment || ignoreSamplingPercent) {
             uri += "?";
@@ -2839,8 +2879,8 @@ public class TestBase extends ServiceTestBase {
      * The response must contain {@link HttpStatus#SC_CREATED}.
      *
      * @param application the application
-     * @param user the user
-     * @param page the page
+     * @param user        the user
+     * @param page        the page
      * @return the created assignments, can be 0
      */
     public List<Assignment> postAssignments(Application application, Page page, User user) {
@@ -2852,9 +2892,9 @@ public class TestBase extends ServiceTestBase {
      * given in the {@code segmentationProfile}.
      * The response must contain {@link HttpStatus#SC_CREATED}.
      *
-     * @param application the application
-     * @param user the user
-     * @param page the page
+     * @param application         the application
+     * @param user                the user
+     * @param page                the page
      * @param segmentationProfile the segmantation profile, will be wrapped into the correct JSON object
      * @return the created assignments, can be 0
      */
@@ -2949,6 +2989,7 @@ public class TestBase extends ServiceTestBase {
      * @return the created assignments, can be 0
      */
     public List<Assignment> postAssignments(Application application, Page page, User user, Map<String, Object> segmentationProfile, String context, boolean createAssignment, boolean ignoreSamplingPercent, int expectedStatus, APIServerConnector apiServerConnector) {
+        clearAssignmentsMetadataCache();
         String uri = "assignments/applications/" + application.name + "/pages/" + page.name + "/users/" + user.userID;
         if (context != null || !createAssignment || ignoreSamplingPercent) {
             uri += "?";
@@ -3054,6 +3095,8 @@ public class TestBase extends ServiceTestBase {
      * @return the response
      */
     public Response postEvents(List<Event> events, Experiment experiment, User user, int expectedStatus, APIServerConnector apiServerConnector) {
+        clearAssignmentsMetadataCache();
+
         String uri = "events/applications/" + experiment.applicationName + "/experiments/"
                 + experiment.label + "/users/" + user.userID;
         String json = TestUtils.wrapJsonIntoObject(simpleGson.toJson(events.toArray()), "events");
@@ -3297,56 +3340,50 @@ public class TestBase extends ServiceTestBase {
 
 
     /**
-     *
      * Sends a GET request to receive a list of experiments for an application
      * The response must contain HTTP {@link HttpStatus#SC_OK}
      *
      * @param application the application for which the experiments are
      * @return a list of experiments
      */
-    public List<Experiment> getExperimentsByApplication(Application application)
-    {
-        return getExperimentsByApplication(application,HttpStatus.SC_OK);
+    public List<Experiment> getExperimentsByApplication(Application application) {
+        return getExperimentsByApplication(application, HttpStatus.SC_OK);
     }
 
 
     /**
-     *
      * Sends a GET request to receive a list of experiments for an application
      * The response must contain HTTP {@link HttpStatus#SC_OK}
      *
-     * @param application the application for which the experiments are
+     * @param application    the application for which the experiments are
      * @param expectedStatus the expected HTTP status code
      * @return a list of experiments
      */
-    public List<Experiment> getExperimentsByApplication(Application application, int expectedStatus)
-    {
-        return getExperimentsByApplication(application,expectedStatus,apiServerConnector);
+    public List<Experiment> getExperimentsByApplication(Application application, int expectedStatus) {
+        return getExperimentsByApplication(application, expectedStatus, apiServerConnector);
     }
 
 
     /**
-     *
      * Sends a GET request to receive a list of experiments for an application
      * The response must contain HTTP {@link HttpStatus#SC_OK}
      *
-     * @param application the application for which the experiments are
-     * @param expectedStatus the expected HTTP status code
+     * @param application        the application for which the experiments are
+     * @param expectedStatus     the expected HTTP status code
      * @param apiServerConnector the server connector to use
      * @return a list of experiments
      */
-    public List<Experiment> getExperimentsByApplication(Application application, int expectedStatus,APIServerConnector apiServerConnector)
-    {
-         String uri = "applications/" + application.name+ "/experiments";
-         response = apiServerConnector.doGet(uri);
-         assertReturnCode(response, expectedStatus);
-         List<Map<String, Object>> jsonStrings = response.jsonPath().getList("experiments");
-         List<Experiment> expList = new ArrayList<>(jsonStrings.size());
-         for (Map jsonMap : jsonStrings) {
-             String jsonString = simpleGson.toJson(jsonMap);
-             expList.add(ExperimentFactory.createFromJSONString(jsonString));
-         }
-         return expList;
+    public List<Experiment> getExperimentsByApplication(Application application, int expectedStatus, APIServerConnector apiServerConnector) {
+        String uri = "applications/" + application.name + "/experiments";
+        response = apiServerConnector.doGet(uri);
+        assertReturnCode(response, expectedStatus);
+        List<Map<String, Object>> jsonStrings = response.jsonPath().getList("experiments");
+        List<Experiment> expList = new ArrayList<>(jsonStrings.size());
+        for (Map jsonMap : jsonStrings) {
+            String jsonString = simpleGson.toJson(jsonMap);
+            expList.add(ExperimentFactory.createFromJSONString(jsonString));
+        }
+        return expList;
     }
 
     /**
@@ -4357,53 +4394,53 @@ public class TestBase extends ServiceTestBase {
     ////////////////////////
     // authorization endpoint //
     ////////////////////////
+
     /**
-      * Sends a DELETE request to delete a user role within an application
-      * 
-      * @param userID             - the userID of the user whose role we want to delete
-      * @param applicationName - the applicationName of the application
-      */
-    public void deleteUserRole(String userID,String applicationName) {
-        deleteUserRole(userID, applicationName,HttpStatus.SC_NO_CONTENT);
+     * Sends a DELETE request to delete a user role within an application
+     *
+     * @param userID          - the userID of the user whose role we want to delete
+     * @param applicationName - the applicationName of the application
+     */
+    public void deleteUserRole(String userID, String applicationName) {
+        deleteUserRole(userID, applicationName, HttpStatus.SC_NO_CONTENT);
     }
-    
+
     /**
-      * Sends a DELETE request to delete a user role within an application
-      * 
-      * @param userID             - the userID of the user whose role we want to delete
-      * @param applicationName - the applicationName of the application
-      * @param expectedStatus  - the expected HTTP status code
-      */
-    public void deleteUserRole(String userID,String applicationName,int expectedStatus) {
-          deleteUserRole(userID, applicationName, expectedStatus, apiServerConnector);
+     * Sends a DELETE request to delete a user role within an application
+     *
+     * @param userID          - the userID of the user whose role we want to delete
+     * @param applicationName - the applicationName of the application
+     * @param expectedStatus  - the expected HTTP status code
+     */
+    public void deleteUserRole(String userID, String applicationName, int expectedStatus) {
+        deleteUserRole(userID, applicationName, expectedStatus, apiServerConnector);
     }
-      
+
     /**
-      * Sends a DELETE request to delete a user role within an application
-      * 
-      * @param userID                 - the userID of the user whose role we want to delete
-      * @param applicationName     - the applicationName of the application
-      * @param expectedStatus      - the expected HTTP status code
-      *  @param apiServerConnector - the server connector to use
-      */
-    public void deleteUserRole(String userID,String applicationName,int expectedStatus,APIServerConnector apiServerConnector) {
-        
-           response = apiServerConnector.doDelete("authorization/applications/"+applicationName+"/users/"+userID+"/roles");
+     * Sends a DELETE request to delete a user role within an application
+     *
+     * @param userID             - the userID of the user whose role we want to delete
+     * @param applicationName    - the applicationName of the application
+     * @param expectedStatus     - the expected HTTP status code
+     * @param apiServerConnector - the server connector to use
+     */
+    public void deleteUserRole(String userID, String applicationName, int expectedStatus, APIServerConnector apiServerConnector) {
+
+        response = apiServerConnector.doDelete("authorization/applications/" + applicationName + "/users/" + userID + "/roles");
         assertReturnCode(response, expectedStatus);
     }
-      
+
     /**
-      * Sends a POST request to assign roles for a list of users against list of applications.
-      * 
-      * @param userID - the userID to whom we are going to assign application
-      * @param appList- the list of applications to whom we gonna assign the user
-      * @param role   - the role of the user when assigning him to the application
-      * @return list  - the list of Assignment statuses
-      */
-    public List<AssignmentStatus> postUserRolePermission(String userID,List<Application> appList,String role) {
+     * Sends a POST request to assign roles for a list of users against list of applications.
+     *
+     * @param userID   - the userID to whom we are going to assign application
+     * @param appList- the list of applications to whom we gonna assign the user
+     * @param role     - the role of the user when assigning him to the application
+     * @return list  - the list of Assignment statuses
+     */
+    public List<AssignmentStatus> postUserRolePermission(String userID, List<Application> appList, String role) {
         List<UserRole> userRoleList = new ArrayList<>();
-        for(Application appln : appList)
-        {
+        for (Application appln : appList) {
             UserRole userRole = new UserRole();
             userRole.setApplicationName(appln.name);
             userRole.setUserID(userID);
@@ -4415,102 +4452,100 @@ public class TestBase extends ServiceTestBase {
 
 
     /**
-      * Sends a GET request to get all the applications assigned to user.
-      * The response must contain {@link HttpStatus#SC_OK}.
-      *
-      * @param user the user whose list of applications we are interested 
-      * @return List of application names 
-      */
+     * Sends a GET request to get all the applications assigned to user.
+     * The response must contain {@link HttpStatus#SC_OK}.
+     *
+     * @param user the user whose list of applications we are interested
+     * @return List of application names
+     */
     public List<String> getUserApplications(APIUser user) {
         return getUserApplications(user, HttpStatus.SC_OK);
     }
 
-    
 
     /**
-      * Sends a GET request to get all the applications assigned to user.
-      * The response must contain {@link HttpStatus#SC_OK}.
-      *
-      * @param user the user whose list of applications we are interested
-      * @param expectedStatus  the expected HTTP status code 
-      * @return List of application names 
-      */
-    public List<String>  getUserApplications(APIUser user, int expectedStatus) {
+     * Sends a GET request to get all the applications assigned to user.
+     * The response must contain {@link HttpStatus#SC_OK}.
+     *
+     * @param user           the user whose list of applications we are interested
+     * @param expectedStatus the expected HTTP status code
+     * @return List of application names
+     */
+    public List<String> getUserApplications(APIUser user, int expectedStatus) {
         return getUserApplications(user, expectedStatus, apiServerConnector);
     }
 
     /**
-      * Sends a GET request to get all the applications assigned to user.
-      * The response must contain {@link HttpStatus#SC_OK}.
-      * 
-      * @param user the user whose list of applications we are interested
-      * @param expectedStatus  the expected HTTP status code 
-      * @param apiServerConnector the server connector to use
-      * @return List of application names
-      */
-    public List<String>  getUserApplications(APIUser user, int expectedStatus, APIServerConnector apiServerConnector) {
+     * Sends a GET request to get all the applications assigned to user.
+     * The response must contain {@link HttpStatus#SC_OK}.
+     *
+     * @param user               the user whose list of applications we are interested
+     * @param expectedStatus     the expected HTTP status code
+     * @param apiServerConnector the server connector to use
+     * @return List of application names
+     */
+    public List<String> getUserApplications(APIUser user, int expectedStatus, APIServerConnector apiServerConnector) {
         apiServerConnector.setUserNameAndPassword(user.userId, user.password);
         response = apiServerConnector.doGet("authorization/applications");
-        assertReturnCode(response,expectedStatus);
+        assertReturnCode(response, expectedStatus);
         List<Map<String, Object>> jsonStrings = response.jsonPath().get();
         List<String> applicationList = new ArrayList<>(jsonStrings.size());
-        
+
         //here I am only interested in the name of the application
-        for(int i = 0 ; i < jsonStrings.size(); i++)
-        {
-            String appName = response.jsonPath().get(Constants.ROLE_LIST+"["+i+"].applicationName[0]").toString();
+        for (int i = 0; i < jsonStrings.size(); i++) {
+            String appName = response.jsonPath().get(Constants.ROLE_LIST + "[" + i + "].applicationName[0]").toString();
             applicationList.add(appName);
         }
-        apiServerConnector.setUserNameAndPassword(appProperties.getProperty("user-name"),appProperties.getProperty("password"));
+        apiServerConnector.setUserNameAndPassword(appProperties.getProperty("user-name"), appProperties.getProperty("password"));
         return applicationList;
     }
-    
+
     /**
-      * Sends a POST request to assign roles to users against applications.
-      * The response must contain {@link HttpStatus#SC_OK}.
-      * Sets createNewApplication to {@code true}.
-      *
-      * @param roles the list of userRoles
-      * @return List of assignment status 
-      */
+     * Sends a POST request to assign roles to users against applications.
+     * The response must contain {@link HttpStatus#SC_OK}.
+     * Sets createNewApplication to {@code true}.
+     *
+     * @param roles the list of userRoles
+     * @return List of assignment status
+     */
     public List<AssignmentStatus> postUserRolePermission(List<UserRole> roles) {
         return postUserRolePermission(roles, HttpStatus.SC_OK);
     }
 
-    
+
     /**
-      * Sends a POST request to assign roles to users against applications.
-      * The response must contain {@link HttpStatus#SC_OK}.
-      * Sets createNewApplication to {@code true}.
-      *
-      * @param roles           the list of userRoles
-      * @param expectedStatus  the expected HTTP status code 
-      * @return List of assignment status 
-      */
-    public List<AssignmentStatus>  postUserRolePermission(List<UserRole> roles, int expectedStatus) {
+     * Sends a POST request to assign roles to users against applications.
+     * The response must contain {@link HttpStatus#SC_OK}.
+     * Sets createNewApplication to {@code true}.
+     *
+     * @param roles          the list of userRoles
+     * @param expectedStatus the expected HTTP status code
+     * @return List of assignment status
+     */
+    public List<AssignmentStatus> postUserRolePermission(List<UserRole> roles, int expectedStatus) {
         return postUserRolePermission(roles, expectedStatus, apiServerConnector);
     }
 
     /**
-      * Sends a POST request to assign roles to users against applications.
-      * The response must contain {@link HttpStatus#SC_OK}.
-      * <p>
-      *
-      * @param roles
-      * @param expectedStatus     the expected HTTP status code
-      * @param apiServerConnector the server connector to use
-      * @return List of assignment status
-      */
-    public List<AssignmentStatus>  postUserRolePermission(List<UserRole> roles, int expectedStatus, APIServerConnector apiServerConnector) {
+     * Sends a POST request to assign roles to users against applications.
+     * The response must contain {@link HttpStatus#SC_OK}.
+     * <p>
+     *
+     * @param roles
+     * @param expectedStatus     the expected HTTP status code
+     * @param apiServerConnector the server connector to use
+     * @return List of assignment status
+     */
+    public List<AssignmentStatus> postUserRolePermission(List<UserRole> roles, int expectedStatus, APIServerConnector apiServerConnector) {
         //building the payload
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("{");
-        stringBuilder.append("\""+Constants.ROLE_LIST+"\":");
+        stringBuilder.append("\"" + Constants.ROLE_LIST + "\":");
         stringBuilder.append(roles);
         stringBuilder.append("}");
-        
-        response = apiServerConnector.doPost("authorization/roles",stringBuilder.toString());
-        assertReturnCode(response,expectedStatus);
+
+        response = apiServerConnector.doPost("authorization/roles", stringBuilder.toString());
+        assertReturnCode(response, expectedStatus);
         List<Map<String, Object>> jsonStrings = response.jsonPath().getList("assignmentStatuses");
         List<AssignmentStatus> assignmentStatusList = new ArrayList<>(jsonStrings.size());
         for (Map jsonMap : jsonStrings) {
@@ -4519,7 +4554,7 @@ public class TestBase extends ServiceTestBase {
         }
         return assignmentStatusList;
     }
-    
+
     ///////////
     // OTHER //
     ///////////

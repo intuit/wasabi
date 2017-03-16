@@ -177,6 +177,7 @@ for module in ${modules}; do
         exitOnError "archive rpm failed: curl -v -u [nexus_deploy] --upload-file ./target/${rpm} ${rpm_path}"
     fi
 
+    # Always push the UI zip file because we need it for wasabi-intuit builds
     if [ "${module}" == "ui" ]; then
       # archive MILESTONE ui.zip
       artifact=ui

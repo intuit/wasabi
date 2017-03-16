@@ -13,6 +13,7 @@ import java.util.Properties;
 
 import static com.intuit.autumn.utils.PropertyFactory.create;
 import static com.intuit.autumn.utils.PropertyFactory.getProperty;
+import static com.intuit.wasabi.userdirectory.UserDirectoryAnnotations.USER_DIRECTORY_PATH;
 import static org.apache.commons.lang3.StringUtils.trimToNull;
 
 public class UserInfoListProvider implements Provider<List<UserInfo>> {
@@ -20,7 +21,7 @@ public class UserInfoListProvider implements Provider<List<UserInfo>> {
     private final List<UserInfo> users = new ArrayList<>();
 
     @Inject
-    public UserInfoListProvider(@Named("userDirectoryPath") String userDirectoryPath){
+    public UserInfoListProvider(@Named(USER_DIRECTORY_PATH) String userDirectoryPath) {
         Properties properties = create(userDirectoryPath, UserDirectoryModule.class);
         String userIds = getProperty("user.ids", properties);
         for (String userId : userIds.split(":")) {

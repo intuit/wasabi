@@ -26,8 +26,15 @@ import com.intuit.wasabi.feedbackobjects.UserFeedback;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.slf4j.Logger;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
@@ -35,6 +42,7 @@ import static com.intuit.wasabi.api.APISwaggerResource.EXAMPLE_AUTHORIZATION_HEA
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.CREATED;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * API endpoint for managing user feedback
@@ -44,6 +52,8 @@ import static javax.ws.rs.core.Response.Status.CREATED;
 @Singleton
 @Api(value = "Feedback (Submit feedback about this AB Testing Tool)")
 public class FeedbackResource {
+
+    private static final Logger LOGGER = getLogger(FeedbackResource.class);
 
     private final HttpHeader httpHeader;
     private Authorization authorization;
@@ -58,6 +68,7 @@ public class FeedbackResource {
 
     /**
      * Get all user feedback
+     *
      * @param authorizationHeader
      * @return Response object
      */
@@ -66,20 +77,27 @@ public class FeedbackResource {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Get all feedback")
     @Timed
-    public Response getAllUserFeedback(@HeaderParam(AUTHORIZATION)
-                                       @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                       final String authorizationHeader) {
-        authorization.checkSuperAdmin(authorization.getUser(authorizationHeader));
+    public Response getAllUserFeedback(
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) {
+        try {
+            authorization.checkSuperAdmin(authorization.getUser(authorizationHeader));
 
-        ImmutableMap<String, List<UserFeedback>> userFeedback =
-                new ImmutableMap.Builder<String, List<UserFeedback>>()
-                        .put("feedback", feedback.getAllUserFeedback()).build();
+            ImmutableMap<String, List<UserFeedback>> userFeedback =
+                    new ImmutableMap.Builder<String, List<UserFeedback>>()
+                            .put("feedback", feedback.getAllUserFeedback()).build();
 
-        return httpHeader.headers().entity(userFeedback).build();
+            return httpHeader.headers().entity(userFeedback).build();
+        } catch (Exception exception) {
+            LOGGER.error("getAllUserFeedback failed with error:", exception);
+            throw exception;
+        }
     }
 
     /**
      * Post feedback from user
+     *
      * @param userFeedback
      * @param authorizationHeader
      * @return Response object
@@ -89,20 +107,27 @@ public class FeedbackResource {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Submit feedback")
     @Timed
-    public Response postFeedback(@ApiParam(name = "userFeedback", value = "Please see model example",  required = true)
-                                 final UserFeedback userFeedback,
+    public Response postFeedback(
+            @ApiParam(name = "userFeedback", value = "Please see model example", required = true)
+            final UserFeedback userFeedback,
 
-                                 @HeaderParam(AUTHORIZATION)
-                                 @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                 final String authorizationHeader) {
-        userFeedback.setUsername(authorization.getUser(authorizationHeader));
-        feedback.createUserFeedback(userFeedback);
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) {
+        try {
+            userFeedback.setUsername(authorization.getUser(authorizationHeader));
+            feedback.createUserFeedback(userFeedback);
 
-        return httpHeader.headers(CREATED).build();
+            return httpHeader.headers(CREATED).build();
+        } catch (Exception exception) {
+            LOGGER.error("postFeedback failed for userFeedback={} with error:", userFeedback, exception);
+            throw exception;
+        }
     }
 
     /**
      * Get user feedback
+     *
      * @param username
      * @param authorizationHeader
      * @return Response object
@@ -113,19 +138,25 @@ public class FeedbackResource {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Get single user feedback")
     @Timed
-    public Response getUserFeedback(@PathParam("username")
-                                    @ApiParam(value = "User name")
-                                    final UserInfo.Username username,
+    public Response getUserFeedback(
+            @PathParam("username")
+            @ApiParam(value = "User name")
+            final UserInfo.Username username,
 
-                                    @HeaderParam(AUTHORIZATION)
-                                    @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
-                                    final String authorizationHeader) {
-        authorization.checkSuperAdmin(authorization.getUser(authorizationHeader));
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) {
+        try {
+            authorization.checkSuperAdmin(authorization.getUser(authorizationHeader));
 
-        ImmutableMap<String, List<UserFeedback>> userFeedback =
-                new ImmutableMap.Builder<String, List<UserFeedback>>()
-                        .put("feedbackList", feedback.getUserFeedback(username)).build();
+            ImmutableMap<String, List<UserFeedback>> userFeedback =
+                    new ImmutableMap.Builder<String, List<UserFeedback>>()
+                            .put("feedbackList", feedback.getUserFeedback(username)).build();
 
-        return httpHeader.headers().entity(userFeedback).build();
+            return httpHeader.headers().entity(userFeedback).build();
+        } catch (Exception exception) {
+            LOGGER.error("getUserFeedback failed for username={} with error:", username, exception);
+            throw exception;
+        }
     }
 }

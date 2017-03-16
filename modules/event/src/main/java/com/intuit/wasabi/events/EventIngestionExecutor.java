@@ -4,13 +4,13 @@ import com.intuit.wasabi.eventobjects.EventEnvelopePayload;
 
 public interface EventIngestionExecutor {
 
-	/**
-	 * This method ingests what is contained in the {@link com.intuit.wasabi.eventobjects.EventEnvelopePayload} to real time data ingestion system.
-	 * 
-	 * @param eventEnvelopePayload
-	 */
-	public void execute(EventEnvelopePayload eventEnvelopePayload);
-	
+    /**
+     * This method ingests what is contained in the {@link com.intuit.wasabi.eventobjects.EventEnvelopePayload} to real time data ingestion system.
+     *
+     * @param eventEnvelopePayload
+     */
+    public void execute(EventEnvelopePayload eventEnvelopePayload);
+
     /**
      * Number of elements in the ingestion queue.
      *
@@ -20,7 +20,7 @@ public interface EventIngestionExecutor {
 
     /**
      * Name of the ingestion executor.
-     * 
+     *
      * @return the name of the ingestion executor.
      */
     public String name();

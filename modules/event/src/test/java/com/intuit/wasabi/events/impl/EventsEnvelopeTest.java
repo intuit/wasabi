@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,7 +39,9 @@ import java.util.Date;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -56,7 +58,7 @@ public class EventsEnvelopeTest {
     private Event event;
     @Mock
     private Logger logger;
-    
+
     @Before
     public void setup() {
         assignment = Mockito.mock(Assignment.class);
@@ -90,8 +92,8 @@ public class EventsEnvelopeTest {
 
     @Test
     public void testRecordEventThrowsWasabiClientException() throws Exception {
-    	mockStatic(LoggerFactory.class);
-    	
+        mockStatic(LoggerFactory.class);
+
         given(event.getName()).willReturn(Event.Name.valueOf("ASSIGNMENT"));
         given(event.getType()).willReturn(Event.Type.IMPRESSION);
         given(assignment.getUserID()).willReturn(User.ID.valueOf("user-a"));
@@ -103,14 +105,14 @@ public class EventsEnvelopeTest {
         given(getLogger(any(Class.class))).willReturn(logger);
         logger.warn(any(String.class));
         BDDMockito.willThrow(jce).given(transaction).
-        	insert(any(String.class), any(String.class), any(Experiment.ID.class), 
-        			any(Bucket.Label.class), any(String.class), any(Date.class), any(String.class));
+                insert(any(String.class), any(String.class), any(Experiment.ID.class),
+                        any(Bucket.Label.class), any(String.class), any(Date.class), any(String.class));
         eventsEnvelope.run();
 
         verify(event, times(1)).getName();
         verify(assignment, times(1)).getBucketLabel();
-        verify(transaction, times(1)).insert(any(String.class), any(String.class), any(Experiment.ID.class), 
-    			any(Bucket.Label.class), any(String.class), any(Date.class), any(String.class));
+        verify(transaction, times(1)).insert(any(String.class), any(String.class), any(Experiment.ID.class),
+                any(Bucket.Label.class), any(String.class), any(Date.class), any(String.class));
         // Find a way to validate log message
         verify(logger, times(1)).warn(any(String.class));
     }

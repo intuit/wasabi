@@ -259,8 +259,6 @@ package() {
 
   # FIXME: move to modules/ui/build.sh
   version=$(fromPom . build project.version)
-  # FIXME: server ip
-  server="http://localhost:8080"
   home=$(fromPom ./modules/main build application.home)
   name=wasabi-ui #$(fromPom main build application.name)
   api_name=$(fromPom ./modules/main build application.name)
@@ -308,7 +306,6 @@ package() {
     echo Getting merged plugins.js file and plugins directory; \
     cp dist/scripts/plugins.js target/app/scripts/plugins.js; \
     cp -R dist/plugins target/app; \
-    sed -i '' -e "s|http://localhost:8080|${server}|g" target/constants.json 2>/dev/null; \
     sed -i '' -e "s|VERSIONLOC|${version}|g" target/app/index.html 2>/dev/null; \
     #(cd target; npm install; bower install --no-optional; grunt clean); \
     (cd target; grunt clean); \

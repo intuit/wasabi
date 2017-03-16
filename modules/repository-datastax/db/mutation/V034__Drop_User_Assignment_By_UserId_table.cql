@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS user_assignment_by_userid;

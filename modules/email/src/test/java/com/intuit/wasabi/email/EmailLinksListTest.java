@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,39 +15,41 @@
  *******************************************************************************/
 package com.intuit.wasabi.email;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.*;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 
 public class EmailLinksListTest {
 
-	@Test
-	public void testToStringWithEmptyLinkList() {
-		EmailLinksList list = EmailLinksList.newInstance().build();
-		assertEquals("", list.toString());
-	}
+    @Test
+    public void testToStringWithEmptyLinkList() {
+        EmailLinksList list = EmailLinksList.newInstance().build();
+        assertEquals("", list.toString());
+    }
 
-	@Test
-	public void testToStringWithOneLinkList() {
-		List<String> list = new ArrayList<String>();
-		list.add("one");
-		EmailLinksList elist = EmailLinksList.withEmailLinksList(list).build();
-		assertEquals("one" + EmailLinksList.LINE_SEPARATOR, elist.toString());
-	}
+    @Test
+    public void testToStringWithOneLinkList() {
+        List<String> list = new ArrayList<String>();
+        list.add("one");
+        EmailLinksList elist = EmailLinksList.withEmailLinksList(list).build();
+        assertEquals("one" + EmailLinksList.LINE_SEPARATOR, elist.toString());
+    }
 
-	@Test
-	public void testToStringWithTwoLinkList() {
-		List<String> list = new ArrayList<String>();
-		list.add("one");
-		list.add("two");
-		
-		EmailLinksList elist = EmailLinksList.withEmailLinksList(list).build();
-		assertEquals("one" + EmailLinksList.LINE_SEPARATOR + "two" + EmailLinksList.LINE_SEPARATOR, elist.toString());
-	}
+    @Test
+    public void testToStringWithTwoLinkList() {
+        List<String> list = new ArrayList<String>();
+        list.add("one");
+        list.add("two");
+
+        EmailLinksList elist = EmailLinksList.withEmailLinksList(list).build();
+        assertEquals("one" + EmailLinksList.LINE_SEPARATOR + "two" + EmailLinksList.LINE_SEPARATOR, elist.toString());
+    }
 
 
     //NOTE: this method is created after the code is writen by someone else. Since the exact intent of
@@ -69,9 +71,8 @@ public class EmailLinksListTest {
     }
 
 
-
-	@Test
-    public void fromAnotherEmailList(){
+    @Test
+    public void fromAnotherEmailList() {
         EmailLinksList emailLinksList = EmailLinksList.newInstance().build();
         assertThat(emailLinksList.hashCode(), is(630));
         EmailLinksList emailLinksList1 = EmailLinksList.from(emailLinksList).build();

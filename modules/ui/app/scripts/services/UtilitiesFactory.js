@@ -1157,6 +1157,28 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                 return nameList;
             },
 
+            updateApplicationRoles: function(userID, getUsersPrivilegesForApplication) {
+                AuthzFactory.getUserRoles({
+                    userId: userID
+                }).$promise.then(function (roleList) {
+                    if (roleList) {
+                        // Go through list and get role for this application, if there.
+                        var applications = [];
+                        roleList.forEach(function(nextRole) {
+                            applications.push({ label: nextRole.applicationName, role: nextRole.role });
+                        });
+
+                        if (getUsersPrivilegesForApplication) {
+                            getUsersPrivilegesForApplication();
+                        }
+
+                        return applications;
+                    }
+                }, function(response) {
+                    UtilitiesFactory.handleGlobalError(response, 'The roles for this user could not be retrieved.');
+                });
+            },
+
             displaySuccessWithCacheWarning: function(title, extraMsg) {
                 var msg = extraMsg + '  PLEASE NOTE that this change may not be available for assignment calls for up to 5 minutes.';
                 this.displayPageSuccessMessage(title, msg);

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,12 +19,12 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.intuit.wasabi.analyticsobjects.Event;
 import com.intuit.wasabi.analyticsobjects.EventList;
-import com.intuit.wasabi.events.EventIngestionExecutor;
 import com.intuit.wasabi.assignment.Assignments;
 import com.intuit.wasabi.assignmentobjects.Assignment;
-import com.intuit.wasabi.eventobjects.EventEnvelopePayload;
 import com.intuit.wasabi.assignmentobjects.User;
 import com.intuit.wasabi.database.TransactionFactory;
+import com.intuit.wasabi.eventobjects.EventEnvelopePayload;
+import com.intuit.wasabi.events.EventIngestionExecutor;
 import com.intuit.wasabi.events.Events;
 import com.intuit.wasabi.events.EventsMBean;
 import com.intuit.wasabi.experimentobjects.Application;
@@ -38,6 +38,7 @@ import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import static com.intuit.wasabi.events.EventsAnnotations.EXECUTOR_THREADPOOL_SIZE;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -63,9 +64,9 @@ public class EventsImpl implements Events, EventsMBean {
 
     @Inject
     public EventsImpl(Map<String, EventIngestionExecutor> eventIngestionExecutors,
-            final @Named("executor.threadpool.size") Integer threadPoolSize,
-            final Assignments assignments,
-            final TransactionFactory transactionFactory) {
+                      final @Named(EXECUTOR_THREADPOOL_SIZE) Integer threadPoolSize,
+                      final Assignments assignments,
+                      final TransactionFactory transactionFactory) {
         super();
         this.eventIngestionExecutors = eventIngestionExecutors;
         this.transactionFactory = transactionFactory;
@@ -93,18 +94,17 @@ public class EventsImpl implements Events, EventsMBean {
 
     // This method ingests event to real time ingestion systems.
     private void ingestEventToRealTimeSystems(Application.Name applicationName, Experiment.Label experimentLabel, Event event,
-            Assignment assignment) {
+                                              Assignment assignment) {
         for (String name : eventIngestionExecutors.keySet()) {
             eventIngestionExecutors.get(name).execute(new EventEnvelopePayload(applicationName, experimentLabel, assignment, event));
         }
     }
 
     protected Map<Context, Assignment> getAssignments(User.ID userID, Application.Name applicationName,
-                                                          Experiment.Label experimentLabel, Set<Context> contextSet) {
+                                                      Experiment.Label experimentLabel, Set<Context> contextSet) {
         Map<Context, Assignment> assignmentHashMap = new HashMap<>();
         for (Context context : contextSet) {
-            Assignment assignment = assignments.getAssignment(
-                    userID, applicationName, experimentLabel, context, false, false, null, null);
+            Assignment assignment = assignments.getExistingAssignment(userID, applicationName, experimentLabel, context);
             assignmentHashMap.put(context, assignment);
         }
         return assignmentHashMap;
@@ -121,13 +121,14 @@ public class EventsImpl implements Events, EventsMBean {
 
     /**
      * Helper method to instantiate events envelope
+     *
      * @param assignment
      * @param event
      * @return
      */
-	protected EventsEnvelope makeEventEnvelope(Assignment assignment, Event event) {
-		return new EventsEnvelope(assignment, event, transactionFactory.newTransaction());
-	}
+    protected EventsEnvelope makeEventEnvelope(Assignment assignment, Event event) {
+        return new EventsEnvelope(assignment, event, transactionFactory.newTransaction());
+    }
 
     /**
      * {@inheritDoc}
@@ -143,7 +144,7 @@ public class EventsImpl implements Events, EventsMBean {
         queueLengthMap.put(MYSQL, new Integer(mysqlQueue.size()));
         for (String name : eventIngestionExecutors.keySet()) {
             queueLengthMap.put(name.toLowerCase(), new Integer(eventIngestionExecutors.get(name).queueLength()));
-        }        
+        }
         return queueLengthMap;
     }
 
@@ -154,5 +155,5 @@ public class EventsImpl implements Events, EventsMBean {
     public int getQueueSize() {
         // FIXME: is this MBean method really used??
         return mysqlQueue.size();
-    } 
+    }
 }
