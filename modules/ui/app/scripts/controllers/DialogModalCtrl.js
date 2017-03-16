@@ -7,6 +7,7 @@ angular.module('wasabi.controllers')
 
                 $scope.header = options.header;
 
+                // Use $sce (Strict Contextual Escaping) to safely insert HTML into the message.
                 $scope.description = $sce.trustAsHtml(options.description);
 
                 $scope.okLabel = 'OK';
