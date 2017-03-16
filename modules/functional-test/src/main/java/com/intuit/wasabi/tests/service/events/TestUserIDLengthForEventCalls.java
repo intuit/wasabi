@@ -176,7 +176,7 @@ public class TestUserIDLengthForEventCalls extends TestBase {
         clearAssignmentsMetadataCache();
         int postImpressionCounts = experimentCounts.impressionCounts.eventCount;
 
-        // lets assert that the event impression has been created
+        // lets assert that the event impression should not be created as userId is more than 200 characters
         Assert.assertEquals(postImpressionCounts - preImpressionCounts, 0);
     }
 
