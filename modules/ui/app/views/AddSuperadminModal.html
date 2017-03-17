@@ -1,0 +1,28 @@
+<div id="addSuperadmin" class="modalDialog">
+    <h1>Add Superadmin</h1>
+
+    <form name="superadminForm" novalidate ng-submit="addSuperadmin()">
+        <div class="dialogContent">
+            <div ng-show="!superadmin.superadminID" class="enterCorpId">
+                <div class="verifyField">
+                    <input id="email" type="text" class="text" placeholder="Email Address" auto-focus ng-model="data.superadminEmail" />
+                    <div class="verify" ng-class="{pass: superadminValidated, verifying: validating, fail: failedValidation}"></div>
+                </div>
+                <button class="blue verifySuperadminId" type="button" ng-click="verifySuperadmin()">Verify</button>
+                <div class="hint">Email Address must be entered exactly.</div>
+                <div class="error"
+                     ng-show="verifyFormNoValueError">
+                    <small class="fieldError"
+                           ng-show="verifyFormNoValueError">
+                        Email Address required.
+                    </small>
+                </div>
+            </div>
+            <div class="buttonBar">
+                <button type="submit" id="btnAddSuperadmin" class="blue" ng-class="{disabled: !superadminValidated}" ng-disabled="!superadminValidated">Make Superadmin</button>
+                <button class="cancel" ng-click="closeDialog()">Close</button>
+            </div>
+        </div>
+
+    </form>
+</div>
