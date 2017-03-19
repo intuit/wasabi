@@ -44,6 +44,7 @@ import java.util.stream.Collectors;
 
 import static com.intuit.wasabi.experimentobjects.Experiment.State.DELETED;
 import static com.intuit.wasabi.experimentobjects.Experiment.State.TERMINATED;
+import static java.util.Objects.isNull;
 
 public class MutexImpl implements Mutex {
 
@@ -68,8 +69,8 @@ public class MutexImpl implements Mutex {
     public ExperimentList getExclusions(Experiment.ID experimentID) {
 
         // Throw an exception if the input experiment is not valid
-        final Experiment expID = experiments.getExperiment(experimentID);
-        if (expID.getID() == null) {
+        final Experiment experiment = experiments.getExperiment(experimentID);
+        if (isNull(experiment) || isNull(experiment.getID())) {
             throw new ExperimentNotFoundException(experimentID);
         }
         return mutexRepository.getExclusions(experimentID);

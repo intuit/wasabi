@@ -83,6 +83,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -1486,13 +1487,15 @@ public class ExperimentsResource {
 
             @PathParam("from")
             @DefaultValue("")
-            @ApiParam(value = "Start date of the format \"MM/DD/YYYY\" to use the experiment's start date, e.g. 8/23/1997. Must be URL encoded!",
+            @ApiParam(value = "Start date of the format \"MM/DD/YYYY\" to use the experiment's start date," +
+                    " e.g. 8/23/1997. Must be URL encoded!",
                     required = true)
             final String from,
 
             @PathParam("to")
             @DefaultValue("")
-            @ApiParam(value = "End date of the format \"MM/DD/YYYY\" to use the experiment's start date, e.g. 8/23/1997. Must be URL encoded!",
+            @ApiParam(value = "End date of the format \"MM/DD/YYYY\" to use the experiment's start date," +
+                    " e.g. 8/23/1997. Must be URL encoded!",
                     required = true)
             final String to,
 
@@ -1502,29 +1505,40 @@ public class ExperimentsResource {
 
             @QueryParam("timezone")
             @DefaultValue(APISwaggerResource.DEFAULT_TIMEZONE)
-            @ApiParam(value = "timezone offset, as parsable by https://docs.oracle.com/javase/8/docs/api/java/time/ZoneId.html#of-java.lang.String-",
+            @ApiParam(value = "timezone offset, as parsable by " +
+                    "https://docs.oracle.com/javase/8/docs/api/java/time/ZoneId.html#of-java.lang.String-",
                     defaultValue = APISwaggerResource.DEFAULT_TIMEZONE)
-            final String timezone
-    ) {
-        // Check authorization.
-        Username username = authorization.getUser(authorizationHeader);
-        Experiment experiment = getAuthorizedExperimentOrThrow(experimentID, username);
+            final String timezone) {
+        try {
+            // Check authorization.
+            Username username = authorization.getUser(authorizationHeader);
+            Experiment experiment = getAuthorizedExperimentOrThrow(experimentID, username);
 
-        // Parse from and to
-        OffsetDateTime fromDate = parseUIDate(from, timezone, "from");
-        OffsetDateTime toDate = parseUIDate(to, timezone, "to");
+            // Parse from and to
+            OffsetDateTime fromDate = parseUIDate(from, timezone, "from");
+            OffsetDateTime toDate = parseUIDate(to, timezone, "to");
 
-        List<Experiment> mutexExperiments = mutex.getRecursiveMutualExclusions(experiment);
+            List<Experiment> mutexExperiments = mutex.getRecursiveMutualExclusions(experiment);
 
-        // Sort experiments by their priorities
-        Map<Experiment.ID, Integer> experimentPriorities = priorities.getPriorityPerID(experiment.getApplicationName());
-        Collections.sort(mutexExperiments, (e1, e2) -> experimentPriorities.get(e1.getID()) - experimentPriorities.get(e2.getID()));
+            // Sort experiments by their priorities
+            Map<Experiment.ID, Integer> experimentPriorities =
+                    priorities.getPriorityPerID(experiment.getApplicationName());
+            Collections.sort(mutexExperiments, Comparator.comparingInt(e -> experimentPriorities.get(e.getID())));
 
-        // Retrieve daily ratios
-        ImmutableMap<String, ?> assignmentRatios = assignments.getExperimentAssignmentRatioPerDayTable(mutexExperiments, experimentPriorities, fromDate, toDate);
+            // Retrieve daily ratios
+            ImmutableMap<String, ?> assignmentRatios =
+                    assignments.getExperimentAssignmentRatioPerDayTable(
+                            mutexExperiments, experimentPriorities, fromDate, toDate);
 
-        // build table and dispatch it
-        return httpHeader.headers().entity(assignmentRatios).build();
+            // build table and dispatch it
+            return httpHeader.headers().entity(assignmentRatios).build();
+        } catch (Exception exception) {
+            LOGGER.error("getExperimentAssignmentRatioPerDay failed for experimentID={}, " +
+                    "from={}, to={}, timezone={} with error:",
+                    experimentID, from, to, timezone,
+                    exception);
+            throw exception;
+        }
     }
 
     /**
