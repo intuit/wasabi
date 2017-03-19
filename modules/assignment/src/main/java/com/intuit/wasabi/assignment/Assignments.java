@@ -186,5 +186,6 @@ public interface Assignments {
      * @param toDate               the date to report to
      * @return bucket assignment ratios per day and meta
      */
-    ImmutableMap<String, ?> getExperimentAssignmentRatioPerDayTable(List<Experiment> experiments, Map<Experiment.ID, Integer> experimentPriorities, OffsetDateTime fromDate, OffsetDateTime toDate);
+    ImmutableMap<String, ?> getExperimentAssignmentRatioPerDayTable(List<Experiment> experiments, Map<Experiment.ID,
+            Integer> experimentPriorities, OffsetDateTime fromDate, OffsetDateTime toDate);
 }

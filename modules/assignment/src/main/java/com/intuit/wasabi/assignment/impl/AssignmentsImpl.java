@@ -1429,18 +1429,26 @@ public class AssignmentsImpl implements Assignments {
      * @param toDate      the last day to include
      * @return a map mapping experiment IDs to their daily values for each of the given days
      */
-    Map<Experiment.ID, Map<OffsetDateTime, Double>> getExperimentAssignmentRatioPerDay(List<Experiment> experiments, OffsetDateTime fromDate, OffsetDateTime toDate) {
+    Map<Experiment.ID, Map<OffsetDateTime, Double>> getExperimentAssignmentRatioPerDay(
+            List<Experiment> experiments,
+            OffsetDateTime fromDate,
+            OffsetDateTime toDate) {
         return experiments.parallelStream()
                 .collect(Collectors.toMap(Experiment::getID,
-                        experiment -> (Map<OffsetDateTime,Double>) assignmentsRepository.getExperimentBucketAssignmentRatioPerDay(experiment.getID(), fromDate, toDate)));
+                        experiment -> assignmentsRepository.getExperimentBucketAssignmentRatioPerDay(
+                                experiment.getID(), fromDate, toDate)));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public ImmutableMap<String, ?> getExperimentAssignmentRatioPerDayTable(List<Experiment> experiments, Map<Experiment.ID, Integer> experimentPriorities, OffsetDateTime fromDate, OffsetDateTime toDate) {
-        Map<Experiment.ID, Map<OffsetDateTime, Double>> assignmentRatios = getExperimentAssignmentRatioPerDay(experiments, fromDate, toDate);
+    public ImmutableMap<String, ?> getExperimentAssignmentRatioPerDayTable(
+            List<Experiment> experiments,
+            Map<Experiment.ID, Integer> experimentPriorities,
+            OffsetDateTime fromDate, OffsetDateTime toDate) {
+        Map<Experiment.ID, Map<OffsetDateTime, Double>> assignmentRatios =
+                getExperimentAssignmentRatioPerDay(experiments, fromDate, toDate);
 
         // Prepare table: fill with labels, priorities, and sampling percentages
         List<Experiment.Label> experimentLabelsList = new ArrayList<>(experiments.size());

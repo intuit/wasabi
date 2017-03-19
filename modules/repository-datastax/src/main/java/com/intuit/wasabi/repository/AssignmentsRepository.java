@@ -165,7 +165,8 @@ public interface AssignmentsRepository {
     );
 
     /**
-     * Inserts an assignment type to be counted by {@link #getExperimentBucketAssignmentRatioPerDay(Experiment.ID, OffsetDateTime, OffsetDateTime)}.
+     * Inserts an assignment type to be counted by
+     * {@link #getExperimentBucketAssignmentRatioPerDay(Experiment.ID, OffsetDateTime, OffsetDateTime)}.
      *
      * @param experimentID     the experiment ID
      * @param date             the date of the assignment
@@ -183,6 +184,7 @@ public interface AssignmentsRepository {
      * and "nullAssignments", which each have a list of values which represent the assignment counts of new assignments
      * for each day, ordered from {@code fromDate} to {@code toDate}.
      */
-    Map<OffsetDateTime, Double> getExperimentBucketAssignmentRatioPerDay(Experiment.ID experimentID, OffsetDateTime fromDate, OffsetDateTime toDate);
+    Map<OffsetDateTime, Double> getExperimentBucketAssignmentRatioPerDay(
+            Experiment.ID experimentID, OffsetDateTime fromDate, OffsetDateTime toDate);
 
 }

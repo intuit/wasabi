@@ -762,7 +762,9 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     }
 
 	@Override
-	public void insertExperimentBucketAssignment(ID experimentID, Instant date,
+	public void insertExperimentBucketAssignment(
+	        ID experimentID,
+            Instant date,
 			boolean bucketAssignment) {
 		try {
 			experimentAssignmentTypeAccessor.insert(experimentID.getRawID(), Date.from(date), bucketAssignment);
@@ -771,13 +773,14 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                     experimentID.getRawID().toString(), date, e.getMessage());
             throw new RepositoryException("Failed ot write into  experiment_assignment_type for experiment " + experimentID + 
             		" on " + date + " bucketAssignment " + bucketAssignment  + ". Exception: " + e.getMessage());
-            		
-        }	
+        }
 	}
 
 	@Override
 	public Map<OffsetDateTime, Double> getExperimentBucketAssignmentRatioPerDay(
-			ID experimentID, OffsetDateTime fromDate, OffsetDateTime toDate) {
+			ID experimentID,
+            OffsetDateTime fromDate,
+            OffsetDateTime toDate) {
 		Map<OffsetDateTime, Double> experimentBucketAssignmentRatios = new HashMap<>();
 		
         OffsetDateTime currentDate = fromDate;
