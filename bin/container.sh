@@ -271,7 +271,7 @@ exec_commands_project() {
 }
 
 
-optspec=":f:p:v:m::s:h-:"
+optspec=":f:p:v:m:s:h-:"
 
 while getopts "${optspec}" opt; do
   case "${opt}" in
