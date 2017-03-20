@@ -44,7 +44,7 @@ options:
   -p | --profile [ profile ]             : profile; default ${profile_default}
   -e | --endpoint [ host:port ]          : api endpoint; default: ${endpoint_default}
   -v | --verify [ true | false ]         : verify installation configuration; default: ${verify_default}
-  -m | --migration [ true | false ]      : refresh migration scripts; default: ${migration_default}
+  -m | --migration [ true | false ]      : refresh cassandra migration scripts; default: ${migration_default}
   -t | --buildtests [ true | false ]     : perform tests after build; default: ${buildtests_default}
   -s | --sleep [ sleep-time ]            : sleep/wait time in seconds; default: ${sleep_default}
   -h | --help                            : help message

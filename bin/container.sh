@@ -35,7 +35,7 @@ usage: `basename ${0}` [options] [commands]
 
 options:
   -v | --verify [ true | false ]         : verify installation configuration; default: ${verify_default}
-  -m | --migration [ true | false ]      : refresh migration scripts; default: ${migration_default}
+  -m | --migration [ true | false ]      : refresh cassandra migration scripts; default: ${migration_default}
   -s | --sleep [ sleep-time ]            : sleep/wait time in seconds; default: ${sleep_default}
   -h | --help                            : help message
 
@@ -271,7 +271,7 @@ exec_commands_project() {
 }
 
 
-optspec=":f:p:v:m::s:h-:"
+optspec=":f:p:v:m:s:h-:"
 
 while getopts "${optspec}" opt; do
   case "${opt}" in
