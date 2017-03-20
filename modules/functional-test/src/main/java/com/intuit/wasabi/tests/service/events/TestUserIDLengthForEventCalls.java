@@ -54,7 +54,8 @@ public class TestUserIDLengthForEventCalls extends TestBase {
     private User testUserID201Characters = UserFactory.createUser(StringUtils.repeat("a", 201));// border case on new
                                                                                                 // userlength
     private Application testApplication = null;
-    Event event = new Event("IMPRESSION");
+    Event eventImpression = new Event("IMPRESSION");
+    Event eventAction = new Event("ACTION");
     private Experiment experiment = null;
 
     @BeforeClass
@@ -82,11 +83,15 @@ public class TestUserIDLengthForEventCalls extends TestBase {
         postAssignment(experiment, new User("user4"));
 
         clearAssignmentsMetadataCache();
-        postEvent(event, experiment, new User("user1"), HttpStatus.SC_CREATED);
-        postEvent(event, experiment, new User("user2"), HttpStatus.SC_CREATED);
-        postEvent(event, experiment, new User("user3"), HttpStatus.SC_CREATED);
-        postEvent(event, experiment, new User("user4"), HttpStatus.SC_CREATED);
+        postEvent(eventImpression, experiment, new User("user1"), HttpStatus.SC_CREATED);
+        postEvent(eventImpression, experiment, new User("user2"), HttpStatus.SC_CREATED);
+        postEvent(eventImpression, experiment, new User("user3"), HttpStatus.SC_CREATED);
+        postEvent(eventImpression, experiment, new User("user4"), HttpStatus.SC_CREATED);
         clearAssignmentsMetadataCache();
+        postEvent(eventAction, experiment, new User("user1"), HttpStatus.SC_CREATED);
+        postEvent(eventAction, experiment, new User("user2"), HttpStatus.SC_CREATED);
+        postEvent(eventAction, experiment, new User("user3"), HttpStatus.SC_CREATED);
+        postEvent(eventAction, experiment, new User("user4"), HttpStatus.SC_CREATED);
     }
 
     @Test
@@ -96,19 +101,30 @@ public class TestUserIDLengthForEventCalls extends TestBase {
         Assignment assignment = postAssignment(experiment, testUserID48Characters);
         Assert.assertEquals(assignment.status, "NEW_ASSIGNMENT");
 
-        // before we post event(impression) lets get counts of impression
+        // before we post impression && actions lets get counts of those events
         clearAssignmentsMetadataCache();
         ExperimentCounts experimentCounts = getExperimentCounts(experiment);
         int preImpressionCounts = experimentCounts.impressionCounts.eventCount;
+        int preActionCounts = experimentCounts.jointActionCounts.eventCount;
 
         // lets create an impression and this should increase the event count by one
         clearAssignmentsMetadataCache();
-        postEvent(event, experiment, testUserID48Characters, HttpStatus.SC_CREATED);
+        postEvent(eventImpression, experiment, testUserID48Characters, HttpStatus.SC_CREATED);
         experimentCounts = getExperimentCounts(experiment);
         int postImpressionCounts = experimentCounts.impressionCounts.eventCount;
 
         // lets assert that the event impression has been created
         Assert.assertEquals(postImpressionCounts - preImpressionCounts, 1);
+
+        // lets create an action and this should increase the event count of action by one
+        clearAssignmentsMetadataCache();
+        postEvent(eventAction, experiment, testUserID48Characters, HttpStatus.SC_CREATED);
+        experimentCounts = getExperimentCounts(experiment);
+        int postActionCounts = experimentCounts.jointActionCounts.eventCount;
+
+        // lets assert that the event action has been created
+        Assert.assertEquals(postActionCounts - preActionCounts, 1);
+
     }
 
     @Test
@@ -122,16 +138,26 @@ public class TestUserIDLengthForEventCalls extends TestBase {
         clearAssignmentsMetadataCache();
         ExperimentCounts experimentCounts = getExperimentCounts(experiment);
         int preImpressionCounts = experimentCounts.impressionCounts.eventCount;
+        int preActionCounts = experimentCounts.jointActionCounts.eventCount;
 
         // lets create an impression and this should increase the event count by one
         clearAssignmentsMetadataCache();
-        postEvent(event, experiment, testUserID49Characters, HttpStatus.SC_CREATED);
+        postEvent(eventImpression, experiment, testUserID49Characters, HttpStatus.SC_CREATED);
         experimentCounts = getExperimentCounts(experiment);
         clearAssignmentsMetadataCache();
         int postImpressionCounts = experimentCounts.impressionCounts.eventCount;
 
         // lets assert that the event impression has been created
         Assert.assertEquals(postImpressionCounts - preImpressionCounts, 1);
+
+        // lets create an action and this should increase the event count of action by one
+        clearAssignmentsMetadataCache();
+        postEvent(eventAction, experiment, testUserID49Characters, HttpStatus.SC_CREATED);
+        experimentCounts = getExperimentCounts(experiment);
+        int postActionCounts = experimentCounts.jointActionCounts.eventCount;
+
+        // lets assert that the event action has been created
+        Assert.assertEquals(postActionCounts - preActionCounts, 1);
     }
 
     @Test
@@ -145,18 +171,31 @@ public class TestUserIDLengthForEventCalls extends TestBase {
         clearAssignmentsMetadataCache();
         ExperimentCounts experimentCounts = getExperimentCounts(experiment);
         int preImpressionCounts = experimentCounts.impressionCounts.eventCount;
+        int preActionCounts = experimentCounts.jointActionCounts.eventCount;
 
         // lets create an impression and this should increase the event count by one
         clearAssignmentsMetadataCache();
-        postEvent(event, experiment, testUserID200Characters, HttpStatus.SC_CREATED);
+        postEvent(eventImpression, experiment, testUserID200Characters, HttpStatus.SC_CREATED);
         experimentCounts = getExperimentCounts(experiment);
         clearAssignmentsMetadataCache();
         int postImpressionCounts = experimentCounts.impressionCounts.eventCount;
 
         // lets assert that the event impression has been created
         Assert.assertEquals(postImpressionCounts - preImpressionCounts, 1);
+
+        // lets create an action and this should increase the event count of action by one
+        clearAssignmentsMetadataCache();
+        postEvent(eventAction, experiment, testUserID200Characters, HttpStatus.SC_CREATED);
+        experimentCounts = getExperimentCounts(experiment);
+        int postActionCounts = experimentCounts.jointActionCounts.eventCount;
+
+        // lets assert that the event action has been created
+        Assert.assertEquals(postActionCounts - preActionCounts, 1);
     }
 
+    /**
+     * This test is to test for negative case scenario as the allowed user length is 200
+     */
     @Test
     public void test201characterUserID() {
 
@@ -168,16 +207,26 @@ public class TestUserIDLengthForEventCalls extends TestBase {
         clearAssignmentsMetadataCache();
         ExperimentCounts experimentCounts = getExperimentCounts(experiment);
         int preImpressionCounts = experimentCounts.impressionCounts.eventCount;
+        int preActionCounts = experimentCounts.jointActionCounts.eventCount;
 
         // lets create an impression and this should increase the event count by one
         clearAssignmentsMetadataCache();
-        postEvent(event, experiment, testUserID201Characters, HttpStatus.SC_CREATED);
+        postEvent(eventImpression, experiment, testUserID201Characters, HttpStatus.SC_CREATED);
         experimentCounts = getExperimentCounts(experiment);
         clearAssignmentsMetadataCache();
         int postImpressionCounts = experimentCounts.impressionCounts.eventCount;
 
-        // lets assert that the event impression should not be created as userId is more than 200 characters
+        // assert that the event impression should not be created as userId is more than 200 characters
         Assert.assertEquals(postImpressionCounts - preImpressionCounts, 0);
+
+        // create an action and this should not increase the event count of action by one as userId is more than 200
+        clearAssignmentsMetadataCache();
+        postEvent(eventAction, experiment, testUserID201Characters, HttpStatus.SC_CREATED);
+        experimentCounts = getExperimentCounts(experiment);
+        int postActionCounts = experimentCounts.jointActionCounts.eventCount;
+
+        // lets assert that the event action has not been created
+        Assert.assertEquals(postActionCounts - preActionCounts, 0);
     }
 
     @AfterClass
