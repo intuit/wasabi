@@ -21,6 +21,7 @@ casks=("java" "docker")
 profile_default=development
 endpoint_default=localhost:8080
 verify_default=false
+migration_default=false
 buildtests_default=true
 sleep_default=30
 red=`tput setaf 9`
@@ -43,6 +44,7 @@ options:
   -p | --profile [ profile ]             : profile; default ${profile_default}
   -e | --endpoint [ host:port ]          : api endpoint; default: ${endpoint_default}
   -v | --verify [ true | false ]         : verify installation configuration; default: ${verify_default}
+  -m | --migration [ true | false ]      : refresh cassandra migration scripts; default: ${migration_default}
   -t | --buildtests [ true | false ]     : perform tests after build; default: ${buildtests_default}
   -s | --sleep [ sleep-time ]            : sleep/wait time in seconds; default: ${sleep_default}
   -h | --help                            : help message
@@ -193,7 +195,7 @@ clean() {
 }
 
 start() {
-  ./bin/container.sh -v ${verify} start${1:+:$1}
+  ./bin/container.sh -v ${verify} -m ${migration} start${1:+:$1}
 }
 
 test_api() {
@@ -351,7 +353,7 @@ exec_commands() {
   (IFS=','; for command in ${commands}; do ${prefix} ${command}; done)
 }
 
-optspec=":p:e:v:s:h-:"
+optspec=":p:e:v:m:t:s:h-:"
 
 while getopts "${optspec}" opt; do
   case "${opt}" in
@@ -363,6 +365,8 @@ while getopts "${optspec}" opt; do
         endpoint=*) endpoint="${OPTARG#*=}";;
         verify) verify="${!OPTIND}"; OPTIND=$(( ${OPTIND} + 1 ));;
         verify=*) verify="${OPTARG#*=}";;
+        migration) migration="${!OPTIND}"; OPTIND=$(( ${OPTIND} + 1 ));;
+        migration=*) migration="${OPTARG#*=}";;
         buildtests) buildtests="${!OPTIND}"; OPTIND=$(( ${OPTIND} + 1 ));;
         buildtests=*) buildtests="${OPTARG#*=}";;
         sleep) sleep="${!OPTIND}"; OPTIND=$(( ${OPTIND} + 1 ));;
@@ -373,6 +377,7 @@ while getopts "${optspec}" opt; do
     p) profile=${OPTARG};;
     e) endpoint=${OPTARG};;
     v) verify=${OPTARG};;
+    m) migration=${OPTARG};;
     t) buildtests=${OPTARG};;
     s) sleep=${OPTARG};;
     h) usage;;
@@ -386,6 +391,7 @@ done
 profile=${profile:=${profile_default}}
 endpoint=${endpoint:=${endpoint_default}}
 verify=${verify:=${verify_default}}
+migration=${migration:=${migration_default}}
 buildtests=${buildtests:=${buildtests_default}}
 sleep=${sleep:=${sleep_default}}
 
