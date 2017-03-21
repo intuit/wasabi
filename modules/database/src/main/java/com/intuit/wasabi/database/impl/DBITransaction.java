@@ -32,7 +32,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -123,7 +122,6 @@ public class DBITransaction implements Transaction {
      * @param shouldReturnId
      * @param query
      * @param params
-     *
      * @return
      */
     private Integer insert(final boolean shouldReturnId, final String query, final Object... params) {
@@ -171,9 +169,7 @@ public class DBITransaction implements Transaction {
      * Execute a block (database operation) with a new handle
      *
      * @param block representing a database operation
-     *
      * @return The result of a given database operation
-     *
      */
     private Object perform(HandleBlock block) {
         Handle handle = getHandle();
@@ -198,7 +194,6 @@ public class DBITransaction implements Transaction {
      * Handle represents a connection to the database system. It is a wrapper around a JDBC Connection object.
      *
      * @return handle to perform database operation.
-     *
      */
     protected Handle getHandle() {
         //This operation reuses JDBC Connection object from the pool and then creates a new handle object.
@@ -212,7 +207,7 @@ public class DBITransaction implements Transaction {
 
     /**
      * Begin a new transaction for this instance of DBITransaction.
-     *
+     * <p>
      * Initialize the handle of this instance of DBITransaction
      *
      * @throws WasabiServerException
@@ -231,7 +226,6 @@ public class DBITransaction implements Transaction {
 
     /**
      * Commits an active transaction of this instance of DBITransaction
-     *
      */
     protected void commit(Handle handle) {
         try {
@@ -243,10 +237,9 @@ public class DBITransaction implements Transaction {
 
     /**
      * Rollback an active transaction of this instance of DBITransaction
-     *
      */
     protected void rollback(Handle handle) {
-        if(isNull(handle)) return;
+        if (isNull(handle)) return;
 
         try {
             handle.rollback();
@@ -257,10 +250,9 @@ public class DBITransaction implements Transaction {
 
     /**
      * Close the handle (JDBC Connection) of this instance of DBITransaction
-     *
      */
     public void close(Handle handle) {
-        if(isNull(handle)) return;
+        if (isNull(handle)) return;
 
         try {
             handle.close();
