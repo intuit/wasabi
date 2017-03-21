@@ -1,0 +1,38 @@
+<div ng-controller="SuperadminsTableCtrl">
+    <div class="toolbar">
+        <button id="btnNewSuperadmin" class="blue" ng-click="openAddSuperadminModal()">Add Superadmin</button>
+    </div>
+
+    <div id="usersList">
+        <div class="tableContainer">
+            <table col-resizeable>
+                <tr>
+                    <th style="width:13%" class="_username"><span class="colLabel">ID</span></th>
+                    <th style="width:16%" class="_score"><span class="colLabel">First Name</span></th>
+                    <th style="width:18%" class="_comments"><span class="colLabel">Last Name</span></th>
+                    <th style="width:20%" class="_email"><span class="colLabel">Email</span></th>
+                    <th style="width:8%" class="icon">Actions</th>
+                </tr>
+                <tr ng-repeat="superadmin in superadmins | orderBy:orderByField:reverseSort">
+                    <td>
+                        {{superadmin.userID}}
+                    </td>
+                    <td>
+                        {{superadmin.firstName}}
+                    </td>
+                    <td>
+                        {{superadmin.lastName}}
+                    </td>
+                    <td>
+                        {{superadmin.userEmail}}
+                    </td>
+                    <td class="icon">
+                        <a class="command delete" ng-if="!superadmin.doNotShow" href="#" title="Remove Superadmin" onclick="return false;" ng-click="removeSuperadmin(superadmin)">
+                            Delete
+                        </a>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>

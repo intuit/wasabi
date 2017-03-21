@@ -1531,19 +1531,22 @@ $tabBorderColor: #bcbcbc;
 /* experiment details */
 .exprHead {
     position: relative;
-    padding-top: 14px;
-    min-height: 80px;
+    min-height: 55px;
+    margin-top: 14px;
     margin-left: -5px;
-    /*
-    background: rgb(249,249,249);
-    margin: -15px -25px 10px -25px;
+    margin-bottom: 15px;
     border-bottom: 1px solid rgb(240,240,240);
-    padding: 25px 0 0 100px;*/
-
     canvas {
         position: absolute;
         left: 0;
         top: 0;
+    }
+    .controlBox {
+        float: right;
+        margin-right: 55px;
+        border: 1px solid #cbccce;
+        border-radius: 5px;
+        padding: 4px 5px 2px 5px;
     }
     .pct {
         width: 70px;
@@ -1588,8 +1591,7 @@ $tabBorderColor: #bcbcbc;
     text-align: center;
 }
 .exprName {
-    position: relative;
-    border-bottom: 1px solid rgb(240,240,240);
+    float: left;
     h2 {
         margin-left: 35px;
     }
