@@ -36,6 +36,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.util.Objects.isNull;
 import static java.util.regex.Pattern.compile;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -43,7 +44,6 @@ public class DBITransaction implements Transaction {
 
     private static final Logger LOGGER = getLogger(DBITransaction.class);
     private DBI dbi;
-    private AtomicBoolean inTransaction = new AtomicBoolean(false);
     private final Pattern notNullPattern = compile("^.*Column \'(\\S+)\' cannot be null");
     private final Pattern duplicateEntryPattern = compile("^.*Duplicate entry \'(\\S+)\' for key \'(\\S+)\'");
 
@@ -65,24 +65,15 @@ public class DBITransaction implements Transaction {
             return value;
         } catch (WasabiException | IllegalArgumentException e) {
             LOGGER.warn("Problem executing block. Trying to rollback...", e);
-            tryRollback(handle);
+            rollback(handle);
             throw e;
         } catch (Exception e) {
             LOGGER.warn("Unexpected exception executing block. Trying to rollback...", e);
-
-            tryRollback(handle);
-
+            rollback(handle);
             throw new DatabaseException("Unexpected exception when executing block \"" + block + "\"", e);
         } finally {
+            // Close the handle (internally this call releases the JDBC connection to the pool)
             close(handle);
-        }
-    }
-
-    private void tryRollback(Handle handle) {
-        try {
-            rollback(handle);
-        } catch (Exception e) {
-            LOGGER.error("Failed rolling back transaction", e);
         }
     }
 
@@ -198,9 +189,7 @@ public class DBITransaction implements Transaction {
             throw ex;
         } finally {
             // Close the handle (internally this call releases the JDBC connection to the pool)
-            if (handle!=null) {
-                handle.close();
-            }
+            close(handle);
         }
     }
 
@@ -238,7 +227,6 @@ public class DBITransaction implements Transaction {
         }
 
         handle.begin();
-        inTransaction.set(true);
     }
 
     /**
@@ -246,8 +234,11 @@ public class DBITransaction implements Transaction {
      *
      */
     protected void commit(Handle handle) {
-        handle.commit();
-        inTransaction.set(false);
+        try {
+            handle.commit();
+        } catch (Exception e) {
+            LOGGER.error("Failed to commit transaction", e);
+        }
     }
 
     /**
@@ -255,16 +246,27 @@ public class DBITransaction implements Transaction {
      *
      */
     protected void rollback(Handle handle) {
-        handle.rollback();
-        inTransaction.set(false);
+        if(isNull(handle)) return;
+
+        try {
+            handle.rollback();
+        } catch (Exception e) {
+            LOGGER.error("Failed rolling back transaction", e);
+        }
     }
 
     /**
-     * Close the handle (JDBC Connection) of this instance of DBITransaction and set the handle to NULL
+     * Close the handle (JDBC Connection) of this instance of DBITransaction
      *
      */
     public void close(Handle handle) {
-        handle.close();
+        if(isNull(handle)) return;
+
+        try {
+            handle.close();
+        } catch (Exception e) {
+            LOGGER.error("Failed to close handle", e);
+        }
     }
 
     /**
