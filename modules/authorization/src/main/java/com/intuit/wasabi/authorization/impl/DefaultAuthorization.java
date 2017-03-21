@@ -16,6 +16,7 @@
 package com.intuit.wasabi.authorization.impl;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authorization.Authorization;
 import com.intuit.wasabi.authorizationobjects.Permission;
@@ -129,7 +130,6 @@ public class DefaultAuthorization implements Authorization {
         List<Experiment> experimentList = experiments.getExperiments(userRole.getApplicationName());
 
         // get current permissions
-
         if (!experimentList.isEmpty()) {
             List<UserRole> userRoleList = authorizationRepository.getUserRoleList(userRole.getUserID()).getRoleList();
             Role oldRole = null;
@@ -217,4 +217,55 @@ public class DefaultAuthorization implements Authorization {
 
         return UserInfo.Username.valueOf(fields[0]);
     }
+
+    @Override
+    public void assignUserToSuperAdminRole(final UserInfo candidateUserInfo, final UserInfo assigningUserInfo) {
+
+        LOGGER.debug("Assigning super admin role to user={} by user={} ", candidateUserInfo, assigningUserInfo);
+
+        UserRoleList userRoleList = getUserRoleList(candidateUserInfo.getUsername());
+
+        LOGGER.debug("User role list {}", userRoleList);
+
+        boolean isSuperAdmin =
+                userRoleList.getRoleList().stream().anyMatch((UserRole ur) -> ur.getRole().equals(Role.SUPERADMIN));
+
+        Preconditions.checkArgument(!isSuperAdmin,
+                "User %s is already a superadmin", candidateUserInfo.getUsername());
+
+        authorizationRepository.assignUserToSuperAdminRole(candidateUserInfo);
+        eventLog.postEvent(new AuthorizationChangeEvent(assigningUserInfo,
+                null, candidateUserInfo, null, Role.SUPERADMIN.toString()));
+    }
+
+    @Override
+    public void removeUserFromSuperAdminRole(final UserInfo candidateUserInfo, final UserInfo assigningUserInfo) {
+
+        LOGGER.debug("Removing user={} from superadmin by assigningUser={}", candidateUserInfo, assigningUserInfo);
+
+        List<UserRole> allSuperAdmins = getSuperAdminRoleList();
+
+        LOGGER.debug("Current superadmins {}", allSuperAdmins);
+
+        Preconditions.checkArgument(allSuperAdmins.size() > 1,
+                "Cannot delete. SuperAdmins less than 1");
+
+        boolean isSuperAdmin = allSuperAdmins.stream().anyMatch((UserRole ur) -> ur.getRole().equals(Role.SUPERADMIN)
+                && ur.getUserID().equals(candidateUserInfo.getUsername()));
+
+        Preconditions.checkArgument(isSuperAdmin,
+                "User %s is not a superadmin", candidateUserInfo.getUsername());
+
+        authorizationRepository.removeUserFromSuperAdminRole(candidateUserInfo);
+        eventLog.postEvent(new AuthorizationChangeEvent(assigningUserInfo,
+                null, candidateUserInfo, Role.SUPERADMIN.toString(), null));
+    }
+
+    @Override
+    public List<UserRole> getSuperAdminRoleList() {
+        LOGGER.debug("Getting all super admins");
+
+        return authorizationRepository.getSuperAdminRoleList();
+    }
+
 }

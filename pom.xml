@@ -45,7 +45,7 @@ http://www.w3.org/2001/XMLSchema-instance">
         <assignment.metadata.cache.maxBytesLocalHeap>128M</assignment.metadata.cache.maxBytesLocalHeap>
 
         <jacoco.version>0.7.2.201409121644</jacoco.version>
-        <jacoco.destFile>${basedir}/modules/target/jacoco.exec</jacoco.destFile>
+        <jacoco.destFile>${basedir}/target/jacoco.exec</jacoco.destFile>
 
         <http.proxy.host>http://insert.your.proxy.host.here</http.proxy.host>
         <http.proxy.port>80</http.proxy.port>
@@ -85,8 +85,10 @@ http://www.w3.org/2001/XMLSchema-instance">
         <assignment.decorator.enabled>false</assignment.decorator.enabled>
 
         <!-- mutagen -->
-        <cassandra.mutagen.root.resource.path>com/intuit/wasabi/repository/impl/cassandra/experiments/mutation</cassandra.mutagen.root.resource.path>
-        <mysql.mutagen.root.resource.path>com/intuit/wasabi/repository/impl/mysql/migration</mysql.mutagen.root.resource.path>
+        <cassandra.mutagen.root.resource.path>com/intuit/wasabi/repository/impl/cassandra/experiments/mutation
+        </cassandra.mutagen.root.resource.path>
+        <mysql.mutagen.root.resource.path>com/intuit/wasabi/repository/impl/mysql/migration
+        </mysql.mutagen.root.resource.path>
 
         <!-- FIXME: remove -->
         <assignment.decorator.service>http://decorator.example.com</assignment.decorator.service>
@@ -101,102 +103,102 @@ http://www.w3.org/2001/XMLSchema-instance">
     </properties>
 
     <profiles>
-      <profile>
-          <id>development</id>
-          <activation>
+        <profile>
+            <id>development</id>
+            <activation>
                 <activeByDefault>true</activeByDefault>
-          </activation>
-          <properties>
-              <application.profile>development</application.profile>
-              <application.home>./${application.name}</application.home>
-              <application.http.host>localhost</application.http.host>
-              <application.http.port>8080</application.http.port>
-          </properties>
-          <build>
-              <plugins>
-                <plugin>
-                  <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.11</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.maven.surefire</groupId>
-                        <artifactId>surefire-junit47</artifactId>
-                        <version>2.12</version>
-                    </dependency>
-                </dependencies>
-                <configuration>
-                    <excludes>
-                        <exclude>**/*ITest.class</exclude>
-                    </excludes>
-                </configuration>
-                </plugin>
-              </plugins>
-          </build>
-          </profile>
-            <profile>
-              <id>integration</id>
-              <activation>
-                  <activeByDefault>false</activeByDefault>
-              </activation>
-              <properties>
-                  <application.profile>development</application.profile>
-                  <application.home>./${application.name}</application.home>
-                  <application.http.host>${cassandra.experiments.nodeHosts}</application.http.host>
-                  <application.http.port>8080</application.http.port>
-              </properties>
-              <build>
-                  <plugins>
+            </activation>
+            <properties>
+                <application.profile>development</application.profile>
+                <application.home>./${application.name}</application.home>
+                <application.http.host>localhost</application.http.host>
+                <application.http.port>8080</application.http.port>
+            </properties>
+            <build>
+                <plugins>
                     <plugin>
-                      <groupId>org.apache.maven.plugins</groupId>
-                			<artifactId>maven-surefire-plugin</artifactId>
-                			<version>2.11</version>
-                			<dependencies>
-                				<dependency>
-                					<groupId>org.apache.maven.surefire</groupId>
-                					<artifactId>surefire-junit47</artifactId>
-                					<version>2.12</version>
-                				</dependency>
-                			</dependencies>
-                			<configuration>
-                				<includes>
-                					<include>**/*.class</include>
-                				</includes>
-                			</configuration>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>2.11</version>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.apache.maven.surefire</groupId>
+                                <artifactId>surefire-junit47</artifactId>
+                                <version>2.12</version>
+                            </dependency>
+                        </dependencies>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/*ITest.class</exclude>
+                            </excludes>
+                        </configuration>
                     </plugin>
-                  </plugins>
-                </build>
-              </profile>
-              <profile>
-                <id>build</id>
-                <properties>
-                    <application.profile>build</application.profile>
-                </properties>
-              </profile>
-              <profile>
-                  <id>sign</id>
-                  <properties>
-                      <application.profile>sign</application.profile>
-                  </properties>
-                  <build>
-                      <plugins>
-                          <plugin>
-                              <groupId>org.apache.maven.plugins</groupId>
-                              <artifactId>maven-gpg-plugin</artifactId>
-                              <version>1.6</version>
-                              <executions>
-                                  <execution>
-                                      <id>sign-artifacts</id>
-                                      <phase>verify</phase>
-                                      <goals>
-                                          <goal>sign</goal>
-                                      </goals>
-                                  </execution>
-                              </executions>
-                          </plugin>
-                      </plugins>
-                  </build>
-              </profile>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>integration</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <application.profile>development</application.profile>
+                <application.home>./${application.name}</application.home>
+                <application.http.host>${cassandra.experiments.nodeHosts}</application.http.host>
+                <application.http.port>8080</application.http.port>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>2.11</version>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.apache.maven.surefire</groupId>
+                                <artifactId>surefire-junit47</artifactId>
+                                <version>2.12</version>
+                            </dependency>
+                        </dependencies>
+                        <configuration>
+                            <includes>
+                                <include>**/*.class</include>
+                            </includes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>build</id>
+            <properties>
+                <application.profile>build</application.profile>
+            </properties>
+        </profile>
+        <profile>
+            <id>sign</id>
+            <properties>
+                <application.profile>sign</application.profile>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.6</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
     <modules>
@@ -287,14 +289,6 @@ http://www.w3.org/2001/XMLSchema-instance">
                 </exclusion>
             </exclusions>
         </dependency>
-<!--
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>6.9.6</version>
-            <scope>test</scope>
-        </dependency>
--->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -447,7 +441,7 @@ http://www.w3.org/2001/XMLSchema-instance">
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${jacoco.version}</version>
                 <configuration>
-                    <dataFile>${basedir}/modules/target/jacoco.exec</dataFile>
+                    <dataFile>${basedir}/target/jacoco.exec</dataFile>
                     <excludes>
                         <exclude>com/intuit/wasabi/tests/**/*.class</exclude>
                     </excludes>
@@ -466,8 +460,8 @@ http://www.w3.org/2001/XMLSchema-instance">
                                 <goal>report</goal>
                             </goals>
                             <configuration>
-                                <dataFile>${project.build.directory}/target/jacoco.exec</dataFile>
-                                <outputDirectory>${basedir}/modules/target/</outputDirectory>
+                                <dataFile>${project.build.directory}/jacoco.exec</dataFile>
+                                <outputDirectory>${basedir}/target/</outputDirectory>
                             </configuration>
                     </execution>
                 </executions>
@@ -494,7 +488,7 @@ http://www.w3.org/2001/XMLSchema-instance">
                 <configuration>
                     <repoToken>${env.coveralls_repo_token}</repoToken>
                     <jacocoReports>
-                        <jacocoReport>${basedir}/modules/target/jacoco.xml</jacocoReport>
+                        <jacocoReport>${basedir}/target/jacoco.xml</jacocoReport>
                     </jacocoReports>
                 </configuration>
             </plugin>
@@ -560,24 +554,24 @@ http://www.w3.org/2001/XMLSchema-instance">
                 <artifactId>maven-changelog-plugin</artifactId>
                 <version>2.3</version>
             </plugin>
-<!--
-            <plugin>
-                <groupId>com.github.jinnovations</groupId>
-                <artifactId>attribution-maven-plugin</artifactId>
-                <version>0.9.4</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>generate-attribution-file</goal>
-                        </goals>
-                        <phase>generate-resources</phase>
-                        <configuration>
-                            <outputFile>${user.dir}/ATTRIBUTIONS/${project.artifactId}-attribution.xml</outputFile>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
--->
+            <!--
+                        <plugin>
+                            <groupId>com.github.jinnovations</groupId>
+                            <artifactId>attribution-maven-plugin</artifactId>
+                            <version>0.9.4</version>
+                            <executions>
+                                <execution>
+                                    <goals>
+                                        <goal>generate-attribution-file</goal>
+                                    </goals>
+                                    <phase>generate-resources</phase>
+                                    <configuration>
+                                        <outputFile>${user.dir}/ATTRIBUTIONS/${project.artifactId}-attribution.xml</outputFile>
+                                    </configuration>
+                                </execution>
+                            </executions>
+                        </plugin>
+            -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>

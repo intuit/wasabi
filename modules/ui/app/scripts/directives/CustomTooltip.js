@@ -5,13 +5,17 @@ angular.module('wasabi.directives').directive('customTooltip', ['TooltipFactory'
         return {
             restrict: 'A',
             link: function (scope, element, attrs) {
-                var $tip;
+                var $tip,
+                    timer = null;
 
                 element.on('mouseenter',function () {
+                    if (timer) {
+                        $timeout.cancel(timer);
+                    }
                     $tip = TooltipFactory.createAndShowTooltip(attrs.customTooltip, this);
                     // Sometimes, the tooltip is left displayed after the mouse has left and it won't go
                     // away.  This will automatically make it disappear, no matter what, after 5 seconds.
-                    $timeout(function() {
+                    timer = $timeout(function() {
                         TooltipFactory.hideTooltip($tip);
                     }, 5000);
                 }).on('mouseleave', function () {

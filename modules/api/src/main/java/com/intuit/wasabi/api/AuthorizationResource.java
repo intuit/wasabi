@@ -16,6 +16,8 @@
 package com.intuit.wasabi.api;
 
 import com.codahale.metrics.annotation.Timed;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -31,6 +33,7 @@ import com.intuit.wasabi.experimentobjects.Application;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import javax.ws.rs.Consumes;
@@ -43,6 +46,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +57,8 @@ import static com.intuit.wasabi.api.APISwaggerResource.EXAMPLE_ALL_ROLES;
 import static com.intuit.wasabi.api.APISwaggerResource.EXAMPLE_AUTHORIZATION_HEADER;
 import static com.intuit.wasabi.authorizationobjects.Permission.ADMIN;
 import static com.intuit.wasabi.authorizationobjects.Role.toRole;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
@@ -217,6 +223,128 @@ public class AuthorizationResource {
                     entity(ImmutableMap.<String, Object>builder().put("assignmentStatuses", status).build()).build();
         } catch (Exception exception) {
             LOGGER.error("assignUserRoles failed for userRoleList={} with error:", userRoleList, exception);
+            throw exception;
+        }
+    }
+
+    /**
+     * Add user to super admin role
+     *
+     * @param userID              - user to be added to super admin role
+     * @param authorizationHeader
+     * @return empty response body
+     */
+    @POST
+    @Path("/superadmins/{userID}")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "Assign superadmin privileges to user")
+    @Timed
+    public Response assignUserToSuperAdmin(
+            @PathParam("userID")
+            @ApiParam(value = "User ID")
+            final Username userID,
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) {
+
+        try {
+            LOGGER.debug("Assign userID={} to super admin", userID);
+
+            // Check for assigning user is superadmin
+            Username assigningUser = authorization.getUser(authorizationHeader);
+            UserInfo assigningUserInfo = authorization.getUserInfo(assigningUser);
+
+            authorization.checkSuperAdmin(assigningUser);
+
+            UserInfo candidateUserInfo = authorization.getUserInfo(userID);
+
+            final String USER_ID_INVALID_ERROR_TEMPLATE = "User id %s is not valid";
+            Preconditions.checkArgument(nonNull(candidateUserInfo), USER_ID_INVALID_ERROR_TEMPLATE, userID);
+            Preconditions.checkArgument(nonNull(candidateUserInfo.getUsername()),
+                    USER_ID_INVALID_ERROR_TEMPLATE, userID);
+            Preconditions.checkArgument(!Strings.isNullOrEmpty(candidateUserInfo.getUsername().getUsername()),
+                    USER_ID_INVALID_ERROR_TEMPLATE, userID);
+
+            authorization.assignUserToSuperAdminRole(candidateUserInfo, assigningUserInfo);
+
+            return httpHeader.headers(Status.NO_CONTENT).build();
+        } catch (Exception exception) {
+            LOGGER.error("assignUserToSuperAdmin failed for userID={} with error:", userID, exception);
+            throw exception;
+        }
+    }
+
+    /**
+     * Delete user from superadmin roles
+     *
+     * @param userID
+     * @param authorizationHeader
+     * @return empty response body
+     */
+    @DELETE
+    @Path("/superadmins/{userID}")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "Remove superadmin privileges to user")
+    @Timed
+    public Response removeUserFromSuperAdmin(
+            @PathParam("userID")
+            @ApiParam(value = "User ID")
+            final Username userID,
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) {
+
+        try {
+            LOGGER.debug("Removing user {} from superadmin ", userID);
+
+            // Check for assigning user is superadmin
+            Username assigningUser = authorization.getUser(authorizationHeader);
+            UserInfo assigningUserInfo = authorization.getUserInfo(assigningUser);
+
+            authorization.checkSuperAdmin(assigningUser);
+            UserInfo candidateUserInfo = authorization.getUserInfo(userID);
+            Preconditions.checkArgument(nonNull(candidateUserInfo),
+                    "User id %s is invalid", userID);
+
+            authorization.removeUserFromSuperAdminRole(candidateUserInfo, assigningUserInfo);
+            return httpHeader.headers(Status.NO_CONTENT).build();
+        } catch (Exception exception) {
+            LOGGER.error("removeUserFromSuperAdmin failed for usedID={} with error:", userID, exception);
+            throw exception;
+        }
+    }
+
+    /**
+     * Get all super admins
+     *
+     * @param authorizationHeader
+     * @return array of super admins information
+     */
+    @GET
+    @Path("/superadmins")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "Get all superadmins")
+    @Timed
+    public Response getAllSuperAdminRoleList(
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) {
+
+        try {
+            LOGGER.debug("Getting super admins role");
+
+            // Check for  user is superadmin
+            Username requestingUser = authorization.getUser(authorizationHeader);
+
+            authorization.checkSuperAdmin(requestingUser);
+
+            List<UserRole> userRoles = authorization.getSuperAdminRoleList();
+
+            LOGGER.debug("Super admin user roles received {}", userRoles);
+
+            return httpHeader.headers().entity(userRoles).build();
+        } catch (Exception exception) {
+            LOGGER.error("getAllSuperAdminRoleList failed with error:", exception);
             throw exception;
         }
     }
@@ -426,15 +554,15 @@ public class AuthorizationResource {
             }
 
             UserPermissionsList userPermissionsList = authorization.getUserPermissionsList(subject);
-            List<UserRoleList> userRoleListList = new ArrayList<>();
+            List<UserRoleList> userRoleList = new ArrayList<>();
             for (UserPermissions userPermissions : userPermissionsList.getPermissionsList()) {
                 UserRoleList list = authorization.getApplicationUsers(userPermissions.getApplicationName());
                 if (!list.getRoleList().isEmpty()) {
-                    userRoleListList.add(list);
+                    userRoleList.add(list);
                 }
             }
 
-            return httpHeader.headers().entity(userRoleListList).build();
+            return httpHeader.headers().entity(userRoleList).build();
         } catch (Exception exception) {
             LOGGER.error("getUserList failed with error:", exception);
             throw exception;
