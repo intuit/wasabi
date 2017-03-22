@@ -162,13 +162,11 @@ public class SegmentOnHttpHeaderTest extends TestBase {
      */
     @AfterClass
     public void cleanUp() {
-        if (experiment!=null && experiment.id != null) {
-            experiment.setState(Constants.EXPERIMENT_STATE_PAUSED);
-            putExperiment(experiment);
-            experiment.setState(Constants.EXPERIMENT_STATE_TERMINATED);
-            putExperiment(experiment);
-            deleteExperiment(experiment);
-        }
+        experiment.setState(Constants.EXPERIMENT_STATE_PAUSED);
+        putExperiment(experiment);
+        experiment.setState(Constants.EXPERIMENT_STATE_TERMINATED);
+        putExperiment(experiment);
+        deleteExperiment(experiment);
     }
 
 }
