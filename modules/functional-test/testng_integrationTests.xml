@@ -62,7 +62,8 @@
     </test>
     <test name="IntegrationEventsTests">
         <classes>
-            <class name="com.intuit.wasabi.tests.service.EventsIntegrationTest" />
+            <class name="com.intuit.wasabi.tests.service.events.EventsIntegrationTest" />
+            <class name="com.intuit.wasabi.tests.service.events.TestUserIDLengthForEventCalls" />
         </classes>
     </test>
     <test name="IntegrationCountTests">

@@ -1,19 +1,16 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
  * <p>
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
  * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
  * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
  *******************************************************************************/
-package com.intuit.wasabi.tests.service;
+package com.intuit.wasabi.tests.service.events;
 
 import com.intuit.wasabi.tests.library.TestBase;
 import com.intuit.wasabi.tests.library.util.serialstrategies.DefaultNameExclusionStrategy;
@@ -28,6 +25,7 @@ import com.intuit.wasabi.tests.model.factory.EventFactory;
 import com.intuit.wasabi.tests.model.factory.ExperimentFactory;
 import com.intuit.wasabi.tests.model.factory.UserFactory;
 import com.jayway.restassured.response.Response;
+
 import org.apache.http.HttpStatus;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -65,20 +63,18 @@ public class EventsIntegrationTest extends TestBase {
 
     private Experiment experiment;
     private List<Bucket> buckets = new ArrayList<>();
-    private String[] labels = {BLUE, RED};
-    private double[] allocations = {.50, .50,};
-    private boolean[] control = {false, true};
+    private String[] labels = { BLUE, RED };
+    private double[] allocations = { .50, .50, };
+    private boolean[] control = { false, true };
     private User userBill = UserFactory.createUser("Bill");
     private User userJane = UserFactory.createUser("Jane");
     private User userTom = UserFactory.createUser("Tom");
+    private User[] users = { userBill, userJane, userTom };
 
-    private User[] users = {userBill, userJane, userTom};
-
-    private String actionImpression = "IMPRESSION";
+    private String eventImpression = "IMPRESSION";
     private String actionClick = "click";
     private String actionLoveIt = "love it";
     private SimpleDateFormat dateFormat;
-
 
     /**
      * Initializes a default experiment.
@@ -129,12 +125,13 @@ public class EventsIntegrationTest extends TestBase {
         experiment.label = "experiment";
         experiment.applicationName = QBO + UUID.randomUUID();
 
-        DefaultNameExclusionStrategy experimentComparisonStrategy = new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson");
+        DefaultNameExclusionStrategy experimentComparisonStrategy = new DefaultNameExclusionStrategy("creationTime",
+                "modificationTime", "ruleJson");
         experiment.setSerializationStrategy(experimentComparisonStrategy);
 
     }
 
-    @Test(dependsOnGroups = {"ping"})
+    @Test(dependsOnGroups = { "ping" })
     public void t_CreateTwoBuckets() {
         Experiment exp = postExperiment(experiment);
         Assert.assertNotNull(exp.creationTime, "Experiment creation failed (No creationTime).");
@@ -165,36 +162,33 @@ public class EventsIntegrationTest extends TestBase {
 
     }
 
-    @Test(dependsOnMethods = {"t_CreateTwoBuckets"})
+    @Test(dependsOnMethods = { "t_CreateTwoBuckets" })
     public void t_CheckBasicCounts() {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(FROM_TIME, "");
         AnalyticsParameters params = new AnalyticsParameters();
 
-        List<Event> events = postEvents(experiment,
-                parameters, true,
-                HttpStatus.SC_OK, apiServerConnector);
+        List<Event> events = postEvents(experiment, parameters, true, HttpStatus.SC_OK, apiServerConnector);
         assertEquals(events.size(), 0);
         System.out.println("Evnts size" + events);
 
     }
 
     /**
-     * This experiment tests scenario where we are trying
-     * to GET all assignments of an Invalid Experiment
+     * This experiment tests scenario where we are trying to GET all assignments of an Invalid Experiment
      */
     @Test
     public void t_InvalidExperimentAssignment() {
-        //create an experiment and assign with fake/invaid ID
+        // create an experiment and assign with fake/invaid ID
         Experiment experiment = ExperimentFactory.createCompleteExperiment();
         experiment.setId("00000a00-0a0a-0a00-aa00-a00a0a000000");
 
-        //this should be a failure 404
+        // this should be a failure 404
         getAssignments(experiment, HttpStatus.SC_NOT_FOUND);
 
     }
 
-    @Test(dependsOnMethods = {"t_CheckBasicCounts"})
+    @Test(dependsOnMethods = { "t_CheckBasicCounts" })
     public void t_PostAssignments() {
 
         for (User user : users) {
@@ -204,16 +198,14 @@ public class EventsIntegrationTest extends TestBase {
         }
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(FROM_TIME, "");
-        List<Event> events = postEvents(experiment,
-                parameters, true,
-                HttpStatus.SC_OK, apiServerConnector);
+        List<Event> events = postEvents(experiment, parameters, true, HttpStatus.SC_OK, apiServerConnector);
         assertEquals(events.size(), 0);
         for (Event event : events) {
-            assertEquals(event.name, actionImpression);
+            assertEquals(event.name, eventImpression);
         }
     }
 
-    @Test(dependsOnMethods = {"t_PostAssignments"})
+    @Test(dependsOnMethods = { "t_PostAssignments" })
     public void t_PosImpressionWithoutName() {
         User user = userBill;
         Event event = EventFactory.createEvent();
@@ -223,7 +215,7 @@ public class EventsIntegrationTest extends TestBase {
         Response result = postEvent(event, experiment, user, HttpStatus.SC_BAD_REQUEST);
     }
 
-    @Test(dependsOnMethods = {"t_PostAssignments"})
+    @Test(dependsOnMethods = { "t_PostAssignments" })
     public void t_PosImpressionWithPayload() {
         User user = userBill;
         Event event = EventFactory.createEvent();
@@ -233,7 +225,7 @@ public class EventsIntegrationTest extends TestBase {
         Response result = postEvent(event, experiment, user, HttpStatus.SC_CREATED);
     }
 
-    @Test(dependsOnMethods = {"t_PostAssignments"})
+    @Test(dependsOnMethods = { "t_PostAssignments" })
     public void t_PosImpressionAndLoveItWithPayload() {
         User user = userBill;
         Event event1 = EventFactory.createEvent();
@@ -254,7 +246,7 @@ public class EventsIntegrationTest extends TestBase {
         Response result = postEvents(events, experiment, user, HttpStatus.SC_CREATED);
     }
 
-    @Test(dependsOnMethods = {"t_PostAssignments"})
+    @Test(dependsOnMethods = { "t_PostAssignments" })
     public void t_PosImpressionWithBadDate() {
         User user = userBill;
         Event event = EventFactory.createEvent();
@@ -264,9 +256,9 @@ public class EventsIntegrationTest extends TestBase {
         Response result = postEvent(event, experiment, user, HttpStatus.SC_BAD_REQUEST);
     }
 
-    @Test(dependsOnMethods = {"t_PostAssignments"})
+    @Test(dependsOnMethods = { "t_PostAssignments" })
     public void t_PostClickWithoutName() {
-        User[] users = {userBill, userJane};
+        User[] users = { userBill, userJane };
         for (User user : users) {
             Event event = EventFactory.createEvent();
             event.context = QBO;
@@ -277,9 +269,9 @@ public class EventsIntegrationTest extends TestBase {
         }
     }
 
-    @Test(dependsOnMethods = {"t_PostAssignments"})
+    @Test(dependsOnMethods = { "t_PostAssignments" })
     public void t_PostClickWithPayload() {
-        User[] users = {userBill, userJane};
+        User[] users = { userBill, userJane };
         for (User user : users) {
             Event event = EventFactory.createEvent();
             event.context = QBO;
@@ -290,36 +282,30 @@ public class EventsIntegrationTest extends TestBase {
         }
     }
 
-    @Test(dependsOnMethods = {"t_PosImpressionAndLoveItWithPayload"})
+    @Test(dependsOnMethods = { "t_PosImpressionAndLoveItWithPayload" })
     public void t_CheckAllEventsFrom5DaysBefore() {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(TO_TIME, yesterdayMinus5);
-        List<Event> events = postEvents(experiment,
-                parameters, true,
-                HttpStatus.SC_OK, apiServerConnector);
+        List<Event> events = postEvents(experiment, parameters, true, HttpStatus.SC_OK, apiServerConnector);
 
         assertEquals(events.size(), 0);
 
     }
 
-    @Test(dependsOnMethods = {"t_PosImpressionAndLoveItWithPayload"})
+    @Test(dependsOnMethods = { "t_PosImpressionAndLoveItWithPayload" })
     public void t_CheckAllEventsFrom5DaysAfter() {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(FROM_TIME, tomorrowPlus5);
-        List<Event> events = postEvents(experiment,
-                parameters, true,
-                HttpStatus.SC_OK, apiServerConnector);
+        List<Event> events = postEvents(experiment, parameters, true, HttpStatus.SC_OK, apiServerConnector);
 
         assertEquals(events.size(), 0);
     }
 
-    @Test(dependsOnMethods = {"t_PosImpressionAndLoveItWithPayload"})
+    @Test(dependsOnMethods = { "t_PosImpressionAndLoveItWithPayload" })
     public void t_CheckAllEventsFrom3DaysBefore() {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(FROM_TIME, yesterdayMinus3);
-        List<Event> events = postEvents(experiment,
-                parameters, true,
-                HttpStatus.SC_OK, apiServerConnector);
+        List<Event> events = postEvents(experiment, parameters, true, HttpStatus.SC_OK, apiServerConnector);
 
         assertEquals(events.size(), 5);
 
@@ -333,19 +319,19 @@ public class EventsIntegrationTest extends TestBase {
 
     }
 
-    @Test(dependsOnMethods = {"t_PostAssignments"})
+    @Test(dependsOnMethods = { "t_PostAssignments" })
     public void t_PostClickWithJSONPayloadBad() {
         String data = "{'events': [{'name': 'IMPRESSION','timestamp': '2013-07-02T08:23:45Z',"
                 + "'payload': {'someKey':'someValue'}}]}";
-        response = apiServerConnector.doPost("/events/applications/" + experiment.applicationName + "/experiments/experiment/users/Bill",
-                data);
+        response = apiServerConnector.doPost(
+                "/events/applications/" + experiment.applicationName + "/experiments/experiment/users/Bill", data);
         assertReturnCode(response, HttpStatus.SC_BAD_REQUEST);
 
     }
 
-    @Test(dependsOnMethods = {"t_PostAssignments"})
+    @Test(dependsOnMethods = { "t_PostAssignments" })
     public void t_PostClickWithBadDate() {
-        User[] users = {userBill, userJane};
+        User[] users = { userBill, userJane };
         for (User user : users) {
             Event event = EventFactory.createEvent();
             event.context = QBO;
@@ -355,4 +341,5 @@ public class EventsIntegrationTest extends TestBase {
             assertEquals(result.getStatusCode(), HttpStatus.SC_BAD_REQUEST);
         }
     }
+
 }
