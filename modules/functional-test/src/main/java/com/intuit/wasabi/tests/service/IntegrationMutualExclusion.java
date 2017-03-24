@@ -73,7 +73,7 @@ public class IntegrationMutualExclusion extends TestBase {
 
             Experiment created = postExperiment(experiment);
             experiment.setState(Constants.EXPERIMENT_STATE_DRAFT);
-            assertEqualModelItems(created, experiment, new DefaultNameExclusionStrategy("id", "creationTime", "modificationTime", "ruleJson", "description", "rule"));
+            assertEqualModelItems(created, experiment, new DefaultNameExclusionStrategy("id", "creationTime", "modificationTime", "ruleJson", "description", "rule","hypothesisIsCorrect","results"));
             experiment.update(created);
 
             // Make this experiment mutually exclusive with all previous experiment added in this loop.
@@ -85,7 +85,7 @@ public class IntegrationMutualExclusion extends TestBase {
             // check if all exclusions are correct
             List<Experiment> mutualExclusiveExperiments = getExclusions(experiment);
             if (experiments.size() > 0) {
-                assertEqualModelItemsNoOrder(mutualExclusiveExperiments, experiments, new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson"));
+                assertEqualModelItemsNoOrder(mutualExclusiveExperiments, experiments, new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson","hypothesisIsCorrect","results"));
             } else {
                 Assert.assertEquals(experiments.size(), 0);
             }
@@ -294,7 +294,7 @@ public class IntegrationMutualExclusion extends TestBase {
             Experiment exp = ExperimentFactory.createExperiment();
             Experiment created = postExperiment(exp);
             assertEqualModelItems(created, exp.setState(Constants.EXPERIMENT_STATE_DRAFT),
-                    new DefaultNameExclusionStrategy("id", "creationTime", "modificationTime", "ruleJson", "description", "rule"));
+                    new DefaultNameExclusionStrategy("id", "creationTime", "modificationTime", "ruleJson", "description", "rule","hypothesisIsCorrect","results"));
             exp.update(created);
             batchMutExExperiments.add(exp);
         }
@@ -309,7 +309,7 @@ public class IntegrationMutualExclusion extends TestBase {
         for (Experiment exp : batchMutExExperiments) {
             postBuckets(BucketFactory.createBuckets(exp, 1));
             Experiment update = putExperiment(exp.setState(Constants.EXPERIMENT_STATE_RUNNING));
-            assertEqualModelItems(update, exp, new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson"));
+            assertEqualModelItems(update, exp, new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson","hypothesisIsCorrect","results"));
         }
     }
 
@@ -358,11 +358,11 @@ public class IntegrationMutualExclusion extends TestBase {
         experimentDefApp = ExperimentFactory.createExperiment();
         experimentOtherApp = ExperimentFactory.createExperiment().setApplication(ApplicationFactory.createApplication());
         Experiment created = postExperiment(experimentDefApp);
-        assertEqualModelItems(created, experimentDefApp.setState(Constants.EXPERIMENT_STATE_DRAFT), new DefaultNameExclusionStrategy("id", "creationTime", "modificationTime", "ruleJson", "description", "rule"));
+        assertEqualModelItems(created, experimentDefApp.setState(Constants.EXPERIMENT_STATE_DRAFT), new DefaultNameExclusionStrategy("id", "creationTime", "modificationTime", "ruleJson", "description", "rule","hypothesisIsCorrect","results"));
         experimentDefApp.update(created);
         toCleanUp.add(experimentDefApp);
         created = postExperiment(experimentOtherApp);
-        assertEqualModelItems(created, experimentOtherApp.setState(Constants.EXPERIMENT_STATE_DRAFT), new DefaultNameExclusionStrategy("id", "creationTime", "modificationTime", "ruleJson", "description", "rule"));
+        assertEqualModelItems(created, experimentOtherApp.setState(Constants.EXPERIMENT_STATE_DRAFT), new DefaultNameExclusionStrategy("id", "creationTime", "modificationTime", "ruleJson", "description", "rule","hypothesisIsCorrect","results"));
         experimentOtherApp.update(created);
         toCleanUp.add(experimentOtherApp);
     }
