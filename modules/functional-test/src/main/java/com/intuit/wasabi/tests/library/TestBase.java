@@ -4640,7 +4640,6 @@ public class TestBase extends ServiceTestBase {
 
     /**
      * This util method returns the timeZone offset with respect to UTC in HH:MM format
-     * 
      * @param timeZone - the timeZone whose offset we want to calculate with respect to UTC timeZone
      * @return the String representation of the offset in HH:MM format
      */
