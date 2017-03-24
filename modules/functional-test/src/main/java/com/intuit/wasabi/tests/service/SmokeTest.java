@@ -82,7 +82,7 @@ public class SmokeTest extends TestBase {
         experiment = ExperimentFactory.createExperiment();
         mutualExclusiveExperiment = ExperimentFactory.createExperiment();
 
-        DefaultNameExclusionStrategy experimentComparisonStrategy = new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson");
+        DefaultNameExclusionStrategy experimentComparisonStrategy = new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson","hypothesisIsCorrect","results");
         experiment.setSerializationStrategy(experimentComparisonStrategy);
 
         for (int i = 1; i <= 4; ++i) {
