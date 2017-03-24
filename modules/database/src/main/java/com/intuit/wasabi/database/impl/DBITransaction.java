@@ -35,15 +35,14 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.util.Objects.isNull;
 import static java.util.regex.Pattern.compile;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class DBITransaction implements Transaction {
 
     private static final Logger LOGGER = getLogger(DBITransaction.class);
-    private Handle handle;
     private DBI dbi;
-    private boolean inTransaction = false;
     private final Pattern notNullPattern = compile("^.*Column \'(\\S+)\' cannot be null");
     private final Pattern duplicateEntryPattern = compile("^.*Duplicate entry \'(\\S+)\' for key \'(\\S+)\'");
 
@@ -56,31 +55,24 @@ public class DBITransaction implements Transaction {
      */
     @Override
     public Object transaction(Block block) {
+        Handle handle = null;
         try {
-            begin();
+            handle = getHandle();
+            begin(handle);
             Object value = block.value(this);
-            commit();
+            commit(handle);
             return value;
         } catch (WasabiException | IllegalArgumentException e) {
             LOGGER.warn("Problem executing block. Trying to rollback...", e);
-            tryRollback();
+            rollback(handle);
             throw e;
         } catch (Exception e) {
             LOGGER.warn("Unexpected exception executing block. Trying to rollback...", e);
-
-            tryRollback();
-
+            rollback(handle);
             throw new DatabaseException("Unexpected exception when executing block \"" + block + "\"", e);
         } finally {
-            close();
-        }
-    }
-
-    private void tryRollback() {
-        try {
-            rollback();
-        } catch (Exception e) {
-            LOGGER.error("Failed rolling back transaction", e);
+            // Close the handle (internally this call releases the JDBC connection to the pool)
+            close(handle);
         }
     }
 
@@ -102,7 +94,7 @@ public class DBITransaction implements Transaction {
              * {@inheritDoc}
              */
             @Override
-            public Object value(Handle arg) {
+            public Object value(Handle handle) {
                 return handle.select(query, params);
             }
         });
@@ -124,6 +116,14 @@ public class DBITransaction implements Transaction {
         return insert(true, query, params);
     }
 
+    /**
+     * Make use of perform() operation to execute INSERT statement
+     *
+     * @param shouldReturnId
+     * @param query
+     * @param params
+     * @return
+     */
     private Integer insert(final boolean shouldReturnId, final String query, final Object... params) {
         try {
             return (Integer) perform(new HandleBlock() {
@@ -165,8 +165,14 @@ public class DBITransaction implements Transaction {
         });
     }
 
+    /**
+     * Execute a block (database operation) with a new handle
+     *
+     * @param block representing a database operation
+     * @return The result of a given database operation
+     */
     private Object perform(HandleBlock block) {
-        handle = getHandle();
+        Handle handle = getHandle();
         try {
             return block.value(handle);
         } catch (DBIException ex) {
@@ -178,78 +184,89 @@ public class DBITransaction implements Transaction {
 
             throw ex;
         } finally {
-            if (!inTransaction) {
-                close();
-            }
+            // Close the handle (internally this call releases the JDBC connection to the pool)
+            close(handle);
         }
     }
 
+    /**
+     * Creates a new handle to perform database operation.
+     * Handle represents a connection to the database system. It is a wrapper around a JDBC Connection object.
+     *
+     * @return handle to perform database operation.
+     */
     protected Handle getHandle() {
-        if (null == handle) {
-            handle = dbi.open();
-            // Force MySQL timezone to UTC
-            handle.execute("set time_zone = \"+0:00\"");
-        }
+        //This operation reuses JDBC Connection object from the pool and then creates a new handle object.
+        Handle handle = dbi.open();
+
+        // Force MySQL timezone to UTC
+        handle.execute("set time_zone = \"+0:00\"");
 
         return handle;
     }
 
-    protected void begin() throws WasabiServerException {
-        Handle h = getHandle();
-
+    /**
+     * Begin a new transaction for this instance of DBITransaction.
+     * <p>
+     * Initialize the handle of this instance of DBITransaction
+     *
+     * @throws WasabiServerException
+     */
+    protected void begin(Handle handle) throws WasabiServerException {
         try {
-            Connection connection = h.getConnection();
+            Connection connection = handle.getConnection();
 
             connection.setAutoCommit(false);
         } catch (SQLException e) {
             throw new DatabaseException("Error obtaining database connection", e);
         }
 
-        h.begin();
-
-        inTransaction = true;
+        handle.begin();
     }
 
-    protected void commit() {
-        if (handleIsMissing()) {
-            return;
+    /**
+     * Commits an active transaction of this instance of DBITransaction
+     */
+    protected void commit(Handle handle) {
+        try {
+            handle.commit();
+        } catch (Exception e) {
+            LOGGER.error("Failed to commit transaction", e);
         }
-
-        handle.commit();
-
-        inTransaction = false;
     }
 
-    protected void rollback() {
-        if (handleIsMissing()) {
-            return;
+    /**
+     * Rollback an active transaction of this instance of DBITransaction
+     */
+    protected void rollback(Handle handle) {
+        if (isNull(handle)) return;
+
+        try {
+            handle.rollback();
+        } catch (Exception e) {
+            LOGGER.error("Failed rolling back transaction", e);
         }
-
-        handle.rollback();
-
-        inTransaction = false;
     }
 
-    public void close() {
-        if (handleIsMissing()) {
-            return;
+    /**
+     * Close the handle (JDBC Connection) of this instance of DBITransaction
+     */
+    public void close(Handle handle) {
+        if (isNull(handle)) return;
+
+        try {
+            handle.close();
+        } catch (Exception e) {
+            LOGGER.error("Failed to close handle", e);
         }
-
-        handle.close();
-
-        handle = null;
     }
 
-    private boolean handleIsMissing() {
-        if (handle == null) {
-            LOGGER.warn("no handle present - this should not happen");
-
-            return true;
-        }
-
-        return false;
-    }
-
+    /**
+     * Re-map MySQL Exception
+     *
+     * @param ex
+     * @return
+     */
     private WasabiException remapMySQLException(SQLException ex) {
         String msg = ex.getMessage();
         final Matcher notNull = notNullPattern.matcher(msg);
