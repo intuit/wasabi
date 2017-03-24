@@ -71,11 +71,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -3970,6 +3972,19 @@ public class TestBase extends ServiceTestBase {
 
         return response.jsonPath().prettify();
     }
+    
+    /**
+     * Sends a GET request to retrieve experiment using the analytics endpoint. 
+     * The response must contain {@link HttpStatus#SC_OK}.
+     * <p>
+     * Uses the experiment's experimentLabel.
+     *
+     * @param experiment the experiment
+     * @return the cumulative experiment counts
+     */
+    public void getAnalyticsExperiment(Experiment experiment) {
+        
+    }
 
     /////////////////////
     // CUSTOM requests //
@@ -4634,5 +4649,21 @@ public class TestBase extends ServiceTestBase {
         response = apiServerConnector.doPost(uri);
         assertReturnCode(response, HttpStatus.SC_OK);
         return true;
+    }
+    
+    /**
+     * This util method returns the timeZone offset with respect to UTC
+     * in HH:MM format  
+     * @param timeZone - the timeZone whose offset we want to calculate with 
+     * respect to UTC timeZone
+     * @return the String representation of the offset in HH:MM format
+     */
+    public String getTimeZoneOffSet(String timeZone) {
+        TimeZone tz = TimeZone.getTimeZone(timeZone);
+        int offsetInMills =  tz.getOffset( new Date().getTime());
+        String offset = String.format("%02d:%02d", Math.abs(offsetInMills / 3600000), Math.abs((offsetInMills / 60000) % 60));
+        offset = (offsetInMills >= 0 ? "+" : "-") + offset;
+        
+        return offset;
     }
 }
