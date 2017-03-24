@@ -52,7 +52,7 @@ public class EmptyBucketGetUserAssignmentTest extends TestBase {
 
         experiment = ExperimentFactory.createExperiment();
 
-        DefaultNameExclusionStrategy experimentComparisonStrategy = new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson");
+        DefaultNameExclusionStrategy experimentComparisonStrategy = new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson","hypothesisIsCorrect","results");
         experiment.setSerializationStrategy(experimentComparisonStrategy);
 
     }

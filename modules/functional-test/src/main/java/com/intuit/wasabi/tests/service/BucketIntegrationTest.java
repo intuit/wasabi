@@ -67,7 +67,7 @@ public class BucketIntegrationTest extends TestBase {
         experiment.label = "experiment";
         experiment.applicationName = "qbo" + UUID.randomUUID();
 
-        DefaultNameExclusionStrategy experimentComparisonStrategy = new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson");
+        DefaultNameExclusionStrategy experimentComparisonStrategy = new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson","hypothesisIsCorrect","results");
         experiment.setSerializationStrategy(experimentComparisonStrategy);
 
     }

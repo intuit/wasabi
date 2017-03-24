@@ -133,7 +133,7 @@ public class CountIntegrationTest extends TestBase {
         experiment.label = "experiment";
         experiment.applicationName = QBO + UUID.randomUUID();
 
-        DefaultNameExclusionStrategy experimentComparisonStrategy = new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson");
+        DefaultNameExclusionStrategy experimentComparisonStrategy = new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson","hypothesisIsCorrect","results");
         experiment.setSerializationStrategy(experimentComparisonStrategy);
 
     }
@@ -264,7 +264,7 @@ public class CountIntegrationTest extends TestBase {
                 parameters, true,
                 HttpStatus.SC_OK, apiServerConnector);
 
-        assertEquals(events.size(), 4);
+        assertEquals(events.size(), 3);
         for (Event event : events) {
             assertEquals(event.name, actionClick);
         }

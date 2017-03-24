@@ -112,7 +112,7 @@ public class CountDailyIntegrationTest extends TestBase {
         experiment.label = "experiment";
         experiment.applicationName = QBO + UUID.randomUUID();
 
-        DefaultNameExclusionStrategy experimentComparisonStrategy = new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson");
+        DefaultNameExclusionStrategy experimentComparisonStrategy = new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson","hypothesisIsCorrect","results");
         experiment.setSerializationStrategy(experimentComparisonStrategy);
 
     }
