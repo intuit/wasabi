@@ -3972,10 +3972,10 @@ public class TestBase extends ServiceTestBase {
 
         return response.jsonPath().prettify();
     }
-    
+
     /**
-     * Sends a GET request to retrieve experiment using the analytics endpoint. 
-     * The response must contain {@link HttpStatus#SC_OK}.
+     * Sends a GET request to retrieve experiment using the analytics endpoint. The response must contain
+     * {@link HttpStatus#SC_OK}.
      * <p>
      * Uses the experiment's experimentLabel.
      *
@@ -3983,7 +3983,7 @@ public class TestBase extends ServiceTestBase {
      * @return the cumulative experiment counts
      */
     public void getAnalyticsExperiment(Experiment experiment) {
-        
+
     }
 
     /////////////////////
@@ -4650,20 +4650,20 @@ public class TestBase extends ServiceTestBase {
         assertReturnCode(response, HttpStatus.SC_OK);
         return true;
     }
-    
+
     /**
-     * This util method returns the timeZone offset with respect to UTC
-     * in HH:MM format  
-     * @param timeZone - the timeZone whose offset we want to calculate with 
-     * respect to UTC timeZone
+     * This util method returns the timeZone offset with respect to UTC in HH:MM format
+     * 
+     * @param timeZone - the timeZone whose offset we want to calculate with respect to UTC timeZone
      * @return the String representation of the offset in HH:MM format
      */
     public String getTimeZoneOffSet(String timeZone) {
         TimeZone tz = TimeZone.getTimeZone(timeZone);
-        int offsetInMills =  tz.getOffset( new Date().getTime());
-        String offset = String.format("%02d:%02d", Math.abs(offsetInMills / 3600000), Math.abs((offsetInMills / 60000) % 60));
+        int offsetInMills = tz.getOffset(new Date().getTime());
+        String offset = String.format("%02d:%02d", Math.abs(offsetInMills / 3600000),
+                Math.abs((offsetInMills / 60000) % 60));
         offset = (offsetInMills >= 0 ? "+" : "-") + offset;
-        
+
         return offset;
     }
 }
