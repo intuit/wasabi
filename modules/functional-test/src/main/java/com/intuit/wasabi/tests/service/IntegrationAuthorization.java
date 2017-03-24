@@ -316,10 +316,15 @@ public class IntegrationAuthorization extends TestBase {
         Assert.assertEquals(isWasabiSuperadmin, false);
     }
 
+    /**
+     * TODO: makes the assumption that "admin" is the last remaining superadmin. Integration tests need to be made
+     *       independent of each other to produce this scenario consistently.
+     */
+    /**
     @Test(dependsOnMethods = {"t_removeWasabiReaderAsSuperAdmin"})
     public void t_removeLastSuperAdmin() {
 
         deleteSuperAdmin(USER_ADMIN, HttpStatus.SC_BAD_REQUEST, apiServerConnector);
 
-    }
+    }*/
 }
