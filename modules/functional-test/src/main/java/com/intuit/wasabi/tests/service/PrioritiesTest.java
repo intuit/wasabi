@@ -88,7 +88,7 @@ public class PrioritiesTest extends TestBase {
         List<Experiment> priorities = getApplicationPriorities(priorityApp);
 
         LOGGER.info("Checking if the priorities match.");
-        assertEqualModelItems(priorities, experiments, new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson"));
+        assertEqualModelItems(priorities, experiments, new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson", "hypothesisIsCorrect", "results"));
 
     }
 
@@ -109,7 +109,7 @@ public class PrioritiesTest extends TestBase {
         priorities = getApplicationPriorities(priorityApp);
 
         //Once the experiment is added, it automatically reflects at the end of the priority list of the application
-        assertEqualModelItems(priorities, newExpWithPriorityListExp, new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson"));
+        assertEqualModelItems(priorities, newExpWithPriorityListExp, new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson", "hypothesisIsCorrect", "results"));
 
         LOGGER.info("Check if deleted experiments disappear from the priority list.");
         deleteExperiment(created);
@@ -117,7 +117,7 @@ public class PrioritiesTest extends TestBase {
         priorities = getApplicationPriorities(priorityApp);
 
         //Once the experiment is deleted, it stops reflecting in the priority list of the application
-        assertEqualModelItems(priorities, experiments, new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson"));
+        assertEqualModelItems(priorities, experiments, new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson", "hypothesisIsCorrect", "results"));
 
     }
 
@@ -143,7 +143,7 @@ public class PrioritiesTest extends TestBase {
         priorities = getApplicationPriorities(priorityApp);
 
         //The priority list reflects only the same application experiments, not the new experiment of different application
-        assertEqualModelItems(priorities, experiments, new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson"));
+        assertEqualModelItems(priorities, experiments, new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson", "hypothesisIsCorrect", "results"));
 
     }
 
@@ -168,7 +168,7 @@ public class PrioritiesTest extends TestBase {
         priorities = getApplicationPriorities(priorityApp);
 
         //The priority List reflects only the normal experiments, not the one with invalid uuid
-        assertEqualModelItems(priorities, experiments, new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson"));
+        assertEqualModelItems(priorities, experiments, new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson", "hypothesisIsCorrect", "results"));
 
     }
 
@@ -205,7 +205,7 @@ public class PrioritiesTest extends TestBase {
         priorities = getApplicationPriorities(priorityApp);
 
         //The priority List reflects only the normal experiments, not the terminated one
-        assertEqualModelItems(priorities, experiments, new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson"));
+        assertEqualModelItems(priorities, experiments, new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson", "hypothesisIsCorrect", "results"));
 
     }
 

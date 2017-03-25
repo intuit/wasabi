@@ -115,18 +115,20 @@ public class ModelAssert {
         }
 
         SerializationStrategy serializationStrategy = expected.getSerializationStrategy();
-        if (tempStrategy != null) {
-            expected.setSerializationStrategy(tempStrategy);
-        }
+        try {
+            if (tempStrategy != null) {
+                expected.setSerializationStrategy(tempStrategy);
+            }
 
-        if (equalItems) {
-            Assert.assertEquals(actual, expected, "The two tested items are not equal.");
-        } else {
-            Assert.assertNotEquals(actual, expected, "The two tested items are equal.");
-        }
-
-        if (tempStrategy != null) {
-            expected.setSerializationStrategy(serializationStrategy);
+            if (equalItems) {
+                Assert.assertEquals(actual, expected, "The two tested items are not equal.");
+            } else {
+                Assert.assertNotEquals(actual, expected, "The two tested items are equal.");
+            }
+        } finally {
+            if (tempStrategy != null) {
+                expected.setSerializationStrategy(serializationStrategy);
+            }
         }
     }
 
