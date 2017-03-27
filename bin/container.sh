@@ -226,7 +226,7 @@ start_mysql() {
 EOF
 )
 
-  docker run --net=${docker_network} -it --rm ${mysql} mysql -h${wmip} -P3306 -uroot -p${pwd} -e "${sql}" || \
+  docker run --net=${docker_network} -it --rm ${mysql} mysql -h${wmip} -P4306 -uroot -p${pwd} -e "${sql}" || \
     usage "unable to run command: % docker run --net=${docker_network} -it --rm ${mysql} mysql -h${wmip} -P3306 -uroot -p${pwd} -e \"${sql}\"" 1
 
   [ "${verify}" = true ] && console_mysql
@@ -236,7 +236,7 @@ console_mysql() {
   pwd=mypass
   wmip=$(docker inspect --format "{{ .NetworkSettings.Networks.${docker_network}.IPAddress }}" ${project}-mysql)
 
-  docker run --net=${docker_network} -it --rm ${mysql} mysql -h${wmip} -P3306 -uroot -p${pwd} || \
+  docker run --net=${docker_network} -it --rm ${mysql} mysql -h${wmip} -P4306 -uroot -p${pwd} || \
     usage "unable to run command: % docker run --net=${docker_network} -it --rm ${mysql} mysql -h${wmip} -P3306 -uroot -p${pwd}" 1
 }
 
