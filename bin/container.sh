@@ -215,7 +215,7 @@ start_mysql() {
   pwd=mypass
 
   start_docker
-  start_container ${project}-mysql ${mysql} "-p 3306:3306 -e MYSQL_ROOT_PASSWORD=${pwd}"
+  start_container ${project}-mysql ${mysql} "-p 4306:3306 -e MYSQL_ROOT_PASSWORD=${pwd}"
 
   wmip=$(docker inspect --format "{{ .NetworkSettings.Networks.${docker_network}.IPAddress }}" ${project}-mysql)
   sql=$(cat << EOF

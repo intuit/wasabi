@@ -5,7 +5,9 @@ addons:
       - oracle-java8-installer # FIXME @travis-ci: https://github.com/travis-ci/travis-ci/issues/3259#issuecomment-243534696
 jdk:
   - oraclejdk8
-install: mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+sudo: required
+services:
+  - docker
 cache:
   directories:
     - "~/.m2/repository"
@@ -14,6 +16,9 @@ branches:
     - "/^(?i:feature)/.*$/"
     - develop
     - master
+script:
+  - "./bin/wasabi.sh build"
+  - "./bin/wasabi.sh -m true start test stop"
 after_success:
   - mvn clean test jacoco:report coveralls:report
   - "./.travis/before-deploy.sh"
@@ -27,3 +32,4 @@ env:
 notifications:
   email:
     - wasabi.honeybadger@gmail.com
+    - abhi111jain@gmail.com
