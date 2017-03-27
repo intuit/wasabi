@@ -73,7 +73,9 @@ public class SmokeTest extends TestBase {
     private List<Page> pages;
     private int impressionsFactorPerUser = 5;
     private Experiment mutualExclusiveExperiment;
-    private DefaultNameExclusionStrategy experimentComparisonStrategy = new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson", "hypothesisIsCorrect", "results");
+    private DefaultNameExclusionStrategy experimentComparisonStrategy =
+            new DefaultNameExclusionStrategy("id", "creationTime",
+                    "modificationTime", "ruleJson", "hypothesisIsCorrect", "results");
 
     /**
      * Initializes a default experiment.
@@ -613,9 +615,9 @@ public class SmokeTest extends TestBase {
         experiment.setState(null).id = null;
         Experiment created = postExperiment(experiment);
         experiment.setState(Constants.EXPERIMENT_STATE_DRAFT);
-        experiment.getSerializationStrategy().add("id");
+        //experiment.getSerializationStrategy().add("id");
         assertEqualModelItems(created, experiment, experimentComparisonStrategy);
-        experiment.getSerializationStrategy().remove("id");
+        //experiment.getSerializationStrategy().remove("id");
         experiment.update(created);
     }
 
