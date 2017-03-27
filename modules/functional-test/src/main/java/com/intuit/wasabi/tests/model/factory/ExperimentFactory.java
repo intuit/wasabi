@@ -41,7 +41,9 @@ public class ExperimentFactory {
                 TestUtils.relativeTimeString(42), 1)
                         .setCreatorID(
                                 System.getProperty("user-name") != null ? System.getProperty("user-name") : "admin")
-                        .setDescription("A sample Experiment description.");
+                        .setDescription("A sample Experiment description.")
+                .setHypothesisIsCorrect("")
+                .setResults("");
     }
 
     /**

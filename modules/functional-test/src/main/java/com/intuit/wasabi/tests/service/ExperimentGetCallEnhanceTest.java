@@ -55,10 +55,6 @@ public class ExperimentGetCallEnhanceTest extends TestBase {
     @Test
     public void testHypothesisFieldAndResults() {
 
-        // firstly lets assert that they are null in the first place
-        Assert.assertNull(testExp.hypothesisIsCorrect);
-        Assert.assertNull(testExp.results);
-
         // lets set the results and hypothesisIsCorrect fields
         testExp.setResults("this is the result");
         testExp.setHypothesisIsCorrect("yes");
