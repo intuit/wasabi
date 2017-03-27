@@ -19,8 +19,7 @@ def post_action(application, experiment, user):
     events = {'events':[{'name':'ButtonClicked', 'payload':'{\'state\':\'CA\'}'}]}
 
     r = requests.post(urlAssignment, data = json.dumps(events), headers=headers)
-    print(r.status_code)
-    print(r.text)
+
     if r.status_code == 201: # when the request returns 201 the action was recorded correctly
         return True
     return False

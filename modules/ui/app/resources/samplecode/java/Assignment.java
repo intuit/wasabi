@@ -9,7 +9,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 /**
- * This class contains the sample code to get a wasabi assignments.
+ * This class contains the sample code to get a Wasabi assignments.
  */
 public class Assignment {
 
@@ -30,8 +30,7 @@ public class Assignment {
    */
   private static Object getAssignment(String application, String experiment, String user) throws IOException, ParseException {
 
-    String urlAssignment = "https://abtesting.intuit.com/api/v1/assignments/applications/" + application
-      + "/experiments/" + experiment + "/users/" + user;
+    String urlAssignment = String.format("https://abtesting.intuit.com/api/v1/assignments/applications/%s/experiments/%s/users/%s", application, experiment, user);
 
     URL url = new URL(urlAssignment);
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();

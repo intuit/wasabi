@@ -19,6 +19,7 @@ def get_assignment(application, experiment, user):
         if "EXPERIMENT_NOT_FOUND" in r.text:
             print('The given Experiment is not found')
         else:
+            # further exception handling should happen here
             raise
 
 if __name__ == "__main__":
