@@ -1,7 +1,7 @@
 import requests
 import json
 
-def get_impression(application, experiment, user):
+def post_impression(application, experiment, user):
     """
     Records an impression for the given user and experiment.
 
@@ -26,4 +26,4 @@ if __name__ == "__main__":
     experiment = 'ExperimentName'
     user = 'UserName'
 
-    print('Impression recorded' if get_impression(application, experiment, user) else 'Impression not recorded')
+    print('Impression recorded' if post_impression(application, experiment, user) else 'Impression not recorded')
