@@ -37,7 +37,7 @@ EOF
 }
 
 fromPom() {
-  mvn ${WASABI_MAVEN} -f $1/pom.xml -P$2 help:evaluate -Dexpression=$3 -B \
+  mvn ${WASABI_MAVEN} -f $1/pom.xml -P$2 help:evaluate -Dexpression=$3 -B -q \
     -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=error | \
     sed -n -e '/^\[.*\]/ !{ p; }'
 }
@@ -80,7 +80,7 @@ if [[ "${build}" = true || "${test}" = true || "${build_jar}" = true ]]; then
   [ ! -e ./modules/main/target/wasabi-main-*-SNAPSHOT-${profile}-all.jar ] && package=package
   [ "${test}" = true ] && tests="org.jacoco:jacoco-maven-plugin:prepare-agent findbugs:check test"
 
-  mvn ${WASABI_MAVEN} -P${profile} clean ${tests:--Dmaven.test.skip=true} ${package} javadoc:aggregate || \
+  mvn ${WASABI_MAVEN} -P${profile} clean ${tests:--Dmaven.test.skip=true} ${package} javadoc:aggregate -q || \
     usage "invalid: mvn ${WASABI_MAVEN} -P${profile} clean ${tests:--Dmaven.test.skip=true} ${package} javadoc:aggregate" 1
 fi
 
