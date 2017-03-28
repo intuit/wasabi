@@ -699,6 +699,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
             LOGGER.debug("Finished pushAssignmentsToStaging");
         } catch (Exception e) {
             LOGGER.error("Error occurred while pushAssignmentsToStaging", e);
+            throw new RepositoryException("Error occurred while pushAssignmentsToStaging", e);
         }
     }
 
