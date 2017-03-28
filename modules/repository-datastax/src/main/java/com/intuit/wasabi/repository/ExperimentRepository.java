@@ -265,5 +265,12 @@ public interface ExperimentRepository {
      */
     void createApplication(Application.Name applicationName);
 
+    /**
+     * Gets a list of tags associated with the given {@link Application.Name}.
+     *
+     * @param applicationNames the list of {@link Application.Name}s the tags should be retrieved for
+     * @return a Map of {@link Application.Name}s to their tags
+     */
+    Map<Application.Name, Collection<String>> getTagListForApplications(Collection<Application.Name> applicationNames);
 
 }

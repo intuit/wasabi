@@ -45,12 +45,14 @@ import com.intuit.wasabi.repository.cassandra.UninterruptibleUtil;
 import com.intuit.wasabi.repository.cassandra.accessor.ApplicationListAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.BucketAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.ExperimentTagAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.audit.BucketAuditLogAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.audit.ExperimentAuditLogAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentLabelIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentState;
 import com.intuit.wasabi.repository.cassandra.accessor.index.StateExperimentIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentByAppNameLabel;
+import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentTagsByApplication;
 import com.intuit.wasabi.repository.cassandra.pojo.index.StateExperimentIndex;
 import org.slf4j.Logger;
 
@@ -89,6 +91,8 @@ public class CassandraExperimentRepository implements ExperimentRepository {
     private BucketAuditLogAccessor bucketAuditLogAccessor;
 
     private ExperimentAuditLogAccessor experimentAuditLogAccessor;
+
+    private ExperimentTagAccessor experimentTagAccessor;
 
     /**
      * @return the experimentAccessor
@@ -1191,6 +1195,28 @@ public class CassandraExperimentRepository implements ExperimentRepository {
             LOGGER.error("Error while creating application {}", applicationName, e);
             throw new RepositoryException("Unable to insert into top level application list: \""
                     + applicationName.toString() + "\"" + e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Map<Application.Name, Collection<String>> getTagListForApplications(Collection<Application.Name> applicationNames) {
+
+        LOGGER.debug("Retrieving Experiment Tags for applications {}", applicationNames);
+
+        try {
+
+            Map<Application.Name, Collection<String>> result = experimentTagAccessor.getExperimentTags(applicationNames)
+                    .all().stream().collect(Collectors.toMap(exp -> Application.Name.valueOf(exp.getAppName()),
+                            ExperimentTagsByApplication::getTags));
+
+            return result;
+        } catch (Exception e) {
+            LOGGER.error("Error while retieving ExperimentTags for {}", applicationNames, e);
+            throw new RepositoryException("Unable to get ExperimentTags for applications: \""
+                    + applicationNames.toString() + "\"" + e);
         }
     }
 

@@ -745,9 +745,7 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
     }
 
     /**
-     * Creates an application at top level
-     *
-     * @param applicationName Application Name
+     * {@inheritDoc}
      */
     @Override
     public void createApplication(Application.Name applicationName) {
@@ -755,9 +753,13 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
     }
 
     @Override
-    public void updateStateIndex(Experiment experiment) {
+    public Map<Application.Name, Collection<String>> getTagListForApplications(Collection<Application.Name> applicationNames) {
         throw new UnsupportedOperationException("Not supported ");
     }
 
+    @Override
+    public void updateStateIndex(Experiment experiment) {
+        throw new UnsupportedOperationException("Not supported ");
+    }
 
 }

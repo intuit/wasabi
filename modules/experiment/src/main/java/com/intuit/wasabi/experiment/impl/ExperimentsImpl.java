@@ -42,8 +42,10 @@ import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import static com.intuit.wasabi.experimentobjects.Experiment.State.DELETED;
 import static com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT;
@@ -103,6 +105,14 @@ public class ExperimentsImpl implements Experiments {
     @Override
     public List<Application.Name> getApplications() {
         return cassandraRepository.getApplicationsList();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Map<Application.Name, Collection<String>> getTagsForApplications(Collection<Application.Name> applicationNames) {
+        return cassandraRepository.getTagListForApplications(applicationNames);
     }
 
     /**
