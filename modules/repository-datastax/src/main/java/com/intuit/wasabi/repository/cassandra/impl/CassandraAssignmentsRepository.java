@@ -65,6 +65,7 @@ import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentUserIndex
 import com.intuit.wasabi.repository.cassandra.accessor.index.PageExperimentIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.pojo.export.UserAssignmentExport;
 import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentUserByUserIdContextAppNameExperimentId;
+import org.apache.cassandra.utils.UUIDGen;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -82,6 +83,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -678,6 +680,25 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
             stagingAccessor.insertBy(type, exception, data);
         } catch (WriteTimeoutException | UnavailableException | NoHostAvailableException e) {
             throw new RepositoryException("Could not push the assignment to staging", e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void pushAssignmentsToStaging(String type, String exception, Collection<String> data) {
+        try {
+            Session session = driver.getSession();
+            final BatchStatement batchStatement = new BatchStatement(BatchStatement.Type.UNLOGGED);
+            final UUID timeUUID = UUIDGen.getTimeUUID();
+            data.forEach(message -> {
+                LOGGER.debug("message={}", message);
+                batchStatement.add(stagingAccessor.batchInsertBy(timeUUID, type, exception, message));
+            });
+            session.execute(batchStatement);
+            LOGGER.debug("Finished pushAssignmentsToStaging");
+        } catch (Exception e) {
+            LOGGER.error("Error occurred while pushAssignmentsToStaging", e);
         }
     }
 
