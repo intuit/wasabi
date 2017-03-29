@@ -15,6 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.api;
 
+import com.intuit.wasabi.analytics.Analytics;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authorization.Authorization;
 import com.intuit.wasabi.exceptions.AuthenticationException;
@@ -96,6 +97,8 @@ public class ApplicationsResourceTest {
     private List<PageExperiment> pageExperiments;
     @Mock
     private Response response;
+    @Mock
+    private Analytics analytics;
     @Captor
     private ArgumentCaptor<Map<String, List<Page>>> pagesByNameCaptor;
     @Captor
@@ -105,7 +108,7 @@ public class ApplicationsResourceTest {
     @Before
     public void setup() {
         applicationsResource = new ApplicationsResource(authorizedExperimentGetter, experiments, authorization, priorities,
-                pages, httpHeader);
+                pages, analytics, httpHeader);
     }
 
     @Test

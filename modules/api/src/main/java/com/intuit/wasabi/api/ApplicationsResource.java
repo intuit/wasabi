@@ -19,6 +19,9 @@ import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.intuit.wasabi.analytics.Analytics;
+import com.intuit.wasabi.analyticsobjects.counts.AssignmentCounts;
+import com.intuit.wasabi.analyticsobjects.counts.BucketAssignmentCount;
 import com.intuit.wasabi.authorization.Authorization;
 import com.intuit.wasabi.exceptions.AuthenticationException;
 import com.intuit.wasabi.experiment.Experiments;
@@ -26,6 +29,7 @@ import com.intuit.wasabi.experiment.Pages;
 import com.intuit.wasabi.experiment.Priorities;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.experimentobjects.ExperimentListWithSize;
 import com.intuit.wasabi.experimentobjects.ExperimentIDList;
 import com.intuit.wasabi.experimentobjects.ExperimentList;
 import com.intuit.wasabi.experimentobjects.Page;
@@ -43,6 +47,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -70,6 +75,7 @@ public class ApplicationsResource {
     private Authorization authorization;
     private Pages pages;
     private Priorities priorities;
+    private Analytics analytics;
 
     /**
      * Logger for the class
@@ -81,6 +87,7 @@ public class ApplicationsResource {
                          final Experiments experiments,
                          final Authorization authorization,
                          final Priorities priorities, final Pages pages,
+                         final Analytics analytics,
                          final HttpHeader httpHeader) {
         this.authorizedExperimentGetter = authorizedExperimentGetter;
         this.pages = pages;
@@ -88,6 +95,7 @@ public class ApplicationsResource {
         this.authorization = authorization;
         this.priorities = priorities;
         this.httpHeader = httpHeader;
+        this.analytics = analytics;
     }
 
     /**
@@ -184,10 +192,44 @@ public class ApplicationsResource {
             @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = false)
             final String authorizationHeader) {
         try {
-            return httpHeader.headers().entity(authorizedExperimentGetter
-                    .getExperimentsByName(false, authorizationHeader, applicationName)).build();
+            return httpHeader.headers().entity(addAllocationPercentToExperimentList(authorizedExperimentGetter
+                    .getExperimentsByName(false, authorizationHeader, applicationName))).build();
         } catch (Exception exception) {
             LOGGER.error("getExperiments failed for applicationName={} with error:", applicationName, exception);
+            throw exception;
+        }
+    }
+
+    @GET
+    @Path("/{applicationName}/experimentsByState")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "Returns experiments by state for an application",
+            response = Map.class)
+    @Timed
+    public Response getExperimentsByState(
+            @PathParam("applicationName")
+            @ApiParam(value = "Application Name")
+            final Application.Name applicationName,
+
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = false)
+            final String authorizationHeader) {
+        try {
+            List<Experiment> experiments = addAllocationPercentToExperimentList(authorizedExperimentGetter
+                    .getExperimentsByName(false, authorizationHeader, applicationName));
+            Map<Experiment.State, ExperimentListWithSize> experimentsByState = new HashMap<>();
+            for (Experiment experiment: experiments) {
+                Experiment.State state = experiment.getState();
+                ExperimentListWithSize experimentListWithSize = experimentsByState.get(state);
+                if (null == experimentListWithSize) {
+                    experimentListWithSize = new ExperimentListWithSize();
+                }
+                experimentListWithSize.addExperimentToList(experiment);
+                experimentsByState.put(state, experimentListWithSize);
+            }
+            return httpHeader.headers().entity(experimentsByState).build();
+        } catch (Exception exception) {
+            LOGGER.error("getExperimentsByState failed for applicationName={} with error:", applicationName, exception);
             throw exception;
         }
     }
@@ -372,5 +414,36 @@ public class ApplicationsResource {
                     applicationName, exception);
             throw exception;
         }
+    }
+
+    private List<Experiment> addAllocationPercentToExperimentList(List<Experiment> experimentList) {
+        ExperimentList boxedExperimentList = new ExperimentList();
+        boxedExperimentList.setExperiments(experimentList);
+        boxedExperimentList = addAllocationPercentToExperimentList(boxedExperimentList);
+        return boxedExperimentList != null ? boxedExperimentList.getExperiments() : null;
+    }
+
+    private ExperimentList addAllocationPercentToExperimentList(ExperimentList experimentList) {
+        if (experimentList != null) {
+            for (Experiment experiment : experimentList.getExperiments()) {
+                AssignmentCounts assignmentCounts = analytics.getAssignmentCounts(experiment.getID(), null);
+                long nullAssignments = 0;
+                long bucketAssignments = 0;
+                if (assignmentCounts != null) {
+                    for (BucketAssignmentCount bucketAssignmentCount : assignmentCounts.getAssignments()) {
+                        if (bucketAssignmentCount.getBucket() == null || bucketAssignmentCount.getBucket().toString().equalsIgnoreCase("null")) {
+                            nullAssignments = bucketAssignmentCount.getCount();
+                        } else {
+                            bucketAssignments += bucketAssignmentCount.getCount();
+                        }
+                    }
+                    double totalAssignments = nullAssignments + bucketAssignments;
+                    if (totalAssignments != 0) {
+                        experiment.setAllocationPercent(bucketAssignments / totalAssignments);
+                    }
+                }
+            }
+        }
+        return experimentList;
     }
 }
