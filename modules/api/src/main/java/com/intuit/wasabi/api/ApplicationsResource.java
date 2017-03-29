@@ -29,7 +29,7 @@ import com.intuit.wasabi.experiment.Pages;
 import com.intuit.wasabi.experiment.Priorities;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Experiment;
-import com.intuit.wasabi.experimentobjects.ExperimentCountsByState;
+import com.intuit.wasabi.experimentobjects.ExperimentListWithSize;
 import com.intuit.wasabi.experimentobjects.ExperimentIDList;
 import com.intuit.wasabi.experimentobjects.ExperimentList;
 import com.intuit.wasabi.experimentobjects.Page;
@@ -201,12 +201,12 @@ public class ApplicationsResource {
     }
 
     @GET
-    @Path("/{applicationName}/experimentCountsByState")
+    @Path("/{applicationName}/experimentsByState")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = "Returns experiment counts by state for an application",
-            response = ExperimentCountsByState.class)
+    @ApiOperation(value = "Returns experiments by state for an application",
+            response = Map.class)
     @Timed
-    public Response getExperimentCountsByState(
+    public Response getExperimentsByState(
             @PathParam("applicationName")
             @ApiParam(value = "Application Name")
             final Application.Name applicationName,
@@ -215,9 +215,21 @@ public class ApplicationsResource {
             @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = false)
             final String authorizationHeader) {
         try {
-            return httpHeader.headers().entity(new ExperimentCountsByState()).build();
+            List<Experiment> experiments = addAllocationPercentToExperimentList(authorizedExperimentGetter
+                    .getExperimentsByName(false, authorizationHeader, applicationName));
+            Map<Experiment.State, ExperimentListWithSize> experimentsByState = new HashMap<>();
+            for (Experiment experiment: experiments) {
+                Experiment.State state = experiment.getState();
+                ExperimentListWithSize experimentListWithSize = experimentsByState.get(state);
+                if (null == experimentListWithSize) {
+                    experimentListWithSize = new ExperimentListWithSize();
+                }
+                experimentListWithSize.addExperimentToList(experiment);
+                experimentsByState.put(state, experimentListWithSize);
+            }
+            return httpHeader.headers().entity(experimentsByState).build();
         } catch (Exception exception) {
-            LOGGER.error("getExperiments failed for applicationName={} with error:", applicationName, exception);
+            LOGGER.error("getExperimentsByState failed for applicationName={} with error:", applicationName, exception);
             throw exception;
         }
     }
