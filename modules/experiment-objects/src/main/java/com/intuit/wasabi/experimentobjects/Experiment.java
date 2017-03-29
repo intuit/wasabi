@@ -100,6 +100,8 @@ public class Experiment implements Cloneable, ExperimentBase, Serializable {
     @ApiModelProperty(value = "creator of the experiment", required = false)
     private String creatorID;
 
+    private Double allocationPercent = 0d;
+
     private Boolean favorite;
 
 
@@ -286,6 +288,14 @@ public class Experiment implements Cloneable, ExperimentBase, Serializable {
 
     public void setCreatorID(String creatorID) {
         this.creatorID = creatorID;
+    }
+
+    public Double getAllocationPercent() {
+        return allocationPercent;
+    }
+
+    public void setAllocationPercent(Double allocationPercent) {
+        this.allocationPercent = allocationPercent;
     }
 
     public void setFavorite(Boolean favorite) {
@@ -529,6 +539,7 @@ public class Experiment implements Cloneable, ExperimentBase, Serializable {
             instance.isRapidExperiment = other.isRapidExperiment;
             instance.userCap = other.userCap;
             instance.creatorID = other.creatorID;
+            instance.allocationPercent = other.allocationPercent;
         }
 
         private Date copyDate(Date date) {
@@ -635,6 +646,11 @@ public class Experiment implements Cloneable, ExperimentBase, Serializable {
 
         public Builder withCreatorID(final String creatorID) {
             instance.creatorID = creatorID;
+            return this;
+        }
+
+        public Builder withAllocationPercent(final Double allocationPercent) {
+            instance.allocationPercent = allocationPercent;
             return this;
         }
 
