@@ -261,6 +261,8 @@ public class ExperimentsResource {
                 authorizedExperiments.getExperiments().
                         parallelStream().filter(experiment -> favoriteList.contains(experiment.getID()))
                         .forEach(experiment -> experiment.setFavorite(true));
+
+                addAllocationPercentToExperimentList(authorizedExperiments);
             }
 
             Map<String, Object> experimentResponse = experimentPaginationHelper
@@ -1455,26 +1457,7 @@ public class ExperimentsResource {
             final Page.Name pageName) {
         try {
             ExperimentList experimentList = pages.getPageExperiments(applicationName, pageName);
-            if (experimentList != null) {
-                for (Experiment experiment : experimentList.getExperiments()) {
-                    AssignmentCounts assignmentCounts = analytics.getAssignmentCounts(experiment.getID(), null);
-                    long nullAssignments = 0;
-                    long bucketAssignments = 0;
-                    if (assignmentCounts != null) {
-                        for (BucketAssignmentCount bucketAssignmentCount : assignmentCounts.getAssignments()) {
-                                if (bucketAssignmentCount.getBucket() == null || bucketAssignmentCount.getBucket().toString().equalsIgnoreCase("null")) {
-                                    nullAssignments = bucketAssignmentCount.getCount();
-                                } else {
-                                    bucketAssignments += bucketAssignmentCount.getCount();
-                                }
-                        }
-                        double totalAssignments = nullAssignments + bucketAssignments;
-                        if (totalAssignments != 0) {
-                            experiment.setAllocationPercent(bucketAssignments / totalAssignments);
-                        }
-                    }
-                }
-            }
+            experimentList = addAllocationPercentToExperimentList(experimentList);
             return httpHeader.headers().entity(experimentList).build();
         } catch (Exception exception) {
             LOGGER.error("getPageExperiments failed for applicationName={}, pageName={} with error:",
@@ -1603,6 +1586,30 @@ public class ExperimentsResource {
                     String.format("No proper timezoneOffset given (\"%s\"), expecting format -0000 or +0000.",
                             timezoneOffset));
         }
+    }
+
+    private ExperimentList addAllocationPercentToExperimentList(ExperimentList experimentList) {
+        if (experimentList != null) {
+            for (Experiment experiment : experimentList.getExperiments()) {
+                AssignmentCounts assignmentCounts = analytics.getAssignmentCounts(experiment.getID(), null);
+                long nullAssignments = 0;
+                long bucketAssignments = 0;
+                if (assignmentCounts != null) {
+                    for (BucketAssignmentCount bucketAssignmentCount : assignmentCounts.getAssignments()) {
+                        if (bucketAssignmentCount.getBucket() == null || bucketAssignmentCount.getBucket().toString().equalsIgnoreCase("null")) {
+                            nullAssignments = bucketAssignmentCount.getCount();
+                        } else {
+                            bucketAssignments += bucketAssignmentCount.getCount();
+                        }
+                    }
+                    double totalAssignments = nullAssignments + bucketAssignments;
+                    if (totalAssignments != 0) {
+                        experiment.setAllocationPercent(bucketAssignments / totalAssignments);
+                    }
+                }
+            }
+        }
+        return experimentList;
     }
 
 
