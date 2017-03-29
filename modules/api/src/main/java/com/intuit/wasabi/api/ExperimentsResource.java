@@ -20,7 +20,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.intuit.wasabi.analytics.Analytics;
 import com.intuit.wasabi.analyticsobjects.Parameters;
+import com.intuit.wasabi.analyticsobjects.counts.AssignmentCounts;
+import com.intuit.wasabi.analyticsobjects.counts.BucketAssignmentCount;
 import com.intuit.wasabi.api.pagination.PaginationHelper;
 import com.intuit.wasabi.assignment.Assignments;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
@@ -143,11 +146,13 @@ public class ExperimentsResource {
     private Pages pages;
     private Priorities priorities;
     private Favorites favorites;
+    private Analytics analytics;
 
     @Inject
     ExperimentsResource(final Experiments experiments, final EventsExport export, final Assignments assignments,
                         final Authorization authorization, final Buckets buckets, final Mutex mutex,
                         final Pages pages, final Priorities priorities, final Favorites favorites,
+                        final Analytics analytics,
                         final @Named(DEFAULT_TIME_ZONE) String defaultTimezone,
                         final @Named(DEFAULT_TIME_FORMAT) String defaultTimeFormat,
                         final HttpHeader httpHeader, final PaginationHelper<Experiment> experimentPaginationHelper
@@ -165,6 +170,7 @@ public class ExperimentsResource {
         this.httpHeader = httpHeader;
         this.experimentPaginationHelper = experimentPaginationHelper;
         this.favorites = favorites;
+        this.analytics = analytics;
     }
 
     /**
@@ -1448,7 +1454,28 @@ public class ExperimentsResource {
             @ApiParam(value = "Page name where the experiment will appear")
             final Page.Name pageName) {
         try {
-            return httpHeader.headers().entity(pages.getPageExperiments(applicationName, pageName)).build();
+            ExperimentList experimentList = pages.getPageExperiments(applicationName, pageName);
+            if (experimentList != null) {
+                for (Experiment experiment : experimentList.getExperiments()) {
+                    AssignmentCounts assignmentCounts = analytics.getAssignmentCounts(experiment.getID(), null);
+                    long nullAssignments = 0;
+                    long bucketAssignments = 0;
+                    if (assignmentCounts != null) {
+                        for (BucketAssignmentCount bucketAssignmentCount : assignmentCounts.getAssignments()) {
+                                if (bucketAssignmentCount.getBucket() == null || bucketAssignmentCount.getBucket().toString().equalsIgnoreCase("null")) {
+                                    nullAssignments = bucketAssignmentCount.getCount();
+                                } else {
+                                    bucketAssignments += bucketAssignmentCount.getCount();
+                                }
+                        }
+                        double totalAssignments = nullAssignments + bucketAssignments;
+                        if (totalAssignments != 0) {
+                            experiment.setAllocationPercent(bucketAssignments / totalAssignments);
+                        }
+                    }
+                }
+            }
+            return httpHeader.headers().entity(experimentList).build();
         } catch (Exception exception) {
             LOGGER.error("getPageExperiments failed for applicationName={}, pageName={} with error:",
                     applicationName, pageName, exception);

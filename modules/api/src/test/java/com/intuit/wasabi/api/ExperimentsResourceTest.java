@@ -15,6 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.api;
 
+import com.intuit.wasabi.analytics.Analytics;
 import com.intuit.wasabi.api.pagination.PaginationHelper;
 import com.intuit.wasabi.api.pagination.comparators.impl.ExperimentComparator;
 import com.intuit.wasabi.api.pagination.filters.impl.ExperimentFilter;
@@ -124,6 +125,9 @@ public class ExperimentsResourceTest {
     @Mock
     private Context context;
 
+    @Mock
+    private Analytics analytics;
+
     private ExperimentsResource experimentsResource;
 
     private Experiment experiment;
@@ -156,7 +160,7 @@ public class ExperimentsResourceTest {
                 .build();
 
         experimentsResource = new ExperimentsResource(experiments, eventsExport, assignments,
-                authorization, buckets, mutex, pages, priorities, favorites, "US/New York", "YYYY-mm-DD", new HttpHeader("MyApp-???", "600"), paginationHelper);
+                authorization, buckets, mutex, pages, priorities, favorites, analytics, "US/New York", "YYYY-mm-DD", new HttpHeader("MyApp-???", "600"), paginationHelper);
         doReturn(Collections.emptyList()).when(favorites).getFavorites(Mockito.any());
     }
 
