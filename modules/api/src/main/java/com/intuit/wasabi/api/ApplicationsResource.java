@@ -19,6 +19,9 @@ import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.intuit.wasabi.analytics.Analytics;
+import com.intuit.wasabi.analyticsobjects.counts.AssignmentCounts;
+import com.intuit.wasabi.analyticsobjects.counts.BucketAssignmentCount;
 import com.intuit.wasabi.authorization.Authorization;
 import com.intuit.wasabi.exceptions.AuthenticationException;
 import com.intuit.wasabi.experiment.Experiments;
@@ -70,6 +73,7 @@ public class ApplicationsResource {
     private Authorization authorization;
     private Pages pages;
     private Priorities priorities;
+    private Analytics analytics;
 
     /**
      * Logger for the class
@@ -81,6 +85,7 @@ public class ApplicationsResource {
                          final Experiments experiments,
                          final Authorization authorization,
                          final Priorities priorities, final Pages pages,
+                         final Analytics analytics,
                          final HttpHeader httpHeader) {
         this.authorizedExperimentGetter = authorizedExperimentGetter;
         this.pages = pages;
@@ -88,6 +93,7 @@ public class ApplicationsResource {
         this.authorization = authorization;
         this.priorities = priorities;
         this.httpHeader = httpHeader;
+        this.analytics = analytics;
     }
 
     /**
@@ -184,8 +190,8 @@ public class ApplicationsResource {
             @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = false)
             final String authorizationHeader) {
         try {
-            return httpHeader.headers().entity(authorizedExperimentGetter
-                    .getExperimentsByName(false, authorizationHeader, applicationName)).build();
+            return httpHeader.headers().entity(addAllocationPercentToExperimentList(authorizedExperimentGetter
+                    .getExperimentsByName(false, authorizationHeader, applicationName))).build();
         } catch (Exception exception) {
             LOGGER.error("getExperiments failed for applicationName={} with error:", applicationName, exception);
             throw exception;
@@ -372,5 +378,36 @@ public class ApplicationsResource {
                     applicationName, exception);
             throw exception;
         }
+    }
+
+    private List<Experiment> addAllocationPercentToExperimentList(List<Experiment> experimentList) {
+        ExperimentList boxedExperimentList = new ExperimentList();
+        boxedExperimentList.setExperiments(experimentList);
+        boxedExperimentList = addAllocationPercentToExperimentList(boxedExperimentList);
+        return boxedExperimentList != null ? boxedExperimentList.getExperiments() : null;
+    }
+
+    private ExperimentList addAllocationPercentToExperimentList(ExperimentList experimentList) {
+        if (experimentList != null) {
+            for (Experiment experiment : experimentList.getExperiments()) {
+                AssignmentCounts assignmentCounts = analytics.getAssignmentCounts(experiment.getID(), null);
+                long nullAssignments = 0;
+                long bucketAssignments = 0;
+                if (assignmentCounts != null) {
+                    for (BucketAssignmentCount bucketAssignmentCount : assignmentCounts.getAssignments()) {
+                        if (bucketAssignmentCount.getBucket() == null || bucketAssignmentCount.getBucket().toString().equalsIgnoreCase("null")) {
+                            nullAssignments = bucketAssignmentCount.getCount();
+                        } else {
+                            bucketAssignments += bucketAssignmentCount.getCount();
+                        }
+                    }
+                    double totalAssignments = nullAssignments + bucketAssignments;
+                    if (totalAssignments != 0) {
+                        experiment.setAllocationPercent(bucketAssignments / totalAssignments);
+                    }
+                }
+            }
+        }
+        return experimentList;
     }
 }
