@@ -29,6 +29,7 @@ import com.intuit.wasabi.experiment.Pages;
 import com.intuit.wasabi.experiment.Priorities;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.experimentobjects.ExperimentCountsByState;
 import com.intuit.wasabi.experimentobjects.ExperimentIDList;
 import com.intuit.wasabi.experimentobjects.ExperimentList;
 import com.intuit.wasabi.experimentobjects.Page;
@@ -46,6 +47,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -192,6 +194,28 @@ public class ApplicationsResource {
         try {
             return httpHeader.headers().entity(addAllocationPercentToExperimentList(authorizedExperimentGetter
                     .getExperimentsByName(false, authorizationHeader, applicationName))).build();
+        } catch (Exception exception) {
+            LOGGER.error("getExperiments failed for applicationName={} with error:", applicationName, exception);
+            throw exception;
+        }
+    }
+
+    @GET
+    @Path("/{applicationName}/experimentCountsByState")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "Returns experiment counts by state for an application",
+            response = ExperimentCountsByState.class)
+    @Timed
+    public Response getExperimentCountsByState(
+            @PathParam("applicationName")
+            @ApiParam(value = "Application Name")
+            final Application.Name applicationName,
+
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = false)
+            final String authorizationHeader) {
+        try {
+            return httpHeader.headers().entity(new ExperimentCountsByState()).build();
         } catch (Exception exception) {
             LOGGER.error("getExperiments failed for applicationName={} with error:", applicationName, exception);
             throw exception;
