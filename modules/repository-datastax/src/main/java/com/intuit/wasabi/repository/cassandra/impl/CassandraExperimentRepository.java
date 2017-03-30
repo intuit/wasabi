@@ -603,7 +603,6 @@ public class CassandraExperimentRepository implements ExperimentRepository {
 
             List<Experiment> experiments = experimentPojos.all().stream().filter(experiment ->
                     (experiment.getState() != null) &&
-                            (!experiment.getState().equals(Experiment.State.TERMINATED.name())) &&
                             (!experiment.getState().equals(Experiment.State.DELETED.name())))
                     .map(experimentPojo -> ExperimentHelper.makeExperiment(experimentPojo))
                     .collect(Collectors.toList());
