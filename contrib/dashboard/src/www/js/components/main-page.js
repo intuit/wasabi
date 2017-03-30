@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { PagesPageComponent } from './pages-page';
+import { TabPageComponent } from './tab-page';
 
 export class MainPageComponent extends React.Component {
     constructor(props) {
@@ -68,7 +68,7 @@ export class MainPageComponent extends React.Component {
                 </div>
             </div>
             <div className="storeMain">
-                <PagesPageComponent applicationName={this.state.applicationName} />
+                <TabPageComponent applicationName={this.state.applicationName} />
             </div>
             <div className="modalPanel"></div>
         </div>;
