@@ -53,10 +53,11 @@ const myFields = [
         fieldName: 'state',
         headerStyle: {
             width: '60px',
-            textAlign: 'left'
+            textAlign: 'center'
         },
         style: {
-            paddingLeft: '10px'
+            paddingLeft: '10px',
+            textAlign: 'center'
         },
         dataPrefix: '',
         dataSuffix: '',
@@ -456,7 +457,7 @@ export class PagesPageComponent extends React.Component {
                         <table style={{width: '100%'}}>
                             <thead>
                                 <tr>
-                                    <td>Name</td><td>Sampling %</td><td>Actual %</td><td>State</td>
+                                    <td>&nbsp;</td><td>Name</td><td>Sampling %</td><td>Actual %</td><td style={{textAlign: 'center'}}>Status</td>
                                 </tr>
                             </thead>
                             <tbody>

@@ -56,7 +56,7 @@ module.exports = {
       // updates HTML and CSS paths which reference these files
       {
         test: /\.(png|jpe?g|gif|svg|woff|woff2|ttf|eot|ico)$/,
-        loader: 'file?name=assets/[name].[hash].[ext]'
+        loader: 'url?limit=25000'
       },
       // transpiles global SASS stylesheets
 			{
@@ -100,7 +100,7 @@ module.exports = {
     }),
 
     // configure the file to have the bundle script elements injected
-    // this is almost always the main html for the initial loading of 
+    // this is almost always the main html for the initial loading of
     // the site
     new HtmlWebpackPlugin({
       template: './src/www/index.html'
@@ -111,7 +111,7 @@ module.exports = {
       'Promise': 'exports?global.Promise!es6-promise',
       'fetch': 'imports?this=>global!exports?global.fetch!whatwg-fetch',
       'window.fetch': 'imports?this=>global!exports?global.fetch!whatwg-fetch'
-    })   
+    })
   ]
 
 };
