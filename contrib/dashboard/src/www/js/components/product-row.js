@@ -60,6 +60,9 @@ export class ProductRowComponent extends React.Component{
             else if (field.fieldName === 'selectCheckbox') {
                 return <td key={indx} style={field.style}><input type="checkbox" style={{width: '20px'}} name={this.props.item.id} value={this.state.selected} onChange={this.onSelectChange} /></td>;
             }
+            else if (field.fieldName === 'state') {
+                return <td style={field.style} key={indx}><img src={require('../../images/status_' + this.props.item[field.fieldName].toLowerCase() + '.png')} /></td>;
+            }
             else {
                 if (field.useOnClickHandler) {
                     return <td style={field.style} key={indx}><a onClick={this.onClick}>{field.dataPrefix}{this.props.item[field.fieldName]}{field.dataSuffix}</a></td>;
