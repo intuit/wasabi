@@ -11,6 +11,7 @@ export class ProductRowComponent extends React.Component{
 
         this.onChange = this.onChange.bind(this);
         this.onClick = this.onClick.bind(this);
+        this.onRowClick = this.onRowClick.bind(this);
         this.onSelectChange = this.onSelectChange.bind(this);
     }
 
@@ -28,10 +29,20 @@ export class ProductRowComponent extends React.Component{
         this.props.selectedFunc(e.target.name);
     }
 
-    onClick() {
+    onClick(event) {
+        event.stopPropagation();
         if (this.props.onClickHandler) {
             this.props.onClickHandler(this.props.item);
         }
+        return false;
+    }
+
+    onRowClick(event) {
+        event.stopPropagation();
+        if (this.props.onRowClickHandler) {
+            this.props.onRowClickHandler(this.props.item);
+        }
+        return false;
     }
 
     render() {
@@ -58,7 +69,7 @@ export class ProductRowComponent extends React.Component{
                 }
             }
         });
-        return <tr className={this.props.rowIndex % 2 === 0 ? 'evenRow' : 'oddRow'} key={this.props.rowIndex}>
+        return <tr onClick={this.onRowClick} id={this.props.item.id} className={this.props.rowIndex % 2 === 0 ? 'evenRow' : 'oddRow'} key={this.props.rowIndex}>
             {row}
         </tr>;
     }

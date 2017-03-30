@@ -187,7 +187,10 @@ export class PagesPageComponent extends React.Component {
             showModal: false,
             showExperimentModal: false,
             selectedItems: [],
-            selectedExperiment: {},
+            selectedExperiment: {
+                buckets: []
+            },
+            prioritizedExperiments: [],
             session: {
                 login: {
                     'name': '',
@@ -201,6 +204,7 @@ export class PagesPageComponent extends React.Component {
         this.refreshExperimentsInPageList = this.refreshExperimentsInPageList.bind(this);
         this.selectedFunc = this.selectedFunc.bind(this);
         this.openExperimentModal = this.openExperimentModal.bind(this);
+        this.showMutualExclusions = this.showMutualExclusions.bind(this);
     }
 
     componentDidMount() {
@@ -264,45 +268,64 @@ export class PagesPageComponent extends React.Component {
         headers.append('Content-Type', 'application/json');
         headers.append('Authorization', this.state.session.login.tokenType + ' ' + this.state.session.login.accessToken);
 
-        fetch('http://localhost:8080/api/v1/experiments/applications/' + this.state.applicationName + '/pages/' + pageName, {
+
+        fetch('http://localhost:8080/api/v1/applications/' + this.state.applicationName + '/priorities', {
             method: 'GET',
             headers: headers
-        }).then(res => res.json()).then(items => {
-            if (items && !items.hasOwnProperty('error')) {
-                for (let i=0; i < items.experiments.length; i++) {
-                    items.experiments[i].samplingPercent = items.experiments[i].samplingPercent * 100;
-                    items.experiments[i].allocationPercent = items.experiments[i].allocationPercent * 100;
-                }
-                this.setState({
-                    items: items.experiments.concat()
-                });
-
-                fetch('http://localhost:8080/api/v1/experiments', {
-                    method: 'GET',
-                    headers: headers
-                }).then(res => res.json()).then(results => {
-                    if (results && !results.hasOwnProperty('error')) {
-                        const experimentsNotInPage = [];
-                        for (let i=0; i < results.experiments.length; i++) {
-                            let found = false;
-                            for (let j=0; j < items.experiments.length; j++) {
-                                if (results.experiments[i].label === items.experiments[j].label) {
-                                    found = true;
-                                    break;
-                                }
-                            }
-                            if (!found) {
-                                results.experiments[i].samplingPercent *= 100;
-                                results.experiments[i].allocationPercent *= 100;
-                                experimentsNotInPage.push(results.experiments[i]);
+        }).then(res => res.json()).then(prioritizedExperiments => {
+            this.setState({
+                prioritizedExperiments: prioritizedExperiments.prioritizedExperiments
+            });
+            fetch('http://localhost:8080/api/v1/experiments/applications/' + this.state.applicationName + '/pages/' + pageName, {
+                method: 'GET',
+                headers: headers
+            }).then(res => res.json()).then(items => {
+                if (items && !items.hasOwnProperty('error')) {
+                    for (let i=0; i < items.experiments.length; i++) {
+                        items.experiments[i].samplingPercent = items.experiments[i].samplingPercent * 100;
+                        items.experiments[i].allocationPercent = items.experiments[i].allocationPercent * 100;
+                        // Add the priority
+                        for (let j=0; j < this.state.prioritizedExperiments.length; j++) {
+                            if (items.experiments[i].id === this.state.prioritizedExperiments[j].id) {
+                                // Found it, save the priority
+                                items.experiments[i].priority = this.state.prioritizedExperiments[j].priority;
                             }
                         }
-                        this.setState({
-                            experimentsNotInPage: experimentsNotInPage
-                        });
                     }
-                });
-            }
+                    items.experiments.sort(function(a, b) {
+                        return a.priority - b.priority;
+                    });
+                    this.setState({
+                        items: items.experiments.concat()
+                    });
+
+                    fetch('http://localhost:8080/api/v1/experiments', {
+                        method: 'GET',
+                        headers: headers
+                    }).then(res => res.json()).then(results => {
+                        if (results && !results.hasOwnProperty('error')) {
+                            const experimentsNotInPage = [];
+                            for (let i=0; i < results.experiments.length; i++) {
+                                let found = false;
+                                for (let j=0; j < items.experiments.length; j++) {
+                                    if (results.experiments[i].label === items.experiments[j].label) {
+                                        found = true;
+                                        break;
+                                    }
+                                }
+                                if (!found) {
+                                    results.experiments[i].samplingPercent *= 100;
+                                    results.experiments[i].allocationPercent *= 100;
+                                    experimentsNotInPage.push(results.experiments[i]);
+                                }
+                            }
+                            this.setState({
+                                experimentsNotInPage: experimentsNotInPage
+                            });
+                        }
+                    });
+                }
+            });
         });
     }
 
@@ -361,10 +384,47 @@ export class PagesPageComponent extends React.Component {
         this.setState({ showExperimentModal: false });
     }
 
+    showMutualExclusions(item) {
+        const $list = $('#pageExperimentsList'),
+            $row = $list.find('#' + item.id),
+            $rows = $list.find('tr');
+
+        // highlight mutually exclusive experiments
+        $rows.removeClass('hilite active');
+        $row.addClass('active');
+
+        const headers = new Headers();
+        headers.append('Content-Type', 'application/json');
+        headers.append('Authorization', this.state.session.login.tokenType + ' ' + this.state.session.login.accessToken);
+
+        fetch('http://localhost:8080/api/v1/experiments/' + item.id + '/exclusions/?showAll=true&exclusive=true', {
+            method: 'GET',
+            headers: headers
+        }).then(res => res.json()).then(meExperiments => {
+            for (var i = 0; i < meExperiments.experiments.length; i++) {
+                for (var j = 1; j < $rows.length; j++) {
+                    if ($rows.eq(j).attr('id') === meExperiments.experiments[i].id) {
+                        $rows.eq(j).addClass('hilite');
+                    }
+                }
+            }
+        });
+    }
+
     openExperimentModal(item) {
-        this.setState({
-            selectedExperiment: item,
-            showExperimentModal: true
+        const headers = new Headers();
+        headers.append('Content-Type', 'application/json');
+        headers.append('Authorization', this.state.session.login.tokenType + ' ' + this.state.session.login.accessToken);
+
+        fetch('http://localhost:8080/api/v1/experiments/' + item.id + '/buckets', {
+            method: 'GET',
+            headers: headers
+        }).then(res => res.json()).then(results => {
+            item.buckets = results.buckets;
+            this.setState({
+                selectedExperiment: item,
+                showExperimentModal: true
+            });
         });
     }
 
@@ -383,7 +443,7 @@ export class PagesPageComponent extends React.Component {
                 <section className="addButtonArea">
                     <button type="button" onClick={this.onClick}>Add Experiment To Page</button>
                 </section>
-                <ItemTableComponent fields={this.state.myFields} buttonColor={this.state.buttonColor} textColor={this.state.textColor} onClickHandler={this.openExperimentModal} deleteFunc={this.deleteExperimentFromPage} items={this.state.items} query={this.state.query} />
+                <ItemTableComponent tableId={'pageExperimentsList'} fields={this.state.myFields} buttonColor={this.state.buttonColor} textColor={this.state.textColor} onClickHandler={this.openExperimentModal} onRowClickHandler={this.showMutualExclusions} deleteFunc={this.deleteExperimentFromPage} items={this.state.items} query={this.state.query} />
                 <div className="modalWindow">
                     Shown now?
                 </div>
@@ -416,6 +476,8 @@ export class PagesPageComponent extends React.Component {
                     </Modal.Header>
                     <Modal.Body>
                         <div>{this.state.selectedExperiment.label}</div>
+                        <div>Buckets:</div>
+                        {this.state.selectedExperiment.buckets.map((item, index) => <div key={index}>{item.label} {item.allocationPercent * 100}%</div>)}
                     </Modal.Body>
                     <Modal.Footer>
                         <Button onClick={this.closeExperimentModal}>Close</Button>

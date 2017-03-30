@@ -123,3 +123,12 @@ th {
 .addButtonArea {
     padding-bottom: 10px;
 }
+
+#pageExperimentsList tr {
+    &.hilite {
+        background: #FFF4D4 !important;
+    }
+    &.active {
+        background: #FFE9AA !important;
+    }
+}

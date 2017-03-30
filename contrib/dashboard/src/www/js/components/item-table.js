@@ -19,14 +19,14 @@ export class ItemTableComponent extends React.Component{
 
     render() {
         return  <div>
-            <table style={{width: '100%'}}>
+            <table id={this.props.tableId} style={{width: '100%'}}>
                 <thead>
                     <tr>
                         {this.props.fields.map((field, index) => <th style={field.headerStyle} key={index}>{field.name}</th>)}
                     </tr>
                 </thead>
                 <tbody>
-                    {this.props.items.filter(this.doFilter).map((item, index) => <ProductRowComponent key={item.id} item={item} rowIndex={index} fields={this.props.fields} deleteFunc={this.props.deleteFunc} onClickHandler={this.props.onClickHandler} buttonColor={this.props.buttonColor} textColor={this.props.textColor} />)}
+                    {this.props.items.filter(this.doFilter).map((item, index) => <ProductRowComponent key={item.id} item={item} rowIndex={index} fields={this.props.fields} deleteFunc={this.props.deleteFunc} onClickHandler={this.props.onClickHandler} onRowClickHandler={this.props.onRowClickHandler} buttonColor={this.props.buttonColor} textColor={this.props.textColor} />)}
                 </tbody>
             </table>
         </div>;
