@@ -1002,16 +1002,22 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
 
             changeState: function (experiment, state, afterUpdateFunction) {
                 var stateChange = 'start',
-                    that = this;
+                    that = this,
+                    title = 'Confirm State Change';
                 switch (state.toLowerCase()) {
                     case 'paused':
                         stateChange = 'stop';
                         break;
                     case 'terminated':
                         stateChange = 'terminate';
+                        title = 'Permanently Terminate Experiment';
                         break;
                 }
-                DialogsFactory.confirmDialog('Are you sure you want to ' + stateChange + ' the experiment ' + experiment.label + '?', 'Confirm State Change',
+                var msg = 'Are you sure you want to ' + stateChange + ' the experiment ' + experiment.label + '?';
+                if (state.toLowerCase() === 'terminated') {
+                    msg = 'Are you sure you want to <span style="font-weight: bold;">PERMANENTLY TERMINATE</span> the experiment ' + experiment.label + '?';
+                }
+                DialogsFactory.confirmDialog(msg, title,
                         function() {
                             // Let the state change go through
                             ExperimentsFactory.update({id: experiment.id, state: state}).$promise.then(function () {
@@ -1155,6 +1161,28 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                     }
                 }
                 return nameList;
+            },
+
+            updateApplicationRoles: function(userID, getUsersPrivilegesForApplication) {
+                AuthzFactory.getUserRoles({
+                    userId: userID
+                }).$promise.then(function (roleList) {
+                    if (roleList) {
+                        // Go through list and get role for this application, if there.
+                        var applications = [];
+                        roleList.forEach(function(nextRole) {
+                            applications.push({ label: nextRole.applicationName, role: nextRole.role });
+                        });
+
+                        if (getUsersPrivilegesForApplication) {
+                            getUsersPrivilegesForApplication();
+                        }
+
+                        return applications;
+                    }
+                }, function(response) {
+                    UtilitiesFactory.handleGlobalError(response, 'The roles for this user could not be retrieved.');
+                });
             },
 
             displaySuccessWithCacheWarning: function(title, extraMsg) {

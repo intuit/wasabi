@@ -2,12 +2,13 @@
 
 angular.module('wasabi.controllers')
     .controller('DialogModalCtrl',
-        ['$scope', '$modalInstance', 'options', '$timeout',
-            function ($scope, $modalInstance, options, $timeout) {
+        ['$scope', '$modalInstance', 'options', '$timeout', '$sce',
+            function ($scope, $modalInstance, options, $timeout, $sce) {
 
                 $scope.header = options.header;
 
-                $scope.description = options.description;
+                // Use $sce (Strict Contextual Escaping) to safely insert HTML into the message.
+                $scope.description = $sce.trustAsHtml(options.description);
 
                 $scope.okLabel = 'OK';
                 if (options.okLabel) {

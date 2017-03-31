@@ -53,8 +53,11 @@ import java.util.Spliterators;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static java.util.Objects.nonNull;
+
 public class CassandraAuthorizationRepository implements AuthorizationRepository {
     private static final Logger LOGGER = LoggerFactory.getLogger(CassandraAuthorizationRepository.class);
+    public static final String ALL_APPLICATIONS = "*";
     static final String SUPERADMIN = "superadmin";
     static final Application.Name WILDCARD = Application.Name.valueOf("wildcard");
 
@@ -387,4 +390,76 @@ public class CassandraAuthorizationRepository implements AuthorizationRepository
         }
         return resultList;
     }
+
+    @Override
+    public void assignUserToSuperAdminRole(UserInfo candidateUser) {
+
+        LOGGER.debug("Adding user {} as superadmin", candidateUser);
+
+        String superAdminRole = Role.SUPERADMIN.toString().toLowerCase();
+        String userID = candidateUser.getUsername().toString();
+
+        userRoleAccessor.insertUserRoleBy(userID, ALL_APPLICATIONS,
+                superAdminRole);
+        appRoleAccessor.insertAppRoleBy(ALL_APPLICATIONS, userID,
+                superAdminRole);
+    }
+
+    @Override
+    public void removeUserFromSuperAdminRole(UserInfo candidateUser) {
+        LOGGER.debug("Removing user {} from user admin role", candidateUser);
+
+        String userID = candidateUser.getUsername().toString();
+        userRoleAccessor.deleteUserRoleBy(userID, ALL_APPLICATIONS);
+        appRoleAccessor.deleteAppRoleBy(ALL_APPLICATIONS, userID);
+    }
+
+    @Override
+    public List<UserRole> getSuperAdminRoleList() {
+
+        LOGGER.debug("Getting super admin role list");
+        List<com.intuit.wasabi.repository.cassandra.pojo.UserRole> allUserRoles =
+                userRoleAccessor.getAllUserRoles().all();
+
+        LOGGER.debug("Received all roles {}", allUserRoles);
+
+        List<UserRole> superAdmins = allUserRoles.stream().filter(
+                userRole -> Role.SUPERADMIN.toString().equalsIgnoreCase(
+                        userRole.getRole().toString()) && ALL_APPLICATIONS.equals(userRole.getAppName())).map(
+                userRole -> getRoleWithUserInfo(userRole)).collect(Collectors.toList());
+
+        LOGGER.debug("Returning {} roles", superAdmins);
+
+        return superAdmins;
+    }
+
+    private UserRole getRoleWithUserInfo(com.intuit.wasabi.repository.cassandra.pojo.UserRole userRole) {
+
+        LOGGER.debug("Getting user info for user role={}", userRole);
+
+        Application.Name appName = userRole.getAppName().equals(ALL_APPLICATIONS) ? WILDCARD :
+                Application.Name.valueOf(userRole.getAppName());
+
+        UserInfo userInfo = getUserInfo(UserInfo.Username.valueOf(userRole.getUserId()));
+
+        UserRole roleWithUserInfo;
+
+        if (nonNull(userInfo)) {
+            roleWithUserInfo = UserRole.newInstance(
+                    appName,
+                    Role.toRole(userRole.getRole())).
+                    withUserID(UserInfo.Username.valueOf(userRole.getUserId())).
+                    withFirstName(userInfo.getFirstName()).
+                    withLastName(userInfo.getLastName()).
+                    withUserEmail(userInfo.getEmail()).build();
+        } else {
+            roleWithUserInfo = UserRole.newInstance(appName, Role.toRole(userRole.getRole()))
+                    .withUserID(UserInfo.Username.valueOf(userRole.getUserId())).build();
+        }
+
+        LOGGER.debug("Role with user info for user role={} is {}", userRole, roleWithUserInfo);
+
+        return roleWithUserInfo;
+    }
+
 }

@@ -56,13 +56,15 @@
     </test>
     <test name="IntegrationExperimentTests">
         <classes>
+        	<class name="com.intuit.wasabi.tests.service.ExperimentGetCallEnhanceTest" />
             <class name="com.intuit.wasabi.tests.service.IntegrationExperiment" />
             <class name="com.intuit.wasabi.tests.service.IntegrationMutualExclusion" />
         </classes>
     </test>
     <test name="IntegrationEventsTests">
         <classes>
-            <class name="com.intuit.wasabi.tests.service.EventsIntegrationTest" />
+            <class name="com.intuit.wasabi.tests.service.events.EventsIntegrationTest" />
+            <class name="com.intuit.wasabi.tests.service.events.TestUserIDLengthForEventCalls" />
         </classes>
     </test>
     <test name="IntegrationCountTests">
