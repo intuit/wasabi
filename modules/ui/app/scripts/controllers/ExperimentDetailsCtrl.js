@@ -809,6 +809,8 @@ angular.module('wasabi.controllers').
                             {key: 'item_id', value: experiment.id},
                             {key: 'item_label', value: experiment.label});
 
+                        UtilitiesFactory.displaySuccessWithCacheWarning('Segmentation Rule Saved', 'Your segmentation rule change has been saved.');
+
                         // Since we don't want to parse the rule into elements here, we turn off rule
                         // testing when they saved the rule from the text area.
                         $scope.rulesChangedNotSaved = ($scope.simpleRuleEditing ? $scope.checkForRule() : true);
@@ -937,6 +939,7 @@ angular.module('wasabi.controllers').
                                 {key: 'experiment_id', value: $stateParams.experimentId},
                                 {key: 'item_value', value: experiment.samplingPercent});
 
+                            UtilitiesFactory.displaySuccessWithCacheWarning('Sampling Percentage Changed', 'Your new sampling percentage has been saved.');
                             $scope.loadExperiment();
                         }, function(response) {
                             UtilitiesFactory.handleGlobalError(response, 'Your sampling percentage could not be changed.');
@@ -981,9 +984,10 @@ angular.module('wasabi.controllers').
                                 {key: 'experiment_id', value: $stateParams.experimentId},
                                 {key: 'item_value', value: experiment.samplingPercent});
 
+                            UtilitiesFactory.displaySuccessWithCacheWarning('Rapid Experiment Settings Changed', 'Your rapid experiment settings have been saved.');
                             $scope.loadExperiment();
                         }, function(response) {
-                            UtilitiesFactory.handleGlobalError(response, 'Your sampling percentage could not be changed.');
+                            UtilitiesFactory.handleGlobalError(response, 'Your rapid experiment settings could not be changed.');
                         });
                     });
             };
@@ -1009,6 +1013,7 @@ angular.module('wasabi.controllers').
                                 {key: 'experiment_id', value: $stateParams.experimentId},
                                 {key: 'item_value', value: experiment.endTime});
 
+                            UtilitiesFactory.displaySuccessWithCacheWarning('End Date Changed', 'Your new end date has been saved.');
                             $scope.loadExperiment();
                         }, function(response) {
                             UtilitiesFactory.handleGlobalError(response, 'Your experiment end date could not be changed.');
@@ -1061,6 +1066,8 @@ angular.module('wasabi.controllers').
                 });
 
                 modalInstance.result.then(function () {
+                    UtilitiesFactory.displaySuccessWithCacheWarning('Bucket Saved', 'Your bucket changes have been saved.');
+
                     $scope.loadBuckets();
                 });
             };

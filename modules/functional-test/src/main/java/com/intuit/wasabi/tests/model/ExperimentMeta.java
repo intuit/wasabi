@@ -1,7 +1,5 @@
 package com.intuit.wasabi.tests.model;
 
-import com.intuit.wasabi.tests.model.Experiment;
-
 /**
  * Created on 5/2/16.
  */

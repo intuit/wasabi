@@ -115,6 +115,13 @@ angular.module('wasabi', [
                         authorizedRoles: [USER_ROLES.user, USER_ROLES.admin]
                     }
                 })
+                .state('superadmins', {
+                    url: '/superadmins',
+                    templateUrl: 'views/SuperadminsTable.html',
+                    data: {
+                        authorizedRoles: [USER_ROLES.admin]
+                    }
+                })
                 .state('feedbackReader', {
                     url: '/feedbackReader',
                     templateUrl: 'views/FeedbackTable.html',

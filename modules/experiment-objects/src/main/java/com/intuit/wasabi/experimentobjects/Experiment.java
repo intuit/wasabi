@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,24 +34,34 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.joda.time.DateMidnight;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.LongBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 
-import static com.intuit.wasabi.experimentobjects.Experiment.State.*;
+import static com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT;
+import static com.intuit.wasabi.experimentobjects.Experiment.State.PAUSED;
+import static com.intuit.wasabi.experimentobjects.Experiment.State.RUNNING;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 
 /**
  * An experiment
  */
-public class Experiment implements Cloneable, ExperimentBase {
+public class Experiment implements Cloneable, ExperimentBase, Serializable {
 
-    @ApiModelProperty(value = "unique experiment ID", dataType = "UUID",  required = true)
+    @ApiModelProperty(value = "unique experiment ID", dataType = "UUID", required = true)
     private Experiment.ID id;
-    @ApiModelProperty(value = "experiment label; unique within the application", dataType = "String",  required = true)
+    @ApiModelProperty(value = "experiment label; unique within the application", dataType = "String", required = true)
     private Experiment.Label label;
-    @ApiModelProperty(value = "name of the application; e.g. \"QBO\"", dataType = "String",  required = true)
+    @ApiModelProperty(value = "name of the application; e.g. \"QBO\"", dataType = "String", required = true)
     private Application.Name applicationName;
     @ApiModelProperty(value = "earliest time the experiment allows bucket assignments", required = true)
     private Date startTime;
@@ -139,7 +149,7 @@ public class Experiment implements Cloneable, ExperimentBase {
         this.description = description;
     }
 
-    public String getHypothesisIsCorrect(){
+    public String getHypothesisIsCorrect() {
         return hypothesisIsCorrect;
     }
 
@@ -400,7 +410,7 @@ public class Experiment implements Cloneable, ExperimentBase {
 
     /**
      * Calculates the last day of the experiment.
-     *
+     * <p>
      * This is generally the experiment end date, but may be an earlier date if
      * the experiment was TERMINATED early. In this case the modification date
      * is used.
@@ -454,6 +464,7 @@ public class Experiment implements Cloneable, ExperimentBase {
 
             private static final Map<State, ArrayList<State>> m =
                     new EnumMap<>(State.class);
+
             static {
                 for (ExperimentStateTransition trans :
                         ExperimentStateTransition.values()) {
@@ -463,6 +474,7 @@ public class Experiment implements Cloneable, ExperimentBase {
                     }
                 }
             }
+
             private final transient List<State> allowedStateTransitions;
 
             ExperimentStateTransition(State... allowedTransitions) {
@@ -638,7 +650,7 @@ public class Experiment implements Cloneable, ExperimentBase {
      */
     @JsonSerialize(using = Experiment.ID.Serializer.class)
     @JsonDeserialize(using = Experiment.ID.Deserializer.class)
-    public static class ID {
+    public static class ID implements Serializable {
 
         private UUID id;
 
@@ -663,7 +675,7 @@ public class Experiment implements Cloneable, ExperimentBase {
         public static ID valueOf(byte[] value) {
             if (value.length != 16) {
                 throw new InvalidIdentifierException("Argument \"value\" must " +
-                    "be a 16-byte array representing a UUID");
+                        "be a 16-byte array representing a UUID");
             }
 
             try {
@@ -736,7 +748,7 @@ public class Experiment implements Cloneable, ExperimentBase {
      */
     @JsonSerialize(using = Experiment.Label.Serializer.class)
     @JsonDeserialize(using = Experiment.Label.Deserializer.class)
-    public static class Label {
+    public static class Label implements Serializable {
 
         private String label;
 

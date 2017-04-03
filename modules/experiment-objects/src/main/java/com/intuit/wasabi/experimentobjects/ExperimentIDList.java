@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -45,7 +45,7 @@ public class ExperimentIDList {
         return new Builder(value);
     }
 
-    public static Builder withExperimentIDList(List<Experiment.ID> experimentIDs){
+    public static Builder withExperimentIDList(List<Experiment.ID> experimentIDs) {
         return new Builder(experimentIDs);
     }
 
@@ -72,30 +72,32 @@ public class ExperimentIDList {
             instance.experimentIDs = new ArrayList<>(experimentIDs);
             return this;
         }
-        
+
         public ExperimentIDList build() {
             ExperimentIDList result = instance;
-            instance=null;
+            instance = null;
             return result;
         }
 
     }
 
-    public List<Experiment.ID> getExperimentIDs() { return experimentIDs; }
+    public List<Experiment.ID> getExperimentIDs() {
+        return experimentIDs;
+    }
 
 
     @Override
     public String toString() {
-    	return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 
     @Override
     public int hashCode() {
-    	return HashCodeBuilder.reflectionHashCode(this);
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override
     public boolean equals(Object obj) {
-    	   return EqualsBuilder.reflectionEquals(this, obj);
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 }

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,47 +39,53 @@ public class ExperimentBasicStatistics extends AbstractContainerStatistics {
     @ApiModelProperty(required = true)
     private Map<Bucket.Label, BucketBasicStatistics> buckets;
 
-    public static class Builder{
+    public static class Builder {
 
         private ExperimentBasicStatistics item;
 
 
-        public Builder(){
+        public Builder() {
             this.item = new ExperimentBasicStatistics();
         }
 
-        public Builder withBuckets(Map<Bucket.Label, BucketBasicStatistics> value){
+        public Builder withBuckets(Map<Bucket.Label, BucketBasicStatistics> value) {
             this.item.buckets = value;
             return this;
         }
-        public Builder withActionCounts(Map<Event.Name, ActionCounts> value){
+
+        public Builder withActionCounts(Map<Event.Name, ActionCounts> value) {
             this.item.actionCounts = value;
             return this;
         }
-        public Builder withActionRates(Map<Event.Name, ActionRate> value){
+
+        public Builder withActionRates(Map<Event.Name, ActionRate> value) {
             this.item.actionRates = value;
             return this;
         }
-        public Builder withImpressionCounts(Counts value){
+
+        public Builder withImpressionCounts(Counts value) {
             this.item.impressionCounts = value;
             return this;
         }
-        public Builder withJointActionCounts(Counts value){
+
+        public Builder withJointActionCounts(Counts value) {
             this.item.jointActionCounts = value;
             return this;
         }
-        public Builder withJointActionRate(Estimate value){
+
+        public Builder withJointActionRate(Estimate value) {
             this.item.jointActionRate = value;
             return this;
         }
-        public Builder withExperimentCounts(ExperimentCounts value){
+
+        public Builder withExperimentCounts(ExperimentCounts value) {
             this.item.impressionCounts = value.getImpressionCounts();
             this.item.jointActionCounts = value.getJointActionCounts();
             this.item.actionCounts = value.getActionCounts();
             return this;
         }
 
-        public ExperimentBasicStatistics build(){
+        public ExperimentBasicStatistics build() {
             return this.item;
         }
     }
@@ -87,23 +93,24 @@ public class ExperimentBasicStatistics extends AbstractContainerStatistics {
     public Map<Bucket.Label, BucketBasicStatistics> getBuckets() {
         return buckets;
     }
+
     public void setBuckets(Map<Bucket.Label, BucketBasicStatistics> value) {
         this.buckets = value;
     }
 
     @Override
     public String toString() {
-    	return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 
     @Override
     public int hashCode() {
-    	return HashCodeBuilder.reflectionHashCode(this);
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override
     public boolean equals(Object obj) {
-    	   return EqualsBuilder.reflectionEquals(this, obj);
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 
     @Override
@@ -112,7 +119,7 @@ public class ExperimentBasicStatistics extends AbstractContainerStatistics {
 
         if (buckets != null) {
             Map<Bucket.Label, BucketBasicStatistics> clonedBuckets = new HashMap<>();
-            for ( Entry<Label, BucketBasicStatistics> entry : buckets.entrySet()) {
+            for (Entry<Label, BucketBasicStatistics> entry : buckets.entrySet()) {
                 clonedBuckets.put(entry.getKey(), entry.getValue().clone());
             }
             cloned.setBuckets(clonedBuckets);

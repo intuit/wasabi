@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,18 +36,23 @@ public class LoginCredentials {
     public UserInfo.Username getUsername() {
         return username;
     }
+
     public void setUsername(UserInfo.Username username) {
         this.username = username;
     }
+
     public String getPassword() {
         return password;
     }
+
     public void setPassword(String password) {
         this.password = password;
     }
+
     public String getNamespaceId() {
         return namespaceId;
     }
+
     public void setNamespaceId(String namespaceId) {
         this.namespaceId = namespaceId;
     }
@@ -63,7 +68,7 @@ public class LoginCredentials {
         private Builder(UserInfo.Username username) {
             super();
             instance = new LoginCredentials();
-            instance.username= Preconditions.checkNotNull(username);
+            instance.username = Preconditions.checkNotNull(username);
         }
 
         public Builder withPassword(final String password) {
@@ -77,20 +82,20 @@ public class LoginCredentials {
         }
 
         public LoginCredentials build() {
-            LoginCredentials result=instance;
-            instance=null;
+            LoginCredentials result = instance;
+            instance = null;
             return result;
         }
     }
 
     @Override
     public int hashCode() {
-    	return HashCodeBuilder.reflectionHashCode(this);
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override
     public boolean equals(Object obj) {
-    	   return EqualsBuilder.reflectionEquals(this, obj);
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 
     @Override

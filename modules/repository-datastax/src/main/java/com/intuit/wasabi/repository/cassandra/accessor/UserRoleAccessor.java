@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,26 +28,29 @@ import com.intuit.wasabi.repository.cassandra.pojo.UserRole;
 @Accessor
 public interface UserRoleAccessor {
 
+    @Query("select * from user_roles")
+    Result<UserRole> getAllUserRoles();
+
     @Query("select * from user_roles where user_id = ? and app_name = ?")
-    Result<UserRole> getUserRolesBy(String userId, String appName);
+    Result<UserRole> getUserRolesBy(String userID, String appName);
 
     @Query("select * from user_roles where user_id = ? and app_name = '*'")
-    Result<UserRole> getUserRolesByUserIdWithWildcardAppName(String userId);
+    Result<UserRole> getUserRolesByUserIdWithWildcardAppName(String userID);
 
     @Query("select * from user_roles where user_id = ?")
-    Result<UserRole> getUserRolesByUserId(String userId);
+    Result<UserRole> getUserRolesByUserId(String userID);
 
     @Query("delete from user_roles where user_id = ? and app_name = ?")
-    ResultSet deleteUserRoleBy(String userId, String appName);
+    ResultSet deleteUserRoleBy(String userID, String appName);
 
     @Query("insert into user_roles (user_id, app_name, role) values (?, ?, ?)")
-    ResultSet insertUserRoleBy(String userId, String appName, String role);
+    ResultSet insertUserRoleBy(String userID, String appName, String role);
 
     //TODO: this is a hack for multitable batch statement
     @Query("insert into user_roles (user_id, app_name, role) values (?, ?, ?)")
-    Statement insertUserRoleStatement(String userId, String appName, String role);
+    Statement insertUserRoleStatement(String userID, String appName, String role);
 
     @Query("delete from user_roles where user_id = ? and app_name = ?")
-    Statement deleteUserRoleStatement(String userId, String appName);
+    Statement deleteUserRoleStatement(String userID, String appName);
 
 }

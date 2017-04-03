@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,6 +22,7 @@ import com.intuit.wasabi.tests.library.util.RetryAnalyzer;
 import com.intuit.wasabi.tests.library.util.RetryTest;
 import com.intuit.wasabi.tests.library.util.serialstrategies.DefaultNameExclusionStrategy;
 import com.intuit.wasabi.tests.library.util.serialstrategies.DefaultNameInclusionStrategy;
+import com.intuit.wasabi.tests.library.util.serialstrategies.SerializationStrategy;
 import com.intuit.wasabi.tests.model.Assignment;
 import com.intuit.wasabi.tests.model.Bucket;
 import com.intuit.wasabi.tests.model.Event;
@@ -72,6 +73,9 @@ public class SmokeTest extends TestBase {
     private List<Page> pages;
     private int impressionsFactorPerUser = 5;
     private Experiment mutualExclusiveExperiment;
+    private DefaultNameExclusionStrategy experimentComparisonStrategy =
+            new DefaultNameExclusionStrategy("id", "creationTime",
+                    "modificationTime", "ruleJson", "hypothesisIsCorrect", "results");
 
     /**
      * Initializes a default experiment.
@@ -81,9 +85,6 @@ public class SmokeTest extends TestBase {
 
         experiment = ExperimentFactory.createExperiment();
         mutualExclusiveExperiment = ExperimentFactory.createExperiment();
-
-        DefaultNameExclusionStrategy experimentComparisonStrategy = new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson");
-        experiment.setSerializationStrategy(experimentComparisonStrategy);
 
         for (int i = 1; i <= 4; ++i) {
             users.add(UserFactory.createUser());
@@ -115,7 +116,7 @@ public class SmokeTest extends TestBase {
     @Test(dependsOnMethods = {"t_createExperiments"})
     public void t_retrieveExperiment() {
         Experiment fetchedExperiment = getExperiment(experiment);
-        assertEqualModelItems(fetchedExperiment, experiment);
+        assertEqualModelItems(fetchedExperiment, experiment, experimentComparisonStrategy);
         experiment.update(fetchedExperiment);
     }
 
@@ -166,7 +167,7 @@ public class SmokeTest extends TestBase {
     public void t_startExperiment() {
         experiment.state = Constants.EXPERIMENT_STATE_RUNNING;
         Experiment exp = putExperiment(experiment);
-        assertEqualModelItems(exp, experiment);
+        assertEqualModelItems(exp, experiment, experimentComparisonStrategy);
         experiment.update(exp);
     }
 
@@ -176,7 +177,7 @@ public class SmokeTest extends TestBase {
     @Test(dependsOnMethods = {"t_startExperiment"})
     public void t_retrieveRunningExperiment() {
         Experiment exp = getExperiment(experiment);
-        assertEqualModelItems(exp, experiment);
+        assertEqualModelItems(exp, experiment, experimentComparisonStrategy);
         experiment.update(exp);
     }
 
@@ -537,7 +538,7 @@ public class SmokeTest extends TestBase {
         postExperimentPriority(experiment, 0);
         List<Experiment> experiments = getApplicationPriorities(ApplicationFactory.createApplication().setName(experiment.applicationName));
         // experiment should be first, having highest priority now
-        assertEqualModelItems(experiments.get(0), experiment);
+        assertEqualModelItems(experiments.get(0), experiment, experimentComparisonStrategy);
     }
 
     /**
@@ -570,9 +571,9 @@ public class SmokeTest extends TestBase {
     @Test(dependsOnMethods = {"t_getPages", "t_retrieveExperimentAssignments", "t_emptyBucket"})
     public void t_pauseExperiments() {
         Experiment terminated = putExperiment(experiment.setState(Constants.EXPERIMENT_STATE_PAUSED));
-        assertEqualModelItems(terminated, experiment);
+        assertEqualModelItems(terminated, experiment, experimentComparisonStrategy);
         terminated = putExperiment(mutualExclusiveExperiment.setState(Constants.EXPERIMENT_STATE_PAUSED));
-        assertEqualModelItems(terminated, mutualExclusiveExperiment);
+        assertEqualModelItems(terminated, mutualExclusiveExperiment, experimentComparisonStrategy);
     }
 
     /**
@@ -581,9 +582,9 @@ public class SmokeTest extends TestBase {
     @Test(dependsOnMethods = {"t_pauseExperiments"})
     public void t_terminateExperiments() {
         Experiment terminated = putExperiment(experiment.setState(Constants.EXPERIMENT_STATE_TERMINATED));
-        assertEqualModelItems(terminated, experiment);
+        assertEqualModelItems(terminated, experiment, experimentComparisonStrategy);
         terminated = putExperiment(mutualExclusiveExperiment.setState(Constants.EXPERIMENT_STATE_TERMINATED));
-        assertEqualModelItems(terminated, mutualExclusiveExperiment);
+        assertEqualModelItems(terminated, mutualExclusiveExperiment, experimentComparisonStrategy);
     }
 
     /**
@@ -600,6 +601,7 @@ public class SmokeTest extends TestBase {
      */
     @Test(dependsOnMethods = {"t_deleteExperiments"})
     public void t_checkDeletedExperiments() {
+        clearAssignmentsMetadataCache();
         List<Experiment> experiments = getExperiments();
         Assert.assertFalse(experiments.contains(experiment), experiment + " not deleted.");
         Assert.assertFalse(experiments.contains(mutualExclusiveExperiment), mutualExclusiveExperiment + " not deleted.");
@@ -613,9 +615,9 @@ public class SmokeTest extends TestBase {
         experiment.setState(null).id = null;
         Experiment created = postExperiment(experiment);
         experiment.setState(Constants.EXPERIMENT_STATE_DRAFT);
-        experiment.getSerializationStrategy().add("id");
-        assertEqualModelItems(created, experiment);
-        experiment.getSerializationStrategy().remove("id");
+        //experiment.getSerializationStrategy().add("id");
+        assertEqualModelItems(created, experiment, experimentComparisonStrategy);
+        //experiment.getSerializationStrategy().remove("id");
         experiment.update(created);
     }
 

@@ -62,7 +62,8 @@ public class EmailResource {
      * specified user.
      *
      * @param applicationName the name of the application for which the log should be fetched
-     * @param user            the {@link com.intuit.wasabi.authenticationobjects.UserInfo.Username} of the user access is requested for
+     * @param user            the {@link com.intuit.wasabi.authenticationobjects.UserInfo.Username}
+     *                        of the user access is requested for
      * @param emails          the {@link com.intuit.wasabi.email.EmailLinksList} of links list
      * @return a {@link Response} that is ok when the call succeeded.
      */
@@ -86,21 +87,28 @@ public class EmailResource {
 
             @ApiParam(name = "clickableAccessEmailLinks", value = "Clickable Access Email Links")
             final EmailLinksList emails) {
-        String message;
+        try {
+            String message;
 
-        if (emailService.isActive()) {
-            emailService.sendEmailForUserPermission(applicationName, user, emails);
+            if (emailService.isActive()) {
+                emailService.sendEmailForUserPermission(applicationName, user, emails);
 
-            // todo: string.format
-            message = "An email has been sent to the administrators of " + applicationName
-                    + " to ask for access for user " + user + " with links " + emails.toString();
-            return httpHeader.headers().entity(message).build();
-        } else {
-            LOGGER.warn("User tried to send an email via API-call, but the service is not active.");
+                // todo: string.format
+                message = "An email has been sent to the administrators of "
+                        + applicationName + " to ask for access for user "
+                        + user + " with links " + emails.toString();
+                return httpHeader.headers().entity(message).build();
+            } else {
+                LOGGER.warn("User tried to send an email via API-call, but the service is not active.");
 
-            message = "The email service is not activated at the moment.";
+                message = "The email service is not activated at the moment.";
+            }
+
+            return httpHeader.headers(SERVICE_UNAVAILABLE).entity(message).build();
+        } catch (Exception exception) {
+            LOGGER.error("postEmail failed for applicationName={}, user={}, emails={} with error:",
+                    applicationName, user, emails, exception);
+            throw exception;
         }
-
-        return httpHeader.headers(SERVICE_UNAVAILABLE).entity(message).build();
     }
 }

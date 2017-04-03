@@ -24,7 +24,11 @@ import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
-import static com.google.common.net.HttpHeaders.*;
+import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS;
+import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS;
+import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN;
+import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_MAX_AGE;
+import static com.google.common.net.HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD;
 import static java.lang.Boolean.TRUE;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static javax.ws.rs.core.Response.Status.OK;
@@ -46,7 +50,7 @@ public class HttpHeaderTest {
 
     @Before
     public void before() {
-        httpHeader = new HttpHeader("name");
+        httpHeader = new HttpHeader("name", "600");
     }
 
     @Test
@@ -62,13 +66,14 @@ public class HttpHeaderTest {
 
         MultivaluedMap<String, Object> metaData = response.getMetadata();
 
-        assertThat(metaData.size(), is(6));
+        assertThat(metaData.size(), is(7));
         assertThat(metaData.get(HttpHeaders.CACHE_CONTROL), hasItem(CACHE_CONTROL));
         assertThat(metaData.get(ACCESS_CONTROL_ALLOW_ORIGIN), hasItem("*"));
         assertThat(metaData.get(ACCESS_CONTROL_ALLOW_HEADERS),
                 hasItem("Authorization,X-Forwarded-For,Accept-Language,Content-Type"));
-        assertThat(metaData.get(ACCESS_CONTROL_ALLOW_METHODS), hasItem("GET,POST,OPTIONS"));
-        assertThat(metaData.get(ACCESS_CONTROL_REQUEST_METHOD), hasItem("GET,POST,OPTIONS"));
+        assertThat(metaData.get(ACCESS_CONTROL_ALLOW_METHODS), hasItem("GET,POST,PUT,DELETE,OPTIONS"));
+        assertThat(metaData.get(ACCESS_CONTROL_REQUEST_METHOD), hasItem("GET,POST,PUT,DELETE,OPTIONS"));
+        assertThat(metaData.get(ACCESS_CONTROL_MAX_AGE), hasItem("600"));
         assertThat(metaData.get("X-Application-Id"), hasItem("name"));
         assertThat(response.getEntity(), is(nullValue()));
     }
@@ -81,13 +86,14 @@ public class HttpHeaderTest {
 
         MultivaluedMap<String, Object> metaData = response.getMetadata();
 
-        assertThat(metaData.size(), is(6));
+        assertThat(metaData.size(), is(7));
         assertThat(metaData.get(HttpHeaders.CACHE_CONTROL), hasItem(CACHE_CONTROL));
         assertThat(metaData.get(ACCESS_CONTROL_ALLOW_ORIGIN), hasItem("*"));
         assertThat(metaData.get(ACCESS_CONTROL_ALLOW_HEADERS),
                 hasItem("Authorization,X-Forwarded-For,Accept-Language,Content-Type"));
-        assertThat(metaData.get(ACCESS_CONTROL_ALLOW_METHODS), hasItem("GET,POST,OPTIONS"));
-        assertThat(metaData.get(ACCESS_CONTROL_REQUEST_METHOD), hasItem("GET,POST,OPTIONS"));
+        assertThat(metaData.get(ACCESS_CONTROL_ALLOW_METHODS), hasItem("GET,POST,PUT,DELETE,OPTIONS"));
+        assertThat(metaData.get(ACCESS_CONTROL_REQUEST_METHOD), hasItem("GET,POST,PUT,DELETE,OPTIONS"));
+        assertThat(metaData.get(ACCESS_CONTROL_MAX_AGE), hasItem("600"));
         assertThat(metaData.get("X-Application-Id"), hasItem("name"));
         assertThat(response.getEntity(), is(nullValue()));
     }

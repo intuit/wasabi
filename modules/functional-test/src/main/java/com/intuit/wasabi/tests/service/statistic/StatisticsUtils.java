@@ -37,13 +37,13 @@ import java.util.Map;
 public class StatisticsUtils {
 
     static void COMPUTE_EVENT_COUNT_PER_LABEL(String bucketLabel, JsonObject events,
-                                              Map<String, Map<String, Integer>>bucketLabelToEventCount) {
+                                              Map<String, Map<String, Integer>> bucketLabelToEventCount) {
         Map<String, Integer> event = bucketLabelToEventCount.getOrDefault(bucketLabel, new HashMap<>());
         bucketLabelToEventCount.put(bucketLabel, event);
-        for(JsonElement element : events.getAsJsonArray("events")){
+        for (JsonElement element : events.getAsJsonArray("events")) {
             String name = element.getAsJsonObject().get("name").getAsString().toLowerCase();
             Integer value = event.getOrDefault(name, 0);
-            event.put(name, value+1);
+            event.put(name, value + 1);
         }
     }
 
@@ -55,15 +55,15 @@ public class StatisticsUtils {
         jsonObject.remove("jointActionRate");
         jsonObject.remove("actionRates");
         JsonObject cur = jsonObject.getAsJsonObject("buckets");
-        for(Map.Entry<String, JsonElement> entry : cur.entrySet()){
+        for (Map.Entry<String, JsonElement> entry : cur.entrySet()) {
             entry.getValue().getAsJsonObject().remove("actionRates");
             entry.getValue().getAsJsonObject().remove("jointActionRate");
             entry.getValue().getAsJsonObject().remove("bucketComparisons");
         }
         JsonObject experimentStatistics = jsonObject.getAsJsonObject("buckets");
-        for (String label : new String[]{"red", "blue"}){
+        for (String label : new String[]{"red", "blue"}) {
             JsonObject bucket = experimentStatistics.getAsJsonObject(label);
-            if (bucket.getAsJsonObject("actionCounts").entrySet().size() == 0){
+            if (bucket.getAsJsonObject("actionCounts").entrySet().size() == 0) {
                 experimentStatistics.remove(label);
             }
         }
@@ -72,8 +72,8 @@ public class StatisticsUtils {
     /**
      * @param jsonObject
      */
-    static void COMPUTE_DAILY_COUNT(JsonObject jsonObject){
-        for(JsonElement element : jsonObject.getAsJsonArray("days")) {
+    static void COMPUTE_DAILY_COUNT(JsonObject jsonObject) {
+        for (JsonElement element : jsonObject.getAsJsonArray("days")) {
             element.getAsJsonObject().remove("cumulative");
             element.getAsJsonObject().remove("jointProgress");
             element.getAsJsonObject().remove("actionProgress");
@@ -84,7 +84,7 @@ public class StatisticsUtils {
             experimentStatistics.remove("jointActionRate");
             experimentStatistics.remove("actionRates");
             JsonObject buckets = experimentStatistics.getAsJsonObject("buckets");
-            for (String label : new String[]{"red", "blue"}){
+            for (String label : new String[]{"red", "blue"}) {
                 JsonObject bucket = buckets.getAsJsonObject(label);
                 bucket.remove("actionRates");
                 bucket.remove("jointActionRate");
@@ -92,15 +92,15 @@ public class StatisticsUtils {
         }
     }
 
-    static Map<String, List<EventDateTime>> EVENT_DATETIME(){
+    static Map<String, List<EventDateTime>> EVENT_DATETIME() {
         Map<String, List<EventDateTime>> result = new HashMap<>();
 
-        for(Object[] values : SharedExperimentDataProvider.validEvents()){
+        for (Object[] values : SharedExperimentDataProvider.validEvents()) {
             String bucket = (String) values[0];
             List<EventDateTime> eventAndDatetimes = result.getOrDefault(bucket, new ArrayList<>());
             result.put(bucket, eventAndDatetimes);
             JsonObject eventJsonObject = new JsonParser().parse((String) values[1]).getAsJsonObject();
-            for(JsonElement element : eventJsonObject.getAsJsonArray("events")){
+            for (JsonElement element : eventJsonObject.getAsJsonArray("events")) {
                 String name = element.getAsJsonObject().get("name").getAsString().toLowerCase();
                 LocalDateTime value = LocalDateTime.parse(element.getAsJsonObject().get("timestamp").getAsString(),
                         SharedExperimentDataProvider.formatter);
@@ -111,14 +111,14 @@ public class StatisticsUtils {
     }
 
 
-    static Map<String, Map<String, Integer>> COUNT_EVENT_FROM_TIME_RANGE(String startTime, String endTime){
-        LocalDateTime start = LocalDateTime.parse(startTime,  SharedExperimentDataProvider.formatter);
-        LocalDateTime end = LocalDateTime.parse(endTime,  SharedExperimentDataProvider.formatter);
+    static Map<String, Map<String, Integer>> COUNT_EVENT_FROM_TIME_RANGE(String startTime, String endTime) {
+        LocalDateTime start = LocalDateTime.parse(startTime, SharedExperimentDataProvider.formatter);
+        LocalDateTime end = LocalDateTime.parse(endTime, SharedExperimentDataProvider.formatter);
         Map<String, Map<String, Integer>> result = new HashMap<>();
-        for(Map.Entry<String, List<EventDateTime>> entry : EVENT_DATETIME().entrySet()){
+        for (Map.Entry<String, List<EventDateTime>> entry : EVENT_DATETIME().entrySet()) {
             Map<String, Integer> eventCount = result.getOrDefault(entry.getKey(), new HashMap<>());
             result.put(entry.getKey(), eventCount);
-            for(EventDateTime eventDateTime : entry.getValue()) {
+            for (EventDateTime eventDateTime : entry.getValue()) {
                 if (!eventDateTime.getEventDatetime().isAfter(end) &&
                         !eventDateTime.getEventDatetime().isBefore(start)) {
                     Integer val = eventCount.getOrDefault(eventDateTime.getEventLabel(), 0);
@@ -130,15 +130,15 @@ public class StatisticsUtils {
     }
 
 
-    static String TIME_RANGE_QUERY_BUILDER(String start, String end){
+    static String TIME_RANGE_QUERY_BUILDER(String start, String end) {
         StringBuffer sb = new StringBuffer("{");
         boolean haveStart = false;
-        if (start != null){
+        if (start != null) {
             sb.append("\"fromTime\": \"").append(start).append("\"");
             haveStart = true;
         }
-        if (end != null){
-            if ( haveStart ) {
+        if (end != null) {
+            if (haveStart) {
                 sb.append(",");
             }
             sb.append("\"toTime\": \"").append(end).append("\"");

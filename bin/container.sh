@@ -20,6 +20,7 @@ cassandra=cassandra:2.1
 mysql=mysql:5.6
 docker_network=${project}_nw
 verify_default=false
+migration_default=false
 sleep_default=3
 red=`tput setaf 9`
 green=`tput setaf 10`
@@ -34,6 +35,7 @@ usage: `basename ${0}` [options] [commands]
 
 options:
   -v | --verify [ true | false ]         : verify installation configuration; default: ${verify_default}
+  -m | --migration [ true | false ]      : refresh cassandra migration scripts; default: ${migration_default}
   -s | --sleep [ sleep-time ]            : sleep/wait time in seconds; default: ${sleep_default}
   -h | --help                            : help message
 
@@ -146,12 +148,10 @@ start_wasabi() {
 
   remove_container ${project}-main
 
-  if [ "${verify}" = true ] || ! [ docker inspect ${project}-main >/dev/null 2>&1 ]; then
-    echo "${green}${project}: building${reset}"
+  echo "${green}${project}: building${reset}"
 
-#    sed -i -e "s|\(http://\)localhost\(:8080\)|\1${mip}\2|g" modules/main/target/${id}/content/ui/dist/scripts/config.js 2>/dev/null;
-    docker build -t ${project}-main:${USER}-$(date +%s) -t ${project}-main:latest modules/main/target/${id}
-  fi
+# sed -i -e "s|\(http://\)localhost\(:8080\)|\1${mip}\2|g" modules/main/target/${id}/content/ui/dist/scripts/config.js 2>/dev/null;
+  docker build -t ${project}-main:${USER}-$(date +%s) -t ${project}-main:latest modules/main/target/${id}
 
   echo "${green}${project}: starting${reset}"
 
@@ -178,8 +178,23 @@ start_cassandra() {
 
   if [ "$IS_CONTAINER" = true ] ; then
     echo "${green}${project}: [Start] creating keyspace and migration schemas${reset}"
-    docker run -it --rm -e CASSANDRA_KEYSPACE_PREFIX=${project} -e CQLSH_HOST=${project}-cassandra -e CASSANDRA_PORT=9042 --net=${docker_network} --name wasabi_create_keyspace felixgao/wasabi_keyspace:1.0.0
-    docker run -it --rm -e CQLSH_HOST=${project}-cassandra -e CASSANDRA_PORT=9042 --net=${docker_network} --name wasabi_migration felixgao/wasabi-migration:1.0.0
+    CURRENT_DIR="$(dirname "${BASH_SOURCE[0]}")"
+
+    docker inspect wasabi-keyspace >/dev/null 2>&1
+    IS_IMAGE_AVAILABLE=$?
+    if [ "${migration}" = true ] || ! [ ${IS_IMAGE_AVAILABLE} -eq 0 ]; then
+        echo "${green}${project}: [Start] Building wasabi keyspace image${reset}"
+        docker build -t wasabi-keyspace:latest -f "${CURRENT_DIR}/./docker/cqlsh.docker" "${CURRENT_DIR}/./docker/"
+    fi
+    docker run -it --rm -e CASSANDRA_KEYSPACE_PREFIX=${project} -e CQLSH_HOST=${project}-cassandra -e CASSANDRA_PORT=9042 --net=${docker_network} --name wasabi_create_keyspace wasabi-keyspace
+
+    docker inspect wasabi-migration >/dev/null 2>&1
+    IS_IMAGE_AVAILABLE=$?
+    if [ "${migration}" = true ] || ! [ ${IS_IMAGE_AVAILABLE} -eq 0 ]; then
+        echo "${green}${project}: [Start] Building wasabi migration image${reset}"
+        docker build -t wasabi-migration:latest -f "${CURRENT_DIR}/./docker/migration.docker" "${CURRENT_DIR}/../"
+    fi
+    docker run -it --rm -e CQLSH_HOST=${project}-cassandra -e CASSANDRA_PORT=9042 --net=${docker_network} --name wasabi_migration wasabi-migration
     echo "${green}${project}: [DONE] creating keyspace and migration schemas${reset}"
   else
     echo "[ERROR] Failed to start cassandra container, please check the logs"
@@ -256,7 +271,7 @@ exec_commands_project() {
 }
 
 
-optspec=":f:p:v:s:h-:"
+optspec=":f:p:v:m:s:h-:"
 
 while getopts "${optspec}" opt; do
   case "${opt}" in
@@ -264,12 +279,15 @@ while getopts "${optspec}" opt; do
       case "${OPTARG}" in
         verify) verify="${!OPTIND}"; OPTIND=$(( ${OPTIND} + 1 ));;
         verify=*) verify="${OPTARG#*=}";;
+        migration) migration="${!OPTIND}"; OPTIND=$(( ${OPTIND} + 1 ));;
+        migration=*) migration="${OPTARG#*=}";;
         sleep) sleep="${!OPTIND}"; OPTIND=$(( ${OPTIND} + 1 ));;
         sleep=*) sleep="${OPTARG#*=}";;
         help) usage;;
         *) [ "${OPTERR}" = 1 ] && [ "${optspec:0:1}" != ":" ] && echo "unknown option --${OPTARG}";;
       esac;;
     v) verify=${OPTARG};;
+    m) migration=${OPTARG};;
     s) sleep=${OPTARG};;
     h) usage;;
     :) usage "option -${OPTARG} requires an argument" 1;;
@@ -278,6 +296,7 @@ while getopts "${optspec}" opt; do
 done
 
 verify=${verify:=${verify_default}}
+migration=${migration:=${migration_default}}
 sleep=${sleep:=${sleep_default}}
 
 [[ $# -eq 0 ]] && usage

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,7 +22,11 @@ import com.intuit.wasabi.exceptions.BucketNotFoundException;
 import com.intuit.wasabi.exceptions.ConstraintViolationException;
 import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
 import com.intuit.wasabi.experiment.impl.BucketsImpl;
-import com.intuit.wasabi.experimentobjects.*;
+import com.intuit.wasabi.experimentobjects.Application;
+import com.intuit.wasabi.experimentobjects.Bucket;
+import com.intuit.wasabi.experimentobjects.BucketList;
+import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.experimentobjects.ExperimentValidator;
 import com.intuit.wasabi.experimentobjects.exceptions.InvalidExperimentStateException;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.MutexRepository;
@@ -42,7 +46,10 @@ import java.util.List;
 import static com.googlecode.catchexception.CatchException.verifyException;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BucketsImplTest {
@@ -80,11 +87,11 @@ public class BucketsImplTest {
     @Test
     public void testCreateBucket() throws Exception {
 
-        BucketsImpl bucketsImpl = new BucketsImpl(databaseRepository,cassandraRepository,
-                experiments, buckets, validator, eventLog){
+        BucketsImpl bucketsImpl = new BucketsImpl(databaseRepository, cassandraRepository,
+                experiments, buckets, validator, eventLog) {
             @Override
-            public Bucket getBucket(Experiment.ID experimentID,Bucket.Label bucketLabel){
-                return Bucket.newInstance(experimentID,bucketLabel).withAllocationPercent(.3).build();
+            public Bucket getBucket(Experiment.ID experimentID, Bucket.Label bucketLabel) {
+                return Bucket.newInstance(experimentID, bucketLabel).withAllocationPercent(.3).build();
             }
         };
 
@@ -98,16 +105,16 @@ public class BucketsImplTest {
 
         when(experiments.getExperiment(experiment.getID())).thenReturn(null);
         verifyException(bucketsImpl, ExperimentNotFoundException.class)
-                        .createBucket(experiment.getID(), newBucket, changeUser);
+                .createBucket(experiment.getID(), newBucket, changeUser);
 
         when(experiments.getExperiment(experiment.getID())).thenReturn(experiment);
         verifyException(bucketsImpl, InvalidExperimentStateException.class)
-                        .createBucket(experimentID, newBucket, changeUser);
+                .createBucket(experimentID, newBucket, changeUser);
 
         experiment.setState(Experiment.State.DRAFT);
         when(cassandraRepository.getBucket(newBucket.getExperimentID(), newBucket.getLabel())).thenReturn(bucket);
-        verifyException(bucketsImpl,ConstraintViolationException.class)
-                        .createBucket(experimentID, newBucket, changeUser);
+        verifyException(bucketsImpl, ConstraintViolationException.class)
+                .createBucket(experimentID, newBucket, changeUser);
 
         when(cassandraRepository.getBucket(newBucket.getExperimentID(), newBucket.getLabel())).thenReturn(null);
 
@@ -128,7 +135,7 @@ public class BucketsImplTest {
     @Test
     public void testAdjustAllocationPercentages() {
 
-        BucketsImpl bucketsImpl = new BucketsImpl(databaseRepository,cassandraRepository, experiments, buckets,
+        BucketsImpl bucketsImpl = new BucketsImpl(databaseRepository, cassandraRepository, experiments, buckets,
                 validator, eventLog);
 
         Bucket newBucket = Bucket.newInstance(experimentID, bucketLabel).withAllocationPercent(.3).build();
@@ -142,7 +149,7 @@ public class BucketsImplTest {
                 .withState(Experiment.State.DRAFT)
                 .build();
 
-        when(buckets.getBuckets(experimentID)).thenReturn(bucketList);
+        when(buckets.getBuckets(experimentID, false)).thenReturn(bucketList);
 
         BucketList newBuckets = bucketsImpl.adjustAllocationPercentages(experiment, newBucket);
         bucket.setAllocationPercent(.42);
@@ -152,7 +159,7 @@ public class BucketsImplTest {
         bucketList.addBucket(bucket2);
         for (Bucket b1 : bucketList.getBuckets()) {
             for (Bucket b2 : bucketList.getBuckets()) {
-                if(b1.getLabel().equals(b2.getLabel())) {
+                if (b1.getLabel().equals(b2.getLabel())) {
                     assertTrue(b1.equals(b2));
                 }
             }
@@ -164,7 +171,7 @@ public class BucketsImplTest {
     @Test
     public void testValidateBucketChanges() throws Exception {
 
-        BucketsImpl bucketsImpl = new BucketsImpl(databaseRepository,cassandraRepository,
+        BucketsImpl bucketsImpl = new BucketsImpl(databaseRepository, cassandraRepository,
                 experiments, buckets, validator, eventLog);
 
         Bucket bucket = Bucket.newInstance(experimentID, Bucket.Label.valueOf("a")).withAllocationPercent(.3)
@@ -175,7 +182,7 @@ public class BucketsImplTest {
         try {
             bucketsImpl.validateBucketChanges(bucket, bucket2);
             fail();
-        } catch (IllegalArgumentException ignored){
+        } catch (IllegalArgumentException ignored) {
         }
 
         bucket2.setExperimentID(experimentID);
@@ -183,7 +190,7 @@ public class BucketsImplTest {
         try {
             bucketsImpl.validateBucketChanges(bucket, bucket2);
             fail();
-        } catch (IllegalArgumentException ignored){
+        } catch (IllegalArgumentException ignored) {
         }
 
         bucket2.setExperimentID(experimentID);
@@ -191,7 +198,7 @@ public class BucketsImplTest {
         try {
             bucketsImpl.validateBucketChanges(bucket, bucket2);
             fail();
-        } catch (IllegalArgumentException ignored){
+        } catch (IllegalArgumentException ignored) {
         }
 
         bucket2.setState(Bucket.State.valueOf("OPEN"));
@@ -201,7 +208,7 @@ public class BucketsImplTest {
     @Test
     public void testGetBucketChangeList() throws Exception {
 
-        BucketsImpl bucketsImpl = new BucketsImpl(databaseRepository,cassandraRepository,
+        BucketsImpl bucketsImpl = new BucketsImpl(databaseRepository, cassandraRepository,
                 experiments, buckets, validator, eventLog);
 
         Bucket bucket = Bucket.newInstance(experimentID, bucketLabel)
@@ -212,18 +219,18 @@ public class BucketsImplTest {
 
         ArrayList<Bucket.BucketAuditInfo> changes = new ArrayList<>();
         Bucket.BucketAuditInfo changeData;
-        changeData = new Bucket.BucketAuditInfo("is_control",bucket.isControl().toString(),
+        changeData = new Bucket.BucketAuditInfo("is_control", bucket.isControl().toString(),
                 bucket2.isControl().toString());
         changes.add(changeData);
 
-        changeData = new Bucket.BucketAuditInfo("allocation",bucket.getAllocationPercent().toString(),
+        changeData = new Bucket.BucketAuditInfo("allocation", bucket.getAllocationPercent().toString(),
                 bucket2.getAllocationPercent().toString());
         changes.add(changeData);
 
-        changeData = new Bucket.BucketAuditInfo("description",bucket.getDescription(),bucket2.getDescription());
+        changeData = new Bucket.BucketAuditInfo("description", bucket.getDescription(), bucket2.getDescription());
         changes.add(changeData);
 
-        changeData = new Bucket.BucketAuditInfo("payload",bucket.getPayload(),bucket2.getPayload());
+        changeData = new Bucket.BucketAuditInfo("payload", bucket.getPayload(), bucket2.getPayload());
         changes.add(changeData);
 
         List<Bucket.BucketAuditInfo> returned = bucketsImpl.getBucketChangeList(bucket, bucket2, builder);
@@ -231,7 +238,7 @@ public class BucketsImplTest {
     }
 
     @Test
-    public void testUpdateBucket() throws Exception{
+    public void testUpdateBucket() throws Exception {
         BucketsImpl bucketsImpl = new BucketsImpl(databaseRepository, cassandraRepository,
                 experiments, buckets, validator, eventLog);
         Experiment experiment = Experiment.withID(experimentID)
@@ -245,23 +252,23 @@ public class BucketsImplTest {
 
         when(experiments.getExperiment(experimentID)).thenReturn(null);
         verifyException(bucketsImpl, ExperimentNotFoundException.class)
-                        .updateBucket(experiment.getID(), bucketLabel, updates, changeUser);
+                .updateBucket(experiment.getID(), bucketLabel, updates, changeUser);
 
         when(experiments.getExperiment(experimentID)).thenReturn(experiment);
         when(cassandraRepository.getBucket(experimentID, bucketLabel)).thenReturn(null);
         verifyException(bucketsImpl, BucketNotFoundException.class)
-                        .updateBucket(experiment.getID(), bucketLabel, updates, changeUser);
+                .updateBucket(experiment.getID(), bucketLabel, updates, changeUser);
 
         updates.setAllocationPercent(0.7);
         List<Bucket.BucketAuditInfo> changeList = new ArrayList<>();
-        Bucket.BucketAuditInfo changeData = new Bucket.BucketAuditInfo("allocation",bucket.getAllocationPercent().toString(),
+        Bucket.BucketAuditInfo changeData = new Bucket.BucketAuditInfo("allocation", bucket.getAllocationPercent().toString(),
                 updates.getAllocationPercent().toString());
         changeList.add(changeData);
 
         when(cassandraRepository.getBucket(experimentID, bucketLabel)).thenReturn(bucket);
 
         // The method instantiates an object and sends it as an argument so we have to use matchers
-        when(buckets.getBucketChangeList(Matchers.<Bucket>any(), Matchers.<Bucket>any(),  Matchers.<Bucket.Builder>any())).thenReturn(changeList);
+        when(buckets.getBucketChangeList(Matchers.<Bucket>any(), Matchers.<Bucket>any(), Matchers.<Bucket.Builder>any())).thenReturn(changeList);
         when(cassandraRepository.updateBucket(bucket)).thenReturn(updates);
 
         Bucket result = bucketsImpl.updateBucket(experimentID, bucketLabel, updates, changeUser);
@@ -305,7 +312,7 @@ public class BucketsImplTest {
     @Test
     public void testCombineOldAndNewBuckets() throws Exception {
 
-        BucketsImpl bucketsImpl = new BucketsImpl(databaseRepository,cassandraRepository,
+        BucketsImpl bucketsImpl = new BucketsImpl(databaseRepository, cassandraRepository,
                 experiments, buckets, validator, eventLog);
 
         Bucket bucket = Bucket.newInstance(experimentID, Bucket.Label.valueOf("a"))
@@ -347,7 +354,7 @@ public class BucketsImplTest {
                 .withControl(true).withAllocationPercent(1.0).withDescription("one").build();
         //verify that an not available experiment is not processed
         verifyException(bucketsImpl, ExperimentNotFoundException.class)
-                        .deleteBucket(experimentID, bucket.getLabel(), changeUser);
+                .deleteBucket(experimentID, bucket.getLabel(), changeUser);
 
         when(experiments.getExperiment(experimentID)).thenReturn(experiment);
         when(cassandraRepository.getBucket(experimentID, bucket.getLabel())).thenReturn(bucket);
@@ -371,7 +378,7 @@ public class BucketsImplTest {
     }
 
     @Test
-    public void testGetBucketBuilder(){
+    public void testGetBucketBuilder() {
         BucketsImpl bucketsImpl = new BucketsImpl(databaseRepository, cassandraRepository,
                 experiments, buckets, validator, eventLog);
         Experiment experiment = Experiment.withID(experimentID)

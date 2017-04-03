@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,7 +20,9 @@ import com.intuit.wasabi.tests.library.util.Constants;
 import com.intuit.wasabi.tests.model.Bucket;
 import com.intuit.wasabi.tests.model.Experiment;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * A factory for buckets.
@@ -59,11 +61,11 @@ public class BucketFactory {
      * The allocation percentage is 1/3.
      *
      * @param experiment the experiment this bucket shall belong to
-     * @param isControl control group status
+     * @param isControl  control group status
      * @return the new bucket
      */
     public static Bucket createBucket(Experiment experiment, boolean isControl) {
-        return new Bucket(bucketNameColors()[internalId++%bucketNameColors().length] + internalId, experiment.id, 1.0d/3.0d, isControl);
+        return new Bucket(bucketNameColors()[internalId++ % bucketNameColors().length] + internalId, experiment.id, 1.0d / 3.0d, isControl);
     }
 
     /**
@@ -83,7 +85,7 @@ public class BucketFactory {
      * Creates a bucket and sets all parameters to some default values.
      *
      * @param experiment the experiment for this bucket
-     * @param isControl the control group status
+     * @param isControl  the control group status
      * @return the new bucket
      */
     public static Bucket createCompleteBucket(Experiment experiment, boolean isControl) {
@@ -94,10 +96,10 @@ public class BucketFactory {
      * Creates a sample set of N minimal buckets for the given experiment.
      * The allocation percentage for each bucket is 1/N.
      * The first bucket (index 0) is the control group.
-     *
+     * <p>
      * Minimal means that only the required values are set.
      *
-     * @param experiment the experiment
+     * @param experiment      the experiment
      * @param numberOfBuckets N, the number of buckets
      * @return a list of N buckets with equally assigned allocation percentages
      */
@@ -110,10 +112,10 @@ public class BucketFactory {
     /**
      * Creates {@code allocationPercentages.length} many minimal buckets with their percentages assigned to them.
      * The first bucket (index 0) is the control group.
-     *
+     * <p>
      * Minimal means that only the required values are set.
      *
-     * @param experiment the experiment
+     * @param experiment            the experiment
      * @param allocationPercentages an array of allocation percentages
      * @return a list of N buckets with the assigned allocation percentages
      */
@@ -129,12 +131,12 @@ public class BucketFactory {
     /**
      * Creates {@code allocationPercentages.length} many minimal buckets with their percentages assigned to them.
      * The first bucket (index 0) is the control group. If there are more buckets than labels, the labels are repeated.
-     *
+     * <p>
      * Minimal means that only the required values are set.
      *
-     * @param experiment the experiment
+     * @param experiment            the experiment
      * @param allocationPercentages an array of allocation percentages
-     * @param labels the labels for the buckets
+     * @param labels                the labels for the buckets
      * @return a list of N buckets with the assigned allocation percentages
      */
     public static List<Bucket> createBuckets(Experiment experiment, double[] allocationPercentages, String[] labels) {
@@ -149,10 +151,10 @@ public class BucketFactory {
      * Creates a sample set of N complete buckets for the given experiment.
      * The allocation percentage for each bucket is 1/N.
      * The first bucket (index 0) is the control group.
-     *
+     * <p>
      * Complete means all values are set to some defaults.
      *
-     * @param experiment the experiment
+     * @param experiment      the experiment
      * @param numberOfBuckets N, the number of buckets
      * @return a list of N buckets with equally assigned allocation percentages
      */
@@ -165,10 +167,10 @@ public class BucketFactory {
     /**
      * Creates {@code allocationPercentages.length} many complete buckets with their percentages assigned to them.
      * The first bucket (index 0) is the control group.
-     *
+     * <p>
      * Complete means all values are set to some defaults.
      *
-     * @param experiment the experiment
+     * @param experiment            the experiment
      * @param allocationPercentages an array of allocation percentages
      * @return a list of N buckets with the assigned allocation percentages
      */
@@ -185,12 +187,12 @@ public class BucketFactory {
     /**
      * Creates {@code allocationPercentages.length} many complete buckets with their percentages assigned to them.
      * The first bucket (index 0) is the control group. If there are more buckets than labels, the labels are repeated.
-     *
+     * <p>
      * Complete means all values are set to some defaults.
      *
-     * @param experiment the experiment
+     * @param experiment            the experiment
      * @param allocationPercentages an array of allocation percentages
-     * @param labels the bucket labels
+     * @param labels                the bucket labels
      * @return a list of N buckets with the assigned allocation percentages
      */
     public static List<Bucket> createCompleteBuckets(Experiment experiment, double[] allocationPercentages, String[] labels) {
@@ -201,8 +203,8 @@ public class BucketFactory {
         return buckets;
     }
 
-    public static List<Bucket> createCompleteBuckets(Experiment experiment, 
-    		double[] allocationPercentages, String[] labels, boolean [] control) {
+    public static List<Bucket> createCompleteBuckets(Experiment experiment,
+                                                     double[] allocationPercentages, String[] labels, boolean[] control) {
         List<Bucket> buckets = createCompleteBuckets(experiment, allocationPercentages);
         for (int i = 0; i < buckets.size(); ++i) {
             buckets.get(i).setLabel(labels[i]);
@@ -218,7 +220,7 @@ public class BucketFactory {
      * @return bucket labels
      */
     public static String[] bucketNameColors() {
-        return new String[] {
+        return new String[]{
                 "red", "green", "blue", "yellow", "white",
                 "magenta", "black", "navy", "gray", "orange",
                 "silver", "gold", "pink", "violet", "brown",
@@ -236,7 +238,7 @@ public class BucketFactory {
      */
     public static String[] bucketNameColors(int number) {
         String[] colors = bucketNameColors();
-        String[] modifiers = new String[] {
+        String[] modifiers = new String[]{
                 "", "dark ", "bright ", "metallic ", "shy ",
         };
 

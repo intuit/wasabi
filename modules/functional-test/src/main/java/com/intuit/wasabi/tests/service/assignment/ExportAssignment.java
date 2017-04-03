@@ -41,12 +41,12 @@ public class ExportAssignment extends TestBase {
     static final Logger LOGGER = LoggerFactory.getLogger(BatchAssignment.class);
     Experiment experiment;
 
-    @Test(groups={"setup"}, dataProvider = "ExportAssignmentExperimentData", dataProviderClass = AssignmentDataProvider.class)
-    public void t_setup(String experimentData){
+    @Test(groups = {"setup"}, dataProvider = "ExportAssignmentExperimentData", dataProviderClass = AssignmentDataProvider.class)
+    public void t_setup(String experimentData) {
         response = apiServerConnector.doPost("/experiments", experimentData);
         assertReturnCode(response, HttpStatus.SC_CREATED);
         experiment = ExperimentFactory.createFromJSONString(response.asString());
-        String url = "/experiments/"+experiment.id+"/buckets";
+        String url = "/experiments/" + experiment.id + "/buckets";
         String bucketA = "{\"label\": \"red\", \"allocationPercent\": 0.5, \"isControl\": false, " +
                 "\"description\": \"Bucket red\",\"payload\": \"This is bucket red\"}";
         response = apiServerConnector.doPost(url, bucketA);
@@ -55,39 +55,39 @@ public class ExportAssignment extends TestBase {
                 "\"description\": \"Bucket blue\",\"payload\": \"This is bucket blue\"}";
         response = apiServerConnector.doPost(url, bucketB);
         assertReturnCode(response, HttpStatus.SC_CREATED);
-        response = apiServerConnector.doPut("experiments/"+experiment.id, "{\"state\": \"RUNNING\"}");
+        response = apiServerConnector.doPut("experiments/" + experiment.id, "{\"state\": \"RUNNING\"}");
         assertReturnCode(response, HttpStatus.SC_OK);
     }
 
-    @Test(groups={"assign"}, dependsOnGroups = {"setup"},
+    @Test(groups = {"assign"}, dependsOnGroups = {"setup"},
             dataProvider = "ExportAssignmentExperimentUser", dataProviderClass = AssignmentDataProvider.class)
-    public void t_assign(String user, String event){
-        String url =  "/assignments/applications/"+experiment.applicationName+"/experiments/"+experiment.label+"/users/"+user;
+    public void t_assign(String user, String event) {
+        String url = "/assignments/applications/" + experiment.applicationName + "/experiments/" + experiment.label + "/users/" + user;
         response = apiServerConnector.doPost(url);
         LOGGER.debug("experiment not found status=" + response.getStatusCode()
                 + " response=" + response.asString());
         assertReturnCode(response, HttpStatus.SC_OK);
         Assignment assignment = AssignmentFactory.createFromJSONString(response.asString());
         Assert.assertEquals(assignment.status, "NEW_ASSIGNMENT");
-        Assert.assertNotNull(assignment.assignment, "Assignment should not be null for: "+ assignment);
+        Assert.assertNotNull(assignment.assignment, "Assignment should not be null for: " + assignment);
     }
 
-    @Test(groups={"verify"}, dependsOnGroups = {"assign", "setup"})
-    public void t_verify(){
-        response = apiServerConnector.doGet("/experiments/"+experiment.id+"/assignments");
+    @Test(groups = {"verify"}, dependsOnGroups = {"assign", "setup"})
+    public void t_verify() {
+        response = apiServerConnector.doGet("/experiments/" + experiment.id + "/assignments");
         LOGGER.debug("status=" + response.getStatusCode()
                 + " response=" + response.asString());
         Map<String, String[]> result = new HashMap<>();
         int row = 0;
-        for(String line : response.asString().split("\n")){
-            if(row != 0){
+        for (String line : response.asString().split("\n")) {
+            if (row != 0) {
                 String[] parts = line.split("\t");
                 result.put(parts[1], parts);
             }
             row++;
         }
-        for(Object[] data : AssignmentDataProvider.ExportAssignmentExperimentUser()){
-            String user = (String)data[0];
+        for (Object[] data : AssignmentDataProvider.ExportAssignmentExperimentUser()) {
+            String user = (String) data[0];
             String[] parts = result.get(user);
             Assert.assertNotNull(parts);
             Assert.assertEquals(parts[0], experiment.id);
@@ -96,10 +96,10 @@ public class ExportAssignment extends TestBase {
     }
 
     @AfterClass
-    public void t_cleanUp(){
-        response = apiServerConnector.doPut("experiments/"+experiment.id, "{\"state\": \"TERMINATED\"}");
+    public void t_cleanUp() {
+        response = apiServerConnector.doPut("experiments/" + experiment.id, "{\"state\": \"TERMINATED\"}");
         assertReturnCode(response, HttpStatus.SC_OK);
-        response = apiServerConnector.doDelete("experiments/"+experiment.id);
+        response = apiServerConnector.doDelete("experiments/" + experiment.id);
         assertReturnCode(response, HttpStatus.SC_NO_CONTENT);
 
     }

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,12 +24,6 @@ import com.intuit.wasabi.eventlog.EventLog;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Experiment;
-/*
-import org.codehaus.jackson.JsonEncoding;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.ObjectCodec;
-*/
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -44,6 +38,13 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.UUID;
+
+/*
+import org.codehaus.jackson.JsonEncoding;
+import org.codehaus.jackson.JsonFactory;
+import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.ObjectCodec;
+*/
 
 /**
  * Tests for {@link AuditLogEntry}.
@@ -158,14 +159,14 @@ public class AuditLogEntryTest {
 
         try (BufferedReader br = new BufferedReader(new FileReader(tmpFile))) {
             Assert.assertEquals(
-                     "{\"time\":\"2011-07-01T15:00:13Z\","
-                   + "\"user\":{\"firstName\":\"System\",\"lastName\":\"User\",\"username\":\"system_user\",\"userID\":\"SystemUser\",\"email\":\"admin@example.com\"},"
-                   + "\"action\":{\"type\":\"BUCKET_CHANGED\",\"message\":\"changed allocation of bucket label to 50%\"},"
-                   + "\"applicationName\":\"App\","
-                   + "\"experiment\":{\"experimentLabel\":\"Exp1\",\"experimentId\":\"00000000-0000-0001-0000-000000000001\"},"
-                   + "\"bucketLabel\":\"label\","
-                   + "\"change\":{\"changedAttribute\":\"allocation\",\"before\":\"0.2\",\"after\":\"0.5\"}}",
-                   br.readLine());
+                    "{\"time\":\"2011-07-01T15:00:13Z\","
+                            + "\"user\":{\"firstName\":\"System\",\"lastName\":\"User\",\"username\":\"system_user\",\"userID\":\"SystemUser\",\"email\":\"admin@example.com\"},"
+                            + "\"action\":{\"type\":\"BUCKET_CHANGED\",\"message\":\"changed allocation of bucket label to 50%\"},"
+                            + "\"applicationName\":\"App\","
+                            + "\"experiment\":{\"experimentLabel\":\"Exp1\",\"experimentId\":\"00000000-0000-0001-0000-000000000001\"},"
+                            + "\"bucketLabel\":\"label\","
+                            + "\"change\":{\"changedAttribute\":\"allocation\",\"before\":\"0.2\",\"after\":\"0.5\"}}",
+                    br.readLine());
         } catch (IOException ex) {
             Assert.fail("Failed to read TempFile: " + ex.getMessage());
         }

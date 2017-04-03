@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,17 +30,19 @@ import java.util.UUID;
 @Accessor
 public interface ExperimentLabelIndexAccessor {
 
-	/**
-	 * Get experiment by app name and label
-	 * @param appName
-	 * @param Label
-	 * @return experiment label result
-	 */
+    /**
+     * Get experiment by app name and label
+     *
+     * @param appName
+     * @param Label
+     * @return experiment label result
+     */
     @Query("select * from experiment_label_index where app_name = ? and label = ?")
     Result<ExperimentByAppNameLabel> getExperimentBy(String appName, String Label);
 
     /**
      * Update experiment label index
+     *
      * @param uuid
      * @param modified
      * @param startTime
@@ -56,6 +58,7 @@ public interface ExperimentLabelIndexAccessor {
 
     /**
      * Delete entry from experiment label index
+     *
      * @param appName
      * @param label
      * @return result set

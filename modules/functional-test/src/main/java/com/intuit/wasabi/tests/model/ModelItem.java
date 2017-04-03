@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -94,13 +94,13 @@ public abstract class ModelItem {
      * members are equal. That also means that members of both experiments can be
      * {@code null}, as long as the specific member is {@code null} for both instances
      * and not just one.
-     *
+     * <p>
      * However some tests might need two instances to be equal in all but a few attributes, for example
      * two experiments can be equal except for their {@code modificationTime}.
-     *
+     * <p>
      * In that case you can specify the fields to be excluded from the equality tests by
      * setting the {@link SerializationStrategy} accordingly.
-     *
+     * <p>
      * Note that this slightly breaks the contract with the consistency of equals and hashCode!
      *
      * @param other another object
@@ -114,10 +114,10 @@ public abstract class ModelItem {
 
         boolean equal = true;
         for (Field field : this.getClass().getFields()) {
-            if(!this.getSerializationStrategy().shouldSkipField(new FieldAttributes(field))) {
+            if (!this.getSerializationStrategy().shouldSkipField(new FieldAttributes(field))) {
                 try {
                     boolean thisFieldEquals = Objects.equals(field.get(this), field.get(other));
-                    if(!thisFieldEquals) {
+                    if (!thisFieldEquals) {
                         LOGGER.debug("Field " + field.getName() + " not equal.");
                     }
                     equal &= thisFieldEquals;
@@ -131,7 +131,7 @@ public abstract class ModelItem {
 
     /**
      * See {@link Object#hashCode()}}.
-     *
+     * <p>
      * Uses {@link HashCodeBuilder}.
      *
      * @return the hashcode for this instance

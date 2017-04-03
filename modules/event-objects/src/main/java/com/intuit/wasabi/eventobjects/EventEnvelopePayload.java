@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,17 +15,16 @@
  *******************************************************************************/
 package com.intuit.wasabi.eventobjects;
 
-import java.util.UUID;
-
-import org.apache.cassandra.utils.UUIDGen;
-import org.json.simple.JSONObject;
-
 import com.intuit.wasabi.analyticsobjects.Event;
 import com.intuit.wasabi.assignmentobjects.Assignment;
 import com.intuit.wasabi.experimentobjects.Application.Name;
 import com.intuit.wasabi.experimentobjects.Experiment.Label;
 import com.intuit.wasabi.export.EnvelopePayload;
 import com.intuit.wasabi.export.MessageType;
+import org.apache.cassandra.utils.UUIDGen;
+import org.json.simple.JSONObject;
+
+import java.util.UUID;
 
 /**
  * Export envelope payload for events
@@ -44,7 +43,7 @@ public class EventEnvelopePayload implements EnvelopePayload {
      * @param event     the event {@link Event}
      */
     public EventEnvelopePayload(Name applicationName, Label experimentLabel,
-            Assignment assignment, Event event) {
+                                Assignment assignment, Event event) {
         super();
         this.applicationName = applicationName;
         this.experimentLabel = experimentLabel;
@@ -89,18 +88,18 @@ public class EventEnvelopePayload implements EnvelopePayload {
         JSONObject eventJson = new JSONObject();
 
         eventJson.put("messageType", MessageType.EVENT.toString());
-        eventJson.put("applicationName",applicationName.toString());
-        eventJson.put("experimentLabel",experimentLabel.toString());
-        eventJson.put("userID",assignment.getUserID().toString());
-        eventJson.put("bucketLabel",assignment.getBucketLabel().toString());
-        eventJson.put("time_uuid",makeUUID().toString());
-        eventJson.put("experimentID",assignment.getExperimentID().toString());
-        eventJson.put("context",assignment.getContext().toString());
+        eventJson.put("applicationName", applicationName.toString());
+        eventJson.put("experimentLabel", experimentLabel.toString());
+        eventJson.put("userID", assignment.getUserID().toString());
+        eventJson.put("bucketLabel", assignment.getBucketLabel().toString());
+        eventJson.put("time_uuid", makeUUID().toString());
+        eventJson.put("experimentID", assignment.getExperimentID().toString());
+        eventJson.put("context", assignment.getContext().toString());
         eventJson.put("epochTimestamp", event.getTimestamp().getTime());
-        eventJson.put("eventType",event.getType() + "");
-        eventJson.put("eventName",event.getName() + "");
-        eventJson.put("eventPayload",event.getPayload());
-        eventJson.put("value",event.getValue());
+        eventJson.put("eventType", event.getType() + "");
+        eventJson.put("eventName", event.getName() + "");
+        eventJson.put("eventPayload", event.getPayload());
+        eventJson.put("value", event.getValue());
 
         return eventJson.toString();
     }
@@ -109,7 +108,7 @@ public class EventEnvelopePayload implements EnvelopePayload {
      * Helper method for creating uuid
      * @return UUID
      */
-	protected UUID makeUUID() {
-		 return UUIDGen.getTimeUUID();
+    protected UUID makeUUID() {
+        return UUIDGen.getTimeUUID();
     }
 }

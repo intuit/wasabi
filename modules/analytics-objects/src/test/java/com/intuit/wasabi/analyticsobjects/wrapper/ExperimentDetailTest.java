@@ -81,6 +81,12 @@ public class ExperimentDetailTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
+    public void testConstraintsStateDeleted() {
+        new ExperimentDetail(expId, Experiment.State.DELETED, expLabel, appName, modTime.getTime(),
+                startTime.getTime(), endTime.getTime(), description);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
     public void testConstraintsLabel() {
         new ExperimentDetail(expId, expState, null, appName, modTime.getTime(),
                 startTime.getTime(), endTime.getTime(), description);

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,6 +34,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -45,7 +46,7 @@ import static java.util.Arrays.asList;
 /**
  * An experiment bucket
  */
-public class Bucket {
+public class Bucket implements Serializable {
 
     @ApiModelProperty(value = "unique bucket label in the experiment", dataType = "String", required = true)
     private Bucket.Label label;
@@ -149,17 +150,17 @@ public class Bucket {
 
     @Override
     public String toString() {
-    	return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 
     @Override
     public int hashCode() {
-    	return HashCodeBuilder.reflectionHashCode(this);
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override
     public boolean equals(Object obj) {
-    	   return EqualsBuilder.reflectionEquals(this, obj);
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 
     public boolean isStateTransitionValid(State desiredState) {
@@ -192,6 +193,7 @@ public class Bucket {
 
             private static final Map<State, ArrayList<State>> m =
                     new EnumMap<>(State.class);
+
             static {
                 for (BucketStateTransition trans :
                         BucketStateTransition.values()) {
@@ -201,6 +203,7 @@ public class Bucket {
                     }
                 }
             }
+
             //TODO: remove state from enum - this is a work in progress
             private final transient List<State> allowedStateTransitions;
 
@@ -285,7 +288,7 @@ public class Bucket {
 
     @JsonSerialize(using = Bucket.Label.Serializer.class)
     @JsonDeserialize(using = Bucket.Label.Deserializer.class)
-    public static class Label {
+    public static class Label implements Serializable {
 
         private String label;
 
@@ -321,7 +324,7 @@ public class Bucket {
 
         @Override
         public boolean equals(Object obj) {
-        	   return EqualsBuilder.reflectionEquals(this, obj);
+            return EqualsBuilder.reflectionEquals(this, obj);
         }
 
         public static class Serializer extends JsonSerializer<Label> {
@@ -367,12 +370,12 @@ public class Bucket {
 
         @Override
         public int hashCode() {
-        	return HashCodeBuilder.reflectionHashCode(this);
+            return HashCodeBuilder.reflectionHashCode(this);
         }
 
         @Override
         public boolean equals(Object obj) {
-        	   return EqualsBuilder.reflectionEquals(this, obj);
+            return EqualsBuilder.reflectionEquals(this, obj);
         }
     }
 }

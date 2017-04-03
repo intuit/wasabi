@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,7 +31,7 @@ public class AuditLogEntryComparator extends PaginationComparator<AuditLogEntry>
 
     /**
      * Initializes an AuditLogEntryComparator.
-     *
+     * <p>
      * Sets the default sort order to descending time, that means
      * the most recent events are first.
      */
@@ -59,8 +59,7 @@ public class AuditLogEntryComparator extends PaginationComparator<AuditLogEntry>
         attribute(AuditLogEntry::getChangedProperty, String::compareToIgnoreCase),
         before(AuditLogEntry::getBefore, String::compareToIgnoreCase),
         after(AuditLogEntry::getAfter, String::compareToIgnoreCase),
-        description(AuditLogAction::getDescription, String::compareToIgnoreCase),
-        ;
+        description(AuditLogAction::getDescription, String::compareToIgnoreCase),;
 
         private final Function<AuditLogEntry, ?> propertyExtractor;
         private final BiFunction<?, ?, Integer> comparisonFunction;
@@ -68,9 +67,9 @@ public class AuditLogEntryComparator extends PaginationComparator<AuditLogEntry>
         /**
          * Creates a Property.
          *
-         * @param propertyExtractor the property extractor
+         * @param propertyExtractor  the property extractor
          * @param comparisonFunction the comparison function
-         * @param <T> the property type
+         * @param <T>                the property type
          */
         <T> Property(Function<AuditLogEntry, T> propertyExtractor, BiFunction<T, T, Integer> comparisonFunction) {
             this.propertyExtractor = propertyExtractor;

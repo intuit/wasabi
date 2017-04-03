@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,16 +31,16 @@ public class Context {
     private String ctx = "PROD"; //default value for context
 
     private Context(String ctx) {
-        this.ctx=Preconditions.checkNotNull(ctx);
+        this.ctx = Preconditions.checkNotNull(ctx);
 
         if (ctx.trim().isEmpty()) {
-            throw new IllegalArgumentException("Context cannot be "+
+            throw new IllegalArgumentException("Context cannot be " +
                     "an empty string");
         }
 
-            if (!ctx.matches("^[_\\-$A-Za-z][_\\-$A-Za-z0-9]*")) {
-            throw new InvalidIdentifierException("Context \""+
-                    ctx+"\" must begin with a letter, -, dollar sign, or "+
+        if (!ctx.matches("^[_\\-$A-Za-z][_\\-$A-Za-z0-9]*")) {
+            throw new InvalidIdentifierException("Context \"" +
+                    ctx + "\" must begin with a letter, -, dollar sign, or " +
                     "underscore, and must not contain any spaces");
         }
     }
@@ -73,8 +73,8 @@ public class Context {
         }
 
         public Context build() {
-            Context result=instance;
-            instance=null;
+            Context result = instance;
+            instance = null;
             return result;
         }
 
@@ -85,23 +85,24 @@ public class Context {
     public String getContext() {
         return ctx;
     }
-    public void setContext(String value){
+
+    public void setContext(String value) {
         this.ctx = value;
     }
 
 
     @Override
     public String toString() {
-        return ctx ;
+        return ctx;
     }
 
     @Override
     public int hashCode() {
-    	return HashCodeBuilder.reflectionHashCode(this);
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override
     public boolean equals(Object obj) {
-    	   return EqualsBuilder.reflectionEquals(this, obj);
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 }

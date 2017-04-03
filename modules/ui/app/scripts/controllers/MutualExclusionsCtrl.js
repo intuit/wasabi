@@ -53,6 +53,7 @@ angular.module('wasabi.controllers').
                             {key: 'experiment_id', value: $scope.experiment.id},
                             {key: 'item_id', value: mutualExclusion.id});
 
+                        UtilitiesFactory.displaySuccessWithCacheWarning('Mutual Exclusions Deleted', 'Your mutual exclusion changes have been saved.');
                         $scope.loadMutualExclusions();
                     }, function(response) {
                         UtilitiesFactory.handleGlobalError(response, 'Your mutual exclusion could not be deleted.');

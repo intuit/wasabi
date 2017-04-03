@@ -122,7 +122,7 @@ public class ExperimentDetailsTest {
         BucketList buckList = new BucketList();
         buckList.addBucket(b1);
 
-        when(buckets.getBuckets(expId)).thenReturn(buckList);
+        when(buckets.getBuckets(expId, false)).thenReturn(buckList);
 
         List<ExperimentDetail> expDetail = expDetails.getExperimentDetailsBase();
 

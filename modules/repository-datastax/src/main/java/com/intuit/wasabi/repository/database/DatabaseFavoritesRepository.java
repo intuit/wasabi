@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -40,7 +40,7 @@ public class DatabaseFavoritesRepository implements FavoritesRepository {
      * Creates a DatabaseFavoritesRepository.
      *
      * @param transactionFactory the transaction factory
-     * @param flyway the flyway instance to initialize the database
+     * @param flyway             the flyway instance to initialize the database
      */
     @Inject
     public DatabaseFavoritesRepository(final TransactionFactory transactionFactory, final Flyway flyway,
@@ -67,9 +67,9 @@ public class DatabaseFavoritesRepository implements FavoritesRepository {
     public List<Experiment.ID> getFavorites(UserInfo.Username username) {
         // Remove favorites of now deleted experiments
         String updateSQL = "UPDATE user_experiment_properties INNER JOIN experiment "
-                         + "ON user_experiment_properties.experiment_id = experiment.id "
-                         + "SET user_experiment_properties.is_favorite = 0 "
-                         + "WHERE experiment.state = 'DELETED' AND user_experiment_properties.is_favorite = 1;";
+                + "ON user_experiment_properties.experiment_id = experiment.id "
+                + "SET user_experiment_properties.is_favorite = 0 "
+                + "WHERE experiment.state = 'DELETED' AND user_experiment_properties.is_favorite = 1;";
         transactionFactory.newTransaction().update(updateSQL);
 
         String sql = "SELECT experiment_id FROM user_experiment_properties WHERE user_id = ? AND is_favorite = 1;";
@@ -112,17 +112,17 @@ public class DatabaseFavoritesRepository implements FavoritesRepository {
      * Inserts or updates the favorite value of an experiment for a user in the database.
      * Sets the value to {@code favorite}.
      *
-     * @param username the username
+     * @param username     the username
      * @param experimentID the experiment ID
-     * @param favorite the favorite status
+     * @param favorite     the favorite status
      * @throws DatabaseException if the update was unsuccessful
      */
     private void updateFavorite(UserInfo.Username username, Experiment.ID experimentID, boolean favorite)
             throws DatabaseException {
         String sql = "INSERT INTO user_experiment_properties (user_id, experiment_id, is_favorite) "
-                   + "VALUES (?, ?, ?) "
-                   + "ON DUPLICATE KEY "
-                   + "UPDATE is_favorite = VALUES(is_favorite);";
+                + "VALUES (?, ?, ?) "
+                + "ON DUPLICATE KEY "
+                + "UPDATE is_favorite = VALUES(is_favorite);";
         try {
             transactionFactory.newTransaction().insert(sql, username.toString(), experimentID, favorite);
         } catch (Exception e) {

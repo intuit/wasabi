@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,7 +35,9 @@ import java.util.function.BiFunction;
  */
 public class FilterUtil {
 
-    /** Used to append (and split) the timezone to (and from) the filter. */
+    /**
+     * Used to append (and split) the timezone to (and from) the filter.
+     */
     /*test*/ static final String TIMEZONE_SEPARATOR = "\t";
 
     /**
@@ -43,8 +45,7 @@ public class FilterUtil {
      * {@link PaginationFilter#registerFilterModifierForProperties(FilterModifier, PaginationFilterProperty[])}.
      */
     public enum FilterModifier {
-        APPEND_TIMEZONEOFFSET((fs, fi) -> fs + TIMEZONE_SEPARATOR + fi.getTimeZoneOffset()),
-        ;
+        APPEND_TIMEZONEOFFSET((fs, fi) -> fs + TIMEZONE_SEPARATOR + fi.getTimeZoneOffset()),;
 
         private BiFunction<String, PaginationFilter, String> modifier;
 
@@ -60,7 +61,7 @@ public class FilterUtil {
     /**
      * Extracts the timezone and original filter string and performs a partial match checking on the date.
      *
-     * @param date the date to check
+     * @param date   the date to check
      * @param filter the filter string
      * @return the result of a partial match
      */
@@ -94,11 +95,12 @@ public class FilterUtil {
      * Formats a date as it is shown in the UI to allow for matching searches on date fields.
      * Needs the requesting user's timezone offset to UTC for correct matches.
      *
-     * @param date the date
+     * @param date           the date
      * @param timeZoneOffset the timezone offset to UTC
      * @return a timezone offset adjusted string of the UI pattern {@code MMM d, YYYY HH:mm:ss a}.
      */
-    /*test*/ static String formatDateTimeAsUI(OffsetDateTime date, String timeZoneOffset) {
+    /*test*/
+    static String formatDateTimeAsUI(OffsetDateTime date, String timeZoneOffset) {
         try {
             return date.format(DateTimeFormatter.ofPattern("MMM d, YYYY HH:mm:ss a")
                     .withZone(ZoneId.ofOffset("UTC", ZoneOffset.of(timeZoneOffset))));
@@ -113,7 +115,7 @@ public class FilterUtil {
      * Parses a UI date of the format {@code M/d/yZ} (See {@link DateTimeFormatter}) as it is allowed to be
      * entered in advanced search fields in the UI. Throws a {@link PaginationException} on failure, notifying the user.
      *
-     * @param dateString the string as received from the UI
+     * @param dateString     the string as received from the UI
      * @param timeZoneOffset the user's timezone offset
      * @return a parsed date
      */

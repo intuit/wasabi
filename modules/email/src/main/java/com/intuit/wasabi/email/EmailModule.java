@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,6 +30,10 @@ import static com.google.inject.Scopes.SINGLETON;
 import static com.google.inject.name.Names.named;
 import static com.intuit.autumn.utils.PropertyFactory.create;
 import static com.intuit.autumn.utils.PropertyFactory.getProperty;
+import static com.intuit.wasabi.email.EmailAnnotations.EMAIL_SERVICE_ENABLED;
+import static com.intuit.wasabi.email.EmailAnnotations.EMAIL_SERVICE_FROM;
+import static com.intuit.wasabi.email.EmailAnnotations.EMAIL_SERVICE_HOST;
+import static com.intuit.wasabi.email.EmailAnnotations.EMAIL_SERVICE_SUBJECT_PREFIX;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Class.forName;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -57,13 +61,13 @@ public class EmailModule extends AbstractModule {
 
         Properties properties = create(PROPERTY_NAME, EmailModule.class);
 
-        bind(Boolean.class).annotatedWith(named("email.service.enabled"))
+        bind(Boolean.class).annotatedWith(named(EMAIL_SERVICE_ENABLED))
                 .toInstance(Boolean.valueOf(getProperty("email.service.enabled", properties, FALSE.toString())));
-        bind(String.class).annotatedWith(named("email.service.host"))
+        bind(String.class).annotatedWith(named(EMAIL_SERVICE_HOST))
                 .toInstance(getProperty("email.service.host", properties, ""));
-        bind(String.class).annotatedWith(named("email.service.from"))
+        bind(String.class).annotatedWith(named(EMAIL_SERVICE_FROM))
                 .toInstance(getProperty("email.service.from", properties, ""));
-        bind(String.class).annotatedWith(named("email.service.subject.prefix"))
+        bind(String.class).annotatedWith(named(EMAIL_SERVICE_SUBJECT_PREFIX))
                 .toInstance(getProperty("email.service.subject.prefix", properties, ""));
 
         bind(EmailTextProcessor.class).to(EmailTextProcessorImpl.class).in(SINGLETON);

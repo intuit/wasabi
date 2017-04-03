@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,7 +32,6 @@ import com.intuit.wasabi.experimentobjects.PageExperiment;
 import com.intuit.wasabi.experimentobjects.exceptions.InvalidExperimentStateException;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.PagesRepository;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,11 +44,15 @@ import java.util.Collection;
 import java.util.List;
 
 import static com.googlecode.catchexception.CatchException.verifyException;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.BDDMockito.any;
+import static org.mockito.BDDMockito.anyCollection;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.verify;
+import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.BDDMockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PagesImplTest {
@@ -72,7 +75,7 @@ public class PagesImplTest {
     }
 
     @Test
-    public void testPostPages(){
+    public void testPostPages() {
         PagesImpl pagesImpl = new PagesImpl(cassandraRepository, pagesRepository, experiments, eventLog);
 
         //Create Experiment and PageList for App
@@ -82,28 +85,25 @@ public class PagesImplTest {
         pageList.addPage(expPage);
 
         when(experiments.getExperiment(experimentID)).thenReturn(null);
-        try{
+        try {
             pagesImpl.postPages(experimentID, pageList, null);
-        }
-        catch (ExperimentNotFoundException e){
+        } catch (ExperimentNotFoundException e) {
             // Expecting this so nothing to do
         }
 
         experiment.setState(Experiment.State.TERMINATED);
         when(experiments.getExperiment(experimentID)).thenReturn(experiment);
-        try{
+        try {
             pagesImpl.postPages(experimentID, pageList, null);
-        }
-        catch (InvalidExperimentStateException e){
+        } catch (InvalidExperimentStateException e) {
             // Expecting this so nothing to do
         }
 
         experiment.setState(Experiment.State.RUNNING);
         experiment.setEndTime(new Timestamp(System.currentTimeMillis() - 1000000));
-        try{
+        try {
             pagesImpl.postPages(experimentID, pageList, null);
-        }
-        catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             // Expecting this so nothing to do
         }
 
@@ -113,7 +113,7 @@ public class PagesImplTest {
     }
 
     @Test
-    public void testDeletePage(){
+    public void testDeletePage() {
         PagesImpl pagesImpl = new PagesImpl(cassandraRepository, pagesRepository, experiments, eventLog);
 
         //Create Experiment and PageList for App
@@ -121,28 +121,25 @@ public class PagesImplTest {
         Page page = new Page.Builder().withName(Page.Name.valueOf("somePage")).build();
         when(experiments.getExperiment(experimentID)).thenReturn(null);
 
-        try{
+        try {
             pagesImpl.deletePage(experimentID, page.getName(), null);
-        }
-        catch (ExperimentNotFoundException e){
+        } catch (ExperimentNotFoundException e) {
             // Expecting this so nothing to do
         }
 
         experiment.setState(Experiment.State.TERMINATED);
         when(experiments.getExperiment(experimentID)).thenReturn(experiment);
-        try{
+        try {
             pagesImpl.deletePage(experimentID, page.getName(), null);
-        }
-        catch (InvalidExperimentStateException e){
+        } catch (InvalidExperimentStateException e) {
             // Expecting this so nothing to do
         }
 
         experiment.setState(Experiment.State.RUNNING);
         experiment.setEndTime(new Timestamp(System.currentTimeMillis() - 1000000));
-        try{
+        try {
             pagesImpl.deletePage(experimentID, page.getName(), null);
-        }
-        catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             // Expecting this so nothing to do
         }
 
@@ -150,11 +147,11 @@ public class PagesImplTest {
         doNothing().when(pagesRepository).deletePage(testApp, experimentID, page.getName());
 
         UserInfo user = UserInfo.from(UserInfo.Username.valueOf("user")).build();
-        pagesImpl.deletePage(experimentID, page.getName(),user);
+        pagesImpl.deletePage(experimentID, page.getName(), user);
     }
 
     @Test
-    public void testGetExperimentPages(){
+    public void testGetExperimentPages() {
         PagesImpl pagesImpl = new PagesImpl(cassandraRepository, pagesRepository, experiments, eventLog);
 
         //Create Experiment and PageList for App
@@ -163,10 +160,9 @@ public class PagesImplTest {
         pageList.addPage(new ExperimentPage());
 
         when(experiments.getExperiment(experimentID)).thenReturn(null);
-        try{
+        try {
             pagesImpl.getExperimentPages(experimentID);
-        }
-        catch (ExperimentNotFoundException e){
+        } catch (ExperimentNotFoundException e) {
             // Expecting this so nothing to do
         }
 
@@ -217,46 +213,46 @@ public class PagesImplTest {
         //Put Pages for first experiment, app
         ExperimentList experimentList = new ExperimentList();
         experimentList.addExperiment(experiment);
-        
+
         List<PageExperiment> pageExperiments = new ArrayList<>();
         PageExperiment pe = new PageExperiment();
         pe.setId(ID.newInstance());
         pageExperiments.add(pe);
-        
+
         Collection<Experiment.ID> ids = new ArrayList<>();
         ids.add(experiment.getID());
-        
+
         when(pagesRepository.getExperiments(any(Application.Name.class), any(Page.Name.class))).thenReturn(pageExperiments);
         when(cassandraRepository.getExperiments(anyCollection())).thenReturn(experimentList);
-        
+
         ExperimentList experimentListResult = pagesImpl.getPageExperiments(testApp, page.getName());
-       
+
         assertEquals(1, experimentListResult.getExperiments().size());
     }
 
     @Test
-    public void testErasePageDataExperimentNull(){
+    public void testErasePageDataExperimentNull() {
         PagesImpl pagesImpl = new PagesImpl(cassandraRepository, pagesRepository, experiments, eventLog);
         UserInfo user = UserInfo.from(UserInfo.Username.valueOf("user")).build();
         pagesImpl.erasePageData(testApp, experimentID, user);
     }
 
     @Test
-    public void testErasePageDataSuccessful(){
+    public void testErasePageDataSuccessful() {
         Experiment experiment = Experiment.withID(experimentID).withApplicationName(testApp).build();
         PagesImpl pagesImpl = new PagesImpl(cassandraRepository, pagesRepository, experiments, eventLog);
         given(experiments.getExperiment(experimentID)).willReturn(experiment);
         UserInfo user = UserInfo.from(UserInfo.Username.valueOf("user")).build();
         willDoNothing().given(eventLog).postEvent(any(ExperimentChangeEvent.class));
         pagesImpl.erasePageData(testApp, experimentID, user);
-        
+
         verify(experiments).getExperiment(experimentID);
         verify(eventLog).postEvent(any(ExperimentChangeEvent.class));
-        
+
     }
 
     @Test
-    public void testGetPageList(){
+    public void testGetPageList() {
 
         PagesImpl pagesImpl = new PagesImpl(cassandraRepository, pagesRepository, experiments, eventLog);
 
@@ -270,7 +266,7 @@ public class PagesImplTest {
     }
 
     @Test
-    public void testGetExperiments(){
+    public void testGetExperiments() {
 
         PagesImpl pagesImpl = new PagesImpl(cassandraRepository, pagesRepository, experiments, eventLog);
 
@@ -278,14 +274,14 @@ public class PagesImplTest {
         Experiment.Label label = Experiment.Label.valueOf("expLabel");
         Page.Name pageName = Page.Name.valueOf("somePage");
 
-        PageExperiment pageExperiment = PageExperiment.withAttributes(expID,label,true).build();
+        PageExperiment pageExperiment = PageExperiment.withAttributes(expID, label, true).build();
         List<PageExperiment> pageExperimentList = new ArrayList<>();
         pageExperimentList.add(pageExperiment);
 
-        when(pagesRepository.getExperiments(testApp,pageName)).thenReturn(pageExperimentList);
+        when(pagesRepository.getExperiments(testApp, pageName)).thenReturn(pageExperimentList);
         List<PageExperiment> result = pagesImpl.getExperiments(testApp, pageName);
-        assert  result == pageExperimentList;
-        verifyException(pagesImpl,ApplicationNotFoundException.class).getExperiments(null, pageName);
+        assert result == pageExperimentList;
+        verifyException(pagesImpl, ApplicationNotFoundException.class).getExperiments(null, pageName);
     }
 
 }

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,7 +23,7 @@ import java.util.function.Function;
  * An implementation of the PaginationComparatorProperty is best
  * achieved by implementing an {@code enum} which implements
  * this interface.
- *
+ * <p>
  * This interface assures that a {@link PaginationComparator} can work
  * with a property extractor (which is a {@link Function}) to get
  * properties for comparison, as well as with a comparison function
@@ -34,7 +34,7 @@ import java.util.function.Function;
  * The comparison function is usually a function reference to some existing (implicit)
  * implementation of {@link java.util.Comparator#compare}, for example
  * {@link String#compareToIgnoreCase(String)}.
- *
+ * <p>
  * Example:
  * <pre>{@code
  *  private enum Property implements PaginationComparatorProperty<Object> {
@@ -68,11 +68,11 @@ public interface PaginationComparatorProperty<T> {
     /**
      * Returns a Function which allows to get
      * a value of some type from an object of type T.
-     *
+     * <p>
      * Usually this is a getter, for example:
      * {@code Person::getName}. Another common pattern is
      * something similar to {@code person -> person.getName().toString()}.
-     *
+     * <p>
      * The returned function may return {@code null}, which will cause
      * the object to be sorted to the end.
      *
@@ -83,13 +83,14 @@ public interface PaginationComparatorProperty<T> {
     /**
      * Returns a function which allows to comparing one object
      * to another, returning -1, 0, or 1.
-     *
+     * <p>
      * Common values are for example:
      * <ul>
-     *     <li>{@link String#compareToIgnoreCase(String)}</li>
-     *     <li>{@link Integer#compareTo(Integer)}</li>
-     *     <li>{@link Date#compareTo(Date)}</li>
+     * <li>{@link String#compareToIgnoreCase(String)}</li>
+     * <li>{@link Integer#compareTo(Integer)}</li>
+     * <li>{@link Date#compareTo(Date)}</li>
      * </ul>
+     *
      * @return a function comparing one object to another.
      */
     BiFunction<?, ?, Integer> getComparisonFunction();

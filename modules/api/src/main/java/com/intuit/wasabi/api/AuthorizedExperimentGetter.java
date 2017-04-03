@@ -79,7 +79,7 @@ class AuthorizedExperimentGetter {
 
         return experimentList;
     }
-    
+
     List<Experiment> getAuthorizedExperimentsByName(final String authorizationHeader,
                                                     final Application.Name applicationName) {
         return getExperimentsByName(true, authorizationHeader, applicationName);

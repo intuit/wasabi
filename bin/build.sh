@@ -102,6 +102,7 @@ cp ${home}/classes/web.properties ${home}/${id}/conf
 cp ./modules/analytics/target/classes/analytics.properties ${home}/${id}/conf
 cp ./modules/api/target/classes/api.properties ${home}/${id}/conf
 cp ./modules/assignment/target/classes/assignment.properties ${home}/${id}/conf
+cp ./modules/assignment/target/classes/ehcache.xml ${home}/${id}/conf
 cp ./modules/auditlog/target/classes/auditlog.properties ${home}/${id}/conf
 cp ./modules/authentication/target/classes/authentication.properties ${home}/${id}/conf
 cp ./modules/authorization/target/classes/authorization.properties ${home}/${id}/conf
@@ -136,7 +137,7 @@ fi
 content=${home}/${id}/content/ui/dist
 
 mkdir -p ${content}
-cp -R ./modules/ui/dist/ ${content}
+cp -R ./modules/ui/dist/* ${content}
 mkdir -p ${content}/swagger/swaggerjson
 cp -R ./modules/swagger-ui/target/swaggerui/ ${content}/swagger
 cp -R ./modules/api/target/generated/swagger-ui/swagger.json ${content}/swagger/swaggerjson

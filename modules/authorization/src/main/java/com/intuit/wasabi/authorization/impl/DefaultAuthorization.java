@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2016 Intuit
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,9 +16,15 @@
 package com.intuit.wasabi.authorization.impl;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authorization.Authorization;
-import com.intuit.wasabi.authorizationobjects.*;
+import com.intuit.wasabi.authorizationobjects.Permission;
+import com.intuit.wasabi.authorizationobjects.Role;
+import com.intuit.wasabi.authorizationobjects.UserPermissions;
+import com.intuit.wasabi.authorizationobjects.UserPermissionsList;
+import com.intuit.wasabi.authorizationobjects.UserRole;
+import com.intuit.wasabi.authorizationobjects.UserRoleList;
 import com.intuit.wasabi.eventlog.EventLog;
 import com.intuit.wasabi.eventlog.events.AuthorizationChangeEvent;
 import com.intuit.wasabi.exceptions.AuthenticationException;
@@ -124,7 +130,6 @@ public class DefaultAuthorization implements Authorization {
         List<Experiment> experimentList = experiments.getExperiments(userRole.getApplicationName());
 
         // get current permissions
-
         if (!experimentList.isEmpty()) {
             List<UserRole> userRoleList = authorizationRepository.getUserRoleList(userRole.getUserID()).getRoleList();
             Role oldRole = null;
@@ -145,7 +150,7 @@ public class DefaultAuthorization implements Authorization {
                         oldRole == null || "superadmin".equalsIgnoreCase(oldRole.toString()) ? null : oldRole.toString(),
                         userRole.getRole().toString()));
             } catch (RepositoryException e) {
-                LOGGER.info("RepoitoryException for setting user Role in DefaultAuthorization " , e);
+                LOGGER.info("RepoitoryException for setting user Role in DefaultAuthorization ", e);
                 status.put("roleAssignmentStatus", "FAILED");
                 status.put("reason", "RepositoryException");
             }
@@ -212,4 +217,55 @@ public class DefaultAuthorization implements Authorization {
 
         return UserInfo.Username.valueOf(fields[0]);
     }
+
+    @Override
+    public void assignUserToSuperAdminRole(final UserInfo candidateUserInfo, final UserInfo assigningUserInfo) {
+
+        LOGGER.debug("Assigning super admin role to user={} by user={} ", candidateUserInfo, assigningUserInfo);
+
+        UserRoleList userRoleList = getUserRoleList(candidateUserInfo.getUsername());
+
+        LOGGER.debug("User role list {}", userRoleList);
+
+        boolean isSuperAdmin =
+                userRoleList.getRoleList().stream().anyMatch((UserRole ur) -> ur.getRole().equals(Role.SUPERADMIN));
+
+        Preconditions.checkArgument(!isSuperAdmin,
+                "User %s is already a superadmin", candidateUserInfo.getUsername());
+
+        authorizationRepository.assignUserToSuperAdminRole(candidateUserInfo);
+        eventLog.postEvent(new AuthorizationChangeEvent(assigningUserInfo,
+                null, candidateUserInfo, null, Role.SUPERADMIN.toString()));
+    }
+
+    @Override
+    public void removeUserFromSuperAdminRole(final UserInfo candidateUserInfo, final UserInfo assigningUserInfo) {
+
+        LOGGER.debug("Removing user={} from superadmin by assigningUser={}", candidateUserInfo, assigningUserInfo);
+
+        List<UserRole> allSuperAdmins = getSuperAdminRoleList();
+
+        LOGGER.debug("Current superadmins {}", allSuperAdmins);
+
+        Preconditions.checkArgument(allSuperAdmins.size() > 1,
+                "Cannot delete. SuperAdmins less than 1");
+
+        boolean isSuperAdmin = allSuperAdmins.stream().anyMatch((UserRole ur) -> ur.getRole().equals(Role.SUPERADMIN)
+                && ur.getUserID().equals(candidateUserInfo.getUsername()));
+
+        Preconditions.checkArgument(isSuperAdmin,
+                "User %s is not a superadmin", candidateUserInfo.getUsername());
+
+        authorizationRepository.removeUserFromSuperAdminRole(candidateUserInfo);
+        eventLog.postEvent(new AuthorizationChangeEvent(assigningUserInfo,
+                null, candidateUserInfo, Role.SUPERADMIN.toString(), null));
+    }
+
+    @Override
+    public List<UserRole> getSuperAdminRoleList() {
+        LOGGER.debug("Getting all super admins");
+
+        return authorizationRepository.getSuperAdminRoleList();
+    }
+
 }

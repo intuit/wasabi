@@ -57,7 +57,7 @@ public class EventsResourceTest {
 
     @Before
     public void setUp() throws Exception {
-        resource = new EventsResource(events, new HttpHeader("App-???"));
+        resource = new EventsResource(events, new HttpHeader("App-???", "600"));
     }
 
     @Test
@@ -93,7 +93,8 @@ public class EventsResourceTest {
         eventList.setEvents(listOfEvents);
 
         resource.recordEvents(applicationName, experimentLabel, userID, eventList);
-        verify(events).recordEvents(any(Application.Name.class), any(Experiment.Label.class), any(User.ID.class), any(EventList.class), any(Set.class));
+        verify(events).recordEvents(any(Application.Name.class),
+                any(Experiment.Label.class), any(User.ID.class), any(EventList.class), any(Set.class));
     }
 
     @Test
@@ -111,7 +112,7 @@ public class EventsResourceTest {
 
         thrown.expect(UnsupportedOperationException.class);
         thrown.expectMessage("Not implemented");
-        resource.recordExperimentsEvents(applicationName, userID, eventList);
+        resource.recordExperimentsEvents(applicationName, eventList);
     }
 
     @Test

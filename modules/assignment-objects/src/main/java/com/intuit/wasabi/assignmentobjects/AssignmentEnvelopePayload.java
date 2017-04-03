@@ -322,7 +322,7 @@ public class AssignmentEnvelopePayload implements EnvelopePayload {
     @Override
     public String toJson() {
         JSONObject assignmentJson = new JSONObject();
-        assignmentJson.put("userID", userID.toString());
+        assignmentJson.put("userID", userID != null ? userID.toString() : "");
         assignmentJson.put("applicationName", applicationName != null ? applicationName.toString() : "");
         assignmentJson.put("experimentLabel", experimentLabel != null ? experimentLabel.toString() : "");
         assignmentJson.put("context", context != null ? context.toString() : "PROD");
