@@ -30,6 +30,7 @@ import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.ws.rs.core.StreamingOutput;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -122,6 +123,15 @@ public interface AssignmentsRepository {
      * @param data      Assignment Data to be pushed to staging
      */
     void pushAssignmentToStaging(String type, String exception, String data);
+
+    /**
+     * Push assignment messages to staging in a BATCH
+     *
+     * @param type      type of assignment to be staged
+     * @param exception Exception
+     * @param data      Assignment messages to be pushed to staging
+     */
+    void pushAssignmentsToStaging(String type, String exception, Collection<String> data);
 
     /**
      * Increments the bucket assignments counter up by 1 if countUp is true

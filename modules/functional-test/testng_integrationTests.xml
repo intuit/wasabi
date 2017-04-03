@@ -56,6 +56,7 @@
     </test>
     <test name="IntegrationExperimentTests">
         <classes>
+        	<class name="com.intuit.wasabi.tests.service.ExperimentGetCallEnhanceTest" />
             <class name="com.intuit.wasabi.tests.service.IntegrationExperiment" />
             <class name="com.intuit.wasabi.tests.service.IntegrationMutualExclusion" />
         </classes>
