@@ -17,11 +17,6 @@ export class TabPageComponent extends React.Component{
         console.log('Selected tab: ' + index + ', Last tab: ' + last);
     }
 
-    /*
-    <PagesPageComponent applicationName={this.props.applicationName} />
-
-    */
-
     render() {
         return (
             <Tabs

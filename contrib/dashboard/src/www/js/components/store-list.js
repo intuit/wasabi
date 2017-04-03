@@ -89,7 +89,7 @@ export class StoreListComponent extends React.Component {
             });
         }
 
-        // When the component mounts, resolve the promise from the fetch to get the list of items.
+        // When the component mounts, resolve the promise to get the list of items.
         this.props.items.then(items => {
             this.setState({
                 items: items.experiments.concat(),

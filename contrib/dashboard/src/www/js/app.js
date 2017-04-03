@@ -65,14 +65,6 @@ class AppMain extends React.Component {
         });
     }
 
-    /*
-    <MainPageComponent doLogout={this.doLogout} applications={fetch('http://localhost:8080/api/v1/applications', {
-        method: 'GET',
-        headers: headers
-    }).then(res => res.json())} />
-
-    */
-
     render() {
         const headers = new Headers();
         headers.append('Content-Type', 'application/json');

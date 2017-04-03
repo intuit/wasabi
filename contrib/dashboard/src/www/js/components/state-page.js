@@ -1,5 +1,6 @@
 /*global $:true*/
 import React from 'react';
+const helpers = require('../helpers.js');
 
 export class StatePageComponent extends React.Component {
     constructor(props) {
@@ -44,14 +45,11 @@ export class StatePageComponent extends React.Component {
     }
 
     renderGraph() {
-        const headers = new Headers();
-        headers.append('Content-Type', 'application/json');
-        headers.append('Authorization', this.state.session.login.tokenType + ' ' + this.state.session.login.accessToken);
-
-        fetch('http://localhost:8080/api/v1/applications/' + this.state.applicationName + '/experimentsByState', {
-            method: 'GET',
-            headers: headers
-        }).then(res => res.json()).then(items => {
+        helpers.doWasabiOperation('/api/v1/applications/%APPLICATION_NAME%/experimentsByState',
+            {
+                'APPLICATION_NAME': this.state.applicationName
+            }
+        ).then(items => {
             if (items && !items.hasOwnProperty('error')) {
                 var data = [
                     ['Status', 'Experiments']
@@ -66,14 +64,6 @@ export class StatePageComponent extends React.Component {
                     title: 'Experiments by state'
                 };
                 var pieData = google.visualization.arrayToDataTable(data);
-                //     [
-                //     ['Task', 'Hours per Day'],
-                //     ['Work',     11],
-                //     ['Eat',      2],
-                //     ['Commute',  2],
-                //     ['Watch TV', 2],
-                //     ['Sleep',    7]
-                // ]);
 
                 var wrap = new google.visualization.ChartWrapper({
                     'chartType': 'PieChart',
