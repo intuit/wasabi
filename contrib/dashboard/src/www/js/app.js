@@ -5,6 +5,7 @@ import ReactDOM from 'react-dom';
 
 import { LoginComponent } from './components/login';
 import { MainPageComponent } from './components/main-page';
+const helpers = require('./helpers.js');
 
 class AppMain extends React.Component {
     constructor(props) {
@@ -65,10 +66,7 @@ class AppMain extends React.Component {
     }
 
     /*
-    <StoreListComponent doLogout={this.doLogout} items={fetch('http://localhost:8080/api/v1/experiments', {
-        method: 'GET',
-        headers: headers
-    }).then(res => res.json())} pages={fetch('http://localhost:8080/api/v1/applications/MyApp/pages', {
+    <MainPageComponent doLogout={this.doLogout} applications={fetch('http://localhost:8080/api/v1/applications', {
         method: 'GET',
         headers: headers
     }).then(res => res.json())} />
@@ -82,10 +80,9 @@ class AppMain extends React.Component {
         if (this.state.session.login.loggedIn) {
             headers.append('Authorization', this.state.session.login.tokenType + ' ' + this.state.session.login.accessToken);
             return <div>
-                <MainPageComponent doLogout={this.doLogout} applications={fetch('http://localhost:8080/api/v1/applications', {
-                    method: 'GET',
-                    headers: headers
-                }).then(res => res.json())} />
+                <MainPageComponent doLogout={this.doLogout} applications={helpers.doWasabiOperation('/api/v1/applications',
+                    {}
+                )} />
             </div>;
         }
         else {

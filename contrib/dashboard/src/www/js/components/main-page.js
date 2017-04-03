@@ -41,21 +41,10 @@ export class MainPageComponent extends React.Component {
         this.setState({applicationName: event.target.value});
     }
 
-    /*
-    <PagesPageComponent applicationName={this.state.applicationName} pages={fetch('http://localhost:8080/api/v1/applications/' + this.state.applicationName + '/pages', {
-        method: 'GET',
-        headers: headers
-    }).then(res => res.json())} />
-
-    */
-
     render() {
-        const headers = new Headers();
-        headers.append('Content-Type', 'application/json');
-        headers.append('Authorization', this.state.session.login.tokenType + ' ' + this.state.session.login.accessToken);
-
         return <div>
             <div className="siteHeading">
+                <div style={{fontSize: '30px'}}>Wasabi Dashboard</div>
                 <div className="applicationNameContainer">
                     Application:
                     <select value={this.state.applicationName} onChange={this.handleSelectChange}>

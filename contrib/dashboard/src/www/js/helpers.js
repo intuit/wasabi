@@ -33,49 +33,58 @@ var buildURL = function(path, options) {
     return url;
 };
 
+var getSession = function() {
+    var session = sessionStorage.getItem('session');
+    if (session) {
+        session = JSON.parse(session);
+    }
+    return session;
+};
 
 exports.doWasabiOperation = function(urlTemplate, options, postBody) {
-    var opts = (options || {});
+    var opts = (options || {}),
+        session = getSession();
     $.extend(opts, wasabiOptions);
 
     var url = buildURL(urlTemplate, opts);
 
     var ajaxParams = {
-        'headers': {
+        headers: {
             'Content-Type': 'application/json'
         }
     };
     // Sign in needs special handling
-    if (opts.hasOwnProperty('authOn') && opts.authOn === true) {
+    if (opts.hasOwnProperty('login') && opts.login === true) {
         ajaxParams = {
-            'headers': {
+            headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'Authorization': 'Basic ' + btoa(opts.username + ':' + opts.password)
             }
         };
         postBody = {
-            'grant_type': 'client_credentials'
+            grant_type: 'client_credentials'
         };
+    }
+    else {
+        ajaxParams.headers['Authorization'] = session.login.tokenType + ' ' + session.login.accessToken;
     }
     if (postBody) {
         $.extend(ajaxParams, {
             'method': 'POST',
-            'data': postBody
+            'body': JSON.stringify(postBody)
+        });
+    }
+    else if (opts.hasOwnProperty('method')) {
+        $.extend(ajaxParams, {
+            'method': opts.method
         });
     }
 
-    // In order to solve the problem that jQuery.ajax() interprets the return of a 201 with
-    // empty content as an error, we check for that and if we get it, we call the success result.
-    return new Promise(function(resolve, reject) {
-        $.ajax(url, ajaxParams)
-        .done(function(data) {
-            resolve(data);
-        })
-        .fail(function(jqXHR, textStatus, errorThrown) {
-            if (jqXHR.status === 201) {
-                resolve(null);
+    return fetch(url, ajaxParams).then(
+        res => {
+            if (res.status && res.status !== 201 && res.status !== 204) {
+                return res.json()
             }
-            reject(errorThrown);
-        });
-    });
+        }
+    );
 };

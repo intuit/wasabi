@@ -4,6 +4,7 @@ import React from 'react';
 import { ItemTableComponent } from './item-table';
 import { ProductRowComponent } from './product-row';
 import { Modal, Button } from 'react-bootstrap';
+const helpers = require('../helpers.js');
 
 const myFields = [
     {
@@ -227,18 +228,16 @@ export class PagesPageComponent extends React.Component {
         if (!nextProps.hasOwnProperty('applicationName') || nextProps.applicationName === '') {
             return;
         }
-        const headers = new Headers();
-        headers.append('Content-Type', 'application/json');
-        headers.append('Authorization', this.state.session.login.tokenType + ' ' + this.state.session.login.accessToken);
 
         this.setState({
             applicationName: nextProps.applicationName
         });
 
-        fetch('http://localhost:8080/api/v1/applications/' + nextProps.applicationName + '/pages', {
-            method: 'GET',
-            headers: headers
-        }).then(res => res.json()).then(items => {
+        helpers.doWasabiOperation('/api/v1/applications/%APPLICATION_NAME%/pages',
+            {
+                'APPLICATION_NAME': nextProps.applicationName
+            }
+        ).then(items => {
             if (items && !items.hasOwnProperty('error')) {
                 this.setState({
                     pages: items.pages.concat()
@@ -252,35 +251,32 @@ export class PagesPageComponent extends React.Component {
     }
 
     deleteExperimentFromPage(options) {
-        const headers = new Headers();
-        headers.append('Content-Type', 'application/json');
-        headers.append('Authorization', this.state.session.login.tokenType + ' ' + this.state.session.login.accessToken);
-
-        fetch('http://localhost:8080/api/v1/experiments/' + options.item.id + '/pages/' + this.state.pageName, {
-            method: 'DELETE',
-            headers: headers
-        }).then(() => {
+        helpers.doWasabiOperation('/api/v1/experiments/%ID%/pages/%PAGE_NAME%',
+            {
+                method: 'DELETE',
+                'ID': options.item.id,
+                'PAGE_NAME': this.state.pageName
+            }
+        ).then(() => {
             this.refreshExperimentsInPageList(this.state.pageName);
         });
     }
 
     refreshExperimentsInPageList(pageName) {
-        const headers = new Headers();
-        headers.append('Content-Type', 'application/json');
-        headers.append('Authorization', this.state.session.login.tokenType + ' ' + this.state.session.login.accessToken);
-
-
-        fetch('http://localhost:8080/api/v1/applications/' + this.state.applicationName + '/priorities', {
-            method: 'GET',
-            headers: headers
-        }).then(res => res.json()).then(prioritizedExperiments => {
+        helpers.doWasabiOperation('/api/v1/applications/%APPLICATION_NAME%/priorities',
+            {
+                'APPLICATION_NAME': this.state.applicationName
+            }
+        ).then(prioritizedExperiments => {
             this.setState({
                 prioritizedExperiments: prioritizedExperiments.prioritizedExperiments
             });
-            fetch('http://localhost:8080/api/v1/experiments/applications/' + this.state.applicationName + '/pages/' + pageName, {
-                method: 'GET',
-                headers: headers
-            }).then(res => res.json()).then(items => {
+            helpers.doWasabiOperation('/api/v1/experiments/applications/%APPLICATION_NAME%/pages/%PAGE_NAME%',
+                {
+                    'APPLICATION_NAME': this.state.applicationName,
+                    'PAGE_NAME': pageName
+                }
+            ).then(items => {
                 if (items && !items.hasOwnProperty('error')) {
                     for (let i=0; i < items.experiments.length; i++) {
                         items.experiments[i].samplingPercent = items.experiments[i].samplingPercent * 100;
@@ -300,10 +296,9 @@ export class PagesPageComponent extends React.Component {
                         items: items.experiments.concat()
                     });
 
-                    fetch('http://localhost:8080/api/v1/experiments', {
-                        method: 'GET',
-                        headers: headers
-                    }).then(res => res.json()).then(results => {
+                    helpers.doWasabiOperation('/api/v1/experiments',
+                        {}
+                    ).then(results => {
                         if (results && !results.hasOwnProperty('error')) {
                             const experimentsNotInPage = [];
                             for (let i=0; i < results.experiments.length; i++) {
@@ -351,21 +346,18 @@ export class PagesPageComponent extends React.Component {
     }
 
     save() {
-        const headers = new Headers();
-        headers.append('Content-Type', 'application/json');
-        headers.append('Authorization', this.state.session.login.tokenType + ' ' + this.state.session.login.accessToken);
-
         for (let i = 0; i < this.state.selectedItems.length; i++) {
-            fetch('http://localhost:8080/api/v1/experiments/' + this.state.selectedItems[i] + '/pages', {
-                method: 'POST',
-                headers: headers,
-                body: JSON.stringify({
+            helpers.doWasabiOperation('/api/v1/experiments/%ID%/pages',
+                {
+                    'ID': this.state.selectedItems[i]
+                },
+                {
                     pages: [{
                         name: this.state.pageName,
                         allowNewAssignment: true
                     }]
-                })
-            }).then(() => {
+                }
+            ).then(() => {
                 this.refreshExperimentsInPageList(this.state.pageName);
             });
         }
@@ -394,14 +386,11 @@ export class PagesPageComponent extends React.Component {
         $rows.removeClass('hilite active');
         $row.addClass('active');
 
-        const headers = new Headers();
-        headers.append('Content-Type', 'application/json');
-        headers.append('Authorization', this.state.session.login.tokenType + ' ' + this.state.session.login.accessToken);
-
-        fetch('http://localhost:8080/api/v1/experiments/' + item.id + '/exclusions/?showAll=true&exclusive=true', {
-            method: 'GET',
-            headers: headers
-        }).then(res => res.json()).then(meExperiments => {
+        helpers.doWasabiOperation('/api/v1/experiments/%ID%/exclusions/?showAll=true&exclusive=true',
+            {
+                'ID': item.id
+            }
+        ).then(meExperiments => {
             for (var i = 0; i < meExperiments.experiments.length; i++) {
                 for (var j = 1; j < $rows.length; j++) {
                     if ($rows.eq(j).attr('id') === meExperiments.experiments[i].id) {
@@ -413,14 +402,11 @@ export class PagesPageComponent extends React.Component {
     }
 
     openExperimentModal(item) {
-        const headers = new Headers();
-        headers.append('Content-Type', 'application/json');
-        headers.append('Authorization', this.state.session.login.tokenType + ' ' + this.state.session.login.accessToken);
-
-        fetch('http://localhost:8080/api/v1/experiments/' + item.id + '/buckets', {
-            method: 'GET',
-            headers: headers
-        }).then(res => res.json()).then(results => {
+        helpers.doWasabiOperation('/api/v1/experiments/%ID%/buckets',
+            {
+                'ID': item.id
+            }
+        ).then(results => {
             item.buckets = results.buckets;
             this.setState({
                 selectedExperiment: item,
@@ -430,10 +416,6 @@ export class PagesPageComponent extends React.Component {
     }
 
     render() {
-        const headers = new Headers();
-        headers.append('Content-Type', 'application/json');
-        headers.append('Authorization', this.state.session.login.tokenType + ' ' + this.state.session.login.accessToken);
-
         return <div>
                 <section className="pageMenu">
                     Page:     <select value={this.state.pageName} onChange={this.handleSelectChange}>

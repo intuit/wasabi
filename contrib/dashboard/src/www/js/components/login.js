@@ -41,7 +41,7 @@ export class LoginComponent extends React.Component {
             console.log('Login submitted');
 
             const opts = {
-                authOn: true,
+                login: true,
                 username: this.state.username,
                 password: this.state.password
             };
@@ -49,8 +49,7 @@ export class LoginComponent extends React.Component {
             helpers.doWasabiOperation(
                 '/api/v1/authentication/login',
                 opts /* Don't need to pass body as it is added automatically */
-            ).then(
-                (response) => {
+            ).then(response => {
                     console.log('login: success');
                     console.log(JSON.stringify(response));
 
@@ -65,12 +64,10 @@ export class LoginComponent extends React.Component {
                     sessionStorage.setItem('session', JSON.stringify(sessionObj));
 
                     this.props.setLoggedInFunc();
-                },
-                (error) => {
-                    console.log('getAssignment: error');
-                    console.dir(error);
-                }
-            );
+            }).catch(error => {
+                console.log('getAssignment: error');
+                console.dir(error);
+            });
 
         }
         else {
