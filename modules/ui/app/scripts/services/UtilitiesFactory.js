@@ -43,6 +43,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                     this.hideTopLevelTab('Plugins', false);
                     this.hideTopLevelTabMenuChoice('Logs', false);
                     this.hideTopLevelTabMenuChoice('Feedback', !Session.isSuperadmin);
+                    this.hideTopLevelTabMenuChoice('Superadmins', !Session.isSuperadmin);
                     this.hideTopLevelTab('Tools', false);
                 }
                 else {
@@ -51,6 +52,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                     this.hideTopLevelTab('Plugins');
                     this.hideTopLevelTabMenuChoice('Logs');
                     this.hideTopLevelTabMenuChoice('Feedback', true);
+                    this.hideTopLevelTabMenuChoice('Superadmins', true);
                     this.hideTopLevelTab('Tools', true);
                 }
             },
