@@ -3,6 +3,7 @@ import React from 'react';
 
 import { ItemTableComponent } from './item-table';
 import { ProductRowComponent } from './product-row';
+import { ConfirmationModalComponent } from './confirmation-modal';
 import { Modal, Button } from 'react-bootstrap';
 const helpers = require('../helpers.js');
 
@@ -193,6 +194,7 @@ export class PagesPageComponent extends React.Component {
                 buckets: []
             },
             prioritizedExperiments: [],
+            showConfirmationFlag: false,
             session: {
                 login: {
                     'name': '',
@@ -207,6 +209,8 @@ export class PagesPageComponent extends React.Component {
         this.selectedFunc = this.selectedFunc.bind(this);
         this.openExperimentModal = this.openExperimentModal.bind(this);
         this.showMutualExclusions = this.showMutualExclusions.bind(this);
+        this.showDeleteFromPage = this.showDeleteFromPage.bind(this);
+        this.doDeleteFromPage = this.doDeleteFromPage.bind(this);
     }
 
     componentDidMount() {
@@ -415,6 +419,19 @@ export class PagesPageComponent extends React.Component {
         });
     }
 
+    showDeleteFromPage(item) {
+        console.dir(item);
+        this.setState({ showConfirmationFlag: true });
+    }
+
+    doDeleteFromPage() {
+        console.log('Do Delete called');
+
+        // this.props.deleteFunc({
+        //     item: JSON.parse(JSON.stringify(this.props.item))
+        // });
+    }
+
     render() {
         return <div>
                 <section className="pageMenu">
@@ -426,7 +443,7 @@ export class PagesPageComponent extends React.Component {
                 <section className="addButtonArea">
                     <button type="button" onClick={this.onClick}>Add Experiment To Page</button>
                 </section>
-                <ItemTableComponent tableId={'pageExperimentsList'} fields={this.state.myFields} buttonColor={this.state.buttonColor} textColor={this.state.textColor} onClickHandler={this.openExperimentModal} onRowClickHandler={this.showMutualExclusions} deleteFunc={this.deleteExperimentFromPage} items={this.state.items} query={this.state.query} />
+                <ItemTableComponent tableId={'pageExperimentsList'} fields={this.state.myFields} buttonColor={this.state.buttonColor} textColor={this.state.textColor} onClickHandler={this.openExperimentModal} onRowClickHandler={this.showMutualExclusions} deleteFunc={this.showDeleteFromPage} items={this.state.items} query={this.state.query} />
                 <div className="modalWindow">
                     Shown now?
                 </div>
@@ -467,6 +484,7 @@ export class PagesPageComponent extends React.Component {
                     </Modal.Footer>
                 </Modal>
 
+                <ConfirmationModalComponent okFunc={this.doDeleteFromPage} showConfirmation={this.state.showConfirmationFlag} title={'Remove experiment from page?'} confirmationPrompt={'Are you sure you want to remove this experiment from the page?'} />
         </div>;
     }
 }

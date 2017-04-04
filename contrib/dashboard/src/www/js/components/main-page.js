@@ -47,7 +47,7 @@ export class MainPageComponent extends React.Component {
                 <div style={{fontSize: '30px'}}>Wasabi Dashboard</div>
                 <div className="applicationNameContainer">
                     Application:
-                    <select value={this.state.applicationName} onChange={this.handleSelectChange}>
+                    <select value={this.state.applicationName} onChange={this.handleSelectChange} style={{marginLeft: '10px'}}>
                         {this.state.applications.map((name, index) => <option value={name} key={index}>{name}</option>)}
                     </select>
                 </div>
