@@ -115,6 +115,7 @@ public class Constants {
         USA_PACIFIC("America/Los_Angeles"),
         USA_MOUNTAIN("America/Denver"),
         USA_CENTRAL("America/Chicago"),
+        USA_EAST("America/Detroit"),
         USA_ALASKA("America/Anchorage") ;
 
         private String timeZone;
