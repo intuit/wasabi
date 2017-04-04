@@ -195,6 +195,8 @@ export class PagesPageComponent extends React.Component {
             },
             prioritizedExperiments: [],
             showConfirmationFlag: false,
+            confirmationDialogPrompt: 'Are you sure you want to remove this experiment from the page?',
+            itemToDelete: {},
             session: {
                 login: {
                     'name': '',
@@ -254,14 +256,15 @@ export class PagesPageComponent extends React.Component {
         });
     }
 
-    deleteExperimentFromPage(options) {
+    deleteExperimentFromPage(item) {
         helpers.doWasabiOperation('/api/v1/experiments/%ID%/pages/%PAGE_NAME%',
             {
                 method: 'DELETE',
-                'ID': options.item.id,
+                'ID': item.id,
                 'PAGE_NAME': this.state.pageName
             }
         ).then(() => {
+            this.setState({ showConfirmationFlag: false });
             this.refreshExperimentsInPageList(this.state.pageName);
         });
     }
@@ -419,17 +422,17 @@ export class PagesPageComponent extends React.Component {
         });
     }
 
+    // Display the modal to confirm if the user wants to remove an experiment from the page
     showDeleteFromPage(item) {
-        console.dir(item);
-        this.setState({ showConfirmationFlag: true });
+        this.setState({
+            showConfirmationFlag: true,
+            confirmationDialogPrompt: 'Are you sure you want to remove the experiment, ' + item.item.label + ', from the page, ' + this.state.pageName + '?',
+            itemToDelete: item.item
+        });
     }
 
     doDeleteFromPage() {
-        console.log('Do Delete called');
-
-        // this.props.deleteFunc({
-        //     item: JSON.parse(JSON.stringify(this.props.item))
-        // });
+        this.deleteExperimentFromPage(this.state.itemToDelete);
     }
 
     render() {
@@ -484,7 +487,7 @@ export class PagesPageComponent extends React.Component {
                     </Modal.Footer>
                 </Modal>
 
-                <ConfirmationModalComponent okFunc={this.doDeleteFromPage} showConfirmation={this.state.showConfirmationFlag} title={'Remove experiment from page?'} confirmationPrompt={'Are you sure you want to remove this experiment from the page?'} />
+                <ConfirmationModalComponent okFunc={this.doDeleteFromPage} showConfirmation={this.state.showConfirmationFlag} title={'Remove experiment from page?'} confirmationPrompt={this.state.confirmationDialogPrompt} />
         </div>;
     }
 }

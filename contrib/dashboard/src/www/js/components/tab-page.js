@@ -14,7 +14,7 @@ export class TabPageComponent extends React.Component{
     }
 
     handleSelect(index, last) {
-        console.log('Selected tab: ' + index + ', Last tab: ' + last);
+        // Nothing to do
     }
 
     render() {

@@ -38,8 +38,6 @@ export class LoginComponent extends React.Component {
 
     submit() {
         if (this.validate()) {
-            console.log('Login submitted');
-
             const opts = {
                 login: true,
                 username: this.state.username,
@@ -50,9 +48,6 @@ export class LoginComponent extends React.Component {
                 '/api/v1/authentication/login',
                 opts /* Don't need to pass body as it is added automatically */
             ).then(response => {
-                    console.log('login: success');
-                    console.log(JSON.stringify(response));
-
                     let sessionObj = {
                         'login': {
                             'name': this.state.username,

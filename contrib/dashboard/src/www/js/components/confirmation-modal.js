@@ -18,14 +18,16 @@ export class ConfirmationModalComponent extends React.Component {
         this.setState({showConfirmationFlag: this.props.showConfirmation});
     }
 
+    componentWillReceiveProps(nextProps) {
+        this.setState({ showConfirmationFlag: nextProps.showConfirmation });
+    }
+
     close() {
-        console.log('Close clicked');
-        //this.props.okFunc();
+        this.props.okFunc();
         this.setState({showConfirmationFlag: false});
     }
 
     cancel() {
-        console.log('Cancel clicked');
         this.setState({showConfirmationFlag: false});
     }
 
