@@ -4650,7 +4650,6 @@ public class TestBase extends ServiceTestBase {
         String offset = String.format("%02d:%02d", Math.abs(offsetInMills / 3600000),
                 Math.abs((offsetInMills / 60000) % 60));
         offset = (offsetInMills >= 0 ? "+" : "-") + offset;
-
         return offset;
     }
 }
