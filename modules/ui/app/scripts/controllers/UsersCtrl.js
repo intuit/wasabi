@@ -30,6 +30,14 @@ angular.module('wasabi.controllers').
             $scope.administeredApplications = [];
             $scope.appNames = [];
 
+            $scope.startSpin = function(){
+                UtilitiesFactory.startSpin();
+            }
+
+            $scope.stopSpin = function(){
+                UtilitiesFactory.stopSpin();
+            }
+
             // Load the list of applications the currently logged in user is an admin for.
             $scope.loadAdministeredApplications = function () {
                 $scope.administeredApplications = UtilitiesFactory.getAdministeredApplications();
@@ -40,8 +48,9 @@ angular.module('wasabi.controllers').
             $scope.loadUsers = function (orderByField) {
 
                 var users = [];
-
+                $scope.startSpin();
                 AuthzFactory.getUsersRoles().$promise.then(function(results) {
+                    $scope.stopSpin();
                     if (results && results.length > 0) {
                         for (var i = 0; i < results.length; i++) {
                             // Go through each object, which represents the access for one application.

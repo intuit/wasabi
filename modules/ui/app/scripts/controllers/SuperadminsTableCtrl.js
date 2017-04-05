@@ -8,10 +8,20 @@ angular.module('wasabi.controllers').
 
             $scope.superadmins = [];
 
+            $scope.startSpin = function(){
+                UtilitiesFactory.startSpin();
+            }
+
+            $scope.stopSpin = function(){
+                UtilitiesFactory.stopSpin();
+            }
+
             // load superadmins from server
             $scope.loadSuperadmins = function () {
                 $scope.superadmins = [];
+                $scope.startSpin();
                 SuperadminsFactory.query().$promise.then(function(superadmins) {
+                    $scope.stopSpin();
                     $scope.superadmins = superadmins;
                     for (var i = 0; i < $scope.superadmins.length; i++) {
                         $scope.superadmins[i].doNotShow = (Session.userID === $scope.superadmins[i].userID);

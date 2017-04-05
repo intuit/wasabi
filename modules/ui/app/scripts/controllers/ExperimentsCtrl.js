@@ -101,6 +101,14 @@ angular.module('wasabi.controllers').
                 }
             };
 
+            $scope.startSpin = function(){
+                UtilitiesFactory.startSpin();
+            }
+
+            $scope.stopSpin = function(){
+                UtilitiesFactory.stopSpin();
+            }
+
             $scope.doFavorites = function(experimentsList, forceGet) {
                 function applyFavorites(experimentsList) {
                     if ($scope.favoritesObj.favorites && $scope.favoritesObj.favorites.length && experimentsList) {
@@ -139,6 +147,8 @@ angular.module('wasabi.controllers').
                     }
                     return existingFilter += newFilterValue;
                 }
+
+                $scope.startSpin();
 
                 var queryParams = {
                     perPage: pageSize,
@@ -269,6 +279,7 @@ angular.module('wasabi.controllers').
                             $scope.applicationsWithReadOrBetterAccess.length === 0);
 
                     $scope.applicationsLoaded = true;
+                    $scope.stopSpin();
                 });
             };
 
@@ -382,6 +393,8 @@ angular.module('wasabi.controllers').
                     else {
                         $scope.doFavorites($scope.cardViewExperiments, false);
                     }
+
+                    $scope.stopSpin();
 
                     //$scope.loadGridDataIfNecessary()
                 });

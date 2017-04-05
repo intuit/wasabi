@@ -33,6 +33,14 @@ angular.module('wasabi.controllers').
             UtilitiesFactory.hideHeading(false);
             UtilitiesFactory.selectTopLevelTab('Priority');
 
+            $scope.startSpin = function(){
+                UtilitiesFactory.startSpin();
+            }
+
+            $scope.stopSpin = function(){
+                UtilitiesFactory.stopSpin();
+            }
+
             $scope.changePage = function(destinationApp) {
                 if (destinationApp !== undefined) {
                     $scope.data.applicationName = destinationApp;
@@ -121,8 +129,10 @@ angular.module('wasabi.controllers').
                 if (selectedApp) {
                     $scope.applicationName = $cookies.wasabiDefaultApplication = selectedApp;
                     $scope.noDrag = $scope.readOnly = !$scope.hasUpdatePermission(selectedApp);
+                    $scope.startSpin();
                     PrioritiesFactory.query({applicationName: selectedApp}).$promise.then(function (priorities) {
                         $scope.experiments = priorities;
+                        $scope.stopSpin();
                         $scope.doFavorites();
 
                         UtilitiesFactory.doTrackingInit();
