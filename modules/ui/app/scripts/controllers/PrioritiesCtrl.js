@@ -33,14 +33,6 @@ angular.module('wasabi.controllers').
             UtilitiesFactory.hideHeading(false);
             UtilitiesFactory.selectTopLevelTab('Priority');
 
-            $scope.startSpin = function(){
-                UtilitiesFactory.startSpin();
-            }
-
-            $scope.stopSpin = function(){
-                UtilitiesFactory.stopSpin();
-            }
-
             $scope.changePage = function(destinationApp) {
                 if (destinationApp !== undefined) {
                     $scope.data.applicationName = destinationApp;
@@ -129,10 +121,9 @@ angular.module('wasabi.controllers').
                 if (selectedApp) {
                     $scope.applicationName = $cookies.wasabiDefaultApplication = selectedApp;
                     $scope.noDrag = $scope.readOnly = !$scope.hasUpdatePermission(selectedApp);
-                    $scope.startSpin();
+                    UtilitiesFactory.startSpin();
                     PrioritiesFactory.query({applicationName: selectedApp}).$promise.then(function (priorities) {
                         $scope.experiments = priorities;
-                        $scope.stopSpin();
                         $scope.doFavorites();
 
                         UtilitiesFactory.doTrackingInit();
@@ -142,6 +133,8 @@ angular.module('wasabi.controllers').
                             {key: 'application_name', value: selectedApp});
                     }, function(response) {
                         UtilitiesFactory.handleGlobalError(response, 'The list of priorities could not be retrieved.');
+                    }).finally(function() {
+                        UtilitiesFactory.stopSpin();
                     });
                 }
             };

@@ -101,14 +101,6 @@ angular.module('wasabi.controllers').
                 }
             };
 
-            $scope.startSpin = function(){
-                UtilitiesFactory.startSpin();
-            }
-
-            $scope.stopSpin = function(){
-                UtilitiesFactory.stopSpin();
-            }
-
             $scope.doFavorites = function(experimentsList, forceGet) {
                 function applyFavorites(experimentsList) {
                     if ($scope.favoritesObj.favorites && $scope.favoritesObj.favorites.length && experimentsList) {
@@ -148,7 +140,7 @@ angular.module('wasabi.controllers').
                     return existingFilter += newFilterValue;
                 }
 
-                $scope.startSpin();
+                UtilitiesFactory.startSpin();
 
                 var queryParams = {
                     perPage: pageSize,
@@ -194,7 +186,9 @@ angular.module('wasabi.controllers').
                         function(response) {
                             UtilitiesFactory.handleGlobalError(response, 'The list of experiments could not be retrieved.');
                         }
-                    );
+                    ).finally(function() {
+                        UtilitiesFactory.stopSpin();
+                    });
                 }
                 else {
                     ExperimentStatisticsFactory.cardViewData(queryParams).$promise
@@ -202,7 +196,9 @@ angular.module('wasabi.controllers').
                         function(response) {
                             UtilitiesFactory.handleGlobalError(response, 'The list of experiments could not be retrieved.');
                         }
-                    );
+                    ).finally(function() {
+                        UtilitiesFactory.stopSpin();
+                    });
                 }
             };
 
@@ -279,7 +275,6 @@ angular.module('wasabi.controllers').
                             $scope.applicationsWithReadOrBetterAccess.length === 0);
 
                     $scope.applicationsLoaded = true;
-                    $scope.stopSpin();
                 });
             };
 
@@ -393,10 +388,6 @@ angular.module('wasabi.controllers').
                     else {
                         $scope.doFavorites($scope.cardViewExperiments, false);
                     }
-
-                    $scope.stopSpin();
-
-                    //$scope.loadGridDataIfNecessary()
                 });
             };
 

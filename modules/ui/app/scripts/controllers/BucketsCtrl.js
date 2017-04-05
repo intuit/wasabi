@@ -10,6 +10,7 @@ angular.module('wasabi.controllers').
 
             $scope.loadBuckets = function () {
                 if($scope.experiment.id) {
+                    UtilitiesFactory.startSpin();
                     BucketsFactory.query({
                         experimentId: $scope.experiment.id
                     }).$promise.then(function (buckets) {
@@ -19,6 +20,8 @@ angular.module('wasabi.controllers').
                     function(response) {
                         UtilitiesFactory.handleGlobalError(response, 'The list of experiment buckets could not be retrieved.');
                         $scope.modalInstance.close();
+                    }).finally(function() {
+                        UtilitiesFactory.stopSpin();
                     });
                 }
             };

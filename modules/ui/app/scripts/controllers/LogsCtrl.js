@@ -29,14 +29,6 @@ angular.module('wasabi.controllers').
             UtilitiesFactory.hideHeading(false);
             UtilitiesFactory.selectTopLevelTab('Tools');
 
-            $scope.startSpin = function(){
-                UtilitiesFactory.startSpin();
-            }
-
-            $scope.stopSpin = function(){
-                UtilitiesFactory.stopSpin();
-            }
-
             $scope.changePage = function(destinationApp) {
                 if (destinationApp !== undefined) {
                     $scope.data.applicationName = destinationApp;
@@ -85,9 +77,8 @@ angular.module('wasabi.controllers').
                             sort: ($scope.reverseSort ? '-' : '') + $scope.orderByField.replace('_', '.'),
                             filter: $scope.data.query
                         };
-                    $scope.startSpin();
+                    UtilitiesFactory.startSpin();
                     LogsFactory.query(options).$promise.then(function (data) {
-                        $scope.stopSpin();
                         $scope.logs = data.logEntries;
                         $scope.totalItems = data.totalEntries;
 
@@ -98,6 +89,8 @@ angular.module('wasabi.controllers').
                             {key: 'application_name', value: selectedApp});
                     }, function(response) {
                         UtilitiesFactory.handleGlobalError(response, 'The list of logs could not be retrieved.');
+                    }).finally(function() {
+                        UtilitiesFactory.stopSpin();
                     });
                 }
             };
