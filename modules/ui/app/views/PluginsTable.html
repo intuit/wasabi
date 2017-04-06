@@ -10,7 +10,7 @@
             </div>
         </div>
     </div>
-    <div ng-show="!plugins || plugins.length === 0">
+    <div ng-show="!plugins || (plugins | filter:{ pluginType: 'contributeAppLevelFeature' }).length === 0">
         <label>No plugins are currently installed.</label>
     </div>
 </div>

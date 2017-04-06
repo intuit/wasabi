@@ -40,7 +40,7 @@ angular.module('wasabi.controllers').
             $scope.loadUsers = function (orderByField) {
 
                 var users = [];
-
+                UtilitiesFactory.startSpin();
                 AuthzFactory.getUsersRoles().$promise.then(function(results) {
                     if (results && results.length > 0) {
                         for (var i = 0; i < results.length; i++) {
@@ -92,6 +92,8 @@ angular.module('wasabi.controllers').
                 },
                 function(response) {
                     UtilitiesFactory.handleGlobalError(response, 'The list of user roles could not be retrieved.');
+                }).finally(function() {
+                    UtilitiesFactory.stopSpin();
                 });
 
             };
