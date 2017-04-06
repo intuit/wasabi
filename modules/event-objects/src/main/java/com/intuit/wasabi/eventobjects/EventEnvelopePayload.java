@@ -88,18 +88,27 @@ public class EventEnvelopePayload implements EnvelopePayload {
         JSONObject eventJson = new JSONObject();
 
         eventJson.put("messageType", MessageType.EVENT.toString());
-        eventJson.put("applicationName", applicationName.toString());
-        eventJson.put("experimentLabel", experimentLabel.toString());
-        eventJson.put("userID", assignment.getUserID().toString());
-        eventJson.put("bucketLabel", assignment.getBucketLabel().toString());
+        eventJson.put("applicationName", applicationName != null ? applicationName.toString(): "");
+        eventJson.put("experimentLabel", experimentLabel != null ? experimentLabel.toString(): "");
+        eventJson.put("userID",
+                assignment != null && assignment.getUserID() != null ? assignment.getUserID().toString(): "");
+        eventJson.put("bucketLabel",
+                assignment != null && assignment.getBucketLabel() != null ? assignment.getBucketLabel().toString(): "");
         eventJson.put("time_uuid", makeUUID().toString());
-        eventJson.put("experimentID", assignment.getExperimentID().toString());
-        eventJson.put("context", assignment.getContext().toString());
-        eventJson.put("epochTimestamp", event.getTimestamp().getTime());
-        eventJson.put("eventType", event.getType() + "");
-        eventJson.put("eventName", event.getName() + "");
-        eventJson.put("eventPayload", event.getPayload());
-        eventJson.put("value", event.getValue());
+        eventJson.put("experimentID",
+                assignment != null && assignment.getExperimentID() != null ? assignment.getExperimentID().toString(): "");
+        eventJson.put("context",
+                assignment != null && assignment.getContext() != null ? assignment.getContext().toString(): "");
+        eventJson.put("epochTimestamp",
+                event != null && event.getTimestamp() != null ? event.getTimestamp().getTime(): "");
+        eventJson.put("eventType",
+                event != null && event.getType() != null ? event.getType().toString(): "");
+        eventJson.put("eventName",
+                event != null && event.getName() != null ? event.getName().toString(): "");
+        eventJson.put("eventPayload",
+                event != null ? event.getPayload(): "");
+        eventJson.put("value",
+                event != null ? event.getValue(): "");
 
         return eventJson.toString();
     }
