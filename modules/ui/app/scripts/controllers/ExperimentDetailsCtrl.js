@@ -13,7 +13,8 @@ angular.module('wasabi.controllers').
                 disableAdvanced: false,
                 ruleWidgetsDisabled: false,
                 resultsWidgetsDisabled: true,
-                descriptionLength: 0
+                descriptionLength: 0,
+                apiLanguage: 'curl'
             };
 
             $scope.experiment = {
@@ -1106,6 +1107,23 @@ angular.module('wasabi.controllers').
             $scope.exitDialog = function() {
                 history.back();
                 return false;
+            };
+
+            $scope.showCode = function(codeURL) {
+                var modalInstance = $modal.open({
+                    templateUrl: 'views/DisplaySourceCodeModal.html',
+                    controller: 'DisplaySourceCodeModalCtrl',
+                    windowClass: 'xxx-dialog',
+                    backdrop: 'static',
+                    resolve: {
+                        codeURL: function () {
+                            return codeURL;
+                        }
+                    }
+                });
+
+                modalInstance.result.then(function () {
+                });
             };
 
             $scope.openSegmentationTestModal = function () {

@@ -1,9 +1,8 @@
-<div id="analysisGraphModal" class="modalDialog">
+<div id="displaySourceCodeModal" class="modalDialog">
     <h1>Analysis</h1>
     <div class="dialogContent">
         <div>
-            <span class="info dailiesInfo" help help-content="{{help.performanceGraph}}"></span>
-            <div id="analysis_chart" style="width: 750px; height: 350px;" google-charts ng-model="dailies"></div>
+            <iframe style="width: 100%; background-color: white;" ng-src="{{codeURL}}" ></iframe>
         </div>
 
         <div class="buttonBar">

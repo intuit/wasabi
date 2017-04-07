@@ -1,3 +1,7 @@
+<html>
+<head></head>
+<body>
+<pre>
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
@@ -24,9 +28,9 @@ public class Action {
    */
   private static boolean postAction(String application, String experiment, String user) throws IOException {
 
-    String urlImpression = String.format("https://abtesting.intuit.com/api/v1/events/applications/%s/experiments/%s/users/%s", application, experiment, user);
+    String urlAction = String.format("https://abtesting.intuit.com/api/v1/events/applications/%s/experiments/%s/users/%s", application, experiment, user);
 
-    URL url = new URL(urlImpression);
+    URL url = new URL(urlAction);
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestProperty("content-type", "application/json");
     connection.setRequestMethod("POST");
@@ -45,3 +49,7 @@ public class Action {
   }
 
 }
+</pre>
+</body>
+</html>
+
