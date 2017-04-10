@@ -5,18 +5,24 @@
 import requests
 import json
 
-def get_assignment(application, experiment, user):
+def post_assignment_with_segmentation(application, experiment, user, salary):
     """
-    Get's an assignment for the given user and experiment. If no
-    assignment exists one will be generated.
+    Retrieves an assignment for the specified experiment and user passing profile data
+    for use in evaluating the segmentation rule.
 
     Args:
         application: the application the experiment runs in
         experiment:  the running experiment for which the assignment should be retrieved
         user:        the user who should be assigned
+        salary:      the salary of the user, to be used in evaluating a segmentation rule
     """
+
     urlAssignment = "https://abtesting.intuit.com/api/v1/assignments/applications/%s/experiments/%s/users/%s" %(application, experiment, user);
-    r = requests.get(urlAssignment)
+
+    headers = {'content-type': 'application/json'}
+    profile = {'profile':{'salary': salary}}
+
+    r = requests.post(urlAssignment, data = json.dumps(profile), headers=headers)
     try:
         assignment = json.loads(r.text)['assignment']
     except KeyError as e:
@@ -31,8 +37,9 @@ if __name__ == "__main__":
     application = 'ApplicationName'
     experiment = 'ExperimentName'
     user = 'UserName'
+    salary = '10000'
 
-    print(get_assignment(application, experiment, user))
+    print(post_assignment_with_segmentation(application, experiment, user, salary))
 </pre>
 </body>
 </html>

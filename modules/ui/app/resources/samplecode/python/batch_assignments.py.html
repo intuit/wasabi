@@ -5,34 +5,34 @@
 import requests
 import json
 
-def get_assignment(application, experiment, user):
+def get_batch_assignment(application, page, user):
     """
-    Get's an assignment for the given user and experiment. If no
-    assignment exists one will be generated.
+    Get's assignments for the given user and page. If no
+    assignments exist one will be generated.
 
     Args:
         application: the application the experiment runs in
-        experiment:  the running experiment for which the assignment should be retrieved
+        page:        the page (group of experiments) for which assignments should be retrieved
         user:        the user who should be assigned
     """
-    urlAssignment = "https://abtesting.intuit.com/api/v1/assignments/applications/%s/experiments/%s/users/%s" %(application, experiment, user);
+    urlAssignment = "https://abtesting.intuit.com/api/v1/assignments/applications/%s/pages/%s/users/%s" %(application, page, user);
     r = requests.get(urlAssignment)
     try:
-        assignment = json.loads(r.text)['assignment']
+        assignments = json.loads(r.text)['assignments']
     except KeyError as e:
         if "EXPERIMENT_NOT_FOUND" in r.text:
             print('The given Experiment is not found')
         else:
             # further exception handling should happen here
             raise
-    return assignment
+    return assignments
 
 if __name__ == "__main__":
     application = 'ApplicationName'
-    experiment = 'ExperimentName'
+    page = 'PageName'
     user = 'UserName'
 
-    print(get_assignment(application, experiment, user))
+    print(get_batch_assignment(application, page, user))
 </pre>
 </body>
 </html>
