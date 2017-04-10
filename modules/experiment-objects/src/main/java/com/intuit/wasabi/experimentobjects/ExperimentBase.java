@@ -16,6 +16,7 @@
 package com.intuit.wasabi.experimentobjects;
 
 import java.util.Date;
+import java.util.Set;
 
 /**
  * This interface is a quick workaround for the problem that {@link Experiment}, {@link PrioritizedExperiment}
@@ -87,5 +88,12 @@ public interface ExperimentBase {
      * @return <code>true</code> when personalization is enabled
      */
     Boolean getIsPersonalizationEnabled();
+
+    /**
+     * Returns the set of tags associated with ths experiment.
+     *
+     * @return a sorted set of Strings for all labels stored with the experiment.
+     */
+    Set<String> getTags();
 
 }

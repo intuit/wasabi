@@ -25,6 +25,8 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Object for holding an experiment with Priotization.
@@ -69,9 +71,10 @@ public class PrioritizedExperiment implements Cloneable, ExperimentBase, Seriali
     private Integer userCap;
     @ApiModelProperty(required = false)
     private String creatorID = "";
-
     @ApiModelProperty(value = "priority within the application", required = true)
     private Integer priority;
+    @ApiModelProperty(value = "a set of experiment tags")
+    private Set<String> tags;
 
     protected PrioritizedExperiment() {
         super();
@@ -250,6 +253,7 @@ public class PrioritizedExperiment implements Cloneable, ExperimentBase, Seriali
                 .append(isRapidExperiment)
                 .append(userCap)
                 .append(creatorID)
+                .append(tags)
                 .toHashCode();
     }
 
@@ -282,6 +286,7 @@ public class PrioritizedExperiment implements Cloneable, ExperimentBase, Seriali
                 .append(userCap, other.getUserCap())
                 .append(isRapidExperiment, other.getIsRapidExperiment())
                 .append(creatorID, other.getCreatorID())
+                .append(tags, other.getTags())
                 .isEquals();
     }
 
@@ -304,6 +309,18 @@ public class PrioritizedExperiment implements Cloneable, ExperimentBase, Seriali
     @JsonIgnore
     public boolean isDeleted() {
         return state.equals(Experiment.State.DELETED);
+    }
+
+    @Override
+    public Set<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(Set<String> tags) {
+        if (null != tags)
+            this.tags = new TreeSet<>(tags);
+        else
+            this.tags = new TreeSet<>();
     }
 
     public static class Builder {
@@ -336,6 +353,7 @@ public class PrioritizedExperiment implements Cloneable, ExperimentBase, Seriali
             instance.isRapidExperiment = other.getIsRapidExperiment();
             instance.userCap = other.getUserCap();
             instance.creatorID = other.getCreatorID();
+            instance.tags = other.getTags();
         }
 
         private Date copyDate(Date date) {
@@ -396,7 +414,6 @@ public class PrioritizedExperiment implements Cloneable, ExperimentBase, Seriali
 
         public Builder withLabel(final Experiment.Label label) {
             instance.label = label;
-
             return this;
         }
 
@@ -412,6 +429,11 @@ public class PrioritizedExperiment implements Cloneable, ExperimentBase, Seriali
 
         public Builder withCreatorID(final String creatorID) {
             instance.creatorID = creatorID;
+            return this;
+        }
+
+        public Builder withTags(final Set<String> tags) {
+            instance.setTags(tags);
             return this;
         }
 

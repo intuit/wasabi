@@ -44,6 +44,8 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 
 import static com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT;
@@ -99,6 +101,8 @@ public class Experiment implements Cloneable, ExperimentBase, Serializable {
     private Integer userCap;
     @ApiModelProperty(value = "creator of the experiment", required = false)
     private String creatorID;
+    @ApiModelProperty(value = "a set of experiment tags")
+    private Set<String> tags;
 
     private Boolean favorite;
 
@@ -318,6 +322,7 @@ public class Experiment implements Cloneable, ExperimentBase, Serializable {
                 .append(isRapidExperiment)
                 .append(userCap)
                 .append(creatorID)
+                .append(tags)
                 .toHashCode();
     }
 
@@ -351,6 +356,7 @@ public class Experiment implements Cloneable, ExperimentBase, Serializable {
                 .append(isRapidExperiment, other.getIsRapidExperiment())
                 .append(userCap, other.getUserCap())
                 .append(creatorID, other.getCreatorID())
+                .append(tags, other.getTags())
                 .isEquals();
     }
 
@@ -427,6 +433,18 @@ public class Experiment implements Cloneable, ExperimentBase, Serializable {
             }
         }
         return earliestDay;
+    }
+
+    @Override
+    public Set<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(Set<String> tags) {
+        if (null != tags)
+            this.tags = new TreeSet<>(tags);
+        else
+            this.tags = new TreeSet<>();
     }
 
     //TODO: redesign state and state transition to be state machine
@@ -529,6 +547,7 @@ public class Experiment implements Cloneable, ExperimentBase, Serializable {
             instance.isRapidExperiment = other.isRapidExperiment;
             instance.userCap = other.userCap;
             instance.creatorID = other.creatorID;
+            instance.tags = other.tags;
         }
 
         private Date copyDate(Date date) {
@@ -564,31 +583,26 @@ public class Experiment implements Cloneable, ExperimentBase, Serializable {
 
         public Builder withCreationTime(final Date creationTime) {
             this.instance.creationTime = creationTime;
-
             return this;
         }
 
         public Builder withModificationTime(final Date modificationTime) {
             instance.modificationTime = modificationTime;
-
             return this;
         }
 
         public Builder withDescription(final String description) {
             instance.description = description;
-
             return this;
         }
 
         public Builder withHypothesisIsCorrect(final String hypothesisIsCorrect) {
             instance.hypothesisIsCorrect = hypothesisIsCorrect;
-
             return this;
         }
 
         public Builder withResults(final String results) {
             instance.results = results;
-
             return this;
         }
 
@@ -599,42 +613,41 @@ public class Experiment implements Cloneable, ExperimentBase, Serializable {
 
         public Builder withSamplingPercent(final Double samplingPercent) {
             instance.samplingPercent = samplingPercent;
-
             return this;
         }
 
         public Builder withStartTime(final Date startTime) {
             instance.startTime = startTime;
-
             return this;
         }
 
         public Builder withEndTime(final Date endTime) {
             instance.endTime = endTime;
-
             return this;
         }
 
         public Builder withState(final State state) {
             instance.state = state;
-
             return this;
         }
 
         public Builder withLabel(final Experiment.Label label) {
             instance.label = label;
-
             return this;
         }
 
         public Builder withApplicationName(final Application.Name appName) {
             instance.applicationName = appName;
-
             return this;
         }
 
         public Builder withCreatorID(final String creatorID) {
             instance.creatorID = creatorID;
+            return this;
+        }
+
+        public Builder withTags(final Set<String> tags) {
+            instance.setTags(tags);
             return this;
         }
 
