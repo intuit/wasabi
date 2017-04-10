@@ -12,6 +12,7 @@ angular.module('wasabi.directives').directive('npsWidget', [
                 $(element).on('click', 'li', function() {
                     $(this).addClass('sel').siblings().removeClass('sel');
                     scope.$parent.feedback.score = $(this).text();
+                    scope.$parent.userInteractedWithScore = true;
                 });
             }
         };

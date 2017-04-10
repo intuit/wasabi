@@ -13,10 +13,11 @@ angular.module('wasabi.controllers')
                     comments: '',
                     contactOkay: false
                 };
+                $scope.userInteractedWithScore = false;
                 $scope.closeFunction = $modalInstance.close;
 
                 $scope.sendFeedback = function () {
-                    if ($.trim($scope.feedback.score).length === 0 &&
+                    if (!$scope.userInteractedWithScore &&
                         $.trim($scope.feedback.comments).length === 0 &&
                         !$scope.feedback.contactOkay) {
                         // No feedback
@@ -31,7 +32,7 @@ angular.module('wasabi.controllers')
                         // Remove it
                         delete $scope.feedback.comments;
                     }
-                    if ($scope.feedback.score.length === 0) {
+                    if (!$scope.userInteractedWithScore) {
                         delete $scope.feedback.score;
                     }
                     FeedbackFactory.sendFeedback($scope.feedback).$promise.then(function(/*result*/) {
