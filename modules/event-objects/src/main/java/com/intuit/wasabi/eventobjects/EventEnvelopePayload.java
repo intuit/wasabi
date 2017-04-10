@@ -103,8 +103,8 @@ public class EventEnvelopePayload implements EnvelopePayload {
                 assignment != null && assignment.getContext() != null ? assignment.getContext().toString(): null);
         eventJson.put("epochTimestamp",
                 event != null && event.getTimestamp() != null ? event.getTimestamp().getTime(): null);
-        eventJson.put("eventType", event != null && event.getType() != null ? event.getType() + "": "null");
-        eventJson.put("eventName", event != null && event.getName() != null ? event.getName() + "": "null");
+        eventJson.put("eventType", event != null ? event.getType() + "": "null");
+        eventJson.put("eventName", event != null ? event.getName() + "": "null");
         eventJson.put("eventPayload", event != null ? event.getPayload(): null);
         eventJson.put("value", event != null ? event.getValue(): null);
 
