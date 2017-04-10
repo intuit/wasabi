@@ -15,7 +15,7 @@ def post_action(application, experiment, user):
         user:        the user who should be assigned
     """
 
-    urlAssignment = "http://abtesting.intuit.com/api/v1/events/applications/%s/experiments/%s/users/%s" %(application, experiment, user);
+    urlAssignment = "https://abtesting.intuit.com/api/v1/events/applications/%s/experiments/%s/users/%s" %(application, experiment, user);
 
     headers = {'content-type': 'application/json'}
     # The actoin name can be freely assigned and an additional payload is
