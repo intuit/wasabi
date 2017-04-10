@@ -19,7 +19,7 @@ public class BatchAssignment {
 
   public static void main(String[] args) throws IOException, ParseException {
     // TODO: not sure if this will work, since this response is an array of assignments.
-    System.out.print(getAssignment("ApplicationName", "PageName", "UserName"));
+    System.out.print(getBatchAssignment("ApplicationName", "PageName", "UserName"));
   }
 
 
@@ -33,7 +33,7 @@ public class BatchAssignment {
    * @throws IOException
    * @throws ParseException
    */
-  private static Object getAssignment(String application, String page, String user) throws IOException, ParseException {
+  private static Object getBatchAssignment(String application, String page, String user) throws IOException, ParseException {
 
     String urlAssignment = String.format("https://abtesting.intuit.com/api/v1/assignments/applications/%s/pages/%s/users/%s", application, page, user);
 

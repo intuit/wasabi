@@ -2,8 +2,14 @@
 <head></head>
 <body>
 <pre>
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -13,7 +19,7 @@ import java.net.URL;
  */
 public class BatchAssignmentWithSegmentation {
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws IOException, ParseException {
     // TODO: not sure if this will work, since this response is an array of assignments.
     System.out.print(postBatchAssignmentWithSegmentation("ApplicationName", "PageName", "UserName", "10001"));
   }
@@ -30,7 +36,7 @@ public class BatchAssignmentWithSegmentation {
    * @return <code>true</code> if the assignments were recorded <code>false</code> otherwise
    * @throws IOException
    */
-  private static boolean postBatchAssignmentWithSegmentation(String application, String page, String user, String salary) throws IOException {
+  private static Object postBatchAssignmentWithSegmentation(String application, String page, String user, String salary) throws IOException, ParseException {
 
     String urlBatchAssignmentWithSegmentation = String.format("https://abtesting.intuit.com/api/v1/assignments/applications/%s/pages/%s/users/%s", application, page, user);
 
@@ -42,7 +48,7 @@ public class BatchAssignmentWithSegmentation {
 
     OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream());
     // This example assumes only one parameter in the rule.  If you had more, you'd pass them as other attributes of the "profile".
-    writer.write("{\"profile\":{\"salary\":\"10001\"}}");
+    writer.write("{\"profile\":{\"salary\":\"" + salary + "\"}}");
     writer.flush();
 
     // give it 500 milliseconds to respond
