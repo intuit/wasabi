@@ -31,7 +31,9 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.TimeZone;
+import java.util.TreeSet;
 
 
 /**
@@ -54,9 +56,10 @@ public class ExperimentDetailFilterTest {
         Date startTime = cal.getTime();
         cal.add(Calendar.DATE, 14);
         Date endTime = cal.getTime();
+        Set<String> tags = new TreeSet<>(java.util.Arrays.asList("tag1", "tag2", "tag3"));
 
         experimentDetail = new ExperimentDetail(expId, Experiment.State.RUNNING, expLabel, appName,
-                modTime, startTime, endTime, "testDescription");
+                modTime, startTime, endTime, "testDescription", tags);
 
         Bucket b1 = Bucket.newInstance(expId, Bucket.Label.valueOf("Bucket1")).withAllocationPercent(0.6).build();
         Bucket b2 = Bucket.newInstance(expId, Bucket.Label.valueOf("Bucket2")).withAllocationPercent(0.4).build();

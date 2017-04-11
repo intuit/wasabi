@@ -68,7 +68,9 @@ public class ExperimentDetailFilter extends PaginationFilter<ExperimentDetail> {
         start_time(ExperimentDetail::getStartTime, FilterUtil::extractTimeZoneAndTestDate),
         end_time(ExperimentDetail::getEndTime, FilterUtil::extractTimeZoneAndTestDate),
         date_constraint_start(ExperimentDetail::getStartTime, ExperimentFilter::constraintTest),
-        date_constraint_end(ExperimentDetail::getEndTime, ExperimentFilter::constraintTest);
+        date_constraint_end(ExperimentDetail::getEndTime, ExperimentFilter::constraintTest),
+        tags(ExperimentDetail::getTags, (tagsSet, filter) -> tagsSet.stream().anyMatch(tag
+                -> StringUtils.containsIgnoreCase(tag, filter)));
 
         private final Function<ExperimentDetail, ?> propertyExtractor;
         private final BiPredicate<?, String> filterPredicate;
