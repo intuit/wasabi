@@ -36,6 +36,7 @@ import com.intuit.wasabi.repository.RepositoryException;
 import com.intuit.wasabi.repository.cassandra.accessor.ApplicationListAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.BucketAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.ExperimentTagAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.audit.BucketAuditLogAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.audit.ExperimentAuditLogAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentLabelIndexAccessor;
@@ -45,11 +46,13 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
@@ -59,6 +62,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 public class CassandraExperimentRepositoryTest {
@@ -86,6 +91,7 @@ public class CassandraExperimentRepositoryTest {
 
     private ExperimentAccessor mockExperimentAccessor;
     private ExperimentAuditLogAccessor mockExperimentAuditLogAccessor;
+    private ExperimentTagAccessor mockExperimentTagAccessor;
 
     private StateExperimentIndexAccessor mockStateExperimentIndexAccessor;
 
@@ -102,6 +108,7 @@ public class CassandraExperimentRepositoryTest {
         mockExperimentAuditLogAccessor = Mockito.mock(ExperimentAuditLogAccessor.class);
         mockApplicationListAccessor = Mockito.mock(ApplicationListAccessor.class);
         mockExperimentLabelIndexAccessor = Mockito.mock(ExperimentLabelIndexAccessor.class);
+        mockExperimentTagAccessor = Mockito.mock(ExperimentTagAccessor.class);
 
         if (repository != null) return;
 
@@ -114,7 +121,8 @@ public class CassandraExperimentRepositoryTest {
                 mockDriver, mockExperimentAccessor, mockExperimentLabelIndexAccessor,
                 mockBucketAccessor, mockApplicationListAccessor,
                 mockBucketAuditLogAccessor, mockExperimentAuditLogAccessor,
-                mockStateExperimentIndexAccessor, new ExperimentValidator());
+                mockStateExperimentIndexAccessor, new ExperimentValidator(),
+                mockExperimentTagAccessor);
         bucket1 = Bucket.newInstance(experimentID1, Bucket.Label.valueOf("bl1")).withAllocationPercent(.23)
                 .withControl(true)
                 .withDescription("b1").withPayload("p1")
@@ -641,4 +649,42 @@ public class CassandraExperimentRepositoryTest {
         assertThat(actualResultMap.get(expId1).getBuckets().get(0).getLabel().toString(), is("Test-Bucket-1"));
     }
 
+    @Test
+    public void testUpdateTags() {
+        //------ Input --------
+        Application.Name appName = Application.Name.valueOf("AppName");
+        Set<String> tags = new TreeSet<>(Arrays.asList("tag1", "tag2", "tag3"));
+
+        Set<String> exp1 = new TreeSet<>(Arrays.asList("tag1", "tag3"));
+        Set<String> exp2 = new TreeSet<>(Arrays.asList("tag4"));
+
+        List<Set<String>> dbResultList = Arrays.asList(exp1, exp2);
+
+        //------ Mocking interacting calls
+        Result<Set<String>> dbResult = mock(Result.class);
+        when(mockExperimentAccessor.getAllTags(appName)).thenReturn(dbResult);
+        when(dbResult.all()).thenReturn(dbResultList);
+
+        //------ Make call
+        repository.updateExperimentTags(appName, tags);
+
+        //------ Verify result
+        verify(mockExperimentTagAccessor).insert(appName, new TreeSet<>(Arrays.asList("tag1", "tag2", "tag3", "tag4")));
+
+    }
+
+    @Test
+    public void testNoUpdateTags() {
+        //------ Input --------
+        Application.Name appName = Application.Name.valueOf("AppName");
+        Set<String> tags = new TreeSet<>(); // if there are no tags we want no interaction with the db
+
+        //------ Make call
+        repository.updateExperimentTags(appName, tags);
+
+        //------ Verify result
+        verifyZeroInteractions(mockExperimentAccessor);
+        verifyZeroInteractions(mockExperimentTagAccessor);
+
+    }
 }

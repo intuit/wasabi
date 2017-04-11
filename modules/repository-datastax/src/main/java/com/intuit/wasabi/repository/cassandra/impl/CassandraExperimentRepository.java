@@ -63,6 +63,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -211,7 +213,8 @@ public class CassandraExperimentRepository implements ExperimentRepository {
                                          BucketAuditLogAccessor bucketAuditLogAccessor,
                                          ExperimentAuditLogAccessor experimentAuditLogAccessor,
                                          StateExperimentIndexAccessor stateExperimentIndexAccessor,
-                                         ExperimentValidator validator) {
+                                         ExperimentValidator validator,
+                                         ExperimentTagAccessor experimentTagAccessor) {
         this.driver = driver;
         this.experimentAccessor = experimentAccessor;
         this.experimentLabelIndexAccessor = experimentLabelIndexAccessor;
@@ -221,6 +224,7 @@ public class CassandraExperimentRepository implements ExperimentRepository {
         this.bucketAuditLogAccessor = bucketAuditLogAccessor;
         this.experimentAuditLogAccessor = experimentAuditLogAccessor;
         this.validator = validator;
+        this.experimentTagAccessor = experimentTagAccessor;
     }
 
     /**
@@ -393,16 +397,41 @@ public class CassandraExperimentRepository implements ExperimentRepository {
                     newExperiment.getModelVersion(),
                     newExperiment.getIsRapidExperiment(),
                     newExperiment.getUserCap(),
-                    (newExperiment.getCreatorID() != null) ? newExperiment.getCreatorID() : "");
+                    (newExperiment.getCreatorID() != null) ? newExperiment.getCreatorID() : "",
+                    newExperiment.getTags());
+
 
             // TODO - Do we need to create an application while creating a new experiment ?
             createApplication(newExperiment.getApplicationName());
+
+            // update tags
+            updateExperimentTags(newExperiment.getApplicationName(), newExperiment.getTags());
+
         } catch (Exception e) {
             LOGGER.error("Error while creating experiment {}", newExperiment, e);
             throw new RepositoryException("Exception while creating experiment " + newExperiment + " message " + e, e);
         }
         return newExperiment.getId();
 
+    }
+
+    /**
+     * Updates the tags for a given Application.
+     *
+     * @param applicationName the Application for which the tags should be added
+     * @param tags            list of tags for the experiment
+     */
+    protected void updateExperimentTags(Application.Name applicationName, Set<String> tags) {
+        if (tags != null && !tags.isEmpty()) {
+            // update the tag table, just rewrite the complete entry
+            List<Set<String>> listAllTags = experimentAccessor.getAllTags(applicationName).all();
+            Set<String> allTags = new TreeSet<>();
+            allTags.addAll(tags);
+            for (Set<String> tagsSet : listAllTags) {
+                allTags.addAll(tagsSet);
+            }
+            experimentTagAccessor.insert(applicationName, allTags);
+        }
     }
 
     /**
@@ -523,7 +552,10 @@ public class CassandraExperimentRepository implements ExperimentRepository {
                     experiment.getModelVersion(),
                     experiment.getIsRapidExperiment(),
                     experiment.getUserCap(),
+                    experiment.getTags(),
                     experiment.getID().getRawID());
+
+            updateExperimentTags(experiment.getApplicationName(), experiment.getTags());
 
             // Point the experiment index to this experiment
             updateExperimentLabelIndex(experiment.getID(), experiment.getApplicationName(), experiment.getLabel(),

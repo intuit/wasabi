@@ -460,6 +460,15 @@ public class ExperimentsImpl implements Experiments {
             changeList.add(changeData);
         }
 
+        if (updates.getTags() != null && !updates.getTags().equals(experiment.getTags())) {
+            builder.withTags(updates.getTags());
+            requiresUpdate = true;
+            changeData = new ExperimentAuditInfo("tags",
+                    experiment.getTags().toString(),
+                    updates.getTags().toString());
+            changeList.add(changeData);
+        }
+
         /*
         * Application name and label cannot be changed once the experiment is beyond the DRAFT state.
         * Hence, we are not including them as a part of the audit log.

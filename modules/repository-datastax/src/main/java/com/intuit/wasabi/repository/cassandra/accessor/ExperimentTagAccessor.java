@@ -34,7 +34,18 @@ public interface ExperimentTagAccessor {
     @Query("select * from experiment_tags where application IN ? ")
     Result<ExperimentTagsByApplication> getExperimentTags(Collection<Application.Name> applicationNames);
 
+    @Query("select * from experiment_tags where application = ? ")
+    Result<String> getExperimentTagsForApplication(Application.Name applicationName);
+
     @Query("insert into experiment_tags(app_name, tags) values(?,?)")
     Statement insert(Application.Name appName, Set<String> tags);
 
+    @Query("update experiment_tags set tags = tags + {?} WHERE application = ?;")
+    Statement update(Set<String> tags, Application.Name appName);
+
+    @Query("update experiment_tags set tags = tags - {?} WHERE application = ?;")
+    Statement remove(Set<String> tags, Application.Name appName);
+
+    @Query("delete tags from experiment_tags WHERE application = ?;")
+    Statement removeAll(Application.Name appName);
 }

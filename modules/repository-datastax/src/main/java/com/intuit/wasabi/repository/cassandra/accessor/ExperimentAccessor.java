@@ -20,10 +20,12 @@ import com.datastax.driver.mapping.Result;
 import com.datastax.driver.mapping.annotations.Accessor;
 import com.datastax.driver.mapping.annotations.Query;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.repository.cassandra.pojo.Experiment;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -53,13 +55,13 @@ public interface ExperimentAccessor {
             "rule = ?, sample_percent = ?, " +
             "start_time = ?, end_time = ?, " +
             "state=?, label=?, app_name=?, modified=? , is_personalized=?, model_name=?, model_version=?," +
-            " is_rapid_experiment=?, user_cap=?" +
+            " is_rapid_experiment=?, user_cap=?, tags = ?" +
             " where id = ?")
     ResultSet updateExperiment(String description, String hypothesisIsCorrect, String results,
                                String rule, double sample_percent,
                                Date start_time, Date end_time, String state, String label, String app_name,
                                Date modified, boolean is_personalized, String model_name, String model_version,
-                               boolean is_rapid_experiment, int user_cap, UUID experimentId);
+                               boolean is_rapid_experiment, int user_cap, Set<String> tags, UUID experimentId);
 
 
     @Query("select * from experiment where app_name = ?")
@@ -71,14 +73,19 @@ public interface ExperimentAccessor {
     @Query("select * from experiment where id = ?")
     Result<Experiment> selectBy(UUID experimentId);
 
+
     @Query("insert into experiment " +
             "(id, description, hypothesis_is_correct, results, rule, sample_percent, start_time, end_time, " +
             "   state, label, app_name, created, modified, is_personalized, model_name, model_version," +
-            " is_rapid_experiment, user_cap, creatorid) " +
+            " is_rapid_experiment, user_cap, creatorid, tags) " +
             "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
     void insertExperiment(UUID experimentId, String description, String hypothesisIsCorrect, String results,
                           String rule, double samplePercent,
                           Date startTime, Date endTime, String state, String label, String appName,
                           Date created, Date modified, boolean isPersonalized, String modelName,
-                          String modelVersion, boolean isRapidExperiment, int userCap, String creatorid);
+                          String modelVersion, boolean isRapidExperiment, int userCap, String creatorid,
+                          Set<String> tags);
+
+    @Query("select tags from experiment where app_name = ?;")
+    Result<Set<String>> getAllTags(Application.Name appName);
 }
