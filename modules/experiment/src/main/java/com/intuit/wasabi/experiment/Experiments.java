@@ -25,6 +25,7 @@ import com.intuit.wasabi.experimentobjects.exceptions.InvalidExperimentStateTran
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Interface to perform CRUD operations on experiment. In addition, it also
@@ -166,5 +167,5 @@ public interface Experiments {
      *                         tags should be retrieved
      * @return a {@link Map} containing the Applications and their tags
      */
-    Map<Application.Name, Collection<String>> getTagsForApplications(Collection<Application.Name> applicationNames);
+    Map<Application.Name, Set<String>> getTagsForApplications(Collection<Application.Name> applicationNames);
 }

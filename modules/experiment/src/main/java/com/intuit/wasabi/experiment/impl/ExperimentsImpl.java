@@ -46,6 +46,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.intuit.wasabi.experimentobjects.Experiment.State.DELETED;
 import static com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT;
@@ -111,7 +112,7 @@ public class ExperimentsImpl implements Experiments {
      * {@inheritDoc}
      */
     @Override
-    public Map<Application.Name, Collection<String>> getTagsForApplications(Collection<Application.Name> applicationNames) {
+    public Map<Application.Name, Set<String>> getTagsForApplications(Collection<Application.Name> applicationNames) {
         return cassandraRepository.getTagListForApplications(applicationNames);
     }
 

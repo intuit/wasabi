@@ -22,7 +22,7 @@ import com.datastax.driver.mapping.annotations.Query;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentTagsByApplication;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -32,8 +32,8 @@ import java.util.Set;
 public interface ExperimentTagAccessor {
 
     @Query("select * from experiment_tag where app_name IN ? ")
-    Result<ExperimentTagsByApplication> getExperimentTags(Collection<Application.Name> applicationNames);
-    
+    Result<ExperimentTagsByApplication> getExperimentTags(List<String> applicationNames);
+
     @Query("insert into experiment_tag(app_name, tags) values(?,?)")
     Statement insert(Application.Name appName, Set<String> tags);
 

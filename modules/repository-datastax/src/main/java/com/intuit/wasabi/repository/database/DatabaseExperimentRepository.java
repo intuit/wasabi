@@ -41,6 +41,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.intuit.wasabi.experimentobjects.Experiment.State.DELETED;
 
@@ -753,7 +754,7 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
     }
 
     @Override
-    public Map<Application.Name, Collection<String>> getTagListForApplications(Collection<Application.Name> applicationNames) {
+    public Map<Application.Name, Set<String>> getTagListForApplications(Collection<Application.Name> applicationNames) {
         throw new UnsupportedOperationException("Not supported ");
     }
 

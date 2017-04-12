@@ -44,7 +44,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -412,7 +411,7 @@ public class ApplicationsResource {
             }
 
             // get their associated tags
-            Map<Application.Name, Collection<String>> allTags = experiments.getTagsForApplications(allowed);
+            Map<Application.Name, Set<String>> allTags = experiments.getTagsForApplications(allowed);
 
             return httpHeader.headers().entity(allTags).build();
         } catch (Exception exception) {

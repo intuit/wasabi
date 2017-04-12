@@ -23,7 +23,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Collection;
+import java.util.Set;
 
 @Table(name = "experiment_tag")
 @Data
@@ -37,5 +37,5 @@ public class ExperimentTagsByApplication {
     String appName;
 
     @Column(name = "tags")
-    Collection<String> tags;
+    Set<String> tags;
 }

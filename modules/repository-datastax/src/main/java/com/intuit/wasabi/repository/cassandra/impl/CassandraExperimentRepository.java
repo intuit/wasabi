@@ -63,6 +63,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -1234,13 +1235,13 @@ public class CassandraExperimentRepository implements ExperimentRepository {
      * {@inheritDoc}
      */
     @Override
-    public Map<Application.Name, Collection<String>> getTagListForApplications(Collection<Application.Name> applicationNames) {
+    public Map<Application.Name, Set<String>> getTagListForApplications(Collection<Application.Name> applicationNames) {
 
         LOGGER.debug("Retrieving Experiment Tags for applications {}", applicationNames);
 
         try {
-
-            Map<Application.Name, Collection<String>> result = experimentTagAccessor.getExperimentTags(applicationNames)
+            Map<Application.Name, Set<String>> result = experimentTagAccessor.getExperimentTags(
+                    applicationNames.stream().map(appName -> Objects.toString(appName)).collect(Collectors.toList()))
                     .all().stream().collect(Collectors.toMap(exp -> Application.Name.valueOf(exp.getAppName()),
                             ExperimentTagsByApplication::getTags));
 
