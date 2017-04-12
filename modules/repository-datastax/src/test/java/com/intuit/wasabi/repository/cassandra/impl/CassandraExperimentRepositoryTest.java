@@ -41,6 +41,7 @@ import com.intuit.wasabi.repository.cassandra.accessor.audit.BucketAuditLogAcces
 import com.intuit.wasabi.repository.cassandra.accessor.audit.ExperimentAuditLogAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentLabelIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.StateExperimentIndexAccessor;
+import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentTagsByApplication;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -657,11 +658,15 @@ public class CassandraExperimentRepositoryTest {
 
         Set<String> exp1 = new TreeSet<>(Arrays.asList("tag1", "tag3"));
         Set<String> exp2 = new TreeSet<>(Arrays.asList("tag4"));
+        ExperimentTagsByApplication exp2Tags = ExperimentTagsByApplication.builder()
+                .tags(exp2).appName(appName.toString()).build();
+        ExperimentTagsByApplication exp1Tags = ExperimentTagsByApplication.builder()
+                .tags(exp1).appName(appName.toString()).build();
 
-        List<Set<String>> dbResultList = Arrays.asList(exp1, exp2);
+        List<ExperimentTagsByApplication> dbResultList = Arrays.asList(exp1Tags, exp2Tags);
 
         //------ Mocking interacting calls
-        Result<Set<String>> dbResult = mock(Result.class);
+        Result<ExperimentTagsByApplication> dbResult = mock(Result.class);
         when(mockExperimentAccessor.getAllTags(appName)).thenReturn(dbResult);
         when(dbResult.all()).thenReturn(dbResultList);
 

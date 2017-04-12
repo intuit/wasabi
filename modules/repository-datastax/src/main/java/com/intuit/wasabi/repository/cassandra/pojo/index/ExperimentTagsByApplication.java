@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.Collection;
 
-@Table(name = "experiment_tags")
+@Table(name = "experiment_tag")
 @Data
 @Builder(toBuilder = true)
 @NoArgsConstructor

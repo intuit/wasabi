@@ -424,11 +424,11 @@ public class CassandraExperimentRepository implements ExperimentRepository {
     protected void updateExperimentTags(Application.Name applicationName, Set<String> tags) {
         if (tags != null && !tags.isEmpty()) {
             // update the tag table, just rewrite the complete entry
-            List<Set<String>> listAllTags = experimentAccessor.getAllTags(applicationName).all();
+            List<ExperimentTagsByApplication> listAllTags = experimentAccessor.getAllTags(applicationName).all();
             Set<String> allTags = new TreeSet<>();
             allTags.addAll(tags);
-            for (Set<String> tagsSet : listAllTags) {
-                allTags.addAll(tagsSet);
+            for (ExperimentTagsByApplication tagsSet : listAllTags) {
+                allTags.addAll(tagsSet.getTags());
             }
             experimentTagAccessor.insert(applicationName, allTags);
         }

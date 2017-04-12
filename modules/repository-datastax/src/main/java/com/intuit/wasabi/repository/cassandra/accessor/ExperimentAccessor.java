@@ -22,6 +22,7 @@ import com.datastax.driver.mapping.annotations.Query;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.repository.cassandra.pojo.Experiment;
+import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentTagsByApplication;
 
 import java.util.Date;
 import java.util.List;
@@ -55,7 +56,7 @@ public interface ExperimentAccessor {
             "rule = ?, sample_percent = ?, " +
             "start_time = ?, end_time = ?, " +
             "state=?, label=?, app_name=?, modified=? , is_personalized=?, model_name=?, model_version=?," +
-            " is_rapid_experiment=?, user_cap=?, tags = ?" +
+            " is_rapid_experiment=?, user_cap=?, tags=?" +
             " where id = ?")
     ResultSet updateExperiment(String description, String hypothesisIsCorrect, String results,
                                String rule, double sample_percent,
@@ -78,7 +79,7 @@ public interface ExperimentAccessor {
             "(id, description, hypothesis_is_correct, results, rule, sample_percent, start_time, end_time, " +
             "   state, label, app_name, created, modified, is_personalized, model_name, model_version," +
             " is_rapid_experiment, user_cap, creatorid, tags) " +
-            "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+            "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
     void insertExperiment(UUID experimentId, String description, String hypothesisIsCorrect, String results,
                           String rule, double samplePercent,
                           Date startTime, Date endTime, String state, String label, String appName,
@@ -87,5 +88,5 @@ public interface ExperimentAccessor {
                           Set<String> tags);
 
     @Query("select tags from experiment where app_name = ?;")
-    Result<Set<String>> getAllTags(Application.Name appName);
+    Result<ExperimentTagsByApplication> getAllTags(Application.Name appName);
 }
