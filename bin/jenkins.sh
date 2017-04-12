@@ -21,7 +21,6 @@
 #   build                        : build kill switch; default:false
 #   profile                      : maven profile; default:test
 #   modules                      : project modules to build; default:main ui
-#   execute_integration_tests    : execute integration test kill switch; default:true
 #   execute_unit_tests           : execute unit test kill switch; default:true
 #   deploy_host                  : integration test host; default:deploy.host
 #   deploy_host_url              : integration test deploy user; default:deploy.user
@@ -43,7 +42,6 @@ project=wasabi
 build=${PROJECT_BUILD:-false}
 profile=${PROJECT_PROFILE:-test}
 modules=${PROJECT_MODULES:-main ui}
-execute_integration_tests=${PROJECT_INTEGRATION_TEST:-true}
 execute_unit_tests=${PROJECT_UNIT_TEST:-true}
 deploy_host=${PROJECT_DEPLOY_HOST:-deploy.host}
 deploy_host_user=${PROJECT_DEPLOY_USER:-usr}
@@ -96,8 +94,13 @@ service=$(mvn --settings ./settings.xml -f ./modules/main/pom.xml -P ${profile} 
 group=$(mvn --settings ./settings.xml -f ./modules/main/pom.xml -P ${profile} help:evaluate -Dexpression=project.groupId | sed -n -e '/^\[.*\]/ !{ p; }')
 version=$(mvn --settings ./settings.xml -f ./modules/main/pom.xml -P ${profile} help:evaluate -Dexpression=project.version | sed -n -e '/^\[.*\]/ !{ p; }')
 
-# build
+# publish sonar report
+echo "publishing sonar report"
+(mvn --settings ./settings.xml ${sonar_host_url} ${sonar_auth_token} -P ${profile} sonar:sonar) || \
+  exitOnError "unable to report to sonar: (mvn --settings ./settings.xml [sonar_host_url] [sonar_auth_token] -P ${profile} sonar:sonar)"
 
+
+# build
 echo "packaging: ${project} / ${profile}"
 (eval ${project_env} ./bin/${project}.sh --profile=${profile} --buildtests=${execute_unit_tests} --verify=true package) || \
   exitOnError "unable to build project : (${project_env} ./bin/${project}.sh --profile=${profile} --buildtests=${execute_unit_tests} --verify=true package)"
@@ -110,43 +113,6 @@ for module in ${modules}; do
     echo "prepare deploy: $(find ./target -name ${project}-${module}-${profile}-*.noarch.rpm -type f)"
     rpm=`basename $(find ./target -name ${project}-${module}-${profile}-*.noarch.rpm -type f)` || \
       exitOnError "failed to find ./target/${project}-${module}-${profile}-*.noarch.rpm"
-    status=0
-
-    if [[ "${execute_integration_tests}" == "true" ]]; then
-      echo "deploying: ${rpm}"
-
-      # deploy module rpm, note: remote side daemon process will install
-
-      # note: if we rm the file, it needs to be chmod' such that user:deploy can read/scp the new file
-#      (ssh ${deploy_resource} "rm /tmp/${project}/jacoco-it.exec")
-      (scp ./target/${rpm} ${deploy_host_user}@${deploy_host}:; ssh ${deploy_host_user}@${deploy_host} "mv ${rpm} inbox") || \
-        exitOnError "failed to deploy application: (scp ./target/${rpm} ${deploy_host_user}@${deploy_host}:; ssh ${deploy_host_user}@${deploy_host} \"mv ${rpm} inbox\")"
-
-      sleep 120
-
-      if [ "${module}" == "main" ]; then
-        # test module
-
-        echo "testing: ${rpm} http://${deploy_host}:8080"
-        (eval ${project_env} ./bin/${project}.sh --profile=${profile} --endpoint=${deploy_host}:8080 test)
-        status=$?
-
-        # stop application to flush the jacoco file to disk and fetch it
-
-        (ssh ${deploy_resource} "/home/jenkins/bin/init-d ${service} stop") || \
-          exitOnError "unable to stop project: (ssh ${deploy_resource} \"/home/jenkins/bin/init-d ${service} stop\")"
-        (scp ${deploy_resource}:/tmp/${project}/jacoco-it.exec ./modules/main/target/jacoco-it.exec) || \
-          exitOnError "unable to retrieve test report: (scp ${deploy_resource}:/tmp/${project}/jacoco-it.exec ./target/jacoco-it.exec)"
-      fi
-    fi
-
-    # publish sonar report
-
-    echo "publishing sonar report"
-    (mvn --settings ./settings.xml ${sonar_host_url} ${sonar_auth_token} -P ${profile} sonar:sonar) || \
-      exitOnError "unable to report to sonar: (mvn --settings ./settings.xml [sonar_host_url] [sonar_auth_token] -P ${profile} sonar:sonar)"
-
-    [ "${status}" -ne "0" ] && exitOnError "integration tests failed: (cd ${project}; eval ${project_env} ./bin/${project}.sh --profile=${profile} --endpoint=${deploy_host}:8080 test)"
 
     # fixme: conflicts with distributionManagement in base pom; fallback: use jenkins:publish-to-maven post-build action
     if [[ "${nexus_archive}" == "true" ]]; then
