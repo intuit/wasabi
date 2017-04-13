@@ -104,9 +104,10 @@ echo "Building: MAIN module - STARTED"
 echo "Running : mvn -P ${profile} clean package sonar:sonar"
 (mvn -P ${profile} clean package sonar:sonar) || exitOnError "Unable to build main module... (mvn -P ${profile} clean package sonar:sonar)"
 
-echo "jenkins.sh start: ./bin/fpm.sh -n main -v ${version} -p ${profile} "
-(./bin/fpm.sh -n main -v ${version} -p ${profile}) || exitOnError "Unable to create main RPM... (./bin/fpm.sh -n main -v ${version} -p ${profile})"
-echo "jenkins.sh end: ./bin/fpm.sh "
+echo "Skipping main module RPM creation for now"
+#echo "jenkins.sh start: ./bin/fpm.sh -n main -v ${version} -p ${profile} "
+#(./bin/fpm.sh -n main -v ${version} -p ${profile}) || exitOnError "Unable to create main RPM... (./bin/fpm.sh -n main -v ${version} -p ${profile})"
+#echo "jenkins.sh end: ./bin/fpm.sh "
 echo "Building: MAIN module - FINISHED"
 
 
