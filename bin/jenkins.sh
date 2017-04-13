@@ -90,9 +90,9 @@ wget ${JENKINS_URL}jnlpJars/jenkins-cli.jar || \
 
 # extract meta-data
 
-#service=$(mvn --settings ./settings.xml -f ./modules/main/pom.xml -P ${profile} help:evaluate -Dexpression=application.name | sed -n -e '/^\[.*\]/ !{ p; }')
-group=$(mvn --settings ./settings.xml -f ./modules/main/pom.xml -P ${profile} help:evaluate -Dexpression=project.parent.groupId | sed -n -e '/^\[.*\]/ !{ p; }')
-version=$(mvn --settings ./settings.xml -f ./modules/main/pom.xml -P ${profile} help:evaluate -Dexpression=project.parent.version | sed -n -e '/^\[.*\]/ !{ p; }')
+#service=$(mvn -f ./pom.xml help:evaluate -Dexpression=application.name | sed -n -e '/^\[.*\]/ !{ p; }')
+group=$(mvn -f ./pom.xml help:evaluate -Dexpression=project.groupId | sed -n -e '/^\[.*\]/ !{ p; }')
+version=$(mvn -f ./pom.xml help:evaluate -Dexpression=project.version | sed -n -e '/^\[.*\]/ !{ p; }')
 
 # publish sonar report
 #echo "publishing sonar report"
