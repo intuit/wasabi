@@ -1,25 +1,64 @@
 #!/usr/bin/env bash
+###############################################################################
+# Copyright 2017 Intuit
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+###############################################################################
 
-echo "Building: UI module - STARTED"
-echo "Grunt build - STARTED"
+# configurables:
+#
+#   profile                      : maven profile; default:test
+#   nexus_deploy                 : nexus deploy user; default:usr:pwd
 
-  echo "Installing required dependencies is they are missing - STARTED"
+project=wasabi
+profile=${PROJECT_PROFILE:-test}
+deploy_host=${PROJECT_DEPLOY_HOST:-deploy.host}
+deploy_host_user=${PROJECT_DEPLOY_USER:-usr}
+nexus_deploy=${NEXUS_DEPLOY:-usr:pwd}
+
+exitOnError() {
+  echo "error cause: $1"
+  java -jar jenkins-cli.jar set-build-result unstable
+  exit 1
+}
+
+fromPom() {
+  mvn -f ../../../modules/$1/pom.xml help:evaluate -Dexpression=$2 | sed -n -e '/^\[.*\]/ !{ p; }'
+}
+
+version=${version:-`fromPom main project.version`}
+echo "++ version= ${version}"
+
+echo "++ Building: UI module - STARTED"
+echo "++ Grunt build - STARTED"
+
+  echo "++ Installing required dependencies is they are missing - STARTED"
   # Install required dependencies is they are missing
   if [ "${WASABI_OS}" == "${WASABI_OSX}" ]; then
     brew list node
     if [[ $? -eq 1 ]]; then
-      echo "Node.js is not installed. Installing Node.js packages..."
+      echo "++ Node.js is not installed. Installing Node.js packages..."
       brew install node
       npm install -g yo grunt-cli bower grunt-contrib-compass
       sudo gem install compass
     fi
   fi
   (cd ./modules/ui && npm install && bower install && grunt build)
-  echo "Installing required dependencies is they are missing - FINISHED"
+  echo "++ Installing required dependencies is they are missing - FINISHED"
 
   (for contrib_dir in $CONTRIB_PLUGINS_TO_INSTALL; do
        if [ -d contrib/$contrib_dir ]; then
-         echo "Installing plugin from contrib/$contrib_dir"
+         echo "++ Installing plugin from contrib/$contrib_dir"
          if [ -d contrib/$contrib_dir/plugins ]; then
            cp -R contrib/$contrib_dir/plugins modules/ui/dist
          fi
@@ -57,7 +96,7 @@ echo "Grunt build - STARTED"
     (cd target; grunt clean); \
     (cd target; grunt build --target=develop --no-color) \
   )
-  echo "Grunt build - FINISHED"
+  echo "++ Grunt build - FINISHED"
 
 #  echo "Create UI RPM - STARTED"
 #  (  cp -r build target; \
@@ -77,16 +116,16 @@ echo "Grunt build - STARTED"
 #  find . -type f \( -name "*.rpm" -or -name "*.deb" \) -exec mv {} ./target 2>/dev/null \;
 #  echo "Create UI RPM - FINISHED"
 
-echo "Building: UI module - FINISHED"
+echo "++ Building: UI module - FINISHED"
 
-echo "Push UI ZIP to internal Nexus - STARTED"
+echo "++ Push UI ZIP to internal Nexus - STARTED"
 artifact=ui
 path=${nexus_repositories}/${artifact_repository_id}/`echo ${group} | sed "s/\./\//g"`/${artifact}/${version}
 zip=${project}-${artifact}-${profile}-${version}.zip
 zip_path=${path}/${zip}
 
-echo "archiving: ${zip} ${zip_path}"
+echo "++ Archiving: ${zip} ${zip_path}"
 curl -v -u ${nexus_deploy} --upload-file ./modules/ui/target/dist.zip ${zip_path} || \
 exitOnError "archive failed: curl -v -u [nexus_deploy] --upload-file ./modules/ui/dist.zip ${zip_path}"
 
-echo "Push UI ZIP to internal Nexus - FINISHED"
+echo "++ Push UI ZIP to internal Nexus - FINISHED"
