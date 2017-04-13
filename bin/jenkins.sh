@@ -113,6 +113,21 @@ echo "Building: MAIN module - FINISHED"
 
 echo "Building: UI module - STARTED"
 echo "Grunt build - STARTED"
+
+  echo "Installing required dependencies is they are missing - STARTED"
+  # Install required dependencies is they are missing
+  if [ "${WASABI_OS}" == "${WASABI_OSX}" ]; then
+    brew list node
+    if [[ $? -eq 1 ]]; then
+      echo "Node.js is not installed. Installing Node.js packages..."
+      brew install node
+      npm install -g yo grunt-cli bower grunt-contrib-compass
+      sudo gem install compass
+    fi
+  fi
+  (cd ./modules/ui && npm install && bower install && grunt build)
+  echo "Installing required dependencies is they are missing - FINISHED"
+
   (for contrib_dir in $CONTRIB_PLUGINS_TO_INSTALL; do
        if [ -d contrib/$contrib_dir ]; then
          echo "Installing plugin from contrib/$contrib_dir"
