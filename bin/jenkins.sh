@@ -112,6 +112,7 @@ echo "Building: MAIN module - FINISHED"
 
 
 echo "Building: UI module - STARTED"
+echo "Grunt build - STARTED"
   (for contrib_dir in $CONTRIB_PLUGINS_TO_INSTALL; do
        if [ -d contrib/$contrib_dir ]; then
          echo "Installing plugin from contrib/$contrib_dir"
@@ -139,7 +140,7 @@ echo "Building: UI module - STARTED"
        fi;
   done)
 
- (cd modules/ui; \
+  (cd modules/ui; \
     mkdir -p target; \
     for f in app node_modules bower.json Gruntfile.js constants.json karma.conf.js karma-e2e.conf.js package.json test .bowerrc; do \
       cp -r ${f} target; \
@@ -151,23 +152,26 @@ echo "Building: UI module - STARTED"
     #(cd target; npm install; bower install --no-optional; grunt clean); \
     (cd target; grunt clean); \
     (cd target; grunt build --target=develop --no-color) \
-    #; grunt test); \
-    cp -r build target; \
-    for pkg in deb rpm; do \
-      sed -i '' -e "s|\${application.home}|${home}|g" target/build/${pkg}/before-install.sh 2>/dev/null; \
-      sed -i '' -e "s|\${application.name}|${api_name}|g" target/build/${pkg}/before-install.sh 2>/dev/null; \
-      sed -i '' -e "s|\${application.user}|${user}|g" target/build/${pkg}/before-install.sh 2>/dev/null; \
-      sed -i '' -e "s|\${application.group}|${group}|g" target/build/${pkg}/before-install.sh 2>/dev/null; \
-      sed -i '' -e "s|\${application.ui.home}|${ui_home}|g" target/build/${pkg}/after-install.sh 2>/dev/null; \
-      sed -i '' -e "s|\${application.http.content.directory}|${content}|g" target/build/${pkg}/after-install.sh 2>/dev/null; \
-      sed -i '' -e "s|\${application.user}|${user}|g" target/build/${pkg}/after-install.sh 2>/dev/null; \
-      sed -i '' -e "s|\${application.group}|${group}|g" target/build/${pkg}/after-install.sh 2>/dev/null; \
-      sed -i '' -e "s|\${application.http.content.directory}|${content}|g" target/build/${pkg}/before-remove.sh 2>/dev/null; \
-    done; \
-    (cd target; ../bin/fpm.sh -n ${name} -v ${version} -p ${profile})
   )
+  echo "Grunt build - FINISHED"
 
- find . -type f \( -name "*.rpm" -or -name "*.deb" \) -exec mv {} ./target 2>/dev/null \;
+#  echo "Create UI RPM - STARTED"
+#  (  cp -r build target; \
+#    for pkg in deb rpm; do \
+#      sed -i '' -e "s|\${application.home}|${home}|g" target/build/${pkg}/before-install.sh 2>/dev/null; \
+#      sed -i '' -e "s|\${application.name}|${api_name}|g" target/build/${pkg}/before-install.sh 2>/dev/null; \
+#      sed -i '' -e "s|\${application.user}|${user}|g" target/build/${pkg}/before-install.sh 2>/dev/null; \
+#      sed -i '' -e "s|\${application.group}|${group}|g" target/build/${pkg}/before-install.sh 2>/dev/null; \
+#      sed -i '' -e "s|\${application.ui.home}|${ui_home}|g" target/build/${pkg}/after-install.sh 2>/dev/null; \
+#      sed -i '' -e "s|\${application.http.content.directory}|${content}|g" target/build/${pkg}/after-install.sh 2>/dev/null; \
+#      sed -i '' -e "s|\${application.user}|${user}|g" target/build/${pkg}/after-install.sh 2>/dev/null; \
+#      sed -i '' -e "s|\${application.group}|${group}|g" target/build/${pkg}/after-install.sh 2>/dev/null; \
+#      sed -i '' -e "s|\${application.http.content.directory}|${content}|g" target/build/${pkg}/before-remove.sh 2>/dev/null; \
+#    done; \
+#    (cd target; ../bin/fpm.sh -n ${name} -v ${version} -p ${profile})
+#  )
+#  find . -type f \( -name "*.rpm" -or -name "*.deb" \) -exec mv {} ./target 2>/dev/null \;
+#  echo "Create UI RPM - FINISHED"
 
 echo "Building: UI module - FINISHED"
 
