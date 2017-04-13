@@ -78,21 +78,21 @@ wget ${JENKINS_URL}jnlpJars/jenkins-cli.jar || \
 
 # fetch internal project
 
-#echo "cloning: ${internal_project_repository} / ${internal_project_branch}"
-#git clone -b ${internal_project_branch} https://${internal_project_user}@${internal_project_repository} || \
-#  exitOnError "unable to clone project: git clone -b ${internal_project_branch} https://${internal_project_user}@${internal_project_repository}"
+echo "cloning: ${internal_project_repository} / ${internal_project_branch}"
+git clone -b ${internal_project_branch} https://${internal_project_user}@${internal_project_repository} || \
+  exitOnError "unable to clone project: git clone -b ${internal_project_branch} https://${internal_project_user}@${internal_project_repository}"
 
 # construct viable/complete settings.xml
 # note: need to add distributionManagement/repository to [ws]/pom.xml to map to settings.xml in order to mvn-deploy internally
 # note: add internal repository to settings.xml; see: https://maven.apache.org/guides/mini/guide-multiple-repositories.html
 
-#cat ~/.m2/settings.xml | sed "s|</profiles>|$(cat ${internal_project}/profile.xml | tr -d '\n')</profiles>|" | sed "s|\[PWD\]|$(pwd)|" > settings.xml
+cat ~/.m2/settings.xml | sed "s|</profiles>|$(cat ${internal_project}/profile.xml | tr -d '\n')</profiles>|" | sed "s|\[PWD\]|$(pwd)|" > settings.xml
 
 # extract meta-data
 
-#service=$(mvn -f ./pom.xml help:evaluate -Dexpression=application.name | sed -n -e '/^\[.*\]/ !{ p; }')
-group=$(mvn -f ./pom.xml help:evaluate -Dexpression=project.groupId | sed -n -e '/^\[.*\]/ !{ p; }')
-version=$(mvn -f ./pom.xml help:evaluate -Dexpression=project.version | sed -n -e '/^\[.*\]/ !{ p; }')
+service=$(mvn --settings ./settings.xml -f ./modules/main/pom.xml -P ${profile} help:evaluate -Dexpression=application.name | sed -n -e '/^\[.*\]/ !{ p; }')
+group=$(mvn --settings ./settings.xml -f ./modules/main/pom.xml -P ${profile} help:evaluate -Dexpression=project.groupId | sed -n -e '/^\[.*\]/ !{ p; }')
+version=$(mvn --settings ./settings.xml -f ./modules/main/pom.xml -P ${profile} help:evaluate -Dexpression=project.version | sed -n -e '/^\[.*\]/ !{ p; }')
 
 # publish sonar report
 #echo "publishing sonar report"
