@@ -22,8 +22,6 @@
 
 project=wasabi
 profile=${PROJECT_PROFILE:-test}
-deploy_host=${PROJECT_DEPLOY_HOST:-deploy.host}
-deploy_host_user=${PROJECT_DEPLOY_USER:-usr}
 nexus_deploy=${NEXUS_DEPLOY:-usr:pwd}
 
 exitOnError() {
