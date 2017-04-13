@@ -23,6 +23,9 @@
 project=wasabi
 profile=${PROJECT_PROFILE:-development}
 nexus_deploy=${NEXUS_DEPLOY:-usr:pwd}
+nexus_repositories=${NEXUS_REPOSITORIES}
+nexus_repository_id=${NEXUS_REPOSITORY_ID}
+nexus_snapshot_repository_id=${NEXUS_SNAPSHOT_REPOSITORY_ID}
 
 exitOnError() {
   echo "error cause: $1"
@@ -116,6 +119,14 @@ echo "++ Grunt build - STARTED"
 echo "++ Building: UI module - FINISHED"
 
 echo "++ Push UI ZIP to internal Nexus - STARTED"
+
+if [[ "${version/-SNAPSHOT}" == "${version}" ]]; then
+  artifact_repository_id=${nexus_repository_id}
+elif [[ "${version}" == *SNAPSHOT ]]; then
+  artifact_repository_id=${nexus_snapshot_repository_id}
+fi
+
+group=`fromPom main ${profile} project.groupId`
 artifact=ui
 path=${nexus_repositories}/${artifact_repository_id}/`echo ${group} | sed "s/\./\//g"`/${artifact}/${version}
 zip=${project}-${artifact}-${profile}-${version}.zip

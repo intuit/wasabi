@@ -95,22 +95,65 @@ group=$(mvn --settings ./settings.xml -f ./modules/main/pom.xml -P ${profile} he
 version=$(mvn --settings ./settings.xml -f ./modules/main/pom.xml -P ${profile} help:evaluate -Dexpression=project.version | sed -n -e '/^\[.*\]/ !{ p; }')
 
 # publish sonar report
-#echo "publishing sonar report"
-#(mvn --settings ./settings.xml ${sonar_host_url} ${sonar_auth_token} -P ${profile} sonar:sonar) || \
-#  exitOnError "unable to report to sonar: (mvn --settings ./settings.xml [sonar_host_url] [sonar_auth_token] -P ${profile} sonar:sonar)"
+echo "publishing sonar report"
+(mvn --settings ./settings.xml ${sonar_host_url} ${sonar_auth_token} -P ${profile} sonar:sonar) || \
+  exitOnError "unable to report to sonar: (mvn --settings ./settings.xml [sonar_host_url] [sonar_auth_token] -P ${profile} sonar:sonar)"
 
 
-echo "Building: MAIN module - STARTED"
-echo "Running : mvn -P ${profile} clean package sonar:sonar"
-(mvn -P ${profile} clean package sonar:sonar) || exitOnError "Unable to build main module... (mvn -P ${profile} clean package sonar:sonar)"
+# build
+echo "packaging: ${project} / ${profile}"
+(eval ${project_env} ./bin/${project}.sh --profile=${profile} --buildtests=${execute_unit_tests} --verify=true package) || \
+  exitOnError "unable to build project : (${project_env} ./bin/${project}.sh --profile=${profile} --buildtests=${execute_unit_tests} --verify=true package)"
+echo "end packaging"
 
-echo "Skipping main module RPM creation for now"
-#echo "jenkins.sh start: ./bin/fpm.sh -n main -v ${version} -p ${profile} "
-#(./bin/fpm.sh -n main -v ${version} -p ${profile}) || exitOnError "Unable to create main RPM... (./bin/fpm.sh -n main -v ${version} -p ${profile})"
-#echo "jenkins.sh end: ./bin/fpm.sh "
-echo "Building: MAIN module - FINISHED"
+for module in ${modules}; do
+  if [[ ! -z "${module// }" ]]; then
+    # derive module rpm
 
+    echo "prepare deploy: $(find ./target -name ${project}-${module}-${profile}-*.noarch.rpm -type f)"
+    rpm=`basename $(find ./target -name ${project}-${module}-${profile}-*.noarch.rpm -type f)` || \
+      exitOnError "failed to find ./target/${project}-${module}-${profile}-*.noarch.rpm"
 
-#./modules/ui/bin.build.sh
+    # fixme: conflicts with distributionManagement in base pom; fallback: use jenkins:publish-to-maven post-build action
+    if [[ "${nexus_archive}" == "true" ]]; then
+      # publish artifacts to nexus
 
+      echo "publishing nexus artifacts"
+      (mvn --settings ./settings.xml -Dmaven.test.skip=true -P ${profile} deploy) || \
+        exitOnError "unable to report to sonar: (mvn --settings ./settings.xml -Dmaven.test.skip=true -P ${profile} deploy)"
+    fi
 
+    # determine MILESTONE or SNAPSHOT repository
+
+    if [[ "${version/-SNAPSHOT}" == "${version}" ]]; then
+      artifact_repository_id=${nexus_repository_id}
+    elif [[ "${version}" == *SNAPSHOT ]]; then
+      artifact_repository_id=${nexus_snapshot_repository_id}
+    fi
+
+    if [ "${version/-SNAPSHOT}" == "${version}" ]; then
+      # archive MILESTONE rpms
+
+      artifact=$(mvn --settings ./settings.xml -f ./modules/main/pom.xml -P ${profile} help:evaluate -Dexpression=project.artifactId | sed -n -e '/^\[.*\]/ !{ p; }')
+      path=${nexus_repositories}/${artifact_repository_id}/`echo ${group} | sed "s/\./\//g"`/${artifact}/${version}
+      rpm_path=${path}/${rpm}
+
+      echo "archiving: ${rpm} ${rpm_path}"
+      curl -v -u ${nexus_deploy} --upload-file ./target/${rpm} ${rpm_path} || \
+        exitOnError "archive rpm failed: curl -v -u [nexus_deploy] --upload-file ./target/${rpm} ${rpm_path}"
+    fi
+
+    # Always push the UI zip file because we need it for wasabi-intuit builds
+    if [ "${module}" == "ui" ]; then
+      # archive MILESTONE ui.zip
+      artifact=ui
+      path=${nexus_repositories}/${artifact_repository_id}/`echo ${group} | sed "s/\./\//g"`/${artifact}/${version}
+      zip=${project}-${artifact}-${profile}-${version}.zip
+      zip_path=${path}/${zip}
+
+      echo "archiving: ${zip} ${zip_path}"
+      curl -v -u ${nexus_deploy} --upload-file ./modules/ui/target/dist.zip ${zip_path} || \
+        exitOnError "archive failed: curl -v -u [nexus_deploy] --upload-file ./modules/ui/dist.zip ${zip_path}"
+    fi
+  fi
+done
