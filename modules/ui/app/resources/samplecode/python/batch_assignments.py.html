@@ -1,6 +1,4 @@
-<html>
-<head></head>
-<body>
+<div class="displaySourceCode">
 <pre>
 import requests
 import json
@@ -15,7 +13,7 @@ def get_batch_assignment(application, page, user):
         page:        the page (group of experiments) for which assignments should be retrieved
         user:        the user who should be assigned
     """
-    urlAssignment = "https://abtesting.intuit.com/api/v1/assignments/applications/%s/pages/%s/users/%s" %(application, page, user);
+    urlAssignment = "{{baseUrl}}/assignments/applications/%s/pages/%s/users/%s" %(application, page, user);
     r = requests.get(urlAssignment)
     try:
         assignments = json.loads(r.text)['assignments']
@@ -28,11 +26,10 @@ def get_batch_assignment(application, page, user):
     return assignments
 
 if __name__ == "__main__":
-    application = 'ApplicationName'
-    page = 'PageName'
+    application = '{{experiment.applicationName}}'
+    page = '{{pageName}}'
     user = 'UserName'
 
     print(get_batch_assignment(application, page, user))
 </pre>
-</body>
-</html>
+</div>

@@ -1,6 +1,4 @@
-<html>
-<head></head>
-<body>
+<div class="displaySourceCode">
 <pre>
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -19,7 +17,7 @@ public class BatchAssignment {
 
   public static void main(String[] args) throws IOException, ParseException {
     // TODO: not sure if this will work, since this response is an array of assignments.
-    System.out.print(getBatchAssignment("ApplicationName", "PageName", "UserName"));
+    System.out.print(getBatchAssignment("{{experiment.applicationName}}", "{{pageName}}", "UserName"));
   }
 
 
@@ -35,7 +33,7 @@ public class BatchAssignment {
    */
   private static Object getBatchAssignment(String application, String page, String user) throws IOException, ParseException {
 
-    String urlAssignment = String.format("https://abtesting.intuit.com/api/v1/assignments/applications/%s/pages/%s/users/%s", application, page, user);
+    String urlAssignment = String.format("{{baseUrl}}/assignments/applications/%s/pages/%s/users/%s", application, page, user);
 
     URL url = new URL(urlAssignment);
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -76,7 +74,6 @@ public class BatchAssignment {
 
 }
 </pre>
-</body>
-</html>
+</div>
 
 

@@ -1,8 +1,8 @@
 <div id="displaySourceCodeModal" class="modalDialog">
-    <h1>Analysis</h1>
+    <h1>Example Source Code</h1>
     <div class="dialogContent">
         <div>
-            <iframe style="width: 100%; background-color: white;" ng-src="{{codeURL}}" ></iframe>
+            <ng-include src="codeURL"></ng-include>
         </div>
 
         <div class="buttonBar">

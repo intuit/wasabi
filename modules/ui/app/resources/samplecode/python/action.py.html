@@ -1,6 +1,4 @@
-<html>
-<head></head>
-<body>
+<div class="displaySourceCode">
 <pre>
 import requests
 import json
@@ -15,7 +13,7 @@ def post_action(application, experiment, user):
         user:        the user who should be assigned
     """
 
-    urlAssignment = "https://abtesting.intuit.com/api/v1/events/applications/%s/experiments/%s/users/%s" %(application, experiment, user);
+    urlAssignment = "{{baseUrl}}/events/applications/%s/experiments/%s/users/%s" %(application, experiment, user);
 
     headers = {'content-type': 'application/json'}
     # The actoin name can be freely assigned and an additional payload is
@@ -29,11 +27,10 @@ def post_action(application, experiment, user):
     return False
 
 if __name__ == "__main__":
-    application = 'ApplicationName'
-    experiment = 'ExperimentName'
+    application = '{{experiment.applicationName}}'
+    experiment = '{{experiment.label}}'
     user = 'UserName'
 
     print('Action recorded' if post_action(application, experiment, user) else 'Action not recorded')
 </pre>
-</body>
-</html>
+</div>

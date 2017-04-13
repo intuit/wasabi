@@ -1,6 +1,4 @@
-<html>
-<head></head>
-<body>
+<div class="displaySourceCode">
 <pre>
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -20,7 +18,7 @@ import java.net.URL;
 public class AssignmentWithSegmentation {
 
   public static void main(String[] args) throws IOException, ParseException {
-    System.out.print(postAssignmentWithSegmentation("ApplicationName", "ExperimentName", "UserName", "10001"));
+    System.out.print(postAssignmentWithSegmentation("{{experiment.applicationName}}", "{{experiment.label}}", "UserName", "10001"));
   }
 
 
@@ -37,7 +35,7 @@ public class AssignmentWithSegmentation {
    */
   private static Object postAssignmentWithSegmentation(String application, String experiment, String user, String salary) throws IOException, ParseException {
 
-    String urlAssignmentWithSegmentation = String.format("https://abtesting.intuit.com/api/v1/assignments/applications/%s/experiments/%s/users/%s", application, experiment, user);
+    String urlAssignmentWithSegmentation = String.format("{{baseUrl}}/assignments/applications/%s/experiments/%s/users/%s", application, experiment, user);
 
     URL url = new URL(urlAssignmentWithSegmentation);
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -75,6 +73,5 @@ public class AssignmentWithSegmentation {
 
 }
 </pre>
-</body>
-</html>
+</div>
 

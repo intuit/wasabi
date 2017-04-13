@@ -4508,3 +4508,21 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
 .gridWithAdvanced {
     margin-top: 40px;
 }
+
+.displaySourceCode {
+    display: block;
+    overflow: auto;
+    background: white;
+    height: 500px;
+    padding: 0 20px;
+    p {
+        margin: 0 0 10px;
+    }
+    pre {
+        font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+        font-size: 13px;
+        background: white;
+        overflow: visible;
+        margin-bottom: 10px;
+    }
+}

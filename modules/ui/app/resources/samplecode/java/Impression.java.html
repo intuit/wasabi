@@ -1,6 +1,4 @@
-<html>
-<head></head>
-<body>
+<div class="displaySourceCode">
 <pre>
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -13,7 +11,7 @@ import java.net.URL;
 public class Impression {
 
   public static void main(String[] args) throws IOException {
-    System.out.print(postImpression("ApplicationName", "ExperimentName", "UserName") ? "Impression recorded" : "Impression not recorded");
+    System.out.print(postImpression("{{experiment.applicationName}}", "{{experiment.label}}", "UserName") ? "Impression recorded" : "Impression not recorded");
   }
 
 
@@ -28,7 +26,7 @@ public class Impression {
    */
   private static boolean postImpression(String application, String experiment, String user) throws IOException {
 
-    String urlImpression = String.format("https://abtesting.intuit.com/api/v1/events/applications/%s/experiments/%s/users/%s", application, experiment, user);
+    String urlImpression = String.format("{{baseUrl}}/events/applications/%s/experiments/%s/users/%s", application, experiment, user);
 
     URL url = new URL(urlImpression);
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -49,6 +47,5 @@ public class Impression {
 
 }
 </pre>
-</body>
-</html>
+</div>
 

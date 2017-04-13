@@ -1,0 +1,57 @@
+<div class="displaySourceCode">
+<p>
+    This example is modeled after the Hello World example in the contrib folder of Wasabi.  That example uses the
+    wasabi.js library that is available from the same server as this Admin UI.  In order to use the library,
+    you would add the following to your index.html (or equivalent initial load page):
+</p>
+<pre>
+    &lt;script src="https://code.jquery.com/jquery-1.12.3.min.js">&lt;/script>
+    &lt;script src='{{webServingUrl}}scripts/wasabi.js'>&lt;/script>
+</pre>
+<p>
+    Of course, you can choose whatever version of jQuery works for you and your Wasabi server may be running on
+    a different host or port.
+</p>
+<p>
+    In order to retrieve an assignment for the experiments associated with a given page (the "batch API") passing
+    a profile for use in evaluating segmentation rules using the library, you would make a call like this:
+</p>
+<pre>
+    // Set up properties that will be the same on all Wasabi calls.
+    WASABI.setOptions({
+        'applicationName': '{{experiment.applicationName}}',
+        'pageName': '{{pageName}}',
+        'protocol': '{{serverProtocol}}',
+        'host': '{{serverHostAndPort}}'
+    });
+
+    // Check Wasabi to see if this user should be in the test and which bucket.
+    WASABI.getPageAssignmentWithSegmentation(
+        '{\
+            "profile": {\
+                "platform": "mac"\
+            }\
+        }',
+        {
+            'userID': 'UserName'
+        }
+    ).then(
+        function(response) {
+            console.log('getBatchAssignmentWithSegmentation: success');
+            console.log(JSON.stringify(response));
+            // This object will include an array of the assignments made and the status of each, which might tell you the experiment
+            // has not been started, etc.
+            // Note that if an experiment doesn't exist or hasn't been started, that particular assignment may not succeed.
+            console.dir(response.assignments);
+        },
+        function(error) {
+            console.log('getBatchAssignmentWithSegmentation: error');
+        }
+    );
+</pre>
+<p>
+    In order to see and run locally a working example using JavaScript, AngularJS and node, go to:<br/>
+    <a href="https://github.com/intuit/wasabi/tree/develop/contrib/hello-world" target="_blank">https://github.com/intuit/wasabi/tree/develop/contrib/hello-world</a>
+</p>
+</div>
+

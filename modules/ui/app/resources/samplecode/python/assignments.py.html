@@ -1,6 +1,4 @@
-<html>
-<head></head>
-<body>
+<div class="displaySourceCode">
 <pre>
 import requests
 import json
@@ -15,7 +13,7 @@ def get_assignment(application, experiment, user):
         experiment:  the running experiment for which the assignment should be retrieved
         user:        the user who should be assigned
     """
-    urlAssignment = "https://abtesting.intuit.com/api/v1/assignments/applications/%s/experiments/%s/users/%s" %(application, experiment, user);
+    urlAssignment = "{{baseUrl}}/assignments/applications/%s/experiments/%s/users/%s" %(application, experiment, user);
     r = requests.get(urlAssignment)
     try:
         assignment = json.loads(r.text)['assignment']
@@ -28,11 +26,10 @@ def get_assignment(application, experiment, user):
     return assignment
 
 if __name__ == "__main__":
-    application = 'ApplicationName'
-    experiment = 'ExperimentName'
+    application = '{{experiment.applicationName}}'
+    experiment = '{{experiment.label}}'
     user = 'UserName'
 
     print(get_assignment(application, experiment, user))
 </pre>
-</body>
-</html>
+</div>

@@ -1109,23 +1109,6 @@ angular.module('wasabi.controllers').
                 return false;
             };
 
-            $scope.showCode = function(codeURL) {
-                var modalInstance = $modal.open({
-                    templateUrl: 'views/DisplaySourceCodeModal.html',
-                    controller: 'DisplaySourceCodeModalCtrl',
-                    windowClass: 'xxx-dialog',
-                    backdrop: 'static',
-                    resolve: {
-                        codeURL: function () {
-                            return codeURL;
-                        }
-                    }
-                });
-
-                modalInstance.result.then(function () {
-                });
-            };
-
             $scope.openSegmentationTestModal = function () {
                 var modalInstance = $modal.open({
                     templateUrl: 'views/SegmentationTestModal.html',

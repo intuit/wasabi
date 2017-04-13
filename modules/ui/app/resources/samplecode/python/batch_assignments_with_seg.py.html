@@ -1,6 +1,4 @@
-<html>
-<head></head>
-<body>
+<div class="displaySourceCode">
 <pre>
 import requests
 import json
@@ -17,7 +15,7 @@ def post_batch_assignment_with_segmentation(application, page, user, salary):
         salary:      the salary of the user, to be used in evaluating a segmentation rule
     """
 
-    urlAssignment = "https://abtesting.intuit.com/api/v1/assignments/applications/%s/pages/%s/users/%s" %(application, page, user);
+    urlAssignment = "{{baseUrl}}/assignments/applications/%s/pages/%s/users/%s" %(application, page, user);
 
     headers = {'content-type': 'application/json'}
     profile = {'profile':{'salary': salary}}
@@ -34,12 +32,11 @@ def post_batch_assignment_with_segmentation(application, page, user, salary):
     return assignments
 
 if __name__ == "__main__":
-    application = 'ApplicationName'
-    page = 'PageName'
+    application = '{{experiment.applicationName}}'
+    page = '{{pageName}}'
     user = 'UserName'
     salary = '10000'
 
     print(post_batch_assignment_with_segmentation(application, page, user, salary))
 </pre>
-</body>
-</html>
+</div>

@@ -1,6 +1,4 @@
-<html>
-<head></head>
-<body>
+<div class="displaySourceCode">
 <pre>
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -18,7 +16,7 @@ import java.net.URL;
 public class Assignment {
 
   public static void main(String[] args) throws IOException, ParseException {
-    System.out.print(getAssignment("ApplicationName", "ExperimentName", "UserName"));
+    System.out.print(getAssignment("{{experiment.applicationName}}", "{{experiment.label}}", "UserName"));
   }
 
 
@@ -34,7 +32,7 @@ public class Assignment {
    */
   private static Object getAssignment(String application, String experiment, String user) throws IOException, ParseException {
 
-    String urlAssignment = String.format("https://abtesting.intuit.com/api/v1/assignments/applications/%s/experiments/%s/users/%s", application, experiment, user);
+    String urlAssignment = String.format("{{baseUrl}}/assignments/applications/%s/experiments/%s/users/%s", application, experiment, user);
 
     URL url = new URL(urlAssignment);
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -66,7 +64,6 @@ public class Assignment {
 
 }
 </pre>
-</body>
-</html>
+</div>
 
 
