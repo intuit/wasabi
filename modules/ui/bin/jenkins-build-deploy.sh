@@ -21,20 +21,19 @@
 #   nexus_deploy                 : nexus deploy user; default:usr:pwd
 
 project=wasabi
-profile=${PROJECT_PROFILE:-test}
+profile=${PROJECT_PROFILE:-development}
 nexus_deploy=${NEXUS_DEPLOY:-usr:pwd}
 
 exitOnError() {
   echo "error cause: $1"
-  java -jar jenkins-cli.jar set-build-result unstable
   exit 1
 }
 
 fromPom() {
-  mvn -f ../../../modules/$1/pom.xml help:evaluate -Dexpression=$2 | sed -n -e '/^\[.*\]/ !{ p; }'
+  mvn -f ../../../modules/$1/pom.xml -P $2 help:evaluate -Dexpression=$3 | sed -n -e '/^\[.*\]/ !{ p; }'
 }
 
-version=${version:-`fromPom main project.version`}
+version=${version:-`fromPom main ${profile} project.version`}
 echo "++ version= ${version}"
 
 echo "++ Building: UI module - STARTED"
