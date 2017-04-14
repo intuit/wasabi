@@ -48,12 +48,20 @@ echo "++ Grunt build - STARTED"
     brew list node
     if [[ $? -eq 1 ]]; then
       echo "++ Node.js is not installed. Installing Node.js packages..."
+      echo "++ execute: brew install node"
       brew install node
+
+      echo "++ execute: npm install -g yo grunt-cli bower grunt-contrib-compass"
       npm install -g yo grunt-cli bower grunt-contrib-compass
+
+      echo "++ execute: sudo gem install compass"
       sudo gem install compass
     fi
   fi
+
+  echo "++ execute: (cd ./modules/ui && npm install && bower install && grunt build)"
   (cd ./modules/ui && npm install && bower install && grunt build)
+
   echo "++ Installing required dependencies is they are missing - FINISHED"
 
   (for contrib_dir in $CONTRIB_PLUGINS_TO_INSTALL; do
