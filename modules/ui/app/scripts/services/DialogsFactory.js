@@ -1,10 +1,10 @@
 'use strict';
 
-angular.module('wasabi.services').factory('DialogsFactory', ['$modal',
-    function ($modal) {
+angular.module('wasabi.services').factory('DialogsFactory', ['$uibModal',
+    function ($uibModal) {
         return {
             alertDialog: function(msg, title, resultFunction) {
-                var modalInstance = $modal.open({
+                var modalInstance = $uibModal.open({
                     templateUrl: 'views/DialogModal.html',
                     controller: 'DialogModalCtrl',
                     windowClass: 'xxxx-dialog',
@@ -27,7 +27,7 @@ angular.module('wasabi.services').factory('DialogsFactory', ['$modal',
             },
 
             confirmDialog: function(msg, title, resultFunction, cancelFunction, okLabel, cancelLabel) {
-                var modalInstance = $modal.open({
+                var modalInstance = $uibModal.open({
                     templateUrl: 'views/DialogModal.html',
                     controller: 'DialogModalCtrl',
                     windowClass: 'xxxx-dialog',

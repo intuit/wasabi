@@ -4,8 +4,8 @@
 'use strict';
 
 angular.module('wasabi.controllers').
-    controller('PrioritiesCtrl', ['$scope', '$filter', '$http', '$stateParams', 'PrioritiesFactory', '$modal', 'UtilitiesFactory', '$rootScope', 'DialogsFactory', 'AUTH_EVENTS', '$state', 'PERMISSIONS', 'ConfigFactory', 'ApplicationsFactory', 'ExperimentsFactory', '$cookies', 'FavoritesFactory',
-        function ($scope, $filter, $http, $stateParams, PrioritiesFactory, $modal, UtilitiesFactory, $rootScope, DialogsFactory, AUTH_EVENTS, $state, PERMISSIONS, ConfigFactory, ApplicationsFactory, ExperimentsFactory, $cookies, FavoritesFactory) {
+    controller('PrioritiesCtrl', ['$scope', '$filter', '$http', '$stateParams', 'PrioritiesFactory', '$uibModal', 'UtilitiesFactory', '$rootScope', 'DialogsFactory', 'AUTH_EVENTS', '$state', 'PERMISSIONS', 'ConfigFactory', 'ApplicationsFactory', 'ExperimentsFactory', '$cookies', 'FavoritesFactory',
+        function ($scope, $filter, $http, $stateParams, PrioritiesFactory, $uibModal, UtilitiesFactory, $rootScope, DialogsFactory, AUTH_EVENTS, $state, PERMISSIONS, ConfigFactory, ApplicationsFactory, ExperimentsFactory, $cookies, FavoritesFactory) {
 
             $scope.data = {
                 applicationName: '', // This is bound to the selection in the application name drop down menu.
@@ -283,7 +283,7 @@ angular.module('wasabi.controllers').
             };
 
             $scope.openExperimentModal = function (experiment) {
-                var modalInstance = $modal.open({
+                var modalInstance = $uibModal.open({
                     templateUrl: 'views/ExperimentModal.html',
                     controller: 'ExperimentModalCtrl',
                     windowClass: 'xx-dialog',

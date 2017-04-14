@@ -90,8 +90,8 @@
         <div style="margin-top: 5px; margin-bottom: 10px; font-size: 12px;"><label ng-class="{tooMany: data.descriptionLength > 256}">{{(256 - data.descriptionLength) >= 0 ? 256 - data.descriptionLength : 'NO'}} characters left</label></div>
     </div>
 
-    <tabset id="experimentDetailsTabs" ng-show="experiment.id" class="tabs">
-        <tab id="buckets" heading="Buckets">
+    <uib-tabset id="experimentDetailsTabs" ng-show="experiment.id" class="tabs">
+        <uib-tab id="buckets" heading="Buckets">
             <a ng-show="!readOnly" href="#" id="btnEditBuckets" class="listAction edit" onclick="return false;" ng-click="openEditRunningBucketsModal(experiment)"><span></span>Edit Buckets</a>
             <span class="info newHelp" help help-content="{{help.buckets}}"></span>
             <div id="experimentBuckets" class="tabContainer">
@@ -143,8 +143,8 @@
                     <button id="btnShowAnalysis" type="button" class="blue" title="Add Page" ng-click="showAnalysisGraph()">Show Analysis Graph</button>
                 </div>
             </div>
-        </tab>
-        <tab id="actions" heading="Actions">
+        </uib-tab>
+        <uib-tab id="actions" heading="Actions">
             <div id="analysisBucketList" class="tabContainer">
                 <div style="float: right;">
                     <span style="margin-right: 100px;"><a href="#" onclick="return false;" ng-click="showingActionRates = true;" ng-class="{selectedLink: showingActionRates === true}" title="View action rates for each bucket and each action">Rates</a>&nbsp;&nbsp;&nbsp;<a href="#" onclick="return false;" ng-click="showingActionRates = false;" ng-class="{selectedLink: showingActionRates === false}" title="View unique action counts for each bucket and each action">Counts</a></span>
@@ -162,8 +162,8 @@
                         <tr ng-if="orderedDataRows.length <= 1"><td colspan="{{orderedDataRows[0].length}}">No action data at this time.</td></tr>                    </table>
                 </div>
             </div>
-        </tab>
-        <tab heading="Results">
+        </uib-tab>
+        <uib-tab heading="Results">
             <div class="resultsTab">
                 <div id="resultsToolbar" ng-show="!readOnly" dynamic-edit input-tag="rule" select-function="saveResults" edit-function="editResults" cancel-function="cancelResults" ng-model="experiment.rule" class="dynamicToolbar"></div>
             <form name="resultsForm" novalidate>
@@ -180,8 +180,8 @@
             </div>
             </form>
             </div>
-        </tab>
-        <tab heading="Mutual Exclusion" ng-controller="MutualExclusionsCtrl">
+        </uib-tab>
+        <uib-tab heading="Mutual Exclusion" ng-controller="MutualExclusionsCtrl">
             <a ng-show="!readOnly" href="#" id="newExpAddExclusion" class="listAction add" onclick="return false;" ng-click="openMutualExclusionModal(experiment.id)"><span></span>Add Experiment</a>
             <span class="info newHelp" help help-content="{{help.mutualExclusion}}"></span>
             <div id="newExpExclusionList" class="tabContainer">
@@ -213,8 +213,8 @@
                 </table>
                 </div>
             </div>
-        </tab>
-        <tab heading="Segmentation">
+        </uib-tab>
+        <uib-tab heading="Segmentation">
             <div class="segmentationTab">
             <form name="segForm" novalidate>
             <div>
@@ -261,8 +261,8 @@
             </div>
             </form>
             </div>
-        </tab>
-        <tab id="pages" heading="Pages" ng-controller="PagesCtrl">
+        </uib-tab>
+        <uib-tab id="pages" heading="Pages" ng-controller="PagesCtrl">
             <input ng-show="!readOnly"ng-model="pagesData.pageName" set-focus watch-element="pagesData.setPageNameFocus" abtest-autocomplete list="pagesData.groupPages" select-function="selectPage" enter-function="selectPageOnEnter" id="txtAddPage" type="text" class="text" placeholder="Add Page" maxlength="256" />
             <button ng-show="!readOnly" id="btnAddPage" type="button" class="blue" title="Add Page" ng-click="addPageClick()">Add</button>
             <span class="info newHelp" help help-content="{{help.pages}}"></span>
@@ -293,16 +293,16 @@
                 </div>
             </div>
             <div class="hint">List the page(s) on which this experiment takes place. Allow assignment on the page(s) where this experiment starts (typically just one).</div>
-        </tab>
-        <tab heading="Plugins">
+        </uib-tab>
+        <uib-tab heading="Plugins">
             <div ng-show="plugins && plugins.length > 0">
                 <button ng-repeat="plugin in plugins | filter:{ pluginType: 'contributeDetailsTab' }" style="margin-right: 15px;" onclick="return false;" ng-click="openPluginModal(plugin);">{{plugin.displayName}}</button>
             </div>
             <div ng-show="!plugins || plugins.length === 0">
                 <label>No plugins are currently installed.</label>
             </div>
-        </tab>
-        <tab heading="API Calls">
+        </uib-tab>
+        <uib-tab heading="API Calls">
             <div class="apiCallsTab" ng-controller="APICallsCtrl">
                 <label>Example Wasabi API Calls</label>
                 <div>
@@ -341,8 +341,8 @@
                            value="{{experiment.id}}" readonly />
                 </div>
             </div>
-        </tab>
-    </tabset>
+        </uib-tab>
+    </uib-tabset>
 
     <!-- <div id="exprDetailGraph"></div> -->
     <div class="buttonBar">

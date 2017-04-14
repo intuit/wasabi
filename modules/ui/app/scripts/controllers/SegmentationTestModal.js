@@ -2,8 +2,8 @@
 
 angular.module('wasabi.controllers')
     .controller('SegmentationTestModalCtrl',
-        ['$scope', '$filter', '$modalInstance', 'ApplicationsFactory', 'experiment', 'rules', 'UtilitiesFactory', '$modal', 'ConfigFactory', 'DialogsFactory',
-            function ($scope, $filter, $modalInstance, ApplicationsFactory, experiment, rules, UtilitiesFactory, $modal, ConfigFactory, DialogsFactory) {
+        ['$scope', '$filter', '$uibModalInstance', 'ApplicationsFactory', 'experiment', 'rules', 'UtilitiesFactory', '$uibModal', 'ConfigFactory', 'DialogsFactory',
+            function ($scope, $filter, $uibModalInstance, ApplicationsFactory, experiment, rules, UtilitiesFactory, $uibModal, ConfigFactory, DialogsFactory) {
 
                 $scope.experiment = experiment;
                 $scope.rules = rules;
@@ -93,7 +93,7 @@ angular.module('wasabi.controllers')
                         });
                     }
                     else {
-                        $modalInstance.close();
+                        $uibModalInstance.close();
                     }
                 };
 
@@ -101,6 +101,6 @@ angular.module('wasabi.controllers')
                     // Changed this to call close() instead of dismiss().  We need to catch the Close or Cancel so
                     // we can re-load the buckets, in case the user changed the allocation percentages (since changes
                     // are data-bound to the model).
-                    $modalInstance.close('cancel');
+                    $uibModalInstance.close('cancel');
                 };
             }]);

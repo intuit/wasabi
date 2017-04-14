@@ -3,8 +3,8 @@
 'use strict';
 
 angular.module('wasabi.controllers').
-    controller('UsersCtrl', ['$scope', '$filter', '$http', '$modal', 'UtilitiesFactory', '$rootScope', 'StateFactory', 'DialogsFactory', 'AUTH_EVENTS', 'AuthzFactory', 'Session',
-        function ($scope, $filter, $http, $modal, UtilitiesFactory, $rootScope, StateFactory, DialogsFactory, AUTH_EVENTS, AuthzFactory, Session) {
+    controller('UsersCtrl', ['$scope', '$filter', '$http', '$uibModal', 'UtilitiesFactory', '$rootScope', 'StateFactory', 'DialogsFactory', 'AUTH_EVENTS', 'AuthzFactory', 'Session',
+        function ($scope, $filter, $http, $uibModal, UtilitiesFactory, $rootScope, StateFactory, DialogsFactory, AUTH_EVENTS, AuthzFactory, Session) {
 
             // The data object is where values are stored that need to be data bound to the fields in the form.
             // I believe there was a scope problem and I found this solution on the Googles.  Basically, by
@@ -268,7 +268,7 @@ angular.module('wasabi.controllers').
             $scope.loadAdministeredApplications();
 
             $scope.openUserModal = function (user) {
-                var modalInstance = $modal.open({
+                var modalInstance = $uibModal.open({
                     templateUrl: 'views/UserModal.html',
                     controller: 'UserModalCtrl',
                     windowClass: 'xx-dialog',

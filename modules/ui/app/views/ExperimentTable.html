@@ -134,7 +134,7 @@
             <span style="font-size:13px; color:#888; position: relative; top: -20px; left: -5px;">{{cardViewPageRangeStart()}} - {{cardViewPageRangeEnd()}} of {{cardViewTotalItems}}</span>
 
             <div style="display: inline;">
-                <pagination total-items="cardViewTotalItems" items-per-page="8" ng-model="cardViewData.cardViewCurrentPage" ng-change="cardViewPageChanged()" max-size="5" rotate="false"></pagination>
+                <uib-pagination total-items="cardViewTotalItems" items-per-page="8" ng-model="cardViewData.cardViewCurrentPage" ng-change="cardViewPageChanged()" max-size="5" rotate="false"></uib-pagination>
             </div>
         </div>
     </div>
@@ -216,7 +216,7 @@
             <span style="font-size:13px; color:#888; position: relative; top: -20px; left: -5px;">{{pageRangeStart()}} - {{pageRangeEnd()}} of {{totalItems}}</span>
 
             <div style="display: inline;" ng-show="totalItems > 0">
-                <pagination total-items="totalItems" items-per-page="10" ng-model="currentPage" ng-change="pageChanged()" max-size="5" rotate="false"></pagination>
+                <uib-pagination total-items="totalItems" items-per-page="10" ng-model="currentPage" ng-change="pageChanged()" max-size="5" rotate="false"></uib-pagination>
             </div>
         </div>
     </div>

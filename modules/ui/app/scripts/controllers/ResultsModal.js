@@ -2,8 +2,8 @@
 
 angular.module('wasabi.controllers')
     .controller('ResultsModalCtrl',
-        ['$scope', '$filter', '$modalInstance', 'ExperimentsFactory', 'experiment', 'readOnly', 'UtilitiesFactory', '$modal', 'ConfigFactory',
-            function ($scope, $filter, $modalInstance, ExperimentsFactory, experiment, readOnly, UtilitiesFactory, $modal, ConfigFactory) {
+        ['$scope', '$filter', '$uibModalInstance', 'ExperimentsFactory', 'experiment', 'readOnly', 'UtilitiesFactory', '$uibModal', 'ConfigFactory',
+            function ($scope, $filter, $uibModalInstance, ExperimentsFactory, experiment, readOnly, UtilitiesFactory, $uibModal, ConfigFactory) {
 
                 $scope.experiment = experiment;
 
@@ -30,10 +30,10 @@ angular.module('wasabi.controllers')
                             UtilitiesFactory.handleGlobalError(response, 'Your experiment results could not be changed.');
                         });
                     }
-                    $modalInstance.close();
+                    $uibModalInstance.close();
                 };
 
                 $scope.cancel = function () {
-                    $modalInstance.close('cancel');
+                    $uibModalInstance.close('cancel');
                 };
             }]);

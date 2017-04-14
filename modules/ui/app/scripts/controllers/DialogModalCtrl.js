@@ -2,8 +2,8 @@
 
 angular.module('wasabi.controllers')
     .controller('DialogModalCtrl',
-        ['$scope', '$modalInstance', 'options', '$timeout', '$sce',
-            function ($scope, $modalInstance, options, $timeout, $sce) {
+        ['$scope', '$uibModalInstance', 'options', '$timeout', '$sce',
+            function ($scope, $uibModalInstance, options, $timeout, $sce) {
 
                 $scope.header = options.header;
 
@@ -36,7 +36,7 @@ angular.module('wasabi.controllers')
                 }
 
                 $scope.ok = function () {
-                    $modalInstance.close();
+                    $uibModalInstance.close();
 
                     if ($scope.okCallback && typeof $scope.okCallback === 'function') {
                         $scope.okCallback();
@@ -44,7 +44,7 @@ angular.module('wasabi.controllers')
                 };
 
                 $scope.cancel = function () {
-                    $modalInstance.close();
+                    $uibModalInstance.close();
 
                     if ($scope.cancelCallback && typeof $scope.cancelCallback === 'function') {
                         $timeout($scope.cancelCallback, 100);

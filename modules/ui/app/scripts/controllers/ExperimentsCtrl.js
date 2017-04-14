@@ -5,8 +5,8 @@
 'use strict';
 
 angular.module('wasabi.controllers').
-    controller('ExperimentsCtrl', ['$scope', '$filter', '$http', '$timeout', 'ExperimentsFactory', '$modal', 'UtilitiesFactory', '$rootScope', 'StateFactory', 'DialogsFactory', 'AUTH_EVENTS', 'Session', 'PERMISSIONS', 'ConfigFactory', 'AuthzFactory', 'USER_ROLES', 'ApplicationsFactory', 'BucketsFactory', 'ExperimentStatisticsFactory', 'ApplicationStatisticsFactory', 'FavoritesFactory', '$cookies',
-        function ($scope, $filter, $http, $timeout, ExperimentsFactory, $modal, UtilitiesFactory, $rootScope, StateFactory, DialogsFactory, AUTH_EVENTS, Session, PERMISSIONS, ConfigFactory, AuthzFactory, USER_ROLES, ApplicationsFactory, BucketsFactory, ExperimentStatisticsFactory, ApplicationStatisticsFactory, FavoritesFactory, $cookies) {
+    controller('ExperimentsCtrl', ['$scope', '$filter', '$http', '$timeout', 'ExperimentsFactory', '$uibModal', 'UtilitiesFactory', '$rootScope', 'StateFactory', 'DialogsFactory', 'AUTH_EVENTS', 'Session', 'PERMISSIONS', 'ConfigFactory', 'AuthzFactory', 'USER_ROLES', 'ApplicationsFactory', 'BucketsFactory', 'ExperimentStatisticsFactory', 'ApplicationStatisticsFactory', 'FavoritesFactory', '$cookies',
+        function ($scope, $filter, $http, $timeout, ExperimentsFactory, $uibModal, UtilitiesFactory, $rootScope, StateFactory, DialogsFactory, AUTH_EVENTS, Session, PERMISSIONS, ConfigFactory, AuthzFactory, USER_ROLES, ApplicationsFactory, BucketsFactory, ExperimentStatisticsFactory, ApplicationStatisticsFactory, FavoritesFactory, $cookies) {
 
             var today = moment().format('MM/DD/YYYY');
 
@@ -703,7 +703,7 @@ angular.module('wasabi.controllers').
             };
 
             $scope.openExperimentModal = function (experiment) {
-                var modalInstance = $modal.open({
+                var modalInstance = $uibModal.open({
                     templateUrl: 'views/ExperimentModal.html',
                     controller: 'ExperimentModalCtrl',
                     windowClass: 'xx-dialog',

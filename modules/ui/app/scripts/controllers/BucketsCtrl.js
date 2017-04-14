@@ -3,8 +3,8 @@
 'use strict';
 
 angular.module('wasabi.controllers').
-    controller('BucketsCtrl', ['$scope', '$rootScope', '$filter', '$http', 'BucketsFactory', '$modal', 'UtilitiesFactory', 'DialogsFactory',
-        function ($scope, $rootScope, $filter, $http, BucketsFactory, $modal, UtilitiesFactory, DialogsFactory) {
+    controller('BucketsCtrl', ['$scope', '$rootScope', '$filter', '$http', 'BucketsFactory', '$uibModal', 'UtilitiesFactory', 'DialogsFactory',
+        function ($scope, $rootScope, $filter, $http, BucketsFactory, $uibModal, UtilitiesFactory, DialogsFactory) {
 
             $scope.bucket = [];
 
@@ -54,7 +54,7 @@ angular.module('wasabi.controllers').
             };
 
             $scope.openBucketModal = function (experimentId, bucketLabel) {
-                var modalInstance = $modal.open({
+                var modalInstance = $uibModal.open({
                     templateUrl: 'views/BucketModal.html',
                     controller: 'BucketModalCtrl',
                     windowClass: 'xxx-dialog',

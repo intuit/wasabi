@@ -7,8 +7,8 @@
 // page success message before the first one has faded out.
 var globalPageSuccessMessageFadeOutTimer = null;
 
-angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$state', 'AuthFactory', '$rootScope', 'AUTH_EVENTS', 'PERMISSIONS', 'USER_ROLES', '$filter', 'AuthzFactory', 'BucketsFactory', 'DialogsFactory', 'ExperimentsFactory', 'WasabiFactory', '$modal', '$injector', 'FavoritesFactory', 'StateFactory',
-    function (Session, $state, AuthFactory, $rootScope, AUTH_EVENTS, PERMISSIONS, USER_ROLES, $filter, AuthzFactory, BucketsFactory, DialogsFactory, ExperimentsFactory, WasabiFactory, $modal, $injector, FavoritesFactory, StateFactory) {
+angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$state', 'AuthFactory', '$rootScope', 'AUTH_EVENTS', 'PERMISSIONS', 'USER_ROLES', '$filter', 'AuthzFactory', 'BucketsFactory', 'DialogsFactory', 'ExperimentsFactory', 'WasabiFactory', '$uibModal', '$injector', 'FavoritesFactory', 'StateFactory',
+    function (Session, $state, AuthFactory, $rootScope, AUTH_EVENTS, PERMISSIONS, USER_ROLES, $filter, AuthzFactory, BucketsFactory, DialogsFactory, ExperimentsFactory, WasabiFactory, $uibModal, $injector, FavoritesFactory, StateFactory) {
         return {
             // generate state image url
             stateImgUrl: function (state) {
@@ -1106,7 +1106,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
 
             openPluginModal: function (plugin, experiment) {
                 var exp = (experiment !== undefined ? experiment : null);
-                var modalInstance = $modal.open({
+                var modalInstance = $uibModal.open({
                     templateUrl: plugin.templateUrl,
                     controller: plugin.ctrlName,
                     windowClass: 'xxx-dialog',
@@ -1125,7 +1125,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
             },
 
             openResultsModal: function (experiment, readOnly, afterResultsFunc) {
-                var modalInstance = $modal.open({
+                var modalInstance = $uibModal.open({
                     templateUrl: 'views/ResultsModal.html',
                     controller: 'ResultsModalCtrl',
                     windowClass: 'xxx-dialog',

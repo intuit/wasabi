@@ -2,8 +2,8 @@
 
 angular.module('wasabi.controllers')
     .controller('BucketModalCtrl',
-        ['$scope', '$modalInstance', 'BucketsFactory', 'bucket', 'experimentId', 'isCreateBucket', 'isEditInDetails', 'isNoControl', 'UtilitiesFactory', 'bucketStatistics', 'ConfigFactory', 'readOnly', 'buckets',
-            function ($scope, $modalInstance, BucketsFactory, bucket, experimentId, isCreateBucket, isEditInDetails, isNoControl, UtilitiesFactory, bucketStatistics, ConfigFactory, readOnly, buckets) {
+        ['$scope', '$uibModalInstance', 'BucketsFactory', 'bucket', 'experimentId', 'isCreateBucket', 'isEditInDetails', 'isNoControl', 'UtilitiesFactory', 'bucketStatistics', 'ConfigFactory', 'readOnly', 'buckets',
+            function ($scope, $uibModalInstance, BucketsFactory, bucket, experimentId, isCreateBucket, isEditInDetails, isNoControl, UtilitiesFactory, bucketStatistics, ConfigFactory, readOnly, buckets) {
 
                 $scope.isCreateBucket = isCreateBucket;
                 $scope.bucket = bucket;
@@ -35,7 +35,7 @@ angular.module('wasabi.controllers')
                                 {key: 'item_label', value: bucket.label});
 
                             if (!afterUpdateFunc) {
-                                $modalInstance.close();
+                                $uibModalInstance.close();
                             }
                             else {
                                 afterUpdateFunc(experimentId, newBucket);
@@ -49,7 +49,7 @@ angular.module('wasabi.controllers')
                             $scope.postSubmitError = 'genericUpdateError';
                             if (UtilitiesFactory.extractErrorFromResponse(response) === 'unauthenticated') {
                                 if (!afterUpdateFunc) {
-                                    $modalInstance.close();
+                                    $uibModalInstance.close();
                                 }
                             }
                         });
@@ -68,14 +68,14 @@ angular.module('wasabi.controllers')
                                 {key: 'dialog_name', value: 'createBucket'},
                                 {key: 'experiment_id', value: experimentId});
 
-                            $modalInstance.close();
+                            $uibModalInstance.close();
                         },
                         function(response) {
                             //console.log(response);
                             $scope.bucketFormSubmitted = true;
                             $scope.postSubmitError = 'genericCreateError';
                             if (UtilitiesFactory.extractErrorFromResponse(response) === 'unauthenticated') {
-                                $modalInstance.close();
+                                $uibModalInstance.close();
                             }
                         });
                 };
@@ -121,6 +121,6 @@ angular.module('wasabi.controllers')
                 };
 
                 $scope.cancel = function () {
-                    $modalInstance.dismiss('cancel');
+                    $uibModalInstance.dismiss('cancel');
                 };
             }]);

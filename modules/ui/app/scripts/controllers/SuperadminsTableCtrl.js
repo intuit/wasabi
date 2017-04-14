@@ -3,8 +3,8 @@
 'use strict';
 
 angular.module('wasabi.controllers').
-    controller('SuperadminsTableCtrl', ['$scope', '$filter', '$http', 'Session', 'SuperadminsFactory', '$modal', 'UtilitiesFactory', 'DialogsFactory', 'AUTH_EVENTS',
-        function ($scope, $filter, $http, Session, SuperadminsFactory, $modal, UtilitiesFactory, DialogsFactory, AUTH_EVENTS) {
+    controller('SuperadminsTableCtrl', ['$scope', '$filter', '$http', 'Session', 'SuperadminsFactory', '$uibModal', 'UtilitiesFactory', 'DialogsFactory', 'AUTH_EVENTS',
+        function ($scope, $filter, $http, Session, SuperadminsFactory, $uibModal, UtilitiesFactory, DialogsFactory, AUTH_EVENTS) {
 
             $scope.superadmins = [];
 
@@ -56,7 +56,7 @@ angular.module('wasabi.controllers').
             $scope.loadSuperadmins();
 
             $scope.openAddSuperadminModal = function (superadmin) {
-                var modalInstance = $modal.open({
+                var modalInstance = $uibModal.open({
                     templateUrl: 'views/AddSuperadminModal.html',
                     controller: 'AddSuperadminModalCtrl',
                     windowClass: 'xxx-dialog',

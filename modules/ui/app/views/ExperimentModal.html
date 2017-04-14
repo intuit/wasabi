@@ -15,7 +15,7 @@
                     </label>
                     <input ng-show="!readOnly" type="text" class="form-control text" name="label"
                            ng-model="experiment.label" auto-focus ng-focus required
-                           ng-pattern="/^[_\-\$A-Za-z][_\-\$A-Za-z0-9]*$/" ng-maxlength=64/>
+                           ng-pattern="/^[_\-\$A-Za-z][_\-\$A-Za-z0-9]*$/" ng-maxlength="64"/>
                     <span ng-show="readOnly">{{experiment.label}}</span>
                     <!-- Validation error -->
                     <div class="error"
@@ -88,7 +88,7 @@
                     </div>
                     <input type="text" ng-show="showApplicationName2 || experiment.applicationName === newApplicationNamePrompt" style="width: 265px; margin-top: 10px;" class="form-control text" id="applicationName2"
                            ng-model="experiment.applicationName2" name="applicationName2" required
-                           ng-pattern="/^[_\-\$A-Za-z][_\-\$A-Za-z0-9]*$/" ng-maxlength=64 abtest-autocomplete list="allApplications" select-function="selectApplication" enter-function="selectApplicationOnEnter"/>
+                           ng-pattern="/^[_\-\$A-Za-z][_\-\$A-Za-z0-9]*$/" ng-maxlength="64" abtest-autocomplete list="allApplications" select-function="selectApplication" enter-function="selectApplicationOnEnter"/>
 
                     <!-- Validation error -->
                     <div class="error"
@@ -176,8 +176,8 @@
                     <div ng-show="!readOnly" class="col-md-6" ng-model="experiment.startTime" ng-change="changed()"
                          style="display:inline-block;margin-top:-34px;margin-left: 13px;"
                          ng-controller="TimePickerCtrl">
-                        <timepicker hour-step="hstep" minute-step="mstep"
-                                    show-meridian="ismeridian"></timepicker>
+                        <uib-timepicker hour-step="hstep" minute-step="mstep"
+                                    show-meridian="ismeridian"></uib-timepicker>
                     </div>
                     <span ng-show="readOnly">{{experiment.startTime | date:'M/d/yyyy h:mm a'}}</span>
                 </div>
@@ -201,8 +201,8 @@
                     <div ng-show="!readOnly" class="col-md-6" ng-model="experiment.endTime" ng-change="changed()"
                          style="display:inline-block;margin-top:-34px;margin-left: 13px;"
                          ng-controller="TimePickerCtrl">
-                        <timepicker hour-step="hstep" minute-step="mstep"
-                                    show-meridian="ismeridian"></timepicker>
+                        <uib-timepicker hour-step="hstep" minute-step="mstep"
+                                    show-meridian="ismeridian"></uib-timepicker>
                     </div>
                     <span ng-show="readOnly">{{experiment.endTime | date:'M/d/yyyy h:mm a'}}</span>
                 </div>
@@ -275,8 +275,8 @@
         <div class="clear"></div>
 
         <div id="saveMsg" fade-in-out fade-model-name="experiment.id">Experiment saved. You may now add buckets.</div>
-        <tabset id="newExprTabs" ng-show="experiment.id" class="tabs">
-            <tab id="buckets" active="tabs[0].active" heading="Buckets" ng-controller="BucketsCtrl">
+        <uib-tabset id="newExprTabs" ng-show="experiment.id" class="tabs">
+            <uib-tab id="buckets" active="tabs[0].active" heading="Buckets" ng-controller="BucketsCtrl">
                 <a ng-show="!readOnly" href="#" id="newExpAddBucket" class="listAction add" onclick="return false;" ng-click="openBucketModal(experiment.id)"><span></span>Add Bucket</a>
                 <span class="info newHelp" help help-content="{{help.buckets}}"></span>
                 <div id="newExpBucketList" class="tabContainer">
@@ -310,8 +310,8 @@
                         <a ng-class="{disabled: readOnly}" ng-disabled="readOnly" href="#" onclick="return false;" ng-click="balanceBuckets();">Balance bucket allocations...</a>
                     </div>
                 </div>
-            </tab>
-            <tab heading="Mutual Exclusion" active="tabs[1].active" ng-controller="MutualExclusionsCtrl">
+            </uib-tab>
+            <uib-tab heading="Mutual Exclusion" active="tabs[1].active" ng-controller="MutualExclusionsCtrl">
                 <a ng-show="!readOnly" href="#" id="newExpAddExclusion" class="listAction add" onclick="return false;" ng-click="openMutualExclusionModal(experiment.id)"><span></span>Add Experiment</a>
                 <span class="info newHelp" help help-content="{{help.mutualExclusion}}"></span>
                 <div id="newExpExclusionList" class="tabContainer">
@@ -344,8 +344,8 @@
                     </table>
                     </div>
                 </div>
-            </tab>
-            <tab heading="Segmentation" active="tabs[2].active">
+            </uib-tab>
+            <uib-tab heading="Segmentation" active="tabs[2].active">
                 <div class="segmentationTab">
                     <div>
                         <div style="float: left;"><label>User Segmentation Rule</label></div>
@@ -393,8 +393,8 @@
                         </span>
                     </div>
                 </div>
-            </tab>
-            <tab id="pages" heading="Pages" active="tabs[3].active" ng-controller="PagesCtrl">
+            </uib-tab>
+            <uib-tab id="pages" heading="Pages" active="tabs[3].active" ng-controller="PagesCtrl">
                 <input ng-show="!readOnly" ng-model="pagesData.pageName" abtest-autocomplete list="pagesData.groupPages" select-function="selectPage" enter-function="selectPageOnEnter" id="txtAddPage" type="text" class="text" placeholder="Add Page" maxlength="256" />
                 <button ng-show="!readOnly" id="btnAddPage" type="button" class="blue" title="Add Page" ng-click="addPageClick()">Add</button>
                 <span class="info newHelp" help help-content="{{help.pages}}"></span>
@@ -425,16 +425,16 @@
                     </div>
                 </div>
                 <div class="hint">List the page(s) on which this experiment takes place. Allow assignment on the page(s) where this experiment starts (typically just one).</div>
-            </tab>
-            <tab heading="Plugins">
+            </uib-tab>
+            <uib-tab heading="Plugins">
                 <div ng-show="plugins && plugins.length > 0">
                     <button ng-repeat="plugin in plugins | filter:{ pluginType: 'contributeDraftTab' }" style="margin-right: 15px;" onclick="return false;" ng-click="openPluginModal(plugin);">{{plugin.displayName}}</button>
                 </div>
                 <div ng-show="!plugins || plugins.length === 0">
                     <label>No plugins are currently installed.</label>
                 </div>
-            </tab>
-            <tab heading="API Calls">
+            </uib-tab>
+            <uib-tab heading="API Calls">
                 <div class="apiCallsTab" ng-controller="APICallsCtrl">
                     <label>Example Wasabi API Calls</label>
                     <div style="margin-top: 0">(Note: This experiment is in Draft and so these API calls will not succeed.)</div>
@@ -474,8 +474,8 @@
                                value="{{experiment.id}}" readonly />
                     </div>
                 </div>
-            </tab>
-        </tabset>
+            </uib-tab>
+        </uib-tabset>
 
         <div class="buttonBar">
             <button type="button" id="btnStartExperiment" class="blue" ng-click="startExperiment(experimentForm.$invalid)" ng-show="experiment.id && !readOnly">Start Experiment</button>&nbsp; &nbsp;

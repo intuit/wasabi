@@ -3,8 +3,8 @@
 
 angular.module('wasabi.controllers')
     .controller('AddUserModalCtrl',
-        ['$scope', '$modalInstance', 'AuthFactory', 'AuthzFactory', 'user', 'UtilitiesFactory', 'isEditingPermissions', 'application',
-            function ($scope, $modalInstance, AuthFactory, AuthzFactory, user, UtilitiesFactory, isEditingPermissions, application) {
+        ['$scope', '$uibModalInstance', 'AuthFactory', 'AuthzFactory', 'user', 'UtilitiesFactory', 'isEditingPermissions', 'application',
+            function ($scope, $uibModalInstance, AuthFactory, AuthzFactory, user, UtilitiesFactory, isEditingPermissions, application) {
 
                 $scope.data = {
                     userEmail: '',
@@ -95,7 +95,7 @@ angular.module('wasabi.controllers')
 */
                     if (!$scope.isEditingPermissions && !$scope.userValidated) {
                         // Just close dialog
-                        $modalInstance.close();
+                        $uibModalInstance.close();
                         return;
                     }
                     AuthzFactory.assignRole({
@@ -105,7 +105,7 @@ angular.module('wasabi.controllers')
                             userID: $scope.user.userID
                         }]
                     }).$promise.then(function () {
-                        $modalInstance.close();
+                        $uibModalInstance.close();
 
                         UtilitiesFactory.trackEvent('saveRolesSuccess',
                             {key: 'dialog_name', value: 'addRoleForUserForApplicationDialog'},
@@ -116,12 +116,12 @@ angular.module('wasabi.controllers')
                     }, function(response) {
                         UtilitiesFactory.handleGlobalError(response, 'The role could not be added.');
                         if (UtilitiesFactory.extractErrorFromResponse(response) === 'unauthenticated') {
-                            $modalInstance.close();
+                            $uibModalInstance.close();
                         }
                     });
                 };
 
                 $scope.cancel = function () {
-                    $modalInstance.dismiss('cancel');
+                    $uibModalInstance.dismiss('cancel');
                 };
             }]);

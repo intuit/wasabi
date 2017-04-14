@@ -5,8 +5,8 @@
 
 angular.module('wasabi.controllers').
     controller('ExperimentDetailsCtrl', ['$scope', '$filter', '$http', '$timeout', 'ExperimentsFactory', 'BucketsFactory', 'ConfigFactory',
-        'ExperimentStatisticsFactory', '$stateParams', '$modal', 'UtilitiesFactory', '$rootScope', 'ApplicationStatisticsFactory', 'DialogsFactory', 'RuleEditFactory', '$cookies', 'PERMISSIONS', 'supportEmail',
-        function ($scope, $filter, $http, $timeout, ExperimentsFactory, BucketsFactory, ConfigFactory, ExperimentStatisticsFactory, $stateParams, $modal, UtilitiesFactory, $rootScope, ApplicationStatisticsFactory, DialogsFactory, RuleEditFactory, $cookies, PERMISSIONS, supportEmail) {
+        'ExperimentStatisticsFactory', '$stateParams', '$uibModal', 'UtilitiesFactory', '$rootScope', 'ApplicationStatisticsFactory', 'DialogsFactory', 'RuleEditFactory', '$cookies', 'PERMISSIONS', 'supportEmail',
+        function ($scope, $filter, $http, $timeout, ExperimentsFactory, BucketsFactory, ConfigFactory, ExperimentStatisticsFactory, $stateParams, $uibModal, UtilitiesFactory, $rootScope, ApplicationStatisticsFactory, DialogsFactory, RuleEditFactory, $cookies, PERMISSIONS, supportEmail) {
 
             $scope.data = {
                 disableSimple: false,
@@ -321,7 +321,7 @@ angular.module('wasabi.controllers').
             };
 
             $scope.showAnalysisGraph = function() {
-                var modalInstance = $modal.open({
+                var modalInstance = $uibModal.open({
                     templateUrl: 'views/AnalysisGraphModal.html',
                     controller: 'AnalysisGraphModalCtrl',
                     windowClass: 'xxx-dialog',
@@ -630,7 +630,7 @@ angular.module('wasabi.controllers').
             };
 
             $scope.closeBucket = function (bucketLabel) {
-                $modal.open({
+                $uibModal.open({
                     templateUrl: 'views/CloseBucketConfirmModal.html',
                     controller: 'CloseBucketConfirmModalCtrl',
                     windowClass: 'xxx-dialog',
@@ -922,7 +922,7 @@ angular.module('wasabi.controllers').
             };
 
             $scope.openChangeSamplingModal = function (sampling) {
-                $modal.open({
+                $uibModal.open({
                     templateUrl: 'views/ChangeSamplingModal.html',
                     controller: 'ChangeSamplingModalCtrl',
                     windowClass: 'xxx-dialog',
@@ -948,7 +948,7 @@ angular.module('wasabi.controllers').
             };
 
             $scope.openGetAssignmentsModal = function () {
-                $modal.open({
+                $uibModal.open({
                     templateUrl: 'views/GetAssignmentsModal.html',
                     controller: 'GetAssignmentsModalCtrl',
                     windowClass: 'xxx-dialog',
@@ -964,7 +964,7 @@ angular.module('wasabi.controllers').
             };
 
             $scope.openChangeRapidExperiment = function () {
-                $modal.open({
+                $uibModal.open({
                     templateUrl: 'views/ChangeRapidExperiment.html',
                     controller: 'ChangeRapidExperimentCtrl',
                     windowClass: 'xxx-dialog',
@@ -993,7 +993,7 @@ angular.module('wasabi.controllers').
             };
 
             $scope.openChangeEndTimeModal = function (endTime) {
-                $modal.open({
+                $uibModal.open({
                     templateUrl: 'views/ChangeDateModal.html',
                     controller: 'ChangeDateModalCtrl',
                     windowClass: 'xxx-dialog',
@@ -1022,7 +1022,7 @@ angular.module('wasabi.controllers').
             };
 
             $scope.openBucketModal = function (experimentId, bucketLabel, bucketInfo, readOnly) {
-                var modalInstance = $modal.open({
+                var modalInstance = $uibModal.open({
                     templateUrl: 'views/BucketModal.html',
                     controller: 'BucketModalCtrl',
                     windowClass: 'xxx-dialog',
@@ -1081,7 +1081,7 @@ angular.module('wasabi.controllers').
                 DialogsFactory.confirmDialog(editRunningBucketsWarning, 'Warning',
                         function() {
                             // Let them go to the dialog.
-                            var modalInstance = $modal.open({
+                            var modalInstance = $uibModal.open({
                                 templateUrl: 'views/BucketAssignmentModal.html',
                                 controller: 'BucketAssignmentModalCtrl',
                                 windowClass: 'xxx-dialog',
@@ -1109,7 +1109,7 @@ angular.module('wasabi.controllers').
             };
 
             $scope.openSegmentationTestModal = function () {
-                var modalInstance = $modal.open({
+                var modalInstance = $uibModal.open({
                     templateUrl: 'views/SegmentationTestModal.html',
                     controller: 'SegmentationTestModalCtrl',
                     windowClass: 'xxx-dialog',
