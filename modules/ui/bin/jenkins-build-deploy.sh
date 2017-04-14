@@ -19,6 +19,9 @@
 #
 #   profile                      : maven profile; default:test
 #   nexus_deploy                 : nexus deploy user; default:usr:pwd
+#   nexus_repositories           : nexus repositories
+#   nexus_repository_id          : nexus milestone repository id
+#   nexus_snapshot_repository_id : nexus snapshot repository id
 
 project=wasabi
 profile=${PROJECT_PROFILE:-development}
@@ -39,95 +42,67 @@ fromPom() {
 version=`fromPom main ${profile} project.version`
 echo "++ version= ${version}"
 
+# ------------------------------------------------------------------------------
+# -------------------------- BUILD UI ------------------------------------------
+# ------------------------------------------------------------------------------
 echo "++ Building: UI module - STARTED"
-echo "++ Grunt build - STARTED"
 
-  echo "++ Installing required dependencies is they are missing - STARTED"
-  # Install required dependencies is they are missing
-  if [ "${WASABI_OS}" == "${WASABI_OSX}" ]; then
-    brew list node
-    if [[ $? -eq 1 ]]; then
-      echo "++ Node.js is not installed. Installing Node.js packages..."
-      echo "++ execute: brew install node"
-      brew install node
+# ----------- Install dependencies first ---------------------------------------
+echo "++ execute: (cd ./modules/ui && npm install && bower install && grunt build)"
+(cd ./modules/ui && npm install && bower install && grunt build)
 
-      echo "++ execute: npm install -g yo grunt-cli bower grunt-contrib-compass"
-      npm install -g yo grunt-cli bower grunt-contrib-compass
+# ----------- Copy plugins ------------------------------------------------------
+echo "++ Installing Plugins: ${CONTRIB_PLUGINS_TO_INSTALL}"
+(for contrib_dir in $CONTRIB_PLUGINS_TO_INSTALL; do
+     if [ -d contrib/$contrib_dir ]; then
+       echo "++ Installing plugin from contrib/$contrib_dir"
+       if [ -d contrib/$contrib_dir/plugins ]; then
+         cp -R contrib/$contrib_dir/plugins modules/ui/dist
+       fi
+       if [ -f contrib/$contrib_dir/scripts/plugins.js ]; then
+           if [ -f modules/ui/dist/scripts/plugins.js ] && [ `cat modules/ui/dist/scripts/plugins.js | wc -l` -gt 3 ]; then
+             echo Need to merge
+             # Get all but the last line of the current plugins.js file
+             sed -e "1,$(($(cat modules/ui/dist/scripts/plugins.js | wc -l) - 2))p;d" modules/ui/dist/scripts/plugins.js > tmp.txt
+             # Since this should end in a } we want to add a comma
+             echo ',' >> tmp.txt
+             # Copy all but the first and last lines of this plugins's config.  This assumes first line defines var and array, last line ends array.
+             sed -e "2,$(($(cat contrib/$contrib_dir/scripts/plugins.js | wc -l) - 1))p;d" contrib/$contrib_dir/scripts/plugins.js >> tmp.txt
+             sed '$p;d' modules/ui/dist/scripts/plugins.js >> tmp.txt
+             cp tmp.txt modules/ui/dist/scripts/plugins.js
+             rm tmp.txt
+           else
+             echo Overwriting file
+             cp contrib/$contrib_dir/scripts/plugins.js modules/ui/dist/scripts
+           fi
+       fi
+       echo Merged in $contrib_dir
+     fi;
+done)
 
-      echo "++ execute: sudo gem install compass"
-      sudo gem install compass
-    fi
-  fi
+# ----------- Grunt build ------------------------------------------------------
+echo "++ Starting actual grunt build"
+(cd modules/ui; \
+  mkdir -p target; \
+  for f in app node_modules bower.json Gruntfile.js constants.json karma.conf.js karma-e2e.conf.js package.json test .bowerrc; do \
+    cp -r ${f} target; \
+  done; \
+  echo Getting merged plugins.js file and plugins directory; \
+  cp dist/scripts/plugins.js target/app/scripts/plugins.js; \
+  cp -R dist/plugins target/app; \
+  sed -i '' -e "s|VERSIONLOC|${version}|g" target/app/index.html 2>/dev/null; \
 
-  echo "++ execute: (cd ./modules/ui && npm install && bower install && grunt build)"
-  (cd ./modules/ui && npm install && bower install && grunt build)
-
-  echo "++ Installing required dependencies is they are missing - FINISHED"
-
-  (for contrib_dir in $CONTRIB_PLUGINS_TO_INSTALL; do
-       if [ -d contrib/$contrib_dir ]; then
-         echo "++ Installing plugin from contrib/$contrib_dir"
-         if [ -d contrib/$contrib_dir/plugins ]; then
-           cp -R contrib/$contrib_dir/plugins modules/ui/dist
-         fi
-         if [ -f contrib/$contrib_dir/scripts/plugins.js ]; then
-             if [ -f modules/ui/dist/scripts/plugins.js ] && [ `cat modules/ui/dist/scripts/plugins.js | wc -l` -gt 3 ]; then
-               echo Need to merge
-               # Get all but the last line of the current plugins.js file
-               sed -e "1,$(($(cat modules/ui/dist/scripts/plugins.js | wc -l) - 2))p;d" modules/ui/dist/scripts/plugins.js > tmp.txt
-               # Since this should end in a } we want to add a comma
-               echo ',' >> tmp.txt
-               # Copy all but the first and last lines of this plugins's config.  This assumes first line defines var and array, last line ends array.
-               sed -e "2,$(($(cat contrib/$contrib_dir/scripts/plugins.js | wc -l) - 1))p;d" contrib/$contrib_dir/scripts/plugins.js >> tmp.txt
-               sed '$p;d' modules/ui/dist/scripts/plugins.js >> tmp.txt
-               cp tmp.txt modules/ui/dist/scripts/plugins.js
-               rm tmp.txt
-             else
-               echo Overwriting file
-               cp contrib/$contrib_dir/scripts/plugins.js modules/ui/dist/scripts
-             fi
-         fi
-         echo Merged in $contrib_dir
-       fi;
-  done)
-
-  (cd modules/ui; \
-    mkdir -p target; \
-    for f in app node_modules bower.json Gruntfile.js constants.json karma.conf.js karma-e2e.conf.js package.json test .bowerrc; do \
-      cp -r ${f} target; \
-    done; \
-    echo Getting merged plugins.js file and plugins directory; \
-    cp dist/scripts/plugins.js target/app/scripts/plugins.js; \
-    cp -R dist/plugins target/app; \
-    sed -i '' -e "s|VERSIONLOC|${version}|g" target/app/index.html 2>/dev/null; \
-    #(cd target; npm install; bower install --no-optional; grunt clean); \
-    (cd target; grunt clean); \
-    (cd target; grunt build --target=develop --no-color) \
-  )
-  echo "++ Grunt build - FINISHED"
-
-#  echo "Create UI RPM - STARTED"
-#  (  cp -r build target; \
-#    for pkg in deb rpm; do \
-#      sed -i '' -e "s|\${application.home}|${home}|g" target/build/${pkg}/before-install.sh 2>/dev/null; \
-#      sed -i '' -e "s|\${application.name}|${api_name}|g" target/build/${pkg}/before-install.sh 2>/dev/null; \
-#      sed -i '' -e "s|\${application.user}|${user}|g" target/build/${pkg}/before-install.sh 2>/dev/null; \
-#      sed -i '' -e "s|\${application.group}|${group}|g" target/build/${pkg}/before-install.sh 2>/dev/null; \
-#      sed -i '' -e "s|\${application.ui.home}|${ui_home}|g" target/build/${pkg}/after-install.sh 2>/dev/null; \
-#      sed -i '' -e "s|\${application.http.content.directory}|${content}|g" target/build/${pkg}/after-install.sh 2>/dev/null; \
-#      sed -i '' -e "s|\${application.user}|${user}|g" target/build/${pkg}/after-install.sh 2>/dev/null; \
-#      sed -i '' -e "s|\${application.group}|${group}|g" target/build/${pkg}/after-install.sh 2>/dev/null; \
-#      sed -i '' -e "s|\${application.http.content.directory}|${content}|g" target/build/${pkg}/before-remove.sh 2>/dev/null; \
-#    done; \
-#    (cd target; ../bin/fpm.sh -n ${name} -v ${version} -p ${profile})
-#  )
-#  find . -type f \( -name "*.rpm" -or -name "*.deb" \) -exec mv {} ./target 2>/dev/null \;
-#  echo "Create UI RPM - FINISHED"
+  (cd target; grunt clean); \
+  (cd target; grunt build --target=develop --no-color) \
+)
 
 echo "++ Building: UI module - FINISHED"
 
-echo "++ Push UI ZIP to internal Nexus - STARTED"
 
+# ------------------------------------------------------------------------------
+# -------------------------- PUBLISH UI TO NEXUS -------------------------------
+# ------------------------------------------------------------------------------
+echo "++ Push UI ZIP to internal Nexus - STARTED"
 if [[ "${version/-SNAPSHOT}" == "${version}" ]]; then
   artifact_repository_id=${nexus_repository_id}
 elif [[ "${version}" == *SNAPSHOT ]]; then
