@@ -431,7 +431,7 @@ public class CassandraExperimentRepository implements ExperimentRepository {
             for (ExperimentTagsByApplication tagsSet : listAllTags) {
                 allTags.addAll(tagsSet.getTags());
             }
-            experimentTagAccessor.insert(applicationName, allTags);
+            experimentTagAccessor.insert(applicationName.toString(), allTags);
         }
     }
 

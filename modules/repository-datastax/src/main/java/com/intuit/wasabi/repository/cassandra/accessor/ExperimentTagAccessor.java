@@ -35,7 +35,7 @@ public interface ExperimentTagAccessor {
     Result<ExperimentTagsByApplication> getExperimentTags(List<String> applicationNames);
 
     @Query("insert into experiment_tag(app_name, tags) values(?,?)")
-    Statement insert(Application.Name appName, Set<String> tags);
+    Statement insert(String appName, Set<String> tags);
 
     @Query("update experiment_tag set tags = tags + ? WHERE app_name = ?;")
     Statement update(Set<String> tags, Application.Name appName);
@@ -44,5 +44,5 @@ public interface ExperimentTagAccessor {
     Statement remove(Set<String> tags, Application.Name appName);
 
     @Query("delete tags from experiment_tag WHERE app_name = ?;")
-    Statement removeAll(Application.Name appName);
+    Statement removeAll(String appName);
 }
