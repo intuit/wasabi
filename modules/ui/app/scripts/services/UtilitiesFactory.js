@@ -7,8 +7,8 @@
 // page success message before the first one has faded out.
 var globalPageSuccessMessageFadeOutTimer = null;
 
-angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$state', 'AuthFactory', '$rootScope', 'AUTH_EVENTS', 'PERMISSIONS', 'USER_ROLES', '$filter', 'AuthzFactory', 'BucketsFactory', 'DialogsFactory', 'ExperimentsFactory', 'WasabiFactory', '$modal', '$injector', 'FavoritesFactory', 'StateFactory',
-    function (Session, $state, AuthFactory, $rootScope, AUTH_EVENTS, PERMISSIONS, USER_ROLES, $filter, AuthzFactory, BucketsFactory, DialogsFactory, ExperimentsFactory, WasabiFactory, $modal, $injector, FavoritesFactory, StateFactory) {
+angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$state', 'AuthFactory', '$rootScope', 'AUTH_EVENTS', 'PERMISSIONS', 'USER_ROLES', '$filter', 'AuthzFactory', 'BucketsFactory', 'DialogsFactory', 'ExperimentsFactory', 'WasabiFactory', '$modal', '$injector', 'FavoritesFactory', 'StateFactory', 'usSpinnerService',
+    function (Session, $state, AuthFactory, $rootScope, AUTH_EVENTS, PERMISSIONS, USER_ROLES, $filter, AuthzFactory, BucketsFactory, DialogsFactory, ExperimentsFactory, WasabiFactory, $modal, $injector, FavoritesFactory, StateFactory, usSpinnerService) {
         return {
             // generate state image url
             stateImgUrl: function (state) {
@@ -43,6 +43,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                     this.hideTopLevelTab('Plugins', false);
                     this.hideTopLevelTabMenuChoice('Logs', false);
                     this.hideTopLevelTabMenuChoice('Feedback', !Session.isSuperadmin);
+                    this.hideTopLevelTabMenuChoice('Superadmins', !Session.isSuperadmin);
                     this.hideTopLevelTab('Tools', false);
                 }
                 else {
@@ -51,6 +52,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                     this.hideTopLevelTab('Plugins');
                     this.hideTopLevelTabMenuChoice('Logs');
                     this.hideTopLevelTabMenuChoice('Feedback', true);
+                    this.hideTopLevelTabMenuChoice('Superadmins', true);
                     this.hideTopLevelTab('Tools', true);
                 }
             },
@@ -1188,9 +1190,15 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
             displaySuccessWithCacheWarning: function(title, extraMsg) {
                 var msg = extraMsg + '  PLEASE NOTE that this change may not be available for assignment calls for up to 5 minutes.';
                 this.displayPageSuccessMessage(title, msg);
+            },
+
+            startSpin: function(){
+                usSpinnerService.spin('spinner-1');
+            },
+
+            stopSpin: function(){
+                usSpinnerService.stop('spinner-1');
             }
-
-
         };
     }
 ]);

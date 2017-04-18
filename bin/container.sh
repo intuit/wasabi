@@ -184,7 +184,7 @@ start_cassandra() {
     IS_IMAGE_AVAILABLE=$?
     if [ "${migration}" = true ] || ! [ ${IS_IMAGE_AVAILABLE} -eq 0 ]; then
         echo "${green}${project}: [Start] Building wasabi keyspace image${reset}"
-        docker build -t wasabi-keyspace:latest -f "${CURRENT_DIR}/./docker/cqlsh.docker" "${CURRENT_DIR}/./docker/"
+        docker build --force-rm --no-cache -t wasabi-keyspace:latest -f "${CURRENT_DIR}/./docker/cqlsh.docker" "${CURRENT_DIR}/./docker/"
     fi
     docker run -it --rm -e CASSANDRA_KEYSPACE_PREFIX=${project} -e CQLSH_HOST=${project}-cassandra -e CASSANDRA_PORT=9042 --net=${docker_network} --name wasabi_create_keyspace wasabi-keyspace
 
@@ -192,7 +192,7 @@ start_cassandra() {
     IS_IMAGE_AVAILABLE=$?
     if [ "${migration}" = true ] || ! [ ${IS_IMAGE_AVAILABLE} -eq 0 ]; then
         echo "${green}${project}: [Start] Building wasabi migration image${reset}"
-        docker build -t wasabi-migration:latest -f "${CURRENT_DIR}/./docker/migration.docker" "${CURRENT_DIR}/../"
+        docker build --force-rm --no-cache -t wasabi-migration:latest -f "${CURRENT_DIR}/./docker/migration.docker" "${CURRENT_DIR}/../"
     fi
     docker run -it --rm -e CQLSH_HOST=${project}-cassandra -e CASSANDRA_PORT=9042 --net=${docker_network} --name wasabi_migration wasabi-migration
     echo "${green}${project}: [DONE] creating keyspace and migration schemas${reset}"
