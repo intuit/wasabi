@@ -101,6 +101,7 @@ http://www.w3.org/2001/XMLSchema-instance">
         <swaggerServicePath>swagger/swaggerjson/swagger.json</swaggerServicePath>
         <swaggerServiceUrl>/${swaggerServicePath}</swaggerServiceUrl>
 
+        <dmServerId>ossrh</dmServerId>
         <dmNexusUrl>https://oss.sonatype.org/</dmNexusUrl>
         <dmSnapshotRepository>https://oss.sonatype.org/content/repositories/snapshots</dmSnapshotRepository>
         <dmRepository>https://oss.sonatype.org/service/local/staging/deploy/maven2/</dmRepository>
@@ -393,11 +394,11 @@ http://www.w3.org/2001/XMLSchema-instance">
     </dependencies>
     <distributionManagement>
         <snapshotRepository>
-            <id>ossrh</id>
+            <id>${dmServerId}</id>
             <url>${dmSnapshotRepository}</url>
         </snapshotRepository>
         <repository>
-            <id>ossrh</id>
+            <id>${dmServerId}</id>
             <url>${dmRepository}</url>
         </repository>
     </distributionManagement>
@@ -435,7 +436,7 @@ http://www.w3.org/2001/XMLSchema-instance">
                 <version>1.6.6</version>
                 <extensions>true</extensions>
                 <configuration>
-                    <serverId>ossrh</serverId>
+                    <serverId>${dmServerId}</serverId>
                     <nexusUrl>${dmNexusUrl}</nexusUrl>
                     <autoReleaseAfterClose>true</autoReleaseAfterClose>
                 </configuration>
