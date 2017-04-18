@@ -153,7 +153,7 @@
                 </div>
             </li>
             <li class="layout8020">
-                <div>
+                <div style="margin-bottom: 0;">
                     <label>Start Date</label>
 
                     <div ng-show="!readOnly" class="col-md-7" style="margin-left:-17px">
@@ -181,7 +181,7 @@
                     </div>
                     <span ng-show="readOnly">{{experiment.startTime | date:'M/d/yyyy h:mm a'}}</span>
                 </div>
-                <div>
+                <div style="margin-bottom: 0;">
                     <label>End Date</label>
 
                     <div ng-show="!readOnly" class="col-md-7" style="margin-left:-17px">
@@ -240,6 +240,13 @@
                             Maximum number of user assignments must be a positive number.
                         </small>
                     </div>
+                </div>
+            </li>
+            <li>
+                <div>
+                    <tags-input name="tags" ng-model="tags" style="width: 900px;">
+                        <auto-complete source="queryTags($query)"></auto-complete>
+                    </tags-input>
                 </div>
             </li>
             <li>

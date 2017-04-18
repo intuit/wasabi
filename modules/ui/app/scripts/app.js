@@ -30,7 +30,8 @@ angular.module('wasabi', [
         'wasabi.services',
         'wasabi.controllers',
         'wasabi.directives',
-        'config'
+        'config',
+        'ngTagsInput'
     ])
 
     /*
