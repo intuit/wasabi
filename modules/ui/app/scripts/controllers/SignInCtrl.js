@@ -70,10 +70,6 @@ angular.module('wasabi.controllers')
                     }));
 
                     return AuthFactory.signIn().$promise.then(function(result) {
-/*
-                        console.log('In SignInCtrl');
-                        console.log(result);
-*/
                         localStorage.removeItem('wasabiLastSearch');
 
                         var sessionInfo = {userID: credentials.username, accessToken: result.access_token, tokenType: result.token_type};

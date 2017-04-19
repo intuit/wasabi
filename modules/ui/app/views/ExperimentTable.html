@@ -1,4 +1,5 @@
 <div ng-controller="ExperimentsCtrl">
+    <div class="mobile-spacer">&nbsp;</div>
     <div class="toolbar">
         <a href="" onclick="return false;" id="searchMoreLess" title="More Search Options" ng-show="!noExperiments" ng-click="showMoreLessSearch();"><span></span></a>
         <button id="btnNewExperiment" class="blue" ng-click="openExperimentModal()" ng-class="{disabled: !applicationsLoaded}" ng-disabled="!applicationsLoaded">Create Experiment</button>
@@ -66,7 +67,7 @@
             <li ng-repeat="experiment in cardViewExperiments" ng-class="{favorite: experiment.isFavorite}">
                 <div class="summaryHead">
                     <a href="#" favorites-star favorites-star-experiment-id="experiment.id" favorites-star-favorites-object="favoritesObj" ng-attr-is-favorite="{{experiment.isFavorite}}" after-favorite-func="handleCardStarAnimation" class="star" title="Mark as Favorite"></a>
-                    <label-link-content state="{{experiment.state}}" href="{{customHref}}" ng-click="hasUpdatePermission(experiment) && experiment.state === 'DRAFT' && openExperimentModal(experiment)" class="exprWrapper" exp-id="{{experiment.id}}" custom-tooltip="{{experiment.homePageTooltip}}" has-update="{{hasUpdatePermission(experiment)}}" read-only="{{!hasUpdatePermission(experiment)}}">
+                    <label-link-content state="{{experiment.state}}" href="{{customHref}}" ng-click="!isMobile() && hasUpdatePermission(experiment) && experiment.state === 'DRAFT' && openExperimentModal(experiment)" class="exprWrapper" exp-id="{{experiment.id}}" custom-tooltip="{{experiment.homePageTooltip}}" has-update="{{!isMobile() && hasUpdatePermission(experiment)}}" read-only="{{!isMobile() && !hasUpdatePermission(experiment)}}">
                         <h3>{{experiment.applicationName}}</h3>
                         <h2>{{experiment.label}}</h2>
                     </label-link-content>

@@ -401,6 +401,14 @@ angular.module('wasabi.controllers').
             if (Session && Session.switches) {
                 $scope.data.enableCardView = Session.switches.ShowCardView;
             }
+
+            if (window.mobilecheck()) {
+                // Force card view
+                $scope.data.enableCardView = true;
+                $scope.data.showGrid = true;
+                $cookies.wasabiCardViewSetting = true;
+            }
+
             // If this user has turned on Card View and we've saved it in a cookie, enable it (or use the saved value).
             if ($scope.data.enableCardView) {
                 if ($cookies.wasabiCardViewSetting) {
@@ -705,6 +713,10 @@ angular.module('wasabi.controllers').
             $scope.hasUpdatePermission = function(experiment) {
                 return UtilitiesFactory.hasPermission(experiment.applicationName, PERMISSIONS.updatePerm);
             };
+
+            $scope.isMobile = function() {
+                return window.mobilecheck();
+            }
 
             $scope.openExperimentModal = function (experiment) {
                 var modalInstance = $modal.open({

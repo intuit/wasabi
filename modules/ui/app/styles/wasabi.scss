@@ -186,8 +186,8 @@ header {
 }
 
 #mainContent {
-  width: 1000px;
   margin: 0 auto 20px auto;
+  width: 1000px;
 }
 
 .truncateDiv {
@@ -198,7 +198,7 @@ header {
     display: inline-block;
 }
 
-.pageError {
+.pageError, .pageSuccess {
     display: none;
     position: fixed;
     top: 30px;
@@ -207,17 +207,25 @@ header {
     min-height: 26px;
     margin-left: -200px;
     padding: 15px 15px 15px 40px;
-    background: rgb(250, 228, 204);
-    border: 2px solid rgb(236, 146, 51);
     @include border-radius(3px);
-    box-shadow: 0 0 15px rgba(0,0,0,.7);
-    color: rgb(115, 60, 0);
     text-shadow: 0 1px 0 rgba(255,255,255,.5);
     z-index: 999999999999999;
     opacity: .93;
+
     h2 {
         font-weight: bold;
         padding-bottom: 4px;
+    }
+}
+
+.pageError {
+    background: rgb(250, 228, 204);
+    border: 2px solid rgb(236, 146, 51);
+    box-shadow: 0 0 15px rgba(0,0,0,.7);
+    color: rgb(115, 60, 0);
+    opacity: .93;
+
+    h2 {
         color: rgb(165, 90, 0);
     }
     .icon {
@@ -248,25 +256,12 @@ header {
 }
 
 .pageSuccess {
-    display: none;
-    position: fixed;
-    top: 30px;
-    left: 50%;
-    width: 400px;
-    min-height: 26px;
-    margin-left: -200px;
-    padding: 15px 15px 15px 40px;
     background: rgb(213, 236, 210);
     border: 1px solid rgb(171, 217, 164);
-    @include border-radius(3px);
     color: rgb(44, 160, 28);
     @include box-shadow(0 0 8px rgba(255,255,255,.5) inset);
-    text-shadow: 0 1px 0 rgba(255,255,255,.5);
-    z-index: 999999999999999;
     opacity: .93;
     h2 {
-        font-weight: bold;
-        padding-bottom: 4px;
         color: rgb(64, 180, 28);
     }
     .icon {
@@ -4482,4 +4477,252 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
 
 .gridWithAdvanced {
     margin-top: 40px;
+}
+
+/* Changes to support mobile version */
+
+nav.hamburger-nav {
+    display: block;
+    height: 56px;
+    min-height: 56px;
+    width: 56px;
+    min-width: 56px;
+    cursor: pointer;
+    background-color: transparent;
+    background-image: url(/images/hamburger_sprites.svg);
+    background-position: 20px 20px;
+    background-repeat: no-repeat;
+    background-size: 20px auto;
+}
+
+.logout-button-container {
+    text-align: center;
+    display: block;
+    height: 56px;
+    min-height: 56px;
+    width: 56px;
+    min-width: 56px;
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.logout-button {
+    display: inline-block;
+    margin-top: 20px;
+    width: 20px;
+    height: 20px;
+    background-image: url(/images/logout-icon.svg);
+    background-size: 20px auto;
+    background-repeat: no-repeat;
+    position: relative;
+}
+
+.sticky-nav-bar {
+    display: none;
+    position: fixed;
+    background-color: white;
+    left: 0px;
+    right: 0px;
+    z-index: 10001;
+    .title-name {
+        position: absolute;
+        top: 20px;
+        left: 160px;
+        font-size: large;
+    }
+}
+
+.sticky-nav-bar-logged-off {
+    display: none !important;
+}
+
+.mobile-spacer {
+    height: 0;
+}
+
+.menuPanel {
+    display: block;
+    position: absolute;
+    left: -300px;
+    top: 60px;
+    width: 300px;
+    height: 611px;
+    background: white;
+    z-index: 10001;
+    padding: 20px;
+    @include transform(translate3d(0,0,0));
+    -webkit-transition: all 0.7s ease-in-out;
+    -moz-transition: all 0.7s ease-in-out;
+    -o-transition: all 0.7s ease-in-out;
+    transition: all 0.7s ease-in-out;
+    a {
+        text-decoration: none;
+        color: rgba(0, 0, 0, 0.77);
+        font-size: 18px;
+    }
+    li {
+        padding-bottom: 20px;
+    }
+}
+
+.fixedPanel {
+    display: none;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 1;
+    z-index: 10000;
+}
+
+@media (max-width: 768px) {
+    #mainContent {
+        margin: 0 auto 20px auto;
+        width: 375px;
+        position: absolute;
+        left: 0;
+        @include transform(translate3d(0,0,0));
+        transition: all 0.7s ease-in-out;
+        -webkit-transition: all 0.7s ease-in-out;
+        -moz-transition: all 0.7s ease-in-out;
+        -o-transition: all 0.7s ease-in-out;
+        transition: all 0.7s ease-in-out;
+    }
+
+    #exprSummary > li {
+        height: 540px;
+        width: 355px;
+        margin-left: 10px;
+        .summaryBody .bucketsTable {
+            td {
+                width: 90%;
+            }
+        }
+    }
+
+    #exprSummary > li {
+        .summaryBody .bucketsTable {
+            tbody {
+                td {
+                    .bucketLabel {
+                        width: 260px;
+                        line-height: 18px;
+                    }
+                }
+            }
+        }
+    }
+
+    .pageError, .pageSuccess {
+        width: 360px;
+        margin-left: -180px;
+    }
+
+    #resultsModal {
+        width: 300px;
+        left: 210px;
+        top: 0;
+        textarea {
+            width: 250px !important;
+        }
+    }
+
+    .signinBox {
+        width: 275px;
+        div.signinLogo {
+            margin-left: 39px;
+        }
+    }
+
+    .sticky-nav-bar {
+        display: block;
+    }
+
+    .mobile-spacer {
+        height: 60px;
+    }
+
+    header {
+        display: none !important;
+    }
+
+    input {
+        font-size: 16px !important;
+    }
+
+    .toolbar {
+        display: none !important;
+    }
+
+    #gridView {
+        font-size: 18px;
+    }
+
+    #dlgConfirm {
+        left: 0;
+        margin-left: -10px;
+        width: 360px;
+    }
+
+    .gridShowingMenu {
+        overflow: hidden;
+    }
+}
+
+@media (max-width: 414px) {
+    #exprSummary > li {
+        margin-left: 30px;
+        height: 540px;
+    }
+
+    .signinBox {
+        margin-left: 30px;
+    }
+
+    .sticky-nav-bar {
+        .title-name {
+            left: 180px;
+        }
+    }
+}
+
+@media (max-width: 375px) {
+    #exprSummary > li {
+        margin-left: 10px;
+        height: 480px;
+    }
+
+    .sticky-nav-bar {
+        .title-name {
+            left: 160px;
+        }
+    }
+}
+
+@media (max-width: 320px) {
+    #exprSummary > li {
+        margin-left: 10px;
+        width: 300px;
+        height: 380px;
+    }
+
+    .signinBox {
+        width: 260px;
+        margin-left: 10px;
+        margin-top: 90px;
+        padding: 36px 20px;
+    }
+
+    .sticky-nav-bar {
+        .title-name {
+            left: 140px;
+        }
+    }
+
+    .pageError, .pageSuccess {
+        width: 300px;
+        margin-left: -150px;
+    }
 }
