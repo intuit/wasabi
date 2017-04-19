@@ -84,6 +84,18 @@
     </table>
 
     <div>
+        <div ng-show="!data.tagWidgetsDisabled">
+            <tags-input name="tags" ng-model="tags" style="width: 963px;">
+                <auto-complete source="queryTags($query)"></auto-complete>
+            </tags-input>
+        </div>
+        <div ng-show="data.tagWidgetsDisabled">
+            <input type="text" ng-model="tagsStr" id="experimentTagsReadOnly" name="experimentTags" class="readOnly disabled" disabled />
+        </div>
+        <div id="tagsToolbar" ng-show="!readOnly" dynamic-edit input-tag="experimentTags" select-function="saveTags" edit-function="editTags" cancel-function="cancelTags" ng-model="experiment.tags" class="dynamicToolbar"></div>
+    </div>
+    
+    <div>
         <div style="float: left; margin-right: 862px;"><label class="descriptionLabel">Hypothesis/Description</label></div>
         <pre id="experimentDescription" spellcheck="false" class="readOnly"></pre>
         <div id="descriptionToolbar" ng-show="!readOnly" dynamic-edit input-tag="experimentDescription" select-function="saveDescription" edit-function="editDescription" cancel-function="cancelDescription" ng-model="experiment.description" class="dynamicToolbar"></div>

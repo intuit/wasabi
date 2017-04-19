@@ -4,8 +4,8 @@
 
 angular.module('wasabi.controllers')
     .controller('ExperimentModalCtrl',
-        ['$scope', '$uibModalInstance', '$uibModal', 'ExperimentsFactory', 'experiments', 'experiment', 'UtilitiesFactory', '$rootScope', 'readOnly', 'applications', 'DialogsFactory', 'RuleEditFactory', 'ConfigFactory', 'Session', 'AuthzFactory', 'ApplicationsFactory', 'PERMISSIONS', '$cookies', 'openedFromModal', 'EmailFactory', 'favoritesObj',
-            function ($scope, $uibModalInstance, $uibModal, ExperimentsFactory, experiments, experiment, UtilitiesFactory, $rootScope, readOnly, applications, DialogsFactory, RuleEditFactory, ConfigFactory, Session, AuthzFactory, ApplicationsFactory, PERMISSIONS, $cookies, openedFromModal, EmailFactory, favoritesObj) {
+        ['$scope', '$uibModalInstance', '$uibModal', '$filter', 'ExperimentsFactory', 'experiments', 'experiment', 'UtilitiesFactory', '$rootScope', 'readOnly', 'applications', 'DialogsFactory', 'RuleEditFactory', 'ConfigFactory', 'Session', 'AuthzFactory', 'ApplicationsFactory', 'PERMISSIONS', '$cookies', 'openedFromModal', 'EmailFactory', 'favoritesObj', 'AllTagsFactory',
+            function ($scope, $uibModalInstance, $uibModal, $filter, ExperimentsFactory, experiments, experiment, UtilitiesFactory, $rootScope, readOnly, applications, DialogsFactory, RuleEditFactory, ConfigFactory, Session, AuthzFactory, ApplicationsFactory, PERMISSIONS, $cookies, openedFromModal, EmailFactory, favoritesObj, AllTagsFactory) {
 
                 UtilitiesFactory.trackEvent('loadedDialog',
                     {key: 'dialog_name', value: 'createOrEditExperiment'});
@@ -16,6 +16,8 @@ angular.module('wasabi.controllers')
                 };
 
                 $scope.experiment = experiment;
+                $scope.tags = [];
+                $scope.allTags = [];
                 $scope.experiment.applicationName2 = (applications.length === 1 ? '' : 'novalue');
                 $scope.readOnly = (readOnly ? readOnly : false);
                 $scope.simpleRuleEditing = $cookies.showAdvancedSegmentationEditor === undefined || $cookies.showAdvancedSegmentationEditor !== 'true';
@@ -150,9 +152,23 @@ angular.module('wasabi.controllers')
                     }
                 };
 
+                $scope.loadAllTags = function(query) {
+                    UtilitiesFactory.loadAllTags(query, $scope);
+                };
+
+                $scope.queryTags = function(query) {
+                    return UtilitiesFactory.queryTags(query, $scope.allTags);
+                };
+
+                $scope.transferTags = function(fromExperiment) {
+                    UtilitiesFactory.transferTags(fromExperiment, $scope);
+                };
+
                 $scope.init = function() {
                     $scope.processRule();
                     $scope.loadAllApplications();
+                    $scope.loadAllTags();
+                    $scope.transferTags(true);
                 };
 
                 $scope.loadExperiment = function () {
@@ -354,7 +370,8 @@ angular.module('wasabi.controllers')
                                 startTime: startTime,
                                 endTime: endTime,
                                 description: experiment.description,
-                                isRapidExperiment: experiment.isRapidExperiment
+                                isRapidExperiment: experiment.isRapidExperiment,
+                                tags: experiment.tags
                             };
                             if (experiment.isRapidExperiment) {
                                 newExperiment.userCap = experiment.userCap;
@@ -384,7 +401,8 @@ angular.module('wasabi.controllers')
                                 endTime: endTime,
                                 description: $scope.experiment.description,
                                 rule: $scope.experiment.rule,
-                                isRapidExperiment: $scope.experiment.isRapidExperiment
+                                isRapidExperiment: $scope.experiment.isRapidExperiment,
+                                tags: experiment.tags
                             };
                             if ($scope.experiment.isRapidExperiment) {
                                 experimentUpdates.userCap = $scope.experiment.userCap;
@@ -460,6 +478,7 @@ angular.module('wasabi.controllers')
 
                     var creatingNewApplication = (experiment.applicationName === ConfigFactory.newApplicationNamePrompt);
                     var appName = (creatingNewApplication ? experiment.applicationName2 : experiment.applicationName);
+                    $scope.transferTags(false); // Transfer from the widget to the experiment.
                     if (creatingNewApplication) {
                         // We need to check for and prevent the user from creating an experiment in an existing
                         // application for which they don't have permission.

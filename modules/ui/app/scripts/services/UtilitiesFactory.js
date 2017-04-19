@@ -7,8 +7,8 @@
 // page success message before the first one has faded out.
 var globalPageSuccessMessageFadeOutTimer = null;
 
-angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$state', 'AuthFactory', '$rootScope', 'AUTH_EVENTS', 'PERMISSIONS', 'USER_ROLES', '$filter', 'AuthzFactory', 'BucketsFactory', 'DialogsFactory', 'ExperimentsFactory', 'WasabiFactory', '$uibModal', '$injector', 'FavoritesFactory', 'StateFactory',
-    function (Session, $state, AuthFactory, $rootScope, AUTH_EVENTS, PERMISSIONS, USER_ROLES, $filter, AuthzFactory, BucketsFactory, DialogsFactory, ExperimentsFactory, WasabiFactory, $uibModal, $injector, FavoritesFactory, StateFactory) {
+angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$state', 'AuthFactory', '$rootScope', 'AUTH_EVENTS', 'PERMISSIONS', 'USER_ROLES', '$filter', 'AuthzFactory', 'BucketsFactory', 'DialogsFactory', 'ExperimentsFactory', 'WasabiFactory', '$uibModal', '$injector', 'FavoritesFactory', 'StateFactory', 'AllTagsFactory',
+    function (Session, $state, AuthFactory, $rootScope, AUTH_EVENTS, PERMISSIONS, USER_ROLES, $filter, AuthzFactory, BucketsFactory, DialogsFactory, ExperimentsFactory, WasabiFactory, $uibModal, $injector, FavoritesFactory, StateFactory, AllTagsFactory) {
         return {
             // generate state image url
             stateImgUrl: function (state) {
@@ -1188,8 +1188,69 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
             displaySuccessWithCacheWarning: function(title, extraMsg) {
                 var msg = extraMsg + '  PLEASE NOTE that this change may not be available for assignment calls for up to 5 minutes.';
                 this.displayPageSuccessMessage(title, msg);
-            }
+            },
 
+            loadAllTags: function(query, scope) {
+                var that = this;
+
+                scope.allTags = [];
+
+                AllTagsFactory.query().$promise.then(function (tags) {
+                    if (tags) {
+                        if (tags.hasOwnProperty(scope.experiment.applicationName)) {
+                            scope.allTags = tags[scope.experiment.applicationName];
+                        }
+                    }
+                },
+                function(response) {
+                    that.handleGlobalError(response, 'The list of all tags could not be retrieved.');
+                });
+            },
+
+            // Used with type ahead in the tags input, this function returns the tags from the allTags
+            // array that contain the query value.
+            queryTags: function(query, allTags) {
+                var searchMatch = function (haystack, needle) {
+                    if (!needle) {
+                        return true;
+                    }
+                    return haystack.toLowerCase().indexOf(needle.toLowerCase()) !== -1;
+                };
+
+                if (allTags) {
+                    return $filter('filter')(allTags, function (item) {
+                        return searchMatch(item, query);
+                    });
+                }
+                return [];
+            },
+
+            // Since the format of the tags attribute in an experiment object (an array of strings)
+            // and the format used by the ng-tags-input component (an array of objects with a text attribute) are
+            // different, this function copies from the one to the other.  If fromExperiment is true, the
+            // copy is from the experiment object tag property to the tagsArray.  Otherwise, it is vice versa.
+            transferTags: function(fromExperiment, scope) {
+                var i = 0;
+                if (fromExperiment) {
+                    if (scope.experiment && scope.experiment.tags && scope.experiment.tags.length > 0) {
+                        // The structure needed for the tag input widget and for the backend is different.
+                        // For the backend, this is simply an array of strings.  For the tag input widget,
+                        // it is an array of objects with a "text" attribute that is the tag name.
+                        scope.tags = [];
+                        for (i = 0; i < scope.experiment.tags.length; i++) {
+                            scope.tags.push({
+                                'text': scope.experiment.tags[i]
+                            });
+                        }
+                    }
+                }
+                else {
+                    scope.experiment.tags = [];
+                    for (i = 0; i < scope.tags.length; i++) {
+                        scope.experiment.tags.push(scope.tags[i].text);
+                    }
+                }
+            }
 
         };
     }
