@@ -18,14 +18,14 @@
 # configurables:
 #
 #   profile                      : maven profile; default:test
-#   nexus_deploy                 : nexus deploy user; default:usr:pwd
+#   nexus_credentials                 : nexus deploy user; default:usr:pwd
 #   nexus_repositories           : nexus repositories
 #   nexus_repository_id          : nexus milestone repository id
 #   nexus_snapshot_repository_id : nexus snapshot repository id
 
 project=wasabi
 profile=${PROJECT_PROFILE:-development}
-nexus_deploy=${NEXUS_DEPLOY:-usr:pwd}
+nexus_credentials=${NEXUS_CREDENTIALS:-usr:pwd}
 nexus_repositories=${NEXUS_REPOSITORIES}
 nexus_repository_id=${NEXUS_REPOSITORY_ID}
 nexus_snapshot_repository_id=${NEXUS_SNAPSHOT_REPOSITORY_ID}
@@ -39,7 +39,11 @@ fromPom() {
   mvn -f ./modules/$1/pom.xml -P $2 help:evaluate -Dexpression=$3 | sed -n -e '/^\[.*\]/ !{ p; }'
 }
 
-version=`fromPom main ${profile} project.version`
+fromPom2() {
+  mvn -f ./modules/$1/pom.xml help:evaluate -Dexpression=$2 | sed -n -e '/^\[.*\]/ !{ p; }'
+}
+
+version=`fromPom2 main project.version`
 echo "++ version= ${version}"
 
 # ------------------------------------------------------------------------------
@@ -109,14 +113,14 @@ elif [[ "${version}" == *SNAPSHOT ]]; then
   artifact_repository_id=${nexus_snapshot_repository_id}
 fi
 
-group=`fromPom main ${profile} project.groupId`
+group=`fromPom2 main project.groupId`
 artifact=ui
 path=${nexus_repositories}/${artifact_repository_id}/`echo ${group} | sed "s/\./\//g"`/${artifact}/${version}
 zip=${project}-${artifact}-${profile}-${version}.zip
 zip_path=${path}/${zip}
 
 echo "++ Archiving: ${zip} ${zip_path}"
-curl -v -u ${nexus_deploy} --upload-file ./modules/ui/target/dist.zip ${zip_path} || \
-exitOnError "archive failed: curl -v -u [nexus_deploy] --upload-file ./modules/ui/dist.zip ${zip_path}"
+curl -v -u ${nexus_credentials} --upload-file ./modules/ui/target/dist.zip ${zip_path} || \
+exitOnError "archive failed: curl -v -u [nexus_credentials] --upload-file ./modules/ui/dist.zip ${zip_path}"
 
 echo "++ Push UI ZIP to internal Nexus - FINISHED"
