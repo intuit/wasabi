@@ -20,7 +20,6 @@ import com.datastax.driver.mapping.Result;
 import com.datastax.driver.mapping.annotations.Accessor;
 import com.datastax.driver.mapping.annotations.Query;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.repository.cassandra.pojo.Experiment;
 import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentTagsByApplication;
 
@@ -88,5 +87,5 @@ public interface ExperimentAccessor {
                           Set<String> tags);
 
     @Query("select tags from experiment where app_name = ?;")
-    Result<ExperimentTagsByApplication> getAllTags(Application.Name appName);
+    Result<ExperimentTagsByApplication> getAllTags(String appName);
 }

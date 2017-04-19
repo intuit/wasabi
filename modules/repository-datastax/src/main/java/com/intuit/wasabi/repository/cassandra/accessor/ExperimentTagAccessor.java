@@ -19,7 +19,6 @@ import com.datastax.driver.core.Statement;
 import com.datastax.driver.mapping.Result;
 import com.datastax.driver.mapping.annotations.Accessor;
 import com.datastax.driver.mapping.annotations.Query;
-import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentTagsByApplication;
 
 import java.util.List;
@@ -38,10 +37,10 @@ public interface ExperimentTagAccessor {
     Statement insert(String appName, Set<String> tags);
 
     @Query("update experiment_tag set tags = tags + ? WHERE app_name = ?;")
-    Statement update(Set<String> tags, Application.Name appName);
+    Statement update(Set<String> tags, String appName);
 
     @Query("update experiment_tag set tags = tags - ? WHERE app_name = ?;")
-    Statement remove(Set<String> tags, Application.Name appName);
+    Statement remove(Set<String> tags, String appName);
 
     @Query("delete tags from experiment_tag WHERE app_name = ?;")
     Statement removeAll(String appName);

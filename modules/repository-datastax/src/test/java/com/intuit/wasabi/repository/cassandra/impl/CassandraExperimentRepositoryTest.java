@@ -667,7 +667,7 @@ public class CassandraExperimentRepositoryTest {
 
         //------ Mocking interacting calls
         Result<ExperimentTagsByApplication> dbResult = mock(Result.class);
-        when(mockExperimentAccessor.getAllTags(appName)).thenReturn(dbResult);
+        when(mockExperimentAccessor.getAllTags(appName.toString())).thenReturn(dbResult);
         when(dbResult.all()).thenReturn(dbResultList);
 
         //------ Make call
