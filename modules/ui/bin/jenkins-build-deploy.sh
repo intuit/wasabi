@@ -120,6 +120,7 @@ zip=${project}-${artifact}-${profile}-${version}.zip
 zip_path=${path}/${zip}
 
 echo "++ Archiving: ${zip} ${zip_path}"
+echo "Executing: curl -v -u ${nexus_credentials} --upload-file ./modules/ui/target/dist.zip ${zip_path}"
 curl -v -u ${nexus_credentials} --upload-file ./modules/ui/target/dist.zip ${zip_path} || \
 exitOnError "archive failed: curl -v -u [nexus_credentials] --upload-file ./modules/ui/dist.zip ${zip_path}"
 
