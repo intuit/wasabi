@@ -30,18 +30,18 @@ import java.util.Set;
 @Accessor
 public interface ExperimentTagAccessor {
 
-    @Query("select * from experiment_tag where app_name IN ? ")
+    @Query("select * from experiment_tag where app_name IN ?")
     Result<ExperimentTagsByApplication> getExperimentTags(List<String> applicationNames);
 
-    @Query("insert into experiment_tag(app_name, tags) values(?,?)")
-    Statement insert(String appName, Set<String> tags);
+    @Query("insert into experiment_tag(app_name, tags) values (?,?)")
+    void insertByApp(String appName, Set<String> tags);
 
-    @Query("update experiment_tag set tags = tags + ? WHERE app_name = ?;")
+    @Query("update experiment_tag set tags = tags + ? WHERE app_name = ?")
     Statement update(Set<String> tags, String appName);
 
-    @Query("update experiment_tag set tags = tags - ? WHERE app_name = ?;")
+    @Query("update experiment_tag set tags = tags - ? WHERE app_name = ?")
     Statement remove(Set<String> tags, String appName);
 
-    @Query("delete tags from experiment_tag WHERE app_name = ?;")
+    @Query("delete tags from experiment_tag WHERE app_name = ?")
     Statement removeAll(String appName);
 }

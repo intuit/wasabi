@@ -431,8 +431,9 @@ public class CassandraExperimentRepository implements ExperimentRepository {
             for (ExperimentTagsByApplication tagsSet : listAllTags) {
                 allTags.addAll(tagsSet.getTags());
             }
-            experimentTagAccessor.insert(applicationName.toString(), allTags);
+            experimentTagAccessor.insertByApp(applicationName.toString(), allTags);
         }
+
     }
 
     /**
@@ -1240,6 +1241,7 @@ public class CassandraExperimentRepository implements ExperimentRepository {
         LOGGER.debug("Retrieving Experiment Tags for applications {}", applicationNames);
 
         try {
+
             Map<Application.Name, Set<String>> result = experimentTagAccessor.getExperimentTags(
                     applicationNames.stream().map(appName -> Objects.toString(appName)).collect(Collectors.toList()))
                     .all().stream().collect(Collectors.toMap(exp -> Application.Name.valueOf(exp.getAppName()),

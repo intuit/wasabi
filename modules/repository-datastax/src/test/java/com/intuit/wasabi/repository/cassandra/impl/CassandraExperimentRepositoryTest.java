@@ -674,7 +674,7 @@ public class CassandraExperimentRepositoryTest {
         repository.updateExperimentTags(appName, tags);
 
         //------ Verify result
-        verify(mockExperimentTagAccessor).insert(appName.toString(), new TreeSet<>(Arrays.asList("tag1", "tag2", "tag3", "tag4")));
+        verify(mockExperimentTagAccessor).insertByApp(appName.toString(), new TreeSet<>(Arrays.asList("tag1", "tag2", "tag3", "tag4")));
 
     }
 
