@@ -47,6 +47,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
@@ -794,11 +795,15 @@ public class CassandraExperimentRepositoryITest extends IntegrationTestBase {
     }
 
     @Test
-    public void testAddTagsToExperiment(){
+    public void testAddTagsToExperiment() {
         Experiment experiment = repository.getExperiment(experimentID1);
         experiment.setTags(new HashSet<>(Arrays.asList("tagNew", "tag2")));
         repository.updateExperiment(experiment);
 
-        System.out.print(repository.getTagListForApplications(Arrays.asList(appname)));
+        List<String> allTags = Arrays.asList("tag2", "tag3", "tag4", "tagNew");
+
+        Map<Name, Set<String>> result = repository.getTagListForApplications(Arrays.asList(appname));
+        assertTrue(result.size() == 1); // only one application
+        assertTrue(result.get(appname).containsAll(allTags));
     }
 }

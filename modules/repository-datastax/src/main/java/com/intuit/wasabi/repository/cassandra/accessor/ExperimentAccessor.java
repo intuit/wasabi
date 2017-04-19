@@ -86,6 +86,6 @@ public interface ExperimentAccessor {
                           String modelVersion, boolean isRapidExperiment, int userCap, String creatorid,
                           Set<String> tags);
 
-    @Query("select tags from experiment where app_name = ?;")
+    @Query("select tags from experiment where app_name = ?")
     Result<ExperimentTagsByApplication> getAllTags(String appName);
 }
