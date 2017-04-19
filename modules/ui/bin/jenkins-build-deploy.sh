@@ -116,7 +116,7 @@ fi
 group=`fromPom2 main project.groupId`
 artifact=ui
 path=${nexus_repositories}/${artifact_repository_id}/`echo ${group} | sed "s/\./\//g"`/${artifact}/${version}
-zip=${project}-${artifact}-${profile}-${version}.zip
+zip=${project}-${artifact}-test-${version}.zip
 zip_path=${path}/${zip}
 
 echo "++ Archiving: ${zip} ${zip_path}"
