@@ -1,0 +1,213 @@
+$text-color: black;
+$nav_blue: #5E7ECC;
+
+body {
+    color: $text-color;
+    margin: 0;
+}
+h1 {
+    margin: 0;
+}
+th {
+    background-color: #E4E0E0;
+}
+
+#mainContent {
+  width: 360px;
+  margin: 0 auto 20px auto;
+}
+.signinBox {
+    background: white;
+    margin: 120px auto 0 auto;
+    width: 270px;
+    padding: 36px 40px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.2);
+    box-sizing: content-box !important;
+    color: #555;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-style: normal;
+    font-weight: normal;
+    h1 {
+        text-indent: -9999px;
+        overflow: hidden;
+        height: 50px;
+        margin-bottom: 15px;
+        background: url('../assets/ab_logo_black.png') no-repeat center;
+        background-size: 260px 50px;
+    }
+    h2 {
+        font-size: 16px;
+        font-weight: normal;
+        padding-bottom: 20px;
+        text-align: center;
+        color: rgba(0,0,0,.5);
+    }
+    div.signinLogo {
+        margin-left: 30px;
+    }
+    input[type=checkbox] {
+        margin: 4px 0.5ex;
+    }
+    .checkboxLabel {
+        font-weight: normal;
+        font-size: 12px;
+    }
+}
+#userId, #password {
+    display: block;
+    width: 190px;
+    padding: 10px;
+    font-size: 13px;
+    margin-bottom: 30px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    background: rgb(253,253,253);
+}
+#btnSignin {
+    margin-top: 5px;
+    padding-left: 18px;
+    padding-right: 18px;
+}
+button, a.button {
+	position: relative;
+	display: inline-block;
+	margin: 0;
+    cursor: pointer;
+    padding: 8px 15px;
+    background-color: rgb(220,221,222);
+	border: 1px solid rgb(185,185,185);
+    border-radius: 3px;
+	text-decoration: none;
+    font-size: 14px;
+    line-height: 1em;
+    text-shadow: 0 1px 0 rgba(255,255,255,.5);
+	box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.04);
+    color: rgba(0,0,0,.65);
+    font-weight: bold;
+	letter-spacing: .4px;
+	&:focus {
+		outline: none;
+        box-shadow: 2px 0 2px #7EA8CA, 0 2px 2px #7EA8CA, -2px 0 2px #7EA8CA, 0 -2px 2px #7EA8CA !important;
+        border-color: #3F75A2 !important;
+	}
+	&:hover {
+        background: rgb(220,221,222) linear-gradient(rgba(255,255,255,.2), rgba(255,255,255,.16));
+		text-decoration: none;
+        box-shadow: 0 0 4px rgba(0,0,0,0.3);
+	}
+	&:active {
+        background: rgb(220,221,222) linear-gradient(rgba(0,0,0,.1), rgba(0,0,0,.01));
+        box-shadow: none;
+		text-decoration: none;
+		outline: none;
+	}
+    &.blue {
+        background-color: $nav_blue;
+        text-shadow: 0 1px 0 rgba(0,0,0,.3);
+        font-weight: normal;
+        border-color: rgb(78,105,166); //rgb(69,93,148); //rgba(0,0,0,.3);
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+        color: white;
+        &:hover {
+            background: $nav_blue linear-gradient(rgba(255,255,255,.12), rgba(255,255,255,.1));
+            box-shadow: 0 0 4px rgba(0,0,0,0.45);
+            border-color: rgb(72,97,154); //rgb(69,93,148);
+        }
+        &:active {
+            background: $nav_blue linear-gradient(rgba(0,0,0,.2), rgba(0,0,0,.01));
+            box-shadow: none;
+            border-color: rgb(72,97,154);
+        }
+        &:disabled {
+            color: rgba(255,255,255,.8);
+            &:hover {
+                background: $nav_blue;
+                border-color: rgb(78,105,166);
+                box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+            }
+        }
+    }
+    &:disabled {
+        opacity: .5;
+        cursor: default;
+        &:hover {
+            background: #f8f8f8 linear-gradient(#f8f8f8, #ddd);
+            box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+        }
+    }
+
+}
+
+
+.loginDiv {
+    margin-bottom: 5px;
+}
+
+.loginTitle {
+    font-size: 24px;
+    font-weight: bold;
+}
+.loginPrompt {
+    font-size: 20px;
+    padding: 10px 0;
+}
+.loginBox {
+    background: white;
+    margin: 120px auto 0 auto;
+    width: 400px;
+    padding: 36px 40px 36px 190px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    -moz-box-sizing: content-box !important;
+    box-sizing: content-box !important;
+    color: #555;
+}
+.loginBox label {
+    display: inline-block;
+    width: 80px;
+}
+.loginBtn {
+    margin-top: 15px;
+    padding: 10px 18px;
+    font-family: "Helvetica Neue", Helvetica, Arial;
+    font-size: 14px;
+}
+.loginError {
+    margin-top: 15px;
+    font-weight: bold;
+    font-style: italic;
+}
+.logoutLink {
+    position: absolute;
+    top: 30px;
+    right: 20px;
+}
+.siteHeading {
+    background-color: #add8e6;
+    height: 80px;
+    text-align: center;
+}
+.siteHeading h1 {
+    padding-top: 20px;
+}
+.storeMain {
+    width: 600px;
+    margin: 0 auto;
+}
+.storeProductName {
+    padding-left: 10px;
+}
+.storePriceCell {
+    text-align: right;
+    padding-right: 10px;
+}
+.oddRow {
+    background-color: white;
+}
+
+.evenRow {
+    background-color: #F9F8F8;
+}
