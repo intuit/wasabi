@@ -74,8 +74,12 @@ public class ExperimentDetailFilterTest {
     @Parameterized.Parameters(name = "expDetailFilter({index})")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                {"experiment_label=ExperimentLabel", true}, {"bucket_label=Bucket2", true},
-                {"application_name=testApp", false}, {"mod_time=Summer", false}, {"Experiment", true}
+                {"experiment_label=ExperimentLabel", true},
+                {"bucket_label=Bucket2", true},
+                {"application_name=testApp", false},
+                {"mod_time=Summer", false},
+                {"Experiment", true},
+                {"tags=tag1", true},
         });
     }
 
