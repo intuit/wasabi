@@ -25,6 +25,7 @@ angular.module('wasabi.controllers').
                 advTxtSearchDateOne: today,
                 advTxtSearchDateTwo: today,
                 showGrid: false,
+                showingGrid: false,
                 showAdvancedSearch: false,
                 hideTerminated: true,
                 enableCardView: false
@@ -402,6 +403,7 @@ angular.module('wasabi.controllers').
                 if ($cookies.wasabiCardViewSetting) {
                     $scope.data.showGrid = ((typeof($cookies.wasabiCardViewSetting) === 'boolean' && $cookies.wasabiCardViewSetting) ||
                                             (typeof($cookies.wasabiCardViewSetting) === 'string' && $cookies.wasabiCardViewSetting === 'true'));
+                    $scope.data.showingGrid = $scope.data.showGrid;
                 }
                 else {
                     // Start saving it.
@@ -425,13 +427,13 @@ angular.module('wasabi.controllers').
                     // So that it gets changed correctly in the localStorage that saves the search state,
                     // we need to actually toggle this one because it doesn't get updated until after this has
                     // executed.
-                    $scope.data.showGrid = $cookies.wasabiCardViewSetting = false;
+                    $scope.data.showGrid = $scope.data.showingGrid = $cookies.wasabiCardViewSetting = false;
                     localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
                     $scope.loadTableExperiments();
                 }
                 else {
                     // Record that we are showing the Card View in the localStorage
-                    $scope.data.showGrid = $cookies.wasabiCardViewSetting = true;
+                    $scope.data.showGrid = $scope.data.showingGrid = $cookies.wasabiCardViewSetting = true;
                     localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
                     // Switched to card view.  Since we're not pre-loading the data for the cards, we need to
                     // load (or check if we need to load) the data now.
