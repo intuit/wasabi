@@ -1,0 +1,86 @@
+<div class="displaySourceCode">
+<pre>
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+/**
+ * This class contains the sample code to post a Wasabi assignment, passing profile data to be used in evaluating a Segmentation rule.
+ * This assumes an experiment that has a rule like "salary is greater than 10000".
+ */
+public class BatchAssignmentWithSegmentation {
+
+  public static void main(String[] args) throws IOException, ParseException {
+    // TODO: not sure if this will work, since this response is an array of assignments.
+    System.out.print(postBatchAssignmentWithSegmentation("{{experiment.applicationName}}", "{{pageName}}", "UserName", "10001"));
+  }
+
+
+  /**
+   * This method calls the Wasabi Api to retrieve an assignment for the specified experiment and user passing profile data
+   * for use in evaluating the segmentation rule.
+   *
+   * @param application the ApplicationName the experiment is running in
+   * @param page  the name of the Page
+   * @param user        the user for whom the assignments should be posted
+   * @param salary      the salary of the user, to be used in evaluating a segmentation rule
+   * @return <code>true</code> if the assignments were recorded <code>false</code> otherwise
+   * @throws IOException
+   */
+  private static Object postBatchAssignmentWithSegmentation(String application, String page, String user, String salary) throws IOException, ParseException {
+
+    String urlBatchAssignmentWithSegmentation = String.format("{{baseUrl}}/assignments/applications/%s/pages/%s/users/%s", application, page, user);
+
+    URL url = new URL(urlBatchAssignmentWithSegmentation);
+    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+    connection.setRequestProperty("content-type", "application/json");
+    connection.setRequestMethod("POST");
+    connection.setDoOutput(true);
+
+    OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream());
+    // This example assumes only one parameter in the rule.  If you had more, you'd pass them as other attributes of the "profile".
+    writer.write("{\"profile\":{\"salary\":\"" + salary + "\"}}");
+    writer.flush();
+
+    // give it 500 milliseconds to respond
+    connection.setReadTimeout(500);
+    connection.connect();
+    
+    // read the output from the server
+    BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+    
+    /*
+    The response from the server is a json with the following exemplary entries:
+     {"assignments: [
+       {"cache":true,
+        "experimentLabel": "MyTest",
+        "payload":null,
+        "assignment":"b",
+        "context":"PROD",
+        "status":"EXISTING_ASSIGNMENT"},
+        {"cache":true,
+         "experimentLabel": "MyTest2",
+         "payload":null,
+         "assignment":"a",
+         "context":"PROD",
+         "status":"NEW_ASSIGNMENT"}
+     ]}
+     */
+    String line = reader.readLine();
+
+    JSONParser parser = new JSONParser();
+    JSONObject assignment = (JSONObject) parser.parse(line);
+
+    return assignment.get("assignments"); // The "assignments" field in the JSON response is an array of assignments
+  }
+
+}
+</pre>
+</div>

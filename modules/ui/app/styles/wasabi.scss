@@ -1188,6 +1188,26 @@ header {
     display: none !important;
 }
 
+.codeLink {
+  display: inline-block;
+  position: relative;
+  margin-left: 10px;
+  height: 22px;
+  line-height: 22px;
+  padding-left: 23px;
+  span {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 22px;
+      height: 22px;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 12px;
+      background-image: url(/images/icon_code.png);
+  }
+}
+
 /* New Experiment */
 .listAction {
   display: inline-block;
@@ -3103,9 +3123,14 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
 }
 /* end Home page */
 
-#segmentationTestModal {
+#segmentationTestModal, #analysisGraphModal, #displaySourceCodeModal {
     width: 800px;
     left: -50px;
+}
+
+#displaySourceCodeModal iframe {
+    height: 500px;
+    border: 1px solid #bcbcbc;
 }
 
 #resultsModal {
@@ -4482,4 +4507,22 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
 
 .gridWithAdvanced {
     margin-top: 40px;
+}
+
+.displaySourceCode {
+    display: block;
+    overflow: auto;
+    background: white;
+    height: 500px;
+    padding: 0 20px;
+    p {
+        margin: 0 0 10px;
+    }
+    pre {
+        font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+        font-size: 13px;
+        background: white;
+        overflow: visible;
+        margin-bottom: 10px;
+    }
 }

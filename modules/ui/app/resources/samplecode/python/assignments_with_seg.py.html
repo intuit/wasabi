@@ -1,0 +1,42 @@
+<div class="displaySourceCode">
+<pre>
+import requests
+import json
+
+def post_assignment_with_segmentation(application, experiment, user, salary):
+    """
+    Retrieves an assignment for the specified experiment and user passing profile data
+    for use in evaluating the segmentation rule.
+
+    Args:
+        application: the application the experiment runs in
+        experiment:  the running experiment for which the assignment should be retrieved
+        user:        the user who should be assigned
+        salary:      the salary of the user, to be used in evaluating a segmentation rule
+    """
+
+    urlAssignment = "{{baseUrl}}/assignments/applications/%s/experiments/%s/users/%s" %(application, experiment, user);
+
+    headers = {'content-type': 'application/json'}
+    profile = {'profile':{'salary': salary}}
+
+    r = requests.post(urlAssignment, data = json.dumps(profile), headers=headers)
+    try:
+        assignment = json.loads(r.text)['assignment']
+    except KeyError as e:
+        if "EXPERIMENT_NOT_FOUND" in r.text:
+            print('The given Experiment is not found')
+        else:
+            # further exception handling should happen here
+            raise
+    return assignment
+
+if __name__ == "__main__":
+    application = '{{experiment.applicationName}}'
+    experiment = '{{experiment.label}}'
+    user = 'UserName'
+    salary = '10000'
+
+    print(post_assignment_with_segmentation(application, experiment, user, salary))
+</pre>
+</div>
