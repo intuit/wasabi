@@ -84,6 +84,7 @@ public class ExperimentFilterTest {
         testCases.put("state_exact=draft", false);
         testCases.put("tags=tag2", true);
         testCases.put("tags=tag42", false);
+        testCases.put("tags=foo;tag", true);
 
         for (Map.Entry<String, Boolean> testCase : testCases.entrySet()) {
             experimentFilter.replaceFilter(testCase.getKey(), "+0000");

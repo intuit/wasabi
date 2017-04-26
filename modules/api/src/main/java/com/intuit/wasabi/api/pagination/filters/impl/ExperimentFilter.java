@@ -75,7 +75,7 @@ public class ExperimentFilter extends PaginationFilter<Experiment> {
         date_constraint_end(Experiment::getEndTime, ExperimentFilter::constraintTest),
         favorite(Experiment::isFavorite, (isFavorite, filter) -> Boolean.parseBoolean(filter) == isFavorite),
         tags(Experiment::getTags, (tagsSet, filter) -> tagsSet.stream().anyMatch(tag
-                -> StringUtils.containsIgnoreCase(tag, filter)));
+                -> (StringUtils.containsIgnoreCase(tag, filter) || StringUtils.containsIgnoreCase(filter, tag))));
 
         private final Function<Experiment, ?> propertyExtractor;
         private final BiPredicate<?, String> filterPredicate;
