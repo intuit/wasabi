@@ -115,6 +115,9 @@ angular.module('wasabi.controllers')
                     else {
                         $scope.experiment.applicationName2 = 'novalue';
                         $scope.showApplicationName2 = false;
+                        // Only need the list of tags in the application if one has been specified and it is not
+                        // a new application, as new applications don't have associated tags.
+                        $scope.loadAllTags();
                     }
                 };
 
@@ -152,8 +155,8 @@ angular.module('wasabi.controllers')
                     }
                 };
 
-                $scope.loadAllTags = function(query) {
-                    UtilitiesFactory.loadAllTags(query, $scope);
+                $scope.loadAllTags = function() {
+                    UtilitiesFactory.loadAllTags($scope, true);
                 };
 
                 $scope.queryTags = function(query) {

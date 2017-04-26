@@ -1,17 +1,13 @@
 <div ng-controller="ExperimentsCtrl">
     <div class="toolbar">
-        <a href="" onclick="return false;" id="searchMoreLess" title="More Search Options" ng-show="!noExperiments" ng-click="showMoreLessSearch();"><span></span></a>
+        <a href="" id="searchMoreLess" ng-attr-title="{{data.filtersApplied ? 'Filters applied' : 'Add filters to search'}}" ng-show="!noExperiments" uib-popover-template="dynamicPopover.templateUrl" popover-placement="bottom" popover-is-open="showFilterPopover"><span ng-class="{filtersApplied: data.filtersApplied}"></span></a>
         <button id="btnNewExperiment" class="blue" ng-click="openExperimentModal()" ng-class="{disabled: !applicationsLoaded}" ng-disabled="!applicationsLoaded">Create Experiment</button>
         <span ng-if="data.enableCardView" id="checkToggleListSpan" style="position: relative;"><input type="checkbox" id="chkToggleList" ng-model="data.showingGrid"
                ng-click="switchToGrid()" ng-class="{disabled: disableShowAsGrid}" ng-disabled="disableShowAsGrid"/><label id="chkToggleListLabel" for="chkToggleList" ng-class="{disabled: disableShowAsGrid}" ng-disabled="disableShowAsGrid" class="checkboxLabel">Card view</label>
         </span>
 
-        <div id="basicSearch" switch-search is-advanced="false">
+        <div id="basicSearch">
             <form id="experimentsForm">
-                <input type="checkbox" name="chkHideTerminated" ng-model="data.hideTerminated"
-                       ng-change="applySearchSortFilters(false)"/><label for="chkHideTerminated" class="checkboxLabel">Hide
-                terminated</label>
-
                 <div class="search">
                     <input search type="text" autocorrect="off" autocapitalize="off" placeholder="Search"
                            ng-model="data.query"
@@ -20,46 +16,9 @@
                 </div>
             </form>
         </div>
-        <div id="advancedSearch" switch-search is-advanced="true">
-            <form id="advancedSearchForm">
-                <select ng-model="data.advApplicationName" ng-options="applicationName for applicationName in applicationsWithReadOrBetterAccess"
-                        ng-if="applicationsWithReadOrBetterAccess.length > 1">
-                    <option value="">Select Application</option>
-                </select>
-                <span ng-model="data.advApplicationName" ng-if="applicationsWithReadOrBetterAccess.length === 1">{{applicationsWithReadOrBetterAccess[0]}}</span>
-                <select ng-model="data.advStatus">
-                    <option value="any">Any Status</option>
-                    <option selected="selected" value="notTerminated">Not Terminated</option>
-                    <option value="terminated">Terminated</option>
-                    <option value="running">Running</option>
-                    <option value="paused">Stopped</option>
-                    <option value="draft">Draft</option>
-                </select>
-                <input id="txtExperiment" type="text" autocorrect="off" autocapitalize="off" placeholder="Search" ng-model="data.advExperimentName"/>
-
-                <div style="padding-top:5px">
-                    <select ng-model="data.advStartOrEndDate">
-                        <option value="startDate">Start Date</option>
-                        <option value="endDate">End Date</option>
-                    </select>
-                    <select id="lstDateSearchType" ng-model="data.adv1stDateSearchType">
-                        <option value="isAny">Is Any</option>
-                        <option value="isBefore">Is Before</option>
-                        <option value="isOn">Is On</option>
-                        <option value="isAfter">Is After</option>
-                        <option value="isBetween">Is Between</option>
-                    </select>
-                    <input type="text" id="txtSearchDateOne" init-dates class="text" ng-class="{twoDateInput: data.adv1stDateSearchType === 'isBetween', disabled: data.adv1stDateSearchType === 'isAny'}" ng-disabled="data.adv1stDateSearchType === 'isAny'" ng-model="data.advTxtSearchDateOne">
-                    <span id="searchDateTwo" ng-show="data.adv1stDateSearchType === 'isBetween'">
-                        - <input type="text" id="txtSearchDateTwo" init-dates readonly="true" ng-model="data.advTxtSearchDateTwo">
-                    </span>
-                    <button class="blue" id="btnSearch" ng-click="advSearch()">Go</button>
-                </div>
-            </form>
-        </div>
     </div>
 
-    <div ng-if="data.enableCardView" id="gridView" ng-class="{gridWithAdvanced: data.showAdvancedSearch}" class="leftCol" ng-show="data.showGrid">
+    <div ng-if="data.enableCardView" id="gridView" class="leftCol" ng-show="data.showGrid">
         <div ng-if="experiments.length === 0" id="emptyHomeList">You have no running experiments.</div>
         <div>
         <ul ng-if="experiments.length > 0" id="exprSummary">
