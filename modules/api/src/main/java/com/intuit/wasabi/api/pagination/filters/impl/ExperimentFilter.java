@@ -24,6 +24,7 @@ import com.intuit.wasabi.experimentobjects.exceptions.ErrorCode;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
@@ -75,7 +76,8 @@ public class ExperimentFilter extends PaginationFilter<Experiment> {
         date_constraint_end(Experiment::getEndTime, ExperimentFilter::constraintTest),
         favorite(Experiment::isFavorite, (isFavorite, filter) -> Boolean.parseBoolean(filter) == isFavorite),
         tags(Experiment::getTags, (tagsSet, filter) -> tagsSet.stream().anyMatch(tag
-                -> (StringUtils.containsIgnoreCase(tag, filter) || StringUtils.containsIgnoreCase(filter, tag))));
+                -> Arrays.asList(filter.split(";")).contains(tag))),
+        tags_and(Experiment::getTags, (tagsSet, filter) -> tagsSet.containsAll(Arrays.asList(filter.split(";"))));
 
         private final Function<Experiment, ?> propertyExtractor;
         private final BiPredicate<?, String> filterPredicate;

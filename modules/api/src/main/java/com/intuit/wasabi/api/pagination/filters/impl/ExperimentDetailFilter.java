@@ -21,6 +21,7 @@ import com.intuit.wasabi.api.pagination.filters.PaginationFilter;
 import com.intuit.wasabi.api.pagination.filters.PaginationFilterProperty;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Arrays;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 
@@ -70,7 +71,8 @@ public class ExperimentDetailFilter extends PaginationFilter<ExperimentDetail> {
         date_constraint_start(ExperimentDetail::getStartTime, ExperimentFilter::constraintTest),
         date_constraint_end(ExperimentDetail::getEndTime, ExperimentFilter::constraintTest),
         tags(ExperimentDetail::getTags, (tagsSet, filter) -> tagsSet.stream().anyMatch(tag
-                -> StringUtils.containsIgnoreCase(tag, filter)));
+                -> Arrays.asList(filter.split(";")).contains(tag))),
+        tags_and(ExperimentDetail::getTags, (tagsSet, filter) -> tagsSet.containsAll(Arrays.asList(filter.split(";"))));
 
         private final Function<ExperimentDetail, ?> propertyExtractor;
         private final BiPredicate<?, String> filterPredicate;
