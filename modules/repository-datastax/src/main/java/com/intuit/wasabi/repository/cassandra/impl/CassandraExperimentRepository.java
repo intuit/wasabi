@@ -59,6 +59,7 @@ import org.slf4j.Logger;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -423,18 +424,20 @@ public class CassandraExperimentRepository implements ExperimentRepository {
      * @param tags            list of tags for the experiment
      */
     protected void updateExperimentTags(Application.Name applicationName, Set<String> tags) {
-        if (tags != null && !tags.isEmpty()) {
-            // update the tag table, just rewrite the complete entry
-            List<ExperimentTagsByApplication> listAllTags = experimentAccessor.getAllTags(applicationName.toString()).all();
-            Set<String> allTags = new TreeSet<>();
-            allTags.addAll(tags);
-            for (ExperimentTagsByApplication tagsSet : listAllTags) {
-                allTags.addAll(tagsSet.getTags());
-            }
-            experimentTagAccessor.insertByApp(applicationName.toString(), allTags);
-        }
 
+        if (tags == null)
+            tags = Collections.EMPTY_SET;
+
+        // update the tag table, just rewrite the complete entry
+        List<ExperimentTagsByApplication> listAllTags = experimentAccessor.getAllTags(applicationName.toString()).all();
+        Set<String> allTags = new TreeSet<>();
+        allTags.addAll(tags);
+        for (ExperimentTagsByApplication tagsSet : listAllTags) {
+            allTags.addAll(tagsSet.getTags() == null ? Collections.EMPTY_SET : tagsSet.getTags());
+        }
+        experimentTagAccessor.insertByApp(applicationName.toString(), allTags);
     }
+
 
     /**
      * {@inheritDoc}
