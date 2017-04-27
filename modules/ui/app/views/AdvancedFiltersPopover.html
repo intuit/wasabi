@@ -1,0 +1,63 @@
+<div id="filterDialog" style="width: 600px; height: auto;">
+    Filters:
+        <form id="advancedSearchForm" style="padding-top: 8px;">
+            <div>
+                <div class="dateLabel">Application</div>
+                <select ng-model="data.advApplicationName" ng-options="applicationName for applicationName in applicationsWithReadOrBetterAccess"
+                        ng-if="applicationsWithReadOrBetterAccess.length > 1">
+                    <option value="">Select Application</option>
+                </select>
+                <span ng-model="data.advApplicationName" ng-if="applicationsWithReadOrBetterAccess.length === 1">{{applicationsWithReadOrBetterAccess[0]}}</span>
+            </div>
+            <div>
+                <div class="dateLabel">Status</div>
+                <select style="margin-top: 5px;" ng-model="data.advStatus">
+                    <option value="any">Any Status</option>
+                    <option selected="selected" value="notTerminated">Not Terminated</option>
+                    <option value="terminated">Terminated</option>
+                    <option value="running">Running</option>
+                    <option value="paused">Stopped</option>
+                    <option value="draft">Draft</option>
+                </select>
+            </div>
+
+            <div style="padding-top:5px">
+                <div class="dateLabel">Start Date</div>
+                <select ng-model="data.adv1stDateSearchType">
+                    <option value="isAny">Is Any</option>
+                    <option value="isBefore">Is Before</option>
+                    <option value="isOn">Is On</option>
+                    <option value="isAfter">Is After</option>
+                    <option value="isBetween">Is Between</option>
+                </select>
+                <input type="text" id="txtStartSearchDateOne" init-dates class="text dateInput" ng-class="{twoDateInput: data.adv1stDateSearchType === 'isBetween', disabled: data.adv1stDateSearchType === 'isAny'}" ng-disabled="data.adv1stDateSearchType === 'isAny'" ng-model="data.advTxtSearchDateOne">
+                <span ng-show="data.adv1stDateSearchType === 'isBetween'">
+                    - <input type="text" id="txtStartSearchDateTwo" class="dateInput" init-dates readonly="true" ng-model="data.advTxtSearchDateTwo">
+                </span>
+            </div>
+            <div style="padding-top:5px">
+                <div class="dateLabel">End Date</div>
+                <select ng-model="data.advEnd1stDateSearchType">
+                    <option value="isAny">Is Any</option>
+                    <option value="isBefore">Is Before</option>
+                    <option value="isOn">Is On</option>
+                    <option value="isAfter">Is After</option>
+                    <option value="isBetween">Is Between</option>
+                </select>
+                <input type="text" id="txtSearchDateOne" init-dates class="text dateInput" ng-class="{twoDateInput: data.advEnd1stDateSearchType === 'isBetween', disabled: data.advEnd1stDateSearchType === 'isAny'}" ng-disabled="data.advEnd1stDateSearchType === 'isAny'" ng-model="data.advEndTxtSearchDateOne">
+                <span ng-show="data.advEnd1stDateSearchType === 'isBetween'">
+                    - <input type="text" id="txtSearchDateTwo" class="dateInput" init-dates readonly="true" ng-model="data.advEndTxtSearchDateTwo">
+                </span>
+            </div>
+            <div>
+                <div class="dateLabel">Tags</div>
+                <tags-input name="tags" ng-model="data.searchTags" placeholder="Filter by tags" style="width: 590px;">
+                    <auto-complete source="queryTags($query)"></auto-complete>
+                </tags-input>
+            </div>
+            <div class="buttonBar">
+                <button id="btnClear" title="Clear filters" ng-click="clearFilters()">Clear</button>
+                <button class="blue" id="btnFilter" title="Apply filters to search" ng-click="advSearch()">Apply</button>
+            </div>
+        </form>
+</div>

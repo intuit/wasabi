@@ -1190,16 +1190,41 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                 this.displayPageSuccessMessage(title, msg);
             },
 
-            loadAllTags: function(query, scope) {
+            loadAllTags: function(scope, onlyInCurrentApp) {
                 var that = this;
 
                 scope.allTags = [];
+                if (onlyInCurrentApp && (!scope.experiment.applicationName || scope.experiment.applicationName.length === 0)) {
+                    // This is the New experiment case before they have defined an application name, so we don't need
+                    // to make the call to get all the tags for the application.
+                    return;
+                }
 
                 AllTagsFactory.query().$promise.then(function (tags) {
                     if (tags) {
-                        if (tags.hasOwnProperty(scope.experiment.applicationName)) {
-                            scope.allTags = tags[scope.experiment.applicationName];
+                        var unsortedTagsList = [];
+                        if (onlyInCurrentApp) {
+                            if (tags.hasOwnProperty(scope.experiment.applicationName)) {
+                                unsortedTagsList = tags[scope.experiment.applicationName];
+                            }
                         }
+                        else {
+                            // We want ALL tags in the system.  The result of the API call is an object where the
+                            // properties are application names and the values are arrays of tag name strings.  So
+                            // we need to go through all the lists and make a single, de-duplicated list.
+                            for (var appName in tags) {
+                                if (tags.hasOwnProperty(appName) && Array.isArray(tags[appName])) {
+                                    for (var i = 0; i < tags[appName].length; i++) {
+                                        if (!unsortedTagsList.includes(tags[appName][i])) {
+                                            unsortedTagsList.push(tags[appName][i]);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        scope.allTags = unsortedTagsList.sort(function (a, b) {
+                            return a.toLowerCase().localeCompare(b.toLowerCase());
+                        });
                     }
                 },
                 function(response) {

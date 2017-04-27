@@ -1185,8 +1185,8 @@ angular.module('wasabi.controllers').
                 }
             };
 
-            $scope.loadAllTags = function(query) {
-                UtilitiesFactory.loadAllTags(query, $scope);
+            $scope.loadAllTags = function() {
+                UtilitiesFactory.loadAllTags($scope, true);
             };
 
             $scope.queryTags = function(query) {

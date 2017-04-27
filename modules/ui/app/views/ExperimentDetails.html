@@ -90,7 +90,7 @@
             </tags-input>
         </div>
         <div ng-show="data.tagWidgetsDisabled">
-            <input type="text" ng-model="tagsStr" id="experimentTagsReadOnly" name="experimentTags" class="readOnly disabled" disabled />
+            <input type="text" ng-model="tagsStr" id="experimentTagsReadOnly" placeholder="No tags defined, yet" name="experimentTags" class="readOnly disabled" style="padding-left: 8px;" disabled />
         </div>
         <div id="tagsToolbar" ng-show="!readOnly" dynamic-edit input-tag="experimentTags" select-function="saveTags" edit-function="editTags" cancel-function="cancelTags" ng-model="experiment.tags" class="dynamicToolbar"></div>
     </div>
