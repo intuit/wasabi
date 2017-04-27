@@ -54,6 +54,7 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -92,6 +93,12 @@ public class DefaultCassandraDriver implements CassandraDriver {
                 builder.addContactPoints(nodes.toArray(new String[nodes.size()]))
                         .withRetryPolicy(DefaultRetryPolicy.INSTANCE);
                 builder.withPort(getConfiguration().getPort());
+
+                String username = getConfiguration().getUsername();
+                String password = getConfiguration().getPassword();
+                if(!isBlank(username) && !isBlank(password)) {
+                  builder.withCredentials(username, password);
+                }
 
                 if (getConfiguration().getTokenAwareLoadBalancingLocalDC().isPresent() &&
                         getConfiguration().getTokenAwareLoadBalancingUsedHostsPerRemoteDc() >= 0) {

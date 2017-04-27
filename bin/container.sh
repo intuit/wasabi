@@ -143,8 +143,28 @@ start_wasabi() {
   start_docker
 
   id=$(fromPom modules/main development application.name)
-  wcip=$(docker inspect --format "{{ .NetworkSettings.Networks.${docker_network}.IPAddress }}" ${project}-cassandra)
-  wmip=$(docker inspect --format "{{ .NetworkSettings.Networks.${docker_network}.IPAddress }}" ${project}-mysql)
+
+  CASSANDRA_CONTAINER_NAME=${CASSANDRA_CONTAINER:-${project}-cassandra}
+  IS_CONTAINER=`docker inspect -f {{.State.Running}} $CASSANDRA_CONTAINER_NAME`
+  if [ "$IS_CONTAINER" = true ] ; then
+    wcip=$(docker inspect --format "{{ .NetworkSettings.Networks.${docker_network}.IPAddress }}" ${project}-cassandra)
+  elif [ -z ${NODE_HOST} ]; then
+    echo "[ERROR] Cassandra container must be running or NODE_HOST environment variable must be set"
+    exit 1;
+  else
+    wcip=${NODE_HOST}
+  fi
+
+  MYSQL_CONTAINER_NAME=${MYSQL_CONTAINER:-${project}-mysql}
+  IS_CONTAINER=`docker inspect -f {{.State.Running}} $MYSQL_CONTAINER_NAME`
+  if [ "$IS_CONTAINER" = true ] ; then
+    wmip=$(docker inspect --format "{{ .NetworkSettings.Networks.${docker_network}.IPAddress }}" ${project}-mysql)
+  elif [ -z ${MYSQL_HOST} ]; then
+    echo "[ERROR] Mysql container must be running or MYSQL_HOST environment variable must be set"
+    exit 1;
+  else
+    wmip=${MYSQL_HOST}
+  fi
 
   remove_container ${project}-main
 

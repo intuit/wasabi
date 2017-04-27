@@ -8,7 +8,7 @@ echo "java -jar -Dcassandra.migration.keyspace.name=${CASSANDRA_KEYSPACE:-wasabi
     -Dcassandra.migration.cluster.contactpoints=${CQLSH_HOST:-localhost} \
     ${CASSANDRA_MIGRATION:-/wasabi/cassandra-migration.jar} migrate"
 
-while ! nc -w 1 -z ${CQLSH_HOST-localhost} ${CASSANDRA_PORT:-9042}; do sleep 0.1; done
+while ! nc -w 1 -z ${CQLSH_HOST:-localhost} ${CASSANDRA_PORT:-9042}; do sleep 0.1; done
 
 java -jar -Dcassandra.migration.keyspace.name=${CASSANDRA_KEYSPACE:-wasabi_experiments} \
     -Dcassandra.migration.cluster.port=${CASSANDRA_PORT:-9042} \

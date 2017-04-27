@@ -53,8 +53,15 @@ http://www.w3.org/2001/XMLSchema-instance">
         <mysql.host>localhost</mysql.host>
         <mysql.port>3306</mysql.port>
         <mysql.dbName>wasabi</mysql.dbName>
+        <mysql.username>readwrite</mysql.username>
+        <mysql.password>readwrite</mysql.password>
+        <mysql.numPartitions>1</mysql.numPartitions>
+        <mysql.minConnections>10</mysql.minConnections>
+        <mysql.maxConnections>30</mysql.maxConnections>
         <mysql.Args>verifyServerCertificate=false&amp;useSSL=false&amp;requireSSL=false&amp;autoReconnect=true&amp;autoReconnectForPools=true</mysql.Args>
 
+        <cassandra.username></cassandra.username>
+        <cassandra.password></cassandra.password>
         <cassandra.experiments.keyspaceName>wasabi_experiments</cassandra.experiments.keyspaceName>
         <cassandra.experiments.nodeHosts>localhost</cassandra.experiments.nodeHosts>
         <cassandra.experiments.port>9042</cassandra.experiments.port>
