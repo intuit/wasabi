@@ -23,6 +23,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Collections;
 import java.util.Set;
 
 @Table(name = "experiment_tag")
@@ -38,4 +39,8 @@ public class ExperimentTagsByApplication {
 
     @Column(name = "tags")
     Set<String> tags;
+
+    public Set<String> getTags(){
+        return tags != null ? tags : Collections.EMPTY_SET;
+    }
 }

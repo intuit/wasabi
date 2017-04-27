@@ -64,7 +64,6 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 public class CassandraExperimentRepositoryTest {
@@ -678,18 +677,4 @@ public class CassandraExperimentRepositoryTest {
 
     }
 
-    @Test
-    public void testNoUpdateTags() {
-        //------ Input --------
-        Application.Name appName = Application.Name.valueOf("AppName");
-        Set<String> tags = new TreeSet<>(); // if there are no tags we want no interaction with the db
-
-        //------ Make call
-        repository.updateExperimentTags(appName, tags);
-
-        //------ Verify result
-        verifyZeroInteractions(mockExperimentAccessor);
-        verifyZeroInteractions(mockExperimentTagAccessor);
-
-    }
 }
