@@ -243,38 +243,39 @@
                 </div>
             </li>
             <li>
-                <div>
-                    <tags-input name="tags" ng-model="tags" style="width: 900px;">
+                <div style="float: left; width: 75%;">
+                    <label class="descriptionLabel">Hypothesis/Description</label>
+                    <div style="width: 100%">
+                        <textarea ng-show="!readOnly" name="description" class="form-control" required ng-model="experiment.description" style="width: 100%; height: 75px" ng-maxlength="256" placeholder="Experiment Hypothesis/Description"></textarea>
+                        <textarea ng-show="readOnly" disabled="true" name="description" class="form-control readOnly" ng-model="experiment.description" style="width: 400px; height: 55px"></textarea>
+                        <!-- Validation error -->
+                        <div class="error"
+                             ng-show="(experimentForm.$error && experimentForm.$error.maxlength &&
+                                      experimentForm.$error.maxlength.length > 0 &&
+                                      experimentForm.$error.maxlength[0].$name === 'description') ||
+                                      (experimentFormSubmitted &&
+                                      experimentForm.$error && experimentForm.$error.maxlength &&
+                                      experimentForm.$error.maxlength.length > 0 &&
+                                      experimentForm.$error.maxlength[0].$name === 'description') ||
+                                      (experimentFormSubmitted &&
+                                      experimentForm.$error && experimentForm.$error.required &&
+                                      experimentForm.$error.required[0].$name === 'description')">
+                            <small class="fieldError"
+                                   ng-show="experimentForm.$error.maxlength[0].$name === 'description'">
+                                The hypothesis/description must be 256 characters or less.
+                            </small>
+                            <small class="fieldError"
+                                   ng-show="experimentForm.$error.required[0].$name === 'description'">
+                                You must provide a hypothesis/description for your experiment.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div style="width: 25%; padding-left: 20px;">
+                    <label class="tagsLabel">Tags</label>
+                    <tags-input name="tags" ng-model="tags" style="width: 100%;">
                         <auto-complete source="queryTags($query)"></auto-complete>
                     </tags-input>
-                </div>
-            </li>
-            <li>
-                <label class="descriptionLabel">Hypothesis/Description</label>
-                <div style="width: 100%">
-                    <textarea ng-show="!readOnly" name="description" class="form-control" required ng-model="experiment.description" style="width: 900px; height: 55px" ng-maxlength="256" placeholder="Experiment Hypothesis/Description"></textarea>
-                    <textarea ng-show="readOnly" disabled="true" name="description" class="form-control readOnly" ng-model="experiment.description" style="width: 900px; height: 55px"></textarea>
-                    <!-- Validation error -->
-                    <div class="error"
-                         ng-show="(experimentForm.$error && experimentForm.$error.maxlength &&
-                                  experimentForm.$error.maxlength.length > 0 &&
-                                  experimentForm.$error.maxlength[0].$name === 'description') ||
-                                  (experimentFormSubmitted &&
-                                  experimentForm.$error && experimentForm.$error.maxlength &&
-                                  experimentForm.$error.maxlength.length > 0 &&
-                                  experimentForm.$error.maxlength[0].$name === 'description') ||
-                                  (experimentFormSubmitted &&
-                                  experimentForm.$error && experimentForm.$error.required &&
-                                  experimentForm.$error.required[0].$name === 'description')">
-                        <small class="fieldError"
-                               ng-show="experimentForm.$error.maxlength[0].$name === 'description'">
-                            The hypothesis/description must be 256 characters or less.
-                        </small>
-                        <small class="fieldError"
-                               ng-show="experimentForm.$error.required[0].$name === 'description'">
-                            You must provide a hypothesis/description for your experiment.
-                        </small>
-                    </div>
                 </div>
             </li>
         </ul>

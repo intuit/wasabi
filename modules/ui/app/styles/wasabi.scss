@@ -1142,23 +1142,27 @@ header {
     top: 4px;
 }
 .descriptionLabel {
+    float: left;
+    padding-bottom: 3px;
+    font-size: 12px;
+    font-weight: bold;
+}
+.tagsLabel {
     padding-bottom: 3px;
     font-size: 12px;
     font-weight: bold;
 }
 #descriptionToolbar {
-    right: 38px;
-    top: 242px;
+    right: 377px;
+    top: 197px;
 }
 #tagsToolbar {
-    right: 38px;
-    top: 186px;
+    right: 18px;
+    top: 204px;
 }
 #experimentTagsReadOnly {
     margin-bottom: 5px;
-    margin-top: 6px;
-    width: 963px;
-    height: 34px;
+    width: 75%;
 }
 #personalizationToolbar {
     left: 240px;
