@@ -15,9 +15,12 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.cassandra.accessor;
 
+import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.mapping.annotations.Accessor;
 import com.datastax.driver.mapping.annotations.Query;
+
+import java.util.UUID;
 
 /**
  * Accessor interface
@@ -26,4 +29,8 @@ import com.datastax.driver.mapping.annotations.Query;
 public interface StagingAccessor {
     @Query("insert into staging(time, type, exep , msg) values(now(), ?, ? , ?)")
     ResultSet insertBy(String type, String exception, String message);
+
+    @Query("insert into staging(time, type, exep , msg) values(?, ?, ? , ?)")
+    BoundStatement batchInsertBy(UUID time, String type, String exception, String message);
+
 }

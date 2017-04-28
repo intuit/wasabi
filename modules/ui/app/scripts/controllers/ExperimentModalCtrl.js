@@ -12,7 +12,8 @@ angular.module('wasabi.controllers')
 
                 $scope.data = {
                     disableSimple: false,
-                    userCapValue: (experiment && experiment.isRapidExperiment ? experiment.userCap : '')
+                    userCapValue: (experiment && experiment.isRapidExperiment ? experiment.userCap : ''),
+                    apiLanguage: 'curl'
                 };
 
                 $scope.experiment = experiment;

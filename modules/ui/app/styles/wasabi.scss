@@ -1208,6 +1208,26 @@ header {
     display: none !important;
 }
 
+.codeLink {
+  display: inline-block;
+  position: relative;
+  margin-left: 10px;
+  height: 22px;
+  line-height: 22px;
+  padding-left: 23px;
+  span {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 22px;
+      height: 22px;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 12px;
+      background-image: url(/images/icon_code.png);
+  }
+}
+
 /* New Experiment */
 .listAction {
   display: inline-block;
@@ -3122,9 +3142,14 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
 }
 /* end Home page */
 
-#segmentationTestModal {
+#segmentationTestModal, #analysisGraphModal, #displaySourceCodeModal {
     width: 800px;
     left: -50px;
+}
+
+#displaySourceCodeModal iframe {
+    height: 500px;
+    border: 1px solid #bcbcbc;
 }
 
 #resultsModal {
@@ -3282,7 +3307,7 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
 	list-style: none;
 	position: relative;
     margin: 7px auto 0 auto;
-    width: 355px;
+    width: 305px;
 	padding: 0;
     padding-top: 4px;
 }
@@ -3329,15 +3354,15 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
 	position: absolute;
 	text-align: center;
 	width: 100px;
-	left: 50%;
+	left: 47%;
 	top: 2px;
 	margin-left: -50px;
 }
 #npsLables label:first-child {
-    left: 21%;
+    left: 25%;
 }
 #npsLables label:last-child {
-    left: 78%;
+    left: 74%;
 }
 #txtFeedbackComments {
 	height: 50px;
@@ -4505,4 +4530,22 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
 
 tags-input .tags .tag-item {
     clear: none;
+}
+
+.displaySourceCode {
+    display: block;
+    overflow: auto;
+    background: white;
+    height: 500px;
+    padding: 0 20px;
+    p {
+        margin: 0 0 10px;
+    }
+    pre {
+        font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+        font-size: 13px;
+        background: white;
+        overflow: visible;
+        margin-bottom: 10px;
+    }
 }

@@ -14,7 +14,8 @@ angular.module('wasabi.controllers').
                 ruleWidgetsDisabled: false,
                 resultsWidgetsDisabled: true,
                 descriptionLength: 0,
-                tagWidgetsDisabled: true
+                tagWidgetsDisabled: true,
+                apiLanguage: 'curl'
             };
 
             $scope.experiment = {
@@ -226,6 +227,7 @@ angular.module('wasabi.controllers').
 
             // load experiment from server
             $scope.loadExperiment = function () {
+                UtilitiesFactory.startSpin();
                 ExperimentsFactory.show({id: $stateParams.experimentId}).$promise.then(function (experiment) {
                     $scope.experiment = experiment;
                     if ($scope.experiment.hypothesisIsCorrect === null) {
@@ -262,6 +264,8 @@ angular.module('wasabi.controllers').
                     $rootScope.$broadcast('experiment_created');
                 }, function(response) {
                     UtilitiesFactory.handleGlobalError(response, 'Your experiment could not be retrieved.');
+                }).finally(function() {
+                    UtilitiesFactory.stopSpin();
                 });
             };
 
@@ -269,6 +273,7 @@ angular.module('wasabi.controllers').
 
             // load buckets from server
             $scope.loadBuckets = function () {
+                UtilitiesFactory.startSpin();
                 BucketsFactory.query({
                     experimentId: $stateParams.experimentId
                 }).$promise.then(function (buckets) {
@@ -281,10 +286,13 @@ angular.module('wasabi.controllers').
                     },
                     function(response) {
                     UtilitiesFactory.handleGlobalError(response, 'Your buckets could not be loaded.');
+                }).finally(function() {
+                    UtilitiesFactory.stopSpin();
                 });
             };
 
             $scope.getApplicationStatistics = function() {
+                UtilitiesFactory.startSpin();
                 ApplicationStatisticsFactory.query({
                     experimentId: $stateParams.experimentId
                 }).$promise.then(function (appInfo) {
@@ -303,6 +311,8 @@ angular.module('wasabi.controllers').
                     },
                     function(response) {
                     UtilitiesFactory.handleGlobalError(response, 'Your user count could not be loaded.');
+                }).finally(function() {
+                    UtilitiesFactory.stopSpin();
                 });
             };
 
@@ -312,6 +322,7 @@ angular.module('wasabi.controllers').
 
             // load statistics from server
             $scope.loadStatistics = function () {
+                UtilitiesFactory.startSpin();
                 ExperimentStatisticsFactory.query({experimentId: $stateParams.experimentId}).$promise.
                     then(function (statistics) {
                         $scope.experiment.statistics = statistics;
@@ -324,6 +335,8 @@ angular.module('wasabi.controllers').
 
                     }, function(response) {
                     UtilitiesFactory.handleGlobalError(response, 'Your statistics could not be retrieved.');
+                }).finally(function() {
+                    UtilitiesFactory.stopSpin();
                 });
             };
 

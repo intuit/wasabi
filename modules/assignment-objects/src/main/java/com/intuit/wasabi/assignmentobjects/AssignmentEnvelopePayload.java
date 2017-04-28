@@ -329,9 +329,9 @@ public class AssignmentEnvelopePayload implements EnvelopePayload {
         assignmentJson.put("createAssignment", createAssignment);
         assignmentJson.put("putAssignment", putAssignment);
         assignmentJson.put("ignoreSamplingPercent", ignoreSamplingPercent);
-        assignmentJson.put("segmentationProfile", segmentationProfile != null ?
-                segmentationProfile.getProfile() != null ?
-                        segmentationProfile.getProfile().toString() : "" : "");
+        assignmentJson.put("segmentationProfile",
+                segmentationProfile != null && segmentationProfile.getProfile() != null ?
+                        segmentationProfile.getProfile().toString() : "");
         assignmentJson.put("experimentID", experimentID != null ? experimentID.toString() : "");
         assignmentJson.put("pageName", pageName != null ? pageName.toString() : "");
         assignmentJson.put("assignmentStatus", assignmentStatus != null ?

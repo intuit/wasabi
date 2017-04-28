@@ -121,6 +121,7 @@ angular.module('wasabi.controllers').
                 if (selectedApp) {
                     $scope.applicationName = $cookies.wasabiDefaultApplication = selectedApp;
                     $scope.noDrag = $scope.readOnly = !$scope.hasUpdatePermission(selectedApp);
+                    UtilitiesFactory.startSpin();
                     PrioritiesFactory.query({applicationName: selectedApp}).$promise.then(function (priorities) {
                         $scope.experiments = priorities;
                         $scope.doFavorites();
@@ -132,6 +133,8 @@ angular.module('wasabi.controllers').
                             {key: 'application_name', value: selectedApp});
                     }, function(response) {
                         UtilitiesFactory.handleGlobalError(response, 'The list of priorities could not be retrieved.');
+                    }).finally(function() {
+                        UtilitiesFactory.stopSpin();
                     });
                 }
             };

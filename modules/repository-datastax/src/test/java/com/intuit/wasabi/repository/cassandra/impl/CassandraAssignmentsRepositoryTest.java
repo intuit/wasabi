@@ -54,6 +54,7 @@ import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentUserIndex
 import com.intuit.wasabi.repository.cassandra.accessor.index.PageExperimentIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.pojo.count.BucketAssignmentCount;
 import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentUserByUserIdContextAppNameExperimentId;
+import org.apache.cassandra.utils.UUIDGen;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
@@ -81,6 +82,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -554,6 +556,42 @@ public class CassandraAssignmentsRepositoryTest {
         repository.pushAssignmentToStaging("type", "string1", "string2");
         verify(stagingAccessor, times(1))
                 .insertBy(eq("type"), eq("string1"), eq("string2"));
+    }
+
+    @Test
+    public void testPushAssignmentsToStaging() {
+        //------ Input
+        List<String> messages = newArrayList("Msg1", "Msg2", "Msg3");
+
+        //------ Mocking interacting calls
+        ResultSet genericResultSet = mock(ResultSet.class);
+        when(driver.getSession()).thenReturn(mock(Session.class));
+        when(driver.getSession().execute(any(BatchStatement.class))).thenReturn(genericResultSet);
+
+        //----- Actual call
+        repository.pushAssignmentsToStaging("type", "string1", messages);
+
+        //----- Verify result
+        verify(stagingAccessor, times(3)).batchInsertBy(any(UUID.class), eq("type"), eq("string1"), any(String.class));
+    }
+
+    @Test
+    public void testPushAssignmentsToStagingWriteException() {
+        //------ Input
+        List<String> messages = newArrayList("Msg1", "Msg2", "Msg3");
+
+        //------ Mocking interacting calls
+        doThrow(WriteTimeoutException.class).when(stagingAccessor).batchInsertBy(any(UUID.class), eq("type"), eq("string1"), any(String.class));
+        ResultSet genericResultSet = mock(ResultSet.class);
+        when(driver.getSession()).thenReturn(mock(Session.class));
+        when(driver.getSession().execute(any(BatchStatement.class))).thenReturn(genericResultSet);
+
+        //----- Verify expected exception
+        thrown.expect(RepositoryException.class);
+        thrown.expectMessage("Error occurred while pushAssignmentsToStaging");
+
+        //----- Actual call
+        repository.pushAssignmentsToStaging("type", "string1", messages);
     }
 
     @Test

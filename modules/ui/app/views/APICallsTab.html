@@ -1,0 +1,63 @@
+<div class="apiCallsTab" ng-controller="APICallsCtrl">
+    <label>Example Wasabi API Calls</label>
+    <input style="margin-left: 20px;" type="radio" ng-model="data.apiLanguage" value="curl" /> Curl
+    <input style="margin-left: 10px;" type="radio" ng-model="data.apiLanguage" value="javascript" /> JavaScript
+    <input style="margin-left: 10px;" type="radio" ng-model="data.apiLanguage" value="java" /> Java
+    <input style="margin-left: 10px;" type="radio" ng-model="data.apiLanguage" value="python" /> Python
+    <div>
+        <div class="apiLabel">Assignment</div>
+        <input id="singleAssignmentCall" class="form-control text" type="text" ng-show="data.apiLanguage === 'curl'"
+               value="curl -H &quot;Content-Type: application/json&quot; {{hostUrl}}/assignments/applications/{{experiment.applicationName}}/experiments/{{experiment.label}}/users/userID1" readonly />
+        
+
+        <a ng-show="data.apiLanguage === 'javascript'" class="codeLink" href="#" onclick="return false;" ng-click="showCode('resources/samplecode/javascript/assignment.js.html')"><span></span> View code...</a>
+        <a ng-show="data.apiLanguage === 'java'" class="codeLink" href="#" onclick="return false;" ng-click="showCode('resources/samplecode/java/Assignment.java.html')"><span></span> View code...</a>
+        <a ng-show="data.apiLanguage === 'python'" class="codeLink" href="#" onclick="return false;" ng-click="showCode('resources/samplecode/python/assignments.py.html')"><span></span> View code...</a>
+    </div>
+    <div>
+        <div class="apiLabel">Record an Impression</div>
+        <input id="impressionEventCall" class="form-control text" type="text" ng-show="data.apiLanguage === 'curl'"
+               value="curl -H &quot;Content-Type: application/json&quot; -d &quot;{\&quot;events\&quot;:[{\&quot;name\&quot;:\&quot;IMPRESSION\&quot;}]}&quot; {{hostUrl}}/events/applications/{{experiment.applicationName}}/experiments/{{experiment.label}}/users/userID1" readonly />
+
+        <a ng-show="data.apiLanguage === 'javascript'" class="codeLink" href="#" onclick="return false;" ng-click="showCode('resources/samplecode/javascript/impression.js.html')"><span></span> View code...</a>
+        <a ng-show="data.apiLanguage === 'java'" class="codeLink" href="#" onclick="return false;" ng-click="showCode('resources/samplecode/java/Impression.java.html')"><span></span> View code...</a>
+        <a ng-show="data.apiLanguage === 'python'" class="codeLink" href="#" onclick="return false;" ng-click="showCode('resources/samplecode/python/impression.py.html')"><span></span> View code...</a>
+    </div>
+    <div>
+        <div class="apiLabel">Record an Action</div>
+        <input id="actionEventCall" class="form-control text" type="text" ng-show="data.apiLanguage === 'curl'"
+               value="curl -H &quot;Content-Type: application/json&quot; -d &quot;{\&quot;events\&quot;:[{\&quot;name\&quot;:\&quot;myEventName\&quot;,\&quot;payload\&quot;:\&quot;{\\\&quot;myPayloadKey1\\\&quot;:\\\&quot;payloadKey1Value\\\&quot;}\&quot;}]}&quot; {{hostUrl}}/events/applications/{{experiment.applicationName}}/experiments/{{experiment.label}}/users/userID1" readonly />
+        <a ng-show="data.apiLanguage === 'javascript'" class="codeLink" href="#" onclick="return false;" ng-click="showCode('resources/samplecode/javascript/action.js.html')"><span></span> View code...</a>
+        <a ng-show="data.apiLanguage === 'java'" class="codeLink" href="#" onclick="return false;" ng-click="showCode('resources/samplecode/java/Action.java.html')"><span></span> View code...</a>
+        <a ng-show="data.apiLanguage === 'python'" class="codeLink" href="#" onclick="return false;" ng-click="showCode('resources/samplecode/python/action.py.html')"><span></span> View code...</a>
+    </div>
+    <div ng-show="experiment && experiment.pages && experiment.pages.length > 0">
+        <div class="apiLabel">Batch Assignment</div>
+        <input id="batchAssignmentCall" class="form-control text" type="text" ng-show="data.apiLanguage === 'curl'"
+               value="curl -H &quot;Content-Type: application/json&quot; {{hostUrl}}/assignments/applications/{{experiment.applicationName}}/pages/{{firstPageEncoded()}}/users/userID1" readonly />
+        <a ng-show="data.apiLanguage === 'javascript'" class="codeLink" href="#" onclick="return false;" ng-click="showCode('resources/samplecode/javascript/batch_assignment.js.html')"><span></span> View code...</a>
+        <a ng-show="data.apiLanguage === 'java'" class="codeLink" href="#" onclick="return false;" ng-click="showCode('resources/samplecode/java/BatchAssignment.java.html')"><span></span> View code...</a>
+        <a ng-show="data.apiLanguage === 'python'" class="codeLink" href="#" onclick="return false;" ng-click="showCode('resources/samplecode/python/batch_assignments.py.html')"><span></span> View code...</a>
+    </div>
+    <div ng-show="experiment.rule && experiment.rule !== ''">
+        <div class="apiLabel">Assignment Providing Profile For Use By Segmentation Rule</div>
+        <input id="singleAssignmentCallWithSegmentationRule" class="form-control text" type="text" ng-show="data.apiLanguage === 'curl'"
+               value="curl -H &quot;Content-Type: application/json&quot; -d &quot;{\&quot;profile\&quot;:{\&quot;key1\&quot;:\&quot;value1\&quot;,\&quot;key2\&quot;:\&quot;value2\&quot;}}&quot; {{hostUrl}}/assignments/applications/{{experiment.applicationName}}/experiments/{{experiment.label}}/users/userID1" readonly />
+        <a ng-show="data.apiLanguage === 'javascript'" class="codeLink" href="#" onclick="return false;" ng-click="showCode('resources/samplecode/javascript/assignment_with_seg.js.html')"><span></span> View code...</a>
+        <a ng-show="data.apiLanguage === 'java'" class="codeLink" href="#" onclick="return false;" ng-click="showCode('resources/samplecode/java/AssignmentWithSegmentation.java.html')"><span></span> View code...</a>
+        <a ng-show="data.apiLanguage === 'python'" class="codeLink" href="#" onclick="return false;" ng-click="showCode('resources/samplecode/python/assignments_with_seg.py.html')"><span></span> View code...</a>
+    </div>
+    <div ng-show="experiment && experiment.rule && experiment.rule !== '' && experiment.pages && experiment.pages.length > 0">
+        <div class="apiLabel">Batch Assignment Providing Profile For Use By Segmentation Rule</div>
+        <input id="batchAssignmentCallWithSegmentationRule" class="form-control text" type="text" ng-show="data.apiLanguage === 'curl'"
+               value="curl -H &quot;Content-Type: application/json&quot; -d &quot;{\&quot;profile\&quot;:{\&quot;key1\&quot;:\&quot;value1\&quot;,\&quot;key2\&quot;:\&quot;value2\&quot;}}&quot; {{hostUrl}}/assignments/applications/{{experiment.applicationName}}/pages/{{firstPageEncoded()}}/users/userID1" readonly />
+        <a ng-show="data.apiLanguage === 'javascript'" class="codeLink" href="#" onclick="return false;" ng-click="showCode('resources/samplecode/javascript/batch_assignment_with_seg.js.html')"><span></span> View code...</a>
+        <a ng-show="data.apiLanguage === 'java'" class="codeLink" href="#" onclick="return false;" ng-click="showCode('resources/samplecode/java/BatchAssignmentWithSegmentation.java.html')"><span></span> View code...</a>
+        <a ng-show="data.apiLanguage === 'python'" class="codeLink" href="#" onclick="return false;" ng-click="showCode('resources/samplecode/python/batch_assignments_with_seg.py.html')"><span></span> View code...</a>
+    </div>
+    <div ng-show="experiment && experiment.id">
+        <div class="apiLabel">Experiment ID</div>
+        <input id="experimentId" class="form-control text" type="text"
+               value="{{experiment.id}}" readonly />
+    </div>
+</div>

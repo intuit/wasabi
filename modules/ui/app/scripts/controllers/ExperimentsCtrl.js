@@ -158,6 +158,8 @@ angular.module('wasabi.controllers').
                     return existingFilter += newFilterValue;
                 }
 
+                UtilitiesFactory.startSpin();
+
                 var queryParams = {
                     perPage: pageSize,
                     page: currentPage,
@@ -223,7 +225,9 @@ angular.module('wasabi.controllers').
                         function(response) {
                             UtilitiesFactory.handleGlobalError(response, 'The list of experiments could not be retrieved.');
                         }
-                    );
+                    ).finally(function() {
+                        UtilitiesFactory.stopSpin();
+                    });
                 }
                 else {
                     ExperimentStatisticsFactory.cardViewData(queryParams).$promise
@@ -231,7 +235,9 @@ angular.module('wasabi.controllers').
                         function(response) {
                             UtilitiesFactory.handleGlobalError(response, 'The list of experiments could not be retrieved.');
                         }
-                    );
+                    ).finally(function() {
+                        UtilitiesFactory.stopSpin();
+                    });
                 }
             };
 
@@ -422,8 +428,6 @@ angular.module('wasabi.controllers').
                     else {
                         $scope.doFavorites($scope.cardViewExperiments, false);
                     }
-
-                    //$scope.loadGridDataIfNecessary()
                 });
             };
 

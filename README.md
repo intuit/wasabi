@@ -3,6 +3,7 @@
 **Support:** [![Join the chat at https://gitter.im/intuit/wasabi](https://badges.gitter.im/intuit/wasabi.svg)](https://gitter.im/intuit/wasabi?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) <br/>
 **Documentation:** [User Guide](https://intuit.github.io/wasabi/v1/guide/index.html), [JavaDocs](https://intuit.github.io/wasabi/v1/javadocs/latest/)
 <br/>
+**A/B Testing Overview:** [![A/B Testing Overview](http://img.shields.io/badge/video-A%2FB%20Testing%20Overview-red.svg)](https://www.youtube.com/watch?v=_HtvJwBPUqk&feature=youtu.be) <br/>
 **Continuous Integration:** [![Build Status](https://api.travis-ci.org/intuit/wasabi.svg?branch=develop)](https://travis-ci.org/intuit/wasabi)
 [![Coverage Status](https://coveralls.io/repos/github/intuit/wasabi/badge.svg)](https://coveralls.io/github/intuit/wasabi?branch=develop)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.intuit.wasabi/wasabi/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.intuit.wasabi/wasabi) <br/>
@@ -41,7 +42,7 @@ Learn more about how Wasabi can empower your team to move from hunches to action
 
 ## Get Started
 
-The following steps will help you install the needed tools, then build and run a complete Wasabi stack. Note, at this time, only Mac OS X is supported.
+The following steps will help you install the needed tools, then build and run a complete Wasabi stack.
 
 #### Bootstrap Your Environment
 

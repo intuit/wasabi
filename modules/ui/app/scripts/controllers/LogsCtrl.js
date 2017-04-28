@@ -77,6 +77,7 @@ angular.module('wasabi.controllers').
                             sort: ($scope.reverseSort ? '-' : '') + $scope.orderByField.replace('_', '.'),
                             filter: $scope.data.query
                         };
+                    UtilitiesFactory.startSpin();
                     LogsFactory.query(options).$promise.then(function (data) {
                         $scope.logs = data.logEntries;
                         $scope.totalItems = data.totalEntries;
@@ -88,6 +89,8 @@ angular.module('wasabi.controllers').
                             {key: 'application_name', value: selectedApp});
                     }, function(response) {
                         UtilitiesFactory.handleGlobalError(response, 'The list of logs could not be retrieved.');
+                    }).finally(function() {
+                        UtilitiesFactory.stopSpin();
                     });
                 }
             };

@@ -7,8 +7,8 @@
 // page success message before the first one has faded out.
 var globalPageSuccessMessageFadeOutTimer = null;
 
-angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$state', 'AuthFactory', '$rootScope', 'AUTH_EVENTS', 'PERMISSIONS', 'USER_ROLES', '$filter', 'AuthzFactory', 'BucketsFactory', 'DialogsFactory', 'ExperimentsFactory', 'WasabiFactory', '$uibModal', '$injector', 'FavoritesFactory', 'StateFactory', 'AllTagsFactory',
-    function (Session, $state, AuthFactory, $rootScope, AUTH_EVENTS, PERMISSIONS, USER_ROLES, $filter, AuthzFactory, BucketsFactory, DialogsFactory, ExperimentsFactory, WasabiFactory, $uibModal, $injector, FavoritesFactory, StateFactory, AllTagsFactory) {
+angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$state', 'AuthFactory', '$rootScope', 'AUTH_EVENTS', 'PERMISSIONS', 'USER_ROLES', '$filter', 'AuthzFactory', 'BucketsFactory', 'DialogsFactory', 'ExperimentsFactory', 'WasabiFactory', '$uibModal', '$injector', 'FavoritesFactory', 'StateFactory', 'AllTagsFactory', 'usSpinnerService',
+    function (Session, $state, AuthFactory, $rootScope, AUTH_EVENTS, PERMISSIONS, USER_ROLES, $filter, AuthzFactory, BucketsFactory, DialogsFactory, ExperimentsFactory, WasabiFactory, $uibModal, $injector, FavoritesFactory, StateFactory, AllTagsFactory, usSpinnerService) {
         return {
             // generate state image url
             stateImgUrl: function (state) {
@@ -43,6 +43,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                     this.hideTopLevelTab('Plugins', false);
                     this.hideTopLevelTabMenuChoice('Logs', false);
                     this.hideTopLevelTabMenuChoice('Feedback', !Session.isSuperadmin);
+                    this.hideTopLevelTabMenuChoice('Superadmins', !Session.isSuperadmin);
                     this.hideTopLevelTab('Tools', false);
                 }
                 else {
@@ -51,6 +52,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                     this.hideTopLevelTab('Plugins');
                     this.hideTopLevelTabMenuChoice('Logs');
                     this.hideTopLevelTabMenuChoice('Feedback', true);
+                    this.hideTopLevelTabMenuChoice('Superadmins', true);
                     this.hideTopLevelTab('Tools', true);
                 }
             },
@@ -1275,8 +1277,15 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                         scope.experiment.tags.push(scope.tags[i].text);
                     }
                 }
-            }
+            },
 
+            startSpin: function(){
+                usSpinnerService.spin('spinner-1');
+            },
+
+            stopSpin: function(){
+                usSpinnerService.stop('spinner-1');
+            }
         };
     }
 ]);

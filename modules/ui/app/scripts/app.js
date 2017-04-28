@@ -30,6 +30,7 @@ angular.module('wasabi', [
         'wasabi.services',
         'wasabi.controllers',
         'wasabi.directives',
+        'angularSpinner',
         'config',
         'ngTagsInput'
     ])

@@ -11,6 +11,7 @@ angular.module('wasabi.controllers').
             // load superadmins from server
             $scope.loadSuperadmins = function () {
                 $scope.superadmins = [];
+                UtilitiesFactory.startSpin();
                 SuperadminsFactory.query().$promise.then(function(superadmins) {
                     $scope.superadmins = superadmins;
                     for (var i = 0; i < $scope.superadmins.length; i++) {
@@ -19,6 +20,8 @@ angular.module('wasabi.controllers').
                 },
                 function(response) {
                     UtilitiesFactory.handleGlobalError(response, 'The list of superadmins could not be retrieved.');
+                }).finally(function() {
+                    UtilitiesFactory.stopSpin();
                 });
             };
 
