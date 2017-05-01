@@ -1153,16 +1153,16 @@ header {
     font-weight: bold;
 }
 #descriptionToolbar {
-    right: 377px;
-    top: 197px;
+    right: 373px;
+    top: 174px;
 }
 #tagsToolbar {
-    right: 18px;
-    top: 204px;
+    right: 25px;
+    top: 174px;
 }
 #experimentTagsReadOnly {
     margin-bottom: 5px;
-    width: 75%;
+    width: 100%;
 }
 #personalizationToolbar {
     left: 240px;
@@ -4530,6 +4530,10 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
 
 tags-input .tags .tag-item {
     clear: none;
+}
+
+tags-input .host {
+    margin-top: 0;
 }
 
 .displaySourceCode {
