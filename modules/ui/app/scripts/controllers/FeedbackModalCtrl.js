@@ -34,7 +34,10 @@ angular.module('wasabi.controllers')
                     }
                     if (!$scope.userInteractedWithScore) {
                         $scope.feedback.score = '6';
-                        $scope.feedback.comments += '[[NOTE: Score defaulted to 6 due to bug]]';
+                        if (!$scope.feedback.comments) {
+                            $scope.feedback.comments = '';
+                        }
+                        $scope.feedback.comments += ' [[NOTE: Score defaulted to 6 due to bug]]';
                     }
                     FeedbackFactory.sendFeedback($scope.feedback).$promise.then(function(/*result*/) {
                         UtilitiesFactory.trackEvent('saveItemSuccess',
