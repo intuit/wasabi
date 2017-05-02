@@ -10,7 +10,7 @@ Prerequisite:
 * cd [workspace]/wasabi. mvn clean install
 * Install Oracle VM VirtualBox (version 5.1.18 or higher) and Vagrant (version 1.9.3 or higher).
 
-## Mac installation instructions with brew
+Mac installation instructions with brew
 ```shell
 # install vagrant
 % brew cask install vagrant
