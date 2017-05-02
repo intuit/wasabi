@@ -6,6 +6,7 @@ The tests use [TestNG](http://testng.org/doc/) and are implemented using
 [Gson](https://google-gson.googlecode.com/svn/trunk/gson/docs/javadocs/index.html).
 
 #Running Integration Test in Vagrant
+
 Prerequisite: 
 * cd [workspace]/wasabi. mvn clean install
 * Install Oracle VM VirtualBox (version 5.1.18 or higher) and Vagrant (version 1.9.3 or higher).
