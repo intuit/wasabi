@@ -518,4 +518,14 @@ public class DatabaseExperimentRepositoryTest {
         assertThat(result.getBuckets().size(), is(1));
         assertThat(result.getBuckets().get(0).getExperimentID(), is(id));
     }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testUnsupportedTagMethod() {
+        repository.getTagListForApplications(Collections.EMPTY_LIST);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testUnsupportedApplicationMethod() {
+        repository.createApplication(Application.Name.valueOf("NotSupported"));
+    }
 }
