@@ -58,6 +58,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
@@ -673,8 +674,39 @@ public class CassandraExperimentRepositoryTest {
         repository.updateExperimentTags(appName, tags);
 
         //------ Verify result
-        verify(mockExperimentTagAccessor).insertByApp(appName.toString(), new TreeSet<>(Arrays.asList("tag1", "tag2", "tag3", "tag4")));
+        verify(mockExperimentTagAccessor).insertByApp(appName.toString(),
+                new TreeSet<>(Arrays.asList("tag1", "tag2", "tag3", "tag4")));
+    }
 
+    @Test
+    public void testGetTagList() {
+        //------ Input --------
+        Application.Name app01 = Application.Name.valueOf("app01");
+        Application.Name app02 = Application.Name.valueOf("app02");
+        List<Application.Name> appNames = Arrays.asList(app01, app02);
+
+        Set<String> exp1 = new TreeSet<>(Arrays.asList("tag1", "tag3"));
+        Set<String> exp2 = new TreeSet<>(Arrays.asList("tag4"));
+
+        ExperimentTagsByApplication exp1Tags = ExperimentTagsByApplication.builder()
+                .tags(exp1).appName(app01.toString()).build();
+        ExperimentTagsByApplication exp2Tags = ExperimentTagsByApplication.builder()
+                .tags(exp2).appName(app02.toString()).build();
+
+        List<ExperimentTagsByApplication> res = Arrays.asList(exp1Tags, exp2Tags);
+
+        //------ Mocking interacting calls
+        Result<ExperimentTagsByApplication> dbResult = mock(Result.class);
+        when(mockExperimentTagAccessor.getExperimentTags(Arrays.asList("app01", "app02"))).thenReturn(dbResult);
+        when(dbResult.all()).thenReturn(res);
+
+        //------ Make call
+        Map<Name, Set<String>> callResult = repository.getTagListForApplications(appNames);
+
+        //------ Verify result
+        assertEquals(2, callResult.size());
+        assertArrayEquals(exp1.toArray(), callResult.get(app01).toArray());
+        assertArrayEquals(exp2.toArray(), callResult.get(app02).toArray());
     }
 
 }
