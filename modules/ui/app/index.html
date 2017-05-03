@@ -122,7 +122,7 @@
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
             // Load the Google Charts library.
-            google.charts.load('current', {packages: ['corechart']});
+            google.charts.load('current', {packages: ['corechart','bar']});
     </script>
 
     <!-- build:js({.tmp,app}) scripts/wasabi.js -->
@@ -203,6 +203,7 @@
     <script src="scripts/controllers/PageManagementCtrl.js"></script>
     <script src="scripts/controllers/AddExperimentsToPageModalCtrl.js"></script>
     <script src="scripts/controllers/SuperadminsTableCtrl.js"></script>
+    <script src="scripts/controllers/SpecialAnalysisGraphModalCtrl.js"></script>
     <script src="scripts/controllers/AddSuperadminModalCtrl.js"></script>
     <script src="scripts/directives/ConvertPercentDirective.js"></script>
     <script src="scripts/directives/CustomTooltip.js"></script>
@@ -243,6 +244,7 @@
     <script src="scripts/directives/SetFocusDirective.js"></script>
     <script src="scripts/directives/ColResizeableDirective.js"></script>
     <script src="scripts/directives/HoverPopupDirective.js"></script>
+    <script src="scripts/directives/GoogleChartsBarChartDirective.js"></script>
     <!-- endbuild -->
 </body>
 </html>

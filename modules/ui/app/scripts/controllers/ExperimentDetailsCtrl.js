@@ -337,6 +337,23 @@ angular.module('wasabi.controllers').
                 });
             };
 
+            $scope.showSpecialAnalysisGraph = function() {
+                var modalInstance = $modal.open({
+                    templateUrl: 'views/SpecialAnalysisGraphModal.html',
+                    controller: 'SpecialAnalysisGraphModalCtrl',
+                    windowClass: 'xxx-dialog',
+                    backdrop: 'static',
+                    resolve: {
+                        experiment: function () {
+                            return $scope.experiment;
+                        }
+                    }
+                });
+
+                modalInstance.result.then(function () {
+                });
+            };
+
             // load dailies from server
             $scope.loadDailies = function () {
                 ExperimentStatisticsFactory.dailies({experimentId: $stateParams.experimentId}).$promise.

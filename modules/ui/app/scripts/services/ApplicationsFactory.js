@@ -58,6 +58,26 @@ angular.module('wasabi.services').factory('ApplicationsFactory', ['$resource', '
                 },
                 isArray: true
             },
+            'getImpressionData': { method: 'GET',
+                params: {appName: '@appName', expId: '@expId'},
+                url: ConfigFactory.baseUrl() + '/events/applications/:appName/experiments/:expId/eventImpressionPayload',
+                transformResponse: function (data) {
+                    var parsedData = $.parseJSON(data);
+
+                    return parsedData;
+                },
+                isArray: true
+            },
+            'getActionData': { method: 'GET',
+                params: {appName: '@appName', expId: '@expId'},
+                url: ConfigFactory.baseUrl() + '/events/applications/:appName/experiments/:expId/eventActionPayload',
+                transformResponse: function (data) {
+                    var parsedData = $.parseJSON(data);
+
+                    return parsedData;
+                },
+                isArray: true
+            },
             'testRule': { method: 'POST',
                 params: {appName: '@appName', expName: '@expName'},
                 url: ConfigFactory.baseUrl() + '/assignments/applications/:appName/experiments/:expName/ruletest',
