@@ -21,6 +21,7 @@ import com.intuit.wasabi.experimentobjects.Application.Name;
 import com.intuit.wasabi.experimentobjects.Context;
 import com.intuit.wasabi.experimentobjects.Experiment;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -54,4 +55,7 @@ public interface Events {
      * database before returning
      */
     void shutdown();
+
+    public List<String> getEventsActionPayload(Experiment.ID experimentID);
+    public List<String> getEventsImpressionPayload(Experiment.ID experimentID);
 }

@@ -27,6 +27,7 @@ import com.intuit.wasabi.exceptions.EventException;
 import com.intuit.wasabi.export.DatabaseExport;
 import com.intuit.wasabi.export.Envelope;
 import com.intuit.wasabi.repository.cassandra.CassandraRepositoryModule;
+import com.intuit.wasabi.repository.database.DatabaseExperimentRepositoryModule;
 import org.slf4j.Logger;
 
 import java.util.HashMap;

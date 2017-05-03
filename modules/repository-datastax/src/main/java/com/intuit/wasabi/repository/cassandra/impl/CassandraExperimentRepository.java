@@ -1194,4 +1194,11 @@ public class CassandraExperimentRepository implements ExperimentRepository {
         }
     }
 
+
+    public List<String> getEventActionPayload(Experiment.ID experimentID)
+            throws RepositoryException{return null;}
+
+    public List<String> getEventImpressionPayload(Experiment.ID experimentID)
+            throws RepositoryException{return null;}
+
 }

@@ -759,5 +759,32 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
         throw new UnsupportedOperationException("Not supported ");
     }
 
+    @Override
+    public List<String> getEventImpressionPayload(Experiment.ID experimentID)
+            throws RepositoryException {
+        final String SQL_SELECT_ID =
+                "select payload from event_impression " +
+                        "where experiment_id=? ";
 
+        List<String> payload = newTransaction().select(
+                SQL_SELECT_ID,
+                experimentID
+                );
+
+        return payload;
+    }
+
+    public List<String> getEventActionPayload(Experiment.ID experimentID)
+            throws RepositoryException {
+        final String SQL_SELECT_ID =
+                "select payload from event_action " +
+                        "where experiment_id=? ";
+
+        List<String> payload = newTransaction().select(
+                SQL_SELECT_ID,
+                experimentID
+        );
+
+        return payload;
+    }
 }

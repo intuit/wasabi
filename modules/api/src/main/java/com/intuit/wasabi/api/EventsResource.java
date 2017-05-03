@@ -215,4 +215,38 @@ public class EventsResource {
             throw exception;
         }
     }
+
+    @GET
+    @Path("applications/{applicationName}/experiments/{experimentID}/eventActionPayload")
+    @Consumes(APPLICATION_JSON)
+    @Produces(APPLICATION_JSON)
+    @Timed
+    public Response getEventActionPayload(  @PathParam("experimentID")
+                                     final Experiment.ID experimentID) {
+        try {
+            System.out.println("got event action payload");
+            return httpHeader.headers().entity(events.getEventsActionPayload(experimentID)).build();
+        } catch (Exception exception) {
+            LOGGER.error("getPayload failed with error:", exception);
+            throw exception;
+        }
+    }
+
+
+    @GET
+    @Path("applications/{applicationName}/experiments/{experimentID}/eventImpressionPayload")
+    @Consumes(APPLICATION_JSON)
+    @Produces(APPLICATION_JSON)
+    @Timed
+    public Response getEventImpressionPayload(  @PathParam("experimentID")
+                                 final Experiment.ID experimentID) {
+        try {
+            System.out.println("got event impression payload");
+            return httpHeader.headers().entity(events.getEventsImpressionPayload(experimentID)).build();
+        } catch (Exception exception) {
+            LOGGER.error("getPayload failed with error:", exception);
+            throw exception;
+        }
+    }
+
 }

@@ -30,9 +30,13 @@ import com.intuit.wasabi.events.EventsMBean;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Context;
 import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.repository.DatabaseRepository;
+import com.intuit.wasabi.repository.ExperimentRepository;
+import com.intuit.wasabi.repository.database.DatabaseExperimentRepository;
 import org.slf4j.Logger;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -57,6 +61,7 @@ public class EventsImpl implements Events, EventsMBean {
     private TransactionFactory transactionFactory;
     private LinkedBlockingQueue mysqlQueue = new LinkedBlockingQueue<>();
     private ThreadPoolExecutor mysqlExecutor;
+    private final ExperimentRepository repository;
     /**
      * Executors to ingest event data to real time ingestion system.
      */
@@ -66,13 +71,15 @@ public class EventsImpl implements Events, EventsMBean {
     public EventsImpl(Map<String, EventIngestionExecutor> eventIngestionExecutors,
                       final @Named(EXECUTOR_THREADPOOL_SIZE) Integer threadPoolSize,
                       final Assignments assignments,
-                      final TransactionFactory transactionFactory) {
+                      final TransactionFactory transactionFactory,
+                      @DatabaseRepository ExperimentRepository databaseRepository) {
         super();
         this.eventIngestionExecutors = eventIngestionExecutors;
         this.transactionFactory = transactionFactory;
         this.assignments = assignments;
         mysqlExecutor = new ThreadPoolExecutor(threadPoolSize, threadPoolSize,
                 0L, MILLISECONDS, mysqlQueue);
+        this.repository = databaseRepository;
     }
 
     /**
@@ -155,5 +162,13 @@ public class EventsImpl implements Events, EventsMBean {
     public int getQueueSize() {
         // FIXME: is this MBean method really used??
         return mysqlQueue.size();
+    }
+
+
+    public List<String> getEventsActionPayload(Experiment.ID experimentID){
+        return repository.getEventActionPayload(experimentID);
+    }
+    public List<String> getEventsImpressionPayload(Experiment.ID experimentID){
+        return repository.getEventImpressionPayload(experimentID);
     }
 }
