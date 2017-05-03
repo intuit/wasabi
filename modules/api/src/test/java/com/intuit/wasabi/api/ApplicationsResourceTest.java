@@ -38,8 +38,13 @@ import org.mockito.verification.VerificationMode;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.intuit.wasabi.authorizationobjects.Permission.READ;
 import static com.intuit.wasabi.authorizationobjects.Permission.UPDATE;
@@ -51,6 +56,7 @@ import static org.hamcrest.core.Is.is;
 import static org.mockito.Matchers.anyCollection;
 import static org.mockito.Mockito.anyObject;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -245,5 +251,34 @@ public class ApplicationsResourceTest {
         verify(responseBuilder).build();
         assertThat(pageExperimentsCaptor.getValue().size(), is(1));
         assertThat(pageExperimentsCaptor.getValue(), hasEntry("experiments", pageExperiments));
+    }
+
+    @Test
+    public void testTagsRetrieval() {
+        when(authorization.getUser("foo")).thenReturn(username);
+
+        Iterator<Application.Name> applicationNamesIterator = mock(Iterator.class);
+        when(applicationNamesIterator.hasNext()).thenReturn(true, true, true, false);
+        when(applicationNamesIterator.next()).thenReturn(Application.Name.valueOf("app01"))
+                .thenReturn(Application.Name.valueOf("app02")).thenReturn(Application.Name.valueOf("app03"));
+
+        when(applicationNames.iterator()).thenReturn(applicationNamesIterator);
+        when(experiments.getApplications()).thenReturn(applicationNames);
+        when(httpHeader.headers()).thenReturn(responseBuilder);
+        when(responseBuilder.entity(anyCollection())).thenReturn(responseBuilder);
+        when(responseBuilder.build()).thenReturn(response);
+
+        Map<Application.Name, Set<String>> tags = mock(HashMap.class);
+
+        when(experiments.getTagsForApplications(applicationNames)).thenReturn(tags);
+
+        // all Applications are allowed in this test
+        Set<Application.Name> allowed = new HashSet<>(Arrays.asList(Application.Name.valueOf("app01"),
+                Application.Name.valueOf("app02"), Application.Name.valueOf("app03")));
+
+        applicationsResource.getAllExperimentTags("foo");
+
+        verify(experiments).getTagsForApplications(allowed);
+
     }
 }
