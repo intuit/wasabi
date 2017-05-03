@@ -21,9 +21,12 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test class for the {@link PrioritizedExperiment}
@@ -118,6 +121,20 @@ public class PrioritizedExperimentTest {
     @Test
     public void testClone() throws Exception {
         assertEquals(prioExp, prioExp.clone());
+    }
+
+    @Test
+    public void testIsDeleted() throws Exception {
+        assertFalse(prioExp.isDeleted());
+        PrioritizedExperiment prioExp2 = prioExp.clone();
+        prioExp2.setState(Experiment.State.DELETED);
+        assertTrue(prioExp2.isDeleted());
+    }
+
+    @Test
+    public void addNullTags() {
+        prioExp.setTags(null);
+        assertEquals(prioExp.getTags(), new TreeSet<String>());
     }
 
 
