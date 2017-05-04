@@ -264,9 +264,9 @@ public interface ExperimentRepository {
      * @param applicationName Application name
      */
     void createApplication(Application.Name applicationName);
-    public List<String> getEventImpressionPayload(Experiment.ID experimentID)
+    public String getEventImpressionPayload(Experiment.ID experimentID)
             throws RepositoryException;
-    public List<String> getEventActionPayload(Experiment.ID experimentID)
+    public String getEventActionPayload(Experiment.ID experimentID)
             throws RepositoryException;
 
 

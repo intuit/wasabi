@@ -56,6 +56,6 @@ public interface Events {
      */
     void shutdown();
 
-    public List<String> getEventsActionPayload(Experiment.ID experimentID);
-    public List<String> getEventsImpressionPayload(Experiment.ID experimentID);
+    public String getEventsActionPayload(Experiment.ID experimentID);
+    public String getEventsImpressionPayload(Experiment.ID experimentID);
 }

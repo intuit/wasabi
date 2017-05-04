@@ -165,10 +165,10 @@ public class EventsImpl implements Events, EventsMBean {
     }
 
 
-    public List<String> getEventsActionPayload(Experiment.ID experimentID){
+    public String getEventsActionPayload(Experiment.ID experimentID){
         return repository.getEventActionPayload(experimentID);
     }
-    public List<String> getEventsImpressionPayload(Experiment.ID experimentID){
+    public String getEventsImpressionPayload(Experiment.ID experimentID){
         return repository.getEventImpressionPayload(experimentID);
     }
 }

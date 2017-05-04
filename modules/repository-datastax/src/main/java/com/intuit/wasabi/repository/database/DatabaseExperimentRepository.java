@@ -15,6 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.database;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
@@ -34,6 +35,9 @@ import com.intuit.wasabi.experimentobjects.NewExperiment;
 import com.intuit.wasabi.experimentobjects.exceptions.WasabiException;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.RepositoryException;
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -760,31 +764,131 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
     }
 
     @Override
-    public List<String> getEventImpressionPayload(Experiment.ID experimentID)
+    public String getEventImpressionPayload(Experiment.ID experimentID)
             throws RepositoryException {
-        final String SQL_SELECT_ID =
-                "select payload from event_impression " +
+        ObjectMapper mapper = new ObjectMapper();
+        List<BucketPayloadAction> bucketActionList = new ArrayList<BucketPayloadAction>();
+        final String BUCKET_SELECT_ID =
+                "select distinct(bucket_label) from event_impression " +
                         "where experiment_id=? ";
 
-        List<String> payload = newTransaction().select(
-                SQL_SELECT_ID,
-                experimentID
-                );
-
-        return payload;
-    }
-
-    public List<String> getEventActionPayload(Experiment.ID experimentID)
-            throws RepositoryException {
-        final String SQL_SELECT_ID =
-                "select payload from event_action " +
-                        "where experiment_id=? ";
-
-        List<String> payload = newTransaction().select(
-                SQL_SELECT_ID,
+        List buckets = newTransaction().select(
+                BUCKET_SELECT_ID,
                 experimentID
         );
 
-        return payload;
+        final String SQL_SELECT_ID =
+                "select 'impression_action', payload from event_impression " +
+                        "where experiment_id=? and bucket_label = ?";
+
+        System.out.println("bucket list"+buckets);
+        if (buckets != null && buckets.size() >0)
+
+            for (Object b : buckets) {
+               // System.out.println("buckettttt"+b);
+                Map bucketMap = (Map)b;
+                String bucket_label = (String)bucketMap.get("bucket_label");
+                BucketPayloadAction bucketObj = new BucketPayloadAction();
+                //action payloads for each bucket
+                List actionPayloads = new ArrayList<>();
+
+                List payload = newTransaction().select(
+                        SQL_SELECT_ID,
+                        experimentID,
+                        bucket_label
+                );
+                System.out.println("payload list"+payload);
+                for (Object p : payload) {
+                    ActionPayload aObj = new ActionPayload();
+                    Map payloadAction = (Map) p;
+                    System.out.println(payloadAction.entrySet());
+                    String actualPayload = String.valueOf(payloadAction.get("payload"));
+                    //String actualPayload = "";
+                    aObj.payload= actualPayload;
+                    aObj.eventName="IMPRESSION";
+                    actionPayloads.add(aObj);
+
+                }
+                //add bucket b and list actionPayloads into the final json
+                bucketObj.bucketName=bucket_label;
+                bucketObj.actions = actionPayloads;
+                try {
+                    bucketActionList.add((bucketObj));
+                }
+                catch(Exception e){
+                    e.printStackTrace();
+                }
+            }
+        try {
+            return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(bucketActionList);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public String getEventActionPayload(Experiment.ID experimentID)
+            throws RepositoryException {
+
+        ObjectMapper mapper = new ObjectMapper();
+        List<BucketPayloadAction> bucketActionList = new ArrayList<BucketPayloadAction>();
+        final String BUCKET_SELECT_ID =
+                "select distinct(bucket_label) from event_action " +
+                        "where experiment_id=? ";
+
+        List<String> buckets = newTransaction().select(
+                BUCKET_SELECT_ID,
+                experimentID
+        );
+
+        final String SQL_SELECT_ID =
+                "select action, payload from event_action " +
+                        "where experiment_id=? and bucket_label = ?";
+        System.out.println("bucket list"+buckets);
+        if (buckets != null && buckets.size() >0)
+
+            for (Object b : buckets) {
+                Map bucketMap = (Map)b;
+                String bucket_label = (String)bucketMap.get("bucket_label");
+                BucketPayloadAction bucketObj = new BucketPayloadAction();
+                //action payloads for each bucket
+                List actionPayloads = new ArrayList<>();
+
+                List payload = newTransaction().select(
+                        SQL_SELECT_ID,
+                        experimentID,
+                        bucket_label
+                );
+                System.out.println("payload list"+payload);
+                for (Object p : payload) {
+                    ActionPayload aObj = new ActionPayload();
+                    Map payloadAction = (Map) p;
+                    System.out.println(payloadAction.entrySet());
+                    String actualPayload = String.valueOf(payloadAction.get("payload"));
+                   // String actualPayload = (String)payloadAction.get("payload");
+                    String actualAction = String.valueOf(payloadAction.get("action"));
+                    aObj.payload=actualPayload;
+
+
+                    aObj.eventName=actualAction;
+                    actionPayloads.add(aObj);
+
+                }
+                //add bucket b and list actionPayloads into the final json
+                bucketObj.bucketName=bucket_label;
+                bucketObj.actions = actionPayloads;
+                try {
+                    bucketActionList.add(bucketObj);
+                }
+                catch(Exception e){
+                    e.printStackTrace();
+                }
+            }
+        try {
+            return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(bucketActionList);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
