@@ -1,6 +1,6 @@
 <div ng-controller="ExperimentsCtrl">
     <div class="toolbar">
-        <a href="" id="searchMoreLess" ng-attr-title="{{data.filtersApplied ? 'Filters applied' : 'Add filters to search'}}" ng-show="!noExperiments" uib-popover-template="dynamicPopover.templateUrl" popover-placement="bottom" popover-is-open="showFilterPopover"><span ng-class="{filtersApplied: data.filtersApplied}"></span></a>
+        <a href="" id="searchMoreLess" ng-attr-title="{{data.filtersApplied ? 'Filters applied' : 'Add filters to search'}}" ng-show="!noExperiments" ng-click="popoverClicked();" uib-popover-template="dynamicPopover.templateUrl" popover-placement="bottom" popover-is-open="showFilterPopover"><span ng-class="{filtersApplied: data.filtersApplied}"></span></a>
         <button id="btnNewExperiment" class="blue" ng-click="openExperimentModal()" ng-class="{disabled: !applicationsLoaded}" ng-disabled="!applicationsLoaded">Create Experiment</button>
         <span ng-if="data.enableCardView" id="checkToggleListSpan" style="position: relative;"><input type="checkbox" id="chkToggleList" ng-model="data.showingGrid"
                ng-click="switchToGrid()" ng-class="{disabled: disableShowAsGrid}" ng-disabled="disableShowAsGrid"/><label id="chkToggleListLabel" for="chkToggleList" ng-class="{disabled: disableShowAsGrid}" ng-disabled="disableShowAsGrid" class="checkboxLabel">Card view</label>

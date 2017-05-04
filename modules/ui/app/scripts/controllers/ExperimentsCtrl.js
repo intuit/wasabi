@@ -34,6 +34,22 @@ angular.module('wasabi.controllers').
                 enableCardView: false
             };
 
+            // This stores the values displayed in the advanced filter popup.  That way, until
+            // the user actually clicks on Apply, the values aren't part of the $scope.data, which is
+            // saved in localStorage.
+            $scope.tempAdvancedSearchValues = {
+                advStatus: 'notTerminated',
+                advApplicationName: '',
+                advExperimentName: '',
+                adv1stDateSearchType: 'isAny',
+                advTxtSearchDateOne: today,
+                advTxtSearchDateTwo: today,
+                advEnd1stDateSearchType: 'isAny',
+                advEndTxtSearchDateOne: today,
+                advEndTxtSearchDateTwo: today,
+                searchTags: [],
+            };
+
             // Search filters dialog stuff
             $scope.showFilterPopover = false;
             $scope.dynamicPopover = {
@@ -171,52 +187,54 @@ angular.module('wasabi.controllers').
                     queryParams.filter = encodeURIComponent($scope.data.query);
                 }
 
-                // Add advanced filter info, if available
-                if ($scope.data.advApplicationName && $scope.data.advApplicationName.length > 0) {
-                    queryParams.filter += 'application_name_exact=' + $scope.data.advApplicationName;
-                }
-                if ($scope.data.advStatus !== 'any') {
-                    queryParams.filter = addAdvParam(queryParams.filter, 'state_exact=' + $scope.data.advStatus);
-                }
-                if ($scope.data.advExperimentName && $.trim($scope.data.advExperimentName).length > 0) {
-                    queryParams.filter = addAdvParam(queryParams.filter, 'experiment_label=' + $.trim($scope.data.advExperimentName));
-                }
-                if ($scope.data.adv1stDateSearchType !== 'isAny') {
-                    if ($scope.data.advTxtSearchDateOne.length === 0 ||
-                        ($scope.data.adv1stDateSearchType === 'isBetween' && $scope.data.advTxtSearchDateTwo.length === 0)) {
-                        UtilitiesFactory.displayPageError('Missing Date', 'You must provide a value for the search date.');
-                        return false;
+                if ($scope.data.filtersApplied) {
+                    // Add advanced filter info, if available
+                    if ($scope.data.advApplicationName && $scope.data.advApplicationName.length > 0) {
+                        queryParams.filter = addAdvParam(queryParams.filter, 'application_name_exact=' + $scope.data.advApplicationName);
                     }
-                    queryParams.filter = addAdvParam(queryParams.filter, 'date_constraint_start=' +
-                            $scope.data.adv1stDateSearchType + ':' +
-                            $scope.data.advTxtSearchDateOne +
-                            ($scope.data.adv1stDateSearchType === 'isBetween' ? ':' + $scope.data.advTxtSearchDateTwo : ''));
-                }
-                if ($scope.data.advEnd1stDateSearchType && $scope.data.advEnd1stDateSearchType !== 'isAny') {
-                    if ($scope.data.advEndTxtSearchDateOne.length === 0 ||
-                        ($scope.data.advEnd1stDateSearchType === 'isBetween' && $scope.data.advEndTxtSearchDateTwo.length === 0)) {
-                        UtilitiesFactory.displayPageError('Missing Date', 'You must provide a value for the search date.');
-                        return false;
+                    if ($scope.data.advStatus !== 'any') {
+                        queryParams.filter = addAdvParam(queryParams.filter, 'state_exact=' + $scope.data.advStatus);
                     }
-                    queryParams.filter = addAdvParam(queryParams.filter, 'date_constraint_end=' +
-                            $scope.data.advEnd1stDateSearchType + ':' +
-                            $scope.data.advEndTxtSearchDateOne +
-                            ($scope.data.advEnd1stDateSearchType === 'isBetween' ? ':' + $scope.data.advEndTxtSearchDateTwo : ''));
-                }
-                else {
-                    // Need to initialize new fields because had old fields saved in localStorage.
-                    $scope.data.advEnd1stDateSearchType = 'isAny';
-                    $scope.data.advEndTxtSearchDateOne = today;
-                    $scope.data.advEndTxtSearchDateTwo = today;
-                    localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
-                }
-                if ($scope.data.searchTags && $scope.data.searchTags.length > 0) {
-                    var tagsParam = 'tags_and=';
-                    for (var i = 0; i < $scope.data.searchTags.length; i++) {
-                        tagsParam += (i > 0 ? ';' : '');
-                        tagsParam += $scope.data.searchTags[i].text;
+                    if ($scope.data.advExperimentName && $.trim($scope.data.advExperimentName).length > 0) {
+                        queryParams.filter = addAdvParam(queryParams.filter, 'experiment_label=' + $.trim($scope.data.advExperimentName));
                     }
-                    queryParams.filter = addAdvParam(queryParams.filter, tagsParam);
+                    if ($scope.data.adv1stDateSearchType !== 'isAny') {
+                        if ($scope.data.advTxtSearchDateOne.length === 0 ||
+                            ($scope.data.adv1stDateSearchType === 'isBetween' && $scope.data.advTxtSearchDateTwo.length === 0)) {
+                            UtilitiesFactory.displayPageError('Missing Date', 'You must provide a value for the search date.');
+                            return false;
+                        }
+                        queryParams.filter = addAdvParam(queryParams.filter, 'date_constraint_start=' +
+                                $scope.data.adv1stDateSearchType + ':' +
+                                $scope.data.advTxtSearchDateOne +
+                                ($scope.data.adv1stDateSearchType === 'isBetween' ? ':' + $scope.data.advTxtSearchDateTwo : ''));
+                    }
+                    if ($scope.data.advEnd1stDateSearchType && $scope.data.advEnd1stDateSearchType !== 'isAny') {
+                        if ($scope.data.advEndTxtSearchDateOne.length === 0 ||
+                            ($scope.data.advEnd1stDateSearchType === 'isBetween' && $scope.data.advEndTxtSearchDateTwo.length === 0)) {
+                            UtilitiesFactory.displayPageError('Missing Date', 'You must provide a value for the search date.');
+                            return false;
+                        }
+                        queryParams.filter = addAdvParam(queryParams.filter, 'date_constraint_end=' +
+                                $scope.data.advEnd1stDateSearchType + ':' +
+                                $scope.data.advEndTxtSearchDateOne +
+                                ($scope.data.advEnd1stDateSearchType === 'isBetween' ? ':' + $scope.data.advEndTxtSearchDateTwo : ''));
+                    }
+                    else {
+                        // Need to initialize new fields because had old fields saved in localStorage.
+                        $scope.data.advEnd1stDateSearchType = 'isAny';
+                        $scope.data.advEndTxtSearchDateOne = today;
+                        $scope.data.advEndTxtSearchDateTwo = today;
+                        localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
+                    }
+                    if ($scope.data.searchTags && $scope.data.searchTags.length > 0) {
+                        var tagsParam = 'tags_and=';
+                        for (var i = 0; i < $scope.data.searchTags.length; i++) {
+                            tagsParam += (i > 0 ? ';' : '');
+                            tagsParam += $scope.data.searchTags[i].text;
+                        }
+                        queryParams.filter = addAdvParam(queryParams.filter, tagsParam);
+                    }
                 }
 
                 if (!cardViewFlag) {
@@ -318,30 +336,6 @@ angular.module('wasabi.controllers').
                 });
             };
 
-            $scope.refreshSearch = function() {
-                $scope.search();
-                $scope.$digest(); // Force refresh of list
-            };
-
-            $scope.refreshAdvSearch = function() {
-                $scope.advSearch();
-                $scope.$digest(); // Force refresh of list
-            };
-
-            $scope.showMoreLessSearch = function(forceFlag) {
-                var forceAdvanced = (forceFlag !== undefined ? forceFlag : false);
-
-                if (forceAdvanced || !$scope.data.showAdvancedSearch) {
-                    $scope.data.showAdvancedSearch = true;
-                    setTimeout($scope.refreshAdvSearch, 400);
-                }
-                else {
-                    $scope.data.showAdvancedSearch = false;
-                    setTimeout($scope.refreshSearch, 400);
-                }
-                return false;
-            };
-
             $scope.loadCardViewExperiments = function() {
                 function buildTooltip(bucket) {
                     var s = '<div style="font-weight:normal; font-size:15px; padding-bottom:5px">' +
@@ -431,11 +425,23 @@ angular.module('wasabi.controllers').
                 });
             };
 
+            $scope.transferFilterSettings = function(fromObj, toObj) {
+                for (var prop in fromObj) {
+                    if (fromObj.hasOwnProperty(prop) && prop.indexOf('adv') === 0) {
+                        toObj[prop] = fromObj[prop];
+                    }
+                }
+            };
+
             // Init controller
             // Load local storage object that saves info about the last search we did.
             var tmpSearchSettings = localStorage.getItem('wasabiLastSearch');
             if (tmpSearchSettings) {
                 $scope.data = JSON.parse(tmpSearchSettings);
+                if ($scope.data.filtersApplied) {
+                    // Restore temp settings in filter dialog
+                    $scope.transferFilterSettings($scope.data, $scope.tempAdvancedSearchValues);
+                }
             }
             $scope.loadAllTags();
 
@@ -616,8 +622,29 @@ angular.module('wasabi.controllers').
                 $scope.searchTimer = $timeout($scope.doSearch, 400);
             };
 
+            $scope.popoverClicked = function() {
+                if (!$scope.data.filtersApplied) {
+                    // Clear out temp filter values so dialog starts fresh
+                    $scope.tempAdvancedSearchValues = {
+                        advStatus: 'notTerminated',
+                        advApplicationName: '',
+                        advExperimentName: '',
+                        adv1stDateSearchType: 'isAny',
+                        advTxtSearchDateOne: today,
+                        advTxtSearchDateTwo: today,
+                        advEnd1stDateSearchType: 'isAny',
+                        advEndTxtSearchDateOne: today,
+                        advEndTxtSearchDateTwo: today,
+                        searchTags: [],
+                    };
+                }
+            };
+
             $scope.advSearch = function() {
                 $scope.data.filtersApplied = true;
+
+                // Transfer the filter settings from the temp values
+                $scope.transferFilterSettings($scope.tempAdvancedSearchValues, $scope.data);
 
                 // Save the filter settings
                 localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
@@ -659,6 +686,10 @@ angular.module('wasabi.controllers').
                     searchTags: [],
                     filtersApplied: false
                 });
+                // Save the filter settings
+                localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
+
+                $scope.transferFilterSettings($scope.data, $scope.tempAdvancedSearchValues);
 
                 $scope.loadExperiments();
                 $scope.showFilterPopover = false;
