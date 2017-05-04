@@ -16,20 +16,8 @@ angular.module('wasabi.directives').directive('googleChartsBarChart', function (
                         var data = [],
                             petIndex = 0;
                         for (var i = 0; i < currentData.length; i++) {
-                            var currentPet = currentData[i],
-                                name = 'Cat';
-                            switch (currentPet.bucketName) {
-                                case 'ImageOne':
-                                    name = 'Cat';
-                                    break;
-                                case 'ImageTwo':
-                                    name = 'Dog';
-                                    break;
-                                case 'ImageThree':
-                                    name = 'Fish';
-                                    break;
-                            }
-                            data.push([name, 0, 0, 0]);
+                            var currentPet = currentData[i];
+                            data.push([currentPet.bucketName, 0, 0, 0]);
                             for (var j = 0; j < currentPet.actions.length; j++) {
                                 var parts = currentPet.actions[j].payload.split(':');
                                 var userAgent = parts[1].substring(parts[1].indexOf('"') + 1, parts[1].lastIndexOf('"'));

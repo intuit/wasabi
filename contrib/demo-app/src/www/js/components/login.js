@@ -75,13 +75,13 @@ export class LoginComponent extends React.Component {
                     sessionObj.switches = {};
                     let imageNum = 0;
                     switch (response.assignment) {
-                        case 'ImageOne':
+                        case 'Cat':
                             imageNum = 1;
                             break;
-                        case 'ImageTwo':
+                        case 'Dog':
                             imageNum = 2;
                             break;
-                        case 'ImageThree':
+                        case 'Fish':
                             imageNum = 3;
                             break;
                     }

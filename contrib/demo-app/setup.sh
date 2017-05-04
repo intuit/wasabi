@@ -20,15 +20,15 @@ export EXPERIMENT_ID=$(curl -u ${WASABI_LOGIN} ${WASABI_SERVER}/applications/${A
 echo Experiment ID: ${EXPERIMENT_ID}
 
 # Create buckets
-curl -u ${WASABI_LOGIN} -H "Content-Type: application/json" -d "{\"label\":\"ImageOne\",\"allocationPercent\":0.33,\"description\":\"Show the first background image.\",\"isControl\":false}" \
+curl -u ${WASABI_LOGIN} -H "Content-Type: application/json" -d "{\"label\":\"Cat\",\"allocationPercent\":0.33,\"description\":\"Show the first background image.\",\"isControl\":false}" \
     "${WASABI_SERVER}/experiments/${EXPERIMENT_ID}/buckets"
-echo Created bucket ImageOne
-curl -u ${WASABI_LOGIN} -H "Content-Type: application/json" -d "{\"label\":\"ImageTwo\",\"allocationPercent\":0.33,\"description\":\"Show the second background image.\",\"isControl\":false}" \
+echo Created bucket Cat
+curl -u ${WASABI_LOGIN} -H "Content-Type: application/json" -d "{\"label\":\"Dog\",\"allocationPercent\":0.33,\"description\":\"Show the second background image.\",\"isControl\":false}" \
     "${WASABI_SERVER}/experiments/${EXPERIMENT_ID}/buckets"
-echo Created bucket ImageTwo
-curl -u ${WASABI_LOGIN} -H "Content-Type: application/json" -d "{\"label\":\"ImageThree\",\"allocationPercent\":0.34,\"description\":\"Show the third background image.\",\"isControl\":false}" \
+echo Created bucket Dog
+curl -u ${WASABI_LOGIN} -H "Content-Type: application/json" -d "{\"label\":\"Fish\",\"allocationPercent\":0.34,\"description\":\"Show the third background image.\",\"isControl\":false}" \
     "${WASABI_SERVER}/experiments/${EXPERIMENT_ID}/buckets"
-echo Created bucket ImageThree
+echo Created bucket Fish
 
 echo Starting experiment
 curl -u ${WASABI_LOGIN} -X PUT -H "Content-Type: application/json" -d '{"state":"RUNNING"}' "${WASABI_SERVER}/experiments/${EXPERIMENT_ID}"
