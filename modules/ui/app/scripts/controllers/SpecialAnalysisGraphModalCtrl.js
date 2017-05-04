@@ -21,187 +21,187 @@ angular.module('wasabi.controllers')
                             $scope.tempData.impressionData = data;
 
                             // TODO: But temporarily...
-                            $scope.tempData.impressionData = [
-                                {
-                                    'name': 'ImageOne',
-                                    'actions': [
-                                        {
-                                            'name': 'IMPRESSION',
-                                            'userAgent': 'Android'
-                                        },
-                                        {
-                                            'name': 'IMPRESSION',
-                                            'userAgent': 'iPhone'
-                                        },
-                                        {
-                                            'name': 'IMPRESSION',
-                                            'userAgent': 'iPhone'
-                                        },
-                                        {
-                                            'name': 'IMPRESSION',
-                                            'userAgent': 'Android'
-                                        },
-                                        {
-                                            'name': 'IMPRESSION',
-                                            'userAgent': 'iPhone'
-                                        },
-                                        {
-                                            'name': 'IMPRESSION',
-                                            'userAgent': 'Android'
-                                        }
-                                    ]
-                                },
-                                {
-                                    'name': 'ImageTwo',
-                                    'actions': [
-                                        {
-                                            'name': 'IMPRESSION',
-                                            'userAgent': 'Android'
-                                        },
-                                        {
-                                            'name': 'IMPRESSION',
-                                            'userAgent': 'iPhone'
-                                        },
-                                        {
-                                            'name': 'IMPRESSION',
-                                            'userAgent': 'Android'
-                                        },
-                                        {
-                                            'name': 'IMPRESSION',
-                                            'userAgent': 'Android'
-                                        },
-                                        {
-                                            'name': 'IMPRESSION',
-                                            'userAgent': 'iPhone'
-                                        },
-                                        {
-                                            'name': 'IMPRESSION',
-                                            'userAgent': 'iPhone'
-                                        }
-                                    ]
-                                },
-                                {
-                                    'name': 'ImageThree',
-                                    'actions': [
-                                        {
-                                            'name': 'IMPRESSION',
-                                            'userAgent': 'Android'
-                                        },
-                                        {
-                                            'name': 'IMPRESSION',
-                                            'userAgent': 'iPhone'
-                                        },
-                                        {
-                                            'name': 'IMPRESSION',
-                                            'userAgent': 'iPhone'
-                                        },
-                                        {
-                                            'name': 'IMPRESSION',
-                                            'userAgent': 'iPhone'
-                                        },
-                                        {
-                                            'name': 'IMPRESSION',
-                                            'userAgent': 'Android'
-                                        },
-                                        {
-                                            'name': 'IMPRESSION',
-                                            'userAgent': 'Android'
-                                        }
-                                    ]
-                                }
-                            ];
+//                            $scope.tempData.impressionData = [
+//                                {
+//                                    'name': 'ImageOne',
+//                                    'actions': [
+//                                        {
+//                                            'name': 'IMPRESSION',
+//                                            'userAgent': 'Android'
+//                                        },
+//                                        {
+//                                            'name': 'IMPRESSION',
+//                                            'userAgent': 'iPhone'
+//                                        },
+//                                        {
+//                                            'name': 'IMPRESSION',
+//                                            'userAgent': 'iPhone'
+//                                        },
+//                                        {
+//                                            'name': 'IMPRESSION',
+//                                            'userAgent': 'Android'
+//                                        },
+//                                        {
+//                                            'name': 'IMPRESSION',
+//                                            'userAgent': 'iPhone'
+//                                        },
+//                                        {
+//                                            'name': 'IMPRESSION',
+//                                            'userAgent': 'Android'
+//                                        }
+//                                    ]
+//                                },
+//                                {
+//                                    'name': 'ImageTwo',
+//                                    'actions': [
+//                                        {
+//                                            'name': 'IMPRESSION',
+//                                            'userAgent': 'Android'
+//                                        },
+//                                        {
+//                                            'name': 'IMPRESSION',
+//                                            'userAgent': 'iPhone'
+//                                        },
+//                                        {
+//                                            'name': 'IMPRESSION',
+//                                            'userAgent': 'Android'
+//                                        },
+//                                        {
+//                                            'name': 'IMPRESSION',
+//                                            'userAgent': 'Android'
+//                                        },
+//                                        {
+//                                            'name': 'IMPRESSION',
+//                                            'userAgent': 'iPhone'
+//                                        },
+//                                        {
+//                                            'name': 'IMPRESSION',
+//                                            'userAgent': 'iPhone'
+//                                        }
+//                                    ]
+//                                },
+//                                {
+//                                    'name': 'ImageThree',
+//                                    'actions': [
+//                                        {
+//                                            'name': 'IMPRESSION',
+//                                            'userAgent': 'Android'
+//                                        },
+//                                        {
+//                                            'name': 'IMPRESSION',
+//                                            'userAgent': 'iPhone'
+//                                        },
+//                                        {
+//                                            'name': 'IMPRESSION',
+//                                            'userAgent': 'iPhone'
+//                                        },
+//                                        {
+//                                            'name': 'IMPRESSION',
+//                                            'userAgent': 'iPhone'
+//                                        },
+//                                        {
+//                                            'name': 'IMPRESSION',
+//                                            'userAgent': 'Android'
+//                                        },
+//                                        {
+//                                            'name': 'IMPRESSION',
+//                                            'userAgent': 'Android'
+//                                        }
+//                                    ]
+//                                }
+//                            ];
                         ApplicationsFactory.getActionData(requestBody).$promise.
                             then(function (data) {
                                 $scope.tempData.actionData = data;
-                                $scope.tempData.actionData = [
-                                    {
-                                        'name': 'ImageOne',
-                                        'actions': [
-                                            {
-                                                'name': 'ClickedOnLike',
-                                                'userAgent': 'Android'
-                                            },
-                                            {
-                                                'name': 'ClickedOnLike',
-                                                'userAgent': 'Android'
-                                            },
-                                            {
-                                                'name': 'ClickedOnLike',
-                                                'userAgent': 'Android'
-                                            },
-                                            {
-                                                'name': 'ClickedOnLike',
-                                                'userAgent': 'Android'
-                                            },
-                                            {
-                                                'name': 'ClickedOnLike',
-                                                'userAgent': 'iPhone'
-                                            },
-                                            {
-                                                'name': 'ClickedOnLike',
-                                                'userAgent': 'Android'
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        'name': 'ImageTwo',
-                                        'actions': [
-                                            {
-                                                'name': 'ClickedOnLike',
-                                                'userAgent': 'Android'
-                                            },
-                                            {
-                                                'name': 'ClickedOnLike',
-                                                'userAgent': 'iPhone'
-                                            },
-                                            {
-                                                'name': 'ClickedOnLike',
-                                                'userAgent': 'iPhone'
-                                            },
-                                            {
-                                                'name': 'ClickedOnLike',
-                                                'userAgent': 'iPhone'
-                                            },
-                                            {
-                                                'name': 'ClickedOnLike',
-                                                'userAgent': 'iPhone'
-                                            },
-                                            {
-                                                'name': 'ClickedOnLike',
-                                                'userAgent': 'iPhone'
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        'name': 'ImageThree',
-                                        'actions': [
-                                            {
-                                                'name': 'ClickedOnLike',
-                                                'userAgent': 'Android'
-                                            },
-                                            {
-                                                'name': 'ClickedOnLike',
-                                                'userAgent': 'iPhone'
-                                            },
-                                            {
-                                                'name': 'ClickedOnLike',
-                                                'userAgent': 'iPhone'
-                                            },
-                                            {
-                                                'name': 'ClickedOnLike',
-                                                'userAgent': 'iPhone'
-                                            },
-                                            {
-                                                'name': 'ClickedOnLike',
-                                                'userAgent': 'Android'
-                                            },
-                                            {
-                                                'name': 'ClickedOnLike',
-                                                'userAgent': 'Android'
-                                            }
-                                        ]
-                                    }
-                                ];
+//                                $scope.tempData.actionData = [
+//                                    {
+//                                        'name': 'ImageOne',
+//                                        'actions': [
+//                                            {
+//                                                'name': 'ClickedOnLike',
+//                                                'userAgent': 'Android'
+//                                            },
+//                                            {
+//                                                'name': 'ClickedOnLike',
+//                                                'userAgent': 'Android'
+//                                            },
+//                                            {
+//                                                'name': 'ClickedOnLike',
+//                                                'userAgent': 'Android'
+//                                            },
+//                                            {
+//                                                'name': 'ClickedOnLike',
+//                                                'userAgent': 'Android'
+//                                            },
+//                                            {
+//                                                'name': 'ClickedOnLike',
+//                                                'userAgent': 'iPhone'
+//                                            },
+//                                            {
+//                                                'name': 'ClickedOnLike',
+//                                                'userAgent': 'Android'
+//                                            }
+//                                        ]
+//                                    },
+//                                    {
+//                                        'name': 'ImageTwo',
+//                                        'actions': [
+//                                            {
+//                                                'name': 'ClickedOnLike',
+//                                                'userAgent': 'Android'
+//                                            },
+//                                            {
+//                                                'name': 'ClickedOnLike',
+//                                                'userAgent': 'iPhone'
+//                                            },
+//                                            {
+//                                                'name': 'ClickedOnLike',
+//                                                'userAgent': 'iPhone'
+//                                            },
+//                                            {
+//                                                'name': 'ClickedOnLike',
+//                                                'userAgent': 'iPhone'
+//                                            },
+//                                            {
+//                                                'name': 'ClickedOnLike',
+//                                                'userAgent': 'iPhone'
+//                                            },
+//                                            {
+//                                                'name': 'ClickedOnLike',
+//                                                'userAgent': 'iPhone'
+//                                            }
+//                                        ]
+//                                    },
+//                                    {
+//                                        'name': 'ImageThree',
+//                                        'actions': [
+//                                            {
+//                                                'name': 'ClickedOnLike',
+//                                                'userAgent': 'Android'
+//                                            },
+//                                            {
+//                                                'name': 'ClickedOnLike',
+//                                                'userAgent': 'iPhone'
+//                                            },
+//                                            {
+//                                                'name': 'ClickedOnLike',
+//                                                'userAgent': 'iPhone'
+//                                            },
+//                                            {
+//                                                'name': 'ClickedOnLike',
+//                                                'userAgent': 'iPhone'
+//                                            },
+//                                            {
+//                                                'name': 'ClickedOnLike',
+//                                                'userAgent': 'Android'
+//                                            },
+//                                            {
+//                                                'name': 'ClickedOnLike',
+//                                                'userAgent': 'Android'
+//                                            }
+//                                        ]
+//                                    }
+//                                ];
                                 $scope.data = $scope.tempData;
                             });
                         }, function(response) {

@@ -134,12 +134,12 @@ export class MainPageComponent extends React.Component {
                 <button style={{
                         position: 'absolute',
                         bottom: '90px',
-                        right: '170px'
+                        left: '20px'
                     }} onClick={this.doLikeIt}>Great Pet!</button>
                 <button style={{
                         position: 'absolute',
                         bottom: '90px',
-                        right: '40px'
+                        right: '20px'
                     }} onClick={this.doHateIt}>Not For Me</button>
             </div>
             <div className="thanksMessage">

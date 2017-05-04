@@ -18,7 +18,7 @@ angular.module('wasabi.directives').directive('googleChartsBarChart', function (
                         for (var i = 0; i < currentData.length; i++) {
                             var currentPet = currentData[i],
                                 name = 'Cat';
-                            switch (currentPet.name) {
+                            switch (currentPet.bucketName) {
                                 case 'ImageOne':
                                     name = 'Cat';
                                     break;
@@ -31,7 +31,9 @@ angular.module('wasabi.directives').directive('googleChartsBarChart', function (
                             }
                             data.push([name, 0, 0, 0]);
                             for (var j = 0; j < currentPet.actions.length; j++) {
-                                switch (currentPet.actions[j].userAgent) {
+                                var parts = currentPet.actions[j].payload.split(':');
+                                var userAgent = parts[1].substring(parts[1].indexOf('"') + 1, parts[1].lastIndexOf('"'));
+                                switch (userAgent) {
                                     case 'Android':
                                         data[petIndex][1]++;
                                         break;
@@ -50,21 +52,91 @@ angular.module('wasabi.directives').directive('googleChartsBarChart', function (
 
                     function drawChart() {
                         // Count user agent entries for each bucket
-                        var petData = [['Pets', 'iPhone', 'Android', 'Other']],
+                        var petData = [['Pets', 'Android', 'iPhone', 'Other']],
                             impressionData = c.$modelValue.impressionData,
                             actionData = c.$modelValue.actionData;
 
                         var impressionAggregate = aggregateData(impressionData),
                             actionAggregate = aggregateData(actionData);
 
+                        // Let's brute force this...
+                        var catImpIndex, dogImpIndex, fishImpIndex,
+                            catActIndex, dogActIndex, fishActIndex;
+                        catImpIndex = dogImpIndex = fishImpIndex = catActIndex = dogActIndex = fishActIndex = -1;
+                        for (var j = 0; j < impressionAggregate.length; j++) {
+                            if (impressionAggregate[j][0] === 'Cat') {
+                                catImpIndex = j;
+                            }
+                            else if (impressionAggregate[j][0] === 'Dog') {
+                                dogImpIndex = j;
+                            }
+                            else if (impressionAggregate[j][0] === 'Fish') {
+                                fishImpIndex = j;
+                            }
+                        }
+                        if (impressionAggregate.length < 3) {
+                            // Need to fake out data for other one(s)
+                            if (catImpIndex === -1) {
+                                impressionAggregate.push(['Cat', 0, 0, 0]);
+                                catImpIndex = impressionAggregate.length - 1;
+                            }
+                            if (dogImpIndex === -1) {
+                                impressionAggregate.push(['Dog', 0, 0, 0]);
+                                dogImpIndex = impressionAggregate.length - 1;
+                            }
+                            if (fishImpIndex === -1) {
+                                impressionAggregate.push(['Fish', 0, 0, 0]);
+                                fishImpIndex = impressionAggregate.length - 1;
+                            }
+                        }
+                        for (var k = 0; k < actionAggregate.length; k++) {
+                            if (actionAggregate[k][0] === 'Cat') {
+                                catActIndex = k;
+                            }
+                            else if (actionAggregate[k][0] === 'Dog') {
+                                dogActIndex = k;
+                            }
+                            else if (actionAggregate[k][0] === 'Fish') {
+                                fishActIndex = k;
+                            }
+                        }
+                        if (actionAggregate.length < 3) {
+                            // Need to fake out data for other one(s)
+                            if (catActIndex === -1) {
+                                actionAggregate.push(['Cat', 0, 0, 0]);
+                                catActIndex = actionAggregate.length - 1;
+                            }
+                            if (dogActIndex === -1) {
+                                actionAggregate.push(['Dog', 0, 0, 0]);
+                                dogActIndex = actionAggregate.length - 1;
+                            }
+                            if (fishActIndex === -1) {
+                                actionAggregate.push(['Fish', 0, 0, 0]);
+                                fishActIndex = actionAggregate.length - 1;
+                            }
+                        }
+
                         // Calculate action rates from the data
                         for (var i = 0; i < impressionAggregate.length; i++) {
                             // Action rate is action number devided by total impressions
+                            var impIndx = 0, actIndx = 0;
+                            if (impressionAggregate[i][0] === 'Cat') {
+                                impIndx = catImpIndex;
+                                actIndx = catActIndex;
+                            }
+                            else if (impressionAggregate[i][0] === 'Dog') {
+                                impIndx = dogImpIndex;
+                                actIndx = dogActIndex;
+                            }
+                            else if (impressionAggregate[i][0] === 'Fish') {
+                                impIndx = fishImpIndex;
+                                actIndx = fishActIndex;
+                            }
                             petData.push([
-                                impressionAggregate[i][0],
-                                (impressionAggregate[i][1] ? actionAggregate[i][1] / impressionAggregate[i][1] : 0),
-                                (impressionAggregate[i][2] ? actionAggregate[i][2] / impressionAggregate[i][2] : 0),
-                                (impressionAggregate[i][3] ? actionAggregate[i][3] / impressionAggregate[i][3] : 0)
+                                impressionAggregate[impIndx][0],
+                                (impressionAggregate[impIndx][1] ? (actionAggregate[actIndx][1] / impressionAggregate[impIndx][1]) * 100.0 : 0),
+                                (impressionAggregate[impIndx][2] ? (actionAggregate[actIndx][2] / impressionAggregate[impIndx][2]) * 100.0 : 0),
+                                (impressionAggregate[impIndx][3] ? (actionAggregate[actIndx][3] / impressionAggregate[impIndx][3]) * 100.0 : 0)
                             ]);
                         }
 

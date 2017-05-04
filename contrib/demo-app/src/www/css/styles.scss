@@ -218,12 +218,15 @@ button, a.button {
 .thanksMessage {
     display: none;
     padding: 30px;
-    position: absolute;
-    left: 48px;
-    top: 100px;
+    text-align: center;
+    position: relative;
+    top: -300px;
+    margin: 0 20px;
     background-color: white;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-style: normal;
     font-weight: normal;
     font-size: 18px;
+    border: 1px solid #aaa;
+    border-radius: 5px;
 }
