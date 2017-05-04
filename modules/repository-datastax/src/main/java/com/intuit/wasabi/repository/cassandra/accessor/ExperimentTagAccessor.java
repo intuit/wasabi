@@ -19,6 +19,7 @@ import com.datastax.driver.core.Statement;
 import com.datastax.driver.mapping.Result;
 import com.datastax.driver.mapping.annotations.Accessor;
 import com.datastax.driver.mapping.annotations.Query;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentTagsByApplication;
 
 import java.util.List;
@@ -30,8 +31,8 @@ import java.util.Set;
 @Accessor
 public interface ExperimentTagAccessor {
 
-    @Query("select * from experiment_tag where app_name IN ?")
-    Result<ExperimentTagsByApplication> getExperimentTags(List<String> applicationNames);
+    @Query("select * from experiment_tag where app_name = ?")
+    ListenableFuture<Result<ExperimentTagsByApplication>> getExperimentTagsAsync(String applicationNames);
 
     @Query("insert into experiment_tag(app_name, tags) values (?,?)")
     void insertByApp(String appName, Set<String> tags);

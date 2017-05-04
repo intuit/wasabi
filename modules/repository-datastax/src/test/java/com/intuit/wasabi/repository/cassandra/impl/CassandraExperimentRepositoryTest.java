@@ -679,7 +679,7 @@ public class CassandraExperimentRepositoryTest {
     }
 
     @Test
-    public void testGetTagList() {
+    public void testGetTagList() throws ExecutionException, InterruptedException {
         //------ Input --------
         Application.Name app01 = Application.Name.valueOf("app01");
         Application.Name app02 = Application.Name.valueOf("app02");
@@ -693,12 +693,21 @@ public class CassandraExperimentRepositoryTest {
         ExperimentTagsByApplication exp2Tags = ExperimentTagsByApplication.builder()
                 .tags(exp2).appName(app02.toString()).build();
 
-        List<ExperimentTagsByApplication> res = Arrays.asList(exp1Tags, exp2Tags);
-
         //------ Mocking interacting calls
-        Result<ExperimentTagsByApplication> dbResult = mock(Result.class);
-        when(mockExperimentTagAccessor.getExperimentTags(Arrays.asList("app01", "app02"))).thenReturn(dbResult);
-        when(dbResult.all()).thenReturn(res);
+        ListenableFuture<Result<ExperimentTagsByApplication>> dbResultFuture1 = mock(ListenableFuture.class);
+        ListenableFuture<Result<ExperimentTagsByApplication>> dbResultFuture2 = mock(ListenableFuture.class);
+
+        Result<ExperimentTagsByApplication> dbResult1 = mock(Result.class);
+        Result<ExperimentTagsByApplication> dbResult2 = mock(Result.class);
+
+        when(mockExperimentTagAccessor.getExperimentTagsAsync("app01")).thenReturn(dbResultFuture1);
+        when(mockExperimentTagAccessor.getExperimentTagsAsync("app02")).thenReturn(dbResultFuture2);
+
+        when(dbResultFuture1.get()).thenReturn(dbResult1);
+        when(dbResultFuture2.get()).thenReturn(dbResult2);
+
+        when(dbResult1.one()).thenReturn(exp1Tags);
+        when(dbResult2.one()).thenReturn(exp2Tags);
 
         //------ Make call
         Map<Name, Set<String>> callResult = repository.getTagListForApplications(appNames);

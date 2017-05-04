@@ -64,7 +64,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -1244,11 +1243,19 @@ public class CassandraExperimentRepository implements ExperimentRepository {
         LOGGER.debug("Retrieving Experiment Tags for applications {}", applicationNames);
 
         try {
+            List<ListenableFuture<Result<ExperimentTagsByApplication>>> futures = new ArrayList<>();
 
-            Map<Application.Name, Set<String>> result = experimentTagAccessor.getExperimentTags(
-                    applicationNames.stream().map(appName -> Objects.toString(appName)).collect(Collectors.toList()))
-                    .all().stream().collect(Collectors.toMap(exp -> Application.Name.valueOf(exp.getAppName()),
-                            ExperimentTagsByApplication::getTags));
+            for (Application.Name appName : applicationNames) {
+                ListenableFuture<Result<ExperimentTagsByApplication>> resultSetFuture = experimentTagAccessor
+                        .getExperimentTagsAsync(appName.toString());
+                futures.add(resultSetFuture);
+            }
+
+            Map<Application.Name, Set<String>> result = new HashMap<>();
+            for (ListenableFuture<Result<ExperimentTagsByApplication>> future : futures) {
+                ExperimentTagsByApplication expTagApplication = future.get().one();
+                result.put(Application.Name.valueOf(expTagApplication.getAppName()), expTagApplication.getTags());
+            }
 
             return result;
         } catch (Exception e) {
