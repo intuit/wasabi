@@ -16,7 +16,8 @@ export class MainPageComponent extends React.Component {
                 },
             },
             imageNum: '',
-            whichPhone: 'other'
+            whichPhone: 'other',
+            doLogout: this.props.doLogout
         };
 
         WASABI.setOptions({
@@ -79,9 +80,11 @@ export class MainPageComponent extends React.Component {
     }
 
     doThanks() {
+        const that = this;
         $('.thanksMessage').show();
         setTimeout(function() {
             $('.thanksMessage').hide();
+            that.props.doLogout();
         }, 3000);
     }
 
