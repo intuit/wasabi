@@ -25,6 +25,8 @@ Mac installation instructions with brew
 To run all integration tests defined in testng.xml, simply do the following.
 * cd [workspace]/wasabi/modules/functional-test
 * vagrant up (this step will install dependencies (jdk, Cassandra, MySQL), install Wasabi app, create Cassandra tables, start up Wasabi app, run integration tests, stops Wasabi app and generate Jacoco file for code coverage)
+* Test output will be saved in [workspace]/wasabi/modules/functional-test/target/integration-test.out
+* vagrant destroy (this will destroy the VM)
 
 **NOTE:** jacoco-it.exec will be stored at [workspace]/wasabi/modules/functional-test/target/jacoco
 
