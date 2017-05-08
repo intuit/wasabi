@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ###############################################################################
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 echo "Creating Keyspace ${CASSANDRA_KEYSPACE_PREFIX}_experiments if it not exits"
 echo "cqlsh " \
