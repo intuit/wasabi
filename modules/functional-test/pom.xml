@@ -106,7 +106,7 @@
                             <outputDirectory>${basedir}/target</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>../../modules/main/target/</directory>
+                                    <directory>${basedir}/../../modules/main/target/</directory>
                                     <includes>
                                         <include>*-all.jar</include>
                                     </includes>
