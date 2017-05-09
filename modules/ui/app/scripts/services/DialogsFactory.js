@@ -26,7 +26,7 @@ angular.module('wasabi.services').factory('DialogsFactory', ['$uibModal',
                 });
             },
 
-            confirmDialog: function(msg, title, resultFunction, cancelFunction, okLabel, cancelLabel) {
+            confirmDialog: function(msg, title, resultFunction, cancelFunction, okLabel, cancelLabel, msgWithHTML) {
                 var modalInstance = $uibModal.open({
                     templateUrl: 'views/DialogModal.html',
                     controller: 'DialogModalCtrl',
@@ -36,6 +36,7 @@ angular.module('wasabi.services').factory('DialogsFactory', ['$uibModal',
                         options: function() {
                             var theOptions = {
                                 description: msg,
+                                descriptionWithHTML: msgWithHTML,
                                 header: title,
                                 okCallback: resultFunction,
                                 showCancel: true

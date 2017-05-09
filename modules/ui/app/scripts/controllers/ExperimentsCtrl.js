@@ -25,7 +25,7 @@ angular.module('wasabi.controllers').
                 advEnd1stDateSearchType: 'isAny',
                 advEndTxtSearchDateOne: today,
                 advEndTxtSearchDateTwo: today,
-                searchTags: [],
+                advSearchTags: [],
                 showGrid: false,
                 showingGrid: false,
                 showAdvancedSearch: false,
@@ -47,7 +47,7 @@ angular.module('wasabi.controllers').
                 advEnd1stDateSearchType: 'isAny',
                 advEndTxtSearchDateOne: today,
                 advEndTxtSearchDateTwo: today,
-                searchTags: [],
+                advSearchTags: [],
             };
 
             // Search filters dialog stuff
@@ -227,11 +227,11 @@ angular.module('wasabi.controllers').
                         $scope.data.advEndTxtSearchDateTwo = today;
                         localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
                     }
-                    if ($scope.data.searchTags && $scope.data.searchTags.length > 0) {
+                    if ($scope.data.advSearchTags && $scope.data.advSearchTags.length > 0) {
                         var tagsParam = 'tags_and=';
-                        for (var i = 0; i < $scope.data.searchTags.length; i++) {
+                        for (var i = 0; i < $scope.data.advSearchTags.length; i++) {
                             tagsParam += (i > 0 ? ';' : '');
-                            tagsParam += $scope.data.searchTags[i].text;
+                            tagsParam += $scope.data.advSearchTags[i].text;
                         }
                         queryParams.filter = addAdvParam(queryParams.filter, tagsParam);
                     }
@@ -428,7 +428,15 @@ angular.module('wasabi.controllers').
             $scope.transferFilterSettings = function(fromObj, toObj) {
                 for (var prop in fromObj) {
                     if (fromObj.hasOwnProperty(prop) && prop.indexOf('adv') === 0) {
-                        toObj[prop] = fromObj[prop];
+                        if (fromObj[prop] instanceof Array) {
+                            toObj[prop] = [];
+                            for (var i = 0; i < fromObj[prop].length; i++) {
+                                toObj[prop].push(fromObj[prop][i]);
+                            }
+                        }
+                        else {
+                            toObj[prop] = fromObj[prop];
+                        }
                     }
                 }
             };
@@ -635,7 +643,7 @@ angular.module('wasabi.controllers').
                         advEnd1stDateSearchType: 'isAny',
                         advEndTxtSearchDateOne: today,
                         advEndTxtSearchDateTwo: today,
-                        searchTags: [],
+                        advSearchTags: [],
                     };
                 }
             };
@@ -683,7 +691,7 @@ angular.module('wasabi.controllers').
                     advEnd1stDateSearchType: 'isAny',
                     advEndTxtSearchDateOne: today,
                     advEndTxtSearchDateTwo: today,
-                    searchTags: [],
+                    advSearchTags: [],
                     filtersApplied: false
                 });
                 // Save the filter settings

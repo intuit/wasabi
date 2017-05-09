@@ -2,7 +2,8 @@
     <h1>{{header}}</h1>
 
     <div class="dialogContent">
-        <div class="instructions" ng-bind-html="description"></div>
+        <div ng-show="{{!showWithHTML}}" class="instructions" ng-bind="description"></div>
+        <div ng-show="{{showWithHTML}}" class="instructions" ng-bind-html="descriptionWithHTML"></div>
         <div class="buttonBar">
             <button id="btnConfirmOk" class="blue" ng-click="ok()">{{okLabel}}</button>
             <button class="cancel" ng-show="showCancel" ng-click="cancel()">{{cancelLabel}}</button>
