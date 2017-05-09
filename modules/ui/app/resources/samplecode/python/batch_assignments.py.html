@@ -1,0 +1,35 @@
+<div class="displaySourceCode">
+<pre>
+import requests
+import json
+
+def get_batch_assignment(application, page, user):
+    """
+    Get's assignments for the given user and page. If no
+    assignments exist one will be generated.
+
+    Args:
+        application: the application the experiment runs in
+        page:        the page (group of experiments) for which assignments should be retrieved
+        user:        the user who should be assigned
+    """
+    urlAssignment = "{{baseUrl}}/assignments/applications/%s/pages/%s/users/%s" %(application, page, user);
+    r = requests.get(urlAssignment)
+    try:
+        assignments = json.loads(r.text)['assignments']
+    except KeyError as e:
+        if "EXPERIMENT_NOT_FOUND" in r.text:
+            print('The given Experiment is not found')
+        else:
+            # further exception handling should happen here
+            raise
+    return assignments
+
+if __name__ == "__main__":
+    application = '{{experiment.applicationName}}'
+    page = '{{pageName}}'
+    user = 'UserName'
+
+    print(get_batch_assignment(application, page, user))
+</pre>
+</div>

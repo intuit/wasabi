@@ -1,0 +1,42 @@
+<div class="displaySourceCode">
+<pre>
+import requests
+import json
+
+def post_batch_assignment_with_segmentation(application, page, user, salary):
+    """
+    Retrieves assignments for the specified page and user passing profile data
+    for use in evaluating the segmentation rule.
+
+    Args:
+        application: the application the experiment runs in
+        page:        the page for which the assignments should be retrieved
+        user:        the user who should be assigned
+        salary:      the salary of the user, to be used in evaluating a segmentation rule
+    """
+
+    urlAssignment = "{{baseUrl}}/assignments/applications/%s/pages/%s/users/%s" %(application, page, user);
+
+    headers = {'content-type': 'application/json'}
+    profile = {'profile':{'salary': salary}}
+
+    r = requests.post(urlAssignment, data = json.dumps(profile), headers=headers)
+    try:
+        assignments = json.loads(r.text)['assignments']
+    except KeyError as e:
+        if "EXPERIMENT_NOT_FOUND" in r.text:
+            print('The given Experiment is not found')
+        else:
+            # further exception handling should happen here
+            raise
+    return assignments
+
+if __name__ == "__main__":
+    application = '{{experiment.applicationName}}'
+    page = '{{pageName}}'
+    user = 'UserName'
+    salary = '10000'
+
+    print(post_batch_assignment_with_segmentation(application, page, user, salary))
+</pre>
+</div>

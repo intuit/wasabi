@@ -303,48 +303,10 @@
             </div>
         </tab>
         <tab heading="API Calls">
-            <div class="apiCallsTab" ng-controller="APICallsCtrl">
-                <label>Example Wasabi API Calls</label>
-                <div>
-                    <div class="apiLabel">Assignment</div>
-                    <input id="singleAssignmentCall" class="form-control text" type="text"
-                           value="curl -H &quot;Content-Type: application/json&quot; {{hostUrl}}/assignments/applications/{{experiment.applicationName}}/experiments/{{experiment.label}}/users/userID1" readonly />
-                </div>
-                <div>
-                    <div class="apiLabel">Record an Impression</div>
-                    <input id="impressionEventCall" class="form-control text" type="text"
-                           value="curl -H &quot;Content-Type: application/json&quot; -d &quot;{\&quot;events\&quot;:[{\&quot;name\&quot;:\&quot;IMPRESSION\&quot;}]}&quot; {{hostUrl}}/events/applications/{{experiment.applicationName}}/experiments/{{experiment.label}}/users/userID1" readonly />
-                </div>
-                <div>
-                    <div class="apiLabel">Record an Action</div>
-                    <input id="actionEventCall" class="form-control text" type="text"
-                           value="curl -H &quot;Content-Type: application/json&quot; -d &quot;{\&quot;events\&quot;:[{\&quot;name\&quot;:\&quot;myEventName\&quot;,\&quot;payload\&quot;:\&quot;{\\\&quot;myPayloadKey1\\\&quot;:\\\&quot;payloadKey1Value\\\&quot;}\&quot;}]}&quot; {{hostUrl}}/events/applications/{{experiment.applicationName}}/experiments/{{experiment.label}}/users/userID1" readonly />
-                </div>
-                <div ng-show="experiment && experiment.pages && experiment.pages.length > 0">
-                    <div class="apiLabel">Batch Assignment</div>
-                    <input id="batchAssignmentCall" class="form-control text" type="text"
-                           value="curl -H &quot;Content-Type: application/json&quot; {{hostUrl}}/assignments/applications/{{experiment.applicationName}}/pages/{{firstPageEncoded()}}/users/userID1" readonly />
-                </div>
-                <div ng-show="experiment.rule && experiment.rule !== ''">
-                    <div class="apiLabel">Assignment Providing Profile For Use By Segmentation Rule</div>
-                    <input id="singleAssignmentCallWithSegmentationRule" class="form-control text" type="text"
-                           value="curl -H &quot;Content-Type: application/json&quot; -d &quot;{\&quot;profile\&quot;:{\&quot;key1\&quot;:\&quot;value1\&quot;,\&quot;key2\&quot;:\&quot;value2\&quot;}}&quot; {{hostUrl}}/assignments/applications/{{experiment.applicationName}}/experiments/{{experiment.label}}/users/userID1" readonly />
-                </div>
-                <div ng-show="experiment && experiment.rule && experiment.rule !== '' && experiment.pages && experiment.pages.length > 0">
-                    <div class="apiLabel">Batch Assignment Providing Profile For Use By Segmentation Rule</div>
-                    <input id="batchAssignmentCallWithSegmentationRule" class="form-control text" type="text"
-                           value="curl -H &quot;Content-Type: application/json&quot; -d &quot;{\&quot;profile\&quot;:{\&quot;key1\&quot;:\&quot;value1\&quot;,\&quot;key2\&quot;:\&quot;value2\&quot;}}&quot; {{hostUrl}}/assignments/applications/{{experiment.applicationName}}/pages/{{firstPageEncoded()}}/users/userID1" readonly />
-                </div>
-                <div ng-show="experiment && experiment.id">
-                    <div class="apiLabel">Experiment ID</div>
-                    <input id="experimentId" class="form-control text" type="text"
-                           value="{{experiment.id}}" readonly />
-                </div>
-            </div>
+            <ng-include src="'../../views/APICallsTab.html'"></ng-include>
         </tab>
     </tabset>
 
-    <!-- <div id="exprDetailGraph"></div> -->
     <div class="buttonBar">
         <a id="downloadAssignments" title="Download Assignment Data" ng-click="openGetAssignmentsModal(experiment)">Download Assignment Data</a>
         <a href="#" onclick="return false;" ng-click="exitDialog()" class="button cancel blue">Close</a>

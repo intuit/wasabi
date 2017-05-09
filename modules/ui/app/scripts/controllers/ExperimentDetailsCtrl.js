@@ -13,7 +13,8 @@ angular.module('wasabi.controllers').
                 disableAdvanced: false,
                 ruleWidgetsDisabled: false,
                 resultsWidgetsDisabled: true,
-                descriptionLength: 0
+                descriptionLength: 0,
+                apiLanguage: 'curl'
             };
 
             $scope.experiment = {
