@@ -29,6 +29,20 @@ http://www.w3.org/2001/XMLSchema-instance">
     <description>Opinionated micro-service kernel.</description>
 
     <properties>
+    
+        <!-- for integration test BEGIN -->
+        <wasabi.cassandra.migration.resource.path>com/intuit/wasabi/repository/impl/cassandra/migration</wasabi.cassandra.migration.resource.path>
+        <cassandra.migration.version>0.11</cassandra.migration.version>
+        <cassandra.keyspace.prefix>wasabi</cassandra.keyspace.prefix>
+
+        <application.http.host>localhost</application.http.host>
+        <application.http.port>8080</application.http.port>
+        <application.user.name>admin</application.user.name>
+        <application.user.password>admin</application.user.password>
+        <application.user.email>admin@example.com</application.user.email>
+        <application.user.lastname>Admin</application.user.lastname>
+        <!-- for integration test END -->
+            
         <default.time.zone>UTC</default.time.zone>
         <default.time.format>yyyy-MM-dd HH:mm:ss</default.time.format>
         <access.control.max.age.delta.seconds>86400</access.control.max.age.delta.seconds>

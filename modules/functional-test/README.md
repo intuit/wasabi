@@ -5,6 +5,30 @@ The tests use [TestNG](http://testng.org/doc/) and are implemented using
 [rest-assured](https://github.com/jayway/rest-assured/wiki/Usage) and 
 [Gson](https://google-gson.googlecode.com/svn/trunk/gson/docs/javadocs/index.html).
 
+#Running Integration Test in Vagrant
+
+Prerequisite: 
+* cd [workspace]/wasabi. mvn clean install
+* Install Oracle VM VirtualBox (version 5.1.18 or higher) and Vagrant (version 1.9.3 or higher).
+
+Mac installation instructions with brew
+```shell
+# install vagrant
+% brew cask install vagrant
+# install virtualbox
+% brew cask install virtualbox
+% brew cask install vagrant-manager
+# install vagrant's omnibus
+% vagrant plugin install vagrant-omnibus
+```
+
+To run all integration tests defined in testng.xml, simply do the following.
+* cd [workspace]/wasabi/modules/functional-test
+* vagrant up (this step will install dependencies (jdk, Cassandra, MySQL), install Wasabi app, create Cassandra tables, start up Wasabi app, run integration tests, stops Wasabi app and generate Jacoco file for code coverage)
+* Test output will be saved in [workspace]/wasabi/modules/functional-test/target/integration-test.out
+* vagrant destroy (this will destroy the VM)
+
+**NOTE:** jacoco-it.exec will be stored at [workspace]/wasabi/modules/functional-test/target/jacoco
 
 #Checklist
 
