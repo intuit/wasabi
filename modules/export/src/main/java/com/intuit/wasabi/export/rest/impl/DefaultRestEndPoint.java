@@ -67,10 +67,11 @@ public class DefaultRestEndPoint implements RestEndPoint {
 
     @Override
     public RetryPolicy getRetryPolicy() {
-        if (!configuration.isExponentialBackoffEnabled()) {
-            return new RetryPolicy().withMaxRetries(configuration.getRetries());
+        RetryPolicy retryPolicy = new RetryPolicy().withMaxRetries(configuration.getRetries());
+        if (configuration.isExponentialBackoffEnabled()) {
+            retryPolicy = retryPolicy.withBackoff(configuration.getExponentialBackoffDelay(),
+                    configuration.getExponentialBackoffMaxDelay(), TimeUnit.SECONDS);
         }
-        return new RetryPolicy().withBackoff(configuration.getExponentialBackoffDelay(),
-                configuration.getExponentialBackoffMaxDelay(), TimeUnit.SECONDS);
+        return retryPolicy;
     }
 }
