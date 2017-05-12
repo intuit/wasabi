@@ -254,6 +254,15 @@ http://www.w3.org/2001/XMLSchema-instance">
         </repository>
     </repositories>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>net.jodah</groupId>
+                <artifactId>failsafe</artifactId>
+                <version>1.0.4</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <dependencies>
 		<dependency>
             <groupId>commons-codec</groupId>
