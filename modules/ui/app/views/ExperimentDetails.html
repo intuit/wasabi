@@ -83,7 +83,7 @@
         </tr>
     </table>
 
-    <div style="height: 100px; margin-top: 10px;">
+    <div style="height: 100px; margin-top: 10px; overflow: auto;">
         <div style="float: left; width: 65%;">
             <div><label class="descriptionLabel">Hypothesis/Description</label></div>
             <pre id="experimentDescription" spellcheck="false" class="readOnly"></pre>
@@ -92,11 +92,21 @@
         </div>
         <div style="width: 35%; padding-left: 20px; float: right;">
             <div><label class="tagsLabel">Tags</label></div>
-            <div ng-show="!data.tagWidgetsDisabled">
-                <tags-input name="tags" ng-model="tags" style="width: 100%;">
-                    <auto-complete source="queryTags($query)"></auto-complete>
-                </tags-input>
-            </div>
+            <form name="experimentForm" novalidate >
+                <div ng-show="!data.tagWidgetsDisabled">
+                    <tags-input name="tags" ng-model="tags" allowed-tags-pattern="^[a-zA-Z0-9\.\-\_]*$" min-length="1" max-length="35" style="width: 100%;">
+                        <auto-complete source="queryTags($query)"></auto-complete>
+                    </tags-input>
+                    <!-- Validation error -->
+                    <div class="error"
+                         ng-show="experimentForm.$error && experimentForm.$error.leftoverText">
+                        <small class="fieldError"
+                               ng-show="experimentForm.$error.leftoverText[0].$name === 'tags'">
+                            Enter a tag containing only letters, numbers, -, ., or _ and less than 36 characters.
+                        </small>
+                    </div>
+                </div>
+            </form>
             <div ng-show="data.tagWidgetsDisabled">
                 <textarea ng-model="tagsStr" id="experimentTagsReadOnly" placeholder="No tags defined, yet" name="experimentTags" class="readOnly disabled" style="padding-left: 8px;" disabled ></textarea>
             </div>
