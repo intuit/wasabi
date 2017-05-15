@@ -58,7 +58,7 @@ angular.module('wasabi.controllers').
             // init controller
             $scope.loadSuperadmins();
 
-            $scope.openAddSuperadminModal = function (superadmin) {
+            $scope.openAddSuperadminModal = function () {
                 var modalInstance = $uibModal.open({
                     templateUrl: 'views/AddSuperadminModal.html',
                     controller: 'AddSuperadminModalCtrl',

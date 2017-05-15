@@ -1,4 +1,3 @@
-/*global moment:false*/
 'use strict';
 
 angular.module('wasabi.controllers')

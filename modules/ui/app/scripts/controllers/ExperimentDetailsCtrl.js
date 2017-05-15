@@ -947,13 +947,13 @@ angular.module('wasabi.controllers').
                 return $scope.experiment.tags;
             };
 
-            $scope.cancelTags = function(tempValue) {
+            $scope.cancelTags = function() {
                 $scope.transferTags(true);
                 $scope.data.tagWidgetsDisabled = true;
                 $scope.$digest();
             };
 
-            $scope.saveTags = function(newValue) {
+            $scope.saveTags = function() {
                 var experiment = $scope.experiment;
                 $scope.transferTags(false);
                 ExperimentsFactory.update({

@@ -1168,6 +1168,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
             },
 
             updateApplicationRoles: function(userID, getUsersPrivilegesForApplication) {
+                var that = this;
                 AuthzFactory.getUserRoles({
                     userId: userID
                 }).$promise.then(function (roleList) {
@@ -1185,7 +1186,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                         return applications;
                     }
                 }, function(response) {
-                    UtilitiesFactory.handleGlobalError(response, 'The roles for this user could not be retrieved.');
+                    that.handleGlobalError(response, 'The roles for this user could not be retrieved.');
                 });
             },
 
