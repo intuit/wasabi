@@ -93,4 +93,34 @@ public class DefaultRestEndPointConfiguration implements RestEndPoint.Configurat
     public int getRetries() {
         return Integer.parseInt((String) properties.get("export.rest.retries"));
     }
+
+    /**
+     * Returns the export rest endpoint is exponential backoff enabled property.
+     *
+     * @return whether exponential backoff is enabled for retries
+     */
+    @Override
+    public boolean isExponentialBackoffEnabled() {
+        return Boolean.parseBoolean(properties.getProperty("export.rest.isExponentialBackoffEnabled"));
+    }
+
+    /**
+     * Returns the export rest endpoint exponential backoff initial delay
+     *
+     * @return initial interval size between retries with exponential backoff enabled
+     */
+    @Override
+    public long getExponentialBackoffDelay() {
+        return Long.parseLong(properties.getProperty("export.rest.exponentialBackoffDelay"));
+    }
+
+    /**
+     * Returns the export rest endpoint exponential backoff max delay
+     *
+     * @return the maximum interval size until which retries are going to continue with exponential backoff strategy
+     */
+    @Override
+    public long getExponentialBackoffMaxDelay() {
+        return Long.parseLong(properties.getProperty("export.rest.exponentialBackoffMaxDelay"));
+    }
 }
