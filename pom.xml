@@ -64,7 +64,7 @@ http://www.w3.org/2001/XMLSchema-instance">
         <http.proxy.host>http://insert.your.proxy.host.here</http.proxy.host>
         <http.proxy.port>80</http.proxy.port>
 
-        <mysql.host>localhost</mysql.host>
+        <mysql.host>experiments-nonprod.cbm3at6jufj7.us-west-2.rds.amazonaws.com</mysql.host>
         <mysql.port>3306</mysql.port>
         <mysql.dbName>wasabi</mysql.dbName>
         <mysql.Args>verifyServerCertificate=false&amp;useSSL=false&amp;requireSSL=false&amp;autoReconnect=true&amp;autoReconnectForPools=true</mysql.Args>
