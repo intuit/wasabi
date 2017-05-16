@@ -92,6 +92,10 @@ public class DefaultCassandraDriver implements CassandraDriver {
                 builder.addContactPoints(nodes.toArray(new String[nodes.size()]))
                         .withRetryPolicy(DefaultRetryPolicy.INSTANCE);
                 builder.withPort(getConfiguration().getPort());
+                builder.withCredentials(
+                        getConfiguration().getUsername(),
+                        getConfiguration().getPassword()
+                );
 
                 if (getConfiguration().getTokenAwareLoadBalancingLocalDC().isPresent() &&
                         getConfiguration().getTokenAwareLoadBalancingUsedHostsPerRemoteDc() >= 0) {
