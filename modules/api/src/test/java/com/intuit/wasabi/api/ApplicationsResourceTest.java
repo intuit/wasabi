@@ -17,6 +17,9 @@ package com.intuit.wasabi.api;
 
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authorization.Authorization;
+import com.intuit.wasabi.authorizationobjects.Permission;
+import com.intuit.wasabi.authorizationobjects.UserPermissions;
+import com.intuit.wasabi.authorizationobjects.UserPermissionsList;
 import com.intuit.wasabi.exceptions.AuthenticationException;
 import com.intuit.wasabi.experiment.Experiments;
 import com.intuit.wasabi.experiment.Pages;
@@ -257,13 +260,23 @@ public class ApplicationsResourceTest {
     public void testTagsRetrieval() {
         when(authorization.getUser("foo")).thenReturn(username);
 
-        Iterator<Application.Name> applicationNamesIterator = mock(Iterator.class);
-        when(applicationNamesIterator.hasNext()).thenReturn(true, true, true, false);
-        when(applicationNamesIterator.next()).thenReturn(Application.Name.valueOf("app01"))
-                .thenReturn(Application.Name.valueOf("app02")).thenReturn(Application.Name.valueOf("app03"));
+        Iterator<UserPermissions> userPermIterator = mock(Iterator.class);
+        when(userPermIterator.hasNext()).thenReturn(true, true, true, false);
+        List<Permission> permissions = Arrays.asList(Permission.READ);
+        when(userPermIterator.next())
+                .thenReturn(UserPermissions.newInstance(Application.Name.valueOf("app01"), permissions).build())
+                .thenReturn(UserPermissions.newInstance(Application.Name.valueOf("app02"), permissions).build())
+                .thenReturn(UserPermissions.newInstance(Application.Name.valueOf("app03"), permissions).build());
 
-        when(applicationNames.iterator()).thenReturn(applicationNamesIterator);
-        when(experiments.getApplications()).thenReturn(applicationNames);
+
+        UserPermissionsList wrapClass = mock(UserPermissionsList.class);
+        List<UserPermissions> userPermList = mock(List.class);
+        when(wrapClass.getPermissionsList()).thenReturn(userPermList);
+
+        when(userPermList.iterator()).thenReturn(userPermIterator);
+        when(authorization.getUserPermissionsList(username)).thenReturn(wrapClass);
+
+
         when(httpHeader.headers()).thenReturn(responseBuilder);
         when(responseBuilder.entity(anyCollection())).thenReturn(responseBuilder);
         when(responseBuilder.build()).thenReturn(response);

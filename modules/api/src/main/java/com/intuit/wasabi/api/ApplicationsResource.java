@@ -21,6 +21,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authorization.Authorization;
+import com.intuit.wasabi.authorizationobjects.UserPermissions;
 import com.intuit.wasabi.exceptions.AuthenticationException;
 import com.intuit.wasabi.experiment.Experiments;
 import com.intuit.wasabi.experiment.Pages;
@@ -395,19 +396,13 @@ public class ApplicationsResource {
             @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
             final String authorizationHeader) {
         try {
+            UserInfo.Username userName = authorization.getUser(authorizationHeader);
+            Set<Application.Name> allowed = new HashSet<>();
 
             // get the for the user visible Applications
-            List<Application.Name> allApplications = experiments.getApplications();
-            Set<Application.Name> allowed = new HashSet<>();
-            UserInfo.Username userName = authorization.getUser(authorizationHeader);
-
-            for (Application.Name applicationName : allApplications) {
-                try {
-                    authorization.checkUserPermissions(userName, applicationName, READ);
-                    allowed.add(applicationName);
-                } catch (AuthenticationException ignored) {
-                    LOGGER.trace("ignoring authentication exception", ignored);
-                }
+            List<UserPermissions> authorized = authorization.getUserPermissionsList(userName).getPermissionsList();
+            for (UserPermissions perm : authorized) {
+                allowed.add(perm.getApplicationName());
             }
 
             // get their associated tags

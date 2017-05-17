@@ -22,7 +22,6 @@ import com.datastax.driver.mapping.annotations.Query;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentTagsByApplication;
 
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -43,6 +42,4 @@ public interface ExperimentTagAccessor {
     @Query("update experiment_tag set tags = tags - ? WHERE app_name = ?")
     Statement remove(Set<String> tags, String appName);
 
-    @Query("delete tags from experiment_tag WHERE app_name = ?")
-    Statement removeAll(String appName);
 }
