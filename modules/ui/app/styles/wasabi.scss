@@ -1059,8 +1059,8 @@ header {
     a {
         position: relative;
         display: inline-block;
-        width: 25px;
-        height: 25px;
+        width: 22px;
+        height: 22px;
         overflow: hidden;
         text-indent: -999px;
         background-color: $nav_blue;
@@ -1076,7 +1076,7 @@ header {
             opacity: .85;
             background-repeat: no-repeat;
             background-position: center;
-            background-size: 16px;
+            background-size: 12px;
         }
     	&:hover {
             @include box-shadow(0 0 4px rgba(0,0,0,0.45));

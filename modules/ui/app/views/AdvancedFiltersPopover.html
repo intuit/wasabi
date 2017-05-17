@@ -51,7 +51,7 @@
             </div>
             <div>
                 <div class="dateLabel">Tags</div>
-                <tags-input name="tags" ng-model="tempAdvancedSearchValues.advSearchTags" placeholder="Filter by tags" style="width: 590px; margin-top: 5px;">
+                <tags-input name="tags" ng-model="tempAdvancedSearchValues.advSearchTags" allowed-tags-pattern="^[a-zA-Z0-9\.\-\_]*$" min-length="1" max-length="35" placeholder="Filter by tags" style="width: 590px; margin-top: 5px;">
                     <auto-complete source="queryTags($query)"></auto-complete>
                 </tags-input>
             </div>
