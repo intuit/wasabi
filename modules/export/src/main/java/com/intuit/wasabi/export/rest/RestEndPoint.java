@@ -15,6 +15,8 @@
  *******************************************************************************/
 package com.intuit.wasabi.export.rest;
 
+import net.jodah.failsafe.RetryPolicy;
+
 import java.net.URI;
 
 /**
@@ -39,6 +41,12 @@ public interface RestEndPoint {
      * @return retries
      */
     int getRetries();
+
+    /**
+     * Retry policy
+     * @return retry policy
+     */
+    RetryPolicy getRetryPolicy();
 
     /**
      * Configuration parames for rest endpoint
@@ -80,5 +88,20 @@ public interface RestEndPoint {
          * @return retries
          */
         int getRetries();
+
+        /**
+         * Is exponential backoff enabled
+         */
+        boolean isExponentialBackoffEnabled();
+
+        /**
+         * Get exponential backoff initial delay
+         */
+        long getExponentialBackoffDelay();
+
+        /**
+         * Get exponential backoff max delay
+         */
+        long getExponentialBackoffMaxDelay();
     }
 }

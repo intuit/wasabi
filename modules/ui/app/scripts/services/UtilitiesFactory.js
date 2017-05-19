@@ -1015,9 +1015,11 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                         title = 'Permanently Terminate Experiment';
                         break;
                 }
-                var msg = 'Are you sure you want to ' + stateChange + ' the experiment ' + experiment.label + '?';
+                var msg = 'Are you sure you want to ' + stateChange + ' the experiment ' + experiment.label + '?',
+                    msgWithHTML = null;
                 if (state.toLowerCase() === 'terminated') {
-                    msg = 'Are you sure you want to <span style="font-weight: bold;">PERMANENTLY TERMINATE</span> the experiment ' + experiment.label + '?';
+                    msg = null;
+                    msgWithHTML = 'Are you sure you want to <span style="font-weight: bold;">PERMANENTLY TERMINATE</span> the experiment ' + experiment.label + '?';
                 }
                 DialogsFactory.confirmDialog(msg, title,
                         function() {
@@ -1045,7 +1047,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                                 that.handleGlobalError(response, 'The state of your experiment could not be changed.');
                             });
                         },
-                        function() {/* Don't do the state change */});
+                        function() {/* Don't do the state change */}, null, null, msgWithHTML);
             },
 
             deleteExperiment: function (experiment, afterDeleteFunction) {

@@ -124,6 +124,33 @@ Server: Jetty(9.3.z-SNAPSHOT)
 
 Congratulations! You are the proud owner of a newly minted Wasabi instance. :)
 
+### Running Wasabi with remote storage
+
+##### Set Mysql and Cassandra credentials
+* Modify /pom.xml to set the values that apply to your environment
+
+##### Download Cassandra migration tool https://oss.sonatype.org/content/repositories/public/com/builtamont/cassandra-migration/0.9/cassandra-migration-0.9-jar-with-dependencies.jar
+
+##### Set up your environment variables
+* Set location of the migration tool
+```bash
+export CASSANDRA_MIGRATION=/location/of/cassandra-migration-0.9-jar-with-dependencies.jar
+```
+* Set location of migration scripts within your project
+```bash
+export MIGRATION_SCRIPT=/location/of/modules/repository-datastax/src/main/resources/com/intuit/wasabi/repository/impl/cassandra/migration
+```
+
+##### Set up Cassandra tables
+```bash
+CQLSH_VERSION=<version> CQLSH_USERNAME=<username> CQLSH_PASSWORD=<pwd> CQLSH_HOST=<host> bin/docker/migration.sh
+```
+
+##### Run Wasabi with env variables for remote storage hosts
+```bash
+MYSQL_HOST=<mysql_host> NODE_HOST=<cassandra_host> ./bin/wasabi.sh start:wasabi
+```
+
 #### Troubleshooting
 
 * While starting Wasabi, if you see an error when the docker containers are starting up, you could do the following:
@@ -207,13 +234,13 @@ The following developer resources are available:
 ```bash
 % ./bin/wasabi.sh resource:api
 ```
-  
+
 > Javadoc
 
 ```bash
 % ./bin/wasabi.sh resource:doc
 ```
-  
+
 > Wasabi UI
 
 ```bash
@@ -256,15 +283,15 @@ Further, there are a number of additional wasabi.sh options available you should
 
 ```bash
 % ./bin/wasabi.sh --help
-  
+
   usage: wasabi.sh [options] [commands]
-  
+
   options:
     -e | --endpoint [ host:port ]          : api endpoint; default: localhost:8080
     -v | --verify [ true | false ]         : verify installation configuration; default: false
     -s | --sleep [ sleep-time ]            : sleep/wait time in seconds; default: 30
     -h | --help                            : help message
-  
+
   commands:
     bootstrap                              : install dependencies
     build                                  : build project
@@ -362,7 +389,7 @@ We greatly encourage contributions! You can add new features, report and fix exi
 tutorials, or any of the above. Feel free to open issues and/or send pull requests.
 
 The `master` branch of this repository contains the latest stable release of Wasabi, while snapshots are published to the `develop` branch. In general, pull requests should be submitted against `develop` by forking this repo into your account, developing and testing your changes, and creating pull requests to request merges. See the [Contributing to a Project](https://guides.github.com/activities/contributing-to-open-source/)
-article for more details about how to contribute.
+article for more details about how to contribute in general and find more specific information on how to write code for Wasabi in our [user guide](https://intuit.github.io/wasabi/v1/guide/index.html#developing-wasabi).
 
 Extension projects such as browser plugins, client integration libraries, and apps can be contributed under the `contrib` directory.
 

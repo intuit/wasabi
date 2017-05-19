@@ -65,6 +65,18 @@ public interface CassandraDriver extends Closeable {
         String getKeyspaceName();
 
         /**
+         * Returns Cassandra username
+         * @return username
+         */
+        String getUsername();
+
+        /**
+         * Returns Cassandra password
+         * @return password
+         */
+        String getPassword();
+
+        /**
          * Returns Cassandra port
          * @return port number
          */
