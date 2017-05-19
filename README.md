@@ -364,9 +364,22 @@ Code changes can readily be verified by running the growing collection of includ
 
 Wasabi can readily be packaged as installable *rpm* or *deb* distributions and deployed at scale as follows:
 
+> Package by running integration tests 1st:
+
 ```bash
-% ./bin/wasabi.sh package
-% find ./modules -type f \( -name "*.rpm" -or -name "*.deb" \)
+% ./bin/wasabi.sh start package
+```
+
+> Package without integration tests, if needed:
+
+```bash
+% ./bin/wasabi.sh -t false package
+```
+
+> Find generated package files:
+
+```bash
+% find . -type f \( -name "*.rpm" -or -name "*.deb" \)
 ```
 
 Note: [Java 8](http://www.oracle.com/technetwork/java/javase/overview/index.html) is a runtime dependency
