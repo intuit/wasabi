@@ -71,6 +71,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -212,24 +213,31 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
      */
     @Override
     @Timed
-    public void populateAssignmentsMetadata(User.ID userID, Application.Name appName, Context context, ExperimentBatch experimentBatch, Optional<Map<Experiment.ID, Boolean>> allowAssignments,
+    public void populateAssignmentsMetadata(User.ID userID, Application.Name appName, Context context,
+                                            ExperimentBatch experimentBatch,
+                                            @Nullable Map<Experiment.ID, Boolean> allowAssignments,
                                             PrioritizedExperimentList prioritizedExperimentList,
                                             Map<Experiment.ID, com.intuit.wasabi.experimentobjects.Experiment> experimentMap,
                                             Map<Experiment.ID, BucketList> bucketMap,
                                             Map<Experiment.ID, List<Experiment.ID>> exclusionMap
     ) {
         if (LOGGER.isDebugEnabled())
-            LOGGER.debug("populateExperimentMetadata - STARTED: userID={}, appName={}, context={}, experimentBatch={}, experimentIds={}", userID, appName, context, experimentBatch, allowAssignments);
-        if (isNull(experimentBatch.getLabels()) && !allowAssignments.isPresent()) {
-            LOGGER.error("Invalid input to CassandraAssignmentsRepository.populateExperimentMetadata(): Given input: userID={}, appName={}, context={}, experimentBatch={}, allowAssignments={}", userID, appName, context, experimentBatch, allowAssignments);
+            LOGGER.debug("populateExperimentMetadata - STARTED: userID={}, appName={}, context={}, " +
+                    "experimentBatch={}, experimentIds={}",
+                    userID, appName, context, experimentBatch, allowAssignments);
+        if (null == experimentBatch.getLabels() && null == allowAssignments) {
+            LOGGER.error("Invalid input to CassandraAssignmentsRepository.populateExperimentMetadata(): " +
+                    "Given input: userID={}, appName={}, context={}, experimentBatch={}, allowAssignments={}",
+                    userID, appName, context, experimentBatch, allowAssignments);
             return;
         }
 
         //Populate experiments map, prioritized experiments list and existing user assignments.
-        populateExperimentApplicationAndUserAssignments(userID, appName, context, prioritizedExperimentList, experimentMap);
+        populateExperimentApplicationAndUserAssignments(userID, appName, context,
+                prioritizedExperimentList, experimentMap);
 
         //Populate experiments ids of given batch
-        Set<Experiment.ID> experimentIds = allowAssignments.isPresent() ? allowAssignments.get().keySet() : new HashSet<>();
+        Set<Experiment.ID> experimentIds = allowAssignments != null ? allowAssignments.keySet() : new HashSet<>();
         populateExperimentIdsAndExperimentBatch(allowAssignments, experimentMap, experimentBatch, experimentIds);
 
         //Based on given experiment ids, populate experiment buckets and exclusions..
@@ -337,12 +345,12 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
      * @param experimentBatch  - INPUT/OUTPUT:  if allowAssignments is empty then this contains given batch experiment labels.
      * @param experimentIds    - OUTPUT: Final given batch experiment ids.
      */
-    private void populateExperimentIdsAndExperimentBatch(Optional<Map<Experiment.ID, Boolean>> allowAssignments,
+    private void populateExperimentIdsAndExperimentBatch(@Nullable Map<Experiment.ID, Boolean> allowAssignments,
                                                          Map<Experiment.ID, com.intuit.wasabi.experimentobjects.Experiment> experimentMap,
                                                          ExperimentBatch experimentBatch, Set<Experiment.ID> experimentIds) {
         //allowAssignments is EMPTY means experimentBatch.labels are present.
         //Use experimentBatch.labels to populate experimentIds
-        if (!allowAssignments.isPresent()) {
+        if (null == allowAssignments) {
             for (Experiment exp : experimentMap.values()) {
                 if (experimentBatch.getLabels().contains(exp.getLabel())) {
                     experimentIds.add(exp.getID());

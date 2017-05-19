@@ -49,8 +49,8 @@ import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.BucketList;
 import com.intuit.wasabi.experimentobjects.Context;
 import com.intuit.wasabi.experimentobjects.Experiment;
+import com.intuit.wasabi.experimentobjects.ExperimentBase;
 import com.intuit.wasabi.experimentobjects.ExperimentBatch;
-import com.intuit.wasabi.experimentobjects.ExperimentList;
 import com.intuit.wasabi.experimentobjects.Page;
 import com.intuit.wasabi.experimentobjects.PageExperiment;
 import com.intuit.wasabi.experimentobjects.PrioritizedExperiment;
@@ -68,6 +68,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 
+import javax.annotation.Nullable;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
@@ -448,10 +449,8 @@ public class AssignmentsImpl implements Assignments {
     protected List<Assignment> doAssignments(User.ID userID, Application.Name applicationName, Context context,
                                              boolean createAssignment, boolean forceInExperiment, HttpHeaders headers,
                                              ExperimentBatch experimentBatch, Page.Name pageName,
-                                             Map<Experiment.ID, Boolean> allowAssignments, boolean updateDownstreamSystems) {
-
-        //allowAssignments is NULL when called from AssignmentsResource.getBatchAssignments()
-        Optional<Map<Experiment.ID, Boolean>> allowAssignmentsOptional = Optional.ofNullable(allowAssignments);
+                                             @Nullable Map<Experiment.ID, Boolean> allowAssignments,
+                                             boolean updateDownstreamSystems) {
         PrioritizedExperimentList appPriorities = new PrioritizedExperimentList();
         Map<Experiment.ID, com.intuit.wasabi.experimentobjects.Experiment> experimentMap = new HashMap<>();
         Table<Experiment.ID, Experiment.Label, String> userAssignments = HashBasedTable.create();
@@ -459,11 +458,13 @@ public class AssignmentsImpl implements Assignments {
         Map<Experiment.ID, List<Experiment.ID>> exclusionMap = new HashMap<>();
 
         //Populate required assignment metadata
-        populateAssignmentsMetadata(userID, applicationName, context, experimentBatch, allowAssignmentsOptional, appPriorities, experimentMap, bucketMap, exclusionMap);
+        populateAssignmentsMetadata(userID, applicationName, context, experimentBatch, allowAssignments, appPriorities,
+                experimentMap, bucketMap, exclusionMap);
 
         //Now fetch existing user assignments for given user, application & context
         assignmentsRepository.getAssignments(userID, applicationName, context, experimentMap)
-                .forEach(assignmentPair -> userAssignments.put(assignmentPair.getLeft().getID(), assignmentPair.getLeft().getLabel(), assignmentPair.getRight().toString()));
+                .forEach(assignmentPair -> userAssignments.put(assignmentPair.getLeft().getID(),
+                        assignmentPair.getLeft().getLabel(), assignmentPair.getRight().toString()));
         LOGGER.debug("[DB] existingUserAssignments = {}", userAssignments);
 
         List<Pair<Experiment, Assignment>> assignmentPairs = new LinkedList<>();
@@ -482,9 +483,11 @@ public class AssignmentsImpl implements Assignments {
                 Experiment.Label label = Experiment.Label.valueOf(labelStr);
                 Assignment assignment = null;
                 try {
-                    boolean experimentCreateAssignment = allowAssignmentsOptional.isPresent() ? (allowAssignmentsOptional.get().get(experiment.getID())) : createAssignment;
+                    boolean experimentCreateAssignment =
+                            isNewAssignmentAllowed(experiment, allowAssignments, createAssignment);
 
-                    //This method only gets assignment object, and doesn't create new assignments in a database (cassandra)
+                    //This method only gets assignment object,
+                    //and doesn't create new assignments in a database (cassandra)
                     assignment = getAssignment(userID, applicationName, label,
                             context, experimentCreateAssignment,
                             forceInExperiment, segmentationProfile,
@@ -502,7 +505,7 @@ public class AssignmentsImpl implements Assignments {
                                 assignment.getBucketLabel() != null ? assignment.getBucketLabel().toString() : "null");
                     }
 
-                    assignmentPairs.add(new ImmutablePair<Experiment, Assignment>(experimentMap.get(experiment.getID()), assignment));
+                    assignmentPairs.add(new ImmutablePair(experimentMap.get(experiment.getID()), assignment));
 
                 } catch (WasabiException ex) {
                     LOGGER.error("Exception happened while executing assignment business logic", ex);
@@ -517,10 +520,13 @@ public class AssignmentsImpl implements Assignments {
         }
 
         //Find if there are any experiment which is not part of application-experiment list
-        List<Experiment.Label> pExpLables = appPriorities.getPrioritizedExperiments().stream().map(pExp -> pExp.getLabel()).collect(Collectors.toList());
+        List<Experiment.Label> pExpLables =
+                appPriorities.getPrioritizedExperiments().stream()
+                        .map(pExp -> pExp.getLabel()).collect(Collectors.toList());
         experimentBatch.getLabels().forEach(iExpLabel -> {
             if (!pExpLables.contains(iExpLabel)) {
-                allAssignments.add(nullAssignment(userID, applicationName, null, Assignment.Status.EXPERIMENT_NOT_FOUND));
+                allAssignments.add(nullAssignment(userID, applicationName,
+                        null, Assignment.Status.EXPERIMENT_NOT_FOUND));
             }
         });
 
@@ -539,12 +545,15 @@ public class AssignmentsImpl implements Assignments {
             assignmentPairs.forEach(assignmentPair -> {
                 Assignment assignment = assignmentPair.getRight();
                 Experiment experiment = assignmentPair.getLeft();
-                boolean experimentCreateAssignment = allowAssignmentsOptional.isPresent() ? (allowAssignmentsOptional.get().get(experiment.getID())) : createAssignment;
+                boolean experimentCreateAssignment =
+                        isNewAssignmentAllowed(experiment,
+                                allowAssignments, createAssignment);
                 for (String name : executors.keySet()) {
-                    executors.get(name).execute(new AssignmentEnvelopePayload(userID, context, experimentCreateAssignment, false,
+                    executors.get(name).execute(new AssignmentEnvelopePayload(
+                            userID, context, experimentCreateAssignment, false,
                             forceInExperiment, segmentationProfile, assignment != null ? assignment.getStatus() : null,
-                            assignment != null ? assignment.getBucketLabel() : null, pageName, applicationName, experiment.getLabel(),
-                            experiment.getID(), currentDate, headers));
+                            assignment != null ? assignment.getBucketLabel() : null, pageName, applicationName,
+                            experiment.getLabel(), experiment.getID(), currentDate, headers));
                 }
             });
             LOGGER.debug("Finished Ingest_to_downstream_systems...");
@@ -554,7 +563,8 @@ public class AssignmentsImpl implements Assignments {
         // use the new version of the rule, if it has recently been changed.
         assignmentPairs.forEach(assignmentPair -> {
             Experiment experiment = assignmentPair.getLeft();
-            ruleCacheExecutor.execute(new ExperimentRuleCacheUpdateEnvelope(experiment.getRule(), ruleCache, experiment.getID()));
+            ruleCacheExecutor.execute(
+                    new ExperimentRuleCacheUpdateEnvelope(experiment.getRule(), ruleCache, experiment.getID()));
         });
         LOGGER.debug("Finished update_rule_cache...");
 
@@ -675,34 +685,43 @@ public class AssignmentsImpl implements Assignments {
      * @param bucketMap                 Output: Map of 'experiment id TO BucketList' of ONLY experiments which are associated to the given application and page.
      * @param exclusionMap              Output: Map of 'experiment id TO to its mutual experiment ids' of ONLY experiments which are associated to the given application and page.
      */
-    private void populateAssignmentsMetadata(User.ID userID, Application.Name appName, Context context, ExperimentBatch experimentBatch, Optional<Map<Experiment.ID, Boolean>> allowAssignments,
+    private void populateAssignmentsMetadata(User.ID userID, Application.Name appName, Context context,
+                                             ExperimentBatch experimentBatch,
+                                             @Nullable Map<Experiment.ID, Boolean> allowAssignments,
                                              PrioritizedExperimentList prioritizedExperimentList,
                                              Map<Experiment.ID, Experiment> experimentMap,
                                              Map<Experiment.ID, BucketList> bucketMap,
                                              Map<Experiment.ID, List<Experiment.ID>> exclusionMap) {
-        LOGGER.debug("populateAssignmentsMetadata - STARTED: userID={}, appName={}, context={}, experimentBatch={}, experimentIds={}", userID, appName, context, experimentBatch, allowAssignments);
-        if (isNull(experimentBatch.getLabels()) && !allowAssignments.isPresent()) {
-            LOGGER.error("Invalid input to AssignmentsImpl.populateAssignmentsMetadata(): Given input: userID={}, appName={}, context={}, experimentBatch={}, allowAssignments={}", userID, appName, context, experimentBatch, allowAssignments);
+        LOGGER.debug("populateAssignmentsMetadata - STARTED: userID={}, appName={}, context={}, experimentBatch={}," +
+                " experimentIds={}", userID, appName, context, experimentBatch, allowAssignments);
+        if (null == experimentBatch.getLabels() && null == allowAssignments) {
+            LOGGER.error("Invalid input to AssignmentsImpl.populateAssignmentsMetadata(): Given input: userID={}," +
+                    " appName={}, context={}, experimentBatch={}, allowAssignments={}", userID, appName, context,
+                    experimentBatch, allowAssignments);
             return;
         }
 
-        //IF metadata cache is enabled, THEN use metadata cache to populate assignments metadata ELSE use assignments repository to populate assignments metadata
+        //IF metadata cache is enabled, THEN use metadata cache to populate assignments metadata
+        //ELSE use assignments repository to populate assignments metadata
         if (metadataCacheEnabled) {
             //Populate experiments map of all the experiments of given application
             metadataCache.getExperimentsByAppName(appName).forEach(exp -> experimentMap.put(exp.getID(), exp));
             LOGGER.debug("[cache] experimentMap = {}", experimentMap);
 
             //Populate prioritized experiments list of given application
-            Optional<PrioritizedExperimentList> prioritizedExperimentListOptional = metadataCache.getPrioritizedExperimentListMap(appName);
+            Optional<PrioritizedExperimentList> prioritizedExperimentListOptional =
+                    metadataCache.getPrioritizedExperimentListMap(appName);
             if (prioritizedExperimentListOptional.isPresent()) {
-                prioritizedExperimentListOptional.get().getPrioritizedExperiments().forEach(exp -> prioritizedExperimentList.addPrioritizedExperiment(exp));
+                prioritizedExperimentListOptional.get().getPrioritizedExperiments().
+                        forEach(exp -> prioritizedExperimentList.addPrioritizedExperiment(exp));
             } else {
                 //TODO: 1/30/17  What to do if there are no experiments for given application
             }
-            LOGGER.debug("[cache] prioritizedExperimentList = {}", prioritizedExperimentList.getPrioritizedExperiments());
+            LOGGER.debug("[cache] prioritizedExperimentList = {}",
+                    prioritizedExperimentList.getPrioritizedExperiments());
 
             //Populate experiments ids of given batch
-            Set<Experiment.ID> experimentIds = allowAssignments.isPresent() ? allowAssignments.get().keySet() : new HashSet<>();
+            Set<Experiment.ID> experimentIds = allowAssignments != null ? allowAssignments.keySet() : new HashSet<>();
             populateExperimentIdsAndExperimentBatch(allowAssignments, experimentMap, experimentBatch, experimentIds);
 
             //Based on given experiment ids, populate experiment buckets and exclusions..
@@ -714,7 +733,8 @@ public class AssignmentsImpl implements Assignments {
             LOGGER.debug("[cache] exclusionMap = {}", exclusionMap);
 
         } else {
-            assignmentsRepository.populateAssignmentsMetadata(userID, appName, context, experimentBatch, allowAssignments, prioritizedExperimentList, experimentMap, bucketMap, exclusionMap);
+            assignmentsRepository.populateAssignmentsMetadata(userID, appName, context, experimentBatch,
+                    allowAssignments, prioritizedExperimentList, experimentMap, bucketMap, exclusionMap);
         }
 
         LOGGER.debug("populateAssignmentsMetadata - FINISHED...");
@@ -767,10 +787,13 @@ public class AssignmentsImpl implements Assignments {
      * @param experimentBatch  - INPUT/OUTPUT:  if allowAssignments is empty then this contains given batch experiment labels.
      * @param experimentIds    - OUTPUT: Final given batch experiment ids.
      */
-    private void populateExperimentIdsAndExperimentBatch(Optional<Map<Experiment.ID, Boolean>> allowAssignments, Map<Experiment.ID, com.intuit.wasabi.experimentobjects.Experiment> experimentMap, ExperimentBatch experimentBatch, Set<Experiment.ID> experimentIds) {
+    private void populateExperimentIdsAndExperimentBatch(
+            @Nullable Map<Experiment.ID, Boolean> allowAssignments,
+            Map<Experiment.ID, com.intuit.wasabi.experimentobjects.Experiment> experimentMap,
+            ExperimentBatch experimentBatch, Set<Experiment.ID> experimentIds) {
         //allowAssignments is EMPTY means experimentBatch.labels are present.
         //Use experimentBatch.labels to populate experimentIds
-        if (!allowAssignments.isPresent()) {
+        if (null == allowAssignments) {
             for (Experiment exp : experimentMap.values()) {
                 if (experimentBatch.getLabels().contains(exp.getLabel())) {
                     experimentIds.add(exp.getID());
@@ -1407,6 +1430,15 @@ public class AssignmentsImpl implements Assignments {
             details.put("Status", "Assignments metadata cache is not enabled...");
         }
         return details;
+    }
+
+    private boolean isNewAssignmentAllowed(
+            ExperimentBase experiment,
+            @Nullable Map<Experiment.ID, Boolean> allowAssignments,
+            boolean createAssignment) {
+        boolean isNewAssignmentAllowed =
+                allowAssignments != null ? (allowAssignments.get(experiment.getID())) : createAssignment;
+        return isNewAssignmentAllowed;
     }
 
     /**

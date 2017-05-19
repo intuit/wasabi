@@ -15,7 +15,6 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository;
 
-import com.google.common.collect.Table;
 import com.intuit.wasabi.analyticsobjects.Parameters;
 import com.intuit.wasabi.analyticsobjects.counts.AssignmentCounts;
 import com.intuit.wasabi.assignmentobjects.Assignment;
@@ -29,13 +28,12 @@ import com.intuit.wasabi.experimentobjects.ExperimentBatch;
 import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
 import org.apache.commons.lang3.tuple.Pair;
 
+import javax.annotation.Nullable;
 import javax.ws.rs.core.StreamingOutput;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 
 /**
  * Interface to support assignment requests
@@ -163,7 +161,9 @@ public interface AssignmentsRepository {
      * @param bucketMap
      * @param exclusionMap
      */
-    void populateAssignmentsMetadata(User.ID userID, Application.Name appName, Context context, ExperimentBatch experimentBatch, Optional<Map<Experiment.ID, Boolean>> allowAssignments,
+    void populateAssignmentsMetadata(User.ID userID, Application.Name appName, Context context,
+                                     ExperimentBatch experimentBatch,
+                                     @Nullable Map<Experiment.ID, Boolean> allowAssignments,
                                      PrioritizedExperimentList prioritizedExperimentList,
                                      Map<Experiment.ID, Experiment> experimentMap,
                                      Map<Experiment.ID, BucketList> bucketMap,
