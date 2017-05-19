@@ -146,6 +146,12 @@ public class DefaultCassandraDriver implements CassandraDriver {
                 //Configure to use compression
                 builder.withCompression(ProtocolOptions.Compression.LZ4);
 
+                //Set Operation Timeout to be 5 minutes. Default is 12s
+                builder.getConfiguration().getSocketOptions().setReadTimeoutMillis(300_000);
+
+                //Set Connect Timeout to be 1 minutes. Default is 5s
+                builder.getConfiguration().getSocketOptions().setConnectTimeoutMillis(60_000);
+
                 // SSL connection
                 if (getConfiguration().useSSL()) {
                     try {
