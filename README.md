@@ -389,7 +389,7 @@ We greatly encourage contributions! You can add new features, report and fix exi
 tutorials, or any of the above. Feel free to open issues and/or send pull requests.
 
 The `master` branch of this repository contains the latest stable release of Wasabi, while snapshots are published to the `develop` branch. In general, pull requests should be submitted against `develop` by forking this repo into your account, developing and testing your changes, and creating pull requests to request merges. See the [Contributing to a Project](https://guides.github.com/activities/contributing-to-open-source/)
-article for more details about how to contribute.
+article for more details about how to contribute in general and find more specific information on how to write code for Wasabi in our [user guide](https://intuit.github.io/wasabi/v1/guide/index.html#developing-wasabi).
 
 Extension projects such as browser plugins, client integration libraries, and apps can be contributed under the `contrib` directory.
 
