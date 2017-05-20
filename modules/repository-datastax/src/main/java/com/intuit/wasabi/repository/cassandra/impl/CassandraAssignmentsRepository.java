@@ -483,7 +483,14 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     private void incrementCounts(List<Pair<Experiment, Assignment>> assignments, Date date) {
         boolean countUp = true;
         assignments.forEach(pair -> {
-            assignmentsCountExecutor.execute(new AssignmentCountEnvelope(this, experimentRepository, dbRepository, pair.getLeft(), pair.getRight(), countUp, eventLog, date, assignUserToExport, assignBucketCount));
+            AssignmentCountEnvelope assignmentCountEnvelope = new AssignmentCountEnvelope(
+                    this, experimentRepository, dbRepository, pair.getLeft(),
+                    pair.getRight(), countUp, eventLog, date, assignUserToExport, assignBucketCount);
+            if (pair.getLeft().getIsRapidExperiment()) {
+                assignmentCountEnvelope.run();
+            } else {
+                assignmentsCountExecutor.execute(assignmentCountEnvelope);
+            }
         });
         LOGGER.debug("Finished assignmentsCountExecutor");
     }

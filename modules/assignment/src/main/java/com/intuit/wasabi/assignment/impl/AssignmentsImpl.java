@@ -37,11 +37,13 @@ import com.intuit.wasabi.assignmentobjects.RuleCache;
 import com.intuit.wasabi.assignmentobjects.SegmentationProfile;
 import com.intuit.wasabi.assignmentobjects.User;
 import com.intuit.wasabi.eventlog.EventLog;
+import com.intuit.wasabi.eventlog.events.ExperimentChangeEvent;
 import com.intuit.wasabi.exceptions.AssignmentExistsException;
 import com.intuit.wasabi.exceptions.BucketDistributionNotFetchableException;
 import com.intuit.wasabi.exceptions.BucketNotFoundException;
 import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
 import com.intuit.wasabi.exceptions.InvalidAssignmentStateException;
+import com.intuit.wasabi.experiment.Experiments;
 import com.intuit.wasabi.experiment.Pages;
 import com.intuit.wasabi.experiment.Priorities;
 import com.intuit.wasabi.experimentobjects.Application;
@@ -50,14 +52,11 @@ import com.intuit.wasabi.experimentobjects.BucketList;
 import com.intuit.wasabi.experimentobjects.Context;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.ExperimentBatch;
-import com.intuit.wasabi.experimentobjects.ExperimentList;
 import com.intuit.wasabi.experimentobjects.Page;
 import com.intuit.wasabi.experimentobjects.PageExperiment;
 import com.intuit.wasabi.experimentobjects.PrioritizedExperiment;
 import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
-import com.intuit.wasabi.experimentobjects.exceptions.InvalidBucketStateTransitionException;
 import com.intuit.wasabi.experimentobjects.exceptions.InvalidExperimentStateException;
-import com.intuit.wasabi.experimentobjects.exceptions.WasabiClientException;
 import com.intuit.wasabi.experimentobjects.exceptions.WasabiException;
 import com.intuit.wasabi.repository.AssignmentsRepository;
 import com.intuit.wasabi.repository.CassandraRepository;
@@ -73,9 +72,6 @@ import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -147,6 +143,8 @@ public class AssignmentsImpl implements Assignments {
     private Boolean metadataCacheEnabled;
     private AssignmentsMetadataCache metadataCache;
 
+    private Experiments experimentUtil;
+
 
     /**
      * Helper for unit tests
@@ -186,7 +184,8 @@ public class AssignmentsImpl implements Assignments {
                            final EventLog eventLog,
                            final @Named(ASSIGNMENTS_METADATA_CACHE_ENABLED)
                                    Boolean metadataCacheEnabled,
-                           final AssignmentsMetadataCache metadataCache)
+                           final AssignmentsMetadataCache metadataCache,
+                           final Experiments experimentUtil)
             throws IOException, ConnectionException {
         super();
         try {
@@ -206,6 +205,7 @@ public class AssignmentsImpl implements Assignments {
         this.eventLog = eventLog;
         this.metadataCacheEnabled = metadataCacheEnabled;
         this.metadataCache = metadataCache;
+        this.experimentUtil = experimentUtil;
     }
 
     //-----------------------------------------------------------------------------------------------------------------
@@ -482,7 +482,8 @@ public class AssignmentsImpl implements Assignments {
                 Experiment.Label label = Experiment.Label.valueOf(labelStr);
                 Assignment assignment = null;
                 try {
-                    boolean experimentCreateAssignment = allowAssignmentsOptional.isPresent() ? (allowAssignmentsOptional.get().get(experiment.getID())) : createAssignment;
+                    boolean experimentCreateAssignment = allowAssignmentsOptional.isPresent() ?
+                            (allowAssignmentsOptional.get().get(experiment.getID())) : createAssignment;
 
                     //This method only gets assignment object, and doesn't create new assignments in a database (cassandra)
                     assignment = getAssignment(userID, applicationName, label,
@@ -609,6 +610,14 @@ public class AssignmentsImpl implements Assignments {
             if (createAssignment) {
                 if (experiment.getState() == Experiment.State.PAUSED) {
                     return nullAssignment(userID, applicationName, experimentID, Assignment.Status.EXPERIMENT_PAUSED);
+                } else if (experiment.getIsRapidExperiment()) {
+                    //Get the latest state from the DB for rapid experiments if they are not in stopped state.
+                    Experiment rapidExperiment = experimentUtil.getExperiment(experiment.getID());
+                    if (rapidExperiment == null || !rapidExperiment.getState().equals(experiment.getState())) {
+                        return getAssignment(userID, applicationName, rapidExperiment.getLabel(),
+                                context, createAssignment, ignoreSamplingPercent, segmentationProfile,
+                                headers, rapidExperiment, bucketList, userAssignments, exclusives);
+                    }
                 }
 
                 // Generate a new assignment
