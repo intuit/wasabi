@@ -89,7 +89,7 @@ public class AssignmentCountEnvelope implements Runnable {
         // For rapid experiments; checks if a set userCap is attained.
         // If so, changes the state of the experiment to PAUSED.
         boolean wasExperimentStateUpdateToCassandraSuccessful = false;
-        if (experiment.getIsRapidExperiment()) {
+        if (experiment.getIsRapidExperiment() != null && experiment.getIsRapidExperiment()) {
             int userCap = experiment.getUserCap();
             AssignmentCounts assignmentCounts = assignmentsRepository.getBucketAssignmentCount(experiment);
             if (assignmentCounts.getTotalUsers().getBucketAssignments() >= userCap - 1) {

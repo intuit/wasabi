@@ -486,7 +486,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
             AssignmentCountEnvelope assignmentCountEnvelope = new AssignmentCountEnvelope(
                     this, experimentRepository, dbRepository, pair.getLeft(),
                     pair.getRight(), countUp, eventLog, date, assignUserToExport, assignBucketCount);
-            if (pair.getLeft().getIsRapidExperiment()) {
+            if (pair.getLeft().getIsRapidExperiment() != null && pair.getLeft().getIsRapidExperiment()) {
                 assignmentCountEnvelope.run();
             } else {
                 assignmentsCountExecutor.execute(assignmentCountEnvelope);

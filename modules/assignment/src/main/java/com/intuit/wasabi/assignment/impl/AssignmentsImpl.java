@@ -610,7 +610,7 @@ public class AssignmentsImpl implements Assignments {
             if (createAssignment) {
                 if (experiment.getState() == Experiment.State.PAUSED) {
                     return nullAssignment(userID, applicationName, experimentID, Assignment.Status.EXPERIMENT_PAUSED);
-                } else if (experiment.getIsRapidExperiment()) {
+                } else if (experiment.getIsRapidExperiment() != null && experiment.getIsRapidExperiment()) {
                     //Get the latest state from the DB for rapid experiments if they are not in stopped state.
                     Experiment rapidExperiment = experimentUtil.getExperiment(experiment.getID());
                     if (rapidExperiment == null || !rapidExperiment.getState().equals(experiment.getState())) {

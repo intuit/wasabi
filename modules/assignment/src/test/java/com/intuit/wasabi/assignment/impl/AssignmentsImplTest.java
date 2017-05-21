@@ -31,6 +31,7 @@ import com.intuit.wasabi.assignmentobjects.SegmentationProfile;
 import com.intuit.wasabi.assignmentobjects.User;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.eventlog.EventLog;
+import com.intuit.wasabi.experiment.Experiments;
 import com.intuit.wasabi.experiment.Mutex;
 import com.intuit.wasabi.experiment.Pages;
 import com.intuit.wasabi.experiment.Priorities;
@@ -106,6 +107,7 @@ public class AssignmentsImplTest {
     final static Context context = Context.valueOf("PROD");
     final static String TEST_INGESTION_EXECUTOR_NAME = "TEST";
     AssignmentsImpl cassandraAssignments = mock(AssignmentsImpl.class);
+    private Experiments experimentUtil = mock(Experiments.class);
     private ExperimentRepository cassandraRepository = mock(ExperimentRepository.class);
     private ExperimentRepository experimentRepository = mock(ExperimentRepository.class);
     private AnalyticsRepository analyticsRepository = mock(AnalyticsRepository.class);
@@ -139,7 +141,7 @@ public class AssignmentsImplTest {
         this.assignmentsImpl = new AssignmentsImpl(executors,
                 experimentRepository, assignmentsRepository,
                 ruleCache, pages,
-                assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache);
+                assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache, experimentUtil);
     }
 
     @Test
@@ -221,10 +223,10 @@ public class AssignmentsImplTest {
 
     @Test
     public void testGetSingleAssignmentNullAssignmentExperimentInDraftState() throws IOException {
-        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
+        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap(),
                 experimentRepository, assignmentsRepository,
                 ruleCache, pages, assignmentDecorator, threadPoolExecutor,
-                eventLog, metadataCacheEnabled, metadataCache));
+                eventLog, metadataCacheEnabled, metadataCache, experimentUtil));
         //Input
         Application.Name appName = Application.Name.valueOf("Test");
         User.ID user = User.ID.valueOf("testUser");
@@ -392,9 +394,10 @@ public class AssignmentsImplTest {
 
     @Test
     public void testGetSingleAssignmentNullAssignmentExperimentNoProfileMatch() throws IOException {
-        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
+        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap(),
                 experimentRepository, assignmentsRepository,
-                ruleCache, pages, assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache));
+                ruleCache, pages, assignmentDecorator, threadPoolExecutor,
+                eventLog, metadataCacheEnabled, metadataCache, experimentUtil));
 
         //Input
         Application.Name appName = Application.Name.valueOf("Test");
@@ -497,9 +500,9 @@ public class AssignmentsImplTest {
 
     @Test(expected = AssertionError.class)
     public void testGetSingleAssignmentProfileMatchAssertNewAssignment() throws IOException {
-        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
+        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap(),
                 experimentRepository, assignmentsRepository, ruleCache, pages, assignmentDecorator, threadPoolExecutor,
-                eventLog, metadataCacheEnabled, metadataCache));
+                eventLog, metadataCacheEnabled, metadataCache, experimentUtil));
 
         //Input
         Application.Name appName = Application.Name.valueOf("Test");
@@ -552,9 +555,10 @@ public class AssignmentsImplTest {
 
     @Test
     public void testGetSingleAssignmentSuccess() throws IOException {
-        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
+        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap(),
                 experimentRepository, assignmentsRepository,
-                ruleCache, pages, assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache));
+                ruleCache, pages, assignmentDecorator, threadPoolExecutor, eventLog,
+                metadataCacheEnabled, metadataCache, experimentUtil));
 
         //Input
         Application.Name appName = Application.Name.valueOf("Test");
