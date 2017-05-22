@@ -96,6 +96,7 @@ cp ${home}/extra-resources/service/run ${home}/${id}/bin
 cp ${home}/extra-resources/docker/wasabi/Dockerfile ${home}/${id}
 cp ${home}/extra-resources/docker/wasabi/entrypoint.sh ${home}/${id}
 cp ${home}/classes/logback-access.xml ${home}/${id}/conf
+cp ${home}/classes/logback-console.xml ${home}/${id}/conf
 cp ${home}/classes/logback.xml ${home}/${id}/conf
 cp ${home}/classes/metrics.properties ${home}/${id}/conf
 cp ${home}/classes/web.properties ${home}/${id}/conf
