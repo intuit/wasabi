@@ -359,6 +359,29 @@ Code changes can readily be verified by running the growing collection of includ
 ```bash
 % ./bin/wasabi.sh start test stop
 ```
+##### Troubleshooting
+
+Integration tests might fail intermittently due to a time drift issue in docker containers on Mac OSX.
+
+When the Mac sleeps and wakes back up, there is a lag created between the clock in the Mac vs the
+running docker containers. This is a known issue in Docker for Mac.
+
+This can be fixed by running the following command:
+
+```bash
+% docker run --rm --privileged alpine hwclock -s
+```
+
+The above command will need to be run every time when there is a time drift.
+
+To automatically run this command and update the time each time the Mac wakes up, you could install 
+the following agent:
+
+```bash
+% curl https://raw.githubusercontent.com/arunvelsriram/docker-time-sync-agent/master/install.sh | bash
+```
+
+You can read more about this at: [quick-tip-fixing-time-drift-issue-on-docker-for-mac](https://blog.shameerc.com/2017/03/quick-tip-fixing-time-drift-issue-on-docker-for-mac)
 
 ## Package and Deploy at Scale
 
