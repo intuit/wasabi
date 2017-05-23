@@ -613,8 +613,9 @@ public class AssignmentsImpl implements Assignments {
                 } else if (experiment.getIsRapidExperiment() != null && experiment.getIsRapidExperiment()) {
                     //Get the latest state from the DB for rapid experiments if they are not in stopped state.
                     Experiment rapidExperiment = experimentUtil.getExperiment(experiment.getID());
+                    Experiment.Label rapidExperimentLabel = null != rapidExperiment ? rapidExperiment.getLabel(): null;
                     if (rapidExperiment == null || !rapidExperiment.getState().equals(experiment.getState())) {
-                        return getAssignment(userID, applicationName, rapidExperiment.getLabel(),
+                        return getAssignment(userID, applicationName, rapidExperimentLabel,
                                 context, createAssignment, ignoreSamplingPercent, segmentationProfile,
                                 headers, rapidExperiment, bucketList, userAssignments, exclusives);
                     }
