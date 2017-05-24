@@ -395,7 +395,7 @@ module.exports = function (grunt) {
             development: {
                 constants: {
                     supportEmail: process.env.SUPPORT_EMAIL || 'you@example.com',
-                    apiHostBaseUrlValue: process.env.API_BASE_URL || 'http://localhost:8080/api/v1'
+                    apiHostBaseUrlValue: process.env.API_HOST || 'http://localhost:8080/api/v1'
                 }
             }
         },
