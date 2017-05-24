@@ -1598,6 +1598,130 @@ public class AssignmentsImplTest {
         assert newAssignment_2.getBucketLabel() == null;
     }
 
+    //Rapid Experiment test cases
+    private void setupMocksforRapidExperiment(Application.Name appName,
+                                              Experiment.ID experimentId,
+                                              Experiment.Label experimentLabel) {
+        //Mock dependent interactions
+        Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
+        when(experiment.getID()).thenReturn(experimentId);
+        when(experiment.getEndTime().getTime()).thenReturn(new Date().getTime() + 1000000L);
+        when(experiment.getLabel()).thenReturn(experimentLabel);
+        when(experiment.getState()).thenReturn(Experiment.State.RUNNING);
+        when(experiment.getIsRapidExperiment()).thenReturn(true);
+
+        List<Experiment> expList = newArrayList(experiment);
+
+        PrioritizedExperimentList pExpList = new PrioritizedExperimentList();
+        pExpList.addPrioritizedExperiment(PrioritizedExperiment.from(experiment, 1).build());
+        Optional<PrioritizedExperimentList> prioritizedExperimentListOptional = Optional.of(pExpList);
+
+        BucketList bucketList = new BucketList();
+        bucketList.addBucket(Bucket.newInstance(experimentId, Bucket.Label.valueOf("red")).withAllocationPercent(0.5).build());
+        bucketList.addBucket(Bucket.newInstance(experimentId, Bucket.Label.valueOf("blue")).withAllocationPercent(0.5).build());
+
+        List<Experiment.ID> exclusionList = newArrayList();
+
+        when(metadataCache.getExperimentById(experimentId)).thenReturn(Optional.of(experiment));
+        when(metadataCache.getExperimentsByAppName(appName)).thenReturn(expList);
+        when(metadataCache.getPrioritizedExperimentListMap(appName)).thenReturn(prioritizedExperimentListOptional);
+        when(metadataCache.getBucketList(experimentId)).thenReturn(bucketList);
+        when(metadataCache.getExclusionList(experimentId)).thenReturn(exclusionList);
+
+        when(experiment.getIsRapidExperiment()).thenReturn(true);
+    }
+
+    private void testGetSingleAssignmentRapidExperimentByStateAndTime(Experiment.State experimentState,
+                                                                      Assignment.Status expectedAssignmentStatus,
+                                                                      long startTime,
+                                                                      long endTime) {
+        //Input
+        Application.Name appName = Application.Name.valueOf("Test");
+        User.ID user = User.ID.valueOf("testUser");
+        Experiment.ID id = Experiment.ID.newInstance();
+        Experiment.Label label = Experiment.Label.valueOf("label");
+        SegmentationProfile segmentationProfile = mock(SegmentationProfile.class);
+        HttpHeaders headers = mock(HttpHeaders.class);
+
+        setupMocksforRapidExperiment(appName, id, label);
+
+        Experiment rapidExperiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
+        when(rapidExperiment.getID()).thenReturn(id);
+        when(rapidExperiment.getStartTime().getTime()).thenReturn(startTime);
+        when(rapidExperiment.getEndTime().getTime()).thenReturn(endTime);
+        when(rapidExperiment.getLabel()).thenReturn(label);
+        when(rapidExperiment.getState()).thenReturn(experimentState);
+        when(experimentUtil.getExperiment(id)).thenReturn(rapidExperiment);
+
+        Assignment result = assignmentsImpl.doSingleAssignment(user, appName, label, context,
+                true, true, segmentationProfile, headers);
+
+        assertThat(result.getStatus(), is(expectedAssignmentStatus));
+    }
+
+    @Test
+    public void testGetSingleAssignmentNullAssignmentRapidExperimentPaused() {
+        testGetSingleAssignmentRapidExperimentByStateAndTime(
+                Experiment.State.PAUSED, Assignment.Status.EXPERIMENT_PAUSED,
+                new Date().getTime(), new Date().getTime() + 1000000L);
+    }
+
+    @Test
+    public void testGetSingleAssignmentRapidExperimentRunning() {
+        testGetSingleAssignmentRapidExperimentByStateAndTime(
+                Experiment.State.RUNNING, Assignment.Status.NEW_ASSIGNMENT,
+                new Date().getTime(), new Date().getTime() + 1000000L);
+    }
+
+    @Test
+    public void testGetSingleAssignmentNullAssignmentRapidExperimentDraft() {
+        testGetSingleAssignmentRapidExperimentByStateAndTime(
+                Experiment.State.DRAFT, Assignment.Status.EXPERIMENT_IN_DRAFT_STATE,
+                new Date().getTime(), new Date().getTime() + 1000000L);
+    }
+
+    @Test
+    public void testGetSingleAssignmentNullAssignmentRapidExperimentTerminated() {
+        testGetSingleAssignmentRapidExperimentByStateAndTime(
+                Experiment.State.TERMINATED, Assignment.Status.ASSIGNMENT_FAILED,
+                new Date().getTime(), new Date().getTime() + 1000000L);
+    }
+
+    @Test
+    public void testGetSingleAssignmentNullAssignmentRapidExperimentNotStarted() {
+        testGetSingleAssignmentRapidExperimentByStateAndTime(
+                Experiment.State.PAUSED, Assignment.Status.EXPERIMENT_NOT_STARTED,
+                new Date().getTime() + 10000000L, new Date().getTime() + 1000000L);
+    }
+
+    @Test
+    public void testGetSingleAssignmentNullAssignmentRapidExperimentExpired() {
+        testGetSingleAssignmentRapidExperimentByStateAndTime(
+                Experiment.State.PAUSED, Assignment.Status.EXPERIMENT_EXPIRED,
+                new Date().getTime(), new Date().getTime() - 1000L);
+    }
+
+    @Test
+    public void testGetSingleAssignmentNullAssignmentRapidExperimentNotFound() {
+
+        //Input
+        Application.Name appName = Application.Name.valueOf("Test");
+        User.ID user = User.ID.valueOf("testUser");
+        Experiment.ID id = Experiment.ID.newInstance();
+        Experiment.Label label = Experiment.Label.valueOf("label");
+        SegmentationProfile segmentationProfile = mock(SegmentationProfile.class);
+        HttpHeaders headers = mock(HttpHeaders.class);
+
+        setupMocksforRapidExperiment(appName, id, label);
+
+        when(experimentUtil.getExperiment(id)).thenReturn(null);
+
+        Assignment result = assignmentsImpl.doSingleAssignment(user, appName, label, context, true, true,
+                segmentationProfile, headers);
+
+        assertThat(result.getStatus(), is(Assignment.Status.EXPERIMENT_NOT_FOUND));
+    }
+
     // FIXME:
 //    @Ignore("FIXME:refactor-core")
 //    @Test
