@@ -1,5 +1,5 @@
 ###############################################################################
-# Copyright 2016 Intuit
+# Copyright 2017 Intuit
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,12 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ###############################################################################
-database.url.host:${mysql.host}
-database.url.port:${mysql.port}
-database.url.dbname:${mysql.dbName}
-database.url.args:${mysql.Args}
-database.user:${mysql.username}
-database.password:${mysql.password}
-database.pool.partitions:${mysql.numPartitions}
-database.pool.connections.min:${mysql.minConnections}
-database.pool.connections.max:${mysql.maxConnections}
+#!/usr/bin/env bash
+
+APPLICATION_INSTRUMENT="-javaagent:/vagrant/target/org.jacoco.agent-${jacoco.version}-runtime.jar=destfile=/vagrant/target/jacoco/jacoco-it.exec,append=false"
+CONSOLE_LOG=wasabi-os-console.log
+MAIN_JAR=/vagrant/target/wasabi-main-*-all.jar
+
+JAVA_OPTIONS="-server -Xmx4096m \
+  ${APPLICATION_INSTRUMENT} \
+  -Dlogback.configurationFile=./logback.xml \
+  -Djava.util.logging.config.file=./logging.properties"
+  
+  
+java ${JAVA_OPTIONS} -jar ${MAIN_JAR} 1>>${CONSOLE_LOG} 2>&1 &

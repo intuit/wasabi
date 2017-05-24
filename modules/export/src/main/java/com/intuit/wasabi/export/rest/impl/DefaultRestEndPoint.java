@@ -17,11 +17,13 @@ package com.intuit.wasabi.export.rest.impl;
 
 import com.google.inject.Inject;
 import com.intuit.wasabi.export.rest.RestEndPoint;
+import net.jodah.failsafe.RetryPolicy;
 import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.concurrent.TimeUnit;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -61,5 +63,15 @@ public class DefaultRestEndPoint implements RestEndPoint {
     @Override
     public int getRetries() {
         return configuration.getRetries();
+    }
+
+    @Override
+    public RetryPolicy getRetryPolicy() {
+        RetryPolicy retryPolicy = new RetryPolicy().withMaxRetries(configuration.getRetries());
+        if (configuration.isExponentialBackoffEnabled()) {
+            retryPolicy = retryPolicy.withBackoff(configuration.getExponentialBackoffDelay(),
+                    configuration.getExponentialBackoffMaxDelay(), TimeUnit.SECONDS);
+        }
+        return retryPolicy;
     }
 }

@@ -60,6 +60,16 @@ public class ClientConfiguration implements CassandraDriver.Configuration {
     }
 
     @Override
+    public String getUsername() {
+        return getProperty("username", properties, "");
+    }
+
+    @Override
+    public String getPassword() {
+        return getProperty("password", properties, "");
+    }
+
+    @Override
     public int getPort() {
         return parseInt(getProperty("port", properties, "9160"));
     }

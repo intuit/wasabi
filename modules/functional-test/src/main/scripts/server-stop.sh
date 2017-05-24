@@ -1,5 +1,5 @@
 ###############################################################################
-# Copyright 2016 Intuit
+# Copyright 2017 Intuit
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,12 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ###############################################################################
-database.url.host:${mysql.host}
-database.url.port:${mysql.port}
-database.url.dbname:${mysql.dbName}
-database.url.args:${mysql.Args}
-database.user:${mysql.username}
-database.password:${mysql.password}
-database.pool.partitions:${mysql.numPartitions}
-database.pool.connections.min:${mysql.minConnections}
-database.pool.connections.max:${mysql.maxConnections}
+#!/usr/bin/env bash
+
+PIDS=$(ps ax | grep -i 'wasabi' | grep java | grep -v grep | awk '{print $1}')
+echo PIDS $PIDS
+
+if [ -z "$PIDS" ]; then
+   echo "No wasabi server to stop"
+   exit 1
+else
+   kill -s TERM $PIDS
+   echo "Killed wasabi server"
+fi
