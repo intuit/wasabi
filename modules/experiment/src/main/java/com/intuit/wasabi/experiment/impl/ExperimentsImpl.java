@@ -578,4 +578,28 @@ public class ExperimentsImpl implements Experiments {
 
         return experiment;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void updateExperimentState(final Experiment experiment, final Experiment.State state) {
+        try {
+            LOGGER.info("Updating experiment state for experiment:{} to final state:{}", experiment, state);
+            cassandraRepository.updateExperimentState(experiment, state);
+            // To maintain consistency, revert the changes made in cassandra in case the mysql update fails
+            try {
+                databaseRepository.updateExperimentState(experiment, state);
+            } catch (Exception exception) {
+                cassandraRepository.updateExperimentState(experiment, experiment.getState());
+                throw exception;
+            }
+
+            eventLog.postEvent(new ExperimentChangeEvent(experiment, "state",
+                    experiment.getState().toString(), state.toString()));
+        } catch (Exception exception) {
+            LOGGER.error("Updating experiment state for experiment:{} failed with error:", experiment, exception);
+            throw exception;
+        }
+    }
 }

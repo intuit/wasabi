@@ -86,25 +86,6 @@ public class AssignmentCountEnvelope implements Runnable {
 
     @Override
     public void run() {
-        // For rapid experiments; checks if a set userCap is attained.
-        // If so, changes the state of the experiment to PAUSED.
-        boolean wasExperimentStateUpdateToCassandraSuccessful = false;
-        if (experiment.getIsRapidExperiment() != null && experiment.getIsRapidExperiment()) {
-            int userCap = experiment.getUserCap();
-            AssignmentCounts assignmentCounts = assignmentsRepository.getBucketAssignmentCount(experiment);
-            if (assignmentCounts.getTotalUsers().getBucketAssignments() >= userCap - 1) {
-
-                //updating the state in Cassandra
-                try {
-                    cassandraExperimentRepository.updateExperimentState(experiment, Experiment.State.PAUSED);
-                    wasExperimentStateUpdateToCassandraSuccessful = true;
-                } catch (Exception e) {
-                    LOGGER.error("Error updating  the state of the rapid experiment: ", experiment.getID(), " in Cassandra to" +
-                            " PAUSED with exception: ", e);
-                }
-            }
-        }
-
         try {
             // Updates the bucket assignment counts
             if (assignBucketCount) {
@@ -124,21 +105,6 @@ public class AssignmentCountEnvelope implements Runnable {
         } catch (Exception e) {
             LOGGER.error("Error updating the assignment to the user export for experiment: ", experiment.getID() +
                     " bucket label: " + assignment.getBucketLabel() + " with exception: ", e);
-        }
-
-        //If experiment state was successfully changed in cassandra, adds to event log and updates MySQL
-        if (wasExperimentStateUpdateToCassandraSuccessful) {
-
-            eventLog.postEvent(new ExperimentChangeEvent(experiment, "state",
-                    Experiment.State.RUNNING.toString(), Experiment.State.PAUSED.toString()));
-
-            //updating the state in RDS
-            try {
-                dbExperimentRepository.updateExperimentState(experiment, Experiment.State.PAUSED);
-            } catch (Exception e) {
-                LOGGER.error("Error updating the state of the rapid experiment: ", experiment.getID(), " in RDS to" +
-                        " PAUSED with exception: ", e);
-            }
         }
     }
 }

@@ -19,6 +19,8 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.google.inject.Provider;
 import com.intuit.hyrule.Rule;
+import com.intuit.wasabi.analyticsobjects.counts.AssignmentCounts;
+import com.intuit.wasabi.analyticsobjects.counts.TotalUsers;
 import com.intuit.wasabi.assignment.AssignmentDecorator;
 import com.intuit.wasabi.assignment.AssignmentIngestionExecutor;
 import com.intuit.wasabi.assignment.Assignments;
@@ -67,10 +69,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -78,11 +78,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import static com.google.common.base.Predicates.in;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
-import static org.assertj.core.api.BDDAssertions.then;
 import static org.hamcrest.core.AnyOf.anyOf;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertFalse;
@@ -96,6 +94,7 @@ import static org.mockito.BDDMockito.doReturn;
 import static org.mockito.BDDMockito.eq;
 import static org.mockito.BDDMockito.spy;
 import static org.mockito.BDDMockito.times;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -1599,9 +1598,8 @@ public class AssignmentsImplTest {
     }
 
     //Rapid Experiment test cases
-    private void setupMocksforRapidExperiment(Application.Name appName,
-                                              Experiment.ID experimentId,
-                                              Experiment.Label experimentLabel) {
+    private Experiment setupMocksforRapidExperiment(
+            Application.Name appName, Experiment.ID experimentId, Experiment.Label experimentLabel) {
         //Mock dependent interactions
         Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         when(experiment.getID()).thenReturn(experimentId);
@@ -1629,12 +1627,11 @@ public class AssignmentsImplTest {
         when(metadataCache.getExclusionList(experimentId)).thenReturn(exclusionList);
 
         when(experiment.getIsRapidExperiment()).thenReturn(true);
+        return experiment;
     }
 
-    private void testGetSingleAssignmentRapidExperimentByStateAndTime(Experiment.State experimentState,
-                                                                      Assignment.Status expectedAssignmentStatus,
-                                                                      long startTime,
-                                                                      long endTime) {
+    @Test
+    public void testGetSingleAssignmentNullAssignmentRapidExperimentCapReached() {
         //Input
         Application.Name appName = Application.Name.valueOf("Test");
         User.ID user = User.ID.valueOf("testUser");
@@ -1643,83 +1640,30 @@ public class AssignmentsImplTest {
         SegmentationProfile segmentationProfile = mock(SegmentationProfile.class);
         HttpHeaders headers = mock(HttpHeaders.class);
 
-        setupMocksforRapidExperiment(appName, id, label);
+        Experiment experiment = setupMocksforRapidExperiment(appName, id, label);
 
         Experiment rapidExperiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
         when(rapidExperiment.getID()).thenReturn(id);
-        when(rapidExperiment.getStartTime().getTime()).thenReturn(startTime);
-        when(rapidExperiment.getEndTime().getTime()).thenReturn(endTime);
         when(rapidExperiment.getLabel()).thenReturn(label);
-        when(rapidExperiment.getState()).thenReturn(experimentState);
+        when(rapidExperiment.getState()).thenReturn(Experiment.State.RUNNING);
         when(experimentUtil.getExperiment(id)).thenReturn(rapidExperiment);
+        doNothing().when(experimentUtil).updateExperimentState(experiment, Experiment.State.PAUSED);
+        doReturn(true).when(metadataCache).refresh();
+
+        long bucketAssignmentCount = 10l;
+        int userCap = 10;
+        TotalUsers totalUsers = new TotalUsers.Builder().withBucketAssignments(bucketAssignmentCount).build();
+        AssignmentCounts assignmentCounts = new AssignmentCounts.Builder().withTotalUsers(totalUsers).build();
+        when(assignmentsRepository.getBucketAssignmentCount(experiment)).thenReturn(assignmentCounts);
+        when(experiment.getUserCap()).thenReturn(userCap);
 
         Assignment result = assignmentsImpl.doSingleAssignment(user, appName, label, context,
                 true, true, segmentationProfile, headers);
 
-        assertThat(result.getStatus(), is(expectedAssignmentStatus));
-    }
-
-    @Test
-    public void testGetSingleAssignmentNullAssignmentRapidExperimentPaused() {
-        testGetSingleAssignmentRapidExperimentByStateAndTime(
-                Experiment.State.PAUSED, Assignment.Status.EXPERIMENT_PAUSED,
-                new Date().getTime(), new Date().getTime() + 1000000L);
-    }
-
-    @Test
-    public void testGetSingleAssignmentRapidExperimentRunning() {
-        testGetSingleAssignmentRapidExperimentByStateAndTime(
-                Experiment.State.RUNNING, Assignment.Status.NEW_ASSIGNMENT,
-                new Date().getTime(), new Date().getTime() + 1000000L);
-    }
-
-    @Test
-    public void testGetSingleAssignmentNullAssignmentRapidExperimentDraft() {
-        testGetSingleAssignmentRapidExperimentByStateAndTime(
-                Experiment.State.DRAFT, Assignment.Status.EXPERIMENT_IN_DRAFT_STATE,
-                new Date().getTime(), new Date().getTime() + 1000000L);
-    }
-
-    @Test
-    public void testGetSingleAssignmentNullAssignmentRapidExperimentTerminated() {
-        testGetSingleAssignmentRapidExperimentByStateAndTime(
-                Experiment.State.TERMINATED, Assignment.Status.ASSIGNMENT_FAILED,
-                new Date().getTime(), new Date().getTime() + 1000000L);
-    }
-
-    @Test
-    public void testGetSingleAssignmentNullAssignmentRapidExperimentNotStarted() {
-        testGetSingleAssignmentRapidExperimentByStateAndTime(
-                Experiment.State.PAUSED, Assignment.Status.EXPERIMENT_NOT_STARTED,
-                new Date().getTime() + 10000000L, new Date().getTime() + 1000000L);
-    }
-
-    @Test
-    public void testGetSingleAssignmentNullAssignmentRapidExperimentExpired() {
-        testGetSingleAssignmentRapidExperimentByStateAndTime(
-                Experiment.State.PAUSED, Assignment.Status.EXPERIMENT_EXPIRED,
-                new Date().getTime(), new Date().getTime() - 1000L);
-    }
-
-    @Test
-    public void testGetSingleAssignmentNullAssignmentRapidExperimentNotFound() {
-
-        //Input
-        Application.Name appName = Application.Name.valueOf("Test");
-        User.ID user = User.ID.valueOf("testUser");
-        Experiment.ID id = Experiment.ID.newInstance();
-        Experiment.Label label = Experiment.Label.valueOf("label");
-        SegmentationProfile segmentationProfile = mock(SegmentationProfile.class);
-        HttpHeaders headers = mock(HttpHeaders.class);
-
-        setupMocksforRapidExperiment(appName, id, label);
-
-        when(experimentUtil.getExperiment(id)).thenReturn(null);
-
-        Assignment result = assignmentsImpl.doSingleAssignment(user, appName, label, context, true, true,
-                segmentationProfile, headers);
-
-        assertThat(result.getStatus(), is(Assignment.Status.EXPERIMENT_NOT_FOUND));
+        assertThat(result.getStatus(), is(Assignment.Status.EXPERIMENT_PAUSED));
+        verify(experimentUtil, times(1))
+                .updateExperimentState(experiment, Experiment.State.PAUSED);
+        verify(metadataCache, times(1)).refresh();
     }
 
     // FIXME:

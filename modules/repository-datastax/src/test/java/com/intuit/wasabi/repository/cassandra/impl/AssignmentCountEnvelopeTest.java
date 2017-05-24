@@ -51,9 +51,6 @@ public class AssignmentCountEnvelopeTest {
 
         AssignmentCountEnvelope env = new AssignmentCountEnvelope(ar, cass, mysql, exp, assignment, true, el, date, true, true);
         env.run();
-        // so since the two parts a separate code fragments the fail of the first
-        // should not result in a fail of the other
-        verify(exp, times(2)).getIsRapidExperiment();
     }
 
     @Test
@@ -63,67 +60,5 @@ public class AssignmentCountEnvelopeTest {
 
         AssignmentCountEnvelope env = new AssignmentCountEnvelope(ar, cass, mysql, exp, assignment, true, el, date, true, true);
         env.run();
-        // so since the two parts a separate code fragments the fail of the first
-        // should not result in a fail of the other
-        verify(exp, times(2)).getIsRapidExperiment();
     }
-
-    /**
-     * This tests what happens when the userCap is not reached yet.
-     */
-    @Test
-    public void testRapidExperimentationLimitNotReached() {
-//        doReturn(true).when(exp).getIsRapidExperiment();
-//        doReturn(42).when(exp).getUserCap();
-        when(exp.getIsRapidExperiment()).thenReturn(true);
-        when(exp.getUserCap()).thenReturn(42);
-        when(ar.getBucketAssignmentCount(exp).getTotalUsers().getBucketAssignments()).thenReturn(40l);
-
-        AssignmentCountEnvelope env = new AssignmentCountEnvelope(ar, cass, mysql, exp, assignment, true, el, date, true, true);
-        env.run();
-
-        verifyZeroInteractions(cass);
-        verifyZeroInteractions(mysql);
-    }
-
-
-    /**
-     * This tests what happens if the update in Cassandra fails.
-     */
-    @Test
-    public void testRapidExperimentationCassandraFail() {
-        when(exp.getIsRapidExperiment()).thenReturn(true);
-        when(exp.getUserCap()).thenReturn(7);
-        when(ar.getBucketAssignmentCount(exp).getTotalUsers().getBucketAssignments()).thenReturn(41l);
-        when(cass.updateExperimentState(exp, Experiment.State.PAUSED)).thenThrow(new RuntimeException("Cassandra failed"));
-
-        AssignmentCountEnvelope env = new AssignmentCountEnvelope(ar, cass, mysql, exp, assignment, true, el, date, true, true);
-        env.run();
-
-        //if cassandra fails I don't want to call mysql!
-        verify(cass).updateExperimentState(exp, Experiment.State.PAUSED);
-        verifyZeroInteractions(mysql);
-    }
-
-    /**
-     * This tests what happens if the update in Cassandra succeeds.
-     */
-    @Test
-    public void testRapidExperimentationCassandraSuccess() {
-        when(exp.getIsRapidExperiment()).thenReturn(true);
-        when(exp.getUserCap()).thenReturn(41); //41 users already assigned
-        when(ar.getBucketAssignmentCount(exp).getTotalUsers().getBucketAssignments()).thenReturn(41l);
-        when(cass.updateExperimentState(exp, Experiment.State.PAUSED)).thenReturn(exp);
-        when(mysql.updateExperimentState(exp, Experiment.State.PAUSED)).thenReturn(exp);
-
-        AssignmentCountEnvelope env = new AssignmentCountEnvelope(ar, cass, mysql, exp, assignment, true, el, date, true, true);
-        env.run();
-
-        //if cassandra fails I don't want to call mysql!
-        verify(cass).updateExperimentState(exp, Experiment.State.PAUSED);
-        verify(mysql).updateExperimentState(exp, Experiment.State.PAUSED);
-
-    }
-
-
 }

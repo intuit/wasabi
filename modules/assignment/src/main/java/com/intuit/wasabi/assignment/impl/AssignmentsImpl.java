@@ -27,6 +27,7 @@ import com.intuit.hyrule.exceptions.InvalidInputException;
 import com.intuit.hyrule.exceptions.MissingInputException;
 import com.intuit.hyrule.exceptions.TreeStructureException;
 import com.intuit.wasabi.analyticsobjects.Parameters;
+import com.intuit.wasabi.analyticsobjects.counts.AssignmentCounts;
 import com.intuit.wasabi.assignment.AssignmentDecorator;
 import com.intuit.wasabi.assignment.AssignmentIngestionExecutor;
 import com.intuit.wasabi.assignment.Assignments;
@@ -608,17 +609,8 @@ public class AssignmentsImpl implements Assignments {
         Assignment assignment = getAssignment(experimentID, userID, context, userAssignments, bucketList);
         if (assignment == null || assignment.isBucketEmpty()) {
             if (createAssignment) {
-                if (experiment.getState() == Experiment.State.PAUSED) {
+                if (experiment.getState() == Experiment.State.PAUSED || !checkUserCapForRapidExperiment(experiment)) {
                     return nullAssignment(userID, applicationName, experimentID, Assignment.Status.EXPERIMENT_PAUSED);
-                } else if (experiment.getIsRapidExperiment() != null && experiment.getIsRapidExperiment()) {
-                    //Get the latest state from the DB for rapid experiments if they are not in stopped state.
-                    Experiment rapidExperiment = experimentUtil.getExperiment(experiment.getID());
-                    Experiment.Label rapidExperimentLabel = (null != rapidExperiment ? rapidExperiment.getLabel(): null);
-                    if (rapidExperiment == null || !rapidExperiment.getState().equals(experiment.getState())) {
-                        return getAssignment(userID, applicationName, rapidExperimentLabel,
-                                context, createAssignment, ignoreSamplingPercent, segmentationProfile,
-                                headers, rapidExperiment, bucketList, userAssignments, exclusives);
-                    }
                 }
 
                 // Generate a new assignment
@@ -667,6 +659,27 @@ public class AssignmentsImpl implements Assignments {
         }
 
         return assignment;
+    }
+
+    /**
+     * If the experiment is a rapid experiment, it checks whether the user cap has already been achieved.
+     * If yes, then it sets the experiment state to paused, refreshes the experiment metadata cache
+     * and returns false i.e. assignment is not allowed in that case.
+     */
+    private boolean checkUserCapForRapidExperiment(Experiment experiment) {
+        if (experiment.getIsRapidExperiment() != null && experiment.getIsRapidExperiment()) {
+            int userCap = experiment.getUserCap();
+            AssignmentCounts assignmentCounts = assignmentsRepository.getBucketAssignmentCount(experiment);
+            if (assignmentCounts.getTotalUsers().getBucketAssignments() >= userCap) {
+                Experiment experimentInfoFromDB = experimentUtil.getExperiment(experiment.getID());
+                if (experimentInfoFromDB.getState().equals(Experiment.State.RUNNING)) {
+                    experimentUtil.updateExperimentState(experiment, Experiment.State.PAUSED);
+                }
+                metadataCache.refresh();
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
