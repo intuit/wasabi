@@ -23,6 +23,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentTagsByApplication;
 
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Accessor for the tags associated with Experiments.
@@ -31,15 +32,15 @@ import java.util.Set;
 public interface ExperimentTagAccessor {
 
     @Query("select * from experiment_tag where app_name = ?")
-    ListenableFuture<Result<ExperimentTagsByApplication>> getExperimentTagsAsync(String applicationNames);
+    ListenableFuture<Result<ExperimentTagsByApplication>> getExperimentTagsAsync(String appName);
 
-    @Query("insert into experiment_tag(app_name, tags) values (?,?)")
-    void insertByApp(String appName, Set<String> tags);
+    @Query("insert into experiment_tag(app_name, exp_id, tags) values (?,?,?)")
+    void insert(String appName, UUID experimentId, Set<String> tags);
 
-    @Query("update experiment_tag set tags = tags + ? WHERE app_name = ?")
-    Statement update(Set<String> tags, String appName);
+    @Query("update experiment_tag set tags = tags + ? WHERE app_name = ? and exp_id = ?")
+    Statement update(Set<String> tags, String appName, UUID experimentId);
 
-    @Query("update experiment_tag set tags = tags - ? WHERE app_name = ?")
-    Statement remove(Set<String> tags, String appName);
+    @Query("update experiment_tag set tags = tags - ? WHERE app_name = ? and exp_id = ?")
+    Statement remove(Set<String> tags, String appName, UUID experimentId);
 
 }

@@ -406,7 +406,7 @@ public class CassandraExperimentRepository implements ExperimentRepository {
             createApplication(newExperiment.getApplicationName());
 
             // update tags
-            updateExperimentTags(newExperiment.getApplicationName(), newExperiment.getTags());
+            updateExperimentTags(newExperiment.getApplicationName(), newExperiment.getId(), newExperiment.getTags());
 
         } catch (Exception e) {
             LOGGER.error("Error while creating experiment {}", newExperiment, e);
@@ -417,24 +417,20 @@ public class CassandraExperimentRepository implements ExperimentRepository {
     }
 
     /**
-     * Updates the tags for a given Application.
+     * Updates the tags for a given Experiment. This also means that tags are deleted from
+     * the lookup table in Cassandra if they are removed from the experiment.
      *
      * @param applicationName the Application for which the tags should be added
+     * @param expId           the Id of the experiment that has changed tags
      * @param tags            list of tags for the experiment
      */
-    protected void updateExperimentTags(Application.Name applicationName, Set<String> tags) {
+    public void updateExperimentTags(Application.Name applicationName, Experiment.ID expId, Set<String> tags) {
 
         if (tags == null)
-            tags = Collections.EMPTY_SET;
+            tags = Collections.EMPTY_SET; // need this to update this to delete tags
 
         // update the tag table, just rewrite the complete entry
-        List<ExperimentTagsByApplication> listAllTags = experimentAccessor.getAllTags(applicationName.toString()).all();
-        Set<String> allTags = new TreeSet<>();
-        allTags.addAll(tags);
-        for (ExperimentTagsByApplication tagsSet : listAllTags) {
-            allTags.addAll(tagsSet.getTags() == null ? Collections.EMPTY_SET : tagsSet.getTags());
-        }
-        experimentTagAccessor.insertByApp(applicationName.toString(), allTags);
+        experimentTagAccessor.insert(applicationName.toString(), expId.getRawID(), tags);
     }
 
 
@@ -559,7 +555,7 @@ public class CassandraExperimentRepository implements ExperimentRepository {
                     experiment.getTags(),
                     experiment.getID().getRawID());
 
-            updateExperimentTags(experiment.getApplicationName(), experiment.getTags());
+            updateExperimentTags(experiment.getApplicationName(), experiment.getID(), experiment.getTags());
 
             // Point the experiment index to this experiment
             updateExperimentLabelIndex(experiment.getID(), experiment.getApplicationName(), experiment.getLabel(),
@@ -1253,8 +1249,13 @@ public class CassandraExperimentRepository implements ExperimentRepository {
 
             Map<Application.Name, Set<String>> result = new HashMap<>();
             for (ListenableFuture<Result<ExperimentTagsByApplication>> future : futures) {
-                ExperimentTagsByApplication expTagApplication = future.get().one();
-                result.put(Application.Name.valueOf(expTagApplication.getAppName()), expTagApplication.getTags());
+                List<ExperimentTagsByApplication> expTagApplication = future.get().all();
+
+                Set<String> allTagsForApplication = new TreeSet<>();
+                for (ExperimentTagsByApplication expTagsByApp : expTagApplication) {
+                    allTagsForApplication.addAll(expTagsByApp.getTags());
+                }
+                result.put(Application.Name.valueOf(expTagApplication.get(0).getAppName()), allTagsForApplication);
             }
 
             return result;

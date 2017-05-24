@@ -654,7 +654,6 @@ public class CassandraExperimentRepositoryTest {
     public void testUpdateTags() {
         //------ Input --------
         Application.Name appName = Application.Name.valueOf("AppName");
-        Set<String> tags = new TreeSet<>(Arrays.asList("tag1", "tag2", "tag3"));
 
         Set<String> exp1 = new TreeSet<>(Arrays.asList("tag1", "tag3"));
         Set<String> exp2 = new TreeSet<>(Arrays.asList("tag4"));
@@ -671,11 +670,14 @@ public class CassandraExperimentRepositoryTest {
         when(dbResult.all()).thenReturn(dbResultList);
 
         //------ Make call
-        repository.updateExperimentTags(appName, tags);
+        repository.updateExperimentTags(appName, experimentID1, exp1);
+        repository.updateExperimentTags(appName, experimentID2, exp2);
 
         //------ Verify result
-        verify(mockExperimentTagAccessor).insertByApp(appName.toString(),
-                new TreeSet<>(Arrays.asList("tag1", "tag2", "tag3", "tag4")));
+        verify(mockExperimentTagAccessor).insert(appName.toString(), experimentID1.getRawID(),
+                new TreeSet<>(Arrays.asList("tag1", "tag3")));
+        verify(mockExperimentTagAccessor).insert(appName.toString(), experimentID2.getRawID(),
+                new TreeSet<>(Arrays.asList("tag4")));
     }
 
     @Test
@@ -688,10 +690,10 @@ public class CassandraExperimentRepositoryTest {
         Set<String> exp1 = new TreeSet<>(Arrays.asList("tag1", "tag3"));
         Set<String> exp2 = new TreeSet<>(Arrays.asList("tag4"));
 
-        ExperimentTagsByApplication exp1Tags = ExperimentTagsByApplication.builder()
-                .tags(exp1).appName(app01.toString()).build();
-        ExperimentTagsByApplication exp2Tags = ExperimentTagsByApplication.builder()
-                .tags(exp2).appName(app02.toString()).build();
+        List<ExperimentTagsByApplication> exp1Tags = Arrays.asList(ExperimentTagsByApplication.builder()
+                .tags(exp1).appName(app01.toString()).build());
+        List<ExperimentTagsByApplication> exp2Tags = Arrays.asList(ExperimentTagsByApplication.builder()
+                .tags(exp2).appName(app02.toString()).build());
 
         //------ Mocking interacting calls
         ListenableFuture<Result<ExperimentTagsByApplication>> dbResultFuture1 = mock(ListenableFuture.class);
@@ -706,8 +708,8 @@ public class CassandraExperimentRepositoryTest {
         when(dbResultFuture1.get()).thenReturn(dbResult1);
         when(dbResultFuture2.get()).thenReturn(dbResult2);
 
-        when(dbResult1.one()).thenReturn(exp1Tags);
-        when(dbResult2.one()).thenReturn(exp2Tags);
+        when(dbResult1.all()).thenReturn(exp1Tags);
+        when(dbResult2.all()).thenReturn(exp2Tags);
 
         //------ Make call
         Map<Name, Set<String>> callResult = repository.getTagListForApplications(appNames);

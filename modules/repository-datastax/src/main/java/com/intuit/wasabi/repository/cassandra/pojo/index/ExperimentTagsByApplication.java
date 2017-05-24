@@ -25,6 +25,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.Collections;
 import java.util.Set;
+import java.util.UUID;
 
 @Table(name = "experiment_tag")
 @Data
@@ -37,10 +38,14 @@ public class ExperimentTagsByApplication {
     @Column(name = "app_name")
     String appName;
 
+    @PartitionKey(1)
+    @Column(name = "exp_id")
+    UUID expId;
+
     @Column(name = "tags")
     Set<String> tags;
 
-    public Set<String> getTags(){
+    public Set<String> getTags() {
         return tags != null ? tags : Collections.EMPTY_SET;
     }
 }

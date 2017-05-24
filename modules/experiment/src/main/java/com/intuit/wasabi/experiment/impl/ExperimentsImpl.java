@@ -465,8 +465,9 @@ public class ExperimentsImpl implements Experiments {
         if (updates.getTags() != null && !updates.getTags().equals(experiment.getTags())) {
             builder.withTags(updates.getTags());
             requiresUpdate = true;
+            Set<String> oldTags = experiment.getTags() == null ? Collections.EMPTY_SET : experiment.getTags();
             changeData = new ExperimentAuditInfo("tags",
-                    experiment.getTags().toString(),
+                    oldTags.toString(),
                     updates.getTags().toString());
             changeList.add(changeData);
         }
