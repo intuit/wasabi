@@ -444,7 +444,7 @@ public class Experiment implements Cloneable, ExperimentBase, Serializable {
         if (null != tags)
             this.tags = new TreeSet<>(tags);
         else
-            this.tags = new TreeSet<>();
+            this.tags = tags;
     }
 
     //TODO: redesign state and state transition to be state machine

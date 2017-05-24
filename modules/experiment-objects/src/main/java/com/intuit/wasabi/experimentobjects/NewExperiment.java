@@ -247,7 +247,7 @@ public class NewExperiment implements ExperimentBase {
         if (null != tags)
             this.tags = new TreeSet<>(tags);
         else
-            this.tags = new TreeSet<>();
+            this.tags = tags;
     }
 
     @Override
