@@ -17,6 +17,7 @@ import com.intuit.wasabi.tests.model.Assignment;
 import com.intuit.wasabi.tests.model.Bucket;
 import com.intuit.wasabi.tests.model.Experiment;
 import com.intuit.wasabi.tests.model.User;
+import com.intuit.wasabi.tests.model.factory.AssignmentFactory;
 import com.intuit.wasabi.tests.model.factory.BucketFactory;
 import com.intuit.wasabi.tests.model.factory.ExperimentFactory;
 
@@ -41,6 +42,7 @@ public class RapidExperimentationTest extends TestBase {
     private static final int RAPID_EXP_MAX_USERS = 5;
     Experiment rapidExperiment1 = null;
     Experiment rapidExperiment2 = null;
+    Experiment rapidExperiment3 = null;
     List<Experiment> expList = new ArrayList<Experiment>();
 
     @BeforeClass
@@ -51,12 +53,18 @@ public class RapidExperimentationTest extends TestBase {
                 .setUserCap(RAPID_EXP_MAX_USERS);
         rapidExperiment2 = ExperimentFactory.createExperiment("_2" + UUID.randomUUID().toString())
                 .setApplication(new Application("rapidExperimentApplication"));
-
+        
+        rapidExperiment3 = ExperimentFactory.createExperiment("_3" + UUID.randomUUID().toString())
+                .setApplication(new Application("rapidExperimentApplication")).setIsRapidExperiment(true)
+                .setUserCap(RAPID_EXP_MAX_USERS);
+        
         rapidExperiment1 = postExperiment(rapidExperiment1);
         rapidExperiment2 = postExperiment(rapidExperiment2);
+        rapidExperiment3 = postExperiment(rapidExperiment3);
         expList.add(rapidExperiment1);
         expList.add(rapidExperiment2);
-        for (int i = 1; i <= 2; i++) {
+        expList.add(rapidExperiment3);
+        for (int i = 1; i <= 3; i++) {
             Experiment exp = expList.get(i - 1);
             List<Bucket> bucketList = BucketFactory.createBuckets(exp, 3);
             postBuckets(bucketList);
@@ -121,6 +129,37 @@ public class RapidExperimentationTest extends TestBase {
         expList.set(1, rapidExperiment2);
     }
 
+    /**
+     * This test case tests for the put assignment API call 
+     * that forces assignment call on particular bucket
+     * for a rapid experiment 
+     */
+    @Test
+    public void testPutAssignmentExperimentToRapidExperiment() {
+        Experiment exp = getExperiment(expList.get(2));
+        List<Bucket> bucketList = getBuckets(exp);
+        Assignment assignment = AssignmentFactory.createAssignment()
+                .setAssignment(bucketList.get(0).label)
+                .setExperimentLabel(exp.label)
+                .setOverwrite(true);
+        for (int i = 1; i <= 5; i++) {
+            // lets do an assignment for a user       
+            assignment = putAssignment(exp, assignment, new User("user"+i));
+            // lets assert the status and response code and also the state of the experiment
+            assertReturnCode(response, HttpStatus.SC_OK);
+            Assert.assertEquals(assignment.status, "NEW_ASSIGNMENT");
+            Assert.assertEquals(exp.state, Constants.EXPERIMENT_STATE_RUNNING);
+        }
+
+        // since the experiment crossed the maxusers the experiment should change to PUASED
+        assignment = putAssignment(exp, assignment,new User("user10"), "PROD");
+        assertReturnCode(response, HttpStatus.SC_OK);
+        Assert.assertEquals(assignment.status, "EXPERIMENT_PAUSED");
+        exp = getExperiment(exp);
+        Assert.assertEquals(exp.state, Constants.EXPERIMENT_STATE_PAUSED);
+        expList.set(2, rapidExperiment3);
+    }
+    
     @AfterClass
     public void tearDown() {
 
