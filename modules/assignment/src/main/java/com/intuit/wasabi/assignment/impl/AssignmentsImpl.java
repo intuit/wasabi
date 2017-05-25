@@ -609,7 +609,7 @@ public class AssignmentsImpl implements Assignments {
         Assignment assignment = getAssignment(experimentID, userID, context, userAssignments, bucketList);
         if (assignment == null || assignment.isBucketEmpty()) {
             if (createAssignment) {
-                if (experiment.getState() == Experiment.State.PAUSED || !checkUserCapForRapidExperiment(experiment)) {
+                if (experiment.getState() == Experiment.State.PAUSED || !isUserCapForRapidExperimentReached(experiment)) {
                     return nullAssignment(userID, applicationName, experimentID, Assignment.Status.EXPERIMENT_PAUSED);
                 }
 
@@ -666,7 +666,7 @@ public class AssignmentsImpl implements Assignments {
      * If yes, then it sets the experiment state to paused, refreshes the experiment metadata cache
      * and returns false i.e. assignment is not allowed in that case.
      */
-    private boolean checkUserCapForRapidExperiment(Experiment experiment) {
+    private boolean isUserCapForRapidExperimentReached(Experiment experiment) {
         if (experiment.getIsRapidExperiment() != null && experiment.getIsRapidExperiment()) {
             int userCap = experiment.getUserCap();
             AssignmentCounts assignmentCounts = assignmentsRepository.getBucketAssignmentCount(experiment);
