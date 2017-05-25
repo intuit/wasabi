@@ -152,9 +152,19 @@ public class RapidExperimentationTest extends TestBase {
         }
 
         // since the experiment crossed the maxusers the experiment should change to PUASED
-        assignment = putAssignment(exp, assignment,new User("user10"), "PROD");
+        assignment = putAssignment(exp, assignment,new User("user6"), "PROD");
         assertReturnCode(response, HttpStatus.SC_OK);
-        Assert.assertEquals(assignment.status, "EXPERIMENT_PAUSED");
+        
+//        Assignment assignment2 = postAssignment(exp, new User("user7"), "PROD");
+//        assertReturnCode(response, HttpStatus.SC_OK);
+//        Assert.assertEquals(assignment2.status, "EXPERIMENT_PAUSED");
+        
+        assignment = putAssignment(exp, assignment,new User("user8"), "PROD");
+        assertReturnCode(response, HttpStatus.SC_OK);
+        
+       
+        assignment = putAssignment(exp, assignment,new User("user9"), "PROD");
+        assertReturnCode(response, HttpStatus.SC_OK);
         exp = getExperiment(exp);
         Assert.assertEquals(exp.state, Constants.EXPERIMENT_STATE_PAUSED);
         expList.set(2, rapidExperiment3);
