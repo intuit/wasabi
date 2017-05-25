@@ -648,7 +648,13 @@ angular.module('wasabi.controllers').
                 }
             };
 
-            $scope.advSearch = function() {
+            $scope.advSearch = function(form) {
+                if (form && form.$invalid) {
+                    // Error, probably in the Tags input, just leave without changing anything.
+                    $scope.showFilterPopover = false;
+                    return false;
+                }
+                
                 $scope.data.filtersApplied = true;
 
                 // Transfer the filter settings from the temp values

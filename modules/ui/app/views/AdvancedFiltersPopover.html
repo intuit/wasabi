@@ -1,6 +1,6 @@
 <div id="filterDialog" style="width: 600px; height: auto;">
     Filters:
-        <form id="advancedSearchForm" style="padding-top: 8px;">
+        <form id="advancedSearchForm" name="advancedSearchForm" style="padding-top: 8px;">
             <div style="margin-bottom: 10px;">
                 <div class="dateLabel" style="padding-top: 0;">Application</div>
                 <select ng-model="tempAdvancedSearchValues.advApplicationName" ng-options="applicationName for applicationName in applicationsWithReadOrBetterAccess"
@@ -57,7 +57,7 @@
             </div>
             <div class="buttonBar">
                 <button id="btnClear" title="Clear filters" ng-click="clearFilters()">Clear</button>
-                <button class="blue" id="btnFilter" title="Apply filters to search" ng-click="advSearch()">Apply</button>
+                <button class="blue" id="btnFilter" title="Apply filters to search" ng-click="advSearch(advancedSearchForm)">Apply</button>
             </div>
         </form>
 </div>
