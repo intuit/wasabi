@@ -16,6 +16,7 @@
 package com.intuit.wasabi.assignment.impl;
 
 import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
 import com.google.inject.Provider;
 import com.intuit.hyrule.Rule;
@@ -1654,7 +1655,10 @@ public class AssignmentsImplTest {
         int userCap = 10;
         TotalUsers totalUsers = new TotalUsers.Builder().withBucketAssignments(bucketAssignmentCount).build();
         AssignmentCounts assignmentCounts = new AssignmentCounts.Builder().withTotalUsers(totalUsers).build();
-        when(assignmentsRepository.getBucketAssignmentCount(experiment)).thenReturn(assignmentCounts);
+        Map<Experiment.ID, AssignmentCounts> experimenttoAssignmentCounts = Maps.newHashMap();
+        experimenttoAssignmentCounts.put(experiment.getID(), assignmentCounts);
+        when(assignmentsRepository.getBucketAssignmentCountsInParallel(Mockito.anyList()))
+                .thenReturn(experimenttoAssignmentCounts);
         when(experiment.getUserCap()).thenReturn(userCap);
 
         Assignment result = assignmentsImpl.doSingleAssignment(user, appName, label, context,

@@ -402,7 +402,7 @@ public class AssignmentsImpl implements Assignments {
          * Calling this method here ensures that the experiment state is set to "PAUSED" and the cache refreshed if
          * it was in "RUNNING" state and the cap is reached already.
          */
-        isUserCapForRapidExperimentReached(experiment);
+        isUserCapForRapidExperimentReached(experiment, null);
 
         //Add new assignment in the database
         assignmentsRepository.assignUsersInBatch(newArrayList(new ImmutablePair<>(experiment, assignment)), date);
@@ -480,6 +480,18 @@ public class AssignmentsImpl implements Assignments {
         List<Assignment> allAssignments = new LinkedList<>();
         SegmentationProfile segmentationProfile = SegmentationProfile.from(experimentBatch.getProfile()).build();
 
+        //Prepopulate bucket assignment counts for rapid experiments in running state in asynchronous mode
+        List<Experiment.ID> experimentIds =
+                appPriorities.getPrioritizedExperiments()
+                .stream()
+                .filter(experiment -> (null != experiment.getIsRapidExperiment() && experiment.getIsRapidExperiment())
+                        && experiment.getState().equals(Experiment.State.RUNNING))
+                        .map(experiment -> experiment.getID())
+                        .collect(Collectors.toList());
+
+        Map<Experiment.ID, AssignmentCounts> rapidExperimentToAssignmentCounts =
+                assignmentsRepository.getBucketAssignmentCountsInParallel(experimentIds);
+
         // iterate over all experiments in the application in priority order
         for (PrioritizedExperiment experiment : appPriorities.getPrioritizedExperiments()) {
             LOGGER.debug("Now processing: {}", experiment);
@@ -500,7 +512,8 @@ public class AssignmentsImpl implements Assignments {
                             context, experimentCreateAssignment,
                             forceInExperiment, segmentationProfile,
                             headers, experimentMap.get(experiment.getID()),
-                            bucketMap.get(experiment.getID()), userAssignments, exclusionMap);
+                            bucketMap.get(experiment.getID()), userAssignments, exclusionMap,
+                            rapidExperimentToAssignmentCounts);
 
                     // This wouldn't normally happen because we specified CREATE=true
                     if (isNull(assignment)) {
@@ -584,7 +597,8 @@ public class AssignmentsImpl implements Assignments {
                                        SegmentationProfile segmentationProfile, HttpHeaders headers,
                                        Experiment experiment, BucketList bucketList,
                                        Table<Experiment.ID, Experiment.Label, String> userAssignments,
-                                       Map<Experiment.ID, List<Experiment.ID>> exclusives) {
+                                       Map<Experiment.ID, List<Experiment.ID>> exclusives,
+                                       Map<Experiment.ID, AssignmentCounts> rapidExperimentToAssignmentCounts) {
         final Date currentDate = new Date();
         final long currentTime = currentDate.getTime();
 
@@ -618,7 +632,8 @@ public class AssignmentsImpl implements Assignments {
         Assignment assignment = getAssignment(experimentID, userID, context, userAssignments, bucketList);
         if (assignment == null || assignment.isBucketEmpty()) {
             if (createAssignment) {
-                if (experiment.getState() == Experiment.State.PAUSED || !isUserCapForRapidExperimentReached(experiment)) {
+                if (experiment.getState() == Experiment.State.PAUSED ||
+                        !isUserCapForRapidExperimentReached(experiment, rapidExperimentToAssignmentCounts)) {
                     return nullAssignment(userID, applicationName, experimentID, Assignment.Status.EXPERIMENT_PAUSED);
                 }
 
@@ -675,10 +690,17 @@ public class AssignmentsImpl implements Assignments {
      * If yes, then it sets the experiment state to paused, refreshes the experiment metadata cache
      * and returns false i.e. assignment is not allowed in that case.
      */
-    private boolean isUserCapForRapidExperimentReached(Experiment experiment) {
+    private boolean isUserCapForRapidExperimentReached(Experiment experiment, Map<Experiment.ID,
+            AssignmentCounts> prefetchedAssignmentCounts) {
         if (experiment.getIsRapidExperiment() != null && experiment.getIsRapidExperiment()) {
             int userCap = experiment.getUserCap();
-            AssignmentCounts assignmentCounts = assignmentsRepository.getBucketAssignmentCount(experiment);
+            AssignmentCounts assignmentCounts = null;
+            if (null != prefetchedAssignmentCounts) {
+                 assignmentCounts = prefetchedAssignmentCounts.get(experiment.getID());
+            }
+            if (null == assignmentCounts) {
+                assignmentCounts = assignmentsRepository.getBucketAssignmentCount(experiment);
+            }
             /**
              * The experiment state ideally should be in "RUNNING" state as far as the experiment metadata
              * cache is concerned in order to reach this method in the code flow.
