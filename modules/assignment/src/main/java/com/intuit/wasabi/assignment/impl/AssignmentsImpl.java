@@ -395,6 +395,15 @@ public class AssignmentsImpl implements Assignments {
                     date, null));
         }
 
+        /**
+         * Check whether rapid experiment user cap reached. Proceed with the assignment even if the cap is reached
+         * as in case of PUT API, experiment state of "PAUSED" is also allowed for new assignments.
+         *
+         * Calling this method here ensures that the experiment state is set to "PAUSED" and the cache refreshed if
+         * it was in "RUNNING" state and the cap is reached already.
+         */
+        isUserCapForRapidExperimentReached(experiment);
+
         //Add new assignment in the database
         assignmentsRepository.assignUsersInBatch(newArrayList(new ImmutablePair<>(experiment, assignment)), date);
 
@@ -670,11 +679,23 @@ public class AssignmentsImpl implements Assignments {
         if (experiment.getIsRapidExperiment() != null && experiment.getIsRapidExperiment()) {
             int userCap = experiment.getUserCap();
             AssignmentCounts assignmentCounts = assignmentsRepository.getBucketAssignmentCount(experiment);
-            if (assignmentCounts.getTotalUsers().getBucketAssignments() >= userCap) {
+            /**
+             * The experiment state ideally should be in "RUNNING" state as far as the experiment metadata
+             * cache is concerned in order to reach this method in the code flow.
+             * We only do a hard load of the experiment state when the caller has still given a go ahead of making
+             * the assignment after checking the experiment state in the cache.
+             *
+             * In case of the PUT API, the experiment might be in "PAUSED" state but assignments are allowed
+             * in that scenario too. So, we do not want to update the state and refresh the cache in that scenario
+             * as it is an expensive operation.
+             */
+            if (experiment.getState().equals(Experiment.State.RUNNING) &&
+                    assignmentCounts.getTotalUsers().getBucketAssignments() >= userCap) {
                 Experiment experimentInfoFromDB = experimentUtil.getExperiment(experiment.getID());
                 if (experimentInfoFromDB.getState().equals(Experiment.State.RUNNING)) {
                     experimentUtil.updateExperimentState(experiment, Experiment.State.PAUSED);
                 }
+
                 metadataCache.refresh();
                 return false;
             }
