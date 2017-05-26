@@ -217,7 +217,6 @@ public class RapidExperimentationTest extends TestBase {
             exp = putExperiment(exp);
             batchExperiments.add(exp);
 
-            
         }
         assignPageToExperimentsList(batchExperiments, partialpage);
         // the assignment will happen until the max users cap is reached for all experiments in batch
@@ -268,14 +267,13 @@ public class RapidExperimentationTest extends TestBase {
             exp = putExperiment(exp);
             expList.add(exp);
 
-            
         }
 
         assignPageToExperimentsList(expList, page);
-        
+
         // the assignment will happen until the max users cap is reached for all experiments in batch
         for (int i = 1; i <= RAPID_EXP_MAX_USERS; i++) {
-            List<Assignment> assignments = postAssignments(application, page, new User("user" + (i+1000)));
+            List<Assignment> assignments = postAssignments(application, page, new User("user" + (i + 1000)));
             for (Assignment assignment : assignments) {
                 Assert.assertEquals(assignment.status, "NEW_ASSIGNMENT");
 
@@ -292,8 +290,6 @@ public class RapidExperimentationTest extends TestBase {
         }
 
     }
-
-   
 
     /**
      * This method assigns a page to list of experiments
