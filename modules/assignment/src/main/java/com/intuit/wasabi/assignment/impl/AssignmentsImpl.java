@@ -17,7 +17,6 @@ package com.intuit.wasabi.assignment.impl;
 
 import com.datastax.driver.core.exceptions.ConnectionException;
 import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -38,7 +37,6 @@ import com.intuit.wasabi.assignmentobjects.RuleCache;
 import com.intuit.wasabi.assignmentobjects.SegmentationProfile;
 import com.intuit.wasabi.assignmentobjects.User;
 import com.intuit.wasabi.eventlog.EventLog;
-import com.intuit.wasabi.eventlog.events.ExperimentChangeEvent;
 import com.intuit.wasabi.exceptions.AssignmentExistsException;
 import com.intuit.wasabi.exceptions.BucketDistributionNotFetchableException;
 import com.intuit.wasabi.exceptions.BucketNotFoundException;
@@ -46,7 +44,6 @@ import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
 import com.intuit.wasabi.exceptions.InvalidAssignmentStateException;
 import com.intuit.wasabi.experiment.Experiments;
 import com.intuit.wasabi.experiment.Pages;
-import com.intuit.wasabi.experiment.Priorities;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.BucketList;
@@ -62,7 +59,6 @@ import com.intuit.wasabi.experimentobjects.exceptions.WasabiException;
 import com.intuit.wasabi.repository.AssignmentsRepository;
 import com.intuit.wasabi.repository.CassandraRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
-import com.intuit.wasabi.repository.MutexRepository;
 import com.intuit.wasabi.repository.cassandra.impl.ExperimentRuleCacheUpdateEnvelope;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -95,7 +91,6 @@ import static com.google.common.collect.Sets.newHashSet;
 import static com.intuit.wasabi.assignment.AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_ENABLED;
 import static com.intuit.wasabi.assignment.AssignmentsAnnotations.RULECACHE_THREADPOOL;
 import static com.intuit.wasabi.assignmentobjects.Assignment.Status.ASSIGNMENT_FAILED;
-import static com.intuit.wasabi.assignmentobjects.Assignment.Status.EXPERIMENT_EXPIRED;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -402,7 +397,7 @@ public class AssignmentsImpl implements Assignments {
          * Calling this method here ensures that the experiment state is set to "PAUSED" and the cache refreshed if
          * it was in "RUNNING" state and the cap is reached already.
          */
-        isUserCapForRapidExperimentReached(experiment, null);
+        isAssignmentValidForRapidExperiment(experiment, null);
 
         //Add new assignment in the database
         assignmentsRepository.assignUsersInBatch(newArrayList(new ImmutablePair<>(experiment, assignment)), date);
@@ -633,7 +628,7 @@ public class AssignmentsImpl implements Assignments {
         if (assignment == null || assignment.isBucketEmpty()) {
             if (createAssignment) {
                 if (experiment.getState() == Experiment.State.PAUSED ||
-                        !isUserCapForRapidExperimentReached(experiment, rapidExperimentToAssignmentCounts)) {
+                        !isAssignmentValidForRapidExperiment(experiment, rapidExperimentToAssignmentCounts)) {
                     return nullAssignment(userID, applicationName, experimentID, Assignment.Status.EXPERIMENT_PAUSED);
                 }
 
@@ -690,7 +685,7 @@ public class AssignmentsImpl implements Assignments {
      * If yes, then it sets the experiment state to paused, refreshes the experiment metadata cache
      * and returns false i.e. assignment is not allowed in that case.
      */
-    private boolean isUserCapForRapidExperimentReached(Experiment experiment, Map<Experiment.ID,
+    private boolean isAssignmentValidForRapidExperiment(Experiment experiment, Map<Experiment.ID,
             AssignmentCounts> prefetchedAssignmentCounts) {
         if (experiment.getIsRapidExperiment() != null && experiment.getIsRapidExperiment()) {
             int userCap = experiment.getUserCap();
