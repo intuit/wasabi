@@ -15,6 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.cassandra.pojo.index;
 
+import com.datastax.driver.mapping.annotations.ClusteringColumn;
 import com.datastax.driver.mapping.annotations.Column;
 import com.datastax.driver.mapping.annotations.PartitionKey;
 import com.datastax.driver.mapping.annotations.Table;
@@ -38,7 +39,7 @@ public class ExperimentTagsByApplication {
     @Column(name = "app_name")
     String appName;
 
-    @PartitionKey(1)
+    @ClusteringColumn(0)
     @Column(name = "exp_id")
     UUID expId;
 

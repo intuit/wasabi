@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.TreeSet;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -134,7 +133,7 @@ public class PrioritizedExperimentTest {
     @Test
     public void addNullTags() {
         prioExp.setTags(null);
-        assertEquals(prioExp.getTags(), new TreeSet<String>());
+        assertEquals(prioExp.getTags(), null);
     }
 
 

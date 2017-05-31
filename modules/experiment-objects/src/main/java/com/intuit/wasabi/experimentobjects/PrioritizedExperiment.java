@@ -320,7 +320,7 @@ public class PrioritizedExperiment implements Cloneable, ExperimentBase, Seriali
         if (null != tags)
             this.tags = new TreeSet<>(tags);
         else
-            this.tags = new TreeSet<>();
+            this.tags = tags;
     }
 
     public static class Builder {

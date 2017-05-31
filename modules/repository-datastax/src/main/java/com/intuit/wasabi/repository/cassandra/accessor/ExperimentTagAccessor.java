@@ -15,7 +15,6 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.cassandra.accessor;
 
-import com.datastax.driver.core.Statement;
 import com.datastax.driver.mapping.Result;
 import com.datastax.driver.mapping.annotations.Accessor;
 import com.datastax.driver.mapping.annotations.Query;
@@ -36,11 +35,5 @@ public interface ExperimentTagAccessor {
 
     @Query("insert into experiment_tag(app_name, exp_id, tags) values (?,?,?)")
     void insert(String appName, UUID experimentId, Set<String> tags);
-
-    @Query("update experiment_tag set tags = tags + ? WHERE app_name = ? and exp_id = ?")
-    Statement update(Set<String> tags, String appName, UUID experimentId);
-
-    @Query("update experiment_tag set tags = tags - ? WHERE app_name = ? and exp_id = ?")
-    Statement remove(Set<String> tags, String appName, UUID experimentId);
 
 }
