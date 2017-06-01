@@ -58,7 +58,7 @@ http://www.w3.org/2001/XMLSchema-instance">
         <application.heapsize>256m</application.heapsize>
         <assignment.metadata.cache.maxBytesLocalHeap>128M</assignment.metadata.cache.maxBytesLocalHeap>
 
-        <jacoco.version>0.7.2.201409121644</jacoco.version>
+        <jacoco.version>0.7.9</jacoco.version>
         <jacoco.destFile>${basedir}/target/jacoco.exec</jacoco.destFile>
 
         <http.proxy.host>http://insert.your.proxy.host.here</http.proxy.host>
