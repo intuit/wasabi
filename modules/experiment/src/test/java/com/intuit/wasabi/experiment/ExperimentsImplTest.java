@@ -41,6 +41,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -830,5 +831,12 @@ public class ExperimentsImplTest {
         boolean result = expImpl.buildUpdatedExperiment(testExp, upExp, builder, changeList);
         then(changeList.size()).isEqualTo(1);
         then(result).isEqualTo(true);
+    }
+
+    @Test
+    public void testGetTags() {
+        when(cassandraRepository.getTagListForApplications(null)).thenReturn(null);
+        expImpl.getTagsForApplications(null);
+        verify(cassandraRepository).getTagListForApplications(Collections.emptySet());
     }
 }

@@ -23,6 +23,7 @@ import com.intuit.wasabi.tests.library.util.serialstrategies.SerializationStrate
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Set;
 
 /**
  * A simplified Experiment class which can be instantiated in various ways and
@@ -133,6 +134,11 @@ public class Experiment extends ModelItem {
     public String creatorID;
 
     /**
+     * the tags for this experiment
+     */
+    public Set<String> tags;
+
+    /**
      * The serialization strategy for comparisons and JSON serialization.
      */
     private static SerializationStrategy serializationStrategy = new DefaultNameExclusionStrategy();
@@ -172,7 +178,7 @@ public class Experiment extends ModelItem {
      */
     public Experiment(String label, Application application, String startTime, String endTime,
                       double samplingPercent) {
-        this(label, application, startTime, endTime, samplingPercent, null, null, false, "", "", false, 0, null);
+        this(label, application, startTime, endTime, samplingPercent, null, null, false, "", "", false, 0, null, null);
     }
 
     /**
@@ -191,10 +197,12 @@ public class Experiment extends ModelItem {
      * @param isRapidExperiment        flag if rapid experimentation
      * @param userCap                  max users for rapid experiments
      * @param creatorID                the creator
+     * @param tags                     the set of tags
      */
     public Experiment(String label, Application application, String startTime, String endTime, double samplingPercent,
                       String description, String rule, Boolean isPersonalizationEnabled, String modelName,
-                      String modelVersion, Boolean isRapidExperiment, Integer userCap, String creatorID) {
+                      String modelVersion, Boolean isRapidExperiment, Integer userCap, String creatorID,
+                      Set<String> tags) {
         this.setLabel(label)
                 .setApplication(application)
                 .setStartTime(startTime)
@@ -207,7 +215,8 @@ public class Experiment extends ModelItem {
                 .setIsPersonalizationEnabled(isPersonalizationEnabled)
                 .setIsRapidExperiment(isRapidExperiment)
                 .setUserCap(userCap)
-                .setCreatorID(creatorID);
+                .setCreatorID(creatorID)
+                .setTags(tags);
     }
 
     /**
@@ -515,6 +524,17 @@ public class Experiment extends ModelItem {
      */
     public Experiment setCreatorID(String creatorID) {
         this.creatorID = creatorID;
+        return this;
+    }
+
+    /**
+     * Sets the tags for an experiment
+     *
+     * @param tags the tags
+     * @return this
+     */
+    public Experiment setTags(Set<String> tags) {
+        this.tags = tags;
         return this;
     }
 

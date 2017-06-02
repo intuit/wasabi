@@ -3,8 +3,8 @@
 
 angular.module('wasabi.controllers')
     .controller('AnalysisGraphModalCtrl',
-        ['$scope', '$filter', '$modalInstance', 'experiment', 'UtilitiesFactory', '$modal', 'ConfigFactory', 'ExperimentStatisticsFactory',
-            function ($scope, $filter, $modalInstance, experiment, UtilitiesFactory, $modal, ConfigFactory, ExperimentStatisticsFactory) {
+        ['$scope', '$filter', '$uibModalInstance', 'experiment', 'UtilitiesFactory', '$uibModal', 'ConfigFactory', 'ExperimentStatisticsFactory',
+            function ($scope, $filter, $uibModalInstance, experiment, UtilitiesFactory, $uibModal, ConfigFactory, ExperimentStatisticsFactory) {
 
                 $scope.experiment = experiment;
 
@@ -47,6 +47,6 @@ angular.module('wasabi.controllers')
                     // Changed this to call close() instead of dismiss().  We need to catch the Close or Cancel so
                     // we can re-load the buckets, in case the user changed the allocation percentages (since changes
                     // are data-bound to the model).
-                    $modalInstance.close('cancel');
+                    $uibModalInstance.close('cancel');
                 };
             }]);

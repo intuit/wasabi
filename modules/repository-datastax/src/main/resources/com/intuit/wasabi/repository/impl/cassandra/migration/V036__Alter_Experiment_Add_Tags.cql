@@ -1,0 +1,1 @@
+alter table experiment ADD tags set<text>;

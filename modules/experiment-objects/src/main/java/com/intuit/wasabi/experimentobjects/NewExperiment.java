@@ -23,6 +23,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.Date;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Specification of a new experiment
@@ -64,6 +66,8 @@ public class NewExperiment implements ExperimentBase {
     private Integer userCap = Integer.MAX_VALUE;
     @ApiModelProperty(required = false)
     private String creatorID = "";
+    @ApiModelProperty(value = "a set of experiment tags")
+    private Set<String> tags;
 
     public NewExperiment(Experiment.ID id) {
         super();
@@ -223,7 +227,6 @@ public class NewExperiment implements ExperimentBase {
     }
 
     public void setApplicationName(Application.Name value) {
-//        Preconditions.checkNotNull(value);
         applicationName = value;
     }
 
@@ -232,8 +235,19 @@ public class NewExperiment implements ExperimentBase {
     }
 
     public void setCreatorID(String value) {
-//        Preconditions.checkNotNull(value);
         creatorID = value;
+    }
+
+    @Override
+    public Set<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(Set<String> tags) {
+        if (null != tags)
+            this.tags = new TreeSet<>(tags);
+        else
+            this.tags = tags;
     }
 
     @Override
@@ -314,6 +328,11 @@ public class NewExperiment implements ExperimentBase {
 
         public Builder withCreatorID(final String value) {
             instance.creatorID = Preconditions.checkNotNull(value);
+            return this;
+        }
+
+        public Builder withTags(final Set<String> tags) {
+            instance.setTags(tags);
             return this;
         }
 

@@ -40,11 +40,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
@@ -114,6 +117,7 @@ public class CassandraExperimentRepositoryITest extends IntegrationTestBase {
         newExperiment1.setStartTime(new Date());
         newExperiment1.setEndTime(new Date());
         newExperiment1.setSamplingPercent(0.2);
+        newExperiment1.setTags(new HashSet<>(Arrays.asList("tag1", "tag2")));
         experimentID1 = repository.createExperiment(newExperiment1);
 
         repository.createIndicesForNewExperiment(newExperiment1);
@@ -126,6 +130,7 @@ public class CassandraExperimentRepositoryITest extends IntegrationTestBase {
         newExperiment2.setStartTime(new Date());
         newExperiment2.setEndTime(new Date());
         newExperiment2.setSamplingPercent(0.2);
+        newExperiment2.setTags(new HashSet<>(Arrays.asList("tag3", "tag4")));
         experimentID2 = repository.createExperiment(newExperiment2);
 
         repository.createIndicesForNewExperiment(newExperiment2);
@@ -787,5 +792,18 @@ public class CassandraExperimentRepositoryITest extends IntegrationTestBase {
     @Test(expected = ConstraintViolationException.class)
     public void testCreateExperimentDuplicateThrowsException() {
         ID experimentId = repository.createExperiment(newExperiment1);
+    }
+
+    @Test
+    public void testAddTagsToExperiment() {
+        Experiment experiment = repository.getExperiment(experimentID1);
+        experiment.setTags(new HashSet<>(Arrays.asList("tagNew", "tag2")));
+        repository.updateExperiment(experiment);
+
+        List<String> allTags = Arrays.asList("tag2", "tag3", "tag4", "tagNew");
+
+        Map<Name, Set<String>> result = repository.getTagListForApplications(Arrays.asList(appname));
+        assertTrue(result.size() == 1); // only one application
+        assertTrue(result.get(appname).containsAll(allTags));
     }
 }

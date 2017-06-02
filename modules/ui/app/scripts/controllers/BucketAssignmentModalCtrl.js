@@ -2,8 +2,8 @@
 
 angular.module('wasabi.controllers')
     .controller('BucketAssignmentModalCtrl',
-        ['$scope', '$filter', '$modalInstance', 'BucketsFactory', 'buckets', 'experiment', 'UtilitiesFactory', '$modal', 'ConfigFactory',
-            function ($scope, $filter, $modalInstance, BucketsFactory, buckets, experiment, UtilitiesFactory, $modal, ConfigFactory) {
+        ['$scope', '$filter', '$uibModalInstance', 'BucketsFactory', 'buckets', 'experiment', 'UtilitiesFactory', '$uibModal', 'ConfigFactory',
+            function ($scope, $filter, $uibModalInstance, BucketsFactory, buckets, experiment, UtilitiesFactory, $uibModal, ConfigFactory) {
 
                 $scope.buckets = buckets;
                 $scope.experiment = experiment;
@@ -68,7 +68,7 @@ angular.module('wasabi.controllers')
                         // Editing the bucket, don't want to be able to edit the allocation here.
                         isEditFlag = false;
                     }
-                    var modalInstance = $modal.open({
+                    var modalInstance = $uibModal.open({
                         templateUrl: 'views/BucketModal.html',
                         controller: 'BucketModalCtrl',
                         windowClass: 'xxx-dialog',
@@ -127,7 +127,7 @@ angular.module('wasabi.controllers')
                 };
 
                 $scope.closeBucket = function (bucketLabel) {
-                    $modal.open({
+                    $uibModal.open({
                         templateUrl: 'views/CloseBucketConfirmModal.html',
                         controller: 'CloseBucketConfirmModalCtrl',
                         windowClass: 'xxx-dialog',
@@ -160,7 +160,7 @@ angular.module('wasabi.controllers')
                 };
 
                 $scope.emptyBucket = function (bucketLabel) {
-                    $modal.open({
+                    $uibModal.open({
                         templateUrl: 'views/EmptyBucketConfirmModal.html',
                         controller: 'EmptyBucketConfirmModalCtrl',
                         windowClass: 'xxx-dialog',
@@ -226,12 +226,12 @@ angular.module('wasabi.controllers')
                                 {key: 'experiment_id', value: experiment.id});
 
                             UtilitiesFactory.displaySuccessWithCacheWarning('Buckets Updated', 'Your bucket allocation changes have been saved.');
-                            $modalInstance.close();
+                            $uibModalInstance.close();
                         }, function(response) {
                             // Handle error
                             //console.log(response);
                             if (UtilitiesFactory.extractErrorFromResponse(response) === 'unauthenticated') {
-                                $modalInstance.close();
+                                $uibModalInstance.close();
                             }
                             else {
                                 UtilitiesFactory.handleGlobalError(response);
@@ -239,7 +239,7 @@ angular.module('wasabi.controllers')
                         });
                     }
                     else {
-                        $modalInstance.close();
+                        $uibModalInstance.close();
                     }
                 };
 
@@ -247,6 +247,6 @@ angular.module('wasabi.controllers')
                     // Changed this to call close() instead of dismiss().  We need to catch the Close or Cancel so
                     // we can re-load the buckets, in case the user changed the allocation percentages (since changes
                     // are data-bound to the model).
-                    $modalInstance.close('cancel');
+                    $uibModalInstance.close('cancel');
                 };
             }]);

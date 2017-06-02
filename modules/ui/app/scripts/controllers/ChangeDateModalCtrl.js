@@ -3,8 +3,8 @@
 
 angular.module('wasabi.controllers')
     .controller('ChangeDateModalCtrl',
-        ['$scope', '$modalInstance', 'experiment', 'DialogsFactory',
-            function ($scope, $modalInstance, experiment, DialogsFactory) {
+        ['$scope', '$uibModalInstance', 'experiment', 'DialogsFactory',
+            function ($scope, $uibModalInstance, experiment, DialogsFactory) {
 
                 $scope.experiment = experiment;
                 $scope.experimentFormSubmitted = false;
@@ -17,13 +17,13 @@ angular.module('wasabi.controllers')
                                     'Warning',
                                     function() {
                                         // Submit as normal
-                                        $modalInstance.close($scope.experiment);
+                                        $uibModalInstance.close($scope.experiment);
                                     },
                                     function() {/* Don't do the save */});
                         }
                         else {
                             // Submit as normal
-                            $modalInstance.close($scope.experiment);
+                            $uibModalInstance.close($scope.experiment);
                         }
                     } else {
                         $scope.experimentFormSubmitted = true;
@@ -31,6 +31,6 @@ angular.module('wasabi.controllers')
                 };
 
                 $scope.cancel = function () {
-                    $modalInstance.dismiss('cancel');
+                    $uibModalInstance.dismiss('cancel');
                 };
             }]);

@@ -5,8 +5,8 @@
 'use strict';
 
 angular.module('wasabi.controllers').
-    controller('ExperimentsCtrl', ['$scope', '$filter', '$http', '$timeout', 'ExperimentsFactory', '$modal', 'UtilitiesFactory', '$rootScope', 'StateFactory', 'DialogsFactory', 'AUTH_EVENTS', 'Session', 'PERMISSIONS', 'ConfigFactory', 'AuthzFactory', 'USER_ROLES', 'ApplicationsFactory', 'BucketsFactory', 'ExperimentStatisticsFactory', 'ApplicationStatisticsFactory', 'FavoritesFactory', '$cookies',
-        function ($scope, $filter, $http, $timeout, ExperimentsFactory, $modal, UtilitiesFactory, $rootScope, StateFactory, DialogsFactory, AUTH_EVENTS, Session, PERMISSIONS, ConfigFactory, AuthzFactory, USER_ROLES, ApplicationsFactory, BucketsFactory, ExperimentStatisticsFactory, ApplicationStatisticsFactory, FavoritesFactory, $cookies) {
+    controller('ExperimentsCtrl', ['$scope', '$filter', '$http', '$timeout', 'ExperimentsFactory', '$uibModal', 'UtilitiesFactory', '$rootScope', 'StateFactory', 'DialogsFactory', 'AUTH_EVENTS', 'Session', 'PERMISSIONS', 'ConfigFactory', 'AuthzFactory', 'USER_ROLES', 'ApplicationsFactory', 'BucketsFactory', 'ExperimentStatisticsFactory', 'ApplicationStatisticsFactory', 'FavoritesFactory', '$cookies',
+        function ($scope, $filter, $http, $timeout, ExperimentsFactory, $uibModal, UtilitiesFactory, $rootScope, StateFactory, DialogsFactory, AUTH_EVENTS, Session, PERMISSIONS, ConfigFactory, AuthzFactory, USER_ROLES, ApplicationsFactory, BucketsFactory, ExperimentStatisticsFactory, ApplicationStatisticsFactory, FavoritesFactory, $cookies) {
 
             var today = moment().format('MM/DD/YYYY');
 
@@ -15,19 +15,45 @@ angular.module('wasabi.controllers').
             // using the "data.xx" notation, you do a cleaner job of setting scope for the things that will be
             // bound from the form.  For the fields they are bound to, look at ExperimentTable.html .
             $scope.data = {
-                lastSearchWasSimple: true,
                 query: '',
                 advStatus: 'notTerminated',
                 advApplicationName: '',
                 advExperimentName: '',
-                advStartOrEndDate: 'startDate',
                 adv1stDateSearchType: 'isAny',
                 advTxtSearchDateOne: today,
                 advTxtSearchDateTwo: today,
+                advEnd1stDateSearchType: 'isAny',
+                advEndTxtSearchDateOne: today,
+                advEndTxtSearchDateTwo: today,
+                advSearchTags: [],
                 showGrid: false,
+                showingGrid: false,
                 showAdvancedSearch: false,
+                filtersApplied: false,
                 hideTerminated: true,
                 enableCardView: false
+            };
+
+            // This stores the values displayed in the advanced filter popup.  That way, until
+            // the user actually clicks on Apply, the values aren't part of the $scope.data, which is
+            // saved in localStorage.
+            $scope.tempAdvancedSearchValues = {
+                advStatus: 'notTerminated',
+                advApplicationName: '',
+                advExperimentName: '',
+                adv1stDateSearchType: 'isAny',
+                advTxtSearchDateOne: today,
+                advTxtSearchDateTwo: today,
+                advEnd1stDateSearchType: 'isAny',
+                advEndTxtSearchDateOne: today,
+                advEndTxtSearchDateTwo: today,
+                advSearchTags: [],
+            };
+
+            // Search filters dialog stuff
+            $scope.showFilterPopover = false;
+            $scope.dynamicPopover = {
+                templateUrl: 'views/AdvancedFiltersPopover.html'
             };
 
             // We save the $scope.data object above after a search so we have it when we come back to the list
@@ -126,11 +152,19 @@ angular.module('wasabi.controllers').
                 }
             };
 
+            $scope.loadAllTags = function() {
+                UtilitiesFactory.loadAllTags($scope, false);
+            };
+
+            $scope.queryTags = function(query) {
+                return UtilitiesFactory.queryTags(query, $scope.allTags);
+            };
+
             /*
             This function sets up the call to get the list of experiments.  It sets up the query
-            parameters to do the sorting, filtering and pagination.  It uses the lastSearchWasSimple
-            flag to decide if we are doing simple or advanced filtering and so which parameters need to
-            be used.  This sets up the call whether it is for the table view or the card view (different APIs).
+            parameters to do the sorting, filtering and pagination.  It uses the saved search and filter
+            values from $scope.data .  This sets up the call whether it is for the table view or the
+            card view (different APIs).
              */
             $scope.doLoadExperiments = function(cardViewFlag, pageSize, currentPage, afterLoadFunction) {
                 function addAdvParam(existingFilter, newFilterValue) {
@@ -145,20 +179,18 @@ angular.module('wasabi.controllers').
                 var queryParams = {
                     perPage: pageSize,
                     page: currentPage,
-                    sort: ($scope.reverseSort ? '-' : '') + $scope.convertOrderByField()
+                    sort: ($scope.reverseSort ? '-' : '') + $scope.convertOrderByField(),
+                    filter: ''
                 };
-                if ($scope.data.lastSearchWasSimple) {
+                if ($scope.data.query && $scope.data.query.length !== 0) {
                     // Add simple filter info, if available
                     queryParams.filter = encodeURIComponent($scope.data.query);
-                    if ($scope.data.hideTerminated) {
-                        queryParams.filter += ',state_exact=notTerminated';
-                    }
                 }
-                else {
+
+                if ($scope.data.filtersApplied) {
                     // Add advanced filter info, if available
-                    queryParams.filter = '';
                     if ($scope.data.advApplicationName && $scope.data.advApplicationName.length > 0) {
-                        queryParams.filter += 'application_name_exact=' + $scope.data.advApplicationName;
+                        queryParams.filter = addAdvParam(queryParams.filter, 'application_name_exact=' + $scope.data.advApplicationName);
                     }
                     if ($scope.data.advStatus !== 'any') {
                         queryParams.filter = addAdvParam(queryParams.filter, 'state_exact=' + $scope.data.advStatus);
@@ -172,14 +204,39 @@ angular.module('wasabi.controllers').
                             UtilitiesFactory.displayPageError('Missing Date', 'You must provide a value for the search date.');
                             return false;
                         }
-                        queryParams.filter = addAdvParam(queryParams.filter, 'date_constraint_' +
-                                ($scope.data.advStartOrEndDate === 'startDate' ? 'start' : 'end') +
-                                '=' +
+                        queryParams.filter = addAdvParam(queryParams.filter, 'date_constraint_start=' +
                                 $scope.data.adv1stDateSearchType + ':' +
                                 $scope.data.advTxtSearchDateOne +
                                 ($scope.data.adv1stDateSearchType === 'isBetween' ? ':' + $scope.data.advTxtSearchDateTwo : ''));
                     }
+                    if ($scope.data.advEnd1stDateSearchType && $scope.data.advEnd1stDateSearchType !== 'isAny') {
+                        if ($scope.data.advEndTxtSearchDateOne.length === 0 ||
+                            ($scope.data.advEnd1stDateSearchType === 'isBetween' && $scope.data.advEndTxtSearchDateTwo.length === 0)) {
+                            UtilitiesFactory.displayPageError('Missing Date', 'You must provide a value for the search date.');
+                            return false;
+                        }
+                        queryParams.filter = addAdvParam(queryParams.filter, 'date_constraint_end=' +
+                                $scope.data.advEnd1stDateSearchType + ':' +
+                                $scope.data.advEndTxtSearchDateOne +
+                                ($scope.data.advEnd1stDateSearchType === 'isBetween' ? ':' + $scope.data.advEndTxtSearchDateTwo : ''));
+                    }
+                    else {
+                        // Need to initialize new fields because had old fields saved in localStorage.
+                        $scope.data.advEnd1stDateSearchType = 'isAny';
+                        $scope.data.advEndTxtSearchDateOne = today;
+                        $scope.data.advEndTxtSearchDateTwo = today;
+                        localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
+                    }
+                    if ($scope.data.advSearchTags && $scope.data.advSearchTags.length > 0) {
+                        var tagsParam = 'tags_and=';
+                        for (var i = 0; i < $scope.data.advSearchTags.length; i++) {
+                            tagsParam += (i > 0 ? ';' : '');
+                            tagsParam += $scope.data.advSearchTags[i].text;
+                        }
+                        queryParams.filter = addAdvParam(queryParams.filter, tagsParam);
+                    }
                 }
+
                 if (!cardViewFlag) {
                     ExperimentsFactory.query(queryParams).$promise
                     .then(afterLoadFunction,
@@ -203,6 +260,7 @@ angular.module('wasabi.controllers').
             };
 
             $scope.loadExperiments = function() {
+                $scope.loadAllTags();
                 if ($scope.data.showGrid) {
                     $scope.loadCardViewExperiments();
                 }
@@ -276,30 +334,6 @@ angular.module('wasabi.controllers').
 
                     $scope.applicationsLoaded = true;
                 });
-            };
-
-            $scope.refreshSearch = function() {
-                $scope.search();
-                $scope.$digest(); // Force refresh of list
-            };
-
-            $scope.refreshAdvSearch = function() {
-                $scope.advSearch();
-                $scope.$digest(); // Force refresh of list
-            };
-
-            $scope.showMoreLessSearch = function(forceFlag) {
-                var forceAdvanced = (forceFlag !== undefined ? forceFlag : false);
-
-                if (forceAdvanced || !$scope.data.showAdvancedSearch) {
-                    $scope.data.showAdvancedSearch = true;
-                    setTimeout($scope.refreshAdvSearch, 400);
-                }
-                else {
-                    $scope.data.showAdvancedSearch = false;
-                    setTimeout($scope.refreshSearch, 400);
-                }
-                return false;
             };
 
             $scope.loadCardViewExperiments = function() {
@@ -391,12 +425,34 @@ angular.module('wasabi.controllers').
                 });
             };
 
+            $scope.transferFilterSettings = function(fromObj, toObj) {
+                for (var prop in fromObj) {
+                    if (fromObj.hasOwnProperty(prop) && prop.indexOf('adv') === 0) {
+                        if (fromObj[prop] instanceof Array) {
+                            toObj[prop] = [];
+                            for (var i = 0; i < fromObj[prop].length; i++) {
+                                toObj[prop].push(fromObj[prop][i]);
+                            }
+                        }
+                        else {
+                            toObj[prop] = fromObj[prop];
+                        }
+                    }
+                }
+            };
+
             // Init controller
             // Load local storage object that saves info about the last search we did.
             var tmpSearchSettings = localStorage.getItem('wasabiLastSearch');
             if (tmpSearchSettings) {
                 $scope.data = JSON.parse(tmpSearchSettings);
+                if ($scope.data.filtersApplied) {
+                    // Restore temp settings in filter dialog
+                    $scope.transferFilterSettings($scope.data, $scope.tempAdvancedSearchValues);
+                }
             }
+            $scope.loadAllTags();
+
             // If this user has card view enabled, turn it on.
             if (Session && Session.switches) {
                 $scope.data.enableCardView = Session.switches.ShowCardView;
@@ -406,6 +462,7 @@ angular.module('wasabi.controllers').
                 if ($cookies.wasabiCardViewSetting) {
                     $scope.data.showGrid = ((typeof($cookies.wasabiCardViewSetting) === 'boolean' && $cookies.wasabiCardViewSetting) ||
                                             (typeof($cookies.wasabiCardViewSetting) === 'string' && $cookies.wasabiCardViewSetting === 'true'));
+                    $scope.data.showingGrid = $scope.data.showGrid;
                 }
                 else {
                     // Start saving it.
@@ -429,13 +486,13 @@ angular.module('wasabi.controllers').
                     // So that it gets changed correctly in the localStorage that saves the search state,
                     // we need to actually toggle this one because it doesn't get updated until after this has
                     // executed.
-                    $scope.data.showGrid = $cookies.wasabiCardViewSetting = false;
+                    $scope.data.showGrid = $scope.data.showingGrid = $cookies.wasabiCardViewSetting = false;
                     localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
                     $scope.loadTableExperiments();
                 }
                 else {
                     // Record that we are showing the Card View in the localStorage
-                    $scope.data.showGrid = $cookies.wasabiCardViewSetting = true;
+                    $scope.data.showGrid = $scope.data.showingGrid = $cookies.wasabiCardViewSetting = true;
                     localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
                     // Switched to card view.  Since we're not pre-loading the data for the cards, we need to
                     // load (or check if we need to load) the data now.
@@ -566,7 +623,6 @@ angular.module('wasabi.controllers').
             };
 
             $scope.search = function () {
-                $scope.data.lastSearchWasSimple = true;
                 localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
                 if ($scope.searchTimer) {
                     $timeout.cancel($scope.searchTimer);
@@ -574,9 +630,37 @@ angular.module('wasabi.controllers').
                 $scope.searchTimer = $timeout($scope.doSearch, 400);
             };
 
-            $scope.advSearch = function() {
-                // Save the advanced search settings
-                $scope.data.lastSearchWasSimple = false;
+            $scope.popoverClicked = function() {
+                if (!$scope.data.filtersApplied) {
+                    // Clear out temp filter values so dialog starts fresh
+                    $scope.tempAdvancedSearchValues = {
+                        advStatus: 'notTerminated',
+                        advApplicationName: '',
+                        advExperimentName: '',
+                        adv1stDateSearchType: 'isAny',
+                        advTxtSearchDateOne: today,
+                        advTxtSearchDateTwo: today,
+                        advEnd1stDateSearchType: 'isAny',
+                        advEndTxtSearchDateOne: today,
+                        advEndTxtSearchDateTwo: today,
+                        advSearchTags: [],
+                    };
+                }
+            };
+
+            $scope.advSearch = function(form) {
+                if (form && form.$invalid) {
+                    // Error, probably in the Tags input, just leave without changing anything.
+                    $scope.showFilterPopover = false;
+                    return false;
+                }
+                
+                $scope.data.filtersApplied = true;
+
+                // Transfer the filter settings from the temp values
+                $scope.transferFilterSettings($scope.tempAdvancedSearchValues, $scope.data);
+
+                // Save the filter settings
                 localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
 
                 if ($scope.data.advApplicationName === null) {
@@ -584,18 +668,45 @@ angular.module('wasabi.controllers').
                 }
 
                 $scope.loadExperiments();
+                $scope.showFilterPopover = false;
+
 
                 var searchParms = 'advStatus=' + $scope.data.advStatus +
                         '&advExperimentName=' + $scope.data.advExperimentName +
                         '&advStartOrEndDate=' + $scope.data.advStartOrEndDate +
                         '&adv1stDateSearchType=' + $scope.data.adv1stDateSearchType +
                         '&advTxtSearchDateOne=' + $scope.data.advTxtSearchDateOne +
-                        '&advTxtSearchDateTwo=' + $scope.data.advTxtSearchDateTwo;
+                        '&advTxtSearchDateTwo=' + $scope.data.advTxtSearchDateTwo +
+                        '&advEnd1stDateSearchType=' + $scope.data.advEnd1stDateSearchType +
+                        '&advEndTxtSearchDateOne=' + $scope.data.advEndTxtSearchDateOne +
+                        '&advEndTxtSearchDateTwo=' + $scope.data.advEndTxtSearchDateTwo;
                 UtilitiesFactory.trackEvent('advancedSearch',
                     {key: 'search_parms', value: searchParms});
 
-
                 UtilitiesFactory.doTrackingInit();
+            };
+
+            $scope.clearFilters = function() {
+                $scope.data = Object.assign($scope.data, {
+                    advStatus: 'notTerminated',
+                    advApplicationName: '',
+                    advExperimentName: '',
+                    adv1stDateSearchType: 'isAny',
+                    advTxtSearchDateOne: today,
+                    advTxtSearchDateTwo: today,
+                    advEnd1stDateSearchType: 'isAny',
+                    advEndTxtSearchDateOne: today,
+                    advEndTxtSearchDateTwo: today,
+                    advSearchTags: [],
+                    filtersApplied: false
+                });
+                // Save the filter settings
+                localStorage.setItem('wasabiLastSearch', JSON.stringify($scope.data));
+
+                $scope.transferFilterSettings($scope.data, $scope.tempAdvancedSearchValues);
+
+                $scope.loadExperiments();
+                $scope.showFilterPopover = false;
             };
 
             $scope.pageChanged = function() {
@@ -707,7 +818,7 @@ angular.module('wasabi.controllers').
             };
 
             $scope.openExperimentModal = function (experiment) {
-                var modalInstance = $modal.open({
+                var modalInstance = $uibModal.open({
                     templateUrl: 'views/ExperimentModal.html',
                     controller: 'ExperimentModalCtrl',
                     windowClass: 'xx-dialog',

@@ -4,8 +4,8 @@
 'use strict';
 
 angular.module('wasabi.controllers').
-    controller('PageManagementCtrl', ['$scope', '$filter', '$http', '$stateParams', '$timeout', '$cookies', 'PagesFactory', 'ApplicationsFactory', 'DialogsFactory', 'ExperimentsFactory', '$modal', 'UtilitiesFactory', '$rootScope', 'AUTH_EVENTS', '$state', 'PERMISSIONS', 'ConfigFactory',
-        function ($scope, $filter, $http, $stateParams, $timeout, $cookies, PagesFactory, ApplicationsFactory, DialogsFactory, ExperimentsFactory, $modal, UtilitiesFactory, $rootScope, AUTH_EVENTS, $state, PERMISSIONS, ConfigFactory) {
+    controller('PageManagementCtrl', ['$scope', '$filter', '$http', '$stateParams', '$timeout', '$cookies', 'PagesFactory', 'ApplicationsFactory', 'DialogsFactory', 'ExperimentsFactory', '$uibModal', 'UtilitiesFactory', '$rootScope', 'AUTH_EVENTS', '$state', 'PERMISSIONS', 'ConfigFactory',
+        function ($scope, $filter, $http, $stateParams, $timeout, $cookies, PagesFactory, ApplicationsFactory, DialogsFactory, ExperimentsFactory, $uibModal, UtilitiesFactory, $rootScope, AUTH_EVENTS, $state, PERMISSIONS, ConfigFactory) {
 
             $scope.data = {
                 query: '',
@@ -208,7 +208,7 @@ angular.module('wasabi.controllers').
                 if (!$scope.data.selectedPage) {
                     return;
                 }
-                var modalInstance = $modal.open({
+                var modalInstance = $uibModal.open({
                     templateUrl: 'views/AddExperimentsToPageModal.html',
                     controller: 'AddExperimentsToPageModalCtrl',
                     windowClass: 'larger-dialog',
