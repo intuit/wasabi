@@ -58,4 +58,21 @@ Then:
 This will build the UI into the dist folder and then start a web server, serving the UI from that folder on
 http://localhost:9000 .
 
+### Troubleshooting
+
+If you happen to get some errors or problems with building a new version of the Wasabi UI after an update, you should
+follow these steps to refresh the build-time and run-time libraries:
+
+```
+% cd modules/ui
+% rm -rf node_modules
+% rm -rf app/bower_components
+% npm install
+% bower install
+```
+
+This will ensure that the versions of all the libraries are consistent with the current version of the Wasabi
+UI code.
+
+
 
