@@ -826,6 +826,67 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                 return '';
             },
 
+            getPermissions: function(result, transitionToFirstPage) {
+                var that = this;
+
+                AuthzFactory.getPermissions({userId: result.username}).$promise.then(function(permissionsResult) {
+                    var treatAsAdmin = false,
+                        sessionInfo = {userID: result.username, accessToken: result.access_token, tokenType: result.token_type, permissions: permissionsResult.permissionsList, isSuperadmin: false};
+                    if (permissionsResult.permissionsList && permissionsResult.permissionsList.length > 0) {
+                        // Check if they are superadmin, in which case, we'll just give them the admin role.
+                        if (permissionsResult.permissionsList[0].permissions.indexOf('SUPERADMIN') >= 0) {
+                            treatAsAdmin = true;
+                            sessionInfo.isSuperadmin = true;
+                        }
+                    }
+                    if (treatAsAdmin || that.hasAdmin(permissionsResult.permissionsList)) {
+                        sessionInfo.userRole = USER_ROLES.admin;
+                        that.hideAdminTabs(false);
+                    }
+                    else {
+                        sessionInfo.userRole = USER_ROLES.user;
+                        that.hideAdminTabs();
+                    }
+                    Session.create(sessionInfo);
+                    StateFactory.currentExperimentsPage = 1;
+                    StateFactory.currentCardViewPage = 1;
+
+                    /*
+                    Note: the following code is used to control the new Card View feature.  This requires a
+                    Wasabi experiment, named CardViewTest, in the application, WasabiUI, with a sampling % of 100%
+                    and one bucket named NoCardView with 100% allocation.  All users will, by default, be
+                    assigned to that bucket by the following call.  If the user is in the bucket, they are NOT
+                    shown the Card View (see the code in ExperimentsCtrl related to the $scope.data.enableCardView
+                    for how that is controlled).  So in order to enable Card View for a user, you need to run
+                    something like this curl command to force them to have the "null" bucket:
+
+                    curl -u mylogin -H "Content-Type: application/json" -X PUT
+                      -d '{"assignment":null, "overwrite": true }'
+                      http://localhost:8080/api/v1/assignments/applications/WasabiUI/experiments/CardViewTest/users/userID1
+
+                    where "userID1" is the ID of the user you want to show Card View to and "mylogin" is the login
+                    of an admin user, e.g., admin on your local.
+                     */
+
+                    // This initializes the ShowCardView switch to false, checks/gets assignment for the
+                    // experiment named CardViewTest, if the user has the null bucket assignment, sets the switch
+                    // to true.  Whether we successfully hit Wasabi or not, it calls transitionToFirstPage to
+                    // bring up the initial page.
+                    that.checkBooleanSwitch('ShowCardView', 'CardViewTest', false, null /* the true state is the null bucket */,
+                        function() {
+                            // Success after setting the switch
+                            transitionToFirstPage();
+                        },
+                        function() {
+                            // Error trying to set the switch
+                            transitionToFirstPage();
+                        });
+                },
+                function(/*reason*/) {
+                    console.log('Problem getting authorization permissions.');
+                });
+            },
+
             updatePermissionsAndAppList: function(updateApplicationListCallback) {
                 var that = this,
                     applications = [];

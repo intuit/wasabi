@@ -1,4 +1,6 @@
 {
     "supportEmail": "",
+    "authnType": "basic",
+    "noAuthRedirect": "",
     "apiHostBaseUrlValue": "DEFAULT"
 }

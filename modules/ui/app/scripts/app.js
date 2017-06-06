@@ -173,8 +173,8 @@ angular.module('wasabi', [
     /*
      * watch transitions/routes to the next page/URL and prevents if user is not authorized or signed in
      */
-    .run(['$rootScope', '$state', 'AUTH_EVENTS', 'AuthUtilsFactory', 'ConfigFactory', 'DialogsFactory', 'Session', 'AuthFactory', '$stateParams', '$window', 'UtilitiesFactory',
-        function ($rootScope, $state, AUTH_EVENTS, AuthUtilsFactory, ConfigFactory, DialogsFactory, Session, AuthFactory, $stateParams, $window, UtilitiesFactory) {
+    .run(['$rootScope', '$state', 'AUTH_EVENTS', 'AuthUtilsFactory', 'ConfigFactory', 'DialogsFactory', 'Session', 'AuthFactory', '$stateParams', '$window', 'UtilitiesFactory', 'StateFactory',
+        function ($rootScope, $state, AUTH_EVENTS, AuthUtilsFactory, ConfigFactory, DialogsFactory, Session, AuthFactory, $stateParams, $window, UtilitiesFactory, StateFactory) {
             // Pull in the plugins configuration
             if (!$rootScope.plugins) {
                 $rootScope.plugins = [];
@@ -190,6 +190,17 @@ angular.module('wasabi', [
             }
 
             $rootScope.$on('$stateChangeStart', function (event, next) {
+                var transitionToFirstPage = function() {
+                    $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
+                    if ($rootScope.originalPage) {
+                        $scope.handleOriginalPage();
+                    }
+                    else {
+                        $state.go('experiments');
+                    }
+                };
+
+
                 var authorizedRoles = next.data.authorizedRoles;
                 if(authorizedRoles) {
                     if (!AuthUtilsFactory.isAuthorized(authorizedRoles)) {
@@ -202,7 +213,38 @@ angular.module('wasabi', [
                             $rootScope.originalPage = next.name;
                             $rootScope.originalURI = $window.location.hash;
                             $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
-                            $state.go('signin');
+
+                            if (ConfigFactory.authnType() === 'sso') {
+                                // Call sign in so it will check for cookies and either return error or username and tokens
+
+                                // Need to pass something for the credentials for use in the HttpInterceptor call to login
+                                sessionStorage.setItem('wasabiSession', JSON.stringify({
+                                    username: '',
+                                    password: ''
+                                }));
+
+                                AuthFactory.signIn().$promise.then(function(result) {
+                                    localStorage.removeItem('wasabiLastSearch');
+
+                                    var sessionInfo = {userID: result.username, accessToken: result.access_token, tokenType: result.token_type};
+                                    Session.create(sessionInfo);
+
+                                    UtilitiesFactory.getPermissions(result, transitionToFirstPage);
+                                }, function(reason) {
+                                    if (reason.data.error && reason.data.error.code !== 401) {
+                                        $rootScope.ssoServerDown = true;
+                                        $rootScope.redirectUrl = ConfigFactory.noAuthRedirect();
+                                    }
+                                    else {
+                                        window.location = ConfigFactory.noAuthRedirect();
+                                    }
+                                    return false;
+                                });
+                            }
+                            else {
+                                // Not using alternative authentication.
+                                $state.go('signin');
+                            }
                         }
                     }
                 }
@@ -213,6 +255,9 @@ angular.module('wasabi', [
             };
 
             $rootScope.goToSignin = function() {
+                if (ConfigFactory.authnType() === 'sso') {
+                    window.location = ConfigFactory.noAuthRedirect();
+                }
                 $state.go('signin');
             };
 

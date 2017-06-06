@@ -79,6 +79,9 @@
         <div id="main">
             <div ui-view></div>
         </div>
+        <div ng-if="ssoServerDown">
+          <br/>We're sorry, but the Wasabi service is currently down.  Please <a href="{{redirectUrl}}">try again</a> later.
+        </div>
     </div>
 
     <div style="display: block;" id="help">

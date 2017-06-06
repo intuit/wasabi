@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('wasabi.services').factory('ConfigFactory', ['apiHostBaseUrlValue', function(apiHostBaseUrlValue) {
+angular.module('wasabi.services').factory('ConfigFactory', ['apiHostBaseUrlValue', 'authnType', 'noAuthRedirect', function(apiHostBaseUrlValue, authnType, noAuthRedirect) {
     return {
         baseUrl: function() {
             if (apiHostBaseUrlValue === 'DEFAULT') {
@@ -8,6 +8,14 @@ angular.module('wasabi.services').factory('ConfigFactory', ['apiHostBaseUrlValue
                 return window.location.protocol + '//' + window.location.host + '/api/v1';
             }
             return apiHostBaseUrlValue;
+        },
+
+        authnType: function() {
+            return authnType;
+        },
+
+        noAuthRedirect: function() {
+            return noAuthRedirect;
         },
 
         'loginTimeoutWarningTime': 55 /* minutes */ * 60 /* seconds/minute */ * 1000 /* milliseconds/ second */,

@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('wasabi.services').factory('HttpInterceptor', ['$rootScope', '$q','Session', 'AUTH_EVENTS', '$timeout', 'ConfigFactory',
+angular.module('wasabi.services').factory('HttpInterceptor', ['$rootScope', '$q', 'Session', 'AUTH_EVENTS', '$timeout', 'ConfigFactory',
     function ($rootScope, $q, Session, AUTH_EVENTS, $timeout, ConfigFactory) {
     return {
         request: function (config) {
@@ -17,7 +17,6 @@ angular.module('wasabi.services').factory('HttpInterceptor', ['$rootScope', '$q'
                 $rootScope.keepAlive();
             };
             var doLogout = function() {
-                //console.log('In doLogout');
                 Session.destroy();
                 $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
                 $rootScope.goToSignin();
@@ -33,7 +32,6 @@ angular.module('wasabi.services').factory('HttpInterceptor', ['$rootScope', '$q'
                 $rootScope.timeoutDialog = $rootScope.confirmDialog('Your login is about to expire.  Would you like to continue working?', 'Login Expiring', doRefresh, doLogout, 'Yes', 'No');
             };
 
-            config.headers = config.headers || {};
             if (Session.accessToken && !/\/savefeedback/.test(config.url)) {
                 // http://stackoverflow.com/questions/7802116/custom-http-authorization-header
                 config.headers.Authorization = Session.tokenType + ' ' + Session.accessToken;
@@ -62,7 +60,6 @@ angular.module('wasabi.services').factory('HttpInterceptor', ['$rootScope', '$q'
         },
         response: function (response) {
             if (response && response.config && response.config.data && response.config.data.password) {
-                //console.log(response.config.data.password);
                 response.config.data.password = '';
             }
             return response || $q.when(response);

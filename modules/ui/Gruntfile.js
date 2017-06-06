@@ -376,7 +376,9 @@ module.exports = function (grunt) {
                 name: 'config',
                 dest: '<%= yeoman.app %>/scripts/config.js',
                 constants: {
-                    supportEmail: ''
+                    supportEmail: '',
+                    authnType: 'basic',
+                    noAuthRedirect: ''
                 }
             },
             test: {
