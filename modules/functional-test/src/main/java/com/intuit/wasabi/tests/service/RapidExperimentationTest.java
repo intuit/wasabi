@@ -45,11 +45,12 @@ public class RapidExperimentationTest extends TestBase {
                                                                        // has combination of normal and rapid
                                                                        // experiments
 
+    private static final int NUMBER_OF_BUCKETS_PER_EXPERIMENT = 3; // number of buckets per experiment
     private static final String BATCH_PAGE = "rapidexperiment_page";
     private static final String PARTIAL_BATCH_PAGE = "rapidexperiment_partialpage";
     Experiment rapidExperiment1 = null;
     Experiment experimentChangedToRapidExperiment = null;
-    Experiment rapidExperiment3 = null;
+    Experiment rapidExperiment2 = null;
     Page page = null;
     List<Experiment> experimentList = new ArrayList<Experiment>();
     List<Experiment> batchExperiments = new ArrayList<Experiment>();
@@ -67,21 +68,24 @@ public class RapidExperimentationTest extends TestBase {
 
         rapidExperiment1 = ExperimentFactory.createExperiment("_1_" + UUID.randomUUID().toString(), -1)
                 .setApplication(application).setIsRapidExperiment(true).setUserCap(RAPID_EXP_MAX_USERS);
-        experimentChangedToRapidExperiment = ExperimentFactory.createExperiment("_2_" + UUID.randomUUID().toString(), -1)
+        
+        rapidExperiment2 = ExperimentFactory.createExperiment("_2_" + UUID.randomUUID().toString(), -1)
+                .setApplication(application).setIsRapidExperiment(true).setUserCap(RAPID_EXP_MAX_USERS);
+        
+        experimentChangedToRapidExperiment = ExperimentFactory.createExperiment("_3_" + UUID.randomUUID().toString(), -1)
                 .setApplication(application);
 
-        rapidExperiment3 = ExperimentFactory.createExperiment("_3_" + UUID.randomUUID().toString(), -1)
-                .setApplication(application).setIsRapidExperiment(true).setUserCap(RAPID_EXP_MAX_USERS);
+        
 
         rapidExperiment1 = postExperiment(rapidExperiment1);
         experimentChangedToRapidExperiment = postExperiment(experimentChangedToRapidExperiment);
-        rapidExperiment3 = postExperiment(rapidExperiment3);
+        rapidExperiment2 = postExperiment(rapidExperiment2);
         experimentList.add(rapidExperiment1);
         experimentList.add(experimentChangedToRapidExperiment);
-        experimentList.add(rapidExperiment3);
+        experimentList.add(rapidExperiment2);
         for (Experiment exp: experimentList) {
             
-            List<Bucket> bucketList = BucketFactory.createBuckets(exp, 3);
+            List<Bucket> bucketList = BucketFactory.createBuckets(exp, NUMBER_OF_BUCKETS_PER_EXPERIMENT);
             postBuckets(bucketList);
 
             exp.state = Constants.EXPERIMENT_STATE_RUNNING;
@@ -95,7 +99,9 @@ public class RapidExperimentationTest extends TestBase {
     public void testRapidExperiment() {
 
         Experiment exp = getExperiment(experimentList.get(0));
-        for (int i = 1; i <= 5; i++) {
+        
+        
+        for (int i = 1; i <= RAPID_EXP_MAX_USERS; i++) {
             // lets do an assignment for a user with context set to PROD
             Assignment assignment = postAssignment(exp, new User("user" + i), "PROD");
 
@@ -118,13 +124,14 @@ public class RapidExperimentationTest extends TestBase {
     /**
      * This test case covers a scenario where we start an experiment, do assignments and after that update the
      * experiment to rapid experiment with max users less than the number of users already assigned
+     * and assert the behavior of the service
      */
     @Test
     public void testChangeRegularExperimentToRapidExperiment() {
        
         Experiment exp = getExperiment(experimentList.get(1));
 
-        for (int i = 1; i <= 5; i++) {
+        for (int i = 1; i <= RAPID_EXP_MAX_USERS; i++) {
             // lets do an assignment for a user with context set to PROD
             Assignment assignment = postAssignment(exp, new User("user" + i), "PROD");
 
@@ -196,7 +203,7 @@ public class RapidExperimentationTest extends TestBase {
                 exp.setIsRapidExperiment(true).setUserCap(RAPID_EXP_MAX_USERS);
             }
             exp = postExperiment(exp);
-            List<Bucket> bucketList = BucketFactory.createBuckets(exp, 3);
+            List<Bucket> bucketList = BucketFactory.createBuckets(exp, NUMBER_OF_BUCKETS_PER_EXPERIMENT);
             postBuckets(bucketList);
 
             exp.state = Constants.EXPERIMENT_STATE_RUNNING;
@@ -246,7 +253,7 @@ public class RapidExperimentationTest extends TestBase {
                     .setApplication(application).setIsRapidExperiment(true).setUserCap(RAPID_EXP_MAX_USERS);
 
             exp = postExperiment(exp);
-            List<Bucket> bucketList = BucketFactory.createBuckets(exp, 3);
+            List<Bucket> bucketList = BucketFactory.createBuckets(exp, NUMBER_OF_BUCKETS_PER_EXPERIMENT);
             postBuckets(bucketList);
 
             exp.state = Constants.EXPERIMENT_STATE_RUNNING;
