@@ -41,9 +41,7 @@ public class ExperimentFactory {
                 TestUtils.relativeTimeString(42), 1)
                         .setCreatorID(
                                 System.getProperty("user-name") != null ? System.getProperty("user-name") : "admin")
-                        .setDescription("A sample Experiment description.")
-                .setHypothesisIsCorrect("")
-                .setResults("");
+                        .setDescription("A sample Experiment description.").setHypothesisIsCorrect("").setResults("");
     }
 
     /**
@@ -122,6 +120,85 @@ public class ExperimentFactory {
         experiment.hypothesisIsCorrect = "Sample hypothesis check";
         experiment.results = "Sample experiment results";
         return experiment;
+    }
+
+    /**
+     * Creates a basic rapid Experiment with the required default values but no ID. The values are a name, the default
+     * application, default number of maximum users (10), a start and end time and the sampling percentage (100%), as
+     * well as a hypothesis/description and with isRapidExperiment set to true.
+     * <p>
+     * Sets the creatorID to admin email
+     *
+     * @return a rapid Experiment.
+     */
+    public static Experiment createRapidExperiment() {
+        return createExperiment().setIsRapidExperiment(true).setUserCap(Constants.DEFAULT_RAPIDEXP_MAX_USERS);
+
+    }
+
+    
+    /**
+     * Creates a basic rapid Experiment with the required default values but no ID. The values are a name, the default
+     * application, a start and end time and the sampling percentage (100%), as
+     * well as a hypothesis/description and with isRapidExperiment set to true
+     * 
+     * @param maxUsersCap - the maximum number of users at which the experiment caps and stops.
+     * @return a rapid Experiment.
+     */
+    public static Experiment createRapidExperiment(int maxUsersCap) {
+        return createExperiment().setIsRapidExperiment(true).setUserCap(maxUsersCap);
+
+    }
+    
+    
+    /**
+     * Creates a rapid Experiment with the required default values but no ID. The values are a name, the default
+     * application, a start and end time and the sampling percentage (100%), as
+     * well as a hypothesis/description and with isRapidExperiment set to true.
+     * <p>
+     * 
+     * @param maxUsersCap - the maximum number of users at which the experiment caps and stops.
+     * @param experimentLabel- the label of the experiment Sets the creatorID to admin email
+     * 
+     * @return a rapid Experiment.
+     */
+    public static Experiment createRapidExperiment(int maxUsersCap, String experimentLabel) {
+        return createExperiment(experimentLabel).setIsRapidExperiment(true)
+                .setUserCap(maxUsersCap);
+    }
+
+    /**
+     * Creates a rapid Experiment with the required default values but no ID. The values are a name, the default
+     * application, a start and end time and the sampling percentage (100%), as
+     * well as a hypothesis/description and with isRapidExperiment set to true.
+     * 
+     * @param maxUsersCap - the maximum number of users at which the experiment caps and stops
+     * @param experimentLabel - the label of the experiment Sets the creatorID to admin email
+     * @param relativeStartDay - the relative day on which u want your experiment to start with respect to current time
+     * 
+     * @return a rapid Experiment.
+     */
+    public static Experiment createRapidExperiment(int maxUsersCap, String experimentLabel, int relativeStartDay) {
+        return createExperiment(experimentLabel, relativeStartDay).setIsRapidExperiment(true)
+                .setUserCap(maxUsersCap);
+    }
+    
+    /**
+     * Creates a rapid Experiment with the required default values but no ID. The values are a name, the default
+     * application, default number of maximum users (10), a start and end time and the sampling percentage (100%), as
+     * well as a hypothesis/description and with isRapidExperiment set to true.
+     * <p>
+     * 
+     * @param int maxUsersCap- the maximum number of users at which the experiment stops
+     * @param experimentLabel - the label of the experiment
+     * @param relativeStartDay -the relative day on which u want your experiment to start with respect to current time
+     * @param relativeEndDay -the relative day on which u want your experiment to end with respect to current time
+     * 
+     * @return a rapid Experiment.
+     */
+    public static Experiment createRapidExperiment(int maxUsersCap, String experimentLabel, int relativeStartDay, int relativeEndDay) {
+        return createExperiment(experimentLabel, relativeStartDay, relativeEndDay).setIsRapidExperiment(true)
+                .setUserCap(maxUsersCap);
     }
 
     /**

@@ -48,6 +48,7 @@ public class RapidExperimentationTest extends TestBase {
     private static final int NUMBER_OF_BUCKETS_PER_EXPERIMENT = 3; // number of buckets per experiment
     private static final String BATCH_PAGE = "rapidexperiment_page";
     private static final String PARTIAL_BATCH_PAGE = "rapidexperiment_partialpage";
+    private static final String rapidExperimentTestApplication = "rapidExperimentApplication_functionaltest";
     Experiment rapidExperiment1 = null;
     Experiment experimentChangedToRapidExperiment = null;
     Experiment rapidExperiment2 = null;
@@ -61,46 +62,24 @@ public class RapidExperimentationTest extends TestBase {
     @BeforeClass
     public void setUp() {
 
-        application = new Application("rapidExperimentApplication");
-
+        // lets terminate all the experiments that are created by the previous run of test
+        application = new Application(rapidExperimentTestApplication);
         experimentsListOfRapidApplication = getApplicationExperiments(application);
         pauseTerminateAndDeleteExperiments(experimentsListOfRapidApplication);
-
-        rapidExperiment1 = ExperimentFactory.createExperiment("_1_" + UUID.randomUUID().toString(), -1)
-                .setApplication(application).setIsRapidExperiment(true).setUserCap(RAPID_EXP_MAX_USERS);
-        
-        rapidExperiment2 = ExperimentFactory.createExperiment("_2_" + UUID.randomUUID().toString(), -1)
-                .setApplication(application).setIsRapidExperiment(true).setUserCap(RAPID_EXP_MAX_USERS);
-        
-        experimentChangedToRapidExperiment = ExperimentFactory.createExperiment("_3_" + UUID.randomUUID().toString(), -1)
-                .setApplication(application);
-
-        
-
-        rapidExperiment1 = postExperiment(rapidExperiment1);
-        experimentChangedToRapidExperiment = postExperiment(experimentChangedToRapidExperiment);
-        rapidExperiment2 = postExperiment(rapidExperiment2);
-        experimentList.add(rapidExperiment1);
-        experimentList.add(experimentChangedToRapidExperiment);
-        experimentList.add(rapidExperiment2);
-        for (Experiment exp: experimentList) {
-            
-            List<Bucket> bucketList = BucketFactory.createBuckets(exp, NUMBER_OF_BUCKETS_PER_EXPERIMENT);
-            postBuckets(bucketList);
-
-            exp.state = Constants.EXPERIMENT_STATE_RUNNING;
-            putExperiment(exp);
-
-        }
 
     }
 
     @Test
     public void testRapidExperiment() {
 
-        Experiment exp = getExperiment(experimentList.get(0));
-        
-        
+        Experiment exp = ExperimentFactory
+                .createRapidExperiment(RAPID_EXP_MAX_USERS, "_" + UUID.randomUUID().toString(), -1)
+                .setApplication(application);
+        exp = postExperiment(exp);
+        createBucketsToExperiment(exp, NUMBER_OF_BUCKETS_PER_EXPERIMENT);
+        exp.state = Constants.EXPERIMENT_STATE_RUNNING;
+        putExperiment(exp);
+
         for (int i = 1; i <= RAPID_EXP_MAX_USERS; i++) {
             // lets do an assignment for a user with context set to PROD
             Assignment assignment = postAssignment(exp, new User("user" + i), "PROD");
@@ -115,21 +94,27 @@ public class RapidExperimentationTest extends TestBase {
         Assignment assignment = postAssignment(exp, new User("user10"), "PROD");
         assertReturnCode(response, HttpStatus.SC_OK);
         Assert.assertEquals(assignment.status, "EXPERIMENT_PAUSED");
-        
+
         // we should also assert that the state of the experiment should change to EXPERIMENT_PAUSED
-        Assert.assertEquals(getExperiment(exp).state, Constants.EXPERIMENT_STATE_PAUSED);    
-        
+        Assert.assertEquals(getExperiment(exp).state, Constants.EXPERIMENT_STATE_PAUSED);
+
     }
 
     /**
      * This test case covers a scenario where we start an experiment, do assignments and after that update the
-     * experiment to rapid experiment with max users less than the number of users already assigned
-     * and assert the behavior of the service
+     * experiment to rapid experiment with max users less than the number of users already assigned and assert the
+     * behavior of the service
      */
     @Test
     public void testChangeRegularExperimentToRapidExperiment() {
-       
-        Experiment exp = getExperiment(experimentList.get(1));
+
+        // lets create a normal experiment first
+        Experiment exp = ExperimentFactory.createExperiment("_3_" + UUID.randomUUID().toString(), -1)
+                .setApplication(application);
+        exp = postExperiment(exp);
+        createBucketsToExperiment(exp, NUMBER_OF_BUCKETS_PER_EXPERIMENT);
+        exp.state = Constants.EXPERIMENT_STATE_RUNNING;
+        putExperiment(exp);
 
         for (int i = 1; i <= RAPID_EXP_MAX_USERS; i++) {
             // lets do an assignment for a user with context set to PROD
@@ -141,10 +126,9 @@ public class RapidExperimentationTest extends TestBase {
             Assert.assertEquals(exp.state, Constants.EXPERIMENT_STATE_RUNNING);
         }
 
+        // lets change the experiment now to rapid experiment and set the user cap less than number of assignments
         exp = exp.setIsRapidExperiment(true).setUserCap(3);
         exp = putExperiment(exp);
-
-        
 
         // since the experiment crossed the maxusers the experiment should change to PUASED and response for assignment
         // should be "EXPERIMENT_PAUSED"
@@ -153,7 +137,7 @@ public class RapidExperimentationTest extends TestBase {
         Assert.assertEquals(assignment.status, "EXPERIMENT_PAUSED");
         exp = getExperiment(exp);
         Assert.assertEquals(exp.state, Constants.EXPERIMENT_STATE_PAUSED);
-        
+
     }
 
     /**
@@ -162,11 +146,19 @@ public class RapidExperimentationTest extends TestBase {
      */
     @Test
     public void testPutAssignmentToRapidExperiment() {
-        Experiment exp = getExperiment(experimentList.get(2));
+
+        Experiment exp = ExperimentFactory
+                .createRapidExperiment(RAPID_EXP_MAX_USERS, "_" + UUID.randomUUID().toString(), -1)
+                .setApplication(application);
+        exp = postExperiment(exp);
+        createBucketsToExperiment(exp, NUMBER_OF_BUCKETS_PER_EXPERIMENT);
+        exp.state = Constants.EXPERIMENT_STATE_RUNNING;
+        putExperiment(exp);
+
         List<Bucket> bucketList = getBuckets(exp);
         Assignment assignment = AssignmentFactory.createAssignment().setAssignment(bucketList.get(0).label)
                 .setExperimentLabel(exp.label).setOverwrite(true);
-        
+
         for (int i = 1; i <= RAPID_EXP_MAX_USERS; i++) {
             // lets do an assignment for a user
             assignment = putAssignment(exp, assignment, new User("user" + i));
@@ -176,12 +168,13 @@ public class RapidExperimentationTest extends TestBase {
             Assert.assertEquals(exp.state, Constants.EXPERIMENT_STATE_RUNNING);
         }
 
-        // since the experiment crossed the maxusers the experiment should change to PUASED but it will still allow assignments to buckets
+        // since the experiment crossed the maxusers the experiment should change to PUASED but it will still allow
+        // assignments to buckets
         assignment = putAssignment(exp, assignment, new User("user6"), "PROD");
         assertReturnCode(response, HttpStatus.SC_OK);
         Assert.assertEquals(assignment.status, "NEW_ASSIGNMENT");
         Assert.assertEquals(getExperiment(exp).state, Constants.EXPERIMENT_STATE_PAUSED);
-        
+
     }
 
     /**
@@ -212,13 +205,11 @@ public class RapidExperimentationTest extends TestBase {
 
         }
         assignPageToExperimentsList(batchExperiments, partialpage);
+
         // the assignment will happen until the max users cap is reached for all experiments in batch
         for (int i = 1; i <= RAPID_EXP_MAX_USERS; i++) {
             List<Assignment> assignments = postAssignments(application, partialpage, new User("user" + i));
-            for (Assignment assignment : assignments) {
-                Assert.assertEquals(assignment.status, "NEW_ASSIGNMENT");
-
-            }
+            assertAssignmentResponseStatus(assignments, "NEW_ASSIGNMENT");
         }
 
         // if we do one more assignment the rapid experiments should change to PAUSED/STOPPED state and the remaining
@@ -247,19 +238,18 @@ public class RapidExperimentationTest extends TestBase {
 
         page = new Page(BATCH_PAGE, true);
         List<Experiment> experimentList = new ArrayList<Experiment>();
-        // lets create experiments for the batch
+        // lets create rapid experiments for the batch
         for (int i = 1; i <= NUMBER_OF_EXPERIMENTS_PER_BATCH; i++) {
-            Experiment exp = ExperimentFactory.createExperiment("_" + UUID.randomUUID().toString(), -1)
-                    .setApplication(application).setIsRapidExperiment(true).setUserCap(RAPID_EXP_MAX_USERS);
 
+            Experiment exp = ExperimentFactory
+                    .createRapidExperiment(RAPID_EXP_MAX_USERS, "_" + UUID.randomUUID().toString(), -1)
+                    .setApplication(application);
+            
             exp = postExperiment(exp);
-            List<Bucket> bucketList = BucketFactory.createBuckets(exp, NUMBER_OF_BUCKETS_PER_EXPERIMENT);
-            postBuckets(bucketList);
-
+            createBucketsToExperiment(exp, NUMBER_OF_BUCKETS_PER_EXPERIMENT);
             exp.state = Constants.EXPERIMENT_STATE_RUNNING;
             exp = putExperiment(exp);
             experimentList.add(exp);
-
         }
 
         assignPageToExperimentsList(experimentList, page);
@@ -273,14 +263,14 @@ public class RapidExperimentationTest extends TestBase {
             }
         }
 
-        // if we do one more assignment the rapid experiments should change to PAUSED/STOPPED state 
+        // if we do one more assignment the rapid experiments should change to PAUSED/STOPPED state
         List<Assignment> assignments = postAssignments(application, page, new User("user100"));
-        for (Experiment experiment: experimentList) {
+        for (Experiment experiment : experimentList) {
             Experiment exp = getExperiment(experiment);
             Assert.assertEquals(exp.state, Constants.EXPERIMENT_STATE_PAUSED);
         }
-        
-        //assert that the response of the post assignments are EXPERIMENT_PAUSED
+
+        // assert that the response of the post assignments are EXPERIMENT_PAUSED
         assertAssignmentResponseStatus(assignments, "EXPERIMENT_PAUSED");
 
     }
@@ -298,8 +288,8 @@ public class RapidExperimentationTest extends TestBase {
     }
 
     /**
-     * This method asserts the status of the response we received from  
-     * a post assignment 
+     * This method asserts the status of the response we received from a post assignment
+     * 
      * @param assignmentList - the list of assignments
      * @param assignmentStatus - the assignment status against which we want to assert
      */
@@ -308,7 +298,7 @@ public class RapidExperimentationTest extends TestBase {
             Assert.assertEquals(assignment.status, responseStatus);
         }
     }
-    
+
     /**
      * This method pauses the experiment, terminates the experiments and eventually deletes them
      *
@@ -331,4 +321,5 @@ public class RapidExperimentationTest extends TestBase {
         }
 
     }
+
 }
