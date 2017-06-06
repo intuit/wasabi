@@ -75,10 +75,8 @@ public class RapidExperimentationTest extends TestBase {
         Experiment exp = ExperimentFactory
                 .createRapidExperiment(RAPID_EXP_MAX_USERS, "_" + UUID.randomUUID().toString(), -1)
                 .setApplication(application);
-        exp = postExperiment(exp);
-        createBucketsToExperiment(exp, NUMBER_OF_BUCKETS_PER_EXPERIMENT);
-        exp.state = Constants.EXPERIMENT_STATE_RUNNING;
-        putExperiment(exp);
+       
+        exp = createBucketsAndRunExperiment(exp, NUMBER_OF_BUCKETS_PER_EXPERIMENT);
 
         for (int i = 1; i <= RAPID_EXP_MAX_USERS; i++) {
             // lets do an assignment for a user with context set to PROD
@@ -111,10 +109,7 @@ public class RapidExperimentationTest extends TestBase {
         // lets create a normal experiment first
         Experiment exp = ExperimentFactory.createExperiment("_3_" + UUID.randomUUID().toString(), -1)
                 .setApplication(application);
-        exp = postExperiment(exp);
-        createBucketsToExperiment(exp, NUMBER_OF_BUCKETS_PER_EXPERIMENT);
-        exp.state = Constants.EXPERIMENT_STATE_RUNNING;
-        putExperiment(exp);
+        exp = createBucketsAndRunExperiment(exp, NUMBER_OF_BUCKETS_PER_EXPERIMENT);
 
         for (int i = 1; i <= RAPID_EXP_MAX_USERS; i++) {
             // lets do an assignment for a user with context set to PROD
@@ -150,10 +145,7 @@ public class RapidExperimentationTest extends TestBase {
         Experiment exp = ExperimentFactory
                 .createRapidExperiment(RAPID_EXP_MAX_USERS, "_" + UUID.randomUUID().toString(), -1)
                 .setApplication(application);
-        exp = postExperiment(exp);
-        createBucketsToExperiment(exp, NUMBER_OF_BUCKETS_PER_EXPERIMENT);
-        exp.state = Constants.EXPERIMENT_STATE_RUNNING;
-        putExperiment(exp);
+        exp = createBucketsAndRunExperiment(exp, NUMBER_OF_BUCKETS_PER_EXPERIMENT);
 
         List<Bucket> bucketList = getBuckets(exp);
         Assignment assignment = AssignmentFactory.createAssignment().setAssignment(bucketList.get(0).label)
@@ -195,12 +187,8 @@ public class RapidExperimentationTest extends TestBase {
             if (i <= NUMBER_OF_RAPID_EXPERIMENTS_IN_BATCH) {
                 exp.setIsRapidExperiment(true).setUserCap(RAPID_EXP_MAX_USERS);
             }
-            exp = postExperiment(exp);
-            List<Bucket> bucketList = BucketFactory.createBuckets(exp, NUMBER_OF_BUCKETS_PER_EXPERIMENT);
-            postBuckets(bucketList);
-
-            exp.state = Constants.EXPERIMENT_STATE_RUNNING;
-            exp = putExperiment(exp);
+            
+            exp = createBucketsAndRunExperiment(exp, NUMBER_OF_BUCKETS_PER_EXPERIMENT);
             batchExperiments.add(exp);
 
         }
@@ -245,11 +233,8 @@ public class RapidExperimentationTest extends TestBase {
                     .createRapidExperiment(RAPID_EXP_MAX_USERS, "_" + UUID.randomUUID().toString(), -1)
                     .setApplication(application);
             
-            exp = postExperiment(exp);
-            createBucketsToExperiment(exp, NUMBER_OF_BUCKETS_PER_EXPERIMENT);
-            exp.state = Constants.EXPERIMENT_STATE_RUNNING;
-            exp = putExperiment(exp);
-            experimentList.add(exp);
+           exp = createBucketsAndRunExperiment(exp, NUMBER_OF_BUCKETS_PER_EXPERIMENT);
+           experimentList.add(exp);
         }
 
         assignPageToExperimentsList(experimentList, page);
@@ -257,10 +242,7 @@ public class RapidExperimentationTest extends TestBase {
         // the assignment will happen until the max users cap is reached for all experiments in batch
         for (int i = 1; i <= RAPID_EXP_MAX_USERS; i++) {
             List<Assignment> assignments = postAssignments(application, page, new User("user" + (i + 1000)));
-            for (Assignment assignment : assignments) {
-                Assert.assertEquals(assignment.status, "NEW_ASSIGNMENT");
-
-            }
+            assertAssignmentResponseStatus(assignments, "NEW_ASSIGNMENT");
         }
 
         // if we do one more assignment the rapid experiments should change to PAUSED/STOPPED state
@@ -273,6 +255,23 @@ public class RapidExperimentationTest extends TestBase {
         // assert that the response of the post assignments are EXPERIMENT_PAUSED
         assertAssignmentResponseStatus(assignments, "EXPERIMENT_PAUSED");
 
+    }
+    
+    /**
+     * This util method posts an experiment, creates buckets to the experiment and 
+     * changes state of the experiment to RUNNING.
+     * 
+     * @param exp - the experiment under consideration
+     * @param numberOfBuckets - the number of buckets we need to create for experiment
+     * @return Experiment - the running experiment
+     */
+    private Experiment createBucketsAndRunExperiment(Experiment exp,int numberOfBuckets)    {
+        
+        exp = postExperiment(exp);
+        createBucketsToExperiment(exp, numberOfBuckets);
+        exp.state = Constants.EXPERIMENT_STATE_RUNNING;
+        exp = putExperiment(exp);
+        return exp;
     }
 
     /**
