@@ -35,6 +35,7 @@ import com.intuit.wasabi.repository.cassandra.accessor.BucketAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.ExclusionAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentPageAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.ExperimentTagAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.PrioritiesAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.StagingAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.UserFeedbackAccessor;
@@ -65,6 +66,7 @@ import com.intuit.wasabi.repository.cassandra.provider.BucketAccessorProvider;
 import com.intuit.wasabi.repository.cassandra.provider.ExclusionAccessorProvider;
 import com.intuit.wasabi.repository.cassandra.provider.ExperimentAccessorProvider;
 import com.intuit.wasabi.repository.cassandra.provider.ExperimentPageAccessorProvider;
+import com.intuit.wasabi.repository.cassandra.provider.ExperimentTagAccessorProvider;
 import com.intuit.wasabi.repository.cassandra.provider.MappingManagerProvider;
 import com.intuit.wasabi.repository.cassandra.provider.PrioritiesAccessorProvider;
 import com.intuit.wasabi.repository.cassandra.provider.StagingAccessorProvider;
@@ -90,7 +92,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import static com.google.inject.name.Names.named;
 import static com.intuit.autumn.utils.PropertyFactory.create;
 import static com.intuit.autumn.utils.PropertyFactory.getProperty;
-import static java.lang.Boolean.TRUE;
 import static java.lang.Integer.parseInt;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -137,6 +138,7 @@ public class CassandraRepositoryModule extends AbstractModule {
         bind(UserFeedbackAccessor.class).toProvider(UserFeedbackAccessorProvider.class).in(Singleton.class);
         bind(UserInfoAccessor.class).toProvider(UserInfoAccessorProvider.class).in(Singleton.class);
         bind(UserRoleAccessor.class).toProvider(UserRoleAccessorProvider.class).in(Singleton.class);
+        bind(ExperimentTagAccessor.class).toProvider(ExperimentTagAccessorProvider.class).in(Singleton.class);
 
         //Bind those indexes
         bind(AppPageIndexAccessor.class).toProvider(AppPageIndexAccessorProvider.class).in(Singleton.class);

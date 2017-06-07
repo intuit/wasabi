@@ -17,14 +17,17 @@ package com.intuit.wasabi.experimentobjects;
 
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 /**
- * Created on 3/10/16.
+ * Test for the {@link NewExperiment} class.
  */
 public class NewExperimentTest {
 
@@ -32,6 +35,8 @@ public class NewExperimentTest {
     public void testBuilderCreation() {
         Experiment.ID id = Experiment.ID.newInstance();
         Date date = new Date();
+        String[] tagsArray = {"ui", "mobile", "12&"};
+        Set<String> tags = new HashSet<>(Arrays.asList(tagsArray));
         NewExperiment.Builder builder = NewExperiment.withID(id);
         NewExperiment newExperiment = builder.withDescription("desc")
                 .withIsPersonalizationEnabled(true)
@@ -46,6 +51,7 @@ public class NewExperimentTest {
                 .withIsRapidExperiment(true)
                 .withUserCap(1000)
                 .withCreatorID("c1")
+                .withTags(tags)
                 .build();
 
         assertThat(newExperiment.getApplicationName(), is(Application.Name.valueOf("app")));
@@ -57,6 +63,10 @@ public class NewExperimentTest {
         assertThat(newExperiment.getID(), is(id));
         assertThat(newExperiment.getDescription(), is("desc"));
         assertThat(newExperiment.getLabel(), is(Experiment.Label.valueOf("label")));
+        assertThat(newExperiment.getTags().size(), is(3));
+        Arrays.sort(tagsArray); // the tags should be sorted
+        assertThat(newExperiment.getTags().toArray(), is(tagsArray));
+
 
         newExperiment.setApplicationName(Application.Name.valueOf("NewApp"));
         newExperiment.setCreatorID("c2");
@@ -72,7 +82,7 @@ public class NewExperimentTest {
                 .withModelName("m1")
                 .withModelVersion("v1")
                 .withRule("r1")
-                .withSamplingPercent(null) //<-- this is what causes the execption
+                .withSamplingPercent(null) //<-- this is what causes the exception
                 .withLabel(Experiment.Label.valueOf("label"))
                 .withAppName(Application.Name.valueOf("app"))
                 .withIsRapidExperiment(true)

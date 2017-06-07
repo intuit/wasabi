@@ -14,10 +14,6 @@ angular.module('wasabi.services').factory('AuthFactory', ['$resource', 'Session'
                     return $.param(data);
                 },
                 transformResponse: function (data) {
-/*
-                    console.log("Results from login:");
-                    console.log(data);
-*/
                     if (!data || data.length <= 0) {
                         data = '{"error": true}';
                     }
@@ -28,11 +24,8 @@ angular.module('wasabi.services').factory('AuthFactory', ['$resource', 'Session'
             verifyToken: { method: 'GET',
                 url: ConfigFactory.baseUrl() + '/authentication/verifyToken',
                 transformResponse: function (data) {
-                    //Session.destroy();
-                    //console.log("Results from verifyToken:");
                     if (data) {
                         data = $.parseJSON(data);
-                        //console.log(data);
                         if (data.error) {
                             Session.destroy();
                         }
@@ -41,13 +34,7 @@ angular.module('wasabi.services').factory('AuthFactory', ['$resource', 'Session'
                 }
             },
             signOut: { method: 'GET',
-                url: ConfigFactory.baseUrl() + '/authentication/logout',
-                transformResponse: function (/*data*/) {
-                    Session.destroy();
-                    //console.log("Results from signout:");
-                    //console.log($.parseJSON(data));
-                    return null;
-                }
+                url: ConfigFactory.baseUrl() + '/authentication/logout'
             },
             // Returns info about a user if they are a valid Corp user, otherwise an exception.
             'checkValidUser': { method: 'GET',

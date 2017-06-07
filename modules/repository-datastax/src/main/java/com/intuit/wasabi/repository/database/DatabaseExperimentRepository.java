@@ -41,6 +41,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.intuit.wasabi.experimentobjects.Experiment.State.DELETED;
 
@@ -745,9 +746,7 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
     }
 
     /**
-     * Creates an application at top level
-     *
-     * @param applicationName Application Name
+     * {@inheritDoc}
      */
     @Override
     public void createApplication(Application.Name applicationName) {
@@ -755,9 +754,13 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
     }
 
     @Override
-    public void updateStateIndex(Experiment experiment) {
+    public Map<Application.Name, Set<String>> getTagListForApplications(Collection<Application.Name> applicationNames) {
         throw new UnsupportedOperationException("Not supported ");
     }
 
+    @Override
+    public void updateStateIndex(Experiment experiment) {
+        throw new UnsupportedOperationException("Not supported ");
+    }
 
 }

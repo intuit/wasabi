@@ -4,8 +4,8 @@
 
 angular.module('wasabi.controllers')
     .controller('UserModalCtrl',
-        ['$scope', '$modalInstance', 'AuthFactory', 'AuthzFactory', 'user', 'administeredApplications', 'UtilitiesFactory', '$rootScope', '$modal', 'AUTH_EVENTS', 'DialogsFactory',
-            function ($scope, $modalInstance, AuthFactory, AuthzFactory, user, administeredApplications, UtilitiesFactory, $rootScope, $modal, AUTH_EVENTS, DialogsFactory) {
+        ['$scope', '$uibModalInstance', 'AuthFactory', 'AuthzFactory', 'user', 'administeredApplications', 'UtilitiesFactory', '$rootScope', '$uibModal', 'AUTH_EVENTS', 'DialogsFactory',
+            function ($scope, $uibModalInstance, AuthFactory, AuthzFactory, user, administeredApplications, UtilitiesFactory, $rootScope, $uibModal, AUTH_EVENTS, DialogsFactory) {
 
                 UtilitiesFactory.trackEvent('loadedDialog',
                     {key: 'dialog_name', value: 'createOrEditUser'});
@@ -24,7 +24,7 @@ angular.module('wasabi.controllers')
                 $scope.applications = []; // The applications this user has roles for.
                 $scope.appsThatCanBeAdded = []; // The applications being administered for which the user doesn't already have roles.
                 $scope.postSubmitError = null;
-                $scope.modalInstance = (this._isTesting === true ? null : $modalInstance);
+                $scope.modalInstance = (this._isTesting === true ? null : $uibModalInstance);
                 $scope.verifyFormNoValueError = false;
 
                 $scope.stateImgUrl = function (state) {
@@ -123,7 +123,7 @@ angular.module('wasabi.controllers')
                 };
 
                 $scope.closeDialog = function () {
-                    $modalInstance.close();
+                    $uibModalInstance.close();
                 };
 
                 $scope.openAddApplicationModal = function (user) {
@@ -131,7 +131,7 @@ angular.module('wasabi.controllers')
                         return false;
                     }
 
-                    var modalInstance = $modal.open({
+                    var modalInstance = $uibModal.open({
                         templateUrl: 'views/AddApplicationModal.html',
                         controller: 'AddApplicationModalCtrl',
                         windowClass: 'larger-dialog',
@@ -182,7 +182,7 @@ angular.module('wasabi.controllers')
                         return false;
                     }
 
-                    var modalInstance = $modal.open({
+                    var modalInstance = $uibModal.open({
                         templateUrl: 'views/AddApplicationModal.html',
                         controller: 'AddApplicationModalCtrl',
                         windowClass: 'larger-dialog',

@@ -157,6 +157,18 @@ public interface CassandraDriver extends Closeable {
         int getPoolTimeoutMillis();
 
         /**
+         * Returns the defined connection timeout in milliseconds.
+         * @return the defined connection timeout in milliseconds
+         */
+        int getConnectTimeoutMillis();
+
+        /**
+         * Returned the per-host read timeout in milliseconds from the configuration.
+         * @return the defined read timeout in milliseconds from the configuration
+         */
+        int getReadTimeoutMillis();
+
+        /**
          * Returns max connections per remote host
          * @return max connections per remote host
          */

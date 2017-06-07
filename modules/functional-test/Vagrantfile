@@ -13,8 +13,8 @@ Vagrant.configure("2") do |config|
 
         dev.vm.provider "virtualbox" do |v|
             v.name = "wasabi.os.it.vbox"
-            v.memory = 4096
-            v.cpus = 4
+            v.memory = 8192
+            v.cpus = 8
             v.customize ["modifyvm", :id, "--cableconnected1", "on"]
         end
     end

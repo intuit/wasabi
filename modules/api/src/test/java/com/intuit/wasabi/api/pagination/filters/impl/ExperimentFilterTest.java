@@ -25,8 +25,10 @@ import org.junit.Test;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -56,6 +58,7 @@ public class ExperimentFilterTest {
                 .withEndTime(endTime)
                 .withState(Experiment.State.RUNNING)
                 .withCreatorID("TheCreator")
+                .withTags(new HashSet<>(Arrays.asList("tag1", "tag2", "foo")))
                 .build();
     }
 
@@ -79,6 +82,9 @@ public class ExperimentFilterTest {
         testCases.put("state_exact=notterminated", true);
         testCases.put("state_exact=non-terminated", false);
         testCases.put("state_exact=draft", false);
+        testCases.put("tags=tag2", true);
+        testCases.put("tags=tag42", false);
+        testCases.put("tags=foo;tag", true);
 
         for (Map.Entry<String, Boolean> testCase : testCases.entrySet()) {
             experimentFilter.replaceFilter(testCase.getKey(), "+0000");

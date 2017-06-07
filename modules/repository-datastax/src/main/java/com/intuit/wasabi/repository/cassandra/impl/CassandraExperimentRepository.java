@@ -45,22 +45,27 @@ import com.intuit.wasabi.repository.cassandra.UninterruptibleUtil;
 import com.intuit.wasabi.repository.cassandra.accessor.ApplicationListAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.BucketAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.ExperimentTagAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.audit.BucketAuditLogAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.audit.ExperimentAuditLogAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentLabelIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentState;
 import com.intuit.wasabi.repository.cassandra.accessor.index.StateExperimentIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentByAppNameLabel;
+import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentTagsByApplication;
 import com.intuit.wasabi.repository.cassandra.pojo.index.StateExperimentIndex;
 import org.slf4j.Logger;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -89,6 +94,8 @@ public class CassandraExperimentRepository implements ExperimentRepository {
     private BucketAuditLogAccessor bucketAuditLogAccessor;
 
     private ExperimentAuditLogAccessor experimentAuditLogAccessor;
+
+    private ExperimentTagAccessor experimentTagAccessor;
 
     /**
      * @return the experimentAccessor
@@ -207,7 +214,8 @@ public class CassandraExperimentRepository implements ExperimentRepository {
                                          BucketAuditLogAccessor bucketAuditLogAccessor,
                                          ExperimentAuditLogAccessor experimentAuditLogAccessor,
                                          StateExperimentIndexAccessor stateExperimentIndexAccessor,
-                                         ExperimentValidator validator) {
+                                         ExperimentValidator validator,
+                                         ExperimentTagAccessor experimentTagAccessor) {
         this.driver = driver;
         this.experimentAccessor = experimentAccessor;
         this.experimentLabelIndexAccessor = experimentLabelIndexAccessor;
@@ -217,6 +225,7 @@ public class CassandraExperimentRepository implements ExperimentRepository {
         this.bucketAuditLogAccessor = bucketAuditLogAccessor;
         this.experimentAuditLogAccessor = experimentAuditLogAccessor;
         this.validator = validator;
+        this.experimentTagAccessor = experimentTagAccessor;
     }
 
     /**
@@ -389,10 +398,16 @@ public class CassandraExperimentRepository implements ExperimentRepository {
                     newExperiment.getModelVersion(),
                     newExperiment.getIsRapidExperiment(),
                     newExperiment.getUserCap(),
-                    (newExperiment.getCreatorID() != null) ? newExperiment.getCreatorID() : "");
+                    (newExperiment.getCreatorID() != null) ? newExperiment.getCreatorID() : "",
+                    newExperiment.getTags());
+
 
             // TODO - Do we need to create an application while creating a new experiment ?
             createApplication(newExperiment.getApplicationName());
+
+            // update tags
+            updateExperimentTags(newExperiment.getApplicationName(), newExperiment.getId(), newExperiment.getTags());
+
         } catch (Exception e) {
             LOGGER.error("Error while creating experiment {}", newExperiment, e);
             throw new RepositoryException("Exception while creating experiment " + newExperiment + " message " + e, e);
@@ -400,6 +415,24 @@ public class CassandraExperimentRepository implements ExperimentRepository {
         return newExperiment.getId();
 
     }
+
+    /**
+     * Updates the tags for a given Experiment. This also means that tags are deleted from
+     * the lookup table in Cassandra if they are removed from the experiment.
+     *
+     * @param applicationName the Application for which the tags should be added
+     * @param expId           the Id of the experiment that has changed tags
+     * @param tags            list of tags for the experiment
+     */
+    public void updateExperimentTags(Application.Name applicationName, Experiment.ID expId, Set<String> tags) {
+
+        if (tags == null)
+            tags = Collections.EMPTY_SET; // need this to update this to delete tags
+
+        // update the tag table, just rewrite the complete entry
+        experimentTagAccessor.insert(applicationName.toString(), expId.getRawID(), tags);
+    }
+
 
     /**
      * {@inheritDoc}
@@ -519,7 +552,10 @@ public class CassandraExperimentRepository implements ExperimentRepository {
                     experiment.getModelVersion(),
                     experiment.getIsRapidExperiment(),
                     experiment.getUserCap(),
+                    experiment.getTags(),
                     experiment.getID().getRawID());
+
+            updateExperimentTags(experiment.getApplicationName(), experiment.getID(), experiment.getTags());
 
             // Point the experiment index to this experiment
             updateExperimentLabelIndex(experiment.getID(), experiment.getApplicationName(), experiment.getLabel(),
@@ -1191,6 +1227,42 @@ public class CassandraExperimentRepository implements ExperimentRepository {
             LOGGER.error("Error while creating application {}", applicationName, e);
             throw new RepositoryException("Unable to insert into top level application list: \""
                     + applicationName.toString() + "\"" + e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Map<Application.Name, Set<String>> getTagListForApplications(Collection<Application.Name> applicationNames) {
+
+        LOGGER.debug("Retrieving Experiment Tags for applications {}", applicationNames);
+
+        try {
+            List<ListenableFuture<Result<ExperimentTagsByApplication>>> futures = new ArrayList<>();
+
+            for (Application.Name appName : applicationNames) {
+                ListenableFuture<Result<ExperimentTagsByApplication>> resultSetFuture = experimentTagAccessor
+                        .getExperimentTagsAsync(appName.toString());
+                futures.add(resultSetFuture);
+            }
+
+            Map<Application.Name, Set<String>> result = new HashMap<>();
+            for (ListenableFuture<Result<ExperimentTagsByApplication>> future : futures) {
+                List<ExperimentTagsByApplication> expTagApplication = future.get().all();
+
+                Set<String> allTagsForApplication = new TreeSet<>();
+                for (ExperimentTagsByApplication expTagsByApp : expTagApplication) {
+                    allTagsForApplication.addAll(expTagsByApp.getTags());
+                }
+                result.put(Application.Name.valueOf(expTagApplication.get(0).getAppName()), allTagsForApplication);
+            }
+
+            return result;
+        } catch (Exception e) {
+            LOGGER.error("Error while retieving ExperimentTags for {}", applicationNames, e);
+            throw new RepositoryException("Unable to get ExperimentTags for applications: \""
+                    + applicationNames.toString() + "\"" + e);
         }
     }
 

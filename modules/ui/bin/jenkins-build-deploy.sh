@@ -115,7 +115,15 @@ path=${nexus_repositories}/${artifact_repository_id}/`echo ${group} | sed "s/\./
 zip=${project}-${artifact}-${profile}-${version}.zip
 zip_path=${path}/${zip}
 
-echo "++ Archiving: ${zip} ${zip_path}"
+## echo "++ Archiving: ${zip} ${zip_path}"
+echo "nexus_repositories: ${nexus_repositories}"
+echo "artifact_repository_id: ${artifact_repository_id}"
+echo "group: ${group}"
+echo "artifact: ${artifact}"
+echo "version: ${version}"
+echo "profile: ${profile}"
+echo "project: ${project}"
+
 curl -v -u ${nexus_deploy} --upload-file ./modules/ui/target/dist.zip ${zip_path} || \
 exitOnError "archive failed: curl -v -u [nexus_deploy] --upload-file ./modules/ui/dist.zip ${zip_path}"
 
