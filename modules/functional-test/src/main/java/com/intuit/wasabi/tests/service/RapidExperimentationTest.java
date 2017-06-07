@@ -75,14 +75,14 @@ public class RapidExperimentationTest extends TestBase {
         Experiment exp = ExperimentFactory
                 .createRapidExperiment(RAPID_EXP_MAX_USERS, "_" + UUID.randomUUID().toString(), -1)
                 .setApplication(application);
-       
+
         exp = createBucketsAndRunExperiment(exp, NUMBER_OF_BUCKETS_PER_EXPERIMENT);
 
         for (int i = 1; i <= RAPID_EXP_MAX_USERS; i++) {
             // lets do an assignment for a user with context set to PROD
             Assignment assignment = postAssignment(exp, new User("user" + i), "PROD");
 
-            // lets assert the  response code and also the state of the experiment
+            // lets assert the response code and also the state of the experiment
             Assert.assertEquals(assignment.status, "NEW_ASSIGNMENT");
             Assert.assertEquals(exp.state, Constants.EXPERIMENT_STATE_RUNNING);
         }
@@ -181,7 +181,7 @@ public class RapidExperimentationTest extends TestBase {
             if (i <= NUMBER_OF_RAPID_EXPERIMENTS_IN_BATCH) {
                 exp.setIsRapidExperiment(true).setUserCap(RAPID_EXP_MAX_USERS);
             }
-            
+
             exp = createBucketsAndRunExperiment(exp, NUMBER_OF_BUCKETS_PER_EXPERIMENT);
             batchExperiments.add(exp);
 
@@ -197,16 +197,13 @@ public class RapidExperimentationTest extends TestBase {
         // if we do one more assignment the rapid experiments should change to PAUSED/STOPPED state and the remaining
         // should be in running state
         List<Assignment> assignments = postAssignments(application, partialpage, new User("user1000"));
-        for (int i = 1; i <= RAPID_EXP_MAX_USERS; i++) {
-            Experiment exp = getExperiment(batchExperiments.get(i - 1));
-            if (i <= NUMBER_OF_RAPID_EXPERIMENTS_IN_BATCH) {
-                Assert.assertEquals(assignments.get(i - 1).status, "EXPERIMENT_PAUSED");
-                Assert.assertEquals(exp.state, Constants.EXPERIMENT_STATE_PAUSED);
-            } else {
-                Assert.assertEquals(assignments.get(i - 1).status, "NEW_ASSIGNMENT");
-                Assert.assertEquals(exp.state, Constants.EXPERIMENT_STATE_RUNNING);
-            }
 
+        for (Experiment experiment : batchExperiments) {
+            Experiment exp = getExperiment(experiment);
+            if (exp.isRapidExperiment)
+                Assert.assertEquals(exp.state, Constants.EXPERIMENT_STATE_PAUSED);
+            else
+                Assert.assertEquals(exp.state, Constants.EXPERIMENT_STATE_RUNNING);
         }
 
     }
@@ -226,9 +223,9 @@ public class RapidExperimentationTest extends TestBase {
             Experiment exp = ExperimentFactory
                     .createRapidExperiment(RAPID_EXP_MAX_USERS, "_" + UUID.randomUUID().toString(), -1)
                     .setApplication(application);
-            
-           exp = createBucketsAndRunExperiment(exp, NUMBER_OF_BUCKETS_PER_EXPERIMENT);
-           experimentList.add(exp);
+
+            exp = createBucketsAndRunExperiment(exp, NUMBER_OF_BUCKETS_PER_EXPERIMENT);
+            experimentList.add(exp);
         }
 
         assignPageToExperimentsList(experimentList, page);
@@ -250,17 +247,17 @@ public class RapidExperimentationTest extends TestBase {
         assertAssignmentResponseStatus(assignments, "EXPERIMENT_PAUSED");
 
     }
-    
+
     /**
-     * This util method posts an experiment, creates buckets to the experiment and 
-     * changes state of the experiment to RUNNING.
+     * This util method posts an experiment, creates buckets to the experiment and changes state of the experiment to
+     * RUNNING.
      * 
      * @param exp - the experiment under consideration
      * @param numberOfBuckets - the number of buckets we need to create for experiment
      * @return Experiment - the running experiment
      */
-    private Experiment createBucketsAndRunExperiment(Experiment exp,int numberOfBuckets)    {
-        
+    private Experiment createBucketsAndRunExperiment(Experiment exp, int numberOfBuckets) {
+
         exp = postExperiment(exp);
         createBucketsToExperiment(exp, numberOfBuckets);
         exp.state = Constants.EXPERIMENT_STATE_RUNNING;
