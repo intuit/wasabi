@@ -169,6 +169,10 @@ header {
   }
 }
 
+.dropdown-menu {
+    z-index: 10000;
+}
+
 .nav-tabs > li {
     background-color: rgb(244, 244, 244);
     margin-left: 2px;
