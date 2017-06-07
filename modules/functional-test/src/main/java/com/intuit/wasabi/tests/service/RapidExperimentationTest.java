@@ -82,15 +82,13 @@ public class RapidExperimentationTest extends TestBase {
             // lets do an assignment for a user with context set to PROD
             Assignment assignment = postAssignment(exp, new User("user" + i), "PROD");
 
-            // lets assert the status and response code and also the state of the experiment
-            assertReturnCode(response, HttpStatus.SC_OK);
+            // lets assert the  response code and also the state of the experiment
             Assert.assertEquals(assignment.status, "NEW_ASSIGNMENT");
             Assert.assertEquals(exp.state, Constants.EXPERIMENT_STATE_RUNNING);
         }
 
         // since the experiment crossed the maxusers new assignments should return status as EXPERIMENT_PAUSED
         Assignment assignment = postAssignment(exp, new User("user10"), "PROD");
-        assertReturnCode(response, HttpStatus.SC_OK);
         Assert.assertEquals(assignment.status, "EXPERIMENT_PAUSED");
 
         // we should also assert that the state of the experiment should change to EXPERIMENT_PAUSED
@@ -115,8 +113,7 @@ public class RapidExperimentationTest extends TestBase {
             // lets do an assignment for a user with context set to PROD
             Assignment assignment = postAssignment(exp, new User("user" + i), "PROD");
 
-            // lets assert the status and response code and also the state of the experiment
-            assertReturnCode(response, HttpStatus.SC_OK);
+            // lets assert the response code and also the state of the experiment
             Assert.assertEquals(assignment.status, "NEW_ASSIGNMENT");
             Assert.assertEquals(exp.state, Constants.EXPERIMENT_STATE_RUNNING);
         }
@@ -128,7 +125,6 @@ public class RapidExperimentationTest extends TestBase {
         // since the experiment crossed the maxusers the experiment should change to PUASED and response for assignment
         // should be "EXPERIMENT_PAUSED"
         Assignment assignment = postAssignment(exp, new User("user10"), "PROD");
-        assertReturnCode(response, HttpStatus.SC_OK);
         Assert.assertEquals(assignment.status, "EXPERIMENT_PAUSED");
         exp = getExperiment(exp);
         Assert.assertEquals(exp.state, Constants.EXPERIMENT_STATE_PAUSED);
@@ -155,7 +151,6 @@ public class RapidExperimentationTest extends TestBase {
             // lets do an assignment for a user
             assignment = putAssignment(exp, assignment, new User("user" + i));
             // lets assert the status and response code and also the state of the experiment
-            assertReturnCode(response, HttpStatus.SC_OK);
             Assert.assertEquals(assignment.status, "NEW_ASSIGNMENT");
             Assert.assertEquals(exp.state, Constants.EXPERIMENT_STATE_RUNNING);
         }
@@ -163,7 +158,6 @@ public class RapidExperimentationTest extends TestBase {
         // since the experiment crossed the maxusers the experiment should change to PUASED but it will still allow
         // assignments to buckets
         assignment = putAssignment(exp, assignment, new User("user6"), "PROD");
-        assertReturnCode(response, HttpStatus.SC_OK);
         Assert.assertEquals(assignment.status, "NEW_ASSIGNMENT");
         Assert.assertEquals(getExperiment(exp).state, Constants.EXPERIMENT_STATE_PAUSED);
 
