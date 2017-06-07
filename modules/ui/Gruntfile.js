@@ -47,7 +47,7 @@ module.exports = function (grunt) {
                 tasks: ['compass:server', 'autoprefixer']
             },
             gruntfile: {
-                files: ['Gruntfile.js', 'constants.json'],
+                files: ['Gruntfile.js', 'default_constants.json'],
                 tasks: ['ngconstant:development']
             },
             livereload: {
@@ -65,9 +65,9 @@ module.exports = function (grunt) {
         // The actual grunt server settings
         connect: {
             options: {
-                port: 9000,
+                port: process.env.PORT || 9000,
                 // Change this to '0.0.0.0' to access the server from outside.
-                hostname: 'localhost',
+                hostname: process.env.UI_HOST || 'localhost',
                 livereload: 35729
             },
             livereload: {
@@ -121,6 +121,7 @@ module.exports = function (grunt) {
                     {
                         dot: true,
                         src: [
+                            'build/constants.json',
                             '.tmp',
                             '<%= yeoman.app %>/scripts/config.js',
                             '<%= yeoman.dist %>/*',
@@ -383,18 +384,18 @@ module.exports = function (grunt) {
                 options: {
                     dest: '<%= yeoman.app %>/scripts/config.js'
                 },
-                constants: 'constants.json'
+                constants: 'default_constants.json'
             },
             dist: {
                 options: {
                     dest: '<%= yeoman.dist %>/scripts/config.js'
                 },
-                constants: 'constants.json'
+                constants: 'build/constants.json'
             },
             development: {
                 constants: {
-                    supportEmail: 'you@example.com',
-                    apiHostBaseUrlValue: 'http://localhost:8080/api/v1'
+                    supportEmail: process.env.SUPPORT_EMAIL || 'you@example.com',
+                    apiHostBaseUrlValue: process.env.API_HOST || 'http://localhost:8080/api/v1'
                 }
             }
         },
@@ -514,8 +515,19 @@ module.exports = function (grunt) {
         'karma:junit'
     ]);
 
+    grunt.registerTask('config', 'Set configuration for distribution', function(target) {
+        if (target === 'dist') {
+            var defaultConstants = grunt.file.readJSON('default_constants.json');
+            var distConstants = {};
+            distConstants['supportEmail'] = process.env.SUPPORT_EMAIL || defaultConstants['supportEmail'];
+            distConstants['apiHostBaseUrlValue'] = process.env.API_HOST || defaultConstants['apiHostBaseUrlValue'];
+            grunt.file.write("build/constants.json", JSON.stringify(distConstants, null, 2));
+        }
+    });
+
     grunt.registerTask('build', [
         'clean:dist',
+        'config:dist',
         'bowerInstall',
         'useminPrepare',
         'concurrent:dist',
