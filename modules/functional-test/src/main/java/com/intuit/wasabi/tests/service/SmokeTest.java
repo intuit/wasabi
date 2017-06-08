@@ -162,9 +162,11 @@ public class SmokeTest extends TestBase {
 
     /**
      * Sets the experiment to RUNNING.
+     * @throws InterruptedException 
      */
     @Test(dependsOnMethods = {"t_createNewBucket"})
-    public void t_startExperiment() {
+    public void t_startExperiment() throws InterruptedException {
+        Thread.sleep(50*1000);
         experiment.state = Constants.EXPERIMENT_STATE_RUNNING;
         Experiment exp = putExperiment(experiment);
         assertEqualModelItems(exp, experiment, experimentComparisonStrategy);
@@ -173,20 +175,24 @@ public class SmokeTest extends TestBase {
 
     /**
      * Retrieves the running experiment.
+     * @throws InterruptedException 
      */
     @Test(dependsOnMethods = {"t_startExperiment"})
-    public void t_retrieveRunningExperiment() {
+    public void t_retrieveRunningExperiment() throws InterruptedException {
         Experiment exp = getExperiment(experiment);
         assertEqualModelItems(exp, experiment, experimentComparisonStrategy);
         experiment.update(exp);
+        Thread.sleep(30*1000);
     }
 
     /**
      * Assigns users to buckets.
+     * @throws InterruptedException 
      */
     @Test(dependsOnMethods = {"t_retrieveRunningExperiment"})
     @RetryTest(maxTries = 3, warmup = 1500)
-    public void t_assignUsersToBuckets() {
+    public void t_assignUsersToBuckets() throws InterruptedException {
+        Thread.sleep(40*1000);
         for (User user : users) {
             Assignment assignment = getAssignment(experiment, user);
             assignments.put(user, assignment);

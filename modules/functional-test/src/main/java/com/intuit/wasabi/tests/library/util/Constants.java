@@ -106,4 +106,27 @@ public class Constants {
 
     public static final String ROLE_LIST = "roleList";
 
+
+    /**
+     * This enum class holds the timeZones of various regions..added a few timezones
+     * feel free to add your timeZone if it is not there...
+     */
+    public static  enum TimeZoneEnum {
+        USA_PACIFIC("America/Los_Angeles"),
+        USA_MOUNTAIN("America/Denver"),
+        USA_CENTRAL("America/Chicago"),
+        USA_EAST("America/Detroit"),
+        USA_ALASKA("America/Anchorage") ;
+
+        private String timeZone;
+
+        TimeZoneEnum(String timeZone) {
+            this.timeZone = timeZone;
+        }
+
+        public String getTimeZone() {
+            return  timeZone;
+        }
+    }
+
 }
