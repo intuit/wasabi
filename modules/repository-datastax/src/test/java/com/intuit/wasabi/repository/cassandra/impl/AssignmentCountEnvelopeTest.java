@@ -53,7 +53,7 @@ public class AssignmentCountEnvelopeTest {
         env.run();
         // so since the two parts a separate code fragments the fail of the first
         // should not result in a fail of the other
-        verify(exp, times(1)).getIsRapidExperiment();
+        verify(exp, times(2)).getIsRapidExperiment();
     }
 
     @Test
@@ -65,7 +65,7 @@ public class AssignmentCountEnvelopeTest {
         env.run();
         // so since the two parts a separate code fragments the fail of the first
         // should not result in a fail of the other
-        verify(exp, times(1)).getIsRapidExperiment();
+        verify(exp, times(2)).getIsRapidExperiment();
     }
 
     /**
@@ -77,7 +77,7 @@ public class AssignmentCountEnvelopeTest {
 //        doReturn(42).when(exp).getUserCap();
         when(exp.getIsRapidExperiment()).thenReturn(true);
         when(exp.getUserCap()).thenReturn(42);
-        when(ar.getBucketAssignmentCount(exp).getTotalUsers().getBucketAssignments()).thenReturn(41l);
+        when(ar.getBucketAssignmentCount(exp).getTotalUsers().getBucketAssignments()).thenReturn(40l);
 
         AssignmentCountEnvelope env = new AssignmentCountEnvelope(ar, cass, mysql, exp, assignment, true, el, date, true, true);
         env.run();

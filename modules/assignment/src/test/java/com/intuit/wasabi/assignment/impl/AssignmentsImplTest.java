@@ -31,6 +31,7 @@ import com.intuit.wasabi.assignmentobjects.SegmentationProfile;
 import com.intuit.wasabi.assignmentobjects.User;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.eventlog.EventLog;
+import com.intuit.wasabi.experiment.Experiments;
 import com.intuit.wasabi.experiment.Mutex;
 import com.intuit.wasabi.experiment.Pages;
 import com.intuit.wasabi.experiment.Priorities;
@@ -106,6 +107,7 @@ public class AssignmentsImplTest {
     final static Context context = Context.valueOf("PROD");
     final static String TEST_INGESTION_EXECUTOR_NAME = "TEST";
     AssignmentsImpl cassandraAssignments = mock(AssignmentsImpl.class);
+    private Experiments experimentUtil = mock(Experiments.class);
     private ExperimentRepository cassandraRepository = mock(ExperimentRepository.class);
     private ExperimentRepository experimentRepository = mock(ExperimentRepository.class);
     private AnalyticsRepository analyticsRepository = mock(AnalyticsRepository.class);
@@ -139,7 +141,7 @@ public class AssignmentsImplTest {
         this.assignmentsImpl = new AssignmentsImpl(executors,
                 experimentRepository, assignmentsRepository,
                 ruleCache, pages,
-                assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache);
+                assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache, experimentUtil);
     }
 
     @Test
@@ -221,10 +223,10 @@ public class AssignmentsImplTest {
 
     @Test
     public void testGetSingleAssignmentNullAssignmentExperimentInDraftState() throws IOException {
-        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
+        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap(),
                 experimentRepository, assignmentsRepository,
                 ruleCache, pages, assignmentDecorator, threadPoolExecutor,
-                eventLog, metadataCacheEnabled, metadataCache));
+                eventLog, metadataCacheEnabled, metadataCache, experimentUtil));
         //Input
         Application.Name appName = Application.Name.valueOf("Test");
         User.ID user = User.ID.valueOf("testUser");
@@ -392,9 +394,10 @@ public class AssignmentsImplTest {
 
     @Test
     public void testGetSingleAssignmentNullAssignmentExperimentNoProfileMatch() throws IOException {
-        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
+        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap(),
                 experimentRepository, assignmentsRepository,
-                ruleCache, pages, assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache));
+                ruleCache, pages, assignmentDecorator, threadPoolExecutor,
+                eventLog, metadataCacheEnabled, metadataCache, experimentUtil));
 
         //Input
         Application.Name appName = Application.Name.valueOf("Test");
@@ -497,9 +500,9 @@ public class AssignmentsImplTest {
 
     @Test(expected = AssertionError.class)
     public void testGetSingleAssignmentProfileMatchAssertNewAssignment() throws IOException {
-        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
+        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap(),
                 experimentRepository, assignmentsRepository, ruleCache, pages, assignmentDecorator, threadPoolExecutor,
-                eventLog, metadataCacheEnabled, metadataCache));
+                eventLog, metadataCacheEnabled, metadataCache, experimentUtil));
 
         //Input
         Application.Name appName = Application.Name.valueOf("Test");
@@ -552,9 +555,10 @@ public class AssignmentsImplTest {
 
     @Test
     public void testGetSingleAssignmentSuccess() throws IOException {
-        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
+        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap(),
                 experimentRepository, assignmentsRepository,
-                ruleCache, pages, assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache));
+                ruleCache, pages, assignmentDecorator, threadPoolExecutor, eventLog,
+                metadataCacheEnabled, metadataCache, experimentUtil));
 
         //Input
         Application.Name appName = Application.Name.valueOf("Test");
@@ -1592,6 +1596,130 @@ public class AssignmentsImplTest {
         Mockito.when(cassandraAssignments.putAssignment(userA, testApp, expLabel, context, null, true)).thenReturn(newAssignment);
         assert newAssignment_2.getStatus() == Assignment.Status.NEW_ASSIGNMENT;
         assert newAssignment_2.getBucketLabel() == null;
+    }
+
+    //Rapid Experiment test cases
+    private void setupMocksforRapidExperiment(Application.Name appName,
+                                              Experiment.ID experimentId,
+                                              Experiment.Label experimentLabel) {
+        //Mock dependent interactions
+        Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
+        when(experiment.getID()).thenReturn(experimentId);
+        when(experiment.getEndTime().getTime()).thenReturn(new Date().getTime() + 1000000L);
+        when(experiment.getLabel()).thenReturn(experimentLabel);
+        when(experiment.getState()).thenReturn(Experiment.State.RUNNING);
+        when(experiment.getIsRapidExperiment()).thenReturn(true);
+
+        List<Experiment> expList = newArrayList(experiment);
+
+        PrioritizedExperimentList pExpList = new PrioritizedExperimentList();
+        pExpList.addPrioritizedExperiment(PrioritizedExperiment.from(experiment, 1).build());
+        Optional<PrioritizedExperimentList> prioritizedExperimentListOptional = Optional.of(pExpList);
+
+        BucketList bucketList = new BucketList();
+        bucketList.addBucket(Bucket.newInstance(experimentId, Bucket.Label.valueOf("red")).withAllocationPercent(0.5).build());
+        bucketList.addBucket(Bucket.newInstance(experimentId, Bucket.Label.valueOf("blue")).withAllocationPercent(0.5).build());
+
+        List<Experiment.ID> exclusionList = newArrayList();
+
+        when(metadataCache.getExperimentById(experimentId)).thenReturn(Optional.of(experiment));
+        when(metadataCache.getExperimentsByAppName(appName)).thenReturn(expList);
+        when(metadataCache.getPrioritizedExperimentListMap(appName)).thenReturn(prioritizedExperimentListOptional);
+        when(metadataCache.getBucketList(experimentId)).thenReturn(bucketList);
+        when(metadataCache.getExclusionList(experimentId)).thenReturn(exclusionList);
+
+        when(experiment.getIsRapidExperiment()).thenReturn(true);
+    }
+
+    private void testGetSingleAssignmentRapidExperimentByStateAndTime(Experiment.State experimentState,
+                                                                      Assignment.Status expectedAssignmentStatus,
+                                                                      long startTime,
+                                                                      long endTime) {
+        //Input
+        Application.Name appName = Application.Name.valueOf("Test");
+        User.ID user = User.ID.valueOf("testUser");
+        Experiment.ID id = Experiment.ID.newInstance();
+        Experiment.Label label = Experiment.Label.valueOf("label");
+        SegmentationProfile segmentationProfile = mock(SegmentationProfile.class);
+        HttpHeaders headers = mock(HttpHeaders.class);
+
+        setupMocksforRapidExperiment(appName, id, label);
+
+        Experiment rapidExperiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
+        when(rapidExperiment.getID()).thenReturn(id);
+        when(rapidExperiment.getStartTime().getTime()).thenReturn(startTime);
+        when(rapidExperiment.getEndTime().getTime()).thenReturn(endTime);
+        when(rapidExperiment.getLabel()).thenReturn(label);
+        when(rapidExperiment.getState()).thenReturn(experimentState);
+        when(experimentUtil.getExperiment(id)).thenReturn(rapidExperiment);
+
+        Assignment result = assignmentsImpl.doSingleAssignment(user, appName, label, context,
+                true, true, segmentationProfile, headers);
+
+        assertThat(result.getStatus(), is(expectedAssignmentStatus));
+    }
+
+    @Test
+    public void testGetSingleAssignmentNullAssignmentRapidExperimentPaused() {
+        testGetSingleAssignmentRapidExperimentByStateAndTime(
+                Experiment.State.PAUSED, Assignment.Status.EXPERIMENT_PAUSED,
+                new Date().getTime(), new Date().getTime() + 1000000L);
+    }
+
+    @Test
+    public void testGetSingleAssignmentRapidExperimentRunning() {
+        testGetSingleAssignmentRapidExperimentByStateAndTime(
+                Experiment.State.RUNNING, Assignment.Status.NEW_ASSIGNMENT,
+                new Date().getTime(), new Date().getTime() + 1000000L);
+    }
+
+    @Test
+    public void testGetSingleAssignmentNullAssignmentRapidExperimentDraft() {
+        testGetSingleAssignmentRapidExperimentByStateAndTime(
+                Experiment.State.DRAFT, Assignment.Status.EXPERIMENT_IN_DRAFT_STATE,
+                new Date().getTime(), new Date().getTime() + 1000000L);
+    }
+
+    @Test
+    public void testGetSingleAssignmentNullAssignmentRapidExperimentTerminated() {
+        testGetSingleAssignmentRapidExperimentByStateAndTime(
+                Experiment.State.TERMINATED, Assignment.Status.ASSIGNMENT_FAILED,
+                new Date().getTime(), new Date().getTime() + 1000000L);
+    }
+
+    @Test
+    public void testGetSingleAssignmentNullAssignmentRapidExperimentNotStarted() {
+        testGetSingleAssignmentRapidExperimentByStateAndTime(
+                Experiment.State.PAUSED, Assignment.Status.EXPERIMENT_NOT_STARTED,
+                new Date().getTime() + 10000000L, new Date().getTime() + 1000000L);
+    }
+
+    @Test
+    public void testGetSingleAssignmentNullAssignmentRapidExperimentExpired() {
+        testGetSingleAssignmentRapidExperimentByStateAndTime(
+                Experiment.State.PAUSED, Assignment.Status.EXPERIMENT_EXPIRED,
+                new Date().getTime(), new Date().getTime() - 1000L);
+    }
+
+    @Test
+    public void testGetSingleAssignmentNullAssignmentRapidExperimentNotFound() {
+
+        //Input
+        Application.Name appName = Application.Name.valueOf("Test");
+        User.ID user = User.ID.valueOf("testUser");
+        Experiment.ID id = Experiment.ID.newInstance();
+        Experiment.Label label = Experiment.Label.valueOf("label");
+        SegmentationProfile segmentationProfile = mock(SegmentationProfile.class);
+        HttpHeaders headers = mock(HttpHeaders.class);
+
+        setupMocksforRapidExperiment(appName, id, label);
+
+        when(experimentUtil.getExperiment(id)).thenReturn(null);
+
+        Assignment result = assignmentsImpl.doSingleAssignment(user, appName, label, context, true, true,
+                segmentationProfile, headers);
+
+        assertThat(result.getStatus(), is(Assignment.Status.EXPERIMENT_NOT_FOUND));
     }
 
     // FIXME:
