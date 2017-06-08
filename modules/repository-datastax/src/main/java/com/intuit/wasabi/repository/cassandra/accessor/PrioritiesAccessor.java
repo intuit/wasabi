@@ -15,6 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.cassandra.accessor;
 
+import com.datastax.driver.core.Statement;
 import com.datastax.driver.mapping.Result;
 import com.datastax.driver.mapping.annotations.Accessor;
 import com.datastax.driver.mapping.annotations.Query;
@@ -50,6 +51,15 @@ public interface PrioritiesAccessor {
      */
     @Query("update application set priorities = ? where app_name = ?")
     void updatePriorities(List<UUID> experimentPriorityList, String applicationName);
+
+    /**
+     * Append an experiment to the priorities
+     *
+     * @param experimentId and experiment's id which is to be appended to the existing priorities
+     * @param applicationName name of application
+     */
+    @Query("update application set priorities = priorities + ? where app_name = ?")
+    Statement appendToPriorities(UUID experimentId, String applicationName);
 
     /**
      * Delete the prioritized list for an application

@@ -16,6 +16,7 @@
 package com.intuit.wasabi.repository.cassandra.accessor.index;
 
 import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Statement;
 import com.datastax.driver.mapping.Result;
 import com.datastax.driver.mapping.annotations.Accessor;
 import com.datastax.driver.mapping.annotations.Query;
@@ -55,6 +56,22 @@ public interface ExperimentLabelIndexAccessor {
     @Query("update experiment_label_index set id = ?, modified = ?, start_time = ?, end_time = ?, state = ? " +
             "where app_name = ? and label = ?")
     ResultSet updateBy(UUID uuid, Date modified, Date startTime, Date endTime, String state, String appName, String label);
+
+    /**
+     * Insert experiment label index
+     *
+     * @param uuid
+     * @param modified
+     * @param startTime
+     * @param endTime
+     * @param state
+     * @param appName
+     * @param label
+     * @return result set
+     */
+    @Query("update experiment_label_index set id = ?, modified = ?, start_time = ?, end_time = ?, state = ? " +
+            "where app_name = ? and label = ?")
+    Statement insertBy(UUID uuid, Date modified, Date startTime, Date endTime, String state, String appName, String label);
 
     /**
      * Delete entry from experiment label index

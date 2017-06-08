@@ -134,53 +134,6 @@ public class ExperimentsImplTest {
     }
 
     @Test
-    public void testCreateExperimentFailedPriority() {
-        NewExperiment testExp = NewExperiment.withID(experimentID)
-                .withAppName(testApp)
-                .withLabel(testLabel)
-                .withSamplingPercent(samplingPercent)
-                .withStartTime(startTime)
-                .withEndTime(endTime)
-                .withDescription(description).build();
-        doNothing().when(validator).validateNewExperiment(testExp);
-        doNothing().when(validator).validateNewExperiment(testExp);
-        when(cassandraRepository.createExperiment(testExp)).thenReturn(experimentID);
-        doThrow(new IllegalArgumentException()).when(priorities).appendToPriorityList(experimentID);
-        try {
-            expImpl.createExperiment(testExp, UserInfo.from(UserInfo.Username.valueOf("user")).build());
-            fail("Expected RepositoryException.");
-        } catch (Exception e) {
-            assertEquals(e.getClass(), IllegalArgumentException.class);
-        }
-        verify(cassandraRepository, atLeastOnce()).deleteExperiment(testExp);
-    }
-
-    @Test
-    public void testCreateExperimentFailedIndices() {
-        NewExperiment testExp = NewExperiment.withID(experimentID)
-                .withAppName(testApp)
-                .withLabel(testLabel)
-                .withSamplingPercent(samplingPercent)
-                .withStartTime(startTime)
-                .withEndTime(endTime)
-                .withDescription(description).build();
-        doNothing().when(validator).validateNewExperiment(testExp);
-        when(cassandraRepository.createExperiment(testExp)).thenReturn(experimentID);
-        doNothing().when(priorities).appendToPriorityList(experimentID);
-        when(databaseRepository.createExperiment(testExp)).thenReturn(experimentID);
-        doThrow(new RepositoryException()).when(cassandraRepository).createIndicesForNewExperiment(testExp);
-        try {
-            expImpl.createExperiment(testExp, UserInfo.from(UserInfo.Username.valueOf("user")).build());
-            fail("Expected RepositoryException.");
-        } catch (Exception e) {
-            assertEquals(e.getClass(), RepositoryException.class);
-        }
-        verify(cassandraRepository, atLeastOnce()).deleteExperiment(testExp);
-        verify(databaseRepository, atLeastOnce()).deleteExperiment(testExp);
-        verify(priorities, atLeastOnce()).removeFromPriorityList(testApp, experimentID);
-    }
-
-    @Test
     public void testGetExperiment() throws Exception {
         Experiment testExp = Experiment.withID(experimentID)
                 .withApplicationName(testApp)

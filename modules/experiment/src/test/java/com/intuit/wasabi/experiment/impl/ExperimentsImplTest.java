@@ -123,6 +123,7 @@ public class ExperimentsImplTest {
     // personalization is enabled and model name is not specified
     @Test(expected = IllegalArgumentException.class)
     public void testCreateExperimentFailedValidatorPersonalization() {
+        //Input data
         NewExperiment testExp = NewExperiment.withID(experimentID)
                 .withAppName(testApp)
                 .withLabel(testLabel)
@@ -133,11 +134,19 @@ public class ExperimentsImplTest {
                 .withEndTime(endTime).build();
         testExp.setApplicationName(Application.Name.valueOf(""));
         assertThat(testExp.getApplicationName(), is(Application.Name.valueOf("")));
+
+        //Actual call
         expImpl.createExperiment(testExp, UserInfo.from(UserInfo.Username.valueOf("user")).build());
+
+        //Verify execution
+        verify(databaseRepository, times(0)).createExperiment(any(NewExperiment.class));
+        verify(cassandraRepository, times(0)).createExperiment(any(NewExperiment.class));
+        verify(databaseRepository, times(0)).deleteExperiment(testExp);
+        verify(eventLog, times(0)).postEvent(any(ExperimentCreateEvent.class));
     }
 
     @Test
-    public void testCreateExperimentFailedPriority() {
+    public void testCreateExperimentFailedCassandraCreation() {
         NewExperiment testExp = NewExperiment.withID(experimentID)
                 .withAppName(testApp)
                 .withLabel(testLabel)
@@ -145,17 +154,24 @@ public class ExperimentsImplTest {
                 .withStartTime(startTime)
                 .withEndTime(endTime)
                 .withDescription(description).build();
+        //Mock interactions
         doNothing().when(validator).validateNewExperiment(testExp);
-        doNothing().when(validator).validateNewExperiment(testExp);
-        when(cassandraRepository.createExperiment(testExp)).thenReturn(experimentID);
-        doThrow(new IllegalArgumentException()).when(priorities).appendToPriorityList(experimentID);
+        when(databaseRepository.createExperiment(testExp)).thenReturn(experimentID);
+        doThrow(new RepositoryException()).when(cassandraRepository).createExperiment(testExp);
+
+        //Make actual call
         try {
             expImpl.createExperiment(testExp, UserInfo.from(UserInfo.Username.valueOf("user")).build());
             fail("Expected RepositoryException.");
         } catch (Exception e) {
-            assertEquals(e.getClass(), IllegalArgumentException.class);
+            assertEquals(e.getClass(), RepositoryException.class);
         }
-        verify(cassandraRepository, atLeastOnce()).deleteExperiment(testExp);
+
+        //Verify execution
+        verify(databaseRepository, times(1)).createExperiment(any(NewExperiment.class));
+        verify(databaseRepository, times(1)).deleteExperiment(testExp);
+        verify(eventLog, times(0)).postEvent(any(ExperimentCreateEvent.class));
+
     }
 
     @Test
@@ -167,44 +183,24 @@ public class ExperimentsImplTest {
                 .withStartTime(startTime)
                 .withEndTime(endTime)
                 .withDescription(description).build();
+        //Mock interactions
         doNothing().when(validator).validateNewExperiment(testExp);
-        doNothing().when(validator).validateNewExperiment(testExp);
-        when(cassandraRepository.createExperiment(testExp)).thenReturn(experimentID);
         doThrow(new RepositoryException()).when(databaseRepository).createExperiment(testExp);
+
+        //Make actual call
         try {
             expImpl.createExperiment(testExp, UserInfo.from(UserInfo.Username.valueOf("user")).build());
             fail("Expected RepositoryException.");
         } catch (Exception e) {
             assertEquals(e.getClass(), RepositoryException.class);
         }
-        verify(priorities, times(1)).removeFromPriorityList(testExp.getApplicationName(), experimentID);
-        verify(cassandraRepository, times(1)).deleteExperiment(testExp);
+
+        //Verify execution
+        verify(cassandraRepository, times(0)).createExperiment(any(NewExperiment.class));
+        verify(databaseRepository, times(0)).deleteExperiment(testExp);
+        verify(eventLog, times(0)).postEvent(any(ExperimentCreateEvent.class));
     }
 
-    @Test
-    public void testCreateExperimentFailedIndices() {
-        NewExperiment testExp = NewExperiment.withID(experimentID)
-                .withAppName(testApp)
-                .withLabel(testLabel)
-                .withSamplingPercent(samplingPercent)
-                .withStartTime(startTime)
-                .withEndTime(endTime)
-                .withDescription(description).build();
-        doNothing().when(validator).validateNewExperiment(testExp);
-        when(cassandraRepository.createExperiment(testExp)).thenReturn(experimentID);
-        doNothing().when(priorities).appendToPriorityList(experimentID);
-        when(databaseRepository.createExperiment(testExp)).thenReturn(experimentID);
-        doThrow(new RepositoryException()).when(cassandraRepository).createIndicesForNewExperiment(testExp);
-        try {
-            expImpl.createExperiment(testExp, UserInfo.from(UserInfo.Username.valueOf("user")).build());
-            fail("Expected RepositoryException.");
-        } catch (Exception e) {
-            assertEquals(e.getClass(), RepositoryException.class);
-        }
-        verify(cassandraRepository, atLeastOnce()).deleteExperiment(testExp);
-        verify(databaseRepository, atLeastOnce()).deleteExperiment(testExp);
-        verify(priorities, atLeastOnce()).removeFromPriorityList(testApp, experimentID);
-    }
 
     @Test
     public void testCreateExperimentPass() {
@@ -215,16 +211,20 @@ public class ExperimentsImplTest {
                 .withStartTime(startTime)
                 .withEndTime(endTime)
                 .withDescription(description).build();
+
+        //Mock interactions
         doNothing().when(validator).validateNewExperiment(testExp);
         when(cassandraRepository.createExperiment(testExp)).thenReturn(experimentID);
-        doNothing().when(priorities).appendToPriorityList(experimentID);
         when(databaseRepository.createExperiment(testExp)).thenReturn(experimentID);
-        doNothing().when(cassandraRepository).createIndicesForNewExperiment(testExp);
+
+        //Make actual call
         expImpl.createExperiment(testExp, UserInfo.from(UserInfo.Username.valueOf("user")).build());
+
+        //Verify execution
+        verify(databaseRepository, times(1)).createExperiment(any(NewExperiment.class));
+        verify(cassandraRepository, times(1)).createExperiment(any(NewExperiment.class));
+        verify(databaseRepository, times(0)).deleteExperiment(testExp);
         verify(eventLog, times(1)).postEvent(any(ExperimentCreateEvent.class));
-        List<Application.Name> names = new ArrayList<Application.Name>();
-        when(cassandraRepository.getApplicationsList()).thenReturn(names);
-        assertThat(expImpl.getApplications(), is(names));
     }
 
     @Test

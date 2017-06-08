@@ -515,7 +515,6 @@ public class CassandraExperimentRepositoryTest {
     public void testCreateExperimentExperimentAccessorThrowsException() {
         repository.setExperimentAccessor(mockExperimentAccessor);
         newExperiment1.setId(Experiment.ID.newInstance());
-        ;
         ID experimentId = repository.createExperiment(newExperiment1);
     }
 
