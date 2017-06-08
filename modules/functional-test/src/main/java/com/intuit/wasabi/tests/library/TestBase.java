@@ -102,7 +102,7 @@ public class TestBase extends ServiceTestBase {
         simpleGson = new GsonBuilder().create();
     }
 
-    /**
+    /**o
      * Initializes the TestBase.
      */
     private void init() {
@@ -4647,7 +4647,7 @@ public class TestBase extends ServiceTestBase {
     public String getTimeZoneOffSet(String timeZone) {
         TimeZone tz = TimeZone.getTimeZone(timeZone);
         int offsetInMills = tz.getOffset(new Date().getTime());
-        String offset = String.format("%02d:%02d", Math.abs(offsetInMills / 3600000),
+        String offset = String.format("%02d%02d", Math.abs(offsetInMills / 3600000),
                 Math.abs((offsetInMills / 60000) % 60));
         offset = (offsetInMills >= 0 ? "+" : "-") + offset;
 
