@@ -70,9 +70,8 @@ public class RapidExperimentationTest extends TestBase {
     }
 
     /**
-     * This test case covers a happy path test where we have a rapid experiment
-     * and we want to assert the behavior of the experiment once the user cap 
-     * is reached...the experiment should change to paused state
+     * This test case covers a happy path test where we have a rapid experiment and we want to assert the behavior of
+     * the experiment once the user cap is reached...the experiment should change to paused state
      */
     @Test
     public void testRapidExperiment() {
@@ -203,6 +202,10 @@ public class RapidExperimentationTest extends TestBase {
         // should be in running state
         List<Assignment> assignments = postAssignments(application, partialpage, new User("user1000"));
 
+        // assert the status of the assignments, we should have two assignment status as EXPERIMENT_PAUSED
+        assertAssignmentResponseStatus(assignments, "EXPERIMENT_PAUSED", 2);
+
+        // assert the status of experiments
         for (Experiment experiment : batchExperiments) {
             Experiment exp = getExperiment(experiment);
             if (exp.isRapidExperiment)
@@ -280,6 +283,24 @@ public class RapidExperimentationTest extends TestBase {
         for (Experiment experiment : experimentList) {
             postPages(experiment, page, HttpStatus.SC_CREATED);
         }
+    }
+
+    /**
+     * This method asserts that in a given list of assignments we have exactly the specified number of assignments with
+     * given responseStatus
+     * 
+     * @param assignmentList - the list of assignments
+     * @param responseStatus - the assignment status against which we want to assert
+     * @param numberOfAssignments - the number of assignments that should have the state specifed
+     */
+    private void assertAssignmentResponseStatus(List<Assignment> assignmentList, String responseStatus,
+            int numberOfAssignments) {
+        int counter = 0;
+        for (Assignment assignment : assignmentList) {
+            if (assignment.status.equalsIgnoreCase(responseStatus))
+                counter++;
+        }
+        Assert.assertEquals(counter, numberOfAssignments);
     }
 
     /**
