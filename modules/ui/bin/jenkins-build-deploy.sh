@@ -111,7 +111,8 @@ fi
 
 group=`fromPom main ${profile} project.groupId`
 artifact=ui
-path="${nexus_repositories}/${artifact_repository_id}/`echo ${group} | sed "s/\./\//g"`/${artifact}/${version}"
+group_modified=`echo ${group} | sed "s/\./\//g"`
+path="${nexus_repositories}/${artifact_repository_id}/${group_modified}/${artifact}/${version}"
 zip="${project}-${artifact}-${profile}-${version}.zip"
 zip_path="${path}/${zip}"
 
@@ -123,6 +124,7 @@ echo "artifact: ${artifact}"
 echo "version: ${version}"
 echo "profile: ${profile}"
 echo "project: ${project}"
+echo "group_modified: ${group_modified}"
 echo "Path: ${path}"
 
 curl -v -u ${nexus_deploy} --upload-file ./modules/ui/target/dist.zip ${zip_path} || \
