@@ -23,6 +23,8 @@
 #   nexus_repository_id          : nexus milestone repository id
 #   nexus_snapshot_repository_id : nexus snapshot repository id
 
+#This file assumes that this script is being executed from the root directory of project. E.g. .../wasabi/
+
 project=wasabi
 profile=${PROJECT_PROFILE:-development}
 nexus_deploy=${NEXUS_DEPLOY:-usr:pwd}
@@ -36,10 +38,10 @@ exitOnError() {
 }
 
 fromPom() {
-  mvn -f ./modules/$1/pom.xml -P $2 help:evaluate -Dexpression=$3 | sed -n -e '/^\[.*\]/ !{ p; }'
+  mvn -f pom.xml help:evaluate -Dexpression='$1' | sed -n -e '/^\[.*\]/ !{ p; }'
 }
 
-version=`fromPom main ${profile} project.version`
+version=`fromPom project.version`
 echo "++ version= ${version}"
 
 # ------------------------------------------------------------------------------
@@ -109,7 +111,7 @@ elif [[ "${version}" == *SNAPSHOT ]]; then
   artifact_repository_id=${nexus_snapshot_repository_id}
 fi
 
-group=`fromPom main ${profile} project.groupId`
+group=`fromPom project.groupId`
 artifact=ui
 group_modified=`echo ${group} | sed "s/\./\//g"`
 path="${nexus_repositories}/${artifact_repository_id}/${group_modified}/${artifact}/${version}"
