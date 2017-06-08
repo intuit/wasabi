@@ -69,6 +69,11 @@ public class RapidExperimentationTest extends TestBase {
 
     }
 
+    /**
+     * This test case covers a happy path test where we have a rapid experiment
+     * and we want to assert the behavior of the experiment once the user cap 
+     * is reached...the experiment should change to paused state
+     */
     @Test
     public void testRapidExperiment() {
 
