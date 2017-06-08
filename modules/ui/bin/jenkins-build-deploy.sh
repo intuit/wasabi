@@ -111,9 +111,9 @@ fi
 
 group=`fromPom main ${profile} project.groupId`
 artifact=ui
-path=${nexus_repositories}/${artifact_repository_id}/`echo ${group} | sed "s/\./\//g"`/${artifact}/${version}
-zip=${project}-${artifact}-${profile}-${version}.zip
-zip_path=${path}/${zip}
+path="${nexus_repositories}/${artifact_repository_id}/`echo ${group} | sed "s/\./\//g"`/${artifact}/${version}"
+zip="${project}-${artifact}-${profile}-${version}.zip"
+zip_path="${path}/${zip}"
 
 ## echo "++ Archiving: ${zip} ${zip_path}"
 echo "nexus_repositories: ${nexus_repositories}"
@@ -123,6 +123,7 @@ echo "artifact: ${artifact}"
 echo "version: ${version}"
 echo "profile: ${profile}"
 echo "project: ${project}"
+echo "Path: ${path}"
 
 curl -v -u ${nexus_deploy} --upload-file ./modules/ui/target/dist.zip ${zip_path} || \
 exitOnError "archive failed: curl -v -u [nexus_deploy] --upload-file ./modules/ui/dist.zip ${zip_path}"
