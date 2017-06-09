@@ -23,12 +23,15 @@
 #   nexus_repository_id          : nexus milestone repository id
 #   nexus_snapshot_repository_id : nexus snapshot repository id
 
+#This file assumes that this script is being executed from the root directory of project. E.g. .../wasabi/
+
 project=wasabi
 profile=${PROJECT_PROFILE:-development}
 nexus_deploy=${NEXUS_DEPLOY:-usr:pwd}
 nexus_repositories=${NEXUS_REPOSITORIES}
 nexus_repository_id=${NEXUS_REPOSITORY_ID}
 nexus_snapshot_repository_id=${NEXUS_SNAPSHOT_REPOSITORY_ID}
+publish_artifacts=${PUBLISH_ARTIFACTS:-true}
 
 exitOnError() {
   echo "error cause: $1"
@@ -36,10 +39,10 @@ exitOnError() {
 }
 
 fromPom() {
-  mvn -f ./modules/$1/pom.xml -P $2 help:evaluate -Dexpression=$3 | sed -n -e '/^\[.*\]/ !{ p; }'
+  mvn -f ./pom.xml help:evaluate -Dexpression=$1 | sed -n -e '/^\[.*\]/ !{ p; }'
 }
 
-version=`fromPom main ${profile} project.version`
+version=`fromPom project.version`
 echo "++ version= ${version}"
 
 # ------------------------------------------------------------------------------
@@ -84,7 +87,7 @@ done)
 echo "++ Starting actual grunt build"
 (cd modules/ui; \
   mkdir -p target; \
-  for f in app node_modules bower.json Gruntfile.js default_constants.json karma.conf.js karma-e2e.conf.js package.json test .bowerrc; do \
+  for f in app node_modules bower.json Gruntfile.js constants.json karma.conf.js karma-e2e.conf.js package.json test .bowerrc; do \
     cp -r ${f} target; \
   done; \
   echo Getting merged plugins.js file and plugins directory; \
@@ -102,29 +105,38 @@ echo "++ Building: UI module - FINISHED"
 # ------------------------------------------------------------------------------
 # -------------------------- PUBLISH UI TO NEXUS -------------------------------
 # ------------------------------------------------------------------------------
-echo "++ Push UI ZIP to internal Nexus - STARTED"
-if [[ "${version/-SNAPSHOT}" == "${version}" ]]; then
-  artifact_repository_id=${nexus_repository_id}
-elif [[ "${version}" == *SNAPSHOT ]]; then
-  artifact_repository_id=${nexus_snapshot_repository_id}
+
+if [[ "${publish_artifacts}" == "true" ]]; then
+
+  echo "++ Push UI ZIP to internal Nexus - STARTED"
+  if [[ "${version/-SNAPSHOT}" == "${version}" ]]; then
+    artifact_repository_id=${nexus_repository_id}
+  elif [[ "${version}" == *SNAPSHOT ]]; then
+    artifact_repository_id=${nexus_snapshot_repository_id}
+  fi
+
+  group=`fromPom project.groupId`
+  artifact=ui
+  group_modified=`echo ${group} | sed "s/\./\//g"`
+  path="${nexus_repositories}/${artifact_repository_id}/${group_modified}/${artifact}/${version}"
+  zip="${project}-${artifact}-${profile}-${version}.zip"
+  zip_path="${path}/${zip}"
+
+  ## echo "++ Archiving: ${zip} ${zip_path}"
+  echo "nexus_repositories: ${nexus_repositories}"
+  echo "artifact_repository_id: ${artifact_repository_id}"
+  echo "group: ${group}"
+  echo "artifact: ${artifact}"
+  echo "version: ${version}"
+  echo "profile: ${profile}"
+  echo "project: ${project}"
+  echo "group_modified: ${group_modified}"
+  echo "Path: ${path}"
+
+  curl -v -u ${nexus_deploy} --upload-file ./modules/ui/target/dist.zip ${zip_path} || \
+  exitOnError "archive failed: curl -v -u [nexus_deploy] --upload-file ./modules/ui/dist.zip ${zip_path}"
+
+  echo "++ Push UI ZIP to internal Nexus - FINISHED"
+
 fi
 
-group=`fromPom main ${profile} project.groupId`
-artifact=ui
-path=${nexus_repositories}/${artifact_repository_id}/`echo ${group} | sed "s/\./\//g"`/${artifact}/${version}
-zip=${project}-${artifact}-${profile}-${version}.zip
-zip_path=${path}/${zip}
-
-## echo "++ Archiving: ${zip} ${zip_path}"
-echo "nexus_repositories: ${nexus_repositories}"
-echo "artifact_repository_id: ${artifact_repository_id}"
-echo "group: ${group}"
-echo "artifact: ${artifact}"
-echo "version: ${version}"
-echo "profile: ${profile}"
-echo "project: ${project}"
-
-curl -v -u ${nexus_deploy} --upload-file ./modules/ui/target/dist.zip ${zip_path} || \
-exitOnError "archive failed: curl -v -u [nexus_deploy] --upload-file ./modules/ui/dist.zip ${zip_path}"
-
-echo "++ Push UI ZIP to internal Nexus - FINISHED"
