@@ -39,7 +39,7 @@ exitOnError() {
 }
 
 fromPom() {
-  mvn -f ./pom.xml help:evaluate -Dexpression=$1 | sed -n -e '/^\[.*\]/ !{ p; }'
+  mvn -f ./pom.xml help:evaluate -Dexpression=$1 | sed -n -e '/^\[.*\]/ !{ p; }' | tail -n 1
 }
 
 version=`fromPom project.version`
@@ -85,7 +85,7 @@ done)
 
 # ----------- Grunt build ------------------------------------------------------
 echo "++ Starting actual grunt build"
-(cd modules/ui; \
+(cd ./modules/ui; \
   mkdir -p target; \
   for f in app node_modules bower.json Gruntfile.js constants.json karma.conf.js karma-e2e.conf.js package.json test .bowerrc; do \
     cp -r ${f} target; \
