@@ -55,11 +55,11 @@ public interface PrioritiesAccessor {
     /**
      * Append an experiment to the priorities
      *
-     * @param experimentId and experiment's id which is to be appended to the existing priorities
+     * @param experimentIds and experiment ids which is to be appended to the existing priorities
      * @param applicationName name of application
      */
     @Query("update application set priorities = priorities + ? where app_name = ?")
-    Statement appendToPriorities(UUID experimentId, String applicationName);
+    Statement appendToPriorities(List<UUID> experimentIds, String applicationName);
 
     /**
      * Delete the prioritized list for an application

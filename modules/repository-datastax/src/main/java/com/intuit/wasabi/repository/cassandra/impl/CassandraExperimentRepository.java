@@ -19,6 +19,7 @@ import com.datastax.driver.core.BatchStatement;
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Statement;
+import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.mapping.Result;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashBasedTable;
@@ -69,6 +70,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -218,7 +220,8 @@ public class CassandraExperimentRepository implements ExperimentRepository {
                                          ExperimentAuditLogAccessor experimentAuditLogAccessor,
                                          StateExperimentIndexAccessor stateExperimentIndexAccessor,
                                          ExperimentValidator validator,
-                                         ExperimentTagAccessor experimentTagAccessor) {
+                                         ExperimentTagAccessor experimentTagAccessor,
+                                         PrioritiesAccessor prioritiesAccessor) {
         this.driver = driver;
         this.experimentAccessor = experimentAccessor;
         this.experimentLabelIndexAccessor = experimentLabelIndexAccessor;
@@ -229,6 +232,7 @@ public class CassandraExperimentRepository implements ExperimentRepository {
         this.experimentAuditLogAccessor = experimentAuditLogAccessor;
         this.validator = validator;
         this.experimentTagAccessor = experimentTagAccessor;
+        this.prioritiesAccessor = prioritiesAccessor;
     }
 
     /**
@@ -391,7 +395,7 @@ public class CassandraExperimentRepository implements ExperimentRepository {
 
             //Step#2: Create an entry in the applicationList table
             LOGGER.debug("Adding applicationList table statement into the batch..");
-            batchStmt.add(createApplication(newExperiment.getApplicationName()));
+            batchStmt.add(applicationListAccessor.insert(newExperiment.getApplicationName().toString()));
 
             //Step#3: Create an entry in the experiment_tag table
             LOGGER.debug("Adding experiment_tag table statement into the batch..");
@@ -399,7 +403,7 @@ public class CassandraExperimentRepository implements ExperimentRepository {
 
             //Step#4: Create/update an entry in the application table with experiment priorities
             LOGGER.debug("Adding application table statement into the batch..");
-            batchStmt.add(prioritiesAccessor.appendToPriorities(newExperiment.getId().getRawID(), newExperiment.getApplicationName().toString()));
+            batchStmt.add(prioritiesAccessor.appendToPriorities(newArrayList(newExperiment.getId().getRawID()), newExperiment.getApplicationName().toString()));
 
             //Step#5: Create an entry in the experiment_label_index table
             LOGGER.debug("Adding experiment_label_index table statement into the batch..");
@@ -412,7 +416,7 @@ public class CassandraExperimentRepository implements ExperimentRepository {
             batchStmt.add(updateStateIndexStatement(newExperiment.getID(), ExperimentState.NOT_DELETED));
 
             //Now execute batch statement
-            LOGGER.debug("Executing the batch statement..");
+            LOGGER.debug("Executing the batch statement.. batchStmt={}", batchStmt);
             driver.getSession().execute(batchStmt);
 
         } catch (Exception e) {

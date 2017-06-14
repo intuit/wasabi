@@ -37,6 +37,7 @@ import com.intuit.wasabi.repository.cassandra.accessor.ApplicationListAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.BucketAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentTagAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.PrioritiesAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.audit.BucketAuditLogAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.audit.ExperimentAuditLogAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentLabelIndexAccessor;
@@ -93,6 +94,7 @@ public class CassandraExperimentRepositoryTest {
     private ExperimentAccessor mockExperimentAccessor;
     private ExperimentAuditLogAccessor mockExperimentAuditLogAccessor;
     private ExperimentTagAccessor mockExperimentTagAccessor;
+    private PrioritiesAccessor prioritiesAccessor;
 
     private StateExperimentIndexAccessor mockStateExperimentIndexAccessor;
 
@@ -110,6 +112,7 @@ public class CassandraExperimentRepositoryTest {
         mockApplicationListAccessor = Mockito.mock(ApplicationListAccessor.class);
         mockExperimentLabelIndexAccessor = Mockito.mock(ExperimentLabelIndexAccessor.class);
         mockExperimentTagAccessor = Mockito.mock(ExperimentTagAccessor.class);
+        prioritiesAccessor = Mockito.mock(PrioritiesAccessor.class);
 
         if (repository != null) return;
 
@@ -123,7 +126,7 @@ public class CassandraExperimentRepositoryTest {
                 mockBucketAccessor, mockApplicationListAccessor,
                 mockBucketAuditLogAccessor, mockExperimentAuditLogAccessor,
                 mockStateExperimentIndexAccessor, new ExperimentValidator(),
-                mockExperimentTagAccessor);
+                mockExperimentTagAccessor, prioritiesAccessor);
         bucket1 = Bucket.newInstance(experimentID1, Bucket.Label.valueOf("bl1")).withAllocationPercent(.23)
                 .withControl(true)
                 .withDescription("b1").withPayload("p1")
