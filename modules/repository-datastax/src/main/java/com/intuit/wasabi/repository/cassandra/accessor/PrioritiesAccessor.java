@@ -53,7 +53,7 @@ public interface PrioritiesAccessor {
     void updatePriorities(List<UUID> experimentPriorityList, String applicationName);
 
     /**
-     * Append an experiment to the priorities
+     * Append experiments to the priorities
      *
      * @param experimentIds and experiment ids which is to be appended to the existing priorities
      * @param applicationName name of application

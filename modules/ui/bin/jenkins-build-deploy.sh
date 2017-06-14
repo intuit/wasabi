@@ -38,7 +38,7 @@ exitOnError() {
 }
 
 fromPom() {
-  mvn -f ./pom.xml help:evaluate -Dexpression=$1 | sed -n -e '/^\[.*\]/ !{ p; }'
+  mvn -f ./pom.xml help:evaluate -Dexpression=$1 | sed -n -e '/^\[.*\]/ !{ p; }' | tail -n 1
 }
 
 version=`fromPom project.version`

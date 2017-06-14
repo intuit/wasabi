@@ -58,7 +58,7 @@ public interface ExperimentLabelIndexAccessor {
     ResultSet updateBy(UUID uuid, Date modified, Date startTime, Date endTime, String state, String appName, String label);
 
     /**
-     * Insert experiment label index
+     * Insert experiment label index statement
      *
      * @param uuid
      * @param modified
@@ -67,7 +67,7 @@ public interface ExperimentLabelIndexAccessor {
      * @param state
      * @param appName
      * @param label
-     * @return result set
+     * @return Statement
      */
     @Query("update experiment_label_index set id = ?, modified = ?, start_time = ?, end_time = ?, state = ? " +
             "where app_name = ? and label = ?")

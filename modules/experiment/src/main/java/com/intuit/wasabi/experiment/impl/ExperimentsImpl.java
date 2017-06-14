@@ -171,13 +171,13 @@ public class ExperimentsImpl implements Experiments {
                 throw exceptionFromCassandra;
             }
 
+            //Step#4: Log experiment creation event
+            eventLog.postEvent(new ExperimentCreateEvent(user, newExperiment));
+
         } catch (Exception experimentCreateException) {
             LOGGER.error("Error Message={}... Experiment={}, UserInfo={}", errorMessage, newExperiment, user, experimentCreateException);
             throw experimentCreateException;
         }
-
-        //Step#4: Log experiment creation event
-        eventLog.postEvent(new ExperimentCreateEvent(user, newExperiment));
 
         LOGGER.debug("Create experiment finished.");
     }
