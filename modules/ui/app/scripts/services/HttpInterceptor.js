@@ -34,16 +34,19 @@ angular.module('wasabi.services').factory('HttpInterceptor', ['$rootScope', '$q'
 
             if (Session.accessToken && !/\/savefeedback/.test(config.url)) {
                 // http://stackoverflow.com/questions/7802116/custom-http-authorization-header
-                config.headers.Authorization = Session.tokenType + ' ' + Session.accessToken;
+                if (ConfigFactory.authnType() !== 'sso') {
+                    // Since in this case, the Authorization header is provided by the SSO
+                    config.headers.Authorization = Session.tokenType + ' ' + Session.accessToken;
 
-                if (!$rootScope.isSetTimeout || (config.url && config.url.substring(0,4) === 'http')) {
-                    // Start the timer for logging the user out automatically.
-                    if ($rootScope.isSetTimeout) {
-                        clearTimeouts();
-                    }
-                    if (!/\/logout$/.test(config.url)) {
-                        $rootScope.isSetTimeout = $timeout(doTimeout, ConfigFactory.loginTimeoutWarningTime);
-                        $rootScope.isLogoutTimeout = $timeout(doForcedLogout, ConfigFactory.loginTimeoutTime);
+                    if (!$rootScope.isSetTimeout || (config.url && config.url.substring(0,4) === 'http')) {
+                        // Start the timer for logging the user out automatically.
+                        if ($rootScope.isSetTimeout) {
+                            clearTimeouts();
+                        }
+                        if (!/\/logout$/.test(config.url)) {
+                            $rootScope.isSetTimeout = $timeout(doTimeout, ConfigFactory.loginTimeoutWarningTime);
+                            $rootScope.isLogoutTimeout = $timeout(doForcedLogout, ConfigFactory.loginTimeoutTime);
+                        }
                     }
                 }
             }

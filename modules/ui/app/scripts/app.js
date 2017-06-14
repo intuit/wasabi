@@ -258,7 +258,9 @@ angular.module('wasabi', [
                 if (ConfigFactory.authnType() === 'sso') {
                     window.location = ConfigFactory.noAuthRedirect();
                 }
-                $state.go('signin');
+                else {
+                    $state.go('signin');
+                }
             };
 
             $rootScope.keepAlive = function() {
