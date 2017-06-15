@@ -3256,6 +3256,9 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
       -webkit-transition-delay: 0.2s;
       transition-delay: 0.2s;
   }
+  #exclusionList {
+    height: 280px;
+  }
 }
 #analysisBucketList {
     overflow-x: auto;

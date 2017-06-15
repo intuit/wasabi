@@ -1193,8 +1193,10 @@ angular.module('wasabi.controllers').
 
             $scope.transferTagsToReadOnly = function() {
                 $scope.tagsStr = '';
-                for (var i = 0; i < $scope.experiment.tags.length; i++) {
-                    $scope.tagsStr += $scope.experiment.tags[i] + (i < $scope.experiment.tags.length - 1 ? ', ' : '');
+                if ($scope.experiment && $scope.experiment.tags) {
+                    for (var i = 0; i < $scope.experiment.tags.length; i++) {
+                        $scope.tagsStr += $scope.experiment.tags[i] + (i < $scope.experiment.tags.length - 1 ? ', ' : '');
+                    }
                 }
             };
 
