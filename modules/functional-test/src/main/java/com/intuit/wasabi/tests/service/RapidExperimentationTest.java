@@ -125,7 +125,6 @@ public class RapidExperimentationTest extends TestBase {
         // lets change the experiment now to rapid experiment and set the user cap less than number of assignments
         exp = exp.setIsRapidExperiment(true).setUserCap(3);
         exp = putExperiment(exp);
-
         // since the experiment crossed the maxusers the experiment should change to PUASED and response for assignment
         // should be "EXPERIMENT_PAUSED"
         Assignment assignment = postAssignment(exp, new User("user10"), "PROD");
