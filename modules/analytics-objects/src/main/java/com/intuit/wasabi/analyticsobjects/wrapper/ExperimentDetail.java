@@ -24,6 +24,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -55,6 +56,8 @@ public class ExperimentDetail {
     private long totalNumberUsers;
 
     private String description;
+
+    private Set<String> tags;
 
 
     /**
@@ -209,7 +212,8 @@ public class ExperimentDetail {
      */
     public ExperimentDetail(Experiment exp) {
         this(exp.getID(), exp.getState(), exp.getLabel(), exp.getApplicationName(),
-                exp.getModificationTime(), exp.getStartTime(), exp.getEndTime(), exp.getDescription());
+                exp.getModificationTime(), exp.getStartTime(), exp.getEndTime(), exp.getDescription(),
+                exp.getTags());
     }
 
     /**
@@ -223,10 +227,11 @@ public class ExperimentDetail {
      * @param startTime        the startTime of the experiment to determine the winner so far
      * @param endTime          the endtime of the experiment
      * @param description      the description of the experiment
+     * @param tags             the tags of the experiment
      */
     public ExperimentDetail(Experiment.ID id, Experiment.State state, Experiment.Label label,
                             Application.Name appName, Date modificationTime, Date startTime,
-                            Date endTime, String description) {
+                            Date endTime, String description, Set<String> tags) {
         setId(id);
         setState(state);
         setLabel(label);
@@ -235,6 +240,7 @@ public class ExperimentDetail {
         setStartTime(startTime);
         setEndTime(endTime);
         setDescription(description);
+        setTags(tags);
     }
 
     public Experiment.ID getId() {
@@ -335,6 +341,14 @@ public class ExperimentDetail {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Set<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(Set<String> tags) {
+        this.tags = tags;
     }
 
     /**

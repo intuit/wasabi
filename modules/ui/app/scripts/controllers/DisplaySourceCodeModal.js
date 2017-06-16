@@ -1,10 +1,9 @@
-/*global moment:false*/
 'use strict';
 
 angular.module('wasabi.controllers')
     .controller('DisplaySourceCodeModalCtrl',
-        ['$scope', '$filter', '$modalInstance', 'codeURL', 'experiment', 'pageName', 'UtilitiesFactory', '$modal', 'ConfigFactory',
-            function ($scope, $filter, $modalInstance, codeURL, experiment, pageName, UtilitiesFactory, $modal, ConfigFactory) {
+        ['$scope', '$filter', '$uibModalInstance', 'codeURL', 'experiment', 'pageName', 'UtilitiesFactory', '$uibModal', 'ConfigFactory',
+            function ($scope, $filter, $uibModalInstance, codeURL, experiment, pageName, UtilitiesFactory, $uibModal, ConfigFactory) {
 
                 $scope.webServingUrl = window.location.protocol + '//' + window.location.host + '/';
                 $scope.codeURL = $scope.webServingUrl + codeURL;
@@ -21,6 +20,6 @@ angular.module('wasabi.controllers')
                     // Changed this to call close() instead of dismiss().  We need to catch the Close or Cancel so
                     // we can re-load the buckets, in case the user changed the allocation percentages (since changes
                     // are data-bound to the model).
-                    $modalInstance.close('cancel');
+                    $uibModalInstance.close('cancel');
                 };
             }]);

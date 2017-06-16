@@ -1,0 +1,63 @@
+<div id="filterDialog" style="width: 600px; height: auto;">
+    Filters:
+        <form id="advancedSearchForm" name="advancedSearchForm" style="padding-top: 8px;">
+            <div style="margin-bottom: 10px;">
+                <div class="dateLabel" style="padding-top: 0;">Application</div>
+                <select ng-model="tempAdvancedSearchValues.advApplicationName" ng-options="applicationName for applicationName in applicationsWithReadOrBetterAccess"
+                        ng-if="applicationsWithReadOrBetterAccess.length > 1">
+                    <option value="">Select Application</option>
+                </select>
+                <span ng-model="tempAdvancedSearchValues.advApplicationName" ng-if="applicationsWithReadOrBetterAccess.length === 1">{{applicationsWithReadOrBetterAccess[0]}}</span>
+            </div>
+            <div style="clear: both;">
+                <div class="dateLabel">Status</div>
+                <select ng-model="tempAdvancedSearchValues.advStatus">
+                    <option value="any">Any Status</option>
+                    <option selected="selected" value="notTerminated">Not Terminated</option>
+                    <option value="terminated">Terminated</option>
+                    <option value="running">Running</option>
+                    <option value="paused">Stopped</option>
+                    <option value="draft">Draft</option>
+                </select>
+            </div>
+
+            <div style="padding-top:5px">
+                <div class="dateLabel">Start Date</div>
+                <select ng-model="tempAdvancedSearchValues.adv1stDateSearchType">
+                    <option value="isAny">Is Any</option>
+                    <option value="isBefore">Is Before</option>
+                    <option value="isOn">Is On</option>
+                    <option value="isAfter">Is After</option>
+                    <option value="isBetween">Is Between</option>
+                </select>
+                <input type="text" id="txtStartSearchDateOne" init-dates class="text dateInput" ng-class="{twoDateInput: tempAdvancedSearchValues.adv1stDateSearchType === 'isBetween', disabled: tempAdvancedSearchValues.adv1stDateSearchType === 'isAny'}" ng-disabled="tempAdvancedSearchValues.adv1stDateSearchType === 'isAny'" ng-model="tempAdvancedSearchValues.advTxtSearchDateOne">
+                <span ng-show="tempAdvancedSearchValues.adv1stDateSearchType === 'isBetween'">
+                    - <input type="text" id="txtStartSearchDateTwo" class="dateInput" init-dates readonly="true" ng-model="tempAdvancedSearchValues.advTxtSearchDateTwo">
+                </span>
+            </div>
+            <div style="padding-top:5px">
+                <div class="dateLabel">End Date</div>
+                <select ng-model="tempAdvancedSearchValues.advEnd1stDateSearchType">
+                    <option value="isAny">Is Any</option>
+                    <option value="isBefore">Is Before</option>
+                    <option value="isOn">Is On</option>
+                    <option value="isAfter">Is After</option>
+                    <option value="isBetween">Is Between</option>
+                </select>
+                <input type="text" id="txtSearchDateOne" init-dates class="text dateInput" ng-class="{twoDateInput: tempAdvancedSearchValues.advEnd1stDateSearchType === 'isBetween', disabled: tempAdvancedSearchValues.advEnd1stDateSearchType === 'isAny'}" ng-disabled="tempAdvancedSearchValues.advEnd1stDateSearchType === 'isAny'" ng-model="tempAdvancedSearchValues.advEndTxtSearchDateOne">
+                <span ng-show="tempAdvancedSearchValues.advEnd1stDateSearchType === 'isBetween'">
+                    - <input type="text" id="txtSearchDateTwo" class="dateInput" init-dates readonly="true" ng-model="tempAdvancedSearchValues.advEndTxtSearchDateTwo">
+                </span>
+            </div>
+            <div>
+                <div class="dateLabel">Tags</div>
+                <tags-input name="tags" ng-model="tempAdvancedSearchValues.advSearchTags" allowed-tags-pattern="^[a-zA-Z0-9\.\-\_]*$" min-length="1" max-length="35" placeholder="Filter by tags" style="width: 590px; margin-top: 5px;">
+                    <auto-complete source="queryTags($query)"></auto-complete>
+                </tags-input>
+            </div>
+            <div class="buttonBar">
+                <button id="btnClear" title="Clear filters" ng-click="clearFilters()">Clear</button>
+                <button class="blue" id="btnFilter" title="Apply filters to search" ng-click="advSearch(advancedSearchForm)">Apply</button>
+            </div>
+        </form>
+</div>

@@ -42,8 +42,12 @@ import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static com.intuit.wasabi.experimentobjects.Experiment.State.DELETED;
 import static com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT;
@@ -103,6 +107,14 @@ public class ExperimentsImpl implements Experiments {
     @Override
     public List<Application.Name> getApplications() {
         return cassandraRepository.getApplicationsList();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Map<Application.Name, Set<String>> getTagsForApplications(Collection<Application.Name> applicationNames) {
+        return cassandraRepository.getTagListForApplications(applicationNames != null ? applicationNames : Collections.emptySet());
     }
 
     /**
@@ -447,6 +459,16 @@ public class ExperimentsImpl implements Experiments {
             changeData = new ExperimentAuditInfo("rule",
                     experiment.getRule(),
                     updates.getRule());
+            changeList.add(changeData);
+        }
+
+        if (updates.getTags() != null && !updates.getTags().equals(experiment.getTags())) {
+            builder.withTags(updates.getTags());
+            requiresUpdate = true;
+            Set<String> oldTags = experiment.getTags() == null ? Collections.EMPTY_SET : experiment.getTags();
+            changeData = new ExperimentAuditInfo("tags",
+                    oldTags.toString(),
+                    updates.getTags().toString());
             changeList.add(changeData);
         }
 

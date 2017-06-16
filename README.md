@@ -3,7 +3,7 @@
 **Support:** [![Join the chat at https://gitter.im/intuit/wasabi](https://badges.gitter.im/intuit/wasabi.svg)](https://gitter.im/intuit/wasabi?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) <br/>
 **Documentation:** [User Guide](https://intuit.github.io/wasabi/v1/guide/index.html), [JavaDocs](https://intuit.github.io/wasabi/v1/javadocs/latest/)
 <br/>
-**A/B Testing Overview:** [![A/B Testing Overview](http://img.shields.io/badge/video-A%2FB%20Testing%20Overview-red.svg)](https://www.youtube.com/watch?v=_HtvJwBPUqk&feature=youtu.be) <br/>
+**A/B Testing Overview:** [![A/B Testing Overview](http://img.shields.io/badge/video-A%2FB%20Testing%20Overview-red.svg)](https://www.youtube.com/watch?v=_HtvJwBPUqk&feature=youtu.be) [![Blog Meet Wasabi](https://img.shields.io/badge/blog-Meet%20Wasabi-brightgreen.svg)](https://medium.com/blueprint-by-intuit/open-sourcing-wasabi-the-a-b-testing-platform-by-intuit-a8d5abc958d) [![Blog Architecture Behind Wasabi](https://img.shields.io/badge/blog-Architecture%20Behind%20Wasabi-orange.svg)](https://medium.com/blueprint-by-intuit/the-architecture-behind-wasabi-an-open-source-a-b-testing-platform-b52430d3fd80) <br/>
 **Continuous Integration:** [![Build Status](https://api.travis-ci.org/intuit/wasabi.svg?branch=develop)](https://travis-ci.org/intuit/wasabi)
 [![Coverage Status](https://coveralls.io/repos/github/intuit/wasabi/badge.svg)](https://coveralls.io/github/intuit/wasabi?branch=develop)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.intuit.wasabi/wasabi/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.intuit.wasabi/wasabi) <br/>
@@ -359,6 +359,29 @@ Code changes can readily be verified by running the growing collection of includ
 ```bash
 % ./bin/wasabi.sh start test stop
 ```
+##### Troubleshooting
+
+Integration tests might fail intermittently due to a time drift issue in docker containers on Mac OSX.
+
+When the Mac sleeps and wakes back up, there is a lag created between the clock in the Mac vs the
+running docker containers. This is a known issue in Docker for Mac.
+
+This can be fixed by running the following command:
+
+```bash
+% docker run --rm --privileged alpine hwclock -s
+```
+
+The above command will need to be run every time when there is a time drift.
+
+To automatically run this command and update the time each time the Mac wakes up, you could install 
+the following agent:
+
+```bash
+% curl https://raw.githubusercontent.com/arunvelsriram/docker-time-sync-agent/master/install.sh | bash
+```
+
+You can read more about this at: [quick-tip-fixing-time-drift-issue-on-docker-for-mac](https://blog.shameerc.com/2017/03/quick-tip-fixing-time-drift-issue-on-docker-for-mac)
 
 ## Package and Deploy at Scale
 

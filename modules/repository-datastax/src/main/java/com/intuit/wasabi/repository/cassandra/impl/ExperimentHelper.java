@@ -83,6 +83,7 @@ public class ExperimentHelper {
         experimentObject.setRuleJson(convertRuleToJson(experimentPojo.getRule()));
         experimentObject.setHypothesisIsCorrect(experimentPojo.getHypothesisIsCorrect());
         experimentObject.setResults(experimentPojo.getResults());
+        experimentObject.setTags(experimentPojo.getTags());
 
         return experimentObject;
     }

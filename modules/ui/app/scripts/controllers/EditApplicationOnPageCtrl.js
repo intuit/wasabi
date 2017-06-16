@@ -4,8 +4,8 @@
 
 angular.module('wasabi.controllers')
     .controller('EditApplicationOnPageCtrl',
-        ['$scope', 'AuthzFactory', 'UtilitiesFactory', '$rootScope', '$modal', 'AUTH_EVENTS', 'DialogsFactory', '$filter', 'StateFactory', 'Session',
-            function ($scope, AuthzFactory, UtilitiesFactory, $rootScope, $modal, AUTH_EVENTS, DialogsFactory, $filter, StateFactory, Session) {
+        ['$scope', 'AuthzFactory', 'UtilitiesFactory', '$rootScope', '$uibModal', 'AUTH_EVENTS', 'DialogsFactory', '$filter', 'StateFactory', 'Session',
+            function ($scope, AuthzFactory, UtilitiesFactory, $rootScope, $uibModal, AUTH_EVENTS, DialogsFactory, $filter, StateFactory, Session) {
 
                 UtilitiesFactory.trackEvent('loadedDialog',
                     {key: 'dialog_name', value: 'editApplication'});
@@ -213,7 +213,7 @@ angular.module('wasabi.controllers')
                 };
 
                 $scope.openUserModal = function (user) {
-                    var modalInstance = $modal.open({
+                    var modalInstance = $uibModal.open({
                         templateUrl: 'views/AddUserModal.html',
                         controller: 'AddUserModalCtrl',
                         windowClass: 'larger-dialog',

@@ -2,8 +2,8 @@
 
 angular.module('wasabi.controllers')
     .controller('FeedbackModalCtrl',
-        ['$scope', '$modalInstance', 'FeedbackFactory', 'UtilitiesFactory',
-            function ($scope, $modalInstance, FeedbackFactory, UtilitiesFactory) {
+        ['$scope', '$uibModalInstance', 'FeedbackFactory', 'UtilitiesFactory',
+            function ($scope, $uibModalInstance, FeedbackFactory, UtilitiesFactory) {
 
                 UtilitiesFactory.trackEvent('loadedDialog',
                     {key: 'dialog_name', value: 'createOrEditFeedback'});
@@ -14,14 +14,14 @@ angular.module('wasabi.controllers')
                     contactOkay: false
                 };
                 $scope.userInteractedWithScore = false;
-                $scope.closeFunction = $modalInstance.close;
+                $scope.closeFunction = $uibModalInstance.close;
 
                 $scope.sendFeedback = function () {
                     if (!$scope.userInteractedWithScore &&
                         $.trim($scope.feedback.comments).length === 0 &&
                         !$scope.feedback.contactOkay) {
                         // No feedback
-                        $modalInstance.close();
+                        $uibModalInstance.close();
                         return false;
                     }
                     if (!$scope.feedback.contactOkay) {
