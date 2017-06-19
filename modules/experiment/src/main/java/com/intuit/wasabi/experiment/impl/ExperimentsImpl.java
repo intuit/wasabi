@@ -150,7 +150,6 @@ public class ExperimentsImpl implements Experiments {
 
         //Step#1: Validate new experiment
         validator.validateNewExperiment(newExperiment);
-        String errorMessage = "Exception occurred while creating an experiment in MySQL...";
         try {
 
             //Step#2: Create experiment in MySQL
@@ -161,7 +160,7 @@ public class ExperimentsImpl implements Experiments {
             try {
                 cassandraRepository.createExperiment(newExperiment);
             } catch (Exception exceptionFromCassandra) {
-                errorMessage = "Exception occurred while creating an experiment in Cassandra...";
+                LOGGER.error("Exception occurred while creating an experiment in Cassandra... Experiment={}, UserInfo={}", newExperiment, user, exceptionFromCassandra);
                 // Erase from MySQL
                 try {
                     databaseRepository.deleteExperiment(newExperiment);
@@ -175,7 +174,7 @@ public class ExperimentsImpl implements Experiments {
             eventLog.postEvent(new ExperimentCreateEvent(user, newExperiment));
 
         } catch (Exception experimentCreateException) {
-            LOGGER.error("Error Message={}... Experiment={}, UserInfo={}", errorMessage, newExperiment, user, experimentCreateException);
+            LOGGER.error("Exception occurred while creating an experiment... Experiment={}, UserInfo={}", newExperiment, user, experimentCreateException);
             throw experimentCreateException;
         }
 
