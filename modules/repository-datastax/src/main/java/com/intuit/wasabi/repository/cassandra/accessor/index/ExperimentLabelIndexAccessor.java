@@ -55,7 +55,7 @@ public interface ExperimentLabelIndexAccessor {
      */
     @Query("update experiment_label_index set id = ?, modified = ?, start_time = ?, end_time = ?, state = ? " +
             "where app_name = ? and label = ?")
-    ResultSet updateBy(UUID uuid, Date modified, Date startTime, Date endTime, String state, String appName, String label);
+    ResultSet insertOrUpdateBy(UUID uuid, Date modified, Date startTime, Date endTime, String state, String appName, String label);
 
     /**
      * Insert experiment label index statement
@@ -71,7 +71,7 @@ public interface ExperimentLabelIndexAccessor {
      */
     @Query("update experiment_label_index set id = ?, modified = ?, start_time = ?, end_time = ?, state = ? " +
             "where app_name = ? and label = ?")
-    Statement insertBy(UUID uuid, Date modified, Date startTime, Date endTime, String state, String appName, String label);
+    Statement insertOrUpdateStatementBy(UUID uuid, Date modified, Date startTime, Date endTime, String state, String appName, String label);
 
     /**
      * Delete entry from experiment label index

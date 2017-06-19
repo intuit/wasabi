@@ -23,8 +23,6 @@
 #   nexus_repository_id          : nexus milestone repository id
 #   nexus_snapshot_repository_id : nexus snapshot repository id
 
-#This file assumes that this script is being executed from the root directory of project. E.g. .../wasabi/
-
 project=wasabi
 profile=${PROJECT_PROFILE:-development}
 nexus_deploy=${NEXUS_DEPLOY:-usr:pwd}
@@ -38,10 +36,10 @@ exitOnError() {
 }
 
 fromPom() {
-  mvn -f ./pom.xml help:evaluate -Dexpression=$1 | sed -n -e '/^\[.*\]/ !{ p; }' | tail -n 1
+  mvn -f ./modules/$1/pom.xml -P $2 help:evaluate -Dexpression=$3 | sed -n -e '/^\[.*\]/ !{ p; }' | tail -n 1
 }
 
-version=`fromPom project.version`
+version=`fromPom main ${profile} project.version`
 echo "++ version= ${version}"
 
 # ------------------------------------------------------------------------------
@@ -111,12 +109,11 @@ elif [[ "${version}" == *SNAPSHOT ]]; then
   artifact_repository_id=${nexus_snapshot_repository_id}
 fi
 
-group=`fromPom project.groupId`
+group=`fromPom main ${profile} project.groupId`
 artifact=ui
-group_modified=`echo ${group} | sed "s/\./\//g"`
-path="${nexus_repositories}/${artifact_repository_id}/${group_modified}/${artifact}/${version}"
-zip="${project}-${artifact}-${profile}-${version}.zip"
-zip_path="${path}/${zip}"
+path=${nexus_repositories}/${artifact_repository_id}/`echo ${group} | sed "s/\./\//g"`/${artifact}/${version}
+zip=${project}-${artifact}-${profile}-${version}.zip
+zip_path=${path}/${zip}
 
 ## echo "++ Archiving: ${zip} ${zip_path}"
 echo "nexus_repositories: ${nexus_repositories}"
@@ -126,8 +123,6 @@ echo "artifact: ${artifact}"
 echo "version: ${version}"
 echo "profile: ${profile}"
 echo "project: ${project}"
-echo "group_modified: ${group_modified}"
-echo "Path: ${path}"
 
 curl -v -u ${nexus_deploy} --upload-file ./modules/ui/target/dist.zip ${zip_path} || \
 exitOnError "archive failed: curl -v -u [nexus_deploy] --upload-file ./modules/ui/dist.zip ${zip_path}"

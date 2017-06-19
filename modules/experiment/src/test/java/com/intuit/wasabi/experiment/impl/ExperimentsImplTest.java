@@ -119,32 +119,6 @@ public class ExperimentsImplTest {
         expImpl.createExperiment(testExp, UserInfo.from(UserInfo.Username.valueOf("user")).build());
     }
 
-    // Experiments or New Experiments should throw IllegalArgumentException when
-    // personalization is enabled and model name is not specified
-    @Test(expected = IllegalArgumentException.class)
-    public void testCreateExperimentFailedValidatorPersonalization() {
-        //Input data
-        NewExperiment testExp = NewExperiment.withID(experimentID)
-                .withAppName(testApp)
-                .withLabel(testLabel)
-                .withIsPersonalizationEnabled(true)
-                .withSamplingPercent(samplingPercent)
-                .withStartTime(startTime)
-                .withDescription(description)
-                .withEndTime(endTime).build();
-        testExp.setApplicationName(Application.Name.valueOf(""));
-        assertThat(testExp.getApplicationName(), is(Application.Name.valueOf("")));
-
-        //Actual call
-        expImpl.createExperiment(testExp, UserInfo.from(UserInfo.Username.valueOf("user")).build());
-
-        //Verify execution
-        verify(databaseRepository, times(0)).createExperiment(any(NewExperiment.class));
-        verify(cassandraRepository, times(0)).createExperiment(any(NewExperiment.class));
-        verify(databaseRepository, times(0)).deleteExperiment(testExp);
-        verify(eventLog, times(0)).postEvent(any(ExperimentCreateEvent.class));
-    }
-
     @Test
     public void testCreateExperimentFailedCassandraCreation() {
         NewExperiment testExp = NewExperiment.withID(experimentID)

@@ -117,22 +117,6 @@ public class ExperimentsImplTest {
         expImpl.createExperiment(testExp, UserInfo.from(UserInfo.Username.valueOf("user")).build());
     }
 
-    // Experiments or New Experiments should throw IllegalArgumentException when
-    // personalization is enabled and model name is not specified
-    @Test(expected = IllegalArgumentException.class)
-    public void testCreateExperimentFailedValidatorPersonalization() {
-        NewExperiment testExp = NewExperiment.withID(experimentID)
-                .withAppName(testApp)
-                .withLabel(testLabel)
-                .withIsPersonalizationEnabled(true)
-                .withSamplingPercent(samplingPercent)
-                .withStartTime(startTime)
-                .withEndTime(endTime)
-                .withDescription(description).build();
-        testExp.setApplicationName(Application.Name.valueOf(""));
-        expImpl.createExperiment(testExp, UserInfo.from(UserInfo.Username.valueOf("user")).build());
-    }
-
     @Test
     public void testGetExperiment() throws Exception {
         Experiment testExp = Experiment.withID(experimentID)

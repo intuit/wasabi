@@ -55,7 +55,7 @@ public interface PrioritiesAccessor {
     /**
      * Append experiments to the priorities
      *
-     * @param experimentIds and experiment ids which is to be appended to the existing priorities
+     * @param experimentIds experiment ids to be appended to the existing priorities (experiment ids)
      * @param applicationName name of application
      */
     @Query("update application set priorities = priorities + ? where app_name = ?")

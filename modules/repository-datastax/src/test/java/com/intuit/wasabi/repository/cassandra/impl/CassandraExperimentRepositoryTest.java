@@ -341,7 +341,7 @@ public class CassandraExperimentRepositoryTest {
         Experiment experiment = repository.getExperiment(experimentID1);
         repository.setExperimentAccessor(mockExperimentAccessor);
         repository.setExperimentLabelIndexAccessor(mockExperimentLabelIndexAccessor);
-        Mockito.doThrow(new RuntimeException("test")).when(mockExperimentLabelIndexAccessor).updateBy(
+        Mockito.doThrow(new RuntimeException("test")).when(mockExperimentLabelIndexAccessor).insertOrUpdateBy(
                 Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
                 Mockito.any());
 
@@ -375,7 +375,7 @@ public class CassandraExperimentRepositoryTest {
         experiment.setDescription(description);
         repository.setExperimentLabelIndexAccessor(mockExperimentLabelIndexAccessor);
         Mockito.doThrow(new RuntimeException("test")).when(mockExperimentLabelIndexAccessor).
-                updateBy(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+                insertOrUpdateBy(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
                         Mockito.any(), Mockito.any());
         repository.updateExperiment(experiment);
 

@@ -19,7 +19,6 @@ import com.datastax.driver.core.BatchStatement;
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Statement;
-import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.mapping.Result;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashBasedTable;
@@ -27,7 +26,6 @@ import com.google.common.collect.Table;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.inject.Inject;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
-import com.intuit.wasabi.exceptions.ConstraintViolationException;
 import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
@@ -407,7 +405,7 @@ public class CassandraExperimentRepository implements ExperimentRepository {
 
             //Step#5: Create an entry in the experiment_label_index table
             LOGGER.debug("Adding experiment_label_index table statement into the batch..");
-            batchStmt.add(experimentLabelIndexAccessor.insertBy(newExperiment.getId().getRawID(), NOW,
+            batchStmt.add(experimentLabelIndexAccessor.insertOrUpdateStatementBy(newExperiment.getId().getRawID(), NOW,
                     newExperiment.getStartTime(), newExperiment.getEndTime(), DRAFT.name(), newExperiment.getApplicationName().toString(),
                     newExperiment.getLabel().toString()));
 
@@ -1124,7 +1122,7 @@ public class CassandraExperimentRepository implements ExperimentRepository {
             // the epoch, so timezone is irrelevant
             final Date NOW = new Date();
 
-            experimentLabelIndexAccessor.updateBy(experimentID.getRawID(), NOW,
+            experimentLabelIndexAccessor.insertOrUpdateBy(experimentID.getRawID(), NOW,
                     startTime, endTime, state.name(), appName.toString(),
                     experimentLabel.toString());
 

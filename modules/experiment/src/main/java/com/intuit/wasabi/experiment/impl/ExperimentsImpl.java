@@ -150,7 +150,7 @@ public class ExperimentsImpl implements Experiments {
 
         //Step#1: Validate new experiment
         validator.validateNewExperiment(newExperiment);
-        String errorMessage = "Exception occurred while creating an exception in MySQL...";
+        String errorMessage = "Exception occurred while creating an experiment in MySQL...";
         try {
 
             //Step#2: Create experiment in MySQL
