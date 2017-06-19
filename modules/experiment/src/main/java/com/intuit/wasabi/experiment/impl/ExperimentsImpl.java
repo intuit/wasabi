@@ -152,7 +152,9 @@ public class ExperimentsImpl implements Experiments {
         validator.validateNewExperiment(newExperiment);
         try {
 
-            //Step#2: Create experiment in MySQL
+            //Step#2: Create experiment in MySQL first (before Cassandra) so that duplicate experiment
+            //concern would be addressed automatically. As, AppName and experiment label have a unique constraint
+            //set in MySQL table.
             LOGGER.debug("Creating an experiment in MySQL...");
             databaseRepository.createExperiment(newExperiment);
 

@@ -98,6 +98,7 @@ public class CassandraExperimentRepository implements ExperimentRepository {
 
     private ExperimentTagAccessor experimentTagAccessor;
 
+    //@TODO This and other accessors can be declared final as/if they are being Injected in constructor using guice.
     private PrioritiesAccessor prioritiesAccessor;
 
     /**
