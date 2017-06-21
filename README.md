@@ -151,6 +151,23 @@ CQLSH_VERSION=<version> CQLSH_USERNAME=<username> CQLSH_PASSWORD=<pwd> CQLSH_HOS
 MYSQL_HOST=<mysql_host> NODE_HOST=<cassandra_host> ./bin/wasabi.sh start:wasabi
 ```
 
+##### Run Wasabi outside of docker with WASABI_CONFIGURATION for remote MySQL database
+```bash
+WASABI_CONFIGURATION="
+  -Ddatabase.url.host=$MYSQL_HOST\
+  -Ddatabase.url.port=$MYSQL_PORT\
+  -Ddatabase.url.dbname=$MYSQL_DATABASE\
+  -Ddatabase.user=$MYSQL_USER\
+  -Ddatabase.password=$MYSQL_PASSWORD\
+  -Ddatabase.pool.connections.min=$MYSQL_MIN_CONNECTIONS\
+  -Ddatabase.pool.connections.max=$MYSQL_MAX_CONNECTIONS\
+  -Dusername=$CASSANDRA_USER\
+  -Dpassword=$CASSANDRA_PASSWORD\
+  -DnodeHosts=$CASSANDRA_HOST\
+  -DtokenAwareLoadBalancingLocalDC=$CASSANDRA_DATACENTER\
+  -Dapplication.http.port=$PORT" bash usr/local/wasabi-main-*/bin/run
+```
+
 #### Troubleshooting
 
 * While starting Wasabi, if you see an error when the docker containers are starting up, you could do the following:
