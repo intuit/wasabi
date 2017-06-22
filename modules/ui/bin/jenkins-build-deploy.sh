@@ -23,15 +23,12 @@
 #   nexus_repository_id          : nexus milestone repository id
 #   nexus_snapshot_repository_id : nexus snapshot repository id
 
-#This file assumes that this script is being executed from the root directory of project. E.g. .../wasabi/
-
 project=wasabi
 profile=${PROJECT_PROFILE:-development}
 nexus_deploy=${NEXUS_DEPLOY:-usr:pwd}
 nexus_repositories=${NEXUS_REPOSITORIES}
 nexus_repository_id=${NEXUS_REPOSITORY_ID}
 nexus_snapshot_repository_id=${NEXUS_SNAPSHOT_REPOSITORY_ID}
-publish_artifacts=${PUBLISH_ARTIFACTS:-true}
 
 exitOnError() {
   echo "error cause: $1"
@@ -39,10 +36,25 @@ exitOnError() {
 }
 
 fromPom() {
-  mvn -f ./pom.xml help:evaluate -Dexpression=$1 | sed -n -e '/^\[.*\]/ !{ p; }' | tail -n 1
+  mvn -f ./modules/$1/pom.xml -P $2 help:evaluate -Dexpression=$3 | sed -n -e '/^\[.*\]/ !{ p; }' | tail -n 1
 }
 
-version=`fromPom project.version`
+workspacePath() {
+  # Absolute path to this script, e.g. /home/user/bin/foo.sh
+  SCRIPT=$(readlink -f "$0")
+  # Absolute path this script is in, thus /home/user/bin
+  SCRIPTPATH=$(dirname "$SCRIPT")
+  #echo "SCRIPTPATH: $SCRIPTPATH"
+  # This script is located in the $WORKSPACE_PATH/modules/ui/bin/
+  WORKSPACE_PATH=$(cd "$SCRIPTPATH/../../../"; pwd)
+  echo $WORKSPACE_PATH
+}
+
+
+workspace_path=`workspacePath`
+echo "++ workspace_path= $workspace_path"
+
+version=`fromPom main ${profile} project.version`
 echo "++ version= ${version}"
 
 # ------------------------------------------------------------------------------
@@ -51,8 +63,8 @@ echo "++ version= ${version}"
 echo "++ Building: UI module - STARTED"
 
 # ----------- Install dependencies first ---------------------------------------
-echo "++ execute: (cd ./modules/ui && npm install && bower install && grunt build)"
-(cd ./modules/ui && npm install && bower install && grunt build)
+echo "++ execute: (cd ${workspace_path}/modules/ui && npm install && bower install && grunt build)"
+(cd ${workspace_path}/modules/ui && npm install && bower install && grunt build)
 
 # ----------- Copy plugins ------------------------------------------------------
 echo "++ Installing Plugins: ${CONTRIB_PLUGINS_TO_INSTALL}"
@@ -85,7 +97,7 @@ done)
 
 # ----------- Grunt build ------------------------------------------------------
 echo "++ Starting actual grunt build"
-(cd ./modules/ui; \
+(cd ${workspace_path}/modules/ui; \
   mkdir -p target; \
   for f in app node_modules bower.json Gruntfile.js constants.json karma.conf.js karma-e2e.conf.js package.json test .bowerrc; do \
     cp -r ${f} target; \
@@ -95,48 +107,48 @@ echo "++ Starting actual grunt build"
   cp -R dist/plugins target/app; \
   sed -i '' -e "s|VERSIONLOC|${version}|g" target/app/index.html 2>/dev/null; \
 
-  (cd target; grunt clean); \
-  (cd target; grunt build --target=develop --no-color) \
+  (cd ${workspace_path}/modules/ui/target; grunt clean); \
+  (cd ${workspace_path}/modules/ui/target; grunt build --target=develop --no-color) \
 )
 
 echo "++ Building: UI module - FINISHED"
 
+local_dist_zip_path=""
+if [ -f ${workspace_path}/modules/ui/target/dist.zip ]; then
+  local_dist_zip_path="${workspace_path}/modules/ui/target/dist.zip";
+fi
+
+if [ -f ${workspace_path}/modules/ui/dist.zip ]; then
+  local_dist_zip_path="${workspace_path}/modules/ui/dist.zip";
+fi
+echo "dist.zip is present at ${local_dist_zip_path}"
 
 # ------------------------------------------------------------------------------
 # -------------------------- PUBLISH UI TO NEXUS -------------------------------
 # ------------------------------------------------------------------------------
-
-if [[ "${publish_artifacts}" == "true" ]]; then
-
-  echo "++ Push UI ZIP to internal Nexus - STARTED"
-  if [[ "${version/-SNAPSHOT}" == "${version}" ]]; then
-    artifact_repository_id=${nexus_repository_id}
-  elif [[ "${version}" == *SNAPSHOT ]]; then
-    artifact_repository_id=${nexus_snapshot_repository_id}
-  fi
-
-  group=`fromPom project.groupId`
-  artifact=ui
-  group_modified=`echo ${group} | sed "s/\./\//g"`
-  path="${nexus_repositories}/${artifact_repository_id}/${group_modified}/${artifact}/${version}"
-  zip="${project}-${artifact}-${profile}-${version}.zip"
-  zip_path="${path}/${zip}"
-
-  ## echo "++ Archiving: ${zip} ${zip_path}"
-  echo "nexus_repositories: ${nexus_repositories}"
-  echo "artifact_repository_id: ${artifact_repository_id}"
-  echo "group: ${group}"
-  echo "artifact: ${artifact}"
-  echo "version: ${version}"
-  echo "profile: ${profile}"
-  echo "project: ${project}"
-  echo "group_modified: ${group_modified}"
-  echo "Path: ${path}"
-
-  curl -v -u ${nexus_deploy} --upload-file ./modules/ui/target/dist.zip ${zip_path} || \
-  exitOnError "archive failed: curl -v -u [nexus_deploy] --upload-file ./modules/ui/dist.zip ${zip_path}"
-
-  echo "++ Push UI ZIP to internal Nexus - FINISHED"
-
+echo "++ Push UI ZIP to internal Nexus - STARTED"
+if [[ "${version/-SNAPSHOT}" == "${version}" ]]; then
+  artifact_repository_id=${nexus_repository_id}
+elif [[ "${version}" == *SNAPSHOT ]]; then
+  artifact_repository_id=${nexus_snapshot_repository_id}
 fi
 
+group=`fromPom main ${profile} project.groupId`
+artifact=ui
+path=${nexus_repositories}/${artifact_repository_id}/`echo ${group} | sed "s/\./\//g"`/${artifact}/${version}
+zip=${project}-${artifact}-${profile}-${version}.zip
+nexus_dist_zip_path=${path}/${zip}
+
+## echo "++ Archiving: ${zip} ${zip_path}"
+echo "nexus_repositories: ${nexus_repositories}"
+echo "artifact_repository_id: ${artifact_repository_id}"
+echo "group: ${group}"
+echo "artifact: ${artifact}"
+echo "version: ${version}"
+echo "profile: ${profile}"
+echo "project: ${project}"
+
+curl -v -u ${nexus_deploy} --upload-file "${local_dist_zip_path}" ${nexus_dist_zip_path} || \
+exitOnError "archive failed: curl -v -u [nexus_deploy] --upload-file "${local_dist_zip_path}" ${nexus_dist_zip_path}"
+
+echo "++ Push UI ZIP to internal Nexus - FINISHED"
