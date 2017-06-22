@@ -151,7 +151,7 @@ CQLSH_VERSION=<version> CQLSH_USERNAME=<username> CQLSH_PASSWORD=<pwd> CQLSH_HOS
 MYSQL_HOST=<mysql_host> NODE_HOST=<cassandra_host> ./bin/wasabi.sh start:wasabi
 ```
 
-##### Run Wasabi outside of docker with WASABI_CONFIGURATION for remote MySQL database
+##### Run Wasabi outside of docker with WASABI_CONFIGURATION for remote storage hosts
 ```bash
 WASABI_CONFIGURATION="
   -Ddatabase.url.host=$MYSQL_HOST\
