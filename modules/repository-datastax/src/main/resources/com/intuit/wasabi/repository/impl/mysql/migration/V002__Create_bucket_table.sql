@@ -1,5 +1,3 @@
-USE `${mysql.dbName}`;
-
 CREATE TABLE `bucket` (
   `experiment_id` varbinary(16) NOT NULL,
   `label` varchar(64) COLLATE utf8_bin NOT NULL,
