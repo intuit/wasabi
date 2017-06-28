@@ -15,6 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.cassandra.accessor;
 
+import com.datastax.driver.core.Statement;
 import com.datastax.driver.mapping.Result;
 import com.datastax.driver.mapping.annotations.Accessor;
 import com.datastax.driver.mapping.annotations.Query;
@@ -34,6 +35,6 @@ public interface ExperimentTagAccessor {
     ListenableFuture<Result<ExperimentTagsByApplication>> getExperimentTagsAsync(String appName);
 
     @Query("insert into experiment_tag(app_name, exp_id, tags) values (?,?,?)")
-    void insert(String appName, UUID experimentId, Set<String> tags);
+    Statement insert(String appName, UUID experimentId, Set<String> tags);
 
 }

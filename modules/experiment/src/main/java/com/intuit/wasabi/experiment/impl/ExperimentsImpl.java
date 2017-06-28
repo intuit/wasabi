@@ -146,54 +146,41 @@ public class ExperimentsImpl implements Experiments {
      */
     @Override
     public void createExperiment(NewExperiment newExperiment, UserInfo user) {
+        LOGGER.debug("Create experiment started: experiment={}, UserInfo={} ", newExperiment, user);
 
+        //Step#1: Validate new experiment
         validator.validateNewExperiment(newExperiment);
-
-        //1. Creation in Cassandra
-        Experiment.ID newExperimentID = cassandraRepository.createExperiment(newExperiment);
-
-        //2. Creation priority list
-        // For consistency,  if any exception is raised while appending to priority list
-        // delete the experiment from cassandra too.
         try {
-            // Append the newly created experiment to the priority list
-            priorities.appendToPriorityList(newExperimentID);
-        } catch (Exception e) {
-            // Erase the experiment from cassandra
-            cassandraRepository.deleteExperiment(newExperiment);
-            throw e;
-        }
 
-        //3. Creation in MySQL
-        // For consistency,  if any exception is raised while creating an experiment in mysql
-        // delete the experiment from cassandra too.
-        try {
+            //Step#2: Create experiment in MySQL first (before Cassandra) so that duplicate experiment
+            //concern would be addressed automatically. As, AppName and experiment label have a unique constraint
+            //set in MySQL table.
+            LOGGER.debug("Creating an experiment in MySQL...");
             databaseRepository.createExperiment(newExperiment);
-        } catch (Exception e) {
-            // Remove from priority list
-            priorities.removeFromPriorityList(newExperiment.getApplicationName(), newExperimentID);
-            // Erase the experiment from cassandra
-            cassandraRepository.deleteExperiment(newExperiment);
-            throw e;
+
+            //Step#3: Create experiment in Cassandra
+            try {
+                cassandraRepository.createExperiment(newExperiment);
+            } catch (Exception exceptionFromCassandra) {
+                LOGGER.error("Exception occurred while creating an experiment in Cassandra... Experiment={}, UserInfo={}", newExperiment, user, exceptionFromCassandra);
+                // Erase from MySQL
+                try {
+                    databaseRepository.deleteExperiment(newExperiment);
+                } catch (Exception mysqlRollbackException) {
+                    LOGGER.error("An attempt to rollback of experiment in MySQL is failed...", mysqlRollbackException);
+                }
+                throw exceptionFromCassandra;
+            }
+
+            //Step#4: Log experiment creation event
+            eventLog.postEvent(new ExperimentCreateEvent(user, newExperiment));
+
+        } catch (Exception experimentCreateException) {
+            LOGGER.error("Exception occurred while creating an experiment... Experiment={}, UserInfo={}", newExperiment, user, experimentCreateException);
+            throw experimentCreateException;
         }
 
-        //4. Creation of indices in Cassandra
-        try {
-            //only when the creation in Cassandra and MySQL succeeds should
-            // we create the entries in the index tables in cassandra
-            cassandraRepository.createIndicesForNewExperiment(newExperiment);
-        } catch (RepositoryException e) {
-            //Roll back everything (Note: I guess this case is highly unlikely to happen)
-            priorities.removeFromPriorityList(newExperiment.getApplicationName(), newExperimentID);
-            // Erase the experiment from cassandra
-            cassandraRepository.deleteExperiment(newExperiment);
-            // Erase from MySQL
-            databaseRepository.deleteExperiment(newExperiment);
-            throw e;
-        }
-
-        // allow for logging of the event
-        eventLog.postEvent(new ExperimentCreateEvent(user, newExperiment));
+        LOGGER.debug("Create experiment finished.");
     }
 
     /**

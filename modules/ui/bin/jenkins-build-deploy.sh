@@ -36,7 +36,7 @@ exitOnError() {
 }
 
 fromPom() {
-  mvn -f ./modules/$1/pom.xml -P $2 help:evaluate -Dexpression=$3 | sed -n -e '/^\[.*\]/ !{ p; }'
+  mvn -f ./modules/$1/pom.xml -P $2 help:evaluate -Dexpression=$3 | sed -n -e '/^\[.*\]/ !{ p; }' | tail -n 1
 }
 
 version=`fromPom main ${profile} project.version`
