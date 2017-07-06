@@ -43,8 +43,8 @@
 
         <application.jersey.provider.paths>com.intuit.wasabi.api;com.codahale.metrics.jersey</application.jersey.provider.paths>
         <application.jersey.pojo.enabled>true</application.jersey.pojo.enabled>
-        <application.jersey.request.filters>com.sun.jersey.api.client.filter.LoggingFilter</application.jersey.request.filters>
-        <application.jersey.response.filters>com.intuit.wasabi.api.SimpleCORSResponseFilter;com.sun.jersey.api.client.filter.LoggingFilter</application.jersey.response.filters>
+        <application.jersey.request.filters>com.intuit.wasabi.api.AuthenticationFilter</application.jersey.request.filters>
+        <application.jersey.response.filters>com.intuit.wasabi.api.SimpleCORSResponseFilter</application.jersey.response.filters>
         <application.jersey.wadl.enabled>false</application.jersey.wadl.enabled>
         <application.jmx.port>8090</application.jmx.port>
         <application.debug.port>8180</application.debug.port>
