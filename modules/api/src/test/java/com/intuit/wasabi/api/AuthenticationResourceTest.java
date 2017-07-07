@@ -88,6 +88,6 @@ public class AuthenticationResourceTest {
         when(authentication.verifyToken(authToken)).thenReturn(null);
         Response response = authenticationResource.getUserExists("username@a.b", authToken);
         assert (userInfo.equals(response.getEntity()));
-        Mockito.verify(authentication.verifyToken(authToken));
+        Mockito.verify(authentication).verifyToken(authToken);
     }
 }
