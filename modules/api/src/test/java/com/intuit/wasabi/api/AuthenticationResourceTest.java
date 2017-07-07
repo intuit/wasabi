@@ -21,8 +21,10 @@ import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.exceptions.AuthenticationException;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.ws.rs.core.Response;
@@ -81,8 +83,11 @@ public class AuthenticationResourceTest {
     public void getUserExists() throws Exception {
 
         UserInfo userInfo = UserInfo.newInstance(UserInfo.Username.valueOf("username")).build();
+        String authToken = "authorizationToken";
         when(authentication.getUserExists("username@a.b")).thenReturn(userInfo);
-        Response response = authenticationResource.getUserExists("username@a.b");
+        when(authentication.verifyToken(authToken)).thenReturn(null);
+        Response response = authenticationResource.getUserExists("username@a.b", authToken);
         assert (userInfo.equals(response.getEntity()));
+        Mockito.verify(authentication.verifyToken(authToken));
     }
 }
