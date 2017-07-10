@@ -24,6 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.ws.rs.core.Response;
@@ -92,5 +93,6 @@ public class AuthenticationResourceTest {
         when(authorization.getUser(authToken)).thenReturn(null);
         Response response = authenticationResource.getUserExists("username@a.b", authToken);
         assert (userInfo.equals(response.getEntity()));
+        Mockito.verify(authorization).getUser(authToken);
     }
 }
