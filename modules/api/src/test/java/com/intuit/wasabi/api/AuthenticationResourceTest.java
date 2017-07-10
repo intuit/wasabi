@@ -18,6 +18,7 @@ package com.intuit.wasabi.api;
 import com.intuit.wasabi.authentication.Authentication;
 import com.intuit.wasabi.authenticationobjects.LoginToken;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
+import com.intuit.wasabi.authorization.Authorization;
 import com.intuit.wasabi.exceptions.AuthenticationException;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,9 +45,15 @@ public class AuthenticationResourceTest {
     @Mock
     Authentication authentication;
 
+    @Mock
+    Authorization authorization;
+
     @Before
     public void setup() {
-        authenticationResource = new AuthenticationResource(authentication, new HttpHeader("application-name", "600"));
+        authenticationResource =
+                new AuthenticationResource(authentication,
+                        new HttpHeader("application-name", "600"),
+                        authorization);
     }
 
     @Test
@@ -85,9 +92,9 @@ public class AuthenticationResourceTest {
         UserInfo userInfo = UserInfo.newInstance(UserInfo.Username.valueOf("username")).build();
         String authToken = "authorizationToken";
         when(authentication.getUserExists("username@a.b")).thenReturn(userInfo);
-        when(authentication.verifyToken(authToken)).thenReturn(null);
+        when(authorization.getUser(authToken)).thenReturn(null);
         Response response = authenticationResource.getUserExists("username@a.b", authToken);
         assert (userInfo.equals(response.getEntity()));
-        Mockito.verify(authentication).verifyToken(authToken);
+        Mockito.verify(authorization).getUser(authToken);
     }
 }

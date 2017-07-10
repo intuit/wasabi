@@ -19,6 +19,7 @@ import com.codahale.metrics.annotation.Timed;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.intuit.wasabi.authentication.Authentication;
+import com.intuit.wasabi.authorization.Authorization;
 import com.intuit.wasabi.exceptions.AuthenticationException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -56,11 +57,13 @@ public class AuthenticationResource {
 
     private final HttpHeader httpHeader;
     private Authentication authentication;
+    private Authorization authorization;
 
     @Inject
-    AuthenticationResource(final Authentication authentication, final HttpHeader httpHeader) {
+    AuthenticationResource(final Authentication authentication, final HttpHeader httpHeader, final Authorization authorization) {
         this.authentication = authentication;
         this.httpHeader = httpHeader;
+        this.authorization = authorization;
     }
 
     /**
@@ -166,7 +169,7 @@ public class AuthenticationResource {
             @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
             final String authorizationHeader) {
         try {
-            authentication.verifyToken(authorizationHeader);
+            authorization.getUser(authorizationHeader);
             return httpHeader.headers().entity(authentication.getUserExists(userEmail)).build();
         } catch (Exception exception) {
             LOGGER.error("getUserExists failed for userEmail={} with error:", userEmail, exception);
