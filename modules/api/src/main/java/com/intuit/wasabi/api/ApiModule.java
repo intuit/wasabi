@@ -57,7 +57,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public class ApiModule extends AbstractModule {
 
-    protected static final String PROPERTY_NAME = "/api.properties";
+    private static final String PROPERTY_NAME = "/api.properties";
     private static final Logger LOGGER = getLogger(ApiModule.class);
 
     @Override

@@ -16,7 +16,7 @@
 
 package com.intuit.wasabi.api;
 
-import com.intuit.wasabi.authentication.AuthenticateByHeaders;
+import com.intuit.wasabi.authentication.AuthenticateByHttpRequest;
 import com.intuit.wasabi.exceptions.AuthenticationException;
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerRequestFilter;
@@ -29,11 +29,11 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationFilter.class);
 
-    private final AuthenticateByHeaders authenticateByHeaders;
+    private final AuthenticateByHttpRequest authenticateByHttpRequest;
 
     @Inject
-    public AuthenticationFilter(AuthenticateByHeaders authenticateByHeaders) {
-        this.authenticateByHeaders = authenticateByHeaders;
+    public AuthenticationFilter(AuthenticateByHttpRequest authenticateByHttpRequest) {
+        this.authenticateByHttpRequest = authenticateByHttpRequest;
     }
 
     /**
@@ -48,7 +48,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     @Override
     public ContainerRequest filter(ContainerRequest request) {
         try {
-            this.authenticateByHeaders.authenticate(request.getRequestHeaders());
+            this.authenticateByHttpRequest.authenticate(request);
         } catch (Exception exception) {
             LOGGER.error("Authentication Failure. Exception:", exception);
             throw new AuthenticationException("Authentication failure.");

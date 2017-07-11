@@ -16,10 +16,10 @@
 
 package com.intuit.wasabi.authentication;
 
-import javax.ws.rs.core.MultivaluedMap;
+import com.sun.jersey.api.core.HttpRequestContext;
 import java.util.Map;
 
-public interface AuthenticateByHeaders {
+public interface AuthenticateByHttpRequest {
 
-    Map<String, String> authenticate(MultivaluedMap<String, String> inputHeaders);
+    Map<String, String> authenticate(HttpRequestContext httpRequest);
 }

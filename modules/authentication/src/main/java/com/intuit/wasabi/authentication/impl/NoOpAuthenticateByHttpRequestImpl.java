@@ -16,16 +16,16 @@
 
 package com.intuit.wasabi.authentication.impl;
 
-import com.intuit.wasabi.authentication.AuthenticateByHeaders;
+import com.intuit.wasabi.authentication.AuthenticateByHttpRequest;
+import com.sun.jersey.api.core.HttpRequestContext;
 
-import javax.ws.rs.core.MultivaluedMap;
 import java.util.Collections;
 import java.util.Map;
 
-public class NoOpAuthenticateByHeadersImpl implements AuthenticateByHeaders {
+public class NoOpAuthenticateByHttpRequestImpl implements AuthenticateByHttpRequest {
 
     @Override
-    public Map<String, String> authenticate(MultivaluedMap<String, String> inputHeaders) {
+    public Map<String, String> authenticate(HttpRequestContext httpRequestContext) {
         return Collections.emptyMap();
     }
 }
