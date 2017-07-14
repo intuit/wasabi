@@ -17,7 +17,6 @@ package com.intuit.wasabi.assignment.impl;
 
 import com.datastax.driver.core.exceptions.ConnectionException;
 import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -43,26 +42,21 @@ import com.intuit.wasabi.exceptions.BucketNotFoundException;
 import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
 import com.intuit.wasabi.exceptions.InvalidAssignmentStateException;
 import com.intuit.wasabi.experiment.Pages;
-import com.intuit.wasabi.experiment.Priorities;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.BucketList;
 import com.intuit.wasabi.experimentobjects.Context;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.ExperimentBatch;
-import com.intuit.wasabi.experimentobjects.ExperimentList;
 import com.intuit.wasabi.experimentobjects.Page;
 import com.intuit.wasabi.experimentobjects.PageExperiment;
 import com.intuit.wasabi.experimentobjects.PrioritizedExperiment;
 import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
-import com.intuit.wasabi.experimentobjects.exceptions.InvalidBucketStateTransitionException;
 import com.intuit.wasabi.experimentobjects.exceptions.InvalidExperimentStateException;
-import com.intuit.wasabi.experimentobjects.exceptions.WasabiClientException;
 import com.intuit.wasabi.experimentobjects.exceptions.WasabiException;
 import com.intuit.wasabi.repository.AssignmentsRepository;
 import com.intuit.wasabi.repository.CassandraRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
-import com.intuit.wasabi.repository.MutexRepository;
 import com.intuit.wasabi.repository.cassandra.impl.ExperimentRuleCacheUpdateEnvelope;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -73,9 +67,6 @@ import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -93,12 +84,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.intuit.wasabi.assignment.AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_ENABLED;
 import static com.intuit.wasabi.assignment.AssignmentsAnnotations.RULECACHE_THREADPOOL;
 import static com.intuit.wasabi.assignmentobjects.Assignment.Status.ASSIGNMENT_FAILED;
-import static com.intuit.wasabi.assignmentobjects.Assignment.Status.EXPERIMENT_EXPIRED;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -497,12 +486,12 @@ public class AssignmentsImpl implements Assignments {
                     }
 
                     // Add the assignment to the global list of userAssignments of the user
-                    if (assignment.getStatus() != Assignment.Status.EXPERIMENT_EXPIRED) {
+                    if (Experiment.State.PAUSED != experiment.getState()) { // the Experiment is set to PAUSED in the case of a reached endDate
                         userAssignments.put(experiment.getID(), experiment.getLabel(),
                                 assignment.getBucketLabel() != null ? assignment.getBucketLabel().toString() : "null");
                     }
 
-                    assignmentPairs.add(new ImmutablePair<Experiment, Assignment>(experimentMap.get(experiment.getID()), assignment));
+                    assignmentPairs.add(new ImmutablePair<>(experimentMap.get(experiment.getID()), assignment));
 
                 } catch (WasabiException ex) {
                     LOGGER.error("Exception happened while executing assignment business logic", ex);
@@ -600,8 +589,9 @@ public class AssignmentsImpl implements Assignments {
         }
 
         if (currentTime > experiment.getEndTime().getTime()) {
+            experiment.setState(Experiment.State.PAUSED);
             return nullAssignment(userID, applicationName, experimentID,
-                    Assignment.Status.EXPERIMENT_EXPIRED);
+                    Assignment.Status.EXPERIMENT_PAUSED);
         }
 
         Assignment assignment = getAssignment(experimentID, userID, context, userAssignments, bucketList);

@@ -66,10 +66,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -77,11 +75,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import static com.google.common.base.Predicates.in;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
-import static org.assertj.core.api.BDDAssertions.then;
 import static org.hamcrest.core.AnyOf.anyOf;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertFalse;
@@ -344,7 +340,8 @@ public class AssignmentsImplTest {
         Assignment result = assignmentsImpl.doSingleAssignment(user, appName, label, context, true, true, segmentationProfile, headers);
 
         //Verify result
-        assertThat(result.getStatus(), is(Assignment.Status.EXPERIMENT_EXPIRED));
+        assertThat(result.getStatus(), is(Assignment.Status.EXPERIMENT_PAUSED));
+        verify(experiment).setState(Experiment.State.PAUSED);
     }
 
     @Test

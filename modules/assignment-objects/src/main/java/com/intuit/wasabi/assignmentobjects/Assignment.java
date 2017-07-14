@@ -284,7 +284,6 @@ public class Assignment {
         EXPERIMENT_IN_DRAFT_STATE(false),
         EXPERIMENT_PAUSED(false),
         NO_PROFILE_MATCH(false),
-        EXPERIMENT_EXPIRED(false),
         ASSIGNMENT_FAILED(false),
 
         EXISTING_ASSIGNMENT(true),

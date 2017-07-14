@@ -59,7 +59,6 @@ import java.util.Map;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_LABELLIST;
 import static com.intuit.wasabi.api.APISwaggerResource.EXAMPLE_AUTHORIZATION_HEADER;
-import static com.intuit.wasabi.assignmentobjects.Assignment.Status.EXPERIMENT_EXPIRED;
 import static java.lang.Boolean.FALSE;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -734,7 +733,7 @@ public class AssignmentsResource {
         }
 
         // Only include `assignment` property if there is a definitive assignment, either to a bucket or not
-        if (assignment.getStatus() != EXPERIMENT_EXPIRED) {
+        if (assignment.getStatus().isDefinitiveAssignment()) {
             response.put("assignment",
                     nonNull(assignment.getBucketLabel()) ? assignment.getBucketLabel().toString() : null);
 
