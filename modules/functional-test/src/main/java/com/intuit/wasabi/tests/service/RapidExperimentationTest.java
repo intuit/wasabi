@@ -66,7 +66,8 @@ public class RapidExperimentationTest extends TestBase {
         application = new Application(rapidExperimentTestApplication);
         experimentsListOfRapidApplication = getApplicationExperiments(application);
         pauseTerminateAndDeleteExperiments(experimentsListOfRapidApplication);
-
+        Assert.assertEquals(getApplicationExperiments(application).size(), 0);
+        
     }
 
     /**
