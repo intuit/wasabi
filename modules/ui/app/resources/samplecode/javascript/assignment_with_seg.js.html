@@ -1,0 +1,57 @@
+<div class="displaySourceCode">
+<p>
+    This example is taken from the Hello World example in the contrib folder of Wasabi.  That example uses the
+    wasabi.js library that is available from the same server as this Admin UI.  In order to use the library,
+    you would add the following to your index.html (or equivalent initial load page):
+</p>
+<pre>
+    &lt;script src="https://code.jquery.com/jquery-1.12.3.min.js">&lt;/script>
+    &lt;script src='{{webServingUrl}}scripts/wasabi.js'>&lt;/script>
+</pre>
+<p>
+    Of course, you can choose whatever version of jQuery works for you and your Wasabi server may be running on
+    a different host or port.
+</p>
+<p>
+    In order to retrieve an assignment for an experiment passing
+    a profile for use in evaluating a segmentation rule using the library, you would make a call like this:
+</p>
+<pre>
+    // Set up properties that will be the same on all Wasabi calls.
+    WASABI.setOptions({
+        'applicationName': '{{experiment.applicationName}}',
+        'experimentName': '{{experiment.label}}',
+        'protocol': '{{serverProtocol}}',
+        'host': '{{serverHostAndPort}}'
+    });
+
+    // Check Wasabi to see if this user should be in the test and which bucket.
+    WASABI.getAssignmentWithSegmentation(
+        '{\
+            "profile": {\
+                "platform": "mac"\
+            }\
+        }',
+        {
+            'userID': 'UserName'
+        }
+    ).then(
+        function(response) {
+            console.log('getAssignmentWithSegmentation: success');
+            console.log(JSON.stringify(response));
+            // This object will include the assignment made and the status, which might tell you the experiment
+            // has not been started, etc.
+            // Note that if the experiment doesn't exist or hasn't been started, response.assignment is undefined, which is OK.
+            console.log(response.assignment);
+        },
+        function(error) {
+            console.log('getAssignmentWithSegmentation: error');
+        }
+    );
+</pre>
+<p>
+    In order to see and run locally a working example using JavaScript, AngularJS and node, go to:<br/>
+    <a href="https://github.com/intuit/wasabi/tree/develop/contrib/hello-world" target="_blank">https://github.com/intuit/wasabi/tree/develop/contrib/hello-world</a>
+</p>
+</div>
+

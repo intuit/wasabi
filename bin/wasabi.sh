@@ -302,7 +302,7 @@ package() {
    done)
   (cd modules/ui; \
     mkdir -p target; \
-    for f in app node_modules bower.json Gruntfile.js constants.json karma.conf.js karma-e2e.conf.js package.json test .bowerrc; do \
+    for f in app node_modules bower.json Gruntfile.js default_constants.json karma.conf.js karma-e2e.conf.js package.json test .bowerrc; do \
       cp -r ${f} target; \
     done; \
     echo Getting merged plugins.js file and plugins directory; \

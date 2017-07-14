@@ -65,6 +65,18 @@ public interface CassandraDriver extends Closeable {
         String getKeyspaceName();
 
         /**
+         * Returns Cassandra username
+         * @return username
+         */
+        String getUsername();
+
+        /**
+         * Returns Cassandra password
+         * @return password
+         */
+        String getPassword();
+
+        /**
          * Returns Cassandra port
          * @return port number
          */
@@ -143,6 +155,18 @@ public interface CassandraDriver extends Closeable {
          * @return Pool timeouts in milliseconds
          */
         int getPoolTimeoutMillis();
+
+        /**
+         * Returns the defined connection timeout in milliseconds.
+         * @return the defined connection timeout in milliseconds
+         */
+        int getConnectTimeoutMillis();
+
+        /**
+         * Returned the per-host read timeout in milliseconds from the configuration.
+         * @return the defined read timeout in milliseconds from the configuration
+         */
+        int getReadTimeoutMillis();
 
         /**
          * Returns max connections per remote host

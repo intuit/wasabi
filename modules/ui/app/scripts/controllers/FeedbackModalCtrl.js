@@ -2,8 +2,8 @@
 
 angular.module('wasabi.controllers')
     .controller('FeedbackModalCtrl',
-        ['$scope', '$modalInstance', 'FeedbackFactory', 'UtilitiesFactory',
-            function ($scope, $modalInstance, FeedbackFactory, UtilitiesFactory) {
+        ['$scope', '$uibModalInstance', 'FeedbackFactory', 'UtilitiesFactory',
+            function ($scope, $uibModalInstance, FeedbackFactory, UtilitiesFactory) {
 
                 UtilitiesFactory.trackEvent('loadedDialog',
                     {key: 'dialog_name', value: 'createOrEditFeedback'});
@@ -14,14 +14,14 @@ angular.module('wasabi.controllers')
                     contactOkay: false
                 };
                 $scope.userInteractedWithScore = false;
-                $scope.closeFunction = $modalInstance.close;
+                $scope.closeFunction = $uibModalInstance.close;
 
                 $scope.sendFeedback = function () {
                     if (!$scope.userInteractedWithScore &&
                         $.trim($scope.feedback.comments).length === 0 &&
                         !$scope.feedback.contactOkay) {
                         // No feedback
-                        $modalInstance.close();
+                        $uibModalInstance.close();
                         return false;
                     }
                     if (!$scope.feedback.contactOkay) {
@@ -33,20 +33,20 @@ angular.module('wasabi.controllers')
                         delete $scope.feedback.comments;
                     }
                     if (!$scope.userInteractedWithScore) {
-                        delete $scope.feedback.score;
+                        $scope.feedback.score = '6';
+                        if (!$scope.feedback.comments) {
+                            $scope.feedback.comments = '';
+                        }
+                        $scope.feedback.comments += ' [[NOTE: Score defaulted to 6 due to bug]]';
                     }
                     FeedbackFactory.sendFeedback($scope.feedback).$promise.then(function(/*result*/) {
                         UtilitiesFactory.trackEvent('saveItemSuccess',
                             {key: 'dialog_name', value: 'feedback'});
-                        //$modalInstance.close();
                     }, function(reason) {
                         console.log(reason);
-                        //$modalInstance.close();
                     });
                 };
 
                 $scope.cancel = function () {
-                    //$modalInstance.close();
-                    //$modalInstance.dismiss('cancel');
                 };
             }]);

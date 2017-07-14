@@ -15,7 +15,7 @@
                     </label>
                     <input ng-show="!readOnly" type="text" class="form-control text" name="label"
                            ng-model="experiment.label" auto-focus ng-focus required
-                           ng-pattern="/^[_\-\$A-Za-z][_\-\$A-Za-z0-9]*$/" ng-maxlength=64/>
+                           ng-pattern="/^[_\-\$A-Za-z][_\-\$A-Za-z0-9]*$/" ng-maxlength="64"/>
                     <span ng-show="readOnly">{{experiment.label}}</span>
                     <!-- Validation error -->
                     <div class="error"
@@ -88,7 +88,7 @@
                     </div>
                     <input type="text" ng-show="showApplicationName2 || experiment.applicationName === newApplicationNamePrompt" style="width: 265px; margin-top: 10px;" class="form-control text" id="applicationName2"
                            ng-model="experiment.applicationName2" name="applicationName2" required
-                           ng-pattern="/^[_\-\$A-Za-z][_\-\$A-Za-z0-9]*$/" ng-maxlength=64 abtest-autocomplete list="allApplications" select-function="selectApplication" enter-function="selectApplicationOnEnter"/>
+                           ng-pattern="/^[_\-\$A-Za-z][_\-\$A-Za-z0-9]*$/" ng-maxlength="64" abtest-autocomplete list="allApplications" select-function="selectApplication" enter-function="selectApplicationOnEnter"/>
 
                     <!-- Validation error -->
                     <div class="error"
@@ -153,7 +153,7 @@
                 </div>
             </li>
             <li class="layout8020">
-                <div>
+                <div style="margin-bottom: 0;">
                     <label>Start Date</label>
 
                     <div ng-show="!readOnly" class="col-md-7" style="margin-left:-17px">
@@ -176,12 +176,12 @@
                     <div ng-show="!readOnly" class="col-md-6" ng-model="experiment.startTime" ng-change="changed()"
                          style="display:inline-block;margin-top:-34px;margin-left: 13px;"
                          ng-controller="TimePickerCtrl">
-                        <timepicker hour-step="hstep" minute-step="mstep"
-                                    show-meridian="ismeridian"></timepicker>
+                        <uib-timepicker hour-step="hstep" minute-step="mstep"
+                                    show-meridian="ismeridian"></uib-timepicker>
                     </div>
                     <span ng-show="readOnly">{{experiment.startTime | date:'M/d/yyyy h:mm a'}}</span>
                 </div>
-                <div>
+                <div style="margin-bottom: 0;">
                     <label>End Date</label>
 
                     <div ng-show="!readOnly" class="col-md-7" style="margin-left:-17px">
@@ -201,8 +201,8 @@
                     <div ng-show="!readOnly" class="col-md-6" ng-model="experiment.endTime" ng-change="changed()"
                          style="display:inline-block;margin-top:-34px;margin-left: 13px;"
                          ng-controller="TimePickerCtrl">
-                        <timepicker hour-step="hstep" minute-step="mstep"
-                                    show-meridian="ismeridian"></timepicker>
+                        <uib-timepicker hour-step="hstep" minute-step="mstep"
+                                    show-meridian="ismeridian"></uib-timepicker>
                     </div>
                     <span ng-show="readOnly">{{experiment.endTime | date:'M/d/yyyy h:mm a'}}</span>
                 </div>
@@ -243,29 +243,47 @@
                 </div>
             </li>
             <li>
-                <label class="descriptionLabel">Hypothesis/Description</label>
-                <div style="width: 100%">
-                    <textarea ng-show="!readOnly" name="description" class="form-control" required ng-model="experiment.description" style="width: 900px; height: 55px" ng-maxlength="256" placeholder="Experiment Hypothesis/Description"></textarea>
-                    <textarea ng-show="readOnly" disabled="true" name="description" class="form-control readOnly" ng-model="experiment.description" style="width: 900px; height: 55px"></textarea>
+                <div style="float: left; width: 65%;">
+                    <label class="descriptionLabel">Hypothesis/Description</label>
+                    <div style="width: 100%">
+                        <textarea ng-show="!readOnly" name="description" class="form-control" required ng-model="experiment.description" style="width: 100%; height: 75px" ng-maxlength="256" placeholder="Experiment Hypothesis/Description"></textarea>
+                        <textarea ng-show="readOnly" disabled="true" name="description" class="form-control readOnly" ng-model="experiment.description" style="width: 400px; height: 55px"></textarea>
+                        <!-- Validation error -->
+                        <div class="error"
+                             ng-show="(experimentForm.$error && experimentForm.$error.maxlength &&
+                                      experimentForm.$error.maxlength.length > 0 &&
+                                      experimentForm.$error.maxlength[0].$name === 'description') ||
+                                      (experimentFormSubmitted &&
+                                      experimentForm.$error && experimentForm.$error.maxlength &&
+                                      experimentForm.$error.maxlength.length > 0 &&
+                                      experimentForm.$error.maxlength[0].$name === 'description') ||
+                                      (experimentFormSubmitted &&
+                                      experimentForm.$error && experimentForm.$error.required &&
+                                      experimentForm.$error.required[0].$name === 'description')">
+                            <small class="fieldError"
+                                   ng-show="experimentForm.$error.maxlength[0].$name === 'description'">
+                                The hypothesis/description must be 256 characters or less.
+                            </small>
+                            <small class="fieldError"
+                                   ng-show="experimentForm.$error.required[0].$name === 'description'">
+                                You must provide a hypothesis/description for your experiment.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div style="width: 35%; padding-left: 20px;">
+                    <label class="tagsLabel">Tags</label>
+                    <tags-input name="tags" ng-model="tags" allowed-tags-pattern="^[a-zA-Z0-9\.\-\_]*$" min-length="1" max-length="35" style="width: 100%;">
+                        <auto-complete source="queryTags($query)"></auto-complete>
+                    </tags-input>
                     <!-- Validation error -->
                     <div class="error"
-                         ng-show="(experimentForm.$error && experimentForm.$error.maxlength &&
-                                  experimentForm.$error.maxlength.length > 0 &&
-                                  experimentForm.$error.maxlength[0].$name === 'description') ||
-                                  (experimentFormSubmitted &&
-                                  experimentForm.$error && experimentForm.$error.maxlength &&
-                                  experimentForm.$error.maxlength.length > 0 &&
-                                  experimentForm.$error.maxlength[0].$name === 'description') ||
-                                  (experimentFormSubmitted &&
-                                  experimentForm.$error && experimentForm.$error.required &&
-                                  experimentForm.$error.required[0].$name === 'description')">
+                         ng-show="(experimentForm.$error && experimentForm.$error.leftoverText &&
+                                   experimentForm.$error.leftoverText[0].$name === 'tags')
+                                  || experimentFormSubmitted">
                         <small class="fieldError"
-                               ng-show="experimentForm.$error.maxlength[0].$name === 'description'">
-                            The hypothesis/description must be 256 characters or less.
-                        </small>
-                        <small class="fieldError"
-                               ng-show="experimentForm.$error.required[0].$name === 'description'">
-                            You must provide a hypothesis/description for your experiment.
+                               ng-show="experimentForm.tags.$error.leftoverText">
+                            Enter a tag containing only letters, numbers, -, ., or _ and less than 36 characters.
                         </small>
                     </div>
                 </div>
@@ -275,8 +293,8 @@
         <div class="clear"></div>
 
         <div id="saveMsg" fade-in-out fade-model-name="experiment.id">Experiment saved. You may now add buckets.</div>
-        <tabset id="newExprTabs" ng-show="experiment.id" class="tabs">
-            <tab id="buckets" active="tabs[0].active" heading="Buckets" ng-controller="BucketsCtrl">
+        <uib-tabset id="newExprTabs" ng-show="experiment.id" class="tabs">
+            <uib-tab id="buckets" active="tabs[0].active" heading="Buckets" ng-controller="BucketsCtrl">
                 <a ng-show="!readOnly" href="#" id="newExpAddBucket" class="listAction add" onclick="return false;" ng-click="openBucketModal(experiment.id)"><span></span>Add Bucket</a>
                 <span class="info newHelp" help help-content="{{help.buckets}}"></span>
                 <div id="newExpBucketList" class="tabContainer">
@@ -310,8 +328,8 @@
                         <a ng-class="{disabled: readOnly}" ng-disabled="readOnly" href="#" onclick="return false;" ng-click="balanceBuckets();">Balance bucket allocations...</a>
                     </div>
                 </div>
-            </tab>
-            <tab heading="Mutual Exclusion" active="tabs[1].active" ng-controller="MutualExclusionsCtrl">
+            </uib-tab>
+            <uib-tab heading="Mutual Exclusion" active="tabs[1].active" ng-controller="MutualExclusionsCtrl">
                 <a ng-show="!readOnly" href="#" id="newExpAddExclusion" class="listAction add" onclick="return false;" ng-click="openMutualExclusionModal(experiment.id)"><span></span>Add Experiment</a>
                 <span class="info newHelp" help help-content="{{help.mutualExclusion}}"></span>
                 <div id="newExpExclusionList" class="tabContainer">
@@ -344,8 +362,8 @@
                     </table>
                     </div>
                 </div>
-            </tab>
-            <tab heading="Segmentation" active="tabs[2].active">
+            </uib-tab>
+            <uib-tab heading="Segmentation" active="tabs[2].active">
                 <div class="segmentationTab">
                     <div>
                         <div style="float: left;"><label>User Segmentation Rule</label></div>
@@ -393,8 +411,8 @@
                         </span>
                     </div>
                 </div>
-            </tab>
-            <tab id="pages" heading="Pages" active="tabs[3].active" ng-controller="PagesCtrl">
+            </uib-tab>
+            <uib-tab id="pages" heading="Pages" active="tabs[3].active" ng-controller="PagesCtrl">
                 <input ng-show="!readOnly" ng-model="pagesData.pageName" abtest-autocomplete list="pagesData.groupPages" select-function="selectPage" enter-function="selectPageOnEnter" id="txtAddPage" type="text" class="text" placeholder="Add Page" maxlength="256" />
                 <button ng-show="!readOnly" id="btnAddPage" type="button" class="blue" title="Add Page" ng-click="addPageClick()">Add</button>
                 <span class="info newHelp" help help-content="{{help.pages}}"></span>
@@ -425,57 +443,19 @@
                     </div>
                 </div>
                 <div class="hint">List the page(s) on which this experiment takes place. Allow assignment on the page(s) where this experiment starts (typically just one).</div>
-            </tab>
-            <tab heading="Plugins">
+            </uib-tab>
+            <uib-tab heading="Plugins">
                 <div ng-show="plugins && plugins.length > 0">
                     <button ng-repeat="plugin in plugins | filter:{ pluginType: 'contributeDraftTab' }" style="margin-right: 15px;" onclick="return false;" ng-click="openPluginModal(plugin);">{{plugin.displayName}}</button>
                 </div>
                 <div ng-show="!plugins || plugins.length === 0">
                     <label>No plugins are currently installed.</label>
                 </div>
-            </tab>
-            <tab heading="API Calls">
-                <div class="apiCallsTab" ng-controller="APICallsCtrl">
-                    <label>Example Wasabi API Calls</label>
-                    <div style="margin-top: 0">(Note: This experiment is in Draft and so these API calls will not succeed.)</div>
-                    <div>
-                        <div class="apiLabel">Assignment</div>
-                        <input id="singleAssignmentCall" class="form-control text" type="text"
-                               value="curl -H &quot;Content-Type: application/json&quot; {{hostUrl}}/assignments/applications/{{experiment.applicationName}}/experiments/{{experiment.label}}/users/userID1" readonly />
-                    </div>
-                    <div>
-                        <div class="apiLabel">Record an Impression</div>
-                        <input id="impressionEventCall" class="form-control text" type="text"
-                               value="curl -H &quot;Content-Type: application/json&quot; -d &quot;{\&quot;events\&quot;:[{\&quot;name\&quot;:\&quot;IMPRESSION\&quot;}]}&quot; {{hostUrl}}/events/applications/{{experiment.applicationName}}/experiments/{{experiment.label}}/users/userID1" readonly />
-                    </div>
-                    <div>
-                        <div class="apiLabel">Record an Action</div>
-                        <input id="actionEventCall" class="form-control text" type="text"
-                               value="curl -H &quot;Content-Type: application/json&quot; -d &quot;{\&quot;events\&quot;:[{\&quot;name\&quot;:\&quot;myEventName\&quot;,\&quot;payload\&quot;:\&quot;{\\\&quot;myPayloadKey1\\\&quot;:\\\&quot;payloadKey1Value\\\&quot;}\&quot;}]}&quot; {{hostUrl}}/events/applications/{{experiment.applicationName}}/experiments/{{experiment.label}}/users/userID1" readonly />
-                    </div>
-                    <div ng-show="experiment && experiment.pages && experiment.pages.length > 0">
-                        <div class="apiLabel">Batch Assignment</div>
-                        <input id="batchAssignmentCall" class="form-control text" type="text"
-                               value="curl -H &quot;Content-Type: application/json&quot; {{hostUrl}}/assignments/applications/{{experiment.applicationName}}/pages/{{firstPageEncoded()}}/users/userID1" readonly />
-                    </div>
-                    <div ng-show="experiment && experiment.rule && experiment.rule !== ''">
-                        <div class="apiLabel">Assignment Providing Profile For Use By Segmentation Rule</div>
-                        <input id="singleAssignmentCallWithSegmentationRule" class="form-control text" type="text"
-                               value="curl -H &quot;Content-Type: application/json&quot; -d &quot;{\&quot;profile\&quot;:{\&quot;key1\&quot;:\&quot;value1\&quot;,\&quot;key2\&quot;:\&quot;value2\&quot;}}&quot; {{hostUrl}}/assignments/applications/{{experiment.applicationName}}/experiments/{{experiment.label}}/users/userID1" readonly />
-                    </div>
-                    <div ng-show="experiment && experiment.rule && experiment.rule !== '' && experiment.pages && experiment.pages.length > 0">
-                        <div class="apiLabel">Batch Assignment Providing Profile For Use By Segmentation Rule</div>
-                        <input id="batchAssignmentCallWithSegmentationRule" class="form-control text" type="text"
-                               value="curl -H &quot;Content-Type: application/json&quot; -d &quot;{\&quot;profile\&quot;:{\&quot;key1\&quot;:\&quot;value1\&quot;,\&quot;key2\&quot;:\&quot;value2\&quot;}}&quot; {{hostUrl}}/assignments/applications/{{experiment.applicationName}}/pages/{{firstPageEncoded()}}/users/userID1" readonly />
-                    </div>
-                    <div ng-show="experiment && experiment.id">
-                        <div class="apiLabel">Experiment ID</div>
-                        <input id="experimentId" class="form-control text" type="text"
-                               value="{{experiment.id}}" readonly />
-                    </div>
-                </div>
-            </tab>
-        </tabset>
+            </uib-tab>
+            <uib-tab heading="API Calls">
+                <ng-include src="'../../views/APICallsTab.html'"></ng-include>
+            </uib-tab>
+        </uib-tabset>
 
         <div class="buttonBar">
             <button type="button" id="btnStartExperiment" class="blue" ng-click="startExperiment(experimentForm.$invalid)" ng-show="experiment.id && !readOnly">Start Experiment</button>&nbsp; &nbsp;

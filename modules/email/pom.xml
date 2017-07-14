@@ -21,7 +21,7 @@
     <parent>
         <groupId>com.intuit.wasabi</groupId>
         <artifactId>wasabi</artifactId>
-        <version>1.0.20170418213834</version>
+        <version>1.0.20170714212644</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 

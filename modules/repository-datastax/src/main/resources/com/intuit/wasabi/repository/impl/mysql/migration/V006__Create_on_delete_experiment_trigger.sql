@@ -1,5 +1,3 @@
-USE `${mysql.dbName}`;
-
 --
 -- Cascading deletes from experiment rows to the other tables.
 --

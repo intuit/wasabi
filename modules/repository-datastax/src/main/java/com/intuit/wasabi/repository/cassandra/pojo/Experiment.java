@@ -24,6 +24,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.Set;
 import java.util.UUID;
 
 /*****
@@ -84,6 +85,9 @@ public class Experiment {
 
     @Column(name = "creatorid")
     private String creatorId;
+
+    @Column(name = "tags")
+    private Set<String> tags;
 
     @Column(name = "hypothesis_is_correct")
     private String hypothesisIsCorrect;

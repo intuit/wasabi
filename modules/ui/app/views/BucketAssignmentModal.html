@@ -4,46 +4,67 @@
         <div class="dialogContent">
             <a href="#" id="editExpAddBucket" class="listAction add" onclick="return false;" ng-click="openBucketModal(experiment)"><span></span>Add Bucket</a>
             <div id="editBucketList" class="tableContainer">
-                <table>
-                    <tr>
-                        <th style="width:47%">Bucket</th>
-                        <th style="width:17%; text-align: center;">Allocation</th>
-                        <th style="width:12%" class="icon">Control</th>
-                        <th style="width:12%" class="icon">
-                            Close
-                            <span class="info" help help-content="{{help.closeBucket}}"></span>
-                        </th>
-                        <th style="width:12%" class="icon">
-                            Empty
-                            <span class="info" help help-content="{{help.emptyBucket}}"></span>
-                        </th>
-                    </tr>
-                    <tr ng-repeat="bucket in buckets" ng-class="{'closed notAllowed': bucket.state === 'CLOSED', 'emptied notAllowed': bucket.state === 'EMPTY'}">
-
-                        <td class="bucketName">
-                            <a onclick="return false;" ng-click="openBucketModal(experiment, bucket.label, bucket)" title="{{bucket.label}}">{{bucket.label}}</a>
-                        </td>
-                        <td>
-                            <input type="text" class="text listField" ng-class="{changedAllocation: allocationsUpdated}" ng-readonly="bucketReadOnly(bucket)" digit-only convert-percent ng-model="bucket.allocationPercent" ng-change="changedAllocation()"><span class="unit">%</span>
-                        </td>
-                        <td class="icon" ng-class="{checked: bucket.isControl}"><span></span></td>
-                        <td ng-class="{notAllowed: numActiveBuckets() === 1}">
-                            <a ng-disabled="numActiveBuckets() === 1" ng-class="{disabled: numActiveBuckets() === 1}" class="command closeBucket" title="Close Bucket" onclick="return false;" ng-click="closeBucket(bucket.label)">Close</a>
-                            <span class="bucketClosed">CLOSED</span>
-                        </td>
-                        <td ng-class="{notAllowed: numActiveBuckets() === 1}">
-                            <a ng-disabled="numActiveBuckets() === 1" ng-class="{'notAllowed disabled': numActiveBuckets() === 1}" class="command emptyBucket" title="Empty Bucket" onclick="return false;" ng-click="emptyBucket(bucket.label)">Empty</a>
-                            <span class="bucketEmptied">EMPTY</span>
-                        </td>
-                    </tr>
-                    <tr class="totals">
-                        <td>Total:</td>
-                        <td style="text-align: center;" ng-class="{notValid: !bucketTotalsValid, isValid: bucketTotalsValid}">{{multiply100(totalBucketAllocation())}}%</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                </table>
+                <div id="exclusionList" scrollable-list>
+                    <div class="scrollListHeader">
+                        <table>
+                            <tr>
+                                <th style="width:47%">Bucket</th>
+                                <th style="width:17%; text-align: center;">Allocation</th>
+                                <th style="width:12%" class="icon">Control</th>
+                                <th style="width:12%" class="icon">
+                                    Close
+                                    <span class="info" help help-content="{{help.closeBucket}}"></span>
+                                </th>
+                                <th style="width:12%" class="icon">
+                                    Empty
+                                    <span class="info" help help-content="{{help.emptyBucket}}"></span>
+                                </th>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="scrollListBody">
+                        <table>
+                            <tr>
+                                <th style="width:47%">Bucket</th>
+                                <th style="width:17%; text-align: center;">Allocation</th>
+                                <th style="width:12%" class="icon">Control</th>
+                                <th style="width:12%" class="icon">
+                                    Close
+                                    <span class="info" help help-content="{{help.closeBucket}}"></span>
+                                </th>
+                                <th style="width:12%" class="icon">
+                                    Empty
+                                    <span class="info" help help-content="{{help.emptyBucket}}"></span>
+                                </th>
+                            </tr>
+                            <tr ng-repeat="bucket in buckets" ng-class="{'closed notAllowed': bucket.state === 'CLOSED', 'emptied notAllowed': bucket.state === 'EMPTY'}">
+        
+                                <td class="bucketName">
+                                    <a onclick="return false;" ng-click="openBucketModal(experiment, bucket.label, bucket)" title="{{bucket.label}}">{{bucket.label}}</a>
+                                </td>
+                                <td>
+                                    <input type="text" class="text listField" ng-class="{changedAllocation: allocationsUpdated}" ng-readonly="bucketReadOnly(bucket)" digit-only convert-percent ng-model="bucket.allocationPercent" ng-change="changedAllocation()"><span class="unit">%</span>
+                                </td>
+                                <td class="icon" ng-class="{checked: bucket.isControl}"><span></span></td>
+                                <td ng-class="{notAllowed: numActiveBuckets() === 1}">
+                                    <a ng-disabled="numActiveBuckets() === 1" ng-class="{disabled: numActiveBuckets() === 1}" class="command closeBucket" title="Close Bucket" onclick="return false;" ng-click="closeBucket(bucket.label)">Close</a>
+                                    <span class="bucketClosed">CLOSED</span>
+                                </td>
+                                <td ng-class="{notAllowed: numActiveBuckets() === 1}">
+                                    <a ng-disabled="numActiveBuckets() === 1" ng-class="{'notAllowed disabled': numActiveBuckets() === 1}" class="command emptyBucket" title="Empty Bucket" onclick="return false;" ng-click="emptyBucket(bucket.label)">Empty</a>
+                                    <span class="bucketEmptied">EMPTY</span>
+                                </td>
+                            </tr>
+                            <tr class="totals">
+                                <td>Total:</td>
+                                <td style="text-align: center;" ng-class="{notValid: !bucketTotalsValid, isValid: bucketTotalsValid}">{{multiply100(totalBucketAllocation())}}%</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
             </div>
             <div class="buttonBar" style="padding-top: 0;">
                 <div style="float: left;">

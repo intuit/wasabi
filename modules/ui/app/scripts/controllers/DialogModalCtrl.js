@@ -2,13 +2,14 @@
 
 angular.module('wasabi.controllers')
     .controller('DialogModalCtrl',
-        ['$scope', '$modalInstance', 'options', '$timeout', '$sce',
-            function ($scope, $modalInstance, options, $timeout, $sce) {
+        ['$scope', '$uibModalInstance', 'options', '$timeout', '$sce',
+            function ($scope, $uibModalInstance, options, $timeout, $sce) {
 
                 $scope.header = options.header;
 
-                // Use $sce (Strict Contextual Escaping) to safely insert HTML into the message.
-                $scope.description = $sce.trustAsHtml(options.description);
+                $scope.description = options.description;
+                $scope.descriptionWithHTML = $sce.trustAsHtml(options.descriptionWithHTML);
+                $scope.showWithHTML = (options.descriptionWithHTML && options.descriptionWithHTML.length > 0);
 
                 $scope.okLabel = 'OK';
                 if (options.okLabel) {
@@ -36,7 +37,7 @@ angular.module('wasabi.controllers')
                 }
 
                 $scope.ok = function () {
-                    $modalInstance.close();
+                    $uibModalInstance.close();
 
                     if ($scope.okCallback && typeof $scope.okCallback === 'function') {
                         $scope.okCallback();
@@ -44,7 +45,7 @@ angular.module('wasabi.controllers')
                 };
 
                 $scope.cancel = function () {
-                    $modalInstance.close();
+                    $uibModalInstance.close();
 
                     if ($scope.cancelCallback && typeof $scope.cancelCallback === 'function') {
                         $timeout($scope.cancelCallback, 100);

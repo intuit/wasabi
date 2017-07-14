@@ -22,13 +22,27 @@ http://www.w3.org/2001/XMLSchema-instance">
 
     <groupId>com.intuit.wasabi</groupId>
     <artifactId>wasabi</artifactId>
-    <version>1.0.20170418213834</version>
+    <version>1.0.20170714212644</version>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
     <url>https://github.com/intuit/wasabi</url>
     <description>Opinionated micro-service kernel.</description>
 
     <properties>
+    
+        <!-- for integration test BEGIN -->
+        <wasabi.cassandra.migration.resource.path>com/intuit/wasabi/repository/impl/cassandra/migration</wasabi.cassandra.migration.resource.path>
+        <cassandra.migration.version>0.11</cassandra.migration.version>
+        <cassandra.keyspace.prefix>wasabi</cassandra.keyspace.prefix>
+
+        <application.http.host>localhost</application.http.host>
+        <application.http.port>8080</application.http.port>
+        <application.user.name>admin</application.user.name>
+        <application.user.password>admin</application.user.password>
+        <application.user.email>admin@example.com</application.user.email>
+        <application.user.lastname>Admin</application.user.lastname>
+        <!-- for integration test END -->
+            
         <default.time.zone>UTC</default.time.zone>
         <default.time.format>yyyy-MM-dd HH:mm:ss</default.time.format>
         <access.control.max.age.delta.seconds>86400</access.control.max.age.delta.seconds>
@@ -44,8 +58,8 @@ http://www.w3.org/2001/XMLSchema-instance">
         <application.heapsize>256m</application.heapsize>
         <assignment.metadata.cache.maxBytesLocalHeap>128M</assignment.metadata.cache.maxBytesLocalHeap>
 
-        <jacoco.version>0.7.2.201409121644</jacoco.version>
-        <jacoco.destFile>${basedir}/target/jacoco.exec</jacoco.destFile>
+        <jacoco.version>0.7.9</jacoco.version>
+        <sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
 
         <http.proxy.host>http://insert.your.proxy.host.here</http.proxy.host>
         <http.proxy.port>80</http.proxy.port>
@@ -53,8 +67,15 @@ http://www.w3.org/2001/XMLSchema-instance">
         <mysql.host>localhost</mysql.host>
         <mysql.port>3306</mysql.port>
         <mysql.dbName>wasabi</mysql.dbName>
+        <mysql.username>readwrite</mysql.username>
+        <mysql.password>readwrite</mysql.password>
+        <mysql.numPartitions>1</mysql.numPartitions>
+        <mysql.minConnections>10</mysql.minConnections>
+        <mysql.maxConnections>30</mysql.maxConnections>
         <mysql.Args>verifyServerCertificate=false&amp;useSSL=false&amp;requireSSL=false&amp;autoReconnect=true&amp;autoReconnectForPools=true</mysql.Args>
 
+        <cassandra.username></cassandra.username>
+        <cassandra.password></cassandra.password>
         <cassandra.experiments.keyspaceName>wasabi_experiments</cassandra.experiments.keyspaceName>
         <cassandra.experiments.nodeHosts>localhost</cassandra.experiments.nodeHosts>
         <cassandra.experiments.port>9042</cassandra.experiments.port>
@@ -240,6 +261,15 @@ http://www.w3.org/2001/XMLSchema-instance">
         </repository>
     </repositories>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>net.jodah</groupId>
+                <artifactId>failsafe</artifactId>
+                <version>1.0.4</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <dependencies>
 		<dependency>
             <groupId>commons-codec</groupId>
@@ -441,28 +471,18 @@ http://www.w3.org/2001/XMLSchema-instance">
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${jacoco.version}</version>
                 <configuration>
-                    <dataFile>${basedir}/target/jacoco.exec</dataFile>
+                    <destFile>${sonar.jacoco.reportPath}</destFile>
+                    <append>true</append>
                     <excludes>
                         <exclude>com/intuit/wasabi/tests/**/*.class</exclude>
                     </excludes>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>prepare-agent</id>
+                        <id>agent</id>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
-                    </execution>
-                    <execution>
-                            <id>post-unit-test</id>
-                            <phase>test</phase>
-                            <goals>
-                                <goal>report</goal>
-                            </goals>
-                            <configuration>
-                                <dataFile>${project.build.directory}/jacoco.exec</dataFile>
-                                <outputDirectory>${basedir}/target/</outputDirectory>
-                            </configuration>
                     </execution>
                 </executions>
             </plugin>

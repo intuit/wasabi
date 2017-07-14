@@ -4,8 +4,8 @@
 'use strict';
 
 angular.module('wasabi.controllers').
-    controller('PagesCtrl', ['$scope', '$filter', '$http', 'ExperimentsFactory', '$modal', 'ApplicationsFactory', 'DialogsFactory', 'UtilitiesFactory', '$rootScope', 'ConfigFactory',
-        function ($scope, $filter, $http, ExperimentsFactory, $modal, ApplicationsFactory, DialogsFactory, UtilitiesFactory, $rootScope, ConfigFactory) {
+    controller('PagesCtrl', ['$scope', '$filter', '$http', 'ExperimentsFactory', '$uibModal', 'ApplicationsFactory', 'DialogsFactory', 'UtilitiesFactory', '$rootScope', 'ConfigFactory',
+        function ($scope, $filter, $http, ExperimentsFactory, $uibModal, ApplicationsFactory, DialogsFactory, UtilitiesFactory, $rootScope, ConfigFactory) {
             $scope.pages = [];
             $scope.pagesData = {
                 groupPages: [],

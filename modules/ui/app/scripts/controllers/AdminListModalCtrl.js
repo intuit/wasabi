@@ -2,8 +2,8 @@
 
 angular.module('wasabi.controllers')
     .controller('AdminListModalCtrl',
-        ['$scope', '$filter', '$modalInstance', 'applicationName', 'UtilitiesFactory', 'AuthzFactory',
-            function ($scope, $filter, $modalInstance, applicationName, UtilitiesFactory, AuthzFactory) {
+        ['$scope', '$filter', '$uibModalInstance', 'applicationName', 'UtilitiesFactory', 'AuthzFactory',
+            function ($scope, $filter, $uibModalInstance, applicationName, UtilitiesFactory, AuthzFactory) {
 
                 $scope.applicationName = applicationName;
                 $scope.admins = '';
@@ -28,6 +28,6 @@ angular.module('wasabi.controllers')
                 $scope.loadAdmins();
 
                 $scope.cancel = function () {
-                    $modalInstance.dismiss('cancel');
+                    $uibModalInstance.dismiss('cancel');
                 };
             }]);

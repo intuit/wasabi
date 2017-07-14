@@ -3,8 +3,8 @@
 'use strict';
 
 angular.module('wasabi.controllers').
-    controller('MutualExclusionsCtrl', ['$scope', '$filter', '$http', 'MutualExclusionsFactory', '$modal', 'UtilitiesFactory', 'DialogsFactory', 'PERMISSIONS', 'ConfigFactory', 'AUTH_EVENTS',
-        function ($scope, $filter, $http, MutualExclusionsFactory, $modal, UtilitiesFactory, DialogsFactory, PERMISSIONS, ConfigFactory, AUTH_EVENTS) {
+    controller('MutualExclusionsCtrl', ['$scope', '$filter', '$http', 'MutualExclusionsFactory', '$uibModal', 'UtilitiesFactory', 'DialogsFactory', 'PERMISSIONS', 'ConfigFactory', 'AUTH_EVENTS',
+        function ($scope, $filter, $http, MutualExclusionsFactory, $uibModal, UtilitiesFactory, DialogsFactory, PERMISSIONS, ConfigFactory, AUTH_EVENTS) {
 
             $scope.excludedExperiments = [];
             $scope.nonExpiredExcludedExperiments = [];
@@ -62,7 +62,7 @@ angular.module('wasabi.controllers').
             };
 
             $scope.openMutualExclusionModal = function (experimentId) {
-                var modalInstance = $modal.open({
+                var modalInstance = $uibModal.open({
                     templateUrl: 'views/MutualExclusionModal.html',
                     controller: 'MutualExclusionModalCtrl',
                     windowClass: 'larger-dialog',
@@ -105,7 +105,7 @@ angular.module('wasabi.controllers').
             };
 
             $scope.openExperimentModal = function (experiment) {
-                var modalInstance = $modal.open({
+                var modalInstance = $uibModal.open({
                     templateUrl: 'views/ExperimentModal.html',
                     controller: 'ExperimentModalCtrl',
                     windowClass: 'xxxx-dialog',

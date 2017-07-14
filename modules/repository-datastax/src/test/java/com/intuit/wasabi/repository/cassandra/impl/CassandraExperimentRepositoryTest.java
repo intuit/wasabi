@@ -36,29 +36,36 @@ import com.intuit.wasabi.repository.RepositoryException;
 import com.intuit.wasabi.repository.cassandra.accessor.ApplicationListAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.BucketAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.ExperimentTagAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.PrioritiesAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.audit.BucketAuditLogAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.audit.ExperimentAuditLogAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentLabelIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.StateExperimentIndexAccessor;
+import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentTagsByApplication;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class CassandraExperimentRepositoryTest {
@@ -86,6 +93,8 @@ public class CassandraExperimentRepositoryTest {
 
     private ExperimentAccessor mockExperimentAccessor;
     private ExperimentAuditLogAccessor mockExperimentAuditLogAccessor;
+    private ExperimentTagAccessor mockExperimentTagAccessor;
+    private PrioritiesAccessor prioritiesAccessor;
 
     private StateExperimentIndexAccessor mockStateExperimentIndexAccessor;
 
@@ -102,6 +111,8 @@ public class CassandraExperimentRepositoryTest {
         mockExperimentAuditLogAccessor = Mockito.mock(ExperimentAuditLogAccessor.class);
         mockApplicationListAccessor = Mockito.mock(ApplicationListAccessor.class);
         mockExperimentLabelIndexAccessor = Mockito.mock(ExperimentLabelIndexAccessor.class);
+        mockExperimentTagAccessor = Mockito.mock(ExperimentTagAccessor.class);
+        prioritiesAccessor = Mockito.mock(PrioritiesAccessor.class);
 
         if (repository != null) return;
 
@@ -114,7 +125,8 @@ public class CassandraExperimentRepositoryTest {
                 mockDriver, mockExperimentAccessor, mockExperimentLabelIndexAccessor,
                 mockBucketAccessor, mockApplicationListAccessor,
                 mockBucketAuditLogAccessor, mockExperimentAuditLogAccessor,
-                mockStateExperimentIndexAccessor, new ExperimentValidator());
+                mockStateExperimentIndexAccessor, new ExperimentValidator(),
+                mockExperimentTagAccessor, prioritiesAccessor);
         bucket1 = Bucket.newInstance(experimentID1, Bucket.Label.valueOf("bl1")).withAllocationPercent(.23)
                 .withControl(true)
                 .withDescription("b1").withPayload("p1")
@@ -329,7 +341,7 @@ public class CassandraExperimentRepositoryTest {
         Experiment experiment = repository.getExperiment(experimentID1);
         repository.setExperimentAccessor(mockExperimentAccessor);
         repository.setExperimentLabelIndexAccessor(mockExperimentLabelIndexAccessor);
-        Mockito.doThrow(new RuntimeException("test")).when(mockExperimentLabelIndexAccessor).updateBy(
+        Mockito.doThrow(new RuntimeException("test")).when(mockExperimentLabelIndexAccessor).insertOrUpdateBy(
                 Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
                 Mockito.any());
 
@@ -363,7 +375,7 @@ public class CassandraExperimentRepositoryTest {
         experiment.setDescription(description);
         repository.setExperimentLabelIndexAccessor(mockExperimentLabelIndexAccessor);
         Mockito.doThrow(new RuntimeException("test")).when(mockExperimentLabelIndexAccessor).
-                updateBy(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+                insertOrUpdateBy(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
                         Mockito.any(), Mockito.any());
         repository.updateExperiment(experiment);
 
@@ -506,7 +518,6 @@ public class CassandraExperimentRepositoryTest {
     public void testCreateExperimentExperimentAccessorThrowsException() {
         repository.setExperimentAccessor(mockExperimentAccessor);
         newExperiment1.setId(Experiment.ID.newInstance());
-        ;
         ID experimentId = repository.createExperiment(newExperiment1);
     }
 
@@ -639,6 +650,76 @@ public class CassandraExperimentRepositoryTest {
         assertThat(actualResultMap.get(expId1) != null, is(true));
         assertThat(actualResultMap.get(expId1).getBuckets().size(), is(1));
         assertThat(actualResultMap.get(expId1).getBuckets().get(0).getLabel().toString(), is("Test-Bucket-1"));
+    }
+
+    @Test
+    public void testUpdateTags() {
+        //------ Input --------
+        Application.Name appName = Application.Name.valueOf("AppName");
+
+        Set<String> exp1 = new TreeSet<>(Arrays.asList("tag1", "tag3"));
+        Set<String> exp2 = new TreeSet<>(Arrays.asList("tag4"));
+        ExperimentTagsByApplication exp2Tags = ExperimentTagsByApplication.builder()
+                .tags(exp2).appName(appName.toString()).build();
+        ExperimentTagsByApplication exp1Tags = ExperimentTagsByApplication.builder()
+                .tags(exp1).appName(appName.toString()).build();
+
+        List<ExperimentTagsByApplication> dbResultList = Arrays.asList(exp1Tags, exp2Tags);
+
+        //------ Mocking interacting calls
+        Result<ExperimentTagsByApplication> dbResult = mock(Result.class);
+        when(mockExperimentAccessor.getAllTags(appName.toString())).thenReturn(dbResult);
+        when(dbResult.all()).thenReturn(dbResultList);
+
+        //------ Make call
+        repository.updateExperimentTags(appName, experimentID1, exp1);
+        repository.updateExperimentTags(appName, experimentID2, exp2);
+
+        //------ Verify result
+        verify(mockExperimentTagAccessor).insert(appName.toString(), experimentID1.getRawID(),
+                new TreeSet<>(Arrays.asList("tag1", "tag3")));
+        verify(mockExperimentTagAccessor).insert(appName.toString(), experimentID2.getRawID(),
+                new TreeSet<>(Arrays.asList("tag4")));
+    }
+
+    @Test
+    public void testGetTagList() throws ExecutionException, InterruptedException {
+        //------ Input --------
+        Application.Name app01 = Application.Name.valueOf("app01");
+        Application.Name app02 = Application.Name.valueOf("app02");
+        List<Application.Name> appNames = Arrays.asList(app01, app02);
+
+        Set<String> exp1 = new TreeSet<>(Arrays.asList("tag1", "tag3"));
+        Set<String> exp2 = new TreeSet<>(Arrays.asList("tag4"));
+
+        List<ExperimentTagsByApplication> exp1Tags = Arrays.asList(ExperimentTagsByApplication.builder()
+                .tags(exp1).appName(app01.toString()).build());
+        List<ExperimentTagsByApplication> exp2Tags = Arrays.asList(ExperimentTagsByApplication.builder()
+                .tags(exp2).appName(app02.toString()).build());
+
+        //------ Mocking interacting calls
+        ListenableFuture<Result<ExperimentTagsByApplication>> dbResultFuture1 = mock(ListenableFuture.class);
+        ListenableFuture<Result<ExperimentTagsByApplication>> dbResultFuture2 = mock(ListenableFuture.class);
+
+        Result<ExperimentTagsByApplication> dbResult1 = mock(Result.class);
+        Result<ExperimentTagsByApplication> dbResult2 = mock(Result.class);
+
+        when(mockExperimentTagAccessor.getExperimentTagsAsync("app01")).thenReturn(dbResultFuture1);
+        when(mockExperimentTagAccessor.getExperimentTagsAsync("app02")).thenReturn(dbResultFuture2);
+
+        when(dbResultFuture1.get()).thenReturn(dbResult1);
+        when(dbResultFuture2.get()).thenReturn(dbResult2);
+
+        when(dbResult1.all()).thenReturn(exp1Tags);
+        when(dbResult2.all()).thenReturn(exp2Tags);
+
+        //------ Make call
+        Map<Name, Set<String>> callResult = repository.getTagListForApplications(appNames);
+
+        //------ Verify result
+        assertEquals(2, callResult.size());
+        assertArrayEquals(exp1.toArray(), callResult.get(app01).toArray());
+        assertArrayEquals(exp2.toArray(), callResult.get(app02).toArray());
     }
 
 }

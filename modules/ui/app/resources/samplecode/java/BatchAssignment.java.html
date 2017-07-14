@@ -1,0 +1,79 @@
+<div class="displaySourceCode">
+<pre>
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+/**
+ * This class contains the sample code to get a Wasabi assignment using the "pages" API (also known as a Batch Assignment).
+ */
+public class BatchAssignment {
+
+  public static void main(String[] args) throws IOException, ParseException {
+    // TODO: not sure if this will work, since this response is an array of assignments.
+    System.out.print(getBatchAssignment("{{experiment.applicationName}}", "{{pageName}}", "UserName"));
+  }
+
+
+  /**
+   * This method calls the Wasabi Api to get an assignment for the specified page and user.
+   *
+   * @param application the Application name the experiment is running in
+   * @param page  the name of the Page
+   * @param user        the user for whom an Assignment should be generated
+   * @return the Assignment or <code>null</code> if the configuration was wrong
+   * @throws IOException
+   * @throws ParseException
+   */
+  private static Object getBatchAssignment(String application, String page, String user) throws IOException, ParseException {
+
+    String urlAssignment = String.format("{{baseUrl}}/assignments/applications/%s/pages/%s/users/%s", application, page, user);
+
+    URL url = new URL(urlAssignment);
+    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+    connection.setRequestMethod("GET");
+
+    // give it 500 milliseconds to respond
+    connection.setReadTimeout(500);
+    connection.connect();
+
+    // read the output from the server
+    BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+
+    /*
+    The response from the server is a json with the following exemplary entries:
+     {"assignments: [
+       {"cache":true,
+        "experimentLabel": "MyTest",
+        "payload":null,
+        "assignment":"b",
+        "context":"PROD",
+        "status":"EXISTING_ASSIGNMENT"},
+        {"cache":true,
+         "experimentLabel": "MyTest2",
+         "payload":null,
+         "assignment":"a",
+         "context":"PROD",
+         "status":"NEW_ASSIGNMENT"}
+     ]}
+     */
+    String line = reader.readLine();
+
+    JSONParser parser = new JSONParser();
+    JSONObject assignment = (JSONObject) parser.parse(line);
+
+    return assignment.get("assignments"); // The "assignments" field in the JSON response is an array of assignments
+  }
+
+}
+</pre>
+</div>
+
+

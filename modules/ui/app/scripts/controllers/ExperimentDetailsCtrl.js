@@ -5,15 +5,17 @@
 
 angular.module('wasabi.controllers').
     controller('ExperimentDetailsCtrl', ['$scope', '$filter', '$http', '$timeout', 'ExperimentsFactory', 'BucketsFactory', 'ConfigFactory',
-        'ExperimentStatisticsFactory', '$stateParams', '$modal', 'UtilitiesFactory', '$rootScope', 'ApplicationStatisticsFactory', 'DialogsFactory', 'RuleEditFactory', '$cookies', 'PERMISSIONS', 'supportEmail',
-        function ($scope, $filter, $http, $timeout, ExperimentsFactory, BucketsFactory, ConfigFactory, ExperimentStatisticsFactory, $stateParams, $modal, UtilitiesFactory, $rootScope, ApplicationStatisticsFactory, DialogsFactory, RuleEditFactory, $cookies, PERMISSIONS, supportEmail) {
+        'ExperimentStatisticsFactory', '$stateParams', '$uibModal', 'UtilitiesFactory', '$rootScope', 'ApplicationStatisticsFactory', 'DialogsFactory', 'RuleEditFactory', '$cookies', 'PERMISSIONS', 'supportEmail',
+        function ($scope, $filter, $http, $timeout, ExperimentsFactory, BucketsFactory, ConfigFactory, ExperimentStatisticsFactory, $stateParams, $uibModal, UtilitiesFactory, $rootScope, ApplicationStatisticsFactory, DialogsFactory, RuleEditFactory, $cookies, PERMISSIONS, supportEmail) {
 
             $scope.data = {
                 disableSimple: false,
                 disableAdvanced: false,
                 ruleWidgetsDisabled: false,
                 resultsWidgetsDisabled: true,
-                descriptionLength: 0
+                descriptionLength: 0,
+                tagWidgetsDisabled: true,
+                apiLanguage: 'curl'
             };
 
             $scope.experiment = {
@@ -35,6 +37,10 @@ angular.module('wasabi.controllers').
             $scope.headers = [];
 
             $scope.dataRows = {};
+
+            $scope.tags = [];
+            $scope.allTags = [];
+            $scope.tagsStr = '';
 
             // This is a kludge so that when you open the details from the Mutual Exclusion list of a Draft experiment
             // we needed to remove this class so the Details dialog would be scrollable.
@@ -252,6 +258,8 @@ angular.module('wasabi.controllers').
                     $scope.processRule();
                     //window.setTimeout($scope.disableRule, 2000);
 
+                    $scope.transferTags(true);
+
                     // Tell the Pages tab that it can get the list of global pages, now, because it needed an application name.
                     $rootScope.$broadcast('experiment_created');
                 }, function(response) {
@@ -333,7 +341,7 @@ angular.module('wasabi.controllers').
             };
 
             $scope.showAnalysisGraph = function() {
-                var modalInstance = $modal.open({
+                var modalInstance = $uibModal.open({
                     templateUrl: 'views/AnalysisGraphModal.html',
                     controller: 'AnalysisGraphModalCtrl',
                     windowClass: 'xxx-dialog',
@@ -642,7 +650,7 @@ angular.module('wasabi.controllers').
             };
 
             $scope.closeBucket = function (bucketLabel) {
-                $modal.open({
+                $uibModal.open({
                     templateUrl: 'views/CloseBucketConfirmModal.html',
                     controller: 'CloseBucketConfirmModalCtrl',
                     windowClass: 'xxx-dialog',
@@ -933,8 +941,42 @@ angular.module('wasabi.controllers').
                 );
             };
 
+            $scope.editTags = function() {
+                $scope.data.tagWidgetsDisabled = false;
+                $scope.$digest();
+                return $scope.experiment.tags;
+            };
+
+            $scope.cancelTags = function() {
+                $scope.transferTags(true);
+                $scope.data.tagWidgetsDisabled = true;
+                $scope.$digest();
+            };
+
+            $scope.saveTags = function() {
+                var experiment = $scope.experiment;
+                $scope.transferTags(false);
+                ExperimentsFactory.update({
+                    id: experiment.id,
+                    tags: experiment.tags
+                }).$promise.then(function () {
+                        UtilitiesFactory.trackEvent('saveItemSuccess',
+                            {key: 'dialog_name', value: 'saveTagsFromDetails'},
+                            {key: 'application_name', value: experiment.applicationName},
+                            {key: 'item_id', value: experiment.id},
+                            {key: 'item_label', value: experiment.label});
+
+                        $scope.data.tagWidgetsDisabled = true;
+                    },
+                    function(response) {
+                        UtilitiesFactory.handleGlobalError(response);
+                        $scope.data.tagWidgetsDisabled = true;
+                    }
+                );
+            };
+
             $scope.openChangeSamplingModal = function (sampling) {
-                $modal.open({
+                $uibModal.open({
                     templateUrl: 'views/ChangeSamplingModal.html',
                     controller: 'ChangeSamplingModalCtrl',
                     windowClass: 'xxx-dialog',
@@ -960,7 +1002,7 @@ angular.module('wasabi.controllers').
             };
 
             $scope.openGetAssignmentsModal = function () {
-                $modal.open({
+                $uibModal.open({
                     templateUrl: 'views/GetAssignmentsModal.html',
                     controller: 'GetAssignmentsModalCtrl',
                     windowClass: 'xxx-dialog',
@@ -976,7 +1018,7 @@ angular.module('wasabi.controllers').
             };
 
             $scope.openChangeRapidExperiment = function () {
-                $modal.open({
+                $uibModal.open({
                     templateUrl: 'views/ChangeRapidExperiment.html',
                     controller: 'ChangeRapidExperimentCtrl',
                     windowClass: 'xxx-dialog',
@@ -1005,7 +1047,7 @@ angular.module('wasabi.controllers').
             };
 
             $scope.openChangeEndTimeModal = function (endTime) {
-                $modal.open({
+                $uibModal.open({
                     templateUrl: 'views/ChangeDateModal.html',
                     controller: 'ChangeDateModalCtrl',
                     windowClass: 'xxx-dialog',
@@ -1034,7 +1076,7 @@ angular.module('wasabi.controllers').
             };
 
             $scope.openBucketModal = function (experimentId, bucketLabel, bucketInfo, readOnly) {
-                var modalInstance = $modal.open({
+                var modalInstance = $uibModal.open({
                     templateUrl: 'views/BucketModal.html',
                     controller: 'BucketModalCtrl',
                     windowClass: 'xxx-dialog',
@@ -1093,7 +1135,7 @@ angular.module('wasabi.controllers').
                 DialogsFactory.confirmDialog(editRunningBucketsWarning, 'Warning',
                         function() {
                             // Let them go to the dialog.
-                            var modalInstance = $modal.open({
+                            var modalInstance = $uibModal.open({
                                 templateUrl: 'views/BucketAssignmentModal.html',
                                 controller: 'BucketAssignmentModalCtrl',
                                 windowClass: 'xxx-dialog',
@@ -1121,7 +1163,7 @@ angular.module('wasabi.controllers').
             };
 
             $scope.openSegmentationTestModal = function () {
-                var modalInstance = $modal.open({
+                var modalInstance = $uibModal.open({
                     templateUrl: 'views/SegmentationTestModal.html',
                     controller: 'SegmentationTestModalCtrl',
                     windowClass: 'xxx-dialog',
@@ -1149,6 +1191,30 @@ angular.module('wasabi.controllers').
                 UtilitiesFactory.openPluginModal(plugin, $scope.experiment);
             };
 
+            $scope.transferTagsToReadOnly = function() {
+                $scope.tagsStr = '';
+                if ($scope.experiment && $scope.experiment.tags) {
+                    for (var i = 0; i < $scope.experiment.tags.length; i++) {
+                        $scope.tagsStr += $scope.experiment.tags[i] + (i < $scope.experiment.tags.length - 1 ? ', ' : '');
+                    }
+                }
+            };
+
+            $scope.loadAllTags = function() {
+                UtilitiesFactory.loadAllTags($scope, true);
+            };
+
+            $scope.queryTags = function(query) {
+                return UtilitiesFactory.queryTags(query, $scope.allTags);
+            };
+
+            $scope.transferTags = function(fromExperiment) {
+                UtilitiesFactory.transferTags(fromExperiment, $scope);
+                $scope.transferTagsToReadOnly();
+            };
+
             // init controller
             $scope.loadExperiment();
+            $scope.loadAllTags();
+
         }]);

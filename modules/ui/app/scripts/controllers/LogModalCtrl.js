@@ -2,8 +2,8 @@
 
 angular.module('wasabi.controllers')
     .controller('LogModalCtrl',
-        ['$scope', '$modalInstance', 'log', 'UtilitiesFactory',
-            function ($scope, $modalInstance, log, UtilitiesFactory) {
+        ['$scope', '$uibModalInstance', 'log', 'UtilitiesFactory',
+            function ($scope, $uibModalInstance, log, UtilitiesFactory) {
 
                 $scope.log = log;
 
@@ -16,6 +16,6 @@ angular.module('wasabi.controllers')
                 };
 
                 $scope.cancel = function () {
-                    $modalInstance.dismiss('cancel');
+                    $uibModalInstance.dismiss('cancel');
                 };
             }]);

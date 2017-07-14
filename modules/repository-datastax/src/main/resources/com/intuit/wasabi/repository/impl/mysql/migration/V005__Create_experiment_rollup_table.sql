@@ -1,5 +1,3 @@
-USE `${mysql.dbName}`;
-
 CREATE TABLE `experiment_rollup` (
   `experiment_id` varbinary(16) NOT NULL,
   `day` date NOT NULL,

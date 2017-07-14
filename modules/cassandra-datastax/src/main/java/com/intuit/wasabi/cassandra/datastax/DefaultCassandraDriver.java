@@ -27,6 +27,7 @@ import com.datastax.driver.core.ProtocolOptions;
 import com.datastax.driver.core.QueryLogger;
 import com.datastax.driver.core.QueryOptions;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.core.SocketOptions;
 import com.datastax.driver.core.exceptions.DriverException;
 import com.datastax.driver.core.exceptions.InvalidQueryException;
 import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
@@ -92,6 +93,10 @@ public class DefaultCassandraDriver implements CassandraDriver {
                 builder.addContactPoints(nodes.toArray(new String[nodes.size()]))
                         .withRetryPolicy(DefaultRetryPolicy.INSTANCE);
                 builder.withPort(getConfiguration().getPort());
+                builder.withCredentials(
+                        getConfiguration().getUsername(),
+                        getConfiguration().getPassword()
+                );
 
                 if (getConfiguration().getTokenAwareLoadBalancingLocalDC().isPresent() &&
                         getConfiguration().getTokenAwareLoadBalancingUsedHostsPerRemoteDc() >= 0) {
@@ -141,6 +146,17 @@ public class DefaultCassandraDriver implements CassandraDriver {
 
                 //Configure to use compression
                 builder.withCompression(ProtocolOptions.Compression.LZ4);
+
+
+                //The connection timeout in milliseconds.
+                //As the name implies, the connection timeout defines how long the driver waits to establish a new connection to a Cassandra node before giving up.
+                //Default value is 5000ms
+                builder.getConfiguration().getSocketOptions().setConnectTimeoutMillis(getConfiguration().getConnectTimeoutMillis());
+
+                //The per-host read timeout in milliseconds.
+                //This defines how long the driver will wait for a given Cassandra node to answer a query.
+                //Default value is 12000ms
+                builder.getConfiguration().getSocketOptions().setReadTimeoutMillis(getConfiguration().getReadTimeoutMillis());
 
                 // SSL connection
                 if (getConfiguration().useSSL()) {

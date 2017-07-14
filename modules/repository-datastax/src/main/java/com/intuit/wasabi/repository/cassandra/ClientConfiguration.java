@@ -16,6 +16,7 @@
 package com.intuit.wasabi.repository.cassandra;
 
 import com.datastax.driver.core.ConsistencyLevel;
+import com.datastax.driver.core.SocketOptions;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 
 import java.util.Arrays;
@@ -57,6 +58,16 @@ public class ClientConfiguration implements CassandraDriver.Configuration {
         return Arrays.stream(getProperty("nodeHosts", properties).split(","))
                 .map(String::trim)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public String getUsername() {
+        return getProperty("username", properties, "");
+    }
+
+    @Override
+    public String getPassword() {
+        return getProperty("password", properties, "");
     }
 
     @Override
@@ -123,6 +134,16 @@ public class ClientConfiguration implements CassandraDriver.Configuration {
     @Override
     public int getPoolTimeoutMillis() {
         return parseInt(getProperty("poolTimeoutMillis", properties, "0"));
+    }
+
+    @Override
+    public int getConnectTimeoutMillis() {
+        return parseInt(getProperty("connectTimeoutMillis", properties, String.valueOf(SocketOptions.DEFAULT_CONNECT_TIMEOUT_MILLIS)));
+    }
+
+    @Override
+    public int getReadTimeoutMillis() {
+        return parseInt(getProperty("readTimeoutMillis", properties, String.valueOf(SocketOptions.DEFAULT_READ_TIMEOUT_MILLIS)));
     }
 
     @Override

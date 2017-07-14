@@ -22,7 +22,10 @@ import com.intuit.wasabi.experimentobjects.ExperimentList;
 import com.intuit.wasabi.experimentobjects.NewExperiment;
 import com.intuit.wasabi.experimentobjects.exceptions.InvalidExperimentStateTransitionException;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Interface to perform CRUD operations on experiment. In addition, it also
@@ -155,4 +158,14 @@ public interface Experiments {
      * @return a list of Application.Name types
      */
     List<Application.Name> getApplications();
+
+    /**
+     * Returns all tags that belong to the Applications specified in the given
+     * {@link com.intuit.wasabi.experimentobjects.Application.Name}s.
+     *
+     * @param applicationNames the {@link com.intuit.wasabi.experimentobjects.Application.Name}s for which the
+     *                         tags should be retrieved
+     * @return a {@link Map} containing the Applications and their tags
+     */
+    Map<Application.Name, Set<String>> getTagsForApplications(Collection<Application.Name> applicationNames);
 }
