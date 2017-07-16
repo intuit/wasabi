@@ -589,7 +589,9 @@ public class AssignmentsImpl implements Assignments {
         }
 
         if (currentTime > experiment.getEndTime().getTime()) {
+            // the experiment moves to the PAUSED state if the endtime is reached
             experiment.setState(Experiment.State.PAUSED);
+            repository.updateExperiment(experiment);
             return nullAssignment(userID, applicationName, experimentID,
                     Assignment.Status.EXPERIMENT_PAUSED);
         }
