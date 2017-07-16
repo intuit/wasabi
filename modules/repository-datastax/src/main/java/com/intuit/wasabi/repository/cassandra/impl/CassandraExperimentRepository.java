@@ -1262,7 +1262,9 @@ public class CassandraExperimentRepository implements ExperimentRepository {
                 for (ExperimentTagsByApplication expTagsByApp : expTagApplication) {
                     allTagsForApplication.addAll(expTagsByApp.getTags());
                 }
-                result.put(Application.Name.valueOf(expTagApplication.get(0).getAppName()), allTagsForApplication);
+
+                if (!expTagApplication.isEmpty())
+                    result.put(Application.Name.valueOf(expTagApplication.get(0).getAppName()), allTagsForApplication);
             }
 
             return result;
