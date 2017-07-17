@@ -37,6 +37,7 @@
         <suite-file path="testng_segHttpHeader.xml" />
         <suite-file path="testng_segRuleFix.xml" />
         <suite-file path="testng_repeatStateInconsistency.xml" />
+        <suite-file path="testng_applicationtaglist.xml" />
 
         <!-- final clean up -->
         <suite-file path="testng_teardown.xml" />
