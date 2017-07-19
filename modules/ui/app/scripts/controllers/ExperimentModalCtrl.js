@@ -406,7 +406,7 @@ angular.module('wasabi.controllers')
                                 description: $scope.experiment.description,
                                 rule: $scope.experiment.rule,
                                 isRapidExperiment: $scope.experiment.isRapidExperiment,
-                                tags: experiment.tags
+                                tags: $scope.experiment.tags
                             };
                             if ($scope.experiment.isRapidExperiment) {
                                 experimentUpdates.userCap = $scope.experiment.userCap;
