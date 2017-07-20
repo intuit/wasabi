@@ -15,6 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.database;
 
+import com.datastax.driver.core.Statement;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
@@ -41,6 +42,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.intuit.wasabi.experimentobjects.Experiment.State.DELETED;
 
@@ -745,12 +747,15 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
     }
 
     /**
-     * Creates an application at top level
-     *
-     * @param applicationName Application Name
+     * {@inheritDoc}
      */
     @Override
-    public void createApplication(Application.Name applicationName) {
+    public Statement createApplication(Application.Name applicationName) {
+        throw new UnsupportedOperationException("Not supported ");
+    }
+
+    @Override
+    public Map<Application.Name, Set<String>> getTagListForApplications(Collection<Application.Name> applicationNames) {
         throw new UnsupportedOperationException("Not supported ");
     }
 
@@ -758,6 +763,5 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
     public void updateStateIndex(Experiment experiment) {
         throw new UnsupportedOperationException("Not supported ");
     }
-
 
 }

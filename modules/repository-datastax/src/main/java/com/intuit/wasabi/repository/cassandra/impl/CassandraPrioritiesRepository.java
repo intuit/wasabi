@@ -39,6 +39,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.nonNull;
+
 /**
  * Cassandra priorities repository implementation
  *
@@ -159,8 +161,12 @@ public class CassandraPrioritiesRepository implements PrioritiesRepository {
                 for (com.intuit.wasabi.repository.cassandra.pojo.Application priority : UninterruptibleUtil.getUninterruptibly(applicationFuture).all()) {
                     for (UUID uuid : priority.getPriorities()) {
                         Experiment exp = experimentMap.get(Experiment.ID.valueOf(uuid));
-                        prioritizedExperimentList.addPrioritizedExperiment(PrioritizedExperiment.from(exp, priorityValue).build());
-                        priorityValue += 1;
+                        if (nonNull(exp)) {
+                            prioritizedExperimentList.addPrioritizedExperiment(PrioritizedExperiment.from(exp, priorityValue).build());
+                            priorityValue += 1;
+                        } else {
+                            LOGGER.error("DATA_INCONSISTENCY: Experiment with ID={} is present in the priority list of 'application' table but there is no respective entry in the 'experiment' table ...", uuid);
+                        }
                     }
                 }
                 if (LOGGER.isDebugEnabled()) {

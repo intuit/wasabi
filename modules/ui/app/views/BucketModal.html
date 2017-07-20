@@ -9,7 +9,7 @@
                     <div>
                         <label>Bucket Name</label>
                         <input id="txtBucketName" type="text" class="form-control text" name="label" auto-focus ng-model="bucket.label"
-                               ng-focus required no-spaces ng-pattern="/^[_\-\$A-Za-z][_\-\$A-Za-z0-9]*$/" ng-maxlength=64 ng-disabled="!isCreateBucket || readOnly"/>
+                               ng-focus required no-spaces ng-pattern="/^[_\-\$A-Za-z][_\-\$A-Za-z0-9]*$/" ng-maxlength="64" ng-disabled="!isCreateBucket || readOnly"/>
                         <div ng-if="isEditInDetails && bucketStatistics.actionCounts != undefined" class="bucketCounts">
                             <label>Action Counts</label>
                             <div>{{bucketStatistics.actionCounts}}</div>

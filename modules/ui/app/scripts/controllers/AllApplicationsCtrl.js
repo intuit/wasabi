@@ -3,8 +3,8 @@
 'use strict';
 
 angular.module('wasabi.controllers').
-    controller('AllApplicationsCtrl', ['$scope', '$filter', '$http', 'ApplicationsFactory', 'AuthzFactory', '$modal', 'UtilitiesFactory', '$rootScope', 'StateFactory', 'DialogsFactory', 'AUTH_EVENTS', 'EmailFactory', 'Session', 'ConfigFactory',
-        function ($scope, $filter, $http, ApplicationsFactory, AuthzFactory, $modal, UtilitiesFactory, $rootScope, StateFactory, DialogsFactory, AUTH_EVENTS, EmailFactory, Session, ConfigFactory) {
+    controller('AllApplicationsCtrl', ['$scope', '$filter', '$http', 'ApplicationsFactory', 'AuthzFactory', '$uibModal', 'UtilitiesFactory', '$rootScope', 'StateFactory', 'DialogsFactory', 'AUTH_EVENTS', 'EmailFactory', 'Session', 'ConfigFactory',
+        function ($scope, $filter, $http, ApplicationsFactory, AuthzFactory, $uibModal, UtilitiesFactory, $rootScope, StateFactory, DialogsFactory, AUTH_EVENTS, EmailFactory, Session, ConfigFactory) {
 
             $scope.data = {
                 query: ''

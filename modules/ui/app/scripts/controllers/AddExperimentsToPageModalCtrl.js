@@ -2,8 +2,8 @@
 
 angular.module('wasabi.controllers')
     .controller('AddExperimentsToPageModalCtrl',
-        ['$scope', '$filter', '$modalInstance', 'PagesFactory', 'ExperimentsFactory', 'experiments', 'allExperiments', 'page', 'UtilitiesFactory',
-            function ($scope, $filter, $modalInstance, PagesFactory, ExperimentsFactory, experiments, allExperiments, page, UtilitiesFactory) {
+        ['$scope', '$filter', '$uibModalInstance', 'PagesFactory', 'ExperimentsFactory', 'experiments', 'allExperiments', 'page', 'UtilitiesFactory',
+            function ($scope, $filter, $uibModalInstance, PagesFactory, ExperimentsFactory, experiments, allExperiments, page, UtilitiesFactory) {
 
                 $scope.data = {
                     searchField: '',
@@ -107,13 +107,13 @@ angular.module('wasabi.controllers')
                                 }
                                 var selectedExperimentNames = $scope.createNameList(selectedExperiments, 'label');
                                 UtilitiesFactory.displaySuccessWithCacheWarning('Experiments Added', 'The ' + expmtStr + ', ' + selectedExperimentNames + ', ' + hasBeenStr + ' added to the page, ' + page + '.');
-                                $modalInstance.close();
+                                $uibModalInstance.close();
                             }
                         }, function(response) {
                             UtilitiesFactory.handleGlobalError(response, 'Your experiment could not be added to that page.');
                             numExperimentsToAdd--;
                             if (!numExperimentsToAdd) {
-                                $modalInstance.close();
+                                $uibModalInstance.close();
                             }
                         });
                     }
@@ -133,6 +133,6 @@ angular.module('wasabi.controllers')
                 };
 
                 $scope.cancel = function () {
-                    $modalInstance.dismiss('cancel');
+                    $uibModalInstance.dismiss('cancel');
                 };
             }]);

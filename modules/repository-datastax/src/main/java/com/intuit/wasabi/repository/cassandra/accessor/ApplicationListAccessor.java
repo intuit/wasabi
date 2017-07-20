@@ -15,6 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.cassandra.accessor;
 
+import com.datastax.driver.core.Statement;
 import com.datastax.driver.mapping.Result;
 import com.datastax.driver.mapping.annotations.Accessor;
 import com.datastax.driver.mapping.annotations.Query;
@@ -48,6 +49,6 @@ public interface ApplicationListAccessor {
      * @param appName
      */
     @Query("insert into applicationList (app_name) values (?)")
-    void insert(String appName);
+    Statement insert(String appName);
 
 }

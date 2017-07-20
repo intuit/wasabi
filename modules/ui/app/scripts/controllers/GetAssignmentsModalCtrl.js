@@ -3,8 +3,8 @@
 
 angular.module('wasabi.controllers')
     .controller('GetAssignmentsModalCtrl',
-        ['$scope', '$modalInstance', 'experiment', 'DialogsFactory', 'UtilitiesFactory', 'ConfigFactory',
-            function ($scope, $modalInstance, experiment, DialogsFactory, UtilitiesFactory, ConfigFactory) {
+        ['$scope', '$uibModalInstance', 'experiment', 'DialogsFactory', 'UtilitiesFactory', 'ConfigFactory',
+            function ($scope, $uibModalInstance, experiment, DialogsFactory, UtilitiesFactory, ConfigFactory) {
 
                 $scope.data = {
                     'fromDate': moment().subtract(1, 'days').format('ddd MMM DD YYYY HH:mm:ss ZZ'),
@@ -36,7 +36,7 @@ angular.module('wasabi.controllers')
                                     '&timeZone=' + $scope.data.timeZone;
                             location.href = downloadUrl;
 
-                            $modalInstance.close($scope.experiment);
+                            $uibModalInstance.close($scope.experiment);
                             //UtilitiesFactory.displayPageSuccessMessage('Success', 'Successfully downloaded the file.');
                         }
                     } else {
@@ -45,6 +45,6 @@ angular.module('wasabi.controllers')
                 };
 
                 $scope.cancel = function () {
-                    $modalInstance.dismiss('cancel');
+                    $uibModalInstance.dismiss('cancel');
                 };
             }]);

@@ -19,7 +19,9 @@ import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authorization.Authorization;
+import com.intuit.wasabi.authorizationobjects.UserPermissions;
 import com.intuit.wasabi.exceptions.AuthenticationException;
 import com.intuit.wasabi.experiment.Experiments;
 import com.intuit.wasabi.experiment.Pages;
@@ -43,8 +45,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_MODEXP;
 import static com.intuit.wasabi.api.APISwaggerResource.EXAMPLE_AUTHORIZATION_HEADER;
@@ -370,6 +374,44 @@ public class ApplicationsResource {
         } catch (Exception exception) {
             LOGGER.error("getPagesAndAssociatedExperimentsForApplication failed for applicationName={} with error:",
                     applicationName, exception);
+            throw exception;
+        }
+    }
+
+    /**
+     * Returns a Map of allowed Applications to the corresponding
+     * tags that have been stored with them.
+     *
+     * @param authorizationHeader the authorization headers
+     * @return Response object containing the Applications with their tags
+     */
+    @GET
+    @Path("/tags")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "Returns a Map of Applications to their tags",
+            response = Map.class)
+    @Timed
+    public Response getAllExperimentTags(
+            @HeaderParam(AUTHORIZATION)
+            @ApiParam(value = EXAMPLE_AUTHORIZATION_HEADER, required = true)
+            final String authorizationHeader) {
+        try {
+            UserInfo.Username userName = authorization.getUser(authorizationHeader);
+            Set<Application.Name> allowed = new HashSet<>();
+
+            // get the for the user visible Applications
+            List<UserPermissions> authorized = authorization.getUserPermissionsList(userName).getPermissionsList();
+            for (UserPermissions perm : authorized) {
+                allowed.add(perm.getApplicationName());
+            }
+
+            // get their associated tags
+            Map<Application.Name, Set<String>> allTags = experiments.getTagsForApplications(allowed);
+
+            return httpHeader.headers().entity(allTags).build();
+        } catch (Exception exception) {
+            LOGGER.error("Retrieving the Experiment tags failed with error:",
+                    exception);
             throw exception;
         }
     }
