@@ -49,6 +49,7 @@ import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -720,6 +721,33 @@ public class CassandraExperimentRepositoryTest {
         assertEquals(2, callResult.size());
         assertArrayEquals(exp1.toArray(), callResult.get(app01).toArray());
         assertArrayEquals(exp2.toArray(), callResult.get(app02).toArray());
+    }
+
+
+    @Test
+    public void testGetEmptyTagList() throws ExecutionException, InterruptedException {
+        //------ Input --------
+        Application.Name app01 = Application.Name.valueOf("app01");
+        List<Application.Name> appNames = Arrays.asList(app01);
+
+        List<ExperimentTagsByApplication> exp1Tags = Collections.emptyList();
+
+        //------ Mocking interacting calls
+        ListenableFuture<Result<ExperimentTagsByApplication>> dbResultFuture1 = mock(ListenableFuture.class);
+
+        Result<ExperimentTagsByApplication> dbResult1 = mock(Result.class);
+
+        when(mockExperimentTagAccessor.getExperimentTagsAsync("app01")).thenReturn(dbResultFuture1);
+
+        when(dbResultFuture1.get()).thenReturn(dbResult1);
+
+        when(dbResult1.all()).thenReturn(exp1Tags);
+
+        //------ Make call
+        Map<Name, Set<String>> callResult = repository.getTagListForApplications(appNames);
+
+        //------ Verify result
+        assertEquals(0, callResult.size()); // no results are returned without error
     }
 
 }
