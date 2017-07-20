@@ -1,5 +1,3 @@
-USE `${mysql.dbName}`;
-
 --
 -- Auto-versioning of deleted experiments.
 --

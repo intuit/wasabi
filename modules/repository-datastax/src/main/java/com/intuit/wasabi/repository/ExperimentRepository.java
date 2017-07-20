@@ -15,6 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository;
 
+import com.datastax.driver.core.Statement;
 import com.google.common.collect.Table;
 import com.intuit.wasabi.analyticsobjects.counts.AssignmentCounts;
 import com.intuit.wasabi.assignmentobjects.Assignment;
@@ -264,7 +265,7 @@ public interface ExperimentRepository {
      *
      * @param applicationName Application name
      */
-    void createApplication(Application.Name applicationName);
+    Statement createApplication(Application.Name applicationName);
 
     /**
      * Gets a list of tags associated with the given {@link Application.Name}.

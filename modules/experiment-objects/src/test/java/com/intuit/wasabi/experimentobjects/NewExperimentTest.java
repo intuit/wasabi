@@ -91,4 +91,18 @@ public class NewExperimentTest {
                 .build();
         fail();
     }
+
+    // New Experiment build should throw IllegalArgumentException when
+    // personalization is enabled and model name is not specified
+    @Test(expected = IllegalArgumentException.class)
+    public void testExperimentPartialPersonalizationInfo() {
+        NewExperiment.withID(Experiment.ID.newInstance())
+                .withAppName(Application.Name.valueOf("app"))
+                .withLabel(Experiment.Label.valueOf("label"))
+                .withIsPersonalizationEnabled(true)
+                .withSamplingPercent(0.5)
+                .withStartTime(new Date())
+                .withEndTime(new Date())
+                .withDescription("test").build();
+    }
 }

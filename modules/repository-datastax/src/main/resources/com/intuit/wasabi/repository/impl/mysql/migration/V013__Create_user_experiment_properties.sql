@@ -1,5 +1,3 @@
-USE `${mysql.dbName}`;
-
 CREATE TABLE IF NOT EXISTS `user_experiment_properties` (
   `user_id` varchar(48) COLLATE utf8_bin NOT NULL,
   `experiment_id` varbinary(16) NOT NULL,
