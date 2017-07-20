@@ -41,6 +41,8 @@ public class Constants {
     public static final String NEW_LINE = System.getProperty("line.separator"); // OS dependent line separator
     public static final String TAB = "\t";
 
+    public static final int DEFAULT_RAPIDEXP_MAX_USERS  = 10;
+    
     /**
      * The integration tests prefix, should be {@code SW50ZWdyVGVzdA_}
      */

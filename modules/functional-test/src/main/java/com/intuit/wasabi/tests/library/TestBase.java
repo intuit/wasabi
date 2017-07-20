@@ -4653,4 +4653,17 @@ public class TestBase extends ServiceTestBase {
 
         return offset;
     }
+    
+        /**
+         * This util method creates buckets to the experiment specified
+         *
+         * @param experiment - the experiment to which we want to assign the bucket
+         * @param numberOfBucketsPerExperiment - number of buckets per each experiment
+         */
+       public void createBucketsToExperiment(Experiment experiment, int numberOfBucketsPerExperiment) {
+     
+            List<Bucket> bucketList = BucketFactory.createBuckets(experiment, numberOfBucketsPerExperiment);
+            postBuckets(bucketList);
+            
+        }
 }
