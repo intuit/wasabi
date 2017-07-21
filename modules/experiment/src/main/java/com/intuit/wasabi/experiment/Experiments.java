@@ -89,6 +89,14 @@ public interface Experiments {
     Experiment updateExperiment(Experiment.ID experimentID, Experiment updates, UserInfo user);
 
     /**
+     * Updates experiment state for given experiment
+     *
+     * @param experiment The experiment object containing existing experiment information
+     * @param state The state the experiment needs to be updated to
+     */
+    void updateExperimentState(Experiment experiment, Experiment.State state);
+
+    /**
      * Check state transition from current to desired state.
      *
      * @param experimentID The unique experiment id
