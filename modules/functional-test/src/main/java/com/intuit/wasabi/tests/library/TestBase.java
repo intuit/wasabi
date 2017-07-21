@@ -3986,6 +3986,19 @@ public class TestBase extends ServiceTestBase {
         return response.jsonPath().prettify();
     }
 
+    /**
+     * Sends a GET request to retrieve experiment using the analytics endpoint. The response must contain
+     * {@link HttpStatus#SC_OK}.
+     * <p>
+     * Uses the experiment's experimentLabel.
+     *
+     * @param experiment the experiment
+     * @return the cumulative experiment counts
+     */
+    public void getAnalyticsExperiment(Experiment experiment) {
+
+    }
+
     /////////////////////
     // CUSTOM requests //
     /////////////////////
