@@ -152,6 +152,13 @@ public interface AssignmentsRepository {
     AssignmentCounts getBucketAssignmentCount(Experiment experiment);
 
     /**
+     * Gets the bucket assignmentCounts in parallel using asynchronous database queries.
+     * @param experimentIds List of experiment ids
+     * @return map of experiment id to assignment counts.
+     */
+    Map<Experiment.ID, AssignmentCounts> getBucketAssignmentCountsInParallel(List<Experiment.ID> experimentIds);
+
+    /**
      * Populate experiment metadata asynchronously...
      *
      * @param userID

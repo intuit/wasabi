@@ -29,6 +29,7 @@ import com.intuit.wasabi.assignment.cache.impl.AssignmentsMetadataCacheRefreshTa
 import com.intuit.wasabi.assignment.cache.impl.NoopAssignmentsMetadataCacheImpl;
 import com.intuit.wasabi.assignmentobjects.AssignmentEnvelopePayload;
 import com.intuit.wasabi.exceptions.AssignmentException;
+import com.intuit.wasabi.experiment.ExperimentsModule;
 import com.intuit.wasabi.export.DatabaseExport;
 import com.intuit.wasabi.export.Envelope;
 import com.intuit.wasabi.export.WebExport;
@@ -80,6 +81,7 @@ public class AssignmentsModule extends AbstractModule {
 
         install(new ExportModule());
         install(new CassandraRepositoryModule());
+        install(new ExperimentsModule());
 
         Properties properties = create(PROPERTY_NAME, AssignmentsModule.class);
 
