@@ -21,5 +21,11 @@ import java.util.Map;
 
 public interface AuthenticateByHttpRequest {
 
+    /**
+     * Looks for required headers in the http request and uses that information to authenticate the request.
+     * @param httpRequest
+     * @return a map of any additional information obtained during the authentication process
+     * which might be useful in subsequent code flow.
+     */
     Map<String, String> authenticate(HttpRequestContext httpRequest);
 }
