@@ -19,13 +19,10 @@ package com.intuit.wasabi.authentication.impl;
 import com.intuit.wasabi.authentication.AuthenticateByHttpRequest;
 import com.sun.jersey.api.core.HttpRequestContext;
 
-import java.util.Collections;
-import java.util.Map;
-
-public class NoOpAuthenticateByHttpRequestImpl implements AuthenticateByHttpRequest {
+public class NoOpAuthenticateByHttpRequestImpl<E> implements AuthenticateByHttpRequest<E> {
 
     @Override
-    public Map<String, String> authenticate(HttpRequestContext httpRequestContext) {
-        return Collections.emptyMap();
+    public E authenticate(HttpRequestContext httpRequestContext) {
+        return null;
     }
 }

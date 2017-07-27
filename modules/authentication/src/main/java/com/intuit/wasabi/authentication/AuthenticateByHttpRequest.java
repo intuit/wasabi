@@ -17,15 +17,15 @@
 package com.intuit.wasabi.authentication;
 
 import com.sun.jersey.api.core.HttpRequestContext;
-import java.util.Map;
 
-public interface AuthenticateByHttpRequest {
+public interface AuthenticateByHttpRequest<E> {
 
     /**
      * Looks for required headers in the http request and uses that information to authenticate the request.
+     *
      * @param httpRequest
-     * @return a map of any additional information obtained during the authentication process
+     * @return a generic object of any additional information obtained during the authentication process
      * which might be useful in subsequent code flow.
      */
-    Map<String, String> authenticate(HttpRequestContext httpRequest);
+    E authenticate(HttpRequestContext httpRequest);
 }
