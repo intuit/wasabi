@@ -105,7 +105,7 @@ angular.module('wasabi.controllers')
                         }
                         else {
                             if (ConfigFactory.authnType() === 'sso') {
-                                window.location = ConfigFactory.noAuthRedirect();
+                                window.location.href = ConfigFactory.noAuthRedirect();
                             }
                             else {
                                 $scope.loginFailed = true;
