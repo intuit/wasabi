@@ -1670,6 +1670,46 @@ public class AssignmentsImplTest {
         verify(metadataCache, times(1)).refresh();
     }
 
+    @Test
+    public void testExperimentFetchSameNameButDeleted() {
+
+        //Create input objects
+        Application.Name appName = Application.Name.valueOf("Test");
+        Experiment.ID deleteExperimentId = Experiment.ID.newInstance(); //Experiment.ID.valueOf("");
+        Experiment.ID runningExperimentId = Experiment.ID.newInstance(); //Experiment.ID.valueOf("");
+        Experiment.Label commonExperimentLabel = Experiment.Label.valueOf("SameNamePresetTwice");
+
+        Experiment deleteExperiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
+        when(deleteExperiment.getID()).thenReturn(deleteExperimentId);
+        when(deleteExperiment.getEndTime().getTime()).thenReturn(new Date().getTime() + 1000000L);
+        when(deleteExperiment.getLabel()).thenReturn(commonExperimentLabel);
+        when(deleteExperiment.getState()).thenReturn(Experiment.State.DELETED);
+        when(deleteExperiment.getIsRapidExperiment()).thenReturn(false);
+
+        Experiment runningExperiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
+        when(runningExperiment.getID()).thenReturn(runningExperimentId);
+        when(runningExperiment.getEndTime().getTime()).thenReturn(new Date().getTime() + 1000000L);
+        when(runningExperiment.getLabel()).thenReturn(commonExperimentLabel);
+        when(runningExperiment.getState()).thenReturn(Experiment.State.RUNNING);
+        when(runningExperiment.getIsRapidExperiment()).thenReturn(false);
+
+        PrioritizedExperimentList pExpList = new PrioritizedExperimentList();
+        pExpList.addPrioritizedExperiment(PrioritizedExperiment.from(runningExperiment, 1).build());
+        Optional<PrioritizedExperimentList> prioritizedExperimentListOptional = Optional.of(pExpList);
+
+        //Mock interactions with the cache
+        when(metadataCache.getPrioritizedExperimentListMap(appName)).thenReturn(prioritizedExperimentListOptional);
+        when(metadataCache.getExperimentById(runningExperimentId)).thenReturn(Optional.of(runningExperiment));
+        when(metadataCache.getExperimentById(deleteExperimentId)).thenReturn(Optional.of(deleteExperiment));
+
+        //Make actual call
+        Experiment returnedExperiment = assignmentsImpl.getExperiment(appName, commonExperimentLabel);
+
+        //Verify expected result
+        assertNotNull(returnedExperiment);
+        assertThat(returnedExperiment.getID(), is(runningExperimentId));
+    }
+
     // FIXME:
 //    @Ignore("FIXME:refactor-core")
 //    @Test
