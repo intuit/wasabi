@@ -200,7 +200,6 @@ angular.module('wasabi', [
                     }
                 };
 
-
                 var authorizedRoles = next.data.authorizedRoles;
                 if(authorizedRoles) {
                     if (!AuthUtilsFactory.isAuthorized(authorizedRoles)) {
@@ -214,37 +213,7 @@ angular.module('wasabi', [
                             $rootScope.originalURI = $window.location.hash;
                             $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
 
-                            if (ConfigFactory.authnType() === 'sso') {
-                                // Call sign in so it will check for cookies and either return error or username and tokens
-
-                                // Need to pass something for the credentials for use in the HttpInterceptor call to login
-                                sessionStorage.setItem('wasabiSession', JSON.stringify({
-                                    username: '',
-                                    password: ''
-                                }));
-
-                                AuthFactory.signIn().$promise.then(function(result) {
-                                    localStorage.removeItem('wasabiLastSearch');
-
-                                    var sessionInfo = {userID: result.username, accessToken: result.access_token, tokenType: result.token_type};
-                                    Session.create(sessionInfo);
-
-                                    UtilitiesFactory.getPermissions(result, transitionToFirstPage);
-                                }, function(reason) {
-                                    if (reason.data.error && reason.data.error.code !== 401) {
-                                        $rootScope.ssoServerDown = true;
-                                        $rootScope.redirectUrl = ConfigFactory.noAuthRedirect();
-                                    }
-                                    else {
-                                        window.location = ConfigFactory.noAuthRedirect();
-                                    }
-                                    return false;
-                                });
-                            }
-                            else {
-                                // Not using alternative authentication.
-                                $state.go('signin');
-                            }
+                            $state.go('signin');
                         }
                     }
                 }

@@ -3,13 +3,15 @@
 /*jshint -W106*/ // disable jshint warning about camel case
 
 angular.module('wasabi.controllers')
-    .controller('SignInCtrl', ['$scope', '$rootScope', '$state', 'AuthFactory', 'AuthzFactory', 'AUTH_EVENTS', 'Session', 'UtilitiesFactory', '$cookies', 'USER_ROLES', 'WasabiFactory', 'StateFactory',
-            function ($scope, $rootScope, $state, AuthFactory, AuthzFactory, AUTH_EVENTS, Session, UtilitiesFactory, $cookies, USER_ROLES, WasabiFactory, StateFactory) {
+    .controller('SignInCtrl', ['$scope', '$rootScope', '$state', 'AuthFactory', 'AuthzFactory', 'AUTH_EVENTS', 'Session', 'UtilitiesFactory', '$cookies', 'USER_ROLES', 'WasabiFactory', 'StateFactory', 'ConfigFactory',
+            function ($scope, $rootScope, $state, AuthFactory, AuthzFactory, AUTH_EVENTS, Session, UtilitiesFactory, $cookies, USER_ROLES, WasabiFactory, StateFactory, ConfigFactory) {
 
                 $scope.credentials = {
                     username: '',
                     password: ''
                 };
+
+                $scope.dontShowForm = true;
 
                 UtilitiesFactory.hideHeading(true);
 
@@ -61,33 +63,71 @@ angular.module('wasabi.controllers')
                     $scope.loginFailed = false;
                     $scope.serverDown = false;
 
-                    $cookies.wasabiRememberMe = (credentials.rememberMe ? credentials.username : '');
+                    var creds = JSON.stringify({
+                            username: '',
+                            password: ''
+                        });
+                    if (ConfigFactory.authnType() !== 'sso') {
+                        $cookies.wasabiRememberMe = (credentials.rememberMe ? credentials.username : '');
 
+                        creds = JSON.stringify({
+                                username: credentials.username,
+                                password: credentials.password
+                            });
+                    }
                     // Directly save the credentials for use in the HttpInterceptor (workaround for passing username/password)
-                    sessionStorage.setItem('wasabiSession', JSON.stringify({
-                        username: credentials.username,
-                        password: credentials.password
-                    }));
+                    sessionStorage.setItem('wasabiSession', creds);
 
                     AuthFactory.signIn().$promise.then(function(result) {
                         localStorage.removeItem('wasabiLastSearch');
 
-                        var sessionInfo = {userID: credentials.username, accessToken: result.access_token, tokenType: result.token_type};
+                        // In the case where we are doing an SSO login, we expect the backend to have extracted
+                        // the user's credentials and to return their username to us, since we need that for
+                        // authorization.
+                        var username = (ConfigFactory.authnType() === 'sso' ? result.username : credentials.username);
+                        var sessionInfo = {userID: username, accessToken: result.access_token, tokenType: result.token_type};
                         Session.create(sessionInfo);
 
-                        result.username = credentials.username;
+                        if (ConfigFactory.authnType() !== 'sso') {
+                            result.username = credentials.username;
+                        }
                         UtilitiesFactory.getPermissions(result, $scope.transitionToFirstPage);
                     }, function(reason) {
-                        //console.log(reason);
                         if (reason.data.error && reason.data.error.code !== 401) {
                             $scope.serverDown = true;
+                            if (ConfigFactory.authnType() === 'sso') {
+                                // Something else is wrong besides the user not having their SSO creds.  We don't
+                                // want to show them the login form, so we will just show a message that the system
+                                // is down and they should try again.  This prevents a loop where the user *has*
+                                // authenticated to SSO, but for some reason the backend isn't able to detect it.
+                                // We don't want the user to keep going back to the SSO site, then back here, then
+                                // back to the SSO site, etc.
+                                $scope.redirectUrl = ConfigFactory.noAuthRedirect();
+                            }
                         }
                         else {
-                            $scope.loginFailed = true;
+                            if (ConfigFactory.authnType() === 'sso') {
+                                window.location = ConfigFactory.noAuthRedirect();
+                            }
+                            else {
+                                $scope.loginFailed = true;
+                            }
                         }
                         $rootScope.$broadcast(AUTH_EVENTS.loginFailed);
                     });
                 };
+
+                if (ConfigFactory.authnType() === 'sso') {
+                    // We are performing an alternate form of authentication that assumes the user has authenticated
+                    // to a Single Sign On service and the results have been passed in secure cookies.  We are expecting
+                    // the backend to check those cookies.  If the result is that the user is authenticated, we will
+                    // set the result into the Session and continue on.  Otherwise, we expect a 401 and we will redirect
+                    // the user to the configured sign in URL.
+                    $scope.signIn();
+                }
+                else {
+                    $scope.dontShowForm = false;
+                }
             }]);
 
 

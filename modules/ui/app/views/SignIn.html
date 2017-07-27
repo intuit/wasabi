@@ -1,5 +1,5 @@
 <div class="signinBox">
-    <form name="signInForm" ng-submit="signIn(credentials)" novalidate>
+    <form name="signInForm" ng-submit="signIn(credentials)" novalidate ng-if="!dontShowForm">
      <h1>Wasabi Service</h1>
      <h2>Please sign in with your login.</h2>
 
@@ -20,4 +20,8 @@
             <button id="btnSignin" class="blue">Sign In</button>
         </div>
     </form>
+    <div ng-if="dontShowForm">
+        <span ng-if="serverDown">We're sorry, but the Wasabi service is currently down.  Please <a href="{{redirectUrl}}">try again</a> later.</span>
+        <span ng-if="!serverDown">Checking credentials...</span>
+    </div>
 </div>
