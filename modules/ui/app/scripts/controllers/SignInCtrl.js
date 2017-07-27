@@ -84,13 +84,11 @@ angular.module('wasabi.controllers')
                         // In the case where we are doing an SSO login, we expect the backend to have extracted
                         // the user's credentials and to return their username to us, since we need that for
                         // authorization.
-                        var username = (ConfigFactory.authnType() === 'sso' ? result.username : credentials.username);
+                        var username = (ConfigFactory.authnType() === 'sso' ? result.access_token : credentials.username);
                         var sessionInfo = {userID: username, accessToken: result.access_token, tokenType: result.token_type};
                         Session.create(sessionInfo);
 
-                        if (ConfigFactory.authnType() !== 'sso') {
-                            result.username = credentials.username;
-                        }
+                        result.username = username;
                         UtilitiesFactory.getPermissions(result, $scope.transitionToFirstPage);
                     }, function(reason) {
                         if (reason.data.error && reason.data.error.code !== 401) {
