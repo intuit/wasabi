@@ -1675,12 +1675,12 @@ public class AssignmentsImplTest {
 
         //Create input objects
         Application.Name appName = Application.Name.valueOf("Test");
-        Experiment.ID deleteExperimentId = Experiment.ID.newInstance(); //Experiment.ID.valueOf("");
+        Experiment.ID deletedExperimentId = Experiment.ID.newInstance(); //Experiment.ID.valueOf("");
         Experiment.ID runningExperimentId = Experiment.ID.newInstance(); //Experiment.ID.valueOf("");
         Experiment.Label commonExperimentLabel = Experiment.Label.valueOf("SameNamePresetTwice");
 
         Experiment deleteExperiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
-        when(deleteExperiment.getID()).thenReturn(deleteExperimentId);
+        when(deleteExperiment.getID()).thenReturn(deletedExperimentId);
         when(deleteExperiment.getEndTime().getTime()).thenReturn(new Date().getTime() + 1000000L);
         when(deleteExperiment.getLabel()).thenReturn(commonExperimentLabel);
         when(deleteExperiment.getState()).thenReturn(Experiment.State.DELETED);
@@ -1700,7 +1700,7 @@ public class AssignmentsImplTest {
         //Mock interactions with the cache
         when(metadataCache.getPrioritizedExperimentListMap(appName)).thenReturn(prioritizedExperimentListOptional);
         when(metadataCache.getExperimentById(runningExperimentId)).thenReturn(Optional.of(runningExperiment));
-        when(metadataCache.getExperimentById(deleteExperimentId)).thenReturn(Optional.of(deleteExperiment));
+        when(metadataCache.getExperimentById(deletedExperimentId)).thenReturn(Optional.of(deleteExperiment));
 
         //Make actual call
         Experiment returnedExperiment = assignmentsImpl.getExperiment(appName, commonExperimentLabel);

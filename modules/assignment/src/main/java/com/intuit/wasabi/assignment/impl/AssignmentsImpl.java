@@ -866,7 +866,7 @@ public class AssignmentsImpl implements Assignments {
         Experiment result = null;
 
         if (metadataCacheEnabled) {
-            //First fetch experiment list sorted by priorities
+            //First fetch experiment list sorted by priorities (only contains non-deleted experiment-ids)
             Optional<PrioritizedExperimentList> prioritizedExperimentListOptional = metadataCache.getPrioritizedExperimentListMap(applicationName);
             if (prioritizedExperimentListOptional.isPresent()) {
                 //Iterate as per experiment priority and look for the matching experiment by their label
@@ -874,6 +874,7 @@ public class AssignmentsImpl implements Assignments {
                     if (experimentLabel.equals(prioritizedExperiment.getLabel())) {
                         //Upon match, get the complete experiment object from cache
                         result = metadataCache.getExperimentById(prioritizedExperiment.getID()).orElseGet(null);
+                        break;
                     }
                 }
             }
