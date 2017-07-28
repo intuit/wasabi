@@ -866,7 +866,8 @@ public class AssignmentsImpl implements Assignments {
         Experiment result = null;
 
         if (metadataCacheEnabled) {
-            //First fetch experiment list sorted by priorities (only contains non-deleted experiment-ids)
+            //First fetch experiment list sorted by priorities (contains non-deleted experiment-ids).
+            //This experiment-priority list is the source of truth for ALL assignment flows while looking up experiment...
             Optional<PrioritizedExperimentList> prioritizedExperimentListOptional = metadataCache.getPrioritizedExperimentListMap(applicationName);
             if (prioritizedExperimentListOptional.isPresent()) {
                 //Iterate as per experiment priority and look for the matching experiment by their label
