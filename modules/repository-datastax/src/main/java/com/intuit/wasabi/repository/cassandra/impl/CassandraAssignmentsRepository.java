@@ -125,7 +125,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     private ExclusionAccessor exclusionAccessor;
     private CassandraDriver driver;
 
-    private ConcurrentHashMap<Integer, ConcurrentHashMap<ExpBucket, AtomicInteger>> hourlyCountMap;
+    private Map<Integer, Map<ExpBucket, AtomicInteger>> hourlyCountMap;
 
 
 
@@ -716,37 +716,30 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         int eventTimeHour = getHour(completedHour);
         ExpBucket expBucket = new ExpBucket(experiment.getID(), assignment.getBucketLabel());
 
-        // 2 nested concurrent hash: outer contains the hour while inner contains the counts for certain buckets
+        // 2 nested concurrentHashMaps: outer contains the hour while inner contains the counts for certain buckets
         // need to increment the counts and write the counts to the db at the end of each hour
-        ConcurrentHashMap hourMap = hourlyCountMap.get(eventTimeHour);
+        Map<ExpBucket, AtomicInteger> hourMap = hourlyCountMap.get(eventTimeHour);
         hourMap.putIfAbsent(expBucket, new AtomicInteger(0)); // Thread safe method
         AtomicInteger oldCount = hourMap.get(expBucket);
-
-
-        
-        synchronized incrementValue() {
-            hourMap.put(valueName, hourMap.get(expBucket) + 1);
-        }
-
-
-        // Can’t put synchronized here because it would stop the flow of everything working synchronously
-        if(count == null) {
-            synchronized(hourMap) {                            // First would be initialized to 1 twice w/o this
-                AtomicInteger b = hourMap.get(ExpBucket);
-                if (b == null) {                            // Double Check Locking
-                    b = new AtomicInteger(1);
-                    hourMap.put(b);
-                } else {
-                    b.getAndIncrement();
+                                                                    // If synchronized was here, would delay the process
+        if (oldCount == null){
+            synchronized (hourMap) {                                // First would be initialized to 1 twice w/o this
+                oldCount = hourMap.get(expBucket);
+                if (oldCount == null){                              // Double check locking
+                    oldCount = new AtomicInteger(1);
+                    hourMap.put(expBucket, oldCount);
+                }else{
+                    oldCount.getAndIncrement();
                 }
             }
         }else{
-            count.getAndIncrement();
+            oldCount.getAndIncrement();
         }
 
+
         // If start of a new hour (need a variable that keeps track of this)
-        hourMap.get(eventTimeHour - 1); // Write this to db
-        hourMap.put(eventTimeHour, null); // Set the hour's data to null to delete unnecessary counts
+        hourlyCountMap.get(eventTimeHour - 1);              // Write this to db
+        hourlyCountMap.put(eventTimeHour, null);            // Set the hour's data to null to delete unnecessary counts
 
 
 
