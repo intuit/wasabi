@@ -40,14 +40,7 @@ import com.intuit.wasabi.assignmentobjects.User;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.eventlog.EventLog;
 import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
-import com.intuit.wasabi.experimentobjects.Application;
-import com.intuit.wasabi.experimentobjects.Bucket;
-import com.intuit.wasabi.experimentobjects.BucketList;
-import com.intuit.wasabi.experimentobjects.Context;
-import com.intuit.wasabi.experimentobjects.Experiment;
-import com.intuit.wasabi.experimentobjects.ExperimentBatch;
-import com.intuit.wasabi.experimentobjects.PrioritizedExperiment;
-import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
+import com.intuit.wasabi.experimentobjects.*;
 import com.intuit.wasabi.repository.AssignmentsRepository;
 import com.intuit.wasabi.repository.CassandraRepository;
 import com.intuit.wasabi.repository.DatabaseRepository;
@@ -94,7 +87,9 @@ import java.util.Set;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -129,6 +124,10 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     private PrioritiesAccessor prioritiesAccessor;
     private ExclusionAccessor exclusionAccessor;
     private CassandraDriver driver;
+
+    private ConcurrentHashMap<Integer, ConcurrentHashMap<ExpBucket, AtomicInteger>> hourlyCountMap;
+
+
 
     @Inject
     public CassandraAssignmentsRepository(
@@ -175,6 +174,12 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         this.exclusionAccessor = exclusionAccessor;
         this.driver = driver;
         this.assignmentsCountExecutor = assignmentsCountExecutor;
+        this.hourlyCountMap = new ConcurrentHashMap<>();
+
+        for (int hour = 0; hour <= 23; hour++){
+            hourlyCountMap.put(hour, new ConcurrentHashMap<>());
+        }
+
     }
 
     Stream<ExperimentUserByUserIdContextAppNameExperimentId> getUserIndexStream(String userId,
@@ -706,6 +711,45 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     @Override
     public void updateBucketAssignmentCount(Experiment experiment, Assignment assignment, boolean countUp) {
         Optional<Bucket.Label> labelOptional = Optional.ofNullable(assignment.getBucketLabel());
+
+        Date completedHour = getLastCompletedHour(System.currentTimeMillis());
+        int eventTimeHour = getHour(completedHour);
+        ExpBucket expBucket = new ExpBucket(experiment.getID(), assignment.getBucketLabel());
+
+        // 2 nested concurrent hash: outer contains the hour while inner contains the counts for certain buckets
+        // need to increment the counts and write the counts to the db at the end of each hour
+        ConcurrentHashMap hourMap = hourlyCountMap.get(eventTimeHour);
+        hourMap.putIfAbsent(expBucket, new AtomicInteger(0)); // Thread safe method
+        AtomicInteger oldCount = hourMap.get(expBucket);
+
+
+        
+        synchronized incrementValue() {
+            hourMap.put(valueName, hourMap.get(expBucket) + 1);
+        }
+
+
+        // Can’t put synchronized here because it would stop the flow of everything working synchronously
+        if(count == null) {
+            synchronized(hourMap) {                            // First would be initialized to 1 twice w/o this
+                AtomicInteger b = hourMap.get(ExpBucket);
+                if (b == null) {                            // Double Check Locking
+                    b = new AtomicInteger(1);
+                    hourMap.put(b);
+                } else {
+                    b.getAndIncrement();
+                }
+            }
+        }else{
+            count.getAndIncrement();
+        }
+
+        // If start of a new hour (need a variable that keeps track of this)
+        hourMap.get(eventTimeHour - 1); // Write this to db
+        hourMap.put(eventTimeHour, null); // Set the hour's data to null to delete unnecessary counts
+
+
+
         try {
             if (countUp) {
                 bucketAssignmentCountAccessor.incrementCountBy(experiment.getID().getRawID(),
@@ -720,6 +764,15 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
             throw new RepositoryException("Could not update the bucket count for experiment " + experiment.getID()
                     + " bucket " + labelOptional.orElseGet(() -> NULL_LABEL).toString(), e);
         }
+    }
+
+    public static Date getLastCompletedHour(long time) {
+        return new Date(time - 3600 * 1000);
+    }
+
+    public static int getHour(Date completedHour) {
+        DateFormat hourFormatter = new SimpleDateFormat("HH");
+        return Integer.parseInt(hourFormatter.format(completedHour));
     }
 
     @Override
