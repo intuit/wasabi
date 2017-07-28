@@ -101,7 +101,7 @@ module.exports = function (grunt) {
                         '<%= yeoman.app %>'
                     ],
                     protocol: 'https',
-                    port: 8443,
+                    port: 443,
                     key: grunt.file.read('server.key').toString(),
                     cert: grunt.file.read('server.crt').toString(),
                     ca: grunt.file.read('ca.crt').toString()
