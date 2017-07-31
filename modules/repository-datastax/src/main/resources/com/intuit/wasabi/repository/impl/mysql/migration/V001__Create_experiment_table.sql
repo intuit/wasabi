@@ -1,5 +1,3 @@
-USE `${mysql.dbName}`;
-
 CREATE TABLE `experiment` (
   `id` varbinary(16) NOT NULL,
   `version` integer NOT NULL DEFAULT 0,

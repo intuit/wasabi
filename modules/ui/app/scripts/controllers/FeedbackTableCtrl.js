@@ -3,8 +3,8 @@
 'use strict';
 
 angular.module('wasabi.controllers').
-    controller('FeedbackTableCtrl', ['$scope', '$filter', '$http', 'FeedbackFactory', '$modal', 'UtilitiesFactory', 'DialogsFactory',
-        function ($scope, $filter, $http, FeedbackFactory, $modal, UtilitiesFactory, DialogsFactory) {
+    controller('FeedbackTableCtrl', ['$scope', '$filter', '$http', 'FeedbackFactory', '$uibModal', 'UtilitiesFactory', 'DialogsFactory',
+        function ($scope, $filter, $http, FeedbackFactory, $uibModal, UtilitiesFactory, DialogsFactory) {
 
             $scope.feedbacks = [];
 

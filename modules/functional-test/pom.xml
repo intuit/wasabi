@@ -20,7 +20,7 @@
 	<parent>
 		<groupId>com.intuit.wasabi</groupId>
 		<artifactId>wasabi</artifactId>
-		<version>1.0.20170418213834-SNAPSHOT</version>
+		<version>1.0.20170717233424-SNAPSHOT</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
@@ -210,6 +210,7 @@
                 <targetPath>${basedir}/target/classes</targetPath>
                 <includes>
                     <include>testng.xml</include>
+                    <include>testng_applicationtaglist.xml</include>
                     <include>testng_authTest.xml</include>
                     <include>testng_feedbackTest.xml</include>
                     <include>testng_forcedfailure.xml</include>

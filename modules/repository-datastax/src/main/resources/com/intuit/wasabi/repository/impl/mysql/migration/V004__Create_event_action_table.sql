@@ -1,5 +1,3 @@
-USE `${mysql.dbName}`;
-
 CREATE TABLE `event_action` (
   `user_id` varchar(48) COLLATE utf8_bin NOT NULL,
   `experiment_id` varbinary(16) NOT NULL,

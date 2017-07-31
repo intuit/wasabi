@@ -24,6 +24,8 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
@@ -43,6 +45,7 @@ public class ExperimentDetailTest {
     private static Calendar modTime = Calendar.getInstance();
     private static Calendar startTime = Calendar.getInstance();
     private static Calendar endTime = Calendar.getInstance();
+    private static Set<String> tags = new TreeSet<>(java.util.Arrays.asList("tag1", "tag2", "tag3"));
 
 
     private Experiment exp = Experiment.withID(expId).withApplicationName(appName).withModificationTime(modTime.getTime())
@@ -58,7 +61,7 @@ public class ExperimentDetailTest {
     @Test
     public void testConstructor() {
         ExperimentDetail expDetail = new ExperimentDetail(expId, expState, expLabel, appName, modTime.getTime(),
-                startTime.getTime(), endTime.getTime(), description);
+                startTime.getTime(), endTime.getTime(), description, tags);
         assertEquals(expDetail.getApplicationName(), appName);
         assertEquals(expDetail.getId(), expId);
         assertEquals(expDetail.getLabel(), expLabel);
@@ -66,36 +69,37 @@ public class ExperimentDetailTest {
         assertEquals(expDetail.getModificationTime(), modTime.getTime());
         assertEquals(expDetail.getEndTime(), endTime.getTime());
         assertEquals(expDetail.getDescription(), description);
+        assertEquals(expDetail.getTags(), tags);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstraintsId() {
         new ExperimentDetail(null, expState, expLabel, appName, modTime.getTime(),
-                startTime.getTime(), endTime.getTime(), description);
+                startTime.getTime(), endTime.getTime(), description, tags);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstraintsState() {
         new ExperimentDetail(expId, null, expLabel, appName, modTime.getTime(),
-                startTime.getTime(), endTime.getTime(), description);
+                startTime.getTime(), endTime.getTime(), description, tags);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstraintsStateDeleted() {
         new ExperimentDetail(expId, Experiment.State.DELETED, expLabel, appName, modTime.getTime(),
-                startTime.getTime(), endTime.getTime(), description);
+                startTime.getTime(), endTime.getTime(), description, tags);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstraintsLabel() {
         new ExperimentDetail(expId, expState, null, appName, modTime.getTime(),
-                startTime.getTime(), endTime.getTime(), description);
+                startTime.getTime(), endTime.getTime(), description, tags);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstraintsAppName() {
         new ExperimentDetail(expId, expState, expLabel, null, modTime.getTime(),
-                startTime.getTime(), endTime.getTime(), description);
+                startTime.getTime(), endTime.getTime(), description, tags);
     }
 
     @Test

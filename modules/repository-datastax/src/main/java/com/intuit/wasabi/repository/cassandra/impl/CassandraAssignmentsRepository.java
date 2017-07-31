@@ -482,9 +482,9 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
      */
     private void incrementCounts(List<Pair<Experiment, Assignment>> assignments, Date date) {
         boolean countUp = true;
-        assignments.forEach(pair -> {
-            assignmentsCountExecutor.execute(new AssignmentCountEnvelope(this, experimentRepository, dbRepository, pair.getLeft(), pair.getRight(), countUp, eventLog, date, assignUserToExport, assignBucketCount));
-        });
+        assignments.forEach(pair -> assignmentsCountExecutor.execute(new AssignmentCountEnvelope(
+                this, experimentRepository, dbRepository, pair.getLeft(),
+                pair.getRight(), countUp, eventLog, date, assignUserToExport, assignBucketCount)));
         LOGGER.debug("Finished assignmentsCountExecutor");
     }
 
@@ -730,10 +730,30 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         } catch (ReadTimeoutException | UnavailableException | NoHostAvailableException e) {
             throw new RepositoryException("Could not fetch the bucket assignment counts for experiment " + experiment.getID(), e);
         }
+        return getBucketAssignmentCountFromCassandraResult(experiment.getID(), result);
+    }
+
+    @Override
+    public Map<Experiment.ID, AssignmentCounts> getBucketAssignmentCountsInParallel(List<Experiment.ID> experimentIds) {
+        Map<Experiment.ID, ListenableFuture<Result<com.intuit.wasabi.repository.cassandra.pojo.count.BucketAssignmentCount>>>
+                experimentToBucketAssignmentFutures = new HashMap<>();
+        Map<Experiment.ID, AssignmentCounts> experimentToAssignmentCounts = new HashMap<>();
+        experimentIds.forEach(experimentId -> experimentToBucketAssignmentFutures.put(experimentId,
+                bucketAssignmentCountAccessor.selectByAsync(experimentId.getRawID())));
+        experimentIds.forEach(experimentId ->
+            experimentToAssignmentCounts.put(experimentId,
+                    getBucketAssignmentCountFromCassandraResult(experimentId,
+                            UninterruptibleUtil.getUninterruptibly(experimentToBucketAssignmentFutures.get(experimentId)))));
+        return experimentToAssignmentCounts;
+    }
+
+    private AssignmentCounts getBucketAssignmentCountFromCassandraResult
+            (Experiment.ID experimentId,
+             Result<com.intuit.wasabi.repository.cassandra.pojo.count.BucketAssignmentCount> result) {
         List<BucketAssignmentCount> bucketAssignmentCountList = new ArrayList<>();
         AssignmentCounts.Builder assignmentCountsBuilder = new AssignmentCounts.Builder()
                 .withBucketAssignmentCount(bucketAssignmentCountList)
-                .withExperimentID(experiment.getID());
+                .withExperimentID(experimentId);
 
         if (isNull(result)) {
             bucketAssignmentCountList.add(new com.intuit.wasabi.analyticsobjects.counts.BucketAssignmentCount.Builder()

@@ -15,7 +15,7 @@
 ###############################################################################
 #!/usr/bin/env bash
 
-APPLICATION_INSTRUMENT="-javaagent:/vagrant/target/org.jacoco.agent-${jacoco.version}-runtime.jar=destfile=/vagrant/target/jacoco/jacoco-it.exec,append=false"
+APPLICATION_INSTRUMENT="-javaagent:/vagrant/target/org.jacoco.agent-${jacoco.version}-runtime.jar=destfile=/vagrant/target/jacoco-it.exec,append=false"
 CONSOLE_LOG=wasabi-os-console.log
 MAIN_JAR=/vagrant/target/wasabi-main-*-all.jar
 

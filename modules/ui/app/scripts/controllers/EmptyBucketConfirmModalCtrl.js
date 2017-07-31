@@ -2,16 +2,16 @@
 
 angular.module('wasabi.controllers')
     .controller('EmptyBucketConfirmModalCtrl',
-        ['$scope', '$modalInstance', 'bucketLabel',
-            function ($scope, $modalInstance, bucketLabel) {
+        ['$scope', '$uibModalInstance', 'bucketLabel',
+            function ($scope, $uibModalInstance, bucketLabel) {
 
                 $scope.bucketLabel = bucketLabel;
 
                 $scope.ok = function () {
-                    $modalInstance.close();
+                    $uibModalInstance.close();
                 };
 
                 $scope.cancel = function () {
-                    $modalInstance.dismiss('cancel');
+                    $uibModalInstance.dismiss('cancel');
                 };
             }]);

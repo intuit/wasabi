@@ -169,6 +169,10 @@ header {
   }
 }
 
+.dropdown-menu {
+    z-index: 10000;
+}
+
 .nav-tabs > li {
     background-color: rgb(244, 244, 244);
     margin-left: 2px;
@@ -716,6 +720,42 @@ header {
     }
 }
 
+.popover {
+    max-width: none;
+}
+
+.popover.bottom {
+    left: 360px !important;
+}
+
+.popover.bottom > .arrow {
+    display: none !important;
+}
+
+#filterDialog {
+    label {
+        display: inline-block;
+        font-weight: normal;
+    }
+    select {
+        width: 180px !important;
+        margin-right: 12px;
+        font-size: 13px;
+        padding: 5px;
+    }
+    .group {
+        display: inline-block;
+        margin-right: 12px;
+    }
+    input.dateInput {
+        border: 1px solid #cbccce;
+        @include border-radius(4px);
+        padding: 5px;
+        font-size: 13px;
+        width: 200px;
+    }
+}
+
 #basicSearch, #logsSearch {
     display: block;
     position: absolute;
@@ -731,7 +771,6 @@ header {
     }
 }
 #logsSearch {
-    margin-right: 0 !important;
     width: 600px !important;
 }
 #advancedSearch {
@@ -780,55 +819,26 @@ header {
     width: 22px;
     height: 22px;
     z-index: 9;
-    border: 1px solid transparent;
-    @include border-radius(4px);
     span {
         position: absolute;
         top: 0;
         left: 0;
         width: 20px;
         height: 20px;
-        background: url(/images/searchPlus.png) no-repeat 0 0;
-        -webkit-animation-duration: .5s;
-        -webkit-animation-timing-function: linear;
-        animation-duration: .5s;
-        animation-timing-function: linear;
-    }
-    &:hover {
-        span {
-            background-position: 0 -20px;
-        }
-        background-color: $nav_blue;
-        border-color: $nav_blue;
-    }
-    &.open span {
-        @include transform(rotate(45deg));
-    }
-    &.spinRight span {
-        -webkit-animation-name: spinright;
-        animation-name: spinright;
-    }
-    &.spinLeft span {
-        -webkit-animation-name: spinleft;
-        animation-name: spinleft;
+        background: url(/images/icon_filter_empty.png) no-repeat center;
+        background-size: 22px;
     }
 }
-@-webkit-keyframes spinright {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(225deg); }
+.filtersApplied {
+    background: url(/images/icon_filter.png) no-repeat center !important;
+    background-size: 22px !important;
 }
-@-webkit-keyframes spinleft {
-    0% { transform: rotate(45deg); }
-    100% { transform: rotate(-270deg); }
+.dateLabel {
+    float: left;
+    width: 100px;
+    padding-top: 6px;
 }
-@keyframes spinright {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(225deg); }
-}
-@keyframes spinleft {
-    0% { transform: rotate(45deg); }
-    100% { transform: rotate(-270deg); }
-}
+
 #txtSearchDateTwo {
   width: 89px !important;
   margin-left: 3px;
@@ -1053,8 +1063,8 @@ header {
     a {
         position: relative;
         display: inline-block;
-        width: 25px;
-        height: 25px;
+        width: 22px;
+        height: 22px;
         overflow: hidden;
         text-indent: -999px;
         background-color: $nav_blue;
@@ -1070,7 +1080,7 @@ header {
             opacity: .85;
             background-repeat: no-repeat;
             background-position: center;
-            background-size: 16px;
+            background-size: 12px;
         }
     	&:hover {
             @include box-shadow(0 0 4px rgba(0,0,0,0.45));
@@ -1136,13 +1146,27 @@ header {
     top: 4px;
 }
 .descriptionLabel {
+    float: left;
+    padding-bottom: 3px;
+    font-size: 12px;
+    font-weight: bold;
+}
+.tagsLabel {
     padding-bottom: 3px;
     font-size: 12px;
     font-weight: bold;
 }
 #descriptionToolbar {
-    right: 38px;
-    top: 198px;
+    right: 373px;
+    top: 174px;
+}
+#tagsToolbar {
+    right: 25px;
+    top: 174px;
+}
+#experimentTagsReadOnly {
+    margin-bottom: 5px;
+    width: 100%;
 }
 #personalizationToolbar {
     left: 240px;
@@ -1816,25 +1840,24 @@ button, a.button {
 	margin: 0;
     cursor: pointer;
     padding: 8px 15px;
-    //@include background(#f8f8f8 linear-gradient(#f8f8f8, #ddd));
-    background-color: rgb(220,221,222); // rgba(117,131,145, .3); // rgb(220,220,220);
+    background-color: rgb(220,221,222);
 	border: 1px solid rgb(185,185,185);
-    @include border-radius(3px);
+    border-radius: 3px;
 	text-decoration: none;
     font-size: 14px;
     line-height: 1em;
     text-shadow: 0 1px 0 rgba(255,255,255,.5);
-	@include box-shadow(inset 0 0 0 1px rgba(0, 0, 0, 0.04));
+	box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.04);
     color: rgba(0,0,0,.65);
     font-weight: bold;
 	letter-spacing: .4px;
 	&:focus {
 		outline: none;
-        @include box-shadow(2px 0 2px #7EA8CA, 0 2px 2px #7EA8CA, -2px 0 2px #7EA8CA, 0 -2px 2px #7EA8CA !important);
+        box-shadow: 2px 0 2px #7EA8CA, 0 2px 2px #7EA8CA, -2px 0 2px #7EA8CA, 0 -2px 2px #7EA8CA !important;
         border-color: #3F75A2 !important;
 	}
 	&:hover {
-        @include background(rgb(220,221,222) linear-gradient(rgba(255,255,255,.2), rgba(255,255,255,.16)));
+        background: rgb(220,221,222) linear-gradient(rgba(255,255,255,.2), rgba(255,255,255,.16));
 		text-decoration: none;
         @include box-shadow(0 0 4px rgba(0,0,0,0.3));
 	}
@@ -3233,6 +3256,9 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
       -webkit-transition-delay: 0.2s;
       transition-delay: 0.2s;
   }
+  #exclusionList {
+    height: 280px;
+  }
 }
 #analysisBucketList {
     overflow-x: auto;
@@ -4507,6 +4533,14 @@ form input.ng-dirty.ng-invalid:not(.ng-focused) {
 
 .gridWithAdvanced {
     margin-top: 40px;
+}
+
+tags-input .tags .tag-item {
+    clear: none;
+}
+
+tags-input .host {
+    margin-top: 0;
 }
 
 .displaySourceCode {

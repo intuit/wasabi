@@ -4,8 +4,8 @@
 
 angular.module('wasabi.controllers')
     .controller('ExperimentModalCtrl',
-        ['$scope', '$modalInstance', '$modal', 'ExperimentsFactory', 'experiments', 'experiment', 'UtilitiesFactory', '$rootScope', 'readOnly', 'applications', 'DialogsFactory', 'RuleEditFactory', 'ConfigFactory', 'Session', 'AuthzFactory', 'ApplicationsFactory', 'PERMISSIONS', '$cookies', 'openedFromModal', 'EmailFactory', 'favoritesObj',
-            function ($scope, $modalInstance, $modal, ExperimentsFactory, experiments, experiment, UtilitiesFactory, $rootScope, readOnly, applications, DialogsFactory, RuleEditFactory, ConfigFactory, Session, AuthzFactory, ApplicationsFactory, PERMISSIONS, $cookies, openedFromModal, EmailFactory, favoritesObj) {
+        ['$scope', '$uibModalInstance', '$uibModal', '$filter', 'ExperimentsFactory', 'experiments', 'experiment', 'UtilitiesFactory', '$rootScope', 'readOnly', 'applications', 'DialogsFactory', 'RuleEditFactory', 'ConfigFactory', 'Session', 'AuthzFactory', 'ApplicationsFactory', 'PERMISSIONS', '$cookies', 'openedFromModal', 'EmailFactory', 'favoritesObj',
+            function ($scope, $uibModalInstance, $uibModal, $filter, ExperimentsFactory, experiments, experiment, UtilitiesFactory, $rootScope, readOnly, applications, DialogsFactory, RuleEditFactory, ConfigFactory, Session, AuthzFactory, ApplicationsFactory, PERMISSIONS, $cookies, openedFromModal, EmailFactory, favoritesObj) {
 
                 UtilitiesFactory.trackEvent('loadedDialog',
                     {key: 'dialog_name', value: 'createOrEditExperiment'});
@@ -17,6 +17,8 @@ angular.module('wasabi.controllers')
                 };
 
                 $scope.experiment = experiment;
+                $scope.tags = [];
+                $scope.allTags = [];
                 $scope.experiment.applicationName2 = (applications.length === 1 ? '' : 'novalue');
                 $scope.readOnly = (readOnly ? readOnly : false);
                 $scope.simpleRuleEditing = $cookies.showAdvancedSegmentationEditor === undefined || $cookies.showAdvancedSegmentationEditor !== 'true';
@@ -26,7 +28,7 @@ angular.module('wasabi.controllers')
                 $scope.applications = applications;
                 $scope.allApplications = [];
                 $scope.postSubmitError = null;
-                $scope.modalInstance = $modalInstance;
+                $scope.modalInstance = $uibModalInstance;
                 $scope.showApplicationName2 = false;
                 $scope.newApplicationNamePrompt = ConfigFactory.newApplicationNamePrompt;
                 $scope.currentUser = Session.userID;
@@ -114,6 +116,9 @@ angular.module('wasabi.controllers')
                     else {
                         $scope.experiment.applicationName2 = 'novalue';
                         $scope.showApplicationName2 = false;
+                        // Only need the list of tags in the application if one has been specified and it is not
+                        // a new application, as new applications don't have associated tags.
+                        $scope.loadAllTags();
                     }
                 };
 
@@ -151,9 +156,23 @@ angular.module('wasabi.controllers')
                     }
                 };
 
+                $scope.loadAllTags = function() {
+                    UtilitiesFactory.loadAllTags($scope, true);
+                };
+
+                $scope.queryTags = function(query) {
+                    return UtilitiesFactory.queryTags(query, $scope.allTags);
+                };
+
+                $scope.transferTags = function(fromExperiment) {
+                    UtilitiesFactory.transferTags(fromExperiment, $scope);
+                };
+
                 $scope.init = function() {
                     $scope.processRule();
                     $scope.loadAllApplications();
+                    $scope.loadAllTags();
+                    $scope.transferTags(true);
                 };
 
                 $scope.loadExperiment = function () {
@@ -294,7 +313,7 @@ angular.module('wasabi.controllers')
                         $scope.experimentFormSubmitted = true;
                         $scope.postSubmitError = UtilitiesFactory.extractErrorFromResponse(response);
                         if ($scope.postSubmitError === 'unauthenticated') {
-                            $modalInstance.close();
+                            $uibModalInstance.close();
                         }
                     };
                     var handleUpdateSuccess = function(dialogName) {
@@ -313,7 +332,7 @@ angular.module('wasabi.controllers')
                             afterSaveFunc();
                         }
                         else {
-                            $modalInstance.close();
+                            $uibModalInstance.close();
                         }
                     };
                     var handleUpdateError = function(response) {
@@ -325,7 +344,7 @@ angular.module('wasabi.controllers')
                             UtilitiesFactory.displayPageError('Invalid Segmentation Rule', 'Your segmentation rule has a syntactic error.');
                         }
                         else if ($scope.postSubmitError === 'unauthenticated') {
-                            $modalInstance.close();
+                            $uibModalInstance.close();
                         }
                     };
 
@@ -355,7 +374,8 @@ angular.module('wasabi.controllers')
                                 startTime: startTime,
                                 endTime: endTime,
                                 description: experiment.description,
-                                isRapidExperiment: experiment.isRapidExperiment
+                                isRapidExperiment: experiment.isRapidExperiment,
+                                tags: experiment.tags
                             };
                             if (experiment.isRapidExperiment) {
                                 newExperiment.userCap = experiment.userCap;
@@ -385,7 +405,8 @@ angular.module('wasabi.controllers')
                                 endTime: endTime,
                                 description: $scope.experiment.description,
                                 rule: $scope.experiment.rule,
-                                isRapidExperiment: $scope.experiment.isRapidExperiment
+                                isRapidExperiment: $scope.experiment.isRapidExperiment,
+                                tags: $scope.experiment.tags
                             };
                             if ($scope.experiment.isRapidExperiment) {
                                 experimentUpdates.userCap = $scope.experiment.userCap;
@@ -461,6 +482,7 @@ angular.module('wasabi.controllers')
 
                     var creatingNewApplication = (experiment.applicationName === ConfigFactory.newApplicationNamePrompt);
                     var appName = (creatingNewApplication ? experiment.applicationName2 : experiment.applicationName);
+                    $scope.transferTags(false); // Transfer from the widget to the experiment.
                     if (creatingNewApplication) {
                         // We need to check for and prevent the user from creating an experiment in an existing
                         // application for which they don't have permission.
@@ -546,15 +568,15 @@ angular.module('wasabi.controllers')
                         // Attempt to start the experiment.  If successful, let the user know.
                         $scope.changeState($scope.experiment, 'RUNNING', function() {
                             DialogsFactory.alertDialog('Your experiment has been started successfully!  PLEASE NOTE: The experiment may not be available for assignments for up to 5 minutes.', 'Start Successful');
-                            $modalInstance.close(true);
+                            $uibModalInstance.close(true);
                         });
                     });
 
                 };
 
                 $scope.cancel = function () {
-                    $modalInstance.close();
-                    //$modalInstance.dismiss('cancel');
+                    $uibModalInstance.close();
+                    //$uibModalInstance.dismiss('cancel');
                 };
 
                 $scope.openAdminListModal = function (applicationName) {
@@ -597,7 +619,7 @@ angular.module('wasabi.controllers')
                 };
 
                 $scope.openSegmentationTestModal = function () {
-                    var modalInstance = $modal.open({
+                    var modalInstance = $uibModal.open({
                         templateUrl: 'views/SegmentationTestModal.html',
                         controller: 'SegmentationTestModalCtrl',
                         windowClass: 'xxx-dialog',

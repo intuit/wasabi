@@ -16,9 +16,12 @@
 package com.intuit.wasabi.assignment.impl;
 
 import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
 import com.google.inject.Provider;
 import com.intuit.hyrule.Rule;
+import com.intuit.wasabi.analyticsobjects.counts.AssignmentCounts;
+import com.intuit.wasabi.analyticsobjects.counts.TotalUsers;
 import com.intuit.wasabi.assignment.AssignmentDecorator;
 import com.intuit.wasabi.assignment.AssignmentIngestionExecutor;
 import com.intuit.wasabi.assignment.Assignments;
@@ -31,6 +34,7 @@ import com.intuit.wasabi.assignmentobjects.SegmentationProfile;
 import com.intuit.wasabi.assignmentobjects.User;
 import com.intuit.wasabi.cassandra.datastax.CassandraDriver;
 import com.intuit.wasabi.eventlog.EventLog;
+import com.intuit.wasabi.experiment.Experiments;
 import com.intuit.wasabi.experiment.Mutex;
 import com.intuit.wasabi.experiment.Pages;
 import com.intuit.wasabi.experiment.Priorities;
@@ -66,10 +70,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -77,11 +79,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import static com.google.common.base.Predicates.in;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
-import static org.assertj.core.api.BDDAssertions.then;
 import static org.hamcrest.core.AnyOf.anyOf;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertFalse;
@@ -95,6 +95,7 @@ import static org.mockito.BDDMockito.doReturn;
 import static org.mockito.BDDMockito.eq;
 import static org.mockito.BDDMockito.spy;
 import static org.mockito.BDDMockito.times;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -106,6 +107,7 @@ public class AssignmentsImplTest {
     final static Context context = Context.valueOf("PROD");
     final static String TEST_INGESTION_EXECUTOR_NAME = "TEST";
     AssignmentsImpl cassandraAssignments = mock(AssignmentsImpl.class);
+    private Experiments experimentUtil = mock(Experiments.class);
     private ExperimentRepository cassandraRepository = mock(ExperimentRepository.class);
     private ExperimentRepository experimentRepository = mock(ExperimentRepository.class);
     private AnalyticsRepository analyticsRepository = mock(AnalyticsRepository.class);
@@ -139,7 +141,7 @@ public class AssignmentsImplTest {
         this.assignmentsImpl = new AssignmentsImpl(executors,
                 experimentRepository, assignmentsRepository,
                 ruleCache, pages,
-                assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache);
+                assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache, experimentUtil);
     }
 
     @Test
@@ -221,10 +223,10 @@ public class AssignmentsImplTest {
 
     @Test
     public void testGetSingleAssignmentNullAssignmentExperimentInDraftState() throws IOException {
-        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
+        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap(),
                 experimentRepository, assignmentsRepository,
                 ruleCache, pages, assignmentDecorator, threadPoolExecutor,
-                eventLog, metadataCacheEnabled, metadataCache));
+                eventLog, metadataCacheEnabled, metadataCache, experimentUtil));
         //Input
         Application.Name appName = Application.Name.valueOf("Test");
         User.ID user = User.ID.valueOf("testUser");
@@ -392,9 +394,10 @@ public class AssignmentsImplTest {
 
     @Test
     public void testGetSingleAssignmentNullAssignmentExperimentNoProfileMatch() throws IOException {
-        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
+        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap(),
                 experimentRepository, assignmentsRepository,
-                ruleCache, pages, assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache));
+                ruleCache, pages, assignmentDecorator, threadPoolExecutor,
+                eventLog, metadataCacheEnabled, metadataCache, experimentUtil));
 
         //Input
         Application.Name appName = Application.Name.valueOf("Test");
@@ -497,9 +500,9 @@ public class AssignmentsImplTest {
 
     @Test(expected = AssertionError.class)
     public void testGetSingleAssignmentProfileMatchAssertNewAssignment() throws IOException {
-        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
+        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap(),
                 experimentRepository, assignmentsRepository, ruleCache, pages, assignmentDecorator, threadPoolExecutor,
-                eventLog, metadataCacheEnabled, metadataCache));
+                eventLog, metadataCacheEnabled, metadataCache, experimentUtil));
 
         //Input
         Application.Name appName = Application.Name.valueOf("Test");
@@ -552,9 +555,10 @@ public class AssignmentsImplTest {
 
     @Test
     public void testGetSingleAssignmentSuccess() throws IOException {
-        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap<String, AssignmentIngestionExecutor>(),
+        AssignmentsImpl assignmentsImpl = spy(new AssignmentsImpl(new HashMap(),
                 experimentRepository, assignmentsRepository,
-                ruleCache, pages, assignmentDecorator, threadPoolExecutor, eventLog, metadataCacheEnabled, metadataCache));
+                ruleCache, pages, assignmentDecorator, threadPoolExecutor, eventLog,
+                metadataCacheEnabled, metadataCache, experimentUtil));
 
         //Input
         Application.Name appName = Application.Name.valueOf("Test");
@@ -1592,6 +1596,78 @@ public class AssignmentsImplTest {
         Mockito.when(cassandraAssignments.putAssignment(userA, testApp, expLabel, context, null, true)).thenReturn(newAssignment);
         assert newAssignment_2.getStatus() == Assignment.Status.NEW_ASSIGNMENT;
         assert newAssignment_2.getBucketLabel() == null;
+    }
+
+    //Rapid Experiment test cases
+    private Experiment setupMocksforRapidExperiment(
+            Application.Name appName, Experiment.ID experimentId, Experiment.Label experimentLabel) {
+        //Mock dependent interactions
+        Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
+        when(experiment.getID()).thenReturn(experimentId);
+        when(experiment.getEndTime().getTime()).thenReturn(new Date().getTime() + 1000000L);
+        when(experiment.getLabel()).thenReturn(experimentLabel);
+        when(experiment.getState()).thenReturn(Experiment.State.RUNNING);
+        when(experiment.getIsRapidExperiment()).thenReturn(true);
+
+        List<Experiment> expList = newArrayList(experiment);
+
+        PrioritizedExperimentList pExpList = new PrioritizedExperimentList();
+        pExpList.addPrioritizedExperiment(PrioritizedExperiment.from(experiment, 1).build());
+        Optional<PrioritizedExperimentList> prioritizedExperimentListOptional = Optional.of(pExpList);
+
+        BucketList bucketList = new BucketList();
+        bucketList.addBucket(Bucket.newInstance(experimentId, Bucket.Label.valueOf("red")).withAllocationPercent(0.5).build());
+        bucketList.addBucket(Bucket.newInstance(experimentId, Bucket.Label.valueOf("blue")).withAllocationPercent(0.5).build());
+
+        List<Experiment.ID> exclusionList = newArrayList();
+
+        when(metadataCache.getExperimentById(experimentId)).thenReturn(Optional.of(experiment));
+        when(metadataCache.getExperimentsByAppName(appName)).thenReturn(expList);
+        when(metadataCache.getPrioritizedExperimentListMap(appName)).thenReturn(prioritizedExperimentListOptional);
+        when(metadataCache.getBucketList(experimentId)).thenReturn(bucketList);
+        when(metadataCache.getExclusionList(experimentId)).thenReturn(exclusionList);
+
+        when(experiment.getIsRapidExperiment()).thenReturn(true);
+        return experiment;
+    }
+
+    @Test
+    public void testGetSingleAssignmentNullAssignmentRapidExperimentCapReached() {
+        //Input
+        Application.Name appName = Application.Name.valueOf("Test");
+        User.ID user = User.ID.valueOf("testUser");
+        Experiment.ID id = Experiment.ID.newInstance();
+        Experiment.Label label = Experiment.Label.valueOf("label");
+        SegmentationProfile segmentationProfile = mock(SegmentationProfile.class);
+        HttpHeaders headers = mock(HttpHeaders.class);
+
+        Experiment experiment = setupMocksforRapidExperiment(appName, id, label);
+
+        Experiment rapidExperiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
+        when(rapidExperiment.getID()).thenReturn(id);
+        when(rapidExperiment.getLabel()).thenReturn(label);
+        when(rapidExperiment.getState()).thenReturn(Experiment.State.RUNNING);
+        when(experimentUtil.getExperiment(id)).thenReturn(rapidExperiment);
+        doNothing().when(experimentUtil).updateExperimentState(experiment, Experiment.State.PAUSED);
+        doReturn(true).when(metadataCache).refresh();
+
+        long bucketAssignmentCount = 10l;
+        int userCap = 10;
+        TotalUsers totalUsers = new TotalUsers.Builder().withBucketAssignments(bucketAssignmentCount).build();
+        AssignmentCounts assignmentCounts = new AssignmentCounts.Builder().withTotalUsers(totalUsers).build();
+        Map<Experiment.ID, AssignmentCounts> experimenttoAssignmentCounts = Maps.newHashMap();
+        experimenttoAssignmentCounts.put(experiment.getID(), assignmentCounts);
+        when(assignmentsRepository.getBucketAssignmentCountsInParallel(Mockito.anyList()))
+                .thenReturn(experimenttoAssignmentCounts);
+        when(experiment.getUserCap()).thenReturn(userCap);
+
+        Assignment result = assignmentsImpl.doSingleAssignment(user, appName, label, context,
+                true, true, segmentationProfile, headers);
+
+        assertThat(result.getStatus(), is(Assignment.Status.EXPERIMENT_PAUSED));
+        verify(experimentUtil, times(1))
+                .updateExperimentState(experiment, Experiment.State.PAUSED);
+        verify(metadataCache, times(1)).refresh();
     }
 
     // FIXME:

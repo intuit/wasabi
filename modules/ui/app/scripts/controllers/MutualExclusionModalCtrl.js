@@ -2,8 +2,8 @@
 
 angular.module('wasabi.controllers')
     .controller('MutualExclusionModalCtrl',
-        ['$scope', '$filter', '$modalInstance', 'MutualExclusionsFactory', 'experiments', 'experimentId', 'UtilitiesFactory',
-            function ($scope, $filter, $modalInstance, MutualExclusionsFactory, experiments, experimentId, UtilitiesFactory) {
+        ['$scope', '$filter', '$uibModalInstance', 'MutualExclusionsFactory', 'experiments', 'experimentId', 'UtilitiesFactory',
+            function ($scope, $filter, $uibModalInstance, MutualExclusionsFactory, experiments, experimentId, UtilitiesFactory) {
 
                 $scope.data = {
                     searchField: '',
@@ -95,14 +95,14 @@ angular.module('wasabi.controllers')
                                 });
                             }
                             UtilitiesFactory.displaySuccessWithCacheWarning('Mutual Exclusions Saved', 'Your mutual exclusion changes have been saved.');
-                            $modalInstance.close();
+                            $uibModalInstance.close();
                         }, function(response) {
                             // Handle error
                             //console.log(response);
                             $scope.mutualExclusionFormSubmitted = true;
                             $scope.postSubmitError = 'genericSubmitError';
                             if (UtilitiesFactory.extractErrorFromResponse(response) === 'unauthenticated') {
-                                $modalInstance.close();
+                                $uibModalInstance.close();
                             }
                             else {
                                 UtilitiesFactory.handleGlobalError(response);
@@ -110,11 +110,11 @@ angular.module('wasabi.controllers')
                         });
                     }
                     else {
-                        $modalInstance.close();
+                        $uibModalInstance.close();
                     }
                 };
 
                 $scope.cancel = function () {
-                    $modalInstance.dismiss('cancel');
+                    $uibModalInstance.dismiss('cancel');
                 };
             }]);

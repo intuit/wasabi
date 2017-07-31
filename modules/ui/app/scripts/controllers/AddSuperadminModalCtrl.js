@@ -1,11 +1,9 @@
-/* global $:false */
-
 'use strict';
 
 angular.module('wasabi.controllers')
     .controller('AddSuperadminModalCtrl',
-        ['$scope', '$modalInstance', 'AuthFactory', 'UtilitiesFactory', '$rootScope', '$modal', 'AUTH_EVENTS', 'SuperadminsFactory',
-            function ($scope, $modalInstance, AuthFactory, UtilitiesFactory, $rootScope, $modal, AUTH_EVENTS, SuperadminsFactory) {
+        ['$scope', '$uibModalInstance', 'AuthFactory', 'UtilitiesFactory', '$rootScope', '$uibModal', 'AUTH_EVENTS', 'SuperadminsFactory',
+            function ($scope, $uibModalInstance, AuthFactory, UtilitiesFactory, $rootScope, $uibModal, AUTH_EVENTS, SuperadminsFactory) {
 
                 UtilitiesFactory.trackEvent('loadedDialog',
                     {key: 'dialog_name', value: 'addSuperadmin'});
@@ -22,7 +20,7 @@ angular.module('wasabi.controllers')
                 $scope.failedValidation = false;
 
                 $scope.postSubmitError = null;
-                $scope.modalInstance = (this._isTesting === true ? null : $modalInstance);
+                $scope.modalInstance = (this._isTesting === true ? null : $uibModalInstance);
                 $scope.verifyFormNoValueError = false;
 
                 $scope.updateApplicationRoles = function(userID) {
@@ -48,7 +46,7 @@ angular.module('wasabi.controllers')
                         $scope.validating = false;
                         if (results) {
                             $scope.superadmin = {};
-                            $scope.superadmin.userID = (results.userId ? results.userId : '');
+                            $scope.superadmin.userID = (results.username ? results.username : '');
                             $scope.superadmin.firstName = (results.firstName ? results.firstName : '');
                             $scope.superadmin.lastName = (results.lastName ? results.lastName : '');
                             $scope.superadmin.userEmail = (results.email ? results.email : '');
@@ -79,7 +77,7 @@ angular.module('wasabi.controllers')
                 };
 
                 $scope.closeDialog = function () {
-                    $modalInstance.close();
+                    $uibModalInstance.close();
                 };
 
             }]);

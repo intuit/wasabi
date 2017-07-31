@@ -1,10 +1,10 @@
 'use strict';
 
 angular.module('wasabi.controllers')
-    .controller('FeedbackCtrl', ['$scope', '$rootScope', '$state', '$modal',
-            function ($scope, $rootScope, $state, $modal) {
+    .controller('FeedbackCtrl', ['$scope', '$rootScope', '$state', '$uibModal',
+            function ($scope, $rootScope, $state, $uibModal) {
                 $scope.openFeedbackModal = function () {
-                    $modal.open({
+                    $uibModal.open({
                         templateUrl: 'views/FeedbackModal.html',
                         controller: 'FeedbackModalCtrl',
                         windowClass: 'xx-dialog',

@@ -42,8 +42,12 @@ import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static com.intuit.wasabi.experimentobjects.Experiment.State.DELETED;
 import static com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT;
@@ -109,6 +113,14 @@ public class ExperimentsImpl implements Experiments {
      * {@inheritDoc}
      */
     @Override
+    public Map<Application.Name, Set<String>> getTagsForApplications(Collection<Application.Name> applicationNames) {
+        return cassandraRepository.getTagListForApplications(applicationNames != null ? applicationNames : Collections.emptySet());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Experiment getExperiment(Experiment.ID id) {
         return cassandraRepository.getExperiment(id);
     }
@@ -134,54 +146,41 @@ public class ExperimentsImpl implements Experiments {
      */
     @Override
     public void createExperiment(NewExperiment newExperiment, UserInfo user) {
+        LOGGER.debug("Create experiment started: experiment={}, UserInfo={} ", newExperiment, user);
 
+        //Step#1: Validate new experiment
         validator.validateNewExperiment(newExperiment);
-
-        //1. Creation in Cassandra
-        Experiment.ID newExperimentID = cassandraRepository.createExperiment(newExperiment);
-
-        //2. Creation priority list
-        // For consistency,  if any exception is raised while appending to priority list
-        // delete the experiment from cassandra too.
         try {
-            // Append the newly created experiment to the priority list
-            priorities.appendToPriorityList(newExperimentID);
-        } catch (Exception e) {
-            // Erase the experiment from cassandra
-            cassandraRepository.deleteExperiment(newExperiment);
-            throw e;
-        }
 
-        //3. Creation in MySQL
-        // For consistency,  if any exception is raised while creating an experiment in mysql
-        // delete the experiment from cassandra too.
-        try {
+            //Step#2: Create experiment in MySQL first (before Cassandra) so that duplicate experiment
+            //concern would be addressed automatically. As, AppName and experiment label have a unique constraint
+            //set in MySQL table.
+            LOGGER.debug("Creating an experiment in MySQL...");
             databaseRepository.createExperiment(newExperiment);
-        } catch (Exception e) {
-            // Remove from priority list
-            priorities.removeFromPriorityList(newExperiment.getApplicationName(), newExperimentID);
-            // Erase the experiment from cassandra
-            cassandraRepository.deleteExperiment(newExperiment);
-            throw e;
+
+            //Step#3: Create experiment in Cassandra
+            try {
+                cassandraRepository.createExperiment(newExperiment);
+            } catch (Exception exceptionFromCassandra) {
+                LOGGER.error("Exception occurred while creating an experiment in Cassandra... Experiment={}, UserInfo={}", newExperiment, user, exceptionFromCassandra);
+                // Erase from MySQL
+                try {
+                    databaseRepository.deleteExperiment(newExperiment);
+                } catch (Exception mysqlRollbackException) {
+                    LOGGER.error("An attempt to rollback of experiment in MySQL is failed...", mysqlRollbackException);
+                }
+                throw exceptionFromCassandra;
+            }
+
+            //Step#4: Log experiment creation event
+            eventLog.postEvent(new ExperimentCreateEvent(user, newExperiment));
+
+        } catch (Exception experimentCreateException) {
+            LOGGER.error("Exception occurred while creating an experiment... Experiment={}, UserInfo={}", newExperiment, user, experimentCreateException);
+            throw experimentCreateException;
         }
 
-        //4. Creation of indices in Cassandra
-        try {
-            //only when the creation in Cassandra and MySQL succeeds should
-            // we create the entries in the index tables in cassandra
-            cassandraRepository.createIndicesForNewExperiment(newExperiment);
-        } catch (RepositoryException e) {
-            //Roll back everything (Note: I guess this case is highly unlikely to happen)
-            priorities.removeFromPriorityList(newExperiment.getApplicationName(), newExperimentID);
-            // Erase the experiment from cassandra
-            cassandraRepository.deleteExperiment(newExperiment);
-            // Erase from MySQL
-            databaseRepository.deleteExperiment(newExperiment);
-            throw e;
-        }
-
-        // allow for logging of the event
-        eventLog.postEvent(new ExperimentCreateEvent(user, newExperiment));
+        LOGGER.debug("Create experiment finished.");
     }
 
     /**
@@ -450,6 +449,16 @@ public class ExperimentsImpl implements Experiments {
             changeList.add(changeData);
         }
 
+        if (updates.getTags() != null && !updates.getTags().equals(experiment.getTags())) {
+            builder.withTags(updates.getTags());
+            requiresUpdate = true;
+            Set<String> oldTags = experiment.getTags() == null ? Collections.EMPTY_SET : experiment.getTags();
+            changeData = new ExperimentAuditInfo("tags",
+                    oldTags.toString(),
+                    updates.getTags().toString());
+            changeList.add(changeData);
+        }
+
         /*
         * Application name and label cannot be changed once the experiment is beyond the DRAFT state.
         * Hence, we are not including them as a part of the audit log.
@@ -577,5 +586,29 @@ public class ExperimentsImpl implements Experiments {
         }
 
         return experiment;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void updateExperimentState(final Experiment experiment, final Experiment.State state) {
+        try {
+            LOGGER.info("Updating experiment state for experiment:{} to final state:{}", experiment, state);
+            cassandraRepository.updateExperimentState(experiment, state);
+            // To maintain consistency, revert the changes made in cassandra in case the mysql update fails
+            try {
+                databaseRepository.updateExperimentState(experiment, state);
+            } catch (Exception exception) {
+                cassandraRepository.updateExperimentState(experiment, experiment.getState());
+                throw exception;
+            }
+
+            eventLog.postEvent(new ExperimentChangeEvent(experiment, "state",
+                    experiment.getState().toString(), state.toString()));
+        } catch (Exception exception) {
+            LOGGER.error("Updating experiment state for experiment:{} failed with error:", experiment, exception);
+            throw exception;
+        }
     }
 }

@@ -2,8 +2,8 @@
 
 angular.module('wasabi.controllers')
     .controller('AddApplicationModalCtrl',
-        ['$scope', '$filter', '$modalInstance', 'applications', 'administeredApplications', 'appsThatCanBeAdded', 'user', 'UtilitiesFactory', 'isEditingPermissions', 'application', 'AuthzFactory',
-            function ($scope, $filter, $modalInstance, applications, administeredApplications, appsThatCanBeAdded, user, UtilitiesFactory, isEditingPermissions, application, AuthzFactory) {
+        ['$scope', '$filter', '$uibModalInstance', 'applications', 'administeredApplications', 'appsThatCanBeAdded', 'user', 'UtilitiesFactory', 'isEditingPermissions', 'application', 'AuthzFactory',
+            function ($scope, $filter, $uibModalInstance, applications, administeredApplications, appsThatCanBeAdded, user, UtilitiesFactory, isEditingPermissions, application, AuthzFactory) {
 
                 $scope.data = {
                     searchField: '',
@@ -80,7 +80,7 @@ angular.module('wasabi.controllers')
                                 userID: $scope.user.userID
                             }]
                         }).$promise.then(function () {
-                            $modalInstance.close();
+                            $uibModalInstance.close();
 
                             UtilitiesFactory.trackEvent('saveRolesSuccess',
                                 {key: 'dialog_name', value: 'addApplicationToUserDialog'},
@@ -91,7 +91,7 @@ angular.module('wasabi.controllers')
                         }, function(response) {
                             UtilitiesFactory.handleGlobalError(response, 'The role could not be added.');
                             if (UtilitiesFactory.extractErrorFromResponse(response) === 'unauthenticated') {
-                                $modalInstance.close();
+                                $uibModalInstance.close();
                             }
                         });
                     }
@@ -127,7 +127,7 @@ angular.module('wasabi.controllers')
                             });
 
                             AuthzFactory.assignRole(newApplications).$promise.then(function () {
-                                $modalInstance.close(newApplications);
+                                $uibModalInstance.close(newApplications);
 
                                 newApplications.roleList.forEach(function(nextApp) {
                                     UtilitiesFactory.trackEvent('saveRolesSuccess',
@@ -140,17 +140,17 @@ angular.module('wasabi.controllers')
                             }, function(response) {
                                 UtilitiesFactory.handleGlobalError(response, 'The role could not be added.');
                                 if (UtilitiesFactory.extractErrorFromResponse(response) === 'unauthenticated') {
-                                    $modalInstance.close();
+                                    $uibModalInstance.close();
                                 }
                             });
                         }
                         else {
-                            $modalInstance.close();
+                            $uibModalInstance.close();
                         }
                     }
                 };
 
                 $scope.cancel = function () {
-                    $modalInstance.dismiss('cancel');
+                    $uibModalInstance.dismiss('cancel');
                 };
             }]);

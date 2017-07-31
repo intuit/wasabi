@@ -7,8 +7,8 @@
 // page success message before the first one has faded out.
 var globalPageSuccessMessageFadeOutTimer = null;
 
-angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$state', 'AuthFactory', '$rootScope', 'AUTH_EVENTS', 'PERMISSIONS', 'USER_ROLES', '$filter', 'AuthzFactory', 'BucketsFactory', 'DialogsFactory', 'ExperimentsFactory', 'WasabiFactory', '$modal', '$injector', 'FavoritesFactory', 'StateFactory', 'usSpinnerService',
-    function (Session, $state, AuthFactory, $rootScope, AUTH_EVENTS, PERMISSIONS, USER_ROLES, $filter, AuthzFactory, BucketsFactory, DialogsFactory, ExperimentsFactory, WasabiFactory, $modal, $injector, FavoritesFactory, StateFactory, usSpinnerService) {
+angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$state', 'AuthFactory', '$rootScope', 'AUTH_EVENTS', 'PERMISSIONS', 'USER_ROLES', '$filter', 'AuthzFactory', 'BucketsFactory', 'DialogsFactory', 'ExperimentsFactory', 'WasabiFactory', '$uibModal', '$injector', 'FavoritesFactory', 'StateFactory', 'AllTagsFactory', 'usSpinnerService',
+    function (Session, $state, AuthFactory, $rootScope, AUTH_EVENTS, PERMISSIONS, USER_ROLES, $filter, AuthzFactory, BucketsFactory, DialogsFactory, ExperimentsFactory, WasabiFactory, $uibModal, $injector, FavoritesFactory, StateFactory, AllTagsFactory, usSpinnerService) {
         return {
             // generate state image url
             stateImgUrl: function (state) {
@@ -1171,7 +1171,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
 
             openPluginModal: function (plugin, experiment) {
                 var exp = (experiment !== undefined ? experiment : null);
-                var modalInstance = $modal.open({
+                var modalInstance = $uibModal.open({
                     templateUrl: plugin.templateUrl,
                     controller: plugin.ctrlName,
                     windowClass: 'xxx-dialog',
@@ -1190,7 +1190,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
             },
 
             openResultsModal: function (experiment, readOnly, afterResultsFunc) {
-                var modalInstance = $modal.open({
+                var modalInstance = $uibModal.open({
                     templateUrl: 'views/ResultsModal.html',
                     controller: 'ResultsModalCtrl',
                     windowClass: 'xxx-dialog',
@@ -1229,6 +1229,7 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
             },
 
             updateApplicationRoles: function(userID, getUsersPrivilegesForApplication) {
+                var that = this;
                 AuthzFactory.getUserRoles({
                     userId: userID
                 }).$promise.then(function (roleList) {
@@ -1246,13 +1247,100 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
                         return applications;
                     }
                 }, function(response) {
-                    UtilitiesFactory.handleGlobalError(response, 'The roles for this user could not be retrieved.');
+                    that.handleGlobalError(response, 'The roles for this user could not be retrieved.');
                 });
             },
 
             displaySuccessWithCacheWarning: function(title, extraMsg) {
                 var msg = extraMsg + '  PLEASE NOTE that this change may not be available for assignment calls for up to 5 minutes.';
                 this.displayPageSuccessMessage(title, msg);
+            },
+
+            loadAllTags: function(scope, onlyInCurrentApp) {
+                var that = this;
+
+                scope.allTags = [];
+                if (onlyInCurrentApp && (!scope.experiment.applicationName || scope.experiment.applicationName.length === 0)) {
+                    // This is the New experiment case before they have defined an application name, so we don't need
+                    // to make the call to get all the tags for the application.
+                    return;
+                }
+
+                AllTagsFactory.query().$promise.then(function (tags) {
+                    if (tags) {
+                        var unsortedTagsList = [];
+                        if (onlyInCurrentApp) {
+                            if (tags.hasOwnProperty(scope.experiment.applicationName)) {
+                                unsortedTagsList = tags[scope.experiment.applicationName];
+                            }
+                        }
+                        else {
+                            // We want ALL tags in the system.  The result of the API call is an object where the
+                            // properties are application names and the values are arrays of tag name strings.  So
+                            // we need to go through all the lists and make a single, de-duplicated list.
+                            for (var appName in tags) {
+                                if (tags.hasOwnProperty(appName) && Array.isArray(tags[appName])) {
+                                    for (var i = 0; i < tags[appName].length; i++) {
+                                        if (!unsortedTagsList.includes(tags[appName][i])) {
+                                            unsortedTagsList.push(tags[appName][i]);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        scope.allTags = unsortedTagsList.sort(function (a, b) {
+                            return a.toLowerCase().localeCompare(b.toLowerCase());
+                        });
+                    }
+                },
+                function(response) {
+                    that.handleGlobalError(response, 'The list of all tags could not be retrieved.');
+                });
+            },
+
+            // Used with type ahead in the tags input, this function returns the tags from the allTags
+            // array that contain the query value.
+            queryTags: function(query, allTags) {
+                var searchMatch = function (haystack, needle) {
+                    if (!needle) {
+                        return true;
+                    }
+                    return haystack.toLowerCase().indexOf(needle.toLowerCase()) !== -1;
+                };
+
+                if (allTags) {
+                    return $filter('filter')(allTags, function (item) {
+                        return searchMatch(item, query);
+                    });
+                }
+                return [];
+            },
+
+            // Since the format of the tags attribute in an experiment object (an array of strings)
+            // and the format used by the ng-tags-input component (an array of objects with a text attribute) are
+            // different, this function copies from the one to the other.  If fromExperiment is true, the
+            // copy is from the experiment object tag property to the tagsArray.  Otherwise, it is vice versa.
+            transferTags: function(fromExperiment, scope) {
+                var i = 0;
+                if (fromExperiment) {
+                    if (scope.experiment && scope.experiment.tags && scope.experiment.tags.length > 0) {
+                        // The structure needed for the tag input widget and for the backend is different.
+                        // For the backend, this is simply an array of strings.  For the tag input widget,
+                        // it is an array of objects with a "text" attribute that is the tag name.
+                        scope.tags = [];
+                        for (i = 0; i < scope.experiment.tags.length; i++) {
+                            scope.tags.push({
+                                'text': scope.experiment.tags[i]
+                            });
+                        }
+                    }
+                }
+                else {
+                    scope.experiment.tags = [];
+                    for (i = 0; i < scope.tags.length; i++) {
+                        scope.experiment.tags.push(scope.tags[i].text);
+                    }
+                }
             },
 
             startSpin: function(){

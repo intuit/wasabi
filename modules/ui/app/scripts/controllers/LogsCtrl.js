@@ -4,8 +4,8 @@
 'use strict';
 
 angular.module('wasabi.controllers').
-    controller('LogsCtrl', ['$scope', '$filter', '$http', '$stateParams', '$timeout', 'LogsFactory', '$modal', 'UtilitiesFactory', '$rootScope', 'DialogsFactory', 'AUTH_EVENTS', '$state', 'PERMISSIONS', 'ConfigFactory', '$cookies',
-        function ($scope, $filter, $http, $stateParams, $timeout, LogsFactory, $modal, UtilitiesFactory, $rootScope, DialogsFactory, AUTH_EVENTS, $state, PERMISSIONS, ConfigFactory, $cookies) {
+    controller('LogsCtrl', ['$scope', '$filter', '$http', '$stateParams', '$timeout', 'LogsFactory', '$uibModal', 'UtilitiesFactory', '$rootScope', 'DialogsFactory', 'AUTH_EVENTS', '$state', 'PERMISSIONS', 'ConfigFactory', '$cookies',
+        function ($scope, $filter, $http, $stateParams, $timeout, LogsFactory, $uibModal, UtilitiesFactory, $rootScope, DialogsFactory, AUTH_EVENTS, $state, PERMISSIONS, ConfigFactory, $cookies) {
 
             $scope.data = {
                 query: '',
@@ -153,7 +153,7 @@ angular.module('wasabi.controllers').
             };
 
             $scope.openLogModal = function (log) {
-                var modalInstance = $modal.open({
+                var modalInstance = $uibModal.open({
                     templateUrl: 'views/LogModal.html',
                     controller: 'LogModalCtrl',
                     windowClass: 'xxx-dialog',

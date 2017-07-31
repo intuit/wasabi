@@ -17,7 +17,6 @@ package com.intuit.wasabi.assignment.impl;
 
 import com.datastax.driver.core.exceptions.ConnectionException;
 import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -27,6 +26,7 @@ import com.intuit.hyrule.exceptions.InvalidInputException;
 import com.intuit.hyrule.exceptions.MissingInputException;
 import com.intuit.hyrule.exceptions.TreeStructureException;
 import com.intuit.wasabi.analyticsobjects.Parameters;
+import com.intuit.wasabi.analyticsobjects.counts.AssignmentCounts;
 import com.intuit.wasabi.assignment.AssignmentDecorator;
 import com.intuit.wasabi.assignment.AssignmentIngestionExecutor;
 import com.intuit.wasabi.assignment.Assignments;
@@ -42,27 +42,23 @@ import com.intuit.wasabi.exceptions.BucketDistributionNotFetchableException;
 import com.intuit.wasabi.exceptions.BucketNotFoundException;
 import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
 import com.intuit.wasabi.exceptions.InvalidAssignmentStateException;
+import com.intuit.wasabi.experiment.Experiments;
 import com.intuit.wasabi.experiment.Pages;
-import com.intuit.wasabi.experiment.Priorities;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.BucketList;
 import com.intuit.wasabi.experimentobjects.Context;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.ExperimentBatch;
-import com.intuit.wasabi.experimentobjects.ExperimentList;
 import com.intuit.wasabi.experimentobjects.Page;
 import com.intuit.wasabi.experimentobjects.PageExperiment;
 import com.intuit.wasabi.experimentobjects.PrioritizedExperiment;
 import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
-import com.intuit.wasabi.experimentobjects.exceptions.InvalidBucketStateTransitionException;
 import com.intuit.wasabi.experimentobjects.exceptions.InvalidExperimentStateException;
-import com.intuit.wasabi.experimentobjects.exceptions.WasabiClientException;
 import com.intuit.wasabi.experimentobjects.exceptions.WasabiException;
 import com.intuit.wasabi.repository.AssignmentsRepository;
 import com.intuit.wasabi.repository.CassandraRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
-import com.intuit.wasabi.repository.MutexRepository;
 import com.intuit.wasabi.repository.cassandra.impl.ExperimentRuleCacheUpdateEnvelope;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -73,9 +69,6 @@ import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -98,7 +91,6 @@ import static com.google.common.collect.Sets.newHashSet;
 import static com.intuit.wasabi.assignment.AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_ENABLED;
 import static com.intuit.wasabi.assignment.AssignmentsAnnotations.RULECACHE_THREADPOOL;
 import static com.intuit.wasabi.assignmentobjects.Assignment.Status.ASSIGNMENT_FAILED;
-import static com.intuit.wasabi.assignmentobjects.Assignment.Status.EXPERIMENT_EXPIRED;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -147,6 +139,8 @@ public class AssignmentsImpl implements Assignments {
     private Boolean metadataCacheEnabled;
     private AssignmentsMetadataCache metadataCache;
 
+    private Experiments experimentUtil;
+
 
     /**
      * Helper for unit tests
@@ -186,7 +180,8 @@ public class AssignmentsImpl implements Assignments {
                            final EventLog eventLog,
                            final @Named(ASSIGNMENTS_METADATA_CACHE_ENABLED)
                                    Boolean metadataCacheEnabled,
-                           final AssignmentsMetadataCache metadataCache)
+                           final AssignmentsMetadataCache metadataCache,
+                           final Experiments experimentUtil)
             throws IOException, ConnectionException {
         super();
         try {
@@ -206,6 +201,7 @@ public class AssignmentsImpl implements Assignments {
         this.eventLog = eventLog;
         this.metadataCacheEnabled = metadataCacheEnabled;
         this.metadataCache = metadataCache;
+        this.experimentUtil = experimentUtil;
     }
 
     //-----------------------------------------------------------------------------------------------------------------
@@ -394,6 +390,15 @@ public class AssignmentsImpl implements Assignments {
                     date, null));
         }
 
+        /**
+         * Check whether rapid experiment user cap reached. Proceed with the assignment even if the cap is reached
+         * as in case of PUT API, experiment state of "PAUSED" is also allowed for new assignments.
+         *
+         * Calling this method here ensures that the experiment state is set to "PAUSED" and the cache refreshed if
+         * it was in "RUNNING" state and the cap is reached already.
+         */
+        isAssignmentValidForRapidExperiment(experiment, null);
+
         //Add new assignment in the database
         assignmentsRepository.assignUsersInBatch(newArrayList(new ImmutablePair<>(experiment, assignment)), date);
 
@@ -470,6 +475,18 @@ public class AssignmentsImpl implements Assignments {
         List<Assignment> allAssignments = new LinkedList<>();
         SegmentationProfile segmentationProfile = SegmentationProfile.from(experimentBatch.getProfile()).build();
 
+        //Prepopulate bucket assignment counts for rapid experiments in running state in asynchronous mode
+        List<Experiment.ID> experimentIds =
+                appPriorities.getPrioritizedExperiments()
+                .stream()
+                .filter(experiment -> (null != experiment.getIsRapidExperiment() && experiment.getIsRapidExperiment())
+                        && experiment.getState().equals(Experiment.State.RUNNING))
+                        .map(experiment -> experiment.getID())
+                        .collect(Collectors.toList());
+
+        Map<Experiment.ID, AssignmentCounts> rapidExperimentToAssignmentCounts =
+                assignmentsRepository.getBucketAssignmentCountsInParallel(experimentIds);
+
         // iterate over all experiments in the application in priority order
         for (PrioritizedExperiment experiment : appPriorities.getPrioritizedExperiments()) {
             LOGGER.debug("Now processing: {}", experiment);
@@ -482,14 +499,16 @@ public class AssignmentsImpl implements Assignments {
                 Experiment.Label label = Experiment.Label.valueOf(labelStr);
                 Assignment assignment = null;
                 try {
-                    boolean experimentCreateAssignment = allowAssignmentsOptional.isPresent() ? (allowAssignmentsOptional.get().get(experiment.getID())) : createAssignment;
+                    boolean experimentCreateAssignment = allowAssignmentsOptional.isPresent() ?
+                            (allowAssignmentsOptional.get().get(experiment.getID())) : createAssignment;
 
                     //This method only gets assignment object, and doesn't create new assignments in a database (cassandra)
                     assignment = getAssignment(userID, applicationName, label,
                             context, experimentCreateAssignment,
                             forceInExperiment, segmentationProfile,
                             headers, experimentMap.get(experiment.getID()),
-                            bucketMap.get(experiment.getID()), userAssignments, exclusionMap);
+                            bucketMap.get(experiment.getID()), userAssignments, exclusionMap,
+                            rapidExperimentToAssignmentCounts);
 
                     // This wouldn't normally happen because we specified CREATE=true
                     if (isNull(assignment)) {
@@ -573,7 +592,8 @@ public class AssignmentsImpl implements Assignments {
                                        SegmentationProfile segmentationProfile, HttpHeaders headers,
                                        Experiment experiment, BucketList bucketList,
                                        Table<Experiment.ID, Experiment.Label, String> userAssignments,
-                                       Map<Experiment.ID, List<Experiment.ID>> exclusives) {
+                                       Map<Experiment.ID, List<Experiment.ID>> exclusives,
+                                       Map<Experiment.ID, AssignmentCounts> rapidExperimentToAssignmentCounts) {
         final Date currentDate = new Date();
         final long currentTime = currentDate.getTime();
 
@@ -607,7 +627,8 @@ public class AssignmentsImpl implements Assignments {
         Assignment assignment = getAssignment(experimentID, userID, context, userAssignments, bucketList);
         if (assignment == null || assignment.isBucketEmpty()) {
             if (createAssignment) {
-                if (experiment.getState() == Experiment.State.PAUSED) {
+                if (experiment.getState() == Experiment.State.PAUSED ||
+                        !isAssignmentValidForRapidExperiment(experiment, rapidExperimentToAssignmentCounts)) {
                     return nullAssignment(userID, applicationName, experimentID, Assignment.Status.EXPERIMENT_PAUSED);
                 }
 
@@ -657,6 +678,46 @@ public class AssignmentsImpl implements Assignments {
         }
 
         return assignment;
+    }
+
+    /**
+     * If the experiment is a rapid experiment, it checks whether the user cap has already been achieved.
+     * If yes, then it sets the experiment state to paused, refreshes the experiment metadata cache
+     * and returns false i.e. assignment is not allowed in that case.
+     */
+    private boolean isAssignmentValidForRapidExperiment(Experiment experiment, Map<Experiment.ID,
+            AssignmentCounts> prefetchedAssignmentCounts) {
+        if (experiment.getIsRapidExperiment() != null && experiment.getIsRapidExperiment()) {
+            int userCap = experiment.getUserCap();
+            AssignmentCounts assignmentCounts = null;
+            if (null != prefetchedAssignmentCounts) {
+                 assignmentCounts = prefetchedAssignmentCounts.get(experiment.getID());
+            }
+            if (null == assignmentCounts) {
+                assignmentCounts = assignmentsRepository.getBucketAssignmentCount(experiment);
+            }
+            /**
+             * The experiment state ideally should be in "RUNNING" state as far as the experiment metadata
+             * cache is concerned in order to reach this method in the code flow.
+             * We only do a hard load of the experiment state when the caller has still given a go ahead of making
+             * the assignment after checking the experiment state in the cache.
+             *
+             * In case of the PUT API, the experiment might be in "PAUSED" state but assignments are allowed
+             * in that scenario too. So, we do not want to update the state and refresh the cache in that scenario
+             * as it is an expensive operation.
+             */
+            if (experiment.getState().equals(Experiment.State.RUNNING) &&
+                    assignmentCounts.getTotalUsers().getBucketAssignments() >= userCap) {
+                Experiment experimentInfoFromDB = experimentUtil.getExperiment(experiment.getID());
+                if (experimentInfoFromDB.getState().equals(Experiment.State.RUNNING)) {
+                    experimentUtil.updateExperimentState(experiment, Experiment.State.PAUSED);
+                }
+
+                metadataCache.refresh();
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

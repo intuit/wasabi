@@ -19,6 +19,7 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.mapping.Result;
 import com.datastax.driver.mapping.annotations.Accessor;
 import com.datastax.driver.mapping.annotations.Query;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.intuit.wasabi.repository.cassandra.pojo.count.BucketAssignmentCount;
 
 import java.util.UUID;
@@ -38,5 +39,8 @@ public interface BucketAssignmentCountAccessor {
 
     @Query("SELECT * FROM bucket_assignment_counts WHERE experiment_id =?")
     Result<BucketAssignmentCount> selectBy(UUID experimentId);
+
+    @Query("SELECT * FROM bucket_assignment_counts WHERE experiment_id =?")
+    ListenableFuture<Result<BucketAssignmentCount>> selectByAsync(UUID experimentId);
 
 }

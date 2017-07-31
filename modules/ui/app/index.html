@@ -14,7 +14,9 @@
     <meta http-equiv="expires" content="0" />
     <meta http-equiv="pragma" content="no-cache" />
     <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+    <!-- build:css styles/vendor.css -->
     <!-- bower:css -->
+    <link rel="stylesheet" href="bower_components/ng-tags-input/ng-tags-input.css" />
     <!-- endbower -->
     <!-- endbuild -->
     <!-- build:css({.tmp,app}) styles/wasabi.css -->
@@ -44,9 +46,9 @@
                     <li class="navLink"><a class="tabName" href="#/applications">Applications</a></li>
                     <li class="navLink"><a class="tabName" href="#/plugins">Plugins</a></li>
                     <li class="navLink navDropdown" style="padding-right: 9px;">
-                        <span class="dropdown" dropdown>
-                            <a href class="tabName dropdown-toggle toolsChoice" dropdown-toggle>Tools</a>
-                            <ul class="dropdown-menu" role="menu">
+                        <span class="uib-dropdown" dropdown-append-to-body uib-dropdown>
+                            <a href class="tabName uib-dropdown-toggle toolsChoice" uib-dropdown-toggle>Tools</a>
+                            <ul class="uib-dropdown-menu" role="menu">
                               <li class="toolsMenuChoices">
                                 <a href="#/pages/">Page Manager</a>
                               </li>
@@ -83,7 +85,7 @@
           <br/>We're sorry, but the Wasabi service is currently down.  Please <a href="{{redirectUrl}}">try again</a> later.
         </div>
     </div>
-
+    
     <div style="display: block;" id="help">
         <div>
             <a id="closeHelp" href="javascript: void(0)">
@@ -120,6 +122,7 @@
     <script src="bower_components/bootstrap-sass-official/vendor/assets/javascripts/bootstrap/tooltip.js"></script>
     <script src="bower_components/bootstrap-sass-official/vendor/assets/javascripts/bootstrap/popover.js"></script>
     <script src="bower_components/moment/moment.js"></script>
+    <script src="bower_components/ng-tags-input/ng-tags-input.js"></script>
     <script src="bower_components/angular-spinner/dist/angular-spinner.min.js"></script>
     <!-- endbower -->
     <!-- endbuild -->
@@ -162,6 +165,7 @@
     <script src="scripts/services/FavoritesFactory.js"></script>
     <script src="scripts/services/PagesFactory.js"></script>
     <script src="scripts/services/SuperadminsFactory.js"></script>
+    <script src="scripts/services/AllTagsFactory.js"></script>
     <script src="scripts/services/Session.js"></script>
     <script src="scripts/controllers/ExperimentsCtrl.js"></script>
     <script src="scripts/controllers/ExperimentModalCtrl.js"></script>

@@ -2,8 +2,8 @@
 
 angular.module('wasabi.controllers')
     .controller('ChangeSamplingModalCtrl',
-        ['$scope', '$modalInstance', 'experiment',
-            function ($scope, $modalInstance, experiment) {
+        ['$scope', '$uibModalInstance', 'experiment',
+            function ($scope, $uibModalInstance, experiment) {
 
                 $scope.experiment = experiment;
                 $scope.experimentFormSubmitted = false;
@@ -11,13 +11,13 @@ angular.module('wasabi.controllers')
                 $scope.ok = function (isFormInvalid) {
                     if (!isFormInvalid) {
                         // Submit as normal
-                        $modalInstance.close($scope.experiment);
+                        $uibModalInstance.close($scope.experiment);
                     } else {
                         $scope.experimentFormSubmitted = true;
                     }
                 };
 
                 $scope.cancel = function () {
-                    $modalInstance.dismiss('cancel');
+                    $uibModalInstance.dismiss('cancel');
                 };
             }]);

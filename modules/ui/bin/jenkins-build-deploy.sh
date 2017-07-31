@@ -36,7 +36,7 @@ exitOnError() {
 }
 
 fromPom() {
-  mvn -f ./modules/$1/pom.xml -P $2 help:evaluate -Dexpression=$3 | sed -n -e '/^\[.*\]/ !{ p; }'
+  mvn -f ./modules/$1/pom.xml -P $2 help:evaluate -Dexpression=$3 | sed -n -e '/^\[.*\]/ !{ p; }' | tail -n 1
 }
 
 version=`fromPom main ${profile} project.version`
@@ -84,7 +84,7 @@ done)
 echo "++ Starting actual grunt build"
 (cd modules/ui; \
   mkdir -p target; \
-  for f in app node_modules bower.json Gruntfile.js constants.json karma.conf.js karma-e2e.conf.js package.json test .bowerrc; do \
+  for f in app node_modules bower.json Gruntfile.js default_constants.json karma.conf.js karma-e2e.conf.js package.json test .bowerrc; do \
     cp -r ${f} target; \
   done; \
   echo Getting merged plugins.js file and plugins directory; \
@@ -115,7 +115,15 @@ path=${nexus_repositories}/${artifact_repository_id}/`echo ${group} | sed "s/\./
 zip=${project}-${artifact}-${profile}-${version}.zip
 zip_path=${path}/${zip}
 
-echo "++ Archiving: ${zip} ${zip_path}"
+## echo "++ Archiving: ${zip} ${zip_path}"
+echo "nexus_repositories: ${nexus_repositories}"
+echo "artifact_repository_id: ${artifact_repository_id}"
+echo "group: ${group}"
+echo "artifact: ${artifact}"
+echo "version: ${version}"
+echo "profile: ${profile}"
+echo "project: ${project}"
+
 curl -v -u ${nexus_deploy} --upload-file ./modules/ui/target/dist.zip ${zip_path} || \
 exitOnError "archive failed: curl -v -u [nexus_deploy] --upload-file ./modules/ui/dist.zip ${zip_path}"
 

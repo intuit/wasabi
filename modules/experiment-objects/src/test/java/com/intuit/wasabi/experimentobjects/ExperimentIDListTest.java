@@ -26,8 +26,6 @@ import static org.junit.Assert.assertNotEquals;
 
 /**
  * This class tests the functionality of the {@link ExperimentIDList}
- * <p>
- * Created by asuckro on 8/19/15.
  */
 public class ExperimentIDListTest {
 
