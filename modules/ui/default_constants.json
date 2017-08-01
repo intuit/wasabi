@@ -3,5 +3,6 @@
     "authnType": "basic",
     "noAuthRedirect": "",
     "ssoLogoutRedirect": "",
+    "apiAuthInfo": "",
     "apiHostBaseUrlValue": "DEFAULT"
 }

@@ -49,15 +49,25 @@ angular.module('wasabi.services').factory('HttpInterceptor', ['$rootScope', '$q'
                         }
                     }
                 }
+                else if (ConfigFactory.apiAuthInfo && ConfigFactory.apiAuthInfo().length > 0) {
+                    // We need to pass special authentication information to the API server.
+                    config.headers.Authorization = ConfigFactory.apiAuthInfo();
+                }
             }
             else if (/\/login$/.test(config.url) && sessionStorage.getItem('wasabiSession')) {
-                // TODO: Not the best way to handle this, but this sets the Authorization header specifically for
-                // the /login page to contain the values from the session and then deletes the values.
-                config.headers.Authorization = 'Basic ' + btoa(JSON.parse(sessionStorage.getItem('wasabiSession')).username + ':' + JSON.parse(sessionStorage.getItem('wasabiSession')).password);
-                // NOTE: This is a workaround for the fact that $resource will clear out the Content-Type of
-                // a POST if you are not passing config.data.  The actual data is put in the body in AuthFactory.js.
-                config.data = {};
-                sessionStorage.removeItem('wasabiSession');
+                if (ConfigFactory.authnType() !== 'sso') {
+                    // This sets the Authorization header specifically for
+                    // the /login page to contain the values from the session and then deletes the values.
+                    config.headers.Authorization = 'Basic ' + btoa(JSON.parse(sessionStorage.getItem('wasabiSession')).username + ':' + JSON.parse(sessionStorage.getItem('wasabiSession')).password);
+                    // NOTE: This is a workaround for the fact that $resource will clear out the Content-Type of
+                    // a POST if you are not passing config.data.  The actual data is put in the body in AuthFactory.js.
+                    config.data = {};
+                    sessionStorage.removeItem('wasabiSession');
+                }
+                else if (ConfigFactory.apiAuthInfo && ConfigFactory.apiAuthInfo().length > 0) {
+                    // We need to pass special authentication information to the API server, even when calling the login API.
+                    config.headers.Authorization = ConfigFactory.apiAuthInfo();
+                }
             }
             return config;
         },
