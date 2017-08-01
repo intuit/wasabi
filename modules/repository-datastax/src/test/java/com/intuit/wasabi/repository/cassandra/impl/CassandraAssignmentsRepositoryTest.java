@@ -49,6 +49,7 @@ import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.PrioritiesAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.StagingAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.count.BucketAssignmentCountAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.count.HourlyBucketCountAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.export.UserAssignmentExportAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentUserIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.PageExperimentIndexAccessor;
@@ -126,6 +127,8 @@ public class CassandraAssignmentsRepositoryTest {
     BucketAccessor bucketAccessor;
     @Mock
     BucketAssignmentCountAccessor bucketAssignmentCountAccessor;
+    @Mock
+    HourlyBucketCountAccessor hourlyBucketCountAccessor;
 
     @Mock
     StagingAccessor stagingAccessor;
@@ -164,6 +167,7 @@ public class CassandraAssignmentsRepositoryTest {
                 userAssignmentExportAccessor,
                 bucketAccessor,
                 bucketAssignmentCountAccessor,
+                hourlyBucketCountAccessor,
                 stagingAccessor,
                 prioritiesAccessor,
                 exclusionAccessor,

@@ -53,6 +53,7 @@ import com.intuit.wasabi.repository.cassandra.accessor.ExperimentAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.PrioritiesAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.StagingAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.count.BucketAssignmentCountAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.count.HourlyBucketCountAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.export.UserAssignmentExportAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentUserIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.PageExperimentIndexAccessor;
@@ -119,6 +120,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
 
     private BucketAccessor bucketAccessor;
     private BucketAssignmentCountAccessor bucketAssignmentCountAccessor;
+    private HourlyBucketCountAccessor hourlyBucketCountAccessor;
 
     private StagingAccessor stagingAccessor;
     private PrioritiesAccessor prioritiesAccessor;
@@ -141,6 +143,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
 
             BucketAccessor bucketAccessor,
             BucketAssignmentCountAccessor bucketAssignmentCountAccessor,
+            HourlyBucketCountAccessor hourlyBucketCountAccessor,
 
             StagingAccessor stagingAccessor,
             PrioritiesAccessor prioritiesAccessor,
@@ -168,6 +171,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         //Bucket related accessors
         this.bucketAccessor = bucketAccessor;
         this.bucketAssignmentCountAccessor = bucketAssignmentCountAccessor;
+        this.hourlyBucketCountAccessor = hourlyBucketCountAccessor;
         //Staging related accessor
         this.stagingAccessor = stagingAccessor;
         this.prioritiesAccessor = prioritiesAccessor;
@@ -712,35 +716,36 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     public void updateBucketAssignmentCount(Experiment experiment, Assignment assignment, boolean countUp) {
         Optional<Bucket.Label> labelOptional = Optional.ofNullable(assignment.getBucketLabel());
 
-        Date completedHour = getLastCompletedHour(System.currentTimeMillis());
-        int eventTimeHour = getHour(completedHour);
-        ExpBucket expBucket = new ExpBucket(experiment.getID(), assignment.getBucketLabel());
-
-        // 2 nested concurrentHashMaps: outer contains the hour while inner contains the counts for certain buckets
-        // need to increment the counts and write the counts to the db at the end of each hour
-        Map<ExpBucket, AtomicInteger> hourMap = hourlyCountMap.get(eventTimeHour);
-        hourMap.putIfAbsent(expBucket, new AtomicInteger(0)); // Thread safe method
-        AtomicInteger oldCount = hourMap.get(expBucket);
-                                                                    // If synchronized was here, would delay the process
-        if (oldCount == null){
-            synchronized (hourMap) {                                // First would be initialized to 1 twice w/o this
-                oldCount = hourMap.get(expBucket);
-                if (oldCount == null){                              // Double check locking
-                    oldCount = new AtomicInteger(1);
-                    hourMap.put(expBucket, oldCount);
-                }else{
-                    oldCount.getAndIncrement();
-                }
-            }
-        }else{
-            oldCount.getAndIncrement();
-        }
-
-
-        // If start of a new hour (need a variable that keeps track of this)
-        hourlyCountMap.get(eventTimeHour - 1);              // Write this to db
-        hourlyCountMap.put(eventTimeHour, null);            // Set the hour's data to null to delete unnecessary counts
-
+//        Date completedHour = getLastCompletedHour(System.currentTimeMillis());
+//        int eventTimeHour = getHour(completedHour);
+//        ExpBucket expBucket = new ExpBucket(experiment.getID(), assignment.getBucketLabel());
+//
+//        Map<ExpBucket, AtomicInteger> hourMap = hourlyCountMap.get(eventTimeHour);
+//        //hourMap.putIfAbsent(expBucket, new AtomicInteger(0)); // This returns the value, doesn't update it
+//        AtomicInteger oldCount = hourMap.get(expBucket);
+//                                                                    // If synchronized was here, would delay the process
+//        if (oldCount == null){
+//            synchronized (hourMap) {                                // First would be initialized to 1 twice w/o this
+//                oldCount = hourMap.get(expBucket);
+//                if (oldCount == null){                              // Double-checked locking
+//                    oldCount = new AtomicInteger(1);
+//                    hourMap.put(expBucket, oldCount);
+//                }else{
+//                    oldCount.getAndIncrement();
+//                }
+//            }
+//        }else{
+//            oldCount.getAndIncrement();
+//        }
+//
+//
+//        // TODO: Figure out Bucket.Label --> toString OR labelOptional.orElseGet()
+//        // TODO: This is writing to the DB after every assignment, do this only once per hour instead (hour change var)
+//
+//        int count = hourlyCountMap.get(eventTimeHour).get(expBucket).incrementAndGet();
+//        hourlyBucketCountAccessor.incrementCountBy(experiment.getID().getRawID(),
+//                                  labelOptional.orElseGet(() -> NULL_LABEL).toString(), eventTimeHour, count);
+//        hourlyCountMap.put(eventTimeHour, null);            // Set the hour's data to null to delete unnecessary counts
 
 
         try {
@@ -759,14 +764,14 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         }
     }
 
-    public static Date getLastCompletedHour(long time) {
-        return new Date(time - 3600 * 1000);
-    }
-
-    public static int getHour(Date completedHour) {
-        DateFormat hourFormatter = new SimpleDateFormat("HH");
-        return Integer.parseInt(hourFormatter.format(completedHour));
-    }
+//    private static Date getLastCompletedHour(long time) {
+//        return new Date(time - 3600 * 1000);
+//    }
+//
+//    private static int getHour(Date completedHour) {
+//        DateFormat hourFormatter = new SimpleDateFormat("HH");
+//        return Integer.parseInt(hourFormatter.format(completedHour));
+//    }
 
     @Override
     public AssignmentCounts getBucketAssignmentCount(Experiment experiment) {
