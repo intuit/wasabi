@@ -12,7 +12,7 @@ angular.module('wasabi.controllers')
                         else {
                             $state.go('signin');
                         }
-                    }, functi1on(/*reason*/) {
+                    }, function(/*reason*/) {
                         $scope.loginFailed = true;
                         $rootScope.$broadcast(AUTH_EVENTS.loginFailed);
                         $state.go('signin');
