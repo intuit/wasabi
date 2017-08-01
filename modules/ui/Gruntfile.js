@@ -392,7 +392,10 @@ module.exports = function (grunt) {
                 constants: {
                     supportEmail: '',
                     authnType: 'basic',
-                    noAuthRedirect: ''
+                    noAuthRedirect: '',
+                    ssoLogoutRedirect: '',
+                    apiAuthInfo: ''
+
                 }
             },
             test: {
