@@ -874,7 +874,7 @@ public class AssignmentsImpl implements Assignments {
                 for (PrioritizedExperiment prioritizedExperiment : prioritizedExperimentListOptional.get().getPrioritizedExperiments()) {
                     if (experimentLabel.equals(prioritizedExperiment.getLabel())) {
                         //Upon match, get the complete experiment object from cache
-                        result = metadataCache.getExperimentById(prioritizedExperiment.getID()).orElseGet(null);
+                        result = metadataCache.getExperimentById(prioritizedExperiment.getID()).orElse(null);
                         break;
                     }
                 }

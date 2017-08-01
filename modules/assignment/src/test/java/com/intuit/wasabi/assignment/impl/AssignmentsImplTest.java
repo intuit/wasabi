@@ -1670,6 +1670,16 @@ public class AssignmentsImplTest {
         verify(metadataCache, times(1)).refresh();
     }
 
+    private static Experiment createMockExperiment(Experiment.ID experimentId, Experiment.Label exprimentLabel, Experiment.State experimentState) {
+        Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
+        when(experiment.getID()).thenReturn(experimentId);
+        when(experiment.getEndTime().getTime()).thenReturn(new Date().getTime() + 1000000L);
+        when(experiment.getLabel()).thenReturn(exprimentLabel);
+        when(experiment.getState()).thenReturn(experimentState);
+        when(experiment.getIsRapidExperiment()).thenReturn(false);
+        return experiment;
+    }
+
     @Test
     public void testExperimentFetchSameNameButDeleted() {
 
@@ -1679,19 +1689,8 @@ public class AssignmentsImplTest {
         Experiment.ID runningExperimentId = Experiment.ID.newInstance(); //Experiment.ID.valueOf("");
         Experiment.Label commonExperimentLabel = Experiment.Label.valueOf("SameNamePresetTwice");
 
-        Experiment deletedExperiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
-        when(deletedExperiment.getID()).thenReturn(deletedExperimentId);
-        when(deletedExperiment.getEndTime().getTime()).thenReturn(new Date().getTime() + 1000000L);
-        when(deletedExperiment.getLabel()).thenReturn(commonExperimentLabel);
-        when(deletedExperiment.getState()).thenReturn(Experiment.State.DELETED);
-        when(deletedExperiment.getIsRapidExperiment()).thenReturn(false);
-
-        Experiment runningExperiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
-        when(runningExperiment.getID()).thenReturn(runningExperimentId);
-        when(runningExperiment.getEndTime().getTime()).thenReturn(new Date().getTime() + 1000000L);
-        when(runningExperiment.getLabel()).thenReturn(commonExperimentLabel);
-        when(runningExperiment.getState()).thenReturn(Experiment.State.RUNNING);
-        when(runningExperiment.getIsRapidExperiment()).thenReturn(false);
+        Experiment deletedExperiment = createMockExperiment(deletedExperimentId, commonExperimentLabel, Experiment.State.DELETED);
+        Experiment runningExperiment = createMockExperiment(runningExperimentId, commonExperimentLabel, Experiment.State.RUNNING);
 
         PrioritizedExperimentList pExpList = new PrioritizedExperimentList();
         pExpList.addPrioritizedExperiment(PrioritizedExperiment.from(runningExperiment, 1).build());
@@ -1709,6 +1708,31 @@ public class AssignmentsImplTest {
         assertNotNull(returnedExperiment);
         assertThat(returnedExperiment.getID(), is(runningExperimentId));
     }
+
+    @Test
+    public void testExperimentFetchPrioritizedListEmpty() {
+
+        //Create input objects
+        Application.Name appName = Application.Name.valueOf("Test");
+        Experiment.ID deletedExperimentId = Experiment.ID.newInstance(); //Experiment.ID.valueOf("");
+        Experiment.Label experimentLabel = Experiment.Label.valueOf("SameNamePresetTwice");
+
+        Experiment deletedExperiment = createMockExperiment(deletedExperimentId, experimentLabel, Experiment.State.DELETED);
+
+        Optional<PrioritizedExperimentList> prioritizedExperimentListOptional = Optional.of(new PrioritizedExperimentList());
+
+        //Mock interactions with the cache
+        when(metadataCache.getPrioritizedExperimentListMap(appName)).thenReturn(prioritizedExperimentListOptional);
+        when(metadataCache.getExperimentById(deletedExperimentId)).thenReturn(Optional.of(deletedExperiment));
+
+        //Make actual call
+        Experiment returnedExperiment = assignmentsImpl.getExperiment(appName, experimentLabel);
+
+        //Verify expected result
+        assertNull(returnedExperiment);
+    }
+
+
 
     // FIXME:
 //    @Ignore("FIXME:refactor-core")
