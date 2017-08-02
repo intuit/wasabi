@@ -87,6 +87,12 @@ public class EventEnvelopePayload implements EnvelopePayload {
     public String toJson() {
         JSONObject eventJson = new JSONObject();
 
+        /*
+        * Please take care while inserting values in this map. The JSON simple library explicitly requires values
+        * to be of String type to handle strings for the JSON format such as adding quotes around string values and
+        * escaping any characters inside the value. If you insert a custom type in the map, it is the responsibility
+        * of the custom type's toString() implementation to ensure the formatting in accordance with the JSON format.
+        */
         eventJson.put("messageType", MessageType.EVENT.toString());
         eventJson.put("applicationName", applicationName != null ? applicationName.toString(): null);
         eventJson.put("experimentLabel", experimentLabel != null ? experimentLabel.toString(): null);
