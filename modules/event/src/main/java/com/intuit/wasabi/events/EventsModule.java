@@ -23,6 +23,7 @@ import com.intuit.wasabi.assignment.AssignmentsModule;
 import com.intuit.wasabi.eventobjects.EventEnvelopePayload;
 import com.intuit.wasabi.events.impl.EventsExportImpl;
 import com.intuit.wasabi.events.impl.EventsImpl;
+import com.intuit.wasabi.events.impl.NoOpEventsIngestionExecutor;
 import com.intuit.wasabi.exceptions.EventException;
 import com.intuit.wasabi.export.DatabaseExport;
 import com.intuit.wasabi.export.Envelope;
@@ -86,6 +87,8 @@ public class EventsModule extends AbstractModule {
     @Provides
     @Inject
     public Map<String, EventIngestionExecutor> ingestionExecutors() {
-        return new HashMap<String, EventIngestionExecutor>();
+        Map<String, EventIngestionExecutor> eventIngestionExecutorMap =  new HashMap<>();
+        eventIngestionExecutorMap.put(NoOpEventsIngestionExecutor.NAME, new NoOpEventsIngestionExecutor());
+        return eventIngestionExecutorMap;
     }
 }
