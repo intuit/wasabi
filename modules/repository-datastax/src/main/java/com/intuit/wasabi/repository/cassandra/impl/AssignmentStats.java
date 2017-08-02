@@ -3,7 +3,6 @@ package com.intuit.wasabi.repository.cassandra.impl;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.intuit.wasabi.assignmentobjects.Assignment;
-import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.repository.cassandra.accessor.count.HourlyBucketCountAccessor;
 
@@ -11,11 +10,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static com.intuit.wasabi.repository.cassandra.impl.CassandraAssignmentsRepository.NULL_LABEL;
 
 
 public class AssignmentStats {
@@ -60,13 +56,12 @@ public class AssignmentStats {
     }
 
     public void run(){
-        Optional<Bucket.Label> labelOptional = Optional.ofNullable(assignment.getBucketLabel());
+//        Optional<Bucket.Label> labelOptional = Optional.ofNullable(assignment.getBucketLabel());
         Date completedHour = getLastCompletedHour(System.currentTimeMillis());
         int eventTimeHour = getHour(completedHour);
         ExpBucket expBucket = new ExpBucket(experiment.getID(), assignment.getBucketLabel());
-        if (countUp) fillMaps(hourlyCountMap, expBucket, eventTimeHour);
-        else hourlyBucketCountAccessor.decrementCountBy(experiment.getID().getRawID(),
-                                                        assignment.getBucketLabel().toString(), eventTimeHour, 1);
+        populateMaps(hourlyCountMap, expBucket, eventTimeHour);
+
 
         // TODO: Figure out Bucket.Label --> toString OR labelOptional.orElseGet()
         // TODO: This is writing to the DB after every assignment, do this only once per hour instead (hour change var)
@@ -75,9 +70,12 @@ public class AssignmentStats {
 //        hourlyBucketCountAccessor.incrementCountBy(experiment.getID().getRawID(),
 //                labelOptional.orElseGet(() -> NULL_LABEL).toString(), eventTimeHour, count);
 //        hourlyCountMap.put(eventTimeHour, null);            // Set the hour's data to null to delete unnecessary counts
+
+//        hourlyBucketCountAccessor.decrementCountBy(experiment.getID().getRawID(),
+//                assignment.getBucketLabel().toString(), eventTimeHour, 1);
     }
 
-    public static void fillMaps(Map<Integer, Map<ExpBucket, AtomicInteger>> map, ExpBucket expBucket, int eventTimeHour){
+    public static void populateMaps(Map<Integer, Map<ExpBucket, AtomicInteger>> map, ExpBucket expBucket, int eventTimeHour){
 
         Map<ExpBucket, AtomicInteger> hourMap = map.get(eventTimeHour);
         AtomicInteger oldCount = hourMap.get(expBucket);

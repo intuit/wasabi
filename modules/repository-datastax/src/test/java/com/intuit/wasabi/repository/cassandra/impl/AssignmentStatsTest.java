@@ -23,7 +23,7 @@ public class AssignmentStatsTest {
     }
 
     @Test
-    public void fillMaps() throws Exception {
+    public void populateMaps() throws Exception {
         Map<Integer, Map<ExpBucket, AtomicInteger>> hourlyCountMap = new ConcurrentHashMap<>();
         for (int hour = 0; hour <= 23; hour++){
             hourlyCountMap.put(hour, new ConcurrentHashMap<>());
@@ -33,9 +33,9 @@ public class AssignmentStatsTest {
         Date completedHour = AssignmentStats.getLastCompletedHour(System.currentTimeMillis());
         int eventTimeHour = AssignmentStats.getHour(completedHour);
         ExpBucket expBucket = new ExpBucket(expID, bucket);
-        AssignmentStats.fillMaps(hourlyCountMap, expBucket, eventTimeHour);
+        AssignmentStats.populateMaps(hourlyCountMap, expBucket, eventTimeHour);
         Assert.assertEquals(1, hourlyCountMap.get(eventTimeHour).get(expBucket).getAndIncrement());
-        AssignmentStats.fillMaps(hourlyCountMap, expBucket, eventTimeHour);
+        AssignmentStats.populateMaps(hourlyCountMap, expBucket, eventTimeHour);
         Assert.assertEquals(2, hourlyCountMap.get(eventTimeHour).get(expBucket).getAndIncrement());
     }
 

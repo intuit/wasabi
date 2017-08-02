@@ -18,7 +18,6 @@ package com.intuit.wasabi.repository.cassandra.impl;
 import com.codahale.metrics.annotation.Timed;
 import com.datastax.driver.core.BatchStatement;
 import com.datastax.driver.core.BoundStatement;
-import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.exceptions.NoHostAvailableException;
 import com.datastax.driver.core.exceptions.ReadTimeoutException;
@@ -26,7 +25,6 @@ import com.datastax.driver.core.exceptions.UnavailableException;
 import com.datastax.driver.core.exceptions.WriteTimeoutException;
 import com.datastax.driver.mapping.MappingManager;
 import com.datastax.driver.mapping.Result;
-import com.google.common.collect.Table;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -720,7 +718,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         int eventTimeHour = getHour(completedHour);
         ExpBucket expBucket = new ExpBucket(experiment.getID(), assignment.getBucketLabel());
 
-        AssignmentStats.fillMaps(hourlyCountMap, expBucket, eventTimeHour);
+        AssignmentStats.populateMaps(hourlyCountMap, expBucket, eventTimeHour);
 
 
 //        // TODO: Figure out Bucket.Label --> toString OR labelOptional.orElseGet()
