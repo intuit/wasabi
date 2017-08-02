@@ -712,24 +712,8 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
 
     @Override
     public void updateBucketAssignmentCount(Experiment experiment, Assignment assignment, boolean countUp) {
+        AssignmentStats.incrementCount(experiment, assignment);
         Optional<Bucket.Label> labelOptional = Optional.ofNullable(assignment.getBucketLabel());
-
-        Date completedHour = getLastCompletedHour(System.currentTimeMillis());
-        int eventTimeHour = getHour(completedHour);
-        ExpBucket expBucket = new ExpBucket(experiment.getID(), assignment.getBucketLabel());
-
-        AssignmentStats.populateMaps(hourlyCountMap, expBucket, eventTimeHour);
-
-
-//        // TODO: Figure out Bucket.Label --> toString OR labelOptional.orElseGet()
-//        // TODO: This is writing to the DB after every assignment, do this only once per hour instead (hour change var)
-//
-//        int count = hourlyCountMap.get(eventTimeHour).get(expBucket).incrementAndGet();
-//        hourlyBucketCountAccessor.incrementCountBy(experiment.getID().getRawID(),
-//                                  labelOptional.orElseGet(() -> NULL_LABEL).toString(), eventTimeHour, count);
-//        hourlyCountMap.put(eventTimeHour, null);            // Set the hour's data to null to delete unnecessary counts
-
-
         try {
             if (countUp) {
                 bucketAssignmentCountAccessor.incrementCountBy(experiment.getID().getRawID(),
@@ -744,15 +728,6 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
             throw new RepositoryException("Could not update the bucket count for experiment " + experiment.getID()
                     + " bucket " + labelOptional.orElseGet(() -> NULL_LABEL).toString(), e);
         }
-    }
-
-    private static Date getLastCompletedHour(long time) {
-        return new Date(time - 3600 * 1000);
-    }
-
-    private static int getHour(Date completedHour) {
-        DateFormat hourFormatter = new SimpleDateFormat("HH");
-        return Integer.parseInt(hourFormatter.format(completedHour));
     }
 
     @Override

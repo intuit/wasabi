@@ -1,42 +1,54 @@
 package com.intuit.wasabi.repository.cassandra.impl;
 
+
+import com.intuit.wasabi.assignmentobjects.Assignment;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 
 
 public class AssignmentStatsTest {
 
-
     @Test
-    public void run() throws Exception {
-    }
+    public void incrementCount() throws Exception {
+        // TODO: make this configurable instead of only hourly keys
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-M-yyyy hh:mm:ss");
+        String dateInString = "22-01-2015 10:20:56";
+        Date created = dateFormat.parse(dateInString);
 
-    @Test
-    public void populateMaps() throws Exception {
-        Map<Integer, Map<ExpBucket, AtomicInteger>> hourlyCountMap = new ConcurrentHashMap<>();
-        for (int hour = 0; hour <= 23; hour++){
-            hourlyCountMap.put(hour, new ConcurrentHashMap<>());
-        }
-        Experiment.ID expID = Experiment.ID.newInstance();
-        Bucket.Label bucket = Bucket.Label.valueOf("label1");
-        Date completedHour = AssignmentStats.getLastCompletedHour(System.currentTimeMillis());
-        int eventTimeHour = AssignmentStats.getHour(completedHour);
-        ExpBucket expBucket = new ExpBucket(expID, bucket);
-        AssignmentStats.populateMaps(hourlyCountMap, expBucket, eventTimeHour);
-        Assert.assertEquals(1, hourlyCountMap.get(eventTimeHour).get(expBucket).getAndIncrement());
-        AssignmentStats.populateMaps(hourlyCountMap, expBucket, eventTimeHour);
-        Assert.assertEquals(2, hourlyCountMap.get(eventTimeHour).get(expBucket).getAndIncrement());
+        Experiment experiment = mock(Experiment.class);
+        Assignment assignment = mock(Assignment.class);
+        Mockito.when(assignment.getCreated()).thenReturn(created);
+
+        Bucket.Label maxwellBucket = Bucket.Label.valueOf("Maxwell");
+        Mockito.when(assignment.getBucketLabel()).thenReturn(maxwellBucket);
+        Mockito.when(experiment.getID()).thenReturn(Experiment.ID.newInstance());
+        System.out.println("id = " + experiment.getID());
+
+        AssignmentStats.incrementCount(experiment, assignment);
+        int count = AssignmentStats.getCount(experiment, maxwellBucket, 10);
+        Assert.assertEquals(1, count);
+        AssignmentStats.incrementCount(experiment, assignment);
+        count = AssignmentStats.getCount(experiment, maxwellBucket, 10);
+        Assert.assertEquals(2, count);
+        AssignmentStats.incrementCount(experiment, assignment);
+        count = AssignmentStats.getCount(experiment, maxwellBucket, 10);
+        Assert.assertEquals(3, count);
+
+        maxwellBucket = Bucket.Label.valueOf("Bruckhaus");
+        Mockito.when(assignment.getBucketLabel()).thenReturn(maxwellBucket);
+        AssignmentStats.incrementCount(experiment, assignment);
+        count = AssignmentStats.getCount(experiment, maxwellBucket, 10);
+        Assert.assertEquals(1, count);
     }
 
 

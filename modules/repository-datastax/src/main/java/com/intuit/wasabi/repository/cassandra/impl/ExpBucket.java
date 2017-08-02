@@ -13,4 +13,8 @@ class ExpBucket {
         this.expID = expID;
         this.bucket = bucket;
     }
+
+    public static String getKey(Experiment.ID expID, Bucket.Label bucket){
+        return expID.toString() + bucket.toString();
+    }
 }
