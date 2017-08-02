@@ -716,29 +716,13 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     public void updateBucketAssignmentCount(Experiment experiment, Assignment assignment, boolean countUp) {
         Optional<Bucket.Label> labelOptional = Optional.ofNullable(assignment.getBucketLabel());
 
-//        Date completedHour = getLastCompletedHour(System.currentTimeMillis());
-//        int eventTimeHour = getHour(completedHour);
-//        ExpBucket expBucket = new ExpBucket(experiment.getID(), assignment.getBucketLabel());
-//
-//        Map<ExpBucket, AtomicInteger> hourMap = hourlyCountMap.get(eventTimeHour);
-//        //hourMap.putIfAbsent(expBucket, new AtomicInteger(0)); // This returns the value, doesn't update it
-//        AtomicInteger oldCount = hourMap.get(expBucket);
-//                                                                    // If synchronized was here, would delay the process
-//        if (oldCount == null){
-//            synchronized (hourMap) {                                // First would be initialized to 1 twice w/o this
-//                oldCount = hourMap.get(expBucket);
-//                if (oldCount == null){                              // Double-checked locking
-//                    oldCount = new AtomicInteger(1);
-//                    hourMap.put(expBucket, oldCount);
-//                }else{
-//                    oldCount.getAndIncrement();
-//                }
-//            }
-//        }else{
-//            oldCount.getAndIncrement();
-//        }
-//
-//
+        Date completedHour = getLastCompletedHour(System.currentTimeMillis());
+        int eventTimeHour = getHour(completedHour);
+        ExpBucket expBucket = new ExpBucket(experiment.getID(), assignment.getBucketLabel());
+
+        AssignmentStats.fillMaps(hourlyCountMap, expBucket, eventTimeHour);
+
+
 //        // TODO: Figure out Bucket.Label --> toString OR labelOptional.orElseGet()
 //        // TODO: This is writing to the DB after every assignment, do this only once per hour instead (hour change var)
 //
@@ -764,14 +748,14 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         }
     }
 
-//    private static Date getLastCompletedHour(long time) {
-//        return new Date(time - 3600 * 1000);
-//    }
-//
-//    private static int getHour(Date completedHour) {
-//        DateFormat hourFormatter = new SimpleDateFormat("HH");
-//        return Integer.parseInt(hourFormatter.format(completedHour));
-//    }
+    private static Date getLastCompletedHour(long time) {
+        return new Date(time - 3600 * 1000);
+    }
+
+    private static int getHour(Date completedHour) {
+        DateFormat hourFormatter = new SimpleDateFormat("HH");
+        return Integer.parseInt(hourFormatter.format(completedHour));
+    }
 
     @Override
     public AssignmentCounts getBucketAssignmentCount(Experiment experiment) {
