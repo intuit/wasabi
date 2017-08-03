@@ -129,6 +129,8 @@ public class CassandraAssignmentsRepositoryTest {
     BucketAssignmentCountAccessor bucketAssignmentCountAccessor;
     @Mock
     HourlyBucketCountAccessor hourlyBucketCountAccessor;
+    @Mock
+    AssignmentStats assignmentStats;
 
     @Mock
     StagingAccessor stagingAccessor;
@@ -167,6 +169,7 @@ public class CassandraAssignmentsRepositoryTest {
                 userAssignmentExportAccessor,
                 bucketAccessor,
                 bucketAssignmentCountAccessor,
+                assignmentStats,
                 hourlyBucketCountAccessor,
                 stagingAccessor,
                 prioritiesAccessor,

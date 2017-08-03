@@ -17,37 +17,38 @@ import static org.mockito.Mockito.mock;
 
 
 public class AssignmentStatsTest {
+    private AssignmentStats assignmentStats = new AssignmentStats();
 
     @Test
     public void incrementCount() throws Exception {
-        // TODO: make this configurable instead of only hourly keys
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd-M-yyyy hh:mm:ss");
         String dateInString = "22-01-2015 10:20:56";
         Date created = dateFormat.parse(dateInString);
+        Bucket.Label testBucket = Bucket.Label.valueOf("Maxwell");
 
         Experiment experiment = mock(Experiment.class);
         Assignment assignment = mock(Assignment.class);
         Mockito.when(assignment.getCreated()).thenReturn(created);
-
-        Bucket.Label maxwellBucket = Bucket.Label.valueOf("Maxwell");
-        Mockito.when(assignment.getBucketLabel()).thenReturn(maxwellBucket);
+        Mockito.when(assignment.getBucketLabel()).thenReturn(testBucket);
         Mockito.when(experiment.getID()).thenReturn(Experiment.ID.newInstance());
-        System.out.println("id = " + experiment.getID());
 
-        AssignmentStats.incrementCount(experiment, assignment);
-        int count = AssignmentStats.getCount(experiment, maxwellBucket, 10);
+        assignmentStats.incrementCount(experiment, assignment);
+        int count = assignmentStats.getCount(experiment, testBucket, 10);
         Assert.assertEquals(1, count);
-        AssignmentStats.incrementCount(experiment, assignment);
-        count = AssignmentStats.getCount(experiment, maxwellBucket, 10);
+        assignmentStats.incrementCount(experiment, assignment);
+        count = assignmentStats.getCount(experiment, testBucket, 10);
         Assert.assertEquals(2, count);
-        AssignmentStats.incrementCount(experiment, assignment);
-        count = AssignmentStats.getCount(experiment, maxwellBucket, 10);
+        assignmentStats.incrementCount(experiment, assignment);
+        count = assignmentStats.getCount(experiment, testBucket, 10);
         Assert.assertEquals(3, count);
 
-        maxwellBucket = Bucket.Label.valueOf("Bruckhaus");
-        Mockito.when(assignment.getBucketLabel()).thenReturn(maxwellBucket);
-        AssignmentStats.incrementCount(experiment, assignment);
-        count = AssignmentStats.getCount(experiment, maxwellBucket, 10);
+        dateInString = "22-01-2015 21:20:56";
+        created = dateFormat.parse(dateInString);
+        testBucket = Bucket.Label.valueOf("Bruckhaus");
+        Mockito.when(assignment.getCreated()).thenReturn(created);
+        Mockito.when(assignment.getBucketLabel()).thenReturn(testBucket);
+        assignmentStats.incrementCount(experiment, assignment);
+        count = assignmentStats.getCount(experiment, testBucket, 21);
         Assert.assertEquals(1, count);
     }
 
@@ -63,7 +64,7 @@ public class AssignmentStatsTest {
         Date timeNowMillisDate = new Date(timeNowMillis);
 
         assertEquals(timeNowMillisDate, timeNowDate);
-        Assert.assertEquals(oneHourAgoDate, AssignmentStats.getLastCompletedHour(timeNowMillis));
+        Assert.assertEquals(oneHourAgoDate, assignmentStats.getLastCompletedHour(timeNowMillis));
     }
 
     @Test
@@ -72,11 +73,11 @@ public class AssignmentStatsTest {
 
         String timeNowString = "May 24, 2014 23:39:05";
         Date timeNowDate = format.parse(timeNowString);
-        assertEquals(23, AssignmentStats.getHour(timeNowDate));
+        assertEquals(23, assignmentStats.getHour(timeNowDate));
 
         String timeNowString2 = "June 17, 2017 05:10:26";
         Date timeNowDate2 = format.parse(timeNowString2);
-        assertEquals(05, AssignmentStats.getHour(timeNowDate2));
+        assertEquals(05, assignmentStats.getHour(timeNowDate2));
     }
 
 }

@@ -74,18 +74,7 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.Spliterator;
-import java.util.Spliterators;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -118,14 +107,15 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
 
     private BucketAccessor bucketAccessor;
     private BucketAssignmentCountAccessor bucketAssignmentCountAccessor;
-    private HourlyBucketCountAccessor hourlyBucketCountAccessor;
+//    private HourlyBucketCountAccessor hourlyBucketCountAccessor;
 
     private StagingAccessor stagingAccessor;
     private PrioritiesAccessor prioritiesAccessor;
     private ExclusionAccessor exclusionAccessor;
     private CassandraDriver driver;
 
-    private Map<Integer, Map<ExpBucket, AtomicInteger>> hourlyCountMap;
+    private AssignmentStats assignmentStats;
+//    private Map<Integer, Map<ExpBucket, AtomicInteger>> hourlyCountMap;
 
 
 
@@ -141,6 +131,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
 
             BucketAccessor bucketAccessor,
             BucketAssignmentCountAccessor bucketAssignmentCountAccessor,
+            AssignmentStats assignmentStats,
             HourlyBucketCountAccessor hourlyBucketCountAccessor,
 
             StagingAccessor stagingAccessor,
@@ -169,18 +160,20 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         //Bucket related accessors
         this.bucketAccessor = bucketAccessor;
         this.bucketAssignmentCountAccessor = bucketAssignmentCountAccessor;
-        this.hourlyBucketCountAccessor = hourlyBucketCountAccessor;
+//        this.hourlyBucketCountAccessor = hourlyBucketCountAccessor;
         //Staging related accessor
         this.stagingAccessor = stagingAccessor;
         this.prioritiesAccessor = prioritiesAccessor;
         this.exclusionAccessor = exclusionAccessor;
         this.driver = driver;
         this.assignmentsCountExecutor = assignmentsCountExecutor;
-        this.hourlyCountMap = new ConcurrentHashMap<>();
 
-        for (int hour = 0; hour <= 23; hour++){
-            hourlyCountMap.put(hour, new ConcurrentHashMap<>());
-        }
+        this.assignmentStats = new AssignmentStats();
+//        this.hourlyCountMap = new ConcurrentHashMap<>();
+
+//        for (int hour = 0; hour <= 23; hour++){
+//            hourlyCountMap.put(hour, new ConcurrentHashMap<>());
+//        }
 
     }
 
@@ -712,7 +705,12 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
 
     @Override
     public void updateBucketAssignmentCount(Experiment experiment, Assignment assignment, boolean countUp) {
-        AssignmentStats.incrementCount(experiment, assignment);
+        assignmentStats.incrementCount(experiment, assignment);
+        Calendar assignmentTime = Calendar.getInstance();
+        assignmentTime.setTime(assignment.getCreated());
+        if (assignmentTime.get(Calendar.MINUTE) == 0){
+            assignmentStats.writeCounts(experiment, assignment);
+        }
         Optional<Bucket.Label> labelOptional = Optional.ofNullable(assignment.getBucketLabel());
         try {
             if (countUp) {
