@@ -11,10 +11,13 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
-class AssignmentStats {
+public class AssignmentStats {
 
     private static DateFormat hourFormatter = new SimpleDateFormat("HH");
     private static DateFormat minuteFormatter = new SimpleDateFormat("mm");
@@ -33,7 +36,9 @@ class AssignmentStats {
         }
     }
 
-    void incrementCount(Experiment experiment, Assignment assignment){
+
+
+    public void incrementCount(Experiment experiment, Assignment assignment){
         int assignmentHour = getHour(assignment.getCreated());
         Map<String, AtomicInteger> hourMap = hourlyCountMap.get(assignmentHour);
         Experiment.ID id = experiment.getID();
@@ -59,7 +64,7 @@ class AssignmentStats {
         System.out.println("hourMap(expBucket) = " + hourMap.get(ExpBucket.getKey(id, bucketLabel)));
     }
 
-    int getCount(Experiment experiment, Bucket.Label bucketLabel, int assignmentHour){
+    public int getCount(Experiment experiment, Bucket.Label bucketLabel, int assignmentHour){
         // Print statistics to confirm accuracy
         System.out.println("--- getCount():");
         System.out.println("assignment hour = " + assignmentHour + ". id = " + experiment.getID());
@@ -69,7 +74,7 @@ class AssignmentStats {
         return hourMap.get(ExpBucket.getKey(experiment.getID(), bucketLabel)).get();
     }
 
-    void writeCounts(Experiment experiment, Assignment assignment){
+    public void writeCounts(Experiment experiment, Assignment assignment){
         // TODO: Make write interval configurable instead of only hourly
         // Use UTC time, that's what Wasabi uses to make sure the times are consistent
         Optional<Bucket.Label> labelOptional = Optional.ofNullable(assignment.getBucketLabel());
@@ -89,11 +94,11 @@ class AssignmentStats {
     }
 
 
-    Date getLastCompletedHour(long time) {
+    public Date getLastCompletedHour(long time) {
         return new Date(time - 3600 * 1000);
     }
 
-    int getHour(Date completedHour) {
+    public int getHour(Date completedHour) {
         return Integer.parseInt(hourFormatter.format(completedHour));   // Thread safe method
     }
 
