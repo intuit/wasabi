@@ -84,6 +84,7 @@ public class AssignmentsModule extends AbstractModule {
         bindAssignmentAndDecorator(properties);
         bindRuleCacheThreadPool(properties);
         bindMetadataCache(properties);
+        bindAssignmentsHourlyAggregation();
 
         String databaseAssignmentClassName = getProperty("export.rest.assignment.db.class.name", properties,
                 "com.intuit.wasabi.assignment.impl.NoopDatabaseAssignmentEnvelope");
