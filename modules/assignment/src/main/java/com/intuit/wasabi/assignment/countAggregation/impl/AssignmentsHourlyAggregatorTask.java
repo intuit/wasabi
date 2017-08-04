@@ -1,4 +1,4 @@
-package com.intuit.wasabi.assignment.assignmentHourlyAggregator.impl;
+package com.intuit.wasabi.assignment.countAggregation.impl;
 
 import com.datastax.driver.core.TupleType;
 import com.google.inject.name.Named;
@@ -23,7 +23,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class AssignmentsHourlyAggregationTask implements Runnable {
+public class AssignmentsHourlyAggregatorTask implements Runnable {
 
     private AssignmentsRepository assignmentsRepository;
     private AssignmentStats assignmentStats;
@@ -40,7 +40,7 @@ public class AssignmentsHourlyAggregationTask implements Runnable {
     private int eventTimeHour;
 
     @Inject
-    public AssignmentsHourlyAggregationTask(AssignmentStats assignmentStats){
+    public AssignmentsHourlyAggregatorTask(AssignmentStats assignmentStats){
         this.assignmentStats = assignmentStats;
     }
 
