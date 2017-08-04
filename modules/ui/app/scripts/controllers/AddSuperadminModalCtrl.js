@@ -46,7 +46,7 @@ angular.module('wasabi.controllers')
                         $scope.validating = false;
                         if (results) {
                             $scope.superadmin = {};
-                            $scope.superadmin.userID = (results.userId ? results.userId : '');
+                            $scope.superadmin.userID = (results.username ? results.username : '');
                             $scope.superadmin.firstName = (results.firstName ? results.firstName : '');
                             $scope.superadmin.lastName = (results.lastName ? results.lastName : '');
                             $scope.superadmin.userEmail = (results.email ? results.email : '');

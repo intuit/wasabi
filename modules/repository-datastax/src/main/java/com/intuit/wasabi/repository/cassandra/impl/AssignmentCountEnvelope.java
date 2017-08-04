@@ -106,37 +106,5 @@ public class AssignmentCountEnvelope implements Runnable {
             LOGGER.error("Error updating the assignment to the user export for experiment: ", experiment.getID() +
                     " bucket label: " + assignment.getBucketLabel() + " with exception: ", e);
         }
-
-
-        // For rapid experiments; checks if a set userCap is attained.
-        // If so, changes the state of the experiment to PAUSED.
-        if (experiment.getIsRapidExperiment()) {
-            Integer userCap = experiment.getUserCap();
-            AssignmentCounts assignmentCounts = assignmentsRepository.getBucketAssignmentCount(experiment);
-            if (assignmentCounts.getTotalUsers().getBucketAssignments() >= userCap) {
-                boolean successUpdateCassandra = false;
-                //updating the state in Cassandra
-                try {
-                    cassandraExperimentRepository.updateExperimentState(experiment, Experiment.State.PAUSED);
-                    successUpdateCassandra = true;
-                    // this is a system event
-                    eventLog.postEvent(new ExperimentChangeEvent(experiment, "state", Experiment.State.RUNNING.toString(), Experiment.State.PAUSED.toString()));
-                } catch (Exception e) {
-                    LOGGER.error("Error updating  the state of the rapid experiment: ", experiment.getID(), " in Cassandra to" +
-                            " PAUSED with exception: ", e);
-                }
-
-                if (successUpdateCassandra) {
-                    //updating the state in RDS
-                    try {
-                        dbExperimentRepository.updateExperimentState(experiment, Experiment.State.PAUSED);
-                    } catch (Exception e) {
-                        LOGGER.error("Error updating the state of the rapid experiment: ", experiment.getID(), " in RDS to" +
-                                " PAUSED with exception: ", e);
-                    }
-                }
-
-            }
-        }
     }
 }
