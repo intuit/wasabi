@@ -705,12 +705,15 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
 
     @Override
     public void updateBucketAssignmentCount(Experiment experiment, Assignment assignment, boolean countUp) {
-        assignmentStats.incrementCount(experiment, assignment);
-        Calendar assignmentTime = Calendar.getInstance();
-        assignmentTime.setTime(assignment.getCreated());
-        if (assignmentTime.get(Calendar.MINUTE) == 0){
+
+        // if it's a new hour, do writeCounts();
+        /*
+        int assignmentMinutes = assignmentStats.getMinutes(new Date(System.currentTimeMillis()));
+        if (assignmentMinutes == 0){
             assignmentStats.writeCounts(experiment, assignment);
         }
+        */
+
         Optional<Bucket.Label> labelOptional = Optional.ofNullable(assignment.getBucketLabel());
         try {
             if (countUp) {

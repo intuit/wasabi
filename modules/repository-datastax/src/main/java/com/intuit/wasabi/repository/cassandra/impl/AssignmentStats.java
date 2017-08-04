@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 class AssignmentStats {
 
     private static DateFormat hourFormatter = new SimpleDateFormat("HH");
+    private static DateFormat minuteFormatter = new SimpleDateFormat("mm");
     private static Map<Integer, Map<String, AtomicInteger>> hourlyCountMap;
     private static HourlyBucketCountAccessor hourlyBucketCountAccessor;
     private static final Bucket.Label NULL_LABEL = Bucket.Label.valueOf("NULL");
@@ -39,8 +40,7 @@ class AssignmentStats {
         Bucket.Label bucketLabel = assignment.getBucketLabel();
         // Print statistics to confirm accuracy
         System.out.println("--- incrementCount():");
-        System.out.println("assignment hour = " + assignmentHour);
-        System.out.println("id = " + id);
+        System.out.println("assignment hour = " + assignmentHour + ". id = " + id);
         System.out.println("bucketLabel = " + bucketLabel);                         // operate on expBucket object
         AtomicInteger oldCount = hourMap.get(ExpBucket.getKey(id, bucketLabel)); // Equals method and hashcode method
         if (oldCount == null){
@@ -62,8 +62,7 @@ class AssignmentStats {
     int getCount(Experiment experiment, Bucket.Label bucketLabel, int assignmentHour){
         // Print statistics to confirm accuracy
         System.out.println("--- getCount():");
-        System.out.println("assignmentHour = " + assignmentHour);
-        System.out.println("id = " + experiment.getID());
+        System.out.println("assignment hour = " + assignmentHour + ". id = " + experiment.getID());
         System.out.println("bucketLabel = " + bucketLabel);
         Map<String, AtomicInteger> hourMap = hourlyCountMap.get(assignmentHour);
         System.out.println("hourMap(expBucket) = " + hourMap.get(ExpBucket.getKey(experiment.getID(), bucketLabel)));
@@ -72,7 +71,7 @@ class AssignmentStats {
 
     void writeCounts(Experiment experiment, Assignment assignment){
         // TODO: Make write interval configurable instead of only hourly
-
+        // Use UTC time, that's what Wasabi uses to make sure the times are consistent
         Optional<Bucket.Label> labelOptional = Optional.ofNullable(assignment.getBucketLabel());
         Date completedHour = getLastCompletedHour(System.currentTimeMillis());
         int assignmentHour = getHour(completedHour);
@@ -96,5 +95,9 @@ class AssignmentStats {
 
     int getHour(Date completedHour) {
         return Integer.parseInt(hourFormatter.format(completedHour));   // Thread safe method
+    }
+
+    int getMinutes(Date completedHour){
+        return Integer.parseInt(minuteFormatter.format(completedHour));
     }
 }

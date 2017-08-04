@@ -33,13 +33,13 @@ public class AssignmentStatsTest {
         Mockito.when(experiment.getID()).thenReturn(Experiment.ID.newInstance());
 
         assignmentStats.incrementCount(experiment, assignment);
-        int count = assignmentStats.getCount(experiment, testBucket, 10);
+        int count = assignmentStats.getCount(experiment, assignment.getBucketLabel(), 10);
         Assert.assertEquals(1, count);
         assignmentStats.incrementCount(experiment, assignment);
-        count = assignmentStats.getCount(experiment, testBucket, 10);
+        count = assignmentStats.getCount(experiment, assignment.getBucketLabel(), 10);
         Assert.assertEquals(2, count);
         assignmentStats.incrementCount(experiment, assignment);
-        count = assignmentStats.getCount(experiment, testBucket, 10);
+        count = assignmentStats.getCount(experiment, assignment.getBucketLabel(), 10);
         Assert.assertEquals(3, count);
 
         dateInString = "22-01-2015 21:20:56";
@@ -48,8 +48,11 @@ public class AssignmentStatsTest {
         Mockito.when(assignment.getCreated()).thenReturn(created);
         Mockito.when(assignment.getBucketLabel()).thenReturn(testBucket);
         assignmentStats.incrementCount(experiment, assignment);
-        count = assignmentStats.getCount(experiment, testBucket, 21);
+        count = assignmentStats.getCount(experiment, assignment.getBucketLabel(), 21);
         Assert.assertEquals(1, count);
+        System.out.println("Current time: " + (System.currentTimeMillis() - 3600 * 1000));
+        System.out.println("hour = " + assignmentStats.getHour((assignmentStats.getLastCompletedHour(System.currentTimeMillis()))));
+        System.out.println("minutes = " + assignmentStats.getMinutes((assignmentStats.getLastCompletedHour(System.currentTimeMillis()))));
     }
 
 
