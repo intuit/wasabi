@@ -26,6 +26,7 @@ import com.intuit.wasabi.assignment.cache.impl.AssignmentMetadataCacheTimeServic
 import com.intuit.wasabi.assignment.cache.impl.AssignmentsMetadataCacheHealthCheck;
 import com.intuit.wasabi.assignment.cache.impl.AssignmentsMetadataCacheImpl;
 import com.intuit.wasabi.assignment.cache.impl.AssignmentsMetadataCacheRefreshTask;
+import com.intuit.wasabi.assignment.countAggregation.impl.AssignmentsHourlyAggregatorTask;
 import com.intuit.wasabi.assignment.cache.impl.NoopAssignmentsMetadataCacheImpl;
 import com.intuit.wasabi.assignmentobjects.AssignmentEnvelopePayload;
 import com.intuit.wasabi.exceptions.AssignmentException;
@@ -191,7 +192,7 @@ public class AssignmentsModule extends AbstractModule {
         //Bind hourly assignment aggregator task
         bind(Runnable.class)
                 .annotatedWith(named(ASSIGNMENTS_HOURLY_AGGREGATOR_TASK))
-                .to(AssignmentHourlyAggregatorTask.class).in(SINGLETON);
+                .to(AssignmentsHourlyAggregatorTask.class).in(SINGLETON);
 
     }
 

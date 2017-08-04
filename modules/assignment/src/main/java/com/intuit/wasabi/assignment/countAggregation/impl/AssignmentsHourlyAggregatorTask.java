@@ -1,9 +1,6 @@
 package com.intuit.wasabi.assignment.countAggregation.impl;
 
-import com.datastax.driver.core.TupleType;
-import com.google.inject.name.Named;
 import com.intuit.wasabi.assignmentobjects.Assignment;
-import com.intuit.wasabi.eventlog.EventLog;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.repository.AssignmentsRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
@@ -11,17 +8,9 @@ import com.intuit.wasabi.repository.cassandra.impl.AssignmentStats;
 import com.intuit.wasabi.repository.cassandra.impl.CassandraAssignmentsRepository;
 
 import javax.inject.Inject;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+
 import java.util.Date;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
+
 
 public class AssignmentsHourlyAggregatorTask implements Runnable {
 
