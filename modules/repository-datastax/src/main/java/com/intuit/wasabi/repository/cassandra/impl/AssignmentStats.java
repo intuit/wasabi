@@ -80,9 +80,10 @@ public class AssignmentStats {
         Optional<Bucket.Label> labelOptional = Optional.ofNullable(assignment.getBucketLabel());
         Date completedHour = getLastCompletedHour(System.currentTimeMillis());
         int assignmentHour = getHour(completedHour);
+        String day = getDayString(completedHour);
 
         for (int i = 0; i < hourlyCountMap.get(assignmentHour).size(); i++){
-            hourlyBucketCountAccessor.incrementCountBy(experiment.getID().getRawID(),
+            hourlyBucketCountAccessor.incrementCountBy(experiment.getID().getRawID(), day,
                                       labelOptional.orElseGet(() -> NULL_LABEL).toString(), assignmentHour,
                                       getCount(experiment, assignment.getBucketLabel(), assignmentHour));
         }
@@ -100,6 +101,11 @@ public class AssignmentStats {
 
     public int getHour(Date completedHour) {
         return Integer.parseInt(hourFormatter.format(completedHour));   // Thread safe method
+    }
+
+    public static String getDayString(Date completedHour) {
+        DateFormat dayFormatter = new SimpleDateFormat("yyyy-MM-dd");
+        return dayFormatter.format(completedHour);
     }
 
     int getMinutes(Date completedHour){

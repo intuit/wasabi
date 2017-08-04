@@ -29,12 +29,12 @@ import java.util.UUID;
 @Accessor
 public interface HourlyBucketCountAccessor {
     @Query("UPDATE hourly_bucket_counts SET hourly_bucket_count = hourly_bucket_count + count " +
-            "WHERE experiment_id = ? and bucket_label = ? and event_time_hour = ? and count = ?")
-    ResultSet incrementCountBy(UUID experimentId, String bucketLabel, int eventTimeHour, int count);
+            "WHERE experiment_id = ? and day = ? and bucket_label = ? and event_time_hour = ? and count = ?")
+    ResultSet incrementCountBy(UUID experimentId, String day, String bucketLabel, int eventTimeHour, int count);
 
     @Query("UPDATE hourly_bucket_counts SET hourly_bucket_count = hourly_bucket_count - count " +
-            "WHERE experiment_id = ? and bucket_label = ? and event_time_hour = ? and count = ?")
-    ResultSet decrementCountBy(UUID experimentId, String bucketLabel, int eventTimeHour, int count);
+            "WHERE experiment_id = ? and day = ? and bucket_label = ? and event_time_hour = ? and count = ?")
+    ResultSet decrementCountBy(UUID experimentId, String day, String bucketLabel, int eventTimeHour, int count);
 
     @Query("SELECT * FROM hourly_bucket_counts WHERE experiment_id = ?")
     Result<HourlyBucketCount> selectBy(UUID experimentId);
