@@ -236,6 +236,10 @@ angular.module('wasabi.controllers').
                         queryParams.filter = addAdvParam(queryParams.filter, tagsParam);
                     }
                 }
+                else {
+                    // Default to "notTerminated"
+                    queryParams.filter = addAdvParam(queryParams.filter, 'state_exact=notTerminated');
+                }
 
                 if (!cardViewFlag) {
                     ExperimentsFactory.query(queryParams).$promise

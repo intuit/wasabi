@@ -16,6 +16,7 @@
 package com.intuit.wasabi.repository.cassandra.accessor;
 
 import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Statement;
 import com.datastax.driver.mapping.Result;
 import com.datastax.driver.mapping.annotations.Accessor;
 import com.datastax.driver.mapping.annotations.Query;
@@ -79,7 +80,7 @@ public interface ExperimentAccessor {
             "   state, label, app_name, created, modified, is_personalized, model_name, model_version," +
             " is_rapid_experiment, user_cap, creatorid, tags) " +
             "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
-    void insertExperiment(UUID experimentId, String description, String hypothesisIsCorrect, String results,
+    Statement insertExperiment(UUID experimentId, String description, String hypothesisIsCorrect, String results,
                           String rule, double samplePercent,
                           Date startTime, Date endTime, String state, String label, String appName,
                           Date created, Date modified, boolean isPersonalized, String modelName,

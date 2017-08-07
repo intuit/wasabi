@@ -37,10 +37,12 @@ public class Constants {
     public static final String DEFAULT_PAGE_NAME = "homepage";
     public static final String DEFAULT_NODE_COUNT = String.valueOf(1);
     public static final String DEFAULT_TEST_USER = "wasabi_reader@example.com";
-
+        
     public static final String NEW_LINE = System.getProperty("line.separator"); // OS dependent line separator
     public static final String TAB = "\t";
 
+    public static final int DEFAULT_RAPIDEXP_MAX_USERS  = 10;
+    
     /**
      * The integration tests prefix, should be {@code SW50ZWdyVGVzdA_}
      */

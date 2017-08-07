@@ -15,6 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.database;
 
+import com.datastax.driver.core.Statement;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
@@ -749,7 +750,7 @@ public class DatabaseExperimentRepository implements ExperimentRepository {
      * {@inheritDoc}
      */
     @Override
-    public void createApplication(Application.Name applicationName) {
+    public Statement createApplication(Application.Name applicationName) {
         throw new UnsupportedOperationException("Not supported ");
     }
 

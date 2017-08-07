@@ -3701,6 +3701,19 @@ public class TestBase extends ServiceTestBase {
     }
 
     /**
+     * Sends a GET request to retrieve all experiment tags for any application. The response must contain HTTP
+     * {@code HttpStatus.SC_OK}.
+     *
+     * @return an experiment
+     */
+    public String getExperimentTags() {
+        String uri = "applications/tags";
+        response = apiServerConnector.doGet(uri);
+        assertReturnCode(response, HttpStatus.SC_OK);
+        return response.jsonPath().prettify();
+    }
+
+    /**
      * Sends a POST request to receive statistics for an experiment. The response must contain {@link HttpStatus#SC_OK}.
      *
      * @param experiment the experiment
@@ -4652,5 +4665,18 @@ public class TestBase extends ServiceTestBase {
         offset = (offsetInMills >= 0 ? "+" : "-") + offset;
 
         return offset;
+    }
+    
+    /**
+     * This util method creates buckets to the experiment specified
+     *
+     * @param experiment - the experiment to which we want to assign the bucket
+     * @param numberOfBucketsPerExperiment - number of buckets per each experiment
+     */
+    public void createBucketsToExperiment(Experiment experiment, int numberOfBucketsPerExperiment) {
+ 
+        List<Bucket> bucketList = BucketFactory.createBuckets(experiment, numberOfBucketsPerExperiment);
+        postBuckets(bucketList);
+        
     }
 }
