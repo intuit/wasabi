@@ -26,7 +26,6 @@ import com.intuit.wasabi.repository.AssignmentsRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import org.slf4j.Logger;
 
-import java.util.Calendar;
 import java.util.Date;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -41,7 +40,6 @@ public class AssignmentCountEnvelope implements Runnable {
     private static final Logger LOGGER = getLogger(AssignmentCountEnvelope.class);
     private final EventLog eventLog;
     private AssignmentsRepository assignmentsRepository;
-    private AssignmentStats assignmentStats;
     private ExperimentRepository cassandraExperimentRepository;
     private ExperimentRepository dbExperimentRepository;
     private Experiment experiment;
@@ -70,7 +68,8 @@ public class AssignmentCountEnvelope implements Runnable {
                                    ExperimentRepository cassandraExperimentRepository,
                                    ExperimentRepository dbExperimentRepository,
                                    Experiment experiment, Assignment assignment, boolean countUp, EventLog eventLog,
-                                   Date date, final @Named("assign.user.to.export") Boolean assignUserToExport,
+                                   Date date,
+                                   final @Named("assign.user.to.export") Boolean assignUserToExport,
                                    final @Named("assign.bucket.count") Boolean assignBucketCount) {
         super();
 
@@ -91,7 +90,6 @@ public class AssignmentCountEnvelope implements Runnable {
         try {
             // Updates the bucket assignment counts
             if (assignBucketCount) {
-                assignmentStats.incrementCount(experiment, assignment);
                 assignmentsRepository.updateBucketAssignmentCount(experiment, assignment, countUp);
             }
         } catch (Exception e) {

@@ -1,6 +1,5 @@
 package com.intuit.wasabi.repository.cassandra.impl;
 
-
 import com.intuit.wasabi.assignmentobjects.Assignment;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Experiment;
@@ -14,7 +13,6 @@ import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
-
 
 public class AssignmentStatsTest {
     private AssignmentStats assignmentStats = new AssignmentStats();
@@ -50,11 +48,12 @@ public class AssignmentStatsTest {
         assignmentStats.incrementCount(experiment, assignment);
         count = assignmentStats.getCount(experiment, assignment.getBucketLabel(), 21);
         Assert.assertEquals(1, count);
-        System.out.println("Current time: " + (System.currentTimeMillis() - 3600 * 1000));
-        System.out.println("hour = " + assignmentStats.getHour((assignmentStats.getLastCompletedHour(System.currentTimeMillis()))));
-        System.out.println("minutes = " + assignmentStats.getMinutes((assignmentStats.getLastCompletedHour(System.currentTimeMillis()))));
     }
 
+    @Test
+    public void writeCounts() throws Exception {
+
+    }
 
     @Test
     public void getLastCompletedHour() throws Exception {
@@ -83,47 +82,11 @@ public class AssignmentStatsTest {
         assertEquals(05, assignmentStats.getHour(timeNowDate2));
     }
 
-}
-
-
-
-
-    /*
-
     @Test
     public void getDayString() throws Exception {
         DateFormat format = new SimpleDateFormat("MMMM dd, yyyy HH:mm:ss");
-        String timeNowString = "May 24, 2014 23:39:05";
-        Date timeNowDate = format.parse(timeNowString);
-        assertEquals("2014-05-24", AssignmentHourlyAggregatorTask.getDayString(timeNowDate));
+        String testDateString = "May 24, 2014 23:39:05";
+        Date testDate = format.parse(testDateString);
+        assertEquals("2014-05-24", assignmentStats.getDayString(testDate));
     }
-
-
-
-    @Test
-    public void getStartTime() throws Exception {
-        DateFormat format = new SimpleDateFormat("MMMM dd, yyyy HH:mm:ss");
-        String timeNowString = "November 11, 2011 05:06:07";
-        String expectedStartTimeString = "November 11, 2011 05:00:00";
-        Date timeNowDate = format.parse(timeNowString);
-        Date expectedStartTimeDate = format.parse(expectedStartTimeString);
-        assertEquals(expectedStartTimeDate, AssignmentHourlyAggregatorTask.getStartTime(timeNowDate));
-    }
-
-    @Test
-    public void getEndTime() throws Exception {
-        DateFormat format = new SimpleDateFormat("MMMM dd, yyyy HH:mm:ss");
-
-        String timeNowString = "November 11, 2011 05:06:07";
-        String expectedEndTimeString = "November 11, 2011 06:00:00";
-        Date timeNowDate = format.parse(timeNowString);
-        Date expectedEndTimeDate = format.parse(expectedEndTimeString);
-        assertEquals(expectedEndTimeDate, AssignmentHourlyAggregatorTask.getEndTime(timeNowDate));
-
-        String timeNowString2 = "November 08, 2016 11:52:12";
-        String expectedEndTimeString2 = "November 08, 2016 12:00:00";
-        Date timeNowDate2 = format.parse(timeNowString2);
-        Date expectedEndTimeDate2 = format.parse(expectedEndTimeString2);
-        assertEquals(expectedEndTimeDate2, AssignmentHourlyAggregatorTask.getEndTime(timeNowDate2));
-    }
-    */
+}
