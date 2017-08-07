@@ -477,9 +477,9 @@ public class AssignmentsImpl implements Assignments {
         //Prepopulate bucket assignment counts for rapid experiments in running state in asynchronous mode
         List<Experiment.ID> experimentIds =
                 appPriorities.getPrioritizedExperiments()
-                .stream()
-                .filter(experiment -> (null != experiment.getIsRapidExperiment() && experiment.getIsRapidExperiment())
-                        && experiment.getState().equals(Experiment.State.RUNNING))
+                        .stream()
+                        .filter(experiment -> (null != experiment.getIsRapidExperiment() && experiment.getIsRapidExperiment())
+                                && experiment.getState().equals(Experiment.State.RUNNING))
                         .map(experiment -> experiment.getID())
                         .collect(Collectors.toList());
 
@@ -621,7 +621,8 @@ public class AssignmentsImpl implements Assignments {
         if (currentTime > experiment.getEndTime().getTime()) {
             // the experiment moves to the PAUSED state if the endtime is reached
             experiment.setState(Experiment.State.PAUSED);
-            repository.updateExperiment(experiment);
+            experimentUtil.updateExperimentState(experiment, Experiment.State.PAUSED);
+            metadataCache.refresh();
             return nullAssignment(userID, applicationName, experimentID,
                     Assignment.Status.EXPERIMENT_PAUSED);
         }
@@ -693,7 +694,7 @@ public class AssignmentsImpl implements Assignments {
             int userCap = experiment.getUserCap();
             AssignmentCounts assignmentCounts = null;
             if (null != prefetchedAssignmentCounts) {
-                 assignmentCounts = prefetchedAssignmentCounts.get(experiment.getID());
+                assignmentCounts = prefetchedAssignmentCounts.get(experiment.getID());
             }
             if (null == assignmentCounts) {
                 assignmentCounts = assignmentsRepository.getBucketAssignmentCount(experiment);
