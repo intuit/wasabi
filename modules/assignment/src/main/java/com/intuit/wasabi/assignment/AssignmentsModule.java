@@ -194,7 +194,6 @@ public class AssignmentsModule extends AbstractModule {
         bind(Runnable.class)
                 .annotatedWith(named(ASSIGNMENTS_HOURLY_AGGREGATOR_TASK))
                 .to(AssignmentsHourlyAggregatorTask.class).in(SINGLETON);
-
     }
 
     private void bindAssignmentAndDecorator(final Properties properties) {

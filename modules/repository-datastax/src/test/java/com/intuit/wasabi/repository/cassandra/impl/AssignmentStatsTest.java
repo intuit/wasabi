@@ -19,40 +19,35 @@ public class AssignmentStatsTest {
 
     @Test
     public void incrementCount() throws Exception {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-M-yyyy hh:mm:ss");
-        String dateInString = "22-01-2015 10:20:56";
-        Date created = dateFormat.parse(dateInString);
-        Bucket.Label testBucket = Bucket.Label.valueOf("Maxwell");
-
+        DateFormat dayFormatter = new SimpleDateFormat("yyyy-MM-dd hh");
         Experiment experiment = mock(Experiment.class);
         Assignment assignment = mock(Assignment.class);
+
+        String dateInString = "2016-11-08 16";
+        Date created = dayFormatter.parse(dateInString);
+        Bucket.Label testBucket = Bucket.Label.valueOf("Maxwell");
         Mockito.when(assignment.getCreated()).thenReturn(created);
         Mockito.when(assignment.getBucketLabel()).thenReturn(testBucket);
         Mockito.when(experiment.getID()).thenReturn(Experiment.ID.newInstance());
 
         assignmentStats.incrementCount(experiment, assignment);
-        int count = assignmentStats.getCount(experiment, assignment.getBucketLabel(), 10);
+        int count = assignmentStats.getCount(experiment, assignment.getBucketLabel(), 16);
         Assert.assertEquals(1, count);
         assignmentStats.incrementCount(experiment, assignment);
-        count = assignmentStats.getCount(experiment, assignment.getBucketLabel(), 10);
+        count = assignmentStats.getCount(experiment, assignment.getBucketLabel(), 16);
         Assert.assertEquals(2, count);
         assignmentStats.incrementCount(experiment, assignment);
-        count = assignmentStats.getCount(experiment, assignment.getBucketLabel(), 10);
+        count = assignmentStats.getCount(experiment, assignment.getBucketLabel(), 16);
         Assert.assertEquals(3, count);
 
-        dateInString = "22-01-2015 21:20:56";
-        created = dateFormat.parse(dateInString);
+        dateInString = "2017-05-30 17";
+        created = dayFormatter.parse(dateInString);
         testBucket = Bucket.Label.valueOf("Bruckhaus");
         Mockito.when(assignment.getCreated()).thenReturn(created);
         Mockito.when(assignment.getBucketLabel()).thenReturn(testBucket);
         assignmentStats.incrementCount(experiment, assignment);
-        count = assignmentStats.getCount(experiment, assignment.getBucketLabel(), 21);
+        count = assignmentStats.getCount(experiment, assignment.getBucketLabel(), 17);
         Assert.assertEquals(1, count);
-    }
-
-    @Test
-    public void writeCounts() throws Exception {
-
     }
 
     @Test

@@ -11,16 +11,19 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static com.intuit.wasabi.repository.cassandra.impl.CassandraAssignmentsRepository.NULL_LABEL;
+
 
 public class AssignmentStats {
 
+    private static DateFormat dayFormatter = new SimpleDateFormat("yyyy-MM-dd");
     private static DateFormat hourFormatter = new SimpleDateFormat("HH");
     private static Map<Integer, Map<String, AtomicInteger>> hourlyCountMap;
     private static HourlyBucketCountAccessor hourlyBucketCountAccessor;
     private static final Object lock = new Object();
     private static final int UUID_LENGTH = 36;
 
-    AssignmentStats() {
+    public AssignmentStats() {
         hourlyCountMap = new ConcurrentHashMap<>();
         for (int hour = 0; hour <= 23; hour++) {
             hourlyCountMap.put(hour, new ConcurrentHashMap<>());
@@ -31,8 +34,9 @@ public class AssignmentStats {
         int assignmentHour = getHour(assignment.getCreated());
         Map<String, AtomicInteger> hourMap = hourlyCountMap.get(assignmentHour);
         Experiment.ID id = experiment.getID();
-        Bucket.Label bucketLabel = assignment.getBucketLabel();
-        AtomicInteger oldCount = hourMap.get(ExpBucket.getKey(id, bucketLabel)); // Equals method and hashcode method
+        Optional<Bucket.Label> labelOptional = Optional.ofNullable(assignment.getBucketLabel());
+        Bucket.Label bucketLabel = labelOptional.orElseGet(() -> NULL_LABEL);
+        AtomicInteger oldCount = hourMap.get(ExpBucket.getKey(id, bucketLabel));
         if (oldCount == null) {
             synchronized (lock) {
                 oldCount = hourMap.get(ExpBucket.getKey(id, bucketLabel));
@@ -58,14 +62,16 @@ public class AssignmentStats {
         Date completedHour = getLastCompletedHour(System.currentTimeMillis());
         int assignmentHour = getHour(completedHour);
         String day = getDayString(completedHour);
-
+        
         Iterator it = hourlyCountMap.get(assignmentHour).entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry pair = (Map.Entry)it.next();
             UUID experimentID = getExpUUID(pair);
             String bucketLabel = getBucketLabel(pair);
             int count = (int)pair.getValue();
-            hourlyBucketCountAccessor.incrementCountBy(experimentID, day, bucketLabel, assignmentHour, count);
+            for (int i = 0; i < count; i++){
+                hourlyBucketCountAccessor.incrementCountBy(experimentID, day, bucketLabel, assignmentHour);
+            }
             System.out.println(pair.getKey() + " = " + pair.getValue());
             it.remove(); // avoids a ConcurrentModificationException
         }
@@ -81,7 +87,6 @@ public class AssignmentStats {
     }
 
     public String getDayString(Date completedHour) {
-        DateFormat dayFormatter = new SimpleDateFormat("yyyy-MM-dd");
         return dayFormatter.format(completedHour);
     }
 
