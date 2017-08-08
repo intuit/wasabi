@@ -515,10 +515,8 @@ public class AssignmentsImpl implements Assignments {
                     }
 
                     // Add the assignment to the global list of userAssignments of the user
-                    if (Experiment.State.PAUSED != experiment.getState()) { // the Experiment is set to PAUSED in the case of a reached endDate
-                        userAssignments.put(experiment.getID(), experiment.getLabel(),
-                                assignment.getBucketLabel() != null ? assignment.getBucketLabel().toString() : "null");
-                    }
+                    userAssignments.put(experiment.getID(), experiment.getLabel(),
+                            assignment.getBucketLabel() != null ? assignment.getBucketLabel().toString() : "null");
 
                     assignmentPairs.add(new ImmutablePair<>(experimentMap.get(experiment.getID()), assignment));
 
