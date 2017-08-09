@@ -866,11 +866,17 @@ public class AssignmentsImpl implements Assignments {
         Experiment result = null;
 
         if (metadataCacheEnabled) {
-            List<Experiment> experiments = metadataCache.getExperimentsByAppName(applicationName);
-            for (Experiment exp : experiments) {
-                if (experimentLabel.equals(exp.getLabel())) {
-                    result = exp;
-                    break;
+            //First fetch experiment list sorted by priorities (contains non-deleted experiment-ids).
+            //This experiment-priority list is the source of truth for ALL assignment flows while looking up experiment...
+            Optional<PrioritizedExperimentList> prioritizedExperimentListOptional = metadataCache.getPrioritizedExperimentListMap(applicationName);
+            if (prioritizedExperimentListOptional.isPresent()) {
+                //Iterate as per experiment priority and look for the matching experiment by their label
+                for (PrioritizedExperiment prioritizedExperiment : prioritizedExperimentListOptional.get().getPrioritizedExperiments()) {
+                    if (experimentLabel.equals(prioritizedExperiment.getLabel())) {
+                        //Upon match, get the complete experiment object from cache
+                        result = metadataCache.getExperimentById(prioritizedExperiment.getID()).orElse(null);
+                        break;
+                    }
                 }
             }
         } else {
