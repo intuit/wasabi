@@ -323,6 +323,7 @@ public class AssignmentsImplTest {
         when(experiment.getID()).thenReturn(id);
         when(experiment.getEndTime().getTime()).thenReturn(1000000L);
         when(experiment.getLabel()).thenReturn(label);
+        when(experiment.getState()).thenReturn(Experiment.State.RUNNING);
 
         List<Experiment> expList = newArrayList(experiment);
 
@@ -347,7 +348,7 @@ public class AssignmentsImplTest {
 
         //Verify result
         assertThat(result.getStatus(), is(Assignment.Status.EXPERIMENT_PAUSED));
-        verify(experiment).setState(Experiment.State.PAUSED);
+        verify(experimentUtil).updateExperimentState(experiment, Experiment.State.PAUSED);
     }
 
     @Test
@@ -1732,7 +1733,6 @@ public class AssignmentsImplTest {
         //Verify expected result
         assertNull(returnedExperiment);
     }
-
 
 
     // FIXME:

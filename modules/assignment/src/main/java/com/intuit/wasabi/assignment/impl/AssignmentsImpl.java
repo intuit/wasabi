@@ -616,16 +616,26 @@ public class AssignmentsImpl implements Assignments {
                     Assignment.Status.EXPERIMENT_NOT_STARTED);
         }
 
+        Assignment assignment = getAssignment(experimentID, userID, context, userAssignments, bucketList);
+
+        // Case: Experiment expires -> existing Assignments are returned and new Assignments
+        // are returned as null assignments
         if (currentTime > experiment.getEndTime().getTime()) {
-            // the experiment moves to the PAUSED state if the endtime is reached
-            experiment.setState(Experiment.State.PAUSED);
-            experimentUtil.updateExperimentState(experiment, Experiment.State.PAUSED);
-            metadataCache.refresh();
-            return nullAssignment(userID, applicationName, experimentID,
-                    Assignment.Status.EXPERIMENT_PAUSED);
+
+            // the experiment moves to the PAUSED state if it was RUNNING before
+            if (Experiment.State.RUNNING == experiment.getState()) {
+                experimentUtil.updateExperimentState(experiment, Experiment.State.PAUSED);
+                metadataCache.refresh();
+            }
+
+            if (assignment != null && Assignment.Status.EXISTING_ASSIGNMENT == assignment.getStatus()) {
+                return assignment;
+            } else {
+                return nullAssignment(userID, applicationName, experimentID,
+                        Assignment.Status.EXPERIMENT_PAUSED);
+            }
         }
 
-        Assignment assignment = getAssignment(experimentID, userID, context, userAssignments, bucketList);
         if (assignment == null || assignment.isBucketEmpty()) {
             if (createAssignment) {
                 if (experiment.getState() == Experiment.State.PAUSED ||

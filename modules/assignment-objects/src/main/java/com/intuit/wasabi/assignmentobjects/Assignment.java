@@ -285,7 +285,8 @@ public class Assignment {
         EXPERIMENT_PAUSED(false),
         NO_PROFILE_MATCH(false),
         // EXPERIMENT_EXPIRED is no longer used since the experiment is moved to PAUSED upon expiring.
-        // The status is kept for the historical data.
+        // The status is kept for the historical data in the downstream systems, but is not needed
+        // by Wasabi's application storage (Cassandra & Mysql)
         EXPERIMENT_EXPIRED(false),
         ASSIGNMENT_FAILED(false),
 
