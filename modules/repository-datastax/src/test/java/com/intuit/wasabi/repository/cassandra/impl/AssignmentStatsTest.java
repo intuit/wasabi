@@ -52,16 +52,10 @@ public class AssignmentStatsTest {
 
     @Test
     public void getLastCompletedHour() throws Exception {
-        DateFormat format = new SimpleDateFormat("MMMM dd, yyyy HH:mm:ss");
-        String timeNowString = "May 24, 2014 23:39:05";
-        String oneHourAgoString = "May 24, 2014 22:39:05";
-        Date timeNowDate = format.parse(timeNowString);
-        Date oneHourAgoDate = format.parse(oneHourAgoString);
         long timeNowMillis = 1400999945000L;
-        Date timeNowMillisDate = new Date(timeNowMillis);
-
-        assertEquals(timeNowMillisDate, timeNowDate);
-        Assert.assertEquals(oneHourAgoDate, assignmentStats.getLastCompletedHour(timeNowMillis));
+        long timeOneHourAgoMillis = 1400999945000L - 3600000;
+        Date timeOneHourAgoMillisDate = new Date(timeOneHourAgoMillis);
+        Assert.assertEquals(timeOneHourAgoMillisDate, assignmentStats.getLastCompletedHour(timeNowMillis));
     }
 
     @Test
