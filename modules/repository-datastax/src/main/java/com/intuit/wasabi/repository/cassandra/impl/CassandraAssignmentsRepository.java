@@ -55,6 +55,7 @@ import com.intuit.wasabi.repository.cassandra.accessor.count.HourlyBucketCountAc
 import com.intuit.wasabi.repository.cassandra.accessor.export.UserAssignmentExportAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentUserIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.PageExperimentIndexAccessor;
+import com.intuit.wasabi.repository.cassandra.pojo.count.HourlyBucketCount;
 import com.intuit.wasabi.repository.cassandra.pojo.export.UserAssignmentExport;
 import com.intuit.wasabi.repository.cassandra.pojo.index.ExperimentUserByUserIdContextAppNameExperimentId;
 import org.apache.cassandra.utils.UUIDGen;
@@ -94,12 +95,12 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
     private final EventLog eventLog;
     private final MappingManager mappingManager;
     private final boolean assignUserToExport;
-    private final AssignmentStats assignmentStats;
     private final boolean assignBucketCount;
     private final String defaultTimeFormat;
 
     final ThreadPoolExecutor assignmentsCountExecutor;
 
+    private AssignmentStats assignmentStats;
     private ExperimentAccessor experimentAccessor;
     private ExperimentUserIndexAccessor experimentUserIndexAccessor;
 

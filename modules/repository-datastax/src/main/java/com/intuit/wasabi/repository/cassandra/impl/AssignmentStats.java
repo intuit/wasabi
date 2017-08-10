@@ -16,10 +16,10 @@ import static com.intuit.wasabi.repository.cassandra.impl.CassandraAssignmentsRe
 
 public class AssignmentStats {
 
+    private static HourlyBucketCountAccessor hourlyBucketCountAccessor;
     private static DateFormat dayFormatter = new SimpleDateFormat("yyyy-MM-dd");
     private static DateFormat hourFormatter = new SimpleDateFormat("HH");
     private static Map<Integer, Map<String, AtomicInteger>> hourlyCountMap;
-    private static HourlyBucketCountAccessor hourlyBucketCountAccessor;
     private static final Object lock = new Object();
     private static final int UUID_LENGTH = 36;
 
@@ -58,7 +58,6 @@ public class AssignmentStats {
     }
 
     public void writeCounts() {
-        // TODO: Use UTC time
         Date completedHour = getLastCompletedHour(System.currentTimeMillis());
         int assignmentHour = getHour(completedHour);
         String day = getDayString(completedHour);

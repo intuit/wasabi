@@ -11,10 +11,8 @@ public class AssignmentsHourlyAggregatorTask implements Runnable {
     private AssignmentStats assignmentStats;
 
     @Inject
-    public AssignmentsHourlyAggregatorTask(AssignmentStats assignmentStats,
-                                           CassandraAssignmentsRepository cassandraAssignmentsRepository){
+    public AssignmentsHourlyAggregatorTask(AssignmentStats assignmentStats){
         // TODO: Figure out how to pass the correct AssignmentStats instance from CassandraAssignmentsRepository
-        // this.assignmentStats = cassandraAssignmentsRepository.assignmentStats;
         this.assignmentStats = assignmentStats;
     }
 
