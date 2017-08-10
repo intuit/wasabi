@@ -117,6 +117,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
 
     final ThreadPoolExecutor assignmentsCountExecutor;
 
+    private AssignmentStats assignmentStats;
     private ExperimentAccessor experimentAccessor;
     private ExperimentUserIndexAccessor experimentUserIndexAccessor;
 
@@ -154,6 +155,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
             final @Named("assign.bucket.count") boolean assignBucketCount,
             final @Named("default.time.format") String defaultTimeFormat) {
 
+        this.assignmentStats = new AssignmentStats();
         this.experimentRepository = experimentRepository;
         this.dbRepository = dbRepository;
         this.eventLog = eventLog;
@@ -482,9 +484,12 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
      */
     private void incrementCounts(List<Pair<Experiment, Assignment>> assignments, Date date) {
         boolean countUp = true;
-        assignments.forEach(pair -> assignmentsCountExecutor.execute(new AssignmentCountEnvelope(
-                this, experimentRepository, dbRepository, pair.getLeft(),
-                pair.getRight(), countUp, eventLog, date, assignUserToExport, assignBucketCount)));
+        assignments.forEach(pair -> {
+            assignmentsCountExecutor.execute(new AssignmentCountEnvelope(this, experimentRepository,
+                    dbRepository, pair.getLeft(), pair.getRight(), countUp, eventLog, date,
+                    assignUserToExport, assignBucketCount));
+            assignmentStats.incrementCount(pair.getLeft(), pair.getRight());
+        });
         LOGGER.debug("Finished assignmentsCountExecutor");
     }
 
@@ -741,9 +746,9 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         experimentIds.forEach(experimentId -> experimentToBucketAssignmentFutures.put(experimentId,
                 bucketAssignmentCountAccessor.selectByAsync(experimentId.getRawID())));
         experimentIds.forEach(experimentId ->
-            experimentToAssignmentCounts.put(experimentId,
-                    getBucketAssignmentCountFromCassandraResult(experimentId,
-                            UninterruptibleUtil.getUninterruptibly(experimentToBucketAssignmentFutures.get(experimentId)))));
+                experimentToAssignmentCounts.put(experimentId,
+                        getBucketAssignmentCountFromCassandraResult(experimentId,
+                                UninterruptibleUtil.getUninterruptibly(experimentToBucketAssignmentFutures.get(experimentId)))));
         return experimentToAssignmentCounts;
     }
 

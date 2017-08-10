@@ -26,6 +26,7 @@ import com.intuit.wasabi.assignment.cache.impl.AssignmentMetadataCacheTimeServic
 import com.intuit.wasabi.assignment.cache.impl.AssignmentsMetadataCacheHealthCheck;
 import com.intuit.wasabi.assignment.cache.impl.AssignmentsMetadataCacheImpl;
 import com.intuit.wasabi.assignment.cache.impl.AssignmentsMetadataCacheRefreshTask;
+import com.intuit.wasabi.assignment.countAggregation.impl.AssignmentsHourlyAggregatorTask;
 import com.intuit.wasabi.assignment.cache.impl.NoopAssignmentsMetadataCacheImpl;
 import com.intuit.wasabi.assignmentobjects.AssignmentEnvelopePayload;
 import com.intuit.wasabi.exceptions.AssignmentException;
@@ -59,6 +60,9 @@ import static com.intuit.wasabi.assignment.AssignmentsAnnotations.ASSIGNMENTS_ME
 import static com.intuit.wasabi.assignment.AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_REFRESH_TASK;
 import static com.intuit.wasabi.assignment.AssignmentsAnnotations.ASSIGNMENT_DECORATOR_SERVICE;
 import static com.intuit.wasabi.assignment.AssignmentsAnnotations.RULECACHE_THREADPOOL;
+import static com.intuit.wasabi.assignment.AssignmentsAnnotations.ASSIGNMENTS_HOURLY_AGGREGATOR_SERVICE;
+import static com.intuit.wasabi.assignment.AssignmentsAnnotations.ASSIGNMENTS_AGGREGATOR_INTERVAL;
+import static com.intuit.wasabi.assignment.AssignmentsAnnotations.ASSIGNMENTS_HOURLY_AGGREGATOR_TASK;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Integer.parseInt;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -88,6 +92,7 @@ public class AssignmentsModule extends AbstractModule {
         bindAssignmentAndDecorator(properties);
         bindRuleCacheThreadPool(properties);
         bindMetadataCache(properties);
+        bindAssignmentsHourlyAggregation();
 
         String databaseAssignmentClassName = getProperty("export.rest.assignment.db.class.name", properties,
                 "com.intuit.wasabi.assignment.impl.NoopDatabaseAssignmentEnvelope");
@@ -173,6 +178,30 @@ public class AssignmentsModule extends AbstractModule {
             //Bind cache instance to NOOP Instance if cache is disabled.
             bind(AssignmentsMetadataCache.class).to(NoopAssignmentsMetadataCacheImpl.class).in(SINGLETON);
         }
+    }
+
+    private void bindAssignmentsHourlyAggregation() {
+        //This is the assignment aggregation interval.
+        Integer assignmentAggregationIntervalInMinutes = 60;
+
+        //Create Scheduled Executor Service
+        ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("AssignmentHourlyAggregatorTask-%d").setDaemon(true).build();
+        ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1, threadFactory);
+
+        //Bind Scheduled Executor Service
+        bind(ScheduledExecutorService.class)
+                .annotatedWith(named(ASSIGNMENTS_HOURLY_AGGREGATOR_SERVICE))
+                .toInstance(scheduledExecutorService);
+
+        //Bind refresh interval
+        bind(Integer.class)
+                .annotatedWith(named(ASSIGNMENTS_AGGREGATOR_INTERVAL))
+                .toInstance(assignmentAggregationIntervalInMinutes);
+
+        //Bind hourly assignment aggregator task
+        bind(Runnable.class)
+                .annotatedWith(named(ASSIGNMENTS_HOURLY_AGGREGATOR_TASK))
+                .to(AssignmentsHourlyAggregatorTask.class).in(SINGLETON);
     }
 
     private void bindAssignmentAndDecorator(final Properties properties) {
