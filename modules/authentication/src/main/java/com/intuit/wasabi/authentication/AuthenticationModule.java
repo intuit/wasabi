@@ -16,6 +16,7 @@
 package com.intuit.wasabi.authentication;
 
 import com.google.inject.AbstractModule;
+import com.intuit.wasabi.authentication.impl.NoOpAuthenticateByHttpRequestImpl;
 import com.intuit.wasabi.exceptions.AuthenticationException;
 import org.slf4j.Logger;
 
@@ -62,6 +63,7 @@ public class AuthenticationModule extends AbstractModule {
             Class<Authentication> authImplClass = (Class<Authentication>) forName(authenticationClassName);
 
             bind(Authentication.class).to(authImplClass).in(SINGLETON);
+            bind(AuthenticateByHttpRequest.class).to(NoOpAuthenticateByHttpRequestImpl.class).asEagerSingleton();
         } catch (ClassNotFoundException e) {
             LOGGER.error("unable to find class: {}", authenticationClassName, e);
 
