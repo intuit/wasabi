@@ -68,8 +68,7 @@ public class AssignmentCountEnvelope implements Runnable {
                                    ExperimentRepository cassandraExperimentRepository,
                                    ExperimentRepository dbExperimentRepository,
                                    Experiment experiment, Assignment assignment, boolean countUp, EventLog eventLog,
-                                   Date date,
-                                   final @Named("assign.user.to.export") Boolean assignUserToExport,
+                                   Date date, final @Named("assign.user.to.export") Boolean assignUserToExport,
                                    final @Named("assign.bucket.count") Boolean assignBucketCount) {
         super();
 

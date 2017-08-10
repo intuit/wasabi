@@ -746,9 +746,9 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         experimentIds.forEach(experimentId -> experimentToBucketAssignmentFutures.put(experimentId,
                 bucketAssignmentCountAccessor.selectByAsync(experimentId.getRawID())));
         experimentIds.forEach(experimentId ->
-                experimentToAssignmentCounts.put(experimentId,
-                        getBucketAssignmentCountFromCassandraResult(experimentId,
-                                UninterruptibleUtil.getUninterruptibly(experimentToBucketAssignmentFutures.get(experimentId)))));
+            experimentToAssignmentCounts.put(experimentId,
+                    getBucketAssignmentCountFromCassandraResult(experimentId,
+                            UninterruptibleUtil.getUninterruptibly(experimentToBucketAssignmentFutures.get(experimentId)))));
         return experimentToAssignmentCounts;
     }
 
