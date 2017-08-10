@@ -51,6 +51,7 @@ import static com.google.common.base.Optional.fromNullable;
 import static com.google.inject.Scopes.SINGLETON;
 import static com.google.inject.name.Names.named;
 import static com.intuit.autumn.utils.PropertyFactory.create;
+import static com.intuit.autumn.utils.PropertyFactory.getProperty;
 import static com.intuit.wasabi.assignment.AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_ALLOWED_STALE_TIME;
 import static com.intuit.wasabi.assignment.AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_ENABLED;
 import static com.intuit.wasabi.assignment.AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_HEALTH_CHECK;
