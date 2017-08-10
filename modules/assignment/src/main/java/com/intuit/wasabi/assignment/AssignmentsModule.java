@@ -60,6 +60,7 @@ import static com.intuit.wasabi.assignment.AssignmentsAnnotations.ASSIGNMENTS_ME
 import static com.intuit.wasabi.assignment.AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_REFRESH_TASK;
 import static com.intuit.wasabi.assignment.AssignmentsAnnotations.ASSIGNMENT_DECORATOR_SERVICE;
 import static com.intuit.wasabi.assignment.AssignmentsAnnotations.RULECACHE_THREADPOOL;
+import static com.intuit.wasabi.assignment.AssignmentsAnnotations.ASSIGNMENTS_HOURLY_AGGREGATOR_SERVICE;
 import static com.intuit.wasabi.assignment.AssignmentsAnnotations.ASSIGNMENTS_AGGREGATOR_INTERVAL;
 import static com.intuit.wasabi.assignment.AssignmentsAnnotations.ASSIGNMENTS_HOURLY_AGGREGATOR_TASK;
 import static java.lang.Boolean.FALSE;
