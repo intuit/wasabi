@@ -138,8 +138,13 @@ angular.module('wasabi', [
     /*
      * Inject authentication token in each API request
      */
-    .config(['$httpProvider', function ($httpProvider) {
+    .config(['$httpProvider', 'authnType', function ($httpProvider, authnType) {
         $httpProvider.interceptors.push('HttpInterceptor');
+
+        if (authnType === 'sso') {
+            // Needed to use authentication using cookies correctly.
+            $httpProvider.defaults.withCredentials = true;
+        }
 
         // Set up to use CORS to make things work cross-domain for the login calls.
         $httpProvider.defaults.useXDomain = true;
