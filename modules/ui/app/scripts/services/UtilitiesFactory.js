@@ -7,8 +7,8 @@
 // page success message before the first one has faded out.
 var globalPageSuccessMessageFadeOutTimer = null;
 
-angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$state', 'AuthFactory', '$rootScope', 'AUTH_EVENTS', 'PERMISSIONS', 'USER_ROLES', '$filter', 'AuthzFactory', 'BucketsFactory', 'DialogsFactory', 'ExperimentsFactory', 'WasabiFactory', '$uibModal', '$injector', 'FavoritesFactory', 'StateFactory', 'AllTagsFactory', 'usSpinnerService',
-    function (Session, $state, AuthFactory, $rootScope, AUTH_EVENTS, PERMISSIONS, USER_ROLES, $filter, AuthzFactory, BucketsFactory, DialogsFactory, ExperimentsFactory, WasabiFactory, $uibModal, $injector, FavoritesFactory, StateFactory, AllTagsFactory, usSpinnerService) {
+angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$state', 'authnType', 'AuthFactory', '$rootScope', 'AUTH_EVENTS', 'PERMISSIONS', 'USER_ROLES', '$filter', 'AuthzFactory', 'BucketsFactory', 'DialogsFactory', 'ExperimentsFactory', 'WasabiFactory', '$uibModal', '$injector', 'FavoritesFactory', 'StateFactory', 'AllTagsFactory', 'usSpinnerService',
+    function (Session, $state, authnType, AuthFactory, $rootScope, AUTH_EVENTS, PERMISSIONS, USER_ROLES, $filter, AuthzFactory, BucketsFactory, DialogsFactory, ExperimentsFactory, WasabiFactory, $uibModal, $injector, FavoritesFactory, StateFactory, AllTagsFactory, usSpinnerService) {
         return {
             // generate state image url
             stateImgUrl: function (state) {
@@ -236,21 +236,23 @@ angular.module('wasabi.services').factory('UtilitiesFactory', ['Session', '$stat
             },
 
             failIfTokenExpired: function(modalInstance) {
-                AuthFactory.verifyToken().$promise.then(function(/*result*/) {
-                    // If it worked, we don't need to do anything.
-                }, function(/*reason*/) {
-                    // If it failed, assume the ticket has expired.  We need to
-                    // close the modal dialog, if modalInstance was passed.
-                    if (modalInstance) {
-                        modalInstance.close();
-                    }
-                    // Broadcast that we have detected an expired ticket.  One use of this is it is
-                    // listened to by a modal dialog that will close itself when it receives this.
-                    $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
-                    // Finally, get rid of the session and show the Sign In page.
-                    Session.destroy();
-                    $state.go('signin');
-                });
+                if (authnType !== 'sso') {
+                    AuthFactory.verifyToken().$promise.then(function(/*result*/) {
+                        // If it worked, we don't need to do anything.
+                    }, function(/*reason*/) {
+                        // If it failed, assume the ticket has expired.  We need to
+                        // close the modal dialog, if modalInstance was passed.
+                        if (modalInstance) {
+                            modalInstance.close();
+                        }
+                        // Broadcast that we have detected an expired ticket.  One use of this is it is
+                        // listened to by a modal dialog that will close itself when it receives this.
+                        $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
+                        // Finally, get rid of the session and show the Sign In page.
+                        Session.destroy();
+                        $state.go('signin');
+                    });
+                }
             },
 
             trackEvent: function(eventName, parm1, parm2, parm3, parm4) {

@@ -239,7 +239,9 @@ angular.module('wasabi', [
             };
 
             $rootScope.keepAlive = function() {
-                AuthFactory.verifyToken();
+                if (ConfigFactory.authnType !== 'sso') {
+                    AuthFactory.verifyToken();
+                }
             };
 
             // work around for wired floating point behavior
