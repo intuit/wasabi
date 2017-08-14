@@ -18,7 +18,8 @@ public class AssignmentStatsTest {
     private AssignmentStats assignmentStats = new AssignmentStats();
 
     @Test
-    public void incrementCount() throws Exception {
+    public void incrementCountTest() throws Exception {
+        // Checks whether hourlyCountMap accurately increments counts each time incrementCount is called
         DateFormat dayFormatter = new SimpleDateFormat("yyyy-MM-dd hh");
         Experiment experiment = mock(Experiment.class);
         Assignment assignment = mock(Assignment.class);
@@ -51,31 +52,35 @@ public class AssignmentStatsTest {
     }
 
     @Test
-    public void getLastCompletedHour() throws Exception {
-        long timeNowMillis = 1400999945000L;
-        long timeOneHourAgoMillis = 1400999945000L - 3600000;
+    public void getLastCompletedHourTest() throws Exception {
+        // Checks correct date and time logic for determining the last completed hour
+        long time = 1400999945000L;
+        int hourInMillis = 3600000;
+        long timeOneHourAgoMillis = time - hourInMillis;
         Date timeOneHourAgoMillisDate = new Date(timeOneHourAgoMillis);
-        Assert.assertEquals(timeOneHourAgoMillisDate, assignmentStats.getLastCompletedHour(timeNowMillis));
+        Assert.assertEquals(timeOneHourAgoMillisDate, AssignmentStatsUtil.getLastCompletedHour(time));
     }
 
     @Test
-    public void getHour() throws Exception {
+    public void getHourTest() throws Exception {
+        // Checks whether getHour returns only the hour from a given date correctly
         DateFormat format = new SimpleDateFormat("MMMM dd, yyyy HH:mm:ss");
 
         String timeNowString = "May 24, 2014 23:39:05";
         Date timeNowDate = format.parse(timeNowString);
-        assertEquals(23, assignmentStats.getHour(timeNowDate));
+        assertEquals(23, AssignmentStatsUtil.getHour(timeNowDate));
 
         String timeNowString2 = "June 17, 2017 05:10:26";
         Date timeNowDate2 = format.parse(timeNowString2);
-        assertEquals(05, assignmentStats.getHour(timeNowDate2));
+        assertEquals(05, AssignmentStatsUtil.getHour(timeNowDate2));
     }
 
     @Test
-    public void getDayString() throws Exception {
+    public void getDayStringTest() throws Exception {
+        // Checks if getDayString returns date in correct format: yyyy-MM-dd
         DateFormat format = new SimpleDateFormat("MMMM dd, yyyy HH:mm:ss");
         String testDateString = "May 24, 2014 23:39:05";
         Date testDate = format.parse(testDateString);
-        assertEquals("2014-05-24", assignmentStats.getDayString(testDate));
+        assertEquals("2014-05-24", AssignmentStatsUtil.getDayString(testDate));
     }
 }
