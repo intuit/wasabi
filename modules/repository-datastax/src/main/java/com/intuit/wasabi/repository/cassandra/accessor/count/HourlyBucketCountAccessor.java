@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2016 Intuit
+ * Copyright 2017 Intuit
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,12 +32,7 @@ public interface HourlyBucketCountAccessor {
             "WHERE experiment_id = ? and day = ? and bucket_label = ? and event_time_hour = ? ")
     ResultSet incrementCountBy(UUID experimentId, String day, String bucketLabel, int eventTimeHour);
 
-    @Query("UPDATE hourly_bucket_counts SET hourly_bucket_count = hourly_bucket_count - 1 " +
-            "WHERE experiment_id = ? and day = ? and bucket_label = ? and event_time_hour = ? ")
-    ResultSet decrementCountBy(UUID experimentId, String day, String bucketLabel, int eventTimeHour);
-
-    @Query("SELECT * FROM hourly_bucket_counts WHERE experiment_id = ?")
-    Result<HourlyBucketCount> selectBy(UUID experimentId);
-
+    @Query("SELECT * FROM hourly_bucket_counts WHERE experiment_id = ? and day = ? ")
+    Result<HourlyBucketCount> selectBy(UUID experimentId, String day);
 }
 

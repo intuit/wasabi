@@ -25,10 +25,6 @@ public interface AssignmentsAnnotations {
     String ASSIGNMENTS_METADATA_CACHE_REFRESH_INTERVAL = "AssignmentsMetadataCacheRefreshInterval";
     String ASSIGNMENTS_METADATA_CACHE_REFRESH_TASK = "AssignmentsMetadataCacheRefreshTask";
 
-    String ASSIGNMENTS_HOURLY_AGGREGATOR_SERVICE = "AssignmentsHourlyAggregatorService";
-    String ASSIGNMENTS_AGGREGATOR_INTERVAL = "AssignmentsAggregatorInterval";
-    String ASSIGNMENTS_HOURLY_AGGREGATOR_TASK = "AssignmentHourlyAggregatorTask";
-
     String ASSIGNMENT_DECORATOR_SERVICE = "assignment.decorator.service";
 
     String RULECACHE_THREADPOOL = "ruleCache.threadPool";
