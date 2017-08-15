@@ -618,21 +618,20 @@ public class AssignmentsImpl implements Assignments {
 
         Assignment assignment = getAssignment(experimentID, userID, context, userAssignments, bucketList);
 
-        // Case: Experiment expires -> existing Assignments are returned and new Assignments
-        // are returned as null assignments
         if (currentTime > experiment.getEndTime().getTime()) {
-
             // the experiment moves to the PAUSED state if it was RUNNING before
-            if (Experiment.State.RUNNING == experiment.getState()) {
-                experimentUtil.updateExperimentState(experiment, Experiment.State.PAUSED);
-                metadataCache.refresh();
-            }
-
-            if (assignment != null && Assignment.Status.EXISTING_ASSIGNMENT == assignment.getStatus()) {
-                return assignment;
-            } else {
-                return nullAssignment(userID, applicationName, experimentID,
-                        Assignment.Status.EXPERIMENT_PAUSED);
+            if (Experiment.State.RUNNING.equals(experiment.getState())) {
+                // check if the information matches the one from the database
+                Experiment experimentInfoFromDB = experimentUtil.getExperiment(experiment.getID());
+                if (Experiment.State.RUNNING.equals(experimentInfoFromDB.getState())) {
+                    experimentUtil.updateExperimentState(experiment, Experiment.State.PAUSED);
+                    metadataCache.refresh();
+                    // update the object such that later checks return the right state
+                    experiment.setState(Experiment.State.PAUSED);
+                } else {
+                    // if they are not matching the database state is the new ground truth
+                    experiment.setState(experimentInfoFromDB.getState());
+                }
             }
         }
 

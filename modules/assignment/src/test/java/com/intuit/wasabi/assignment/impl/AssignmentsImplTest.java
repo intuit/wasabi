@@ -319,11 +319,9 @@ public class AssignmentsImplTest {
         HttpHeaders headers = mock(HttpHeaders.class);
 
         //Mock dependent interactions
-        Experiment experiment = mock(Experiment.class, RETURNS_DEEP_STUBS);
-        when(experiment.getID()).thenReturn(id);
-        when(experiment.getEndTime().getTime()).thenReturn(1000000L);
-        when(experiment.getLabel()).thenReturn(label);
-        when(experiment.getState()).thenReturn(Experiment.State.RUNNING);
+        Experiment experiment = Experiment.withID(id).withLabel(label)
+                .withState(Experiment.State.RUNNING).withStartTime(new Date(10000L))
+                .withEndTime(new Date(1000000L)).build();
 
         List<Experiment> expList = newArrayList(experiment);
 
@@ -342,6 +340,7 @@ public class AssignmentsImplTest {
         when(metadataCache.getPrioritizedExperimentListMap(appName)).thenReturn(prioritizedExperimentListOptional);
         when(metadataCache.getBucketList(id)).thenReturn(bucketList);
         when(metadataCache.getExclusionList(id)).thenReturn(exclusionList);
+        when(experimentUtil.getExperiment(id)).thenReturn(experiment);
 
         //This is actual call
         Assignment result = assignmentsImpl.doSingleAssignment(user, appName, label, context, true, true, segmentationProfile, headers);
