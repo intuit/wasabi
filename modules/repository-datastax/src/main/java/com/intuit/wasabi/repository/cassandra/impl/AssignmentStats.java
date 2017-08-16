@@ -102,9 +102,8 @@ public class AssignmentStats {
         for (String key : hourlyCountMap.get(assignmentHour).keySet()){
             String experimentID = key.substring(0, UUID_LENGTH);
             String bucketLabel = key.substring(UUID_LENGTH);
-            String insideKey = experimentID + bucketLabel;
             UUID experimentUUID = UUID.fromString(experimentID);
-            int count = hourlyCountMap.get(assignmentHour).get(insideKey).get();
+            int count = hourlyCountMap.get(assignmentHour).get(key).get();
             for (int i = 0; i < count; i++){
                 hourlyBucketCountAccessor.incrementCountBy(experimentUUID, day, bucketLabel, assignmentHour);
             }

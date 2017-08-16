@@ -16,8 +16,8 @@ class ExpBucket {
 
     public String getKey(){
         // TODO: Instead of concatenating two strings, redefine hashcode and equals methods.
-        // This ensures that two different objects with same experiment ID and bucket label compare as equal.
         // Then, use expBucket objects as keys in the AssignmentStats hourlyCountMap.
+        // The current method works but this may improve performance.
         return expID.toString() + bucket.toString();
     }
 }
