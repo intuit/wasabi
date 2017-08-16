@@ -171,7 +171,7 @@ public class CassandraRepositoryModule extends AbstractModule {
         //Bind Scheduled Executor Service
         bind(ScheduledExecutorService.class).annotatedWith(named(ASSIGNMENTS_HOURLY_AGGREGATOR_SERVICE)).to(AssignmentCountScheduledExecutorService.class).in(Singleton.class);
         //This is the assignment aggregation interval.
-        Integer assignmentAggregationIntervalInMinutes = 2;
+        Integer assignmentAggregationIntervalInMinutes = parseInt(getProperty("bucket.count.aggregation.interval", properties, "60"));
         //Bind refresh interval
         bind(Integer.class)
                 .annotatedWith(named(ASSIGNMENTS_AGGREGATOR_INTERVAL))

@@ -18,14 +18,10 @@ package com.intuit.wasabi.repository.cassandra.impl;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Map;
-import java.util.UUID;
 
 class AssignmentStatsUtil {
-
     private static DateFormat dayFormatter = new SimpleDateFormat("yyyy-MM-dd");
     private static DateFormat hourFormatter = new SimpleDateFormat("HH");
-    private static final int UUID_LENGTH = 36;
 
     /**
      * Helper method takes a time and returns a Date object which is an hour before the input time
@@ -56,28 +52,5 @@ class AssignmentStatsUtil {
      */
     static String getDayString(Date date) {
         return dayFormatter.format(date);
-    }
-
-    /**
-     * Helper method extracts the experiment UUID from an experiment, assignment pair
-     *
-     * @param pair contains a String consisting of concatenated experiment id and bucket label
-     * @return UUID of an experiment
-     */
-    static UUID getExpUUID(Map.Entry pair){
-        if (pair == null) return null;
-        String expIDString = pair.getKey().toString().substring(0, UUID_LENGTH);
-        return UUID.fromString(expIDString);
-    }
-
-    /**
-     * Helper method returns the bucket label from an experiment
-     *
-     * @param pair contains a String consisting of concatenated experiment id and bucket label
-     * @return bucket label for this pair
-     */
-    static String getBucketLabel(Map.Entry pair){
-        if (pair == null) return null;
-        return pair.getKey().toString().substring(UUID_LENGTH);
     }
 }

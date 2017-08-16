@@ -22,7 +22,6 @@ import com.google.inject.name.Named;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 public class AssignmentCountScheduledExecutorService extends ScheduledThreadPoolExecutor implements Runnable {
-
     private AssignmentStats assignmentStats;
 
     @Inject

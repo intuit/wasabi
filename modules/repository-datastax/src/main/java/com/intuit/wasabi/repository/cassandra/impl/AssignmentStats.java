@@ -22,7 +22,6 @@ import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.repository.cassandra.accessor.count.HourlyBucketCountAccessor;
 
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -36,6 +35,7 @@ public class AssignmentStats {
     private HourlyBucketCountAccessor hourlyBucketCountAccessor;
     private static Map<Integer, Map<String, AtomicInteger>> hourlyCountMap;
     private static final Object lock = new Object();
+    private final int UUID_LENGTH = 36;
 
     /**
      * Constructor
@@ -98,17 +98,16 @@ public class AssignmentStats {
         Date completedHour = AssignmentStatsUtil.getLastCompletedHour(System.currentTimeMillis());
         int assignmentHour = AssignmentStatsUtil.getHour(completedHour);
         String day = AssignmentStatsUtil.getDayString(completedHour);
-        
-        Iterator it = hourlyCountMap.get(assignmentHour).entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry)it.next();
-            UUID experimentID = AssignmentStatsUtil.getExpUUID(pair);
-            String bucketLabel = AssignmentStatsUtil.getBucketLabel(pair);
-            int count = (int)pair.getValue();
+
+        for (String key : hourlyCountMap.get(assignmentHour).keySet()){
+            String experimentID = key.substring(0, UUID_LENGTH);
+            String bucketLabel = key.substring(UUID_LENGTH);
+            String insideKey = experimentID + bucketLabel;
+            UUID experimentUUID = UUID.fromString(experimentID);
+            int count = hourlyCountMap.get(assignmentHour).get(insideKey).get();
             for (int i = 0; i < count; i++){
-                hourlyBucketCountAccessor.incrementCountBy(experimentID, day, bucketLabel, assignmentHour);
+                hourlyBucketCountAccessor.incrementCountBy(experimentUUID, day, bucketLabel, assignmentHour);
             }
-            it.remove(); // avoids a ConcurrentModificationException
         }
         hourlyCountMap.put(assignmentHour, new ConcurrentHashMap<>());
     }

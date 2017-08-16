@@ -68,6 +68,7 @@ public class AssignmentStatsTest {
         Assert.assertEquals(1, count);
     }
 
+
     @Test
     public void getLastCompletedHourTest() throws Exception {
         // Checks correct date and time logic for determining the last completed hour
