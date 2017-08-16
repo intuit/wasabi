@@ -30,7 +30,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.intuit.wasabi.repository.cassandra.impl.CassandraAssignmentsRepository.NULL_LABEL;
 
-
 public class AssignmentStats {
     private HourlyBucketCountAccessor hourlyBucketCountAccessor;
     private static Map<Integer, Map<String, AtomicInteger>> hourlyCountMap;
@@ -56,7 +55,7 @@ public class AssignmentStats {
      * @param assignment
      */
     public void incrementCount(Experiment experiment, Assignment assignment) {
-        int assignmentHour = AssignmentStatsUtil.getHour(assignment.getCreated());
+        int assignmentHour = AssignmentStatsUtil.getHour(new Date(System.currentTimeMillis()));
         Map<String, AtomicInteger> hourMap = hourlyCountMap.get(assignmentHour);
         Experiment.ID id = experiment.getID();
         Optional<Bucket.Label> labelOptional = Optional.ofNullable(assignment.getBucketLabel());

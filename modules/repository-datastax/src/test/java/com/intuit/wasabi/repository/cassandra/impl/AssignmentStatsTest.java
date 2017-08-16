@@ -37,34 +37,27 @@ public class AssignmentStatsTest {
     @Test
     public void incrementCountTest() throws Exception {
         // Checks whether hourlyCountMap accurately increments counts each time incrementCount is called
-        DateFormat dayFormatter = new SimpleDateFormat("yyyy-MM-dd hh");
         Experiment experiment = mock(Experiment.class);
         Assignment assignment = mock(Assignment.class);
-
-        String dateInString = "2016-11-08 16";
-        Date created = dayFormatter.parse(dateInString);
         Bucket.Label testBucket = Bucket.Label.valueOf("Maxwell");
-        Mockito.when(assignment.getCreated()).thenReturn(created);
         Mockito.when(assignment.getBucketLabel()).thenReturn(testBucket);
         Mockito.when(experiment.getID()).thenReturn(Experiment.ID.newInstance());
 
+        int assignmentHour = AssignmentStatsUtil.getHour(new Date(System.currentTimeMillis()));
         assignmentStats.incrementCount(experiment, assignment);
-        int count = assignmentStats.getCount(experiment, assignment.getBucketLabel(), 16);
+        int count = assignmentStats.getCount(experiment, assignment.getBucketLabel(), assignmentHour);
         Assert.assertEquals(1, count);
         assignmentStats.incrementCount(experiment, assignment);
-        count = assignmentStats.getCount(experiment, assignment.getBucketLabel(), 16);
+        count = assignmentStats.getCount(experiment, assignment.getBucketLabel(), assignmentHour);
         Assert.assertEquals(2, count);
         assignmentStats.incrementCount(experiment, assignment);
-        count = assignmentStats.getCount(experiment, assignment.getBucketLabel(), 16);
+        count = assignmentStats.getCount(experiment, assignment.getBucketLabel(), assignmentHour);
         Assert.assertEquals(3, count);
 
-        dateInString = "2017-05-30 17";
-        created = dayFormatter.parse(dateInString);
         testBucket = Bucket.Label.valueOf("Bruckhaus");
-        Mockito.when(assignment.getCreated()).thenReturn(created);
         Mockito.when(assignment.getBucketLabel()).thenReturn(testBucket);
         assignmentStats.incrementCount(experiment, assignment);
-        count = assignmentStats.getCount(experiment, assignment.getBucketLabel(), 17);
+        count = assignmentStats.getCount(experiment, assignment.getBucketLabel(), assignmentHour);
         Assert.assertEquals(1, count);
     }
 
