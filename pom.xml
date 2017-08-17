@@ -111,6 +111,9 @@ http://www.w3.org/2001/XMLSchema-instance">
         <mysql.mutagen.root.resource.path>com/intuit/wasabi/repository/impl/mysql/migration
         </mysql.mutagen.root.resource.path>
 
+        <!-- for assignment stats -->
+        <bucket.count.aggregation.interval>60</bucket.count.aggregation.interval>
+
         <!-- FIXME: remove -->
         <assignment.decorator.service>http://decorator.example.com</assignment.decorator.service>
         <assignment.decorator.class.name>com.intuit.wasabi.assignment.impl.DefaultAssignmentDecorator

@@ -33,12 +33,10 @@ import java.util.concurrent.atomic.AtomicLong;
 import static com.intuit.wasabi.repository.cassandra.impl.CassandraAssignmentsRepository.NULL_LABEL;
 
 public class AssignmentStats {
-
     private HourlyBucketCountAccessor hourlyBucketCountAccessor;
-    private static Map<Integer, Map<String, AtomicLong>> hourlyCountMap;
+    private static Map<Integer, Map<ExperimentBucketKey, AtomicLong>> hourlyCountMap;
     private static final Object lock = new Object();
     private final Logger LOGGER = LoggerFactory.getLogger(CassandraAssignmentsRepository.class);
-    private final int UUID_LENGTH = 36;
 
     /**
      * Constructor
@@ -62,16 +60,16 @@ public class AssignmentStats {
         LOGGER.debug("incrementCount - START: experiment={}, assignment={}", experiment, assignment);
         Optional<Bucket.Label> labelOptional = Optional.ofNullable(assignment.getBucketLabel());
         int assignmentHour = AssignmentStatsUtil.getHour(new Date(System.currentTimeMillis()));
-        Map<String, AtomicLong> hourMap = hourlyCountMap.get(assignmentHour);
+        Map<ExperimentBucketKey, AtomicLong> hourMap = hourlyCountMap.get(assignmentHour);
         // Using the experimentID and bucket label as the key for hourMap, which contains an hour's worth of counts
         Experiment.ID id = experiment.getID();
         Bucket.Label bucketLabel = labelOptional.orElseGet(() -> NULL_LABEL);
-        String key = new ExperimentBucketKey(id, bucketLabel).getKey();
-        AtomicLong oldCount = hourMap.get(key);        // oldCount is the value of a certain expID + bucket combo
+        ExperimentBucketKey key = new ExperimentBucketKey(id, bucketLabel);
+        AtomicLong oldCount = hourMap.get(key);        // oldCount is the value of a certain expID + bucket combination
         if (oldCount == null) {
-            synchronized (lock) {                         // oldCount would be initialized to 1 twice w/o this
+            synchronized (lock) {                      // oldCount would be initialized to 1 twice w/o this
                 oldCount = hourMap.get(key);
-                if (oldCount == null) {                   // double-checked locking
+                if (oldCount == null) {                // double-checked locking
                     AtomicLong count = new AtomicLong(1);
                     hourMap.put(key, count);
                 } else {
@@ -93,11 +91,11 @@ public class AssignmentStats {
      * @return int representing the counts for a given bucket during the given hour
      */
     public long getCount(Experiment experiment, Bucket.Label bucketLabel, int assignmentHour) {
-        Map<String, AtomicLong> hourMap = hourlyCountMap.get(assignmentHour);
-        if (hourMap.get(new ExperimentBucketKey(experiment.getID(), bucketLabel).getKey()) == null){
+        Map<ExperimentBucketKey, AtomicLong> hourMap = hourlyCountMap.get(assignmentHour);
+        if (hourMap.get(new ExperimentBucketKey(experiment.getID(), bucketLabel)) == null){
             return 0;
         }else {
-            return hourMap.get(new ExperimentBucketKey(experiment.getID(), bucketLabel).getKey()).get();
+            return hourMap.get(new ExperimentBucketKey(experiment.getID(), bucketLabel)).get();
         }
     }
 
@@ -109,10 +107,9 @@ public class AssignmentStats {
         int assignmentHour = AssignmentStatsUtil.getHour(completedHour);
         String day = AssignmentStatsUtil.getDayString(completedHour);
 
-        for (String key : hourlyCountMap.get(assignmentHour).keySet()){
-            String experimentID = key.substring(0, UUID_LENGTH);
-            String bucketLabel = key.substring(UUID_LENGTH);
-            UUID experimentUUID = UUID.fromString(experimentID);
+        for (ExperimentBucketKey key : hourlyCountMap.get(assignmentHour).keySet()){
+            String bucketLabel = key.getBucketLabel();
+            UUID experimentUUID = key.getExpID();
             long count = hourlyCountMap.get(assignmentHour).get(key).get();
             hourlyBucketCountAccessor.incrementCountBy(count, experimentUUID, day, bucketLabel, assignmentHour);
             LOGGER.debug("Wrote counts for " + experimentUUID + bucketLabel + ". Count = " + count + ". Hour = " + assignmentHour);
