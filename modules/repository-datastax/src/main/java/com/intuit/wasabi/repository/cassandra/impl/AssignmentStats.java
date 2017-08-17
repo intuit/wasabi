@@ -20,10 +20,10 @@ import com.intuit.wasabi.assignmentobjects.Assignment;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.repository.cassandra.accessor.count.HourlyBucketCountAccessor;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -59,7 +59,7 @@ public class AssignmentStats {
     public void incrementCount(Experiment experiment, Assignment assignment) {
         LOGGER.debug("incrementCount - START: experiment={}, assignment={}", experiment, assignment);
         Optional<Bucket.Label> labelOptional = Optional.ofNullable(assignment.getBucketLabel());
-        int assignmentHour = AssignmentStatsUtil.getHour(new Date(System.currentTimeMillis()));
+        int assignmentHour = AssignmentStatsUtil.getHour(new org.joda.time.DateTime());
         Map<ExperimentBucketKey, AtomicLong> hourMap = hourlyCountMap.get(assignmentHour);
         // Using the experimentID and bucket label as the key for hourMap, which contains an hour's worth of counts
         Experiment.ID id = experiment.getID();
@@ -103,7 +103,7 @@ public class AssignmentStats {
      * Writes hourly assignment counts to cassandra for the last completed hour based on current time
      */
     public void writeCounts() {
-        Date completedHour = AssignmentStatsUtil.getLastCompletedHour(System.currentTimeMillis());
+        DateTime completedHour = AssignmentStatsUtil.getLastCompletedHour(System.currentTimeMillis());
         int assignmentHour = AssignmentStatsUtil.getHour(completedHour);
         String day = AssignmentStatsUtil.getDayString(completedHour);
 

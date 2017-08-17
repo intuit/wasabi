@@ -19,13 +19,12 @@ import com.intuit.wasabi.assignmentobjects.Assignment;
 import com.intuit.wasabi.experimentobjects.Bucket;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.repository.cassandra.accessor.count.HourlyBucketCountAccessor;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -43,7 +42,7 @@ public class AssignmentStatsTest {
         Mockito.when(assignment.getBucketLabel()).thenReturn(testBucket);
         Mockito.when(experiment.getID()).thenReturn(Experiment.ID.newInstance());
 
-        int assignmentHour = AssignmentStatsUtil.getHour(new Date(System.currentTimeMillis()));
+        int assignmentHour = AssignmentStatsUtil.getHour(new org.joda.time.DateTime());
         assignmentStats.incrementCount(experiment, assignment);
         long count = assignmentStats.getCount(experiment, assignment.getBucketLabel(), assignmentHour);
         Assert.assertEquals(1, count);
@@ -68,30 +67,30 @@ public class AssignmentStatsTest {
         long time = 1400999945000L;
         int hourInMillis = 3600000;
         long timeOneHourAgoMillis = time - hourInMillis;
-        Date timeOneHourAgoMillisDate = new Date(timeOneHourAgoMillis);
+        DateTime timeOneHourAgoMillisDate = new DateTime(timeOneHourAgoMillis);
         Assert.assertEquals(timeOneHourAgoMillisDate, AssignmentStatsUtil.getLastCompletedHour(time));
     }
 
     @Test
     public void getHourTest() throws Exception {
         // Checks whether getHour returns only the hour from a given date correctly
-        DateFormat format = new SimpleDateFormat("MMMM dd, yyyy HH:mm:ss");
+        DateTimeFormatter format = DateTimeFormat.forPattern("MMMM dd, yyyy HH:mm:ss");
 
         String timeNowString = "May 24, 2014 23:39:05";
-        Date timeNowDate = format.parse(timeNowString);
+        DateTime timeNowDate = format.parseDateTime(timeNowString);
         assertEquals(23, AssignmentStatsUtil.getHour(timeNowDate));
 
         String timeNowString2 = "June 17, 2017 05:10:26";
-        Date timeNowDate2 = format.parse(timeNowString2);
+        DateTime timeNowDate2 = format.parseDateTime(timeNowString2);
         assertEquals(05, AssignmentStatsUtil.getHour(timeNowDate2));
     }
 
     @Test
     public void getDayStringTest() throws Exception {
         // Checks if getDayString returns date in correct format: yyyy-MM-dd
-        DateFormat format = new SimpleDateFormat("MMMM dd, yyyy HH:mm:ss");
+        DateTimeFormatter format = DateTimeFormat.forPattern("MMMM dd, yyyy HH:mm:ss");
         String testDateString = "May 24, 2014 23:39:05";
-        Date testDate = format.parse(testDateString);
+        DateTime testDate = format.parseDateTime(testDateString);
         assertEquals("2014-05-24", AssignmentStatsUtil.getDayString(testDate));
     }
 }

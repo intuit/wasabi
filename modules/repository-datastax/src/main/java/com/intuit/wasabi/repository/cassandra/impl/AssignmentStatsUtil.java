@@ -15,13 +15,15 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.cassandra.impl;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 import java.util.Date;
 
 class AssignmentStatsUtil {
-    private static DateFormat dayFormatter = new SimpleDateFormat("yyyy-MM-dd");
-    private static DateFormat hourFormatter = new SimpleDateFormat("HH");
+    private static DateTimeFormatter dayFormatter = DateTimeFormat.forPattern("yyyy-MM-dd");
+    private static DateTimeFormatter hourFormatter = DateTimeFormat.forPattern("HH");
 
     /**
      * Helper method takes a time and returns a Date object which is an hour before the input time
@@ -29,8 +31,9 @@ class AssignmentStatsUtil {
      * @param time number of milliseconds between Jan 1, 1970 and a desired time
      * @return Date object
      */
-    static Date getLastCompletedHour(long time) {
-        return new Date(time - 3600 * 1000);
+    static DateTime getLastCompletedHour(long time) {
+        Date oldDate = new Date(time - 3600 * 1000);
+        return new DateTime(oldDate);
     }
 
     /**
@@ -40,8 +43,10 @@ class AssignmentStatsUtil {
      * @param date the date containing the last completed hour
      * @return int representing an hour of the day
      */
-    static int getHour(Date date) {
-        return Integer.parseInt(hourFormatter.format(date));
+    static int getHour(DateTime date) {
+        String dtSTr = hourFormatter.print(date);
+        DateTime jodaTime = hourFormatter.parseDateTime(dtSTr);
+        return jodaTime.getHourOfDay();
     }
 
     /**
@@ -50,7 +55,7 @@ class AssignmentStatsUtil {
      * @param date the date object for which the date string is returned
      * @return String representing a day
      */
-    static String getDayString(Date date) {
-        return dayFormatter.format(date);
+    static String getDayString(DateTime date) {
+        return dayFormatter.print(date);
     }
 }
