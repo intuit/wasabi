@@ -45,7 +45,7 @@ public class AssignmentStatsTest {
 
         int assignmentHour = AssignmentStatsUtil.getHour(new Date(System.currentTimeMillis()));
         assignmentStats.incrementCount(experiment, assignment);
-        int count = assignmentStats.getCount(experiment, assignment.getBucketLabel(), assignmentHour);
+        long count = assignmentStats.getCount(experiment, assignment.getBucketLabel(), assignmentHour);
         Assert.assertEquals(1, count);
         assignmentStats.incrementCount(experiment, assignment);
         count = assignmentStats.getCount(experiment, assignment.getBucketLabel(), assignmentHour);

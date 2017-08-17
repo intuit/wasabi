@@ -53,6 +53,7 @@ import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentUserIndex
 import com.intuit.wasabi.repository.cassandra.accessor.index.PageExperimentIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.StateExperimentIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.impl.AssignmentCountExecutor;
+import com.intuit.wasabi.repository.cassandra.impl.AssignmentHourlyCountTimeServiceImpl;
 import com.intuit.wasabi.repository.cassandra.impl.AssignmentStats;
 import com.intuit.wasabi.repository.cassandra.impl.AssignmentCountScheduledExecutorService;
 import com.intuit.wasabi.repository.cassandra.impl.CassandraAssignmentsRepository;
@@ -99,13 +100,13 @@ import static com.google.inject.Scopes.SINGLETON;
 import static com.google.inject.name.Names.named;
 import static com.intuit.autumn.utils.PropertyFactory.create;
 import static com.intuit.autumn.utils.PropertyFactory.getProperty;
+import static com.intuit.wasabi.repository.AssignmentStatsAnnotations.ASSIGNMENTS_AGGREGATOR_INTERVAL;
+import static com.intuit.wasabi.repository.AssignmentStatsAnnotations.ASSIGNMENTS_HOURLY_AGGREGATOR_SERVICE;
+import static com.intuit.wasabi.repository.AssignmentStatsAnnotations.ASSIGNMENTS_HOURLY_AGGREGATOR_TASK;
 import static java.lang.Integer.parseInt;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class CassandraRepositoryModule extends AbstractModule {
-    public String ASSIGNMENTS_HOURLY_AGGREGATOR_SERVICE = "AssignmentsHourlyAggregatorService";
-    public String ASSIGNMENTS_AGGREGATOR_INTERVAL = "AssignmentsAggregatorInterval";
-    public String ASSIGNMENTS_HOURLY_AGGREGATOR_TASK = "AssignmentHourlyAggregatorTask";
     public static final String CLIENT_CONFIG_NAME = "/cassandra_client_config.properties";
     private static final String PROPERTY_NAME = "/repository.properties";
     private static final Logger LOGGER = getLogger(CassandraRepositoryModule.class);
@@ -176,6 +177,8 @@ public class CassandraRepositoryModule extends AbstractModule {
         bind(Integer.class)
                 .annotatedWith(named(ASSIGNMENTS_AGGREGATOR_INTERVAL))
                 .toInstance(assignmentAggregationIntervalInMinutes);
+        //Bind time service
+        bind(AssignmentHourlyCountTimeService.class).to(AssignmentHourlyCountTimeServiceImpl.class).in(SINGLETON);
         //Bind AssignmentStats
         bind(AssignmentStats.class).toProvider(AssignmentStatsProvider.class).in(Singleton.class);
         //Bind hourly assignment aggregator task
