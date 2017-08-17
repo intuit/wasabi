@@ -1,7 +1,7 @@
 'use strict';
 
-angular.module('wasabi.services').factory('ConfigFactory', ['apiHostBaseUrlValue', 'authnType', 'noAuthRedirect', 'ssoLogoutRedirect', 'apiAuthInfo',
-function(apiHostBaseUrlValue, authnType, noAuthRedirect, ssoLogoutRedirect, apiAuthInfo) {
+angular.module('wasabi.services').factory('ConfigFactory', ['apiHostBaseUrlValue', 'authnType', 'noAuthRedirect', 'ssoLogoutRedirect', 'apiAuthInfo', 'downloadBaseUrlValue',
+function(apiHostBaseUrlValue, authnType, noAuthRedirect, ssoLogoutRedirect, apiAuthInfo, downloadBaseUrlValue) {
     return {
         baseUrl: function() {
             if (apiHostBaseUrlValue === 'DEFAULT') {
@@ -9,6 +9,14 @@ function(apiHostBaseUrlValue, authnType, noAuthRedirect, ssoLogoutRedirect, apiA
                 return window.location.protocol + '//' + window.location.host + '/api/v1';
             }
             return apiHostBaseUrlValue;
+        },
+
+        downloadBaseUrl: function() {
+            if (downloadBaseUrlValue === 'DEFAULT') {
+                // We want to pull the URL to use as the backend URL from where the UI was served.
+                return window.location.protocol + '//' + window.location.host + '/api/v1';
+            }
+            return downloadBaseUrlValue;
         },
 
         authnType: function() {

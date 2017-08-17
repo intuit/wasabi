@@ -4,5 +4,6 @@
     "noAuthRedirect": "",
     "ssoLogoutRedirect": "",
     "apiAuthInfo": "",
-    "apiHostBaseUrlValue": "DEFAULT"
+    "apiHostBaseUrlValue": "DEFAULT",
+    "downloadBaseUrlValue": "DEFAULT"
 }

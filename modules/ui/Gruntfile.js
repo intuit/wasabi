@@ -413,7 +413,8 @@ module.exports = function (grunt) {
             development: {
                 constants: {
                     supportEmail: process.env.SUPPORT_EMAIL || 'you@example.com',
-                    apiHostBaseUrlValue: process.env.API_HOST || 'http://localhost:8080/api/v1'
+                    apiHostBaseUrlValue: process.env.API_HOST || 'http://localhost:8080/api/v1',
+                    downloadBaseUrlValue: process.env.API_HOST || 'http://localhost:8080/api/v1'
                 }
             }
         },
@@ -539,6 +540,7 @@ module.exports = function (grunt) {
             var distConstants = {};
             distConstants['supportEmail'] = process.env.SUPPORT_EMAIL || defaultConstants['supportEmail'];
             distConstants['apiHostBaseUrlValue'] = process.env.API_HOST || defaultConstants['apiHostBaseUrlValue'];
+            distConstants['defaultBaseUrlValue'] = process.env.API_HOST || defaultConstants['defaultBaseUrlValue'];
             grunt.file.write("build/constants.json", JSON.stringify(distConstants, null, 2));
         }
     });

@@ -17,7 +17,7 @@ angular.module('wasabi.controllers')
                 ];
                 $scope.experiment = experiment;
                 $scope.getAssignmentsFormSubmitted = false;
-                $scope.downloadBaseUrl = ConfigFactory.baseUrl() + '/experiments/' + $scope.experiment.id + '/assignments';
+                $scope.downloadBaseUrl = ConfigFactory.downloadBaseUrl() + '/experiments/' + $scope.experiment.id + '/assignments';
 
                 $scope.ok = function (isFormInvalid) {
                     if (!isFormInvalid) {
