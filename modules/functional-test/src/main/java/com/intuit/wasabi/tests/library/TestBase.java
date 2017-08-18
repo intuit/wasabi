@@ -74,6 +74,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -197,11 +198,20 @@ public class TestBase extends ServiceTestBase {
         String apiVersionString = appProperties.getProperty("api-version-string",
                 Constants.DEFAULT_CONFIG_API_VERSION_STRING);
 
+        String authorizationHeader = appProperties.getProperty("authorization-header");
+        
         String baseUri = apiServerProtocol + "://" + apiServerName;
         String basePath = "/api/" + apiVersionString + "/";
         LOGGER.info("API base: " + baseUri + basePath);
-
-        apiServerConnector = new APIServerConnector(baseUri, basePath, userName, password);
+        
+        //setting the header
+        if(authorizationHeader!=null)   {
+            Map<String,String> headerMap = new HashMap<String,String>();
+            headerMap.put("Authorization", authorizationHeader);
+            apiServerConnector = new APIServerConnector(baseUri, basePath, userName, password, headerMap);
+        }
+        else
+            apiServerConnector = new APIServerConnector(baseUri, basePath, userName, password);
     }
 
     /**
@@ -4678,5 +4688,19 @@ public class TestBase extends ServiceTestBase {
         List<Bucket> bucketList = BucketFactory.createBuckets(experiment, numberOfBucketsPerExperiment);
         postBuckets(bucketList);
         
+    }
+    /**
+     * 
+     * @param mp
+     */
+    public static String iterateMap(Map mp) {
+        Iterator it = mp.entrySet().iterator();
+        StringBuffer str = new StringBuffer();
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry)it.next();
+            str.append(pair.getKey() + "=" + pair.getValue()+",");
+            it.remove(); // avoids a ConcurrentModificationException
+        }
+        return str.toString();
     }
 }
