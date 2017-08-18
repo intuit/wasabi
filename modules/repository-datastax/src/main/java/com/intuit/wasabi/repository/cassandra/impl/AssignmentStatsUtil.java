@@ -19,8 +19,6 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import java.util.Date;
-
 class AssignmentStatsUtil {
     private static DateTimeFormatter dayFormatter = DateTimeFormat.forPattern("yyyy-MM-dd");
 
@@ -31,8 +29,7 @@ class AssignmentStatsUtil {
      * @return Date object
      */
     static DateTime getLastCompletedHour(long time) {
-        Date oldDate = new Date(time - 3600 * 1000);
-        return new DateTime(oldDate);
+        return new DateTime(time - 3600 * 1000);
     }
 
     /**
