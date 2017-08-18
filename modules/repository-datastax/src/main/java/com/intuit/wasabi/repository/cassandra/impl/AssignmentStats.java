@@ -59,7 +59,7 @@ public class AssignmentStats {
     public void incrementCount(Experiment experiment, Assignment assignment) {
         LOGGER.debug("incrementCount - START: experiment={}, assignment={}", experiment, assignment);
         Optional<Bucket.Label> labelOptional = Optional.ofNullable(assignment.getBucketLabel());
-        int assignmentHour = AssignmentStatsUtil.getHour(new org.joda.time.DateTime());
+        int assignmentHour = (new org.joda.time.DateTime()).getHourOfDay();
         Map<ExperimentBucketKey, AtomicLong> hourMap = hourlyCountMap.get(assignmentHour);
         // Using the experimentID and bucket label as the key for hourMap, which contains an hour's worth of counts
         Experiment.ID id = experiment.getID();
@@ -104,7 +104,7 @@ public class AssignmentStats {
      */
     public void writeCounts() {
         DateTime completedHour = AssignmentStatsUtil.getLastCompletedHour(System.currentTimeMillis());
-        int assignmentHour = AssignmentStatsUtil.getHour(completedHour);
+        int assignmentHour = completedHour.getHourOfDay();
         String day = AssignmentStatsUtil.getDayString(completedHour);
 
         for (ExperimentBucketKey key : hourlyCountMap.get(assignmentHour).keySet()){

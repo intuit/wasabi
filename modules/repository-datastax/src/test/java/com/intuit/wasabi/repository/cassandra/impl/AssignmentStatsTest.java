@@ -42,7 +42,7 @@ public class AssignmentStatsTest {
         Mockito.when(assignment.getBucketLabel()).thenReturn(testBucket);
         Mockito.when(experiment.getID()).thenReturn(Experiment.ID.newInstance());
 
-        int assignmentHour = AssignmentStatsUtil.getHour(new org.joda.time.DateTime());
+        int assignmentHour = (new org.joda.time.DateTime()).getHourOfDay();
         assignmentStats.incrementCount(experiment, assignment);
         long count = assignmentStats.getCount(experiment, assignment.getBucketLabel(), assignmentHour);
         Assert.assertEquals(1, count);
@@ -69,20 +69,6 @@ public class AssignmentStatsTest {
         long timeOneHourAgoMillis = time - hourInMillis;
         DateTime timeOneHourAgoMillisDate = new DateTime(timeOneHourAgoMillis);
         Assert.assertEquals(timeOneHourAgoMillisDate, AssignmentStatsUtil.getLastCompletedHour(time));
-    }
-
-    @Test
-    public void getHourTest() throws Exception {
-        // Checks whether getHour returns only the hour from a given date correctly
-        DateTimeFormatter format = DateTimeFormat.forPattern("MMMM dd, yyyy HH:mm:ss");
-
-        String timeNowString = "May 24, 2014 23:39:05";
-        DateTime timeNowDate = format.parseDateTime(timeNowString);
-        assertEquals(23, AssignmentStatsUtil.getHour(timeNowDate));
-
-        String timeNowString2 = "June 17, 2017 05:10:26";
-        DateTime timeNowDate2 = format.parseDateTime(timeNowString2);
-        assertEquals(05, AssignmentStatsUtil.getHour(timeNowDate2));
     }
 
     @Test

@@ -23,7 +23,6 @@ import java.util.Date;
 
 class AssignmentStatsUtil {
     private static DateTimeFormatter dayFormatter = DateTimeFormat.forPattern("yyyy-MM-dd");
-    private static DateTimeFormatter hourFormatter = DateTimeFormat.forPattern("HH");
 
     /**
      * Helper method takes a time and returns a Date object which is an hour before the input time
@@ -34,19 +33,6 @@ class AssignmentStatsUtil {
     static DateTime getLastCompletedHour(long time) {
         Date oldDate = new Date(time - 3600 * 1000);
         return new DateTime(oldDate);
-    }
-
-    /**
-     * Helper method takes a Date object, extracts the last hour that has been completed,
-     * and returns the hour as an int. (e.g.: returns 23 for date: 2017-08-10 0:05:06)
-
-     * @param date the date containing the last completed hour
-     * @return int representing an hour of the day
-     */
-    static int getHour(DateTime date) {
-        String dtSTr = hourFormatter.print(date);
-        DateTime jodaTime = hourFormatter.parseDateTime(dtSTr);
-        return jodaTime.getHourOfDay();
     }
 
     /**
