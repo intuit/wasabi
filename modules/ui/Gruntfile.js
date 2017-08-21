@@ -540,6 +540,7 @@ module.exports = function (grunt) {
             var distConstants = {};
             distConstants['supportEmail'] = process.env.SUPPORT_EMAIL || defaultConstants['supportEmail'];
             distConstants['apiHostBaseUrlValue'] = process.env.API_HOST || defaultConstants['apiHostBaseUrlValue'];
+            distConstants['downloadBaseUrlValue'] = process.env.API_HOST || defaultConstants['downloadBaseUrlValue'];
             distConstants['defaultBaseUrlValue'] = process.env.API_HOST || defaultConstants['defaultBaseUrlValue'];
             grunt.file.write("build/constants.json", JSON.stringify(distConstants, null, 2));
         }
