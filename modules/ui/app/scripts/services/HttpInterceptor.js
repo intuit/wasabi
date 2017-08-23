@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('wasabi.services').factory('HttpInterceptor', ['$rootScope', '$q','Session', 'AUTH_EVENTS', '$timeout', 'ConfigFactory',
+angular.module('wasabi.services').factory('HttpInterceptor', ['$rootScope', '$q', 'Session', 'AUTH_EVENTS', '$timeout', 'ConfigFactory',
     function ($rootScope, $q, Session, AUTH_EVENTS, $timeout, ConfigFactory) {
     return {
         request: function (config) {
@@ -17,7 +17,6 @@ angular.module('wasabi.services').factory('HttpInterceptor', ['$rootScope', '$q'
                 $rootScope.keepAlive();
             };
             var doLogout = function() {
-                //console.log('In doLogout');
                 Session.destroy();
                 $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
                 $rootScope.goToSignin();
@@ -33,26 +32,38 @@ angular.module('wasabi.services').factory('HttpInterceptor', ['$rootScope', '$q'
                 $rootScope.timeoutDialog = $rootScope.confirmDialog('Your login is about to expire.  Would you like to continue working?', 'Login Expiring', doRefresh, doLogout, 'Yes', 'No');
             };
 
-            config.headers = config.headers || {};
             if (Session.accessToken && !/\/savefeedback/.test(config.url)) {
                 // http://stackoverflow.com/questions/7802116/custom-http-authorization-header
-                config.headers.Authorization = Session.tokenType + ' ' + Session.accessToken;
+                if (ConfigFactory.authnType() !== 'sso') {
+                    // Since in this case, the Authorization header is provided by the SSO
+                    config.headers.Authorization = Session.tokenType + ' ' + Session.accessToken;
 
-                if (!$rootScope.isSetTimeout || (config.url && config.url.substring(0,4) === 'http')) {
-                    // Start the timer for logging the user out automatically.
-                    if ($rootScope.isSetTimeout) {
-                        clearTimeouts();
+                    if (!$rootScope.isSetTimeout || (config.url && config.url.substring(0,4) === 'http')) {
+                        // Start the timer for logging the user out automatically.
+                        if ($rootScope.isSetTimeout) {
+                            clearTimeouts();
+                        }
+                        if (!/\/logout$/.test(config.url)) {
+                            $rootScope.isSetTimeout = $timeout(doTimeout, ConfigFactory.loginTimeoutWarningTime);
+                            $rootScope.isLogoutTimeout = $timeout(doForcedLogout, ConfigFactory.loginTimeoutTime);
+                        }
                     }
-                    if (!/\/logout$/.test(config.url)) {
-                        $rootScope.isSetTimeout = $timeout(doTimeout, ConfigFactory.loginTimeoutWarningTime);
-                        $rootScope.isLogoutTimeout = $timeout(doForcedLogout, ConfigFactory.loginTimeoutTime);
-                    }
+                }
+                else if (ConfigFactory.apiAuthInfo && ConfigFactory.apiAuthInfo().length > 0) {
+                    // We need to pass special authentication information to the API server.
+                    config.headers.Authorization = ConfigFactory.apiAuthInfo();
                 }
             }
             else if (/\/login$/.test(config.url) && sessionStorage.getItem('wasabiSession')) {
-                // TODO: Not the best way to handle this, but this sets the Authorization header specifically for
-                // the /login page to contain the values from the session and then deletes the values.
-                config.headers.Authorization = 'Basic ' + btoa(JSON.parse(sessionStorage.getItem('wasabiSession')).username + ':' + JSON.parse(sessionStorage.getItem('wasabiSession')).password);
+                if (ConfigFactory.authnType() !== 'sso') {
+                    // This sets the Authorization header specifically for
+                    // the /login page to contain the values from the session and then deletes the values.
+                    config.headers.Authorization = 'Basic ' + btoa(JSON.parse(sessionStorage.getItem('wasabiSession')).username + ':' + JSON.parse(sessionStorage.getItem('wasabiSession')).password);
+                }
+                else if (ConfigFactory.apiAuthInfo && ConfigFactory.apiAuthInfo().length > 0) {
+                    // We need to pass special authentication information to the API server, even when calling the login API.
+                    config.headers.Authorization = ConfigFactory.apiAuthInfo();
+                }
                 // NOTE: This is a workaround for the fact that $resource will clear out the Content-Type of
                 // a POST if you are not passing config.data.  The actual data is put in the body in AuthFactory.js.
                 config.data = {};
@@ -62,7 +73,6 @@ angular.module('wasabi.services').factory('HttpInterceptor', ['$rootScope', '$q'
         },
         response: function (response) {
             if (response && response.config && response.config.data && response.config.data.password) {
-                //console.log(response.config.data.password);
                 response.config.data.password = '';
             }
             return response || $q.when(response);

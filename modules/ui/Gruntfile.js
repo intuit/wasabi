@@ -93,6 +93,19 @@ module.exports = function (grunt) {
                 options: {
                     base: '<%= yeoman.dist %>'
                 }
+            },
+            distsecure: {
+                options: {
+                    base: [
+                        '.tmp',
+                        '<%= yeoman.app %>'
+                    ],
+                    protocol: 'https',
+                    port: 443,
+                    key: grunt.file.read('server.key').toString(),
+                    cert: grunt.file.read('server.crt').toString(),
+                    ca: grunt.file.read('ca.crt').toString()
+                }
             }
         },
 
@@ -377,7 +390,12 @@ module.exports = function (grunt) {
                 name: 'config',
                 dest: '<%= yeoman.app %>/scripts/config.js',
                 constants: {
-                    supportEmail: ''
+                    supportEmail: '',
+                    authnType: 'basic',
+                    noAuthRedirect: '',
+                    ssoLogoutRedirect: '',
+                    apiAuthInfo: ''
+
                 }
             },
             test: {
@@ -395,7 +413,8 @@ module.exports = function (grunt) {
             development: {
                 constants: {
                     supportEmail: process.env.SUPPORT_EMAIL || 'you@example.com',
-                    apiHostBaseUrlValue: process.env.API_HOST || 'http://localhost:8080/api/v1'
+                    apiHostBaseUrlValue: process.env.API_HOST || 'http://localhost:8080/api/v1',
+                    downloadBaseUrlValue: process.env.API_HOST || 'http://localhost:8080/api/v1'
                 }
             }
         },
@@ -521,6 +540,8 @@ module.exports = function (grunt) {
             var distConstants = {};
             distConstants['supportEmail'] = process.env.SUPPORT_EMAIL || defaultConstants['supportEmail'];
             distConstants['apiHostBaseUrlValue'] = process.env.API_HOST || defaultConstants['apiHostBaseUrlValue'];
+            distConstants['downloadBaseUrlValue'] = process.env.API_HOST || defaultConstants['downloadBaseUrlValue'];
+            distConstants['defaultBaseUrlValue'] = process.env.API_HOST || defaultConstants['defaultBaseUrlValue'];
             grunt.file.write("build/constants.json", JSON.stringify(distConstants, null, 2));
         }
     });

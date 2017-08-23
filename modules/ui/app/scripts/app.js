@@ -138,8 +138,13 @@ angular.module('wasabi', [
     /*
      * Inject authentication token in each API request
      */
-    .config(['$httpProvider', function ($httpProvider) {
+    .config(['$httpProvider', 'authnType', function ($httpProvider, authnType) {
         $httpProvider.interceptors.push('HttpInterceptor');
+
+        if (authnType === 'sso') {
+            // Needed to use authentication using cookies correctly.
+            $httpProvider.defaults.withCredentials = true;
+        }
 
         // Set up to use CORS to make things work cross-domain for the login calls.
         $httpProvider.defaults.useXDomain = true;
@@ -174,8 +179,8 @@ angular.module('wasabi', [
     /*
      * watch transitions/routes to the next page/URL and prevents if user is not authorized or signed in
      */
-    .run(['$rootScope', '$state', 'AUTH_EVENTS', 'AuthUtilsFactory', 'ConfigFactory', 'DialogsFactory', 'Session', 'AuthFactory', '$stateParams', '$window', 'UtilitiesFactory',
-        function ($rootScope, $state, AUTH_EVENTS, AuthUtilsFactory, ConfigFactory, DialogsFactory, Session, AuthFactory, $stateParams, $window, UtilitiesFactory) {
+    .run(['$rootScope', '$state', 'AUTH_EVENTS', 'AuthUtilsFactory', 'ConfigFactory', 'DialogsFactory', 'Session', 'AuthFactory', '$stateParams', '$window', 'UtilitiesFactory', 'StateFactory',
+        function ($rootScope, $state, AUTH_EVENTS, AuthUtilsFactory, ConfigFactory, DialogsFactory, Session, AuthFactory, $stateParams, $window, UtilitiesFactory, StateFactory) {
             // Pull in the plugins configuration
             if (!$rootScope.plugins) {
                 $rootScope.plugins = [];
@@ -191,6 +196,16 @@ angular.module('wasabi', [
             }
 
             $rootScope.$on('$stateChangeStart', function (event, next) {
+                var transitionToFirstPage = function() {
+                    $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
+                    if ($rootScope.originalPage) {
+                        $scope.handleOriginalPage();
+                    }
+                    else {
+                        $state.go('experiments');
+                    }
+                };
+
                 var authorizedRoles = next.data.authorizedRoles;
                 if(authorizedRoles) {
                     if (!AuthUtilsFactory.isAuthorized(authorizedRoles)) {
@@ -203,6 +218,7 @@ angular.module('wasabi', [
                             $rootScope.originalPage = next.name;
                             $rootScope.originalURI = $window.location.hash;
                             $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
+
                             $state.go('signin');
                         }
                     }
@@ -214,11 +230,18 @@ angular.module('wasabi', [
             };
 
             $rootScope.goToSignin = function() {
-                $state.go('signin');
+                if (ConfigFactory.authnType() === 'sso') {
+                    window.location = ConfigFactory.noAuthRedirect();
+                }
+                else {
+                    $state.go('signin');
+                }
             };
 
             $rootScope.keepAlive = function() {
-                AuthFactory.verifyToken();
+                if (ConfigFactory.authnType !== 'sso') {
+                    AuthFactory.verifyToken();
+                }
             };
 
             // work around for wired floating point behavior
