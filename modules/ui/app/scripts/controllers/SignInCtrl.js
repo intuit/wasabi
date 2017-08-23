@@ -3,13 +3,15 @@
 /*jshint -W106*/ // disable jshint warning about camel case
 
 angular.module('wasabi.controllers')
-    .controller('SignInCtrl', ['$scope', '$rootScope', '$state', 'AuthFactory', 'AuthzFactory', 'AUTH_EVENTS', 'Session', 'UtilitiesFactory', '$cookies', 'USER_ROLES', 'WasabiFactory', 'StateFactory',
-            function ($scope, $rootScope, $state, AuthFactory, AuthzFactory, AUTH_EVENTS, Session, UtilitiesFactory, $cookies, USER_ROLES, WasabiFactory, StateFactory) {
+    .controller('SignInCtrl', ['$scope', '$rootScope', '$state', 'AuthFactory', 'AuthzFactory', 'AUTH_EVENTS', 'Session', 'UtilitiesFactory', '$cookies', 'USER_ROLES', 'WasabiFactory', 'StateFactory', 'ConfigFactory',
+            function ($scope, $rootScope, $state, AuthFactory, AuthzFactory, AUTH_EVENTS, Session, UtilitiesFactory, $cookies, USER_ROLES, WasabiFactory, StateFactory, ConfigFactory) {
 
                 $scope.credentials = {
                     username: '',
                     password: ''
                 };
+
+                $scope.dontShowForm = true;
 
                 UtilitiesFactory.hideHeading(true);
 
@@ -61,92 +63,69 @@ angular.module('wasabi.controllers')
                     $scope.loginFailed = false;
                     $scope.serverDown = false;
 
-                    $cookies.wasabiRememberMe = (credentials.rememberMe ? credentials.username : '');
+                    var creds = JSON.stringify({
+                            username: '',
+                            password: ''
+                        });
+                    if (ConfigFactory.authnType() !== 'sso') {
+                        $cookies.wasabiRememberMe = (credentials.rememberMe ? credentials.username : '');
 
+                        creds = JSON.stringify({
+                                username: credentials.username,
+                                password: credentials.password
+                            });
+                    }
                     // Directly save the credentials for use in the HttpInterceptor (workaround for passing username/password)
-                    sessionStorage.setItem('wasabiSession', JSON.stringify({
-                        username: credentials.username,
-                        password: credentials.password
-                    }));
+                    sessionStorage.setItem('wasabiSession', creds);
 
-                    return AuthFactory.signIn().$promise.then(function(result) {
-/*
-                        console.log('In SignInCtrl');
-                        console.log(result);
-*/
+                    AuthFactory.signIn().$promise.then(function(result) {
                         localStorage.removeItem('wasabiLastSearch');
 
-                        var sessionInfo = {userID: credentials.username, accessToken: result.access_token, tokenType: result.token_type};
+                        // In the case where we are doing an SSO login, we expect the backend to have extracted
+                        // the user's credentials and to return their username to us, since we need that for
+                        // authorization.
+                        var username = (ConfigFactory.authnType() === 'sso' ? result.access_token : credentials.username);
+                        var sessionInfo = {userID: username, accessToken: result.access_token, tokenType: result.token_type};
                         Session.create(sessionInfo);
 
-                        AuthzFactory.getPermissions({userId: credentials.username}).$promise.then(function(permissionsResult) {
-                            //console.log(permissionsResult);
-                            var treatAsAdmin = false;
-                            sessionInfo = {userID: credentials.username, accessToken: result.access_token, tokenType: result.token_type, permissions: permissionsResult.permissionsList, isSuperadmin: false};
-                            if (permissionsResult.permissionsList && permissionsResult.permissionsList.length > 0) {
-                                // Check if they are superadmin, in which case, we'll just give them the admin role.
-                                if (permissionsResult.permissionsList[0].permissions.indexOf('SUPERADMIN') >= 0) {
-                                    treatAsAdmin = true;
-                                    sessionInfo.isSuperadmin = true;
-                                }
-                            }
-                            if (treatAsAdmin || UtilitiesFactory.hasAdmin(permissionsResult.permissionsList)) {
-                                sessionInfo.userRole = USER_ROLES.admin;
-                                UtilitiesFactory.hideAdminTabs(false);
-                            }
-                            else {
-                                sessionInfo.userRole = USER_ROLES.user;
-                                UtilitiesFactory.hideAdminTabs();
-                            }
-                            Session.create(sessionInfo);
-                            StateFactory.currentExperimentsPage = 1;
-                            StateFactory.currentCardViewPage = 1;
-
-                            /*
-                            Note: the following code is used to control the new Card View feature.  This requires a
-                            Wasabi experiment, named CardViewTest, in the application, WasabiUI, with a sampling % of 100%
-                            and one bucket named NoCardView with 100% allocation.  All users will, by default, be
-                            assigned to that bucket by the following call.  If the user is in the bucket, they are NOT
-                            shown the Card View (see the code in ExperimentsCtrl related to the $scope.data.enableCardView
-                            for how that is controlled).  So in order to enable Card View for a user, you need to run
-                            something like this curl command to force them to have the "null" bucket:
-
-                            curl -u mylogin -H "Content-Type: application/json" -X PUT
-                              -d '{"assignment":null, "overwrite": true }'
-                              http://localhost:8080/api/v1/assignments/applications/WasabiUI/experiments/CardViewTest/users/userID1
-
-                            where "userID1" is the ID of the user you want to show Card View to and "mylogin" is the login
-                            of an admin user, e.g., admin on your local.
-                             */
-
-                            // This initializes the ShowCardView switch to false, checks/gets assignment for the
-                            // experiment named CardViewTest, if the user has the null bucket assignment, sets the switch
-                            // to true.  Whether we successfully hit Wasabi or not, it calls transitionToFirstPage to
-                            // bring up the initial page.
-                            UtilitiesFactory.checkBooleanSwitch('ShowCardView', 'CardViewTest', false, null /* the true state is the null bucket */,
-                                function() {
-                                    // Success after setting the switch
-                                    $scope.transitionToFirstPage();
-                                },
-                                function() {
-                                    // Error trying to set the switch
-                                    $scope.transitionToFirstPage();
-                                });
-                        },
-                        function(/*reason*/) {
-                            console.log('Problem getting authorization permissions.');
-                        });
+                        result.username = username;
+                        UtilitiesFactory.getPermissions(result, $scope.transitionToFirstPage);
                     }, function(reason) {
-                        //console.log(reason);
                         if (reason.data.error && reason.data.error.code !== 401) {
                             $scope.serverDown = true;
+                            if (ConfigFactory.authnType() === 'sso') {
+                                // Something else is wrong besides the user not having their SSO creds.  We don't
+                                // want to show them the login form, so we will just show a message that the system
+                                // is down and they should try again.  This prevents a loop where the user *has*
+                                // authenticated to SSO, but for some reason the backend isn't able to detect it.
+                                // We don't want the user to keep going back to the SSO site, then back here, then
+                                // back to the SSO site, etc.
+                                $scope.redirectUrl = ConfigFactory.noAuthRedirect();
+                            }
                         }
                         else {
-                            $scope.loginFailed = true;
+                            if (ConfigFactory.authnType() === 'sso') {
+                                window.location.href = ConfigFactory.noAuthRedirect();
+                            }
+                            else {
+                                $scope.loginFailed = true;
+                            }
                         }
                         $rootScope.$broadcast(AUTH_EVENTS.loginFailed);
                     });
                 };
+
+                if (ConfigFactory.authnType() === 'sso') {
+                    // We are performing an alternate form of authentication that assumes the user has authenticated
+                    // to a Single Sign On service and the results have been passed in secure cookies.  We are expecting
+                    // the backend to check those cookies.  If the result is that the user is authenticated, we will
+                    // set the result into the Session and continue on.  Otherwise, we expect a 401 and we will redirect
+                    // the user to the configured sign in URL.
+                    $scope.signIn();
+                }
+                else {
+                    $scope.dontShowForm = false;
+                }
             }]);
 
 
