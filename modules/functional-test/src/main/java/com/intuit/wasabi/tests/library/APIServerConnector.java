@@ -196,7 +196,10 @@ public class APIServerConnector {
                         contentTypeString = "-H \"Content-Type:" + value + "\" ";
                         break;
                     case "Authorization":
-                        authString = "-H \"Authorization: " + value + "\"";
+                        authString = "-H \"Authorization: " + value + "\" ";
+                        break;
+                    case "Cookie":
+                        authString = "-H \"Cookie: " + value + "\" ";
                         break;
                     default:
                         throw new IllegalArgumentException("Support for key \"" + key + "\" not implemented yet.");
