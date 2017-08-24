@@ -22,6 +22,7 @@ import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
 import com.jayway.restassured.specification.RequestSpecification;
 import org.slf4j.Logger;
+import org.testng.util.Strings;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -183,6 +184,7 @@ public class APIServerConnector {
 
         String agentString = "";
         String contentTypeString = "-H \"Content-Type:application/json\" "; // Default is JSON
+        String headerString = "";
         if (this.headerMap != null) {
             for (Map.Entry<String, String> entry : this.headerMap.entrySet()) {
                 String key = entry.getKey();
@@ -195,23 +197,20 @@ public class APIServerConnector {
                     case "Content-Type":
                         contentTypeString = "-H \"Content-Type:" + value + "\" ";
                         break;
-                    case "Authorization":
-                        authString = "-H \"Authorization: " + value + "\"";
-                        break;
                     default:
-                        throw new IllegalArgumentException("Support for key \"" + key + "\" not implemented yet.");
+                        headerString += "-H \"" + key + ":" + value + "\" ";
                 }
             }
         }
 
-        String curlCall =
-                "curl " +
-                        "-X " + method + " " +
-                        authString +
-                        agentString +
-                        contentTypeString +
-                        dataString +
-                        baseUri + basePath + url;
+        String curlCall = "curl -X "
+                + method + " "
+                + authString
+                + headerString
+                + agentString +
+                contentTypeString
+                + dataString +
+                baseUri + basePath + url;
         return curlCall;
     }
 
@@ -223,9 +222,10 @@ public class APIServerConnector {
         reqBuilder.setRelaxedHTTPSValidation();
         reqBuilder.log(LogDetail.ALL); // NIT use setting to control this
 
-        if (userName != null) {
+        if (!Strings.isNullOrEmpty(userName)) {
             reqBuilder.setAuth(preemptive().basic(this.userName, this.password));
         }
+
         if (headerMap != null) {
             reqBuilder.addHeaders(headerMap);
         }

@@ -72,12 +72,15 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -87,6 +90,8 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 @Listeners({ RetryListener.class })
 public class TestBase extends ServiceTestBase {
+
+    private static final Pattern PROPERTY_HEADERS_PATTERN = Pattern.compile("header\\.(.+)");
 
     private static final Logger LOGGER = getLogger(TestBase.class);
     private static boolean pingSuccess = false;
@@ -197,11 +202,22 @@ public class TestBase extends ServiceTestBase {
         String apiVersionString = appProperties.getProperty("api-version-string",
                 Constants.DEFAULT_CONFIG_API_VERSION_STRING);
 
+        Map<String, String> headerMap = new HashMap<>();
+        //Any additional headers
+        for (Enumeration<?> e = appProperties.propertyNames(); e.hasMoreElements(); ) {
+            String propertyName = e.nextElement().toString();
+            Matcher matcher = PROPERTY_HEADERS_PATTERN.matcher(propertyName);
+            if (matcher.find() && matcher.groupCount() == 1) {
+                String headerName = matcher.group(1);
+                headerMap.put(headerName, appProperties.getProperty(propertyName));
+            }
+        }
+
         String baseUri = apiServerProtocol + "://" + apiServerName;
         String basePath = "/api/" + apiVersionString + "/";
         LOGGER.info("API base: " + baseUri + basePath);
 
-        apiServerConnector = new APIServerConnector(baseUri, basePath, userName, password);
+        apiServerConnector = new APIServerConnector(baseUri, basePath, userName, password, headerMap);
     }
 
     /**
