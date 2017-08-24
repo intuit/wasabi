@@ -184,6 +184,7 @@ public class APIServerConnector {
 
         String agentString = "";
         String contentTypeString = "-H \"Content-Type:application/json\" "; // Default is JSON
+        String headerString = "";
         if (this.headerMap != null) {
             for (Map.Entry<String, String> entry : this.headerMap.entrySet()) {
                 String key = entry.getKey();
@@ -196,26 +197,20 @@ public class APIServerConnector {
                     case "Content-Type":
                         contentTypeString = "-H \"Content-Type:" + value + "\" ";
                         break;
-                    case "Authorization":
-                        authString = "-H \"Authorization: " + value + "\" ";
-                        break;
-                    case "Cookie":
-                        authString = "-H \"Cookie: " + value + "\" ";
-                        break;
                     default:
-                        throw new IllegalArgumentException("Support for key \"" + key + "\" not implemented yet.");
+                        headerString += "-H \"" + key + ":" + value + "\" ";
                 }
             }
         }
 
-        String curlCall =
-                "curl " +
-                        "-X " + method + " " +
-                        authString +
-                        agentString +
-                        contentTypeString +
-                        dataString +
-                        baseUri + basePath + url;
+        String curlCall = "curl -X "
+                + method + " "
+                + authString
+                + headerString
+                + agentString +
+                contentTypeString
+                + dataString +
+                baseUri + basePath + url;
         return curlCall;
     }
 
