@@ -22,6 +22,7 @@ import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
 import com.jayway.restassured.specification.RequestSpecification;
 import org.slf4j.Logger;
+import org.testng.util.Strings;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -226,9 +227,10 @@ public class APIServerConnector {
         reqBuilder.setRelaxedHTTPSValidation();
         reqBuilder.log(LogDetail.ALL); // NIT use setting to control this
 
-        if (userName != null) {
+        if (!Strings.isNullOrEmpty(userName)) {
             reqBuilder.setAuth(preemptive().basic(this.userName, this.password));
         }
+
         if (headerMap != null) {
             reqBuilder.addHeaders(headerMap);
         }
