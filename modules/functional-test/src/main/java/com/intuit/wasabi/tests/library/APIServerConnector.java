@@ -15,6 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.tests.library;
 
+import com.google.common.net.HttpHeaders;
 import com.google.gson.Gson;
 import com.jayway.restassured.builder.RequestSpecBuilder;
 import com.jayway.restassured.filter.log.LogDetail;
@@ -238,7 +239,7 @@ public class APIServerConnector {
 
     private Boolean containsAuthorizationHeaders() {
         if (headerMap != null) {
-            return headerMap.containsKey("Authorization");
+            return headerMap.containsKey(HttpHeaders.AUTHORIZATION);
         }
         return Boolean.FALSE;
     }
