@@ -53,7 +53,8 @@ public class SegmentOnHttpHeaderTest extends TestBase {
     private User user2;
     private List<Bucket> buckets;
     private SerializationStrategy defExpStrategy =
-            new DefaultNameExclusionStrategy("creationTime", "modificationTime", "ruleJson", "id", "description", "rule");
+            new DefaultNameExclusionStrategy("id", "creationTime",
+                    "modificationTime", "ruleJson", "hypothesisIsCorrect", "results", "creatorID");
     private String matchAgentValue = "MatchAgentValue";
 
     @BeforeTest
@@ -69,6 +70,8 @@ public class SegmentOnHttpHeaderTest extends TestBase {
     @RetryTest(maxTries = 3, warmup = 2000)
     public void prepareExperiment() {
         experiment = ExperimentFactory.createExperiment().setRule("User-Agent = \"" + matchAgentValue + "\"");
+        experiment.setSerializationStrategy(defExpStrategy);
+
         Experiment created = postExperiment(experiment);
 
         experiment.setState(Constants.EXPERIMENT_STATE_DRAFT);

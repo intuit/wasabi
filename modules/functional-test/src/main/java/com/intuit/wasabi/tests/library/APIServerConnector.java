@@ -44,7 +44,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public class APIServerConnector {
 
-    private static final Logger logger = getLogger(APIServerConnector.class);
     private static final Logger LOGGER = getLogger(APIServerConnector.class);
     public String emptyFormJSON = "{}";
     private RequestSpecification requestSpec;
@@ -222,12 +221,12 @@ public class APIServerConnector {
         reqBuilder.setRelaxedHTTPSValidation();
         reqBuilder.log(LogDetail.ALL); // NIT use setting to control this
 
-        if (!Strings.isNullOrEmpty(userName)) {
-            reqBuilder.setAuth(preemptive().basic(this.userName, this.password));
-        }
-
         if (headerMap != null) {
             reqBuilder.addHeaders(headerMap);
+        }
+
+        if (!Strings.isNullOrEmpty(userName) && !containsAuthorizationHeaders()) {
+            reqBuilder.setAuth(preemptive().basic(this.userName, this.password));
         }
 
         return reqBuilder.build();
@@ -235,6 +234,13 @@ public class APIServerConnector {
         // reqBuilder.setRelaxedHTTPSValidation();
         // was put in because we did not have certificate for the host
         // https://code.google.com/p/rest-assured/wiki/Usage#SSL
+    }
+
+    private Boolean containsAuthorizationHeaders() {
+        if (headerMap != null) {
+            return headerMap.containsKey("Authorization");
+        }
+        return Boolean.FALSE;
     }
 
     // HTTP method calls

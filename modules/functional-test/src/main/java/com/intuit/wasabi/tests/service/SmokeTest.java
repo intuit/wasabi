@@ -612,12 +612,11 @@ public class SmokeTest extends TestBase {
      */
     @Test(dependsOnMethods = {"t_checkDeletedExperiments"})
     public void t_recreateExperiment() {
+        experiment.setSerializationStrategy(experimentComparisonStrategy);
         experiment.setState(null).id = null;
         Experiment created = postExperiment(experiment);
         experiment.setState(Constants.EXPERIMENT_STATE_DRAFT);
-        //experiment.getSerializationStrategy().add("id");
         assertEqualModelItems(created, experiment, experimentComparisonStrategy);
-        //experiment.getSerializationStrategy().remove("id");
         experiment.update(created);
     }
 
