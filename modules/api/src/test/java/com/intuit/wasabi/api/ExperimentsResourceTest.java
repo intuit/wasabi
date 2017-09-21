@@ -183,7 +183,7 @@ public class ExperimentsResourceTest {
 
         when(experiments.getExperiments()).thenReturn(experimentList);
 
-        Response response = experimentsResource.getExperiments(AUTHHEADER, 1, 10, "", "", "");
+        Response response = experimentsResource.getExperiments(AUTHHEADER, 1, 10, "", "", "", false);
 
         List responseList = Collections.EMPTY_LIST;
         if (response.getEntity() instanceof HashMap) {
@@ -202,7 +202,7 @@ public class ExperimentsResourceTest {
         doThrow(AuthenticationException.class).when(authorization)
                 .checkUserPermissions(USER, TESTAPP2, Permission.READ);
 
-        response = experimentsResource.getExperiments(AUTHHEADER, 1, 10, "", "", "");
+        response = experimentsResource.getExperiments(AUTHHEADER, 1, 10, "", "", "", false);
 
         responseList = Collections.EMPTY_LIST;
         if (response.getEntity() instanceof HashMap) {
@@ -221,7 +221,7 @@ public class ExperimentsResourceTest {
     @Test
     public void testGetExperiments_NullAuth() throws Exception {
         thrown.expect(AuthenticationException.class);
-        experimentsResource.getExperiments(null, 1, 10, "", "", "");
+        experimentsResource.getExperiments(null, 1, 10, "", "", "", false);
     }
 
     @Test
@@ -231,7 +231,7 @@ public class ExperimentsResourceTest {
         experimentList.addExperiment(experiment);
         when(experiments.getExperiments()).thenReturn(experimentList);
 
-        Response response = experimentsResource.getExperiments(AUTHHEADER, 1, 10, "", "", "");
+        Response response = experimentsResource.getExperiments(AUTHHEADER, 1, 10, "", "", "", false);
         if (response.getEntity() instanceof HashMap) {
             if (((HashMap) response.getEntity()).get("experiments") instanceof List) {
                 assertThat("Experiment was not included in list.",
