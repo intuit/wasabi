@@ -37,16 +37,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.LongBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.UUID;
+import java.util.*;
 
 import static com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT;
 import static com.intuit.wasabi.experimentobjects.Experiment.State.PAUSED;
@@ -104,8 +95,9 @@ public class Experiment implements Cloneable, ExperimentBase, Serializable {
     @ApiModelProperty(value = "a set of experiment tags")
     private Set<String> tags;
 
-    private Boolean favorite;
+    private List<Bucket> buckets = new ArrayList<>();
 
+    private Boolean favorite;
 
     protected Experiment() {
         super();
@@ -323,6 +315,7 @@ public class Experiment implements Cloneable, ExperimentBase, Serializable {
                 .append(userCap)
                 .append(creatorID)
                 .append(tags)
+                .append(buckets)
                 .toHashCode();
     }
 
@@ -357,6 +350,7 @@ public class Experiment implements Cloneable, ExperimentBase, Serializable {
                 .append(userCap, other.getUserCap())
                 .append(creatorID, other.getCreatorID())
                 .append(tags, other.getTags())
+                .append(buckets, other.getBuckets())
                 .isEquals();
     }
 
@@ -445,6 +439,17 @@ public class Experiment implements Cloneable, ExperimentBase, Serializable {
             this.tags = new TreeSet<>(tags);
         else
             this.tags = tags;
+    }
+
+    public List<Bucket> getBuckets() {
+        return buckets;
+    }
+
+    public void setBuckets(List<Bucket> buckets) {
+        if (null != buckets)
+            this.buckets = new ArrayList<>();
+        else
+            this.buckets = buckets;
     }
 
     //TODO: redesign state and state transition to be state machine
@@ -548,6 +553,7 @@ public class Experiment implements Cloneable, ExperimentBase, Serializable {
             instance.userCap = other.userCap;
             instance.creatorID = other.creatorID;
             instance.tags = other.tags;
+            instance.buckets = other.buckets;
         }
 
         private Date copyDate(Date date) {
@@ -648,6 +654,11 @@ public class Experiment implements Cloneable, ExperimentBase, Serializable {
 
         public Builder withTags(final Set<String> tags) {
             instance.setTags(tags);
+            return this;
+        }
+
+        public Builder withBuckets(final List<Bucket> buckets) {
+            instance.setBuckets(buckets);
             return this;
         }
 
