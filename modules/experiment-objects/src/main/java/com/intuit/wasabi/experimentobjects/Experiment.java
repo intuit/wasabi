@@ -446,7 +446,7 @@ public class Experiment implements Cloneable, ExperimentBase, Serializable {
     }
 
     public void setBuckets(List<Bucket> buckets) {
-        if (null != buckets)
+        if (buckets == null)
             this.buckets = new ArrayList<>();
         else
             this.buckets = buckets;
