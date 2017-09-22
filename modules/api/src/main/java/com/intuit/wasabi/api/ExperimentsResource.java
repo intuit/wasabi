@@ -60,6 +60,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -246,15 +247,15 @@ public class ExperimentsResource {
             }
 
             String experimentsResponseJsonKey = "experiments";
+            List<Experiment> experimentsList = authorizedExperiments.getExperiments();
             Map<String, Object> experimentResponse = experimentPaginationHelper
                     .paginate(experimentsResponseJsonKey,
-                            authorizedExperiments.getExperiments(),
+                            experimentsList,
                             filter, timezoneOffset,
                             (perPage != -1 ? "-favorite," : "") + sort,
                             page, perPage);
 
             if (all) {
-                List<Experiment> experimentsList = (List<Experiment>) experimentResponse.get(experimentsResponseJsonKey);
                 experimentsList.parallelStream()
                         .forEach(experiment -> {
                             Experiment.ID experimentID = experiment.getID();
