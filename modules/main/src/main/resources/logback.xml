@@ -156,6 +156,9 @@
         <appender-ref ref="ASYNC_EHCACHE_LOG"/>
     </logger>
 
+    <logger name="org.eclipse.jetty" level="WARN" additivity="false"/>
+    <logger name="com.datastax" level="INFO" additivity="false" />
+
     <logger name="com.intuit.wasabi.assignment.impl.NoopDatabaseAssignmentEnvelope"
             level="${log.level}" additivity="false">
         <appender-ref ref="ASYNC_ASSIGNMENT_EXPORT_DB_LOG"/>
