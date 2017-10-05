@@ -40,33 +40,14 @@ import com.intuit.wasabi.experiment.Favorites;
 import com.intuit.wasabi.experiment.Mutex;
 import com.intuit.wasabi.experiment.Pages;
 import com.intuit.wasabi.experiment.Priorities;
-import com.intuit.wasabi.experimentobjects.Application;
-import com.intuit.wasabi.experimentobjects.Bucket;
-import com.intuit.wasabi.experimentobjects.BucketList;
-import com.intuit.wasabi.experimentobjects.Context;
-import com.intuit.wasabi.experimentobjects.Experiment;
-import com.intuit.wasabi.experimentobjects.ExperimentIDList;
-import com.intuit.wasabi.experimentobjects.ExperimentList;
-import com.intuit.wasabi.experimentobjects.ExperimentPageList;
-import com.intuit.wasabi.experimentobjects.NewExperiment;
-import com.intuit.wasabi.experimentobjects.Page;
+import com.intuit.wasabi.experimentobjects.*;
 import com.intuit.wasabi.repository.RepositoryException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.text.ParseException;
@@ -79,6 +60,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -86,6 +68,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
+import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_ALL;
 import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_FILTER;
 import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_MODBUCK;
 import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_PAGE;
@@ -93,6 +76,7 @@ import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_PER_PAGE;
 import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_PUTBUCK;
 import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_SORT;
 import static com.intuit.wasabi.api.APISwaggerResource.DEFAULT_TIMEZONE;
+import static com.intuit.wasabi.api.APISwaggerResource.DOC_All;
 import static com.intuit.wasabi.api.APISwaggerResource.DOC_FILTER;
 import static com.intuit.wasabi.api.APISwaggerResource.DOC_PAGE;
 import static com.intuit.wasabi.api.APISwaggerResource.DOC_PER_PAGE;
@@ -216,7 +200,12 @@ public class ExperimentsResource {
             @QueryParam("timezone")
             @DefaultValue(DEFAULT_TIMEZONE)
             @ApiParam(name = "timezone", defaultValue = DEFAULT_TIMEZONE, value = DOC_TIMEZONE)
-            final String timezoneOffset) {
+            final String timezoneOffset,
+
+            @QueryParam("all")
+            @DefaultValue("false")
+            @ApiParam(name = "all", defaultValue = DEFAULT_ALL, value = DOC_All)
+            final Boolean all) {
 
         try {
             ExperimentList experimentList = experiments.getExperiments();
@@ -257,10 +246,24 @@ public class ExperimentsResource {
                         .forEach(experiment -> experiment.setFavorite(true));
             }
 
+            String experimentsResponseJsonKey = "experiments";
+            List<Experiment> experimentsList = authorizedExperiments.getExperiments();
             Map<String, Object> experimentResponse = experimentPaginationHelper
-                    .paginate("experiments", authorizedExperiments.getExperiments(), filter, timezoneOffset,
-                            (perPage != -1 ? "-favorite," : "") + sort, page, perPage);
+                    .paginate(experimentsResponseJsonKey,
+                            experimentsList,
+                            filter, timezoneOffset,
+                            (perPage != -1 ? "-favorite," : "") + sort,
+                            page, perPage);
 
+            if (all) {
+                experimentsList.parallelStream()
+                        .forEach(experiment -> {
+                            Experiment.ID experimentID = experiment.getID();
+                            // Since we know that the experiment already exists, we do not need to check again.
+                            BucketList bucketList = buckets.getBuckets(experimentID, false);
+                            experiment.setBuckets(bucketList.getBuckets());
+                        });
+            }
             return httpHeader.headers().entity(experimentResponse).build();
         } catch (Exception exception) {
             LOGGER.error("getExperiments failed for page={}, perPage={}, "
