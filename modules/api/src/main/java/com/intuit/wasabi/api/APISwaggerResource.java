@@ -50,6 +50,7 @@ interface APISwaggerResource {
     String DEFAULT_FILTER = "";
     String DEFAULT_SORT = "";
     String DEFAULT_TIMEZONE = "+0000";
+    String DEFAULT_ALL = "false";
 
     String DOC_PAGE = "A positive integer determining the page to return. If the page does not exist, it is " +
             "returned empty.";
@@ -63,4 +64,5 @@ interface APISwaggerResource {
             "general the sort order follows the pattern: [-]primary[,[-]secondary[...]] . The keys determine the " +
             "fields and a prefixed hyphen changes the sort order to descending.";
     String DOC_TIMEZONE = "The user's timezone offset. Valid values are for example: +0100, -07:30 or the like.";
+    String DOC_All = "A boolean value indicating whether all the underlying configurations should be retrieved.";
 }
