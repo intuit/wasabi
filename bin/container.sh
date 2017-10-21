@@ -261,7 +261,10 @@ console_mysql() {
 }
 
 status() {
-  wget -q --spider --tries=20 --waitretry=3 http://localhost:8080/api/v1/ping
+  host_ip=$(echo $DOCKER_HOST | sed -e 's/^[^0-9]*//; s/\(\([0-9]\{1,3\}\.\)\{3\}[0-9]\{1,3\}\).*/\1/') || 'localhost'
+  [ "${host_ip}" = "" ] && host_ip=localhost
+
+  wget -q --spider --tries=20 --waitretry=3 http://${host_ip}:8080/api/v1/ping
   [ $? -ne 0 ] && usage "not started" 1
 
   cat << EOF
@@ -269,9 +272,9 @@ status() {
 ${green}
 wasabi is operational:
 
-  ui: % open http://localhost:8080     note: sign in as admin/admin
-  ping: % curl -i http://localhost:8080/api/v1/ping
-  debug: attach to localhost:8180
+  ui: % open http://${host_ip}:8080     note: sign in as admin/admin
+  ping: % curl -i http://${host_ip}:8080/api/v1/ping
+  debug: attach to ${host_ip}:8180
 ${reset}
 EOF
 
