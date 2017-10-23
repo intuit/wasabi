@@ -121,6 +121,19 @@ public class ExperimentFactory {
         experiment.results = "Sample experiment results";
         return experiment;
     }
+    
+    /**
+     * Create Create a basic Experiment with required default values and with a Tag name
+     * 
+     */
+    public static Experiment createExperimentWithTag() {
+    	Set tags = new HashSet<String>();
+    	tags.add(Constants.DEFAULT_PREFIX_TAG);
+        
+    	Experiment experiment = ExperimentFactory.createCompleteExperiment();
+        experiment.setTags(tags);
+        return experiment;
+    }
 
     /**
      * Creates a basic rapid Experiment with the required default values but no ID. The values are a name, the default
