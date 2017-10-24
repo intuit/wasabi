@@ -191,7 +191,7 @@ public class IntegrationExperiment extends TestBase {
      */
     @Test(groups = {"basicExperimentTests"}, dependsOnMethods = {"t_createTestExperimentWithTag"})
     public void t_checkexperimentswithTagName() {
-        clearAssignmentsMetadataCache();
+        //clearAssignmentsMetadataCache();
         String tagName = taggedExperiment.tags.iterator().next();        
         response = doGet("/experiments?per_page=-1&all=true&filter=tags="+tagName,null,null, HttpStatus.SC_OK, apiServerConnector);
         Assert.assertNotNull(response.jsonPath().getList("experiments"));
