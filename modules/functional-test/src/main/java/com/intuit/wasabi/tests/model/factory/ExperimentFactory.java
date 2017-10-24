@@ -12,6 +12,9 @@
  *******************************************************************************/
 package com.intuit.wasabi.tests.model.factory;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.google.gson.GsonBuilder;
 import com.intuit.wasabi.tests.library.util.Constants;
 import com.intuit.wasabi.tests.library.util.TestUtils;
@@ -126,8 +129,9 @@ public class ExperimentFactory {
      * Create Create a basic Experiment with required default values and with a Tag name
      * 
      */
-    public static Experiment createExperimentWithTag() {
-    	Set tags = new HashSet<String>();
+  
+	public static Experiment createExperimentWithTag() {
+    	Set<String> tags = new HashSet<String>();
     	tags.add(Constants.DEFAULT_PREFIX_TAG);
         
     	Experiment experiment = ExperimentFactory.createCompleteExperiment();
