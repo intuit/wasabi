@@ -101,6 +101,7 @@ public class IntegrationExperiment extends TestBase {
         initialExperiment = ExperimentFactory.createCompleteExperiment();
         completeExperiment = ExperimentFactory.createCompleteExperiment();
         personalizationExperiment = ExperimentFactory.createCompleteExperiment();
+	taggedExperiment = ExperimentFactory.createExperimentWithTag();
     }
 
     /**
