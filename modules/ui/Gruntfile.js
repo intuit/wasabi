@@ -102,9 +102,13 @@ module.exports = function (grunt) {
                     ],
                     protocol: 'https',
                     port: 443,
-                    key: grunt.file.read('server.key').toString(),
-                    cert: grunt.file.read('server.crt').toString(),
-                    ca: grunt.file.read('ca.crt').toString()
+                    // FIXME: fails to read key files
+                    // key: grunt.file.read('server.key').toString(),
+                    // cert: grunt.file.read('server.crt').toString(),
+                    // ca: grunt.file.read('ca.crt').toString()
+                    key: '',
+                    cert: '',
+                    ca: ''
                 }
             }
         },
