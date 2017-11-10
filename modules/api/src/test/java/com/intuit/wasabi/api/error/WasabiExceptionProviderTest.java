@@ -25,6 +25,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import javax.ws.rs.core.Response;
@@ -37,6 +39,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
+@PowerMockIgnore({ "jdk.internal.reflect.*" })
 @PrepareForTest({ErrorCode.class})
 public class WasabiExceptionProviderTest {
 
