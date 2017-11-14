@@ -218,6 +218,11 @@ public class BucketsImpl implements Buckets {
         // Save the state of the bucket; used for reverting the cassandra changes
         Bucket oldBucket = bucket;
 
+        LOGGER.info("Updating Bucket, old configuration : bucketLable={},experimentName={},applicationName={},allocationPercent={}," +
+                        "control={},description={},payload={},state={}",
+                oldBucket.getLabel(), experiment.getLabel(), experiment.getApplicationName(), oldBucket.getAllocationPercent(),
+                oldBucket.isControl(), oldBucket.getDescription(), oldBucket.getPayload(), oldBucket.getState());
+
         buckets.validateBucketChanges(bucket, updates);
 
         Bucket.Builder builder = getBucketBuilder(experimentID, bucketLabel);
@@ -250,6 +255,12 @@ public class BucketsImpl implements Buckets {
                 }
             }
         }
+
+        LOGGER.info("Finished updating bucket, new configuration: bucketLable={},experimentName={},applicationName={}," +
+                        "allocationPercent={},control={},description={},payload={},state={}",
+                bucket.getLabel(), experiment.getLabel(), experiment.getApplicationName(), bucket.getAllocationPercent(),
+                bucket.isControl(), bucket.getDescription(), bucket.getPayload(), bucket.getState());
+
         return bucket;
     }
 
@@ -269,6 +280,9 @@ public class BucketsImpl implements Buckets {
         if (bucket == null) {
             throw new BucketNotFoundException(bucketLabel);
         }
+
+        LOGGER.info("Updating bucket state: bucketLable={},experimentName={},applicationName={},oldState={}",
+                bucketLabel, experiment.getLabel(), experiment.getApplicationName(), bucket.getState());
 
         // Changes to state is not allowed in experiment's DRAFT state
         if (experiment.getState().equals(DRAFT)) {
@@ -396,6 +410,10 @@ public class BucketsImpl implements Buckets {
                 }
             }
         }
+
+        LOGGER.info("Finished updating bucket state: lable={},experimentName={},applicationName={},newState={}",
+                bucketLabel, experiment.getLabel(), experiment.getApplicationName(), bucket.getState());
+
         //return the updated closed bucket
         return bucket;
     }
@@ -430,6 +448,9 @@ public class BucketsImpl implements Buckets {
         // Save the bucket object before deleting it
         // To use it again to preserve data consistency
         Bucket bucket = cassandraRepository.getBucket(experimentID, bucketLabel);
+
+        LOGGER.info("Deleting bucket: bucketLabel={},experimentName={},applicationName={}",
+                bucket.getLabel(), experiment.getLabel(), experiment.getApplicationName());
 
         // Update both repositories
         cassandraRepository.deleteBucket(experimentID, bucketLabel);
