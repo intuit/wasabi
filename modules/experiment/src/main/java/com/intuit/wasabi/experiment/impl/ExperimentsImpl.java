@@ -180,7 +180,7 @@ public class ExperimentsImpl implements Experiments {
             throw experimentCreateException;
         }
 
-        LOGGER.debug("Create experiment finished.");
+        LOGGER.info("Created Experiment with configuration: "+newExperiment);
     }
 
     /**
@@ -525,6 +525,8 @@ public class ExperimentsImpl implements Experiments {
         Experiment.Builder builder = Experiment.from(experiment);
         boolean requiresUpdate = buildUpdatedExperiment(experiment, updates, builder, changeList);
 
+        LOGGER.info("Updating Experiment, old configuration: "+oldExperiment);
+
         if (requiresUpdate) {
 
             experiment = builder.build();
@@ -584,7 +586,7 @@ public class ExperimentsImpl implements Experiments {
                 }
             }
         }
-
+        LOGGER.info("Finished updating experiment, new configuration: "+experiment);
         return experiment;
     }
 
