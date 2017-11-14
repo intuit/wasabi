@@ -35,6 +35,8 @@ import com.intuit.wasabi.repository.CassandraRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.PagesRepository;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -47,6 +49,7 @@ import static java.util.Objects.isNull;
 
 public class PagesImpl implements Pages {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(PagesImpl.class);
     final Date NOW = new Date();
     private final ExperimentRepository cassandraRepository;
     private final Experiments experiments;
@@ -79,7 +82,9 @@ public class PagesImpl implements Pages {
             }
             String pageString = StringUtils.join(pageNames, ", ");
             eventLog.postEvent(new ExperimentChangeEvent(user, experiment, "pages", null, pageString));
+            LOGGER.info("Added pages={} to experiment={}",pageString,experiment.getLabel());
         }
+
     }
 
     /**
@@ -94,6 +99,8 @@ public class PagesImpl implements Pages {
         if (experiment != null) {
             eventLog.postEvent(new ExperimentChangeEvent(user, experiment, "pages", pageName.toString(), null));
         }
+
+        LOGGER.info("Removed pageName={} from experiment={} by user={}",pageName,experiment.getLabel(),user.getUsername());
     }
 
     /**

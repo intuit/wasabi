@@ -240,7 +240,6 @@ public class ExperimentsResource {
                 }
 
                 List<Experiment.ID> favoriteList = favorites.getFavorites(userName);
-
                 authorizedExperiments.getExperiments().
                         parallelStream().filter(experiment -> favoriteList.contains(experiment.getID()))
                         .forEach(experiment -> experiment.setFavorite(true));
@@ -569,9 +568,9 @@ public class ExperimentsResource {
 
             Bucket newBucket = Bucket.from(newBucketEntity).withExperimentID(experimentID).build();
 
-            LOGGER.warn("Bucket edited: user " + userName.toString()
-                    + " is adding bucket " + newBucket.toString() + " to experiment "
-                    + experimentID.toString());
+            LOGGER.info("Bucket edited: user=" + userName.toString()
+                    + ", bucket=" + newBucket.toString() + ", experiment="
+                    + experiment.getLabel()+", applicationName="+experiment.getApplicationName());
 
             UserInfo user = authorization.getUserInfo(userName);
             Bucket bucket = buckets.createBucket(experimentID, newBucket, user);
@@ -624,8 +623,8 @@ public class ExperimentsResource {
 
             authorization.checkUserPermissions(userName, experiment.getApplicationName(), UPDATE);
 
-            LOGGER.warn("Bucket edited: user " + userName.toString()
-                    + " is batch editing buckets for experiment " + experimentID.toString());
+            LOGGER.info("Buckets edited in batch: user=" + userName.toString()
+                    + ", experiment=" +experiment.getLabel()+", applicationName="+experiment.getApplicationName()+", buckets="+bucketList.toString());
 
             UserInfo user = authorization.getUserInfo(userName);
             BucketList bucketList1 = buckets.updateBucketBatch(experimentID, bucketList, user);
