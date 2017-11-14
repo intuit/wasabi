@@ -95,7 +95,9 @@ public class MutexImpl implements Mutex {
         Experiment exp_1 = experiments.getExperiment(expID_1);
         Experiment exp_2 = experiments.getExperiment(expID_2);
 
-        LOGGER.info("Deleting mutual exclusion between experiments="+exp_1.getLabel()+"and"+exp_2.getLabel());
+        if (exp_1 != null && exp_2 != null) {
+            LOGGER.info("Deleting mutual exclusion between experiments=" + exp_1.getLabel() + "and" + exp_2.getLabel());
+        }
 
         // Check that expID_1 is a valid experiment
         if (exp_1 == null) {
