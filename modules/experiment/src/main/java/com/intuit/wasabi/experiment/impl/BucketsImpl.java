@@ -218,6 +218,9 @@ public class BucketsImpl implements Buckets {
         // Save the state of the bucket; used for reverting the cassandra changes
         Bucket oldBucket = bucket;
 
+        LOGGER.info("event=EXPERIMENT_METADATA_CHANGE, message=UPDATING_BUCKET, applicationName={}, experimentName={}, configuration=[{}]",
+                experiment.getApplicationName(), experiment.getLabel(), oldBucket);
+
         buckets.validateBucketChanges(bucket, updates);
 
         Bucket.Builder builder = getBucketBuilder(experimentID, bucketLabel);
@@ -250,6 +253,10 @@ public class BucketsImpl implements Buckets {
                 }
             }
         }
+
+        LOGGER.info("event=EXPERIMENT_METADATA_CHANGE, message=BUCKET_UPDATED, applicationName={}, experimentName={}, configuration=[{}]",
+                experiment.getApplicationName(), experiment.getLabel(), bucket);
+
         return bucket;
     }
 
@@ -396,6 +403,10 @@ public class BucketsImpl implements Buckets {
                 }
             }
         }
+
+        LOGGER.info("event=EXPERIMENT_METADATA_CHANGE, message=BUCKET_STATE_UPDATED, applicationName={}, experimentName={}, configuration=[oldState={}, newState={}]",
+                experiment.getApplicationName(), experiment.getLabel(), bucket.getState(),desiredState);
+
         //return the updated closed bucket
         return bucket;
     }
@@ -452,6 +463,8 @@ public class BucketsImpl implements Buckets {
             }
             throw e;
         }
+        LOGGER.info("event=EXPERIMENT_METADATA_CHANGE, message=BUCKET_DELETED, applicationName={}, experimentName={}, configuration=[{}]",
+                experiment.getApplicationName(), experiment.getLabel(), bucket);
     }
 
     /**
