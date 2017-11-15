@@ -180,7 +180,7 @@ public class ExperimentsImpl implements Experiments {
             throw experimentCreateException;
         }
 
-        LOGGER.debug("Create experiment finished.");
+        LOGGER.info("event=EXPERIMENT_METADATA_CHANGE, message=EXPERIMENT_CREATED, applicationName={}, configuration={}",newExperiment.getApplicationName(),newExperiment);
     }
 
     /**
@@ -525,6 +525,8 @@ public class ExperimentsImpl implements Experiments {
         Experiment.Builder builder = Experiment.from(experiment);
         boolean requiresUpdate = buildUpdatedExperiment(experiment, updates, builder, changeList);
 
+        LOGGER.info("event=EXPERIMENT_METADATA_CHANGE, message=UPDATING_EXPERIMENT, applicationName={}, configuration={}", oldExperiment.getApplicationName(), oldExperiment);
+
         if (requiresUpdate) {
 
             experiment = builder.build();
@@ -584,6 +586,7 @@ public class ExperimentsImpl implements Experiments {
                 }
             }
         }
+        LOGGER.info("event=EXPERIMENT_METADATA_CHANGE, Message=EXPERIMENT_UPDATED, applicationName={}, configuration={}", experiment.getApplicationName(), experiment);
 
         return experiment;
     }
@@ -594,7 +597,6 @@ public class ExperimentsImpl implements Experiments {
     @Override
     public void updateExperimentState(final Experiment experiment, final Experiment.State state) {
         try {
-            LOGGER.info("Updating experiment state for experiment:{} to final state:{}", experiment, state);
             cassandraRepository.updateExperimentState(experiment, state);
             // To maintain consistency, revert the changes made in cassandra in case the mysql update fails
             try {
@@ -610,5 +612,7 @@ public class ExperimentsImpl implements Experiments {
             LOGGER.error("Updating experiment state for experiment:{} failed with error:", experiment, exception);
             throw exception;
         }
+        LOGGER.info("event=EXPERIMENT_METADATA_CHANGE, message=EXPERIMENT_STATE_UPDATED, applicationName={}, configuration=[experimentName={}, oldState={}, newState={}]",
+                experiment.getApplicationName(), experiment.getLabel(), experiment.getState(), state);
     }
 }

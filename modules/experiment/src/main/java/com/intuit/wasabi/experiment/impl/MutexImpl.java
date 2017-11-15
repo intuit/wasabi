@@ -107,6 +107,9 @@ public class MutexImpl implements Mutex {
 
         mutexRepository.deleteExclusion(expID_1, expID_2);
         eventLog.postEvent(new ExperimentChangeEvent(user, exp_1, "mutex", exp_2.getLabel().toString(), null));
+
+        LOGGER.info("event=EXPERIMENT_METADATA_CHANGE, message=MUTUAL_EXCLUSION_DELETED, applicationName={}, configuration=[experiment1={}, experiment2={}]",
+                exp_1.getApplicationName(), exp_1.getLabel(), exp_2.getLabel());
     }
 
     /**
@@ -207,9 +210,12 @@ public class MutexImpl implements Mutex {
                 results.add(tempResult);
                 continue;
             }
+            LOGGER.info("event=EXPERIMENT_METADATA_CHANGE, message=MUTUAL_EXCLUSION_CREATED, applicationName={}, configuration=[experiment1={}, experiment2={}]",
+                    baseExp.getApplicationName(), baseExp.getLabel(), pairExp.getLabel());
             tempResult.put("status", "SUCCESS");
             results.add(tempResult);
         }
+
         return results;
     }
 

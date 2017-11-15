@@ -240,7 +240,6 @@ public class ExperimentsResource {
                 }
 
                 List<Experiment.ID> favoriteList = favorites.getFavorites(userName);
-
                 authorizedExperiments.getExperiments().
                         parallelStream().filter(experiment -> favoriteList.contains(experiment.getID()))
                         .forEach(experiment -> experiment.setFavorite(true));
@@ -569,14 +568,13 @@ public class ExperimentsResource {
 
             Bucket newBucket = Bucket.from(newBucketEntity).withExperimentID(experimentID).build();
 
-            LOGGER.warn("Bucket edited: user " + userName.toString()
-                    + " is adding bucket " + newBucket.toString() + " to experiment "
-                    + experimentID.toString());
-
             UserInfo user = authorization.getUserInfo(userName);
             Bucket bucket = buckets.createBucket(experimentID, newBucket, user);
 
             assert bucket != null : "Created bucket was null";
+
+            LOGGER.info("event=EXPERIMENT_METADATA_CHANGE, message=BUCKET_EDITED, applicationName={}, configuration=[userName={}, experimentName={}, bucket={}]",
+                    experiment.getApplicationName(), userName.toString(), experiment.getLabel(), newBucket.toString());
 
             return httpHeader.headers(CREATED).entity(bucket).build();
         } catch (Exception exception) {
@@ -624,11 +622,11 @@ public class ExperimentsResource {
 
             authorization.checkUserPermissions(userName, experiment.getApplicationName(), UPDATE);
 
-            LOGGER.warn("Bucket edited: user " + userName.toString()
-                    + " is batch editing buckets for experiment " + experimentID.toString());
-
             UserInfo user = authorization.getUserInfo(userName);
             BucketList bucketList1 = buckets.updateBucketBatch(experimentID, bucketList, user);
+
+            LOGGER.info("event=EXPERIMENT_METADATA_CHANGE, message=BUCKETS_EDITED_BATCH, applicationName={}, configuration:[userName={}, experimentName={}, buckets={}]",
+                    experiment.getApplicationName(), userName.toString(), experiment.getLabel(), bucketList.toString());
 
             return httpHeader.headers().entity(bucketList1).build();
         } catch (Exception exception) {
@@ -636,6 +634,7 @@ public class ExperimentsResource {
                     experimentID, bucketList, exception);
             throw exception;
         }
+
     }
 
     /**
