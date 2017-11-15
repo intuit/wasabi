@@ -82,7 +82,9 @@ public class PagesImpl implements Pages {
             }
             String pageString = StringUtils.join(pageNames, ", ");
             eventLog.postEvent(new ExperimentChangeEvent(user, experiment, "pages", null, pageString));
-            LOGGER.info("Added pages={} to experiment={}",pageString,experiment.getLabel());
+
+            LOGGER.info("event=EXPERIMENT_METADATA_CHANGE, message=PAGES_ADDED, applicationName={}, experimentName={}, configuration=[pages={}]",
+                    experiment.getApplicationName(), experiment.getLabel(), pageString);
         }
 
     }
@@ -100,7 +102,8 @@ public class PagesImpl implements Pages {
             eventLog.postEvent(new ExperimentChangeEvent(user, experiment, "pages", pageName.toString(), null));
         }
 
-        LOGGER.info("Removed pageName={} from experiment={} by user={}",pageName,experiment.getLabel(),user.getUsername());
+        LOGGER.info("event=EXPERIMENT_METADATA_CHANGE, message=PAGE_REMOVED, applicationName={}, experimentName={}, configuration=[pageName={}, userName={}]",
+                experiment.getApplicationName(), experiment.getLabel(), pageName, user.getUsername());
     }
 
     /**

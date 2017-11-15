@@ -91,8 +91,8 @@ public class PrioritiesImpl implements Priorities {
         }
         prioritiesRepository.createPriorities(applicationName, experimentPriorityList);
 
-        LOGGER.info("Added experiment={} to the priority list of applicationName={} with priorityPosition={}",
-                experiment.getLabel(), experiment.getApplicationName(), priorityNum);
+        LOGGER.info("event=EXPERIMENT_METADATA_CHANGE, message=SET_PRIORITY, applicationName={}, configuration=[experimentName={}, priorityPosition={}]",
+                experiment.getApplicationName(), experiment.getLabel(), priorityNum);
 
     }
 
