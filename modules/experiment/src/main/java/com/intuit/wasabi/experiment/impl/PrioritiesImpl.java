@@ -24,6 +24,8 @@ import com.intuit.wasabi.experimentobjects.ExperimentIDList;
 import com.intuit.wasabi.experimentobjects.PrioritizedExperiment;
 import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
 import com.intuit.wasabi.repository.PrioritiesRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -37,6 +39,7 @@ import static com.intuit.wasabi.experimentobjects.Experiment.State.TERMINATED;
 
 public class PrioritiesImpl implements Priorities {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(PrioritiesImpl.class);
     private final PrioritiesRepository prioritiesRepository;
     private final Experiments experiments;
 
@@ -87,6 +90,10 @@ public class PrioritiesImpl implements Priorities {
             experimentPriorityList.add(adjustedPriorityNum, experimentID);
         }
         prioritiesRepository.createPriorities(applicationName, experimentPriorityList);
+
+        LOGGER.info("event=EXPERIMENT_METADATA_CHANGE, message=SET_PRIORITY, applicationName={}, configuration=[experimentName={}, priorityPosition={}]",
+                experiment.getApplicationName(), experiment.getLabel(), priorityNum);
+
     }
 
     /**
