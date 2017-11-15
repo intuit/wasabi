@@ -95,10 +95,6 @@ public class MutexImpl implements Mutex {
         Experiment exp_1 = experiments.getExperiment(expID_1);
         Experiment exp_2 = experiments.getExperiment(expID_2);
 
-        if (exp_1 != null && exp_2 != null) {
-            LOGGER.info("Deleting mutual exclusion between experiments=" + exp_1.getLabel() + "and" + exp_2.getLabel());
-        }
-
         // Check that expID_1 is a valid experiment
         if (exp_1 == null) {
             throw new ExperimentNotFoundException(expID_1);
@@ -111,6 +107,9 @@ public class MutexImpl implements Mutex {
 
         mutexRepository.deleteExclusion(expID_1, expID_2);
         eventLog.postEvent(new ExperimentChangeEvent(user, exp_1, "mutex", exp_2.getLabel().toString(), null));
+
+        LOGGER.info("event=EXPERIMENT_METADATA_CHANGE, message=MUTUAL_EXCLUSION_DELETED, applicationName={}, configuration=[experiment1={}, experiment2={}]",
+                exp_1.getApplicationName(), exp_1.getLabel(), exp_2.getLabel());
     }
 
     /**
@@ -211,7 +210,8 @@ public class MutexImpl implements Mutex {
                 results.add(tempResult);
                 continue;
             }
-            LOGGER.info("Created mutual exclusion for experiments={} and {}", baseExp.getLabel(), pairExp.getLabel());
+            LOGGER.info("event=EXPERIMENT_METADATA_CHANGE, message=MUTUAL_EXCLUSION_CREATED, applicationName={}, configuration=[experiment1={}, experiment2={}]",
+                    baseExp.getApplicationName(), baseExp.getLabel(), pairExp.getLabel());
             tempResult.put("status", "SUCCESS");
             results.add(tempResult);
         }
