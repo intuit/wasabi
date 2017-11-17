@@ -1,6 +1,6 @@
 ---- Query: Get the assignment of a user to an experiment
 --THIS IS COMMENTED OUT BECAUSE WE ARE USING A NEWER VERSION
---create table user_assignment (
+--create table if not exists user_assignment (
 --    experiment_id uuid,
 --    user_id varchar,
 --
@@ -10,7 +10,7 @@
 --    PRIMARY KEY ((experiment_id, user_id))
 --);
 
-create table user_assignment (
+create table if not exists user_assignment (
     experiment_id uuid,
     user_id varchar,
     context varchar,

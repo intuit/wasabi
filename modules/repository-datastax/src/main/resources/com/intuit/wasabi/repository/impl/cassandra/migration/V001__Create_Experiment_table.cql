@@ -1,6 +1,6 @@
 -- Query: Get experiment metadata
 
-create table experiment (
+create table if not exists experiment (
     id uuid,
 
     description varchar,
@@ -23,4 +23,4 @@ create table experiment (
 );
 
 -- Query: Get all experiment IDs for an app
-create index on experiment(app_name);
+create index if not exists on experiment(app_name);

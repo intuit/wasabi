@@ -1,4 +1,4 @@
-create table user_assignment_by_userid (
+create table if not exists user_assignment_by_userid (
   experiment_id uuid,
   user_id varchar,
   context varchar,

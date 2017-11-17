@@ -1,6 +1,6 @@
 -- Query: Get the status of an experiment (deleted or not)
 
-create table state_experiment_index (
+create table if not exists state_experiment_index (
     index_key varchar,
     experiment_id uuid,
 

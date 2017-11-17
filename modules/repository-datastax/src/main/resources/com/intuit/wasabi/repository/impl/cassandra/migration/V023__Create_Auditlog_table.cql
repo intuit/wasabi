@@ -17,7 +17,7 @@
 --
 
 -- 'original' AuditLog table
-CREATE TABLE auditlog (
+CREATE TABLE IF NOT EXISTS auditlog (
     time             timestamp,
     event_id         uuid,
     action           varchar,

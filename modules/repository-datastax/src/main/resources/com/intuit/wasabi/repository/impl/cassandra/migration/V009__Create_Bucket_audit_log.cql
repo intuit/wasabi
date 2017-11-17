@@ -1,4 +1,4 @@
-CREATE TABLE bucket_audit_log (
+CREATE TABLE IF NOT EXISTS bucket_audit_log (
   experiment_id uuid,
   label text,
   modified timestamp,

@@ -1,4 +1,4 @@
-CREATE TABLE experiment_audit_log (
+CREATE TABLE IF NOT EXISTS experiment_audit_log (
   experiment_id uuid,
   modified timestamp,
   attribute_name text,

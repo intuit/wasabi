@@ -1,4 +1,4 @@
-create table user_assignment_export(
+create table if not exists user_assignment_export(
   experiment_id uuid,
   user_id varchar,
   context varchar,

@@ -1,4 +1,4 @@
-create table user_assignment_look_up(
+create table if not exists user_assignment_look_up(
   experiment_id uuid,
   user_id varchar,
   context varchar,

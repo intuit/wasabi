@@ -1,6 +1,6 @@
 -- Query: Get bucket metadata
 
-create table bucket (
+create table if not exists bucket (
     experiment_id uuid,
     label varchar,
     state text,
