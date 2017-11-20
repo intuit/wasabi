@@ -34,6 +34,9 @@ RUN yum -y update && yum install -y wget
 RUN wget --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/${JDK_VERSION}/d54c1d3a095b4ff2b6607d096fa80163/jdk-${JDK_MAJOR_VERSION}-linux-x64.rpm \
 	&& rpm -ivh jdk-${JDK_MAJOR_VERSION}-linux-x64.rpm && rm jdk-${JDK_MAJOR_VERSION}-linux-x64.rpm
 
+# install runit for chpst support
+RUN wget --content-disposition https://packagecloud.io/imeyer/runit/packages/el/7/runit-2.1.1-7.el7.centos.x86_64.rpm/download.rpm && yum install -y runit-2.1.1-7.el7.centos.x86_64.rpm && rm runit-2.1.1-7.el7.centos.x86_64.rpm
+
 COPY ./ ${WASABI_HOME}/
 COPY entrypoint.sh /usr/local/bin/
 RUN sed -i -e $'s/1>>.*2>&1//' ${WASABI_HOME}/bin/run 2>/dev/null;
