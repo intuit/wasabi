@@ -64,6 +64,11 @@ public class Constants {
      * {@link #INTEGRATION_TESTS_PREFIX}{@code + "Experiment_";}
      */
     public static final String DEFAULT_PREFIX_EXPERIMENT = INTEGRATION_TESTS_PREFIX + "Experiment_";
+    
+    /**
+     * {@link #INTEGRATION_TESTS_PREFIX}{@code + "Tag_";}
+     */
+    public static final String DEFAULT_PREFIX_TAG = INTEGRATION_TESTS_PREFIX + "Tag_";
 
     /**
      * {@link #INTEGRATION_TESTS_PREFIX}{@code + "User_";}

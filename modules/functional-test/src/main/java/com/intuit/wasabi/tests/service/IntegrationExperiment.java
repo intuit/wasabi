@@ -89,6 +89,7 @@ public class IntegrationExperiment extends TestBase {
     private Experiment initialExperiment;
     private Experiment completeExperiment;
     private Experiment personalizationExperiment;
+    private Experiment taggedExperiment;
     private String userName;
 
     /**
@@ -100,6 +101,7 @@ public class IntegrationExperiment extends TestBase {
         initialExperiment = ExperimentFactory.createCompleteExperiment();
         completeExperiment = ExperimentFactory.createCompleteExperiment();
         personalizationExperiment = ExperimentFactory.createCompleteExperiment();
+	taggedExperiment = ExperimentFactory.createExperimentWithTag();
     }
 
     /**
@@ -110,6 +112,8 @@ public class IntegrationExperiment extends TestBase {
         Experiment created = postExperiment(initialExperiment);
         initialExperiment.update(created);
     }
+    
+  
 
     /**
      * Checks if the experiment output is a correctly formatted list.
@@ -120,6 +124,9 @@ public class IntegrationExperiment extends TestBase {
         List<Experiment> experiments = getExperiments();
         Assert.assertTrue(experiments.size() > 0, "List did not contain any elements - should be at least 1.");
     }
+    
+    
+
 
     /**
      * Checks the raw output of an experiment to see if there are unintended or missing fields.
@@ -164,6 +171,52 @@ public class IntegrationExperiment extends TestBase {
         }
         Assert.assertTrue(found, "Required experiment not found in list of experiments.");
     }
+    
+    /*
+     * Create a test experiment with Tag name
+     * 
+     */
+    @Test(groups = {"basicExperimentTests"}, dependsOnGroups = {"ping"})
+    public void t_createTestExperimentWithTag() {
+        Experiment created = postExperiment(taggedExperiment);
+        taggedExperiment.update(created);
+        // Create buckets for the experiment
+        Bucket bucket = BucketFactory.createBucket(taggedExperiment).setAllocationPercent(1);
+        postBucket(bucket);
+    }
+    
+    
+     /**
+     * Tests if experiments are returned for a given Tag Name. Test Expose Meta Data Feature
+     */
+    @Test(groups = {"basicExperimentTests"}, dependsOnMethods = {"t_createTestExperimentWithTag"})
+    public void t_checkexperimentswithTagName() {
+        //clearAssignmentsMetadataCache();
+        String tagName = taggedExperiment.tags.iterator().next();        
+        response = doGet("/experiments?per_page=-1&all=true&filter=tags="+tagName,null,null, HttpStatus.SC_OK, apiServerConnector);
+        Assert.assertNotNull(response.jsonPath().getList("experiments"));
+        Assert.assertTrue(response.jsonPath().getList("experiments").size() > 0, "List should have at least one " +
+                "experiment.");
+        
+        List<Map<String, Object>> jsonMapping = response.jsonPath().get("experiments");
+        for (Map<String, Object> map : jsonMapping) {
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                if (entry.getKey().equalsIgnoreCase("tags")) {
+                	@SuppressWarnings("unchecked")
+					ArrayList<String> values = (ArrayList<String>) entry.getValue();
+                	if(values.contains(tagName)){
+                		Assert.assertTrue(values.contains(tagName));
+                		break;
+                	}                	
+                }                  
+                if(entry.getKey().equalsIgnoreCase("buckets")){
+                	Assert.assertNotNull(entry.getValue());
+                }
+            }
+        }
+                  
+    }       
+
 
     /**
      * Provides invalid IDs and their expected results.
