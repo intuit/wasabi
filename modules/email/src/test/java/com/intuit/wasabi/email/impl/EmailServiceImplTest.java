@@ -49,7 +49,7 @@ public class EmailServiceImplTest {
 
     @Before
     public void setUp() {
-        emailService = new EmailServiceImpl(true, "host1", "from1", "prefix1", new EmailTextProcessorImpl(null));
+        emailService = new EmailServiceImpl(true, "host1", "from1", "prefix1", "username","",false, false, new EmailTextProcessorImpl(null));
     }
 
     @Test
@@ -91,7 +91,7 @@ public class EmailServiceImplTest {
     @Test(expected = WasabiEmailException.class)
     public void testSetEmailTextProcessor() {
         EmailTextProcessor emailTextProcessor = mock(EmailTextProcessor.class);
-        EmailServiceImpl emailService = spy(new EmailServiceImpl(false, "host1", "from1", "prefix", emailTextProcessor));
+        EmailServiceImpl emailService = spy(new EmailServiceImpl(false, "host1", "from1", "prefix","username","", false,false, emailTextProcessor));
         Email simpleEmail = mock(Email.class);
         List<String> emailList = new ArrayList();
         emailList.add("mocked emmail");
@@ -111,7 +111,7 @@ public class EmailServiceImplTest {
         EmailTextProcessor emailTextProcessor = mock(EmailTextProcessor.class);
         Email simpleEmail = mock(Email.class);
         EmailServiceImpl emailService = spy(new EmailServiceImpl
-                (false, "host1", "from1", "prefix", emailTextProcessor));
+                (false, "host1", "from1", "prefix","username","", false,false, emailTextProcessor));
         emailService.setActive(true);
         when(emailService.createSimpleMailService()).thenReturn(simpleEmail);
         emailService.send("mocked subject", "mocked message", "mock@example.com");

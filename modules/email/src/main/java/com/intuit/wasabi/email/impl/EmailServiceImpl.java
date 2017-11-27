@@ -35,10 +35,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.intuit.wasabi.email.EmailAnnotations.EMAIL_SERVICE_ENABLED;
-import static com.intuit.wasabi.email.EmailAnnotations.EMAIL_SERVICE_FROM;
-import static com.intuit.wasabi.email.EmailAnnotations.EMAIL_SERVICE_HOST;
-import static com.intuit.wasabi.email.EmailAnnotations.EMAIL_SERVICE_SUBJECT_PREFIX;
+import static com.intuit.wasabi.email.EmailAnnotations.*;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -55,12 +52,20 @@ public class EmailServiceImpl implements EmailService {
     private String subjectPrefix;
     private EmailValidator emailVal = EmailValidator.getInstance();
     private EmailTextProcessor emailTextProcessor;
+    private String userName;
+    private String password;
+    private boolean authenticationEnabled;
+    private boolean sslEnabled;
 
     @Inject
     public EmailServiceImpl(final @Named(EMAIL_SERVICE_ENABLED) boolean enabled,
                             final @Named(EMAIL_SERVICE_HOST) String host,
                             final @Named(EMAIL_SERVICE_FROM) String from,
                             final @Named(EMAIL_SERVICE_SUBJECT_PREFIX) String subjectPrefix,
+                            final @Named(EMAIL_SERVICE_USERNAME) String userName,
+                            final @Named(EMAIL_SERVICE_PASSWORD) String password,
+                            final @Named(EMAIL_SERVICE_AUTHENTICATION_ENABLED) boolean authenticationEnabled,
+                            final @Named(EMAIL_SERVICE_SSL_ENABLED) boolean sslEnabled,
                             final EmailTextProcessor emailTextProcessor) {
         this.enabled = enabled;
 
@@ -70,6 +75,10 @@ public class EmailServiceImpl implements EmailService {
 
         this.subjectPrefix = subjectPrefix;
         this.emailTextProcessor = emailTextProcessor;
+        this.userName=userName;
+        this.password=password;
+        this.authenticationEnabled=authenticationEnabled;
+        this.sslEnabled=sslEnabled;
     }
 
     /**
@@ -151,6 +160,10 @@ public class EmailServiceImpl implements EmailService {
                 email.setSubject(subjectPrefix + " " + subject);
                 email.setMsg(msg);
                 email.addTo(clearTo);
+                if (this.authenticationEnabled) {
+                    email.setAuthentication(this.userName, this.password);
+                }
+                email.setSSLOnConnect(sslEnabled);
                 email.send();
             } catch (EmailException mailExcp) {
                 LOGGER.error("Email could not be send because of " + mailExcp.getMessage());
@@ -217,4 +230,6 @@ public class EmailServiceImpl implements EmailService {
     public void setSubjectPrefix(String subjectPrefix) {
         this.subjectPrefix = subjectPrefix;
     }
+
+
 }
