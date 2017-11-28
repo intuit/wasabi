@@ -21,4 +21,9 @@ public interface EmailAnnotations {
     String EMAIL_SERVICE_HOST = "email.service.host";
     String EMAIL_SERVICE_FROM = "email.service.from";
     String EMAIL_SERVICE_SUBJECT_PREFIX = "email.service.subject.prefix";
+    String EMAIL_SERVICE_USERNAME="email.service.username";
+    String EMAIL_SERVICE_PASSWORD="email.service.password";
+    String EMAIL_SERVICE_AUTHENTICATION_ENABLED="email.service.authentication.enabled";
+    String EMAIL_SERVICE_SSL_ENABLED="email.service.ssl.enabled";
+
 }

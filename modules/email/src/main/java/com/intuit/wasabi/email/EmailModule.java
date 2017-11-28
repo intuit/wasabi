@@ -30,10 +30,7 @@ import static com.google.inject.Scopes.SINGLETON;
 import static com.google.inject.name.Names.named;
 import static com.intuit.autumn.utils.PropertyFactory.create;
 import static com.intuit.autumn.utils.PropertyFactory.getProperty;
-import static com.intuit.wasabi.email.EmailAnnotations.EMAIL_SERVICE_ENABLED;
-import static com.intuit.wasabi.email.EmailAnnotations.EMAIL_SERVICE_FROM;
-import static com.intuit.wasabi.email.EmailAnnotations.EMAIL_SERVICE_HOST;
-import static com.intuit.wasabi.email.EmailAnnotations.EMAIL_SERVICE_SUBJECT_PREFIX;
+import static com.intuit.wasabi.email.EmailAnnotations.*;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Class.forName;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -69,6 +66,15 @@ public class EmailModule extends AbstractModule {
                 .toInstance(getProperty("email.service.from", properties, ""));
         bind(String.class).annotatedWith(named(EMAIL_SERVICE_SUBJECT_PREFIX))
                 .toInstance(getProperty("email.service.subject.prefix", properties, ""));
+        bind(String.class).annotatedWith(named(EMAIL_SERVICE_USERNAME))
+                .toInstance(getProperty("email.service.username", properties, ""));
+        bind(String.class).annotatedWith(named(EMAIL_SERVICE_PASSWORD))
+                .toInstance(getProperty("email.service.password", properties, ""));
+        bind(String.class).annotatedWith(named(EMAIL_SERVICE_AUTHENTICATION_ENABLED))
+                .toInstance(getProperty("email.service.authentication.enabled", properties, FALSE.toString()));
+        bind(String.class).annotatedWith(named(EMAIL_SERVICE_SSL_ENABLED))
+                .toInstance(getProperty("email.service.ssl.enabled", properties, FALSE.toString()));
+
 
         bind(EmailTextProcessor.class).to(EmailTextProcessorImpl.class).in(SINGLETON);
         //create listener
