@@ -166,7 +166,7 @@ public class EmailServiceImpl implements EmailService {
                 email.setSSLOnConnect(sslEnabled);
                 email.send();
             } catch (EmailException mailExcp) {
-                LOGGER.error("Email could not be send because of " + mailExcp.getMessage());
+                LOGGER.error("Email could not be send because of " + mailExcp.getMessage(),mailExcp);
                 throw new WasabiEmailException("Email: " + emailToString(subject, msg, to) + " could not be sent.", mailExcp);
             }
         } else {
