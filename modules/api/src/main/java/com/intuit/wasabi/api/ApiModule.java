@@ -115,6 +115,8 @@ public class ApiModule extends AbstractModule {
         install(new EventsModule());
     }
 
+    protected void installEmailModule() { install(new EmailModule());}
+
     private void installModules() {
         LOGGER.debug("installing module: {}", ApiModule.class.getCanonicalName());
 
@@ -127,7 +129,8 @@ public class ApiModule extends AbstractModule {
         install(new AuditLogModule());
         installAuthModule();
 
-        install(new EmailModule());
+        //install(new EmailModule());
+        installEmailModule();
         installEventModule();
         install(new ExperimentsModule());
         install(new FeedbackModule());
