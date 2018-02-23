@@ -99,6 +99,12 @@ public class Experiment implements Cloneable, ExperimentBase, Serializable {
 
     private Boolean favorite;
 
+    private List<Experiment.ID> exclusionIdList;
+
+    private List<ExperimentPage> experimentPageList;
+
+    private Integer priority;
+
     protected Experiment() {
         super();
     }
@@ -291,6 +297,30 @@ public class Experiment implements Cloneable, ExperimentBase, Serializable {
     @JsonIgnore
     public Boolean isFavorite() {
         return favorite;
+    }
+
+    public List<ID> getExclusionIdList() {
+        return exclusionIdList;
+    }
+
+    public void setExclusionIdList(List<ID> exclusionIdList) {
+        this.exclusionIdList = exclusionIdList;
+    }
+
+    public List<ExperimentPage> getExperimentPageList() {
+        return experimentPageList;
+    }
+
+    public void setExperimentPageList(List<ExperimentPage> experimentPageList) {
+        this.experimentPageList = experimentPageList;
+    }
+
+    public Integer getPriority() {
+        return priority;
+    }
+
+    public void setPriority(Integer priority) {
+        this.priority = priority;
     }
 
     @Override
