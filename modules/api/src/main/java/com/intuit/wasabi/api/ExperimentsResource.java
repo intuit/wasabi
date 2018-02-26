@@ -258,9 +258,27 @@ public class ExperimentsResource {
                 experimentsList.parallelStream()
                         .forEach(experiment -> {
                             Experiment.ID experimentID = experiment.getID();
-                            // Since we know that the experiment already exists, we do not need to check again.
                             BucketList bucketList = buckets.getBuckets(experimentID, false);
+                            ExperimentList exclusionExperimentList = mutex.getExclusions(experimentID);
+                            List<Experiment> exclusionList = exclusionExperimentList.getExperiments();
+                            List<Experiment.ID> exclusionIdList = new ArrayList<>();
+                            for (Experiment exclusionExperiment : exclusionList) {
+                                exclusionIdList.add(exclusionExperiment.getID());
+                            }
+
                             experiment.setBuckets(bucketList.getBuckets());
+                            experiment.setExclusionIdList(exclusionIdList);
+
+                            PrioritizedExperimentList prioritizedExperiments =
+                                    priorities.getPriorities(experiment.getApplicationName(), true);
+                            for (PrioritizedExperiment prioritizedExperiment :
+                                    prioritizedExperiments.getPrioritizedExperiments()) {
+                                if (prioritizedExperiment.getID().equals(experiment.getID())) {
+                                    experiment.setPriority(prioritizedExperiment.getPriority());
+                                }
+                            }
+                            ExperimentPageList experimentPageList = pages.getExperimentPages(experiment.getID());
+                            experiment.setExperimentPageList(experimentPageList.getPages());
                         });
             }
             return httpHeader.headers().entity(experimentResponse).build();
