@@ -1,0 +1,81 @@
+version: '2.1'
+services:
+  wasabi-main:
+    image: wasabi-main
+    restart: always
+    depends_on:
+      - wasabi-mysql
+      - wasabi-cassandra
+    environment:
+      - WASABI_CONFIGURATION=
+        -Ddatabase.url.host=${MYSQL_HOST:-wasabi-mysql}
+        -Ddatabase.url.port=${MYSQL_PORT:-3306}
+        -Ddatabase.url.dbname=${MYSQL_DATABASE:-wasabi}
+        -Ddatabase.user=${MYSQL_USER:-wasabi}
+        -Ddatabase.password=${MYSQL_PASSWORD:-ibasa_W42}
+        -Ddatabase.pool.connections.min=1
+        -Ddatabase.pool.connections.max=10
+        -DnodeHosts=${CASSANDRA_HOSTS:-wasabi-cassandra}
+        -Dusername=${CASSANDRA_USER:-}
+        -Dpassword=${CASSANDRA_PASSWORD:-}
+        -Duser.ids=admin:wasabi_reader
+        -Duser.admin=${ADMIN_USER:-wasabi}:${ADMIN_PASSWORD:-wasabi-non-default_password}:admin@example.com:Wasabi:Admin
+        -Duser.wasabi_reader:${READER_USER:-wasabi_reader}:${READER_PASSWORD:-reader_password}:wasabi_reader@example.com:Wasabi:Reader
+    ports:
+      - 8080:8080
+    command: wasabi
+    healthcheck:
+      test: ["CMD-SHELL", "echo", ">", "/dev/tcp/127.0.0.1/9042"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    depends_on:
+      - wasabi-mysql
+      - wasabi-cassandra
+
+  wasabi-mysql:
+    image: mysql:5.7
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-stronk_Mahsikuel_P@ssw0rt}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-wasabi}
+      - MYSQL_USER=${MYSQL_USER:-wasabi}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-ibasa_W42}
+    ports:
+      - 3306:3306
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+      - ./config/mysql:/etc/mysql
+
+  wasabi-cassandra:
+    image: cassandra:2.1
+    environment:
+        - CASSANDRA_USER=${CASSANDRA_USER:-}
+        - CASSANDRA_PASSWORD=${CASSANDRA_PASSWORD:-}
+    volumes:
+      - ./data/cassandra:/var/lib/cassandra
+      - ./logs/cassandra:/var/log/cassandra
+    ports:
+      - 7000:7000
+      - 7001:7001
+      - 7199:7199
+      - 9042:9042
+      - 9160:9160
+    healthcheck:
+      test: ["CMD-SHELL", "curl", "--silent", "--retry-max-time=3", "http://127.0.0.1:8080/api/v1/ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  wasabi-keyspace:
+    image: wasabi-keyspace:latest
+    environment:
+      - CQLSH_HOST=wasabi-cassandra
+    depends_on:
+      - wasabi-cassandra
+
+  wasabi-migration:
+    image: wasabi-migration:latest
+    environment:
+      - CQLSH_HOST=wasabi-cassandra
+    depends_on:
+      - wasabi-cassandra
