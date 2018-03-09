@@ -24,77 +24,53 @@ verify_default=false
 migration_default=false
 buildtests_default=true
 sleep_default=30
-red=`tput setaf 9`
-green=`tput setaf 10`
-reset=`tput sgr0`
-export WASABI_OS=${WASABI_OS:-`uname -s`}
-export WASABI_OSX="Darwin"
+export BUILD_OS=${BUILD_OS:-`uname -s`}
+export OSX="Darwin"
 export WASABI_LINUX="Linux"
-export WASABI_MAVEN=${WASABI_MAVEN}
+export MAVEN_FLAGS=${MAVEN_FLAGS:-}
 export CONTRIB_PLUGINS_TO_INSTALL=${CONTRIB_PLUGINS_TO_INSTALL:-}
 
+. $(dirname $0)/functions.bash
+
 usage() {
-  [ "${1}" ] && echo "${red}error: ${1}${reset}"
+  green $"
+    usage: `basename ${0}` [options] [commands]
 
-  cat << EOF
-${green}
-usage: `basename ${0}` [options] [commands]
+    options:
+      -p | --profile [ profile ]             : profile; default ${profile_default}
+      -e | --endpoint [ host:port ]          : api endpoint; default: ${endpoint_default}
+      -v | --verify [ true | false ]         : verify installation configuration; default: ${verify_default}
+      -m | --migration [ true | false ]      : refresh cassandra migration scripts; default: ${migration_default}
+      -t | --buildtests [ true | false ]     : perform tests after build; default: ${buildtests_default}
+      -s | --sleep [ sleep-time ]            : sleep/wait time in seconds; default: ${sleep_default}
+      -h | --help                            : help message
 
-options:
-  -p | --profile [ profile ]             : profile; default ${profile_default}
-  -e | --endpoint [ host:port ]          : api endpoint; default: ${endpoint_default}
-  -v | --verify [ true | false ]         : verify installation configuration; default: ${verify_default}
-  -m | --migration [ true | false ]      : refresh cassandra migration scripts; default: ${migration_default}
-  -t | --buildtests [ true | false ]     : perform tests after build; default: ${buildtests_default}
-  -s | --sleep [ sleep-time ]            : sleep/wait time in seconds; default: ${sleep_default}
-  -h | --help                            : help message
-
-commands:
-  bootstrap                              : install dependencies
-  build                                  : build project
-  clean                                  : clean build
-  start[:cassandra,mysql,wasabi]         : start all, cassandra, mysql, wasabi
-  test                                   : run the integration tests (needs a running wasabi)
-  test[:module-name,...]                 : run the unit tests for the specified module(s) only
-  stop[:wasabi,cassandra,mysql]          : stop all, wasabi, cassandra, mysql
-  resource[:ui,api,doc,cassandra,mysql]  : open resource api, javadoc, cassandra, mysql
-  status                                 : display resource status
-  remove[:wasabi,cassandra,mysql]        : remove all, wasabi, cassandra, mysql
-  package                                : build deployable packages
-  release[:start,finish]                 : promote release
-${reset}
-EOF
-
-  exit ${2:-0}
-}
-
-fromPom() {
-    mvn ${WASABI_MAVEN} -f $1/pom.xml -P $2 help:evaluate -Dexpression=$3 | sed -n -e '/^\[.*\]/ !{ p; }'
-}
-
-beerMe() {
-  sleepTime=${1:-sleep_default}
-  cntr=0
-
-  echo -ne "${green}chill'ax ${reset}"
-
-  while (( cntr < ${sleepTime} )); do
-    echo -ne "\xF0\x9F\x8D\xBA "
-    sleep 3
-    cntr=$(($cntr + 3))
-  done
-
-  echo ""
+    commands:
+      bootstrap                              : install dependencies
+      build                                  : build project
+      clean                                  : clean build
+      start[:cassandra,mysql,wasabi]         : start all, cassandra, mysql, wasabi
+      test                                   : run the integration tests (needs a running wasabi)
+      test[:module-name,...]                 : run the unit tests for the specified module(s) only
+      stop[:wasabi,cassandra,mysql]          : stop all, wasabi, cassandra, mysql
+      resource[:ui,api,doc,cassandra,mysql]  : open resource api, javadoc, cassandra, mysql
+      status                                 : display resource status
+      remove[:wasabi,cassandra,mysql]        : remove all, wasabi, cassandra, mysql
+      package                                : build deployable packages
+      release[:start,finish]                 : promote release
+"
+  exit 0
 }
 
 bootstrap() {
-  if [ "${WASABI_OS}" == "${WASABI_OSX}" ]; then
-    if ! hash brew 2>/dev/null; then
-      echo "${green}installing homebrew ...${reset}"
-
-      ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-
-      echo "${green}installed homebrew${reset}"
+  if [ "${BUILD_OS}" == "${OSX}" ]; then
+    if which brew &>/dev/null; then
+      cyan "installing homebrew… "
+      echo
+      ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" \
+      && green "Installed!" \
+      && echo \
+      || die "Home brewing is not allowed here"
     fi
 
     brew update
@@ -119,7 +95,7 @@ bootstrap() {
     npm config set prefix $(brew --prefix)
 
     echo "${green}installed dependencies: ${formulas[@]} ${taps[@]} ${casks[@]}${reset}"
-  elif [ "${WASABI_OS}" == "${WASABI_LINUX}" ]; then
+  elif [ "${BUILD_OS}" == "${WASABI_LINUX}" ]; then
     echo "OS is Linux"
     if [ -f /etc/lsb-release ]; then
       . /etc/lsb-release
@@ -190,7 +166,7 @@ build() {
 }
 
 clean() {
-  mvn ${WASABI_MAVEN} clean
+  mvn ${MAVEN_FLAGS} clean
   (cd modules/ui; grunt clean)
 }
 
@@ -232,7 +208,7 @@ resource() {
         # FIXME: this can fail after 'package' given the profile = build
         sed -i '' "s/this.model.validatorUrl.*$/this.model.validatorUrl = null;/g" ${content}/swagger/swagger-ui.js
         ./bin/wasabi.sh start
-        beerMe 6
+        sleepIter 6
         open http://localhost:8080/swagger/index.html;;
       doc) [ ! -f ./target/site/apidocs/index.html ] && build
         open ./target/site/apidocs/index.html;;
