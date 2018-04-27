@@ -390,7 +390,9 @@ public class CassandraExperimentRepository implements ExperimentRepository {
                     newExperiment.getIsRapidExperiment(),
                     newExperiment.getUserCap(),
                     (newExperiment.getCreatorID() != null) ? newExperiment.getCreatorID() : "",
-                    newExperiment.getTags()));
+                    newExperiment.getTags(),
+                    newExperiment.getSourceURL(),
+                    newExperiment.getExperimentType()));
 
             //Step#2: Create an entry in the applicationList table
             LOGGER.debug("Adding applicationList table statement into the batch..");
@@ -563,6 +565,8 @@ public class CassandraExperimentRepository implements ExperimentRepository {
                     experiment.getIsRapidExperiment(),
                     experiment.getUserCap(),
                     experiment.getTags(),
+                    experiment.getSourceURL(),
+                    experiment.getExperimentType(),
                     experiment.getID().getRawID());
 
             updateExperimentTags(experiment.getApplicationName(), experiment.getID(), experiment.getTags());
