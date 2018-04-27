@@ -94,6 +94,29 @@ public class Experiment implements Cloneable, ExperimentBase, Serializable {
     private String creatorID;
     @ApiModelProperty(value = "a set of experiment tags")
     private Set<String> tags;
+    @ApiModelProperty(value = "client experimentation", required = false)
+    private String sourceURL;
+    @ApiModelProperty(value = "client experimentation", required = false)
+    private String experimentType;
+
+    public String getSourceURL() {
+        return sourceURL;
+    }
+
+    public void setSourceURL(String sourceURL) {
+        this.sourceURL = sourceURL;
+    }
+
+
+
+    public String getExperimentType() {
+        return experimentType;
+    }
+
+    public void setExperimentType(String experimentType) {
+        this.experimentType = experimentType;
+    }
+
 
     private List<Bucket> buckets = new ArrayList<>();
 
@@ -346,6 +369,8 @@ public class Experiment implements Cloneable, ExperimentBase, Serializable {
                 .append(creatorID)
                 .append(tags)
                 .append(buckets)
+                .append(sourceURL)
+                .append(experimentType)
                 .toHashCode();
     }
 
@@ -381,6 +406,8 @@ public class Experiment implements Cloneable, ExperimentBase, Serializable {
                 .append(creatorID, other.getCreatorID())
                 .append(tags, other.getTags())
                 .append(buckets, other.getBuckets())
+                .append(sourceURL,other.getSourceURL())
+                .append(experimentType,other.getExperimentType())
                 .isEquals();
     }
 
@@ -584,6 +611,8 @@ public class Experiment implements Cloneable, ExperimentBase, Serializable {
             instance.creatorID = other.creatorID;
             instance.tags = other.tags;
             instance.buckets = other.buckets;
+            instance.sourceURL=other.sourceURL;
+            instance.experimentType=other.experimentType;
         }
 
         private Date copyDate(Date date) {
@@ -689,6 +718,15 @@ public class Experiment implements Cloneable, ExperimentBase, Serializable {
 
         public Builder withBuckets(final List<Bucket> buckets) {
             instance.setBuckets(buckets);
+            return this;
+        }
+
+        public Builder withSourceURL(final String sourceURL) {
+            instance.sourceURL = sourceURL;
+            return this;
+        }
+        public Builder withExperimentType(final String experimentType) {
+            instance.experimentType = experimentType;
             return this;
         }
 

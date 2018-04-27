@@ -68,6 +68,11 @@ public class NewExperiment implements ExperimentBase {
     private String creatorID = "";
     @ApiModelProperty(value = "a set of experiment tags")
     private Set<String> tags;
+    @ApiModelProperty(required = false)
+    private String sourceURL = "";
+    @ApiModelProperty(required = false)
+    private String experimentType="";
+
 
     public NewExperiment(Experiment.ID id) {
         super();
@@ -140,6 +145,24 @@ public class NewExperiment implements ExperimentBase {
 
     public void setUserCap(Integer userCap) {
         this.userCap = userCap;
+    }
+
+    public String getSourceURL() {
+        return sourceURL;
+    }
+
+    public void setSourceURL(String sourceURL) {
+        this.sourceURL = sourceURL;
+    }
+
+
+
+    public String getExperimentType() {
+        return experimentType;
+    }
+
+    public void setExperimentType(String experimentType) {
+        this.experimentType = experimentType;
     }
 
     public static NewExperiment.Builder withID(Experiment.ID id) {
@@ -335,6 +358,17 @@ public class NewExperiment implements ExperimentBase {
             instance.setTags(tags);
             return this;
         }
+
+        public Builder withSourceURL(final String value) {
+            instance.sourceURL = value;
+            return this;
+        }
+        public Builder withexperimentType(final String value) {
+            instance.experimentType = value;
+            return this;
+        }
+
+
 
 
         public NewExperiment build() {

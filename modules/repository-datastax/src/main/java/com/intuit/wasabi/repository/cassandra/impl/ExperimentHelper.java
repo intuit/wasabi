@@ -84,6 +84,8 @@ public class ExperimentHelper {
         experimentObject.setHypothesisIsCorrect(experimentPojo.getHypothesisIsCorrect());
         experimentObject.setResults(experimentPojo.getResults());
         experimentObject.setTags(experimentPojo.getTags());
+        experimentObject.setSourceURL(experimentPojo.getSourceURL());
+        experimentObject.setExperimentType(experimentPojo.getExperimentType());
 
         return experimentObject;
     }

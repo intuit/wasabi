@@ -49,7 +49,7 @@ public class ExperimentAccessorITest extends IntegrationTestBase {
                 "d1", "yes", "r1", "", 1.0, date1, date2,
                 com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT.name(), "l1",
                 "app1", date1, date2, true,
-                "m1", "v1", true, 5000, "c1", null);
+                "m1", "v1", true, 5000, "c1", null, null,null);
 
         Result<Experiment> experiment1 = accessor.getExperimentById(experimentId1);
         List<Experiment> experimentResult = experiment1.all();
@@ -80,12 +80,12 @@ public class ExperimentAccessorITest extends IntegrationTestBase {
                 "d1", "yes", "r1", "", 1.0, date1, date2,
                 com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT.name(), "l1",
                 "app1", date1, date2, true,
-                "m1", "v1", true, 5000, "c1", null);
+                "m1", "v1", true, 5000, "c1", null,null,null);
         accessor.insertExperiment(experimentId2,
                 "d2", "no", "r2", "", 1.0, date1, date2,
                 com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT.name(), "l2",
                 "app2", date1, date2, true,
-                "m2", "v2", true, 5000, "c2", null);
+                "m2", "v2", true, 5000, "c2", null,null,null);
 
 
         List<UUID> experimentIds = new ArrayList<>();

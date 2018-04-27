@@ -95,4 +95,11 @@ public class Experiment {
     @Column(name = "results")
     private String results;
 
+    @Column(name = "source_url")
+    private String sourceURL;
+
+    @Column(name = "experiment_type")
+    private String experimentType;
+
+
 }

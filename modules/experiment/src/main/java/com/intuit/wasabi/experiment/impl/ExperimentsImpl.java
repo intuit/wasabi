@@ -449,6 +449,25 @@ public class ExperimentsImpl implements Experiments {
             changeList.add(changeData);
         }
 
+
+        if (updates.getSourceURL() != null && !updates.getSourceURL().equals(experiment.getSourceURL())) {
+            builder.withSourceURL(updates.getSourceURL());
+            requiresUpdate = true;
+            changeData = new ExperimentAuditInfo("sourceURL",
+                    experiment.getSourceURL().toString(),
+                    updates.getSourceURL());
+            changeList.add(changeData);
+        }
+
+        if (updates.getExperimentType() != null && !updates.getExperimentType().equals(experiment.getExperimentType())) {
+            builder.withExperimentType(updates.getExperimentType());
+            requiresUpdate = true;
+            changeData = new ExperimentAuditInfo("experimentType",
+                    experiment.getExperimentType().toString(),
+                    updates.getExperimentType());
+            changeList.add(changeData);
+        }
+
         if (updates.getTags() != null && !updates.getTags().equals(experiment.getTags())) {
             builder.withTags(updates.getTags());
             requiresUpdate = true;

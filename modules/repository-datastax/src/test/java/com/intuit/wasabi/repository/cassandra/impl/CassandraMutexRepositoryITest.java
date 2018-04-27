@@ -78,12 +78,12 @@ public class CassandraMutexRepositoryITest extends IntegrationTestBase {
                 "d1", "yes", "r1", "", 1.0, date1, date2,
                 com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT.name(), "l1",
                 "app1", date1, date2, true,
-                "m1", "v1", true, 5000, "c1", null);
+                "m1", "v1", true, 5000, "c1", null,null,null);
         experimentAccessor.insertExperiment(pair.getRawID(),
                 "d2", "no", "r2", "", 1.0, date1, date2,
                 com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT.name(), "l2",
                 "app2", date1, date2, true,
-                "m2", "v2", true, 5000, "c2", null);
+                "m2", "v2", true, 5000, "c2", null,null,null);
 
         repository.createExclusion(base, pair);
 
@@ -107,17 +107,17 @@ public class CassandraMutexRepositoryITest extends IntegrationTestBase {
                 "d1", "yes", "r1", "", 1.0, date1, date2,
                 com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT.name(), "l1",
                 "app1", date1, date2, true,
-                "m1", "v1", true, 5000, "c1", null);
+                "m1", "v1", true, 5000, "c1", null,null,null);
         experimentAccessor.insertExperiment(pair1.getRawID(),
                 "d2", "yes", "r2", "", 1.0, date1, date2,
                 com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT.name(), "l2",
                 "app2", date1, date2, true,
-                "m2", "v2", true, 5000, "c2", null);
+                "m2", "v2", true, 5000, "c2", null,null,null);
         experimentAccessor.insertExperiment(pair2.getRawID(),
                 "d2", "yes", "r2", "", 1.0, date1, date2,
                 com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT.name(), "l2",
                 "app2", date1, date2, true,
-                "m2", "v2", true, 5000, "c2", null);
+                "m2", "v2", true, 5000, "c2", null,null,null);
 
         repository.createExclusion(base, pair1);
         repository.createExclusion(base, pair2);
@@ -154,19 +154,19 @@ public class CassandraMutexRepositoryITest extends IntegrationTestBase {
                 "d1", "yes", "r1", "", 1.0, date1, date2,
                 com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT.name(), "l1",
                 appName, date1, date2, true,
-                "m1", "v1", true, 5000, "c1", null);
+                "m1", "v1", true, 5000, "c1", null,null,null);
 
         experimentAccessor.insertExperiment(pair1.getRawID(),
                 "d2", "yes", "r2", "", 1.0, date1, date2,
                 com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT.name(), "l2",
                 appName, date1, date2, true,
-                "m2", "v2", true, 5000, "c2", null);
+                "m2", "v2", true, 5000, "c2", null,null,null);
 
         experimentAccessor.insertExperiment(notExclusion.getRawID(),
                 "d2", "yes", "r2", "", 1.0, date1, date2,
                 com.intuit.wasabi.experimentobjects.Experiment.State.DRAFT.name(), "l2",
                 appName, date1, date2, true,
-                "m2", "v2", true, 5000, "c2", null);
+                "m2", "v2", true, 5000, "c2", null,null,null);
 
         repository.createExclusion(base, pair1);
 
