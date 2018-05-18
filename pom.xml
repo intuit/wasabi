@@ -419,13 +419,13 @@ http://www.w3.org/2001/XMLSchema-instance">
             <version>3.2.0</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.jacoco</groupId>
-            <artifactId>org.jacoco.agent</artifactId>
-            <version>${jacoco.version}</version>
-            <type>pom</type>
-            <scope>test</scope>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.jacoco</groupId>-->
+            <!--<artifactId>org.jacoco.agent</artifactId>-->
+            <!--<version>${jacoco.version}</version>-->
+            <!--<type>pom</type>-->
+            <!--<scope>test</scope>-->
+        <!--</dependency>-->
     </dependencies>
     <distributionManagement>
         <snapshotRepository>
@@ -476,26 +476,26 @@ http://www.w3.org/2001/XMLSchema-instance">
                     <autoReleaseAfterClose>true</autoReleaseAfterClose>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${jacoco.version}</version>
-                <configuration>
-                    <destFile>${sonar.jacoco.reportPath}</destFile>
-                    <append>true</append>
-                    <excludes>
-                        <exclude>com/intuit/wasabi/tests/**/*.class</exclude>
-                    </excludes>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>agent</id>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+            <!--<plugin>-->
+                <!--<groupId>org.jacoco</groupId>-->
+                <!--<artifactId>jacoco-maven-plugin</artifactId>-->
+                <!--<version>${jacoco.version}</version>-->
+                <!--<configuration>-->
+                    <!--<destFile>${sonar.jacoco.reportPath}</destFile>-->
+                    <!--<append>true</append>-->
+                    <!--<excludes>-->
+                        <!--<exclude>com/intuit/wasabi/tests/**/*.class</exclude>-->
+                    <!--</excludes>-->
+                <!--</configuration>-->
+                <!--<executions>-->
+                    <!--<execution>-->
+                        <!--<id>agent</id>-->
+                        <!--<goals>-->
+                            <!--<goal>prepare-agent</goal>-->
+                        <!--</goals>-->
+                    <!--</execution>-->
+                <!--</executions>-->
+            <!--</plugin>-->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>cobertura-maven-plugin</artifactId>

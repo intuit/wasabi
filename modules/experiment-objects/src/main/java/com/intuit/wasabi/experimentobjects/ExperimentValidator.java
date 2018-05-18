@@ -102,7 +102,7 @@ public class ExperimentValidator {
                     "Experiment sampling percent cannot be null");
         }
 
-        if ((rate <= 0.0) || (rate > 1.0)) {
+        if ((rate < 0.0) || (rate > 1.0)) {
             throw new IllegalArgumentException("Sampling percent must be between 0.0 and 1.0 inclusive");
         }
     }

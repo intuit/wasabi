@@ -129,7 +129,7 @@
                         <span class="info" help help-content="{{help.samplingRate}}"></span>
                     </label>
                     <input ng-show="!readOnly" type="text" step="any" min="0" class="form-control sampling" placeholder=".01-100" name="samplingPercent"
-                           convert-percent ng-model="experiment.samplingPercent" required ng-focus ensure-number ensure-interval/>
+                           convert-percent ng-model="experiment.samplingPercent" required ng-focus ensure-number/>
                     <span ng-show="!readOnly" class="unit">%</span>
                     <span ng-show="readOnly">{{multiply100(experiment.samplingPercent)}}%</span>
 

@@ -45,7 +45,7 @@
                     <div>
                         <label>Allocation</label>
                         <input id="txtBucketAllocation" type="text" class="form-control text allocation" name="allocationPercent"
-                               digit-only ng-model="bucket.allocationPercent" convert-percent required ng-focus ensure-interval ng-disabled="isEditInDetails || readOnly"/>
+                               digit-only ng-model="bucket.allocationPercent" convert-percent required ng-focus ng-disabled="isEditInDetails || readOnly"/>
                         <span class="unit">%</span>
                         <span style="display:inline-block; position:relative; left:40px; top:0px">
                             <input id="chkControlBucket" type="checkbox" ng-model="bucket.isControl" ng-disabled="isEditInDetails || isNoControl || readOnly"/>&nbsp;&nbsp;<label
