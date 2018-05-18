@@ -51,6 +51,9 @@ public interface ExperimentUserIndexAccessor {
     @Query("select * from experiment_user_index where user_id = ? and app_name = ? and context = ?")
     Result<ExperimentUserByUserIdContextAppNameExperimentId> selectBy(String userId, String appName, String context);
 
+    @Query("select * from experiment_user_index where bucket = ? and app_name = ? and context = ? and experiment_id = ? ALLOW FILTERING")
+    Result<ExperimentUserByUserIdContextAppNameExperimentId> selectBy(String bucketLabel, String appName, String context, UUID experimentId);
+
 
     @Query("select * from experiment_user_index where user_id = ? and app_name = ? and context = ?")
     ListenableFuture<Result<ExperimentUserByUserIdContextAppNameExperimentId>> asyncSelectBy(String userId, String appName, String context);
@@ -60,5 +63,8 @@ public interface ExperimentUserIndexAccessor {
 
     @Query("delete from experiment_user_index where user_id = ? and experiment_id = ? and context = ? and app_name = ?")
     ResultSet deleteBy(String userId, UUID experimentId, String context, String appName);
+
+    @Query("delete from experiment_user_index where user_id = ? and experiment_id = ? and context = ? and app_name = ? and bucket = ?")
+    ResultSet deleteBy(String userId, UUID experimentId, String context, String appName, String bucketLabel);
 
 }

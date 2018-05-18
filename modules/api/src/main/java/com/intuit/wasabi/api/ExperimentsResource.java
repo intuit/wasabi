@@ -812,6 +812,7 @@ public class ExperimentsResource {
             authorization.checkUserPermissions(userName, experiment.getApplicationName(), UPDATE);
 
             UserInfo user = authorization.getUserInfo(userName);
+
             Bucket bucket = buckets.updateBucketState(experimentID, bucketLabel, desiredState, user);
 
             assert bucket != null : "Error updating bucket state";

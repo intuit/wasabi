@@ -15,27 +15,15 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository;
 
-import com.google.common.collect.Table;
 import com.intuit.wasabi.analyticsobjects.Parameters;
 import com.intuit.wasabi.analyticsobjects.counts.AssignmentCounts;
 import com.intuit.wasabi.assignmentobjects.Assignment;
 import com.intuit.wasabi.assignmentobjects.User;
-import com.intuit.wasabi.experimentobjects.Application;
-import com.intuit.wasabi.experimentobjects.Bucket;
-import com.intuit.wasabi.experimentobjects.BucketList;
-import com.intuit.wasabi.experimentobjects.Context;
-import com.intuit.wasabi.experimentobjects.Experiment;
-import com.intuit.wasabi.experimentobjects.ExperimentBatch;
-import com.intuit.wasabi.experimentobjects.PrioritizedExperimentList;
+import com.intuit.wasabi.experimentobjects.*;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.ws.rs.core.StreamingOutput;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Interface to support assignment requests
@@ -94,6 +82,8 @@ public interface AssignmentsRepository {
      */
     void deleteAssignment(Experiment experiment, User.ID userID, Context context, Application.Name appName,
                           Assignment currentAssignment);
+
+    void deleteAssignments(Experiment experiment, Context context, Application.Name appName, String bucketLabel);
 
     /**
      * Assign user to exports

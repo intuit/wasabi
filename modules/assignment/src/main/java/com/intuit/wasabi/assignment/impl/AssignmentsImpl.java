@@ -267,12 +267,9 @@ public class AssignmentsImpl implements Assignments {
         ExperimentBatch experimentBatch = createExperimentBatch(segmentationProfile, newHashSet(experimentLabel));
 
         //Call the common doAssignment() method to either retrieve existing or create new assignment.
-        Page.Name pageName = null;
-        Map<Experiment.ID, Boolean> allowAssignments = null;
-        boolean updateDownstreamSystems = true; //Do update down stream systems while getting existing assignment
         List<Assignment> assignments = doAssignments(userID, applicationName, context,
-                createAssignment, ignoreSamplingPercent, headers, experimentBatch, pageName, allowAssignments,
-                updateDownstreamSystems);
+                createAssignment, ignoreSamplingPercent, headers, experimentBatch, null, null,
+                true);
 
         //Get the final single assignment
         Assignment assignment = null;

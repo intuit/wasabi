@@ -26,16 +26,10 @@ import com.intuit.wasabi.exceptions.ConstraintViolationException;
 import com.intuit.wasabi.exceptions.ExperimentNotFoundException;
 import com.intuit.wasabi.experiment.Buckets;
 import com.intuit.wasabi.experiment.Experiments;
-import com.intuit.wasabi.experimentobjects.Bucket;
-import com.intuit.wasabi.experimentobjects.BucketList;
-import com.intuit.wasabi.experimentobjects.Experiment;
-import com.intuit.wasabi.experimentobjects.ExperimentValidator;
+import com.intuit.wasabi.experimentobjects.*;
 import com.intuit.wasabi.experimentobjects.exceptions.InvalidExperimentStateException;
 import com.intuit.wasabi.experimentobjects.exceptions.WasabiException;
-import com.intuit.wasabi.repository.CassandraRepository;
-import com.intuit.wasabi.repository.DatabaseRepository;
-import com.intuit.wasabi.repository.ExperimentRepository;
-import com.intuit.wasabi.repository.RepositoryException;
+import com.intuit.wasabi.repository.*;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -56,14 +50,17 @@ public class BucketsImpl implements Buckets {
     private final Experiments experiments;
     private final Buckets buckets;
     private final EventLog eventLog;
+    private AssignmentsRepository assignmentsRepository;
     private final ExperimentValidator validator;
 
     @Inject
     public BucketsImpl(@DatabaseRepository final ExperimentRepository databaseRepository,
                        @CassandraRepository final ExperimentRepository cassandraRepository,
+                       final AssignmentsRepository assignmentsRepository,
                        final Experiments experiments, final Buckets buckets, final ExperimentValidator validator,
                        final EventLog eventLog) {
         super();
+        this.assignmentsRepository = assignmentsRepository;
 
         this.validator = validator;
         this.databaseRepository = databaseRepository;
@@ -273,6 +270,9 @@ public class BucketsImpl implements Buckets {
         }
 
         Bucket bucket = getBucket(experimentID, bucketLabel);
+        if (desiredState.equals(Bucket.State.EMPTY)) {
+            assignmentsRepository.deleteAssignments(experiment, Context.valueOf("PROD"), experiment.getApplicationName(), bucketLabel.toString());
+        }
         if (bucket == null) {
             throw new BucketNotFoundException(bucketLabel);
         }
@@ -320,11 +320,11 @@ public class BucketsImpl implements Buckets {
                 //check if this is the bucket to be closed
                 if (buck.getLabel().equals(bucket.getLabel())) {
                     newPct = 0.;
-                    newState = desiredState;
+                    newState = desiredState.equals(Bucket.State.EMPTY) ? Bucket.State.OPEN : desiredState;
 
                     // Update the bucket audit log
                     Bucket.BucketAuditInfo changeData = new Bucket.BucketAuditInfo("state", buck.getState().toString(),
-                            desiredState.toString());
+                            newState.toString());
 
                     //log the change
                     changeList.add(changeData);

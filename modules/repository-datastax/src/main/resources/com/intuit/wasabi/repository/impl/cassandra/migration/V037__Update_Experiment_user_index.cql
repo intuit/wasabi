@@ -11,6 +11,8 @@
 --)
 --;
 
+DROP TABLE IF EXISTS experiment_user_index;
+
 create table experiment_user_index (
     user_id varchar,
     context varchar,

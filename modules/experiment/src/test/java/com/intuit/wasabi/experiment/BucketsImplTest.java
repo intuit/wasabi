@@ -28,6 +28,7 @@ import com.intuit.wasabi.experimentobjects.BucketList;
 import com.intuit.wasabi.experimentobjects.Experiment;
 import com.intuit.wasabi.experimentobjects.ExperimentValidator;
 import com.intuit.wasabi.experimentobjects.exceptions.InvalidExperimentStateException;
+import com.intuit.wasabi.repository.AssignmentsRepository;
 import com.intuit.wasabi.repository.ExperimentRepository;
 import com.intuit.wasabi.repository.MutexRepository;
 import com.intuit.wasabi.repository.RepositoryException;
@@ -61,6 +62,8 @@ public class BucketsImplTest {
     @Mock
     private ExperimentRepository cassandraRepository;
     @Mock
+    private AssignmentsRepository assignmentsRepository;
+    @Mock
     private MutexRepository mutexRepository;
     @Mock
     private ExperimentValidator validator;
@@ -87,7 +90,7 @@ public class BucketsImplTest {
     @Test
     public void testCreateBucket() throws Exception {
 
-        BucketsImpl bucketsImpl = new BucketsImpl(databaseRepository, cassandraRepository,
+        BucketsImpl bucketsImpl = new BucketsImpl(databaseRepository, cassandraRepository, assignmentsRepository,
                 experiments, buckets, validator, eventLog) {
             @Override
             public Bucket getBucket(Experiment.ID experimentID, Bucket.Label bucketLabel) {
@@ -135,7 +138,7 @@ public class BucketsImplTest {
     @Test
     public void testAdjustAllocationPercentages() {
 
-        BucketsImpl bucketsImpl = new BucketsImpl(databaseRepository, cassandraRepository, experiments, buckets,
+        BucketsImpl bucketsImpl = new BucketsImpl(databaseRepository, cassandraRepository, assignmentsRepository, experiments, buckets,
                 validator, eventLog);
 
         Bucket newBucket = Bucket.newInstance(experimentID, bucketLabel).withAllocationPercent(.3).build();
@@ -171,7 +174,7 @@ public class BucketsImplTest {
     @Test
     public void testValidateBucketChanges() throws Exception {
 
-        BucketsImpl bucketsImpl = new BucketsImpl(databaseRepository, cassandraRepository,
+        BucketsImpl bucketsImpl = new BucketsImpl(databaseRepository, cassandraRepository, assignmentsRepository,
                 experiments, buckets, validator, eventLog);
 
         Bucket bucket = Bucket.newInstance(experimentID, Bucket.Label.valueOf("a")).withAllocationPercent(.3)
@@ -208,7 +211,7 @@ public class BucketsImplTest {
     @Test
     public void testGetBucketChangeList() throws Exception {
 
-        BucketsImpl bucketsImpl = new BucketsImpl(databaseRepository, cassandraRepository,
+        BucketsImpl bucketsImpl = new BucketsImpl(databaseRepository, cassandraRepository, assignmentsRepository,
                 experiments, buckets, validator, eventLog);
 
         Bucket bucket = Bucket.newInstance(experimentID, bucketLabel)
@@ -239,7 +242,7 @@ public class BucketsImplTest {
 
     @Test
     public void testUpdateBucket() throws Exception {
-        BucketsImpl bucketsImpl = new BucketsImpl(databaseRepository, cassandraRepository,
+        BucketsImpl bucketsImpl = new BucketsImpl(databaseRepository, cassandraRepository, assignmentsRepository,
                 experiments, buckets, validator, eventLog);
         Experiment experiment = Experiment.withID(experimentID)
                 .withApplicationName(testApp)
@@ -278,7 +281,7 @@ public class BucketsImplTest {
     @Test
     public void testUpdateBucketBatch() throws Exception {
 
-        BucketsImpl bucketsImpl = new BucketsImpl(databaseRepository, cassandraRepository,
+        BucketsImpl bucketsImpl = new BucketsImpl(databaseRepository, cassandraRepository, assignmentsRepository,
                 experiments, buckets, validator, eventLog);
 
         Bucket bucket = Bucket.newInstance(experimentID, bucketLabel)
@@ -312,7 +315,7 @@ public class BucketsImplTest {
     @Test
     public void testCombineOldAndNewBuckets() throws Exception {
 
-        BucketsImpl bucketsImpl = new BucketsImpl(databaseRepository, cassandraRepository,
+        BucketsImpl bucketsImpl = new BucketsImpl(databaseRepository, cassandraRepository, assignmentsRepository,
                 experiments, buckets, validator, eventLog);
 
         Bucket bucket = Bucket.newInstance(experimentID, Bucket.Label.valueOf("a"))
@@ -341,7 +344,7 @@ public class BucketsImplTest {
     @Test
     public void testDeleteBucket() {
 
-        BucketsImpl bucketsImpl = new BucketsImpl(databaseRepository, cassandraRepository,
+        BucketsImpl bucketsImpl = new BucketsImpl(databaseRepository, cassandraRepository, assignmentsRepository,
                 experiments, buckets, validator, eventLog);
 
         Experiment experiment = Experiment.withID(experimentID)
@@ -379,7 +382,7 @@ public class BucketsImplTest {
 
     @Test
     public void testGetBucketBuilder() {
-        BucketsImpl bucketsImpl = new BucketsImpl(databaseRepository, cassandraRepository,
+        BucketsImpl bucketsImpl = new BucketsImpl(databaseRepository, cassandraRepository, assignmentsRepository,
                 experiments, buckets, validator, eventLog);
         Experiment experiment = Experiment.withID(experimentID)
                 .withApplicationName(testApp)

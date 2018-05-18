@@ -586,6 +586,26 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         removeIndexExperimentsToUser(userID, experiment.getID(), context, appName);
     }
 
+    @Override
+    public void deleteAssignments(Experiment experiment, Context context, Application.Name appName, String bucketLabel) {
+        // Deletes the assignment data across all the relevant tables in a consistent manner
+
+        //Note: Only removing the use of user_assignment & user_assignment_bu_userid tables. A separate card is created to completely remove these tables.
+        //deleteUserFromLookUp(experiment.getID(), userID, context);
+        //deleteAssignmentOld(experiment.getID(), userID, context, appName, currentAssignment.getBucketLabel());
+
+        //Updating the assignment bucket counts by -1 in a asynchronous AssignmentCountEnvelope thread
+        // false to subtract 1 from the count for the bucket
+//        boolean countUp = false;
+//        assignmentsCountExecutor.execute(new AssignmentCountEnvelope(this, experimentRepository,
+//                dbRepository, experiment, currentAssignment, countUp, eventLog, null, assignUserToExport,
+//                assignBucketCount));
+
+        removeIndexExperimentsToUser(experiment.getID(), context, appName, bucketLabel);
+    }
+
+
+
     void removeIndexExperimentsToUser(User.ID userID, Experiment.ID experimentID, Context context,
                                       Application.Name appName) {
         try {
@@ -596,6 +616,21 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         } catch (WriteTimeoutException | UnavailableException | NoHostAvailableException e) {
             throw new RepositoryException(
                     "Could not delete index from experiment_user_index for user: " + userID + "to experiment: " +
+                            experimentID, e);
+        }
+    }
+
+    void removeIndexExperimentsToUser(Experiment.ID experimentID, Context context,
+                                      Application.Name appName, String bucketLabel) {
+        try {
+
+            Result<ExperimentUserByUserIdContextAppNameExperimentId> assignments = experimentUserIndexAccessor.selectBy(bucketLabel, appName.toString(), context.getContext(), experimentID.getRawID());
+            assignments.all().stream().map(r -> r.getUserId()).forEach(
+                    u -> experimentUserIndexAccessor.deleteBy(u, experimentID.getRawID(), context.getContext(), appName.toString(), bucketLabel)
+            );
+        } catch (WriteTimeoutException | UnavailableException | NoHostAvailableException e) {
+            throw new RepositoryException(
+                    "Could not delete index from experiment_user_index for bucket: " + bucketLabel  + "to experiment: " +
                             experimentID, e);
         }
     }

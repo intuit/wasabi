@@ -197,10 +197,10 @@ angular.module('wasabi.controllers')
                     var bucketAllocations = [];
                     var totalAllocation = 0;
                     for (var i = 0; i < $scope.buckets.length; i++) {
-                        if ($scope.buckets[i].state !== 'CLOSED' && $scope.buckets[i].state !== 'EMPTY' && (!$scope.buckets[i].allocationPercent || $scope.buckets[i].allocationPercent <= 0)) {
-                            UtilitiesFactory.displayPageError('Allocation Error', 'No bucket can have an empty or zero allocation.', true);
-                            return;
-                        }
+                        // if ($scope.buckets[i].state !== 'CLOSED' && $scope.buckets[i].state !== 'EMPTY') {
+                        //     UtilitiesFactory.displayPageError('Allocation Error', 'No bucket can have an empty or zero allocation.', true);
+                        //     return;
+                        // }
                         // Round it to 2 decimal places as a percent.
                         // This technique of multiplying the floating point numbers, then rounding them, is used to get around
                         // floating point precision issues.
