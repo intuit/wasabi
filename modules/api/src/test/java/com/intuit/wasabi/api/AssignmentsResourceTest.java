@@ -105,6 +105,7 @@ public class AssignmentsResourceTest {
     private User.ID userID = User.ID.valueOf("12345");
     private Boolean createAssignment = true;
     private Boolean ignoreSamplingPercent = true;
+    private Boolean forceProfileCheck = false;
 
     @Before
     public void setUp() {
@@ -115,7 +116,7 @@ public class AssignmentsResourceTest {
     public void testGetAssignmentNull() {
         when(assignments.doSingleAssignment(userID, applicationName, experimentLabel,
                 context, createAssignment, ignoreSamplingPercent, null,
-                headers)).thenReturn(null);
+                headers,forceProfileCheck)).thenReturn(null);
         thrown.expect(AssignmentNotFoundException.class);
         resource.getAssignment(applicationName, experimentLabel, userID, context, createAssignment, ignoreSamplingPercent, headers);
     }
@@ -124,7 +125,7 @@ public class AssignmentsResourceTest {
     public void getAssignment() {
         when(assignments.doSingleAssignment(userID, applicationName, experimentLabel,
                 context, createAssignment, ignoreSamplingPercent, null,
-                headers)).thenReturn(assignment);
+                headers,forceProfileCheck)).thenReturn(assignment);
         when(assignment.getStatus()).thenReturn(Status.NEW_ASSIGNMENT);
         when(assignment.getBucketLabel()).thenReturn(label);
         when(assignment.getContext()).thenReturn(context);
@@ -135,20 +136,20 @@ public class AssignmentsResourceTest {
     @Test
     public void postAssignmentNull() throws Exception {
         when(assignments.doSingleAssignment(userID, applicationName, experimentLabel,
-                context, createAssignment, ignoreSamplingPercent, segmentationProfile, headers)).thenReturn(null);
+                context, createAssignment, ignoreSamplingPercent, segmentationProfile, headers,forceProfileCheck)).thenReturn(null);
         thrown.expect(AssignmentNotFoundException.class);
-        resource.postAssignment(applicationName, experimentLabel, userID, createAssignment, ignoreSamplingPercent, context, segmentationProfile, headers);
+        resource.postAssignment(applicationName, experimentLabel, userID, createAssignment, ignoreSamplingPercent, context, segmentationProfile,forceProfileCheck,headers);
     }
 
     @Test
     public void postAssignment() throws Exception {
         when(assignments.doSingleAssignment(userID, applicationName, experimentLabel,
-                context, createAssignment, ignoreSamplingPercent, segmentationProfile, headers)).thenReturn(assignment);
+                context, createAssignment, ignoreSamplingPercent, segmentationProfile, headers,forceProfileCheck)).thenReturn(assignment);
         when(assignment.getStatus()).thenReturn(Status.EXPERIMENT_PAUSED);
         when(assignment.getBucketLabel()).thenReturn(label);
         when(assignment.getContext()).thenReturn(context);
 
-        assertNotNull(resource.postAssignment(applicationName, experimentLabel, userID, createAssignment, ignoreSamplingPercent, context, segmentationProfile, headers));
+        assertNotNull(resource.postAssignment(applicationName, experimentLabel, userID, createAssignment, ignoreSamplingPercent, context, segmentationProfile, forceProfileCheck, headers));
     }
 
     @Test
@@ -167,8 +168,8 @@ public class AssignmentsResourceTest {
     public void getBatchAssignmentExp() throws Exception {
         List<Assignment> myAssignments = new ArrayList<>();
         when(assignments.doBatchAssignments(userID, applicationName, context,
-                CREATE, FORCE_IN_EXPERIMENT, headers, experimentBatch)).thenReturn(myAssignments);
-        assertNotNull(resource.getBatchAssignments(applicationName, userID, context, CREATE, experimentBatch, headers));
+                CREATE, FORCE_IN_EXPERIMENT, headers, experimentBatch,forceProfileCheck)).thenReturn(myAssignments);
+        assertNotNull(resource.getBatchAssignments(applicationName, userID, context, CREATE, experimentBatch, forceProfileCheck, headers));
     }
 
     @Test
@@ -213,7 +214,7 @@ public class AssignmentsResourceTest {
         List<Assignment> assignmentsFromPage = new ArrayList<>();
 
         when(assignments.doPageAssignments(applicationName, pageName, userID, context,
-                createAssignment, ignoreSamplingPercent, headers, null)).thenReturn(assignmentsFromPage);
+                createAssignment, ignoreSamplingPercent, headers, null,forceProfileCheck)).thenReturn(assignmentsFromPage);
 
         assertNotNull(resource.getBatchAssignmentForPage(applicationName, pageName, userID, createAssignment,
                 ignoreSamplingPercent, context, headers));
@@ -224,10 +225,10 @@ public class AssignmentsResourceTest {
         List<Assignment> assignmentsFromPage = new ArrayList<>();
 
         when(assignments.doPageAssignments(applicationName, pageName, userID, context,
-                createAssignment, ignoreSamplingPercent, headers, segmentationProfile)).thenReturn(assignmentsFromPage);
+                createAssignment, ignoreSamplingPercent, headers, segmentationProfile,forceProfileCheck)).thenReturn(assignmentsFromPage);
 
         assertNotNull(resource.postBatchAssignmentForPage(applicationName, pageName, userID, createAssignment,
-                ignoreSamplingPercent, context, segmentationProfile, headers));
+                ignoreSamplingPercent, context, segmentationProfile, forceProfileCheck, headers));
     }
 
     @Test

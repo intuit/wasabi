@@ -71,7 +71,7 @@ public interface Assignments {
      */
     Assignment doSingleAssignment(User.ID userID, Application.Name appLabel,
                                   Experiment.Label experimentLabel, Context context, boolean createAssignment, boolean ignoreSamplingPercent,
-                                  SegmentationProfile segmentationProfile, HttpHeaders headers);
+                                  SegmentationProfile segmentationProfile, HttpHeaders headers,boolean forceProfileCheck);
 
     /**
      * Get or create user assignments for a given user to given experiments.
@@ -87,7 +87,7 @@ public interface Assignments {
      */
     List<Assignment> doBatchAssignments(User.ID userID, Application.Name applicationName, Context context,
                                         boolean createAssignment, boolean overwrite, HttpHeaders headers,
-                                        ExperimentBatch experimentBatch);
+                                        ExperimentBatch experimentBatch, boolean forceProfileCheck);
 
     /**
      * Get or create user assignments for a given user to experiments associated to given application and page.
@@ -104,7 +104,7 @@ public interface Assignments {
      */
     List<Assignment> doPageAssignments(Application.Name applicationName, Page.Name pageName, User.ID userID,
                                        Context context, boolean createAssignment, boolean ignoreSamplingPercent,
-                                       HttpHeaders headers, SegmentationProfile segmentationProfile);
+                                       HttpHeaders headers, SegmentationProfile segmentationProfile, boolean forceProfileCheck);
 
     /**
      * Return an existing assignment of a given user to the given experiment.

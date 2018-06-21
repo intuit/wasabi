@@ -153,7 +153,7 @@ public class AssignmentsResource {
                     ignoreSamplingPercent, headers);
 
             Assignment assignment = getAssignment(userID, applicationName, experimentLabel, context, createAssignment,
-                    ignoreSamplingPercent, null, headers);
+                    ignoreSamplingPercent, null, headers,false);
 
             return httpHeader.headers().entity(toSingleAssignmentResponseMap(assignment)).build();
         } catch (Exception exception) {
@@ -168,9 +168,9 @@ public class AssignmentsResource {
     private Assignment getAssignment(final User.ID userID, final Application.Name applicationName,
                                      final Experiment.Label experimentLabel, final Context context,
                                      final boolean createAssignment, final boolean ignoreSamplingPercent,
-                                     final SegmentationProfile segmentationProfile, final HttpHeaders headers) {
+                                     final SegmentationProfile segmentationProfile, final HttpHeaders headers,boolean forceProfileCheck) {
         Assignment assignment = assignments.doSingleAssignment(userID, applicationName, experimentLabel, context,
-                createAssignment, ignoreSamplingPercent, segmentationProfile, headers);
+                createAssignment, ignoreSamplingPercent, segmentationProfile, headers,forceProfileCheck);
 
         // This should not happen when createAssignment == true
         if (isNull(assignment)) {
@@ -237,6 +237,12 @@ public class AssignmentsResource {
             @ApiParam(name = "segmentationProfile", value = "Segmentation Profile")
             final SegmentationProfile segmentationProfile,
 
+            @QueryParam("forceProfileCheck")
+            @DefaultValue("false")
+            @ApiParam(value = "whether to force user profile match",
+                    defaultValue = "false")
+            final Boolean forceProfileCheck,
+
             @javax.ws.rs.core.Context
             final HttpHeaders headers) {
         try {
@@ -246,7 +252,7 @@ public class AssignmentsResource {
                     segmentationProfile, headers);
 
             Assignment assignment = getAssignment(userID, applicationName, experimentLabel, context, createAssignment,
-                    ignoreSamplingPercent, segmentationProfile, headers);
+                    ignoreSamplingPercent, segmentationProfile, headers,forceProfileCheck);
 
             return httpHeader.headers().entity(toSingleAssignmentResponseMap(assignment)).build();
         } catch (Exception exception) {
@@ -301,6 +307,12 @@ public class AssignmentsResource {
             @ApiParam(required = true, defaultValue = DEFAULT_LABELLIST)
             final ExperimentBatch experimentBatch,
 
+            @QueryParam("forceProfileCheck")
+            @DefaultValue("false")
+            @ApiParam(value = "whether to force user profile match",
+                    defaultValue = "false")
+            final Boolean forceProfileCheck,
+
             @javax.ws.rs.core.Context
             final HttpHeaders headers) {
         try {
@@ -310,7 +322,7 @@ public class AssignmentsResource {
 
             List<Assignment> myAssignments = assignments.doBatchAssignments(userID, applicationName,
                     context, createAssignment, FALSE,
-                    headers, experimentBatch);
+                    headers, experimentBatch,forceProfileCheck);
 
             return httpHeader.headers().entity(ImmutableMap.<String, Object>builder().put("assignments",
                     toBatchAssignmentResponseMap(myAssignments)).build()).build();
@@ -457,7 +469,7 @@ public class AssignmentsResource {
                     applicationName, pageName, userID, context, createAssignment, ignoreSamplingPercent, headers);
 
             List<Assignment> assignmentsFromPage = assignments.doPageAssignments(applicationName,
-                    pageName, userID, context, createAssignment, ignoreSamplingPercent, headers, null);
+                    pageName, userID, context, createAssignment, ignoreSamplingPercent, headers, null,false);
 
             return httpHeader.headers()
                     .entity(ImmutableMap.<String, Object>builder().put("assignments",
@@ -524,6 +536,12 @@ public class AssignmentsResource {
             @ApiParam(value = "Segmentation Profile")
             final SegmentationProfile segmentationProfile,
 
+            @QueryParam("forceProfileCheck")
+            @DefaultValue("false")
+            @ApiParam(value = "whether to force user profile match",
+                    defaultValue = "false")
+            final Boolean forceProfileCheck,
+
             @javax.ws.rs.core.Context final HttpHeaders headers) {
         try {
             LOGGER.debug("postBatchAssignmentForPage applicationName={}, pageName={}, userID={}, context={}, "
@@ -533,7 +551,7 @@ public class AssignmentsResource {
 
             List<Assignment> assignmentsFromPage =
                     assignments.doPageAssignments(applicationName, pageName, userID, context,
-                            createAssignment, ignoreSamplingPercent, headers, segmentationProfile);
+                            createAssignment, ignoreSamplingPercent, headers, segmentationProfile,forceProfileCheck);
 
             return httpHeader.headers()
                     .entity(ImmutableMap.<String, Object>builder().put("assignments",
