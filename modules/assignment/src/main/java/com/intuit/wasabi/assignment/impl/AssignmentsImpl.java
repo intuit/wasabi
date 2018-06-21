@@ -214,14 +214,14 @@ public class AssignmentsImpl implements Assignments {
     @Override
     public List<Assignment> doBatchAssignments(User.ID userID, Application.Name applicationName, Context context,
                                                boolean createAssignment, boolean overwrite, HttpHeaders headers,
-                                               ExperimentBatch experimentBatch) {
+                                               ExperimentBatch experimentBatch,boolean forceProfileCheck) {
         //Call the common doAssignment() method to either retrieve existing or create new assignments.
         //Here send null for page name & allowAssignments map
         Page.Name pageName = null;
         Map<Experiment.ID, Boolean> allowAssignments = null;
         boolean updateDownstreamSystems = true; //Do update down stream systems while getting existing assignment
         List<Assignment> assignments = doAssignments(userID, applicationName, context, createAssignment, overwrite,
-                headers, experimentBatch, pageName, allowAssignments, updateDownstreamSystems);
+                headers, experimentBatch, pageName, allowAssignments, updateDownstreamSystems,forceProfileCheck);
 
         return assignments;
     }
@@ -232,7 +232,7 @@ public class AssignmentsImpl implements Assignments {
     @Override
     public List<Assignment> doPageAssignments(Application.Name applicationName, Page.Name pageName, User.ID userID,
                                               Context context, boolean createAssignment, boolean ignoreSamplingPercent,
-                                              HttpHeaders headers, SegmentationProfile segmentationProfile) {
+                                              HttpHeaders headers, SegmentationProfile segmentationProfile,boolean forceProfileCheck) {
 
         //Get the experiments (id & allowNewAssignment only) associated to the given application and page.
         List<PageExperiment> pageExperimentList = getExperiments(applicationName, pageName);
@@ -250,7 +250,7 @@ public class AssignmentsImpl implements Assignments {
         boolean updateDownstreamSystems = true; //Do update down stream systems while getting existing assignment
         List<Assignment> assignments = doAssignments(userID, applicationName, context,
                 createAssignment, ignoreSamplingPercent, headers, experimentBatch, pageName, allowAssignments,
-                updateDownstreamSystems);
+                updateDownstreamSystems,forceProfileCheck);
 
         return assignments;
     }
@@ -261,7 +261,7 @@ public class AssignmentsImpl implements Assignments {
     @Override
     public Assignment doSingleAssignment(User.ID userID, Application.Name applicationName, Experiment.Label experimentLabel,
                                          Context context, boolean createAssignment, boolean ignoreSamplingPercent,
-                                         SegmentationProfile segmentationProfile, HttpHeaders headers) {
+                                         SegmentationProfile segmentationProfile, HttpHeaders headers, boolean forceProfileCheck) {
 
         //Prepare experiment batch
         ExperimentBatch experimentBatch = createExperimentBatch(segmentationProfile, newHashSet(experimentLabel));
@@ -272,7 +272,7 @@ public class AssignmentsImpl implements Assignments {
         boolean updateDownstreamSystems = true; //Do update down stream systems while getting existing assignment
         List<Assignment> assignments = doAssignments(userID, applicationName, context,
                 createAssignment, ignoreSamplingPercent, headers, experimentBatch, pageName, allowAssignments,
-                updateDownstreamSystems);
+                updateDownstreamSystems, forceProfileCheck);
 
         //Get the final single assignment
         Assignment assignment = null;
@@ -304,7 +304,7 @@ public class AssignmentsImpl implements Assignments {
         boolean updateDownstreamSystems = false; //Do not update down stream systems while getting existing assignment
         List<Assignment> assignments = doAssignments(userID, appName, context,
                 createAssignment, ignoreSamplingPercent, headers, experimentBatch, pageName, allowAssignments,
-                updateDownstreamSystems);
+                updateDownstreamSystems,false);
 
         //Get the final single assignment
         Assignment assignment = null;
@@ -453,7 +453,8 @@ public class AssignmentsImpl implements Assignments {
     protected List<Assignment> doAssignments(User.ID userID, Application.Name applicationName, Context context,
                                              boolean createAssignment, boolean forceInExperiment, HttpHeaders headers,
                                              ExperimentBatch experimentBatch, Page.Name pageName,
-                                             Map<Experiment.ID, Boolean> allowAssignments, boolean updateDownstreamSystems) {
+                                             Map<Experiment.ID, Boolean> allowAssignments, boolean updateDownstreamSystems,
+                                             boolean forceProfileCheck) {
 
         //allowAssignments is NULL when called from AssignmentsResource.getBatchAssignments()
         Optional<Map<Experiment.ID, Boolean>> allowAssignmentsOptional = Optional.ofNullable(allowAssignments);
@@ -478,9 +479,9 @@ public class AssignmentsImpl implements Assignments {
         //Prepopulate bucket assignment counts for rapid experiments in running state in asynchronous mode
         List<Experiment.ID> experimentIds =
                 appPriorities.getPrioritizedExperiments()
-                .stream()
-                .filter(experiment -> (null != experiment.getIsRapidExperiment() && experiment.getIsRapidExperiment())
-                        && experiment.getState().equals(Experiment.State.RUNNING))
+                        .stream()
+                        .filter(experiment -> (null != experiment.getIsRapidExperiment() && experiment.getIsRapidExperiment())
+                                && experiment.getState().equals(Experiment.State.RUNNING))
                         .map(experiment -> experiment.getID())
                         .collect(Collectors.toList());
 
@@ -508,7 +509,7 @@ public class AssignmentsImpl implements Assignments {
                             forceInExperiment, segmentationProfile,
                             headers, experimentMap.get(experiment.getID()),
                             bucketMap.get(experiment.getID()), userAssignments, exclusionMap,
-                            rapidExperimentToAssignmentCounts);
+                            rapidExperimentToAssignmentCounts, forceProfileCheck);
 
                     // This wouldn't normally happen because we specified CREATE=true
                     if (isNull(assignment)) {
@@ -593,7 +594,8 @@ public class AssignmentsImpl implements Assignments {
                                        Experiment experiment, BucketList bucketList,
                                        Table<Experiment.ID, Experiment.Label, String> userAssignments,
                                        Map<Experiment.ID, List<Experiment.ID>> exclusives,
-                                       Map<Experiment.ID, AssignmentCounts> rapidExperimentToAssignmentCounts) {
+                                       Map<Experiment.ID, AssignmentCounts> rapidExperimentToAssignmentCounts,
+                                       boolean forceProfileCheck) {
         final Date currentDate = new Date();
         final long currentTime = currentDate.getTime();
 
@@ -623,6 +625,29 @@ public class AssignmentsImpl implements Assignments {
             return nullAssignment(userID, applicationName, experimentID,
                     Assignment.Status.EXPERIMENT_EXPIRED);
         }
+
+        if (forceProfileCheck) {
+            return getAssignmentForceProfileCheck(experimentID, userID, applicationName, experimentLabel,
+                    context, createAssignment, ignoreSamplingPercent, segmentationProfile,
+                    headers, experiment, bucketList, userAssignments, exclusives,
+                    rapidExperimentToAssignmentCounts);
+        } else {
+            return getAssignment(experimentID, userID, applicationName, experimentLabel,
+                    context, createAssignment, ignoreSamplingPercent, segmentationProfile,
+                    headers, experiment, bucketList, userAssignments, exclusives,
+                    rapidExperimentToAssignmentCounts);
+        }
+
+    }
+
+    private Assignment getAssignment(Experiment.ID experimentID, User.ID userID, Application.Name applicationName, Experiment.Label experimentLabel,
+                                     Context context, boolean createAssignment, boolean ignoreSamplingPercent,
+                                     SegmentationProfile segmentationProfile, HttpHeaders headers,
+                                     Experiment experiment, BucketList bucketList,
+                                     Table<Experiment.ID, Experiment.Label, String> userAssignments,
+                                     Map<Experiment.ID, List<Experiment.ID>> exclusives,
+                                     Map<Experiment.ID, AssignmentCounts> rapidExperimentToAssignmentCounts) {
+        final Date currentDate = new Date();
 
         Assignment assignment = getAssignment(experimentID, userID, context, userAssignments, bucketList);
         if (assignment == null || assignment.isBucketEmpty()) {
@@ -676,8 +701,74 @@ public class AssignmentsImpl implements Assignments {
                 throw new InvalidAssignmentStateException(userID, applicationName, experimentLabel, assignment.getStatus(), null);
             }
         }
-
         return assignment;
+    }
+
+    private Assignment getAssignmentForceProfileCheck(Experiment.ID experimentID, User.ID userID, Application.Name applicationName, Experiment.Label experimentLabel,
+                                                      Context context, boolean createAssignment, boolean ignoreSamplingPercent,
+                                                      SegmentationProfile segmentationProfile, HttpHeaders headers,
+                                                      Experiment experiment, BucketList bucketList,
+                                                      Table<Experiment.ID, Experiment.Label, String> userAssignments,
+                                                      Map<Experiment.ID, List<Experiment.ID>> exclusives,
+                                                      Map<Experiment.ID, AssignmentCounts> rapidExperimentToAssignmentCounts) {
+
+        final Date currentDate = new Date();
+
+        // Check if the current user is selected by the segmentation rule of this experiment
+        // when their profile values (and the headers and context) are used in the evaluation.
+        // NOTE: If available, this uses the parsed version of the rule for this experiment that
+        // has been cached in memory on this system.  That means a recent change to the rule
+        // won't be taken into account until the ruleCacheExecutor call below.  This is an optimization
+        // to improve performance which can mean that several assignments will use the old version of
+        // the rule (until all servers have been updated with the new version).
+        if (doesProfileMatch(experiment, segmentationProfile, headers, context)) {
+            Assignment assignment = getAssignment(experimentID, userID, context, userAssignments, bucketList);
+            if (assignment == null || assignment.isBucketEmpty()) {
+                if (createAssignment) {
+                    if (experiment.getState() == Experiment.State.PAUSED ||
+                            !isAssignmentValidForRapidExperiment(experiment, rapidExperimentToAssignmentCounts)) {
+                        return nullAssignment(userID, applicationName, experimentID, Assignment.Status.EXPERIMENT_PAUSED);
+                    }
+
+                    // Generate a new assignment
+                    double samplePercent = experiment.getSamplingPercent();
+                    if (!(samplePercent >= 0.0 && samplePercent <= 1.0)) {
+                        throw new InvalidExperimentStateException(new StringBuilder("Sample percent must be between 0.0 and 1.0 for experiment \"")
+                                .append(experimentID).append("\" via label \"")
+                                .append(experimentLabel).append("\"").toString());
+                    }
+
+                    boolean selectBucket = checkMutex(experiment, userAssignments, exclusives) &&
+                            (ignoreSamplingPercent || (rollDie() < samplePercent));
+
+                    if (segmentationProfile == null || segmentationProfile.getProfile() == null) {
+                        Map profileMap = new HashMap();
+                        segmentationProfile = new SegmentationProfile.Builder(profileMap).build();
+                    }
+
+                    //Create an assignment object with status as NEW_ASSIGNMENT / NO_OPEN_BUCKETS
+                    assignment = createAssignmentObject(experiment, userID, context, selectBucket, bucketList, currentDate, segmentationProfile);
+
+                    if (assignment.getStatus() != Assignment.Status.NEW_ASSIGNMENT && assignment.getStatus() != Assignment.Status.NO_OPEN_BUCKETS) {
+                        throw new InvalidAssignmentStateException(userID, applicationName, experimentLabel, assignment.getStatus(), null);
+                    }
+                }
+            } else {
+                // Do nothing; user has an assignment, with or without a bucket
+                if (assignment.getStatus() != Assignment.Status.EXISTING_ASSIGNMENT) {
+                    throw new InvalidAssignmentStateException(userID, applicationName, experimentLabel, assignment.getStatus(), null);
+                }
+            }
+            return assignment;
+        } else {
+            Assignment assignment = getAssignment(experimentID, userID, context, userAssignments, bucketList);
+            if (assignment != null) {
+                assignmentsRepository.deleteAssignment(experiment,userID,context,applicationName,assignment);
+            }
+            return nullAssignment(userID, applicationName, experimentID,
+                    Assignment.Status.NO_PROFILE_MATCH);
+        }
+
     }
 
     /**
@@ -691,7 +782,7 @@ public class AssignmentsImpl implements Assignments {
             int userCap = experiment.getUserCap();
             AssignmentCounts assignmentCounts = null;
             if (null != prefetchedAssignmentCounts) {
-                 assignmentCounts = prefetchedAssignmentCounts.get(experiment.getID());
+                assignmentCounts = prefetchedAssignmentCounts.get(experiment.getID());
             }
             if (null == assignmentCounts) {
                 assignmentCounts = assignmentsRepository.getBucketAssignmentCount(experiment);
