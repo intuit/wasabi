@@ -216,7 +216,7 @@ public class AssignmentsImplTest {
         Experiment.Label nonExistantLabel = Experiment.Label.valueOf("ThisExpIsNotCreated");
 
         Assignment result = assignmentsImpl.doSingleAssignment(user, appName, nonExistantLabel, context, true, true,
-                segmentationProfile, headers);
+                segmentationProfile, headers,false);
 
         assertThat(result.getStatus(), is(Assignment.Status.EXPERIMENT_NOT_FOUND));
     }
@@ -261,7 +261,7 @@ public class AssignmentsImplTest {
         when(metadataCache.getExclusionList(id)).thenReturn(exclusionList);
 
         Assignment result = assignmentsImpl.doSingleAssignment(user, appName, label, context, true, true,
-                segmentationProfile, headers);
+                segmentationProfile, headers,false);
 
         assertThat(result.getStatus(), is(Assignment.Status.EXPERIMENT_IN_DRAFT_STATE));
     }
@@ -303,7 +303,7 @@ public class AssignmentsImplTest {
 
 
         Assignment result = assignmentsImpl.doSingleAssignment(user, appName, label, context, true, true,
-                segmentationProfile, headers);
+                segmentationProfile, headers,false);
 
         assertThat(result.getStatus(), is(Assignment.Status.EXPERIMENT_NOT_STARTED));
     }
@@ -343,7 +343,7 @@ public class AssignmentsImplTest {
         when(metadataCache.getExclusionList(id)).thenReturn(exclusionList);
 
         //This is actual call
-        Assignment result = assignmentsImpl.doSingleAssignment(user, appName, label, context, true, true, segmentationProfile, headers);
+        Assignment result = assignmentsImpl.doSingleAssignment(user, appName, label, context, true, true, segmentationProfile, headers,false);
 
         //Verify result
         assertThat(result.getStatus(), is(Assignment.Status.EXPERIMENT_EXPIRED));
@@ -387,7 +387,7 @@ public class AssignmentsImplTest {
 
 
         Assignment result = assignmentsImpl.doSingleAssignment(user, appName, label, context, true, true,
-                segmentationProfile, headers);
+                segmentationProfile, headers,false);
 
         assertThat(result.getStatus(), is(Assignment.Status.EXPERIMENT_PAUSED));
     }
@@ -441,7 +441,7 @@ public class AssignmentsImplTest {
 
         //Make actual call
         Assignment result = assignmentsImpl.doSingleAssignment(user, appName, label, context, true, true,
-                segmentationProfile, headers);
+                segmentationProfile, headers,false);
 
         //Varify result
         assertThat(result.getStatus(), is(Assignment.Status.NO_PROFILE_MATCH));
@@ -492,7 +492,7 @@ public class AssignmentsImplTest {
         expMap.put(id, experiment);
         when(assignmentsRepository.getAssignments(user, appName, context, expMap)).thenReturn(existingAssignments);
 
-        Assignment result = assignmentsImpl.doSingleAssignment(user, appName, label, context, true, true, segmentationProfile, headers);
+        Assignment result = assignmentsImpl.doSingleAssignment(user, appName, label, context, true, true, segmentationProfile, headers,false);
 
         assertThat(result.getStatus(), is(Assignment.Status.EXISTING_ASSIGNMENT));
         verify(threadPoolExecutor, times(0)).execute(any(Runnable.class));
@@ -549,7 +549,7 @@ public class AssignmentsImplTest {
                 any(Context.class), any(Boolean.class), any(BucketList.class), any(Date.class), any(SegmentationProfile.class));
         when(assignment.getStatus()).thenReturn(Assignment.Status.EXPERIMENT_NOT_FOUND);
 
-        assignmentsImpl.doSingleAssignment(user, appName, label, context, true, true, null, headers);
+        assignmentsImpl.doSingleAssignment(user, appName, label, context, true, true, null, headers,false);
         verify(threadPoolExecutor, times(0)).execute(any(Runnable.class));
     }
 
@@ -600,7 +600,7 @@ public class AssignmentsImplTest {
         when(assignmentsRepository.getAssignments(user, appName, context, expMap)).thenReturn(existingAssignments);
 
         Assignment result = assignmentsImpl.doSingleAssignment(user, appName, label, context, true, true,
-                segmentationProfile, headers);
+                segmentationProfile, headers,false);
 
         assertThat(result.getStatus(), is(Assignment.Status.EXISTING_ASSIGNMENT));
         verify(threadPoolExecutor, times(1)).execute(any(ExperimentRuleCacheUpdateEnvelope.class));
@@ -1239,7 +1239,7 @@ public class AssignmentsImplTest {
 
         //This is real call to the method
         List<Assignment> resultAssignments = assignmentsImpl.doBatchAssignments(user, appName,
-                context, true, false, null, experimentBatch);
+                context, true, false, null, experimentBatch,false);
 
         //Verify result
         assertThat(resultAssignments.size(), is(2));
@@ -1318,7 +1318,7 @@ public class AssignmentsImplTest {
 
         //This is real call to the method
         List<Assignment> resultAssignments = assignmentsImpl.doBatchAssignments(user, appName,
-                context, true, false, null, experimentBatch);
+                context, true, false, null, experimentBatch,false);
 
         //Verify result
         assertThat(resultAssignments.size(), is(2));
@@ -1403,7 +1403,7 @@ public class AssignmentsImplTest {
 
         //This is real call to the method
         List<Assignment> resultAssignments = assignmentsImpl.doPageAssignments(appName, pageName, user,
-                context, true, false, headers, segmentationProfile);
+                context, true, false, headers, segmentationProfile,false);
 
         //Verify result
         assertThat(resultAssignments.size(), is(2));
@@ -1662,7 +1662,7 @@ public class AssignmentsImplTest {
         when(experiment.getUserCap()).thenReturn(userCap);
 
         Assignment result = assignmentsImpl.doSingleAssignment(user, appName, label, context,
-                true, true, segmentationProfile, headers);
+                true, true, segmentationProfile, headers,false);
 
         assertThat(result.getStatus(), is(Assignment.Status.EXPERIMENT_PAUSED));
         verify(experimentUtil, times(1))
