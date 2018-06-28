@@ -761,10 +761,6 @@ public class AssignmentsImpl implements Assignments {
             }
             return assignment;
         } else {
-            Assignment assignment = getAssignment(experimentID, userID, context, userAssignments, bucketList);
-            if (assignment != null) {
-                assignmentsRepository.deleteAssignment(experiment,userID,context,applicationName,assignment);
-            }
             return nullAssignment(userID, applicationName, experimentID,
                     Assignment.Status.NO_PROFILE_MATCH);
         }
