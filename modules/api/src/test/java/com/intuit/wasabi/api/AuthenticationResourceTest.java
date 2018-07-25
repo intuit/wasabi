@@ -19,7 +19,11 @@ import com.intuit.wasabi.authentication.Authentication;
 import com.intuit.wasabi.authenticationobjects.LoginToken;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authorization.Authorization;
+import com.intuit.wasabi.authorizationobjects.Role;
+import com.intuit.wasabi.authorizationobjects.UserRole;
+import com.intuit.wasabi.authorizationobjects.UserRoleList;
 import com.intuit.wasabi.exceptions.AuthenticationException;
+import com.intuit.wasabi.experimentobjects.Application;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,6 +44,11 @@ public class AuthenticationResourceTest {
     private static final String USERPASS = new String(encodeBase64("admin@example.com:admin01".getBytes(forName("UTF-8"))), forName("UTF-8"));
     private static final String AUTHHEADER = "Basic: " + USERPASS;
     private static final String TOKENHEADER = "Bearer: " + USERPASS;
+    private static final Application.Name TESTAPP = Application.Name.valueOf("test_app");
+    private static final Application.Name TESTAPP2 = Application.Name.valueOf("test_app2");
+    private static final UserInfo.Username USER = UserInfo.Username.valueOf("admin@example.com");
+
+
     public AuthenticationResource authenticationResource;
     @Mock
     Authentication authentication;
@@ -87,12 +96,20 @@ public class AuthenticationResourceTest {
 
     @Test
     public void getUserExists() throws Exception {
-        UserInfo userInfo = UserInfo.newInstance(UserInfo.Username.valueOf("username")).build();
-        String authToken = "authorizationToken";
+        UserInfo userInfo = UserInfo.newInstance(USER).build();
+
+        UserRole userRole = UserRole.newInstance(TESTAPP, Role.ADMIN).withUserID(USER).build();
+        UserRole userRole1 = UserRole.newInstance(TESTAPP2, Role.READWRITE).withUserID(USER).build();
+        UserRoleList userRoleList = new UserRoleList();
+        userRoleList.addRole(userRole);
+        userRoleList.addRole(userRole1);
+
         when(authentication.getUserExists("username@a.b")).thenReturn(userInfo);
-        when(authorization.getUser(authToken)).thenReturn(null);
-        Response response = authenticationResource.getUserExists("username@a.b", authToken);
+        when(authorization.getUser(AUTHHEADER)).thenReturn(USER);
+        when(authorization.getUserRoleList(USER)).thenReturn(userRoleList);
+
+        Response response = authenticationResource.getUserExists("username@a.b", AUTHHEADER);
         assert (userInfo.equals(response.getEntity()));
-        Mockito.verify(authorization).getUser(authToken);
+        Mockito.verify(authorization).getUser(AUTHHEADER);
     }
 }
