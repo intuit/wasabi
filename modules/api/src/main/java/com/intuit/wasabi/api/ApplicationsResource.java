@@ -189,7 +189,7 @@ public class ApplicationsResource {
             final String authorizationHeader) {
         try {
             return httpHeader.headers().entity(authorizedExperimentGetter
-                    .getExperimentsByName(false, authorizationHeader, applicationName)).build();
+                    .getExperimentsByName(true, authorizationHeader, applicationName)).build();
         } catch (Exception exception) {
             LOGGER.error("getExperiments failed for applicationName={} with error:", applicationName, exception);
             throw exception;

@@ -24,10 +24,7 @@ import com.google.inject.Singleton;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authenticationobjects.UserInfo.Username;
 import com.intuit.wasabi.authorization.Authorization;
-import com.intuit.wasabi.authorizationobjects.UserPermissions;
-import com.intuit.wasabi.authorizationobjects.UserPermissionsList;
-import com.intuit.wasabi.authorizationobjects.UserRole;
-import com.intuit.wasabi.authorizationobjects.UserRoleList;
+import com.intuit.wasabi.authorizationobjects.*;
 import com.intuit.wasabi.exceptions.AuthenticationException;
 import com.intuit.wasabi.experimentobjects.Application;
 import io.swagger.annotations.Api;
@@ -522,6 +519,7 @@ public class AuthorizationResource {
             if (userName == null) {
                 throw new AuthenticationException("User is not authenticated");
             }
+            authorization.checkUserPermissions(userName, applicationName, Permission.ADMIN);
 
             return httpHeader.headers().entity(authorization.getApplicationUsers(applicationName)).build();
         } catch (Exception exception) {
