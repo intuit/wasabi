@@ -185,7 +185,7 @@ public class ApplicationsResourceTest {
 
         applicationsResource.getExperiments(applicationName, "foo");
 
-        verify(authorizedExperimentGetter).getExperimentsByName(false, "foo", applicationName);
+        verify(authorizedExperimentGetter).getExperimentsByName(true, "foo", applicationName);
         verify(httpHeader).headers();
         verify(responseBuilder).build();
     }

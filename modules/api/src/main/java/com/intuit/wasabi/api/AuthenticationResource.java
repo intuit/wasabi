@@ -19,7 +19,11 @@ import com.codahale.metrics.annotation.Timed;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.intuit.wasabi.authentication.Authentication;
+import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authorization.Authorization;
+import com.intuit.wasabi.authorizationobjects.Role;
+import com.intuit.wasabi.authorizationobjects.UserRole;
+import com.intuit.wasabi.authorizationobjects.UserRoleList;
 import com.intuit.wasabi.exceptions.AuthenticationException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -171,7 +175,15 @@ public class AuthenticationResource {
             final String authorizationHeader) {
         try {
             //Check whether user is authenticated
-            authorization.getUser(authorizationHeader);
+            UserInfo.Username username=authorization.getUser(authorizationHeader);
+            //check whether user is authorized
+            UserRoleList userRoleList = authorization.getUserRoleList(username);
+            boolean isAdmin = userRoleList.getRoleList().stream().anyMatch((UserRole ur) ->
+                    (ur.getRole().equals(Role.SUPERADMIN) || ur.getRole().equals(Role.ADMIN)));
+            if (!isAdmin) {
+                throw new AuthenticationException("Error, user " + username + " is not authorized");
+            }
+
             return httpHeader.headers().entity(authentication.getUserExists(userEmail)).build();
         } catch (Exception exception) {
             LOGGER.error("getUserExists failed for userEmail={} with error:", userEmail, exception);
