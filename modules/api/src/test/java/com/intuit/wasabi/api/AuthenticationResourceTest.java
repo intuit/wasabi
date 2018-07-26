@@ -61,7 +61,7 @@ public class AuthenticationResourceTest {
         authenticationResource =
                 new AuthenticationResource(authentication,
                         new HttpHeader("application-name", "600"),
-                        authorization);
+                        authorization,false,1);
     }
 
     @Test

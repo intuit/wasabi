@@ -20,4 +20,7 @@ public interface ApiAnnotations {
     String DEFAULT_TIME_ZONE = "default.time.zone";
     String DEFAULT_TIME_FORMAT = "default.time.format";
     String ACCESS_CONTROL_MAX_AGE_DELTA_SECONDS = "access.control.max.age.delta.seconds";
+
+    String RATE_HOURLY_LIMIT="rate.hourly.limit";
+    String RATE_LIMIT_ENABLED="rate.limit.enabled";
 }

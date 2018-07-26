@@ -49,10 +49,7 @@ import static com.google.inject.Scopes.SINGLETON;
 import static com.google.inject.name.Names.named;
 import static com.intuit.autumn.utils.PropertyFactory.create;
 import static com.intuit.autumn.utils.PropertyFactory.getProperty;
-import static com.intuit.wasabi.api.ApiAnnotations.ACCESS_CONTROL_MAX_AGE_DELTA_SECONDS;
-import static com.intuit.wasabi.api.ApiAnnotations.APPLICATION_ID;
-import static com.intuit.wasabi.api.ApiAnnotations.DEFAULT_TIME_FORMAT;
-import static com.intuit.wasabi.api.ApiAnnotations.DEFAULT_TIME_ZONE;
+import static com.intuit.wasabi.api.ApiAnnotations.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class ApiModule extends AbstractModule {
@@ -75,6 +72,10 @@ public class ApiModule extends AbstractModule {
                 .toInstance(getProperty("default.time.format", properties, "yyyy-MM-dd HH:mm:ss"));
         bind(String.class).annotatedWith(named(ACCESS_CONTROL_MAX_AGE_DELTA_SECONDS))
                 .toInstance(getProperty("access.control.max.age.delta.seconds", properties));
+        bind(Boolean.class).annotatedWith(named(RATE_LIMIT_ENABLED))
+                .toInstance(Boolean.parseBoolean(getProperty("rate.limit.enabled", properties, "false")));
+        bind(Integer.class).annotatedWith(named(RATE_HOURLY_LIMIT))
+                .toInstance(Integer.parseInt(getProperty("rate.hourly.limit", properties, "1")));
 
         bind(AuthorizedExperimentGetter.class).in(SINGLETON);
         bind(HealthCheckRegistry.class).in(SINGLETON);
