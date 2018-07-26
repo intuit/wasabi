@@ -18,6 +18,8 @@ package com.intuit.wasabi.api;
 import com.codahale.metrics.annotation.Timed;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+import com.intuit.wasabi.api.ratelimiter.SimpleRateLimiter;
 import com.intuit.wasabi.authentication.Authentication;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authorization.Authorization;
@@ -41,7 +43,14 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+
 import static com.intuit.wasabi.api.APISwaggerResource.EXAMPLE_AUTHORIZATION_HEADER;
+import static com.intuit.wasabi.api.ApiAnnotations.RATE_HOURLY_LIMIT;
+import static com.intuit.wasabi.api.ApiAnnotations.RATE_LIMIT_ENABLED;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -63,12 +72,20 @@ public class AuthenticationResource {
     private final Authentication authentication;
     private final Authorization authorization;
 
+    private boolean rateLimitEnabled;
+    private int rateHourlyLimit;
+    private Map<String, SimpleRateLimiter> limiters = new ConcurrentHashMap<>();
+
     @Inject
     AuthenticationResource(final Authentication authentication, final HttpHeader httpHeader,
-                           final Authorization authorization) {
+                           final Authorization authorization,
+                           final @Named(RATE_LIMIT_ENABLED) Boolean rateLimitEnabled,
+                           final @Named(RATE_HOURLY_LIMIT) Integer rateHourlyLimit) {
         this.authentication = authentication;
         this.httpHeader = httpHeader;
         this.authorization = authorization;
+        this.rateLimitEnabled=rateLimitEnabled;
+        this.rateHourlyLimit=rateHourlyLimit;
     }
 
     /**
@@ -176,6 +193,15 @@ public class AuthenticationResource {
         try {
             //Check whether user is authenticated
             UserInfo.Username username=authorization.getUser(authorizationHeader);
+
+            if (this.rateLimitEnabled) {
+                SimpleRateLimiter rateLimiter = getRateLimiter(username.toString());
+                boolean allowRequest = rateLimiter.tryAcquire();
+                if (!allowRequest) {
+                    return httpHeader.headers(429).build();
+                }
+            }
+
             //check whether user is authorized
             UserRoleList userRoleList = authorization.getUserRoleList(username);
             boolean isAdmin = userRoleList.getRoleList().stream().anyMatch((UserRole ur) ->
@@ -190,4 +216,21 @@ public class AuthenticationResource {
             throw exception;
         }
     }
+
+    private SimpleRateLimiter getRateLimiter(String userId) {
+        if (limiters.containsKey(userId)) {
+            return limiters.get(userId);
+        } else {
+            synchronized (userId.intern()) {
+                // double-checked locking to avoid multiple-reinitializations
+                if (limiters.containsKey(userId)) {
+                    return limiters.get(userId);
+                }
+                SimpleRateLimiter rateLimiter = SimpleRateLimiter.create(rateHourlyLimit, TimeUnit.HOURS);
+                limiters.put(userId, rateLimiter);
+                return rateLimiter;
+            }
+        }
+    }
+
 }
