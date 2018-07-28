@@ -22,7 +22,7 @@ http://www.w3.org/2001/XMLSchema-instance">
 
     <groupId>com.intuit.wasabi</groupId>
     <artifactId>wasabi</artifactId>
-    <version>1.0.20180726114301</version>
+    <version>1.0.20180728071504</version>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
     <url>https://github.com/intuit/wasabi</url>
@@ -46,6 +46,10 @@ http://www.w3.org/2001/XMLSchema-instance">
         <default.time.zone>UTC</default.time.zone>
         <default.time.format>yyyy-MM-dd HH:mm:ss</default.time.format>
         <access.control.max.age.delta.seconds>86400</access.control.max.age.delta.seconds>
+
+        <!-- Rate Limit -->
+        <rate.limit.enabled>false</rate.limit.enabled>
+        <rate.hourly.limit>1</rate.hourly.limit>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
