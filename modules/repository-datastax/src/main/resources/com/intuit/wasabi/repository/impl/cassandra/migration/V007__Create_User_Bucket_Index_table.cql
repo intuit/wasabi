@@ -1,7 +1,7 @@
 -- Query: Get the list of users assigned to a bucket
 --commented out for migration to context flg
 
---create table user_bucket_index (
+--create table if not exists user_bucket_index (
 --    experiment_id uuid,
 --    bucket_label varchar,
 --    user_id varchar,
@@ -12,7 +12,7 @@
 --)
 --with compact storage;
 
-create table user_bucket_index (
+create table if not exists user_bucket_index (
     experiment_id uuid,
     bucket_label varchar,
     user_id varchar,

@@ -1,4 +1,4 @@
-CREATE TABLE page_experiment_index (
+CREATE TABLE IF NOT EXISTS page_experiment_index (
   app_name text,
   page text,
   exp_id uuid,

@@ -1,4 +1,4 @@
-CREATE TABLE app_roles (
+CREATE TABLE IF NOT EXISTS app_roles (
   app_name text,
   user_id text,
   role text,

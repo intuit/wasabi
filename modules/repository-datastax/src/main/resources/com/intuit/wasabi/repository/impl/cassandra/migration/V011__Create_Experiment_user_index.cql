@@ -1,6 +1,6 @@
 ---- Query: Get the list of experiments to which an app/user has been assigned
 --
---create table experiment_user_index (
+--create table if not exists experiment_user_index (
 --    user_id varchar,
 --    app_name varchar,
 --    bucket varchar,
@@ -11,7 +11,7 @@
 --)
 --;
 
-create table experiment_user_index (
+create table if not exists experiment_user_index (
     user_id varchar,
     context varchar,
     app_name varchar,

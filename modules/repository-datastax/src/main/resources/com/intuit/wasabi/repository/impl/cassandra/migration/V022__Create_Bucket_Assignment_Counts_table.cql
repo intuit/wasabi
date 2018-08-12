@@ -1,4 +1,4 @@
-CREATE TABLE bucket_assignment_counts
+CREATE TABLE IF NOT EXISTS bucket_assignment_counts
   (experiment_id uuid,
    bucket_label varchar,
    bucket_assignment_count counter,

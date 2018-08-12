@@ -1,4 +1,4 @@
-create table experiment_tag (
+create table if not exists experiment_tag (
   app_name text,
   exp_id uuid,
   tags set<text>,

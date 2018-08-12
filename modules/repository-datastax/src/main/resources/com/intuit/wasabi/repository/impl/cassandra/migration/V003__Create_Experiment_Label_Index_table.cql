@@ -1,6 +1,6 @@
 -- Query: Get the experiment associated with an app/label locator
 
-create table experiment_label_index (
+create table if not exists experiment_label_index (
     app_name varchar,
     label varchar,
 
@@ -17,4 +17,4 @@ create table experiment_label_index (
 );
 
 -- Query: Get the experiment labels associated with an app
-create index on experiment_label_index(app_name);
+create index if not exists on experiment_label_index(app_name);

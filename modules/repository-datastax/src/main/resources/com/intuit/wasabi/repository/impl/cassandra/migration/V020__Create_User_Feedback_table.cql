@@ -1,4 +1,4 @@
-CREATE TABLE user_feedback (
+CREATE TABLE IF NOT EXISTS user_feedback (
   user_id text,
   submitted timestamp,
   score int,
@@ -9,7 +9,7 @@ CREATE TABLE user_feedback (
   PRIMARY KEY (user_id, submitted)
 );
 
-create index on user_feedback(user_email);
-create index on user_feedback(contact_okay);
+create index if not exists on user_feedback(user_email);
+create index if not exists on user_feedback(contact_okay);
 
 
