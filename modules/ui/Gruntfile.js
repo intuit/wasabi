@@ -542,6 +542,10 @@ module.exports = function (grunt) {
             distConstants['apiHostBaseUrlValue'] = process.env.API_HOST || defaultConstants['apiHostBaseUrlValue'];
             distConstants['downloadBaseUrlValue'] = process.env.API_HOST || defaultConstants['downloadBaseUrlValue'];
             distConstants['defaultBaseUrlValue'] = process.env.API_HOST || defaultConstants['defaultBaseUrlValue'];
+            distConstants['authnType'] = process.env.AUTHN_TYPE || defaultConstants['authnType'];
+            distConstants['noAuthRedirect'] = process.env.NO_AUTH_REDIRECT || defaultConstants['noAuthRedirect'];
+            distConstants['ssoLogoutRedirect'] = process.env.SSO_LOGOUT_REDIRECT || defaultConstants['ssoLogoutRedirect'];
+            distConstants['apiAuthInfo'] = process.env.API_AUTH_INFO || defaultConstants['apiAuthInfo'];
             grunt.file.write("build/constants.json", JSON.stringify(distConstants, null, 2));
         }
     });
