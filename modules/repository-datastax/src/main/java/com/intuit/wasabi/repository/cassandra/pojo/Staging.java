@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
-@Table(name = "staging")
+@Table(name = "staging_v2")
 @Data
 @Builder(toBuilder = true)
 @NoArgsConstructor
