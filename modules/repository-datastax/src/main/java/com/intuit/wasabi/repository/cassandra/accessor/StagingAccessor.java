@@ -27,10 +27,10 @@ import java.util.UUID;
  */
 @Accessor
 public interface StagingAccessor {
-    @Query("insert into staging(time, type, exep , msg) values(now(), ?, ? , ?)")
+    @Query("insert into staging_v2(time, type, exep , msg) values(now(), ?, ? , ?)")
     ResultSet insertBy(String type, String exception, String message);
 
-    @Query("insert into staging(time, type, exep , msg) values(?, ?, ? , ?)")
+    @Query("insert into staging_v2(time, type, exep , msg) values(?, ?, ? , ?)")
     BoundStatement batchInsertBy(UUID time, String type, String exception, String message);
 
 }
