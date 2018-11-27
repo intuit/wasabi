@@ -16,6 +16,7 @@
 package com.intuit.wasabi.api.pagination;
 
 import com.intuit.wasabi.api.pagination.comparators.PaginationComparatorTest;
+import com.intuit.wasabi.api.pagination.filters.PaginationFilter;
 import com.intuit.wasabi.api.pagination.filters.PaginationFilterTest;
 import org.junit.Assert;
 import org.junit.Test;
@@ -23,6 +24,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
@@ -142,9 +144,9 @@ public class PaginationHelperTest {
         testCaseList.add(new TestCase("E", "hash", 2, 1, 2, new Integer[]{4}));
         testCaseList.add(new TestCase("1", "string,-hash", 2, 3, 5, new Integer[]{6, 2}));
 
-        PaginationHelper<Object> paginationHelper = new PaginationHelper<>(
-                new PaginationFilterTest.TestObjectFilter(),
-                new PaginationComparatorTest.TestObjectComparator());
+        PaginationHelper<Object> paginationHelper = new PaginationHelper<Object>(
+                () -> new PaginationFilterTest.TestObjectFilter(),
+                () -> new PaginationComparatorTest.TestObjectComparator());
 
         for (TestCase testCase : testCaseList) {
             List<Object> copyList = new ArrayList<>(objectList.size());

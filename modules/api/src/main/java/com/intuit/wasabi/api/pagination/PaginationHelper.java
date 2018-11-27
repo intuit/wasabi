@@ -18,12 +18,15 @@ package com.intuit.wasabi.api.pagination;
 import com.google.inject.Inject;
 import com.intuit.wasabi.api.pagination.comparators.PaginationComparator;
 import com.intuit.wasabi.api.pagination.filters.PaginationFilter;
+import com.intuit.wasabi.exceptions.PaginationException;
 import com.intuit.wasabi.experimentobjects.Application;
 import com.intuit.wasabi.experimentobjects.ExperimentList;
+import com.intuit.wasabi.experimentobjects.exceptions.ErrorCode;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -55,21 +58,21 @@ import java.util.stream.Collectors;
  *
  * @param <T> the type of elements to be paginated
  */
-public class PaginationHelper<T> {
+public class PaginationHelper<T> implements Cloneable {
 
-    private final PaginationFilter<T> paginationFilter;
-    private final PaginationComparator<T> paginationComparator;
+    private final Supplier<PaginationFilter<T>> paginationFilterSupplier;
+    private final Supplier<PaginationComparator<T>> paginationComparatorSupplier;
 
     /**
      * Initializes the pagination helper with implementations of filter and comparator via Guice injection.
      *
-     * @param paginationFilter     the pagination filter
-     * @param paginationComparator the pagination comparator
+     * @param paginationFilterSupplier     the pagination filter
+     * @param paginationComparatorSupplier the pagination comparator
      */
     @Inject
-    public PaginationHelper(PaginationFilter<T> paginationFilter, PaginationComparator<T> paginationComparator) {
-        this.paginationFilter = paginationFilter;
-        this.paginationComparator = paginationComparator;
+    public PaginationHelper(Supplier<PaginationFilter<T>> paginationFilterSupplier, Supplier<PaginationComparator<T>> paginationComparatorSupplier) {
+        this.paginationFilterSupplier = paginationFilterSupplier;
+        this.paginationComparatorSupplier = paginationComparatorSupplier;
     }
 
     /**
@@ -152,6 +155,9 @@ public class PaginationHelper<T> {
     public Map<String, Object> paginate(String jsonKey, List<T> list, String filter,
                                         String timezoneOffset, String sort, int page, int perPage) {
         Map<String, Object> response = new HashMap<>();
+
+        PaginationFilter<T> paginationFilter = paginationFilterSupplier.get();
+        PaginationComparator<T> paginationComparator = paginationComparatorSupplier.get();
 
         paginationFilter.replaceFilter(filter, timezoneOffset);
         paginationComparator.replaceSortorder(sort);
