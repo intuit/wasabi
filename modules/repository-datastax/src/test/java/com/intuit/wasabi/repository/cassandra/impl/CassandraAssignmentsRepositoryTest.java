@@ -567,7 +567,7 @@ public class CassandraAssignmentsRepositoryTest {
         when(stagingAccessor.batchSelectBy(anyInt())).thenReturn(resultSet);
         when(resultSet.all()).thenReturn(mockRows);
 
-        Map<String, String> payloads = repository.getBatchPayloadsFromStaging(10);
+        Map<UUID, String> payloads = repository.getBatchPayloadsFromStaging(10);
         assertThat(payloads.keySet().size(), is(10));
     }
 
