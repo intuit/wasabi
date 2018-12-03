@@ -700,9 +700,9 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         }
     }
 
-    public Map<String, String> getBatchPayloadsFromStaging(int batchSize){
+    public Map<UUID, String> getBatchPayloadsFromStaging(int batchSize){
 
-        Map<String, String> payloads = null;
+        Map<UUID, String> payloads = null;
 
         try {
             ResultSet result = stagingAccessor.batchSelectBy(batchSize);
@@ -812,15 +812,15 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         return assignmentCountsBuilder.build();
     }
 
-    private Map<String, String> getPayloadsFromCassandraResult(ResultSet result){
+    private Map<UUID, String> getPayloadsFromCassandraResult(ResultSet result){
         List<Row> resultRows = null;
-        Map<String, String> payloads = new HashMap<>();
+        Map<UUID, String> payloads = new HashMap<>();
         if(result != null && !result.isExhausted()){
             resultRows = result.all();
             for(Row row : resultRows){
                 UUID time = row.get("time", UUID.class);
                 String payload = row.getString("msg");
-                payloads.put(time.toString(), payload);
+                payloads.put(time, payload);
             }
         }
         return payloads;
