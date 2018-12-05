@@ -15,10 +15,7 @@
  *******************************************************************************/
 package com.intuit.wasabi.repository.cassandra.impl;
 
-import com.datastax.driver.core.BatchStatement;
-import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.ResultSetFuture;
-import com.datastax.driver.core.Session;
+import com.datastax.driver.core.*;
 import com.datastax.driver.core.exceptions.ReadTimeoutException;
 import com.datastax.driver.core.exceptions.WriteTimeoutException;
 import com.datastax.driver.mapping.MappingManager;
@@ -89,6 +86,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
@@ -549,6 +547,35 @@ public class CassandraAssignmentsRepositoryTest {
                 Experiment.ID.valueOf(this.experimentId),
                 Context.valueOf("test"),
                 APPLICATION_NAME);
+    }
+
+    @Test
+    public void testGetBatchPayloadsFromStaging(){
+
+        int i;
+        String message = "message";
+        String time = "time";
+        List<Row> mockRows = new ArrayList<Row>();
+        for(i=0;i<10;i++){
+            mockRows.add(mock(Row.class,message+i));
+            long ms = new Date().getTime();
+            when(mockRows.get(i).get("time", UUID.class)).thenReturn(new UUID(ms+i, ms+i+1));
+            when(mockRows.get(i).getString("msg")).thenReturn(message+i);
+        }
+
+        ResultSet resultSet = mock(ResultSet.class);
+        when(stagingAccessor.batchSelectBy(anyInt())).thenReturn(resultSet);
+        when(resultSet.all()).thenReturn(mockRows);
+
+        Map<UUID, String> payloads = repository.getBatchPayloadsFromStaging(10);
+        assertThat(payloads.keySet().size(), is(10));
+    }
+
+    @Test()
+    public void testDeleteFromStaging(){
+
+        when(stagingAccessor.deleteBy(any())).thenReturn(null);
+        repository.deleteFromStaging(UUID.randomUUID());
     }
 
     @Test

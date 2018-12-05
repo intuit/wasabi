@@ -33,4 +33,10 @@ public interface StagingAccessor {
     @Query("insert into staging_v2(time, type, exep , msg) values(?, ?, ? , ?)")
     BoundStatement batchInsertBy(UUID time, String type, String exception, String message);
 
+    @Query("select * from staging_v2 limit ?")
+    ResultSet batchSelectBy(int batchSize);
+
+    @Query("delete from staging_v2 where time = ?")
+    ResultSet deleteBy(UUID timeUUID);
+
 }

@@ -16,10 +16,7 @@
 package com.intuit.wasabi.repository.cassandra.impl;
 
 import com.codahale.metrics.annotation.Timed;
-import com.datastax.driver.core.BatchStatement;
-import com.datastax.driver.core.BoundStatement;
-import com.datastax.driver.core.ResultSetFuture;
-import com.datastax.driver.core.Session;
+import com.datastax.driver.core.*;
 import com.datastax.driver.core.exceptions.NoHostAvailableException;
 import com.datastax.driver.core.exceptions.ReadTimeoutException;
 import com.datastax.driver.core.exceptions.UnavailableException;
@@ -703,6 +700,29 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         }
     }
 
+    public Map<UUID, String> getBatchPayloadsFromStaging(int batchSize){
+
+        Map<UUID, String> payloads = null;
+
+        try {
+            ResultSet result = stagingAccessor.batchSelectBy(batchSize);
+            payloads = getPayloadsFromCassandraResult(result);
+        } catch (ReadTimeoutException | UnavailableException | NoHostAvailableException e){
+            throw new RepositoryException("Could not get the payloads from staging", e);
+        }
+        return payloads;
+    }
+
+    public void deleteFromStaging(UUID timeUUID){
+
+        try{
+            stagingAccessor.deleteBy(timeUUID);
+        } catch (UnavailableException | NoHostAvailableException e){
+            throw new RepositoryException("Could not delete the payloads from staging", e);
+        }
+    }
+
+
     @Override
     public void updateBucketAssignmentCount(Experiment experiment, Assignment assignment, boolean countUp) {
         Optional<Bucket.Label> labelOptional = Optional.ofNullable(assignment.getBucketLabel());
@@ -790,5 +810,19 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
                             .build());
         }
         return assignmentCountsBuilder.build();
+    }
+
+    private Map<UUID, String> getPayloadsFromCassandraResult(ResultSet result){
+        List<Row> resultRows = null;
+        Map<UUID, String> payloads = new HashMap<>();
+        if(result != null && !result.isExhausted()){
+            resultRows = result.all();
+            for(Row row : resultRows){
+                UUID time = row.get("time", UUID.class);
+                String payload = row.getString("msg");
+                payloads.put(time, payload);
+            }
+        }
+        return payloads;
     }
 }
