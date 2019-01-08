@@ -16,8 +16,8 @@
 ###############################################################################
 
 formulas=("bash" "cask" "git" "git-flow-avh" "maven" "wget" "ruby" "node")
-taps=("caskroom/cask")
-casks=("java" "docker")
+taps=("caskroom/cask" "caskroom/versions")
+casks=("java8" "docker")
 profile_default=development
 endpoint_default=localhost:8080
 verify_default=false
@@ -115,6 +115,8 @@ bootstrap() {
       [[ $(brew cask list ${cask} 2>/dev/null) ]] && brew cask uninstall --force ${cask} 2>/dev/null
       brew cask install --force ${cask}
     done
+
+    open /Applications/Docker.app
 
     npm config set prefix $(brew --prefix)
 
