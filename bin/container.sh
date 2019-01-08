@@ -184,7 +184,7 @@ start_wasabi() {
       usage "docker run --net=${docker_network} --name ${project}-main -p 8080:8080 -p 8090:8090 -p 8180:8180 -e \"${wenv}\" -d ${project}-main" 1
   else
     docker run --net=${docker_network} --name ${project}-main -p 8080:8080 -p 8090:8090 -p 8180:8180 \
-      -e "${wenv}" -d ${project}-main || \
+      -e "${wenv}" -e MONGO_URI=${MONGO_URI} -e MONGO_DB=${MONGO_DB} -d ${project}-main || \
       usage "docker run --net=${docker_network} --name ${project}-main -p 8080:8080 -p 8090:8090 -p 8180:8180 -e \"${wenv}\" -e MONGO_URI=${MONGO_URI} -e MONGO_DB=${MONGO_DB} -d ${project}-main" 1
   fi
 
