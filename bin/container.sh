@@ -178,9 +178,15 @@ start_wasabi() {
   wenv="WASABI_CONFIGURATION=-DnodeHosts=${wcip} -Ddatabase.url.host=${wmip}"
 
 #   fixme: try to reuse the start_container() method instead of 'docker run...' directly; currently a problem with quotes in ${wenv} being passed into container.
-  docker run --net=${docker_network} --name ${project}-main -p 8080:8080 -p 8090:8090 -p 8180:8180 \
-    -e "${wenv}" -d ${project}-main || \
-    usage "docker run --net=${docker_network} --name ${project}-main -p 8080:8080 -p 8090:8090 -p 8180:8180 -e \"${wenv}\" -d ${project}-main" 1
+  if [ -z ${MONGO_URI} ] || [ -z ${MONGO_DB} ] ; then
+    docker run --net=${docker_network} --name ${project}-main -p 8080:8080 -p 8090:8090 -p 8180:8180 \
+      -e "${wenv}" -d ${project}-main || \
+      usage "docker run --net=${docker_network} --name ${project}-main -p 8080:8080 -p 8090:8090 -p 8180:8180 -e \"${wenv}\" -d ${project}-main" 1
+  else
+    docker run --net=${docker_network} --name ${project}-main -p 8080:8080 -p 8090:8090 -p 8180:8180 \
+      -e "${wenv}" -d ${project}-main || \
+      usage "docker run --net=${docker_network} --name ${project}-main -p 8080:8080 -p 8090:8090 -p 8180:8180 -e \"${wenv}\" -e MONGO_URI=${MONGO_URI} -e MONGO_DB=${MONGO_DB} -d ${project}-main" 1
+  fi
 
   echo -ne "${green}chill'ax ${reset}"
 
