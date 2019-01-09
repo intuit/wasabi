@@ -36,23 +36,27 @@ public class MongoAssignmentIngestionExecutor implements AssignmentIngestionExec
     @Override
     public Future<?> execute(AssignmentEnvelopePayload assignmentEnvelopePayload) {
         return executor.submit(() -> {
-            try {
-                MongoClient mongoClient = new MongoClient(new MongoClientURI(System.getenv("MONGO_URI")));
-                DB database = mongoClient.getDB(System.getenv("MONGO_DB"));
-                DBCollection assignmentCollection = database.getCollection("experimentassignments");
+            String mongoURI = System.getenv("MONGO_URI");
+            String mongoDB = System.getenv("MONGO_DB");
+            if (mongoURI != null && mongoDB != null) {
+                try {
+                    MongoClient mongoClient = new MongoClient(new MongoClientURI(mongoURI));
+                    DB database = mongoClient.getDB(mongoDB);
+                    DBCollection assignmentCollection = database.getCollection("experimentassignments");
 
-                User.ID userID = assignmentEnvelopePayload.getUserID();
-                Bucket.Label bucketLabel = assignmentEnvelopePayload.getBucketLabel();
-                Experiment.Label experimentLabel = assignmentEnvelopePayload.getExperimentLabel();
+                    User.ID userID = assignmentEnvelopePayload.getUserID();
+                    Bucket.Label bucketLabel = assignmentEnvelopePayload.getBucketLabel();
+                    Experiment.Label experimentLabel = assignmentEnvelopePayload.getExperimentLabel();
 
-                BasicDBObject doc = new BasicDBObject("userTrackingID", userID.toString())
-                    .append("experiment", experimentLabel.toString())
-                    .append("bucket", bucketLabel.toString())
-                    .append("createTime", new Date());
-                assignmentCollection.insert(doc);
-                mongoClient.close();
-            } catch (UnknownHostException e) {
-                LOGGER.debug("An error occurred in writing to MongoDB");
+                    BasicDBObject doc = new BasicDBObject("userTrackingID", userID.toString())
+                        .append("experiment", experimentLabel.toString())
+                        .append("bucket", bucketLabel.toString())
+                        .append("createTime", new Date());
+                    assignmentCollection.insert(doc);
+                    mongoClient.close();
+                } catch (UnknownHostException e) {
+                    LOGGER.debug("An error occurred in writing to MongoDB");
+                }
             }
             return 0;
         });
