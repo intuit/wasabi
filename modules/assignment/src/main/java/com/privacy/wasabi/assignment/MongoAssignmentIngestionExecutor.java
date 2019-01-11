@@ -13,6 +13,8 @@ import com.mongodb.MongoClientURI;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.BasicDBObject;
+import com.mongodb.ServerAddress;
+import com.mongodb.MongoException;
 
 import org.slf4j.Logger;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -32,15 +34,20 @@ public class MongoAssignmentIngestionExecutor implements AssignmentIngestionExec
     private static final Logger LOGGER = getLogger(MongoAssignmentIngestionExecutor.class);
 
     private ExecutorService executor = Executors.newSingleThreadExecutor();
+    private MongoClient mongoClient = null;
+
+    private String mongoURI = System.getenv("MONGO_URI");
+    private String mongoDB = System.getenv("MONGO_DB");
 
     @Override
     public Future<?> execute(AssignmentEnvelopePayload assignmentEnvelopePayload) {
         return executor.submit(() -> {
-            String mongoURI = System.getenv("MONGO_URI");
-            String mongoDB = System.getenv("MONGO_DB");
             if (mongoURI != null && mongoDB != null) {
                 try {
-                    MongoClient mongoClient = new MongoClient(new MongoClientURI(mongoURI));
+                    if (mongoClient == null || mongoClient.getDatabaseNames().isEmpty()) {
+                        LOGGER.debug("Instantiating MongoClient");
+                        mongoClient = new MongoClient(new MongoClientURI(mongoURI));
+                    }
                     DB database = mongoClient.getDB(mongoDB);
                     DBCollection assignmentCollection = database.getCollection("experimentassignments");
 
@@ -53,9 +60,10 @@ public class MongoAssignmentIngestionExecutor implements AssignmentIngestionExec
                         .append("bucket", bucketLabel.toString())
                         .append("createTime", new Date());
                     assignmentCollection.insert(doc);
-                    mongoClient.close();
-                } catch (UnknownHostException e) {
-                    LOGGER.debug("An error occurred in writing to MongoDB");
+                } catch (MongoException e) {
+                    LOGGER.warn("Cannot write to mongoDB. Error=", e.toString());
+                } catch (Exception e) {
+                    LOGGER.warn("An error occurred. Error=", e.toString());
                 }
             }
             return 0;
