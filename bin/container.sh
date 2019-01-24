@@ -189,7 +189,7 @@ start_wasabi() {
 
 start_cassandra() {
   start_docker
-  start_container ${project}-cassandra ${cassandra} "-v /var/lib/cassandra:/var/lib/cassandra --privileged=true -p 9042:9042 -p 9160:9160"
+  start_container ${project}-cassandra ${cassandra} "--privileged=true -p 9042:9042 -p 9160:9160"
 
   [ "${verify}" = true ] && console_cassandra
 
@@ -235,7 +235,7 @@ start_mysql() {
   pwd=mypass
 
   start_docker
-  start_container ${project}-mysql ${mysql} "-v /var/lib/mysql:/var/lib/mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=${pwd}"
+  start_container ${project}-mysql ${mysql} "-p 3306:3306 -e MYSQL_ROOT_PASSWORD=${pwd} -v /var/lib/mysql:/var/lib/mysql"
 
   wmip=$(docker inspect --format "{{ .NetworkSettings.Networks.${docker_network}.IPAddress }}" ${project}-mysql)
   sql=$(cat << EOF
@@ -246,7 +246,7 @@ start_mysql() {
 EOF
 )
 
-  docker run -v /var/lib/mysql:/var/lib/mysql --net=${docker_network} -it --rm ${mysql} mysql -h${wmip} -P 3306 -uroot -p${pwd} -e "${sql}" || \
+  docker run -v /var/lib/mysql:/var/lib/mysql --net=${docker_network} -it --rm ${mysql} mysql -h${wmip} -P3306 -uroot -p${pwd} -e "${sql}" || \
     usage "unable to run command: % docker run --net=${docker_network} -it --rm ${mysql} mysql -h${wmip} -P3306 -uroot -p${pwd} -e \"${sql}\"" 1
 
   [ "${verify}" = true ] && console_mysql
@@ -256,7 +256,7 @@ console_mysql() {
   pwd=mypass
   wmip=$(docker inspect --format "{{ .NetworkSettings.Networks.${docker_network}.IPAddress }}" ${project}-mysql)
 
-  docker run -v /var/lib/mysql:/var/lib/mysql --net=${docker_network} -it --rm ${mysql} mysql -h${wmip} -P 3306 -uroot -p${pwd} || \
+  docker run -v /var/lib/mysql:/var/lib/mysql --net=${docker_network} -it --rm ${mysql} mysql -h${wmip} -P3306 -uroot -p${pwd} || \
     usage "unable to run command: % docker run --net=${docker_network} -it --rm ${mysql} mysql -h${wmip} -P3306 -uroot -p${pwd}" 1
 }
 
