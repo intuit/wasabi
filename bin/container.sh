@@ -206,7 +206,7 @@ start_cassandra() {
         echo "${green}${project}: [Start] Building wasabi keyspace image${reset}"
         docker build --force-rm --no-cache -t wasabi-keyspace:latest -f "${CURRENT_DIR}/./docker/cqlsh.docker" "${CURRENT_DIR}/./docker/"
     fi
-    docker run -it --rm -e CASSANDRA_KEYSPACE_PREFIX=${project} -e CQLSH_HOST=${project}-cassandra -e CASSANDRA_PORT=9042 --net=${docker_network} --name wasabi_create_keyspace wasabi-keyspace
+    docker run -v /var/lib/cassandra:/var/lib/cassandra -it --rm -e CASSANDRA_KEYSPACE_PREFIX=${project} -e CQLSH_HOST=${project}-cassandra -e CASSANDRA_PORT=9042 --net=${docker_network} --name wasabi_create_keyspace wasabi-keyspace
 
     docker inspect wasabi-migration >/dev/null 2>&1
     IS_IMAGE_AVAILABLE=$?
@@ -214,7 +214,7 @@ start_cassandra() {
         echo "${green}${project}: [Start] Building wasabi migration image${reset}"
         docker build --force-rm --no-cache -t wasabi-migration:latest -f "${CURRENT_DIR}/./docker/migration.docker" "${CURRENT_DIR}/../"
     fi
-    docker run -it --rm -e CQLSH_HOST=${project}-cassandra -e CASSANDRA_PORT=9042 --net=${docker_network} --name wasabi_migration wasabi-migration
+    docker run -v /var/lib/cassandra:/var/lib/cassandra -it --rm -e CQLSH_HOST=${project}-cassandra -e CASSANDRA_PORT=9042 --net=${docker_network} --name wasabi_migration wasabi-migration
     echo "${green}${project}: [DONE] creating keyspace and migration schemas${reset}"
   else
     echo "[ERROR] Failed to start cassandra container, please check the logs"
@@ -227,7 +227,7 @@ start_cassandra() {
 console_cassandra() {
   wcip=$(docker inspect --format "{{ .NetworkSettings.Networks.${docker_network}.IPAddress }}" ${project}-cassandra)
 
-  docker run --net=${docker_network} -it --rm ${cassandra} cqlsh ${wcip} || \
+  docker run -v /var/lib/cassandra:/var/lib/cassandra --net=${docker_network} -it --rm ${cassandra} cqlsh ${wcip} || \
     usage "unable to run command: docker run --net=${docker_network} -it --rm ${cassandra} cqlsh ${wcip}" 1
 }
 
@@ -246,7 +246,7 @@ start_mysql() {
 EOF
 )
 
-  docker run --net=${docker_network} -it --rm ${mysql} mysql -h${wmip} -P3306 -uroot -p${pwd} -e "${sql}" || \
+  docker run -v /var/lib/mysql:/var/lib/mysql --net=${docker_network} -it --rm ${mysql} mysql -h${wmip} -P 3306 -uroot -p${pwd} -e "${sql}" || \
     usage "unable to run command: % docker run --net=${docker_network} -it --rm ${mysql} mysql -h${wmip} -P3306 -uroot -p${pwd} -e \"${sql}\"" 1
 
   [ "${verify}" = true ] && console_mysql
@@ -256,7 +256,7 @@ console_mysql() {
   pwd=mypass
   wmip=$(docker inspect --format "{{ .NetworkSettings.Networks.${docker_network}.IPAddress }}" ${project}-mysql)
 
-  docker run --net=${docker_network} -it --rm ${mysql} mysql -h${wmip} -P3306 -uroot -p${pwd} || \
+  docker run -v /var/lib/mysql:/var/lib/mysql --net=${docker_network} -it --rm ${mysql} mysql -h${wmip} -P 3306 -uroot -p${pwd} || \
     usage "unable to run command: % docker run --net=${docker_network} -it --rm ${mysql} mysql -h${wmip} -P3306 -uroot -p${pwd}" 1
 }
 
