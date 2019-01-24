@@ -189,7 +189,7 @@ start_wasabi() {
 
 start_cassandra() {
   start_docker
-  start_container ${project}-cassandra ${cassandra} "--privileged=true -p 9042:9042 -p 9160:9160"
+  start_container ${project}-cassandra ${cassandra} "--privileged=true -p 9042:9042 -p 9160:9160 -v /var/lib/cassandra:/var/lib/cassandra"
 
   [ "${verify}" = true ] && console_cassandra
 
