@@ -227,7 +227,7 @@ start_cassandra() {
 console_cassandra() {
   wcip=$(docker inspect --format "{{ .NetworkSettings.Networks.${docker_network}.IPAddress }}" ${project}-cassandra)
 
-  docker run --net=${docker_network} -it --rm ${cassandra} cqlsh ${wcip} || \
+  docker run -v /var/lib/cassandra:/var/lib/cassandra --net=${docker_network} -it --rm ${cassandra} cqlsh ${wcip} || \
     usage "unable to run command: docker run --net=${docker_network} -it --rm ${cassandra} cqlsh ${wcip}" 1
 }
 
@@ -246,7 +246,7 @@ start_mysql() {
 EOF
 )
 
-  docker run --net=${docker_network} -it --rm ${mysql} mysql -h${wmip} -P3306 -uroot -p${pwd} -e "${sql}" || \
+  docker run -v /var/lib/mysql:/var/lib/mysql --net=${docker_network} -it --rm ${mysql} mysql -h${wmip} -P3306 -uroot -p${pwd} -e "${sql}" || \
     usage "unable to run command: % docker run --net=${docker_network} -it --rm ${mysql} mysql -h${wmip} -P3306 -uroot -p${pwd} -e \"${sql}\"" 1
 
   [ "${verify}" = true ] && console_mysql
