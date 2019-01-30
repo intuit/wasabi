@@ -32,8 +32,6 @@ public class MongoAssignmentIngestionExecutor implements AssignmentIngestionExec
 
     private ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    private String mongoDB = System.getenv("MONGO_DB");
-
     @Override
     public Future<?> execute(AssignmentEnvelopePayload assignmentEnvelopePayload) {
         return executor.submit(() -> {
