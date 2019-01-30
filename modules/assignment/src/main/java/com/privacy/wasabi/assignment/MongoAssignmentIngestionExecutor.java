@@ -83,6 +83,7 @@ public class MongoAssignmentIngestionExecutor implements AssignmentIngestionExec
 
     @Override
     public void flushMessages() {
+        LOGGER.warn("Trying to flush messages from ", NAME);
     }
 
     @Override
