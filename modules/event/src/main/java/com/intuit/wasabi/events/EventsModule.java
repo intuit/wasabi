@@ -19,7 +19,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
-import com.intuit.wasabi.assignment.AssignmentsModule;
+import com.intuit.wasabi.assignmentlogger.AssignmentLoggerModule;
 import com.intuit.wasabi.eventobjects.EventEnvelopePayload;
 import com.intuit.wasabi.events.impl.EventsExportImpl;
 import com.intuit.wasabi.events.impl.EventsImpl;
@@ -55,7 +55,7 @@ public class EventsModule extends AbstractModule {
     protected void configure() {
         LOGGER.debug("installing module: {}", EventsModule.class.getSimpleName());
 
-        install(new AssignmentsModule());
+        install(new AssignmentLoggerModule());
         install(new CassandraRepositoryModule());
 
         Properties properties = create(PROPERTY_NAME, EventsModule.class);

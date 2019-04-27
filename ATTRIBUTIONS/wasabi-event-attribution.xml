@@ -2078,9 +2078,9 @@
          <downloadUrls/>
       </dependency>
       <dependency>
-         <name>wasabi-assignment</name>
+         <name>wasabi-assignment-logger</name>
          <groupId>com.intuit.wasabi</groupId>
-         <artifactId>wasabi-assignment</artifactId>
+         <artifactId>wasabi-assignment-logger</artifactId>
          <version>1.0.20161103082910-SNAPSHOT</version>
          <projectUrl>https://github.com/intuit/wasabi/modules/wasabi-assignment</projectUrl>
          <type>jar</type>
