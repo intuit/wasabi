@@ -37,7 +37,7 @@ public class AssignmentLoggerModule extends AssignmentsModule {
         int myThreadPoolSize = 5;
         ThreadPoolExecutor myThreadPoolExecutor = new ThreadPoolExecutor(myThreadPoolSize,
                 myThreadPoolSize, 0L, MILLISECONDS, myQueue, new ThreadFactoryBuilder()
-                .setNameFormat("MyIngestion-%d")
+                .setNameFormat("LoggerIngestion-%d")
                 .setDaemon(true)
                 .build());
         bind(ThreadPoolExecutor.class).annotatedWith(named("my.assignmentThreadPoolExecutor")).toInstance(myThreadPoolExecutor);

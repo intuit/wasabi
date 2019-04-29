@@ -12,6 +12,8 @@ import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import static org.slf4j.LoggerFactory.getLogger;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 /**
  * MyIngestionExecutor
  */
@@ -24,7 +26,7 @@ public class LoggerIngestionExecutor implements AssignmentIngestionExecutor {
 
     @Override
    public Future<?> execute(AssignmentEnvelopePayload assignmentEnvelopePayload) {
-      LOGGER.debug("california kiwi", "Thanks god!");
+      LOGGER.debug("california dump damaged by the sunn  => {}", assignmentEnvelopePayload.toJson());
       return null;
     }
 
