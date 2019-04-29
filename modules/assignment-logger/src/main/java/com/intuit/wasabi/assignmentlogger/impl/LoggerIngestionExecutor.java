@@ -5,6 +5,7 @@ package com.intuit.wasabi.assignmentlogger.impl;
 
 import com.intuit.wasabi.assignment.AssignmentIngestionExecutor;
 import com.intuit.wasabi.assignmentobjects.AssignmentEnvelopePayload;
+import com.intuit.wasabi.assignmentobjects.Assignment;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 import com.intuit.wasabi.assignmentlogger.AssignmentLogger;
@@ -43,13 +44,20 @@ public class LoggerIngestionExecutor implements AssignmentIngestionExecutor {
 
   @Override
    public Future<?> execute(AssignmentEnvelopePayload assignmentEnvelopePayload) {
-      // asynchronously calling the logging logic
-      return this.loggerExecutor.submit(() -> {
-          LOGGER.debug("Logging Assignment Evenlop  => {}", assignmentEnvelopePayload.toJson());
-          this.assignmentLogger.logAssignemntEnvelope(assignmentEnvelopePayload);
-         // Since no one needs to awaits any returned value as long as we are only logging here
-         return null;
-      });
+     if(assignmentEnvelopePayload.getAssignmentStatus() == Assignment.Status.NEW_ASSIGNMENT)
+     {
+       // asynchronously calling the logging logic
+        return this.loggerExecutor.submit(() -> {
+
+            LOGGER.debug("Logging Assignment Evenlop  => {}", assignmentEnvelopePayload.toJson());
+            this.assignmentLogger.logAssignemntEnvelope(assignmentEnvelopePayload);
+           // Since no one needs to awaits any returned value as long as we are only logging here
+           return null;
+        });
+      }
+      else {
+        return null;
+      }
     }
 
     @Override
