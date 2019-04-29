@@ -13,6 +13,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 
 import com.intuit.wasabi.assignment.AssignmentsModule;
+import static com.intuit.wasabi.assignmentlogger.AssignmentLoggerAnnotations.LOGGER_EXECUTOR;
 
 /**
  * Created by tislam1 on 6/21/16.
@@ -23,23 +24,24 @@ public class AssignmentLoggerModule extends AssignmentsModule {
     protected void configure() {
         super.configure();
 
-        // bind the threadpool executor to your ingestor's threadpool
+        // binding the threadpool executor to logger ingestion executer threadpool
         bindMyIngestionThreadPool();
 
-        // add your IngestionExecutor's class to the mapBinder
+        // adding the logger ingestion executer class to the mapBinder
         mapBinder.addBinding(LoggerIngestionExecutor.NAME).to(LoggerIngestionExecutor.class);
     }
 
     private void bindMyIngestionThreadPool() {
-        // create an in-memory queue
+        // creating an in-memory queue
         LinkedBlockingQueue<Runnable> myQueue = new LinkedBlockingQueue<>();
-        // set your threadpool size
-        int myThreadPoolSize = 5;
-        ThreadPoolExecutor myThreadPoolExecutor = new ThreadPoolExecutor(myThreadPoolSize,
-                myThreadPoolSize, 0L, MILLISECONDS, myQueue, new ThreadFactoryBuilder()
+
+        // creating a thread pool of size 5
+        int loggerThreadPoolSize = 5;
+        ThreadPoolExecutor loggerThreadPoolExecutor = new ThreadPoolExecutor(loggerThreadPoolSize,
+                loggerThreadPoolSize, 0L, MILLISECONDS, myQueue, new ThreadFactoryBuilder()
                 .setNameFormat("LoggerIngestion-%d")
                 .setDaemon(true)
                 .build());
-        bind(ThreadPoolExecutor.class).annotatedWith(named("my.assignmentThreadPoolExecutor")).toInstance(myThreadPoolExecutor);
+        bind(ThreadPoolExecutor.class).annotatedWith(named(LOGGER_EXECUTOR)).toInstance(loggerThreadPoolExecutor);
     }
 }
