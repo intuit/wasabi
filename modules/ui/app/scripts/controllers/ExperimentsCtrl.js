@@ -5,11 +5,13 @@
 'use strict';
 
 angular.module('wasabi.controllers').
-    controller('ExperimentsCtrl', ['$scope', '$filter', '$http', '$timeout', 'ExperimentsFactory', '$uibModal', 'UtilitiesFactory', '$rootScope', 'StateFactory', 'DialogsFactory', 'AUTH_EVENTS', 'Session', 'PERMISSIONS', 'ConfigFactory', 'AuthzFactory', 'USER_ROLES', 'ApplicationsFactory', 'BucketsFactory', 'ExperimentStatisticsFactory', 'ApplicationStatisticsFactory', 'FavoritesFactory', '$cookies',
-        function ($scope, $filter, $http, $timeout, ExperimentsFactory, $uibModal, UtilitiesFactory, $rootScope, StateFactory, DialogsFactory, AUTH_EVENTS, Session, PERMISSIONS, ConfigFactory, AuthzFactory, USER_ROLES, ApplicationsFactory, BucketsFactory, ExperimentStatisticsFactory, ApplicationStatisticsFactory, FavoritesFactory, $cookies) {
+    controller('ExperimentsCtrl', ['$scope', '$filter', '$http', '$timeout', 'ExperimentsFactory', '$uibModal', 'UtilitiesFactory', '$rootScope', 'StateFactory', 'DialogsFactory', 'AUTH_EVENTS', 'Session', 'PERMISSIONS', 'ConfigFactory', 'AuthzFactory', 'USER_ROLES', 'ApplicationsFactory', 'BucketsFactory', 'ExperimentStatisticsFactory', 'ApplicationStatisticsFactory', 'FavoritesFactory', '$cookies', 'disableAppCreation', 'sunsetStyles', 'sunsetText',
+        function ($scope, $filter, $http, $timeout, ExperimentsFactory, $uibModal, UtilitiesFactory, $rootScope, StateFactory, DialogsFactory, AUTH_EVENTS, Session, PERMISSIONS, ConfigFactory, AuthzFactory, USER_ROLES, ApplicationsFactory, BucketsFactory, ExperimentStatisticsFactory, ApplicationStatisticsFactory, FavoritesFactory, $cookies, disableAppCreation, sunsetStyles, sunsetText) {
 
             var today = moment().format('MM/DD/YYYY');
 
+            $scope.sunsetStyles = sunsetStyles
+            $scope.sunsetText = sunsetText
             // The data object is where values are stored that need to be data bound to the fields in the form.
             // I believe there was a scope problem and I found this solution on the Googles.  Basically, by
             // using the "data.xx" notation, you do a cleaner job of setting scope for the things that will be
@@ -855,6 +857,9 @@ angular.module('wasabi.controllers').
                             return false;
                         },
                         applications: function () {
+                            if (disableAppCreation) {
+                                return $scope.applications;
+                            }
                             var clone = $scope.applications.slice(0);
                             // Add ability for user to create a new application while creating an experiment.
                             clone.push(ConfigFactory.newApplicationNamePrompt);

@@ -5,5 +5,8 @@
     "ssoLogoutRedirect": "",
     "apiAuthInfo": "",
     "apiHostBaseUrlValue": "DEFAULT",
-    "downloadBaseUrlValue": "DEFAULT"
+    "downloadBaseUrlValue": "DEFAULT",
+    "disableAppCreation": false,
+    "sunsetStyles": {},
+    "sunsetText": ""
 }

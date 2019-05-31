@@ -394,8 +394,10 @@ module.exports = function (grunt) {
                     authnType: 'basic',
                     noAuthRedirect: '',
                     ssoLogoutRedirect: '',
-                    apiAuthInfo: ''
-
+                    apiAuthInfo: '',
+                    disableAppCreation: false,
+                    sunsetStyles: {},
+                    sunsetText: ''
                 }
             },
             test: {
