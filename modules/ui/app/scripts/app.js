@@ -179,8 +179,17 @@ angular.module('wasabi', [
     /*
      * watch transitions/routes to the next page/URL and prevents if user is not authorized or signed in
      */
-    .run(['$rootScope', '$state', 'AUTH_EVENTS', 'AuthUtilsFactory', 'ConfigFactory', 'DialogsFactory', 'Session', 'AuthFactory', '$stateParams', '$window', 'UtilitiesFactory', 'StateFactory',
-        function ($rootScope, $state, AUTH_EVENTS, AuthUtilsFactory, ConfigFactory, DialogsFactory, Session, AuthFactory, $stateParams, $window, UtilitiesFactory, StateFactory) {
+    .run(['$rootScope', '$state', 'AUTH_EVENTS', 'AuthUtilsFactory', 'ConfigFactory', 'DialogsFactory', 'Session', 'AuthFactory', '$stateParams', '$window', 'UtilitiesFactory', 'StateFactory', 'injectScript',
+        function ($rootScope, $state, AUTH_EVENTS, AuthUtilsFactory, ConfigFactory, DialogsFactory, Session, AuthFactory, $stateParams, $window, UtilitiesFactory, StateFactory, injectScript) {
+            if (injectScript) {
+                var node = document.createElement('script');
+                node.src = injectScript;
+                node.type = 'text/javascript';
+                node.async = false;
+                node.charset = 'utf-8';
+                document.getElementsByTagName('head')[0].appendChild(node);
+            }
+
             // Pull in the plugins configuration
             if (!$rootScope.plugins) {
                 $rootScope.plugins = [];

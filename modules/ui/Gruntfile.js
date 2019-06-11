@@ -396,8 +396,7 @@ module.exports = function (grunt) {
                     ssoLogoutRedirect: '',
                     apiAuthInfo: '',
                     disableAppCreation: false,
-                    homeBannerStyles: {},
-                    homeBannerText: ''
+                    injectScript: ''
                 }
             },
             test: {
