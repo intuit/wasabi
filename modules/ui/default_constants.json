@@ -7,6 +7,6 @@
     "apiHostBaseUrlValue": "DEFAULT",
     "downloadBaseUrlValue": "DEFAULT",
     "disableAppCreation": false,
-    "sunsetStyles": {},
-    "sunsetText": ""
+    "homeBannerStyles": {},
+    "homeBannerText": ""
 }
