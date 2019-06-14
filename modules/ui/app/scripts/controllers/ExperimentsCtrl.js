@@ -5,8 +5,8 @@
 'use strict';
 
 angular.module('wasabi.controllers').
-    controller('ExperimentsCtrl', ['$scope', '$filter', '$http', '$timeout', 'ExperimentsFactory', '$uibModal', 'UtilitiesFactory', '$rootScope', 'StateFactory', 'DialogsFactory', 'AUTH_EVENTS', 'Session', 'PERMISSIONS', 'ConfigFactory', 'AuthzFactory', 'USER_ROLES', 'ApplicationsFactory', 'BucketsFactory', 'ExperimentStatisticsFactory', 'ApplicationStatisticsFactory', 'FavoritesFactory', '$cookies',
-        function ($scope, $filter, $http, $timeout, ExperimentsFactory, $uibModal, UtilitiesFactory, $rootScope, StateFactory, DialogsFactory, AUTH_EVENTS, Session, PERMISSIONS, ConfigFactory, AuthzFactory, USER_ROLES, ApplicationsFactory, BucketsFactory, ExperimentStatisticsFactory, ApplicationStatisticsFactory, FavoritesFactory, $cookies) {
+    controller('ExperimentsCtrl', ['$scope', '$filter', '$http', '$timeout', 'ExperimentsFactory', '$uibModal', 'UtilitiesFactory', '$rootScope', 'StateFactory', 'DialogsFactory', 'AUTH_EVENTS', 'Session', 'PERMISSIONS', 'ConfigFactory', 'AuthzFactory', 'USER_ROLES', 'ApplicationsFactory', 'BucketsFactory', 'ExperimentStatisticsFactory', 'ApplicationStatisticsFactory', 'FavoritesFactory', '$cookies', 'disableAppCreation',
+        function ($scope, $filter, $http, $timeout, ExperimentsFactory, $uibModal, UtilitiesFactory, $rootScope, StateFactory, DialogsFactory, AUTH_EVENTS, Session, PERMISSIONS, ConfigFactory, AuthzFactory, USER_ROLES, ApplicationsFactory, BucketsFactory, ExperimentStatisticsFactory, ApplicationStatisticsFactory, FavoritesFactory, $cookies, disableAppCreation) {
 
             var today = moment().format('MM/DD/YYYY');
 
@@ -855,6 +855,9 @@ angular.module('wasabi.controllers').
                             return false;
                         },
                         applications: function () {
+                            if (disableAppCreation) {
+                                return $scope.applications;
+                            }
                             var clone = $scope.applications.slice(0);
                             // Add ability for user to create a new application while creating an experiment.
                             clone.push(ConfigFactory.newApplicationNamePrompt);
