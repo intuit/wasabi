@@ -49,7 +49,7 @@ echo "++ Building: UI module - STARTED"
 
 # ----------- Install dependencies first ---------------------------------------
 echo "++ execute: (cd ./modules/ui && npm install && bower install && grunt build)"
-(cd ./modules/ui && npm install && bower install && grunt build)
+(cd ./modules/ui && npm install && bower install && ./node_modules/grunt-cli/bin/grunt build)
 
 # ----------- Copy plugins ------------------------------------------------------
 echo "++ Installing Plugins: ${CONTRIB_PLUGINS_TO_INSTALL}"
@@ -92,8 +92,8 @@ echo "++ Starting actual grunt build"
   cp -R dist/plugins target/app; \
   sed -i '' -e "s|VERSIONLOC|${version}|g" target/app/index.html 2>/dev/null; \
 
-  (cd target; grunt clean); \
-  (cd target; grunt build --target=develop --no-color) \
+  (cd target; ./node_modules/grunt-cli/bin/grunt clean); \
+  (cd target; ./node_modules/grunt-cli/bin/grunt build --target=develop --no-color) \
 )
 
 echo "++ Building: UI module - FINISHED"
