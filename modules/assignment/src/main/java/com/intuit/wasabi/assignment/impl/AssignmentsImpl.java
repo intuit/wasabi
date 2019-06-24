@@ -31,6 +31,7 @@ import com.intuit.wasabi.assignment.AssignmentDecorator;
 import com.intuit.wasabi.assignment.AssignmentIngestionExecutor;
 import com.intuit.wasabi.assignment.Assignments;
 import com.intuit.wasabi.assignment.cache.AssignmentsMetadataCache;
+import com.intuit.wasabi.assignment.util.FileLoggingUtil;
 import com.intuit.wasabi.assignmentobjects.Assignment;
 import com.intuit.wasabi.assignmentobjects.AssignmentEnvelopePayload;
 import com.intuit.wasabi.assignmentobjects.RuleCache;
@@ -91,6 +92,7 @@ import static com.google.common.collect.Sets.newHashSet;
 import static com.intuit.wasabi.assignment.AssignmentsAnnotations.ASSIGNMENTS_METADATA_CACHE_ENABLED;
 import static com.intuit.wasabi.assignment.AssignmentsAnnotations.RULECACHE_THREADPOOL;
 import static com.intuit.wasabi.assignmentobjects.Assignment.Status.ASSIGNMENT_FAILED;
+import static com.intuit.wasabi.assignmentobjects.Assignment.Status.NEW_ASSIGNMENT;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -278,6 +280,10 @@ public class AssignmentsImpl implements Assignments {
         Assignment assignment = null;
         if (nonNull(assignments) && assignments.size() > 0) {
             assignment = assignments.get(0);
+        }
+
+        if (assignment != null && assignment.getStatus().equals(NEW_ASSIGNMENT)) {
+            FileLoggingUtil.logNewAssignedUser(assignment);
         }
 
         return assignment;
