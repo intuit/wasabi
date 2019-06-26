@@ -1,0 +1,36 @@
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+      <groupId>com.intuit.wasabi</groupId>
+      <artifactId>wasabi</artifactId>
+      <version>1.0.20181205072204</version>
+      <relativePath>../../pom.xml</relativePath>
+  </parent>
+
+  <groupId>com.intuit.wasabi</groupId>
+  <artifactId>wasabi-assignment-logger</artifactId>
+  <packaging>jar</packaging>
+  <name>${project.artifactId}</name>
+
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
+  </properties>
+
+  <dependencies>
+    <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>wasabi-assignment-objects</artifactId>
+        <version>${project.parent.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>wasabi-assignment</artifactId>
+        <version>${project.parent.version}</version>
+    </dependency>
+  </dependencies>
+
+</project>
