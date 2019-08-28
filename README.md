@@ -1,3 +1,5 @@
+Wasabi A/B Testing service is an open source project that is no longer under active development or being supported
+
 # Wasabi - A/B Testing Platform
 
 **Support:** [![Join the chat at https://gitter.im/intuit/wasabi](https://badges.gitter.im/intuit/wasabi.svg)](https://gitter.im/intuit/wasabi?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) <br/>
