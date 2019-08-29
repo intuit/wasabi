@@ -311,11 +311,13 @@ Further, there are a number of additional wasabi.sh options available you should
     -s | --sleep [ sleep-time ]            : sleep/wait time in seconds; default: 30
     -h | --help                            : help message
 
-  commands:
+commands:
     bootstrap                              : install dependencies
     build                                  : build project
+    clean                                  : clean build
     start[:cassandra,mysql,wasabi]         : start all, cassandra, mysql, wasabi
-    test                                   : test wasabi
+    test                                   : run the integration tests (needs a running wasabi)
+    test[:module-name,...]                 : run the unit tests for the specified module(s) only
     stop[:wasabi,cassandra,mysql]          : stop all, wasabi, cassandra, mysql
     resource[:ui,api,doc,cassandra,mysql]  : open resource api, javadoc, cassandra, mysql
     status                                 : display resource status
