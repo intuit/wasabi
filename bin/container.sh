@@ -22,6 +22,7 @@ docker_network=${project}_nw
 verify_default=false
 migration_default=false
 sleep_default=3
+profile_default=development
 red=`tput setaf 9`
 green=`tput setaf 10`
 reset=`tput sgr0`
@@ -34,10 +35,11 @@ ${green}
 usage: `basename ${0}` [options] [commands]
 
 options:
-  -v | --verify [ true | false ]         : verify installation configuration; default: ${verify_default}
-  -m | --migration [ true | false ]      : refresh cassandra migration scripts; default: ${migration_default}
-  -s | --sleep [ sleep-time ]            : sleep/wait time in seconds; default: ${sleep_default}
-  -h | --help                            : help message
+  -v | --verify [ true | false ]    : verify installation configuration; default: ${verify_default}
+  -m | --migration [ true | false ] : refresh cassandra migration scripts; default: ${migration_default}
+  -p | --profile [profile]          : build profile; default: ${profile_default}
+  -s | --sleep [ sleep-time ]       : sleep/wait time in seconds; default: ${sleep_default}
+  -h | --help                       : help message
 
 commands:
   start[:wasabi,cassandra,mysql,docker]  : start all, wasabi, cassandra, mysql, docker
@@ -142,7 +144,7 @@ remove_container() {
 start_wasabi() {
   start_docker
 
-  id=$(fromPom modules/main development application.name)
+  id=$(fromPom modules/main ${profile} application.name)
 
   CASSANDRA_CONTAINER_NAME=${CASSANDRA_CONTAINER:-${project}-cassandra}
   IS_CONTAINER=`docker inspect -f {{.State.Running}} $CASSANDRA_CONTAINER_NAME`
@@ -303,12 +305,15 @@ while getopts "${optspec}" opt; do
         migration=*) migration="${OPTARG#*=}";;
         sleep) sleep="${!OPTIND}"; OPTIND=$(( ${OPTIND} + 1 ));;
         sleep=*) sleep="${OPTARG#*=}";;
+        profile) profile="${!OPTIND}"; OPTIND=$(( ${OPTIND} + 1 ));;
+        profile=*) profile="${OPTARG#*=}";;
         help) usage;;
         *) [ "${OPTERR}" = 1 ] && [ "${optspec:0:1}" != ":" ] && echo "unknown option --${OPTARG}";;
       esac;;
     v) verify=${OPTARG};;
     m) migration=${OPTARG};;
     s) sleep=${OPTARG};;
+    p) profile=${OPTARG};;
     h) usage;;
     :) usage "option -${OPTARG} requires an argument" 1;;
     \?) [ "${OPTERR}" != 1 ] || [ "${optspec:0:1}" = ":" ] && usage "unknown option -${OPTARG}" 1;;
@@ -318,6 +323,7 @@ done
 verify=${verify:=${verify_default}}
 migration=${migration:=${migration_default}}
 sleep=${sleep:=${sleep_default}}
+profile=${profile:=${profile_default}}
 
 [[ $# -eq 0 ]] && usage
 
