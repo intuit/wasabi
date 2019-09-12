@@ -351,6 +351,11 @@ public class TestBase extends ServiceTestBase {
         return postExperiment(experiment, HttpStatus.SC_CREATED);
     }
 
+    public Experiment postExperiment(Experiment experiment, String appName){
+        return postExperimentWithexistingApp(experiment,false, HttpStatus.SC_CREATED,apiServerConnector,appName);
+
+    }
+
     /**
      * Sends a POST request to create an experiment. The response must contain {@link HttpStatus#SC_CREATED}.
      * <p>
@@ -374,7 +379,7 @@ public class TestBase extends ServiceTestBase {
      * @return the new experiment
      */
     public Experiment postExperiment(Experiment experiment, int expectedStatus) {
-        return postExperiment(experiment, true, expectedStatus, apiServerConnector);
+        return postExperiment(experiment, false, expectedStatus, apiServerConnector);
     }
 
     /**
@@ -414,6 +419,27 @@ public class TestBase extends ServiceTestBase {
      */
     public Experiment postExperiment(Experiment experiment, boolean createNewApplication, int expectedStatus,
             APIServerConnector apiServerConnector) {
+        response = apiServerConnector.doPost("experiments?createNewApplication=" + createNewApplication,
+                experiment == null ? null : experiment.toJSONString());
+        // FIXME: jwtodd
+        assertReturnCode(response, response.getStatusCode() == 500 ? 500 : expectedStatus);
+        return ExperimentFactory.createFromJSONString(response.jsonPath().prettify());
+    }
+
+
+    /**
+     * Sends a POST request to create an experiment for the existing application. The response must contain HTTP {@code expectedStatus}.
+     *
+     * @param experiment the experiment to POST
+     * @param createNewApplication allow to create a new application
+     * @param expectedStatus the expected HTTP status code
+     * @param apiServerConnector the server connector to use
+     * @return the new experiment
+     */
+    public Experiment postExperimentWithexistingApp(Experiment experiment, boolean createNewApplication , int expectedStatus,
+                                     APIServerConnector apiServerConnector,String applicationName) {
+
+        experiment.setApplication(new Application().setName(applicationName));
         response = apiServerConnector.doPost("experiments?createNewApplication=" + createNewApplication,
                 experiment == null ? null : experiment.toJSONString());
         // FIXME: jwtodd
