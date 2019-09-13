@@ -97,8 +97,8 @@ public class SmokeTest extends TestBase {
     /**
      * POSTs the experiment to the server and updates it with the returned values.
      */
-    @Test(dependsOnGroups = {"ping"})
-    public void t_createExperiments() {
+    //@Test(dependsOnGroups = {"ping"})
+  /*  public void t_createExperiments() {
         Experiment exp = postExperiment(experiment);
         Assert.assertNotNull(exp.creationTime, "Experiment creation failed (No creationTime).");
         Assert.assertNotNull(exp.modificationTime, "Experiment creation failed (No modificationTime).");
@@ -111,12 +111,13 @@ public class SmokeTest extends TestBase {
         Assert.assertNotNull(expExcl.state, "Experiment creation failed (No state).");
         mutualExclusiveExperiment.update(expExcl);
     }
-
+*/
     /**
      * POSTs the experiment for the existing app to the server and updates it with the returned values.
+     * This we are using as the experiment creation is blocked for other apps
      */
-   // @Test(dependsOnGroups = {"ping"})
-    public void t_createExperimentsWithExistingApp() {
+   @Test(dependsOnGroups = {"ping"})
+    public void t_createExperiments() {
         Experiment exp = postExperiment(experiment,TEST_APP_ENABLED);
         Assert.assertNotNull(exp.creationTime, "Experiment creation failed (No creationTime).");
         Assert.assertNotNull(exp.modificationTime, "Experiment creation failed (No modificationTime).");
@@ -256,7 +257,7 @@ public class SmokeTest extends TestBase {
     /**
      * Gets assignments for multiple experiments. Since we have just one experiment, this should not change the outcome.
      */
-    @Test(dependsOnMethods = {"t_changeSpecialUsersAssignment"})
+  //  @Test(dependsOnMethods = {"t_changeSpecialUsersAssignment"})
     public void t_getUserAssignmentsAcrossExperiments() {
         // since users are just assigned to one experiment, the assignment should not change as of now
         Assignment specialUserAssignment = assignments.get(specialUser);
