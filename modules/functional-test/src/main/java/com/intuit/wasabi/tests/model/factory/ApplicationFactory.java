@@ -35,7 +35,7 @@ public class ApplicationFactory {
     /**
      * the primary application to keep it consistent across the board.
      */
-    private static final Application defaultApplication = new Application(Constants.DEFAULT_PREFIX_APPLICATION + "PRIMARY");
+    private static final Application defaultApplication = new Application("wasabitestapp");
 
     /**
      * Returns the default application.

@@ -208,6 +208,11 @@ public class SmokeTest extends TestBase {
     @Test(dependsOnMethods = {"t_retrieveRunningExperiment"})
     @RetryTest(maxTries = 3, warmup = 1500)
     public void t_assignUsersToBuckets() {
+        try{
+            Thread.sleep(300000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         for (User user : users) {
             Assignment assignment = getAssignment(experiment, user);
             assignments.put(user, assignment);
@@ -257,16 +262,17 @@ public class SmokeTest extends TestBase {
     /**
      * Gets assignments for multiple experiments. Since we have just one experiment, this should not change the outcome.
      */
-  //  @Test(dependsOnMethods = {"t_changeSpecialUsersAssignment"})
+    @Test(dependsOnMethods = {"t_changeSpecialUsersAssignment"})
     public void t_getUserAssignmentsAcrossExperiments() {
-        // since users are just assigned to one experiment, the assignment should not change as of now
-        Assignment specialUserAssignment = assignments.get(specialUser);
-        // still we need to add our expected experiment to our expected assignment
-        specialUserAssignment.experimentLabel = experiment.label;
-        List<Assignment> actualAssignments = postAssignments(ApplicationFactory.defaultApplication(), specialUser, Collections.singletonList(experiment));
-        // context was not set, and cache can change, so we exclude those from our check
-        assertEqualModelItems(actualAssignments.get(0), specialUserAssignment, new DefaultNameExclusionStrategy("context", "cache"));
-        Assert.assertEquals(actualAssignments.size(), 1, "Number of returned assignments does not match.");
+            // since users are just assigned to one experiment, the assignment should not change as of now
+            Assignment specialUserAssignment = assignments.get(specialUser);
+            // still we need to add our expected experiment to our expected assignment
+            specialUserAssignment.experimentLabel = experiment.label;
+            List<Assignment> actualAssignments = postAssignments(ApplicationFactory.defaultApplication(), specialUser, Collections.singletonList(experiment));
+            // context was not set, and cache can change, so we exclude those from our check
+            assertEqualModelItems(actualAssignments.get(0), specialUserAssignment, new DefaultNameExclusionStrategy("context", "cache"));
+            Assert.assertEquals(actualAssignments.size(), 1, "Number of returned assignments does not match.");
+
     }
 
     /**
