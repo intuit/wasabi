@@ -91,12 +91,17 @@ import java.util.Set;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.UUID;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static com.intuit.wasabi.repository.AssignmentStatsAnnotations.ASSIGNMENTS_AGGREGATOR_INTERVAL;
+import static com.intuit.wasabi.repository.AssignmentStatsAnnotations.ASSIGNMENTS_HOURLY_AGGREGATOR_SERVICE;
+import static com.intuit.wasabi.repository.AssignmentStatsAnnotations.ASSIGNMENTS_HOURLY_AGGREGATOR_TASK;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
@@ -119,6 +124,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
 
     private UserAssignmentExportAccessor userAssignmentExportAccessor;
 
+    public AssignmentStats assignmentStats;
     private BucketAccessor bucketAccessor;
     private BucketAssignmentCountAccessor bucketAssignmentCountAccessor;
 
@@ -137,6 +143,7 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
 
             UserAssignmentExportAccessor userAssignmentExportAccessor,
 
+            AssignmentStats assignmentStats,
             BucketAccessor bucketAccessor,
             BucketAssignmentCountAccessor bucketAssignmentCountAccessor,
 
@@ -146,11 +153,15 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
             PageExperimentIndexAccessor pageExperimentIndexAccessor,
             CassandraDriver driver,
             MappingManager mappingManager,
+            @Named(ASSIGNMENTS_HOURLY_AGGREGATOR_SERVICE) ScheduledExecutorService hourlyCountService,
+            @Named(ASSIGNMENTS_AGGREGATOR_INTERVAL) Integer aggregatorIntervalInMinutes,
+            @Named(ASSIGNMENTS_HOURLY_AGGREGATOR_TASK) Runnable assignmentsHourlyAggregatorTask,
             @Named("AssignmentsCountThreadPoolExecutor") ThreadPoolExecutor assignmentsCountExecutor,
             final @Named("assign.user.to.export") boolean assignUserToExport,
             final @Named("assign.bucket.count") boolean assignBucketCount,
             final @Named("default.time.format") String defaultTimeFormat) {
 
+        this.assignmentStats = assignmentStats;
         this.experimentRepository = experimentRepository;
         this.dbRepository = dbRepository;
         this.eventLog = eventLog;
@@ -172,6 +183,8 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
         this.exclusionAccessor = exclusionAccessor;
         this.driver = driver;
         this.assignmentsCountExecutor = assignmentsCountExecutor;
+
+        hourlyCountService.scheduleAtFixedRate(assignmentsHourlyAggregatorTask, aggregatorIntervalInMinutes, aggregatorIntervalInMinutes, TimeUnit.MINUTES);
     }
 
     Stream<ExperimentUserByUserIdContextAppNameExperimentId> getUserIndexStream(String userId,
@@ -479,9 +492,12 @@ public class CassandraAssignmentsRepository implements AssignmentsRepository {
      */
     private void incrementCounts(List<Pair<Experiment, Assignment>> assignments, Date date) {
         boolean countUp = true;
-        assignments.forEach(pair -> assignmentsCountExecutor.execute(new AssignmentCountEnvelope(
-                this, experimentRepository, dbRepository, pair.getLeft(),
-                pair.getRight(), countUp, eventLog, date, assignUserToExport, assignBucketCount)));
+        assignments.forEach(pair -> {
+            assignmentsCountExecutor.execute(new AssignmentCountEnvelope(this, experimentRepository,
+                    dbRepository, pair.getLeft(), pair.getRight(), countUp, eventLog, date,
+                    assignUserToExport, assignBucketCount));
+            assignmentStats.incrementCount(pair.getLeft(), pair.getRight());
+        });
         LOGGER.debug("Finished assignmentsCountExecutor");
     }
 

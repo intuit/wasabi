@@ -33,6 +33,9 @@ import com.intuit.wasabi.repository.cassandra.accessor.audit.AuditLogAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.count.BucketAssignmentCountAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.export.UserAssignmentExportAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentUserIndexAccessor;
+import com.intuit.wasabi.repository.cassandra.impl.AssignmentCountScheduledExecutorService;
+import com.intuit.wasabi.repository.cassandra.impl.AssignmentStats;
+import com.intuit.wasabi.repository.cassandra.impl.CassandraAssignmentsRepository;
 import com.intuit.wasabi.repository.cassandra.impl.CassandraFeedbackRepository;
 import com.intuit.wasabi.repository.database.DatabaseExperimentRepositoryModule;
 import com.intuit.wasabi.userdirectory.UserDirectoryModule;
@@ -71,5 +74,8 @@ public class CassandraRepositoryModuleITest {
         assertThat(injector.getInstance(BucketAssignmentCountAccessor.class), is(not(nullValue())));
         assertThat(injector.getInstance(UserAssignmentExportAccessor.class), is(not(nullValue())));
 
+        assertThat(injector.getInstance(CassandraAssignmentsRepository.class), is(not(nullValue())));
+        assertThat(injector.getInstance(AssignmentStats.class), is(not(nullValue())));
+        assertThat(injector.getInstance(AssignmentCountScheduledExecutorService.class), is(not(nullValue())));
     }
 }

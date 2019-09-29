@@ -76,6 +76,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
@@ -121,6 +122,9 @@ public class CassandraAssignmentsRepositoryTest {
     UserAssignmentExportAccessor userAssignmentExportAccessor;
 
     @Mock
+    AssignmentStats assignmentStats;
+
+    @Mock
     BucketAccessor bucketAccessor;
     @Mock
     BucketAssignmentCountAccessor bucketAssignmentCountAccessor;
@@ -143,6 +147,12 @@ public class CassandraAssignmentsRepositoryTest {
     Result mockedResultMapping;
 
     @Mock
+    ScheduledExecutorService hourlyCountService;
+    @Mock
+    Runnable assignmentsHourlyAggregatorTask;
+
+
+    @Mock
     ThreadPoolExecutor assignmentsCountExecutor;
 
     CassandraAssignmentsRepository repository;
@@ -160,6 +170,7 @@ public class CassandraAssignmentsRepositoryTest {
                 experimentAccessor,
                 experimentUserIndexAccessor,
                 userAssignmentExportAccessor,
+                assignmentStats,
                 bucketAccessor,
                 bucketAssignmentCountAccessor,
                 stagingAccessor,
@@ -168,6 +179,9 @@ public class CassandraAssignmentsRepositoryTest {
                 pageExperimentIndexAccessor,
                 driver,
                 mappingManager,
+                hourlyCountService,
+                60,
+                assignmentsHourlyAggregatorTask,
                 assignmentsCountExecutor,
                 true,
                 true,

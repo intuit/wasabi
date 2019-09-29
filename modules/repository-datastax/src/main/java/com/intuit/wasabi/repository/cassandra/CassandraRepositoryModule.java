@@ -45,6 +45,7 @@ import com.intuit.wasabi.repository.cassandra.accessor.audit.AuditLogAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.audit.BucketAuditLogAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.audit.ExperimentAuditLogAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.count.BucketAssignmentCountAccessor;
+import com.intuit.wasabi.repository.cassandra.accessor.count.HourlyBucketCountAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.export.UserAssignmentExportAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.AppPageIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentLabelIndexAccessor;
@@ -52,6 +53,9 @@ import com.intuit.wasabi.repository.cassandra.accessor.index.ExperimentUserIndex
 import com.intuit.wasabi.repository.cassandra.accessor.index.PageExperimentIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.accessor.index.StateExperimentIndexAccessor;
 import com.intuit.wasabi.repository.cassandra.impl.AssignmentCountExecutor;
+import com.intuit.wasabi.repository.cassandra.impl.AssignmentHourlyCountTimeServiceImpl;
+import com.intuit.wasabi.repository.cassandra.impl.AssignmentStats;
+import com.intuit.wasabi.repository.cassandra.impl.AssignmentCountScheduledExecutorService;
 import com.intuit.wasabi.repository.cassandra.impl.CassandraAssignmentsRepository;
 import com.intuit.wasabi.repository.cassandra.impl.CassandraAuditLogRepository;
 import com.intuit.wasabi.repository.cassandra.impl.CassandraAuthorizationRepository;
@@ -62,6 +66,7 @@ import com.intuit.wasabi.repository.cassandra.impl.CassandraPagesRepository;
 import com.intuit.wasabi.repository.cassandra.impl.CassandraPrioritiesRepository;
 import com.intuit.wasabi.repository.cassandra.provider.AppRoleAccessorProvider;
 import com.intuit.wasabi.repository.cassandra.provider.ApplicationListAccessorProvider;
+import com.intuit.wasabi.repository.cassandra.provider.AssignmentStatsProvider;
 import com.intuit.wasabi.repository.cassandra.provider.BucketAccessorProvider;
 import com.intuit.wasabi.repository.cassandra.provider.ExclusionAccessorProvider;
 import com.intuit.wasabi.repository.cassandra.provider.ExperimentAccessorProvider;
@@ -77,6 +82,7 @@ import com.intuit.wasabi.repository.cassandra.provider.audit.AuditLogAccessorPro
 import com.intuit.wasabi.repository.cassandra.provider.audit.BucketAuditLogAccessorProvider;
 import com.intuit.wasabi.repository.cassandra.provider.audit.ExperimentAuditLogAccessorProvider;
 import com.intuit.wasabi.repository.cassandra.provider.count.BucketAssignmentCountAccessorProvider;
+import com.intuit.wasabi.repository.cassandra.provider.count.HourlyBucketCountAccessorProvider;
 import com.intuit.wasabi.repository.cassandra.provider.export.UserAssignmentExportAccessorProvider;
 import com.intuit.wasabi.repository.cassandra.provider.index.AppPageIndexAccessorProvider;
 import com.intuit.wasabi.repository.cassandra.provider.index.ExperimentLabelIndexAccessorProvider;
@@ -87,11 +93,16 @@ import org.slf4j.Logger;
 
 import javax.inject.Singleton;
 import java.util.Properties;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import static com.google.inject.Scopes.SINGLETON;
 import static com.google.inject.name.Names.named;
 import static com.intuit.autumn.utils.PropertyFactory.create;
 import static com.intuit.autumn.utils.PropertyFactory.getProperty;
+import static com.intuit.wasabi.repository.AssignmentStatsAnnotations.ASSIGNMENTS_AGGREGATOR_INTERVAL;
+import static com.intuit.wasabi.repository.AssignmentStatsAnnotations.ASSIGNMENTS_HOURLY_AGGREGATOR_SERVICE;
+import static com.intuit.wasabi.repository.AssignmentStatsAnnotations.ASSIGNMENTS_HOURLY_AGGREGATOR_TASK;
 import static java.lang.Integer.parseInt;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -152,10 +163,28 @@ public class CassandraRepositoryModule extends AbstractModule {
         bind(ExperimentAuditLogAccessor.class).toProvider(ExperimentAuditLogAccessorProvider.class).in(Singleton.class);
         //Bind those count
         bind(BucketAssignmentCountAccessor.class).toProvider(BucketAssignmentCountAccessorProvider.class).in(Singleton.class);
+        bind(HourlyBucketCountAccessor.class).toProvider(HourlyBucketCountAccessorProvider.class).in(Singleton.class);
         //Bind those export
         bind(UserAssignmentExportAccessor.class).toProvider(UserAssignmentExportAccessorProvider.class).in(Singleton.class);
         //Bind assignments Count thread pool executor
         bind(ThreadPoolExecutor.class).annotatedWith(named("AssignmentsCountThreadPoolExecutor")).to(AssignmentCountExecutor.class).in(Singleton.class);
+
+        //Bind Scheduled Executor Service
+        bind(ScheduledExecutorService.class).annotatedWith(named(ASSIGNMENTS_HOURLY_AGGREGATOR_SERVICE)).to(AssignmentCountScheduledExecutorService.class).in(Singleton.class);
+        //This is the assignment aggregation interval.
+        Integer assignmentAggregationIntervalInMinutes = parseInt(getProperty("bucket.count.aggregation.interval", properties, "60"));
+        //Bind refresh interval
+        bind(Integer.class)
+                .annotatedWith(named(ASSIGNMENTS_AGGREGATOR_INTERVAL))
+                .toInstance(assignmentAggregationIntervalInMinutes);
+        //Bind time service
+        bind(AssignmentHourlyCountTimeService.class).to(AssignmentHourlyCountTimeServiceImpl.class).in(SINGLETON);
+        //Bind AssignmentStats
+        bind(AssignmentStats.class).toProvider(AssignmentStatsProvider.class).in(Singleton.class);
+        //Bind hourly assignment aggregator task
+        bind(Runnable.class)
+                .annotatedWith(named(ASSIGNMENTS_HOURLY_AGGREGATOR_TASK))
+                .to(AssignmentCountScheduledExecutorService.class).in(SINGLETON);
 
         //Bind those repositories
         bind(AssignmentsRepository.class).to(CassandraAssignmentsRepository.class).in(Singleton.class);
