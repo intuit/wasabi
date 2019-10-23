@@ -22,6 +22,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.intuit.wasabi.analyticsobjects.Parameters;
 import com.intuit.wasabi.api.pagination.PaginationHelper;
+import com.intuit.wasabi.api.pagination.filters.impl.ExperimentFilter;
 import com.intuit.wasabi.assignment.Assignments;
 import com.intuit.wasabi.authenticationobjects.UserInfo;
 import com.intuit.wasabi.authenticationobjects.UserInfo.Username;
@@ -135,7 +136,7 @@ public class ExperimentsResource {
                         final @Named(DEFAULT_TIME_ZONE) String defaultTimezone,
                         final @Named(DEFAULT_TIME_FORMAT) String defaultTimeFormat,
                         final HttpHeader httpHeader, final PaginationHelper<Experiment> experimentPaginationHelper
-    ) {
+                        ) {
         this.experiments = experiments;
         this.export = export;
         this.assignments = assignments;

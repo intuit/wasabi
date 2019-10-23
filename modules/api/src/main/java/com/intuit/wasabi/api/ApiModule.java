@@ -44,6 +44,7 @@ import com.intuit.wasabi.userdirectory.UserDirectoryModule;
 import org.slf4j.Logger;
 
 import java.util.Properties;
+import java.util.function.Supplier;
 
 import static com.google.inject.Scopes.SINGLETON;
 import static com.google.inject.name.Names.named;
@@ -83,24 +84,23 @@ public class ApiModule extends AbstractModule {
         bind(ExceptionJsonifier.class).in(SINGLETON);
 
         // Bind comparators and filters for pagination
-        bind(new TypeLiteral<PaginationComparator<AuditLogEntry>>() {
-        }).to(new TypeLiteral<AuditLogEntryComparator>() {
-        });
-        bind(new TypeLiteral<PaginationFilter<AuditLogEntry>>() {
-        }).to(new TypeLiteral<AuditLogEntryFilter>() {
-        });
-        bind(new TypeLiteral<PaginationComparator<Experiment>>() {
-        }).to(new TypeLiteral<ExperimentComparator>() {
-        });
-        bind(new TypeLiteral<PaginationFilter<Experiment>>() {
-        }).to(new TypeLiteral<ExperimentFilter>() {
-        });
-        bind(new TypeLiteral<PaginationFilter<ExperimentDetail>>() {
-        }).to(new TypeLiteral<ExperimentDetailFilter>() {
-        });
-        bind(new TypeLiteral<PaginationComparator<ExperimentDetail>>() {
-        }).to(new TypeLiteral<ExperimentDetailComparator>() {
-        });
+        bind(new TypeLiteral<Supplier<PaginationComparator<AuditLogEntry>>>() {
+        }).toInstance(() -> new AuditLogEntryComparator());
+
+        bind(new TypeLiteral<Supplier<PaginationFilter<AuditLogEntry>>>() {
+        }).toInstance(() -> new AuditLogEntryFilter());
+
+        bind(new TypeLiteral<Supplier<PaginationComparator<Experiment>>>() {
+        }).toInstance(() -> new ExperimentComparator());
+
+        bind(new TypeLiteral<Supplier<PaginationFilter<Experiment>>>() {
+        }).toInstance(() -> new ExperimentFilter());
+
+        bind(new TypeLiteral<Supplier<PaginationFilter<ExperimentDetail>>>() {
+        }).toInstance(() -> new ExperimentDetailFilter());
+
+        bind(new TypeLiteral<Supplier<PaginationComparator<ExperimentDetail>>>() {
+        }).toInstance(() -> new ExperimentDetailComparator());
 
     }
 

@@ -136,7 +136,7 @@ public class ExperimentsResourceTest {
 
 
     private PaginationHelper<Experiment> paginationHelper = new PaginationHelper<>(
-            new ExperimentFilter(), new ExperimentComparator());
+            () -> new ExperimentFilter(), () -> new ExperimentComparator());
 
     @Before
     public void setup() {
