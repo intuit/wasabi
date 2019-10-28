@@ -15,6 +15,48 @@
 # limitations under the License.
 ###############################################################################
 
+logging_default=file
+red=`tput setaf 9`
+green=`tput setaf 10`
+reset=`tput sgr0`
+
+usage() {
+  [ "${1}" ] && echo "${red}error: ${1}${reset}"
+
+  cat << EOF
+${green}
+usage: `basename ${0}` [options]
+
+options:
+  -l | --logging [ file | console ]      : logging location; default ${logging_default}
+  -h | --help                            : help message
+
+${reset}
+EOF
+
+  exit ${2:-0}
+}
+
+optspec=":l-:"
+
+while getopts "${optspec}" opt; do
+  case "${opt}" in
+    -)
+      case "${OPTARG}" in
+        logging) logging="${!OPTIND}"; OPTIND=$(( ${OPTIND} + 1 ));;
+        logging=*) logging="${OPTARG#*=}";;
+        help) usage;;
+        *) [ "${OPTERR}" = 1 ] && [ "${optspec:0:1}" != ":" ] && echo "unknown option --${OPTARG}";;
+      esac;;
+    l) logging=${OPTARG};;
+    h) usage;;
+    :) usage "option -${OPTARG} requires an argument" 1;;
+    \?) [ "${OPTERR}" != 1 ] || [ "${optspec:0:1}" = ":" ] && usage "unknown option -${OPTARG}" 1;;
+  esac
+done
+
+logging=${logging:=${logging_default}}
+
 HOME_DIR=${application.home}
 JMX_PORT=${application.jmx.port}
 DEBUG_PORT=${application.debug.port}
@@ -33,7 +75,7 @@ JAVA_OPTIONS="
   ${application.monitor}\
   -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=\${LOG_DIR}/java_$$.hprof\
   -XX:+UseConcMarkSweepGC -XX:+UseParNewGC\
-  -verbose:gc -Xloggc:\${LOG_DIR}/gc.log\
+  -verbose:gc\
   -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCApplicationStoppedTime\
   -XX:+PrintGCApplicationConcurrentTime -XX:+PrintTenuringDistribution\
   -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=\${DEBUG_PORT}\
@@ -42,9 +84,20 @@ JAVA_OPTIONS="
   -Dcom.sun.management.jmxremote.port=\${JMX_PORT}\
   -Dcom.sun.management.jmxremote.ssl=false\
   -Dcom.sun.management.jmxremote.authenticate=false\
-  -Dlogback.configurationFile=\${HOME_DIR}/conf/logback.xml\
   -Djava.util.logging.config.file=\${HOME_DIR}/conf/logging.properties\
   ${WASABI_CONFIGURATION}"
+
+echo "Info: Logging to ${logging} enabled"
+if [ "${logging}" = "file" ]; then
+  JAVA_OPTIONS="
+    ${JAVA_OPTIONS}\
+    -Xloggc:\${LOG_DIR}/gc.log\
+    -Dlogback.configurationFile=\${HOME_DIR}/conf/logback.xml"
+else
+  JAVA_OPTIONS="
+    ${JAVA_OPTIONS}\
+    -Dlogback.configurationFile=\${HOME_DIR}/conf/logback-console.xml"
+fi
 
 # if JAVA_HOME is not set, set it based on OS
 if [ "$JAVA_HOME" = "" ]; then
@@ -53,7 +106,7 @@ if [ "$JAVA_HOME" = "" ]; then
     export JAVA_HOME=$(/usr/libexec/java_home -v 1.8)
   elif [ -d /usr/java/latest ]; then
     # Linux
-    export JAVA_HOME=/usr/java/latest  
+    export JAVA_HOME=/usr/java/latest
   else
     echo "Error: JAVA_HOME could not be identified"
     exit 1
@@ -64,4 +117,9 @@ if [ \${DAEMON} = "true" ]; then
   run_as="chpst -u ${application.user}:${application.group}"
 fi
 
-exec $run_as \${JAVA_HOME}/bin/java \${JAVA_OPTIONS} -cp \${CLASSPATH} \${MAIN} 1>>\${CONSOLE_LOG} 2>&1
+run_output="2>&1"
+if [ "${logging}" = "file" ]; then
+  run_output="1>>\${CONSOLE_LOG} ${run_output}"
+fi
+
+exec $run_as \${JAVA_HOME}/bin/java \${JAVA_OPTIONS} -cp \${CLASSPATH} \${MAIN} $run_output
