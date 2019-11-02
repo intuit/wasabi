@@ -256,6 +256,7 @@ http://www.w3.org/2001/XMLSchema-instance">
         <module>modules/util</module>
         <module>modules/cassandra-datastax</module>
         <module>modules/repository-datastax</module>
+        <module>modules/custom-assignment-writer</module>
     </modules>
 
     <repositories>
