@@ -1,29 +1,30 @@
 This directory contains two docker files
-1. cqlsh.docker
-2. migration.docker
 
-##Create Keyspace
+1. cqlsh.docker
+1. migration.docker
+
+## Create Keyspace
 To create the docker images that is needed for creating keyspace, you may use the following command.
 
 ```
 docker build -t felixgao/wasabi_keyspace:1.0.0 -f cqlsh.docker .
 ```
 
-####Environment Variables
-- CASSANDRA_KEYSPACE_PREFIX
-    * default: wasabi
-- CQLSH_USERNAME
+### Environment Variables
+- `CASSANDRA_KEYSPACE_PREFIX`
+    * default: wasabi
+- `CQLSH_USERNAME`
     * default: [empty]
-- CQLSH_PASSWORD
+- `CQLSH_PASSWORD`
     * default: [empty]
-- CQLSH_HOST
+- `CQLSH_HOST`
     * default: localhost
-- CASSANDRA_REPLICATION
+- `CASSANDRA_REPLICATION`
     * default: 1
-- CASSANDRA_PORT
+- `CASSANDRA_PORT`
     * default: 9042
 
-For example, to run the cqlsh container using docker, assuming the Cassandra is running on a host called wasabi-cassandra and listens on port 9042.  You may omit --network option if the cassandra node is not managed by docker.
+For example, to run the cqlsh container using docker, assuming the Cassandra is running on a host called `wasabi-cassandra` and listens on port 9042.  You may omit `--network` option if the cassandra node is not managed by docker.
 ```
 docker run -it --rm -e CASSANDRA_KEYSPACE_PREFIX=wasabi -e CQLSH_HOST=wasabi-cassandra -e CASSANDRA_PORT=9042 --network=wasabi_nw --name wasabi_create_keyspace felixgao/wasabi_keyspace:1.0.0
 ```
@@ -33,7 +34,7 @@ docker run -it --rm -e CASSANDRA_KEYSPACE_PREFIX=wasabi -e CQLSH_HOST=wasabi-cas
 - The migration cql script names indicate the nature of the mutation involved in that step - eg: Create, Drop, etc
 - Destructive cql that have ```Drop``` in the name will drop the table and data in that table will be lost. If such data is required, please save it before executing the migration script and reimport it into the new table as required.
 
-##Migration
+## Migration
 
  To create the docker image that is need for migration, you may use the following command
  ```
@@ -41,23 +42,23 @@ docker run -it --rm -e CASSANDRA_KEYSPACE_PREFIX=wasabi -e CQLSH_HOST=wasabi-cas
  ```
  The above command assumes you are in the $ProjectDir/bin/docker directory.  You may change the docker build context as you see fit.
 
- ####Environment Variables
- - CASSANDRA_KEYSPACE
+ ### Environment Variables
+ - `CASSANDRA_KEYSPACE`
      * default: wasabi_experiments
- - CQLSH_USERNAME
+ - `CQLSH_USERNAME`
      * default: [empty]
- - CQLSH_PASSWORD
+ - `CQLSH_PASSWORD`
      * default: [empty]
- - CQLSH_HOST
+ - `CQLSH_HOST`
      * default: localhost
- - MIGRATION_SCRIPT
+ - `MIGRATION_SCRIPT`
      * default: /wasabi/mutation
- - CASSANDRA_PORT
+ - `CASSANDRA_PORT`
      * default: 9042
- - CASSANDRA_MIGRATION
-     # default: /wasabi/cassandra-migration.jar
+ - `CASSANDRA_MIGRATION`
+     * default: /wasabi/cassandra-migration.jar
 
- For example, to run the wasabi-migration container using docker, assuming the Cassandra is running on a host called wasabi-cassandra and listens on port 9042.  You may omit --network option if the cassandra node is not managed by docker.
+ For example, to run the wasabi-migration container using docker, assuming the Cassandra is running on a host called `wasabi-cassandra` and listens on port 9042.  You may omit `--network` option if the cassandra node is not managed by docker.
  ```
  docker run -it --rm -e CQLSH_HOST=wasabi-cassandra -e CASSANDRA_PORT=9042 --network=wasabi_nw --name wasabi_schema_migration felixgao/wasabi-migration:1.0.0
  ```
