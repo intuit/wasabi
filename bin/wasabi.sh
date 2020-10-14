@@ -149,7 +149,7 @@ bootstrap() {
     sudo apt-get install -y git-flow
 
     #Install Nodejs
-    curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+    curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
     sudo apt-get install -y nodejs
     sudo npm install -g bower
     sudo npm install -g grunt-cli
@@ -160,15 +160,13 @@ bootstrap() {
     sudo apt-get install -y ruby-compass
 
     #Install docker
-    sudo apt-get install -y apt-transport-https ca-certificates
+    sudo apt-get remove docker docker-engine docker.io containerd runc
+    sudo apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
     sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
-    sudo echo "deb https://apt.dockerproject.org/repo ubuntu-xenial main" > /tmp/docker.list
-    sudo cp /tmp/docker.list /etc/apt/sources.list.d/docker.list
-    sudo rm -rf /tmp/docker.list
-    sudo apt-get purge lxc-docker
     sudo apt-get update
-    sudo apt-get install -y linux-image-extra-$(uname -r) linux-image-extra-virtual
-    sudo apt-get install -y docker-engine
+    sudo apt-get install -y docker-ce docker-ce-cli containerd.io
 
     sudo groupadd docker
     sudo usermod -aG docker $USER
