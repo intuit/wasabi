@@ -959,7 +959,7 @@ public class AssignmentsImpl implements Assignments {
             if (prioritizedExperimentListOptional.isPresent()) {
                 //Iterate as per experiment priority and look for the matching experiment by their label
                 for (PrioritizedExperiment prioritizedExperiment : prioritizedExperimentListOptional.get().getPrioritizedExperiments()) {
-                    if (experimentLabel.equals(prioritizedExperiment.getLabel())) {
+                    if (experimentLabel.equals(prioritizedExperiment.getLabel()) && prioritizedExperiment.getState().isActiveState()) {
                         //Upon match, get the complete experiment object from cache
                         result = metadataCache.getExperimentById(prioritizedExperiment.getID()).orElse(null);
                         break;

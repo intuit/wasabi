@@ -333,15 +333,23 @@ public class CassandraExperimentRepository implements ExperimentRepository {
         Experiment experiment = null;
 
         try {
-            ExperimentByAppNameLabel experimentAppLabel = experimentLabelIndexAccessor
-                    .getExperimentBy(appName.toString(),
-                            experimentLabel.toString()).one();
 
-            if (experimentAppLabel != null) {
-                com.intuit.wasabi.repository.cassandra.pojo.Experiment experimentPojo = experimentAccessor
-                        .getExperimentById(experimentAppLabel.getId()).one();
-                experiment = ExperimentHelper.makeExperiment(experimentPojo);
+            Result<ExperimentByAppNameLabel> result = experimentLabelIndexAccessor
+                    .getExperimentBy(appName.toString(),
+                            experimentLabel.toString());
+            for(ExperimentByAppNameLabel experimentAppLabel: result.all()){
+                if (experimentAppLabel != null) {
+                    // Need to iterate here as well
+                    com.intuit.wasabi.repository.cassandra.pojo.Experiment experimentPojo = experimentAccessor
+                            .getExperimentById(experimentAppLabel.getId()).one();
+                    experiment = ExperimentHelper.makeExperiment(experimentPojo);
+                    if(experiment.getState().isActiveState()){
+                        break;
+                    }
+                }
             }
+
+
 
         } catch (Exception e) {
             LOGGER.error("Error while getting experiment by app {} with label {} ", new Object[]{appName, experimentLabel}, e);
