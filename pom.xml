@@ -25,7 +25,7 @@ http://www.w3.org/2001/XMLSchema-instance">
     <version>1.0.20190619090227-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
-    <url>https://github.com/intuit/wasabi</url>
+    <url>https://github.com/les-buchanan/wasabi</url>
     <description>Opinionated micro-service kernel.</description>
 
     <properties>
@@ -62,7 +62,7 @@ http://www.w3.org/2001/XMLSchema-instance">
         <application.heapsize>256m</application.heapsize>
         <assignment.metadata.cache.maxBytesLocalHeap>128M</assignment.metadata.cache.maxBytesLocalHeap>
 
-        <jacoco.version>0.7.9</jacoco.version>
+        <jacoco.version>0.8.0</jacoco.version>
         <sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
 
         <http.proxy.host>http://insert.your.proxy.host.here</http.proxy.host>
@@ -682,7 +682,7 @@ http://www.w3.org/2001/XMLSchema-instance">
             <id>IntuitIdea</id>
             <name>Intuit / IDEA</name>
             <email>data&lt;at&gt;intuit.com</email>
-            <url>https://github.com/intuit/wasabi</url>
+            <url>https://github.com/les-buchanan/wasabi</url>
         </developer>
     </developers>
     <licenses>
@@ -693,8 +693,8 @@ http://www.w3.org/2001/XMLSchema-instance">
         </license>
     </licenses>
     <scm>
-        <url>https://github.com/intuit/wasabi</url>
-        <connection>scm:git:git://github.com/intuit/wasabi.git</connection>
-        <developerConnection>scm:git:git@github.com:intuit/wasabi.git</developerConnection>
+        <url>https://github.com/les-buchanan/wasabi</url>
+        <connection>scm:git:git://github.com/les-buchanan/wasabi.git</connection>
+        <developerConnection>scm:git:git@github.com:les-buchanan/wasabi.git</developerConnection>
     </scm>
 </project>

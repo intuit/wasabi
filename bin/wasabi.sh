@@ -77,6 +77,7 @@ beerMe() {
   cntr=0
 
   echo -ne "${green}chill'ax ${reset}"
+  echo "WTF"
 
   while (( cntr < ${sleepTime} )); do
     echo -ne "\xF0\x9F\x8D\xBA "
@@ -125,10 +126,10 @@ bootstrap() {
       . /etc/lsb-release
       DISTRO=$DISTRIB_ID
       DISTROVER=$DISTRIB_RELEASE
-      if [ $DISTRO == "Ubuntu" ] && [ $DISTROVER == "16.04" ]; then
+      if [ $DISTRO == "Ubuntu" ]; then #&& [ $DISTROVER == "16.04" ]; then
         echo "${green}Operating system Ubuntu 16.04${reset}"
       else
-        echo "${red}Unsupported Linux distribution${reset}"
+        echo "${red}Unsupported Linux distribution - $DISTRO - $DISTROVER ${reset}"
         exit 1
       fi
     fi
@@ -149,7 +150,7 @@ bootstrap() {
     sudo apt-get install -y git-flow
 
     #Install Nodejs
-    curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+    curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
     sudo apt-get install -y nodejs
     sudo npm install -g bower
     sudo npm install -g grunt-cli
@@ -157,18 +158,18 @@ bootstrap() {
 
     #Install compass
     sudo apt-get install -y ruby
-    sudo apt-get install -y ruby-compass
+    sudo apt-get install -y compass-blueprint-plugin #ruby-compass
 
     #Install docker
     sudo apt-get install -y apt-transport-https ca-certificates
     sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
-    sudo echo "deb https://apt.dockerproject.org/repo ubuntu-xenial main" > /tmp/docker.list
+    sudo echo "deb https://download.docker.com/linux/ubuntu xenial stable" > /tmp/docker.list
     sudo cp /tmp/docker.list /etc/apt/sources.list.d/docker.list
     sudo rm -rf /tmp/docker.list
     sudo apt-get purge lxc-docker
     sudo apt-get update
     sudo apt-get install -y linux-image-extra-$(uname -r) linux-image-extra-virtual
-    sudo apt-get install -y docker-engine
+    sudo apt-get install -y docker-ce #docker-engine
 
     sudo groupadd docker
     sudo usermod -aG docker $USER

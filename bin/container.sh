@@ -57,21 +57,23 @@ fromPom() {
 
 beerMe() {
   sleepTime=${1:-sleep_default}
-  cntr=0
+  cntr=3
 
   echo -ne "${green}chill'ax ${reset}"
 
-  while (( cntr < ${sleepTime} )); do
+  while (($cntr < $sleepTime)); do
     echo -ne "${green}\xF0\x9F\x8D\xBA ${reset}"
+    echo -ne "cntr: $cntr, sleepTime: $sleepTime"
     sleep 3
-    cntr=$(($cntr + 3))
+    let cntr+=3 
   done
 
   echo ""
 }
 
 start_docker() {
-  docker ps >/dev/null 2>&1
+  #docker ps >/dev/null 2>&1
+  docker ps 2>&1
   [[ $? != 0 && "${WASABI_OS}" == "${WASABI_OSX}" ]] && open /Applications/Docker.app
 
   while :; do
