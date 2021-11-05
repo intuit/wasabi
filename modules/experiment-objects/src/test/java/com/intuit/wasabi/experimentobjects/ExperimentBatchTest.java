@@ -17,9 +17,11 @@ package com.intuit.wasabi.experimentobjects;
 
 
 import com.google.common.collect.Sets;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -31,19 +33,18 @@ import static org.junit.Assert.assertNotEquals;
  */
 public class ExperimentBatchTest {
 
-    private Set<Experiment.Label> labels = Sets.newHashSet(Experiment.Label.valueOf("a"),
-            Experiment.Label.valueOf("b"), Experiment.Label.valueOf("c"));
+    private Set<Experiment.Label> labels = Sets.newLinkedHashSet();
 
     private static Map<String, Object> profile;
 
     private static Map<String, Object> personalizationParameters;
 
     static {
-        profile = new HashMap<>();
+        profile = new LinkedHashMap<>();
         profile.put("a.b.c", 42);
         profile.put("d.e.f", 84);
 
-        personalizationParameters = new HashMap<>();
+        personalizationParameters = new LinkedHashMap<>();
         personalizationParameters.put("g.h.i", 42);
         personalizationParameters.put("j.k.l", 84);
     }
@@ -53,6 +54,13 @@ public class ExperimentBatchTest {
             .withProfile(profile)
             .withPersonalizationParameters(personalizationParameters)
             .build();
+    
+    @Before
+    public void initialize() {
+        labels.add(Experiment.Label.valueOf("a"));
+        labels.add(Experiment.Label.valueOf("b"));
+        labels.add(Experiment.Label.valueOf("c"));
+    }
 
 
     @Test
